@@ -461,8 +461,12 @@
           <div class="progress-bar">
             <div class="progress-fill" id="progressFill"></div>
           </div>
-          <button class="complete-btn" onclick="exportSCORM()">
-            Export SCORM 📦
+          <button
+            class="complete-btn"
+            onclick="sharePath()"
+            style="background: var(--primary)"
+          >
+            Share Path 🔗
           </button>
         </div>
       </section>
@@ -678,12 +682,21 @@
         document.getElementById("progressFill").style.width = percent + "%";
       }
 
-      function exportSCORM() {
-        alert(
-          'To export SCORM, run:\npython -m ui.scorm_exporter --generate "' +
-            (currentPath?.query || "your query") +
-            '"',
-        );
+      function sharePath() {
+        const query = currentPath?.query || "";
+        const shareUrl = `${window.location.origin}${window.location.pathname}?q=${encodeURIComponent(query)}`;
+
+        navigator.clipboard
+          .writeText(shareUrl)
+          .then(() => {
+            alert(
+              "Link copied to clipboard! 🔗\n\nShare this URL with others:\n" +
+                shareUrl,
+            );
+          })
+          .catch(() => {
+            prompt("Copy this URL to share:", shareUrl);
+          });
       }
 
       // Enter key support
