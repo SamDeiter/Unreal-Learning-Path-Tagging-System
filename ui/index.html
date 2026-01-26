@@ -414,6 +414,22 @@
         font-weight: 600;
       }
 
+      .content-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+      }
+
+      .content-thumbnail {
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      .content-thumbnail:hover {
+        transform: scale(1.05);
+      }
+
       /* Action Box */
       .action-box {
         background: linear-gradient(
@@ -485,6 +501,73 @@
         color: white;
         font-weight: 500;
         cursor: pointer;
+      }
+
+      /* Video Modal */
+      .video-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .video-modal.active {
+        display: flex;
+      }
+
+      .video-container {
+        width: 90%;
+        max-width: 1000px;
+        position: relative;
+      }
+
+      .video-container iframe {
+        width: 100%;
+        aspect-ratio: 16/9;
+        border-radius: 0.75rem;
+        border: none;
+      }
+
+      .video-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+      }
+
+      .video-close:hover {
+        opacity: 1;
+      }
+
+      .watch-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #ff0000, #cc0000);
+        border: none;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 500;
+        cursor: pointer;
+        margin-right: 0.5rem;
+        transition: transform 0.2s;
+      }
+
+      .watch-btn:hover {
+        transform: scale(1.05);
       }
 
       /* Footer */
@@ -612,6 +695,14 @@
       </footer>
     </div>
 
+    <!-- Video Modal -->
+    <div class="video-modal" id="videoModal" onclick="closeVideo(event)">
+      <div class="video-container" onclick="event.stopPropagation()">
+        <button class="video-close" onclick="closeVideo()">&times;</button>
+        <iframe id="videoFrame" src="" allowfullscreen></iframe>
+      </div>
+    </div>
+
     <script>
       // Sample learning path data (would come from backend API)
       const samplePaths = {
@@ -713,6 +804,52 @@
           .replace(/⏱️/g, "<br>⏱️"); // line break before timestamp
       }
 
+      // Extract video ID from YouTube URL
+      function getYouTubeId(url) {
+        const match = url.match(
+          /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
+        );
+        return match ? match[1] : null;
+      }
+
+      // Play video in modal
+      function playVideo(url, description) {
+        const videoId = getYouTubeId(url);
+        if (!videoId) {
+          window.open(url, "_blank");
+          return;
+        }
+
+        // Try to extract timestamp from description (e.g., "Start at 5:00" or "Start at ~3:00")
+        let startTime = 0;
+        if (description) {
+          const timeMatch = description.match(
+            /(?:Start at|from)\s*~?\s*(\d+):(\d+)/i,
+          );
+          if (timeMatch) {
+            startTime = parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]);
+          }
+        }
+
+        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startTime}`;
+        document.getElementById("videoFrame").src = embedUrl;
+        document.getElementById("videoModal").classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
+
+      // Close video modal
+      function closeVideo(event) {
+        if (event && event.target !== event.currentTarget) return;
+        document.getElementById("videoFrame").src = "";
+        document.getElementById("videoModal").classList.remove("active");
+        document.body.style.overflow = "";
+      }
+
+      // Close on Escape key
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeVideo();
+      });
+
       function setQuery(query) {
         document.getElementById("queryInput").value = query;
       }
@@ -811,12 +948,15 @@
                               .map(
                                 (c) => `
                                 <div class="content-item">
-                                    ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="" class="content-thumbnail">` : ""}
+                                    ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="" class="content-thumbnail" onclick="playVideo('${c.url}', '${(c.description || "").replace(/'/g, "\\'")}')">` : ""}
                                     <div class="content-details">
                                         <div class="content-type">${c.type}</div>
                                         <div class="content-title">${c.title}</div>
                                         ${c.description ? `<p class="content-description">${parseMarkdown(c.description)}</p>` : ""}
-                                        <a href="${c.url}" target="_blank" class="content-link">Open Resource ↗</a>
+                                        <div class="content-actions">
+                                            ${c.type.toLowerCase() === "video" ? `<button class="watch-btn" onclick="playVideo('${c.url}', '${(c.description || "").replace(/'/g, "\\'")}')">▶ Watch</button>` : ""}
+                                            <a href="${c.url}" target="_blank" class="content-link">Open Resource ↗</a>
+                                        </div>
                                     </div>
                                 </div>
                             `,

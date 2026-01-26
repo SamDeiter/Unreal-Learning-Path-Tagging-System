@@ -7,9 +7,17 @@ Uses Python's built-in http.server - no external dependencies required.
 import json
 import os
 import sys
+from datetime import datetime
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+# Analytics storage (in-memory for now)
+ANALYTICS = {
+    "queries": [],  # List of {timestamp, query, tags}
+    "total_paths_generated": 0,
+    "server_start": datetime.utcnow().isoformat(),
+}
 
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -37,6 +45,8 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
             self.handle_search(parsed.query)
         elif parsed.path == "/api/tags":
             self.handle_tags()
+        elif parsed.path == "/api/stats":
+            self.handle_stats()
         else:
             # Serve static files
             super().do_GET()
@@ -90,6 +100,18 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
 
             self.send_json(path_dict)
 
+            # Track analytics
+            ANALYTICS["total_paths_generated"] += 1
+            ANALYTICS["queries"].append({
+                "timestamp": datetime.utcnow().isoformat(),
+                "query": query,
+                "tags": path.tags,
+                "steps_count": len(path.steps),
+            })
+            # Keep only last 100 queries
+            if len(ANALYTICS["queries"]) > 100:
+                ANALYTICS["queries"] = ANALYTICS["queries"][-100:]
+
         except Exception as e:
             self.send_error(500, str(e))
 
@@ -142,6 +164,24 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
 
         except Exception as e:
             self.send_error(500, str(e))
+
+    def handle_stats(self):
+        """Return analytics data."""
+        from collections import Counter
+
+        # Calculate tag frequency
+        all_tags = []
+        for q in ANALYTICS["queries"]:
+            all_tags.extend(q.get("tags", []))
+        tag_counts = Counter(all_tags).most_common(10)
+
+        stats = {
+            "server_start": ANALYTICS["server_start"],
+            "total_paths_generated": ANALYTICS["total_paths_generated"],
+            "recent_queries": ANALYTICS["queries"][-10:],  # Last 10
+            "top_tags": [{"tag": t, "count": c} for t, c in tag_counts],
+        }
+        self.send_json(stats)
 
     def send_json(self, data):
         """Send JSON response with CORS headers."""
