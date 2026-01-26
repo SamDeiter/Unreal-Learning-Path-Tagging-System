@@ -178,6 +178,120 @@ Don't use quotes. Be specific and actionable."""
             print(f"Gemini step summary error: {e}")
             return None
 
+    def curate_learning_path(
+        self,
+        user_query: str,
+        videos: list[dict],
+    ) -> Optional[dict]:
+        """Use AI to curate videos into a structured learning path.
+
+        Args:
+            user_query: The user's problem statement.
+            videos: List of video dicts with title, description, video_id, thumbnail_url.
+
+        Returns:
+            Curated path structure or None if API unavailable.
+        """
+        if not self.is_available() or not videos:
+            return None
+
+        # Build video list for prompt
+        video_info = []
+        for i, v in enumerate(videos[:8]):  # Max 8 videos
+            desc = v.get("description", "")[:200]
+            video_info.append(f"{i+1}. Title: {v['title']}\n   Description: {desc}")
+
+        prompt = f"""You are an expert UE5 educator. A user has this problem: "{user_query}"
+
+Here are videos from Epic Games that might help:
+{chr(10).join(video_info)}
+
+Create a structured 4-step learning path. For EACH step, pick the most relevant video(s) and explain:
+1. WHY this video helps with their specific problem
+2. WHAT timestamp/section to watch (estimate based on title/description, e.g., "Skip to ~5:00 for...")
+3. A brief ACTION for the user
+
+Return JSON with this EXACT structure:
+{{
+  "problem_overview": "1 sentence explaining the user's problem",
+  "steps": [
+    {{
+      "step_number": 1,
+      "step_type": "foundations",
+      "title": "Step 1: Understand [Topic]",
+      "description": "Why this matters for their problem",
+      "action": "What to do (e.g., Watch the first 5 minutes)",
+      "videos": [
+        {{
+          "video_index": 1,
+          "why_relevant": "Why this specific video helps",
+          "timestamp_hint": "e.g., 'Start at 3:00 where they explain...'",
+          "watch_duration": "e.g., '5 minutes'"
+        }}
+      ]
+    }},
+    {{
+      "step_number": 2,
+      "step_type": "diagnostics",
+      "title": "Step 2: Diagnose Your Issue",
+      ...
+    }},
+    {{
+      "step_number": 3,
+      "step_type": "resolution",
+      "title": "Step 3: Apply the Fix",
+      ...
+    }},
+    {{
+      "step_number": 4,
+      "step_type": "prevention",
+      "title": "Step 4: Prevent Future Issues",
+      ...
+    }}
+  ]
+}}
+
+IMPORTANT: 
+- Each step MUST have at least one video
+- Different steps should use DIFFERENT videos when possible
+- Be specific about timestamps and what to look for
+- Keep descriptions concise but actionable"""
+
+        try:
+            data = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.7,
+                    "maxOutputTokens": 2000,
+                },
+            }
+
+            url = f"{self.API_URL}?key={self.api_key}"
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(data).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+
+            with urllib.request.urlopen(req, timeout=30) as response:
+                result = json.loads(response.read().decode())
+
+            # Extract text from response
+            text = result["candidates"][0]["content"]["parts"][0]["text"]
+
+            # Parse JSON from response (handle markdown code blocks)
+            if "```json" in text:
+                text = text.split("```json")[1].split("```")[0]
+            elif "```" in text:
+                text = text.split("```")[1].split("```")[0]
+
+            return json.loads(text.strip())
+
+        except Exception as e:
+            print(f"Gemini curate error: {e}")
+            return None
+
 
 def main():
     """Test Gemini helper."""

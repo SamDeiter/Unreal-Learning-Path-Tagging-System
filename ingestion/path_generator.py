@@ -166,7 +166,7 @@ class PathGenerator:
             return "foundations"
 
     def generate_path(self, query: str) -> LearningPath:
-        """Generate a complete learning path from a query.
+        """Generate a complete learning path from a query using AI curation.
 
         Args:
             query: User's problem statement (e.g., "UE5 packaging fails").
@@ -177,76 +177,100 @@ class PathGenerator:
         # Extract tags
         tags = self.extract_query_tags(query)
         if not tags:
-            # Fallback to keyword search
             tags = ["build.packaging"]  # Default
 
-        # Find content
-        content_by_step = self.find_content(tags)
+        # Collect all videos first
+        all_videos = []
+        for tag_id in tags[:3]:
+            tag = self.tags.get(tag_id, {})
+            display_name = tag.get("display_name", tag_id.split(".")[-1])
+            search_query = f"UE5 {display_name}"
+            videos = self.fetcher.search_videos(search_query, max_results=5, epic_only=True)
+            
+            for video in videos:
+                all_videos.append({
+                    "video_id": video.video_id,
+                    "title": video.title,
+                    "description": video.description,
+                    "thumbnail_url": video.thumbnail_url,
+                    "url": f"https://youtube.com/watch?v={video.video_id}",
+                })
 
-        # Build steps with actionable guidance
+        # Use AI to curate the path
         steps = []
-        step_config = {
-            "foundations": {
-                "title": "📚 Step 1: Understand the Basics",
-                "description": "Before diving into the fix, watch these videos to understand the underlying concepts. This will help you troubleshoot faster.",
-                "action": "Watch at least one video to build context",
-            },
-            "diagnostics": {
-                "title": "🔍 Step 2: Diagnose Your Issue", 
-                "description": "Now that you understand the basics, let's figure out what's causing YOUR specific problem. These resources explain common causes.",
-                "action": "Compare your error messages to the ones shown",
-            },
-            "resolution": {
-                "title": "🔧 Step 3: Apply the Fix",
-                "description": "Time to fix it! Follow along with these step-by-step solutions. Try the most relevant one first.",
-                "action": "Follow along and apply the fix to your project",
-            },
-            "prevention": {
-                "title": "🛡️ Step 4: Prevent Future Issues",
-                "description": "Great job fixing it! Now learn how to avoid this problem in the future with best practices.",
-                "action": "Bookmark these for future reference",
-            },
-        }
-
-        for i, step_type in enumerate(self.STEP_TYPES):
-            content = content_by_step[step_type]
-            config = step_config[step_type]
-            if content:
-                steps.append(
-                    LearningStep(
-                        step_number=i + 1,
-                        step_type=step_type,
-                        title=config["title"],
-                        description=f"{config['description']}\n\n👉 **Action:** {config['action']}",
-                        content=content,
-                        skills_gained=[config["action"]],
-                    )
-                )
-
-        # Get all video titles for AI context
-        all_video_titles = [
-            c.title for step in content_by_step.values() for c in step
-        ]
-
-        # Generate AI guidance
         ai_summary = None
         ai_what_you_learn = None
         ai_estimated_time = None
         ai_difficulty = None
         ai_hint = None
 
-        if self.gemini.is_available():
-            guidance = self.gemini.generate_guidance(
-                user_query=query,
-                tags=tags,
-                video_titles=all_video_titles,
-            )
-            if guidance:
-                ai_summary = guidance.problem_summary
-                ai_what_you_learn = guidance.what_you_will_learn
-                ai_estimated_time = guidance.estimated_time
-                ai_difficulty = guidance.difficulty_level
-                ai_hint = guidance.first_step_hint
+        if self.gemini.is_available() and all_videos:
+            curated = self.gemini.curate_learning_path(query, all_videos)
+            
+            if curated:
+                ai_summary = curated.get("problem_overview")
+                
+                for step_data in curated.get("steps", []):
+                    # Build content items from curated videos
+                    content = []
+                    for vid_ref in step_data.get("videos", []):
+                        idx = vid_ref.get("video_index", 1) - 1
+                        if 0 <= idx < len(all_videos):
+                            video = all_videos[idx]
+                            # Build enhanced description with AI context
+                            desc = f"**Why this helps:** {vid_ref.get('why_relevant', '')}"
+                            if vid_ref.get('timestamp_hint'):
+                                desc += f"\n\n⏱️ **When to watch:** {vid_ref['timestamp_hint']}"
+                            if vid_ref.get('watch_duration'):
+                                desc += f" ({vid_ref['watch_duration']})"
+                            
+                            content.append(ContentItem(
+                                content_id=video["video_id"],
+                                title=video["title"],
+                                source_type="video",
+                                url=video["url"],
+                                matched_tags=tags[:1],
+                                relevance_score=0.9,
+                                step_type=step_data.get("step_type", "foundations"),
+                                thumbnail_url=video["thumbnail_url"],
+                                description=desc,
+                            ))
+                    
+                    if content:
+                        step_desc = step_data.get("description", "")
+                        if step_data.get("action"):
+                            step_desc += f"\n\n👉 **Action:** {step_data['action']}"
+                        
+                        steps.append(LearningStep(
+                            step_number=step_data.get("step_number", len(steps) + 1),
+                            step_type=step_data.get("step_type", "foundations"),
+                            title=step_data.get("title", f"Step {len(steps) + 1}"),
+                            description=step_desc,
+                            content=content,
+                            skills_gained=[step_data.get("action", "")],
+                        ))
+
+        # Fallback to old method if AI fails
+        if not steps:
+            content_by_step = self.find_content(tags)
+            step_config = {
+                "foundations": {"title": "📚 Step 1: Understand the Basics", "description": "Build foundational knowledge"},
+                "diagnostics": {"title": "🔍 Step 2: Diagnose Your Issue", "description": "Identify the root cause"},
+                "resolution": {"title": "🔧 Step 3: Apply the Fix", "description": "Implement the solution"},
+                "prevention": {"title": "🛡️ Step 4: Prevent Future Issues", "description": "Learn best practices"},
+            }
+            for i, step_type in enumerate(self.STEP_TYPES):
+                content = content_by_step[step_type]
+                if content:
+                    config = step_config[step_type]
+                    steps.append(LearningStep(
+                        step_number=i + 1,
+                        step_type=step_type,
+                        title=config["title"],
+                        description=config["description"],
+                        content=content,
+                        skills_gained=[],
+                    ))
 
         # Create path
         path_id = query.lower().replace(" ", "_")[:30]
