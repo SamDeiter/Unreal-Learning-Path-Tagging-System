@@ -311,7 +311,130 @@
         transform: translateY(-2px);
       }
 
-      /* Gallery Section */
+      /* Screenshot Upload Section */
+      .screenshot-section {
+        margin-top: 0.5rem;
+      }
+
+      .screenshot-toggle {
+        background: transparent;
+        border: 1px dashed var(--border);
+        color: var(--text-muted);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+      }
+
+      .screenshot-toggle:hover {
+        border-color: #22c55e;
+        color: #22c55e;
+        background: rgba(34, 197, 94, 0.05);
+      }
+
+      .screenshot-container {
+        margin-top: 0.75rem;
+        animation: slideDown 0.3s ease;
+      }
+
+      .screenshot-dropzone {
+        border: 2px dashed var(--border);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: var(--bg);
+        position: relative;
+      }
+
+      .screenshot-dropzone:hover,
+      .screenshot-dropzone.dragover {
+        border-color: #22c55e;
+        background: rgba(34, 197, 94, 0.05);
+      }
+
+      .dropzone-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .dropzone-icon {
+        font-size: 2rem;
+      }
+
+      .dropzone-text {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      .dropzone-hint {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+      }
+
+      .screenshot-preview {
+        position: relative;
+        display: inline-block;
+      }
+
+      .screenshot-preview img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border);
+      }
+
+      .remove-screenshot {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #ef4444;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .screenshot-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .screenshot-analyze-btn {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          opacity 0.2s;
+      }
+
+      .screenshot-analyze-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .screenshot-analyze-btn:not(:disabled):hover {
+        transform: translateY(-2px);
+      }
       .gallery-section {
         background: var(--bg-card);
         border-radius: 1rem;
@@ -979,6 +1102,66 @@ ShaderCompileWorker crashed"
             </div>
           </div>
         </div>
+
+        <!-- Screenshot Upload Section -->
+        <div class="screenshot-section">
+          <button class="screenshot-toggle" onclick="toggleScreenshotUpload()">
+            📷 Upload Screenshot
+          </button>
+          <div
+            class="screenshot-container"
+            id="screenshotContainer"
+            style="display: none"
+          >
+            <div
+              class="screenshot-dropzone"
+              id="screenshotDropzone"
+              onclick="document.getElementById('screenshotInput').click()"
+            >
+              <input
+                type="file"
+                id="screenshotInput"
+                accept="image/*"
+                style="display: none"
+                onchange="handleScreenshotSelect(event)"
+              />
+              <div class="dropzone-content" id="dropzoneContent">
+                <span class="dropzone-icon">📁</span>
+                <span class="dropzone-text"
+                  >Click to upload or drag & drop</span
+                >
+                <span class="dropzone-hint">Supports PNG, JPG, WebP</span>
+              </div>
+              <div
+                class="screenshot-preview"
+                id="screenshotPreview"
+                style="display: none"
+              >
+                <img id="previewImage" alt="Screenshot preview" />
+                <button
+                  class="remove-screenshot"
+                  onclick="
+                    event.stopPropagation();
+                    removeScreenshot();
+                  "
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div class="screenshot-actions">
+              <div class="extracted-tags" id="screenshotTags"></div>
+              <button
+                class="screenshot-analyze-btn"
+                id="analyzeBtn"
+                onclick="analyzeScreenshot()"
+                disabled
+              >
+                🔍 Analyze with AI
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="examples">
           <span style="color: var(--text-muted); margin-right: 0.5rem"
             >Try:</span
@@ -1412,7 +1595,122 @@ ShaderCompileWorker crashed"
         }
       }
 
-      // Cached paths index (loaded on startup)
+      // Screenshot upload state
+      let currentScreenshot = null;
+
+      // Toggle screenshot upload visibility
+      function toggleScreenshotUpload() {
+        const container = document.getElementById("screenshotContainer");
+        const isVisible = container.style.display !== "none";
+        container.style.display = isVisible ? "none" : "block";
+      }
+
+      // Handle file selection
+      function handleScreenshotSelect(event) {
+        const file = event.target.files[0];
+        if (file) processScreenshot(file);
+      }
+
+      // Process the screenshot file
+      function processScreenshot(file) {
+        if (!file.type.startsWith("image/")) {
+          alert("Please select an image file.");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          currentScreenshot = e.target.result; // base64 data URL
+
+          // Show preview
+          document.getElementById("dropzoneContent").style.display = "none";
+          document.getElementById("screenshotPreview").style.display = "block";
+          document.getElementById("previewImage").src = currentScreenshot;
+          document.getElementById("analyzeBtn").disabled = false;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // Remove screenshot
+      function removeScreenshot() {
+        currentScreenshot = null;
+        document.getElementById("screenshotInput").value = "";
+        document.getElementById("dropzoneContent").style.display = "flex";
+        document.getElementById("screenshotPreview").style.display = "none";
+        document.getElementById("analyzeBtn").disabled = true;
+        document.getElementById("screenshotTags").innerHTML = "";
+      }
+
+      // Setup drag and drop
+      const dropzone = document.getElementById("screenshotDropzone");
+      if (dropzone) {
+        dropzone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dropzone.classList.add("dragover");
+        });
+        dropzone.addEventListener("dragleave", () => {
+          dropzone.classList.remove("dragover");
+        });
+        dropzone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dropzone.classList.remove("dragover");
+          const file = e.dataTransfer.files[0];
+          if (file) processScreenshot(file);
+        });
+      }
+
+      // Analyze screenshot with Gemini Vision (requires backend)
+      async function analyzeScreenshot() {
+        if (!currentScreenshot) {
+          alert("Please upload a screenshot first.");
+          return;
+        }
+
+        const btn = document.getElementById("analyzeBtn");
+        const tagsContainer = document.getElementById("screenshotTags");
+
+        btn.disabled = true;
+        btn.textContent = "⏳ Analyzing...";
+        tagsContainer.innerHTML =
+          '<span class="extracted-tag">Processing image...</span>';
+
+        try {
+          // Check if running locally (has API access)
+          const response = await fetch("/api/analyze-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: currentScreenshot }),
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+
+            if (result.extracted_text) {
+              tagsContainer.innerHTML = result.extracted_text
+                .split(",")
+                .map((t) => `<span class="extracted-tag">${t.trim()}</span>`)
+                .join("");
+
+              document.getElementById("queryInput").value =
+                result.extracted_text;
+              generatePath();
+            } else {
+              tagsContainer.innerHTML =
+                '<span class="extracted-tag" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">No text detected in image</span>';
+            }
+          } else {
+            throw new Error("API not available");
+          }
+        } catch (err) {
+          // Fallback for static hosting
+          tagsContainer.innerHTML =
+            '<span class="extracted-tag" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3);">AI analysis requires local server - describe the issue manually</span>';
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "🔍 Analyze with AI";
+        }
+      }
+
       let cachedPathsIndex = [];
 
       // Load the paths index on page load
