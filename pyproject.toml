@@ -1,0 +1,41 @@
+# Python linting and formatting
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "D",      # pydocstring
+    "SIM",    # flake8-simplify (reduces code repetition)
+]
+ignore = ["D100", "D104"]  # Missing docstrings in public module/package
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+# Prevent code repetition
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+
+[project]
+name = "unreal-learning-path-tagging"
+version = "0.1.0"
+description = "Semantic tagging system for UE5 learning paths"
+requires-python = ">=3.11"
+dependencies = [
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.4.0",
+    "pre-commit>=3.5.0",
+    "pytest>=8.0.0",
+]
