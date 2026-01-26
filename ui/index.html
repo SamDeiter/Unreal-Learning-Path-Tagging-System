@@ -191,6 +191,50 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
       }
+      /* Basket UI Styles */
+      .basket-title { font-size: 1.5rem; color: var(--text); margin-bottom: 0.25rem; }
+      .basket-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+      .input-methods { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+      .input-method-btn { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem 1.5rem; background: var(--bg); border: 1px dashed var(--border); border-radius: 0.75rem; cursor: pointer; transition: all 0.2s; flex: 1; min-width: 100px; }
+      .input-method-btn:hover { border-style: solid; }
+      .input-method-btn.text-btn:hover, .input-method-btn.text-btn.active { border-color: var(--primary); background: rgba(14, 165, 233, 0.1); }
+      .input-method-btn.log-btn:hover, .input-method-btn.log-btn.active { border-color: #a855f7; background: rgba(168, 85, 247, 0.1); }
+      .input-method-btn.screenshot-btn:hover, .input-method-btn.screenshot-btn.active { border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+      .method-icon { font-size: 1.5rem; }
+      .method-label { color: var(--text-muted); font-size: 0.8rem; }
+      .input-panel { display: flex; gap: 0.5rem; margin-bottom: 1rem; animation: slideDown 0.2s ease; }
+      @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+      .basket-input { flex: 1; padding: 0.75rem 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 0.5rem; color: var(--text); font-size: 0.9rem; }
+      .basket-input:focus { outline: none; border-color: var(--primary); }
+      .basket-textarea { flex: 1; padding: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 0.5rem; color: var(--text); font-size: 0.8rem; font-family: monospace; resize: vertical; }
+      .basket-textarea:focus { outline: none; border-color: #a855f7; }
+      .add-ingredient-btn { padding: 0.75rem 1rem; background: var(--primary); border: none; border-radius: 0.5rem; color: white; font-weight: 600; cursor: pointer; white-space: nowrap; }
+      .add-ingredient-btn.log-add { background: #a855f7; }
+      .add-ingredient-btn.screenshot-add { background: #22c55e; }
+      .add-ingredient-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .ingredient-basket { background: var(--bg); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1rem; min-height: 60px; margin-bottom: 1rem; }
+      .basket-empty { color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 0.5rem; }
+      .ingredient-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+      .ingredient-chip { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; border-radius: 2rem; font-size: 0.8rem; animation: fadeIn 0.2s ease; }
+      @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+      .ingredient-chip.text-chip { background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.3); color: var(--primary); }
+      .ingredient-chip.log-chip { background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); color: #a855f7; }
+      .ingredient-chip.screenshot-chip { background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e; }
+      .chip-remove { background: none; border: none; color: inherit; cursor: pointer; opacity: 0.7; font-size: 0.7rem; padding: 0; }
+      .chip-remove:hover { opacity: 1; }
+      .generate-btn { width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; border-radius: 0.75rem; color: white; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 1rem; }
+      .generate-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); }
+      .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .screenshot-dropzone { border: 2px dashed var(--border); border-radius: 0.5rem; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg); flex: 1; }
+      .screenshot-dropzone:hover, .screenshot-dropzone.dragover { border-color: #22c55e; background: rgba(34, 197, 94, 0.05); }
+      .dropzone-content { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+      .dropzone-icon { font-size: 1.5rem; }
+      .dropzone-text { color: var(--text-muted); font-size: 0.8rem; }
+      .screenshot-preview { position: relative; display: inline-block; }
+      .screenshot-preview img { max-width: 100%; max-height: 100px; border-radius: 0.5rem; }
+      .remove-preview { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: #ef4444; border: none; color: white; cursor: pointer; font-size: 0.6rem; }
+
+
 
       .examples {
         display: flex;
@@ -1061,141 +1105,70 @@
       </header>
 
       <section class="search-section">
-        <div class="search-box">
-          <input
-            type="text"
-            class="search-input"
-            id="queryInput"
-            placeholder="Describe your UE5 problem... (e.g., 'Lumen flickering artifacts')"
-          />
-          <button class="search-btn" onclick="generatePath()">
-            Build Path 🚀
+        <h2 class="basket-title">🧺 Build Your Problem</h2>
+        <p class="basket-subtitle">Add ingredients to describe your issue, then generate a learning path</p>
+        
+        <!-- Hidden queryInput for compatibility -->
+        <input type="hidden" id="queryInput" value="">
+        
+        <!-- Input Method Buttons -->
+        <div class="input-methods">
+          <button class="input-method-btn text-btn" onclick="showInputPanel('text')">
+            <span class="method-icon">📝</span>
+            <span class="method-label">Describe Issue</span>
+          </button>
+          <button class="input-method-btn log-btn" onclick="showInputPanel('log')">
+            <span class="method-icon">📋</span>
+            <span class="method-label">Paste Error Log</span>
+          </button>
+          <button class="input-method-btn screenshot-btn" onclick="showInputPanel('screenshot')">
+            <span class="method-icon">📷</span>
+            <span class="method-label">Add Screenshot</span>
           </button>
         </div>
 
-        <!-- Crash Log Paste Section -->
-        <div class="crashlog-section">
-          <button class="crashlog-toggle" onclick="toggleCrashLog()">
-            📋 Paste Crash Log / Error Output
-          </button>
-          <div
-            class="crashlog-container"
-            id="crashlogContainer"
-            style="display: none"
-          >
-            <textarea
-              id="crashLogInput"
-              class="crashlog-textarea"
-              placeholder="Paste your UE5 crash log, error output, or Output Log content here...
-
-Example:
-LogWindows: Error: appError called: Fatal error: [File:Runtime/Core/Private/...]
-ExitCode=25
-ShaderCompileWorker crashed"
-              rows="6"
-            ></textarea>
-            <div class="crashlog-actions">
-              <div class="extracted-tags" id="extractedTags"></div>
-              <button class="crashlog-parse-btn" onclick="parseCrashLog()">
-                🔍 Extract & Search
-              </button>
-            </div>
+        <!-- Expandable Input Panels -->
+        <div class="input-panels">
+          <div class="input-panel" id="textPanel" style="display: none;">
+            <input type="text" class="basket-input" id="textInput" placeholder="Describe your UE5 problem..."/>
+            <button class="add-ingredient-btn" onclick="addTextIngredient()">+ Add</button>
           </div>
-        </div>
-
-        <!-- Screenshot Upload Section -->
-        <div class="screenshot-section">
-          <button class="screenshot-toggle" onclick="toggleScreenshotUpload()">
-            📷 Upload Screenshot
-          </button>
-          <div
-            class="screenshot-container"
-            id="screenshotContainer"
-            style="display: none"
-          >
-            <div
-              class="screenshot-dropzone"
-              id="screenshotDropzone"
-              onclick="document.getElementById('screenshotInput').click()"
-            >
-              <input
-                type="file"
-                id="screenshotInput"
-                accept="image/*"
-                style="display: none"
-                onchange="handleScreenshotSelect(event)"
-              />
+          <div class="input-panel" id="logPanel" style="display: none;">
+            <textarea id="logInput" class="basket-textarea" placeholder="Paste crash log or error output..." rows="4"></textarea>
+            <button class="add-ingredient-btn log-add" onclick="addLogIngredient()">+ Extract & Add</button>
+          </div>
+          <div class="input-panel" id="screenshotPanel" style="display: none;">
+            <div class="screenshot-dropzone" id="screenshotDropzone" onclick="document.getElementById('screenshotInput').click()">
+              <input type="file" id="screenshotInput" accept="image/*" style="display: none;" onchange="handleScreenshotSelect(event)">
               <div class="dropzone-content" id="dropzoneContent">
                 <span class="dropzone-icon">📁</span>
-                <span class="dropzone-text"
-                  >Click to upload or drag & drop</span
-                >
-                <span class="dropzone-hint">Supports PNG, JPG, WebP</span>
+                <span class="dropzone-text">Click or drag to upload</span>
               </div>
-              <div
-                class="screenshot-preview"
-                id="screenshotPreview"
-                style="display: none"
-              >
-                <img id="previewImage" alt="Screenshot preview" />
-                <button
-                  class="remove-screenshot"
-                  onclick="
-                    event.stopPropagation();
-                    removeScreenshot();
-                  "
-                >
-                  ✕
-                </button>
+              <div class="screenshot-preview" id="screenshotPreview" style="display: none;">
+                <img id="previewImage" alt="Preview">
+                <button class="remove-preview" onclick="event.stopPropagation(); clearScreenshotPreview()">✕</button>
               </div>
             </div>
-            <div class="screenshot-actions">
-              <div class="extracted-tags" id="screenshotTags"></div>
-              <button
-                class="screenshot-analyze-btn"
-                id="analyzeBtn"
-                onclick="analyzeScreenshot()"
-                disabled
-              >
-                🔍 Analyze with AI
-              </button>
-            </div>
+            <button class="add-ingredient-btn screenshot-add" id="addScreenshotBtn" onclick="addScreenshotIngredient()" disabled>+ Add Screenshot</button>
           </div>
         </div>
+
+        <!-- Ingredient Basket -->
+        <div class="ingredient-basket" id="ingredientBasket">
+          <div class="basket-empty" id="basketEmpty"><span>No ingredients yet — add something above!</span></div>
+          <div class="ingredient-chips" id="ingredientChips"></div>
+        </div>
+
+        <!-- Generate Button -->
+        <button class="generate-btn" id="generateBtn" onclick="generateFromBasket()" disabled>🚀 Generate Learning Path</button>
+
+        <!-- Quick Examples -->
         <div class="examples">
-          <span style="color: var(--text-muted); margin-right: 0.5rem"
-            >Try:</span
-          >
-          <button
-            class="example-btn"
-            onclick="setQuery('UE5 packaging error ExitCode 25')"
-          >
-            Packaging Error
-          </button>
-          <button
-            class="example-btn"
-            onclick="setQuery('Lumen flickering and noise')"
-          >
-            Lumen Artifacts
-          </button>
-          <button
-            class="example-btn"
-            onclick="setQuery('Blueprint Accessed None error')"
-          >
-            Blueprint Crash
-          </button>
-          <button
-            class="example-btn"
-            onclick="setQuery('Multiplayer replication lag')"
-          >
-            Multiplayer Lag
-          </button>
-          <button
-            class="example-btn"
-            onclick="setQuery('D3D device lost crash')"
-          >
-            GPU Crash
-          </button>
+          <span style="color: var(--text-muted); margin-right: 0.5rem">Quick add:</span>
+          <button class="example-btn" onclick="quickAddIngredient('Packaging error ExitCode 25')">Packaging Error</button>
+          <button class="example-btn" onclick="quickAddIngredient('Lumen flickering')">Lumen</button>
+          <button class="example-btn" onclick="quickAddIngredient('Blueprint Accessed None')">Blueprint</button>
+          <button class="example-btn" onclick="quickAddIngredient('GPU crash D3D')">GPU Crash</button>
         </div>
       </section>
 
@@ -1710,6 +1683,147 @@ ShaderCompileWorker crashed"
           btn.textContent = "🔍 Analyze with AI";
         }
       }
+
+      
+      // =====================================================
+      // PROBLEM BASKET - Ingredient Management
+      // =====================================================
+      const ingredients = [];
+      let currentPanel = null;
+      let currentScreenshot = null;
+
+      function showInputPanel(panelType) {
+        const panels = ['text', 'log', 'screenshot'];
+        const buttons = document.querySelectorAll('.input-method-btn');
+        panels.forEach((p, i) => {
+          const panel = document.getElementById(p + 'Panel');
+          const btn = buttons[i];
+          if (p === panelType && currentPanel !== panelType) {
+            panel.style.display = 'flex';
+            btn.classList.add('active');
+          } else {
+            panel.style.display = 'none';
+            btn.classList.remove('active');
+          }
+        });
+        currentPanel = currentPanel === panelType ? null : panelType;
+        if (currentPanel === 'text') document.getElementById('textInput').focus();
+        else if (currentPanel === 'log') document.getElementById('logInput').focus();
+      }
+
+      function addTextIngredient() {
+        const input = document.getElementById('textInput');
+        const text = input.value.trim();
+        if (!text) return;
+        addIngredient('text', text, '📝');
+        input.value = '';
+      }
+
+      const UE5_PATTERNS = [
+        { pattern: /ExitCode[=:\s]*(\d+)/i, extract: m => `ExitCode ${m[1]}` },
+        { pattern: /ShaderCompileWorker/i, extract: () => "Shader error" },
+        { pattern: /D3D\s*device\s*lost/i, extract: () => "D3D device lost" },
+        { pattern: /Accessed\s*None/i, extract: () => "Accessed None" },
+        { pattern: /Lumen/i, extract: () => "Lumen" },
+        { pattern: /Nanite/i, extract: () => "Nanite" },
+        { pattern: /packaging\s*(fail|error)/i, extract: () => "Packaging error" },
+        { pattern: /Fatal\s*error/i, extract: () => "Fatal error" },
+      ];
+
+      function addLogIngredient() {
+        const textarea = document.getElementById('logInput');
+        const log = textarea.value.trim();
+        if (!log) return;
+        const found = new Set();
+        for (const { pattern, extract } of UE5_PATTERNS) {
+          const match = log.match(pattern);
+          if (match) found.add(extract(match));
+        }
+        if (found.size > 0) found.forEach(term => addIngredient('log', term, '📋'));
+        else addIngredient('log', log.split('\n')[0].substring(0, 40), '📋');
+        textarea.value = '';
+      }
+
+      function handleScreenshotSelect(event) {
+        const file = event.target.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          currentScreenshot = { data: e.target.result, name: file.name };
+          document.getElementById('dropzoneContent').style.display = 'none';
+          document.getElementById('screenshotPreview').style.display = 'block';
+          document.getElementById('previewImage').src = currentScreenshot.data;
+          document.getElementById('addScreenshotBtn').disabled = false;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function clearScreenshotPreview() {
+        currentScreenshot = null;
+        document.getElementById('screenshotInput').value = '';
+        document.getElementById('dropzoneContent').style.display = 'flex';
+        document.getElementById('screenshotPreview').style.display = 'none';
+        document.getElementById('addScreenshotBtn').disabled = true;
+      }
+
+      function addScreenshotIngredient() {
+        if (!currentScreenshot) return;
+        addIngredient('screenshot', 'Screenshot', '📷', currentScreenshot.data);
+        clearScreenshotPreview();
+      }
+
+      function addIngredient(type, label, icon, data = null) {
+        const id = Date.now() + Math.random();
+        ingredients.push({ id, type, label, icon, data });
+        renderBasket();
+      }
+
+      function removeIngredient(id) {
+        const idx = ingredients.findIndex(i => i.id === id);
+        if (idx !== -1) { ingredients.splice(idx, 1); renderBasket(); }
+      }
+
+      function quickAddIngredient(text) { addIngredient('text', text, '📝'); }
+
+      function renderBasket() {
+        const empty = document.getElementById('basketEmpty');
+        const chips = document.getElementById('ingredientChips');
+        const btn = document.getElementById('generateBtn');
+        if (ingredients.length === 0) {
+          empty.style.display = 'block';
+          chips.innerHTML = '';
+          btn.disabled = true;
+        } else {
+          empty.style.display = 'none';
+          chips.innerHTML = ingredients.map(ing => 
+            `<div class="ingredient-chip ${ing.type}-chip"><span>${ing.icon} ${ing.label}</span><button class="chip-remove" onclick="removeIngredient(${ing.id})">✕</button></div>`
+          ).join('');
+          btn.disabled = false;
+        }
+      }
+
+      function generateFromBasket() {
+        if (ingredients.length === 0) return;
+        const query = ingredients.filter(i => i.type !== 'screenshot').map(i => i.label).join(' ');
+        document.getElementById('queryInput').value = query;
+        generatePath();
+      }
+
+      // Drag and drop for screenshots
+      document.addEventListener('DOMContentLoaded', () => {
+        const dz = document.getElementById('screenshotDropzone');
+        if (dz) {
+          dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+          dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+          dz.addEventListener('drop', e => {
+            e.preventDefault();
+            dz.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleScreenshotSelect({ target: { files: [file] } });
+          });
+        }
+      });
+
 
       let cachedPathsIndex = [];
 
