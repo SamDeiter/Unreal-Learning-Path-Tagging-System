@@ -154,18 +154,41 @@
       }
 
       .spinner {
-        width: 50px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
         border: 4px solid var(--border);
         border-top-color: var(--primary);
+        border-right-color: var(--purple);
         border-radius: 50%;
         animation: spin 1s linear infinite;
-        margin: 0 auto 1rem;
+        margin: 0 auto 1.5rem;
+      }
+
+      .loading-text {
+        font-size: 1.2rem;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+      }
+
+      .loading-subtext {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        animation: pulse 2s ease-in-out infinite;
       }
 
       @keyframes spin {
         to {
           transform: rotate(360deg);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
         }
       }
 
@@ -341,6 +364,8 @@
         padding: 1rem 1.5rem;
         border-radius: 0.75rem;
         border-left: 4px solid var(--primary);
+        display: flex;
+        gap: 1rem;
       }
 
       .content-type {
@@ -363,6 +388,30 @@
 
       .content-link:hover {
         text-decoration: underline;
+      }
+
+      .content-thumbnail {
+        width: 120px;
+        height: 68px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        flex-shrink: 0;
+      }
+
+      .content-details {
+        flex: 1;
+      }
+
+      .content-description {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin: 0.25rem 0;
+        line-height: 1.6;
+      }
+
+      .content-description strong {
+        color: var(--text);
+        font-weight: 600;
       }
 
       /* Action Box */
@@ -507,7 +556,10 @@
 
       <div class="loading" id="loading">
         <div class="spinner"></div>
-        <p>Building your learning path...</p>
+        <p class="loading-text">🤖 AI is curating your path...</p>
+        <p class="loading-subtext">
+          Finding the best content and timestamps for you
+        </p>
       </div>
 
       <section class="path-section" id="pathSection">
@@ -651,6 +703,16 @@
       let currentPath = null;
       let completedSteps = new Set();
 
+      // Simple markdown to HTML converter
+      function parseMarkdown(text) {
+        if (!text) return "";
+        return text
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // **bold**
+          .replace(/\*(.*?)\*/g, "<em>$1</em>") // *italic*
+          .replace(/\n\n/g, "<br><br>") // paragraphs
+          .replace(/⏱️/g, "<br>⏱️"); // line break before timestamp
+      }
+
       function setQuery(query) {
         document.getElementById("queryInput").value = query;
       }
@@ -748,12 +810,12 @@
                             ${step.content
                               .map(
                                 (c) => `
-                                <div class="content-item" style="display: flex; gap: 1rem;">
-                                    ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="" style="width: 120px; height: 68px; object-fit: cover; border-radius: 0.5rem; flex-shrink: 0;">` : ""}
-                                    <div style="flex: 1;">
+                                <div class="content-item">
+                                    ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="" class="content-thumbnail">` : ""}
+                                    <div class="content-details">
                                         <div class="content-type">${c.type}</div>
                                         <div class="content-title">${c.title}</div>
-                                        ${c.description ? `<p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0; line-height: 1.5;">${c.description}</p>` : ""}
+                                        ${c.description ? `<p class="content-description">${parseMarkdown(c.description)}</p>` : ""}
                                         <a href="${c.url}" target="_blank" class="content-link">Open Resource ↗</a>
                                     </div>
                                 </div>
