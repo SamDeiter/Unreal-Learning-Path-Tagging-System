@@ -238,11 +238,45 @@
         width: 40px;
         height: 40px;
         background: var(--bg);
+        border: 2px solid var(--border);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      /* Step number colors by type */
+      .step-card[data-type="foundations"] .step-number {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+      .step-card[data-type="diagnostics"] .step-number {
+        border-color: var(--warning);
+        color: var(--warning);
+      }
+      .step-card[data-type="resolution"] .step-number {
+        border-color: var(--success);
+        color: var(--success);
+      }
+      .step-card[data-type="prevention"] .step-number {
+        border-color: var(--purple);
+        color: var(--purple);
+      }
+
+      /* Completed step number */
+      .step-card.completed .step-number {
+        background: var(--success);
+        border-color: var(--success);
+        color: white;
+      }
+      .step-card.completed .step-number::after {
+        content: "✓";
+        position: absolute;
+      }
+      .step-card.completed .step-number span {
+        visibility: hidden;
       }
 
       .step-type {
@@ -688,9 +722,9 @@
         stepsContainer.innerHTML = path.steps
           .map(
             (step) => `
-                <div class="step-card" id="step-${step.number}">
+                <div class="step-card" id="step-${step.number}" data-type="${step.type}">
                     <div class="step-header" onclick="toggleStep(${step.number})">
-                        <div class="step-number">${step.number}</div>
+                        <div class="step-number"><span>${step.number}</span></div>
                         <span class="step-type ${step.type}">${step.type}</span>
                         <span class="step-title">${step.title}</span>
                         <span class="step-toggle">▼</span>
@@ -719,7 +753,7 @@
                                     <div style="flex: 1;">
                                         <div class="content-type">${c.type}</div>
                                         <div class="content-title">${c.title}</div>
-                                        ${c.description ? `<p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0;">${c.description.substring(0, 150)}...</p>` : ""}
+                                        ${c.description ? `<p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0; line-height: 1.5;">${c.description}</p>` : ""}
                                         <a href="${c.url}" target="_blank" class="content-link">Open Resource ↗</a>
                                     </div>
                                 </div>
@@ -748,10 +782,13 @@
 
       function completeStep(num) {
         completedSteps.add(num);
+        const card = document.getElementById(`step-${num}`);
+        card.classList.add("completed");
         const btn = document.getElementById(`complete-${num}`);
         btn.textContent = "✓ Completed";
         btn.disabled = true;
-        btn.style.opacity = "0.7";
+        btn.style.background = "var(--success)";
+        btn.style.opacity = "0.8";
         updateProgress();
       }
 
