@@ -215,6 +215,102 @@
         border-color: var(--primary);
       }
 
+      /* Crash Log Section */
+      .crashlog-section {
+        margin-top: 1rem;
+      }
+
+      .crashlog-toggle {
+        background: transparent;
+        border: 1px dashed var(--border);
+        color: var(--text-muted);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+      }
+
+      .crashlog-toggle:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: rgba(14, 165, 233, 0.05);
+      }
+
+      .crashlog-container {
+        margin-top: 0.75rem;
+        animation: slideDown 0.3s ease;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .crashlog-textarea {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        color: var(--text);
+        padding: 1rem;
+        font-family: "Consolas", "Monaco", monospace;
+        font-size: 0.8rem;
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .crashlog-textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+      }
+
+      .crashlog-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .extracted-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+      }
+
+      .extracted-tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        background: rgba(168, 85, 247, 0.2);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        border-radius: 0.25rem;
+        color: #a855f7;
+      }
+
+      .crashlog-parse-btn {
+        background: linear-gradient(135deg, #a855f7, #8b5cf6);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      .crashlog-parse-btn:hover {
+        transform: translateY(-2px);
+      }
+
       /* Gallery Section */
       .gallery-section {
         background: var(--bg-card);
@@ -853,6 +949,36 @@
             Build Path 🚀
           </button>
         </div>
+
+        <!-- Crash Log Paste Section -->
+        <div class="crashlog-section">
+          <button class="crashlog-toggle" onclick="toggleCrashLog()">
+            📋 Paste Crash Log / Error Output
+          </button>
+          <div
+            class="crashlog-container"
+            id="crashlogContainer"
+            style="display: none"
+          >
+            <textarea
+              id="crashLogInput"
+              class="crashlog-textarea"
+              placeholder="Paste your UE5 crash log, error output, or Output Log content here...
+
+Example:
+LogWindows: Error: appError called: Fatal error: [File:Runtime/Core/Private/...]
+ExitCode=25
+ShaderCompileWorker crashed"
+              rows="6"
+            ></textarea>
+            <div class="crashlog-actions">
+              <div class="extracted-tags" id="extractedTags"></div>
+              <button class="crashlog-parse-btn" onclick="parseCrashLog()">
+                🔍 Extract & Search
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="examples">
           <span style="color: var(--text-muted); margin-right: 0.5rem"
             >Try:</span
@@ -1173,6 +1299,117 @@
 
       function setQuery(query) {
         document.getElementById("queryInput").value = query;
+      }
+
+      // Toggle crash log textarea visibility
+      function toggleCrashLog() {
+        const container = document.getElementById("crashlogContainer");
+        const isVisible = container.style.display !== "none";
+        container.style.display = isVisible ? "none" : "block";
+        if (!isVisible) {
+          document.getElementById("crashLogInput").focus();
+        }
+      }
+
+      // UE5 Error Patterns for parsing crash logs
+      const UE5_ERROR_PATTERNS = [
+        {
+          pattern: /ExitCode[=:\s]*(\d+)/i,
+          type: "exitcode",
+          extract: (m) => `ExitCode ${m[1]}`,
+        },
+        {
+          pattern: /Error[:\s]+([A-Z]+\d+)/i,
+          type: "linker",
+          extract: (m) => m[1],
+        },
+        {
+          pattern: /ShaderCompileWorker/i,
+          type: "shader",
+          extract: () => "Shader compilation error",
+        },
+        {
+          pattern: /D3D\s*device\s*lost/i,
+          type: "gpu",
+          extract: () => "D3D device lost",
+        },
+        { pattern: /GPU\s*crash/i, type: "gpu", extract: () => "GPU crash" },
+        {
+          pattern: /Accessed\s*None/i,
+          type: "blueprint",
+          extract: () => "Blueprint Accessed None",
+        },
+        {
+          pattern: /cook\s*(fail|error)/i,
+          type: "cook",
+          extract: () => "Cook failure",
+        },
+        {
+          pattern: /packaging\s*(fail|error)/i,
+          type: "packaging",
+          extract: () => "Packaging error",
+        },
+        { pattern: /Lumen/i, type: "lumen", extract: () => "Lumen issue" },
+        { pattern: /Nanite/i, type: "nanite", extract: () => "Nanite issue" },
+        {
+          pattern: /replication|multiplayer|net/i,
+          type: "network",
+          extract: () => "Network/replication",
+        },
+        {
+          pattern: /Fatal\s*error/i,
+          type: "fatal",
+          extract: () => "Fatal error",
+        },
+        {
+          pattern: /LogCore:\s*Error/i,
+          type: "core",
+          extract: () => "Core error",
+        },
+        {
+          pattern: /out\s*of\s*(memory|video\s*memory)/i,
+          type: "memory",
+          extract: () => "Out of memory",
+        },
+      ];
+
+      // Parse crash log and extract key terms
+      function parseCrashLog() {
+        const logInput = document.getElementById("crashLogInput").value.trim();
+        if (!logInput) {
+          alert("Please paste a crash log or error output first.");
+          return;
+        }
+
+        const extractedTerms = [];
+        const seenTypes = new Set();
+
+        // Run all patterns
+        for (const { pattern, type, extract } of UE5_ERROR_PATTERNS) {
+          const match = logInput.match(pattern);
+          if (match && !seenTypes.has(type)) {
+            extractedTerms.push(extract(match));
+            seenTypes.add(type);
+          }
+        }
+
+        // Display extracted tags
+        const tagsContainer = document.getElementById("extractedTags");
+        if (extractedTerms.length > 0) {
+          tagsContainer.innerHTML = extractedTerms
+            .map((t) => `<span class="extracted-tag">${t}</span>`)
+            .join("");
+
+          // Build query from extracted terms
+          const query = extractedTerms.slice(0, 3).join(" ");
+          document.getElementById("queryInput").value = query;
+
+          // Auto-generate the path
+          generatePath();
+        } else {
+          tagsContainer.innerHTML =
+            '<span class="extracted-tag" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">No patterns found - try describing the issue</span>';
+        }
       }
 
       // Cached paths index (loaded on startup)
