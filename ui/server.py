@@ -72,6 +72,7 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
                         "type": s.step_type,
                         "title": s.title,
                         "description": s.description,
+                        "action": s.skills_gained[0] if s.skills_gained else None,
                         "content": [
                             {
                                 "type": c.source_type,

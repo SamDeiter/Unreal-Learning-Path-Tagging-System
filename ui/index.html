@@ -331,6 +331,39 @@
         text-decoration: underline;
       }
 
+      /* Action Box */
+      .action-box {
+        background: linear-gradient(
+          135deg,
+          rgba(14, 165, 233, 0.15),
+          rgba(168, 85, 247, 0.1)
+        );
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        margin: 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .action-box .action-icon {
+        font-size: 1.5rem;
+      }
+
+      .action-box .action-text {
+        font-weight: 500;
+        color: var(--text);
+      }
+
+      .action-box .action-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--primary);
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+      }
+
       /* Progress */
       .progress-section {
         background: var(--bg-card);
@@ -663,7 +696,20 @@
                         <span class="step-toggle">▼</span>
                     </div>
                     <div class="step-content">
-                        <p class="step-description">${step.description}</p>
+                        <p class="step-description">${step.description.split("\n\n👉")[0]}</p>
+                        ${
+                          step.action
+                            ? `
+                        <div class="action-box">
+                            <span class="action-icon">👉</span>
+                            <div>
+                                <div class="action-label">Your Action</div>
+                                <div class="action-text">${step.action}</div>
+                            </div>
+                        </div>
+                        `
+                            : ""
+                        }
                         <div class="content-list">
                             ${step.content
                               .map(
@@ -673,7 +719,7 @@
                                     <div style="flex: 1;">
                                         <div class="content-type">${c.type}</div>
                                         <div class="content-title">${c.title}</div>
-                                        ${c.description ? `<p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0;">${c.description.substring(0, 100)}...</p>` : ""}
+                                        ${c.description ? `<p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0;">${c.description.substring(0, 150)}...</p>` : ""}
                                         <a href="${c.url}" target="_blank" class="content-link">Open Resource ↗</a>
                                     </div>
                                 </div>
