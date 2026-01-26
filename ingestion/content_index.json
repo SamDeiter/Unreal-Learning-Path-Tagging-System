@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "0.1.0",
+  "description": "Atomic content references for docs and video slices",
+  "content_schema": {
+    "required": ["content_id", "content_type", "title", "url"],
+    "properties": {
+      "content_id": {
+        "type": "string",
+        "description": "Unique identifier (yt:<video_id>#t=start-end or doc:<slug>#section=<id>)"
+      },
+      "content_type": {
+        "type": "string",
+        "enum": ["youtube_clip", "doc_section", "forum_thread"]
+      },
+      "title": { "type": "string" },
+      "url": { "type": "string", "format": "uri" },
+      "snippet": {
+        "type": "string",
+        "description": "Brief excerpt or summary"
+      },
+      "derived_tags": { "type": "array", "items": { "type": "string" } },
+      "engine_versions": { "type": "array", "items": { "type": "string" } },
+      "quality": {
+        "signal_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+        "freshness_date": { "type": "string", "format": "date" },
+        "source_authority": {
+          "type": "string",
+          "enum": ["official", "community", "verified_creator"]
+        }
+      }
+    }
+  },
+  "entries": [
+    {
+      "content_id": "doc:packaging-projects#section=troubleshooting",
+      "content_type": "doc_section",
+      "title": "Packaging Projects - Troubleshooting",
+      "url": "https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects",
+      "snippet": "Common packaging issues and their solutions including exit codes and cook failures",
+      "derived_tags": [
+        "build.packaging",
+        "build.exitcode_25",
+        "build.exitcode_6"
+      ],
+      "engine_versions": ["5.0", "5.1", "5.2", "5.3", "5.4"],
+      "quality": {
+        "signal_strength": 0.95,
+        "freshness_date": "2025-12-01",
+        "source_authority": "official"
+      }
+    },
+    {
+      "content_id": "doc:lumen-gi#section=performance",
+      "content_type": "doc_section",
+      "title": "Lumen Global Illumination - Performance",
+      "url": "https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine",
+      "snippet": "Performance optimization for Lumen GI including quality settings and hardware requirements",
+      "derived_tags": ["rendering.lumen", "symptom.lumen_noise"],
+      "engine_versions": ["5.0", "5.1", "5.2", "5.3", "5.4"],
+      "quality": {
+        "signal_strength": 0.92,
+        "freshness_date": "2025-11-15",
+        "source_authority": "official"
+      }
+    },
+    {
+      "content_id": "yt:abc123xyz#t=120-240",
+      "content_type": "youtube_clip",
+      "title": "UE5 Packaging Errors Explained (2:00-4:00)",
+      "url": "https://www.youtube.com/watch?v=abc123xyz&t=120",
+      "snippet": "Walkthrough of common ExitCode errors and how to read the packaging log",
+      "derived_tags": [
+        "build.packaging",
+        "build.exitcode_25",
+        "debug.output_log"
+      ],
+      "engine_versions": ["5.3", "5.4"],
+      "quality": {
+        "signal_strength": 0.85,
+        "freshness_date": "2025-10-20",
+        "source_authority": "verified_creator"
+      }
+    },
+    {
+      "content_id": "yt:def456uvw#t=300-480",
+      "content_type": "youtube_clip",
+      "title": "Fixing GPU Crashes in UE5 (5:00-8:00)",
+      "url": "https://www.youtube.com/watch?v=def456uvw&t=300",
+      "snippet": "Diagnosing D3D device lost errors and driver-related GPU crashes",
+      "derived_tags": [
+        "crash.d3d_device_lost",
+        "rendering.lumen",
+        "platform.windows"
+      ],
+      "engine_versions": ["5.2", "5.3", "5.4"],
+      "quality": {
+        "signal_strength": 0.88,
+        "freshness_date": "2025-09-10",
+        "source_authority": "verified_creator"
+      }
+    },
+    {
+      "content_id": "doc:blueprint-debugging#section=accessed-none",
+      "content_type": "doc_section",
+      "title": "Blueprint Debugging - Accessed None Errors",
+      "url": "https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-debugging-in-unreal-engine",
+      "snippet": "Understanding and fixing Accessed None errors in Blueprints",
+      "derived_tags": [
+        "blueprint.accessed_none",
+        "scripting.blueprint",
+        "debug.output_log"
+      ],
+      "engine_versions": ["5.0", "5.1", "5.2", "5.3", "5.4"],
+      "quality": {
+        "signal_strength": 0.9,
+        "freshness_date": "2025-08-01",
+        "source_authority": "official"
+      }
+    }
+  ]
+}

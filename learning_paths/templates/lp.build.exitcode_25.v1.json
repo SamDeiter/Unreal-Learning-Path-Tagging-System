@@ -1,0 +1,193 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "template_id": "lp.build.exitcode_25.v1",
+  "version": "1.0.0",
+  "display_name": "Resolving Packaging Failure: ExitCode=25",
+  "description": "Step-by-step learning path for diagnosing and fixing UE5 packaging failures with exit code 25",
+  "entry_conditions": {
+    "required_tags": ["build.exitcode_25"],
+    "optional_tags": ["build.packaging", "tool.uat"],
+    "minimum_match_score": 0.7
+  },
+  "estimated_duration": "45-90 minutes",
+  "skill_level": "intermediate",
+  "engine_versions": ["5.0", "5.1", "5.2", "5.3", "5.4"],
+  "steps": [
+    {
+      "step_id": 1,
+      "step_type": "foundation",
+      "title": "Understanding the Build Pipeline",
+      "description": "Learn how UE5 packaging works and what ExitCode=25 means",
+      "skills_gained": ["Build pipeline literacy", "Log file navigation"],
+      "tags_referenced": ["build.packaging", "tool.uat", "debug.output_log"],
+      "content_selectors": [
+        { "type": "doc", "query": "packaging projects unreal engine" },
+        { "type": "video", "query": "UE5 packaging explained" }
+      ],
+      "duration": "10-15 min",
+      "checkpoint": {
+        "question": "Can you locate the Saved/Logs folder in your project?",
+        "expected_action": "Navigate to project Saved/Logs directory"
+      }
+    },
+    {
+      "step_id": 2,
+      "step_type": "diagnostic",
+      "title": "Reading the Build Log",
+      "description": "Locate and analyze the actual error in the packaging log",
+      "skills_gained": ["Log analysis", "Error pattern recognition"],
+      "tags_referenced": ["debug.output_log", "tool.uat"],
+      "content_selectors": [
+        { "type": "doc", "query": "reading build logs unreal" },
+        { "type": "video", "query": "UE5 packaging log analysis" }
+      ],
+      "duration": "15-20 min",
+      "decision_gate": {
+        "condition": "What type of error appears BEFORE ExitCode=25?",
+        "branches": [
+          {
+            "match": "Cook error",
+            "goto_step": 3
+          },
+          {
+            "match": "Compile error",
+            "goto_step": 4
+          },
+          {
+            "match": "Shader error",
+            "goto_step": 5
+          },
+          {
+            "match": "Unknown/Other",
+            "goto_step": 6
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 3,
+      "step_type": "remediation",
+      "title": "Fixing Cook Errors",
+      "description": "Resolve asset cooking failures that cause ExitCode=25",
+      "skills_gained": ["Asset validation", "Reference repair"],
+      "tags_referenced": ["build.packaging"],
+      "content_selectors": [
+        { "type": "doc", "query": "cooking content unreal engine" },
+        { "type": "video", "query": "UE5 cook errors fix" }
+      ],
+      "duration": "15-25 min",
+      "actions": [
+        "Check Output Log for 'LogCook' entries",
+        "Validate referenced assets exist",
+        "Fix redirectors: Right-click Content folder > Fix Up Redirectors",
+        "Re-save any assets with warnings"
+      ],
+      "goto_step": 7
+    },
+    {
+      "step_id": 4,
+      "step_type": "remediation",
+      "title": "Fixing Compile Errors",
+      "description": "Resolve C++ or Blueprint compilation failures",
+      "skills_gained": ["Compilation debugging", "Error interpretation"],
+      "tags_referenced": ["scripting.cpp", "scripting.blueprint"],
+      "content_selectors": [
+        { "type": "doc", "query": "compile errors unreal" },
+        { "type": "video", "query": "UE5 blueprint compile error" }
+      ],
+      "duration": "15-30 min",
+      "actions": [
+        "Open Message Log > Blueprint Log",
+        "Check for missing dependencies",
+        "Verify all Blueprints compile in editor first",
+        "For C++: Check for missing includes or undefined symbols"
+      ],
+      "goto_step": 7
+    },
+    {
+      "step_id": 5,
+      "step_type": "remediation",
+      "title": "Fixing Shader Errors",
+      "description": "Resolve shader compilation issues during packaging",
+      "skills_gained": ["Shader debugging", "Material validation"],
+      "tags_referenced": ["rendering.material"],
+      "content_selectors": [
+        { "type": "doc", "query": "shader compilation errors unreal" },
+        { "type": "video", "query": "UE5 material shader error" }
+      ],
+      "duration": "15-25 min",
+      "actions": [
+        "Look for 'LogShaderCompilers' errors",
+        "Open suspect materials and check for errors",
+        "Validate custom nodes and material functions",
+        "Try packaging with fewer shader permutations"
+      ],
+      "goto_step": 7
+    },
+    {
+      "step_id": 6,
+      "step_type": "diagnostic",
+      "title": "Deep Dive: Uncommon Causes",
+      "description": "Investigate less common causes of ExitCode=25",
+      "skills_gained": ["Advanced troubleshooting", "Process of elimination"],
+      "tags_referenced": ["build.packaging", "tool.uat", "tool.ubt"],
+      "content_selectors": [
+        { "type": "doc", "query": "troubleshooting packaging unreal" },
+        { "type": "video", "query": "UE5 packaging troubleshooting advanced" }
+      ],
+      "duration": "20-30 min",
+      "actions": [
+        "Check disk space (>50GB free recommended)",
+        "Verify Project Settings > Packaging configuration",
+        "Try packaging a blank project to isolate issue",
+        "Check for antivirus blocking UAT",
+        "Review plugin compatibility"
+      ],
+      "goto_step": 7
+    },
+    {
+      "step_id": 7,
+      "step_type": "verification",
+      "title": "Verify the Fix",
+      "description": "Confirm packaging succeeds and test the build",
+      "skills_gained": ["Build verification", "Testing discipline"],
+      "tags_referenced": ["build.packaging"],
+      "content_selectors": [
+        { "type": "doc", "query": "testing packaged builds unreal" }
+      ],
+      "duration": "10-15 min",
+      "actions": [
+        "Run Package Project again",
+        "Confirm 'BUILD SUCCESSFUL' in log",
+        "Test the packaged executable",
+        "Document what fixed the issue"
+      ]
+    },
+    {
+      "step_id": 8,
+      "step_type": "foundation",
+      "title": "Prevention: Build Hygiene",
+      "description": "Establish practices to prevent future packaging failures",
+      "skills_gained": ["Build hygiene", "CI/CD awareness"],
+      "tags_referenced": ["build.packaging", "tool.uat"],
+      "content_selectors": [
+        { "type": "doc", "query": "best practices packaging unreal" },
+        { "type": "video", "query": "UE5 build automation" }
+      ],
+      "duration": "10-15 min",
+      "actions": [
+        "Package regularly during development",
+        "Use Source Control for easy rollback",
+        "Consider nightly automated builds",
+        "Keep DDC (Derived Data Cache) healthy"
+      ]
+    }
+  ],
+  "metadata": {
+    "created_utc": "2026-01-26T19:20:00Z",
+    "updated_utc": "2026-01-26T19:20:00Z",
+    "author": "system",
+    "success_rate": null,
+    "feedback_count": 0
+  }
+}

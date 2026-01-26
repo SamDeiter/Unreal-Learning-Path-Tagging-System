@@ -1,14 +1,22 @@
 # Unreal Learning Path Tagging System
 
-A system to **analyze user queries** about Unreal Engine, **tag them semantically**, and **generate personalized learning paths** for solving UE issues.
+A schema-driven system to **analyze user queries** about Unreal Engine, **tag them semantically**, and **generate personalized learning paths** for solving UE issues.
+
+> **Philosophy**: Problem-solving over tutorials. Debugging literacy over passive consumption.
 
 ---
 
 ## 🎯 Project Goals
 
 1. **Query Analysis** – Capture and normalize user questions about Unreal Engine
-2. **Semantic Tagging** – Automatically categorize queries using a structured taxonomy
-3. **Learning Path Generation** – Match tagged queries to curated learning resources
+2. **Semantic Tagging** – Automatically categorize queries using deterministic matching
+3. **Learning Path Generation** – Match tagged queries to step-by-step resolution paths
+
+## 🚫 Non-Goals
+
+- No monolithic video courses or "tutorial hell"
+- No embeddings-based matching (v0.1 uses regex/contains only)
+- No user accounts or progress tracking (POC scope)
 
 ---
 
@@ -16,65 +24,115 @@ A system to **analyze user queries** about Unreal Engine, **tag them semanticall
 
 ```
 ├── tags/
-│   ├── schema.json       # Tag data schema definition
-│   └── taxonomy.json     # Predefined tag taxonomy
+│   ├── tags.json         # 55 canonical tags with full schema
+│   ├── categories.json   # Lightweight category taxonomy
+│   ├── edges.json        # Tag relationship graph
+│   └── GOVERNANCE.md     # Rules to prevent schema rot
 ├── user_queries/
-│   ├── schema.json       # User query schema
+│   ├── schema.json       # Query schema definition
 │   └── examples/         # Sample queries for testing
 ├── learning_paths/
 │   ├── schema.json       # Learning path schema
-│   └── templates/        # Path templates
+│   └── templates/        # Step-by-step resolution paths
+├── ingestion/
+│   ├── match_rules.json  # Deterministic text→tag matching
+│   └── content_index.json # Atomic content references
+├── .env.example          # API key template
 └── README.md
 ```
 
 ---
 
-## 🏷️ Tag Schema
+## 🏷️ Tag Schema (v0.1)
 
-Tags have the following structure:
+Each tag includes:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Unique identifier for the tag |
-| `type` | enum | One of: `category`, `concept`, `skill_level`, `ue_feature`, `issue_type` |
-| `relatedQueries` | array | IDs of user queries associated with this tag |
-| `description` | string | Human-readable description |
-| `parentTag` | string | Optional parent for hierarchical organization |
-
-### Tag Types
-
-- **category** – Broad UE5 domains (Blueprints, Materials, Animation)
-- **concept** – Specific concepts (Event Graph, State Machines)
-- **skill_level** – Difficulty levels (Beginner, Intermediate, Advanced)
-- **ue_feature** – Specific UE features (Niagara, Lumen, Nanite)
-- **issue_type** – Problem categories (Performance, Compile Error, Runtime)
+| Field | Description |
+|-------|-------------|
+| `tag_id` | Namespaced identifier (e.g., `build.exitcode_25`) |
+| `display_name` | Human-readable name |
+| `tag_type` | One of: `system`, `workflow`, `symptom`, `error_code`, `tool`, `platform`, `concept`, `ui_surface` |
+| `synonyms` | Search trigger variants |
+| `aliases` | Typed variants (abbrev, legacy, community) |
+| `signals.error_signatures` | Exact error strings for matching |
+| `constraints.engine_versions` | UE version compatibility |
+| `relevance.global_weight` | 0-1 importance score |
 
 ---
 
-## 🔄 Workflow
+## 🔄 How Matching Works
 
 ```
-User Query → Tag Analysis → Tag Assignment → Learning Path Matching → Resource Delivery
+User Query → Deterministic Match → Tag Assignment → Learning Path Selection
 ```
 
-1. User submits a query about an Unreal Engine issue
-2. System analyzes query text and assigns relevant tags
-3. Tags are matched against learning path requirements
-4. Personalized learning path is generated
+1. User submits query: `"UE5 packaging fails with ExitCode=25"`
+2. `match_rules.json` applies regex/contains patterns
+3. Matches: `build.exitcode_25` + `build.packaging`
+4. System selects: `lp.build.exitcode_25.v1` learning path
+
+**No embeddings required** – all matching is deterministic via:
+
+- Regex patterns: `ExitCode[=:\s]*25`
+- Contains rules: `"D3D device lost"`
+- Error signatures: `0xC0000005`, `DXGI_ERROR_DEVICE_REMOVED`
 
 ---
 
-## 🚀 Future Roadmap
+## 📚 Learning Path Structure
 
-- [ ] Integration with UE5 LMS ecosystem
-- [ ] AI-powered query analysis
-- [ ] Dynamic learning path generation
-- [ ] Progress tracking per user
-- [ ] Query resolution feedback loop
+Each path has:
+
+- **Entry conditions**: Required/optional tags
+- **Steps**: foundation → diagnostic → remediation → verification
+- **Decision gates**: Branch based on detected symptoms
+- **Skills gained**: What the user learns (not just actions)
+
+Example path: `lp.build.exitcode_25.v1.json`
+
+```
+Step 1: Understanding the Build Pipeline (foundation)
+Step 2: Reading the Build Log (diagnostic)
+  └─ Decision Gate: What error type?
+     ├─ Cook error → Step 3
+     ├─ Compile error → Step 4
+     └─ Shader error → Step 5
+Step 7: Verify the Fix (verification)
+```
 
 ---
 
-## 📚 Related Projects
+## 🚀 Quick Start
+
+```bash
+# Clone the repo
+git clone https://github.com/SamDeiter/Unreal-Learning-Path-Tagging-System.git
+
+# Copy environment template
+cp .env.example .env
+
+# Add your YouTube API key to .env
+# YOUTUBE_API_KEY=your_key_here
+```
+
+---
+
+## 📊 Current Tag Coverage (v0.1)
+
+| Category | Count |
+|----------|-------|
+| Core Systems (C++, Blueprint, AI, Multiplayer) | 8 |
+| Visuals (Lumen, Nanite, Niagara, Materials) | 10 |
+| Characters & Animation | 5 |
+| Platforms (VR, Quest, Android, iOS) | 8 |
+| Genres & Templates | 8 |
+| Build & Errors | 6 |
+| Crashes & Debugging | 6 |
+| **Total** | **55** |
+
+---
+
+## 🔗 Related Projects
 
 - [UE5QuestionGenerator](https://github.com/SamDeiter/UE5QuestionGenerator)
 - [UE5LMSBlueprint](https://github.com/SamDeiter/UE5LMSBlueprint)

@@ -1,0 +1,203 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "template_id": "lp.crash.d3d_device_lost.v1",
+  "version": "1.0.0",
+  "display_name": "Resolving D3D Device Lost / GPU Crashes",
+  "description": "Step-by-step learning path for diagnosing and fixing DXGI_ERROR_DEVICE_REMOVED crashes",
+  "entry_conditions": {
+    "required_tags": ["crash.d3d_device_lost"],
+    "optional_tags": [
+      "rendering.lumen",
+      "rendering.nanite",
+      "rendering.raytracing"
+    ],
+    "minimum_match_score": 0.7
+  },
+  "estimated_duration": "30-60 minutes",
+  "skill_level": "intermediate",
+  "engine_versions": ["5.0", "5.1", "5.2", "5.3", "5.4"],
+  "steps": [
+    {
+      "step_id": 1,
+      "step_type": "foundation",
+      "title": "Understanding GPU Crashes",
+      "description": "Learn what D3D device lost means and common causes",
+      "skills_gained": ["GPU crash literacy", "DirectX fundamentals"],
+      "tags_referenced": ["crash.d3d_device_lost", "debug.callstack"],
+      "content_selectors": [
+        { "type": "doc", "query": "GPU crash device removed unreal" },
+        { "type": "video", "query": "DXGI error device removed fix" }
+      ],
+      "duration": "5-10 min",
+      "key_concepts": [
+        "GPU driver timeout (TDR)",
+        "VRAM exhaustion",
+        "Driver bugs or instability",
+        "Overheating"
+      ]
+    },
+    {
+      "step_id": 2,
+      "step_type": "diagnostic",
+      "title": "Gather Crash Information",
+      "description": "Collect data to identify the crash pattern",
+      "skills_gained": ["Crash log analysis", "Pattern recognition"],
+      "tags_referenced": ["debug.output_log", "debug.callstack"],
+      "content_selectors": [
+        { "type": "doc", "query": "crash logs unreal engine" }
+      ],
+      "duration": "10-15 min",
+      "actions": [
+        "Open Saved/Crashes folder",
+        "Note when crash occurs (editor? play? packaging?)",
+        "Check if crash is reproducible",
+        "Monitor GPU temperature during use"
+      ],
+      "decision_gate": {
+        "condition": "When does the crash occur?",
+        "branches": [
+          {
+            "match": "During Lumen/Nanite scenes",
+            "goto_step": 3
+          },
+          {
+            "match": "During ray tracing",
+            "goto_step": 4
+          },
+          {
+            "match": "Random/Unpredictable",
+            "goto_step": 5
+          },
+          {
+            "match": "Under heavy GPU load",
+            "goto_step": 6
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 3,
+      "step_type": "remediation",
+      "title": "Optimizing Lumen/Nanite Settings",
+      "description": "Reduce GPU load from UE5's demanding features",
+      "skills_gained": ["Lumen tuning", "Performance optimization"],
+      "tags_referenced": ["rendering.lumen", "rendering.nanite"],
+      "content_selectors": [
+        { "type": "doc", "query": "lumen performance optimization" },
+        { "type": "video", "query": "UE5 lumen settings performance" }
+      ],
+      "duration": "10-15 min",
+      "actions": [
+        "Lower Lumen quality in Project Settings",
+        "Reduce Lumen Scene Detail",
+        "Disable Nanite for complex meshes temporarily",
+        "Use r.Lumen.ScreenProbeGather.ScreenTraces 0 to test"
+      ],
+      "goto_step": 7
+    },
+    {
+      "step_id": 4,
+      "step_type": "remediation",
+      "title": "Ray Tracing Stability",
+      "description": "Address ray tracing related GPU crashes",
+      "skills_gained": ["Ray tracing configuration", "Feature isolation"],
+      "tags_referenced": ["rendering.raytracing"],
+      "content_selectors": [
+        { "type": "doc", "query": "ray tracing crashes unreal" },
+        { "type": "video", "query": "UE5 ray tracing troubleshooting" }
+      ],
+      "duration": "10-15 min",
+      "actions": [
+        "Disable ray tracing temporarily: r.RayTracing 0",
+        "Update GPU drivers to latest",
+        "Check if specific RT feature causes crash",
+        "Reduce RT quality settings"
+      ],
+      "goto_step": 7
+    },
+    {
+      "step_id": 5,
+      "step_type": "remediation",
+      "title": "Driver and System Stability",
+      "description": "Address underlying system issues",
+      "skills_gained": ["Driver management", "System stability"],
+      "tags_referenced": ["platform.windows"],
+      "content_selectors": [
+        { "type": "doc", "query": "GPU driver update gaming" },
+        { "type": "video", "query": "NVIDIA AMD driver clean install" }
+      ],
+      "duration": "15-20 min",
+      "actions": [
+        "Download latest GPU drivers from NVIDIA/AMD",
+        "Use DDU for clean driver reinstall",
+        "Disable GPU overclocking",
+        "Increase TDR timeout: TdrDelay registry key",
+        "Check Windows Event Viewer for GPU errors"
+      ],
+      "goto_step": 7
+    },
+    {
+      "step_id": 6,
+      "step_type": "remediation",
+      "title": "Addressing VRAM and Thermal Issues",
+      "description": "Resolve memory and overheating problems",
+      "skills_gained": ["VRAM management", "Thermal monitoring"],
+      "tags_referenced": ["crash.d3d_device_lost"],
+      "content_selectors": [
+        { "type": "doc", "query": "GPU VRAM management unreal" },
+        { "type": "video", "query": "monitor GPU temperature gaming" }
+      ],
+      "duration": "10-15 min",
+      "actions": [
+        "Monitor VRAM usage with GPU-Z or similar",
+        "Reduce texture quality if near VRAM limit",
+        "Check GPU temps (should stay under 85°C)",
+        "Improve case airflow or clean GPU fans",
+        "Use r.Streaming.PoolSize to limit texture memory"
+      ],
+      "goto_step": 7
+    },
+    {
+      "step_id": 7,
+      "step_type": "verification",
+      "title": "Verify Stability",
+      "description": "Confirm the fix prevents future crashes",
+      "skills_gained": ["Stability testing", "Regression prevention"],
+      "tags_referenced": ["debug.output_log"],
+      "content_selectors": [],
+      "duration": "10-15 min",
+      "actions": [
+        "Run the previously crashing scenario",
+        "Monitor GPU stats during extended session",
+        "Gradually re-enable disabled features",
+        "Document working configuration"
+      ]
+    },
+    {
+      "step_id": 8,
+      "step_type": "foundation",
+      "title": "Prevention: GPU Stability Best Practices",
+      "description": "Establish practices to prevent future GPU crashes",
+      "skills_gained": ["Preventive maintenance", "Performance awareness"],
+      "tags_referenced": ["crash.d3d_device_lost", "rendering.lumen"],
+      "content_selectors": [
+        { "type": "doc", "query": "performance best practices unreal" },
+        { "type": "video", "query": "UE5 optimization workflow" }
+      ],
+      "duration": "5-10 min",
+      "actions": [
+        "Keep GPU drivers updated (but not bleeding edge)",
+        "Profile scenes before adding complex features",
+        "Use scalability settings for development",
+        "Set up automated GPU monitoring"
+      ]
+    }
+  ],
+  "metadata": {
+    "created_utc": "2026-01-26T19:20:00Z",
+    "updated_utc": "2026-01-26T19:20:00Z",
+    "author": "system",
+    "success_rate": null,
+    "feedback_count": 0
+  }
+}

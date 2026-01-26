@@ -1,0 +1,378 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "0.1.0",
+  "description": "Deterministic matching rules for mapping text to tags without embeddings",
+  "rules": [
+    {
+      "rule_id": "exitcode_25",
+      "target_tag": "build.exitcode_25",
+      "priority": 100,
+      "patterns": [
+        {
+          "type": "regex",
+          "value": "ExitCode[=:\\s]*25",
+          "case_insensitive": true
+        },
+        {
+          "type": "regex",
+          "value": "exit\\s*code\\s*25",
+          "case_insensitive": true
+        },
+        { "type": "contains", "value": "Error: 25", "case_insensitive": false }
+      ]
+    },
+    {
+      "rule_id": "exitcode_6",
+      "target_tag": "build.exitcode_6",
+      "priority": 100,
+      "patterns": [
+        {
+          "type": "regex",
+          "value": "ExitCode[=:\\s]*6\\b",
+          "case_insensitive": true
+        },
+        {
+          "type": "regex",
+          "value": "exit\\s*code\\s*6\\b",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "d3d_device_lost",
+      "target_tag": "crash.d3d_device_lost",
+      "priority": 100,
+      "patterns": [
+        {
+          "type": "contains",
+          "value": "DXGI_ERROR_DEVICE_REMOVED",
+          "case_insensitive": false
+        },
+        {
+          "type": "contains",
+          "value": "D3D device lost",
+          "case_insensitive": true
+        },
+        {
+          "type": "contains",
+          "value": "0x887A0006",
+          "case_insensitive": false
+        },
+        { "type": "regex", "value": "GPU.*crash", "case_insensitive": true },
+        {
+          "type": "contains",
+          "value": "device removed",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "access_violation",
+      "target_tag": "crash.access_violation",
+      "priority": 100,
+      "patterns": [
+        {
+          "type": "contains",
+          "value": "0xC0000005",
+          "case_insensitive": false
+        },
+        {
+          "type": "contains",
+          "value": "0xc0000005",
+          "case_insensitive": false
+        },
+        {
+          "type": "contains",
+          "value": "Access violation",
+          "case_insensitive": true
+        },
+        {
+          "type": "contains",
+          "value": "EXCEPTION_ACCESS_VIOLATION",
+          "case_insensitive": false
+        }
+      ]
+    },
+    {
+      "rule_id": "accessed_none",
+      "target_tag": "blueprint.accessed_none",
+      "priority": 90,
+      "patterns": [
+        {
+          "type": "contains",
+          "value": "Accessed None",
+          "case_insensitive": true
+        },
+        {
+          "type": "regex",
+          "value": "accessed\\s+none.*trying\\s+to\\s+read",
+          "case_insensitive": true
+        },
+        {
+          "type": "contains",
+          "value": "Blueprint Runtime Error",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "infinite_loop",
+      "target_tag": "blueprint.infinite_loop",
+      "priority": 90,
+      "patterns": [
+        {
+          "type": "regex",
+          "value": "infinite\\s*loop",
+          "case_insensitive": true
+        },
+        {
+          "type": "contains",
+          "value": "Runaway loop",
+          "case_insensitive": true
+        },
+        { "type": "regex", "value": "loop.*timeout", "case_insensitive": true }
+      ]
+    },
+    {
+      "rule_id": "lumen_noise",
+      "target_tag": "symptom.lumen_noise",
+      "priority": 80,
+      "patterns": [
+        {
+          "type": "regex",
+          "value": "lumen.*(noise|grain|speckle|artifact)",
+          "case_insensitive": true
+        },
+        {
+          "type": "regex",
+          "value": "(noise|grain|speckle).*(lumen|GI)",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "lumen",
+      "target_tag": "rendering.lumen",
+      "priority": 50,
+      "patterns": [
+        { "type": "contains", "value": "lumen", "case_insensitive": true },
+        {
+          "type": "contains",
+          "value": "global illumination",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "nanite",
+      "target_tag": "rendering.nanite",
+      "priority": 50,
+      "patterns": [
+        { "type": "contains", "value": "nanite", "case_insensitive": true },
+        {
+          "type": "contains",
+          "value": "virtualized geometry",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "niagara",
+      "target_tag": "rendering.niagara",
+      "priority": 50,
+      "patterns": [
+        { "type": "contains", "value": "niagara", "case_insensitive": true },
+        {
+          "type": "regex",
+          "value": "particle.*system",
+          "case_insensitive": true
+        },
+        { "type": "contains", "value": "VFX", "case_insensitive": false }
+      ]
+    },
+    {
+      "rule_id": "blueprint",
+      "target_tag": "scripting.blueprint",
+      "priority": 40,
+      "patterns": [
+        {
+          "type": "regex",
+          "value": "\\bblueprint(s)?\\b",
+          "case_insensitive": true
+        },
+        { "type": "regex", "value": "\\bBP\\b", "case_insensitive": false },
+        {
+          "type": "contains",
+          "value": "visual scripting",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "cpp",
+      "target_tag": "scripting.cpp",
+      "priority": 40,
+      "patterns": [
+        {
+          "type": "regex",
+          "value": "\\bC\\+\\+\\b",
+          "case_insensitive": false
+        },
+        { "type": "regex", "value": "\\bcpp\\b", "case_insensitive": true },
+        { "type": "contains", "value": "UCLASS", "case_insensitive": false },
+        { "type": "contains", "value": "UPROPERTY", "case_insensitive": false }
+      ]
+    },
+    {
+      "rule_id": "packaging",
+      "target_tag": "build.packaging",
+      "priority": 60,
+      "patterns": [
+        { "type": "regex", "value": "packag(e|ing)", "case_insensitive": true },
+        {
+          "type": "regex",
+          "value": "\\bbuild\\b.*fail",
+          "case_insensitive": true
+        },
+        { "type": "contains", "value": "shipping", "case_insensitive": true },
+        { "type": "contains", "value": "cook", "case_insensitive": true }
+      ]
+    },
+    {
+      "rule_id": "metahuman",
+      "target_tag": "character.metahuman",
+      "priority": 50,
+      "patterns": [
+        { "type": "contains", "value": "metahuman", "case_insensitive": true },
+        { "type": "contains", "value": "meta human", "case_insensitive": true }
+      ]
+    },
+    {
+      "rule_id": "vr",
+      "target_tag": "platform.vr",
+      "priority": 50,
+      "patterns": [
+        { "type": "regex", "value": "\\bVR\\b", "case_insensitive": false },
+        {
+          "type": "contains",
+          "value": "virtual reality",
+          "case_insensitive": true
+        },
+        { "type": "regex", "value": "\\bXR\\b", "case_insensitive": false }
+      ]
+    },
+    {
+      "rule_id": "quest",
+      "target_tag": "platform.quest",
+      "priority": 60,
+      "patterns": [
+        {
+          "type": "regex",
+          "value": "quest\\s*(2|3|pro)?",
+          "case_insensitive": true
+        },
+        { "type": "contains", "value": "oculus", "case_insensitive": true },
+        { "type": "contains", "value": "meta quest", "case_insensitive": true }
+      ]
+    },
+    {
+      "rule_id": "android",
+      "target_tag": "platform.android",
+      "priority": 50,
+      "patterns": [
+        { "type": "contains", "value": "android", "case_insensitive": true },
+        { "type": "regex", "value": "\\bAPK\\b", "case_insensitive": false },
+        {
+          "type": "contains",
+          "value": "INSTALL_FAILED",
+          "case_insensitive": false
+        }
+      ]
+    },
+    {
+      "rule_id": "ios",
+      "target_tag": "platform.ios",
+      "priority": 50,
+      "patterns": [
+        { "type": "regex", "value": "\\biOS\\b", "case_insensitive": false },
+        { "type": "contains", "value": "iPhone", "case_insensitive": true },
+        { "type": "contains", "value": "iPad", "case_insensitive": true },
+        {
+          "type": "contains",
+          "value": "code signing",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "umg",
+      "target_tag": "ui.umg",
+      "priority": 50,
+      "patterns": [
+        { "type": "regex", "value": "\\bUMG\\b", "case_insensitive": false },
+        { "type": "regex", "value": "\\bUI\\b", "case_insensitive": false },
+        { "type": "contains", "value": "widget", "case_insensitive": true },
+        {
+          "type": "contains",
+          "value": "user interface",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "sequencer",
+      "target_tag": "cinematic.sequencer",
+      "priority": 50,
+      "patterns": [
+        { "type": "contains", "value": "sequencer", "case_insensitive": true },
+        { "type": "contains", "value": "cinematic", "case_insensitive": true },
+        { "type": "contains", "value": "cutscene", "case_insensitive": true },
+        {
+          "type": "contains",
+          "value": "level sequence",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "lyra",
+      "target_tag": "template.lyra",
+      "priority": 60,
+      "patterns": [
+        { "type": "contains", "value": "lyra", "case_insensitive": true }
+      ]
+    },
+    {
+      "rule_id": "linker_error",
+      "target_tag": "scripting.cpp",
+      "priority": 80,
+      "patterns": [
+        { "type": "regex", "value": "LNK\\d{4}", "case_insensitive": false },
+        {
+          "type": "contains",
+          "value": "unresolved external",
+          "case_insensitive": true
+        }
+      ]
+    },
+    {
+      "rule_id": "replication",
+      "target_tag": "multiplayer.replication",
+      "priority": 50,
+      "patterns": [
+        {
+          "type": "contains",
+          "value": "replication",
+          "case_insensitive": true
+        },
+        {
+          "type": "contains",
+          "value": "multiplayer",
+          "case_insensitive": true
+        },
+        { "type": "contains", "value": "networking", "case_insensitive": true },
+        { "type": "regex", "value": "\\bRPC\\b", "case_insensitive": false }
+      ]
+    }
+  ]
+}
