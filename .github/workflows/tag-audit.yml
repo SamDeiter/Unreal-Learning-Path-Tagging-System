@@ -1,0 +1,39 @@
+name: Tag Governance Audit
+
+on:
+  schedule:
+    # Run monthly on the 1st at 6 AM UTC
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  audit-tags:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run tag audit
+        run: |
+          python scripts/tag_audit.py
+
+      - name: Create issue if problems found
+        if: ${{ env.AUDIT_ISSUES == 'true' }}
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "🏷️ Monthly Tag Audit Report"
+          content-filepath: ./audit_report.md
+          labels: |
+            governance
+            audit
