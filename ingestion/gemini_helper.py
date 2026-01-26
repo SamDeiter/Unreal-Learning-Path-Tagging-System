@@ -209,7 +209,7 @@ Here are videos from Epic Games that might help:
 Create a structured 4-step learning path. For EACH step, pick the most relevant video(s) and explain:
 1. WHY this video helps with their specific problem
 2. WHAT timestamp/section to watch (estimate based on title/description, e.g., "Skip to ~5:00 for...")
-3. A brief ACTION for the user
+3. A SPECIFIC ACTION telling them exactly what to look for (e.g., "Look for the section where they adjust r.Lumen.* cvars and note the values")
 
 Return JSON with this EXACT structure:
 {{
@@ -226,13 +226,13 @@ Return JSON with this EXACT structure:
       "step_type": "foundations",
       "title": "Step 1: Understand [Topic]",
       "description": "Why this matters for their problem",
-      "action": "What to do (e.g., Watch the first 5 minutes)",
+      "action": "SPECIFIC things to look for in the video - mention exact settings, panels, or concepts (e.g., 'Look for where they open Project Settings > Rendering and explain the Lumen options')",
       "videos": [
         {{
           "video_index": 1,
           "why_relevant": "Why this specific video helps",
-          "timestamp_hint": "e.g., 'Start at 3:00 where they explain...'",
-          "watch_duration": "e.g., '5 minutes'"
+          "timestamp_hint": "e.g., Start at 3:00 where they explain...",
+          "watch_duration": "e.g., 5 minutes"
         }}
       ]
     }},
