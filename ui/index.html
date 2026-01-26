@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UE5 Learning Path Builder</title>
+    <style>
+      :root {
+        --primary: #0ea5e9;
+        --primary-dark: #0284c7;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --error: #ef4444;
+        --purple: #8b5cf6;
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-hover: #334155;
+        --text: #f1f5f9;
+        --text-muted: #94a3b8;
+        --border: #334155;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      /* Header */
+      header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--primary), var(--purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+      }
+
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+      }
+
+      /* Search */
+      .search-section {
+        background: var(--bg-card);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .search-box {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .search-input {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        font-size: 1.1rem;
+        background: var(--bg);
+        border: 2px solid var(--border);
+        border-radius: 0.75rem;
+        color: var(--text);
+        transition: border-color 0.2s;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .search-input::placeholder {
+        color: var(--text-muted);
+      }
+
+      .search-btn {
+        padding: 1rem 2rem;
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+        border: none;
+        border-radius: 0.75rem;
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+      }
+
+      .examples {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .example-btn {
+        padding: 0.5rem 1rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 2rem;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .example-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text);
+        border-color: var(--primary);
+      }
+
+      /* Loading */
+      .loading {
+        text-align: center;
+        padding: 3rem;
+        display: none;
+      }
+
+      .loading.active {
+        display: block;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Path Display */
+      .path-section {
+        display: none;
+      }
+
+      .path-section.active {
+        display: block;
+      }
+
+      .path-header {
+        background: var(--bg-card);
+        border-radius: 1rem;
+        padding: 1.5rem 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .path-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .path-query {
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+      }
+
+      .path-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .tag {
+        background: var(--primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+      }
+
+      /* Steps */
+      .steps-container {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .step-card {
+        background: var(--bg-card);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: transform 0.2s;
+      }
+
+      .step-card:hover {
+        transform: translateY(-4px);
+      }
+
+      .step-header {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        cursor: pointer;
+      }
+
+      .step-number {
+        width: 40px;
+        height: 40px;
+        background: var(--bg);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+      }
+
+      .step-type {
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .step-type.foundations {
+        background: var(--primary);
+      }
+      .step-type.diagnostics {
+        background: var(--warning);
+        color: #000;
+      }
+      .step-type.resolution {
+        background: var(--success);
+      }
+      .step-type.prevention {
+        background: var(--purple);
+      }
+
+      .step-title {
+        flex: 1;
+        font-size: 1.1rem;
+      }
+
+      .step-toggle {
+        font-size: 1.5rem;
+        transition: transform 0.3s;
+      }
+
+      .step-card.expanded .step-toggle {
+        transform: rotate(180deg);
+      }
+
+      .step-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+      }
+
+      .step-card.expanded .step-content {
+        max-height: 1000px;
+      }
+
+      .step-description {
+        padding: 0 1.5rem 1rem;
+        color: var(--text-muted);
+      }
+
+      .content-list {
+        padding: 0 1.5rem 1.5rem;
+        display: grid;
+        gap: 1rem;
+      }
+
+      .content-item {
+        background: var(--bg);
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        border-left: 4px solid var(--primary);
+      }
+
+      .content-type {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+      }
+
+      .content-title {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+      }
+
+      .content-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .content-link:hover {
+        text-decoration: underline;
+      }
+
+      /* Progress */
+      .progress-section {
+        background: var(--bg-card);
+        border-radius: 1rem;
+        padding: 1.5rem 2rem;
+        margin-top: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      .progress-text {
+        font-weight: 500;
+      }
+
+      .progress-bar {
+        flex: 1;
+        height: 10px;
+        background: var(--border);
+        border-radius: 5px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--success));
+        width: 0%;
+        transition: width 0.5s;
+      }
+
+      .complete-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--success);
+        border: none;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🎮 UE5 Learning Path Builder</h1>
+        <p class="subtitle">
+          Enter your problem, get a structured learning path from existing
+          content
+        </p>
+      </header>
+
+      <section class="search-section">
+        <div class="search-box">
+          <input
+            type="text"
+            class="search-input"
+            id="queryInput"
+            placeholder="Describe your UE5 problem... (e.g., 'Lumen flickering artifacts')"
+          />
+          <button class="search-btn" onclick="generatePath()">
+            Build Path 🚀
+          </button>
+        </div>
+        <div class="examples">
+          <span style="color: var(--text-muted); margin-right: 0.5rem"
+            >Try:</span
+          >
+          <button
+            class="example-btn"
+            onclick="setQuery('UE5 packaging error ExitCode 25')"
+          >
+            Packaging Error
+          </button>
+          <button
+            class="example-btn"
+            onclick="setQuery('Lumen flickering and noise')"
+          >
+            Lumen Artifacts
+          </button>
+          <button
+            class="example-btn"
+            onclick="setQuery('Blueprint Accessed None error')"
+          >
+            Blueprint Crash
+          </button>
+          <button
+            class="example-btn"
+            onclick="setQuery('Multiplayer replication lag')"
+          >
+            Multiplayer Lag
+          </button>
+          <button
+            class="example-btn"
+            onclick="setQuery('D3D device lost crash')"
+          >
+            GPU Crash
+          </button>
+        </div>
+      </section>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Building your learning path...</p>
+      </div>
+
+      <section class="path-section" id="pathSection">
+        <div class="path-header">
+          <h2 class="path-title" id="pathTitle">Learning Path</h2>
+          <p class="path-query" id="pathQuery">Query: ...</p>
+          <div class="path-tags" id="pathTags"></div>
+        </div>
+
+        <div class="steps-container" id="stepsContainer">
+          <!-- Steps will be inserted here -->
+        </div>
+
+        <div class="progress-section">
+          <span class="progress-text" id="progressText"
+            >Progress: 0/4 steps</span
+          >
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <button class="complete-btn" onclick="exportSCORM()">
+            Export SCORM 📦
+          </button>
+        </div>
+      </section>
+
+      <footer>
+        <p>Powered by UE5 Learning Path Tagging System</p>
+        <p>Content curated from YouTube, Epic Docs, and Community</p>
+      </footer>
+    </div>
+
+    <script>
+      // Sample learning path data (would come from backend API)
+      const samplePaths = {
+        packaging: {
+          title: "Fix UE5 Packaging Errors",
+          query: "UE5 packaging error ExitCode 25",
+          tags: ["build.packaging", "build.exitcode_25", "build.cooking"],
+          steps: [
+            {
+              number: 1,
+              type: "foundations",
+              title: "Understand the Build Pipeline",
+              description:
+                "Learn how UE5 packages and cooks content before diving into fixes.",
+              content: [
+                {
+                  type: "video",
+                  title: "UE5 Packaging Complete Guide",
+                  url: "https://youtube.com/watch?v=example1",
+                },
+                {
+                  type: "docs",
+                  title: "Cooking Content - Epic Docs",
+                  url: "https://dev.epicgames.com/documentation",
+                },
+              ],
+            },
+            {
+              number: 2,
+              type: "diagnostics",
+              title: "Diagnose Exit Code 25",
+              description:
+                "Understand what causes Unknown Cook Failure and how to read logs.",
+              content: [
+                {
+                  type: "video",
+                  title: "Reading UE5 Build Logs",
+                  url: "https://youtube.com/watch?v=example2",
+                },
+                {
+                  type: "forum",
+                  title: "ExitCode 25 Common Causes",
+                  url: "https://forums.unrealengine.com",
+                },
+              ],
+            },
+            {
+              number: 3,
+              type: "resolution",
+              title: "Apply the Fix",
+              description:
+                "Step-by-step solutions for the most common packaging failures.",
+              content: [
+                {
+                  type: "video",
+                  title: "Fix ExitCode 25 - Complete Solution",
+                  url: "https://youtube.com/watch?v=example3",
+                },
+                {
+                  type: "video",
+                  title: "Asset Naming Conventions",
+                  url: "https://youtube.com/watch?v=example4",
+                },
+              ],
+            },
+            {
+              number: 4,
+              type: "prevention",
+              title: "Prevent Future Issues",
+              description:
+                "Best practices to avoid packaging errors in your projects.",
+              content: [
+                {
+                  type: "video",
+                  title: "UE5 Project Organization Tips",
+                  url: "https://youtube.com/watch?v=example5",
+                },
+                {
+                  type: "docs",
+                  title: "Asset Management Best Practices",
+                  url: "https://dev.epicgames.com/documentation",
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      let currentPath = null;
+      let completedSteps = new Set();
+
+      function setQuery(query) {
+        document.getElementById("queryInput").value = query;
+      }
+
+      function generatePath() {
+        const query = document.getElementById("queryInput").value.trim();
+        if (!query) return;
+
+        // Show loading
+        document.getElementById("loading").classList.add("active");
+        document.getElementById("pathSection").classList.remove("active");
+
+        // Simulate API call
+        setTimeout(() => {
+          document.getElementById("loading").classList.remove("active");
+
+          // Use sample data (in production, this would call the backend)
+          currentPath = samplePaths.packaging;
+          currentPath.query = query;
+
+          renderPath(currentPath);
+        }, 1500);
+      }
+
+      function renderPath(path) {
+        document.getElementById("pathTitle").textContent = path.title;
+        document.getElementById("pathQuery").textContent =
+          `Query: "${path.query}"`;
+
+        // Render tags
+        const tagsContainer = document.getElementById("pathTags");
+        tagsContainer.innerHTML = path.tags
+          .map((t) => `<span class="tag">${t}</span>`)
+          .join("");
+
+        // Render steps
+        const stepsContainer = document.getElementById("stepsContainer");
+        stepsContainer.innerHTML = path.steps
+          .map(
+            (step) => `
+                <div class="step-card" id="step-${step.number}">
+                    <div class="step-header" onclick="toggleStep(${step.number})">
+                        <div class="step-number">${step.number}</div>
+                        <span class="step-type ${step.type}">${step.type}</span>
+                        <span class="step-title">${step.title}</span>
+                        <span class="step-toggle">▼</span>
+                    </div>
+                    <div class="step-content">
+                        <p class="step-description">${step.description}</p>
+                        <div class="content-list">
+                            ${step.content
+                              .map(
+                                (c) => `
+                                <div class="content-item">
+                                    <div class="content-type">${c.type}</div>
+                                    <div class="content-title">${c.title}</div>
+                                    <a href="${c.url}" target="_blank" class="content-link">Open Resource ↗</a>
+                                </div>
+                            `,
+                              )
+                              .join("")}
+                            <button class="complete-btn" onclick="completeStep(${step.number})" 
+                                    id="complete-${step.number}" style="margin-top: 0.5rem;">
+                                ✓ Mark Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+
+        document.getElementById("pathSection").classList.add("active");
+        updateProgress();
+      }
+
+      function toggleStep(num) {
+        const card = document.getElementById(`step-${num}`);
+        card.classList.toggle("expanded");
+      }
+
+      function completeStep(num) {
+        completedSteps.add(num);
+        const btn = document.getElementById(`complete-${num}`);
+        btn.textContent = "✓ Completed";
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        updateProgress();
+      }
+
+      function updateProgress() {
+        if (!currentPath) return;
+        const total = currentPath.steps.length;
+        const completed = completedSteps.size;
+        const percent = (completed / total) * 100;
+
+        document.getElementById("progressText").textContent =
+          `Progress: ${completed}/${total} steps`;
+        document.getElementById("progressFill").style.width = percent + "%";
+      }
+
+      function exportSCORM() {
+        alert(
+          'To export SCORM, run:\npython -m ui.scorm_exporter --generate "' +
+            (currentPath?.query || "your query") +
+            '"',
+        );
+      }
+
+      // Enter key support
+      document
+        .getElementById("queryInput")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") generatePath();
+        });
+    </script>
+  </body>
+</html>
