@@ -25,6 +25,7 @@ class VideoMetadata:
     duration: Optional[str] = None
     view_count: Optional[int] = None
     tags: Optional[list[str]] = None
+    thumbnail_url: Optional[str] = None
 
 
 class YouTubeFetcher:
@@ -100,6 +101,14 @@ class YouTubeFetcher:
             if epic_only and snippet.get("channelId") != self.CHANNEL_IDS["epic_games"]:
                 continue
                 
+            # Get best available thumbnail
+            thumbnails = snippet.get("thumbnails", {})
+            thumbnail_url = (
+                thumbnails.get("high", {}).get("url") or
+                thumbnails.get("medium", {}).get("url") or
+                thumbnails.get("default", {}).get("url")
+            )
+            
             videos.append(
                 VideoMetadata(
                     video_id=item["id"]["videoId"],
@@ -107,6 +116,7 @@ class YouTubeFetcher:
                     description=snippet["description"],
                     channel_title=snippet["channelTitle"],
                     published_at=snippet["publishedAt"],
+                    thumbnail_url=thumbnail_url,
                 )
             )
             

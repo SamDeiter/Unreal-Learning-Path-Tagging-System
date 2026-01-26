@@ -71,6 +71,8 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
                                 "type": c.source_type,
                                 "title": c.title,
                                 "url": c.url,
+                                "thumbnail_url": c.thumbnail_url,
+                                "description": c.description,
                             }
                             for c in s.content
                         ],

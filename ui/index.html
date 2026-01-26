@@ -626,10 +626,14 @@
                             ${step.content
                               .map(
                                 (c) => `
-                                <div class="content-item">
-                                    <div class="content-type">${c.type}</div>
-                                    <div class="content-title">${c.title}</div>
-                                    <a href="${c.url}" target="_blank" class="content-link">Open Resource ↗</a>
+                                <div class="content-item" style="display: flex; gap: 1rem;">
+                                    ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="" style="width: 120px; height: 68px; object-fit: cover; border-radius: 0.5rem; flex-shrink: 0;">` : ""}
+                                    <div style="flex: 1;">
+                                        <div class="content-type">${c.type}</div>
+                                        <div class="content-title">${c.title}</div>
+                                        ${c.description ? `<p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0;">${c.description.substring(0, 100)}...</p>` : ""}
+                                        <a href="${c.url}" target="_blank" class="content-link">Open Resource ↗</a>
+                                    </div>
                                 </div>
                             `,
                               )

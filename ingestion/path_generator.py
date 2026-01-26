@@ -12,6 +12,7 @@ from typing import Optional
 from .config import TAGS_DIR, LEARNING_PATHS_DIR
 from .youtube_fetcher import YouTubeFetcher, VideoMetadata
 from .concept_extractor import ConceptExtractor
+from .timestamp_extractor import TimestampExtractor
 
 
 @dataclass
@@ -25,6 +26,9 @@ class ContentItem:
     matched_tags: list[str]
     relevance_score: float
     step_type: Optional[str] = None  # foundations, diagnostics, resolution, prevention
+    snippets: Optional[list[dict]] = None  # Timestamped sections
+    thumbnail_url: Optional[str] = None  # Preview image
+    description: Optional[str] = None  # Brief description
 
 
 @dataclass
@@ -61,6 +65,7 @@ class PathGenerator:
         self.tags = self._load_tags()
         self.fetcher = YouTubeFetcher()
         self.extractor = ConceptExtractor()
+        self.timestamp_extractor = TimestampExtractor()
 
     def _load_tags(self) -> dict:
         """Load canonical tags from tags.json."""
@@ -123,6 +128,8 @@ class PathGenerator:
                     matched_tags=[tag_id],
                     relevance_score=0.8,
                     step_type=step_type,
+                    thumbnail_url=video.thumbnail_url,
+                    description=video.description[:150] + "..." if len(video.description) > 150 else video.description,
                 )
 
                 if len(content_by_step[step_type]) < max_per_step:
