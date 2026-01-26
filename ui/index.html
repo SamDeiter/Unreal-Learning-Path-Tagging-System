@@ -77,8 +77,8 @@
         }
       }
     </script>
-    
-      <link rel="stylesheet" href="css/styles.css">
+
+    <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
     <div class="container">
@@ -92,22 +92,33 @@
 
       <section class="search-section">
         <h2 class="basket-title">🧺 Build Your Problem</h2>
-        <p class="basket-subtitle">Add ingredients to describe your issue, then generate a learning path</p>
-        
+        <p class="basket-subtitle">
+          Add ingredients to describe your issue, then generate a learning path
+        </p>
+
         <!-- Hidden queryInput for compatibility -->
-        <input type="hidden" id="queryInput" value="">
-        
+        <input type="hidden" id="queryInput" value="" />
+
         <!-- Input Method Buttons -->
         <div class="input-methods">
-          <button class="input-method-btn text-btn" onclick="showInputPanel('text')">
+          <button
+            class="input-method-btn text-btn"
+            onclick="showInputPanel('text')"
+          >
             <span class="method-icon">📝</span>
             <span class="method-label">Describe Issue</span>
           </button>
-          <button class="input-method-btn log-btn" onclick="showInputPanel('log')">
+          <button
+            class="input-method-btn log-btn"
+            onclick="showInputPanel('log')"
+          >
             <span class="method-icon">📋</span>
             <span class="method-label">Paste Error Log</span>
           </button>
-          <button class="input-method-btn screenshot-btn" onclick="showInputPanel('screenshot')">
+          <button
+            class="input-method-btn screenshot-btn"
+            onclick="showInputPanel('screenshot')"
+          >
             <span class="method-icon">📷</span>
             <span class="method-label">Add Screenshot</span>
           </button>
@@ -115,46 +126,100 @@
 
         <!-- Expandable Input Panels -->
         <div class="input-panels">
-          <div class="input-panel" id="textPanel" style="display: none;">
-            <input type="text" class="basket-input" id="textInput" placeholder="Describe your UE5 problem..."/>
-            <button class="add-ingredient-btn" onclick="addTextIngredient()">+ Add</button>
+          <div class="input-panel" id="textPanel" style="display: none">
+            <input
+              type="text"
+              class="basket-input"
+              id="textInput"
+              placeholder="Describe your UE5 problem..."
+            />
+            <button class="add-ingredient-btn" onclick="addTextIngredient()">
+              + Add
+            </button>
           </div>
-          <div class="input-panel" id="logPanel" style="display: none;">
-            <textarea id="logInput" class="basket-textarea" placeholder="Paste crash log or error output..." rows="4"></textarea>
-            <button class="add-ingredient-btn log-add" onclick="addLogIngredient()">+ Extract & Add</button>
+          <div class="input-panel" id="logPanel" style="display: none">
+            <textarea
+              id="logInput"
+              class="basket-textarea"
+              placeholder="Paste crash log or error output..."
+              rows="4"
+            ></textarea>
+            <button
+              class="add-ingredient-btn log-add"
+              onclick="addLogIngredient()"
+            >
+              + Extract & Add
+            </button>
           </div>
-          <div class="input-panel" id="screenshotPanel" style="display: none;">
-            <div class="screenshot-dropzone" id="screenshotDropzone" onclick="document.getElementById('screenshotInput').click()">
-              <input type="file" id="screenshotInput" accept="image/*" style="display: none;" onchange="handleScreenshotSelect(event)">
+          <div class="input-panel" id="screenshotPanel" style="display: none">
+            <div
+              class="screenshot-dropzone"
+              id="screenshotDropzone"
+              onclick="document.getElementById('screenshotInput').click()"
+            >
+              <input
+                type="file"
+                id="screenshotInput"
+                accept="image/*"
+                style="display: none"
+                onchange="handleScreenshotSelect(event)"
+              />
               <div class="dropzone-content" id="dropzoneContent">
                 <span class="dropzone-icon">📁</span>
                 <span class="dropzone-text">Click or drag to upload</span>
               </div>
-              <div class="screenshot-preview" id="screenshotPreview" style="display: none;">
-                <img id="previewImage" alt="Preview">
-                <button class="remove-preview" onclick="event.stopPropagation(); clearScreenshotPreview()">✕</button>
+              <div
+                class="screenshot-preview"
+                id="screenshotPreview"
+                style="display: none"
+              >
+                <img id="previewImage" alt="Preview" />
+                <button
+                  class="remove-preview"
+                  onclick="
+                    event.stopPropagation();
+                    clearScreenshotPreview();
+                  "
+                >
+                  ✕
+                </button>
               </div>
             </div>
-            <button class="add-ingredient-btn screenshot-add" id="addScreenshotBtn" onclick="addScreenshotIngredient()" disabled>+ Add Screenshot</button>
+            <button
+              class="add-ingredient-btn screenshot-add"
+              id="addScreenshotBtn"
+              onclick="addScreenshotIngredient()"
+              disabled
+            >
+              + Add Screenshot
+            </button>
           </div>
         </div>
 
         <!-- Ingredient Basket -->
         <div class="ingredient-basket" id="ingredientBasket">
-          <div class="basket-empty" id="basketEmpty"><span>No ingredients yet — add something above!</span></div>
+          <div class="basket-empty" id="basketEmpty">
+            <span>No ingredients yet — add something above!</span>
+          </div>
           <div class="ingredient-chips" id="ingredientChips"></div>
         </div>
 
         <!-- Generate Button -->
-        <button class="generate-btn" id="generateBtn" onclick="generateFromBasket()" disabled>🚀 Generate Learning Path</button>
+        <button
+          class="generate-btn"
+          id="generateBtn"
+          onclick="generateFromBasket()"
+          disabled
+        >
+          🚀 Generate Learning Path
+        </button>
 
-        <!-- Quick Examples -->
-        <div class="examples">
-          <span style="color: var(--text-muted); margin-right: 0.5rem">Quick add:</span>
-          <button class="example-btn" onclick="quickAddIngredient('Packaging error ExitCode 25')">Packaging Error</button>
-          <button class="example-btn" onclick="quickAddIngredient('Lumen flickering')">Lumen</button>
-          <button class="example-btn" onclick="quickAddIngredient('Blueprint Accessed None')">Blueprint</button>
-          <button class="example-btn" onclick="quickAddIngredient('GPU crash D3D')">GPU Crash</button>
+        <!-- Trending Quick Add (populated from Firestore) -->
+        <div class="examples" id="trendingQuickAdd">
+          <span style="color: var(--text-muted); margin-right: 0.5rem"
+            >🔥 Trending:</span
+          >
+          <span class="example-btn" style="opacity: 0.5">Loading...</span>
         </div>
       </section>
 

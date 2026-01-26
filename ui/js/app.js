@@ -467,7 +467,91 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+
+  // Load trending quick add buttons
+  loadTrendingQueries();
 });
+
+// Load trending queries from Firestore or fall back to cached paths
+async function loadTrendingQueries() {
+  const container = document.getElementById("trendingQuickAdd");
+  if (!container) return;
+
+  let trendingTerms = [];
+
+  // Try Firestore first (works standalone with Firebase)
+  if (typeof firebase !== "undefined" && firebase.firestore) {
+    try {
+      const db = firebase.firestore();
+      // Get queries from last 7 days, group by query, count
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      const snapshot = await db
+        .collection("query_logs")
+        .where("timestamp", ">", oneWeekAgo)
+        .orderBy("timestamp", "desc")
+        .limit(100)
+        .get();
+
+      // Count query frequencies
+      const counts = {};
+      snapshot.forEach((doc) => {
+        const q = doc.data().query;
+        if (q && q.length > 2) {
+          counts[q] = (counts[q] || 0) + 1;
+        }
+      });
+
+      // Sort by count and take top 5
+      trendingTerms = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([term]) => term);
+    } catch (e) {
+      console.log(
+        "Firestore trending fetch failed, using fallback:",
+        e.message,
+      );
+    }
+  }
+
+  // Fallback: Use cached paths index (works in LMS without Firebase)
+  if (trendingTerms.length === 0 && cachedPathsIndex.length > 0) {
+    trendingTerms = cachedPathsIndex.slice(0, 5).map((p) => p.query);
+  }
+
+  // Final fallback: Common UE5 issues
+  if (trendingTerms.length === 0) {
+    trendingTerms = [
+      "Packaging error",
+      "Lumen flickering",
+      "Blueprint Accessed None",
+      "GPU crash",
+      "Shader compile error",
+    ];
+  }
+
+  // Render buttons
+  container.innerHTML = `
+    <span style="color: var(--text-muted); margin-right: 0.5rem">🔥 Trending:</span>
+    ${trendingTerms
+      .map(
+        (term) =>
+          `<button class="example-btn" onclick="quickAddIngredient('${term.replace(/'/g, "\\'")}')">${shortenTerm(term)}</button>`,
+      )
+      .join("")}
+  `;
+}
+
+// Shorten long query terms for button display
+function shortenTerm(term) {
+  const words = term.split(" ");
+  if (words.length > 3) {
+    return words.slice(0, 2).join(" ") + "...";
+  }
+  return term.length > 20 ? term.substring(0, 18) + "..." : term;
+}
 
 let cachedPathsIndex = [];
 
