@@ -445,8 +445,24 @@
 
       <section class="path-section" id="pathSection">
         <div class="path-header">
-          <h2 class="path-title" id="pathTitle">Learning Path</h2>
-          <p class="path-query" id="pathQuery">Query: ...</p>
+          <h2 class="path-title" id="pathTitle">🎯 Your Learning Path</h2>
+          <p class="path-query" id="pathQuery"></p>
+          <div
+            style="
+              background: rgba(14, 165, 233, 0.1);
+              border-left: 4px solid var(--primary);
+              padding: 1rem;
+              border-radius: 0.5rem;
+              margin: 1rem 0;
+            "
+          >
+            <strong>💡 How to use this path:</strong>
+            <ol style="margin: 0.5rem 0 0 1.25rem; color: var(--text-muted)">
+              <li>Work through each step in order</li>
+              <li>Watch the most relevant video in each step</li>
+              <li>Mark steps complete as you go</li>
+            </ol>
+          </div>
           <div class="path-tags" id="pathTags"></div>
         </div>
 
@@ -602,9 +618,31 @@
       }
 
       function renderPath(path) {
-        document.getElementById("pathTitle").textContent = path.title;
-        document.getElementById("pathQuery").textContent =
-          `Query: "${path.query}"`;
+        document.getElementById("pathTitle").textContent =
+          "🎯 Your Learning Path";
+
+        // Build query display with AI info
+        let queryHtml = `<strong>Problem:</strong> "${path.query}"`;
+        if (path.ai_summary) {
+          queryHtml += `<br><br>📝 <strong>What's happening:</strong> ${path.ai_summary}`;
+        }
+        if (path.ai_estimated_time || path.ai_difficulty) {
+          queryHtml += `<br><br>`;
+          if (path.ai_estimated_time)
+            queryHtml += `⏱️ ${path.ai_estimated_time} `;
+          if (path.ai_difficulty) queryHtml += `| 📊 ${path.ai_difficulty}`;
+        }
+        if (path.ai_hint) {
+          queryHtml += `<br><br>💡 <strong>Tip:</strong> ${path.ai_hint}`;
+        }
+        if (path.ai_what_you_learn && path.ai_what_you_learn.length > 0) {
+          queryHtml += `<br><br><strong>What you'll learn:</strong><ul style="margin: 0.5rem 0 0 1.25rem; color: var(--text-muted);">`;
+          path.ai_what_you_learn.forEach((item) => {
+            queryHtml += `<li>${item}</li>`;
+          });
+          queryHtml += `</ul>`;
+        }
+        document.getElementById("pathQuery").innerHTML = queryHtml;
 
         // Render tags
         const tagsContainer = document.getElementById("pathTags");

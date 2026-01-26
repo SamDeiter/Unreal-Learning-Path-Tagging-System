@@ -60,6 +60,12 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
                 "title": path.title,
                 "query": path.query,
                 "tags": path.tags,
+                # AI-generated guidance
+                "ai_summary": path.ai_summary,
+                "ai_what_you_learn": path.ai_what_you_learn,
+                "ai_estimated_time": path.ai_estimated_time,
+                "ai_difficulty": path.ai_difficulty,
+                "ai_hint": path.ai_hint,
                 "steps": [
                     {
                         "number": s.step_number,

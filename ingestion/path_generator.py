@@ -13,6 +13,7 @@ from .config import TAGS_DIR, LEARNING_PATHS_DIR
 from .youtube_fetcher import YouTubeFetcher, VideoMetadata
 from .concept_extractor import ConceptExtractor
 from .timestamp_extractor import TimestampExtractor
+from .gemini_helper import GeminiHelper
 
 
 @dataclass
@@ -53,6 +54,12 @@ class LearningPath:
     tags: list[str]
     steps: list[LearningStep] = field(default_factory=list)
     total_duration_minutes: int = 0
+    # AI-generated guidance
+    ai_summary: Optional[str] = None
+    ai_what_you_learn: Optional[list[str]] = None
+    ai_estimated_time: Optional[str] = None
+    ai_difficulty: Optional[str] = None
+    ai_hint: Optional[str] = None
 
 
 class PathGenerator:
@@ -66,6 +73,7 @@ class PathGenerator:
         self.fetcher = YouTubeFetcher()
         self.extractor = ConceptExtractor()
         self.timestamp_extractor = TimestampExtractor()
+        self.gemini = GeminiHelper()
 
     def _load_tags(self) -> dict:
         """Load canonical tags from tags.json."""
@@ -175,28 +183,70 @@ class PathGenerator:
         # Find content
         content_by_step = self.find_content(tags)
 
-        # Build steps
+        # Build steps with actionable guidance
         steps = []
-        step_descriptions = {
-            "foundations": "Build the foundational knowledge needed",
-            "diagnostics": "Understand what's causing the problem",
-            "resolution": "Apply the fix or solution",
-            "prevention": "Learn how to prevent this in the future",
+        step_config = {
+            "foundations": {
+                "title": "📚 Step 1: Understand the Basics",
+                "description": "Before diving into the fix, watch these videos to understand the underlying concepts. This will help you troubleshoot faster.",
+                "action": "Watch at least one video to build context",
+            },
+            "diagnostics": {
+                "title": "🔍 Step 2: Diagnose Your Issue", 
+                "description": "Now that you understand the basics, let's figure out what's causing YOUR specific problem. These resources explain common causes.",
+                "action": "Compare your error messages to the ones shown",
+            },
+            "resolution": {
+                "title": "🔧 Step 3: Apply the Fix",
+                "description": "Time to fix it! Follow along with these step-by-step solutions. Try the most relevant one first.",
+                "action": "Follow along and apply the fix to your project",
+            },
+            "prevention": {
+                "title": "🛡️ Step 4: Prevent Future Issues",
+                "description": "Great job fixing it! Now learn how to avoid this problem in the future with best practices.",
+                "action": "Bookmark these for future reference",
+            },
         }
 
         for i, step_type in enumerate(self.STEP_TYPES):
             content = content_by_step[step_type]
+            config = step_config[step_type]
             if content:
                 steps.append(
                     LearningStep(
                         step_number=i + 1,
                         step_type=step_type,
-                        title=step_type.capitalize(),
-                        description=step_descriptions[step_type],
+                        title=config["title"],
+                        description=f"{config['description']}\n\n👉 **Action:** {config['action']}",
                         content=content,
-                        skills_gained=[f"Understand {step_type}"],
+                        skills_gained=[config["action"]],
                     )
                 )
+
+        # Get all video titles for AI context
+        all_video_titles = [
+            c.title for step in content_by_step.values() for c in step
+        ]
+
+        # Generate AI guidance
+        ai_summary = None
+        ai_what_you_learn = None
+        ai_estimated_time = None
+        ai_difficulty = None
+        ai_hint = None
+
+        if self.gemini.is_available():
+            guidance = self.gemini.generate_guidance(
+                user_query=query,
+                tags=tags,
+                video_titles=all_video_titles,
+            )
+            if guidance:
+                ai_summary = guidance.problem_summary
+                ai_what_you_learn = guidance.what_you_will_learn
+                ai_estimated_time = guidance.estimated_time
+                ai_difficulty = guidance.difficulty_level
+                ai_hint = guidance.first_step_hint
 
         # Create path
         path_id = query.lower().replace(" ", "_")[:30]
@@ -206,6 +256,11 @@ class PathGenerator:
             query=query,
             tags=tags,
             steps=steps,
+            ai_summary=ai_summary,
+            ai_what_you_learn=ai_what_you_learn,
+            ai_estimated_time=ai_estimated_time,
+            ai_difficulty=ai_difficulty,
+            ai_hint=ai_hint,
         )
 
         return path
