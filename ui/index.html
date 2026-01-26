@@ -984,6 +984,72 @@
         return match;
       }
 
+      // Populate the gallery with cached paths
+      function populateGallery() {
+        const grid = document.getElementById("galleryGrid");
+        if (!grid) return;
+
+        grid.innerHTML = ""; // Clear existing cards
+
+        // Icon mapping based on query keywords
+        const getIcon = (query) => {
+          const q = query.toLowerCase();
+          if (q.includes("lumen")) return "💡";
+          if (q.includes("nanite")) return "🔷";
+          if (q.includes("blueprint")) return "📘";
+          if (q.includes("crash") || q.includes("gpu") || q.includes("d3d"))
+            return "💥";
+          if (q.includes("packaging") || q.includes("cook")) return "📦";
+          if (q.includes("exit")) return "⚠️";
+          return "🎯";
+        };
+
+        cachedPathsIndex.forEach((path, index) => {
+          const card = document.createElement("button");
+          card.className = "gallery-card";
+          card.onclick = () => loadGalleryPath(path.file);
+
+          const popularBadge =
+            index < 3 ? '<span class="popular-badge">🔥 Popular</span>' : "";
+
+          card.innerHTML = `
+            <span class="gallery-icon">${getIcon(path.query)}</span>
+            <span class="gallery-title">${path.query}</span>
+            <span class="gallery-steps">${path.steps} steps</span>
+            ${popularBadge}
+          `;
+
+          grid.appendChild(card);
+        });
+
+        // Show gallery section
+        document.getElementById("gallerySection").style.display = "block";
+      }
+
+      // Load a path from the gallery
+      function loadGalleryPath(filename) {
+        document.getElementById("loading").classList.add("active");
+        document.getElementById("gallerySection").style.display = "none";
+
+        fetch(`/paths/${filename}`)
+          .then((r) => r.json())
+          .then((data) => {
+            document.getElementById("loading").classList.remove("active");
+            currentPath = data;
+            renderPath(currentPath);
+            if (typeof Tracker !== "undefined") {
+              Tracker.trackEvent("path_started", {
+                pathId: data.path_id,
+                title: data.title,
+              });
+            }
+          })
+          .catch((err) => {
+            document.getElementById("loading").classList.remove("active");
+            alert("Failed to load path: " + err.message);
+          });
+      }
+
       function generatePath() {
         const query = document.getElementById("queryInput").value.trim();
         if (!query) return;

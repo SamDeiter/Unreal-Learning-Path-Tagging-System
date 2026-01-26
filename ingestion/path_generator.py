@@ -5,6 +5,7 @@ No new content created - curates YouTube videos, docs, and forum posts.
 """
 
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -224,8 +225,27 @@ class PathGenerator:
                             video = all_videos[idx]
                             # Build enhanced description with AI context
                             desc = f"**Why this helps:** {vid_ref.get('why_relevant', '')}"
-                            if vid_ref.get('timestamp_hint'):
-                                desc += f"\n\n⏱️ **When to watch:** {vid_ref['timestamp_hint']}"
+                            
+                            # Parse timestamp and add to URL
+                            video_url = video["url"]
+                            timestamp_hint = vid_ref.get('timestamp_hint', '')
+                            if timestamp_hint:
+                                desc += f"\n\n⏱️ **When to watch:** {timestamp_hint}"
+                                # Try to extract timestamp from hint (e.g., "10:00", "start at 5:30", "around 15 minutes")
+                                time_match = re.search(r'(\d{1,2}):(\d{2})', timestamp_hint)
+                                minute_match = re.search(r'(\d+)\s*(?:minute|min)', timestamp_hint, re.IGNORECASE)
+                                
+                                start_seconds = 0
+                                if time_match:
+                                    minutes = int(time_match.group(1))
+                                    seconds = int(time_match.group(2))
+                                    start_seconds = minutes * 60 + seconds
+                                elif minute_match:
+                                    start_seconds = int(minute_match.group(1)) * 60
+                                
+                                if start_seconds > 0:
+                                    video_url += f"&t={start_seconds}"
+                            
                             if vid_ref.get('watch_duration'):
                                 desc += f" ({vid_ref['watch_duration']})"
                             
@@ -233,7 +253,7 @@ class PathGenerator:
                                 content_id=video["video_id"],
                                 title=video["title"],
                                 source_type="video",
-                                url=video["url"],
+                                url=video_url,
                                 matched_tags=tags[:1],
                                 relevance_score=0.9,
                                 step_type=step_data.get("step_type", "foundations"),
