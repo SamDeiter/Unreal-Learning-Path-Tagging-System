@@ -576,16 +576,25 @@
         document.getElementById("loading").classList.add("active");
         document.getElementById("pathSection").classList.remove("active");
 
-        // Simulate API call
-        setTimeout(() => {
-          document.getElementById("loading").classList.remove("active");
-
-          // Use sample data (in production, this would call the backend)
-          currentPath = samplePaths.packaging;
-          currentPath.query = query;
-
-          renderPath(currentPath);
-        }, 1500);
+        // Call real API
+        fetch(`/api/generate?q=${encodeURIComponent(query)}`)
+          .then((response) => {
+            if (!response.ok) throw new Error("API error");
+            return response.json();
+          })
+          .then((data) => {
+            document.getElementById("loading").classList.remove("active");
+            currentPath = data;
+            renderPath(currentPath);
+          })
+          .catch((error) => {
+            document.getElementById("loading").classList.remove("active");
+            alert(
+              "Error generating path: " +
+                error.message +
+                "\n\nMake sure the server is running:\npython ui/server.py",
+            );
+          });
       }
 
       function renderPath(path) {

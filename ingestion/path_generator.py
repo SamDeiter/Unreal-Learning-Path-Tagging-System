@@ -107,9 +107,9 @@ class PathGenerator:
             tag = self.tags.get(tag_id, {})
             display_name = tag.get("display_name", tag_id.split(".")[-1])
 
-            # Build search query
+            # Build search query - Epic Games channel only
             search_query = f"UE5 {display_name}"
-            videos = self.fetcher.search_videos(search_query, max_results=5)
+            videos = self.fetcher.search_videos(search_query, max_results=5, epic_only=True)
 
             for video in videos:
                 # Classify into step type based on title keywords

@@ -65,12 +65,14 @@ class YouTubeFetcher:
         self,
         query: str,
         max_results: int = 10,
+        epic_only: bool = False,
     ) -> list[VideoMetadata]:
         """Search for UE5 tutorial videos.
 
         Args:
             query: Search query (e.g., 'UE5 ExitCode 25').
             max_results: Maximum videos to return.
+            epic_only: If True, only return videos from Epic Games channel.
 
         Returns:
             List of VideoMetadata objects.
@@ -78,16 +80,26 @@ class YouTubeFetcher:
         params = {
             "part": "snippet",
             "q": f"Unreal Engine 5 {query}",
-            "maxResults": max_results,
+            "maxResults": max_results * 3 if epic_only else max_results,  # Fetch more to filter
             "type": "video",
             "relevanceLanguage": "en",
         }
+
+        # If epic_only, filter by Epic Games channel directly
+        if epic_only:
+            params["channelId"] = self.CHANNEL_IDS["epic_games"]
+            params["maxResults"] = max_results
 
         data = self._api_request("search", params)
         videos = []
 
         for item in data.get("items", []):
             snippet = item["snippet"]
+            
+            # Filter by Epic Games if requested (fallback for search without channelId)
+            if epic_only and snippet.get("channelId") != self.CHANNEL_IDS["epic_games"]:
+                continue
+                
             videos.append(
                 VideoMetadata(
                     video_id=item["id"]["videoId"],
@@ -97,6 +109,9 @@ class YouTubeFetcher:
                     published_at=snippet["publishedAt"],
                 )
             )
+            
+            if len(videos) >= max_results:
+                break
 
         return videos
 
