@@ -76,6 +76,7 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
                 "ai_estimated_time": path.ai_estimated_time,
                 "ai_difficulty": path.ai_difficulty,
                 "ai_hint": path.ai_hint,
+                "ai_key_takeaways": path.ai_key_takeaways,
                 "steps": [
                     {
                         "number": s.step_number,

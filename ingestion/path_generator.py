@@ -14,6 +14,7 @@ from .youtube_fetcher import YouTubeFetcher, VideoMetadata
 from .concept_extractor import ConceptExtractor
 from .timestamp_extractor import TimestampExtractor
 from .gemini_helper import GeminiHelper
+from .epic_docs_fetcher import EpicDocsFetcher
 
 
 @dataclass
@@ -60,6 +61,8 @@ class LearningPath:
     ai_estimated_time: Optional[str] = None
     ai_difficulty: Optional[str] = None
     ai_hint: Optional[str] = None
+    ai_key_takeaways: Optional[list[str]] = None
+    epic_docs: Optional[list[dict]] = None  # Official Epic documentation links
 
 
 class PathGenerator:
@@ -74,6 +77,7 @@ class PathGenerator:
         self.extractor = ConceptExtractor()
         self.timestamp_extractor = TimestampExtractor()
         self.gemini = GeminiHelper()
+        self.docs_fetcher = EpicDocsFetcher()
 
     def _load_tags(self) -> dict:
         """Load canonical tags from tags.json."""
@@ -209,6 +213,7 @@ class PathGenerator:
             
             if curated:
                 ai_summary = curated.get("problem_overview")
+                ai_what_you_learn = curated.get("key_takeaways", [])
                 
                 for step_data in curated.get("steps", []):
                     # Build content items from curated videos

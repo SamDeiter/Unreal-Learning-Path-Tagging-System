@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Query logs - allow writes with rate limiting and validation
+    match /query_logs/{logId} {
+      // Anyone can write a query log (for analytics)
+      // But with strict validation to prevent abuse
+      allow create: if 
+        // Must have required fields
+        request.resource.data.keys().hasAll(['query', 'timestamp']) &&
+        // Query must be a string, max 200 chars (prevent large payloads)
+        request.resource.data.query is string &&
+        request.resource.data.query.size() <= 200 &&
+        // Timestamp must be server timestamp
+        request.resource.data.timestamp == request.time &&
+        // Limit document size (prevent abuse)
+        request.resource.data.keys().size() <= 5;
+      
+      // No reads from client (admin only via console)
+      allow read: if false;
+      
+      // No updates or deletes
+      allow update, delete: if false;
+    }
+    
+    // Cached paths - read only (managed by admin)
+    match /cached_paths/{pathId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Default deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

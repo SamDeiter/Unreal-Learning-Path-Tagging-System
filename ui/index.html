@@ -4,6 +4,79 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UE5 Learning Path Builder</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+    <!-- xAPI (Tin Can) Support for LMS Integration -->
+    <script src="js/xapiwrapper.min.js"></script>
+    <script src="js/tracking.js"></script>
+    <script>
+      // Firebase configuration for ue5-learning-paths project
+      const firebaseConfig = {
+        apiKey: "REDACTED_FIREBASE_API_KEY",
+        authDomain: "ue5-learning-paths.firebaseapp.com",
+        projectId: "ue5-learning-paths",
+        storageBucket: "ue5-learning-paths.firebasestorage.app",
+        messagingSenderId: "687715963885",
+        appId: "1:687715963885:web:d34c7a26f7471ff0d54de4",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      // Rate limiting - max 10 queries per 5 minutes
+      const queryHistory = [];
+      const RATE_LIMIT = 10;
+      const RATE_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+
+      function isRateLimited() {
+        const now = Date.now();
+        // Remove old entries
+        while (
+          queryHistory.length > 0 &&
+          queryHistory[0] < now - RATE_WINDOW_MS
+        ) {
+          queryHistory.shift();
+        }
+        return queryHistory.length >= RATE_LIMIT;
+      }
+
+      // Sanitize input - only allow safe characters
+      function sanitizeQuery(query) {
+        return query
+          .substring(0, 200) // Max length
+          .replace(/[<>{}()\[\]\\\/'"`;]/g, "") // Remove dangerous chars
+          .trim();
+      }
+
+      // Log a query to Firestore for trend tracking
+      async function logQuery(query, hasResults) {
+        if (isRateLimited()) {
+          console.log("Rate limited - skipping log");
+          return;
+        }
+
+        queryHistory.push(Date.now());
+        const sanitized = sanitizeQuery(query);
+        if (!sanitized) return;
+
+        try {
+          await db.collection("query_logs").add({
+            query: sanitized.toLowerCase(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            hasResults: hasResults,
+          });
+        } catch (e) {
+          console.log("Query logging disabled or failed:", e.message);
+        }
+
+        // Also track via unified Tracker (works in both standalone and LMS modes)
+        if (typeof Tracker !== "undefined") {
+          Tracker.trackQuery(sanitized, []);
+        }
+      }
+    </script>
     <style>
       :root {
         --primary: #0ea5e9;
@@ -637,6 +710,25 @@
         </div>
       </section>
 
+      <!-- Popular Paths Gallery -->
+      <section class="gallery-section" id="gallerySection">
+        <h2 style="color: var(--text); margin-bottom: 1rem; font-size: 1.25rem">
+          📚 Popular Learning Paths
+        </h2>
+        <p
+          style="
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+          "
+        >
+          Click any card to load a pre-built path instantly
+        </p>
+        <div class="gallery-grid" id="galleryGrid">
+          <!-- Gallery cards will be populated by JS -->
+        </div>
+      </section>
+
       <div class="loading" id="loading">
         <div class="spinner"></div>
         <p class="loading-text">🤖 AI is curating your path...</p>
@@ -820,11 +912,12 @@
           return;
         }
 
-        // Try to extract timestamp from description (e.g., "Start at 5:00" or "Start at ~3:00")
+        // Try to extract timestamp from description (e.g., "Start at 5:00", "around 15:00", "~3:00")
         let startTime = 0;
         if (description) {
+          // Match patterns like: "~5:00", "around 5:00", "Start at 5:00", "start watching around 15:00"
           const timeMatch = description.match(
-            /(?:Start at|from)\s*~?\s*(\d+):(\d+)/i,
+            /(?:start|around|at|from|~)\s*(?:watching\s*)?(?:around\s*)?~?\s*(\d{1,2}):(\d{2})/i,
           );
           if (timeMatch) {
             startTime = parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]);
@@ -835,6 +928,15 @@
         document.getElementById("videoFrame").src = embedUrl;
         document.getElementById("videoModal").classList.add("active");
         document.body.style.overflow = "hidden";
+      }
+
+      // Helper to play video from content card (uses data attributes)
+      function playVideoFromCard(card) {
+        const url = card.dataset.url;
+        const desc = card.dataset.desc
+          ? decodeURIComponent(card.dataset.desc)
+          : "";
+        playVideo(url, desc);
       }
 
       // Close video modal
@@ -854,6 +956,34 @@
         document.getElementById("queryInput").value = query;
       }
 
+      // Cached paths index (loaded on startup)
+      let cachedPathsIndex = [];
+
+      // Load the paths index on page load
+      fetch("/paths/index.json")
+        .then((r) => r.json())
+        .then((data) => {
+          cachedPathsIndex = data;
+          populateGallery();
+        })
+        .catch(() => console.log("No cached paths index"));
+
+      // Find best matching cached path
+      function findCachedPath(query) {
+        const q = query.toLowerCase();
+        // First try exact match
+        let match = cachedPathsIndex.find((p) => p.query.toLowerCase() === q);
+        if (match) return match;
+        // Then try partial match (query contains cached query term)
+        match = cachedPathsIndex.find((p) => q.includes(p.query.toLowerCase()));
+        if (match) return match;
+        // Try if cached query contains search term
+        match = cachedPathsIndex.find((p) =>
+          p.query.toLowerCase().includes(q.split(" ")[0]),
+        );
+        return match;
+      }
+
       function generatePath() {
         const query = document.getElementById("queryInput").value.trim();
         if (!query) return;
@@ -861,8 +991,32 @@
         // Show loading
         document.getElementById("loading").classList.add("active");
         document.getElementById("pathSection").classList.remove("active");
+        document.getElementById("gallerySection").style.display = "none";
 
-        // Call real API
+        // Try to find matching cached path
+        const cached = findCachedPath(query);
+
+        if (cached) {
+          fetch(`/paths/${cached.file}`)
+            .then((response) => {
+              if (!response.ok) throw new Error("Cache miss");
+              return response.json();
+            })
+            .then((data) => {
+              document.getElementById("loading").classList.remove("active");
+              currentPath = data;
+              renderPath(currentPath);
+              logQuery(query, true);
+              console.log("Loaded from cache:", cached.file);
+            })
+            .catch(() => tryApiCall(query));
+        } else {
+          tryApiCall(query);
+        }
+      }
+
+      function tryApiCall(query) {
+        // Cache miss - try API (works only with local server)
         fetch(`/api/generate?q=${encodeURIComponent(query)}`)
           .then((response) => {
             if (!response.ok) throw new Error("API error");
@@ -872,13 +1026,14 @@
             document.getElementById("loading").classList.remove("active");
             currentPath = data;
             renderPath(currentPath);
+            logQuery(query, data.steps && data.steps.length > 0);
           })
           .catch((error) => {
             document.getElementById("loading").classList.remove("active");
+            // Log the query even if it failed (helps identify trending requests)
+            logQuery(query, false);
             alert(
-              "Error generating path: " +
-                error.message +
-                "\n\nMake sure the server is running:\npython ui/server.py",
+              "This query isn't cached yet. Try one of the common queries like:\n\n• Lumen flickering\n• Packaging error\n• Blueprint accessed none\n\nOr run locally with: python ui/server.py",
             );
           });
       }
@@ -945,24 +1100,26 @@
                         }
                         <div class="content-list">
                             ${step.content
-                              .map(
-                                (c) => `
-                                <div class="content-item">
-                                    ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="" class="content-thumbnail" onclick="playVideo('${c.url}', '${(c.description || "").replace(/'/g, "\\'")}')">` : ""}
+                              .map((c) => {
+                                const safeDesc = encodeURIComponent(
+                                  c.description || "",
+                                );
+                                return `
+                                <div class="content-item" data-url="${c.url}" data-desc="${safeDesc}">
+                                    ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="" class="content-thumbnail" onclick="playVideoFromCard(this.closest('.content-item'))">` : ""}
                                     <div class="content-details">
                                         <div class="content-type">${c.type}</div>
                                         <div class="content-title">${c.title}</div>
                                         ${c.description ? `<p class="content-description">${parseMarkdown(c.description)}</p>` : ""}
                                         <div class="content-actions">
-                                            ${c.type.toLowerCase() === "video" ? `<button class="watch-btn" onclick="playVideo('${c.url}', '${(c.description || "").replace(/'/g, "\\'")}')">▶ Watch</button>` : ""}
+                                            ${c.type.toLowerCase() === "video" ? `<button class="watch-btn" onclick="playVideoFromCard(this.closest('.content-item'))">▶ Watch</button>` : ""}
                                             <a href="${c.url}" target="_blank" class="content-link">Open Resource ↗</a>
                                         </div>
                                     </div>
-                                </div>
-                            `,
-                              )
+                                </div>`;
+                              })
                               .join("")}
-                            <button class="complete-btn" onclick="completeStep(${step.number})" 
+                            <button class="complete-btn" onclick="completeStep(${step.number})"
                                     id="complete-${step.number}" style="margin-top: 0.5rem;">
                                 ✓ Mark Complete
                             </button>

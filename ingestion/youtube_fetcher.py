@@ -81,7 +81,7 @@ class YouTubeFetcher:
         params = {
             "part": "snippet",
             "q": f"Unreal Engine 5 {query}",
-            "maxResults": max_results * 3 if epic_only else max_results,  # Fetch more to filter
+            "maxResults": max_results * 5 if epic_only else max_results * 2,  # Fetch more to filter intros
             "type": "video",
             "relevanceLanguage": "en",
         }
@@ -89,16 +89,23 @@ class YouTubeFetcher:
         # If epic_only, filter by Epic Games channel directly
         if epic_only:
             params["channelId"] = self.CHANNEL_IDS["epic_games"]
-            params["maxResults"] = max_results
 
         data = self._api_request("search", params)
         videos = []
+        
+        # Terms that indicate intro/preview content (skip these for detailed tutorials)
+        skip_terms = ['preview', 'intro', 'introduction', 'trailer', 'teaser', 'essentials', 'overview']
 
         for item in data.get("items", []):
             snippet = item["snippet"]
             
             # Filter by Epic Games if requested (fallback for search without channelId)
             if epic_only and snippet.get("channelId") != self.CHANNEL_IDS["epic_games"]:
+                continue
+            
+            # Skip intro/preview videos for better content matching
+            title_lower = snippet["title"].lower()
+            if any(term in title_lower for term in skip_terms):
                 continue
                 
             # Get best available thumbnail

@@ -214,6 +214,12 @@ Create a structured 4-step learning path. For EACH step, pick the most relevant 
 Return JSON with this EXACT structure:
 {{
   "problem_overview": "1 sentence explaining the user's problem",
+  "key_takeaways": [
+    "Specific setting or concept to remember (e.g., 'Set Lumen Scene Lighting Quality to High')",
+    "Another actionable takeaway with specific values or steps",
+    "Third key point - be specific about settings, values, or workflows",
+    "Fourth practical tip they should remember"
+  ],
   "steps": [
     {{
       "step_number": 1,
@@ -255,7 +261,8 @@ IMPORTANT:
 - Each step MUST have at least one video
 - Different steps should use DIFFERENT videos when possible
 - Be specific about timestamps and what to look for
-- Keep descriptions concise but actionable"""
+- Keep descriptions concise but actionable
+- key_takeaways should list SPECIFIC settings, values, or actions (not vague advice)"""
 
         try:
             data = {
