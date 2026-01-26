@@ -101,6 +101,9 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
 
             self.send_json(path_dict)
 
+            # Save path to file for sharing
+            self.save_path_to_file(path_dict)
+
             # Track analytics
             ANALYTICS["total_paths_generated"] += 1
             ANALYTICS["queries"].append({
@@ -115,6 +118,60 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
 
         except Exception as e:
             self.send_error(500, str(e))
+
+    def save_path_to_file(self, path_dict):
+        """Save generated path to paths/ folder and update index."""
+        try:
+            paths_dir = self.static_dir / "paths"
+            paths_dir.mkdir(exist_ok=True)
+            
+            # Create safe filename from path_id
+            path_id = path_dict.get("path_id", "unknown")
+            filename = f"{path_id}.json"
+            filepath = paths_dir / filename
+            
+            # Save the path JSON
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(path_dict, f, indent=2)
+            
+            # Update index.json
+            self.update_paths_index(path_dict, filename)
+            
+            print(f"[SAVED] Path saved: {filename}")
+            
+        except Exception as e:
+            print(f"[ERROR] Failed to save path: {e}")
+
+    def update_paths_index(self, path_dict, filename):
+        """Add path to index.json if not already present."""
+        index_path = self.static_dir / "paths" / "index.json"
+        
+        # Load existing index
+        if index_path.exists():
+            with open(index_path, "r", encoding="utf-8") as f:
+                index = json.load(f)
+        else:
+            index = []
+        
+        # Check if path already exists
+        query = path_dict.get("query", "")
+        existing = [p for p in index if p.get("query", "").lower() == query.lower()]
+        
+        if not existing:
+            # Add new entry
+            index.append({
+                "query": query,
+                "file": filename,
+                "steps": len(path_dict.get("steps", [])),
+                "path_id": path_dict.get("path_id"),
+                "created": datetime.utcnow().isoformat(),
+            })
+            
+            # Save updated index
+            with open(index_path, "w", encoding="utf-8") as f:
+                json.dump(index, f, indent=2)
+            
+            print(f"[INDEX] Added to index: {query}")
 
     def handle_search(self, query_string):
         """Search for matching tags."""

@@ -1435,8 +1435,13 @@
       }
 
       function sharePath() {
+        const pathId = currentPath?.path_id || "";
         const query = currentPath?.query || "";
-        const shareUrl = `${window.location.origin}${window.location.pathname}?q=${encodeURIComponent(query)}`;
+
+        // Use path_id for exact path sharing, fallback to query
+        const shareUrl = pathId
+          ? `${window.location.origin}${window.location.pathname}?pathId=${encodeURIComponent(pathId)}`
+          : `${window.location.origin}${window.location.pathname}?q=${encodeURIComponent(query)}`;
 
         navigator.clipboard
           .writeText(shareUrl)
