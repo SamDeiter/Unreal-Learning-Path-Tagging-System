@@ -343,15 +343,22 @@ function renderPath(path) {
 
   document.getElementById("pathQuery").innerHTML = queryHtml;
 
-  // Render tags
+  // Render tags (with fallback for empty/missing)
   const tagsContainer = document.getElementById("pathTags");
-  tagsContainer.innerHTML = path.tags
+  const tags = path.tags || [];
+  tagsContainer.innerHTML = tags
     .map((t) => `<span class="tag">${t}</span>`)
     .join("");
 
-  // Render steps
+  // Render steps (with fallback for empty/missing)
   const stepsContainer = document.getElementById("stepsContainer");
-  stepsContainer.innerHTML = path.steps
+  const steps = path.steps || [];
+  if (steps.length === 0) {
+    stepsContainer.innerHTML =
+      '<p style="color: var(--text-muted);">No steps generated. Try a more specific query.</p>';
+    return;
+  }
+  stepsContainer.innerHTML = steps
     .map(
       (step) => `
           <div class="step-card" id="step-${step.number}" data-type="${step.type}">
