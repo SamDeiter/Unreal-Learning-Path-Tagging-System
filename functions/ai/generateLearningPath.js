@@ -9,18 +9,42 @@ const { logApiUsage } = require("../utils/apiUsage");
 
 /**
  * Load curated video catalog for RAG context
- * Falls back to empty array if not available
+ * Lazy-loaded on first request to ensure proper Cloud Functions environment
  */
-let videoCatalog = [];
-try {
-  const catalogPath = path.join(__dirname, "../data/video_catalog.json");
-  if (fs.existsSync(catalogPath)) {
-    const data = JSON.parse(fs.readFileSync(catalogPath, "utf-8"));
-    videoCatalog = data.videos || [];
-    console.log(`[INFO] Loaded ${videoCatalog.length} curated videos`);
+let videoCatalog = null;
+
+function loadVideoCatalog() {
+  if (videoCatalog !== null) return videoCatalog;
+
+  try {
+    // Try multiple possible paths for Cloud Functions deployment
+    const possiblePaths = [
+      path.join(__dirname, "../data/video_catalog.json"),
+      path.join(__dirname, "../../data/video_catalog.json"),
+      path.resolve(__dirname, "../data/video_catalog.json"),
+      "/workspace/functions/data/video_catalog.json",
+    ];
+
+    for (const catalogPath of possiblePaths) {
+      console.log(`[DEBUG] Trying catalog path: ${catalogPath}`);
+      if (fs.existsSync(catalogPath)) {
+        const data = JSON.parse(fs.readFileSync(catalogPath, "utf-8"));
+        videoCatalog = data.videos || [];
+        console.log(
+          `[INFO] Loaded ${videoCatalog.length} curated videos from: ${catalogPath}`,
+        );
+        return videoCatalog;
+      }
+    }
+
+    console.warn("[WARN] Video catalog not found at any path");
+    videoCatalog = [];
+    return videoCatalog;
+  } catch (e) {
+    console.error("[ERROR] Could not load video catalog:", e.message);
+    videoCatalog = [];
+    return videoCatalog;
   }
-} catch (e) {
-  console.warn("[WARN] Could not load video catalog:", e.message);
 }
 
 /**
@@ -28,11 +52,17 @@ try {
  * Only include relevant videos based on query keywords
  */
 function buildVideoContext(query, maxVideos = 20) {
+  const catalog = loadVideoCatalog();
+  if (!catalog || catalog.length === 0) {
+    console.log("[DEBUG] No videos in catalog, returning null");
+    return null;
+  }
+
   const queryLower = query.toLowerCase();
   const queryWords = queryLower.split(/\s+/);
 
   // Score videos by relevance
-  const scored = videoCatalog.map((video) => {
+  const scored = catalog.map((video) => {
     let score = 0;
     const titleLower = video.title.toLowerCase();
     const tagsStr = video.tags.join(" ").toLowerCase();
