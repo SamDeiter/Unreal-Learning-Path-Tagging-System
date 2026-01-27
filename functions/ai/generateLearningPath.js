@@ -91,7 +91,21 @@ VIDEO RULES (CRITICAL):
   * A timestamp URL with &t=XXX pointing to the relevant section start
   * In the description, specify EXACT time range: "Watch 15:30-25:30 for [specific topic]"
   * Do NOT just say "10 minutes" - specify WHICH 10 minutes!
-- Example: "Watch 12:45-22:30 for the object reference validation technique"`;
+- Example: "Watch 12:45-22:30 for the object reference validation technique"
+
+FORBIDDEN PHRASES (NEVER USE):
+- "Search online for..." - ALWAYS provide the actual link instead
+- "Look up tutorials on..." - Provide the specific tutorial URL
+- "Research how to..." - Give the documentation link
+- "Find resources about..." - Include the actual resource URL
+- Any action telling users to search - YOU must find and provide the links
+
+ACTION RULES:
+- Every "action" field MUST be a concrete task the user can do RIGHT NOW
+- If an action references a concept, provide the Epic docs link for it
+- Example BAD: "Search online for IsValid tutorials"
+- Example GOOD: "Read the IsValid node documentation, then add an IsValid check before accessing your object reference"
+- Actions should reference the content items provided in that step`;
 
       const userPrompt = `Create an EDUCATIONAL learning path for: "${query}"
 
