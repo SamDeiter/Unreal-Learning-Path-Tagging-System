@@ -104,17 +104,20 @@ CRITICAL RULES:
 - Create 4 steps: understand (why it happens), diagnose (identify the cause), resolve (fix it), prevent (best practices)
 - Step 1 MUST explain the underlying concept - users should understand WHY the error exists
 - Step 4 MUST include prevention strategies and best practices
-- EVERY step includes official Epic documentation FIRST, then supplementary videos
-- Use dev.epicgames.com/documentation URLs
 - Be specific to their ACTUAL problem, not generic advice
 
-VIDEO SELECTION (CRITICAL):
-- You MUST ONLY select videos from the curated video database provided below
-- Each video has topics and timestamps - choose the one most relevant to the user's problem
+CONTENT REQUIREMENTS (MANDATORY):
+- EVERY step MUST have a "content" array with at least ONE Epic documentation link
+- Use dev.epicgames.com/documentation URLs - find the most relevant page for each step
+- Documentation is REQUIRED in all steps - never leave content empty
+- Videos are OPTIONAL supplements - only add if a relevant video exists in the curated database
+
+VIDEO SELECTION (OPTIONAL - curated videos only):
+- If a video in the database matches the topic, include it with thumbnail_url
 - Use the timestamp_start field to link directly to the relevant section
 - Format video URL as: https://youtube.com/watch?v=VIDEO_ID&t=TIMESTAMP_SECONDS
-- ALWAYS include thumbnail_url using format: https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg
-- If no video in the database matches, omit video content for that step (docs are sufficient)
+- Format thumbnail_url as: https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg
+- If no video matches, that's fine - just include the required Epic docs
 
 CURATED VIDEO DATABASE (SELECT FROM THESE ONLY):
 ${curatedVideosPrompt}`;
