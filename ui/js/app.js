@@ -503,7 +503,7 @@ function ratePath(rating) {
 
   const feedback = document.getElementById("ratingFeedback");
 
-  // Log to Firestore
+  // 1. Log to Firestore (primary analytics)
   if (typeof firebase !== "undefined" && firebase.firestore) {
     firebase
       .firestore()
@@ -515,11 +515,45 @@ function ratePath(rating) {
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       })
       .then(() => {
-        console.log("Rating logged:", rating);
+        console.log("Rating logged to Firestore:", rating);
       })
       .catch((e) => {
-        console.log("Rating log failed:", e.message);
+        console.log("Firestore rating log failed:", e.message);
       });
+  }
+
+  // 2. Log to xAPI (LMS analytics - for SCORM integration)
+  if (typeof xAPIWrapper !== "undefined" && xAPIWrapper.sendStatement) {
+    const statement = {
+      verb: {
+        id:
+          rating === "up"
+            ? "http://adlnet.gov/expapi/verbs/liked"
+            : "http://adlnet.gov/expapi/verbs/disliked",
+        display: { "en-US": rating === "up" ? "liked" : "disliked" },
+      },
+      object: {
+        id: `ue5-path:${currentPath.path_id || currentPath.query}`,
+        definition: {
+          name: { "en-US": currentPath.title || currentPath.query },
+          type: "http://adlnet.gov/expapi/activities/assessment",
+        },
+      },
+      result: {
+        response: rating,
+        success: rating === "up",
+      },
+    };
+    xAPIWrapper.sendStatement(statement);
+    console.log("Rating logged to xAPI:", rating);
+  }
+
+  // 3. Log to internal Tracker (if available)
+  if (typeof Tracker !== "undefined") {
+    Tracker.trackEvent("path_rating", {
+      path_id: currentPath.path_id || currentPath.query,
+      rating: rating,
+    });
   }
 
   // Update UI
