@@ -1,96 +1,116 @@
-# Search Intent Analysis: UE5 Developer Behavior
+# Understanding Developer Search Behavior
 
-This document describes the psychology of how developers search for help in the Unreal Engine ecosystem, based on Section 12 of the Unified Taxonomy research.
-
----
-
-## The Escalation of Specificity
-
-Users progress through distinct stages when seeking help:
-
-| Stage | Query Type | Example | Associated Tags |
-|-------|-----------|---------|-----------------|
-| **1. Discovery** | Natural Language | "How to make a game menu" | `ui.umg`, `ui.widget` |
-| **2. Implementation** | Specific Feature | "Cast to player controller" | `scripting.casting`, `core.player_controller` |
-| **3. Troubleshooting** | Symptom Description | "Menu buttons not clicking" | `ui.input_mode`, `ui.focus` |
-| **4. Failure** | Error/Log Signature | "Access violation 0xC0000005" | `crash.access_violation`, `debug.callstack` |
-
-> **Insight**: The tag database must capture users at ALL stages. A novice searching for "Menu" needs to find `ui.umg`. An expert searching for `0xC0000005` needs memory debugging tools.
+> How users seek help in the Unreal Engine ecosystem and how this system bridges their questions to solutions.
 
 ---
 
-## Common Search Patterns
+## Overview
 
-### The "Unknown Cook Failure" Search Black Hole
+When developers encounter problems in Unreal Engine, they don't search for documentation—they search for symptoms. A user experiencing a black screen doesn't search "HDR configuration"; they search "why is my screen black." This system translates that intent into actionable learning paths.
 
-Users who encounter `ExitCode=25` rarely realize it's a wrapper error. Their queries:
+---
+
+## How Developers Search
+
+### The Four Stages of Problem-Solving
+
+Developers progress through increasingly specific query types:
+
+1. **Discovery** - Broad questions in natural language
+   - Example: *"How to make a game menu"*
+   - These users need foundational tutorials
+
+2. **Implementation** - Feature-specific queries
+   - Example: *"Cast to player controller blueprint"*
+   - These users know what they want, just not how
+
+3. **Troubleshooting** - Symptom descriptions
+   - Example: *"Menu buttons not responding"*
+   - These users have a working system with a specific bug
+
+4. **Failure** - Error codes and log output
+   - Example: *"Access violation 0xC0000005"*
+   - These users need precise diagnostic paths
+
+Our tagging system captures all four stages by indexing both concepts AND error signatures.
+
+---
+
+## High-Volume Problem Clusters
+
+Based on community forum analysis, these are the most common search patterns:
+
+### Build Failures: The ExitCode=25 Trap
+
+`ExitCode=25` appears in thousands of forum posts because it's a **wrapper error**—the real cause is buried in the logs. Users search for:
 
 - "AutomationTool exiting with ExitCode=25"
-- "Unknown Cook Failure UE5"
-- "Packaging failed Unknown Error"
+- "Unknown Cook Failure"
+- "Packaging failed"
 
-**Solution**: The database provides symptom-to-cause hierarchy linking `ExitCode=25` to specific root causes (Path_Length_Limit, Asset_Validation, Corrupt_Asset).
+**Our Solution**: Link `ExitCode=25` to specific root causes: path length limits, asset corruption, naming violations, and shader errors.
 
-### The "Black Screen" Cluster
+### VR/Mobile: The Black Screen Problem
 
-High-volume searches for VR/Mobile:
+New VR developers frequently encounter:
 
-- "Oculus Quest black screen audio plays"
-- "Android build black screen"
-- "VR game shows nothing"
+- "Quest black screen but audio plays"
+- "Android launch shows nothing"
 
-**Root Causes**: Mobile HDR enabled on unsupported hardware, OpenXR configuration, Vulkan issues.
+**Root Causes**: Mobile HDR, OpenXR misconfiguration, Vulkan driver issues.
 
-### The "Lag" Misnomer
+### Multiplayer: The "Lag" Misnomer
 
-In multiplayer, users search for "Lag" when experiencing replication issues:
+Users report "lag" when experiencing replication bugs:
 
-- User sees: Character stuttering
-- User searches: "fix multiplayer lag"
-- Actual solution: `CharacterMovementComponent`, Network Prediction, Replication settings
-
----
-
-## Vocabulary Bifurcation: UE4 to UE5
-
-The transition introduced terminology changes users may not know:
-
-| Legacy Term (UE4) | Current Term (UE5) | Canonical Tag |
-|-------------------|-------------------|---------------|
-| PhysX | Chaos | `physics.chaos` |
-| Cascade | Niagara | `rendering.niagara` |
-| Static Lighting | Lumen (optional) | `rendering.lumen` |
-| LOD System | Nanite | `rendering.nanite` |
-
-**Tagging Implication**: The `synonym_rings.json` includes legacy terms pointing to current systems.
+- What they see: *Character stuttering*
+- What they search: *"fix multiplayer lag"*
+- What they need: *Replication settings, Network Prediction*
 
 ---
 
-## Proficiency-Based Search Intent
+## UE4 to UE5 Terminology Shift
 
-### Novice Users
+Many developers learned on UE4 and search using outdated terms:
 
-- Search for high-level workflows
-- Use imprecise language ("why is my screen black")
-- Need: Tutorials tagged with `skill_level.beginner`
+| What They Search | What They Need |
+|-----------------|----------------|
+| PhysX | Chaos Physics |
+| Cascade | Niagara VFX |
+| Static Lighting | Lumen |
+| LOD Meshes | Nanite |
 
-### Intermediate Users
-
-- Search for specific Blueprint nodes
-- Use feature names ("Get Player Controller")
-- Need: Workflow examples with step-by-step guidance
-
-### Advanced/Engineers
-
-- Search for exact log signatures
-- Paste error codes verbatim
-- Need: Error indexing that matches `LNK1181` or `ExitCode=25` precisely
+The `synonym_rings.json` maps legacy terms to current systems automatically.
 
 ---
 
-## Design Principles for Discoverability
+## Skill Level Patterns
 
-1. **Index Error Signatures**: Tags must include exact error codes as searchable terms
-2. **Support Synonyms**: Link vernacular ("BP") to canonical ("Blueprint")
-3. **Version Awareness**: Every tag must specify engine version compatibility
-4. **Symptom-to-Cause Mapping**: Visual artifacts connect to root causes via `edges.json`
+### Beginners
+
+- Use natural language and vague descriptions
+- Search: *"why is my character stuck"*
+- Need: Step-by-step tutorials with context
+
+### Intermediate
+
+- Know feature names, need workflow guidance
+- Search: *"blend space vs anim montage"*
+- Need: Comparison content and best practices
+
+### Advanced
+
+- Paste exact error text from logs
+- Search: *"LNK2019 unresolved external UMyClass"*
+- Need: Direct, technical solutions
+
+---
+
+## Design Principles
+
+These principles guide how we structure tags:
+
+1. **Error Indexing**: Every error code is a searchable tag
+2. **Synonym Coverage**: Common abbreviations ("BP") resolve to full terms
+3. **Version Awareness**: Tags specify which UE versions they apply to
+4. **Cause-Effect Mapping**: Symptoms link to root causes through graph edges

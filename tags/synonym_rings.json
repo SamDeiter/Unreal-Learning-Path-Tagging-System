@@ -1,9 +1,19 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "synonym_rings.schema.json",
+  "title": "UE5 Synonym Ring Database",
   "version": "1.0.0",
-  "description": "Synonym Ring Architecture - Maps vernacular search terms to canonical tags (Section 9.1)",
+  "description": "Maps user search terms to canonical tag IDs. When a user searches for 'BP' or 'Visual Scripting', the system resolves to the canonical 'scripting.blueprint' tag. This improves search discoverability across different terminology users might know.",
+
+  "_design_notes": {
+    "purpose": "Bridge the gap between how developers describe problems and how we categorize solutions",
+    "usage": "Query normalization layer - run user input through synonym lookup before tag matching",
+    "maintenance": "Add new synonyms when users consistently fail to find content using common terms"
+  },
+
   "synonym_rings": [
     {
+      "_comment": "Blueprint is the #1 searched term but users say 'BP' or 'visual scripting' interchangeably",
       "canonical_tag": "scripting.blueprint",
       "display_name": "Blueprint",
       "synonyms": [
@@ -16,6 +26,7 @@
       "scope": "Scripting Logic"
     },
     {
+      "_comment": "Packaging has 7+ synonyms because the workflow spans build/cook/package/deploy",
       "canonical_tag": "build.packaging",
       "display_name": "Packaging",
       "synonyms": [
@@ -30,6 +41,7 @@
       "scope": "Deployment"
     },
     {
+      "_comment": "Lumen is UE5's GI system - many users don't know the name, just 'global illumination'",
       "canonical_tag": "rendering.lumen",
       "display_name": "Lumen",
       "synonyms": [
@@ -42,6 +54,7 @@
       "scope": "Rendering"
     },
     {
+      "_comment": "ExitCode=25 is the infamous 'Unknown Cook Failure' - users paste this from logs constantly",
       "canonical_tag": "build.exitcode_25",
       "display_name": "ExitCode=25",
       "synonyms": [
@@ -53,6 +66,7 @@
       "scope": "Error Codes"
     },
     {
+      "_comment": "UMG is the formal name but users say 'UI' or 'Widget' far more often",
       "canonical_tag": "ui.umg",
       "display_name": "UMG",
       "synonyms": [
@@ -66,6 +80,7 @@
       "scope": "User Interface"
     },
     {
+      "_comment": "C++ in UE has many nicknames including 'native code' and just 'code'",
       "canonical_tag": "scripting.cpp",
       "display_name": "C++",
       "synonyms": [
@@ -79,24 +94,21 @@
       "scope": "Programming"
     },
     {
+      "_comment": "Nanite is UE5's geometry system - 'virtual geometry' is the technical term",
       "canonical_tag": "rendering.nanite",
       "display_name": "Nanite",
       "synonyms": ["Virtualized Geometry", "Micropolygon", "Virtual Geometry"],
       "scope": "Rendering"
     },
     {
+      "_comment": "Niagara replaced Cascade - many UE4 users still search for 'particles' or 'Cascade'",
       "canonical_tag": "rendering.niagara",
       "display_name": "Niagara",
-      "synonyms": [
-        "VFX",
-        "Particles",
-        "Effects",
-        "Particle System",
-        "Cascade replacement"
-      ],
+      "synonyms": ["VFX", "Particles", "Effects", "Particle System", "Cascade"],
       "scope": "Visual Effects"
     },
     {
+      "_comment": "GPU crashes appear with many names - TDR, device lost, device removed",
       "canonical_tag": "crash.d3d_device_lost",
       "display_name": "D3D Device Lost",
       "synonyms": [
@@ -109,12 +121,14 @@
       "scope": "Crashes"
     },
     {
+      "_comment": "Control Rig is the new animation system - related to IK and procedural animation",
       "canonical_tag": "animation.control_rig",
       "display_name": "Control Rig",
       "synonyms": ["IK Rig", "Rigging", "Animation Rig", "Full Body IK"],
       "scope": "Animation"
     },
     {
+      "_comment": "MetaSounds replaced Sound Cues for procedural audio",
       "canonical_tag": "audio.metasounds",
       "display_name": "MetaSounds",
       "synonyms": [
@@ -126,6 +140,7 @@
       "scope": "Audio"
     },
     {
+      "_comment": "Networking/Replication is searched as 'multiplayer', 'netcode', or 'RPC'",
       "canonical_tag": "multiplayer.replication",
       "display_name": "Replication",
       "synonyms": [
@@ -139,12 +154,14 @@
       "scope": "Networking"
     },
     {
+      "_comment": "Meta Quest has gone through several brand names - Oculus, Quest, Meta",
       "canonical_tag": "platform.quest",
       "display_name": "Meta Quest",
       "synonyms": ["Oculus Quest", "Quest 2", "Quest 3", "Quest Pro", "Oculus"],
       "scope": "VR/XR"
     },
     {
+      "_comment": "Fab is the new unified marketplace - users still search for 'Marketplace' and 'Megascans'",
       "canonical_tag": "asset.fab",
       "display_name": "Fab",
       "synonyms": [
@@ -157,6 +174,7 @@
       "scope": "Asset Management"
     },
     {
+      "_comment": "Accessed None is THE most common Blueprint runtime error - many names for it",
       "canonical_tag": "blueprint.accessed_none",
       "display_name": "Accessed None",
       "synonyms": [
@@ -169,12 +187,26 @@
       "scope": "Blueprint Errors"
     }
   ],
-  "fuzzy_matching_rules": {
-    "description": "Rules for handling compound word/space issues identified in Fab search (Section 7.1)",
+
+  "fuzzy_matching": {
+    "_comment": "Rules to handle compound word and spacing issues common in search",
+    "description": "Normalizes user input before synonym lookup - handles typos and formatting variations",
     "examples": [
-      { "input": "swimmingpool", "normalized": "swimming pool" },
-      { "input": "snow mobile", "normalized": "snowmobile" },
-      { "input": "exitcode25", "normalized": "ExitCode=25" }
+      {
+        "input": "swimmingpool",
+        "normalized": "swimming pool",
+        "_note": "Compound words are often written without spaces"
+      },
+      {
+        "input": "snow mobile",
+        "normalized": "snowmobile",
+        "_note": "Or with spaces where there shouldn't be"
+      },
+      {
+        "input": "exitcode25",
+        "normalized": "ExitCode=25",
+        "_note": "Error codes need exact formatting for lookup"
+      }
     ]
   }
 }
