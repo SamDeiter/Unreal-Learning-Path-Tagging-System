@@ -49,8 +49,11 @@ function tryApiCall(query) {
         document.getElementById("loading").classList.remove("active");
         if (result.data.success && result.data.path) {
           currentPath = result.data.path;
+          // Ensure steps array exists
+          currentPath.steps = currentPath.steps || [];
+          currentPath.tags = currentPath.tags || [];
           renderPath(currentPath);
-          logQuery(query, currentPath.steps && currentPath.steps.length > 0);
+          logQuery(query, currentPath.steps.length > 0);
         } else {
           throw new Error("No path in response");
         }
