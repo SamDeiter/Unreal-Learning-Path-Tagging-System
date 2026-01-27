@@ -1,0 +1,742 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.459
+Hi. In this class,
+
+2
+00:00:03.459 --> 00:00:06.860
+we'll be reviewing some basic lighting concepts
+
+3
+00:00:06.860 --> 00:00:09.060
+when working in virtual production.
+
+4
+00:00:09.060 --> 00:00:10.880
+Let's get right into it.
+
+5
+00:00:10.880 --> 00:00:12.820
+All right, full disclosure.
+
+6
+00:00:12.820 --> 00:00:15.700
+I'm going to be throwing at you a few complicated terms
+
+7
+00:00:15.700 --> 00:00:17.780
+and then explain what they mean because I
+
+8
+00:00:17.780 --> 00:00:19.460
+think it's going to help you understand
+
+9
+00:00:19.460 --> 00:00:21.859
+how Unreal Engine works under the hood.
+
+10
+00:00:21.859 --> 00:00:26.980
+Let's first discuss what global illumination means in Unreal Engine.
+
+11
+00:00:27.140 --> 00:00:32.619
+Global illumination or GI simulates how light bounces around the scene,
+
+12
+00:00:32.619 --> 00:00:35.420
+creating indirect lighting effects that make
+
+13
+00:00:35.420 --> 00:00:37.939
+an environment look more realistic.
+
+14
+00:00:37.939 --> 00:00:42.219
+In Unreal Engine, GI can be either baked,
+
+15
+00:00:42.219 --> 00:00:45.380
+meaning calculated once and stored,
+
+16
+00:00:45.380 --> 00:00:49.460
+which is faster but very static because it doesn't move,
+
+17
+00:00:49.460 --> 00:00:53.380
+or dynamic, meaning calculated in real time,
+
+18
+00:00:53.380 --> 00:00:55.420
+therefore changing as it gets
+
+19
+00:00:55.420 --> 00:00:59.100
+either animated or interacted with by a player.
+
+20
+00:00:59.100 --> 00:01:01.859
+Just so you know, in the same scene,
+
+21
+00:01:01.859 --> 00:01:05.820
+it is possible to have both dynamic and baked GI.
+
+22
+00:01:05.820 --> 00:01:07.820
+One doesn't exclude the other.
+
+23
+00:01:07.820 --> 00:01:10.019
+Now talking about baked lighting,
+
+24
+00:01:10.019 --> 00:01:15.500
+lighting data in Unreal Engine can be baked on the CPU or the GPU
+
+25
+00:01:15.500 --> 00:01:19.219
+using the Lightmass global illumination system.
+
+26
+00:01:19.219 --> 00:01:21.439
+Whenever you hear Lightmass,
+
+27
+00:01:21.439 --> 00:01:24.060
+it means that the lighting has been baked.
+
+28
+00:01:24.060 --> 00:01:29.900
+CPU-based Lightmass uses the CPU to compute and generate lighting data,
+
+29
+00:01:29.900 --> 00:01:32.980
+and it can also be distributed across a computer farm.
+
+30
+00:01:32.980 --> 00:01:36.299
+GPU-based Lightmass uses your computers and
+
+31
+00:01:36.299 --> 00:01:39.460
+Bedia GPU to generate those lighting data.
+
+32
+00:01:39.460 --> 00:01:41.540
+Now Lumen, on the other hand,
+
+33
+00:01:41.540 --> 00:01:44.420
+is a fully dynamic global illumination and
+
+34
+00:01:44.420 --> 00:01:47.980
+reflection system that's enabled by default in the Engine.
+
+35
+00:01:47.980 --> 00:01:50.099
+Compared to Lightmass,
+
+36
+00:01:50.099 --> 00:01:53.540
+it responds instantly to any moving object and
+
+37
+00:01:53.540 --> 00:01:58.540
+allows us to iterate our lighting setup without having to wait for baking times,
+
+38
+00:01:58.540 --> 00:02:00.860
+which can take really long sometimes.
+
+39
+00:02:00.860 --> 00:02:05.140
+Lumen also provides infinite light bounces,
+
+40
+00:02:05.140 --> 00:02:07.340
+so to infinity and beyond.
+
+41
+00:02:07.340 --> 00:02:09.300
+Now, there is a trade-off though,
+
+42
+00:02:09.300 --> 00:02:12.540
+because Lumen is more demanding on our machine,
+
+43
+00:02:12.540 --> 00:02:14.740
+and it sacrifices some accuracy for
+
+44
+00:02:14.740 --> 00:02:17.939
+the ability to have a fully dynamic real-time GI.
+
+45
+00:02:17.939 --> 00:02:20.939
+In this class, we'll only be focusing on Lumen,
+
+46
+00:02:20.939 --> 00:02:26.340
+as it's mostly compatible with virtual production and in-camera visual effects.
+
+47
+00:02:26.340 --> 00:02:28.579
+It's the standard way of working with the Engine,
+
+48
+00:02:28.579 --> 00:02:31.659
+because it's very fast and it's flexible.
+
+49
+00:02:31.659 --> 00:02:35.539
+Lumen GI best functions with its sidekick,
+
+50
+00:02:35.539 --> 00:02:38.139
+Nanite Virtualized Geometry,
+
+51
+00:02:38.139 --> 00:02:41.659
+or simply referred to by friends as Nanite.
+
+52
+00:02:41.659 --> 00:02:46.659
+Together, they achieve full resolution shading.
+
+53
+00:02:46.659 --> 00:02:49.579
+Nanite Simplified Geometry Representation
+
+54
+00:02:49.580 --> 00:02:53.300
+helps Lumen provide more accurate indirect lighting.
+
+55
+00:02:53.300 --> 00:02:55.219
+So they really help each other out.
+
+56
+00:02:55.219 --> 00:02:57.140
+They're best friends basically.
+
+57
+00:02:57.140 --> 00:03:00.380
+Now, down here, I talk about skylighting.
+
+58
+00:03:00.380 --> 00:03:07.060
+The skylighting takes care of the ambient light that comes from the entire skydome and not just the sun.
+
+59
+00:03:07.060 --> 00:03:09.460
+In its last step in calculating the light,
+
+60
+00:03:09.460 --> 00:03:12.939
+also referred to as final gather in this sentence,
+
+61
+00:03:12.939 --> 00:03:17.180
+Lumen calculates how the skylight is solved across a scene.
+
+62
+00:03:17.260 --> 00:03:21.420
+This makes indoor areas properly dark compared to outdoor ones,
+
+63
+00:03:21.420 --> 00:03:29.379
+and recreates very realistic lighting where interiors only get lit by the sky through openings like windows or doors.
+
+64
+00:03:29.379 --> 00:03:35.460
+Also, just so you know, Lumen works best with solid objects rather than transparent ones.
+
+65
+00:03:35.460 --> 00:03:38.939
+When working with translucency or volumetric fog,
+
+66
+00:03:38.939 --> 00:03:43.420
+the lighting calculations will be simplified and unfortunately not as detailed,
+
+67
+00:03:43.420 --> 00:03:45.819
+but it's getting better and better.
+
+68
+00:03:45.819 --> 00:03:49.060
+As anticipated today, we'll only be focusing on Lumen
+
+69
+00:03:49.060 --> 00:03:52.900
+and we will create a basic lighting setup in an empty level.
+
+70
+00:03:52.900 --> 00:03:57.659
+Overall, Lumen is going to be your go-to solution when working with lights in Unreal,
+
+71
+00:03:57.659 --> 00:04:04.060
+but if your machine struggles to compute a heavy environment or your FPS drop below optimal rate,
+
+72
+00:04:04.060 --> 00:04:07.340
+you could also consider to use Lightmass instead,
+
+73
+00:04:07.340 --> 00:04:09.939
+either the GPU or the CPU.
+
+74
+00:04:09.939 --> 00:04:13.180
+The GPU would be faster, while the CPU a little slower.
+
+75
+00:04:13.180 --> 00:04:15.980
+And also, when working with baked lighting,
+
+76
+00:04:15.980 --> 00:04:21.860
+you'll be sticking to standard shadow maps compared to the virtual shadow maps with Lumen, unfortunately.
+
+77
+00:04:21.860 --> 00:04:26.540
+Light baked lighting, standard shadow maps have a fixed resolution for the entire scene.
+
+78
+00:04:26.540 --> 00:04:30.420
+They're simpler and less efficient compared to the virtual shadow maps,
+
+79
+00:04:30.420 --> 00:04:35.939
+which adapt to the complexity of the scene and get more detailed the closer they get to the camera.
+
+80
+00:04:35.939 --> 00:04:39.139
+Now, I said Lumen is well optimized,
+
+81
+00:04:39.139 --> 00:04:42.860
+but be mindful that if using a ton of lights in your scene,
+
+82
+00:04:42.860 --> 00:04:46.220
+your performance will still be impacted.
+
+83
+00:04:46.220 --> 00:04:54.620
+Alright, let's jump into the engine and create our first basic lighting setup using the environment light mixer.
+
+84
+00:04:54.620 --> 00:04:58.300
+Alright, so before diving into creating our first lighting setup,
+
+85
+00:04:58.300 --> 00:05:02.939
+we want to make sure that our project is correctly set up to use Lumen.
+
+86
+00:05:02.939 --> 00:05:08.980
+So let's go up here under Edit and then open up the project settings.
+
+87
+00:05:08.980 --> 00:05:12.060
+Here on the left, you will find different sections,
+
+88
+00:05:12.060 --> 00:05:18.139
+and we will find under Engine, a section called Rendering.
+
+89
+00:05:18.139 --> 00:05:23.939
+Alright, so we want to make sure that first of all, virtual texture support is enabled,
+
+90
+00:05:23.939 --> 00:05:29.259
+and then we want to check that dynamic global illumination is set to Lumen,
+
+91
+00:05:29.259 --> 00:05:32.579
+as well as the reflection method set to Lumen.
+
+92
+00:05:32.579 --> 00:05:35.740
+The ray lighting mode should be set to Surface Cache,
+
+93
+00:05:35.740 --> 00:05:39.420
+and the shadow map method should be virtual shadow maps.
+
+94
+00:05:39.460 --> 00:05:43.860
+After that, we just want to make sure that Nanite is turned on.
+
+95
+00:05:43.860 --> 00:05:47.860
+Now let's go up here in the search bar and type SM6.
+
+96
+00:05:47.860 --> 00:05:51.740
+Down here on the platform windows, if you're on the Windows machine,
+
+97
+00:05:51.740 --> 00:05:57.819
+you want to make sure that the DirectX 12 targeted Shitter format SM6 is enabled.
+
+98
+00:05:57.819 --> 00:06:02.540
+Now if you're on Windows, you should really just take care of this little checkbox down here,
+
+99
+00:06:02.540 --> 00:06:06.100
+and not the one below here, which is the Vulkan one.
+
+100
+00:06:06.100 --> 00:06:09.340
+Unless you plan to port your project to Linux or Android,
+
+101
+00:06:09.340 --> 00:06:13.260
+or somehow your GPU performs better with Vulkan for some reason.
+
+102
+00:06:13.260 --> 00:06:16.700
+Enabling both of them would just increase compilation time,
+
+103
+00:06:16.700 --> 00:06:20.420
+as well as the size of the project, so I wouldn't recommend that.
+
+104
+00:06:20.420 --> 00:06:24.580
+Okay, let's close down this window, and now we can create a new level.
+
+105
+00:06:24.580 --> 00:06:27.660
+So let's go under File, New Level,
+
+106
+00:06:27.660 --> 00:06:30.460
+and the level we're going to be creating today is completely empty,
+
+107
+00:06:30.460 --> 00:06:33.980
+because we want to start from scratch, building our light system.
+
+108
+00:06:33.980 --> 00:06:39.780
+Alright, now if we go under Window, we can open up the Environment Light Mixer.
+
+109
+00:06:39.780 --> 00:06:46.420
+Environment Light Mixer is a very simple tool that allows artists to edit their environment lighting components quickly,
+
+110
+00:06:46.420 --> 00:06:49.819
+and get access to their properties all at once.
+
+111
+00:06:49.819 --> 00:06:52.980
+So if we click all these little nice buttons over here,
+
+112
+00:06:52.980 --> 00:06:57.180
+we should be able to create our first very basic lighting setup.
+
+113
+00:06:57.180 --> 00:07:01.819
+Let's start with the skylight, and Unreal is going to give us an error.
+
+114
+00:07:01.819 --> 00:07:06.459
+That's just because the sky atmosphere is not there yet, and they're best friends.
+
+115
+00:07:06.459 --> 00:07:09.740
+So let's move on with the directional light,
+
+116
+00:07:09.740 --> 00:07:13.379
+then the sky atmosphere, and now Unreal is happy,
+
+117
+00:07:13.379 --> 00:07:16.939
+the volumetric cloud, and the high fog.
+
+118
+00:07:16.939 --> 00:07:19.699
+Now if we close the Environment Light Mixer,
+
+119
+00:07:19.699 --> 00:07:24.219
+we can see that we have a beautiful and well-lit scene,
+
+120
+00:07:24.219 --> 00:07:27.819
+and we can start building our environment in.
+
+121
+00:07:27.819 --> 00:07:33.019
+So this is a very quick and fun way to setting up realistic lighting in a scene from scratch.
+
+122
+00:07:33.019 --> 00:07:35.980
+Now let's go back to our old level by clicking on Levels,
+
+123
+00:07:35.980 --> 00:07:39.339
+and then open up the Assembly Small Map.
+
+124
+00:07:39.339 --> 00:07:42.819
+And I'm not going to save these changes.
+
+125
+00:07:42.819 --> 00:07:45.899
+Now you see this big purple cube up here?
+
+126
+00:07:45.899 --> 00:07:51.219
+If you click on it, you will see that it is a post-process volume.
+
+127
+00:07:51.219 --> 00:07:55.939
+A post-process volume allows us to define the overall look and feel of a scene
+
+128
+00:07:55.939 --> 00:08:00.180
+through some properties that we get exposed to in its settings.
+
+129
+00:08:00.180 --> 00:08:03.779
+Today, we'll just use it to review different properties we can tweak
+
+130
+00:08:03.779 --> 00:08:08.579
+to increase the quality of our illumination system using Lumen.
+
+131
+00:08:08.579 --> 00:08:12.259
+So if we type Lumen up here in the search bar,
+
+132
+00:08:12.259 --> 00:08:17.899
+we would get access to the Lumen global illumination properties of this post-process volume.
+
+133
+00:08:17.899 --> 00:08:20.259
+Okay, so I'm going to get a little bit technical here,
+
+134
+00:08:20.259 --> 00:08:23.139
+and I'm not going to dive too deep into the technicalities
+
+135
+00:08:23.139 --> 00:08:26.819
+of what each setting of this post-process volume really means.
+
+136
+00:08:26.819 --> 00:08:31.779
+But if interested, there are some courses that focus only on lighting in Unreal Engine,
+
+137
+00:08:31.779 --> 00:08:35.620
+so I'd encourage you to watch those if you're interested in learning more about this.
+
+138
+00:08:35.620 --> 00:08:39.539
+All right, so the first one we get access to is the ray lighting mode,
+
+139
+00:08:39.539 --> 00:08:44.340
+which controls how Lumen rays are lit when Lumen is using hardware ray tracing.
+
+140
+00:08:44.340 --> 00:08:48.019
+And right now, we have set it to Surface Cache.
+
+141
+00:08:48.019 --> 00:08:51.539
+Surface Cache is a memory system that stores information
+
+142
+00:08:51.539 --> 00:08:55.860
+about the surfaces in our scenes to calculate lighting quickly.
+
+143
+00:08:55.860 --> 00:09:00.579
+After that, we have the Lumen scene lighting quality, which is set to one.
+
+144
+00:09:00.579 --> 00:09:04.259
+A higher setting would help Lumen render with higher fidelity,
+
+145
+00:09:04.259 --> 00:09:06.500
+but it can cost more GPU.
+
+146
+00:09:06.500 --> 00:09:11.219
+So just so you know, any setting that you increase here is going to have a GPU cost.
+
+147
+00:09:12.179 --> 00:09:16.179
+We can tweak the Lumen scene detail if we wanted to and increase it to two.
+
+148
+00:09:16.980 --> 00:09:20.980
+And larger values here would help render smaller objects.
+
+149
+00:09:21.539 --> 00:09:24.980
+Then we have the final gather quality that was set to two,
+
+150
+00:09:24.980 --> 00:09:28.579
+so it was increased compared to the default value of one.
+
+151
+00:09:29.779 --> 00:09:33.539
+The final gather quality helps remove overall noise in the scene,
+
+152
+00:09:33.539 --> 00:09:35.539
+but again, it can be expensive.
+
+153
+00:09:36.899 --> 00:09:40.579
+Lastly, we have the scene capture cache resolution scale,
+
+154
+00:09:40.579 --> 00:09:46.259
+which is a scale factor for the Lumen surface cache resolution for scene capture.
+
+155
+00:09:46.259 --> 00:09:50.819
+Again, the higher this value, the more it's going to cost GPU-wise, so be careful.
+
+156
+00:09:51.699 --> 00:09:54.339
+Okay, we're ready to go back to our slides now.
+
+157
+00:09:55.139 --> 00:10:00.500
+Now, we've already taken a look at how to enable and disable NANIT on our assets,
+
+158
+00:10:00.500 --> 00:10:03.379
+but let's just review it one more time in the engine.
+
+159
+00:10:03.379 --> 00:10:06.980
+All right, so I'm going to be selecting my usual rock down here
+
+160
+00:10:06.980 --> 00:10:09.539
+that we have selected also in the previous video.
+
+161
+00:10:10.099 --> 00:10:12.179
+Then I'm going to clear out my filters.
+
+162
+00:10:12.179 --> 00:10:16.419
+So I want to be able to navigate to the place in the content browser
+
+163
+00:10:16.419 --> 00:10:20.099
+where this asset is stored by clicking on this little icon down here.
+
+164
+00:10:20.100 --> 00:10:26.820
+Okay, so now if I right click on this asset, like in the last video,
+
+165
+00:10:26.820 --> 00:10:32.180
+if I navigate up here, I can either enable or disable NANIT on it.
+
+166
+00:10:32.740 --> 00:10:37.860
+If I wanted to, I could also select multiple static matches like this four,
+
+167
+00:10:37.860 --> 00:10:40.740
+and then right click on all of them, and you can see down here
+
+168
+00:10:40.740 --> 00:10:44.500
+that we could disable NANIT on all four of them if we wanted to.
+
+169
+00:10:45.300 --> 00:10:47.940
+Okay, now let's double click on our boulder,
+
+170
+00:10:48.740 --> 00:10:52.180
+and then let's review one more time that if you search for NANIT,
+
+171
+00:10:52.820 --> 00:10:56.340
+up here you can also enable or disable NANIT support
+
+172
+00:10:56.340 --> 00:10:59.620
+from the static mesh editor settings directly.
+
+173
+00:10:59.620 --> 00:11:02.580
+All right, we're done with our review on NANIT,
+
+174
+00:11:02.580 --> 00:11:06.100
+and we can switch back to the slides now to conclude this video.
+
+175
+00:11:06.100 --> 00:11:07.620
+So that was it for this class.
+
+176
+00:11:07.620 --> 00:11:11.140
+Thanks to Sean Spitzer for the creation of this lesson.
+
+177
+00:11:11.140 --> 00:11:14.500
+You can find some additional documentation at this link
+
+178
+00:11:14.500 --> 00:11:17.380
+if you're interested in further expanding your knowledge
+
+179
+00:11:17.460 --> 00:11:20.019
+in Lumen Global Illumination.
+
+180
+00:11:20.019 --> 00:11:24.019
+I'd also encourage you to take a look at our courses focused on lighting
+
+181
+00:11:24.019 --> 00:11:28.500
+on our platform, because they will dive into these concepts in better detail,
+
+182
+00:11:28.500 --> 00:11:29.539
+and they're pretty cool.
+
+183
+00:11:29.539 --> 00:11:31.939
+Thanks for sticking around, and in the upcoming lesson,
+
+184
+00:11:31.939 --> 00:11:34.820
+we'll be looking to editing assets in the engine.
+
+185
+00:11:35.539 --> 00:11:39.539
+Bye!
+

@@ -541,6 +541,33 @@
         gap: 1.5rem;
       }
 
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .dashboard-header h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        background: var(--gradient-epic);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .last-updated {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .last-updated::before {
+        content: '🕐';
+      }
+
       @media (max-width: 900px) {
         .dashboard-summary {
           grid-template-columns: repeat(2, 1fr);
@@ -828,11 +855,15 @@
         >
           🛠️ Path Builder
         </button>
-      </nav>
+    </nav>
     </header>
 
     <!-- Coverage Dashboard View -->
     <div id="dashboardView" class="view-container">
+      <div class="dashboard-header">
+        <h2>📊 Coverage Dashboard</h2>
+        <div id="lastUpdated" class="last-updated"></div>
+      </div>
       <div class="dashboard-grid">
         <!-- Summary Cards -->
         <div class="dashboard-summary" id="dashboardSummary"></div>
@@ -1008,6 +1039,7 @@
         try {
           const response = await fetch("content/video_library_enriched.json");
           const data = await response.json();
+          window.libraryData = data; // Store for last_updated access
           courses = data.courses;
           taxonomy = data.taxonomy;
 
@@ -1033,6 +1065,13 @@
 
       // Render Coverage Dashboard
       function renderDashboard() {
+        // Show last updated timestamp
+        if (window.libraryData && window.libraryData.last_updated) {
+          const date = new Date(window.libraryData.last_updated);
+          document.getElementById('lastUpdated').textContent = 
+            `Last updated: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
+        }
+
         // Summary Cards
         const totalVideos = courses.reduce((sum, c) => sum + (c.video_count || 0), 0);
         const aiCount = courses.filter(c => c.has_ai_tags).length;
