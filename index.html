@@ -503,15 +503,222 @@
           position: static;
         }
       }
+
+      /* Tab Navigation */
+      .tab-btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        background: rgba(255,255,255,0.1);
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+      .tab-btn:hover {
+        background: rgba(255,255,255,0.2);
+      }
+      .tab-btn.active {
+        background: white;
+        color: #2563eb;
+      }
+
+      /* Dashboard Grid */
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        padding: 1.5rem;
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      .dashboard-summary {
+        grid-column: span 2;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+      }
+
+      .summary-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+      }
+      .summary-card .value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: var(--gradient-epic);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .summary-card .label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+      }
+
+      .coverage-section {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+      }
+      .coverage-section h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+      }
+      .coverage-section.full-width {
+        grid-column: span 2;
+      }
+
+      /* Bar Charts */
+      .chart-bar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+      }
+      .chart-bar .label {
+        width: 140px;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .chart-bar .bar-container {
+        flex: 1;
+        height: 24px;
+        background: var(--bg-tertiary);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .chart-bar .bar {
+        height: 100%;
+        background: var(--gradient-epic);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+        min-width: 30px;
+      }
+      .chart-bar .count {
+        width: 50px;
+        text-align: right;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+
+      /* Courses Table */
+      .courses-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+      }
+      .courses-table th {
+        text-align: left;
+        padding: 0.75rem;
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+      }
+      .courses-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+      }
+      .courses-table tr:hover td {
+        background: var(--bg-tertiary);
+      }
+      .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      /* Level Colors */
+      .level-beginner { color: var(--accent-green); }
+      .level-intermediate { color: var(--accent-orange); }
+      .level-advanced { color: var(--accent-red); }
     </style>
   </head>
   <body>
     <header class="header">
       <h1>🎮 UE5 Learning Path Builder</h1>
       <p>Browse 107 courses • Build custom learning paths • AI-enriched tags</p>
+      <nav
+        class="header-tabs"
+        style="
+          margin-top: 1rem;
+          display: flex;
+          gap: 0.5rem;
+          justify-content: center;
+        "
+      >
+        <button
+          class="tab-btn active"
+          data-tab="dashboard"
+          onclick="switchTab('dashboard')"
+        >
+          📊 Coverage Dashboard
+        </button>
+        <button
+          class="tab-btn"
+          data-tab="builder"
+          onclick="switchTab('builder')"
+        >
+          🛠️ Path Builder
+        </button>
+      </nav>
     </header>
 
-    <div class="container">
+    <!-- Coverage Dashboard View -->
+    <div id="dashboardView" class="view-container">
+      <div class="dashboard-grid">
+        <!-- Summary Cards -->
+        <div class="dashboard-summary" id="dashboardSummary"></div>
+
+        <!-- Topic Coverage -->
+        <div class="coverage-section">
+          <h2>📚 Content by Topic</h2>
+          <div class="coverage-chart" id="topicChart"></div>
+        </div>
+
+        <!-- Level Distribution -->
+        <div class="coverage-section">
+          <h2>📈 Level Distribution</h2>
+          <div class="coverage-chart" id="levelChart"></div>
+        </div>
+
+        <!-- Industry Coverage -->
+        <div class="coverage-section">
+          <h2>🏭 Industry Focus</h2>
+          <div class="coverage-chart" id="industryChart"></div>
+        </div>
+
+        <!-- Recent/All Courses Table -->
+        <div class="coverage-section full-width">
+          <h2>📋 All Courses Overview</h2>
+          <div class="table-container" id="coursesTable"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Path Builder View (existing) -->
+    <div id="builderView" class="view-container" style="display: none">
       <!-- Filters Sidebar -->
       <aside class="sidebar">
         <h2>🔍 Filters</h2>
@@ -593,6 +800,7 @@
         </div>
       </aside>
     </div>
+    </div> <!-- Close builderView -->
 
     <!-- Course Detail Modal -->
     <div class="modal-overlay" id="modalOverlay">
@@ -638,11 +846,132 @@
           initFilters();
           renderStats(data.statistics);
           renderCourses();
+          renderDashboard(); // Add dashboard rendering
         } catch (err) {
           console.error("Failed to load data:", err);
           document.getElementById("courseGrid").innerHTML =
             '<p style="color: var(--accent-red)">Failed to load course data. Make sure video_library_enriched.json exists.</p>';
         }
+      }
+
+      // Tab switching
+      function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tab === tab);
+        });
+        document.getElementById('dashboardView').style.display = tab === 'dashboard' ? 'block' : 'none';
+        document.getElementById('builderView').style.display = tab === 'builder' ? 'block' : 'none';
+      }
+
+      // Render Coverage Dashboard
+      function renderDashboard() {
+        // Summary Cards
+        const totalVideos = courses.reduce((sum, c) => sum + (c.video_count || 0), 0);
+        const aiCount = courses.filter(c => c.has_ai_tags).length;
+        const withVideos = courses.filter(c => c.video_count > 0).length;
+        
+        document.getElementById('dashboardSummary').innerHTML = `
+          <div class="summary-card">
+            <div class="value">${courses.length}</div>
+            <div class="label">Total Courses</div>
+          </div>
+          <div class="summary-card">
+            <div class="value">${totalVideos}</div>
+            <div class="label">Video Files</div>
+          </div>
+          <div class="summary-card">
+            <div class="value">${withVideos}</div>
+            <div class="label">Courses with Videos</div>
+          </div>
+          <div class="summary-card">
+            <div class="value">${aiCount}</div>
+            <div class="label">AI-Enriched</div>
+          </div>
+        `;
+
+        // Topic Chart
+        const topicCounts = {};
+        courses.forEach(c => {
+          const topic = c.tags.topic || 'Other';
+          topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+        });
+        const sortedTopics = Object.entries(topicCounts).sort((a, b) => b[1] - a[1]);
+        const maxTopic = Math.max(...Object.values(topicCounts));
+        
+        document.getElementById('topicChart').innerHTML = sortedTopics.map(([topic, count]) => `
+          <div class="chart-bar">
+            <div class="label" title="${topic}">${topic}</div>
+            <div class="bar-container">
+              <div class="bar" style="width: ${(count/maxTopic)*100}%">${count}</div>
+            </div>
+          </div>
+        `).join('');
+
+        // Level Chart
+        const levelCounts = { Beginner: 0, Intermediate: 0, Advanced: 0 };
+        courses.forEach(c => {
+          const level = c.tags.level;
+          if (levelCounts[level] !== undefined) levelCounts[level]++;
+        });
+        const maxLevel = Math.max(...Object.values(levelCounts));
+        const levelColors = { Beginner: '#3fb950', Intermediate: '#d29922', Advanced: '#f85149' };
+        
+        document.getElementById('levelChart').innerHTML = Object.entries(levelCounts).map(([level, count]) => `
+          <div class="chart-bar">
+            <div class="label">${level}</div>
+            <div class="bar-container">
+              <div class="bar" style="width: ${(count/maxLevel)*100}%; background: ${levelColors[level]}">${count}</div>
+            </div>
+          </div>
+        `).join('');
+
+        // Industry Chart
+        const industryCounts = {};
+        courses.forEach(c => {
+          const industry = c.tags.industry || 'General';
+          industryCounts[industry] = (industryCounts[industry] || 0) + 1;
+        });
+        const sortedIndustries = Object.entries(industryCounts).sort((a, b) => b[1] - a[1]);
+        const maxIndustry = Math.max(...Object.values(industryCounts));
+        
+        document.getElementById('industryChart').innerHTML = sortedIndustries.map(([industry, count]) => `
+          <div class="chart-bar">
+            <div class="label" title="${industry}">${industry}</div>
+            <div class="bar-container">
+              <div class="bar" style="width: ${(count/maxIndustry)*100}%">${count}</div>
+            </div>
+          </div>
+        `).join('');
+
+        // Courses Table
+        document.getElementById('coursesTable').innerHTML = `
+          <table class="courses-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Title</th>
+                <th>Level</th>
+                <th>Topic</th>
+                <th>Industry</th>
+                <th>Videos</th>
+                <th>AI</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${courses.map(c => `
+                <tr>
+                  <td>${c.code || '-'}</td>
+                  <td>${c.title}</td>
+                  <td class="level-${(c.tags.level || '').toLowerCase()}">${c.tags.level || '-'}</td>
+                  <td>${c.tags.topic || '-'}</td>
+                  <td>${c.tags.industry || '-'}</td>
+                  <td>${c.video_count || 0}</td>
+                  <td>${c.has_ai_tags ? '✓' : ''}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
       }
 
       // Initialize filter checkboxes
