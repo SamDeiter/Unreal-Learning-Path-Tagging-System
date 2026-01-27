@@ -205,7 +205,19 @@ Return JSON:
       "takeaway": "Key insight they should remember",
       "content": [
         {"type": "docs", "title": "Epic Docs: [concept]", "url": "https://dev.epicgames.com/...", "description": "Why this matters"},
-        {"type": "video", "title": "Focused Clip Title", "url": "https://youtube.com/watch?v=VIDEO_ID&t=330", "thumbnail_url": "https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg", "description": "(5 min) Watch from 5:30 - covers the exact concept", "duration": "5 min", "timestamp_start": "5:30"}
+        {
+          "type": "video",
+          "title": "Focused Clip Title",
+          "url": "https://youtube.com/watch?v=VIDEO_ID&t=330",
+          "thumbnail_url": "https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg",
+          "description": "(5 min) Covers project packaging essentials",
+          "duration": "5 min",
+          "watch_points": [
+            {"time": "0:30", "label": "Asset Preparation", "keywords": ["content browser", "references"]},
+            {"time": "2:15", "label": "Project Settings", "keywords": ["build configuration", "target platform"]},
+            {"time": "4:00", "label": "Packaging Steps", "keywords": ["cook", "package", "output"]}
+          ]
+        }
       ]
     },
     {

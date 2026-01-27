@@ -58,6 +58,31 @@ function playVideoFromCard(card) {
   playVideo(url, desc);
 }
 
+// Play video at specific timestamp (from watch points)
+function playVideoAtTime(url, timeStr) {
+  // Parse time string like "2:15" or "1:30:45" to seconds
+  const parts = timeStr.split(":").map((p) => parseInt(p, 10));
+  let seconds = 0;
+  if (parts.length === 3) {
+    seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+  } else if (parts.length === 2) {
+    seconds = parts[0] * 60 + parts[1];
+  } else {
+    seconds = parts[0] || 0;
+  }
+
+  const videoId = getYouTubeId(url);
+  if (!videoId) {
+    window.open(url, "_blank");
+    return;
+  }
+
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${seconds}`;
+  document.getElementById("videoFrame").src = embedUrl;
+  document.getElementById("videoModal").classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
 // Close video modal
 function closeVideo(event) {
   if (event && event.target !== event.currentTarget) return;

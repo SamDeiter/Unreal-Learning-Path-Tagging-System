@@ -100,6 +100,16 @@ function parseMarkdown(text) {
     .replace(/⏱️/g, "<br>⏱️"); // line break before timestamp
 }
 
+// Toggle watch point checkbox with visual feedback
+function toggleWatchPoint(checkbox) {
+  const li = checkbox.closest(".watch-point");
+  if (checkbox.checked) {
+    li.classList.add("watched");
+  } else {
+    li.classList.remove("watched");
+  }
+}
+
 // Format action text with interactive checklists
 function formatActionText(text) {
   if (!text) return "";
@@ -441,6 +451,30 @@ function renderPath(path) {
                                   <div class="content-type">${c.type}</div>
                                   <div class="content-title">${c.title}</div>
                                   ${c.description ? `<p class="content-description">${parseMarkdown(c.description)}</p>` : ""}
+                                  ${
+                                    c.watch_points && c.watch_points.length > 0
+                                      ? `
+                                  <div class="watch-points">
+                                      <div class="watch-points-label">📍 Key Sections to Watch:</div>
+                                      <ul class="watch-points-list">
+                                          ${c.watch_points
+                                            .map(
+                                              (wp, idx) => `
+                                              <li class="watch-point">
+                                                  <label class="wp-checkbox-label">
+                                                      <input type="checkbox" class="wp-checkbox" onchange="toggleWatchPoint(this)">
+                                                      <span class="wp-time" onclick="playVideoAtTime('${c.url}', '${wp.time}')">${wp.time}</span>
+                                                      <span class="wp-label">${wp.label}</span>
+                                                  </label>
+                                                  ${wp.keywords ? `<span class="wp-keywords">${wp.keywords.join(", ")}</span>` : ""}
+                                              </li>
+                                          `,
+                                            )
+                                            .join("")}
+                                      </ul>
+                                  </div>`
+                                      : ""
+                                  }
                                   <div class="content-actions">
                                       ${c.type.toLowerCase() === "video" ? `<button class="watch-btn" onclick="playVideoFromCard(this.closest('.content-item'))">▶ Watch</button>` : ""}
                                       <a href="${c.url}" target="_blank" class="content-link">Open Resource ↗</a>
