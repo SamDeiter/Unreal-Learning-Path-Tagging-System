@@ -74,7 +74,13 @@ CRITICAL RULES:
 - Step 4 MUST include prevention strategies and best practices
 - EVERY step includes official Epic documentation FIRST, then supplementary videos
 - Use dev.epicgames.com/documentation URLs
-- Be specific to their ACTUAL problem, not generic advice`;
+- Be specific to their ACTUAL problem, not generic advice
+
+VIDEO RULES (IMPORTANT):
+- PREFER videos under 15 minutes - shorter is better for focused learning
+- If a video is over 15 minutes, include a "When to watch" field with timestamp range (e.g., "Watch 5:30-12:00 for the relevant section")
+- Include the video duration estimate in the description
+- Avoid hour-long tutorial marathons - find the focused clip that solves THIS problem`;
 
       const userPrompt = `Create an EDUCATIONAL learning path for: "${query}"
 
@@ -105,7 +111,7 @@ Return JSON:
       "takeaway": "Key insight they should remember",
       "content": [
         {"type": "docs", "title": "Epic Docs: [concept]", "url": "https://dev.epicgames.com/...", "description": "Why this matters"},
-        {"type": "video", "title": "Visual explanation", "url": "https://youtube.com/...", "description": "Supplementary"}
+        {"type": "video", "title": "Focused Clip Title", "url": "https://youtube.com/watch?v=VIDEO_ID&t=330", "description": "(5 min) Watch from 5:30 - covers the exact concept", "duration": "5 min", "timestamp_start": "5:30"}
       ]
     },
     {
