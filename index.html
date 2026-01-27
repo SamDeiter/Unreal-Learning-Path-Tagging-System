@@ -524,70 +524,108 @@
         color: #2563eb;
       }
 
-      /* Dashboard Grid */
+      /* Dashboard Grid - Improved Layout */
       .dashboard-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        padding: 1.5rem;
-        max-width: 1600px;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 2rem;
+        max-width: 1400px;
         margin: 0 auto;
       }
 
       .dashboard-summary {
-        grid-column: span 2;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+      }
+
+      @media (max-width: 900px) {
+        .dashboard-summary {
+          grid-template-columns: repeat(2, 1fr);
+        }
       }
 
       .summary-card {
-        background: var(--bg-secondary);
+        background: linear-gradient(145deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1.5rem;
+        border-radius: 16px;
+        padding: 2rem 1.5rem;
         text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.3);
       }
       .summary-card .value {
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 3.5rem;
+        font-weight: 800;
         background: var(--gradient-epic);
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
+        line-height: 1;
+        margin-bottom: 0.5rem;
       }
       .summary-card .label {
         color: var(--text-secondary);
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Coverage Sections - Two Column Layout */
+      .coverage-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+      }
+      @media (max-width: 900px) {
+        .coverage-row {
+          grid-template-columns: 1fr;
+        }
       }
 
       .coverage-section {
         background: var(--bg-secondary);
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1.5rem;
+        border-radius: 16px;
+        padding: 2rem;
       }
       .coverage-section h2 {
-        font-size: 1rem;
+        font-size: 1.25rem;
         font-weight: 600;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
         color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .coverage-section h2::before {
+        content: '';
+        width: 4px;
+        height: 1.25rem;
+        background: var(--gradient-epic);
+        border-radius: 2px;
       }
       .coverage-section.full-width {
         grid-column: span 2;
       }
 
-      /* Bar Charts */
+      /* Bar Charts - Improved */
       .chart-bar {
         display: flex;
         align-items: center;
         gap: 1rem;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem 0;
       }
       .chart-bar .label {
-        width: 140px;
-        font-size: 0.875rem;
+        width: 160px;
+        font-size: 0.9375rem;
+        font-weight: 500;
         color: var(--text-primary);
         white-space: nowrap;
         overflow: hidden;
@@ -595,64 +633,106 @@
       }
       .chart-bar .bar-container {
         flex: 1;
-        height: 24px;
+        height: 32px;
         background: var(--bg-tertiary);
-        border-radius: 4px;
+        border-radius: 8px;
         overflow: hidden;
+        position: relative;
       }
       .chart-bar .bar {
         height: 100%;
         background: var(--gradient-epic);
-        border-radius: 4px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        padding-right: 0.5rem;
-        font-size: 0.75rem;
-        font-weight: 600;
+        padding-right: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 700;
         color: white;
-        min-width: 30px;
+        min-width: 40px;
+        transition: width 0.5s ease;
       }
       .chart-bar .count {
         width: 50px;
         text-align: right;
-        font-size: 0.875rem;
+        font-size: 1rem;
+        font-weight: 600;
         color: var(--text-secondary);
       }
 
-      /* Courses Table */
+      /* Courses Table - Better Readability */
       .courses-table {
         width: 100%;
-        border-collapse: collapse;
-        font-size: 0.875rem;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.9375rem;
       }
       .courses-table th {
         text-align: left;
-        padding: 0.75rem;
+        padding: 1rem;
         background: var(--bg-tertiary);
         color: var(--text-secondary);
-        font-weight: 500;
+        font-weight: 600;
         text-transform: uppercase;
         font-size: 0.75rem;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .courses-table th:first-child {
+        border-radius: 8px 0 0 0;
+      }
+      .courses-table th:last-child {
+        border-radius: 0 8px 0 0;
       }
       .courses-table td {
-        padding: 0.75rem;
+        padding: 1rem;
         border-bottom: 1px solid var(--border-color);
         color: var(--text-primary);
+        vertical-align: middle;
       }
       .courses-table tr:hover td {
-        background: var(--bg-tertiary);
+        background: rgba(88, 166, 255, 0.05);
+      }
+      .courses-table tbody tr:last-child td {
+        border-bottom: none;
       }
       .table-container {
-        max-height: 400px;
+        max-height: 500px;
         overflow-y: auto;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
       }
 
-      /* Level Colors */
-      .level-beginner { color: var(--accent-green); }
-      .level-intermediate { color: var(--accent-orange); }
-      .level-advanced { color: var(--accent-red); }
+      /* Level Colors - Pill Style */
+      .level-pill {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      .level-beginner { 
+        background: rgba(63, 185, 80, 0.15);
+        color: var(--accent-green); 
+      }
+      .level-intermediate { 
+        background: rgba(210, 153, 34, 0.15);
+        color: var(--accent-orange); 
+      }
+      .level-advanced { 
+        background: rgba(248, 81, 73, 0.15);
+        color: var(--accent-red); 
+      }
+
+      /* AI Badge in Table */
+      .ai-check {
+        color: var(--accent-green);
+        font-size: 1.25rem;
+      }
     </style>
   </head>
   <body>
@@ -691,27 +771,38 @@
         <!-- Summary Cards -->
         <div class="dashboard-summary" id="dashboardSummary"></div>
 
-        <!-- Topic Coverage -->
-        <div class="coverage-section">
-          <h2>📚 Content by Topic</h2>
-          <div class="coverage-chart" id="topicChart"></div>
+        <!-- Charts Row -->
+        <div class="coverage-row">
+          <!-- Topic Coverage -->
+          <div class="coverage-section">
+            <h2>Content by Topic</h2>
+            <div class="coverage-chart" id="topicChart"></div>
+          </div>
+
+          <!-- Level Distribution -->
+          <div class="coverage-section">
+            <h2>Level Distribution</h2>
+            <div class="coverage-chart" id="levelChart"></div>
+          </div>
         </div>
 
-        <!-- Level Distribution -->
-        <div class="coverage-section">
-          <h2>📈 Level Distribution</h2>
-          <div class="coverage-chart" id="levelChart"></div>
+        <!-- Industry Row -->
+        <div class="coverage-row">
+          <div class="coverage-section">
+            <h2>Industry Focus</h2>
+            <div class="coverage-chart" id="industryChart"></div>
+          </div>
+
+          <!-- Video Coverage -->
+          <div class="coverage-section">
+            <h2>Video Coverage</h2>
+            <div class="coverage-chart" id="videoChart"></div>
+          </div>
         </div>
 
-        <!-- Industry Coverage -->
+        <!-- Courses Table -->
         <div class="coverage-section">
-          <h2>🏭 Industry Focus</h2>
-          <div class="coverage-chart" id="industryChart"></div>
-        </div>
-
-        <!-- Recent/All Courses Table -->
-        <div class="coverage-section full-width">
-          <h2>📋 All Courses Overview</h2>
+          <h2>All Courses</h2>
           <div class="table-container" id="coursesTable"></div>
         </div>
       </div>
@@ -943,7 +1034,31 @@
           </div>
         `).join('');
 
-        // Courses Table
+        // Video Coverage Chart
+        const videoCoverage = {
+          'Has Videos': withVideos,
+          'No Videos': courses.length - withVideos,
+          'AI Analyzed': aiCount,
+          'Needs Analysis': courses.length - aiCount
+        };
+        const maxVideo = Math.max(...Object.values(videoCoverage));
+        const videoColors = {
+          'Has Videos': '#3fb950',
+          'No Videos': 'rgba(139, 148, 158, 0.5)',
+          'AI Analyzed': '#58a6ff',
+          'Needs Analysis': 'rgba(139, 148, 158, 0.5)'
+        };
+        
+        document.getElementById('videoChart').innerHTML = Object.entries(videoCoverage).map(([label, count]) => `
+          <div class="chart-bar">
+            <div class="label">${label}</div>
+            <div class="bar-container">
+              <div class="bar" style="width: ${(count/maxVideo)*100}%; background: ${videoColors[label]}">${count}</div>
+            </div>
+          </div>
+        `).join('');
+
+        // Courses Table with pill styling
         document.getElementById('coursesTable').innerHTML = `
           <table class="courses-table">
             <thead>
@@ -953,20 +1068,20 @@
                 <th>Level</th>
                 <th>Topic</th>
                 <th>Industry</th>
-                <th>Videos</th>
-                <th>AI</th>
+                <th style="text-align:center">Videos</th>
+                <th style="text-align:center">AI</th>
               </tr>
             </thead>
             <tbody>
               ${courses.map(c => `
                 <tr>
-                  <td>${c.code || '-'}</td>
+                  <td><strong>${c.code || '-'}</strong></td>
                   <td>${c.title}</td>
-                  <td class="level-${(c.tags.level || '').toLowerCase()}">${c.tags.level || '-'}</td>
+                  <td><span class="level-pill level-${(c.tags.level || '').toLowerCase()}">${c.tags.level || '-'}</span></td>
                   <td>${c.tags.topic || '-'}</td>
                   <td>${c.tags.industry || '-'}</td>
-                  <td>${c.video_count || 0}</td>
-                  <td>${c.has_ai_tags ? '✓' : ''}</td>
+                  <td style="text-align:center"><strong>${c.video_count || 0}</strong></td>
+                  <td style="text-align:center">${c.has_ai_tags ? '<span class="ai-check">✓</span>' : '<span style="color:#6e7681">—</span>'}</td>
                 </tr>
               `).join('')}
             </tbody>
