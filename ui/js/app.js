@@ -678,7 +678,34 @@ function generatePath() {
 }
 
 function tryApiCall(query) {
-  // Cache miss - try API (works only with local server)
+  // Try Cloud Function first (works in production)
+  if (typeof firebase !== "undefined" && firebase.functions) {
+    const generateLearningPath = firebase
+      .functions()
+      .httpsCallable("generateLearningPath");
+
+    generateLearningPath({ query: query })
+      .then((result) => {
+        document.getElementById("loading").classList.remove("active");
+        if (result.data.success && result.data.path) {
+          currentPath = result.data.path;
+          renderPath(currentPath);
+          logQuery(query, currentPath.steps && currentPath.steps.length > 0);
+        } else {
+          throw new Error("No path in response");
+        }
+      })
+      .catch((error) => {
+        console.log("Cloud Function failed, trying local API:", error.message);
+        tryLocalApi(query);
+      });
+  } else {
+    tryLocalApi(query);
+  }
+}
+
+function tryLocalApi(query) {
+  // Fallback to local Python server (for development)
   fetch(`/api/generate?q=${encodeURIComponent(query)}`)
     .then((response) => {
       if (!response.ok) throw new Error("API error");
