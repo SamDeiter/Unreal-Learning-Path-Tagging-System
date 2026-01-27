@@ -20,6 +20,21 @@ A schema-driven system to **analyze user queries** about Unreal Engine, **tag th
 
 ---
 
+## 🛠️ Tech Stack
+
+> **Important**: This is a **JavaScript/Node.js** project. Do not add Python scripts.
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | Vanilla JS, HTML, CSS |
+| **Backend** | Firebase Cloud Functions (Node.js) |
+| **Database** | Firebase Firestore |
+| **AI** | Google Gemini API |
+| **Hosting** | Firebase Hosting |
+| **Scripts** | Node.js (not Python)
+
+---
+
 ## 📁 Project Structure
 
 ```

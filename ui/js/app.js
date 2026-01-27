@@ -474,6 +474,7 @@ function renderPath(path) {
     .join("");
 
   document.getElementById("pathSection").classList.add("active");
+  renderStepTree(steps); // Populate sidebar step tree
   updateProgress();
 }
 
@@ -511,9 +512,62 @@ function updateProgress() {
   const completed = completedSteps.size;
   const percent = (completed / total) * 100;
 
-  document.getElementById("progressText").textContent =
-    `Progress: ${completed}/${total} steps`;
-  document.getElementById("progressFill").style.width = percent + "%";
+  // Update progress bar and text (both desktop sidebar and mobile)
+  const progressFill = document.getElementById("progressFill");
+  const progressFillMobile = document.getElementById("progressFillMobile");
+  const progressCount = document.getElementById("progressCount");
+  const progressTextMobile = document.getElementById("progressTextMobile");
+
+  if (progressFill) progressFill.style.width = percent + "%";
+  if (progressFillMobile) progressFillMobile.style.width = percent + "%";
+  if (progressCount) progressCount.textContent = `${completed}/${total}`;
+  if (progressTextMobile)
+    progressTextMobile.textContent = `Progress: ${completed}/${total} steps`;
+
+  // Update step tree items
+  currentPath.steps.forEach((step) => {
+    const treeItem = document.getElementById(`tree-step-${step.number}`);
+    if (treeItem) {
+      treeItem.classList.toggle("completed", completedSteps.has(step.number));
+      const indicator = treeItem.querySelector(".tree-indicator");
+      if (indicator && completedSteps.has(step.number)) {
+        indicator.textContent = "✓";
+      }
+    }
+  });
+}
+
+// Render the step tree in the sidebar
+function renderStepTree(steps) {
+  const tree = document.getElementById("stepTree");
+  if (!tree) return;
+
+  tree.innerHTML = steps
+    .map(
+      (step) => `
+      <div class="step-tree-item" id="tree-step-${step.number}" onclick="jumpToStep(${step.number})">
+        <span class="tree-indicator">${step.number}</span>
+        <span class="tree-label">${step.title}</span>
+      </div>
+    `,
+    )
+    .join("");
+}
+
+// Jump to a specific step
+function jumpToStep(num) {
+  const card = document.getElementById(`step-${num}`);
+  if (card) {
+    card.classList.add("expanded");
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    // Highlight active in tree
+    document.querySelectorAll(".step-tree-item").forEach((item) => {
+      item.classList.remove("active");
+    });
+    const treeItem = document.getElementById(`tree-step-${num}`);
+    if (treeItem) treeItem.classList.add("active");
+  }
 }
 
 function sharePath() {
