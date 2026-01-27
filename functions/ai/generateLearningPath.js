@@ -63,18 +63,23 @@ exports.generateLearningPath = functions
 
       // 5. Build the prompt for learning path generation
       const systemPrompt = `You are an expert UE5 (Unreal Engine 5) learning path curator. 
-You help developers solve problems by creating structured learning paths from YouTube videos and official documentation.
+You help developers solve problems by creating structured learning paths from BOTH official documentation AND YouTube videos.
 
-RULES:
+CRITICAL RULES:
 - Create 4 steps: foundations, diagnostics, resolution, prevention
-- Each step should have 1-3 relevant YouTube videos with REAL video IDs
+- EVERY step MUST include at least 1 official Epic documentation link
+- Official docs are PRIMARY, videos are supplementary
+- Use dev.epicgames.com/documentation URLs for official docs
+- For videos: use REAL YouTube video IDs from known UE5 channels
 - Include timestamps when you know specific sections are relevant
-- Be practical and action-oriented
-- Estimate realistic watch times`;
+- Be practical and action-oriented`;
 
       const userPrompt = `Create a learning path for this UE5 problem: "${query}"
 
 ${tags.length > 0 ? `Related tags: ${tags.join(", ")}` : ""}
+
+IMPORTANT: Include BOTH official Epic documentation AND YouTube videos in each step.
+Official Epic docs should be listed FIRST in each step's content array.
 
 Return a JSON object with this structure:
 {
@@ -93,17 +98,23 @@ Return a JSON object with this structure:
       "action": "What the user should do",
       "content": [
         {
+          "type": "docs",
+          "title": "Official Epic Docs: [topic]",
+          "url": "https://dev.epicgames.com/documentation/...",
+          "description": "Why this documentation helps"
+        },
+        {
           "type": "video",
           "title": "Video title",
           "url": "https://youtube.com/watch?v=REAL_ID",
-          "description": "Why this helps. Start at X:XX for specific section."
+          "description": "Supplementary tutorial. Start at X:XX for specific section."
         }
       ]
     }
   ]
 }
 
-Use REAL YouTube video IDs that you know exist for UE5 topics. Search for actual tutorials.`;
+Use REAL documentation URLs from dev.epicgames.com and real YouTube video IDs.`;
 
       // 6. Call Gemini API
       const model = "gemini-2.0-flash";
