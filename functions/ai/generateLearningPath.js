@@ -62,59 +62,79 @@ exports.generateLearningPath = functions
       }
 
       // 5. Build the prompt for learning path generation
-      const systemPrompt = `You are an expert UE5 (Unreal Engine 5) learning path curator. 
-You help developers solve problems by creating structured learning paths from BOTH official documentation AND YouTube videos.
+      const systemPrompt = `You are an expert UE5 educator creating DIAGNOSTIC learning paths.
+Your goal is NOT just to fix symptoms, but to teach developers:
+1. WHY this problem occurs (root cause understanding)
+2. HOW to fix it (practical resolution)
+3. HOW TO PREVENT it in the future (best practices)
 
 CRITICAL RULES:
-- Create 4 steps: foundations, diagnostics, resolution, prevention
-- EVERY step MUST include at least 1 official Epic documentation link
-- Official docs are PRIMARY, videos are supplementary
-- Use dev.epicgames.com/documentation URLs for official docs
-- For videos: use REAL YouTube video IDs from known UE5 channels
-- Include timestamps when you know specific sections are relevant
-- Be practical and action-oriented`;
+- Create 4 steps: understand (why it happens), diagnose (identify the cause), resolve (fix it), prevent (best practices)
+- Step 1 MUST explain the underlying concept - users should understand WHY the error exists
+- Step 4 MUST include prevention strategies and best practices
+- EVERY step includes official Epic documentation FIRST, then supplementary videos
+- Use dev.epicgames.com/documentation URLs
+- Be specific to their ACTUAL problem, not generic advice`;
 
-      const userPrompt = `Create a learning path for this UE5 problem: "${query}"
+      const userPrompt = `Create an EDUCATIONAL learning path for: "${query}"
 
-${tags.length > 0 ? `Related tags: ${tags.join(", ")}` : ""}
+${tags.length > 0 ? `Context tags: ${tags.join(", ")}` : ""}
 
-IMPORTANT: Include BOTH official Epic documentation AND YouTube videos in each step.
-Official Epic docs should be listed FIRST in each step's content array.
+This developer has a specific problem. Your learning path should:
+1. UNDERSTAND: Explain the underlying UE5 concept and WHY this error/issue occurs
+2. DIAGNOSE: Help them identify the specific cause in THEIR project
+3. RESOLVE: Step-by-step fix with practical actions
+4. PREVENT: Best practices so this NEVER happens again
 
-Return a JSON object with this structure:
+Return JSON:
 {
-  "title": "Learning Path: [problem description]",
-  "ai_summary": "1-2 sentence explanation of the problem",
-  "ai_what_you_learn": ["skill 1", "skill 2", "skill 3"],
+  "title": "Learning Path: [problem]",
+  "ai_summary": "WHY this happens in plain language",
+  "ai_root_cause": "The fundamental reason this occurs",
+  "ai_what_you_learn": ["concept 1", "skill 2", "prevention technique"],
   "ai_estimated_time": "X-Y minutes",
   "ai_difficulty": "Beginner/Intermediate/Advanced",
-  "ai_hint": "A quick tip to get started",
+  "ai_hint": "Quick prevention tip they can apply immediately",
   "steps": [
     {
       "number": 1,
-      "type": "foundations",
-      "title": "Step title",
-      "description": "What this step covers",
-      "action": "What the user should do",
+      "type": "understand",
+      "title": "Why This Happens",
+      "description": "The underlying concept",
+      "action": "Read and understand the concept",
+      "takeaway": "Key insight they should remember",
       "content": [
-        {
-          "type": "docs",
-          "title": "Official Epic Docs: [topic]",
-          "url": "https://dev.epicgames.com/documentation/...",
-          "description": "Why this documentation helps"
-        },
-        {
-          "type": "video",
-          "title": "Video title",
-          "url": "https://youtube.com/watch?v=REAL_ID",
-          "description": "Supplementary tutorial. Start at X:XX for specific section."
-        }
+        {"type": "docs", "title": "Epic Docs: [concept]", "url": "https://dev.epicgames.com/...", "description": "Why this matters"},
+        {"type": "video", "title": "Visual explanation", "url": "https://youtube.com/...", "description": "Supplementary"}
       ]
+    },
+    {
+      "number": 2,
+      "type": "diagnose",
+      "title": "Find the Cause",
+      "description": "How to identify the specific issue",
+      "action": "Steps to debug",
+      "takeaway": "How to diagnose this in future"
+    },
+    {
+      "number": 3,
+      "type": "resolve",
+      "title": "Fix It",
+      "description": "Practical solution",
+      "action": "Exact steps to fix"
+    },
+    {
+      "number": 4,
+      "type": "prevent",
+      "title": "Prevent Future Issues",
+      "description": "Best practices",
+      "action": "Habits to adopt",
+      "takeaway": "How to never have this problem again"
     }
   ]
 }
 
-Use REAL documentation URLs from dev.epicgames.com and real YouTube video IDs.`;
+Use REAL Epic documentation URLs and real YouTube video IDs.`;
 
       // 6. Call Gemini API
       const model = "gemini-2.0-flash";
