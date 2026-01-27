@@ -102,14 +102,18 @@ function tryLocalApi(query) {
 function logQuery(query, success) {
   if (typeof firebase !== "undefined" && firebase.firestore) {
     try {
+      // Use serverTimestamp() - required by security rules
       firebase
         .firestore()
         .collection("query_logs")
         .add({
           query: query.substring(0, 200),
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          // Limit to 5 fields max per security rules
           success: success,
-          timestamp: new Date(),
-          userAgent: navigator.userAgent.substring(0, 100),
+        })
+        .catch(() => {
+          // Silent fail - analytics are optional
         });
     } catch (e) {
       // Silent fail - analytics are optional

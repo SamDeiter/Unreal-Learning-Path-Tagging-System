@@ -3,6 +3,7 @@
 // =====================================================
 // PROBLEM BASKET - Ingredient Management
 // =====================================================
+const MAX_INGREDIENTS = 5; // Limit for focused queries
 const ingredients = [];
 let currentPanel = null;
 let currentScreenshot = null;
@@ -91,6 +92,10 @@ function addScreenshotIngredient() {
 
 // Core ingredient management
 function addIngredient(type, label, icon, data = null) {
+  // Enforce max limit
+  if (ingredients.length >= MAX_INGREDIENTS) {
+    return; // Silently refuse - UI disables inputs
+  }
   const id = Date.now() + Math.random();
   ingredients.push({ id, type, label, icon, data });
   renderBasket();
@@ -112,12 +117,25 @@ function renderBasket() {
   const empty = document.getElementById("basketEmpty");
   const chips = document.getElementById("ingredientChips");
   const btn = document.getElementById("generateBtn");
+  const atLimit = ingredients.length >= MAX_INGREDIENTS;
+
+  // Disable add buttons when at limit
+  document.querySelectorAll(".input-method-btn").forEach((b) => {
+    b.style.opacity = atLimit ? "0.5" : "1";
+    b.style.pointerEvents = atLimit ? "none" : "auto";
+  });
+
   if (ingredients.length === 0) {
     empty.style.display = "block";
+    empty.textContent = "Add up to 5 ingredients to describe your problem";
     chips.innerHTML = "";
     btn.disabled = true;
   } else {
-    empty.style.display = "none";
+    empty.style.display = atLimit ? "block" : "none";
+    if (atLimit) {
+      empty.textContent = `✓ Max ${MAX_INGREDIENTS} ingredients reached`;
+      empty.style.color = "var(--success)";
+    }
     chips.innerHTML = ingredients
       .map(
         (ing) =>
