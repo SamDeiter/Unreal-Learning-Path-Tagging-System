@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UE5 Learning Path Builder</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-primary: #0d1117;
+        --bg-secondary: #161b22;
+        --bg-tertiary: #21262d;
+        --border-color: #30363d;
+        --text-primary: #f0f6fc;
+        --text-secondary: #8b949e;
+        --accent-blue: #58a6ff;
+        --accent-purple: #a371f7;
+        --accent-green: #3fb950;
+        --accent-orange: #d29922;
+        --accent-red: #f85149;
+        --gradient-epic: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+      }
+
+      /* Header */
+      .header {
+        background: var(--gradient-epic);
+        padding: 2rem;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .header p {
+        opacity: 0.9;
+        font-size: 1rem;
+      }
+
+      /* Main Layout */
+      .container {
+        display: grid;
+        grid-template-columns: 280px 1fr 320px;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        max-width: 1800px;
+        margin: 0 auto;
+      }
+
+      /* Sidebar - Filters */
+      .sidebar {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        height: fit-content;
+        position: sticky;
+        top: 120px;
+      }
+
+      .sidebar h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--accent-blue);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .filter-section {
+        margin-bottom: 1.5rem;
+      }
+
+      .filter-section h3 {
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .filter-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .filter-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background 0.2s;
+      }
+
+      .filter-option:hover {
+        background: var(--bg-tertiary);
+      }
+
+      .filter-option input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent-blue);
+      }
+
+      .filter-option label {
+        cursor: pointer;
+        font-size: 0.875rem;
+      }
+
+      .filter-count {
+        margin-left: auto;
+        background: var(--bg-tertiary);
+        padding: 0.125rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      /* Search Box */
+      .search-box {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .search-box:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+      }
+
+      /* Main Content - Course Grid */
+      .main-content {
+        min-height: 100vh;
+      }
+
+      .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .results-count {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      .course-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+      }
+
+      /* Course Card */
+      .course-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.25rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .course-card:hover {
+        border-color: var(--accent-blue);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(88, 166, 255, 0.15);
+      }
+
+      .course-card.selected {
+        border-color: var(--accent-green);
+        background: rgba(63, 185, 80, 0.1);
+      }
+
+      .course-code {
+        font-family: monospace;
+        font-size: 0.75rem;
+        color: var(--accent-purple);
+        margin-bottom: 0.5rem;
+      }
+
+      .course-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+      }
+
+      .course-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .tag {
+        font-size: 0.6875rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+
+      .tag-level {
+        background: rgba(88, 166, 255, 0.2);
+        color: var(--accent-blue);
+      }
+
+      .tag-topic {
+        background: rgba(163, 113, 247, 0.2);
+        color: var(--accent-purple);
+      }
+
+      .tag-industry {
+        background: rgba(210, 153, 34, 0.2);
+        color: var(--accent-orange);
+      }
+
+      .tag-ai {
+        background: rgba(63, 185, 80, 0.2);
+        color: var(--accent-green);
+      }
+
+      .course-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      .ai-badge {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: var(--gradient-epic);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.625rem;
+        font-weight: 600;
+      }
+
+      /* Learning Path Panel */
+      .path-panel {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        height: fit-content;
+        position: sticky;
+        top: 120px;
+      }
+
+      .path-panel h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--accent-green);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .path-empty {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      .path-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .path-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        font-size: 0.875rem;
+      }
+
+      .path-number {
+        width: 24px;
+        height: 24px;
+        background: var(--gradient-epic);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      .path-item-title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .path-item-remove {
+        background: none;
+        border: none;
+        color: var(--accent-red);
+        cursor: pointer;
+        font-size: 1.25rem;
+        padding: 0;
+        line-height: 1;
+      }
+
+      .path-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .btn {
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background: var(--gradient-epic);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+
+      .btn-secondary {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+      }
+
+      .btn-secondary:hover {
+        border-color: var(--accent-blue);
+      }
+
+      /* Course Detail Modal */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal {
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 700px;
+        max-height: 80vh;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+      }
+
+      .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+      }
+
+      .modal-section {
+        margin-bottom: 1.5rem;
+      }
+
+      .modal-section h4 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+      }
+
+      .modal-section ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+      }
+
+      .modal-section li {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        background: var(--bg-tertiary);
+        border-radius: 6px;
+      }
+
+      .modal-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 0.75rem;
+      }
+
+      /* Stats Bar */
+      .stats-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .stat {
+        background: var(--bg-secondary);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent-blue);
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      /* Responsive */
+      @media (max-width: 1200px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+        .sidebar,
+        .path-panel {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <h1>🎮 UE5 Learning Path Builder</h1>
+      <p>Browse 107 courses • Build custom learning paths • AI-enriched tags</p>
+    </header>
+
+    <div class="container">
+      <!-- Filters Sidebar -->
+      <aside class="sidebar">
+        <h2>🔍 Filters</h2>
+
+        <input
+          type="text"
+          class="search-box"
+          id="searchInput"
+          placeholder="Search courses..."
+        />
+
+        <div class="filter-section">
+          <h3>Level</h3>
+          <div class="filter-options" id="levelFilters"></div>
+        </div>
+
+        <div class="filter-section">
+          <h3>Topic</h3>
+          <div class="filter-options" id="topicFilters"></div>
+        </div>
+
+        <div class="filter-section">
+          <h3>Industry</h3>
+          <div class="filter-options" id="industryFilters"></div>
+        </div>
+
+        <div class="filter-section">
+          <h3>AI Analysis</h3>
+          <div class="filter-options">
+            <label class="filter-option">
+              <input type="checkbox" id="aiOnlyFilter" />
+              <label for="aiOnlyFilter">AI-enriched only</label>
+            </label>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="stats-bar" id="statsBar"></div>
+        <div class="results-header">
+          <span class="results-count" id="resultsCount">Loading...</span>
+        </div>
+        <div class="course-grid" id="courseGrid"></div>
+      </main>
+
+      <!-- Learning Path Panel -->
+      <aside class="path-panel">
+        <h2>📚 Learning Path</h2>
+        <div class="path-list" id="pathList">
+          <div class="path-empty">
+            Click courses to add them to your learning path
+          </div>
+        </div>
+        <div
+          class="path-stats"
+          id="pathStats"
+          style="
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+          "
+        ></div>
+        <div class="path-actions">
+          <button class="btn btn-primary" id="exportVideos">
+            📹 Export Videos
+          </button>
+          <button
+            class="btn btn-primary"
+            id="exportPath"
+            style="
+              background: var(--bg-tertiary);
+              border: 1px solid var(--border-color);
+            "
+          >
+            Export Path JSON
+          </button>
+          <button class="btn btn-secondary" id="clearPath">Clear All</button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Course Detail Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <div class="course-code" id="modalCode"></div>
+            <h3 id="modalTitle"></h3>
+          </div>
+          <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="modalAddBtn">Add to Path</button>
+          <button class="btn btn-secondary" onclick="closeModal()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let courses = [];
+      let taxonomy = {};
+      let selectedPath = [];
+      let filters = {
+        search: "",
+        levels: [],
+        topics: [],
+        industries: [],
+        aiOnly: false,
+      };
+
+      // Load data
+      async function loadData() {
+        try {
+          const response = await fetch("content/video_library_enriched.json");
+          const data = await response.json();
+          courses = data.courses;
+          taxonomy = data.taxonomy;
+
+          initFilters();
+          renderStats(data.statistics);
+          renderCourses();
+        } catch (err) {
+          console.error("Failed to load data:", err);
+          document.getElementById("courseGrid").innerHTML =
+            '<p style="color: var(--accent-red)">Failed to load course data. Make sure video_library_enriched.json exists.</p>';
+        }
+      }
+
+      // Initialize filter checkboxes
+      function initFilters() {
+        // Level filters
+        const levelCounts = {};
+        courses.forEach((c) => {
+          const level = c.tags.level || "Unknown";
+          levelCounts[level] = (levelCounts[level] || 0) + 1;
+        });
+
+        const levelContainer = document.getElementById("levelFilters");
+        ["Beginner", "Intermediate", "Advanced"].forEach((level) => {
+          const count = levelCounts[level] || 0;
+          levelContainer.innerHTML += `
+          <label class="filter-option">
+            <input type="checkbox" value="${level}" onchange="updateFilter('levels', this)">
+            <label>${level}</label>
+            <span class="filter-count">${count}</span>
+          </label>
+        `;
+        });
+
+        // Topic filters
+        const topicCounts = {};
+        courses.forEach((c) => {
+          const topic = c.tags.topic || "Other";
+          topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+        });
+
+        const sortedTopics = Object.entries(topicCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10);
+
+        const topicContainer = document.getElementById("topicFilters");
+        sortedTopics.forEach(([topic, count]) => {
+          topicContainer.innerHTML += `
+          <label class="filter-option">
+            <input type="checkbox" value="${topic}" onchange="updateFilter('topics', this)">
+            <label>${topic}</label>
+            <span class="filter-count">${count}</span>
+          </label>
+        `;
+        });
+
+        // Industry filters
+        const industryCounts = {};
+        courses.forEach((c) => {
+          const industry = c.tags.industry || "General";
+          industryCounts[industry] = (industryCounts[industry] || 0) + 1;
+        });
+
+        const industryContainer = document.getElementById("industryFilters");
+        Object.entries(industryCounts)
+          .sort((a, b) => b[1] - a[1])
+          .forEach(([industry, count]) => {
+            industryContainer.innerHTML += `
+          <label class="filter-option">
+            <input type="checkbox" value="${industry}" onchange="updateFilter('industries', this)">
+            <label>${industry}</label>
+            <span class="filter-count">${count}</span>
+          </label>
+        `;
+          });
+
+        // Search
+        document
+          .getElementById("searchInput")
+          .addEventListener("input", (e) => {
+            filters.search = e.target.value.toLowerCase();
+            renderCourses();
+          });
+
+        // AI only filter
+        document
+          .getElementById("aiOnlyFilter")
+          .addEventListener("change", (e) => {
+            filters.aiOnly = e.target.checked;
+            renderCourses();
+          });
+      }
+
+      // Update filter state
+      function updateFilter(filterType, checkbox) {
+        if (checkbox.checked) {
+          filters[filterType].push(checkbox.value);
+        } else {
+          filters[filterType] = filters[filterType].filter(
+            (v) => v !== checkbox.value,
+          );
+        }
+        renderCourses();
+      }
+
+      // Render stats
+      function renderStats(stats) {
+        const aiCount = courses.filter((c) => c.has_ai_tags).length;
+        const totalVideos = courses.reduce(
+          (sum, c) => sum + (c.video_count || 0),
+          0,
+        );
+        document.getElementById("statsBar").innerHTML = `
+        <div class="stat">
+          <div class="stat-value">${stats.total_courses}</div>
+          <div class="stat-label">Total Courses</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${totalVideos}</div>
+          <div class="stat-label">Video Files</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${aiCount}</div>
+          <div class="stat-label">AI-Enriched</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${Object.keys(stats.by_topic).length}</div>
+          <div class="stat-label">Topics</div>
+        </div>
+      `;
+      }
+
+      // Filter courses
+      function getFilteredCourses() {
+        return courses.filter((course) => {
+          // Search filter
+          if (filters.search) {
+            const searchText =
+              `${course.title} ${course.code} ${course.tags.topic} ${course.tags.industry}`.toLowerCase();
+            if (!searchText.includes(filters.search)) return false;
+          }
+
+          // Level filter
+          if (filters.levels.length > 0) {
+            if (!filters.levels.includes(course.tags.level)) return false;
+          }
+
+          // Topic filter
+          if (filters.topics.length > 0) {
+            if (!filters.topics.includes(course.tags.topic)) return false;
+          }
+
+          // Industry filter
+          if (filters.industries.length > 0) {
+            if (!filters.industries.includes(course.tags.industry))
+              return false;
+          }
+
+          // AI only filter
+          if (filters.aiOnly && !course.has_ai_tags) return false;
+
+          return true;
+        });
+      }
+
+      // Render course cards
+      function renderCourses() {
+        const filtered = getFilteredCourses();
+        document.getElementById("resultsCount").textContent =
+          `${filtered.length} courses found`;
+
+        const grid = document.getElementById("courseGrid");
+        grid.innerHTML = filtered
+          .map((course) => {
+            const isSelected = selectedPath.find((p) => p.code === course.code);
+            return `
+          <div class="course-card ${isSelected ? "selected" : ""}" onclick="toggleCourse('${course.code}')">
+            ${course.has_ai_tags ? '<div class="ai-badge">AI ✨</div>' : ""}
+            <div class="course-code">${course.code || "N/A"}</div>
+            <div class="course-title">${course.title}</div>
+            <div class="course-tags">
+              <span class="tag tag-level">${course.tags.level || "Unknown"}</span>
+              <span class="tag tag-topic">${course.tags.topic || "Other"}</span>
+              <span class="tag tag-industry">${course.tags.industry || "General"}</span>
+            </div>
+            <div class="course-meta">
+              <span>🎬 ${course.video_count || 0} videos</span>
+              <span>📦 ${course.versions?.length || 0} versions</span>
+              ${course.has_cc ? "<span>📝 CC</span>" : ""}
+            </div>
+          </div>
+        `;
+          })
+          .join("");
+      }
+
+      // Toggle course in path
+      function toggleCourse(code) {
+        const course = courses.find((c) => c.code === code);
+        if (!course) return;
+
+        const index = selectedPath.findIndex((p) => p.code === code);
+        if (index >= 0) {
+          selectedPath.splice(index, 1);
+        } else {
+          selectedPath.push(course);
+        }
+
+        renderPath();
+        renderCourses();
+      }
+
+      // Render learning path
+      function renderPath() {
+        const list = document.getElementById("pathList");
+        const statsEl = document.getElementById("pathStats");
+
+        if (selectedPath.length === 0) {
+          list.innerHTML =
+            '<div class="path-empty">Click courses to add them to your learning path</div>';
+          statsEl.innerHTML = "";
+          return;
+        }
+
+        // Calculate path stats
+        const totalVideos = selectedPath.reduce(
+          (sum, c) => sum + (c.video_count || 0),
+          0,
+        );
+        statsEl.innerHTML = `📚 ${selectedPath.length} courses • 🎬 ${totalVideos} videos`;
+
+        list.innerHTML = selectedPath
+          .map(
+            (course, i) => `
+        <div class="path-item">
+          <div class="path-number">${i + 1}</div>
+          <div class="path-item-title">${course.title}</div>
+          <span style="font-size: 0.6rem; color: var(--text-secondary);">${course.video_count || 0}🎬</span>
+          <button class="path-item-remove" onclick="removeCourse('${course.code}')">×</button>
+        </div>
+      `,
+          )
+          .join("");
+      }
+
+      // Remove course from path
+      function removeCourse(code) {
+        selectedPath = selectedPath.filter((c) => c.code !== code);
+        renderPath();
+        renderCourses();
+      }
+
+      // Export path
+      document.getElementById("exportPath").addEventListener("click", () => {
+        if (selectedPath.length === 0) {
+          alert("Add courses to your learning path first!");
+          return;
+        }
+
+        const pathData = {
+          name: "My Learning Path",
+          created: new Date().toISOString(),
+          courses: selectedPath.map((c, i) => ({
+            order: i + 1,
+            code: c.code,
+            title: c.title,
+            level: c.tags.level,
+            topic: c.tags.topic,
+            industry: c.tags.industry,
+          })),
+        };
+
+        const blob = new Blob([JSON.stringify(pathData, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "learning-path.json";
+        a.click();
+      });
+
+      // Clear path
+      document.getElementById("clearPath").addEventListener("click", () => {
+        selectedPath = [];
+        renderPath();
+        renderCourses();
+      });
+
+      // Export videos list
+      document.getElementById("exportVideos").addEventListener("click", () => {
+        if (selectedPath.length === 0) {
+          alert("Add courses to your learning path first!");
+          return;
+        }
+
+        // Collect all video files from selected courses
+        const allVideos = [];
+        selectedPath.forEach((course, courseIndex) => {
+          if (course.videos && course.videos.length > 0) {
+            course.videos.forEach((video, videoIndex) => {
+              allVideos.push({
+                order: allVideos.length + 1,
+                course_code: course.code,
+                course_title: course.title,
+                video_name: video.name,
+                video_path: video.path,
+                version: video.version,
+              });
+            });
+          }
+        });
+
+        if (allVideos.length === 0) {
+          alert(
+            "No video files found in selected courses.\n\nNote: Video data needs to be refreshed. Run:\nnode scripts/scan_video_library.js",
+          );
+          return;
+        }
+
+        // Create CSV content
+        const csvHeader =
+          "Order,Course Code,Course Title,Video Name,Video Path,Version\n";
+        const csvRows = allVideos
+          .map(
+            (v) =>
+              `${v.order},"${v.course_code}","${v.course_title}","${v.video_name}","${v.video_path}","${v.version}"`,
+          )
+          .join("\n");
+        const csvContent = csvHeader + csvRows;
+
+        // Download CSV
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "learning-path-videos.csv";
+        a.click();
+
+        alert(
+          `Exported ${allVideos.length} video files from ${selectedPath.length} courses!`,
+        );
+      });
+
+      // Show course detail modal
+      function showCourseDetail(code) {
+        const course = courses.find((c) => c.code === code);
+        if (!course) return;
+
+        document.getElementById("modalCode").textContent = course.code || "N/A";
+        document.getElementById("modalTitle").textContent = course.title;
+
+        let bodyHTML = `
+        <div class="modal-section">
+          <h4>Tags</h4>
+          <div class="course-tags">
+            <span class="tag tag-level">${course.tags.level}</span>
+            <span class="tag tag-topic">${course.tags.topic}</span>
+            <span class="tag tag-industry">${course.tags.industry}</span>
+            <span class="tag" style="background: rgba(88, 166, 255, 0.2); color: var(--accent-blue);">${course.tags.product}</span>
+          </div>
+        </div>
+      `;
+
+        if (course.ai_analysis) {
+          const ai = course.ai_analysis;
+          bodyHTML += `
+          <div class="modal-section">
+            <h4>Subtopics (AI)</h4>
+            <ul>${ai.subtopics?.map((s) => `<li>${s}</li>`).join("") || "<li>None</li>"}</ul>
+          </div>
+          <div class="modal-section">
+            <h4>UE5 Features (AI)</h4>
+            <ul>${ai.ue5_features?.map((f) => `<li>${f}</li>`).join("") || "<li>None</li>"}</ul>
+          </div>
+          <div class="modal-section">
+            <h4>Learning Objectives (AI)</h4>
+            <ul>${ai.learning_objectives?.map((o) => `<li>${o}</li>`).join("") || "<li>None</li>"}</ul>
+          </div>
+          <div class="modal-section">
+            <h4>Prerequisites (AI)</h4>
+            <ul>${ai.prerequisites?.map((p) => `<li>${p}</li>`).join("") || "<li>None</li>"}</ul>
+          </div>
+          <div class="modal-section">
+            <h4>Difficulty Notes (AI)</h4>
+            <p style="font-size: 0.875rem; color: var(--text-secondary);">${ai.difficulty_notes || "No notes"}</p>
+          </div>
+        `;
+        }
+
+        document.getElementById("modalBody").innerHTML = bodyHTML;
+        document.getElementById("modalOverlay").classList.add("active");
+
+        const addBtn = document.getElementById("modalAddBtn");
+        const isInPath = selectedPath.find((p) => p.code === code);
+        addBtn.textContent = isInPath ? "Remove from Path" : "Add to Path";
+        addBtn.onclick = () => {
+          toggleCourse(code);
+          closeModal();
+        };
+      }
+
+      function closeModal() {
+        document.getElementById("modalOverlay").classList.remove("active");
+      }
+
+      // Close modal on overlay click
+      document.getElementById("modalOverlay").addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) closeModal();
+      });
+
+      // Initialize
+      loadData();
+    </script>
+  </body>
+</html>
