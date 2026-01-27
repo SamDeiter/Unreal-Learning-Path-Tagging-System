@@ -14,9 +14,14 @@ function playVideo(url, description) {
     return;
   }
 
-  // Try to extract START timestamp from description
+  // Priority 1: Extract timestamp from URL (?t= or &t=)
   let startTime = 0;
-  if (description) {
+  const urlTimeMatch = url.match(/[?&]t=(\d+)/);
+  if (urlTimeMatch) {
+    startTime = parseInt(urlTimeMatch[1], 10);
+  }
+  // Priority 2: Try to extract timestamp from description
+  else if (description) {
     // Check for explicit "beginning" or "0:00"
     if (/start\s*(?:at\s*)?(?:the\s*)?beginning/i.test(description)) {
       startTime = 0;
