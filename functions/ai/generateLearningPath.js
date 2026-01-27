@@ -107,17 +107,17 @@ CRITICAL RULES:
 - Be specific to their ACTUAL problem, not generic advice
 
 CONTENT REQUIREMENTS (MANDATORY):
-- EVERY step MUST have a "content" array with at least ONE Epic documentation link
-- Use dev.epicgames.com/documentation URLs - find the most relevant page for each step
-- Documentation is REQUIRED in all steps - never leave content empty
-- Videos are OPTIONAL supplements - only add if a relevant video exists in the curated database
+- EVERY step MUST have a "content" array with at least ONE video from the curated database below
+- Select the video most relevant to the step's topic, using appropriate timestamp
+- Epic documentation links are OPTIONAL supplements - include if helpful but not required
+- Never leave the content array empty - always include at least one video
 
-VIDEO SELECTION (OPTIONAL - curated videos only):
-- If a video in the database matches the topic, include it with thumbnail_url
+VIDEO SELECTION (REQUIRED - curated videos only):
+- You MUST include at least one video per step from the curated database
+- Choose the video with topics most relevant to the step, even if not a perfect match
+- ALWAYS include thumbnail_url using format: https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg
 - Use the timestamp_start field to link directly to the relevant section
 - Format video URL as: https://youtube.com/watch?v=VIDEO_ID&t=TIMESTAMP_SECONDS
-- Format thumbnail_url as: https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg
-- If no video matches, that's fine - just include the required Epic docs
 
 CURATED VIDEO DATABASE (SELECT FROM THESE ONLY):
 ${curatedVideosPrompt}`;
