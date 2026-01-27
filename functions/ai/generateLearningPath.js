@@ -246,8 +246,26 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
         .replace(/\s+/g, "_")
         .substring(0, 50);
       pathData.query = query;
-      pathData.tags = tags;
+      pathData.tags = tags || [];
       pathData.generated_at = new Date().toISOString();
+
+      // Ensure steps array exists (defensive check)
+      if (!Array.isArray(pathData.steps)) {
+        console.error(
+          "[ERROR] AI did not return a steps array. Full response:",
+          JSON.stringify(pathData),
+        );
+        pathData.steps = [];
+      }
+
+      // Ensure each step has required fields
+      pathData.steps = pathData.steps.map((step, index) => ({
+        ...step,
+        number: step.number || index + 1,
+        content: Array.isArray(step.content) ? step.content : [],
+      }));
+
+      console.log(`[DEBUG] Returning path with ${pathData.steps.length} steps`);
 
       // 9. Log usage
       await logApiUsage(userId, {
