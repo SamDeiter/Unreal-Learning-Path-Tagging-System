@@ -13,7 +13,7 @@ const { logApiUsage } = require("../utils/apiUsage");
  */
 let videoCatalog = [];
 try {
-  const catalogPath = path.join(__dirname, "../../content/video_catalog.json");
+  const catalogPath = path.join(__dirname, "../data/video_catalog.json");
   if (fs.existsSync(catalogPath)) {
     const data = JSON.parse(fs.readFileSync(catalogPath, "utf-8"));
     videoCatalog = data.videos || [];

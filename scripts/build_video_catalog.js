@@ -312,10 +312,22 @@ function main() {
 
   fs.writeFileSync(catalogPath, JSON.stringify(output, null, 2));
 
+  // Also copy to functions/data for Cloud Functions deployment
+  const functionsDataDir = path.join(baseDir, "functions", "data");
+  if (!fs.existsSync(functionsDataDir)) {
+    fs.mkdirSync(functionsDataDir, { recursive: true });
+  }
+  const functionsCatalogPath = path.join(
+    functionsDataDir,
+    "video_catalog.json",
+  );
+  fs.writeFileSync(functionsCatalogPath, JSON.stringify(output, null, 2));
+
   console.log("✅ Built video catalog for RAG");
   console.log(`   Videos: ${catalog.length}`);
   console.log(`   Unique tags: ${Object.keys(tagCounts).length}`);
   console.log(`\n💾 Saved to: ${catalogPath}`);
+  console.log(`   Also: ${functionsCatalogPath}`);
 
   // Print top tags
   console.log("\n📊 Top tags:");
