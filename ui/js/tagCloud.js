@@ -105,19 +105,14 @@ function renderTagCloud(tags, containerId = "tagCloud") {
  * Users can combine multiple tags before generating
  */
 function addTagToBasket(term) {
-  // Show the text input panel and add the term
-  if (typeof showInputPanel === "function") {
-    showInputPanel("text");
+  // Add directly to basket without switching panels
+  if (typeof addIngredient === "function") {
+    addIngredient("text", term, "📝");
   }
 
-  const textInput = document.getElementById("textInput");
-  if (textInput) {
-    textInput.value = term;
-  }
-
-  // Add to basket using existing function
-  if (typeof addTextIngredient === "function") {
-    addTextIngredient();
+  // Update tag suggestions to show related tags
+  if (typeof updateTagSuggestions === "function") {
+    updateTagSuggestions();
   }
 
   // Track the click
