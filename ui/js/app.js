@@ -244,7 +244,8 @@ function populateGallery() {
   cachedPathsIndex.forEach((path, index) => {
     const card = document.createElement("button");
     card.className = "gallery-card";
-    card.onclick = () => loadGalleryPath(path.file);
+    // Use query to generate fresh path instead of loading cached file
+    card.onclick = () => loadGalleryPath(path.query);
 
     const popularBadge =
       index < 3 ? '<span class="popular-badge">🔥 Popular</span>' : "";
@@ -263,28 +264,11 @@ function populateGallery() {
   document.getElementById("gallerySection").style.display = "block";
 }
 
-// Load a path from the gallery
-function loadGalleryPath(filename) {
-  document.getElementById("loading").classList.add("active");
-  document.getElementById("gallerySection").style.display = "none";
-
-  fetch(`/paths/${filename}`)
-    .then((r) => r.json())
-    .then((data) => {
-      document.getElementById("loading").classList.remove("active");
-      currentPath = data;
-      renderPath(currentPath);
-      if (typeof Tracker !== "undefined") {
-        Tracker.trackEvent("path_started", {
-          pathId: data.path_id,
-          title: data.title,
-        });
-      }
-    })
-    .catch((err) => {
-      document.getElementById("loading").classList.remove("active");
-      alert("Failed to load path: " + err.message);
-    });
+// Load a path from the gallery - generates fresh AI path
+function loadGalleryPath(query) {
+  // Set the query input and trigger fresh generation
+  document.getElementById("queryInput").value = query;
+  generatePath();
 }
 
 function generatePath() {
