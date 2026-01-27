@@ -167,52 +167,29 @@ Return JSON:
 
 Use REAL Epic documentation URLs and real YouTube video IDs.`;
 
-      // 6. Call Gemini API
-      const model = "gemini-2.0-flash";
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      // 6. Call Gemini API using official SDK
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash",
+        systemInstruction: systemPrompt,
+      });
 
-      const payload = {
-        contents: [{ parts: [{ text: userPrompt }] }],
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        tools: [
-          {
-            googleSearch: {}, // Enable grounding for real video URLs
-          },
-        ],
+      console.log("[DEBUG] Calling Gemini API with SDK...");
+
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+        tools: [{ googleSearch: {} }],
         generationConfig: {
           temperature: 0.3,
           maxOutputTokens: 8192,
         },
-      };
-
-      console.log("[DEBUG] Calling Gemini API...");
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(
-          `[ERROR] Gemini API failed: ${response.status} ${response.statusText}`,
-          errorText,
-        );
-        throw new Error(
-          `Gemini API error: ${response.status} ${response.statusText}`,
-        );
-      }
-
-      const responseData = await response.json();
-      const generatedText =
-        responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+      const generatedText = result.response.text();
 
       if (!generatedText) {
-        console.error(
-          "[ERROR] No content in Gemini response:",
-          JSON.stringify(responseData),
-        );
+        console.error("[ERROR] No content in Gemini response");
         throw new Error("No content generated from Gemini");
       }
 
