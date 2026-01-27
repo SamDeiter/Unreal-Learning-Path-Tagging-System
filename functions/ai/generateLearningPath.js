@@ -1,19 +1,87 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const fs = require("fs");
+const path = require("path");
 
 // Import utility functions
 const { checkRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
 
 /**
+ * Load curated video catalog for RAG context
+ * Falls back to empty array if not available
+ */
+let videoCatalog = [];
+try {
+  const catalogPath = path.join(__dirname, "../../content/video_catalog.json");
+  if (fs.existsSync(catalogPath)) {
+    const data = JSON.parse(fs.readFileSync(catalogPath, "utf-8"));
+    videoCatalog = data.videos || [];
+    console.log(`[INFO] Loaded ${videoCatalog.length} curated videos`);
+  }
+} catch (e) {
+  console.warn("[WARN] Could not load video catalog:", e.message);
+}
+
+/**
+ * Build compact video context for Gemini prompt
+ * Only include relevant videos based on query keywords
+ */
+function buildVideoContext(query, maxVideos = 20) {
+  const queryLower = query.toLowerCase();
+  const queryWords = queryLower.split(/\s+/);
+
+  // Score videos by relevance
+  const scored = videoCatalog.map((video) => {
+    let score = 0;
+    const titleLower = video.title.toLowerCase();
+    const tagsStr = video.tags.join(" ").toLowerCase();
+
+    // Title matches
+    for (const word of queryWords) {
+      if (titleLower.includes(word)) score += 3;
+      if (tagsStr.includes(word)) score += 2;
+    }
+
+    // Tag matches
+    for (const tag of video.tags) {
+      if (queryLower.includes(tag.split(".")[0])) score += 1;
+    }
+
+    return { ...video, score };
+  });
+
+  // Sort by score and take top N
+  const relevant = scored
+    .filter((v) => v.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxVideos);
+
+  if (relevant.length === 0) {
+    return null; // No relevant videos, use Google Search
+  }
+
+  // Build compact context string
+  return relevant
+    .map(
+      (v) =>
+        `[${v.id}] "${v.title}" (${Math.round(v.duration / 60)}min) - ${v.tags.join(", ")} - ${v.url}`,
+    )
+    .join("\n");
+}
+
+/**
  * Cloud Function: generateLearningPath
- * Securely calls the Gemini API with server-side API key
+ * Uses HYBRID approach:
+ * 1. First, try to match from curated video catalog (RAG)
+ * 2. Fall back to Google Search grounding for new/missing content
  *
  * This function:
  * 1. Validates the user is authenticated
  * 2. Implements rate limiting per user
- * 3. Calls Gemini API with server-side key
- * 4. Returns generated learning path
+ * 3. Loads relevant videos from catalog
+ * 4. Calls Gemini API with server-side key
+ * 5. Returns generated learning path
  */
 
 exports.generateLearningPath = functions
@@ -61,8 +129,16 @@ exports.generateLearningPath = functions
         );
       }
 
-      // 5. Build system prompt (videos found via Google Search grounding)
+      // 5. Build video context from curated catalog
+      const videoContext = buildVideoContext(query);
+      const hasCuratedVideos = videoContext !== null;
+
+      console.log(
+        `[DEBUG] Query: "${query}", Curated videos found: ${hasCuratedVideos}`,
+      );
+
       // 6. Build the prompt for learning path generation
+      // HYBRID APPROACH: Prioritize curated catalog, fall back to Google Search
       const systemPrompt = `You are an expert UE5 educator creating DIAGNOSTIC learning paths.
 Your goal is NOT just to fix symptoms, but to teach developers:
 1. WHY this problem occurs (root cause understanding)
@@ -77,19 +153,28 @@ CRITICAL RULES:
 
 CONTENT REQUIREMENTS (MANDATORY):
 - EVERY step MUST have a "content" array with at least ONE video
-- Use Google Search to find REAL YouTube videos from the @UnrealEngine official channel
-- Only include videos that you can verify exist via Google Search
 - Epic documentation links are OPTIONAL supplements
 
-VIDEO SELECTION (REQUIRED - use Google Search):
+VIDEO SELECTION PRIORITY:
+${
+  hasCuratedVideos
+    ? `
+**PRIORITY 1 - CURATED CATALOG (USE THESE FIRST):**
+Below is our curated video database. ALWAYS prefer these verified videos:
+${videoContext}
+
+Use the video IDs and URLs exactly as shown. These are verified to exist.
+`
+    : ""
+}
+**${hasCuratedVideos ? "PRIORITY 2 - " : ""}GOOGLE SEARCH (for topics not in catalog):**
+- If no curated video matches, use Google Search to find NEW videos from @UnrealEngine
 - Search for "@UnrealEngine" + topic keywords to find official tutorial videos
-- ONLY use videos from the Unreal Engine official YouTube channel
 - Extract the REAL video ID from the YouTube URL found in search results
 - ALWAYS include thumbnail_url using format: https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg
-- Format video URL as: https://youtube.com/watch?v=VIDEO_ID
-- If you cannot find a relevant official video, use a highly-rated community UE5 tutorial
+- Format video URL as: https://youtube.com/watch?v=VIDEO_ID&t=START_SECONDS
 
-IMPORTANT: Only include video URLs you find via search. Never make up video IDs.`;
+IMPORTANT: Prefer curated catalog videos. Only use Google Search for topics not covered.`;
 
       const userPrompt = `Create an EDUCATIONAL learning path for: "${query}"
 
