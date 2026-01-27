@@ -77,13 +77,11 @@ CRITICAL RULES:
 EPIC DOCUMENTATION REQUIREMENT (MANDATORY - DO NOT SKIP):
 - The FIRST content item in EVERY step MUST be official Epic Games documentation
 - Use REAL URLs from: https://dev.epicgames.com/documentation/en-us/unreal-engine/
-- IMPORTANT: URLs should work without version parameters - use the base article slug
-- Example valid URLs (use these exact formats):
-  * https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprints-visual-scripting-in-unreal-engine
-  * https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine
-  * https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-projects-in-unreal-engine
+- Example valid URLs:
+  * https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-best-practices-in-unreal-engine
+  * https://dev.epicgames.com/documentation/en-us/unreal-engine/object-referencing-in-unreal-engine
+  * https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects
 - NEVER use placeholder URLs - find the REAL documentation page
-- If a URL doesn't exist, use a related valid Epic docs page instead
 - Every step needs at least one docs link BEFORE any video links
 
 VIDEO RULES (CRITICAL):
