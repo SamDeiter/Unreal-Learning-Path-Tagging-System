@@ -386,6 +386,19 @@ function renderPath(path) {
     </div>
   `;
 
+  // Add usage stats if available
+  if (path.usage) {
+    const u = path.usage;
+    queryHtml += `
+    <div class="usage-stats" style="margin-top: 0.75rem; padding: 0.5rem; background: var(--surface); border-radius: 6px; font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 1rem; flex-wrap: wrap;">
+      <span title="Tokens used">🔢 ${u.totalTokens.toLocaleString()} tokens</span>
+      <span title="Estimated API cost">💰 $${u.totalCost}</span>
+      <span title="Energy used">⚡ ${u.energyKwh} kWh</span>
+      <span title="CO2 equivalent">🌱 ${u.co2Grams}g CO₂</span>
+    </div>
+    `;
+  }
+
   document.getElementById("pathQuery").innerHTML = queryHtml;
 
   // Render tags (with fallback for empty/missing)

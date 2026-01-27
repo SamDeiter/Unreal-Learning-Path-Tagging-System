@@ -52,6 +52,10 @@ function tryApiCall(query) {
           // Ensure steps array exists
           currentPath.steps = currentPath.steps || [];
           currentPath.tags = currentPath.tags || [];
+          // Store usage stats for display
+          if (result.data.usage) {
+            currentPath.usage = result.data.usage;
+          }
           renderPath(currentPath);
           logQuery(query, currentPath.steps.length > 0);
         } else {
