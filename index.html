@@ -557,6 +557,11 @@
         background-clip: text;
         -webkit-text-fill-color: transparent;
       }
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
       .last-updated {
         font-size: 0.875rem;
         color: var(--text-secondary);
@@ -566,6 +571,57 @@
       }
       .last-updated::before {
         content: '🕐';
+      }
+      .refresh-btn {
+        background: var(--gradient-epic);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .refresh-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3);
+      }
+      .refresh-option {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s;
+      }
+      .refresh-option:hover {
+        border-color: var(--accent-blue);
+        background: rgba(88, 166, 255, 0.1);
+      }
+      .refresh-option .option-icon {
+        font-size: 1.5rem;
+      }
+      .refresh-option strong {
+        display: block;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+      }
+      .refresh-option span {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+      }
+      .refresh-option code {
+        background: var(--bg-primary);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        font-family: monospace;
+        color: var(--accent-blue);
       }
 
       @media (max-width: 900px) {
@@ -862,7 +918,10 @@
     <div id="dashboardView" class="view-container">
       <div class="dashboard-header">
         <h2>📊 Coverage Dashboard</h2>
-        <div id="lastUpdated" class="last-updated"></div>
+        <div class="header-actions">
+          <div id="lastUpdated" class="last-updated"></div>
+          <button class="refresh-btn" onclick="showRefreshModal()">🔄 Refresh Data</button>
+        </div>
       </div>
       <div class="dashboard-grid">
         <!-- Summary Cards -->
@@ -1001,6 +1060,55 @@
     </div>
     </div> <!-- Close builderView -->
 
+    <!-- Refresh Data Modal -->
+    <div class="modal-overlay" id="refreshModal" style="display:none;">
+      <div class="modal" style="max-width: 500px;">
+        <div class="modal-header">
+          <h2>🔄 Refresh Data</h2>
+          <button class="modal-close" onclick="closeRefreshModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem;">
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+            Choose how to update the course library data:
+          </p>
+          
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <a href="https://github.com/SamDeiter/Unreal-Learning-Path-Tagging-System/actions/workflows/deploy.yml" 
+               target="_blank" 
+               class="refresh-option">
+              <span class="option-icon">🚀</span>
+              <div>
+                <strong>Trigger GitHub Deploy</strong>
+                <span>Re-deploy current data to GitHub Pages</span>
+              </div>
+            </a>
+            
+            <div class="refresh-option" onclick="copyCommand()">
+              <span class="option-icon">💻</span>
+              <div>
+                <strong>Run Local Update</strong>
+                <span>Copy command: <code id="updateCmd">npm run update</code></span>
+              </div>
+            </div>
+            
+            <a href="https://github.com/SamDeiter/Unreal-Learning-Path-Tagging-System/settings/pages" 
+               target="_blank" 
+               class="refresh-option">
+              <span class="option-icon">⚙️</span>
+              <div>
+                <strong>Configure GitHub Pages</strong>
+                <span>Set up automatic deployments</span>
+              </div>
+            </a>
+          </div>
+          
+          <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            💡 <strong>Tip:</strong> Run <code>npm run update</code> in your terminal to scan + commit + push in one command.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Course Detail Modal -->
     <div class="modal-overlay" id="modalOverlay">
       <div class="modal">
@@ -1022,6 +1130,35 @@
     </div>
 
     <script>
+      // Refresh Modal Functions
+      function showRefreshModal() {
+        document.getElementById('refreshModal').style.display = 'flex';
+      }
+      
+      function closeRefreshModal() {
+        document.getElementById('refreshModal').style.display = 'none';
+      }
+      
+      function copyCommand() {
+        navigator.clipboard.writeText('npm run update').then(() => {
+          const code = document.getElementById('updateCmd');
+          const original = code.textContent;
+          code.textContent = '✓ Copied!';
+          code.style.color = '#3fb950';
+          setTimeout(() => {
+            code.textContent = original;
+            code.style.color = '';
+          }, 2000);
+        });
+      }
+      
+      // Close modal on backdrop click
+      document.addEventListener('click', (e) => {
+        if (e.target.id === 'refreshModal') {
+          closeRefreshModal();
+        }
+      });
+
       // Global state
       let courses = [];
       let taxonomy = {};
