@@ -36,13 +36,16 @@ function fetchPath(query) {
 
 function tryApiCall(query) {
   // Try Cloud Function first (works in production)
+  console.log("[API] Attempting Cloud Function...");
   if (typeof firebase !== "undefined" && firebase.functions) {
+    console.log("[API] Firebase available, calling generateLearningPath...");
     const generateLearningPath = firebase
       .functions()
       .httpsCallable("generateLearningPath");
 
     generateLearningPath({ query: query })
       .then((result) => {
+        console.log("[API] Cloud Function SUCCESS:", result.data);
         document.getElementById("loading").classList.remove("active");
         if (result.data.success && result.data.path) {
           currentPath = result.data.path;
@@ -53,10 +56,11 @@ function tryApiCall(query) {
         }
       })
       .catch((error) => {
-        console.log("Cloud Function failed, trying local API:", error.message);
+        console.log("[API] Cloud Function FAILED:", error.message);
         tryLocalApi(query);
       });
   } else {
+    console.log("[API] Firebase NOT available, trying local API...");
     tryLocalApi(query);
   }
 }
