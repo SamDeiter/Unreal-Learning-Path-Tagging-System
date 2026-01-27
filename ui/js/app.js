@@ -104,36 +104,38 @@ function parseMarkdown(text) {
 function formatActionText(text) {
   if (!text) return "";
 
-  // First apply markdown parsing
-  let html = parseMarkdown(text);
+  // Normalize escaped newlines to actual newlines
+  let normalizedText = text.replace(/\\n/g, "\n");
 
-  // Convert numbered lists (1. item 2. item) to checkbox list
-  // Matches patterns like "1. text" or "1." followed by content
-  const numberedPattern =
-    /(\d+)\.\s*\*?\*?([^:]+)\*?\*?:?\s*(.*?)(?=(?:\d+\.\s)|$)/g;
-  const matches = [...text.matchAll(numberedPattern)];
+  // Split by number pattern (1. 2. 3. etc.) and filter empty parts
+  const parts = normalizedText.split(/(?=\d+\.\s)/);
+  const items = parts.filter((p) => /^\d+\.\s/.test(p.trim()));
 
-  if (matches.length >= 2) {
+  if (items.length >= 2) {
     // Build checklist HTML
     let checklistHtml = '<ul class="action-checklist">';
-    matches.forEach((match, i) => {
-      const title = match[2].replace(/\*\*/g, "").trim();
-      const desc = match[3] ? match[3].trim() : "";
-      checklistHtml += `
-        <li class="action-item">
-          <label>
-            <input type="checkbox" class="action-checkbox" onchange="trackCheckbox(this)">
-            <span class="action-item-title">${title}</span>
-          </label>
-          ${desc ? `<p class="action-item-desc">${parseMarkdown(desc)}</p>` : ""}
-        </li>`;
+    items.forEach((item) => {
+      // Parse each item: "1. **Title** Description" or "1. **Title:** Description"
+      const match = item.match(/^\d+\.\s*\*{0,2}([^*:]+)\*{0,2}:?\s*(.*)/s);
+      if (match) {
+        const title = match[1].trim();
+        const desc = match[2] ? match[2].trim() : "";
+        checklistHtml += `
+          <li class="action-item">
+            <label>
+              <input type="checkbox" class="action-checkbox" onchange="trackCheckbox(this)">
+              <span class="action-item-title">${title}</span>
+            </label>
+            ${desc ? `<p class="action-item-desc">${parseMarkdown(desc)}</p>` : ""}
+          </li>`;
+      }
     });
     checklistHtml += "</ul>";
     return checklistHtml;
   }
 
   // If not a numbered list, just return parsed markdown
-  return html;
+  return parseMarkdown(normalizedText);
 }
 
 // Track checkbox progress
