@@ -84,10 +84,14 @@ EPIC DOCUMENTATION REQUIREMENT (MANDATORY - DO NOT SKIP):
 - NEVER use placeholder URLs - find the REAL documentation page
 - Every step needs at least one docs link BEFORE any video links
 
-VIDEO RULES:
+VIDEO RULES (CRITICAL):
 - Videos come AFTER documentation, as supplementary learning
 - PREFER videos under 15 minutes
-- For long videos, include timestamp URL (e.g., youtube.com/watch?v=xxx&t=330)`;
+- For videos over 15 minutes, you MUST include:
+  * A timestamp URL with &t=XXX pointing to the relevant section start
+  * In the description, specify EXACT time range: "Watch 15:30-25:30 for [specific topic]"
+  * Do NOT just say "10 minutes" - specify WHICH 10 minutes!
+- Example: "Watch 12:45-22:30 for the object reference validation technique"`;
 
       const userPrompt = `Create an EDUCATIONAL learning path for: "${query}"
 
