@@ -436,7 +436,7 @@ function renderPath(path) {
                           );
                           return `
                           <div class="content-item" data-url="${c.url}" data-desc="${safeDesc}">
-                              ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="" class="content-thumbnail" onclick="playVideoFromCard(this.closest('.content-item'))">` : ""}
+                              ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="" class="content-thumbnail" onclick="playVideoFromCard(this.closest('.content-item'))" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22><rect fill=%22%232a2a3e%22 width=%22320%22 height=%22180%22/><text x=%22160%22 y=%2290%22 text-anchor=%22middle%22 fill=%22%237a7a8a%22 font-size=%2232%22>▶ Video</text></svg>'">` : ""}
                               <div class="content-details">
                                   <div class="content-type">${c.type}</div>
                                   <div class="content-title">${c.title}</div>
@@ -486,11 +486,23 @@ function completeStep(num) {
   completedSteps.add(num);
   const card = document.getElementById(`step-${num}`);
   card.classList.add("completed");
+  card.classList.remove("expanded"); // Auto-collapse on completion
   const btn = document.getElementById(`complete-${num}`);
   btn.textContent = "✓ Completed";
   btn.disabled = true;
   btn.classList.add("completed");
   updateProgress();
+
+  // Auto-expand and scroll to next uncompleted step
+  const nextStep = num + 1;
+  const nextCard = document.getElementById(`step-${nextStep}`);
+  if (nextCard && !completedSteps.has(nextStep)) {
+    nextCard.classList.add("expanded");
+    // Smooth scroll to the next step after a brief delay
+    setTimeout(() => {
+      nextCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 200);
+  }
 }
 
 function updateProgress() {
