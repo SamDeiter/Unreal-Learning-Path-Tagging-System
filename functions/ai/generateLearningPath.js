@@ -113,6 +113,7 @@ VIDEO SELECTION (CRITICAL):
 - Each video has topics and timestamps - choose the one most relevant to the user's problem
 - Use the timestamp_start field to link directly to the relevant section
 - Format video URL as: https://youtube.com/watch?v=VIDEO_ID&t=TIMESTAMP_SECONDS
+- ALWAYS include thumbnail_url using format: https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg
 - If no video in the database matches, omit video content for that step (docs are sufficient)
 
 CURATED VIDEO DATABASE (SELECT FROM THESE ONLY):
@@ -142,12 +143,12 @@ Return JSON:
       "number": 1,
       "type": "understand",
       "title": "Why This Happens",
-      "description": "The underlying concept",
-      "action": "Read and understand the concept",
+      "description": "The underlying concept explained in detail",
+      "action": "1. **Open your Blueprint** and locate the node causing the error\\n2. **Examine the connection** - look at what object is being passed in\\n3. **Check the target type** - ensure it matches what you're casting to\\n4. **Review the execution flow** - trace back to see where the reference comes from",
       "takeaway": "Key insight they should remember",
       "content": [
         {"type": "docs", "title": "Epic Docs: [concept]", "url": "https://dev.epicgames.com/...", "description": "Why this matters"},
-        {"type": "video", "title": "Focused Clip Title", "url": "https://youtube.com/watch?v=VIDEO_ID&t=330", "description": "(5 min) Watch from 5:30 - covers the exact concept", "duration": "5 min", "timestamp_start": "5:30"}
+        {"type": "video", "title": "Focused Clip Title", "url": "https://youtube.com/watch?v=VIDEO_ID&t=330", "thumbnail_url": "https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg", "description": "(5 min) Watch from 5:30 - covers the exact concept", "duration": "5 min", "timestamp_start": "5:30"}
       ]
     },
     {
@@ -155,22 +156,22 @@ Return JSON:
       "type": "diagnose",
       "title": "Find the Cause",
       "description": "How to identify the specific issue",
-      "action": "Steps to debug",
+      "action": "1. **Enable Blueprint debugging** - Right-click the node and select 'Add Breakpoint'\\n2. **Print the object reference** - Add a Print String node to see what's being passed\\n3. **Check if object is valid** - Use an IsValid node before the Cast\\n4. **Test in PIE mode** - Play in editor and trigger the code path",
       "takeaway": "How to diagnose this in future"
     },
     {
       "number": 3,
       "type": "resolve",
       "title": "Fix It",
-      "description": "Practical solution",
-      "action": "Exact steps to fix"
+      "description": "Practical solution with exact steps",
+      "action": "1. **Add an IsValid check** before the Cast node\\n2. **Use the Cast Failed exec pin** - Connect it to handle the failure case\\n3. **Store a reference properly** - Create a variable to cache the valid reference\\n4. **Test your fix** - Play the game and verify the error no longer occurs"
     },
     {
       "number": 4,
       "type": "prevent",
       "title": "Prevent Future Issues",
-      "description": "Best practices",
-      "action": "Habits to adopt",
+      "description": "Best practices to adopt",
+      "action": "1. **Always check IsValid** before using any object reference\\n2. **Use Cast with 'As' suffix** for cleaner code (Cast To PlayerController → GetControlledPawn as PlayerController)\\n3. **Handle both success and failure** - Never leave Cast Failed unconnected\\n4. **Document your assumptions** - Add comments about expected object types",
       "takeaway": "How to never have this problem again"
     }
   ]
