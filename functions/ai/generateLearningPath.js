@@ -1,5 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const fs = require("fs");
+const path = require("path");
 
 // Import utility functions
 const { checkRateLimit } = require("../utils/rateLimit");
@@ -61,7 +63,37 @@ exports.generateLearningPath = functions
         );
       }
 
-      // 5. Build the prompt for learning path generation
+      // 5. Load curated video database
+      let curatedVideosPrompt = "";
+      try {
+        const videosPath = path.join(__dirname, "../data/curated_videos.json");
+        const videosData = fs.readFileSync(videosPath, "utf8");
+        const videos = JSON.parse(videosData);
+
+        // Build a compact prompt with available videos
+        const videoList = [];
+        for (const [categoryKey, category] of Object.entries(
+          videos.categories,
+        )) {
+          for (const video of category.videos) {
+            const topicsStr = video.topics.join(", ");
+            const timestampsStr = Object.entries(video.timestamps || {})
+              .map(([key, sec]) => `${key}:${sec}s`)
+              .join(", ");
+            videoList.push(
+              `- ID: ${video.id} | "${video.title}" | Topics: [${topicsStr}] | Timestamps: {${timestampsStr}}`,
+            );
+          }
+        }
+        curatedVideosPrompt = videoList.join("\n");
+        console.log(`[DEBUG] Loaded ${videoList.length} curated videos`);
+      } catch (err) {
+        console.warn("[WARN] Could not load curated videos:", err.message);
+        curatedVideosPrompt =
+          "No curated videos available - focus on Epic documentation only.";
+      }
+
+      // 6. Build the prompt for learning path generation
       const systemPrompt = `You are an expert UE5 educator creating DIAGNOSTIC learning paths.
 Your goal is NOT just to fix symptoms, but to teach developers:
 1. WHY this problem occurs (root cause understanding)
@@ -76,11 +108,15 @@ CRITICAL RULES:
 - Use dev.epicgames.com/documentation URLs
 - Be specific to their ACTUAL problem, not generic advice
 
-VIDEO RULES (IMPORTANT):
-- PREFER videos under 15 minutes - shorter is better for focused learning
-- If a video is over 15 minutes, include a "When to watch" field with timestamp range (e.g., "Watch 5:30-12:00 for the relevant section")
-- Include the video duration estimate in the description
-- Avoid hour-long tutorial marathons - find the focused clip that solves THIS problem`;
+VIDEO SELECTION (CRITICAL):
+- You MUST ONLY select videos from the curated video database provided below
+- Each video has topics and timestamps - choose the one most relevant to the user's problem
+- Use the timestamp_start field to link directly to the relevant section
+- Format video URL as: https://youtube.com/watch?v=VIDEO_ID&t=TIMESTAMP_SECONDS
+- If no video in the database matches, omit video content for that step (docs are sufficient)
+
+CURATED VIDEO DATABASE (SELECT FROM THESE ONLY):
+${curatedVideosPrompt}`;
 
       const userPrompt = `Create an EDUCATIONAL learning path for: "${query}"
 
