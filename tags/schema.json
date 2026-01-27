@@ -1,36 +1,192 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Tag",
+  "title": "UnifiedTag",
+  "description": "Comprehensive tag schema based on Unified UE5 Taxonomy (v1.0)",
   "type": "object",
-  "required": ["name", "type"],
+  "required": ["tag_id", "display_name", "tag_type"],
   "properties": {
-    "name": {
+    "tag_id": {
       "type": "string",
-      "description": "Unique identifier for the tag"
+      "description": "Namespaced stable ID (lowercase, dot-separated)",
+      "pattern": "^[a-z0-9]+\\.[a-z0-9_]+$"
     },
-    "type": {
+    "display_name": {
+      "type": "string",
+      "description": "Human-readable label"
+    },
+    "tag_type": {
       "type": "string",
       "enum": [
-        "category",
+        "system",
+        "workflow",
+        "symptom",
+        "error_code",
+        "tool",
+        "platform",
         "concept",
-        "skill_level",
-        "ue_feature",
-        "issue_type"
+        "ui_surface",
+        "category",
+        "skill_level"
       ],
       "description": "Classification type of the tag"
     },
-    "relatedQueries": {
+    "category_path": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "IDs of user queries associated with this tag"
+      "description": "Multi-assignable list of domain strings"
     },
     "description": {
       "type": "string",
-      "description": "Human-readable description of the tag"
+      "description": "Functional summary"
     },
-    "parentTag": {
-      "type": "string",
-      "description": "Parent tag for hierarchical organization"
+    "synonyms": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Array of exact search triggers"
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["value", "type"],
+        "properties": {
+          "value": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["abbrev", "legacy", "community_term", "alternative"]
+          }
+        }
+      },
+      "description": "Typed aliases for search normalization"
+    },
+    "related_tags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tag_id", "relation"],
+        "properties": {
+          "tag_id": { "type": "string" },
+          "relation": {
+            "type": "string",
+            "enum": [
+              "symptom_of",
+              "often_caused_by",
+              "subtopic",
+              "replaces",
+              "related"
+            ]
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "engine_versions": {
+          "type": "object",
+          "properties": {
+            "min": { "type": "string" },
+            "max": { "type": "string" }
+          }
+        },
+        "platforms": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "content_modalities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["docs", "video", "forum", "blog"]
+          }
+        }
+      }
+    },
+    "signals": {
+      "type": "object",
+      "properties": {
+        "error_signatures": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Exact strings or regex identifiers from logs"
+        },
+        "log_tokens": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Common tokens found in logs"
+        },
+        "ui_terms": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "UI language likely to appear"
+        }
+      }
+    },
+    "relevance": {
+      "type": "object",
+      "properties": {
+        "global_weight": { "type": "number", "minimum": 0, "maximum": 1 },
+        "freshness_bias_days": { "type": "integer" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["active", "deprecated", "experimental"]
+        },
+        "owner": { "type": "string" },
+        "created_utc": { "type": "string", "format": "date-time" },
+        "updated_utc": { "type": "string", "format": "date-time" }
+      }
+    },
+    "fab_seo": {
+      "type": "object",
+      "description": "Fab marketplace SEO metadata for discovery optimization",
+      "properties": {
+        "semantic_layer": {
+          "type": "string",
+          "enum": ["visual", "technical", "functional", "contextual"],
+          "description": "Primary semantic classification for the tag"
+        },
+        "user_persona_relevance": {
+          "type": "object",
+          "description": "Relevance scores per user persona (0-1)",
+          "properties": {
+            "hobbyist": { "type": "number", "minimum": 0, "maximum": 1 },
+            "professional": { "type": "number", "minimum": 0, "maximum": 1 },
+            "assembler": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "search_terms": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "High-volume Fab autocomplete terms"
+        },
+        "long_tail_variants": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Semantic gap terms from community listening"
+        },
+        "art_style": {
+          "type": "string",
+          "enum": [
+            "realistic",
+            "stylized",
+            "low_poly",
+            "sci_fi",
+            "fantasy",
+            "mixed"
+          ],
+          "description": "Visual style classification"
+        },
+        "marketplace_category": {
+          "type": "string",
+          "description": "Fab marketplace category mapping"
+        }
+      }
     }
   }
 }
