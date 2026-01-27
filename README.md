@@ -104,6 +104,22 @@ Step 7: Verify the Fix (verification)
 
 ## 🚀 Quick Start
 
+**Live Demo**: <https://ue5-learning-paths.web.app>
+
+### Cloud Deployment (Production)
+
+The app uses Firebase Cloud Functions for serverless AI generation:
+
+```bash
+# Deploy functions (requires Blaze plan)
+firebase deploy --only functions
+
+# Deploy hosting
+firebase deploy --only hosting
+```
+
+### Local Development
+
 ```bash
 # Clone the repo
 git clone https://github.com/SamDeiter/Unreal-Learning-Path-Tagging-System.git
@@ -111,8 +127,13 @@ git clone https://github.com/SamDeiter/Unreal-Learning-Path-Tagging-System.git
 # Copy environment template
 cp .env.example .env
 
-# Add your YouTube API key to .env
+# Add your API keys to .env
 # YOUTUBE_API_KEY=your_key_here
+# GEMINI_API_KEY=your_key_here
+
+# Run local server
+python ui/server.py
+# Open http://localhost:8080
 ```
 
 ---
