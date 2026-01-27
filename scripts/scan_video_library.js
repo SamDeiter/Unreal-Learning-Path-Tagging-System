@@ -203,9 +203,14 @@ function parseCourseFolder(folderName, fullPath, subEntries) {
   const titleMatch = cleanedName.match(/^\d{3}\.\d{2}[-\s]*(.+)$/);
   const title = titleMatch ? titleMatch[1].trim() : folderName;
 
-  // Find version folders
+  // Find version folders (V55, V56, 5.0, 5.6, 427, etc.)
   const versions = subEntries
-    .filter((e) => e.isDirectory() && /^V\d/.test(e.name))
+    .filter(
+      (e) =>
+        e.isDirectory() &&
+        /^(V\d|[0-9]+\.?[0-9]*$)/.test(e.name) &&
+        e.name.toUpperCase() !== "OLD",
+    )
     .map((e) => e.name);
 
   // Check for CC folder
