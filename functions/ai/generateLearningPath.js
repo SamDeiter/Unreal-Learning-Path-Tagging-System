@@ -13,6 +13,101 @@ const { logApiUsage } = require("../utils/apiUsage");
  */
 let videoCatalog = null;
 
+// Hardcoded fallback videos (verified real @UnrealEngine IDs)
+const FALLBACK_VIDEOS = [
+  {
+    id: "-OyVWhP2ekk",
+    title: "Packaging Your Project in Unreal Engine",
+    tags: ["build", "packaging"],
+    duration: 319,
+    url: "https://www.youtube.com/watch?v=-OyVWhP2ekk",
+  },
+  {
+    id: "ARfQ58w31Vs",
+    title: "Package Your Project in Unreal Engine",
+    tags: ["build", "packaging"],
+    duration: 49,
+    url: "https://www.youtube.com/watch?v=ARfQ58w31Vs",
+  },
+  {
+    id: "Bpw8LIud3SM",
+    title: "Compiling Your Project in Unreal Engine",
+    tags: ["build", "compile"],
+    duration: 187,
+    url: "https://www.youtube.com/watch?v=Bpw8LIud3SM",
+  },
+  {
+    id: "VVpZW4pKafQ",
+    title: "Introduction to Player Blueprints",
+    tags: ["blueprint", "gameplay"],
+    duration: 346,
+    url: "https://www.youtube.com/watch?v=VVpZW4pKafQ",
+  },
+  {
+    id: "ZkP4VOOlNbM",
+    title: "Adding Blueprint Components",
+    tags: ["blueprint", "components"],
+    duration: 327,
+    url: "https://www.youtube.com/watch?v=ZkP4VOOlNbM",
+  },
+  {
+    id: "TiDo_J4VOFA",
+    title: "Enhanced Input Action Mapping",
+    tags: ["gameplay", "input"],
+    duration: 414,
+    url: "https://www.youtube.com/watch?v=TiDo_J4VOFA",
+  },
+  {
+    id: "U4x2AvWnFKw",
+    title: "Building a HUD with UMG",
+    tags: ["ui", "umg"],
+    duration: 57,
+    url: "https://www.youtube.com/watch?v=U4x2AvWnFKw",
+  },
+  {
+    id: "7GmEMMJ6v60",
+    title: "Introduction to Unreal Motion Graphics",
+    tags: ["ui", "umg"],
+    duration: 391,
+    url: "https://www.youtube.com/watch?v=7GmEMMJ6v60",
+  },
+  {
+    id: "H5jIMq98hRg",
+    title: "Landscape Basics: Getting Started",
+    tags: ["world", "landscape"],
+    duration: 1750,
+    url: "https://www.youtube.com/watch?v=H5jIMq98hRg",
+  },
+  {
+    id: "ArdM5qdGi6g",
+    title: "Landscape Basics: Landscape Materials",
+    tags: ["materials", "landscape"],
+    duration: 1318,
+    url: "https://www.youtube.com/watch?v=ArdM5qdGi6g",
+  },
+  {
+    id: "W9a6511ZBsc",
+    title: "Adding a Coin Material",
+    tags: ["materials", "beginner"],
+    duration: 291,
+    url: "https://www.youtube.com/watch?v=W9a6511ZBsc",
+  },
+  {
+    id: "u7QQztB7JWM",
+    title: "Installing Unreal Engine",
+    tags: ["onboarding", "installation"],
+    duration: 251,
+    url: "https://www.youtube.com/watch?v=u7QQztB7JWM",
+  },
+  {
+    id: "EsvfCEtATMk",
+    title: "Navigating the Viewport",
+    tags: ["onboarding", "editor"],
+    duration: 445,
+    url: "https://www.youtube.com/watch?v=EsvfCEtATMk",
+  },
+];
+
 function loadVideoCatalog() {
   if (videoCatalog !== null) return videoCatalog;
 
@@ -37,12 +132,12 @@ function loadVideoCatalog() {
       }
     }
 
-    console.warn("[WARN] Video catalog not found at any path");
-    videoCatalog = [];
+    console.warn("[WARN] Video catalog not found, using fallback videos");
+    videoCatalog = FALLBACK_VIDEOS;
     return videoCatalog;
   } catch (e) {
     console.error("[ERROR] Could not load video catalog:", e.message);
-    videoCatalog = [];
+    videoCatalog = FALLBACK_VIDEOS;
     return videoCatalog;
   }
 }
