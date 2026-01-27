@@ -2248,14 +2248,17 @@
         });
       }
 
-      // Render stats
+      // Render stats (optional - element may not exist in new layout)
       function renderStats(stats) {
+        const statsBar = document.getElementById("statsBar");
+        if (!statsBar) return; // Stats bar removed in new horizontal layout
+
         const aiCount = courses.filter((c) => c.has_ai_tags).length;
         const totalVideos = courses.reduce(
           (sum, c) => sum + (c.video_count || 0),
           0,
         );
-        document.getElementById("statsBar").innerHTML = `
+        statsBar.innerHTML = `
         <div class="stat">
           <div class="stat-value">${stats.total_courses}</div>
           <div class="stat-label">Total Courses</div>
