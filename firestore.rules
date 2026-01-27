@@ -25,6 +25,16 @@ service cloud.firestore {
       allow update, delete: if false;
     }
     
+    // Path ratings - allow creating feedback
+    match /path_ratings/{ratingId} {
+      allow create: if 
+        request.resource.data.keys().hasAll(['path_id', 'rating', 'timestamp']) &&
+        request.resource.data.rating in ['up', 'down'] &&
+        request.resource.data.timestamp == request.time &&
+        request.resource.data.keys().size() <= 5;
+      allow read, update, delete: if false;
+    }
+    
     // Cached paths - read only (managed by admin)
     match /cached_paths/{pathId} {
       allow read: if true;

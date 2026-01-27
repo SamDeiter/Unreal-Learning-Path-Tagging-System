@@ -328,6 +328,9 @@ function renderPath(path) {
   if (path.ai_summary) {
     queryHtml += `<br><br>📝 <strong>What's happening:</strong> ${path.ai_summary}`;
   }
+  if (path.ai_root_cause) {
+    queryHtml += `<br><br>🔍 <strong>Root cause:</strong> ${path.ai_root_cause}`;
+  }
   if (path.ai_estimated_time || path.ai_difficulty) {
     queryHtml += `<br><br>`;
     if (path.ai_estimated_time) queryHtml += `⏱️ ${path.ai_estimated_time} `;
@@ -343,6 +346,17 @@ function renderPath(path) {
     });
     queryHtml += `</ul>`;
   }
+
+  // Add rating buttons
+  queryHtml += `
+    <div class="path-rating" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+      <span style="color: var(--text-muted); margin-right: 0.5rem;">Was this helpful?</span>
+      <button class="rate-btn" onclick="ratePath('up')" title="Helpful">👍</button>
+      <button class="rate-btn" onclick="ratePath('down')" title="Not helpful">👎</button>
+      <span id="ratingFeedback" style="margin-left: 0.5rem; color: var(--success);"></span>
+    </div>
+  `;
+
   document.getElementById("pathQuery").innerHTML = queryHtml;
 
   // Render tags
@@ -481,6 +495,47 @@ function goBackToSearch() {
   if (typeof Tracker !== "undefined") {
     Tracker.trackEvent("navigation", { action: "back_to_search" });
   }
+}
+
+// Rate the current learning path (thumbs up/down)
+function ratePath(rating) {
+  if (!currentPath) return;
+
+  const feedback = document.getElementById("ratingFeedback");
+
+  // Log to Firestore
+  if (typeof firebase !== "undefined" && firebase.firestore) {
+    firebase
+      .firestore()
+      .collection("path_ratings")
+      .add({
+        path_id: currentPath.path_id || currentPath.query,
+        query: currentPath.query,
+        rating: rating, // 'up' or 'down'
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      })
+      .then(() => {
+        console.log("Rating logged:", rating);
+      })
+      .catch((e) => {
+        console.log("Rating log failed:", e.message);
+      });
+  }
+
+  // Update UI
+  if (rating === "up") {
+    feedback.textContent = "Thanks for the feedback! 🎉";
+    feedback.style.color = "var(--success)";
+  } else {
+    feedback.textContent = "We'll work on improving this.";
+    feedback.style.color = "var(--text-muted)";
+  }
+
+  // Disable buttons after rating
+  document.querySelectorAll(".rate-btn").forEach((btn) => {
+    btn.disabled = true;
+    btn.style.opacity = "0.5";
+  });
 }
 
 // Enter key support
