@@ -1,0 +1,534 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.639
+Welcome back and thank you for your interest in learning more about
+
+2
+00:00:04.639 --> 00:00:07.440
+world building for virtual production.
+
+3
+00:00:07.440 --> 00:00:11.679
+In this class, we'll review our agenda for the upcoming lessons,
+
+4
+00:00:11.679 --> 00:00:15.839
+and then we'll take a look into derived data cache and its importance.
+
+5
+00:00:15.839 --> 00:00:17.320
+As I just anticipated,
+
+6
+00:00:17.320 --> 00:00:20.600
+in this first module we'll explore derived data cache.
+
+7
+00:00:20.600 --> 00:00:23.359
+We'll be starting out with some ground theory on it,
+
+8
+00:00:23.359 --> 00:00:25.359
+understanding what DTC is,
+
+9
+00:00:25.359 --> 00:00:26.760
+its different types,
+
+10
+00:00:26.760 --> 00:00:29.560
+and where it's located and how to change that.
+
+11
+00:00:29.799 --> 00:00:32.240
+Once the theory is covered and out of the way,
+
+12
+00:00:32.240 --> 00:00:36.079
+we'll be ready to dive into world scopes and initial setup.
+
+13
+00:00:36.079 --> 00:00:39.039
+We'll be exploring different ways of dealing with a project,
+
+14
+00:00:39.039 --> 00:00:41.439
+breaking it down into shocks and assets,
+
+15
+00:00:41.439 --> 00:00:46.679
+and importing outside assets from libraries like Megascans or Fab.
+
+16
+00:00:46.679 --> 00:00:50.119
+And after that, we'll be uncovering some basic lighting concepts
+
+17
+00:00:50.119 --> 00:00:54.599
+and briefly talk about a very useful tool called Environment Light Mixer,
+
+18
+00:00:54.599 --> 00:00:58.960
+which is used to quickly set up our maps with realistic lighting.
+
+19
+00:00:59.000 --> 00:01:00.439
+Alright, spicing it up a bit,
+
+20
+00:01:00.439 --> 00:01:03.920
+we'll explore different approaches of editing assets,
+
+21
+00:01:03.920 --> 00:01:07.640
+whether using construction blueprints or blueprints in general,
+
+22
+00:01:07.640 --> 00:01:11.319
+procedural content generators, or modeling tools.
+
+23
+00:01:11.319 --> 00:01:15.240
+We'll also discuss about how to manage levels using the Stage Monitor
+
+24
+00:01:15.240 --> 00:01:18.599
+and increment them easily using the Level Snapshot tool.
+
+25
+00:01:18.599 --> 00:01:20.640
+Then we'll get an overview on materials
+
+26
+00:01:20.640 --> 00:01:24.359
+and how to use them efficiently using material instancing.
+
+27
+00:01:24.359 --> 00:01:27.920
+Lastly, we'll conclude this course by learning about the foliage tool
+
+28
+00:01:27.960 --> 00:01:32.560
+and we'll be getting a little nerdy checking out the profiling tool of the engine.
+
+29
+00:01:33.680 --> 00:01:37.480
+Cool, let's get started with some draft data cache theory.
+
+30
+00:01:37.480 --> 00:01:39.840
+First of all, in basic computer terms,
+
+31
+00:01:39.840 --> 00:01:43.920
+a cache is a small, fast storage area of your computer memory
+
+32
+00:01:43.920 --> 00:01:48.439
+where your computer temporarily keeps copies of frequently used information
+
+33
+00:01:48.439 --> 00:01:51.680
+so it can access that information much more quickly
+
+34
+00:01:51.680 --> 00:01:54.680
+than going back to the original source each time.
+
+35
+00:01:54.680 --> 00:01:58.080
+This is similar to keeping your most used items on your desk
+
+36
+00:01:58.080 --> 00:02:01.360
+rather than just storing them in a cabinet across the room.
+
+37
+00:02:01.360 --> 00:02:06.280
+In Unreal Engine terms, the draft data cache holds a very similar function.
+
+38
+00:02:06.280 --> 00:02:11.800
+DDC is like a smart finding system that saves your time when working with assets.
+
+39
+00:02:11.800 --> 00:02:14.680
+Imagine you have assets like textures or models
+
+40
+00:02:14.680 --> 00:02:17.680
+that need to be processed before the engine can use them.
+
+41
+00:02:17.680 --> 00:02:21.719
+Instead of processing these assets from scratch every time you need them,
+
+42
+00:02:21.719 --> 00:02:25.599
+Unreal stores the processed versions into DCC's.
+
+43
+00:02:25.599 --> 00:02:28.520
+When Unreal needs a processed asset,
+
+44
+00:02:28.520 --> 00:02:32.599
+it first checks the fastest, closest storage location.
+
+45
+00:02:32.599 --> 00:02:37.639
+If not found there, it checks progressively slower storage locations.
+
+46
+00:02:37.639 --> 00:02:43.439
+And when found, it copies that data to the fastest storage for quicker access next time.
+
+47
+00:02:43.439 --> 00:02:48.120
+If not found anywhere, Unreal processes it from scratch,
+
+48
+00:02:48.159 --> 00:02:55.520
+then saves it to all storage locations so it's available to you or your team in the future.
+
+49
+00:02:55.520 --> 00:02:58.640
+Now the DCC contains only 10 Ferrari copies
+
+50
+00:02:58.640 --> 00:03:02.960
+that Unreal Engine can just throw away and recreate whenever it needs them.
+
+51
+00:03:02.960 --> 00:03:05.879
+The original files are the U-Asset ones
+
+52
+00:03:05.879 --> 00:03:08.759
+and those contain all the important information.
+
+53
+00:03:08.759 --> 00:03:12.719
+So make sure not to delete them or just move them around.
+
+54
+00:03:12.719 --> 00:03:15.759
+Now this setup is really helpful because Unreal Engine can change
+
+55
+00:03:15.759 --> 00:03:20.319
+how it works with our assets without ever changing their original files.
+
+56
+00:03:20.319 --> 00:03:22.840
+Kind of like making different versions of a photo
+
+57
+00:03:22.840 --> 00:03:25.759
+without changing the original image itself.
+
+58
+00:03:27.120 --> 00:03:29.799
+There are two main types of DCC's.
+
+59
+00:03:29.799 --> 00:03:33.359
+The boot DCC, which consists of startup files
+
+60
+00:03:33.359 --> 00:03:36.479
+loaded into memory to increase boot times.
+
+61
+00:03:36.479 --> 00:03:41.680
+And then the local DCC, which includes the derived data for our projects.
+
+62
+00:03:41.680 --> 00:03:45.719
+If you're interested in learning about the different DCC types in depth,
+
+63
+00:03:45.719 --> 00:03:48.560
+I'd encourage you to follow the link in the slide down here
+
+64
+00:03:48.560 --> 00:03:53.080
+because it will provide you with all the information and specifics you need.
+
+65
+00:03:53.080 --> 00:03:56.599
+Let's jump into the engine for a moment to take a glimpse at the Zen server
+
+66
+00:03:56.599 --> 00:03:58.719
+and other cache statistics.
+
+67
+00:04:00.000 --> 00:04:02.520
+Alright, so if we take a look down here,
+
+68
+00:04:02.520 --> 00:04:07.280
+we can find the green check mark with Zen server written right next to it.
+
+69
+00:04:07.280 --> 00:04:12.319
+And the Zen server or the Unreal Zen storage is an EpicMate program
+
+70
+00:04:12.319 --> 00:04:16.759
+that manages our local DCC's separately from the main editor.
+
+71
+00:04:16.759 --> 00:04:19.639
+Now by default, when we launch the editor,
+
+72
+00:04:19.639 --> 00:04:22.279
+the Zen server automatically starts too.
+
+73
+00:04:22.279 --> 00:04:26.240
+And when we close the editor down, then the Zen server does the same.
+
+74
+00:04:26.240 --> 00:04:29.039
+And that's why we have this green check mark here.
+
+75
+00:04:29.039 --> 00:04:32.519
+All it says is that the Zen server is on.
+
+76
+00:04:32.519 --> 00:04:36.360
+Now if we click on Zen server, we get access to a few options.
+
+77
+00:04:36.360 --> 00:04:39.399
+The first one being the launch dashboard.
+
+78
+00:04:39.439 --> 00:04:46.199
+And if we launch it, we'll get an overview of how our Zen server is doing.
+
+79
+00:04:46.199 --> 00:04:51.439
+We can see that it is running on the engine version 5.6
+
+80
+00:04:51.439 --> 00:04:57.479
+and that the disk space that this project is occupying is 4.2 gigs.
+
+81
+00:04:57.479 --> 00:05:02.599
+Now under tools here, we have the option of stopping, restarting
+
+82
+00:05:02.599 --> 00:05:05.519
+or starting the Zen server if we wanted to.
+
+83
+00:05:05.519 --> 00:05:08.560
+And then we have something really useful down here.
+
+84
+00:05:08.560 --> 00:05:11.680
+We could actually launch a garbage collection process
+
+85
+00:05:11.680 --> 00:05:14.639
+and then free some unused disk space.
+
+86
+00:05:14.639 --> 00:05:18.120
+So this process will basically just delete some unused asset
+
+87
+00:05:18.120 --> 00:05:22.199
+and we can choose whether we want to just delete all the unused asset
+
+88
+00:05:22.199 --> 00:05:24.399
+or the asset we haven't used in a week
+
+89
+00:05:24.399 --> 00:05:26.680
+or the ones we haven't used in the past day.
+
+90
+00:05:26.680 --> 00:05:29.560
+And then our project will get lighter.
+
+91
+00:05:29.560 --> 00:05:33.240
+Okay, let's check out some few different options that we have down here.
+
+92
+00:05:33.240 --> 00:05:39.000
+So if I click on cash settings, we will go into the editor preferences.
+
+93
+00:05:39.000 --> 00:05:46.280
+We'll be able to change the global local DDC and shared DDC paths if we wanted to.
+
+94
+00:05:46.280 --> 00:05:50.319
+Or the individual project local and shared DDCs.
+
+95
+00:05:50.319 --> 00:05:56.199
+We will be able to enable all disabled notifications for the derived data cache
+
+96
+00:05:56.199 --> 00:06:01.040
+as well as enable or disable the AWS S3 cache.
+
+97
+00:06:01.080 --> 00:06:05.439
+And then we will be able to input the Horde server URL.
+
+98
+00:06:05.439 --> 00:06:10.319
+We would be using the Horde server if we needed help distributing build tasks.
+
+99
+00:06:10.319 --> 00:06:17.600
+So if we were building a game or a project across multiple computers in a theme environment.
+
+100
+00:06:17.600 --> 00:06:19.439
+Okay, what else do we have down here?
+
+101
+00:06:19.439 --> 00:06:24.879
+We have the cache statistics, which would tell us what's been loaded here in the project
+
+102
+00:06:24.879 --> 00:06:27.320
+and how it's working.
+
+103
+00:06:27.320 --> 00:06:30.680
+And then we also have the cache resource usage,
+
+104
+00:06:30.720 --> 00:06:35.280
+which would tell us how our resources are being used.
+
+105
+00:06:35.280 --> 00:06:41.519
+All right, let's go back to our slides and see how to set up shared DDCs.
+
+106
+00:06:41.519 --> 00:06:47.519
+So a shared draft data cache in Unreal Engine is a system where processed asset data
+
+107
+00:06:47.519 --> 00:06:53.280
+is stored in a central location that all team members can access, like a shared drive.
+
+108
+00:06:53.280 --> 00:06:57.720
+Instead of each person having to process the same asset individually,
+
+109
+00:06:57.760 --> 00:07:01.320
+which can take a long time, the first person processes it
+
+110
+00:07:01.320 --> 00:07:04.920
+and everyone else can use that same processed version.
+
+111
+00:07:04.920 --> 00:07:09.080
+By default, the editor is not set up to use a shared DDC
+
+112
+00:07:09.080 --> 00:07:15.200
+and instead each person's Unreal installation uses a local DDC stored in the wrong computer.
+
+113
+00:07:15.200 --> 00:07:20.640
+But we can easily enable shared DDC either by adding an override in the default engine
+
+114
+00:07:20.640 --> 00:07:24.760
+configuration file to set the path of the project to a shared location.
+
+115
+00:07:24.800 --> 00:07:27.719
+By setting an environment variable to the shared folder
+
+116
+00:07:27.719 --> 00:07:31.759
+or setting the shared draft data cache variable in the editor.
+
+117
+00:07:31.759 --> 00:07:36.000
+Now, in order to work together with a team on a single or multiple projects,
+
+118
+00:07:36.000 --> 00:07:40.159
+those projects would first need to be accessible by every member of the team
+
+119
+00:07:40.159 --> 00:07:42.560
+on their own individual computers.
+
+120
+00:07:42.560 --> 00:07:45.120
+Now, there are various ways of setting that up.
+
+121
+00:07:45.120 --> 00:07:50.000
+The simplest would probably be mapping a network drive on your local network.
+
+122
+00:07:50.000 --> 00:07:55.160
+This will allow you to share this mapped network or folder across your team
+
+123
+00:07:55.160 --> 00:07:59.279
+as long as they're connected to the same network as yours.
+
+124
+00:07:59.279 --> 00:08:04.639
+You can find further information at this link to understand how to do that in a Windows environment.
+
+125
+00:08:04.639 --> 00:08:08.079
+And a simple research online will let you find different solutions
+
+126
+00:08:08.079 --> 00:08:13.199
+for different operating systems too, like Linux or Mac OS.
+
+127
+00:08:13.199 --> 00:08:14.560
+All right, that was it for this class.
+
+128
+00:08:14.560 --> 00:08:17.920
+But you can find some additional documentation at this link
+
+129
+00:08:17.920 --> 00:08:21.720
+if you're interested in further expanding your knowledge in the RAP data cache
+
+130
+00:08:21.720 --> 00:08:23.680
+and mapped network drives.
+
+131
+00:08:23.680 --> 00:08:24.879
+Thanks for sticking around.
+
+132
+00:08:24.879 --> 00:08:29.240
+And in the upcoming lesson, we will look into world scopes and initial setups
+
+133
+00:08:29.240 --> 00:08:32.080
+when building our environments for virtual production.
+

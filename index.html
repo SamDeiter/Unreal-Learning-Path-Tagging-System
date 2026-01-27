@@ -8,6 +8,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       :root {
         --bg-primary: #0d1117;
@@ -614,6 +615,13 @@
         grid-column: span 2;
       }
 
+      /* Chart Wrapper for Chart.js */
+      .chart-wrapper {
+        position: relative;
+        width: 100%;
+        min-height: 250px;
+      }
+
       /* Bar Charts - Improved */
       .chart-bar {
         display: flex;
@@ -771,32 +779,37 @@
         <!-- Summary Cards -->
         <div class="dashboard-summary" id="dashboardSummary"></div>
 
-        <!-- Charts Row -->
+        <!-- Charts Row 1: Topics & Levels -->
         <div class="coverage-row">
-          <!-- Topic Coverage -->
           <div class="coverage-section">
             <h2>Content by Topic</h2>
-            <div class="coverage-chart" id="topicChart"></div>
+            <div class="chart-wrapper">
+              <canvas id="topicChart"></canvas>
+            </div>
           </div>
 
-          <!-- Level Distribution -->
           <div class="coverage-section">
             <h2>Level Distribution</h2>
-            <div class="coverage-chart" id="levelChart"></div>
+            <div class="chart-wrapper" style="max-width: 300px; margin: 0 auto;">
+              <canvas id="levelChart"></canvas>
+            </div>
           </div>
         </div>
 
-        <!-- Industry Row -->
+        <!-- Charts Row 2: Industry & Coverage -->
         <div class="coverage-row">
           <div class="coverage-section">
             <h2>Industry Focus</h2>
-            <div class="coverage-chart" id="industryChart"></div>
+            <div class="chart-wrapper">
+              <canvas id="industryChart"></canvas>
+            </div>
           </div>
 
-          <!-- Video Coverage -->
           <div class="coverage-section">
-            <h2>Video Coverage</h2>
-            <div class="coverage-chart" id="videoChart"></div>
+            <h2>Content Status</h2>
+            <div class="chart-wrapper" style="max-width: 300px; margin: 0 auto;">
+              <canvas id="statusChart"></canvas>
+            </div>
           </div>
         </div>
 
@@ -987,76 +1000,152 @@
           topicCounts[topic] = (topicCounts[topic] || 0) + 1;
         });
         const sortedTopics = Object.entries(topicCounts).sort((a, b) => b[1] - a[1]);
-        const maxTopic = Math.max(...Object.values(topicCounts));
         
-        document.getElementById('topicChart').innerHTML = sortedTopics.map(([topic, count]) => `
-          <div class="chart-bar">
-            <div class="label" title="${topic}">${topic}</div>
-            <div class="bar-container">
-              <div class="bar" style="width: ${(count/maxTopic)*100}%">${count}</div>
-            </div>
-          </div>
-        `).join('');
+        // Chart.js defaults for dark theme
+        Chart.defaults.color = '#8b949e';
+        Chart.defaults.borderColor = '#30363d';
 
-        // Level Chart
+        // Topic Horizontal Bar Chart
+        new Chart(document.getElementById('topicChart'), {
+          type: 'bar',
+          data: {
+            labels: sortedTopics.map(([t]) => t),
+            datasets: [{
+              data: sortedTopics.map(([, c]) => c),
+              backgroundColor: 'rgba(88, 166, 255, 0.8)',
+              borderColor: '#58a6ff',
+              borderWidth: 1,
+              borderRadius: 4,
+              barThickness: 20
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#21262d',
+                titleColor: '#f0f6fc',
+                bodyColor: '#f0f6fc',
+                borderColor: '#30363d',
+                borderWidth: 1
+              }
+            },
+            scales: {
+              x: { 
+                grid: { color: 'rgba(48, 54, 61, 0.5)' },
+                ticks: { stepSize: 5 }
+              },
+              y: { 
+                grid: { display: false }
+              }
+            }
+          }
+        });
+
+        // Level Doughnut Chart
         const levelCounts = { Beginner: 0, Intermediate: 0, Advanced: 0 };
         courses.forEach(c => {
           const level = c.tags.level;
           if (levelCounts[level] !== undefined) levelCounts[level]++;
         });
-        const maxLevel = Math.max(...Object.values(levelCounts));
-        const levelColors = { Beginner: '#3fb950', Intermediate: '#d29922', Advanced: '#f85149' };
         
-        document.getElementById('levelChart').innerHTML = Object.entries(levelCounts).map(([level, count]) => `
-          <div class="chart-bar">
-            <div class="label">${level}</div>
-            <div class="bar-container">
-              <div class="bar" style="width: ${(count/maxLevel)*100}%; background: ${levelColors[level]}">${count}</div>
-            </div>
-          </div>
-        `).join('');
+        new Chart(document.getElementById('levelChart'), {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(levelCounts),
+            datasets: [{
+              data: Object.values(levelCounts),
+              backgroundColor: ['#3fb950', '#d29922', '#f85149'],
+              borderColor: '#161b22',
+              borderWidth: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '60%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { padding: 20, usePointStyle: true, pointStyle: 'circle' }
+              },
+              tooltip: {
+                backgroundColor: '#21262d',
+                titleColor: '#f0f6fc',
+                bodyColor: '#f0f6fc'
+              }
+            }
+          }
+        });
 
-        // Industry Chart
+        // Industry Horizontal Bar Chart
         const industryCounts = {};
         courses.forEach(c => {
           const industry = c.tags.industry || 'General';
           industryCounts[industry] = (industryCounts[industry] || 0) + 1;
         });
         const sortedIndustries = Object.entries(industryCounts).sort((a, b) => b[1] - a[1]);
-        const maxIndustry = Math.max(...Object.values(industryCounts));
         
-        document.getElementById('industryChart').innerHTML = sortedIndustries.map(([industry, count]) => `
-          <div class="chart-bar">
-            <div class="label" title="${industry}">${industry}</div>
-            <div class="bar-container">
-              <div class="bar" style="width: ${(count/maxIndustry)*100}%">${count}</div>
-            </div>
-          </div>
-        `).join('');
+        new Chart(document.getElementById('industryChart'), {
+          type: 'bar',
+          data: {
+            labels: sortedIndustries.map(([i]) => i),
+            datasets: [{
+              data: sortedIndustries.map(([, c]) => c),
+              backgroundColor: 'rgba(163, 113, 247, 0.8)',
+              borderColor: '#a371f7',
+              borderWidth: 1,
+              borderRadius: 4,
+              barThickness: 20
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: { 
+                grid: { color: 'rgba(48, 54, 61, 0.5)' },
+                ticks: { stepSize: 10 }
+              },
+              y: { grid: { display: false } }
+            }
+          }
+        });
 
-        // Video Coverage Chart
-        const videoCoverage = {
-          'Has Videos': withVideos,
-          'No Videos': courses.length - withVideos,
-          'AI Analyzed': aiCount,
-          'Needs Analysis': courses.length - aiCount
-        };
-        const maxVideo = Math.max(...Object.values(videoCoverage));
-        const videoColors = {
-          'Has Videos': '#3fb950',
-          'No Videos': 'rgba(139, 148, 158, 0.5)',
-          'AI Analyzed': '#58a6ff',
-          'Needs Analysis': 'rgba(139, 148, 158, 0.5)'
-        };
-        
-        document.getElementById('videoChart').innerHTML = Object.entries(videoCoverage).map(([label, count]) => `
-          <div class="chart-bar">
-            <div class="label">${label}</div>
-            <div class="bar-container">
-              <div class="bar" style="width: ${(count/maxVideo)*100}%; background: ${videoColors[label]}">${count}</div>
-            </div>
-          </div>
-        `).join('');
+        // Status Doughnut Chart
+        new Chart(document.getElementById('statusChart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['With Videos', 'No Videos', 'AI Analyzed', 'Needs Analysis'],
+            datasets: [
+              {
+                label: 'Videos',
+                data: [withVideos, courses.length - withVideos],
+                backgroundColor: ['#3fb950', 'rgba(139, 148, 158, 0.3)'],
+                borderColor: '#161b22',
+                borderWidth: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '65%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { padding: 15, usePointStyle: true, pointStyle: 'circle' }
+              }
+            }
+          }
+        });
 
         // Courses Table with pill styling
         document.getElementById('coursesTable').innerHTML = `
