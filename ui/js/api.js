@@ -28,24 +28,10 @@ function findCachedPath(query) {
   return match;
 }
 
-// Fetch learning path from cache or API
+// Fetch learning path - AI FIRST, cache as fallback only
 function fetchPath(query) {
-  // First try cached paths (works offline/in LMS)
-  const cached = findCachedPath(query);
-  if (cached) {
-    fetch(`/paths/${cached.file}`)
-      .then((r) => r.json())
-      .then((data) => {
-        document.getElementById("loading").classList.remove("active");
-        currentPath = data;
-        renderPath(currentPath);
-        logQuery(query, true);
-        console.log("Loaded from cache:", cached.file);
-      })
-      .catch(() => tryApiCall(query));
-  } else {
-    tryApiCall(query);
-  }
+  // Always try AI first for fresh, up-to-date content
+  tryApiCall(query);
 }
 
 function tryApiCall(query) {
@@ -89,13 +75,37 @@ function tryLocalApi(query) {
       logQuery(query, data.steps && data.steps.length > 0);
     })
     .catch((error) => {
-      document.getElementById("loading").classList.remove("active");
-      // Log the query even if it failed (helps identify trending requests)
-      logQuery(query, false);
-      alert(
-        "This query isn't cached yet. Try one of the common queries like:\n\n• Lumen flickering\n• Packaging error\n• Blueprint accessed none\n\nOr run locally with: python ui/server.py",
-      );
+      console.log("Local API failed, trying cache:", error.message);
+      // Final fallback: try cached paths (for offline/LMS)
+      tryCacheFallback(query);
     });
+}
+
+// Last resort: use cached paths if all APIs fail
+function tryCacheFallback(query) {
+  const cached = findCachedPath(query);
+  if (cached) {
+    fetch(`/paths/${cached.file}`)
+      .then((r) => r.json())
+      .then((data) => {
+        document.getElementById("loading").classList.remove("active");
+        currentPath = data;
+        renderPath(currentPath);
+        logQuery(query, true);
+        console.log("Loaded from cache (offline fallback):", cached.file);
+      })
+      .catch(() => showOfflineError(query));
+  } else {
+    showOfflineError(query);
+  }
+}
+
+function showOfflineError(query) {
+  document.getElementById("loading").classList.remove("active");
+  logQuery(query, false);
+  alert(
+    "Unable to generate path. Check your connection or try a common query like:\\n\\n• Lumen flickering\\n• Packaging error\\n• Blueprint accessed none",
+  );
 }
 
 // Log query to Firestore for analytics (optional - fails gracefully)
