@@ -9,14 +9,19 @@ let currentPanel = null;
 let currentScreenshot = null;
 
 function showInputPanel(panelType) {
-  const panels = ["text", "log", "screenshot"];
+  const panels = ["text", "log", "screenshot", "tags"];
   const buttons = document.querySelectorAll(".input-method-btn");
   panels.forEach((p, i) => {
     const panel = document.getElementById(p + "Panel");
     const btn = buttons[i];
+    if (!panel || !btn) return;
     if (p === panelType && currentPanel !== panelType) {
       panel.style.display = "flex";
       btn.classList.add("active");
+      // Update dynamic suggestions when opening tags panel
+      if (p === "tags" && typeof updateTagSuggestions === "function") {
+        updateTagSuggestions();
+      }
     } else {
       panel.style.display = "none";
       btn.classList.remove("active");
