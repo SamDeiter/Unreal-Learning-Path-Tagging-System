@@ -192,6 +192,37 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
       const generatedText =
         responseData.candidates?.[0]?.content?.parts?.[0]?.text;
 
+      // Extract usage metadata for stats
+      const usageMetadata = responseData.usageMetadata || {};
+      const inputTokens = usageMetadata.promptTokenCount || 0;
+      const outputTokens = usageMetadata.candidatesTokenCount || 0;
+      const totalTokens =
+        usageMetadata.totalTokenCount || inputTokens + outputTokens;
+
+      // Calculate costs (Gemini 2.0 Flash pricing)
+      const inputCost = (inputTokens / 1000000) * 0.075;
+      const outputCost = (outputTokens / 1000000) * 0.3;
+      const groundingCost = 0.035; // $35/1K queries = $0.035/query
+      const totalCost = inputCost + outputCost + groundingCost;
+
+      // Estimate energy consumption
+      const energyKwh = (totalTokens / 1000) * 0.005;
+      const co2Grams = (totalTokens / 1000) * 0.4;
+
+      const usageStats = {
+        inputTokens,
+        outputTokens,
+        totalTokens,
+        inputCost: inputCost.toFixed(6),
+        outputCost: outputCost.toFixed(6),
+        groundingCost: groundingCost.toFixed(4),
+        totalCost: totalCost.toFixed(4),
+        energyKwh: energyKwh.toFixed(4),
+        co2Grams: co2Grams.toFixed(2),
+      };
+
+      console.log(`[DEBUG] Usage stats:`, usageStats);
+
       if (!generatedText) {
         console.error(
           "[ERROR] No content in Gemini response:",
@@ -264,6 +295,7 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
       return {
         success: true,
         path: pathData,
+        usage: usageStats,
       };
     } catch (error) {
       console.error("[ERROR] Error details:", JSON.stringify(error, null, 2));
