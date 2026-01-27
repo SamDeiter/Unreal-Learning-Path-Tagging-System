@@ -1,0 +1,97 @@
+name: Validate Tag Schema
+
+# Runs on PRs that modify tag files to ensure schema compliance
+
+on:
+  pull_request:
+    paths:
+      - "tags/*.json"
+      - "tags/**/*.json"
+  push:
+    paths:
+      - "tags/*.json"
+    branches: [master, main]
+
+jobs:
+  validate-schema:
+    runs-on: ubuntu-latest
+    name: Validate JSON Schema
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install AJV CLI
+        run: npm install -g ajv-cli ajv-formats
+
+      - name: Validate tags.json against schema
+        run: |
+          echo "🔍 Validating tags.json..."
+          ajv validate -s tags/schema.json -d tags/tags.json --all-errors || exit 1
+          echo "✅ tags.json is valid"
+
+      - name: Validate categories.json structure
+        run: |
+          echo "🔍 Checking categories.json..."
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('tags/categories.json'));
+            if (!data.categories || !Array.isArray(data.categories)) {
+              console.error('❌ categories.json must have a categories array');
+              process.exit(1);
+            }
+            console.log('✅ categories.json structure is valid');
+            console.log('   Found ' + data.categories.length + ' categories');
+          "
+
+      - name: Validate synonym_rings.json structure
+        run: |
+          echo "🔍 Checking synonym_rings.json..."
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('tags/synonym_rings.json'));
+            if (!data.synonym_rings || !Array.isArray(data.synonym_rings)) {
+              console.error('❌ synonym_rings.json must have a synonym_rings array');
+              process.exit(1);
+            }
+            // Check each ring has required fields
+            for (const ring of data.synonym_rings) {
+              if (!ring.canonical_tag || !ring.synonyms) {
+                console.error('❌ Each ring needs canonical_tag and synonyms');
+                process.exit(1);
+              }
+            }
+            console.log('✅ synonym_rings.json is valid');
+            console.log('   Found ' + data.synonym_rings.length + ' synonym rings');
+          "
+
+      - name: Check for duplicate tag IDs
+        run: |
+          echo "🔍 Checking for duplicate tag IDs..."
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('tags/tags.json'));
+            const ids = data.tags.map(t => t.tag_id || t.name);
+            const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);
+            if (duplicates.length > 0) {
+              console.error('❌ Duplicate tag IDs found:', [...new Set(duplicates)]);
+              process.exit(1);
+            }
+            console.log('✅ No duplicate tag IDs');
+            console.log('   Total tags: ' + ids.length);
+          "
+
+      - name: Summary
+        run: |
+          echo "## 🏷️ Tag Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| tags.json | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
+          echo "| categories.json | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
+          echo "| synonym_rings.json | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
