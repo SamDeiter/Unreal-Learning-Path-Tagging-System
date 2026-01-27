@@ -741,6 +741,64 @@
         color: var(--accent-green);
         font-size: 1.25rem;
       }
+
+      /* Recommendations Section */
+      .recommendations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+      }
+      .recommendation-card {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.25rem;
+        transition: all 0.2s ease;
+      }
+      .recommendation-card:hover {
+        border-color: var(--accent-blue);
+        transform: translateY(-2px);
+      }
+      .recommendation-card.gap {
+        border-left: 4px solid var(--accent-red);
+      }
+      .recommendation-card.opportunity {
+        border-left: 4px solid var(--accent-orange);
+      }
+      .recommendation-card.strength {
+        border-left: 4px solid var(--accent-green);
+      }
+      .recommendation-card .rec-type {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+      }
+      .recommendation-card.gap .rec-type { color: var(--accent-red); }
+      .recommendation-card.opportunity .rec-type { color: var(--accent-orange); }
+      .recommendation-card.strength .rec-type { color: var(--accent-green); }
+      .recommendation-card .rec-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+      }
+      .recommendation-card .rec-desc {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+      .recommendation-card .rec-stat {
+        display: inline-block;
+        background: rgba(88, 166, 255, 0.15);
+        color: var(--accent-blue);
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-top: 0.75rem;
+      }
     </style>
   </head>
   <body>
@@ -811,6 +869,12 @@
               <canvas id="statusChart"></canvas>
             </div>
           </div>
+        </div>
+
+        <!-- Coverage Recommendations -->
+        <div class="coverage-section recommendations-section">
+          <h2>📋 Coverage Recommendations</h2>
+          <div id="recommendations" class="recommendations-grid"></div>
         </div>
 
         <!-- Courses Table -->
@@ -1146,6 +1210,83 @@
             }
           }
         });
+
+        // Generate Coverage Recommendations
+        const recommendations = [];
+        
+        // 1. Find topics with too few courses (gaps)
+        const avgPerTopic = courses.length / sortedTopics.length;
+        sortedTopics.filter(([topic, count]) => count < 3).forEach(([topic, count]) => {
+          recommendations.push({
+            type: 'gap',
+            title: `${topic}: Low Coverage`,
+            desc: `Only ${count} course${count === 1 ? '' : 's'} cover this topic. Consider adding more content.`,
+            stat: `${count} courses`
+          });
+        });
+
+        // 2. Find missing level combinations
+        const levelByTopic = {};
+        courses.forEach(c => {
+          const topic = c.tags.topic || 'Other';
+          const level = c.tags.level;
+          if (!levelByTopic[topic]) levelByTopic[topic] = new Set();
+          if (level) levelByTopic[topic].add(level);
+        });
+        sortedTopics.slice(0, 8).forEach(([topic]) => {
+          const levels = levelByTopic[topic] || new Set();
+          ['Beginner', 'Intermediate', 'Advanced'].forEach(level => {
+            if (!levels.has(level)) {
+              recommendations.push({
+                type: 'opportunity',
+                title: `No ${level} ${topic} Course`,
+                desc: `Add a ${level.toLowerCase()}-level course for ${topic} to complete the learning path.`,
+                stat: 'Missing level'
+              });
+            }
+          });
+        });
+
+        // 3. Find courses without videos (needs content)
+        const noVideos = courses.filter(c => c.video_count === 0).length;
+        if (noVideos > 0) {
+          recommendations.push({
+            type: 'gap',
+            title: `${noVideos} Courses Without Videos`,
+            desc: 'These courses may need video content added or may be legacy courses to review.',
+            stat: `${Math.round((noVideos/courses.length)*100)}% of library`
+          });
+        }
+
+        // 4. Find courses needing AI analysis
+        const needsAI = courses.filter(c => !c.has_ai_tags && c.video_count > 0).length;
+        if (needsAI > 0) {
+          recommendations.push({
+            type: 'opportunity',
+            title: `${needsAI} Courses Ready for AI Tagging`,
+            desc: 'These courses have videos but no AI-enriched tags. Run analysis to improve discoverability.',
+            stat: 'Ready to analyze'
+          });
+        }
+
+        // 5. Highlight strengths
+        const topTopics = sortedTopics.slice(0, 3);
+        recommendations.push({
+          type: 'strength',
+          title: 'Strong Topic Coverage',
+          desc: `Top areas: ${topTopics.map(([t, c]) => `${t} (${c})`).join(', ')}`,
+          stat: `${topTopics.reduce((s, [,c]) => s + c, 0)} courses`
+        });
+
+        // Render recommendations (limit to 6)
+        document.getElementById('recommendations').innerHTML = recommendations.slice(0, 6).map(r => `
+          <div class="recommendation-card ${r.type}">
+            <div class="rec-type">${r.type === 'gap' ? '⚠️ Gap' : r.type === 'opportunity' ? '💡 Opportunity' : '✅ Strength'}</div>
+            <div class="rec-title">${r.title}</div>
+            <div class="rec-desc">${r.desc}</div>
+            <span class="rec-stat">${r.stat}</span>
+          </div>
+        `).join('');
 
         // Courses Table with pill styling
         document.getElementById('coursesTable').innerHTML = `

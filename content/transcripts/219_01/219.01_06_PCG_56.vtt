@@ -1,0 +1,738 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.480
+Hi, welcome back.
+
+2
+00:00:04.480 --> 00:00:09.759
+In this class, we'll be learning some basics of procedural content generation in Unreal
+
+3
+00:00:09.759 --> 00:00:15.160
+Engine to support our world-building workflows.
+
+4
+00:00:15.160 --> 00:00:19.120
+There are a few settings in our project we need to take care of before starting to work
+
+5
+00:00:19.120 --> 00:00:25.320
+with PCGs, so let's jump for a moment in the engine and review them one by one.
+
+6
+00:00:25.320 --> 00:00:29.800
+Back in our project, we want to go under Edit and Plugins.
+
+7
+00:00:29.800 --> 00:00:32.960
+Then in the search bar, type Procedural.
+
+8
+00:00:32.960 --> 00:00:36.240
+And specifically, these three plugins should be activated.
+
+9
+00:00:36.240 --> 00:00:40.920
+So Procedural Content Generation Framework, Content Generation Framework External Data
+
+10
+00:00:40.920 --> 00:00:45.560
+Interrupt, and Content Generation Framework Geometry Script Interrupt.
+
+11
+00:00:45.560 --> 00:00:51.159
+Besides that, you also want to make sure that Procedural Mesh Component is activated.
+
+12
+00:00:51.159 --> 00:00:56.040
+Those four plugins should be already activated in this specific project, but if they're not,
+
+13
+00:00:56.039 --> 00:01:00.119
+make sure to activate them manually yourself and then restart the engine.
+
+14
+00:01:00.119 --> 00:01:05.400
+Alright, once your engine is wired up again and running, we can close this window.
+
+15
+00:01:05.400 --> 00:01:09.239
+And then if you wanted to get started with your PCGs, you would first need to create
+
+16
+00:01:09.239 --> 00:01:11.079
+a PCG Graph Asset.
+
+17
+00:01:11.079 --> 00:01:16.519
+So you would need to right-click on the Content Browser, go under PCG, and then create a PCG
+
+18
+00:01:16.519 --> 00:01:17.519
+Graph.
+
+19
+00:01:17.519 --> 00:01:21.920
+An Unreal Engine here gives you the option to start from a template, or if you prefer,
+
+20
+00:01:21.920 --> 00:01:24.480
+you can also create an empty graph.
+
+21
+00:01:24.480 --> 00:01:29.040
+Now unfortunately today, we're not going to build a whole PCG Graph from scratch.
+
+22
+00:01:29.040 --> 00:01:34.240
+This series of lessons only aims to give you an overview of these workflows.
+
+23
+00:01:34.240 --> 00:01:39.719
+But you can find courses on our platform that you can just follow to dive deeper into PCGs.
+
+24
+00:01:39.719 --> 00:01:43.480
+So let's go back to the slides and we will take a look at the further steps we will need
+
+25
+00:01:43.480 --> 00:01:46.640
+to take when getting started with PCGs.
+
+26
+00:01:46.640 --> 00:01:52.200
+Alright, once your PCG asset has been created, you want to drag it in your scene and adjust
+
+27
+00:01:52.200 --> 00:01:54.359
+the size of it as you need it.
+
+28
+00:01:54.359 --> 00:01:59.840
+Later on, you want to open up your PCG Graph Asset and start out by defining the way you'd
+
+29
+00:01:59.840 --> 00:02:05.879
+like to populate your map, either by spawning these meshes on your terrain or landscape
+
+30
+00:02:05.879 --> 00:02:13.680
+using a surface sampler or through a spline using a spline sampler, for example.
+
+31
+00:02:13.680 --> 00:02:19.639
+After that, you want to add a few nodes to assess how the ISM or instance aesthetic meshes
+
+32
+00:02:19.639 --> 00:02:21.800
+are going to be placed into your map.
+
+33
+00:02:21.800 --> 00:02:25.200
+And that's what the transform points would be for.
+
+34
+00:02:25.200 --> 00:02:30.800
+So usually the nodes expressing which meshes will be spawned are at the end of the graph.
+
+35
+00:02:30.800 --> 00:02:36.240
+And it's useful as you move along in the development of a PCG Graph to just enable debug mode by
+
+36
+00:02:36.240 --> 00:02:42.040
+pressing D on a node or just double-clicking on it to inspect it and view it in the Data
+
+37
+00:02:42.040 --> 00:02:43.040
+Viewport.
+
+38
+00:02:43.040 --> 00:02:47.680
+This will display little squares as preview meshes and will give you an overview of where
+
+39
+00:02:47.680 --> 00:02:50.240
+you're at in the development of your PCG.
+
+40
+00:02:50.680 --> 00:02:56.320
+OK, let's jump into the engine and see a complete example of a PCG using a surface sampler.
+
+41
+00:02:56.320 --> 00:03:00.760
+You're totally welcome to use an Examine this graph as a starting point to create your own
+
+42
+00:03:00.760 --> 00:03:02.920
+or just learn from it.
+
+43
+00:03:02.920 --> 00:03:03.920
+Let's go.
+
+44
+00:03:05.760 --> 00:03:13.480
+Alright, so if we pan a little bit around, we can find up here this big purple cube encompassing
+
+45
+00:03:13.480 --> 00:03:16.480
+most of the trees down here in our set.
+
+46
+00:03:16.479 --> 00:03:20.959
+And if we click on it, we will find out that this is actually a PCG Graph.
+
+47
+00:03:20.959 --> 00:03:26.079
+And once we have it selected in our Outliner, we can go down here into the Details panel
+
+48
+00:03:26.079 --> 00:03:30.719
+and if we scroll down, we will find the graph that is connected to this asset.
+
+49
+00:03:30.719 --> 00:03:32.839
+So let's double-click on it to open it up.
+
+50
+00:03:32.839 --> 00:03:38.479
+Alright, so if we zoom into this graph, we can see that we have one main input point,
+
+51
+00:03:38.479 --> 00:03:41.039
+which comes from the landscape.
+
+52
+00:03:41.039 --> 00:03:45.959
+And then we have five different set of nodes or different static meshes.
+
+53
+00:03:45.960 --> 00:03:51.640
+The plants and the rocks, the small bushes, the many trees, the large trees and the large
+
+54
+00:03:51.640 --> 00:03:52.640
+rocks.
+
+55
+00:03:52.640 --> 00:03:56.640
+This different set of nodes will basically be spawning different meshes.
+
+56
+00:03:56.640 --> 00:04:01.640
+We're using surface samplers to generate a point cloud that follows the topology of
+
+57
+00:04:01.640 --> 00:04:05.040
+the input surface, in this case the landscape.
+
+58
+00:04:05.040 --> 00:04:09.360
+And if we click on the surface sampler, we will get access to a few settings, especially
+
+59
+00:04:09.360 --> 00:04:11.360
+the points per square meters.
+
+60
+00:04:11.360 --> 00:04:16.199
+With this setting specifically, we can control the density of the point distribution.
+
+61
+00:04:16.199 --> 00:04:21.280
+So if we click on the node and then press A, we can start inspecting it and it will
+
+62
+00:04:21.280 --> 00:04:23.360
+be displayed in the data view board.
+
+63
+00:04:23.360 --> 00:04:27.199
+These little cubes are actually just temporary preview meshes.
+
+64
+00:04:27.199 --> 00:04:33.080
+So if I, for example, were to increase the points per square to something like 26, you
+
+65
+00:04:33.080 --> 00:04:37.360
+will see that the density of these points will highly increase.
+
+66
+00:04:37.360 --> 00:04:41.319
+So I'm just going to control Z to keep it to its original value.
+
+67
+00:04:41.319 --> 00:04:45.680
+Now after the surface sampler, we have a transform points nodes.
+
+68
+00:04:45.680 --> 00:04:51.079
+And transform points simply add spatial transformations to the point data we output from the surface
+
+69
+00:04:51.079 --> 00:04:52.079
+sampler.
+
+70
+00:04:52.079 --> 00:04:59.360
+They basically let us define minimum and maximum position, rotation and scale values of our
+
+71
+00:04:59.360 --> 00:05:02.639
+points and add some variation to them.
+
+72
+00:05:02.639 --> 00:05:06.439
+After that, we have a union and difference set of nodes.
+
+73
+00:05:06.439 --> 00:05:12.160
+Now the difference node performs a subtraction on the sample points, removing specific ones
+
+74
+00:05:12.160 --> 00:05:15.600
+from the source that fall within the bounds of that difference.
+
+75
+00:05:15.600 --> 00:05:19.120
+For now, there is nothing connected to the difference input.
+
+76
+00:05:19.120 --> 00:05:23.240
+So if we double click on this node, we will see that nothing is actually happening in
+
+77
+00:05:23.240 --> 00:05:24.240
+the view board.
+
+78
+00:05:24.240 --> 00:05:27.560
+And that's because we're actually not subtracting anything to it.
+
+79
+00:05:27.560 --> 00:05:31.319
+If we click on the difference node, we will see in the setting that the density function
+
+80
+00:05:31.319 --> 00:05:33.680
+will be set to binary.
+
+81
+00:05:33.680 --> 00:05:37.519
+It's important to leave it like that because this way we will be treating all the points
+
+82
+00:05:37.519 --> 00:05:45.680
+as either present, so once, or absent, zeros, and get very predictable results or very predictable
+
+83
+00:05:45.680 --> 00:05:47.160
+cuts.
+
+84
+00:05:47.160 --> 00:05:53.199
+We usually use a union node before the difference node to resolve multiple point sources into
+
+85
+00:05:53.199 --> 00:06:00.519
+a single merged point cloud before performing a subtraction operation with a difference.
+
+86
+00:06:00.519 --> 00:06:04.240
+Now this last node over here is a static mesh spawner.
+
+87
+00:06:04.240 --> 00:06:08.839
+So if you simply right click in the graph and then add a static mesh spawner, you will
+
+88
+00:06:08.839 --> 00:06:13.039
+see that it will have the same look and input and outputs.
+
+89
+00:06:13.039 --> 00:06:17.519
+And if you press F2 or right click on it and then rename, you will be able to rename it
+
+90
+00:06:17.519 --> 00:06:20.199
+large rocks.
+
+91
+00:06:20.199 --> 00:06:24.439
+So this is how this node was created.
+
+92
+00:06:24.439 --> 00:06:30.199
+Static mesh spawners basically just spawn static meshes positioned based on whatever
+
+93
+00:06:30.199 --> 00:06:32.560
+we expressed in the nodes before it.
+
+94
+00:06:32.560 --> 00:06:37.240
+And we can define the meshes we want to spawn through the static mesh spawner down here
+
+95
+00:06:37.240 --> 00:06:40.039
+in the details under mesh entries.
+
+96
+00:06:40.039 --> 00:06:46.639
+We would need to add one more, then open up the index, the descriptor, and then down here
+
+97
+00:06:46.639 --> 00:06:49.439
+we would be able to input our static meshes.
+
+98
+00:06:49.439 --> 00:06:52.639
+I will just go on and delete it.
+
+99
+00:06:52.639 --> 00:06:57.879
+Now if I pan down here in the graph, you will find this self pruning node.
+
+100
+00:06:57.959 --> 00:07:02.600
+A self pruning node will basically remove any overlapping points from a point cloud
+
+101
+00:07:02.600 --> 00:07:04.600
+based on their bounds.
+
+102
+00:07:04.600 --> 00:07:09.319
+So it basically checks all the points for self intersection and an emulates those conflicting
+
+103
+00:07:09.319 --> 00:07:10.839
+with each other.
+
+104
+00:07:10.839 --> 00:07:15.879
+In this specific setup down here, we could actually bypass the union and different nodes
+
+105
+00:07:15.879 --> 00:07:20.560
+as right now we're basically subtracting the same points from each other, resulting
+
+106
+00:07:20.560 --> 00:07:22.120
+in zero points.
+
+107
+00:07:22.120 --> 00:07:25.759
+So if I double click on the difference, you will see that our view board will be completely
+
+108
+00:07:25.839 --> 00:07:29.399
+empty and we wouldn't have any preview meshes.
+
+109
+00:07:29.399 --> 00:07:34.560
+But if we press Alt on our keyboard and then click on the input pin of large trees to disconnect
+
+110
+00:07:34.560 --> 00:07:39.719
+it, and then connect the self pruning output directly to large trees, and then inspect
+
+111
+00:07:39.719 --> 00:07:44.319
+these large trees node, some large trees would actually end up being spawned.
+
+112
+00:07:44.319 --> 00:07:49.199
+Alright, so you can take a look at this further, but for now we'll just go back to the slides
+
+113
+00:07:49.199 --> 00:07:52.759
+and check out a different type of PCG workflow.
+
+114
+00:07:52.759 --> 00:07:58.759
+There is one thing to keep in mind, even though PCG graphs are optimized and using mesh instancing,
+
+115
+00:07:58.759 --> 00:08:04.199
+they do have limitations and your performance will be impacted if you add too many items
+
+116
+00:08:04.199 --> 00:08:07.920
+to them, especially if those static meshes are too heavy.
+
+117
+00:08:07.920 --> 00:08:08.920
+They're not invincible.
+
+118
+00:08:08.920 --> 00:08:12.839
+So let's acknowledge that when creating an environment, there won't be always one tool
+
+119
+00:08:12.839 --> 00:08:14.759
+fitting all our needs.
+
+120
+00:08:14.759 --> 00:08:18.560
+And in this course, we're presenting you with multiple options to allow you to pick and
+
+121
+00:08:18.560 --> 00:08:22.079
+choose the ones that best aligns with your goals.
+
+122
+00:08:22.079 --> 00:08:26.359
+So let's go back into Unreal and check out a different PCG setup.
+
+123
+00:08:26.359 --> 00:08:29.159
+Alright, let's go back to our map.
+
+124
+00:08:29.159 --> 00:08:33.840
+And then if I pen around here, I will find a different PCG cube.
+
+125
+00:08:33.840 --> 00:08:36.000
+So let's select it in our map.
+
+126
+00:08:36.000 --> 00:08:40.600
+And then down here on the right in the details panel, we'll get access to the graph.
+
+127
+00:08:40.600 --> 00:08:42.480
+So let's double click to open it up.
+
+128
+00:08:42.480 --> 00:08:46.720
+Alright, we can immediately see that this graph is a little different from the one of
+
+129
+00:08:46.720 --> 00:08:49.360
+the PCG sample 01.
+
+130
+00:08:49.360 --> 00:08:54.840
+Simply because it doesn't generate a point cloud from a landscape, but from spline data.
+
+131
+00:08:54.840 --> 00:09:00.200
+So simply we can see that we are defining the spline that we will be sampling through
+
+132
+00:09:00.200 --> 00:09:05.440
+an actor selection tag that is specified here in the details.
+
+133
+00:09:05.440 --> 00:09:12.639
+The first spline data is sampled from a spline with a tag assigned to it of test spline.
+
+134
+00:09:12.639 --> 00:09:18.200
+And the second spline data is taken from a spline or an actor with the path tag assigned
+
+135
+00:09:18.200 --> 00:09:19.200
+to it.
+
+136
+00:09:19.200 --> 00:09:24.400
+So let's go briefly to our map and then zoom into this PCG graph.
+
+137
+00:09:24.400 --> 00:09:28.040
+We can see that we actually do have two splines here.
+
+138
+00:09:28.040 --> 00:09:33.560
+One is outlining the trees and the other one is like a path cutting through them.
+
+139
+00:09:33.560 --> 00:09:37.520
+So let's select our first spline here that is encompassing the trees.
+
+140
+00:09:37.520 --> 00:09:39.480
+It's going to be a little bit tricky at first.
+
+141
+00:09:39.480 --> 00:09:44.640
+You will be selecting the landscape, but finally you will succeed and select the correct spline.
+
+142
+00:09:44.640 --> 00:09:47.759
+So this is BP underscore samspline.
+
+143
+00:09:47.759 --> 00:09:53.000
+And if I search down here in the details for tag, I can see that I do have a tag assigned
+
+144
+00:09:53.000 --> 00:09:55.559
+to it and it is test spline.
+
+145
+00:09:55.559 --> 00:10:00.200
+If I click on BP path spline in the outliner, I will be able to select the path going to
+
+146
+00:10:00.200 --> 00:10:01.319
+the trees.
+
+147
+00:10:01.319 --> 00:10:05.919
+And down here in the details, you will see that the tag assigned to it is path.
+
+148
+00:10:05.919 --> 00:10:10.879
+So that's how the PCG graph is getting that spline data.
+
+149
+00:10:10.879 --> 00:10:15.319
+After that, we're using the spline samplers to generate a point cloud that follows the
+
+150
+00:10:15.320 --> 00:10:16.320
+splines.
+
+151
+00:10:16.320 --> 00:10:22.000
+And we're using two because with one, we're defining the area encompassing the spline.
+
+152
+00:10:22.000 --> 00:10:26.560
+And the other one, if we zoom into it like this, it's a little bit hard to see, but I
+
+153
+00:10:26.560 --> 00:10:29.200
+hope you will be able to see it in the video.
+
+154
+00:10:29.200 --> 00:10:33.520
+We're basically defining the outline of the spline.
+
+155
+00:10:33.520 --> 00:10:41.280
+And then we're subtracting the two, thus limiting the spawn trees to be only within the spline.
+
+156
+00:10:41.280 --> 00:10:44.600
+We're self-rooting to make sure that there are no overlapping trees.
+
+157
+00:10:44.600 --> 00:10:48.279
+And then we're moving them a bit around and scaling them down.
+
+158
+00:10:48.279 --> 00:10:53.200
+Then on this other set of notes below, we're getting the spline data from the path.
+
+159
+00:10:53.200 --> 00:10:56.600
+We're sampling the point cloud along the spline.
+
+160
+00:10:56.600 --> 00:11:01.399
+We're using a bounce modifier, which allows us to explicitly modify the extent of the
+
+161
+00:11:01.399 --> 00:11:06.360
+points in our point cloud, which in this case, we're basically using this to create a larger
+
+162
+00:11:06.360 --> 00:11:11.320
+exclusion zone around our points, larger than our spline path.
+
+163
+00:11:11.320 --> 00:11:16.040
+And then we're basically subtracting this from the areas of the trees.
+
+164
+00:11:16.040 --> 00:11:20.520
+And thus we're creating a path that is cutting to the trees.
+
+165
+00:11:20.520 --> 00:11:22.560
+And this is easier to see in our map.
+
+166
+00:11:22.560 --> 00:11:28.000
+So if I go back to our map, you can see here that if I start moving these points around
+
+167
+00:11:28.000 --> 00:11:34.680
+with my spline selected, I will be able to define how this path or road will be going
+
+168
+00:11:34.680 --> 00:11:36.320
+through the trees.
+
+169
+00:11:36.320 --> 00:11:42.000
+And if I were to be painting the terrain here and adding a different materials like some
+
+170
+00:11:42.000 --> 00:11:47.879
+rocks or pebbles, it would really look as if a road will be cutting through this forest.
+
+171
+00:11:47.879 --> 00:11:51.520
+Now let's select this other spline over here.
+
+172
+00:11:51.520 --> 00:11:55.480
+And if I move the points of the spline here, you can see that the trees will always fall
+
+173
+00:11:55.480 --> 00:11:57.840
+within the spline area.
+
+174
+00:11:57.840 --> 00:12:02.640
+But if I increase the surface area of the spline, more trees will be spawned.
+
+175
+00:12:02.639 --> 00:12:06.080
+And if I just reduce it, less trees will be spawned.
+
+176
+00:12:06.080 --> 00:12:11.159
+All right, now that we have an overview on different PCG workflows, let's go back to
+
+177
+00:12:11.159 --> 00:12:14.759
+our slides to conclude this video.
+
+178
+00:12:14.759 --> 00:12:18.960
+So that was it for this class, but you can find some additional documentation at this
+
+179
+00:12:18.960 --> 00:12:23.759
+link if you're interested in further expanding your knowledge in PCGs.
+
+180
+00:12:23.759 --> 00:12:27.879
+I would also encourage you to take a look at our courses focused on procedural content
+
+181
+00:12:27.879 --> 00:12:32.600
+generation on our platform, because they will walk you through the development of PCGs.
+
+182
+00:12:32.600 --> 00:12:39.040
+Thanks for sticking around, and in the upcoming lesson, we will be looking into Blueprint
+
+183
+00:12:39.040 --> 00:12:41.399
+and Modeling Tools in Unreal Engine.
+
+184
+00:12:41.399 --> 00:12:42.040
+I'll see you there.
+
