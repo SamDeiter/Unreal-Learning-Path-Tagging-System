@@ -440,8 +440,7 @@ function completeStep(num) {
   const btn = document.getElementById(`complete-${num}`);
   btn.textContent = "✓ Completed";
   btn.disabled = true;
-  btn.style.background = "var(--success)";
-  btn.style.opacity = "0.8";
+  btn.classList.add("completed");
   updateProgress();
 }
 

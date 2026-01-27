@@ -72,15 +72,22 @@ CRITICAL RULES:
 - Create 4 steps: understand (why it happens), diagnose (identify the cause), resolve (fix it), prevent (best practices)
 - Step 1 MUST explain the underlying concept - users should understand WHY the error exists
 - Step 4 MUST include prevention strategies and best practices
-- EVERY step includes official Epic documentation FIRST, then supplementary videos
-- Use dev.epicgames.com/documentation URLs
 - Be specific to their ACTUAL problem, not generic advice
 
-VIDEO RULES (IMPORTANT):
-- PREFER videos under 15 minutes - shorter is better for focused learning
-- If a video is over 15 minutes, include a "When to watch" field with timestamp range (e.g., "Watch 5:30-12:00 for the relevant section")
-- Include the video duration estimate in the description
-- Avoid hour-long tutorial marathons - find the focused clip that solves THIS problem`;
+EPIC DOCUMENTATION REQUIREMENT (MANDATORY - DO NOT SKIP):
+- The FIRST content item in EVERY step MUST be official Epic Games documentation
+- Use REAL URLs from: https://dev.epicgames.com/documentation/en-us/unreal-engine/
+- Example valid URLs:
+  * https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-best-practices-in-unreal-engine
+  * https://dev.epicgames.com/documentation/en-us/unreal-engine/object-referencing-in-unreal-engine
+  * https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects
+- NEVER use placeholder URLs - find the REAL documentation page
+- Every step needs at least one docs link BEFORE any video links
+
+VIDEO RULES:
+- Videos come AFTER documentation, as supplementary learning
+- PREFER videos under 15 minutes
+- For long videos, include timestamp URL (e.g., youtube.com/watch?v=xxx&t=330)`;
 
       const userPrompt = `Create an EDUCATIONAL learning path for: "${query}"
 
