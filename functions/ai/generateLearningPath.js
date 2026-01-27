@@ -1,7 +1,5 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const fs = require("fs");
-const path = require("path");
 
 // Import utility functions
 const { checkRateLimit } = require("../utils/rateLimit");
@@ -63,36 +61,7 @@ exports.generateLearningPath = functions
         );
       }
 
-      // 5. Load curated video database
-      let curatedVideosPrompt = "";
-      try {
-        const videosPath = path.join(__dirname, "../data/curated_videos.json");
-        const videosData = fs.readFileSync(videosPath, "utf8");
-        const videos = JSON.parse(videosData);
-
-        // Build a compact prompt with available videos
-        const videoList = [];
-        for (const [categoryKey, category] of Object.entries(
-          videos.categories,
-        )) {
-          for (const video of category.videos) {
-            const topicsStr = video.topics.join(", ");
-            const timestampsStr = Object.entries(video.timestamps || {})
-              .map(([key, sec]) => `${key}:${sec}s`)
-              .join(", ");
-            videoList.push(
-              `- ID: ${video.id} | "${video.title}" | Topics: [${topicsStr}] | Timestamps: {${timestampsStr}}`,
-            );
-          }
-        }
-        curatedVideosPrompt = videoList.join("\n");
-        console.log(`[DEBUG] Loaded ${videoList.length} curated videos`);
-      } catch (err) {
-        console.warn("[WARN] Could not load curated videos:", err.message);
-        curatedVideosPrompt =
-          "No curated videos available - focus on Epic documentation only.";
-      }
-
+      // 5. Build system prompt (videos found via Google Search grounding)
       // 6. Build the prompt for learning path generation
       const systemPrompt = `You are an expert UE5 educator creating DIAGNOSTIC learning paths.
 Your goal is NOT just to fix symptoms, but to teach developers:
@@ -107,20 +76,20 @@ CRITICAL RULES:
 - Be specific to their ACTUAL problem, not generic advice
 
 CONTENT REQUIREMENTS (MANDATORY):
-- EVERY step MUST have a "content" array with at least ONE video from the curated database below
-- Select the video most relevant to the step's topic, using appropriate timestamp
-- Epic documentation links are OPTIONAL supplements - include if helpful but not required
-- Never leave the content array empty - always include at least one video
+- EVERY step MUST have a "content" array with at least ONE video
+- Use Google Search to find REAL YouTube videos from the @UnrealEngine official channel
+- Only include videos that you can verify exist via Google Search
+- Epic documentation links are OPTIONAL supplements
 
-VIDEO SELECTION (REQUIRED - curated videos only):
-- You MUST include at least one video per step from the curated database
-- Choose the video with topics most relevant to the step, even if not a perfect match
+VIDEO SELECTION (REQUIRED - use Google Search):
+- Search for "@UnrealEngine" + topic keywords to find official tutorial videos
+- ONLY use videos from the Unreal Engine official YouTube channel
+- Extract the REAL video ID from the YouTube URL found in search results
 - ALWAYS include thumbnail_url using format: https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg
-- Use the timestamp_start field to link directly to the relevant section
-- Format video URL as: https://youtube.com/watch?v=VIDEO_ID&t=TIMESTAMP_SECONDS
+- Format video URL as: https://youtube.com/watch?v=VIDEO_ID
+- If you cannot find a relevant official video, use a highly-rated community UE5 tutorial
 
-CURATED VIDEO DATABASE (SELECT FROM THESE ONLY):
-${curatedVideosPrompt}`;
+IMPORTANT: Only include video URLs you find via search. Never make up video IDs.`;
 
       const userPrompt = `Create an EDUCATIONAL learning path for: "${query}"
 
