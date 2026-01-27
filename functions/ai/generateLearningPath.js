@@ -72,40 +72,15 @@ CRITICAL RULES:
 - Create 4 steps: understand (why it happens), diagnose (identify the cause), resolve (fix it), prevent (best practices)
 - Step 1 MUST explain the underlying concept - users should understand WHY the error exists
 - Step 4 MUST include prevention strategies and best practices
+- EVERY step includes official Epic documentation FIRST, then supplementary videos
+- Use dev.epicgames.com/documentation URLs
 - Be specific to their ACTUAL problem, not generic advice
 
-EPIC DOCUMENTATION REQUIREMENT (MANDATORY - DO NOT SKIP):
-- The FIRST content item in EVERY step MUST be official Epic Games documentation
-- Use REAL URLs from: https://dev.epicgames.com/documentation/en-us/unreal-engine/
-- Example valid URLs:
-  * https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-best-practices-in-unreal-engine
-  * https://dev.epicgames.com/documentation/en-us/unreal-engine/object-referencing-in-unreal-engine
-  * https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects
-- NEVER use placeholder URLs - find the REAL documentation page
-- Every step needs at least one docs link BEFORE any video links
-
-VIDEO RULES (CRITICAL):
-- Videos come AFTER documentation, as supplementary learning
-- PREFER videos under 15 minutes
-- For videos over 15 minutes, you MUST include:
-  * A timestamp URL with &t=XXX pointing to the relevant section start
-  * In the description, specify EXACT time range: "Watch 15:30-25:30 for [specific topic]"
-  * Do NOT just say "10 minutes" - specify WHICH 10 minutes!
-- Example: "Watch 12:45-22:30 for the object reference validation technique"
-
-FORBIDDEN PHRASES (NEVER USE):
-- "Search online for..." - ALWAYS provide the actual link instead
-- "Look up tutorials on..." - Provide the specific tutorial URL
-- "Research how to..." - Give the documentation link
-- "Find resources about..." - Include the actual resource URL
-- Any action telling users to search - YOU must find and provide the links
-
-ACTION RULES:
-- Every "action" field MUST be a concrete task the user can do RIGHT NOW
-- If an action references a concept, provide the Epic docs link for it
-- Example BAD: "Search online for IsValid tutorials"
-- Example GOOD: "Read the IsValid node documentation, then add an IsValid check before accessing your object reference"
-- Actions should reference the content items provided in that step`;
+VIDEO RULES (IMPORTANT):
+- PREFER videos under 15 minutes - shorter is better for focused learning
+- If a video is over 15 minutes, include a "When to watch" field with timestamp range (e.g., "Watch 5:30-12:00 for the relevant section")
+- Include the video duration estimate in the description
+- Avoid hour-long tutorial marathons - find the focused clip that solves THIS problem`;
 
       const userPrompt = `Create an EDUCATIONAL learning path for: "${query}"
 
@@ -167,29 +142,52 @@ Return JSON:
 
 Use REAL Epic documentation URLs and real YouTube video IDs.`;
 
-      // 6. Call Gemini API using official SDK
-      const { GoogleGenerativeAI } = require("@google/generative-ai");
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash",
-        systemInstruction: systemPrompt,
-      });
+      // 6. Call Gemini API
+      const model = "gemini-2.0-flash";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-      console.log("[DEBUG] Calling Gemini API with SDK...");
-
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        tools: [{ googleSearch: {} }],
+      const payload = {
+        contents: [{ parts: [{ text: userPrompt }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        tools: [
+          {
+            googleSearch: {}, // Enable grounding for real video URLs
+          },
+        ],
         generationConfig: {
           temperature: 0.3,
           maxOutputTokens: 8192,
         },
+      };
+
+      console.log("[DEBUG] Calling Gemini API...");
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
-      const generatedText = result.response.text();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          `[ERROR] Gemini API failed: ${response.status} ${response.statusText}`,
+          errorText,
+        );
+        throw new Error(
+          `Gemini API error: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const responseData = await response.json();
+      const generatedText =
+        responseData.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!generatedText) {
-        console.error("[ERROR] No content in Gemini response");
+        console.error(
+          "[ERROR] No content in Gemini response:",
+          JSON.stringify(responseData),
+        );
         throw new Error("No content generated from Gemini");
       }
 
