@@ -195,7 +195,6 @@
         border-radius: 12px;
         padding: 1.25rem;
         transition: all 0.2s;
-        cursor: pointer;
         position: relative;
       }
 
@@ -207,7 +206,41 @@
 
       .course-card.selected {
         border-color: var(--accent-green);
-        background: rgba(63, 185, 80, 0.1);
+        background: rgba(63, 185, 80, 0.08);
+      }
+
+      .card-add-btn {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: none;
+        background: var(--gradient-epic);
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        opacity: 0.8;
+      }
+
+      .card-add-btn:hover {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+
+      .card-add-btn.remove {
+        background: var(--accent-green);
+        font-size: 1rem;
+      }
+
+      .card-add-btn.remove:hover {
+        background: var(--accent-red);
       }
 
       .course-code {
@@ -290,18 +323,67 @@
       .path-panel h2 {
         font-size: 1rem;
         font-weight: 600;
-        margin-bottom: 1rem;
+        margin: 0;
         color: var(--accent-green);
         display: flex;
         align-items: center;
         gap: 0.5rem;
       }
 
+      .path-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .path-count {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        background: var(--bg-tertiary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+      }
+
       .path-empty {
         text-align: center;
-        padding: 2rem 1rem;
+        padding: 2.5rem 1.5rem;
         color: var(--text-secondary);
+      }
+
+      .path-empty .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        opacity: 0.7;
+      }
+
+      .path-empty .empty-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .path-empty .empty-hint {
+        font-size: 0.8rem;
+        line-height: 1.5;
+      }
+
+      .path-empty .hint-add {
+        display: inline-flex;
+        width: 20px;
+        height: 20px;
+        background: var(--gradient-epic);
+        color: white;
+        border-radius: 4px;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
         font-size: 0.875rem;
+        margin: 0 2px;
+        vertical-align: middle;
       }
 
       .path-list {
@@ -309,7 +391,7 @@
         flex-direction: column;
         gap: 0.5rem;
         margin-bottom: 1rem;
-        max-height: 400px;
+        max-height: 350px;
         overflow-y: auto;
       }
 
@@ -321,6 +403,22 @@
         background: var(--bg-tertiary);
         border-radius: 8px;
         font-size: 0.875rem;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+      }
+
+      .path-item:hover {
+        border-color: var(--border-color);
+      }
+
+      .path-item .drag-handle {
+        color: var(--text-secondary);
+        cursor: grab;
+        opacity: 0.5;
+      }
+
+      .path-item:hover .drag-handle {
+        opacity: 1;
       }
 
       .path-number {
@@ -343,14 +441,53 @@
         white-space: nowrap;
       }
 
+      .path-item-level {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 10px;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      .path-item-level.beginner { background: rgba(63, 185, 80, 0.15); color: var(--accent-green); }
+      .path-item-level.intermediate { background: rgba(210, 153, 34, 0.15); color: var(--accent-orange); }
+      .path-item-level.advanced { background: rgba(248, 81, 73, 0.15); color: var(--accent-red); }
+
       .path-item-remove {
         background: none;
         border: none;
-        color: var(--accent-red);
+        color: var(--text-secondary);
         cursor: pointer;
-        font-size: 1.25rem;
-        padding: 0;
+        font-size: 1rem;
+        padding: 0.25rem;
         line-height: 1;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+
+      .path-item-remove:hover {
+        background: rgba(248, 81, 73, 0.15);
+        color: var(--accent-red);
+      }
+
+      .path-summary {
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.35rem 0;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+
+      .summary-row span:last-child {
+        font-weight: 600;
+        color: var(--text-primary);
       }
 
       .path-actions {
@@ -358,6 +495,48 @@
         flex-direction: column;
         gap: 0.5rem;
       }
+
+      .btn-export {
+        background: var(--gradient-epic);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .btn-export:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+
+      .btn-export-secondary {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .btn-export-secondary:hover {
+        border-color: var(--accent-blue);
+        background: rgba(88, 166, 255, 0.1);
+      }
+
+      .btn-clear {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+      }
+
+      .btn-clear:hover {
+        border-color: var(--accent-red);
+        color: var(--accent-red);
+      }
+
 
       .btn {
         padding: 0.75rem 1rem;
@@ -1025,36 +1204,44 @@
 
       <!-- Learning Path Panel -->
       <aside class="path-panel">
-        <h2>📚 Learning Path</h2>
+        <div class="path-header">
+          <h2>📚 Your Learning Path</h2>
+          <span class="path-count" id="pathCount">0 courses</span>
+        </div>
+        
         <div class="path-list" id="pathList">
-          <div class="path-empty">
-            Click courses to add them to your learning path
+          <div class="path-empty" id="pathEmpty">
+            <div class="empty-icon">🎯</div>
+            <div class="empty-title">Start Building Your Path</div>
+            <div class="empty-hint">Click the <span class="hint-add">+</span> on any course card to add it here</div>
           </div>
         </div>
-        <div
-          class="path-stats"
-          id="pathStats"
-          style="
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.75rem;
-          "
-        ></div>
-        <div class="path-actions">
-          <button class="btn btn-primary" id="exportVideos">
-            📹 Export Videos
+        
+        <div class="path-summary" id="pathSummary" style="display: none;">
+          <div class="summary-row">
+            <span>📹 Videos</span>
+            <span id="summaryVideos">0</span>
+          </div>
+          <div class="summary-row">
+            <span>⏱️ Est. Duration</span>
+            <span id="summaryDuration">0h</span>
+          </div>
+          <div class="summary-row">
+            <span>📊 Levels</span>
+            <span id="summaryLevels">—</span>
+          </div>
+        </div>
+        
+        <div class="path-actions" id="pathActions" style="display: none;">
+          <button class="btn btn-export" id="exportVideos">
+            <span>📹</span> Export Video List
           </button>
-          <button
-            class="btn btn-primary"
-            id="exportPath"
-            style="
-              background: var(--bg-tertiary);
-              border: 1px solid var(--border-color);
-            "
-          >
-            Export Path JSON
+          <button class="btn btn-export-secondary" id="exportPath">
+            <span>📋</span> Export as JSON
           </button>
-          <button class="btn btn-secondary" id="clearPath">Clear All</button>
+          <button class="btn btn-clear" id="clearPath">
+            Clear All
+          </button>
         </div>
       </aside>
     </div>
@@ -1658,18 +1845,20 @@
           .map((course) => {
             const isSelected = selectedPath.find((p) => p.code === course.code);
             return `
-          <div class="course-card ${isSelected ? "selected" : ""}" onclick="toggleCourse('${course.code}')">
+          <div class="course-card ${isSelected ? "selected" : ""}">
+            <button class="card-add-btn ${isSelected ? 'remove' : ''}" onclick="event.stopPropagation(); toggleCourse('${course.code}')" title="${isSelected ? 'Remove from path' : 'Add to path'}">
+              ${isSelected ? '✓' : '+'}
+            </button>
             ${course.has_ai_tags ? '<div class="ai-badge">AI ✨</div>' : ""}
             <div class="course-code">${course.code || "N/A"}</div>
-            <div class="course-title">${course.title}</div>
+            <div class="course-title" onclick="openModal('${course.code}')">${course.title}</div>
             <div class="course-tags">
               <span class="tag tag-level">${course.tags.level || "Unknown"}</span>
               <span class="tag tag-topic">${course.tags.topic || "Other"}</span>
-              <span class="tag tag-industry">${course.tags.industry || "General"}</span>
             </div>
             <div class="course-meta">
               <span>🎬 ${course.video_count || 0} videos</span>
-              <span>📦 ${course.versions?.length || 0} versions</span>
+              <span>📦 ${course.versions?.length || 0} ver</span>
               ${course.has_cc ? "<span>📝 CC</span>" : ""}
             </div>
           </div>
@@ -1697,34 +1886,51 @@
       // Render learning path
       function renderPath() {
         const list = document.getElementById("pathList");
-        const statsEl = document.getElementById("pathStats");
+        const emptyState = document.getElementById("pathEmpty");
+        const summary = document.getElementById("pathSummary");
+        const actions = document.getElementById("pathActions");
+        const countEl = document.getElementById("pathCount");
+
+        // Update course count
+        countEl.textContent = `${selectedPath.length} course${selectedPath.length !== 1 ? 's' : ''}`;
 
         if (selectedPath.length === 0) {
-          list.innerHTML =
-            '<div class="path-empty">Click courses to add them to your learning path</div>';
-          statsEl.innerHTML = "";
+          // Show empty state, hide summary and actions
+          list.innerHTML = `
+            <div class="path-empty" id="pathEmpty">
+              <div class="empty-icon">🎯</div>
+              <div class="empty-title">Start Building Your Path</div>
+              <div class="empty-hint">Click the <span class="hint-add">+</span> on any course card to add it here</div>
+            </div>
+          `;
+          summary.style.display = 'none';
+          actions.style.display = 'none';
           return;
         }
 
-        // Calculate path stats
-        const totalVideos = selectedPath.reduce(
-          (sum, c) => sum + (c.video_count || 0),
-          0,
-        );
-        statsEl.innerHTML = `📚 ${selectedPath.length} courses • 🎬 ${totalVideos} videos`;
+        // Show summary and actions
+        summary.style.display = 'block';
+        actions.style.display = 'flex';
 
-        list.innerHTML = selectedPath
-          .map(
-            (course, i) => `
-        <div class="path-item">
-          <div class="path-number">${i + 1}</div>
-          <div class="path-item-title">${course.title}</div>
-          <span style="font-size: 0.6rem; color: var(--text-secondary);">${course.video_count || 0}🎬</span>
-          <button class="path-item-remove" onclick="removeCourse('${course.code}')">×</button>
-        </div>
-      `,
-          )
-          .join("");
+        // Calculate path stats
+        const totalVideos = selectedPath.reduce((sum, c) => sum + (c.video_count || 0), 0);
+        const estHours = Math.round(totalVideos * 0.15); // ~9min per video avg
+        const levels = [...new Set(selectedPath.map(c => c.tags.level).filter(Boolean))];
+
+        document.getElementById('summaryVideos').textContent = totalVideos;
+        document.getElementById('summaryDuration').textContent = estHours > 0 ? `~${estHours}h` : '< 1h';
+        document.getElementById('summaryLevels').textContent = levels.length > 0 ? levels.join(', ') : '—';
+
+        // Render path items
+        list.innerHTML = selectedPath.map((course, i) => `
+          <div class="path-item" draggable="true" data-index="${i}">
+            <span class="drag-handle">⋮⋮</span>
+            <div class="path-number">${i + 1}</div>
+            <div class="path-item-title">${course.title}</div>
+            <span class="path-item-level ${(course.tags.level || '').toLowerCase()}">${course.tags.level || ''}</span>
+            <button class="path-item-remove" onclick="removeCourse('${course.code}')" title="Remove">×</button>
+          </div>
+        `).join("");
       }
 
       // Remove course from path
