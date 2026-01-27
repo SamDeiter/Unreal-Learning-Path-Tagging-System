@@ -100,6 +100,49 @@ function parseMarkdown(text) {
     .replace(/⏱️/g, "<br>⏱️"); // line break before timestamp
 }
 
+// Format action text with interactive checklists
+function formatActionText(text) {
+  if (!text) return "";
+
+  // First apply markdown parsing
+  let html = parseMarkdown(text);
+
+  // Convert numbered lists (1. item 2. item) to checkbox list
+  // Matches patterns like "1. text" or "1." followed by content
+  const numberedPattern =
+    /(\d+)\.\s*\*?\*?([^:]+)\*?\*?:?\s*(.*?)(?=(?:\d+\.\s)|$)/g;
+  const matches = [...text.matchAll(numberedPattern)];
+
+  if (matches.length >= 2) {
+    // Build checklist HTML
+    let checklistHtml = '<ul class="action-checklist">';
+    matches.forEach((match, i) => {
+      const title = match[2].replace(/\*\*/g, "").trim();
+      const desc = match[3] ? match[3].trim() : "";
+      checklistHtml += `
+        <li class="action-item">
+          <label>
+            <input type="checkbox" class="action-checkbox" onchange="trackCheckbox(this)">
+            <span class="action-item-title">${title}</span>
+          </label>
+          ${desc ? `<p class="action-item-desc">${parseMarkdown(desc)}</p>` : ""}
+        </li>`;
+    });
+    checklistHtml += "</ul>";
+    return checklistHtml;
+  }
+
+  // If not a numbered list, just return parsed markdown
+  return html;
+}
+
+// Track checkbox progress
+function trackCheckbox(checkbox) {
+  if (typeof Tracker !== "undefined") {
+    Tracker.trackEvent("action_checkbox", { checked: checkbox.checked });
+  }
+}
+
 // [REFACTORED] Code from lines 103-167 moved to modules
 
 function setQuery(query) {
@@ -399,7 +442,7 @@ function renderPath(path) {
                       <span class="action-icon">👉</span>
                       <div>
                           <div class="action-label">Your Action</div>
-                          <div class="action-text">${step.action}</div>
+                          <div class="action-text">${formatActionText(step.action)}</div>
                       </div>
                   </div>
                   `
