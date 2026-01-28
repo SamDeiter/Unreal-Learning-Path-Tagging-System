@@ -1,0 +1,498 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.440
+Hi everyone, in this lesson we're going to go ahead and grab that sprite sheet, create
+
+2
+00:00:05.440 --> 00:00:12.200
+a material for it, and then create a Niagara system and load that material in that system.
+
+3
+00:00:12.200 --> 00:00:14.280
+So let's get started.
+
+4
+00:00:14.280 --> 00:00:18.359
+So in here we're going to go ahead and bring in our texture sprite sheet.
+
+5
+00:00:18.359 --> 00:00:23.320
+Now you can simply just hit the T key and if it's selected you'll notice it will automatically
+
+6
+00:00:23.320 --> 00:00:24.320
+populate.
+
+7
+00:00:24.320 --> 00:00:30.079
+But for some reason you don't have it in place, you can simply go in here in our content
+
+8
+00:00:30.079 --> 00:00:34.439
+drawer, have the sprite sheet selected, grab it, and you should be familiar with this,
+
+9
+00:00:34.439 --> 00:00:38.079
+but if you're not simply click on the arrow and load it this way.
+
+10
+00:00:38.079 --> 00:00:41.560
+So what we want to do now is build out this material.
+
+11
+00:00:41.560 --> 00:00:45.280
+So to build out this material we're going to hit the D key and left click to create the
+
+12
+00:00:45.280 --> 00:00:46.280
+divide node.
+
+13
+00:00:46.280 --> 00:00:50.719
+I'm going to pull that RGB string and pull it into the A slot here, and I'm going to
+
+14
+00:00:50.719 --> 00:00:55.280
+grab the A for the alpha here and pull it into the B slot here.
+
+15
+00:00:55.280 --> 00:00:59.239
+And then what I can do from here is pull that right into the base color.
+
+16
+00:00:59.239 --> 00:01:03.560
+Now you'll notice we're actually not quite doing exactly what we want, right?
+
+17
+00:01:03.560 --> 00:01:08.420
+So to help things out, and there's no alpha information being read, we can simply click
+
+18
+00:01:08.420 --> 00:01:13.439
+on our original node that we have here, the home base where everything gets plugged in,
+
+19
+00:01:13.439 --> 00:01:17.680
+and we can go in here underneath our blend mode and set that to translucent.
+
+20
+00:01:17.680 --> 00:01:22.800
+Now we're not done yet because we now need to grab that alpha and pull it into the opacity.
+
+21
+00:01:22.800 --> 00:01:26.800
+And you'll see we're going to kind of get a one to one to our original effect.
+
+22
+00:01:26.800 --> 00:01:28.360
+That's actually pretty cool.
+
+23
+00:01:28.360 --> 00:01:30.200
+But say you want to have a little bit of glow.
+
+24
+00:01:30.200 --> 00:01:36.840
+You'll notice in my original sample it has connected right from our divide into the emissive
+
+25
+00:01:36.840 --> 00:01:39.940
+for a little bit of glow, but it does make things a bit lighter.
+
+26
+00:01:39.940 --> 00:01:44.840
+So if we look into our scene itself, you'll actually see the effect here brighter than
+
+27
+00:01:44.840 --> 00:01:46.440
+the one in the distance.
+
+28
+00:01:46.439 --> 00:01:52.439
+So to be able to control some of that, what you can simply do is go in here and I can
+
+29
+00:01:52.439 --> 00:01:57.799
+hit the M key and the M key will give us our multiplying.
+
+30
+00:01:57.799 --> 00:02:02.599
+And then if I want to hit my finger on the S key left click, and we'll have our scalar
+
+31
+00:02:02.599 --> 00:02:16.120
+and we'll call this emiss one M emissive amounts and plug that into the B channel.
+
+32
+00:02:16.560 --> 00:02:21.840
+Plug this guy, the divide into the A channel and then grab that and put it into the emissive.
+
+33
+00:02:21.840 --> 00:02:25.840
+So now if I wanted to increase this, I can create an instance of this material and have
+
+34
+00:02:25.840 --> 00:02:29.800
+this exposed so that I can control it.
+
+35
+00:02:29.800 --> 00:02:30.800
+Pretty awesome.
+
+36
+00:02:30.800 --> 00:02:36.280
+But remember, you have to keep in mind what your sprite sheets number of rows are.
+
+37
+00:02:36.280 --> 00:02:43.759
+And you'll see we have one, two, three, four, five, six, seven, eight.
+
+38
+00:02:43.759 --> 00:02:45.960
+And we have an eight by eight square.
+
+39
+00:02:45.960 --> 00:02:47.400
+That's going to be 64.
+
+40
+00:02:47.400 --> 00:02:52.840
+And that number is going to be key as we build out our emitter.
+
+41
+00:02:52.840 --> 00:02:55.200
+Let's go ahead and do that real quick here.
+
+42
+00:02:55.200 --> 00:02:59.480
+So again, we want to make sure when we build our emitter initially, let's go back to the
+
+43
+00:02:59.480 --> 00:03:01.800
+FX folder, a little bit less busy.
+
+44
+00:03:01.800 --> 00:03:05.920
+You can see in the in class effects one, because I didn't change the folder, I kept
+
+45
+00:03:05.920 --> 00:03:10.700
+it here, all of the individual sprites are rendered out as well as a sprite sheet.
+
+46
+00:03:10.700 --> 00:03:15.040
+So that can be convenient if you need to take these into Photoshop and edit them later for
+
+47
+00:03:15.039 --> 00:03:20.359
+whatever reason or make a brand new sprite sheet using a software to be able to do so.
+
+48
+00:03:20.359 --> 00:03:23.840
+But we have an already made, so we're okay there.
+
+49
+00:03:23.840 --> 00:03:27.319
+So I want to go ahead and right click in here and I go to effects.
+
+50
+00:03:27.319 --> 00:03:32.680
+And again, I go to Niagara system in this Niagara system, I can hit next, and I can
+
+51
+00:03:32.680 --> 00:03:34.639
+simply go to an empty slot.
+
+52
+00:03:34.639 --> 00:03:38.799
+So you can do emitter or system, but just whatever you choose, make sure it's an empty
+
+53
+00:03:38.799 --> 00:03:43.319
+one, and you just hit a plus and then you hit finish and you're in.
+
+54
+00:03:43.319 --> 00:03:47.519
+Now we have one here that's already set up here, but let me show you again pointing out
+
+55
+00:03:47.519 --> 00:03:50.840
+what we have in place.
+
+56
+00:03:50.840 --> 00:03:57.479
+I made sure that underneath my emitter state, I hit plus and added or I should say update,
+
+57
+00:03:57.479 --> 00:04:01.680
+I hit plus and I added my spawn burst instantaneous.
+
+58
+00:04:01.680 --> 00:04:05.120
+And I kept this spawn count to one and the spawn time to zero.
+
+59
+00:04:05.120 --> 00:04:08.039
+I left those default and that worked just great.
+
+60
+00:04:08.039 --> 00:04:13.120
+From there, I also want to underneath my particle update, click down the plus arrow, and I added
+
+61
+00:04:13.120 --> 00:04:15.319
+a sub UV animation.
+
+62
+00:04:15.319 --> 00:04:16.319
+Click on this one.
+
+63
+00:04:16.319 --> 00:04:20.680
+And we want to make sure that we're using our start frame of zero like I mentioned before,
+
+64
+00:04:20.680 --> 00:04:25.079
+and end frame is 63 because we want one just behind the next frame.
+
+65
+00:04:25.079 --> 00:04:27.639
+Very important to consider.
+
+66
+00:04:27.639 --> 00:04:32.120
+And then from there, we go to sprite render and under sprite render underneath sub image
+
+67
+00:04:32.120 --> 00:04:36.600
+size, we change that to eight by eight, like we talked about before.
+
+68
+00:04:36.600 --> 00:04:41.360
+And finally underneath our initial particle, we want to make sure that our underneath our
+
+69
+00:04:41.360 --> 00:04:46.920
+sprite attributes, we set the sprite size mode to uniform and then the uniform sprite
+
+70
+00:04:46.920 --> 00:04:48.520
+size to 500.
+
+71
+00:04:48.520 --> 00:04:53.720
+This is key so that we actually have the accurate size that we need and it almost does like
+
+72
+00:04:53.720 --> 00:04:54.720
+a one to one.
+
+73
+00:04:54.720 --> 00:04:59.199
+Now again, you can change the size to whatever you need for your sprite.
+
+74
+00:04:59.199 --> 00:05:03.360
+So once you're done, you want to go ahead and hit save and then you simply just drag
+
+75
+00:05:03.360 --> 00:05:04.860
+it into your scene.
+
+76
+00:05:04.860 --> 00:05:09.420
+This particular one is going straight from the opacity and the emissive.
+
+77
+00:05:09.420 --> 00:05:12.460
+The opacity is working great, but the emissive is a little bit bright.
+
+78
+00:05:12.460 --> 00:05:20.259
+So if we decided to revisit this effect, we can go in here and go to its material.
+
+79
+00:05:20.259 --> 00:05:26.060
+And if we want to hit save, let's see if we'll update this guy is the one that we kind of
+
+80
+00:05:26.060 --> 00:05:28.660
+were tweaking with.
+
+81
+00:05:28.660 --> 00:05:33.060
+And then now we can see that it is a bit darker and a little bit closer to what our original
+
+82
+00:05:33.060 --> 00:05:34.060
+is.
+
+83
+00:05:34.060 --> 00:05:36.340
+Now again, keep in mind you're looping.
+
+84
+00:05:36.339 --> 00:05:40.859
+So if you do want to use this and this isn't too bad, the resolution isn't too shabby,
+
+85
+00:05:40.859 --> 00:05:43.139
+especially if it's far away.
+
+86
+00:05:43.139 --> 00:05:45.779
+You want to go ahead and edit things accordingly.
+
+87
+00:05:45.779 --> 00:05:50.579
+So you can also go in here and edit the glow and Photoshop if you want to.
+
+88
+00:05:50.579 --> 00:05:54.739
+And there's multiple ways to get this where you want, but this gives you a lower level
+
+89
+00:05:54.739 --> 00:05:56.979
+effect that you can put in the background.
+
+90
+00:05:56.979 --> 00:06:02.259
+Again, you do need to consider how many frames you want, how long it's going to play and
+
+91
+00:06:02.259 --> 00:06:04.459
+how long the camera is going to be looking at it.
+
+92
+00:06:04.459 --> 00:06:07.939
+Now in another way, which I mentioned earlier, and I'll give you a link at the end of this
+
+93
+00:06:07.939 --> 00:06:14.779
+course, you can also create a plate that you render out to using Houdini or Emberjan or
+
+94
+00:06:14.779 --> 00:06:21.060
+Maya and it can be an EXR HDR output and UNRUL will accept that in your scene.
+
+95
+00:06:21.060 --> 00:06:26.019
+Now this isn't part of this course, that course, but I do offer that link to you if you decide
+
+96
+00:06:26.019 --> 00:06:29.579
+to go that route and you need something even higher resolution wise.
+
+97
+00:06:29.699 --> 00:06:34.539
+But this gives you a quick, simple solution versus that EXR one, which gives you even
+
+98
+00:06:34.539 --> 00:06:35.539
+a higher resolution.
+
+99
+00:06:35.539 --> 00:06:38.740
+So you have the best of both worlds to play with things.
+
+100
+00:06:38.740 --> 00:06:44.459
+Again, all of these steps are laid out for you, such as building the material, making
+
+101
+00:06:44.459 --> 00:06:48.979
+sure that it's translucent, and then making sure you're loading the right texture in your
+
+102
+00:06:48.979 --> 00:06:54.180
+texture sample node, and then connecting a divide to your opacity emissive.
+
+103
+00:06:54.180 --> 00:06:56.500
+And also you can connect it to your base color.
+
+104
+00:06:56.500 --> 00:07:00.060
+But keep in mind, if you connected to your emissive, there could be some brightness there
+
+105
+00:07:00.060 --> 00:07:02.660
+and kind of just use it the way that I created.
+
+106
+00:07:02.660 --> 00:07:07.819
+We had a scalar and a multiply and we can downplay that if we need to or increase it
+
+107
+00:07:07.819 --> 00:07:09.819
+as needed.
+
+108
+00:07:09.819 --> 00:07:14.660
+And then also in the effect itself, some quick review here again, start frame needs to be
+
+109
+00:07:14.660 --> 00:07:19.779
+set to zero and end frame in the sub UV animation node that you need to make.
+
+110
+00:07:19.779 --> 00:07:25.540
+Make sure you also create a spawn burst instantaneous, keep things at default, and then a sprite
+
+111
+00:07:25.540 --> 00:07:30.180
+renderer you want to make sure the sub UV size is eight and eight underneath your sub
+
+112
+00:07:30.180 --> 00:07:32.260
+UV category.
+
+113
+00:07:32.260 --> 00:07:37.840
+And then finally in that Niagara emitter, or I should say system, you should go in here
+
+114
+00:07:37.840 --> 00:07:40.379
+underneath your sprite attributes.
+
+115
+00:07:40.379 --> 00:07:45.500
+And in here you want to control and make sure your uniform sprite size is 500.
+
+116
+00:07:45.500 --> 00:07:51.140
+By default, the life cycle mode should be system on both scalability and life cycle.
+
+117
+00:07:51.140 --> 00:07:54.900
+But you can triple check this, especially if you're inheriting an effect that someone else
+
+118
+00:07:54.899 --> 00:08:00.659
+has created, make sure that the life cycle mode for this particular node is set to system
+
+119
+00:08:00.659 --> 00:08:03.620
+and it sets a system for both of them.
+
+120
+00:08:03.620 --> 00:08:05.120
+That's it with this lecture.
+
+121
+00:08:05.120 --> 00:08:09.339
+Here's some links to help you along your journey to give you more information about what we
+
+122
+00:08:09.339 --> 00:08:10.339
+talked about.
+
+123
+00:08:10.339 --> 00:08:11.339
+Thanks again.
+
+124
+00:08:11.339 --> 00:08:15.339
+And in the next video, we'll do a quick recap about everything that we've learned.
+

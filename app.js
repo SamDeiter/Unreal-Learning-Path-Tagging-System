@@ -800,15 +800,15 @@ document.getElementById("exportPath").addEventListener("click", () => {
   a.click();
 });
 
-// Clear path
-document.getElementById("clearPath").addEventListener("click", () => {
+// Clear path function (called from inline onclick)
+function clearPath() {
   selectedPath = [];
   renderPath();
   renderCourses();
-});
+}
 
-// Export videos list
-document.getElementById("exportVideos").addEventListener("click", () => {
+// Export videos list (optional - element may not exist)
+document.getElementById("exportVideos")?.addEventListener("click", () => {
   if (selectedPath.length === 0) {
     alert("Add courses to your learning path first!");
     return;
@@ -816,9 +816,9 @@ document.getElementById("exportVideos").addEventListener("click", () => {
 
   // Collect all video files from selected courses
   const allVideos = [];
-  selectedPath.forEach((course, courseIndex) => {
+  selectedPath.forEach((course, _courseIndex) => {
     if (course.videos && course.videos.length > 0) {
-      course.videos.forEach((video, videoIndex) => {
+      course.videos.forEach((video, _videoIndex) => {
         allVideos.push({
           order: allVideos.length + 1,
           course_code: course.code,
