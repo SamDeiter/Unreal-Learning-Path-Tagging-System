@@ -1,0 +1,510 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.200
+Hi everyone, in this lesson we're going to go over the outline for this series of videos
+
+2
+00:00:06.200 --> 00:00:10.320
+as well as look at some optimization lighting concepts.
+
+3
+00:00:10.320 --> 00:00:12.679
+So let's get started.
+
+4
+00:00:12.679 --> 00:00:16.760
+So the outline for the scores, first up we'll be looking at lighting optimization.
+
+5
+00:00:16.760 --> 00:00:22.359
+We'll be analyzing scenes and priority areas as that's very important when it comes to
+
+6
+00:00:22.359 --> 00:00:23.359
+lighting.
+
+7
+00:00:23.359 --> 00:00:27.400
+We'll look at baking versus dynamic as a quick overview and then we're going to jump right
+
+8
+00:00:27.400 --> 00:00:28.400
+in.
+
+9
+00:00:28.399 --> 00:00:34.239
+So in Lumen we'll look at the Lumen equation overall as in key workflows, limitations,
+
+10
+00:00:34.239 --> 00:00:37.439
+quality control, optimizing and editing.
+
+11
+00:00:37.439 --> 00:00:40.320
+Next we'll look at a review of light mass baking.
+
+12
+00:00:40.320 --> 00:00:44.399
+This includes CPU and GPU workflows.
+
+13
+00:00:44.399 --> 00:00:47.000
+We'll look at light mass baking CPU review.
+
+14
+00:00:47.000 --> 00:00:52.719
+We'll set up how to set up a pre-computed lighting scenario review and GPU light mass
+
+15
+00:00:52.719 --> 00:00:54.480
+review.
+
+16
+00:00:54.480 --> 00:00:57.159
+Next we'll look at screen space global illumination.
+
+17
+00:00:57.159 --> 00:01:00.439
+How to use it, when to use it and how to add some things.
+
+18
+00:01:00.439 --> 00:01:05.759
+Then we'll look at ray tracing as an overall review which will include optimizing for final
+
+19
+00:01:05.759 --> 00:01:10.519
+pixel review and optimizing for ICV effects to workflows.
+
+20
+00:01:10.519 --> 00:01:13.840
+And finally last but not least we'll look at optimizing for fog effects.
+
+21
+00:01:13.840 --> 00:01:15.799
+We get that request a lot.
+
+22
+00:01:15.799 --> 00:01:18.879
+What to look for and optimizing settings.
+
+23
+00:01:18.879 --> 00:01:22.560
+With that in mind let's go ahead and get started.
+
+24
+00:01:22.560 --> 00:01:24.879
+So review, lighting optimization.
+
+25
+00:01:24.879 --> 00:01:29.759
+Now this is covered in some of the foundational lighting courses but we will be pointing out
+
+26
+00:01:29.759 --> 00:01:33.599
+a few things specifically for ICV effects and linear workflows.
+
+27
+00:01:33.599 --> 00:01:39.439
+With some mentions to games because there are some very fundamental principles for both
+
+28
+00:01:39.439 --> 00:01:43.199
+of these that need to be considered when working with lighting.
+
+29
+00:01:43.199 --> 00:01:45.759
+So let's go ahead and get started.
+
+30
+00:01:45.759 --> 00:01:48.840
+So analyzing scenes and priority areas.
+
+31
+00:01:48.840 --> 00:01:49.959
+The approach.
+
+32
+00:01:49.959 --> 00:01:55.599
+You need to determine up front if you're using lumen versus ray tracing versus baked lighting.
+
+33
+00:01:55.599 --> 00:02:00.359
+This is really important because with each type of lighting comes some things you need
+
+34
+00:02:00.359 --> 00:02:01.639
+to consider.
+
+35
+00:02:01.639 --> 00:02:05.399
+This can be determined if final pixel is your goal or ICV effects.
+
+36
+00:02:05.399 --> 00:02:09.400
+Even games also depend on the strength of the machine's running.
+
+37
+00:02:09.400 --> 00:02:13.240
+And you also need to consider where you're sending your information to.
+
+38
+00:02:13.240 --> 00:02:18.439
+So are you going to be in the case of games are you packaging it out for mobile or for
+
+39
+00:02:18.439 --> 00:02:20.599
+iPads.
+
+40
+00:02:20.599 --> 00:02:26.159
+Are you in the case of ICV effects on a large wall with high performance machines that you're
+
+41
+00:02:26.159 --> 00:02:35.039
+sending to the via switchboard or are you working with a lower end scene or output and
+
+42
+00:02:35.039 --> 00:02:36.039
+final pixel.
+
+43
+00:02:36.039 --> 00:02:40.360
+What kind of GPO are you running when you decide to do and work with your machines.
+
+44
+00:02:40.360 --> 00:02:44.560
+What is the best approach with those restrictions in mind.
+
+45
+00:02:44.560 --> 00:02:49.280
+So no lumen is currently available for ICV effects but takes some material and noise overhead.
+
+46
+00:02:49.280 --> 00:02:51.640
+So you need to consider those things.
+
+47
+00:02:51.640 --> 00:02:54.960
+Ray tracing is not effective for ICV effects.
+
+48
+00:02:54.960 --> 00:02:59.759
+But for virtual production you can use it or in the case of final pixel.
+
+49
+00:02:59.759 --> 00:03:03.879
+If used in games materials are a big part of the performance when it comes to ray tracing
+
+50
+00:03:03.879 --> 00:03:09.640
+as well as small numerous geo and enclosed areas.
+
+51
+00:03:09.640 --> 00:03:13.680
+So analyzing the scenes and priority areas.
+
+52
+00:03:13.680 --> 00:03:19.000
+So your priorities are really important when it comes to ICV effects and virtual production.
+
+53
+00:03:19.000 --> 00:03:23.920
+You need to make sure that what's important what's up front needs to have the best visual
+
+54
+00:03:23.920 --> 00:03:28.319
+fidelity and have the highest polys.
+
+55
+00:03:28.319 --> 00:03:31.680
+So that's kind of the same principle when it comes to games.
+
+56
+00:03:31.680 --> 00:03:36.520
+So if you're not worried when it comes to final pixel if you're not worried about frame
+
+57
+00:03:36.520 --> 00:03:39.040
+rate typically.
+
+58
+00:03:39.039 --> 00:03:44.000
+So ray tracing path tracer or lumen can be used or even a bake method with a combination
+
+59
+00:03:44.000 --> 00:03:46.639
+of ray tracing at the same time if you wish.
+
+60
+00:03:46.639 --> 00:03:50.680
+Out of the box unreal legacy baking does a great job.
+
+61
+00:03:50.680 --> 00:03:53.639
+So ray tracing or lumen may not always be needed.
+
+62
+00:03:53.639 --> 00:03:58.079
+So just just depends what your visual and you need or want.
+
+63
+00:03:58.079 --> 00:04:01.719
+The reason why I say that is because each one has a caveat.
+
+64
+00:04:01.719 --> 00:04:04.919
+If we went to baking our reflections aren't going to be accurate.
+
+65
+00:04:04.919 --> 00:04:10.000
+If we go to lumen we may find some noise that is persistent a little bit tricky to deal with.
+
+66
+00:04:10.000 --> 00:04:15.079
+I say the effects lumen in this case is the best approach for instant results and output
+
+67
+00:04:15.079 --> 00:04:17.599
+when it comes to putting stuff to your wall.
+
+68
+00:04:17.599 --> 00:04:22.120
+But again you need to consider your materials and you need to consider what you can do to
+
+69
+00:04:22.120 --> 00:04:25.560
+maybe hide some of that noise that is occurring.
+
+70
+00:04:25.560 --> 00:04:30.879
+Others will pre bake or use GPU light mass and that also is an option for ICV effects.
+
+71
+00:04:30.879 --> 00:04:36.519
+GPU baking makes things be a little bit faster if you have to update things on the fly on
+
+72
+00:04:36.519 --> 00:04:39.319
+set versus CPU baking.
+
+73
+00:04:39.319 --> 00:04:42.560
+Now we'll talk about the difference between those and it's a bit of review if you've taken
+
+74
+00:04:42.560 --> 00:04:48.000
+some of the lighting classes but we're definitely going to look at some of those caveats.
+
+75
+00:04:48.000 --> 00:04:52.639
+So keep those things in mind when you are tackling your scenes.
+
+76
+00:04:52.639 --> 00:04:58.480
+ICV effects approach having a good idea of the visual concepts ahead of time is key.
+
+77
+00:04:58.480 --> 00:05:04.319
+A lot of people I find out working with clients and helping people out working in this workflow
+
+78
+00:05:04.319 --> 00:05:10.000
+trying to get ICV effects or understand the concept of it in the context of Unreal.
+
+79
+00:05:10.000 --> 00:05:14.640
+A lot of people will still think of Reels like an offline render and throw everything
+
+80
+00:05:14.640 --> 00:05:17.520
+at it including the kitchen sink.
+
+81
+00:05:17.520 --> 00:05:19.160
+But it doesn't work like that.
+
+82
+00:05:19.160 --> 00:05:24.319
+You have to actually work within a real time within real time restrictions.
+
+83
+00:05:24.319 --> 00:05:27.319
+So again priority areas are key.
+
+84
+00:05:27.319 --> 00:05:30.319
+Everything in the background can even be put on cards.
+
+85
+00:05:30.319 --> 00:05:35.240
+So you can make an alpha that's clean and believable maybe even hide some of its impurities with
+
+86
+00:05:35.240 --> 00:05:41.759
+fog cards or actual fog and you can actually come up with a really nice scene but you got
+
+87
+00:05:41.759 --> 00:05:45.360
+to be very strategic when you do so.
+
+88
+00:05:45.360 --> 00:05:50.959
+One thing people need to consider if they are looking at ray tracing it is not path tracing.
+
+89
+00:05:50.959 --> 00:05:53.839
+In a real time scenario ray tracing is expensive.
+
+90
+00:05:53.839 --> 00:05:56.919
+Lumion is the best approach for your LED volumes.
+
+91
+00:05:56.919 --> 00:05:59.799
+So keep those things in mind.
+
+92
+00:05:59.799 --> 00:06:05.679
+So here's a couple comparisons here of how things are a bit more streamlined and work
+
+93
+00:06:05.679 --> 00:06:08.919
+better when it comes to lumen versus baking.
+
+94
+00:06:08.919 --> 00:06:12.959
+For ICV effects the dynamic lighting because all your lights are removable with lumen is
+
+95
+00:06:12.959 --> 00:06:16.919
+ideal and optimized in 5.3 using level snapshots.
+
+96
+00:06:16.919 --> 00:06:18.719
+We'll talk a little bit about level snapshots.
+
+97
+00:06:18.719 --> 00:06:21.879
+We do have classes for that so we're not going to get too deep into it.
+
+98
+00:06:21.879 --> 00:06:27.920
+They can be used for baking scenarios but they were primarily focused on or can update
+
+99
+00:06:27.920 --> 00:06:30.560
+correctly better with stationary lights.
+
+100
+00:06:30.560 --> 00:06:34.639
+Now when you introduce static lighting and you're trying to use level snapshots that's
+
+101
+00:06:34.639 --> 00:06:40.959
+a little trickier because that bake information doesn't always slide across between each level
+
+102
+00:06:40.959 --> 00:06:46.120
+snapshot that you made smoothly so it's better to use lumen if you can.
+
+103
+00:06:46.120 --> 00:06:51.079
+For baking using a blueprint level streaming is an option which we'll briefly talk about
+
+104
+00:06:51.199 --> 00:06:53.639
+for pre-computed lighting scenarios.
+
+105
+00:06:53.639 --> 00:06:55.199
+Baked.
+
+106
+00:06:55.199 --> 00:07:00.680
+That is better to be considered because Unreal can easily snap between them but there is
+
+107
+00:07:00.680 --> 00:07:07.919
+a limitation where you only get about 3 otherwise you'll hit a GPU cap.
+
+108
+00:07:07.919 --> 00:07:10.240
+So final pixel approach.
+
+109
+00:07:10.240 --> 00:07:14.959
+Baking or ray tracing as well as lumen can be used depending on the need.
+
+110
+00:07:14.959 --> 00:07:18.919
+Ray tracing many times will be used due to the fact that frame rate performance is not
+
+111
+00:07:18.920 --> 00:07:21.680
+a concern when it comes to final pixel.
+
+112
+00:07:21.680 --> 00:07:28.759
+So keep that in mind so if you just need a good final product you can turn down by using
+
+113
+00:07:28.759 --> 00:07:34.080
+it in scaling turn down a bunch of effects and looks and feel and get the raw data you
+
+114
+00:07:34.080 --> 00:07:38.040
+need then turn it on before you go to your final render and that can actually work pretty
+
+115
+00:07:38.040 --> 00:07:39.680
+well.
+
+116
+00:07:39.680 --> 00:07:45.639
+You'll see down below there's a lot of great things you can produce using baked lighting.
+
+117
+00:07:45.639 --> 00:07:48.000
+All three of these are all baked lighting.
+
+118
+00:07:48.000 --> 00:07:51.680
+This is the Australian outback sample that we had a while back.
+
+119
+00:07:51.680 --> 00:07:57.319
+This is the rebirth demo that was done by Quixel before we acquired them and all of them are
+
+120
+00:07:57.319 --> 00:07:58.399
+all baking.
+
+121
+00:07:58.399 --> 00:08:00.279
+No ray tracing is involved.
+
+122
+00:08:00.279 --> 00:08:06.560
+No lumen is involved for it hasn't come around yet and it's straight up baking.
+
+123
+00:08:06.560 --> 00:08:10.800
+Here's a link if you want to dive in more into these topics and get a better idea about
+
+124
+00:08:10.800 --> 00:08:11.800
+optimizing.
+
+125
+00:08:11.800 --> 00:08:17.040
+In the next section we're going to take a look at the lumen equation and have a deep dive
+
+126
+00:08:17.040 --> 00:08:21.360
+into how to optimize and use lumen to the best of its ability.
+
+127
+00:08:21.360 --> 00:08:21.840
+Thanks again.
+

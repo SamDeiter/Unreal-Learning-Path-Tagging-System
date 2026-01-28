@@ -1,0 +1,1090 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.360
+Hi everyone, in this lesson we're going to go ahead and take a look at some of the debugging
+
+2
+00:00:05.360 --> 00:00:09.080
+tools for Niagara as well as some things to consider.
+
+3
+00:00:09.080 --> 00:00:11.080
+So let's get started.
+
+4
+00:00:11.080 --> 00:00:14.599
+One of the tools that we have at our disposal is you'll see at the top if you double click
+
+5
+00:00:14.599 --> 00:00:18.199
+your effect, a button called performance.
+
+6
+00:00:18.199 --> 00:00:24.120
+Performance will give us a readout in milliseconds on how each one of the modules that we've created
+
+7
+00:00:24.120 --> 00:00:25.120
+is performing.
+
+8
+00:00:25.359 --> 00:00:30.080
+This can be pretty handy to be able to track where you might have some stalls if you've
+
+9
+00:00:30.080 --> 00:00:36.280
+made a lot of like really complicated things and they're all starting to pile up or several
+
+10
+00:00:36.280 --> 00:00:42.400
+different type of effects embedded in your overall effect.
+
+11
+00:00:42.400 --> 00:00:46.960
+Things could cost if you start to put too much at one particular effect.
+
+12
+00:00:46.960 --> 00:00:52.359
+So this helps you track that and see how things are performing and how their playback is doing.
+
+13
+00:00:52.359 --> 00:00:55.200
+Let's go and jump into Unreal and take a peek.
+
+14
+00:00:55.200 --> 00:00:58.799
+So here in Unreal we'll see that we have a performance button.
+
+15
+00:00:58.799 --> 00:01:01.159
+I'm going to go ahead and click on that.
+
+16
+00:01:01.159 --> 00:01:04.480
+Now this performance button and you'll see the numbers.
+
+17
+00:01:04.480 --> 00:01:08.840
+If you can't see them a little pro tip here, I can hit control and do the wheel mouse.
+
+18
+00:01:08.840 --> 00:01:14.200
+You can actually see these in percentage wise how much they're taking up in our scene.
+
+19
+00:01:14.200 --> 00:01:19.439
+You'll see an average millisecond calculation on the top there and you'll be able to actually
+
+20
+00:01:19.439 --> 00:01:21.399
+see what they're doing.
+
+21
+00:01:21.399 --> 00:01:22.560
+And again, you'll see it here.
+
+22
+00:01:22.560 --> 00:01:26.239
+It says this shows the module runtime cost in percent.
+
+23
+00:01:26.239 --> 00:01:31.159
+So your overall percentages in here you can track and you can see, well, man, this effect
+
+24
+00:01:31.159 --> 00:01:33.079
+is really heavy in this area.
+
+25
+00:01:33.079 --> 00:01:39.039
+This effect is overall I could probably do to the milliseconds that we have going on.
+
+26
+00:01:39.039 --> 00:01:40.319
+Maybe slow some things down.
+
+27
+00:01:40.319 --> 00:01:42.079
+Maybe have too much in here.
+
+28
+00:01:42.079 --> 00:01:44.640
+Have a fluid within a fluid.
+
+29
+00:01:44.640 --> 00:01:47.840
+One thing I do want to point out though, when you are using fluids, they are pretty heavy
+
+30
+00:01:47.920 --> 00:01:52.719
+because they are in a GPU effect and you'll see GPU is on here and I'll be referencing
+
+31
+00:01:52.719 --> 00:01:54.079
+GPU back and forth.
+
+32
+00:01:54.079 --> 00:01:55.840
+Now we do have Niagara classes.
+
+33
+00:01:55.840 --> 00:02:03.719
+This isn't a Niagara class, but this talks about how to control your environment and
+
+34
+00:02:03.719 --> 00:02:05.400
+optimize things accordingly.
+
+35
+00:02:05.400 --> 00:02:09.159
+So if you want to dive more into Niagara, feel free to do so.
+
+36
+00:02:09.159 --> 00:02:15.599
+But keep in mind, fluids are expensive by nature and sometimes they may not refresh
+
+37
+00:02:15.599 --> 00:02:16.599
+like you want.
+
+38
+00:02:16.599 --> 00:02:21.319
+You can simply just hit pause in the playback and run it again or you could select it and
+
+39
+00:02:21.319 --> 00:02:23.719
+sometimes it pops back into view.
+
+40
+00:02:23.719 --> 00:02:28.240
+Certain gas fluids may have a little bit of a refresh issue, but overall, especially if
+
+41
+00:02:28.240 --> 00:02:33.199
+you're pairing them with other effects like maybe there's a gas nested within another
+
+42
+00:02:33.199 --> 00:02:34.199
+effect.
+
+43
+00:02:34.199 --> 00:02:38.639
+So these are just things to consider when working with your effects overall.
+
+44
+00:02:38.639 --> 00:02:42.879
+You'll see the three dot button here right next to the performance button.
+
+45
+00:02:42.879 --> 00:02:48.400
+You'll be able to pull down and see the GPU profiling, display average, display maximum
+
+46
+00:02:48.400 --> 00:02:55.079
+if we turn that on, and you'll also see display relative values as well as display absolute
+
+47
+00:02:55.079 --> 00:02:56.079
+values.
+
+48
+00:02:56.079 --> 00:02:58.840
+So you have a bit of options here.
+
+49
+00:02:58.840 --> 00:03:03.159
+Another tool we have for debugging is the literal debug tool.
+
+50
+00:03:03.159 --> 00:03:06.000
+Now we'll break down a few other aspects of it too.
+
+51
+00:03:06.000 --> 00:03:10.240
+It is evolving, getting better, stronger, faster, but we're going to be looking at some of the
+
+52
+00:03:10.240 --> 00:03:13.520
+primary tools that we can use for optimization.
+
+53
+00:03:13.520 --> 00:03:16.320
+To be able to activate it, you can go to three different areas.
+
+54
+00:03:16.320 --> 00:03:21.719
+One, you can go into the details of that effect if you're selecting that in your editor.
+
+55
+00:03:21.719 --> 00:03:29.080
+Two, you can go to the tools pull down menu and go to debug and go to Niagara debugger.
+
+56
+00:03:29.080 --> 00:03:34.320
+And three, if you go into your effect itself and double click it, you'll be able to see
+
+57
+00:03:34.320 --> 00:03:38.879
+debug right next to that performance button nearby.
+
+58
+00:03:38.879 --> 00:03:42.639
+Let's go ahead and jump into Unreal and take a look at a few things.
+
+59
+00:03:42.639 --> 00:03:49.000
+So if I want to, I can run the performance in here showing my overall what's going on
+
+60
+00:03:49.000 --> 00:03:51.840
+with our effect and those percentages.
+
+61
+00:03:51.840 --> 00:03:54.240
+And I can also run the debug at the same time if I wish.
+
+62
+00:03:54.240 --> 00:03:58.319
+But I'm going to save a little bit of overhead and I'm going to turn that performance off.
+
+63
+00:03:58.319 --> 00:04:03.159
+Now that performance is not dependent upon whether we're playing in the viewer here.
+
+64
+00:04:03.159 --> 00:04:08.319
+We can actually hit pause and you'll see your percentages still running.
+
+65
+00:04:08.319 --> 00:04:10.799
+So I'm going to go and click on performance and turn that off.
+
+66
+00:04:10.799 --> 00:04:15.039
+I'm going to go and click on that debug here and you'll see it says debug hut.
+
+67
+00:04:15.039 --> 00:04:18.959
+You also have the option to look at the FX outliner, which we'll look at later.
+
+68
+00:04:18.959 --> 00:04:22.120
+And there's also an attribute spreadsheet.
+
+69
+00:04:22.120 --> 00:04:25.519
+Let's go ahead and take a look at the debug hut.
+
+70
+00:04:25.519 --> 00:04:31.039
+Now when we open up this debug hug, like I said before, you can get to it two different
+
+71
+00:04:31.039 --> 00:04:32.620
+ways, three different ways.
+
+72
+00:04:32.620 --> 00:04:40.100
+So we have tools, debug, now agro debugger, or selecting the effect in your environment.
+
+73
+00:04:40.100 --> 00:04:42.980
+You can simply just click on debug.
+
+74
+00:04:42.980 --> 00:04:48.300
+You can also capture some data, which is kind of connected, which you can also do with the
+
+75
+00:04:48.300 --> 00:04:50.379
+FX outliner.
+
+76
+00:04:50.379 --> 00:04:52.660
+Let's go and take a look at this debugger.
+
+77
+00:04:52.660 --> 00:04:56.220
+Now in the debugger, we want to be able to turn on our debug, HUD enabled.
+
+78
+00:04:56.220 --> 00:04:58.620
+There should be on by default.
+
+79
+00:04:58.620 --> 00:05:02.100
+You also want to turn on your debug, HUD rendering enabled.
+
+80
+00:05:03.100 --> 00:05:09.340
+This will give you some text, but also it will show you your overall little outline here
+
+81
+00:05:09.340 --> 00:05:10.340
+that we have for a scene.
+
+82
+00:05:10.340 --> 00:05:13.100
+We want to be able to actually see our little bounce.
+
+83
+00:05:13.100 --> 00:05:17.980
+This is important and isn't always on by default, but you can actually help that by clicking
+
+84
+00:05:17.980 --> 00:05:18.980
+this on.
+
+85
+00:05:18.980 --> 00:05:22.379
+You'll see it'll actually turn on for us.
+
+86
+00:05:22.379 --> 00:05:26.860
+So we also want to have a validate system simulation data buffers.
+
+87
+00:05:26.860 --> 00:05:29.500
+You can turn that on.
+
+88
+00:05:29.500 --> 00:05:30.500
+But these are optional.
+
+89
+00:05:30.500 --> 00:05:35.980
+You don't necessarily have to have all these on, such as validate particle data buffers,
+
+90
+00:05:35.980 --> 00:05:41.740
+validate particle system simulation data buffers, as well as validate log errors.
+
+91
+00:05:41.740 --> 00:05:46.899
+This is just a little secondary checkbox that allows you to double check your work and see
+
+92
+00:05:46.899 --> 00:05:49.459
+if things are doing what their intentions are.
+
+93
+00:05:49.459 --> 00:05:52.139
+So I'm going to go and turn these off for now.
+
+94
+00:05:52.139 --> 00:05:55.100
+We should be okay without them, but the options are there.
+
+95
+00:05:55.100 --> 00:05:59.939
+At any time you're unsure what something does, simply float over that effect and Unreal will
+
+96
+00:05:59.939 --> 00:06:02.060
+give you some pro tips.
+
+97
+00:06:02.060 --> 00:06:04.219
+These are very helpful.
+
+98
+00:06:04.219 --> 00:06:05.860
+These do have impact on performance.
+
+99
+00:06:05.860 --> 00:06:07.219
+I do want to mention that.
+
+100
+00:06:07.219 --> 00:06:08.939
+So note to self.
+
+101
+00:06:08.939 --> 00:06:11.699
+We have a debug overview enabled.
+
+102
+00:06:11.699 --> 00:06:12.779
+Turn that on.
+
+103
+00:06:12.779 --> 00:06:16.540
+And this will give us an overlay of what's going on in milliseconds for that particular
+
+104
+00:06:16.540 --> 00:06:17.860
+effect.
+
+105
+00:06:17.860 --> 00:06:20.180
+You'll also see include cascade.
+
+106
+00:06:20.180 --> 00:06:25.420
+So if you're grabbing something from the marketplace, that's a bit older and includes cascade.
+
+107
+00:06:25.420 --> 00:06:26.620
+You can do so.
+
+108
+00:06:26.620 --> 00:06:32.220
+But there's a Python script you can use to be able to convert those cascades into Niagara.
+
+109
+00:06:32.220 --> 00:06:34.379
+You have to just turn it on into your plugins.
+
+110
+00:06:34.379 --> 00:06:40.340
+But keep in mind when you do that, there's some editing that may be involved.
+
+111
+00:06:40.340 --> 00:06:43.819
+So let's go ahead and take a look at the debug overview mode.
+
+112
+00:06:43.819 --> 00:06:46.699
+You'll see we have GPU compute performance in here.
+
+113
+00:06:46.699 --> 00:06:49.139
+But by default, we can have the overview here.
+
+114
+00:06:49.139 --> 00:06:53.860
+And it shows us our total particles that were pushing.
+
+115
+00:06:53.860 --> 00:06:56.459
+Now it also shows us our memory.
+
+116
+00:06:56.459 --> 00:06:58.859
+And it also shows us our total emitters here.
+
+117
+00:06:58.859 --> 00:07:03.859
+I'll pulse my cursor so you can actually see where I'm at.
+
+118
+00:07:03.859 --> 00:07:07.019
+We can go over here too and choose scalability.
+
+119
+00:07:07.019 --> 00:07:12.539
+This will give us another overview, looking at all the content that we have going on.
+
+120
+00:07:12.539 --> 00:07:15.620
+Next we can do performance.
+
+121
+00:07:15.620 --> 00:07:18.819
+And again, this will show us the data that we need.
+
+122
+00:07:18.819 --> 00:07:26.379
+It'll show us what's going on on an average RT and also our general playback here in milliseconds
+
+123
+00:07:26.379 --> 00:07:27.819
+and also what we're pushing.
+
+124
+00:07:27.819 --> 00:07:33.899
+Again, you'll see the game thread, max on this particular one, and game thread average here.
+
+125
+00:07:33.899 --> 00:07:38.860
+And we've talked about game thread in previous classes.
+
+126
+00:07:38.860 --> 00:07:42.500
+Next we can go in here and choose performance graph.
+
+127
+00:07:42.500 --> 00:07:46.860
+Now this performance graph is going to give us a readout and show us where things are
+
+128
+00:07:46.860 --> 00:07:48.659
+spiking in here.
+
+129
+00:07:48.659 --> 00:07:52.860
+And these tools are really helpful, especially if you have a lot of effects in the scene.
+
+130
+00:07:52.860 --> 00:07:55.339
+So you've got to keep that in mind.
+
+131
+00:07:55.339 --> 00:07:59.539
+Also note to self, if you have fluids, fluids are a bit more expensive.
+
+132
+00:07:59.539 --> 00:08:04.500
+For again, they are GPU, they're running some GPU processes here.
+
+133
+00:08:04.500 --> 00:08:10.459
+And the higher or the more advanced they are and lots of different effects nested inside
+
+134
+00:08:10.459 --> 00:08:18.620
+of them, you've got to keep in mind that what they're going to cost, especially with several.
+
+135
+00:08:18.620 --> 00:08:22.139
+We can then choose also GPU compute performance again.
+
+136
+00:08:22.139 --> 00:08:23.139
+Go back to where we were.
+
+137
+00:08:23.139 --> 00:08:24.939
+And it gives us a big overlay.
+
+138
+00:08:24.939 --> 00:08:30.300
+Let me move this down so you can see it here and shows our average instances, average use
+
+139
+00:08:30.300 --> 00:08:34.740
+here or US, I should say, and max US.
+
+140
+00:08:34.740 --> 00:08:36.740
+Now you'll look at this in context.
+
+141
+00:08:36.740 --> 00:08:39.019
+You can see them all categorized here.
+
+142
+00:08:39.019 --> 00:08:45.100
+So we have compute curl, scattered particles, pre-sim velocity, sourcing.
+
+143
+00:08:45.100 --> 00:08:49.100
+So it's kind of peeling back the onion of all the effects that were working and some
+
+144
+00:08:49.100 --> 00:08:53.820
+of the modules that we have active within our effect.
+
+145
+00:08:53.820 --> 00:08:58.700
+As you look in the menu, as we scroll down, you have several options for viewing as well
+
+146
+00:08:58.700 --> 00:09:03.340
+as you'll be able to change some of the positioning and the font.
+
+147
+00:09:03.340 --> 00:09:05.180
+You'll see there's a font control here.
+
+148
+00:09:05.180 --> 00:09:10.740
+And if we scroll down even more, we can actually see there's a debug filter.
+
+149
+00:09:10.740 --> 00:09:14.060
+You can actually choose what system you're looking at.
+
+150
+00:09:14.060 --> 00:09:18.060
+Simply what I like to do is just deselect it, select it and then run the debug again.
+
+151
+00:09:18.060 --> 00:09:22.900
+Otherwise, if you load that filter, make sure you're not confused on what you have in place.
+
+152
+00:09:22.899 --> 00:09:25.659
+And that can happen, especially if you're working late at night.
+
+153
+00:09:25.659 --> 00:09:28.139
+But I like to simply just click and re-click again.
+
+154
+00:09:28.139 --> 00:09:30.340
+And it's pretty easy to do so.
+
+155
+00:09:30.340 --> 00:09:34.579
+You'll see there's a debug system here where you actually can look at verbose and just
+
+156
+00:09:34.579 --> 00:09:37.419
+gives you a little bit more information.
+
+157
+00:09:37.419 --> 00:09:39.139
+You'll see I got verbose here on.
+
+158
+00:09:39.139 --> 00:09:42.699
+We'll just do basic on this one if you want to basic.
+
+159
+00:09:42.699 --> 00:09:45.360
+And it's just looking at the system overall.
+
+160
+00:09:45.360 --> 00:09:48.220
+So you have a little bit of quality control in here too.
+
+161
+00:09:48.220 --> 00:09:51.139
+So if I went in here, you'll see there's system attributes.
+
+162
+00:09:51.139 --> 00:09:54.819
+If I hit a plus here, I'll be able to select what I want here.
+
+163
+00:09:54.819 --> 00:10:00.299
+Do I want to, let's go and open this up here, go and add an array for this system attribute.
+
+164
+00:10:00.299 --> 00:10:02.559
+And let me show you what I mean.
+
+165
+00:10:02.559 --> 00:10:08.600
+If I typed in system, it's basically like a tag area.
+
+166
+00:10:08.600 --> 00:10:13.299
+This would actually match all system processes to that particular region.
+
+167
+00:10:13.299 --> 00:10:16.860
+So it's almost like adding another slot in here and you'll see it real give you a quick
+
+168
+00:10:16.860 --> 00:10:18.620
+rundown for that.
+
+169
+00:10:18.620 --> 00:10:21.580
+So there's some advanced stuff and stuff you may not even touch.
+
+170
+00:10:21.580 --> 00:10:27.220
+I rarely will touch this one because I know that I don't really need it.
+
+171
+00:10:27.220 --> 00:10:30.740
+Everything that I try to build, I try to build clean in the system itself.
+
+172
+00:10:30.740 --> 00:10:35.000
+You'll also see that you have a font control, like we said before, but even here you can
+
+173
+00:10:35.000 --> 00:10:37.460
+move it and shift it if you needed to.
+
+174
+00:10:37.460 --> 00:10:41.340
+You'll notice there's debug particles here where actually we have a few more things we
+
+175
+00:10:41.340 --> 00:10:44.820
+can do such as there's tech more text options.
+
+176
+00:10:44.820 --> 00:10:48.259
+You can actually show your particle index if you need to.
+
+177
+00:10:48.259 --> 00:10:50.580
+There's quite a bit that we can play with.
+
+178
+00:10:50.580 --> 00:10:51.580
+It's really up to you.
+
+179
+00:10:51.580 --> 00:10:53.460
+And again, it's like a case by case.
+
+180
+00:10:53.460 --> 00:10:57.220
+I don't want to get too much into buttonology, but I want to talk mainly on the stuff that
+
+181
+00:10:57.220 --> 00:10:59.419
+I would be playing with and working with.
+
+182
+00:10:59.419 --> 00:11:01.539
+You'll see there's a perf overview here.
+
+183
+00:11:01.539 --> 00:11:07.620
+We can actually can control our preferences here for reporting your frames and you're also
+
+184
+00:11:07.620 --> 00:11:12.340
+samples mode, your frame total if you want to take a look at that.
+
+185
+00:11:12.340 --> 00:11:16.539
+And we also, if we scroll down just a little bit more, you can control the color of the
+
+186
+00:11:16.539 --> 00:11:21.019
+overall kind of testing of your look and feel for your object here.
+
+187
+00:11:21.019 --> 00:11:24.659
+And also, let me see here.
+
+188
+00:11:24.659 --> 00:11:28.699
+You'll also see there's a show global budget info right here.
+
+189
+00:11:28.699 --> 00:11:31.899
+And you'll see that pop up towards the bottom.
+
+190
+00:11:31.899 --> 00:11:37.740
+And let's go and turn this off for now.
+
+191
+00:11:37.740 --> 00:11:41.659
+So if we scroll up a little bit, you'll notice we also have an area called particle attributes.
+
+192
+00:11:41.659 --> 00:11:44.219
+This is under the debug particles.
+
+193
+00:11:44.220 --> 00:11:49.700
+Now I can add systems in here if I wanted to, but this is not typical for me personally.
+
+194
+00:11:49.700 --> 00:11:54.700
+I like to do it where I can track it a little bit better within the effect itself.
+
+195
+00:11:54.700 --> 00:11:59.660
+Again, let's go ahead and look at a quick review here at the interface.
+
+196
+00:11:59.660 --> 00:12:01.820
+We have Niagara debugger panel.
+
+197
+00:12:01.820 --> 00:12:03.379
+We have the playback options.
+
+198
+00:12:03.379 --> 00:12:05.940
+And we have the debugger tabs.
+
+199
+00:12:05.940 --> 00:12:10.060
+Each one of these are set up so that you can control the speed if you wanted to.
+
+200
+00:12:10.060 --> 00:12:11.940
+And take a look what you need to.
+
+201
+00:12:11.940 --> 00:12:19.220
+Now, when I say take a look, we want to focus mainly on the debug HUD and the FX Outliner.
+
+202
+00:12:19.220 --> 00:12:25.020
+Performance session browser and debug spawn are all experimental and they may not perform
+
+203
+00:12:25.020 --> 00:12:26.980
+exactly like you want.
+
+204
+00:12:26.980 --> 00:12:32.380
+So the main ones you want to focus on are these two, the debug HUD and the FX Outliner.
+
+205
+00:12:32.380 --> 00:12:37.180
+They're a bit more stable right now in their current version.
+
+206
+00:12:37.180 --> 00:12:39.420
+So just keep that in mind.
+
+207
+00:12:40.419 --> 00:12:45.459
+Again, key points I want to iterate here is again, we have the debug HUD enabled and
+
+208
+00:12:45.459 --> 00:12:47.899
+also the debug overview enabled.
+
+209
+00:12:47.899 --> 00:12:52.379
+This will give us what we need to be able to bring things onto the screen.
+
+210
+00:12:52.379 --> 00:12:58.860
+And again, under debug overview, you can analyze visually the output such as the GPU compute
+
+211
+00:12:58.860 --> 00:13:03.779
+performance and the overall performance.
+
+212
+00:13:03.779 --> 00:13:08.179
+Let's go and take a look at some things we can do on screen, such as look at our particle
+
+213
+00:13:08.419 --> 00:13:09.419
+perf.
+
+214
+00:13:09.419 --> 00:13:13.819
+This is basically looking at what's going on under the hood and how the frames per second
+
+215
+00:13:13.819 --> 00:13:16.899
+and the averages are working in our scene.
+
+216
+00:13:16.899 --> 00:13:20.019
+So what we'll do here is close the debugger.
+
+217
+00:13:20.019 --> 00:13:24.299
+With that on or with that off, I should say, you'll see that stuff that we had on screen
+
+218
+00:13:24.299 --> 00:13:25.699
+go away.
+
+219
+00:13:25.699 --> 00:13:32.379
+Let's go to our stats and in our stats, we'll look at engine and we'll look at the particle
+
+220
+00:13:32.379 --> 00:13:33.819
+preferences here.
+
+221
+00:13:33.819 --> 00:13:37.059
+Again, this is going to give us an overlay on our screen.
+
+222
+00:13:37.059 --> 00:13:41.259
+Now for running some problems, you can squeeze in your menus a bit.
+
+223
+00:13:41.259 --> 00:13:47.779
+You can actually see those full run of those numbers and see how things are performing
+
+224
+00:13:47.779 --> 00:13:51.500
+with our frames in our scene.
+
+225
+00:13:51.500 --> 00:13:56.139
+Another one we can run under stat Niagara, we can turn on Niagara baselines.
+
+226
+00:13:56.139 --> 00:13:58.139
+Let's do that.
+
+227
+00:13:58.139 --> 00:13:59.859
+So let's do that same thing.
+
+228
+00:13:59.859 --> 00:14:04.019
+We'll go under stat Niagara and Niagara baselines.
+
+229
+00:14:04.019 --> 00:14:07.379
+Now if it doesn't turn on automatically, just move your camera a little bit and it should
+
+230
+00:14:07.379 --> 00:14:08.860
+show up.
+
+231
+00:14:08.860 --> 00:14:10.860
+It sometimes is a little bit refreshed.
+
+232
+00:14:10.860 --> 00:14:11.860
+There it goes.
+
+233
+00:14:11.860 --> 00:14:16.819
+It's popped in and it's now decided to give us our information.
+
+234
+00:14:16.819 --> 00:14:22.220
+Now that particular system is used if you're going in here and it's a class for baseline
+
+235
+00:14:22.220 --> 00:14:27.860
+controllers and these can be or are responsible for spawning and manipulating the effect needed
+
+236
+00:14:27.860 --> 00:14:30.939
+for the baseline perf tests.
+
+237
+00:14:30.940 --> 00:14:35.540
+Now if you're a little bit more into programming to effects, you would understand where that
+
+238
+00:14:35.540 --> 00:14:36.540
+might be needed.
+
+239
+00:14:36.540 --> 00:14:37.740
+Now we're not going to jump into that.
+
+240
+00:14:37.740 --> 00:14:43.820
+I'm not going to run you through Python, Gambit here or a bit of C++ but overall you
+
+241
+00:14:43.820 --> 00:14:47.420
+can use these as a comparable if you turn them on on your screen.
+
+242
+00:14:47.420 --> 00:14:52.820
+And you'll notice we don't have anything right now to compare things to.
+
+243
+00:14:52.820 --> 00:14:58.340
+Another way to optimize your scene is to go in here and if your effect doesn't need to
+
+244
+00:14:58.340 --> 00:15:03.460
+move around, you can turn off require current frame data.
+
+245
+00:15:03.460 --> 00:15:05.580
+So this can save a little bit of overhead.
+
+246
+00:15:05.580 --> 00:15:10.019
+But again, if your effect doesn't need to move, you can turn this off.
+
+247
+00:15:10.019 --> 00:15:14.120
+This can help a little bit of the overall, especially if you have several that are kind
+
+248
+00:15:14.120 --> 00:15:16.259
+of complicated, but they're not really going to move.
+
+249
+00:15:16.259 --> 00:15:19.420
+There's no that extra calculation isn't really needed.
+
+250
+00:15:19.420 --> 00:15:23.740
+Now Unreal in aggregate slimmer, faster, stronger.
+
+251
+00:15:23.740 --> 00:15:26.620
+So and your machines may be really spot on.
+
+252
+00:15:26.620 --> 00:15:31.580
+You may not need to do this, but in other cases, it might help a little bit.
+
+253
+00:15:31.580 --> 00:15:37.460
+All of the stuff that we talked about so far in looking at the debug hub or HUD, I should
+
+254
+00:15:37.460 --> 00:15:42.379
+say, heads up display, you can actually run them via a console command.
+
+255
+00:15:42.379 --> 00:15:45.659
+And here are all the console commands that have listed in the lecture if you want to
+
+256
+00:15:45.659 --> 00:15:46.659
+reference them.
+
+257
+00:15:46.659 --> 00:15:49.259
+Obviously, you don't want to load them all.
+
+258
+00:15:49.259 --> 00:15:54.779
+You actually can do all of these through the menu, but these are options in here.
+
+259
+00:15:54.899 --> 00:15:59.220
+Here's a few more that can help you with playback if you wanted to control some of that.
+
+260
+00:15:59.220 --> 00:16:02.539
+So the first one here will play all simulations.
+
+261
+00:16:02.539 --> 00:16:07.980
+You'll see FX Niagara dot debug playback mode one will pause the simulation and FX Niagara
+
+262
+00:16:07.980 --> 00:16:13.779
+dot debug dot playback mode two will step single frames and then pause all simulations.
+
+263
+00:16:13.779 --> 00:16:19.220
+Now you can also do that within the Delta tick inside of the effect itself, but you
+
+264
+00:16:19.220 --> 00:16:21.980
+can also do it here through their playback mode.
+
+265
+00:16:22.220 --> 00:16:24.860
+FX dot Niagara dot debug playback rate.
+
+266
+00:16:24.860 --> 00:16:30.139
+You can also control that as well as FX dot Niagara debug playback rate 0.1.
+
+267
+00:16:30.139 --> 00:16:32.980
+If you want to run all simulations at half the speed.
+
+268
+00:16:33.539 --> 00:16:36.659
+So I'm not going to go through all of these, but these are all available to be able to
+
+269
+00:16:36.659 --> 00:16:40.620
+see and be able to tweak and edit things if you needed to.
+
+270
+00:16:40.899 --> 00:16:46.379
+If you wanted to check your speed, check your thread count and et cetera, as well as your budget.
+
+271
+00:16:47.580 --> 00:16:48.940
+That's it with this lecture.
+
+272
+00:16:48.940 --> 00:16:52.420
+In the next lecture, we're going to take a look at FX Outliner breakdown.
+
