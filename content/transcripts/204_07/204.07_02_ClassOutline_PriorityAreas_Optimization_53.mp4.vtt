@@ -1,0 +1,814 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.520
+In this lesson, we're going to go and take a look at the outline for this course overall,
+
+2
+00:00:05.520 --> 00:00:09.599
+and then we're going to go ahead and take a look at the concept of priority areas when
+
+3
+00:00:09.599 --> 00:00:12.480
+working with foliage as well as a bit of optimization.
+
+4
+00:00:12.480 --> 00:00:14.220
+So let's get started.
+
+5
+00:00:14.220 --> 00:00:18.100
+So one of the first things we'll talk about is foliage optimization, and what that includes
+
+6
+00:00:18.100 --> 00:00:22.920
+is analyzing scenes and priority areas, one of the most important things that you need
+
+7
+00:00:22.920 --> 00:00:26.760
+to bring to light, when it comes to your shots, your scene, or interactivity.
+
+8
+00:00:26.760 --> 00:00:31.420
+One will look at optimization based on shots, lumen updates with foliage, and foliage and
+
+9
+00:00:31.420 --> 00:00:32.920
+world partition.
+
+10
+00:00:32.920 --> 00:00:35.960
+Finally, we'll take a look at Niagara optimizations.
+
+11
+00:00:35.960 --> 00:00:40.380
+From there, we'll look at the checklist for performance, debugging, additional steps,
+
+12
+00:00:40.380 --> 00:00:47.240
+console commands, FX Outliner, and bacon effects via a foot book as an option.
+
+13
+00:00:47.240 --> 00:00:49.000
+So let's go and dive right in.
+
+14
+00:00:49.000 --> 00:00:53.760
+So one of the first things we'll talk about here is foliage optimization.
+
+15
+00:00:53.759 --> 00:00:59.439
+Rating your scenes and priority areas, I cannot emphasize enough, is very important.
+
+16
+00:00:59.439 --> 00:01:03.439
+But one of the first things you do need to determine is exactly what your rendering type
+
+17
+00:01:03.439 --> 00:01:08.079
+is going to be, what you're going to be using for your interactivity, whether you're going
+
+18
+00:01:08.079 --> 00:01:12.280
+to be using ICVFX or film or interactivity for a game.
+
+19
+00:01:12.280 --> 00:01:18.000
+This is really up to you, but you need to choose between ray tracing, big lighting, or
+
+20
+00:01:18.000 --> 00:01:19.000
+lumen.
+
+21
+00:01:19.439 --> 00:01:25.439
+Now when it comes to ray tracing, you're going to have to handle your frames carefully because
+
+22
+00:01:25.439 --> 00:01:30.960
+well, the higher you go, using such things as brute force, things are going to slow down
+
+23
+00:01:30.960 --> 00:01:33.519
+a bit, which we've talked about in previous classes.
+
+24
+00:01:33.519 --> 00:01:37.319
+When it comes to bake lighting, you need to understand that your reflectivity will not
+
+25
+00:01:37.319 --> 00:01:42.519
+be accurate unless you're using certain particular tools, maybe even some plugins that are not
+
+26
+00:01:42.519 --> 00:01:44.640
+inherently on by default.
+
+27
+00:01:44.640 --> 00:01:49.359
+But they still may not capture the realism that you need and want, and it doesn't update
+
+28
+00:01:49.359 --> 00:01:50.840
+on the fly.
+
+29
+00:01:50.840 --> 00:01:56.960
+Lumen allows you to have realistic reflectivity, and it allows you to have updates on the fly,
+
+30
+00:01:56.960 --> 00:02:00.480
+but at the same time, there is a bit of noise because lumen is still evolving.
+
+31
+00:02:00.480 --> 00:02:04.439
+So you have to decide your look based on your needs.
+
+32
+00:02:04.439 --> 00:02:10.599
+So overall, the games workflow is similar to the film workflow, but is a bit more determinant
+
+33
+00:02:10.719 --> 00:02:14.960
+on whether or where you are in the world, where you're positioned.
+
+34
+00:02:14.960 --> 00:02:19.519
+So you have to figure that out, and you have to decide where your player is going to go.
+
+35
+00:02:19.519 --> 00:02:24.039
+In the case of ICVFX, we need to decide where a camera is going to be showing or pointing
+
+36
+00:02:24.039 --> 00:02:27.159
+at, and how much movement is in that camera.
+
+37
+00:02:27.159 --> 00:02:28.479
+Is this a still shot?
+
+38
+00:02:28.479 --> 00:02:35.560
+Do we need the camera to switch to a different angle in the middle of the actors on stage?
+
+39
+00:02:35.560 --> 00:02:37.599
+This is really things you need to consider.
+
+40
+00:02:37.599 --> 00:02:40.599
+For foliage, determine how much and where the plant will go.
+
+41
+00:02:40.599 --> 00:02:43.879
+Note, foliage has a limit as you populate a scene.
+
+42
+00:02:43.879 --> 00:02:49.479
+So everything has a cap, believe it or not, is cool and as neat as Unreal is.
+
+43
+00:02:49.479 --> 00:02:54.959
+You can throw the kitchen sink at it, and you can still slow it down if you're not careful.
+
+44
+00:02:54.959 --> 00:02:59.199
+With too much foliage, you can bring your machine to a crawl, as you see here.
+
+45
+00:02:59.199 --> 00:03:05.799
+So you can get away with even putting cards in the distance, which have those alphas on
+
+46
+00:03:06.000 --> 00:03:09.120
+there, such as you can do like a large mountain, could be set on an alpha.
+
+47
+00:03:09.120 --> 00:03:15.520
+You can actually put a series of baked assets, foliage that is moving in the wind, on an
+
+48
+00:03:15.520 --> 00:03:17.160
+alpha in a flip book.
+
+49
+00:03:17.160 --> 00:03:20.560
+And you just have to determine how long that's on screen and where that cutoff point where
+
+50
+00:03:20.560 --> 00:03:23.400
+the loop is going to be.
+
+51
+00:03:23.400 --> 00:03:29.080
+Now when it comes to foliage for ICVFX, final pixel priority areas, it's very important
+
+52
+00:03:29.080 --> 00:03:34.240
+to consider some of these assets and how you want to handle them inside of the settings
+
+53
+00:03:34.240 --> 00:03:35.240
+themselves.
+
+54
+00:03:35.280 --> 00:03:37.280
+So we're going to actually take a look at that real quick.
+
+55
+00:03:37.280 --> 00:03:41.760
+One of the things you do want to turn on is evaluate world position offset.
+
+56
+00:03:41.760 --> 00:03:44.480
+You also want to make sure that your foliage is movable.
+
+57
+00:03:44.480 --> 00:03:49.920
+This prevents any super sampling that we have to cause any blurring.
+
+58
+00:03:49.920 --> 00:03:53.680
+And in the older versions of Lumen, this was a bigger problem.
+
+59
+00:03:53.680 --> 00:03:57.680
+If you didn't put it on movable, you would have definite blurring happening.
+
+60
+00:03:57.680 --> 00:04:03.320
+But right now, just for a precautionary measure, I like to turn it on and I think everyone
+
+61
+00:04:03.319 --> 00:04:08.359
+should because also you get the option if you want to eventually make it dynamic and
+
+62
+00:04:08.359 --> 00:04:12.000
+even control it in such a way so that there's wind and movement.
+
+63
+00:04:12.000 --> 00:04:14.000
+So it doesn't just look like a fake prop.
+
+64
+00:04:16.000 --> 00:04:21.000
+So in Unreal, let's go and jump in and we're going to go back to some of these settings.
+
+65
+00:04:21.000 --> 00:04:25.600
+We'll take a look at screen percentages as well as anti-aliasing, as well as that last
+
+66
+00:04:25.600 --> 00:04:30.719
+screen here where I show you how to address and to tweak and control some of the movability
+
+67
+00:04:30.719 --> 00:04:32.560
+as well as casting shadows.
+
+68
+00:04:32.560 --> 00:04:35.800
+Let's go and jump into Unreal and take a peek.
+
+69
+00:04:35.800 --> 00:04:38.120
+So in our scene here, let's go and switch to foliage.
+
+70
+00:04:38.120 --> 00:04:42.639
+So I'm going to go ahead and turn on foliage for a bit.
+
+71
+00:04:42.639 --> 00:04:43.879
+There we go.
+
+72
+00:04:43.879 --> 00:04:47.319
+In foliage, you'll see that we have a few settings that we can control.
+
+73
+00:04:47.319 --> 00:04:52.480
+Now we can make it so that we can paint on landscape, static meshes, or even a BSP.
+
+74
+00:04:52.480 --> 00:04:57.560
+If you're not familiar with BSP, it's kind of our old school low level, think of it as
+
+75
+00:04:57.560 --> 00:04:59.360
+an object.
+
+76
+00:04:59.360 --> 00:05:04.639
+You can actually turn a cube into a BSP if you needed, but there are also active BSPs
+
+77
+00:05:04.639 --> 00:05:06.480
+that you can use.
+
+78
+00:05:06.480 --> 00:05:08.319
+So you can actually paint on those too if you want.
+
+79
+00:05:08.319 --> 00:05:12.639
+You can even paint on other foliage if you want to and anything that's translucent.
+
+80
+00:05:12.639 --> 00:05:14.600
+So that option is there too.
+
+81
+00:05:14.600 --> 00:05:21.000
+So I'm going to go ahead and select this and shift select all my foliage for a moment.
+
+82
+00:05:21.000 --> 00:05:22.680
+And I'm going to turn them on.
+
+83
+00:05:22.680 --> 00:05:27.840
+This allows me now to paint wherever and whatever I want to based on that tick box in there.
+
+84
+00:05:27.839 --> 00:05:33.319
+Any of the settings that you create in each one of your foliage is, foliage is, if that
+
+85
+00:05:33.319 --> 00:05:38.679
+is such a word, you can actually go in here and save those if you change them.
+
+86
+00:05:38.679 --> 00:05:40.799
+Now let's go and just pick on one of these for now.
+
+87
+00:05:40.799 --> 00:05:42.459
+We'll just pick on this guy here.
+
+88
+00:05:42.459 --> 00:05:48.919
+So in here, we can choose our density, how much density we want to have, say 300 or so.
+
+89
+00:05:48.919 --> 00:05:50.759
+Then it shows that we can save it.
+
+90
+00:05:50.759 --> 00:05:56.399
+And I'll go and get rid of this guy here or put it back to default.
+
+91
+00:05:56.399 --> 00:05:57.919
+We can choose the radius.
+
+92
+00:05:57.919 --> 00:06:01.560
+We can choose the unit if we want it uniform or if we want to make them a little bit more
+
+93
+00:06:01.560 --> 00:06:07.439
+free as well as be able to lock down or change those values when it comes to the scale and
+
+94
+00:06:07.439 --> 00:06:09.239
+size.
+
+95
+00:06:09.239 --> 00:06:15.519
+At any time you can actually hit the marquee boxes here to be able to increase this is
+
+96
+00:06:15.519 --> 00:06:17.879
+similar to what you can do in Photoshop and ZBrush.
+
+97
+00:06:17.879 --> 00:06:21.719
+So you can actually go in here and close those down.
+
+98
+00:06:21.720 --> 00:06:28.800
+So you'll go down here, you'll see an alignment angle as well as a random yaw.
+
+99
+00:06:28.800 --> 00:06:31.640
+But this is where we want to turn on our moveable.
+
+100
+00:06:31.640 --> 00:06:33.080
+You want to turn that on.
+
+101
+00:06:33.080 --> 00:06:36.720
+In there we can choose casting shadows, effects dynamic.
+
+102
+00:06:36.720 --> 00:06:43.840
+You want to actually turn that on too, indirect lighting, effects a distance field lighting.
+
+103
+00:06:43.840 --> 00:06:49.840
+So when you turn this on, you do got to keep in mind when it comes to lighting in general,
+
+104
+00:06:49.839 --> 00:06:53.000
+you can turn this on and that's fine.
+
+105
+00:06:53.000 --> 00:06:57.839
+The only thing is in your lights themselves, you need to make sure your directional light,
+
+106
+00:06:57.839 --> 00:07:02.639
+especially if you're grabbing something from the marketplace has has your mesh distance
+
+107
+00:07:02.639 --> 00:07:06.059
+fields on your other lights don't necessarily have to do that.
+
+108
+00:07:06.059 --> 00:07:09.479
+If you did do that with your other lights and turn on mesh distance field, you could
+
+109
+00:07:09.479 --> 00:07:10.759
+get some banding.
+
+110
+00:07:10.759 --> 00:07:12.279
+So just be careful of that.
+
+111
+00:07:12.279 --> 00:07:13.759
+So we can actually turn this off.
+
+112
+00:07:13.759 --> 00:07:15.599
+We should still be okay.
+
+113
+00:07:15.600 --> 00:07:20.360
+This is mainly a little bit leaning more towards our old baking method.
+
+114
+00:07:20.360 --> 00:07:24.879
+Why this is off, but you can actually turn that on if you're seeing something's not
+
+115
+00:07:24.879 --> 00:07:26.400
+quite rendering correctly.
+
+116
+00:07:26.400 --> 00:07:29.620
+Ours is doing pretty well right now, so we're okay.
+
+117
+00:07:29.620 --> 00:07:34.120
+So for the most part here, again, also if you're doing baking, and again, remember,
+
+118
+00:07:34.120 --> 00:07:39.600
+I'll be putting some baking nuggets into here into this, each one of these lectures, just
+
+119
+00:07:39.600 --> 00:07:43.120
+to remind you, so we're going to mainly focus on lumen, but we're also going to be talking
+
+120
+00:07:43.120 --> 00:07:45.120
+a bit about some baking.
+
+121
+00:07:45.120 --> 00:07:49.360
+So you can control your resolution for this particular resource if you wanted to, you
+
+122
+00:07:49.360 --> 00:07:53.680
+can do that here, or you can do that within the object itself.
+
+123
+00:07:53.680 --> 00:07:57.720
+Now you'll notice we have all these different aspects, there's even an advanced area where
+
+124
+00:07:57.720 --> 00:08:02.120
+we can cast shadows on two sided, you can control all of this and actually can be pretty
+
+125
+00:08:02.120 --> 00:08:03.199
+helpful.
+
+126
+00:08:03.199 --> 00:08:05.480
+Does it bloat the scene?
+
+127
+00:08:05.480 --> 00:08:06.480
+Not so much.
+
+128
+00:08:06.480 --> 00:08:08.280
+It's mainly the asset itself.
+
+129
+00:08:08.280 --> 00:08:11.920
+We're mainly controlling a bit of its look visually in our scene.
+
+130
+00:08:11.920 --> 00:08:16.439
+As you can see, there's even some light map control here, if you were to do some baking,
+
+131
+00:08:16.439 --> 00:08:20.520
+and casting shadows on two sides, that does make it a little bit more beefy when it comes
+
+132
+00:08:20.520 --> 00:08:21.520
+to that object.
+
+133
+00:08:21.520 --> 00:08:26.360
+But for the most part, Unreal's working pretty slim and lean and mean right now, which is
+
+134
+00:08:26.360 --> 00:08:27.759
+actually pretty cool.
+
+135
+00:08:27.759 --> 00:08:29.759
+Now again, you can bring things to a crawl.
+
+136
+00:08:29.759 --> 00:08:33.399
+I said that with a grain of salt, because if I went in here and started painting my foliage
+
+137
+00:08:33.399 --> 00:08:37.120
+everywhere, I can make things go really, really slow.
+
+138
+00:08:37.120 --> 00:08:41.899
+So in the case of ICVFX, what you want to do is you can actually go in here and just
+
+139
+00:08:41.899 --> 00:08:44.860
+literally find that asset.
+
+140
+00:08:44.860 --> 00:08:53.740
+And if you need to, let's go ahead and just find the folder for it.
+
+141
+00:08:53.740 --> 00:08:56.059
+Grab this mesh, open this up a little bit.
+
+142
+00:08:56.059 --> 00:08:57.059
+It's really cramped.
+
+143
+00:08:57.059 --> 00:08:58.939
+I wouldn't grab the component class.
+
+144
+00:08:58.939 --> 00:09:00.980
+We want to go to the actual asset.
+
+145
+00:09:00.980 --> 00:09:04.220
+And you can actually literally just drag it into your scene if you need to.
+
+146
+00:09:04.220 --> 00:09:05.779
+And there's no fear in doing that.
+
+147
+00:09:05.779 --> 00:09:06.980
+You can totally do that.
+
+148
+00:09:06.980 --> 00:09:10.819
+So you can do a combination of painting foliage, maybe in the background.
+
+149
+00:09:10.820 --> 00:09:14.980
+When things are up close, you can actually bring them closer to the scene and then you
+
+150
+00:09:14.980 --> 00:09:17.700
+can adjust them accordingly, maybe even make a duplicate.
+
+151
+00:09:17.700 --> 00:09:21.300
+So if you need to make it a little bit higher, the one thing I do want to emphasize too,
+
+152
+00:09:21.300 --> 00:09:26.460
+you also want to make things nanite as much as possible.
+
+153
+00:09:26.460 --> 00:09:28.540
+Let's go and minimize this for a second here.
+
+154
+00:09:28.540 --> 00:09:30.900
+And we'll go back to that asset itself.
+
+155
+00:09:30.900 --> 00:09:33.860
+So you'll notice also you can control placement.
+
+156
+00:09:33.860 --> 00:09:38.700
+Now in that placement, it really just depends how you want it to be in the world, where
+
+157
+00:09:38.700 --> 00:09:39.980
+you want it to set.
+
+158
+00:09:39.980 --> 00:09:41.580
+The default should work just fine.
+
+159
+00:09:41.580 --> 00:09:46.340
+But again, we give you the option to be able to control as much as you need in your scene.
+
+160
+00:09:46.340 --> 00:09:48.180
+You can say whether it has collision or not.
+
+161
+00:09:48.180 --> 00:09:51.539
+You can even control heck, even the channels in here for the lighting.
+
+162
+00:09:51.539 --> 00:09:56.420
+I like to do this in the asset itself, but you do have the option to do this here inside
+
+163
+00:09:56.420 --> 00:09:59.779
+of our foliage as we generate and paint them in the scene.
+
+164
+00:09:59.779 --> 00:10:02.139
+Now you'll see there's also virtual texturing.
+
+165
+00:10:02.139 --> 00:10:04.180
+So if you need to draw on that, you can.
+
+166
+00:10:04.180 --> 00:10:08.019
+That is covered a bit in our other classes, but I definitely want to point that out so
+
+167
+00:10:08.019 --> 00:10:15.539
+that you can know that you can be drunk with power and build this any way that you want.
+
+168
+00:10:15.539 --> 00:10:21.259
+You can also remove noise if it does persist, particularly when it comes to your final pixel.
+
+169
+00:10:21.259 --> 00:10:24.019
+So you can increase the screen percentage.
+
+170
+00:10:24.019 --> 00:10:25.379
+There's persistent flickering.
+
+171
+00:10:25.379 --> 00:10:28.819
+But keep in mind, this is more from Final Pixel, like I said.
+
+172
+00:10:28.819 --> 00:10:34.419
+And if you're going to LED wall, this may cause a hit performance, make things a bit
+
+173
+00:10:34.419 --> 00:10:36.199
+harder to work with.
+
+174
+00:10:36.200 --> 00:10:40.920
+So when rendering, punch in the console variable in our movie render queue, you'll see right
+
+175
+00:10:40.920 --> 00:10:42.879
+here.
+
+176
+00:10:42.879 --> 00:10:48.720
+You want to punch in r.screenPercentage200 to remove noise when rendering 4K output.
+
+177
+00:10:48.720 --> 00:10:53.440
+Now, warning, like I said earlier, it's the same thing if you're just going to wall versus
+
+178
+00:10:53.440 --> 00:10:54.560
+Final Pixel.
+
+179
+00:10:54.560 --> 00:10:58.580
+All of this can be VRAM intensive if you're not careful.
+
+180
+00:10:58.580 --> 00:11:05.960
+So increasing that rendering and tweaking these out can cause things to get a little
+
+181
+00:11:06.720 --> 00:11:07.720
+bit chunky if you're not careful.
+
+182
+00:11:07.720 --> 00:11:13.080
+To also remove noise, you can override anti-aliasing and set the spatial sample to 2 and temporal
+
+183
+00:11:13.080 --> 00:11:15.200
+sample count to 16.
+
+184
+00:11:15.200 --> 00:11:19.440
+So that's also an option in your movie render queue.
+
+185
+00:11:19.440 --> 00:11:24.560
+So if you're using LODs, you can also increase your frames per second.
+
+186
+00:11:24.560 --> 00:11:29.800
+We can decrease our polys on screen if you want to when you're using your LODs.
+
+187
+00:11:29.800 --> 00:11:31.000
+So just be careful with that.
+
+188
+00:11:31.000 --> 00:11:33.400
+Again, test it out before you commit.
+
+189
+00:11:33.399 --> 00:11:38.360
+So to unlock screen size, control turn off your auto compute LOD distance, which we talked
+
+190
+00:11:38.360 --> 00:11:41.199
+about in the previous class set.
+
+191
+00:11:41.199 --> 00:11:46.439
+And in the LOD settings, you can set foliage to a small prop to gain frames per second.
+
+192
+00:11:46.439 --> 00:11:49.199
+So that's also an option if you needed to.
+
+193
+00:11:49.199 --> 00:11:55.159
+Now remember, converting your foliage to nanite ahead of time, like I said, when using Lumen
+
+194
+00:11:55.159 --> 00:11:57.120
+is the best workflow for optimization.
+
+195
+00:11:57.360 --> 00:12:03.480
+Again, nanite works on a triangular basis versus your regular LODs.
+
+196
+00:12:03.480 --> 00:12:08.440
+And LODs will actually swap out geometry more on that asset itself.
+
+197
+00:12:08.440 --> 00:12:13.039
+What we're going to be doing when we're using nanite, it actually uses that triangle information
+
+198
+00:12:13.039 --> 00:12:18.679
+so we get more finite detail and it pulls up what is needed on that object in a more
+
+199
+00:12:18.679 --> 00:12:21.840
+finite control, which is pretty great.
+
+200
+00:12:21.840 --> 00:12:24.840
+So don't rule out nanites.
+
+201
+00:12:24.840 --> 00:12:25.840
+That's it with this video.
+
+202
+00:12:26.040 --> 00:12:29.160
+In the next video, we're going to talk a bit more about optimization.
+
+203
+00:12:29.160 --> 00:12:29.680
+Thanks again.
+
