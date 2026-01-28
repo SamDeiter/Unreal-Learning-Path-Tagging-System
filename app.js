@@ -1,89 +1,88 @@
 // Refresh Modal Functions
-      function showRefreshModal() {
-        document.getElementById("refreshModal").style.display = "flex";
-      }
+function showRefreshModal() {
+  document.getElementById("refreshModal").style.display = "flex";
+}
 
-      function closeRefreshModal() {
-        document.getElementById("refreshModal").style.display = "none";
-      }
+function closeRefreshModal() {
+  document.getElementById("refreshModal").style.display = "none";
+}
 
-      function copyCommand() {
-        navigator.clipboard.writeText("npm run update").then(() => {
-          const code = document.getElementById("updateCmd");
-          const original = code.textContent;
-          code.textContent = "✓ Copied!";
-          code.style.color = "#3fb950";
-          setTimeout(() => {
-            code.textContent = original;
-            code.style.color = "";
-          }, 2000);
-        });
-      }
+function copyCommand() {
+  navigator.clipboard.writeText("npm run update").then(() => {
+    const code = document.getElementById("updateCmd");
+    const original = code.textContent;
+    code.textContent = "✓ Copied!";
+    code.style.color = "#3fb950";
+    setTimeout(() => {
+      code.textContent = original;
+      code.style.color = "";
+    }, 2000);
+  });
+}
 
-      // Close modal on backdrop click
-      document.addEventListener("click", (e) => {
-        if (e.target.id === "refreshModal") {
-          closeRefreshModal();
-        }
-      });
+// Close modal on backdrop click
+document.addEventListener("click", (e) => {
+  if (e.target.id === "refreshModal") {
+    closeRefreshModal();
+  }
+});
 
-      // Global state
-      let courses = [];
-      let taxonomy = {};
-      let selectedPath = [];
-      let filters = {
-        search: "",
-        levels: [],
-        topics: [],
-        industries: [],
-        aiOnly: false,
-      };
+// Global state
+let courses = [];
+let taxonomy = {};
+let selectedPath = [];
+let filters = {
+  search: "",
+  levels: [],
+  topics: [],
+  industries: [],
+  aiOnly: false,
+};
 
-      // Load data
-      async function loadData() {
-        try {
-          const response = await fetch("content/video_library_enriched.json");
-          const data = await response.json();
-          window.libraryData = data; // Store for last_updated access
-          courses = data.courses;
-          taxonomy = data.taxonomy;
+// Load data
+async function loadData() {
+  try {
+    const response = await fetch("content/video_library_enriched.json");
+    const data = await response.json();
+    window.libraryData = data; // Store for last_updated access
+    courses = data.courses;
+    taxonomy = data.taxonomy;
 
-          initFilters();
-          renderStats(data.statistics);
-          renderCourses();
-          renderDashboard(); // Add dashboard rendering
-        } catch (err) {
-          console.error("Failed to load data:", err);
-          document.getElementById("courseGrid").innerHTML =
-            '<p style="color: var(--accent-red)">Failed to load course data. Make sure video_library_enriched.json exists.</p>';
-        }
-      }
+    initFilters();
+    renderStats(data.statistics);
+    renderCourses();
+    renderDashboard(); // Add dashboard rendering
+  } catch (err) {
+    console.error("Failed to load data:", err);
+    document.getElementById("courseGrid").innerHTML =
+      '<p style="color: var(--accent-red)">Failed to load course data. Make sure video_library_enriched.json exists.</p>';
+  }
+}
 
-      // Tab switching
-      function switchTab(tab) {
-        document.querySelectorAll(".tab-btn").forEach((btn) => {
-          btn.classList.toggle("active", btn.dataset.tab === tab);
-        });
-        document.getElementById("dashboardView").style.display =
-          tab === "dashboard" ? "block" : "none";
-        document.getElementById("builderView").style.display = tab === "builder" ? "block" : "none";
-      }
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.tab === tab);
+  });
+  document.getElementById("dashboardView").style.display = tab === "dashboard" ? "block" : "none";
+  document.getElementById("builderView").style.display = tab === "builder" ? "block" : "none";
+}
 
-      // Render Coverage Dashboard
-      function renderDashboard() {
-        // Show last updated timestamp
-        if (window.libraryData && window.libraryData.last_updated) {
-          const date = new Date(window.libraryData.last_updated);
-          document.getElementById("lastUpdated").textContent =
-            `Last updated: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
-        }
+// Render Coverage Dashboard
+function renderDashboard() {
+  // Show last updated timestamp
+  if (window.libraryData && window.libraryData.last_updated) {
+    const date = new Date(window.libraryData.last_updated);
+    document.getElementById("lastUpdated").textContent =
+      `Last updated: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
+  }
 
-        // Summary Cards
-        const totalVideos = courses.reduce((sum, c) => sum + (c.video_count || 0), 0);
-        const aiCount = courses.filter((c) => c.has_ai_tags).length;
-        const withVideos = courses.filter((c) => c.video_count > 0).length;
+  // Summary Cards
+  const totalVideos = courses.reduce((sum, c) => sum + (c.video_count || 0), 0);
+  const aiCount = courses.filter((c) => c.has_ai_tags).length;
+  const withVideos = courses.filter((c) => c.video_count > 0).length;
 
-        document.getElementById("dashboardSummary").innerHTML = `
+  document.getElementById("dashboardSummary").innerHTML = `
           <div class="summary-card">
             <div class="value">${courses.length}</div>
             <div class="label">Total Courses</div>
@@ -102,292 +101,292 @@
           </div>
         `;
 
-        // Topic Chart
-        const topicCounts = {};
-        courses.forEach((c) => {
-          const topic = c.tags.topic || "Other";
-          topicCounts[topic] = (topicCounts[topic] || 0) + 1;
-        });
-        const sortedTopics = Object.entries(topicCounts).sort((a, b) => b[1] - a[1]);
+  // Topic Chart
+  const topicCounts = {};
+  courses.forEach((c) => {
+    const topic = c.tags.topic || "Other";
+    topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+  });
+  const sortedTopics = Object.entries(topicCounts).sort((a, b) => b[1] - a[1]);
 
-        // Chart.js defaults for dark theme
-        Chart.defaults.color = "#8b949e";
-        Chart.defaults.borderColor = "#30363d";
+  // Chart.js defaults for dark theme
+  Chart.defaults.color = "#8b949e";
+  Chart.defaults.borderColor = "#30363d";
 
-        // Topic Horizontal Bar Chart
-        new Chart(document.getElementById("topicChart"), {
-          type: "bar",
-          data: {
-            labels: sortedTopics.map(([t]) => t),
-            datasets: [
-              {
-                data: sortedTopics.map(([, c]) => c),
-                backgroundColor: "rgba(88, 166, 255, 0.8)",
-                borderColor: "#58a6ff",
-                borderWidth: 1,
-                borderRadius: 4,
-                barThickness: 20,
-              },
-            ],
+  // Topic Horizontal Bar Chart
+  new Chart(document.getElementById("topicChart"), {
+    type: "bar",
+    data: {
+      labels: sortedTopics.map(([t]) => t),
+      datasets: [
+        {
+          data: sortedTopics.map(([, c]) => c),
+          backgroundColor: "rgba(88, 166, 255, 0.8)",
+          borderColor: "#58a6ff",
+          borderWidth: 1,
+          borderRadius: 4,
+          barThickness: 20,
+        },
+      ],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#21262d",
+          titleColor: "#f0f6fc",
+          bodyColor: "#f0f6fc",
+          borderColor: "#30363d",
+          borderWidth: 1,
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: "rgba(48, 54, 61, 0.5)" },
+          ticks: { stepSize: 5 },
+        },
+        y: {
+          grid: { display: false },
+        },
+      },
+    },
+  });
+
+  // Level Doughnut Chart
+  const levelCounts = { Beginner: 0, Intermediate: 0, Advanced: 0 };
+  courses.forEach((c) => {
+    const level = c.tags.level;
+    if (levelCounts[level] !== undefined) levelCounts[level]++;
+  });
+
+  new Chart(document.getElementById("levelChart"), {
+    type: "doughnut",
+    data: {
+      labels: Object.keys(levelCounts),
+      datasets: [
+        {
+          data: Object.values(levelCounts),
+          backgroundColor: ["#3fb950", "#d29922", "#f85149"],
+          borderColor: "#161b22",
+          borderWidth: 3,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      cutout: "60%",
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            padding: 20,
+            usePointStyle: true,
+            pointStyle: "circle",
           },
-          options: {
-            indexAxis: "y",
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                backgroundColor: "#21262d",
-                titleColor: "#f0f6fc",
-                bodyColor: "#f0f6fc",
-                borderColor: "#30363d",
-                borderWidth: 1,
-              },
-            },
-            scales: {
-              x: {
-                grid: { color: "rgba(48, 54, 61, 0.5)" },
-                ticks: { stepSize: 5 },
-              },
-              y: {
-                grid: { display: false },
-              },
-            },
+        },
+        tooltip: {
+          backgroundColor: "#21262d",
+          titleColor: "#f0f6fc",
+          bodyColor: "#f0f6fc",
+        },
+      },
+    },
+  });
+
+  // Industry Horizontal Bar Chart
+  const industryCounts = {};
+  courses.forEach((c) => {
+    const industry = c.tags.industry || "General";
+    industryCounts[industry] = (industryCounts[industry] || 0) + 1;
+  });
+  const sortedIndustries = Object.entries(industryCounts).sort((a, b) => b[1] - a[1]);
+
+  new Chart(document.getElementById("industryChart"), {
+    type: "bar",
+    data: {
+      labels: sortedIndustries.map(([i]) => i),
+      datasets: [
+        {
+          data: sortedIndustries.map(([, c]) => c),
+          backgroundColor: "rgba(163, 113, 247, 0.8)",
+          borderColor: "#a371f7",
+          borderWidth: 1,
+          borderRadius: 4,
+          barThickness: 20,
+        },
+      ],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        x: {
+          grid: { color: "rgba(48, 54, 61, 0.5)" },
+          ticks: { stepSize: 10 },
+        },
+        y: { grid: { display: false } },
+      },
+    },
+  });
+
+  // Status Doughnut Chart
+  new Chart(document.getElementById("statusChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["With Videos", "No Videos", "AI Analyzed", "Needs Analysis"],
+      datasets: [
+        {
+          label: "Videos",
+          data: [withVideos, courses.length - withVideos],
+          backgroundColor: ["#3fb950", "rgba(139, 148, 158, 0.3)"],
+          borderColor: "#161b22",
+          borderWidth: 3,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      cutout: "65%",
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            padding: 15,
+            usePointStyle: true,
+            pointStyle: "circle",
           },
-        });
+        },
+      },
+    },
+  });
 
-        // Level Doughnut Chart
-        const levelCounts = { Beginner: 0, Intermediate: 0, Advanced: 0 };
-        courses.forEach((c) => {
-          const level = c.tags.level;
-          if (levelCounts[level] !== undefined) levelCounts[level]++;
-        });
+  // Render Tag Cloud - Top 100 Tags
+  const allTags = {};
+  courses.forEach((c) => {
+    // Collect all tag types
+    if (c.tags) {
+      if (c.tags.topic) allTags[c.tags.topic] = (allTags[c.tags.topic] || 0) + 1;
+      if (c.tags.industry) allTags[c.tags.industry] = (allTags[c.tags.industry] || 0) + 1;
+      if (c.tags.level) allTags[c.tags.level] = (allTags[c.tags.level] || 0) + 1;
+    }
+    // AI-generated tags
+    if (c.ai_tags) {
+      (c.ai_tags.keywords || []).forEach((k) => {
+        allTags[k] = (allTags[k] || 0) + 1;
+      });
+      (c.ai_tags.concepts || []).forEach((k) => {
+        allTags[k] = (allTags[k] || 0) + 1;
+      });
+    }
+  });
 
-        new Chart(document.getElementById("levelChart"), {
-          type: "doughnut",
-          data: {
-            labels: Object.keys(levelCounts),
-            datasets: [
-              {
-                data: Object.values(levelCounts),
-                backgroundColor: ["#3fb950", "#d29922", "#f85149"],
-                borderColor: "#161b22",
-                borderWidth: 3,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            cutout: "60%",
-            plugins: {
-              legend: {
-                position: "bottom",
-                labels: {
-                  padding: 20,
-                  usePointStyle: true,
-                  pointStyle: "circle",
-                },
-              },
-              tooltip: {
-                backgroundColor: "#21262d",
-                titleColor: "#f0f6fc",
-                bodyColor: "#f0f6fc",
-              },
-            },
-          },
-        });
+  // Sort by frequency and take top 100
+  const sortedTags = Object.entries(allTags)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 100);
 
-        // Industry Horizontal Bar Chart
-        const industryCounts = {};
-        courses.forEach((c) => {
-          const industry = c.tags.industry || "General";
-          industryCounts[industry] = (industryCounts[industry] || 0) + 1;
-        });
-        const sortedIndustries = Object.entries(industryCounts).sort((a, b) => b[1] - a[1]);
+  // Calculate size buckets
+  const maxCount = sortedTags[0]?.[1] || 1;
+  const getSize = (count) => {
+    const ratio = count / maxCount;
+    if (ratio > 0.7) return 5;
+    if (ratio > 0.4) return 4;
+    if (ratio > 0.2) return 3;
+    if (ratio > 0.1) return 2;
+    return 1;
+  };
 
-        new Chart(document.getElementById("industryChart"), {
-          type: "bar",
-          data: {
-            labels: sortedIndustries.map(([i]) => i),
-            datasets: [
-              {
-                data: sortedIndustries.map(([, c]) => c),
-                backgroundColor: "rgba(163, 113, 247, 0.8)",
-                borderColor: "#a371f7",
-                borderWidth: 1,
-                borderRadius: 4,
-                barThickness: 20,
-              },
-            ],
-          },
-          options: {
-            indexAxis: "y",
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-            },
-            scales: {
-              x: {
-                grid: { color: "rgba(48, 54, 61, 0.5)" },
-                ticks: { stepSize: 10 },
-              },
-              y: { grid: { display: false } },
-            },
-          },
-        });
-
-        // Status Doughnut Chart
-        new Chart(document.getElementById("statusChart"), {
-          type: "doughnut",
-          data: {
-            labels: ["With Videos", "No Videos", "AI Analyzed", "Needs Analysis"],
-            datasets: [
-              {
-                label: "Videos",
-                data: [withVideos, courses.length - withVideos],
-                backgroundColor: ["#3fb950", "rgba(139, 148, 158, 0.3)"],
-                borderColor: "#161b22",
-                borderWidth: 3,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            cutout: "65%",
-            plugins: {
-              legend: {
-                position: "bottom",
-                labels: {
-                  padding: 15,
-                  usePointStyle: true,
-                  pointStyle: "circle",
-                },
-              },
-            },
-          },
-        });
-
-        // Render Tag Cloud - Top 100 Tags
-        const allTags = {};
-        courses.forEach((c) => {
-          // Collect all tag types
-          if (c.tags) {
-            if (c.tags.topic) allTags[c.tags.topic] = (allTags[c.tags.topic] || 0) + 1;
-            if (c.tags.industry) allTags[c.tags.industry] = (allTags[c.tags.industry] || 0) + 1;
-            if (c.tags.level) allTags[c.tags.level] = (allTags[c.tags.level] || 0) + 1;
-          }
-          // AI-generated tags
-          if (c.ai_tags) {
-            (c.ai_tags.keywords || []).forEach((k) => {
-              allTags[k] = (allTags[k] || 0) + 1;
-            });
-            (c.ai_tags.concepts || []).forEach((k) => {
-              allTags[k] = (allTags[k] || 0) + 1;
-            });
-          }
-        });
-
-        // Sort by frequency and take top 100
-        const sortedTags = Object.entries(allTags)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 100);
-
-        // Calculate size buckets
-        const maxCount = sortedTags[0]?.[1] || 1;
-        const getSize = (count) => {
-          const ratio = count / maxCount;
-          if (ratio > 0.7) return 5;
-          if (ratio > 0.4) return 4;
-          if (ratio > 0.2) return 3;
-          if (ratio > 0.1) return 2;
-          return 1;
-        };
-
-        document.getElementById("tagCloud").innerHTML = sortedTags
-          .map(
-            ([tag, count]) => `
+  document.getElementById("tagCloud").innerHTML = sortedTags
+    .map(
+      ([tag, count]) => `
             <span class="cloud-tag size-${getSize(count)}">${tag}<span class="tag-count">(${count})</span></span>
           `
-          )
-          .join("");
+    )
+    .join("");
 
-        // Generate Coverage Recommendations
-        const recommendations = [];
+  // Generate Coverage Recommendations
+  const recommendations = [];
 
-        // 1. Find topics with too few courses (gaps)
-        const avgPerTopic = courses.length / sortedTopics.length;
-        sortedTopics
-          .filter(([topic, count]) => count < 3)
-          .forEach(([topic, count]) => {
-            recommendations.push({
-              type: "gap",
-              title: `${topic}: Low Coverage`,
-              desc: `Only ${count} course${count === 1 ? "" : "s"} cover this topic. Consider adding more content.`,
-              stat: `${count} courses`,
-            });
-          });
+  // 1. Find topics with too few courses (gaps)
+  const avgPerTopic = courses.length / sortedTopics.length;
+  sortedTopics
+    .filter(([topic, count]) => count < 3)
+    .forEach(([topic, count]) => {
+      recommendations.push({
+        type: "gap",
+        title: `${topic}: Low Coverage`,
+        desc: `Only ${count} course${count === 1 ? "" : "s"} cover this topic. Consider adding more content.`,
+        stat: `${count} courses`,
+      });
+    });
 
-        // 2. Find missing level combinations
-        const levelByTopic = {};
-        courses.forEach((c) => {
-          const topic = c.tags.topic || "Other";
-          const level = c.tags.level;
-          if (!levelByTopic[topic]) levelByTopic[topic] = new Set();
-          if (level) levelByTopic[topic].add(level);
-        });
-        sortedTopics.slice(0, 8).forEach(([topic]) => {
-          const levels = levelByTopic[topic] || new Set();
-          ["Beginner", "Intermediate", "Advanced"].forEach((level) => {
-            if (!levels.has(level)) {
-              recommendations.push({
-                type: "opportunity",
-                title: `No ${level} ${topic} Course`,
-                desc: `Add a ${level.toLowerCase()}-level course for ${topic} to complete the learning path.`,
-                stat: "Missing level",
-              });
-            }
-          });
-        });
-
-        // 3. Find courses without videos (needs content)
-        const noVideos = courses.filter((c) => c.video_count === 0).length;
-        if (noVideos > 0) {
-          recommendations.push({
-            type: "gap",
-            title: `${noVideos} Courses Without Videos`,
-            desc: "These courses may need video content added or may be legacy courses to review.",
-            stat: `${Math.round((noVideos / courses.length) * 100)}% of library`,
-          });
-        }
-
-        // 4. Find courses needing AI analysis
-        const needsAI = courses.filter((c) => !c.has_ai_tags && c.video_count > 0).length;
-        if (needsAI > 0) {
-          recommendations.push({
-            type: "opportunity",
-            title: `${needsAI} Courses Ready for AI Tagging`,
-            desc: "These courses have videos but no AI-enriched tags. Run analysis to improve discoverability.",
-            stat: "Ready to analyze",
-          });
-        }
-
-        // 5. Highlight strengths
-        const topTopics = sortedTopics.slice(0, 3);
+  // 2. Find missing level combinations
+  const levelByTopic = {};
+  courses.forEach((c) => {
+    const topic = c.tags.topic || "Other";
+    const level = c.tags.level;
+    if (!levelByTopic[topic]) levelByTopic[topic] = new Set();
+    if (level) levelByTopic[topic].add(level);
+  });
+  sortedTopics.slice(0, 8).forEach(([topic]) => {
+    const levels = levelByTopic[topic] || new Set();
+    ["Beginner", "Intermediate", "Advanced"].forEach((level) => {
+      if (!levels.has(level)) {
         recommendations.push({
-          type: "strength",
-          title: "Strong Topic Coverage",
-          desc: `Top areas: ${topTopics.map(([t, c]) => `${t} (${c})`).join(", ")}`,
-          stat: `${topTopics.reduce((s, [, c]) => s + c, 0)} courses`,
+          type: "opportunity",
+          title: `No ${level} ${topic} Course`,
+          desc: `Add a ${level.toLowerCase()}-level course for ${topic} to complete the learning path.`,
+          stat: "Missing level",
         });
+      }
+    });
+  });
 
-        // Render recommendations (limit to 6)
-        document.getElementById("recommendations").innerHTML = recommendations
-          .slice(0, 6)
-          .map(
-            (r) => `
+  // 3. Find courses without videos (needs content)
+  const noVideos = courses.filter((c) => c.video_count === 0).length;
+  if (noVideos > 0) {
+    recommendations.push({
+      type: "gap",
+      title: `${noVideos} Courses Without Videos`,
+      desc: "These courses may need video content added or may be legacy courses to review.",
+      stat: `${Math.round((noVideos / courses.length) * 100)}% of library`,
+    });
+  }
+
+  // 4. Find courses needing AI analysis
+  const needsAI = courses.filter((c) => !c.has_ai_tags && c.video_count > 0).length;
+  if (needsAI > 0) {
+    recommendations.push({
+      type: "opportunity",
+      title: `${needsAI} Courses Ready for AI Tagging`,
+      desc: "These courses have videos but no AI-enriched tags. Run analysis to improve discoverability.",
+      stat: "Ready to analyze",
+    });
+  }
+
+  // 5. Highlight strengths
+  const topTopics = sortedTopics.slice(0, 3);
+  recommendations.push({
+    type: "strength",
+    title: "Strong Topic Coverage",
+    desc: `Top areas: ${topTopics.map(([t, c]) => `${t} (${c})`).join(", ")}`,
+    stat: `${topTopics.reduce((s, [, c]) => s + c, 0)} courses`,
+  });
+
+  // Render recommendations (limit to 6)
+  document.getElementById("recommendations").innerHTML = recommendations
+    .slice(0, 6)
+    .map(
+      (r) => `
           <div class="recommendation-card ${r.type}">
             <div class="rec-type">${r.type === "gap" ? "⚠️ Gap" : r.type === "opportunity" ? "💡 Opportunity" : "✅ Strength"}</div>
             <div class="rec-title">${r.title}</div>
@@ -395,11 +394,11 @@
             <span class="rec-stat">${r.stat}</span>
           </div>
         `
-          )
-          .join("");
+    )
+    .join("");
 
-        // Courses Table with pill styling
-        document.getElementById("coursesTable").innerHTML = `
+  // Courses Table with pill styling
+  document.getElementById("coursesTable").innerHTML = `
           <table class="courses-table">
             <thead>
               <tr>
@@ -431,208 +430,204 @@
             </tbody>
           </table>
         `;
-      }
+}
 
-      // Initialize filter chips
-      function initFilters() {
-        // Topic chips
-        const topicCounts = {};
-        courses.forEach((c) => {
-          const topic = c.tags.topic || "Other";
-          topicCounts[topic] = (topicCounts[topic] || 0) + 1;
-        });
+// Initialize filter chips
+function initFilters() {
+  // Topic chips
+  const topicCounts = {};
+  courses.forEach((c) => {
+    const topic = c.tags.topic || "Other";
+    topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+  });
 
-        const sortedTopics = Object.entries(topicCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 12);
+  const sortedTopics = Object.entries(topicCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 12);
 
-        const topicContainer = document.getElementById("topicChips");
-        topicContainer.innerHTML = sortedTopics
-          .map(
-            ([topic, count]) => `
+  const topicContainer = document.getElementById("topicChips");
+  topicContainer.innerHTML = sortedTopics
+    .map(
+      ([topic, count]) => `
           <button class="filter-chip" data-type="topics" data-value="${topic}" onclick="toggleChip(this)">
             ${topic}<span class="chip-count">${count}</span>
           </button>
         `
-          )
-          .join("");
+    )
+    .join("");
 
-        // Industry chips
-        const industryCounts = {};
-        courses.forEach((c) => {
-          const industry = c.tags.industry || "General";
-          industryCounts[industry] = (industryCounts[industry] || 0) + 1;
-        });
+  // Industry chips
+  const industryCounts = {};
+  courses.forEach((c) => {
+    const industry = c.tags.industry || "General";
+    industryCounts[industry] = (industryCounts[industry] || 0) + 1;
+  });
 
-        const industryContainer = document.getElementById("industryChips");
-        industryContainer.innerHTML = Object.entries(industryCounts)
-          .sort((a, b) => b[1] - a[1])
-          .map(
-            ([industry, count]) => `
+  const industryContainer = document.getElementById("industryChips");
+  industryContainer.innerHTML = Object.entries(industryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(
+      ([industry, count]) => `
             <button class="filter-chip" data-type="industries" data-value="${industry}" onclick="toggleChip(this)">
               ${industry}<span class="chip-count">${count}</span>
             </button>
           `
-          )
-          .join("");
+    )
+    .join("");
 
-        // Search
-        document.getElementById("searchInput").addEventListener("input", (e) => {
-          filters.search = e.target.value.toLowerCase();
-          renderCourses();
-          updateActiveFilters();
-        });
+  // Search
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    filters.search = e.target.value.toLowerCase();
+    renderCourses();
+    updateActiveFilters();
+  });
 
-        // AI only filter
-        document.getElementById("aiOnlyFilter").addEventListener("change", (e) => {
-          filters.aiOnly = e.target.checked;
-          renderCourses();
-          updateActiveFilters();
-        });
-      }
+  // AI only filter
+  document.getElementById("aiOnlyFilter").addEventListener("change", (e) => {
+    filters.aiOnly = e.target.checked;
+    renderCourses();
+    updateActiveFilters();
+  });
+}
 
-      // Toggle level pill
-      function toggleLevelPill(btn) {
-        btn.classList.toggle("active");
-        const level = btn.dataset.level;
-        if (btn.classList.contains("active")) {
-          if (!filters.levels.includes(level)) {
-            filters.levels.push(level);
-          }
-        } else {
-          filters.levels = filters.levels.filter((l) => l !== level);
-        }
-        renderCourses();
-        updateActiveFilters();
-      }
+// Toggle level pill
+function toggleLevelPill(btn) {
+  btn.classList.toggle("active");
+  const level = btn.dataset.level;
+  if (btn.classList.contains("active")) {
+    if (!filters.levels.includes(level)) {
+      filters.levels.push(level);
+    }
+  } else {
+    filters.levels = filters.levels.filter((l) => l !== level);
+  }
+  renderCourses();
+  updateActiveFilters();
+}
 
-      // Toggle chip filter
-      function toggleChip(btn) {
-        btn.classList.toggle("active");
-        const type = btn.dataset.type;
-        const value = btn.dataset.value;
-        if (btn.classList.contains("active")) {
-          if (!filters[type].includes(value)) {
-            filters[type].push(value);
-          }
-        } else {
-          filters[type] = filters[type].filter((v) => v !== value);
-        }
-        renderCourses();
-        updateActiveFilters();
-      }
+// Toggle chip filter
+function toggleChip(btn) {
+  btn.classList.toggle("active");
+  const type = btn.dataset.type;
+  const value = btn.dataset.value;
+  if (btn.classList.contains("active")) {
+    if (!filters[type].includes(value)) {
+      filters[type].push(value);
+    }
+  } else {
+    filters[type] = filters[type].filter((v) => v !== value);
+  }
+  renderCourses();
+  updateActiveFilters();
+}
 
-      // Toggle more filters
-      function toggleMoreFilters() {
-        const expanded = document.getElementById("filterExpanded");
-        const icon = document.getElementById("moreFiltersIcon");
-        if (expanded.style.display === "none") {
-          expanded.style.display = "block";
-          icon.textContent = "▲";
-        } else {
-          expanded.style.display = "none";
-          icon.textContent = "▼";
-        }
-      }
+// Toggle more filters
+function toggleMoreFilters() {
+  const expanded = document.getElementById("filterExpanded");
+  const icon = document.getElementById("moreFiltersIcon");
+  if (expanded.style.display === "none") {
+    expanded.style.display = "block";
+    icon.textContent = "▲";
+  } else {
+    expanded.style.display = "none";
+    icon.textContent = "▼";
+  }
+}
 
-      // Update active filters display
-      function updateActiveFilters() {
-        const activeFilters = document.getElementById("activeFilters");
-        const activeChips = document.getElementById("activeChips");
+// Update active filters display
+function updateActiveFilters() {
+  const activeFilters = document.getElementById("activeFilters");
+  const activeChips = document.getElementById("activeChips");
 
-        const allActive = [
-          ...filters.levels.map((l) => ({
-            type: "levels",
-            value: l,
-            label: l,
-          })),
-          ...filters.topics.map((t) => ({
-            type: "topics",
-            value: t,
-            label: t,
-          })),
-          ...filters.industries.map((i) => ({
-            type: "industries",
-            value: i,
-            label: i,
-          })),
-        ];
+  const allActive = [
+    ...filters.levels.map((l) => ({
+      type: "levels",
+      value: l,
+      label: l,
+    })),
+    ...filters.topics.map((t) => ({
+      type: "topics",
+      value: t,
+      label: t,
+    })),
+    ...filters.industries.map((i) => ({
+      type: "industries",
+      value: i,
+      label: i,
+    })),
+  ];
 
-        if (filters.aiOnly) {
-          allActive.push({ type: "ai", value: true, label: "AI Only" });
-        }
+  if (filters.aiOnly) {
+    allActive.push({ type: "ai", value: true, label: "AI Only" });
+  }
 
-        if (allActive.length === 0) {
-          activeFilters.style.display = "none";
-          return;
-        }
+  if (allActive.length === 0) {
+    activeFilters.style.display = "none";
+    return;
+  }
 
-        activeFilters.style.display = "flex";
-        activeChips.innerHTML = allActive
-          .map(
-            (f) => `
+  activeFilters.style.display = "flex";
+  activeChips.innerHTML = allActive
+    .map(
+      (f) => `
           <span class="active-chip">
             ${f.label}
             <button onclick="removeFilter('${f.type}', '${f.value}')">×</button>
           </span>
         `
-          )
-          .join("");
-      }
+    )
+    .join("");
+}
 
-      // Remove a specific filter
-      function removeFilter(type, value) {
-        if (type === "ai") {
-          filters.aiOnly = false;
-          document.getElementById("aiOnlyFilter").checked = false;
-        } else if (type === "levels") {
-          filters.levels = filters.levels.filter((l) => l !== value);
-          document.querySelector(`.level-pill[data-level="${value}"]`)?.classList.remove("active");
-        } else {
-          filters[type] = filters[type].filter((v) => v !== value);
-          document.querySelector(`.filter-chip[data-value="${value}"]`)?.classList.remove("active");
-        }
-        renderCourses();
-        updateActiveFilters();
-      }
+// Remove a specific filter
+function removeFilter(type, value) {
+  if (type === "ai") {
+    filters.aiOnly = false;
+    document.getElementById("aiOnlyFilter").checked = false;
+  } else if (type === "levels") {
+    filters.levels = filters.levels.filter((l) => l !== value);
+    document.querySelector(`.level-pill[data-level="${value}"]`)?.classList.remove("active");
+  } else {
+    filters[type] = filters[type].filter((v) => v !== value);
+    document.querySelector(`.filter-chip[data-value="${value}"]`)?.classList.remove("active");
+  }
+  renderCourses();
+  updateActiveFilters();
+}
 
-      // Clear all filters
-      function clearAllFilters() {
-        filters.levels = [];
-        filters.topics = [];
-        filters.industries = [];
-        filters.aiOnly = false;
-        filters.search = "";
+// Clear all filters
+function clearAllFilters() {
+  filters.levels = [];
+  filters.topics = [];
+  filters.industries = [];
+  filters.aiOnly = false;
+  filters.search = "";
 
-        document
-          .querySelectorAll(".level-pill.active")
-          .forEach((p) => p.classList.remove("active"));
-        document
-          .querySelectorAll(".filter-chip.active")
-          .forEach((c) => c.classList.remove("active"));
-        document.getElementById("aiOnlyFilter").checked = false;
-        document.getElementById("searchInput").value = "";
+  document.querySelectorAll(".level-pill.active").forEach((p) => p.classList.remove("active"));
+  document.querySelectorAll(".filter-chip.active").forEach((c) => c.classList.remove("active"));
+  document.getElementById("aiOnlyFilter").checked = false;
+  document.getElementById("searchInput").value = "";
 
-        renderCourses();
-        updateActiveFilters();
-      }
+  renderCourses();
+  updateActiveFilters();
+}
 
-      // Legacy support
-      function updateFilter(filterType, checkbox) {
-        toggleChip({
-          classList: { toggle: () => {}, contains: () => checkbox.checked },
-          dataset: { type: filterType, value: checkbox.value },
-        });
-      }
+// Legacy support
+function updateFilter(filterType, checkbox) {
+  toggleChip({
+    classList: { toggle: () => {}, contains: () => checkbox.checked },
+    dataset: { type: filterType, value: checkbox.value },
+  });
+}
 
-      // Render stats (optional - element may not exist in new layout)
-      function renderStats(stats) {
-        const statsBar = document.getElementById("statsBar");
-        if (!statsBar) return; // Stats bar removed in new horizontal layout
+// Render stats (optional - element may not exist in new layout)
+function renderStats(stats) {
+  const statsBar = document.getElementById("statsBar");
+  if (!statsBar) return; // Stats bar removed in new horizontal layout
 
-        const aiCount = courses.filter((c) => c.has_ai_tags).length;
-        const totalVideos = courses.reduce((sum, c) => sum + (c.video_count || 0), 0);
-        statsBar.innerHTML = `
+  const aiCount = courses.filter((c) => c.has_ai_tags).length;
+  const totalVideos = courses.reduce((sum, c) => sum + (c.video_count || 0), 0);
+  statsBar.innerHTML = `
         <div class="stat">
           <div class="stat-value">${stats.total_courses}</div>
           <div class="stat-label">Total Courses</div>
@@ -650,50 +645,50 @@
           <div class="stat-label">Topics</div>
         </div>
       `;
-      }
+}
 
-      // Filter courses
-      function getFilteredCourses() {
-        return courses.filter((course) => {
-          // Search filter
-          if (filters.search) {
-            const searchText =
-              `${course.title} ${course.code} ${course.tags.topic} ${course.tags.industry}`.toLowerCase();
-            if (!searchText.includes(filters.search)) return false;
-          }
+// Filter courses
+function getFilteredCourses() {
+  return courses.filter((course) => {
+    // Search filter
+    if (filters.search) {
+      const searchText =
+        `${course.title} ${course.code} ${course.tags.topic} ${course.tags.industry}`.toLowerCase();
+      if (!searchText.includes(filters.search)) return false;
+    }
 
-          // Level filter
-          if (filters.levels.length > 0) {
-            if (!filters.levels.includes(course.tags.level)) return false;
-          }
+    // Level filter
+    if (filters.levels.length > 0) {
+      if (!filters.levels.includes(course.tags.level)) return false;
+    }
 
-          // Topic filter
-          if (filters.topics.length > 0) {
-            if (!filters.topics.includes(course.tags.topic)) return false;
-          }
+    // Topic filter
+    if (filters.topics.length > 0) {
+      if (!filters.topics.includes(course.tags.topic)) return false;
+    }
 
-          // Industry filter
-          if (filters.industries.length > 0) {
-            if (!filters.industries.includes(course.tags.industry)) return false;
-          }
+    // Industry filter
+    if (filters.industries.length > 0) {
+      if (!filters.industries.includes(course.tags.industry)) return false;
+    }
 
-          // AI only filter
-          if (filters.aiOnly && !course.has_ai_tags) return false;
+    // AI only filter
+    if (filters.aiOnly && !course.has_ai_tags) return false;
 
-          return true;
-        });
-      }
+    return true;
+  });
+}
 
-      // Render course cards
-      function renderCourses() {
-        const filtered = getFilteredCourses();
-        document.getElementById("resultsCount").textContent = `${filtered.length} courses found`;
+// Render course cards
+function renderCourses() {
+  const filtered = getFilteredCourses();
+  document.getElementById("resultsCount").textContent = `${filtered.length} courses found`;
 
-        const grid = document.getElementById("courseGrid");
-        grid.innerHTML = filtered
-          .map((course) => {
-            const isSelected = selectedPath.find((p) => p.code === course.code);
-            return `
+  const grid = document.getElementById("courseGrid");
+  grid.innerHTML = filtered
+    .map((course) => {
+      const isSelected = selectedPath.find((p) => p.code === course.code);
+      return `
           <div class="course-card ${isSelected ? "selected" : ""}">
             <button class="card-add-btn ${isSelected ? "remove" : ""}" onclick="event.stopPropagation(); toggleCourse('${course.code}')" title="${isSelected ? "Remove from path" : "Add to path"}">
               ${isSelected ? "✓" : "+"}
@@ -712,182 +707,167 @@
             </div>
           </div>
         `;
-          })
-          .join("");
-      }
+    })
+    .join("");
+}
 
-      // Toggle course in path
-      function toggleCourse(code) {
-        const course = courses.find((c) => c.code === code);
-        if (!course) return;
+// Toggle course in path
+function toggleCourse(code) {
+  const course = courses.find((c) => c.code === code);
+  if (!course) return;
 
-        const index = selectedPath.findIndex((p) => p.code === code);
-        if (index >= 0) {
-          selectedPath.splice(index, 1);
-        } else {
-          selectedPath.push(course);
-        }
+  const index = selectedPath.findIndex((p) => p.code === code);
+  if (index >= 0) {
+    selectedPath.splice(index, 1);
+  } else {
+    selectedPath.push(course);
+  }
 
-        renderPath();
-        renderCourses();
-      }
+  renderPath();
+  renderCourses();
+}
 
-      // Render learning path - Simple version
-      function renderPath() {
-        const list = document.getElementById("pathList");
-        const summary = document.getElementById("pathSummary");
-        const actions = document.getElementById("pathActions");
-        const countEl = document.getElementById("pathCount");
-        const count = selectedPath.length;
+// Render learning path - Horizontal bar version
+function renderPath() {
+  const list = document.getElementById("pathList");
+  const countEl = document.getElementById("pathCount");
+  const count = selectedPath.length;
 
-        // Update count badge
-        countEl.textContent = count;
-        countEl.classList.toggle("has-items", count > 0);
+  // Update count badge
+  countEl.textContent = count;
+  countEl.classList.toggle("has-items", count > 0);
 
-        if (count === 0) {
-          list.innerHTML = `
-            <div class="path-empty">
-              <div class="empty-icon">🎯</div>
-              <div class="empty-title">Start Building</div>
-              <div class="empty-hint">Click <span class="hint-add">+</span> on any course</div>
-            </div>
-          `;
-          summary.classList.add("hidden");
-          actions.classList.add("hidden");
-          return;
-        }
+  if (count === 0) {
+    list.innerHTML = `<span class="path-empty-inline">Click <span class="hint-add">+</span> on courses to add</span>`;
+    document.getElementById("summaryVideos").textContent = "0";
+    document.getElementById("summaryDuration").textContent = "0h";
+    return;
+  }
 
-        // Show summary and actions
-        summary.classList.remove("hidden");
-        actions.classList.remove("hidden");
+  // Calculate stats
+  const totalVideos = selectedPath.reduce((sum, c) => sum + (c.video_count || 0), 0);
+  const estHours = Math.round(totalVideos * 0.15);
+  document.getElementById("summaryVideos").textContent = totalVideos;
+  document.getElementById("summaryDuration").textContent = estHours > 0 ? `~${estHours}h` : "< 1h";
 
-        // Calculate stats
-        const totalVideos = selectedPath.reduce((sum, c) => sum + (c.video_count || 0), 0);
-        const estHours = Math.round(totalVideos * 0.15);
-        document.getElementById("summaryVideos").textContent = totalVideos;
-        document.getElementById("summaryDuration").textContent =
-          estHours > 0 ? `~${estHours}h` : "< 1h";
-
-        // Render items
-        list.innerHTML = selectedPath
-          .map(
-            (course, i) => `
-          <div class="path-item">
-            <span class="path-number">${i + 1}</span>
-            <span class="path-item-title">${course.title}</span>
-            <span class="path-item-level ${(course.tags.level || "").toLowerCase()}">${course.tags.level || ""}</span>
-            <button class="path-item-remove" onclick="removeCourse('${course.code}')">×</button>
-          </div>
+  // Render chips
+  list.innerHTML = selectedPath
+    .map(
+      (course) => `
+          <span class="path-chip">
+            ${course.code || course.title.slice(0, 15)}
+            <button onclick="removeCourse('${course.code}')" title="Remove">×</button>
+          </span>
         `
-          )
-          .join("");
-      }
+    )
+    .join("");
+}
 
-      // Remove course from path
-      function removeCourse(code) {
-        selectedPath = selectedPath.filter((c) => c.code !== code);
-        renderPath();
-        renderCourses();
-      }
+// Remove course from path
+function removeCourse(code) {
+  selectedPath = selectedPath.filter((c) => c.code !== code);
+  renderPath();
+  renderCourses();
+}
 
-      // Export path
-      document.getElementById("exportPath").addEventListener("click", () => {
-        if (selectedPath.length === 0) {
-          alert("Add courses to your learning path first!");
-          return;
-        }
+// Export path
+document.getElementById("exportPath").addEventListener("click", () => {
+  if (selectedPath.length === 0) {
+    alert("Add courses to your learning path first!");
+    return;
+  }
 
-        const pathData = {
-          name: "My Learning Path",
-          created: new Date().toISOString(),
-          courses: selectedPath.map((c, i) => ({
-            order: i + 1,
-            code: c.code,
-            title: c.title,
-            level: c.tags.level,
-            topic: c.tags.topic,
-            industry: c.tags.industry,
-          })),
-        };
+  const pathData = {
+    name: "My Learning Path",
+    created: new Date().toISOString(),
+    courses: selectedPath.map((c, i) => ({
+      order: i + 1,
+      code: c.code,
+      title: c.title,
+      level: c.tags.level,
+      topic: c.tags.topic,
+      industry: c.tags.industry,
+    })),
+  };
 
-        const blob = new Blob([JSON.stringify(pathData, null, 2)], {
-          type: "application/json",
+  const blob = new Blob([JSON.stringify(pathData, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "learning-path.json";
+  a.click();
+});
+
+// Clear path
+document.getElementById("clearPath").addEventListener("click", () => {
+  selectedPath = [];
+  renderPath();
+  renderCourses();
+});
+
+// Export videos list
+document.getElementById("exportVideos").addEventListener("click", () => {
+  if (selectedPath.length === 0) {
+    alert("Add courses to your learning path first!");
+    return;
+  }
+
+  // Collect all video files from selected courses
+  const allVideos = [];
+  selectedPath.forEach((course, courseIndex) => {
+    if (course.videos && course.videos.length > 0) {
+      course.videos.forEach((video, videoIndex) => {
+        allVideos.push({
+          order: allVideos.length + 1,
+          course_code: course.code,
+          course_title: course.title,
+          video_name: video.name,
+          video_path: video.path,
+          version: video.version,
         });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "learning-path.json";
-        a.click();
       });
+    }
+  });
 
-      // Clear path
-      document.getElementById("clearPath").addEventListener("click", () => {
-        selectedPath = [];
-        renderPath();
-        renderCourses();
-      });
+  if (allVideos.length === 0) {
+    alert(
+      "No video files found in selected courses.\n\nNote: Video data needs to be refreshed. Run:\nnode scripts/scan_video_library.js"
+    );
+    return;
+  }
 
-      // Export videos list
-      document.getElementById("exportVideos").addEventListener("click", () => {
-        if (selectedPath.length === 0) {
-          alert("Add courses to your learning path first!");
-          return;
-        }
+  // Create CSV content
+  const csvHeader = "Order,Course Code,Course Title,Video Name,Video Path,Version\n";
+  const csvRows = allVideos
+    .map(
+      (v) =>
+        `${v.order},"${v.course_code}","${v.course_title}","${v.video_name}","${v.video_path}","${v.version}"`
+    )
+    .join("\n");
+  const csvContent = csvHeader + csvRows;
 
-        // Collect all video files from selected courses
-        const allVideos = [];
-        selectedPath.forEach((course, courseIndex) => {
-          if (course.videos && course.videos.length > 0) {
-            course.videos.forEach((video, videoIndex) => {
-              allVideos.push({
-                order: allVideos.length + 1,
-                course_code: course.code,
-                course_title: course.title,
-                video_name: video.name,
-                video_path: video.path,
-                version: video.version,
-              });
-            });
-          }
-        });
+  // Download CSV
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "learning-path-videos.csv";
+  a.click();
 
-        if (allVideos.length === 0) {
-          alert(
-            "No video files found in selected courses.\n\nNote: Video data needs to be refreshed. Run:\nnode scripts/scan_video_library.js"
-          );
-          return;
-        }
+  alert(`Exported ${allVideos.length} video files from ${selectedPath.length} courses!`);
+});
 
-        // Create CSV content
-        const csvHeader = "Order,Course Code,Course Title,Video Name,Video Path,Version\n";
-        const csvRows = allVideos
-          .map(
-            (v) =>
-              `${v.order},"${v.course_code}","${v.course_title}","${v.video_name}","${v.video_path}","${v.version}"`
-          )
-          .join("\n");
-        const csvContent = csvHeader + csvRows;
+// Show course detail modal
+function showCourseDetail(code) {
+  const course = courses.find((c) => c.code === code);
+  if (!course) return;
 
-        // Download CSV
-        const blob = new Blob([csvContent], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "learning-path-videos.csv";
-        a.click();
+  document.getElementById("modalCode").textContent = course.code || "N/A";
+  document.getElementById("modalTitle").textContent = course.title;
 
-        alert(`Exported ${allVideos.length} video files from ${selectedPath.length} courses!`);
-      });
-
-      // Show course detail modal
-      function showCourseDetail(code) {
-        const course = courses.find((c) => c.code === code);
-        if (!course) return;
-
-        document.getElementById("modalCode").textContent = course.code || "N/A";
-        document.getElementById("modalTitle").textContent = course.title;
-
-        let bodyHTML = `
+  let bodyHTML = `
         <div class="modal-section">
           <h4>Tags</h4>
           <div class="course-tags">
@@ -899,9 +879,9 @@
         </div>
       `;
 
-        if (course.ai_analysis) {
-          const ai = course.ai_analysis;
-          bodyHTML += `
+  if (course.ai_analysis) {
+    const ai = course.ai_analysis;
+    bodyHTML += `
           <div class="modal-section">
             <h4>Subtopics (AI)</h4>
             <ul>${ai.subtopics?.map((s) => `<li>${s}</li>`).join("") || "<li>None</li>"}</ul>
@@ -923,28 +903,28 @@
             <p style="font-size: 0.875rem; color: var(--text-secondary);">${ai.difficulty_notes || "No notes"}</p>
           </div>
         `;
-        }
+  }
 
-        document.getElementById("modalBody").innerHTML = bodyHTML;
-        document.getElementById("modalOverlay").classList.add("active");
+  document.getElementById("modalBody").innerHTML = bodyHTML;
+  document.getElementById("modalOverlay").classList.add("active");
 
-        const addBtn = document.getElementById("modalAddBtn");
-        const isInPath = selectedPath.find((p) => p.code === code);
-        addBtn.textContent = isInPath ? "Remove from Path" : "Add to Path";
-        addBtn.onclick = () => {
-          toggleCourse(code);
-          closeModal();
-        };
-      }
+  const addBtn = document.getElementById("modalAddBtn");
+  const isInPath = selectedPath.find((p) => p.code === code);
+  addBtn.textContent = isInPath ? "Remove from Path" : "Add to Path";
+  addBtn.onclick = () => {
+    toggleCourse(code);
+    closeModal();
+  };
+}
 
-      function closeModal() {
-        document.getElementById("modalOverlay").classList.remove("active");
-      }
+function closeModal() {
+  document.getElementById("modalOverlay").classList.remove("active");
+}
 
-      // Close modal on overlay click
-      document.getElementById("modalOverlay").addEventListener("click", (e) => {
-        if (e.target === e.currentTarget) closeModal();
-      });
+// Close modal on overlay click
+document.getElementById("modalOverlay").addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
 
-      // Initialize
-      loadData();
+// Initialize
+loadData();
