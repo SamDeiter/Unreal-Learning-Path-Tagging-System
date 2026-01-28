@@ -1,0 +1,414 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.000
+In this video, we'll look at collisions.
+
+2
+00:00:03.000 --> 00:00:06.000
+Oftentimes, when we're importing into Unreal Engine,
+
+3
+00:00:06.000 --> 00:00:08.000
+we'll have a checkbox available to us that asks
+
+4
+00:00:08.000 --> 00:00:11.000
+if we would like to generate missing collisions.
+
+5
+00:00:11.000 --> 00:00:14.000
+This will tell Unreal Engine that when we're walking around a scene,
+
+6
+00:00:14.000 --> 00:00:17.000
+especially in, for example, a third-person character template,
+
+7
+00:00:17.000 --> 00:00:22.000
+that we should bump into and not go through certain kinds of geometry.
+
+8
+00:00:22.000 --> 00:00:24.000
+As we see in the bottom right,
+
+9
+00:00:24.000 --> 00:00:27.000
+we can also have collisions set up manually,
+
+10
+00:00:27.000 --> 00:00:30.000
+in this case, just affecting the columns,
+
+11
+00:00:30.000 --> 00:00:33.000
+which is particularly useful if we have more complex geometry
+
+12
+00:00:33.000 --> 00:00:36.000
+above the height that a character will be able to access,
+
+13
+00:00:36.000 --> 00:00:38.000
+and there's no reason to have collision data there.
+
+14
+00:00:38.000 --> 00:00:42.000
+To give your CPU a break, it's always ideal to keep your collisions
+
+15
+00:00:42.000 --> 00:00:45.000
+as simple as possible, but if your platform can handle it,
+
+16
+00:00:45.000 --> 00:00:48.000
+there are also very simple ways to make all the geometry
+
+17
+00:00:48.000 --> 00:00:52.000
+just match the same collision data as the geometry itself.
+
+18
+00:00:52.000 --> 00:00:55.000
+Here's an example of modeling a custom collision box
+
+19
+00:00:55.000 --> 00:00:57.000
+over in a DCC tool.
+
+20
+00:00:57.000 --> 00:01:00.000
+You can see that it's much simpler than the geometry inside of it,
+
+21
+00:01:00.000 --> 00:01:02.000
+but will still allow more complex collisions
+
+22
+00:01:02.000 --> 00:01:05.000
+than something like a simple box or sphere.
+
+23
+00:01:05.000 --> 00:01:09.000
+These collision meshes can import into Unreal Engine automatically
+
+24
+00:01:09.000 --> 00:01:13.000
+as long as they follow the naming convention of the prefix
+
+25
+00:01:13.000 --> 00:01:18.000
+ucx underscore, full mesh name, underscore number.
+
+26
+00:01:18.000 --> 00:01:22.000
+Let's take a look at the collisions map in Content Maps,
+
+27
+00:01:22.000 --> 00:01:26.000
+where we'll see that we've got a simple wall
+
+28
+00:01:26.000 --> 00:01:28.000
+with a hole cut through it,
+
+29
+00:01:28.000 --> 00:01:32.000
+some various objects on the ground, and some columns.
+
+30
+00:01:32.000 --> 00:01:37.000
+So if we go ahead and start by looking at our Flayer collision,
+
+31
+00:01:37.000 --> 00:01:39.000
+we can see that these are already set up
+
+32
+00:01:39.000 --> 00:01:42.000
+in a pretty useful way that gives us a good sense
+
+33
+00:01:42.000 --> 00:01:44.000
+of how collisions should work.
+
+34
+00:01:44.000 --> 00:01:48.000
+So if we think our character is going to be able to hit the top of this wall,
+
+35
+00:01:48.000 --> 00:01:50.000
+of course, we want this tab collision,
+
+36
+00:01:50.000 --> 00:01:53.000
+whereas with the much taller columns,
+
+37
+00:01:53.000 --> 00:01:58.000
+we probably don't need to go above the height that the player could jump or reach to,
+
+38
+00:01:58.000 --> 00:01:59.000
+so this is perfectly fine.
+
+39
+00:01:59.000 --> 00:02:04.000
+There's no need to get into the details of every nook and cranny of these columns.
+
+40
+00:02:04.000 --> 00:02:08.000
+Down here, we want these, of course, to be a little bit more convex.
+
+41
+00:02:11.000 --> 00:02:14.000
+And so these are set up just enough to be able to block the player
+
+42
+00:02:14.000 --> 00:02:18.000
+in a more robust way than a simple cube or sphere would be able to.
+
+43
+00:02:18.000 --> 00:02:20.000
+Let's take a look at these a little bit closer.
+
+44
+00:02:20.000 --> 00:02:23.000
+So if I open up Cart Damaged,
+
+45
+00:02:26.000 --> 00:02:29.000
+and I view the collision here,
+
+46
+00:02:31.000 --> 00:02:34.000
+we can see that this was set up as a convex element.
+
+47
+00:02:34.000 --> 00:02:37.000
+So if we wanted to try creating something like this ourselves,
+
+48
+00:02:37.000 --> 00:02:39.000
+we could go and remove collision,
+
+49
+00:02:39.000 --> 00:02:43.000
+and then try doing this with auto-convex collision.
+
+50
+00:02:43.000 --> 00:02:47.000
+It'll ask us what we want the whole count and the max vertices to be.
+
+51
+00:02:47.000 --> 00:02:52.000
+I can hit apply, and it will give us something actually a little bit more detailed
+
+52
+00:02:52.000 --> 00:02:54.000
+than the one we just had.
+
+53
+00:02:54.000 --> 00:02:56.000
+If we wanted to simplify it,
+
+54
+00:02:56.000 --> 00:02:58.000
+we could say remove collision,
+
+55
+00:02:58.000 --> 00:03:02.000
+make the whole count to max-hole vertices 8,
+
+56
+00:03:02.000 --> 00:03:06.000
+hull precision 10,000, hit apply,
+
+57
+00:03:06.000 --> 00:03:11.000
+and there we are with a simpler piece of collision geometry.
+
+58
+00:03:11.000 --> 00:03:14.000
+This is different from the other cart over here,
+
+59
+00:03:14.000 --> 00:03:18.000
+where the collision data was actually brought over from its origin,
+
+60
+00:03:18.000 --> 00:03:20.000
+I believe in 3ds Max.
+
+61
+00:03:23.000 --> 00:03:25.000
+And you can see the way this was modeled
+
+62
+00:03:25.000 --> 00:03:30.000
+is quite different from how Unreal Engine would automatically process this kind of data.
+
+63
+00:03:33.000 --> 00:03:35.000
+For our simple wall,
+
+64
+00:03:35.000 --> 00:03:38.000
+we might want to see what the existing collision data is,
+
+65
+00:03:38.000 --> 00:03:41.000
+but once we click here, we'll see remove collision is grayed out.
+
+66
+00:03:41.000 --> 00:03:44.000
+That's because this does not actually have any collision data.
+
+67
+00:03:44.000 --> 00:03:47.000
+We have no primitives, no convex elements.
+
+68
+00:03:47.000 --> 00:03:50.000
+What's happening here is we have collision complexity
+
+69
+00:03:50.000 --> 00:03:53.000
+set to use complex collision as simple,
+
+70
+00:03:53.000 --> 00:03:57.000
+which means that it'll use the exact geometry here as collision data,
+
+71
+00:03:57.000 --> 00:04:03.000
+which isn't too bad because there's only 44 triangles and 76 vertices in this entire object.
+
+72
+00:04:03.000 --> 00:04:07.000
+It would be much more expensive if we did something like that with the colonnade here.
+
+73
+00:04:07.000 --> 00:04:10.000
+So we went down to the same thing and said,
+
+74
+00:04:11.000 --> 00:04:16.000
+collision complexity, use complex collision as simple and save that.
+
+75
+00:04:16.000 --> 00:04:20.000
+We could test to see that it's working with player collision.
+
+76
+00:04:20.000 --> 00:04:22.000
+And now we're putting a lot more load on the CPU,
+
+77
+00:04:22.000 --> 00:04:27.000
+even though it's very unlikely if we've got a standard third-person game, for example.
+
+78
+00:04:27.000 --> 00:04:33.000
+It's very unlikely a player would be encountering colliding with the cornice of the columns.
+
+79
+00:04:34.000 --> 00:04:36.000
+So we could go back here,
+
+80
+00:04:36.000 --> 00:04:38.000
+change this back to project default,
+
+81
+00:04:38.000 --> 00:04:42.000
+and if we wanted to, we could view the current collision
+
+82
+00:04:43.000 --> 00:04:45.000
+and try modeling this ourselves.
+
+83
+00:04:45.000 --> 00:04:48.000
+So I could select each of these and delete them,
+
+84
+00:04:48.000 --> 00:04:51.000
+or just to remove collision at the start of that.
+
+85
+00:04:51.000 --> 00:04:56.000
+And now I could go ahead and add a box or, you know, let's say to make it a little different.
+
+86
+00:04:56.000 --> 00:05:00.000
+Maybe I want to do a capsule because this is a little bit more rounded.
+
+87
+00:05:00.000 --> 00:05:06.000
+So I could do a capsule and I'd scale that down using my traditional hotkeys of Q, W, E and R.
+
+88
+00:05:09.000 --> 00:05:12.000
+Get this at a height.
+
+89
+00:05:12.000 --> 00:05:15.000
+Turn off some of my snapping, maybe.
+
+90
+00:05:21.000 --> 00:05:26.000
+Get this at a height that I think is reasonable for my particular use case.
+
+91
+00:05:26.000 --> 00:05:29.000
+Put it roughly there into the column.
+
+92
+00:05:29.000 --> 00:05:31.000
+It's actually a pretty good fit.
+
+93
+00:05:31.000 --> 00:05:34.000
+I could fine-tune this, of course, if I wanted to,
+
+94
+00:05:34.000 --> 00:05:37.000
+by looking in some orthographic views,
+
+95
+00:05:37.000 --> 00:05:42.000
+maybe in a wireframe mode, something like this.
+
+96
+00:05:45.000 --> 00:05:47.000
+Yeah, that looks pretty good.
+
+97
+00:05:47.000 --> 00:05:49.000
+I could make it a little bigger if I wanted to.
+
+98
+00:05:49.000 --> 00:05:55.000
+But the other thing here is I can hold down Alt and drag this out to duplicate this
+
+99
+00:05:55.000 --> 00:05:58.000
+and create another collider right there.
+
+100
+00:05:58.000 --> 00:06:00.000
+So if I go ahead and save that now,
+
+101
+00:06:00.000 --> 00:06:03.000
+we can now see that my new colliders, these capsules,
+
+102
+00:06:03.000 --> 00:06:09.000
+are existing here in place of the cubes that were there before.
+
+103
+00:06:09.000 --> 00:06:13.000
+In the next video, we'll look at a skeletal mesh import pipeline.
+

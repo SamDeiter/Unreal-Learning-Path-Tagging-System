@@ -1,0 +1,354 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.640
+In this portion of our course, we will explore various workflows that can be used to make
+
+2
+00:00:07.640 --> 00:00:11.120
+changes to the metahuman neutral pose.
+
+3
+00:00:11.120 --> 00:00:18.080
+We begin with pipeline considerations for achieving likeness using DNA calibration.
+
+4
+00:00:18.080 --> 00:00:24.080
+Then we cover different approaches for fitting metahuman topology to face scan data and sculpted
+
+5
+00:00:24.080 --> 00:00:25.960
+3D head meshes.
+
+6
+00:00:25.960 --> 00:00:29.320
+From there, we move on to two hands-on exercises.
+
+7
+00:00:29.320 --> 00:00:35.480
+For the first exercise, we will export a metahuman identity-conformed mesh from Unreal Engine
+
+8
+00:00:35.480 --> 00:00:38.240
+that can be used for additional fitting.
+
+9
+00:00:38.240 --> 00:00:44.280
+For the second one, we will solve a metahuman identity based on geometry using the mesh-to-metahuman
+
+10
+00:00:44.280 --> 00:00:47.879
+workflow with the template mesh option.
+
+11
+00:00:47.879 --> 00:00:54.320
+We then delve into best practices for fitting the metahuman head geometry and its additional
+
+12
+00:00:54.320 --> 00:01:00.719
+assets, such as the eyes, eyelashes, and so on, to our target delta.
+
+13
+00:01:00.719 --> 00:01:06.359
+Let's begin by exploring workflows for achieving likeness using 3D sculpted head meshes and
+
+14
+00:01:06.359 --> 00:01:09.519
+face scan data.
+
+15
+00:01:09.519 --> 00:01:15.519
+In this section, we begin by looking at pipeline considerations for achieving likeness using
+
+16
+00:01:15.519 --> 00:01:18.180
+DNA calibration.
+
+17
+00:01:18.180 --> 00:01:24.460
+We then delve into different approaches for fitting metahuman topology to face scan data
+
+18
+00:01:24.460 --> 00:01:27.560
+and sculpted 3D head meshes.
+
+19
+00:01:27.560 --> 00:01:32.880
+To finalize changes that have been made to the metahuman neutral pose, metahuman DNA
+
+20
+00:01:32.880 --> 00:01:38.460
+needs to be updated before bringing the modified assets back into Unreal Engine.
+
+21
+00:01:38.460 --> 00:01:44.100
+To do this, we can use the DNA calibration toolset.
+
+22
+00:01:44.099 --> 00:01:49.299
+The main step we will see when working with either scan or sculpted mesh workflows is
+
+23
+00:01:49.299 --> 00:01:55.019
+that metahuman DNA will need to be recalibrated before bringing any changes back into Unreal
+
+24
+00:01:55.019 --> 00:01:56.299
+Engine.
+
+25
+00:01:56.299 --> 00:02:01.699
+One of the reasons is due to the relationship the vertex and joint positions have with each
+
+26
+00:02:01.699 --> 00:02:02.859
+other.
+
+27
+00:02:02.859 --> 00:02:07.379
+Each joint name has a value assigned as a vertex index.
+
+28
+00:02:07.379 --> 00:02:12.859
+Once we start to work with DNA calibration, you will notice two commands we will be running,
+
+29
+00:02:12.860 --> 00:02:18.980
+which is to save the current vertex and joint positions, then update the vertex and joints
+
+30
+00:02:18.980 --> 00:02:24.060
+to their new positions, and save those changes to the DNA.
+
+31
+00:02:24.060 --> 00:02:28.940
+The images in the top right demonstrate the surface joint positions before and after they
+
+32
+00:02:28.940 --> 00:02:34.060
+have been updated once the vertex positions have been changed.
+
+33
+00:02:34.060 --> 00:02:40.060
+Surface joints are responsible for preserving volume, especially for lower LODs.
+
+34
+00:02:40.060 --> 00:02:46.340
+So once a change is made to the vertex positions, using commands, we are able to snap the surface
+
+35
+00:02:46.340 --> 00:02:52.219
+joints to their new vertex positions so that the volume is preserved.
+
+36
+00:02:52.219 --> 00:02:58.860
+Simply put, when making changes to the vertex positions or joint positions, the DNA file
+
+37
+00:02:58.860 --> 00:03:05.500
+needs to account for these changes by updating the behavior and geometry layer of the DNA
+
+38
+00:03:05.500 --> 00:03:06.620
+file.
+
+39
+00:03:06.620 --> 00:03:11.939
+When we do this so that when we bring our finalized rig back into Unreal Engine, along
+
+40
+00:03:11.939 --> 00:03:16.020
+with the updated DNA file, it will behave correctly.
+
+41
+00:03:16.020 --> 00:03:22.099
+Now, let's take a look at pipeline considerations when working with a face skin or sculpted
+
+42
+00:03:22.099 --> 00:03:24.340
+head mesh.
+
+43
+00:03:24.340 --> 00:03:29.500
+When working with a head sculpt, the focus will be on fitting the metahuman topology
+
+44
+00:03:29.500 --> 00:03:35.860
+to the sculpt first, and then fitting the additional face geometry assets to it.
+
+45
+00:03:35.860 --> 00:03:42.380
+The first step would be to select a metahuman preset and wrap the LOD0 head topology to
+
+46
+00:03:42.380 --> 00:03:44.140
+the head sculpt.
+
+47
+00:03:44.140 --> 00:03:48.940
+The second step would be to use the mesh to metahuman workflow with the template mesh
+
+48
+00:03:48.940 --> 00:03:55.100
+option to create a metahuman identity that is solved based on geometry, as this will
+
+49
+00:03:55.100 --> 00:03:59.620
+get the geometry and joints closer to the target delta.
+
+50
+00:03:59.620 --> 00:04:05.060
+This differs from the standard mesh to metahuman workflow, which solves a metahuman identity
+
+51
+00:04:05.060 --> 00:04:09.620
+based on image and how the tracking markers are positioned.
+
+52
+00:04:09.620 --> 00:04:15.460
+The third step would be to refit any details that may have been lost from the solve, and
+
+53
+00:04:15.460 --> 00:04:21.100
+then manually fit all of the additional face geometry assets to the metahuman identity
+
+54
+00:04:21.100 --> 00:04:24.379
+head mesh vertex by vertex.
+
+55
+00:04:24.379 --> 00:04:28.459
+This is the most time consuming portion of this workflow.
+
+56
+00:04:28.459 --> 00:04:34.699
+The fourth step would be to use DNA calibration to update the vertex and joint positions
+
+57
+00:04:34.819 --> 00:04:38.099
+and save those changes to the DNA file.
+
+58
+00:04:38.099 --> 00:04:44.539
+The head LODs can then be exported as FBX, along with the new DNA file.
+
+59
+00:04:44.539 --> 00:04:49.860
+And the final step would be to bring the modified assets back into Unreal Engine and configure
+
+60
+00:04:49.860 --> 00:04:51.579
+the new assets.
+
+61
+00:04:51.579 --> 00:04:57.219
+This workflow chart represents what a pipeline might look like, and it is not a hard roadmap
+
+62
+00:04:57.219 --> 00:05:01.019
+as the steps may vary depending on a pipeline's needs.
+
+63
+00:05:01.060 --> 00:05:07.459
+Now, let's take a look at how this workflow may differ if using face scan data.
+
+64
+00:05:07.459 --> 00:05:12.899
+For face scan data, the focus may be more on transferring the texture maps correctly
+
+65
+00:05:12.899 --> 00:05:17.579
+by aligning the head geometry with the original face scan.
+
+66
+00:05:17.579 --> 00:05:22.899
+Step one would be to use the standard mesh to metahuman workflow to create an initial
+
+67
+00:05:22.899 --> 00:05:28.539
+metahuman identity that is solved based on image, which relies on where the tracking markers
+
+68
+00:05:28.580 --> 00:05:31.300
+are placed on the facial features.
+
+69
+00:05:31.300 --> 00:05:36.900
+This would align the head geometry with the scan in order to transfer the textures.
+
+70
+00:05:36.900 --> 00:05:42.300
+Step two would be to export the conformed mesh from the metahuman identity asset and
+
+71
+00:05:42.300 --> 00:05:46.700
+refit any details that were lost from the solve.
+
+72
+00:05:46.700 --> 00:05:51.900
+Step three would be to use the mesh to metahuman workflow with the template mesh option in
+
+73
+00:05:51.900 --> 00:05:56.259
+order to get the geometry and joints closer to the target delta.
+
+74
+00:05:56.259 --> 00:06:02.740
+And step four would be to use this new metahuman identity to refit any lost details and then
+
+75
+00:06:02.740 --> 00:06:06.180
+fit the additional head geometry assets.
+
+76
+00:06:06.180 --> 00:06:11.539
+Step five would be to update the changes to the vertex and joint positions and save those
+
+77
+00:06:11.539 --> 00:06:19.099
+changes to the DNA and then export the head LODs as FBX bundled with the new DNA file.
+
+78
+00:06:19.099 --> 00:06:25.099
+Step six would be to finalize the rig by bringing the modified assets into Unreal Engine and
+
+79
+00:06:25.100 --> 00:06:26.820
+then configure them.
+
+80
+00:06:26.820 --> 00:06:31.700
+The process of transferring textures is not included in this workflow chart.
+
+81
+00:06:31.700 --> 00:06:34.820
+As mentioned, these charts are not a hard roadmap.
+
+82
+00:06:34.820 --> 00:06:40.180
+They simply demonstrate different approaches for fitting and that by adding DNA calibration
+
+83
+00:06:40.180 --> 00:06:46.540
+to a workflow, this ensures that the metahuman DNA file will take into account changes that
+
+84
+00:06:46.540 --> 00:06:49.180
+have been made to the neutral pose.
+
+85
+00:06:49.180 --> 00:06:54.020
+And once those changes have been brought back into Unreal Engine, the metahuman face will
+
+86
+00:06:54.019 --> 00:06:56.079
+behave correctly.
+
+87
+00:06:56.079 --> 00:07:02.419
+In the next section, we will delve into approaches for fitting metahuman topology to a skin or
+
+88
+00:07:02.419 --> 00:07:03.500
+sculpted mesh.
+

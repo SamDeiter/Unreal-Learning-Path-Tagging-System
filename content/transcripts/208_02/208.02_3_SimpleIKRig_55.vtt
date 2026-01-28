@@ -1,0 +1,362 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.160
+We're going to open up our project now and take a look at setting up an IK Rig asset.
+
+2
+00:00:06.160 --> 00:00:09.560
+We're going to set this up with a quadruped character and show you how you can really
+
+3
+00:00:09.560 --> 00:00:13.400
+quickly create what you need to start adjusting the pose of your character.
+
+4
+00:00:13.400 --> 00:00:17.559
+We can even preview inside the IK Rig editor to see how it might affect an animation that's
+
+5
+00:00:17.559 --> 00:00:20.039
+playing on the character.
+
+6
+00:00:20.039 --> 00:00:22.559
+And this is our IK Rig editor window.
+
+7
+00:00:22.559 --> 00:00:26.560
+So on the left hand side here, we have the hierarchy, and this will show us the bones
+
+8
+00:00:26.559 --> 00:00:31.559
+that we have inside our Skeletal Mesh, as well as any IK goals or IK settings that we've
+
+9
+00:00:31.559 --> 00:00:34.280
+set up inside this IK Rig.
+
+10
+00:00:34.280 --> 00:00:38.799
+On the bottom left, there is the solver stack, and this will display any IK solvers that
+
+11
+00:00:38.799 --> 00:00:41.759
+we're currently using for the Skeletal Mesh.
+
+12
+00:00:41.759 --> 00:00:46.280
+Then we have the output log along the bottom here, and that displays any errors or warnings
+
+13
+00:00:46.280 --> 00:00:48.920
+that you might have with your Rig.
+
+14
+00:00:48.920 --> 00:00:52.640
+And then top right, we have the details panel, and this is just a universal panel that will
+
+15
+00:00:52.640 --> 00:00:56.719
+display details about anything you currently have selected.
+
+16
+00:00:56.719 --> 00:00:59.240
+And on the bottom right, we have the asset browser.
+
+17
+00:00:59.240 --> 00:01:03.480
+Now this will show you a list of animation sequences that you can use to preview the
+
+18
+00:01:03.480 --> 00:01:08.879
+behavior of your IK Rig, which we'll do in just a moment once we've got it set up.
+
+19
+00:01:08.879 --> 00:01:13.400
+There are two main things that we need to set up for the full body IK system here.
+
+20
+00:01:13.400 --> 00:01:17.879
+We need to set the IK goals, and we need to set the solver root.
+
+21
+00:01:17.879 --> 00:01:23.239
+Now the IK goals are the effective points at the end of your IK chains, and this is
+
+22
+00:01:23.239 --> 00:01:28.039
+the target that the chain will try to reach by adjusting the pose of your character, and
+
+23
+00:01:28.039 --> 00:01:31.119
+they work together with the solver to achieve that.
+
+24
+00:01:31.119 --> 00:01:35.840
+Now since the IK goals are going to be the end points of your bone chains, they'll typically
+
+25
+00:01:35.840 --> 00:01:41.199
+be set up on the hands and the feet of your characters.
+
+26
+00:01:41.199 --> 00:01:46.879
+And the second thing is the solver root, which is typically the starting bone in the chain.
+
+27
+00:01:46.879 --> 00:01:50.879
+This is just so the solver knows which bones it should be adjusting.
+
+28
+00:01:50.879 --> 00:01:55.039
+And in this case with a full body IK, we're going to use the pelvis.
+
+29
+00:01:55.039 --> 00:01:58.959
+That's because this is the true root of where the character's movement comes from, rather
+
+30
+00:01:58.959 --> 00:02:03.359
+than the actual root of the skeleton, and it'll give us much better results.
+
+31
+00:02:03.359 --> 00:02:06.280
+So the first thing we're going to set is the IK goals.
+
+32
+00:02:06.280 --> 00:02:12.439
+And to do that, I'm going to select all four feet of our character here.
+
+33
+00:02:12.439 --> 00:02:17.919
+And if I show our skeleton, we'll be able to see that we have the end joints selected
+
+34
+00:02:17.919 --> 00:02:19.639
+currently.
+
+35
+00:02:19.639 --> 00:02:23.759
+And if we right click inside the hierarchy here, we can choose a new IK goal, or we could
+
+36
+00:02:23.759 --> 00:02:26.759
+press control N for that.
+
+37
+00:02:26.759 --> 00:02:30.159
+And it's going to ask us what kind of solver we want to use for this.
+
+38
+00:02:30.159 --> 00:02:35.560
+Now we could use sort of a limb IK for this, which will just set up individual limbs for
+
+39
+00:02:35.560 --> 00:02:37.159
+each of these controls.
+
+40
+00:02:37.159 --> 00:02:42.199
+And then we need to set up, you know, individual roots for each of the solvers on sort of the
+
+41
+00:02:42.199 --> 00:02:45.159
+shoulders and shoulder blades and hips down here.
+
+42
+00:02:45.159 --> 00:02:48.679
+But because we want to do like a full body system, we're going to choose the full body
+
+43
+00:02:48.679 --> 00:02:49.679
+IK.
+
+44
+00:02:49.679 --> 00:02:55.119
+So if we choose add solver, you see that in our solver stack here, we now have a new
+
+45
+00:02:55.119 --> 00:02:57.280
+solver full body IK.
+
+46
+00:02:57.280 --> 00:03:01.939
+And it does give us a warning here that it's missing a root bone, which means that although
+
+47
+00:03:01.939 --> 00:03:06.120
+it knows the end of each joint chain, it doesn't know the beginning.
+
+48
+00:03:06.120 --> 00:03:09.839
+It doesn't know where it should be starting from.
+
+49
+00:03:09.840 --> 00:03:16.200
+So if we come up to our pelvis here with our solver selected, I'll right click and choose
+
+50
+00:03:16.200 --> 00:03:20.439
+set root bone on selected solver.
+
+51
+00:03:20.439 --> 00:03:24.680
+And what that will do now is it will fill in the full body IK solver here so it's no longer
+
+52
+00:03:24.680 --> 00:03:29.599
+grayed out, which just means that it's active and its settings are set up correctly.
+
+53
+00:03:29.599 --> 00:03:34.199
+So if we were to select a couple of these goals here, these IK goals, you can see that
+
+54
+00:03:34.280 --> 00:03:40.519
+we can instantly move them and the pose of our character changes to compensate for that.
+
+55
+00:03:40.519 --> 00:03:45.039
+So one way to quickly test this and see how this looks on an animation would be to just
+
+56
+00:03:45.039 --> 00:03:51.280
+double click one of these animations in the asset browser here and shift our IK goals around
+
+57
+00:03:51.280 --> 00:03:54.399
+and see how that affects our character.
+
+58
+00:03:54.399 --> 00:03:58.039
+And you can see that really, really quickly, we actually have an animation playing our
+
+59
+00:03:58.039 --> 00:04:04.159
+character and we can adjust the pose of it in quite a basic way with just a few IK
+
+60
+00:04:04.240 --> 00:04:11.759
+goals, a full body solver and just making sure we set the root for that full body solver.
+
+61
+00:04:11.759 --> 00:04:16.680
+If I quickly set up an individual limb IK here just to compare that with the full body
+
+62
+00:04:16.680 --> 00:04:22.240
+IK solver, you'll see that it's really nice to use the full body IK solver because you
+
+63
+00:04:22.240 --> 00:04:25.399
+get all the extra little bit of nuanced movement.
+
+64
+00:04:25.399 --> 00:04:29.800
+So if I come up to add new solver, choose limb IK, I'll just do this with the back left
+
+65
+00:04:29.800 --> 00:04:31.560
+foot for example.
+
+66
+00:04:31.560 --> 00:04:36.160
+With that limb IK selected, I'll right click and connect that goal to the selected solver.
+
+67
+00:04:36.160 --> 00:04:39.120
+This is just another way to set things up.
+
+68
+00:04:39.120 --> 00:04:43.720
+And the top of that chain is going to be the thigh here.
+
+69
+00:04:43.720 --> 00:04:49.680
+So with that limb IK selected, if I right click set root bone on selected solver and
+
+70
+00:04:49.680 --> 00:04:52.879
+I just deactivate the full body solver for now.
+
+71
+00:04:52.879 --> 00:04:59.560
+When I select this rear left foot goal, you can see that we're affecting that entire chain
+
+72
+00:04:59.680 --> 00:05:02.000
+from the tip of the toe to the hip.
+
+73
+00:05:02.000 --> 00:05:06.879
+We're not getting any movement from the full body IK.
+
+74
+00:05:06.879 --> 00:05:11.800
+So if I turn that off and turn the full body IK back on, you can see that instantly everything
+
+75
+00:05:11.800 --> 00:05:17.560
+looks a lot nicer because we do get that extra movement from the whole body.
+
+76
+00:05:17.560 --> 00:05:21.439
+And that's really how quick it is to set up the IK rig asset.
+
+77
+00:05:21.439 --> 00:05:25.879
+Now a great advantage of this setting it up with the full body solver is that you end
+
+78
+00:05:25.920 --> 00:05:29.560
+up with that full range of motion and have the whole body reacting to each of the IK
+
+79
+00:05:29.560 --> 00:05:31.719
+goals or effectors.
+
+80
+00:05:31.719 --> 00:05:36.079
+Comparing that to like an individual limb chain where each of the root bones would sort
+
+81
+00:05:36.079 --> 00:05:38.839
+of be locked down to their initial positions in the animation.
+
+82
+00:05:38.839 --> 00:05:43.759
+Now the main sort of disadvantage of this is that you can't really use this within a
+
+83
+00:05:43.759 --> 00:05:46.480
+sequencer for any animation purposes.
+
+84
+00:05:46.480 --> 00:05:50.240
+It is designed for use inside an animation blueprint where you can adjust the pose on
+
+85
+00:05:50.240 --> 00:05:55.279
+the fly based on where you want these IK goals to be.
+
+86
+00:05:55.279 --> 00:05:58.879
+And here's an example of what that logic might look like.
+
+87
+00:05:58.879 --> 00:06:04.519
+So we have the animation playing on our character here where mannequin is pressing a button.
+
+88
+00:06:04.519 --> 00:06:11.559
+We then insert an IK rig node that references our IK rig asset that we've created and essentially
+
+89
+00:06:11.559 --> 00:06:17.239
+feed in a positional update to the goals position and in this case it's for the right hand to
+
+90
+00:06:17.239 --> 00:06:22.039
+adjust where the character is pressing a button before we reach our final output pose.
+

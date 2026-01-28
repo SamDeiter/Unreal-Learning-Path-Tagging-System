@@ -1,0 +1,518 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.500
+Welcome to another Unreal Engine training course.
+
+2
+00:00:03.500 --> 00:00:06.500
+Today we're going to be looking at an introduction to Control Rig.
+
+3
+00:00:08.500 --> 00:00:11.500
+So we'll take a look at how rigging works in Unreal,
+
+4
+00:00:11.500 --> 00:00:14.500
+and what the concept of a Control Rig is and so how they work.
+
+5
+00:00:14.500 --> 00:00:17.500
+And then we'll create our own Control Rig,
+
+6
+00:00:17.500 --> 00:00:20.500
+going over how to create controls and set their transforms,
+
+7
+00:00:20.500 --> 00:00:24.500
+and then set up the logic to make them drive your skeleton with a simple FK setup,
+
+8
+00:00:24.500 --> 00:00:27.500
+and then get a little more complex with a simple IK setup.
+
+9
+00:00:28.000 --> 00:00:31.000
+And then we'll see how to set up an aim control.
+
+10
+00:00:31.000 --> 00:00:33.000
+So there are a lot of different benefits for this,
+
+11
+00:00:33.000 --> 00:00:36.000
+which allow you to easily control what something is pointing at,
+
+12
+00:00:36.000 --> 00:00:39.000
+like somebody's head or a turret of a gun, for example.
+
+13
+00:00:39.000 --> 00:00:42.000
+And lastly, we'll take our Control Rig into Sequencer
+
+14
+00:00:42.000 --> 00:00:45.000
+and see how you can animate with it directly in the engine.
+
+15
+00:00:47.000 --> 00:00:51.000
+So let's start off with what Control Rig is and what it can do.
+
+16
+00:00:52.000 --> 00:00:56.500
+So Control Rig is a sort of umbrella term for a suite of tools
+
+17
+00:00:56.500 --> 00:01:00.500
+that you can use to rig and animate your characters in engine.
+
+18
+00:01:00.500 --> 00:01:04.500
+There's a lot of familiar functionality with the way that Control Rigs are set up
+
+19
+00:01:04.500 --> 00:01:08.500
+and how they function when you compare it to external rigging softwares.
+
+20
+00:01:08.500 --> 00:01:11.500
+And it's super user-friendly with visual scripting,
+
+21
+00:01:11.500 --> 00:01:13.500
+like you'd use in a traditional blueprint,
+
+22
+00:01:13.500 --> 00:01:18.500
+with nodes and functions to easily connect your controls to your bones for animating.
+
+23
+00:01:19.000 --> 00:01:23.000
+And it has some great functionality, like procedural rigging or modular rigging,
+
+24
+00:01:23.000 --> 00:01:26.500
+where you can create controls and hierarchies automatically,
+
+25
+00:01:26.500 --> 00:01:30.000
+based on various tags and metadata that you can set up,
+
+26
+00:01:30.000 --> 00:01:34.500
+or even create template rigs that work across several different characters in your project.
+
+27
+00:01:34.500 --> 00:01:39.500
+And the best part is you don't need to know how to write any code to set up advanced rigs,
+
+28
+00:01:39.500 --> 00:01:43.500
+but you can use the Python editor to write tools or code directly in the engine,
+
+29
+00:01:43.500 --> 00:01:46.500
+and that'll help automate some of your workflow.
+
+30
+00:01:48.500 --> 00:01:50.500
+Now, if we jump inside the engine here,
+
+31
+00:01:50.500 --> 00:01:57.500
+this is the Control Rig Editor with an example of a Control Rig that's been created for our mannequin character.
+
+32
+00:01:57.500 --> 00:02:00.000
+And to give you an overview of the editor here,
+
+33
+00:02:00.000 --> 00:02:02.500
+in the center we have the Rig Graph,
+
+34
+00:02:02.500 --> 00:02:05.000
+which is similar to all of Unreal Engine's editors,
+
+35
+00:02:05.000 --> 00:02:11.000
+where you'd set up your visual scripting and all of your logic that would connect your controls and your bones together.
+
+36
+00:02:11.000 --> 00:02:14.000
+On the right-hand side we have the Details panel,
+
+37
+00:02:14.000 --> 00:02:18.000
+and this contains all of the information about the element that you currently have selected.
+
+38
+00:02:18.000 --> 00:02:21.000
+So if I was to select a control from the viewport here,
+
+39
+00:02:21.000 --> 00:02:26.500
+we can see what type of control it is, and some of the transform values on that control.
+
+40
+00:02:26.500 --> 00:02:31.000
+Coming down to the bottom left-hand side, we have a few different Rig menus.
+
+41
+00:02:31.000 --> 00:02:33.500
+So this first one is the Rig Hierarchy,
+
+42
+00:02:33.500 --> 00:02:37.500
+and this shows us the hierarchy of our Rig that's been created,
+
+43
+00:02:37.500 --> 00:02:42.500
+as well as the hierarchy of the skeleton that the Rig is connected to.
+
+44
+00:02:42.500 --> 00:02:45.000
+The next is the Execution Stack,
+
+45
+00:02:45.000 --> 00:02:49.000
+and this will give you a preview of the order of operation for the Control Rig logic.
+
+46
+00:02:49.000 --> 00:02:54.000
+Now this can really help with debugging your logic and seeing the sequence of events that are triggering.
+
+47
+00:02:54.000 --> 00:02:56.500
+And next we have the My Blueprint tab,
+
+48
+00:02:56.500 --> 00:03:00.000
+and this is similar to the panel you'll find in a regular blueprint,
+
+49
+00:03:00.000 --> 00:03:03.500
+where you can see your various functions and variables that you've created.
+
+50
+00:03:03.500 --> 00:03:08.000
+Now the slight difference is that the variables in here are meant to be used within your Rig Graph
+
+51
+00:03:08.000 --> 00:03:13.000
+as a way to drive logic, rather than being exposed when you have the asset in a level.
+
+52
+00:03:13.000 --> 00:03:19.500
+And if I zoom out of the Rig Graph here, you can see that the logic is split up into a few different branches.
+
+53
+00:03:19.500 --> 00:03:23.500
+And that's because there are a few different types of solve directions.
+
+54
+00:03:23.500 --> 00:03:28.500
+So control rigs are evaluated in several ways called solve directions,
+
+55
+00:03:28.500 --> 00:03:33.500
+and these allow you to split the logic into different streams or solvers,
+
+56
+00:03:33.500 --> 00:03:39.500
+which enable workflows such as rig sharing or baking your animation from your bones to your controls,
+
+57
+00:03:39.500 --> 00:03:42.500
+and even debugging the behavior inside your Rig logic.
+
+58
+00:03:42.500 --> 00:03:45.500
+So there are three solve directions we can look at.
+
+59
+00:03:45.500 --> 00:03:48.500
+Up the top here we have Forward Solve.
+
+60
+00:03:48.500 --> 00:03:51.500
+Now this is the primary solve direction for the control rig,
+
+61
+00:03:51.500 --> 00:03:56.500
+where you would set up the traditional rigging logic of having your controls drive your bones,
+
+62
+00:03:56.500 --> 00:04:00.500
+and then allow you to key the controls and animate your characters.
+
+63
+00:04:00.500 --> 00:04:04.000
+So next would be Backward Solve.
+
+64
+00:04:04.000 --> 00:04:09.500
+Now this is the inverse of Forward Solve, where you would have the bones drive the controls,
+
+65
+00:04:09.500 --> 00:04:15.000
+and this is intended to be used to bake skeletal animation back to the control rigging sequencer,
+
+66
+00:04:15.000 --> 00:04:19.000
+so that you could then easily make edits to the animation if you wanted to.
+
+67
+00:04:19.000 --> 00:04:23.000
+And the last we'll look at is Construction Event.
+
+68
+00:04:23.000 --> 00:04:26.500
+Now the Construction Event executes at the top of the stack,
+
+69
+00:04:26.500 --> 00:04:29.500
+and this is used to execute preparation logic,
+
+70
+00:04:29.500 --> 00:04:35.500
+so you could use it to initialize data like variables or spawn controls and set their initial positions,
+
+71
+00:04:35.500 --> 00:04:40.500
+so you can use those within the other two solve directions.
+
+72
+00:04:40.500 --> 00:04:45.500
+Now that we've gone over some of the basics of what control rig is, let's create our own.
+
+73
+00:04:45.500 --> 00:04:51.000
+So we'll create a new control rig, and we'll learn a couple of different methods of how to create new controls,
+
+74
+00:04:51.000 --> 00:04:53.000
+depending on the circumstances,
+
+75
+00:04:53.000 --> 00:04:56.500
+and then set up the logic to connect those directly to the bones,
+
+76
+00:04:56.500 --> 00:05:02.500
+giving us control over the character with a simple FK setup.
+
+77
+00:05:02.500 --> 00:05:09.000
+So inside the engine here, what we're going to do is create a new control rig for our Quinn character.
+
+78
+00:05:09.000 --> 00:05:12.000
+So to do that, we can do that one of two different ways.
+
+79
+00:05:12.000 --> 00:05:16.500
+We could right click, come up to Create, and choose Control Rig,
+
+80
+00:05:16.500 --> 00:05:22.500
+and what this will do is give us a control rig that's paired to the Quinn character skeletal mesh.
+
+81
+00:05:22.500 --> 00:05:28.500
+Now the second way that you could create a control rig is by right clicking in an empty space in the content browser,
+
+82
+00:05:28.500 --> 00:05:34.500
+coming up to Animation, and then down to Control Rig, and you could create a new control rig here.
+
+83
+00:05:34.500 --> 00:05:39.500
+This will give you another option, whether or not you want a standard control rig or a modular control rig,
+
+84
+00:05:39.500 --> 00:05:41.500
+that you could reuse with different characters.
+
+85
+00:05:41.500 --> 00:05:46.500
+But if we just choose Control Rig here to create a standard one, it will ask you to name it,
+
+86
+00:05:46.500 --> 00:05:50.500
+so I'll just rename it CRDemo for now.
+
+87
+00:05:50.500 --> 00:05:56.500
+Now the differences between these two is that our CRDemo control rig we just made
+
+88
+00:05:56.500 --> 00:05:59.500
+isn't paired or connected to any other character,
+
+89
+00:05:59.500 --> 00:06:08.500
+and what we'd have to do is come inside here, set our preview mesh, and import our hierarchy for that to be connected.
+
+90
+00:06:08.500 --> 00:06:14.500
+Something that you might have noticed when we right clicked in the content browser and came down to the Control Rig options
+
+91
+00:06:14.500 --> 00:06:17.500
+is the Control Shape Library.
+
+92
+00:06:17.500 --> 00:06:22.500
+Now this contains all of the Control Shape assets, where there are many different shapes available by default,
+
+93
+00:06:22.500 --> 00:06:33.500
+but you could use this to import and build your own library of shapes if you need something more custom or visually different for your rig.
+
+94
+00:06:33.500 --> 00:06:38.500
+We're going to look at two different methods we can use to create a new control.
+
+95
+00:06:38.500 --> 00:06:43.500
+With this first method, we'll create a control that doesn't have a relationship to any bones in the skeleton,
+
+96
+00:06:43.500 --> 00:06:48.500
+and then see how to reposition it and customize the look of it.
+
+97
+00:06:48.500 --> 00:06:54.500
+So if we come to our Rig hierarchy window here and scroll down to the bottom until we find an empty space,
+
+98
+00:06:54.500 --> 00:07:00.500
+I'll right click, come up to New, and select New Control.
+
+99
+00:07:00.500 --> 00:07:05.500
+Now what this will do is create a new control outside of the skeleton hierarchy,
+
+100
+00:07:05.500 --> 00:07:08.500
+and it'll position it at World Zero.
+
+101
+00:07:08.500 --> 00:07:12.500
+Now typically with new controls, especially with an FK setup,
+
+102
+00:07:12.500 --> 00:07:17.500
+you want their initial position to be in the location of the bone that you're trying to control.
+
+103
+00:07:17.500 --> 00:07:24.500
+So we could come into the window here, the Preview window, and reposition this up to the elbow, for example.
+
+104
+00:07:24.500 --> 00:07:29.500
+And we can actually get our control close to this bone and use a tool to snap it to its location.
+
+105
+00:07:29.500 --> 00:07:39.500
+So if we come to Character and just show bones so we can see the elbow joint here,
+
+106
+00:07:39.500 --> 00:07:42.500
+and we'll right click the control inside the Rig hierarchy window,
+
+107
+00:07:42.500 --> 00:07:47.500
+we have an option to set offset transform from closest bone.
+
+108
+00:07:47.500 --> 00:07:54.500
+And what this will do is snap its position and its orientation to the closest bone in the viewport.
+
+109
+00:07:54.500 --> 00:07:59.500
+And we can see that that's now positioned and oriented to the elbow joint.
+
+110
+00:07:59.500 --> 00:08:07.500
+So when we set up the logic, we know that they both have the same initial start points.
+
+111
+00:08:07.500 --> 00:08:09.500
+Now we can customize the look of these controls.
+
+112
+00:08:09.500 --> 00:08:14.500
+So if you select the control in the viewport or in the Rig hierarchy and come to the Details panel here,
+
+113
+00:08:14.500 --> 00:08:17.500
+under Shape we have Shape Properties.
+
+114
+00:08:17.500 --> 00:08:20.500
+Now this might be closed by default, but if we just pop it open.
+
+115
+00:08:20.500 --> 00:08:27.500
+And under the Shape dropdown, we have the default shape mesh here.
+
+116
+00:08:27.500 --> 00:08:31.500
+And so there are lots of different shapes here and you can just choose whatever's appropriate.
+
+117
+00:08:31.500 --> 00:08:36.500
+Now if we go for something like a circle thick here,
+
+118
+00:08:37.500 --> 00:08:43.500
+we can see that it's still slightly inside the mesh,
+
+119
+00:08:43.500 --> 00:08:48.500
+so what we could do is reposition the rotation of the shape.
+
+120
+00:08:48.500 --> 00:08:54.500
+And if we reposition it along a Y axis like this,
+
+121
+00:08:54.500 --> 00:08:59.500
+I think that's going to give us a result that we want to encompass the elbow.
+
+122
+00:09:00.500 --> 00:09:05.500
+So I'll just put 90 degrees inside the shape transforms.
+
+123
+00:09:05.500 --> 00:09:11.500
+And I'll actually scale it up just to make it a little bigger.
+
+124
+00:09:11.500 --> 00:09:21.500
+And now this is much easier to select and it's not stuck inside our mesh.
+
+125
+00:09:21.500 --> 00:09:24.500
+We can also change the color of the shape here.
+
+126
+00:09:24.500 --> 00:09:29.500
+And as you can see as we scrub through the various colors, it updates live in the viewport,
+
+127
+00:09:29.500 --> 00:09:36.500
+and you can also see the icon for the control down here changes color to match.
+
+128
+00:09:36.500 --> 00:09:40.500
+So I'm just going to make it green for now.
+
+129
+00:09:40.500 --> 00:09:45.500
+And that's it, we've made our first control.
+

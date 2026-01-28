@@ -1,0 +1,1050 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.680
+So let's take a look at creating a custom function of our own.
+
+2
+00:00:03.680 --> 00:00:07.440
+Now it won't be quite as complex as the IK2 bone function, but
+
+3
+00:00:07.440 --> 00:00:11.320
+we're going to set something up to connect our fingers to our finger controls.
+
+4
+00:00:11.320 --> 00:00:14.599
+There are two ways to create a custom function of our own.
+
+5
+00:00:14.599 --> 00:00:18.199
+So we could highlight a handful of nodes inside the rig graph and
+
+6
+00:00:18.199 --> 00:00:21.359
+right click and collapse that logic to a function.
+
+7
+00:00:21.359 --> 00:00:26.199
+Now this is great if you're only using this specific function within this control rig.
+
+8
+00:00:26.199 --> 00:00:29.199
+But if you want to share the function across your entire project,
+
+9
+00:00:29.199 --> 00:00:32.000
+we're going to need to create a function library.
+
+10
+00:00:34.560 --> 00:00:39.840
+Now a function library is essentially a traditional control rig asset
+
+11
+00:00:39.840 --> 00:00:43.079
+that acts like a container where you build all of your custom functions.
+
+12
+00:00:44.159 --> 00:00:48.000
+Now as I said previously, they are similar to blueprints where you can create custom
+
+13
+00:00:48.000 --> 00:00:51.840
+functions and then share them across all the control rigs in your project.
+
+14
+00:00:51.840 --> 00:00:56.840
+You just need to make sure that you've set them to public as they're private by default.
+
+15
+00:00:56.840 --> 00:01:01.000
+Now built in that comes with the engine is a standard function library
+
+16
+00:01:01.000 --> 00:01:03.920
+where we've created a lot of different functions for you that do a lot of
+
+17
+00:01:03.920 --> 00:01:08.000
+different things that you can experiment with and learn how they work when you're
+
+18
+00:01:08.000 --> 00:01:09.920
+setting up your own rigs.
+
+19
+00:01:09.920 --> 00:01:14.520
+And the main sort of bonus of them is that they really do help to clean up your
+
+20
+00:01:14.520 --> 00:01:19.600
+rig graph and compartmentalize all these chunks of logic just to make it easier
+
+21
+00:01:19.600 --> 00:01:24.879
+to understand what's going on and simplify the setup as you're creating your control rigs.
+
+22
+00:01:24.879 --> 00:01:30.439
+Now a function library is essentially a traditional control rig asset that acts
+
+23
+00:01:30.439 --> 00:01:34.000
+like a container where you build all of your custom functions.
+
+24
+00:01:34.000 --> 00:01:37.519
+And as I said previously, they're similar to blueprints where you could create a
+
+25
+00:01:37.519 --> 00:01:41.759
+custom function and then share that across all of the control rigs in your project.
+
+26
+00:01:41.759 --> 00:01:44.439
+You just need to make sure that you've set the function to public as they're
+
+27
+00:01:44.439 --> 00:01:45.439
+private by default.
+
+28
+00:01:46.679 --> 00:01:50.079
+Now the engine comes with a pre-built standard function library.
+
+29
+00:01:50.079 --> 00:01:53.159
+And this contains a lot of useful pre-made functions that you can already
+
+30
+00:01:53.200 --> 00:01:55.519
+utilize with your control rigs.
+
+31
+00:01:55.519 --> 00:01:58.039
+And a big bonus of them is that you can really do...
+
+32
+00:01:59.920 --> 00:02:03.439
+And a big bonus of them is that they really do help clean up your rig graph and
+
+33
+00:02:03.439 --> 00:02:07.039
+help compartmentalize all these chunks of logic that make it just easier to
+
+34
+00:02:07.039 --> 00:02:10.639
+understand the flow of your logic and more simple to get things set up as you're
+
+35
+00:02:10.639 --> 00:02:11.879
+creating your control rigs.
+
+36
+00:02:13.280 --> 00:02:16.560
+Our custom function will connect the transforms of our finger bones to the
+
+37
+00:02:16.560 --> 00:02:19.840
+finger controls, just like an FK chain.
+
+38
+00:02:19.840 --> 00:02:22.960
+And what we're going to need for that is some new controls for our fingers.
+
+39
+00:02:22.960 --> 00:02:25.320
+So let's head back into the project and get started.
+
+40
+00:02:27.640 --> 00:02:31.680
+Back inside our control rig here, you can see that in the rig hierarchy window,
+
+41
+00:02:31.680 --> 00:02:35.960
+I have selected all of the finger bones that we have on our skeleton.
+
+42
+00:02:35.960 --> 00:02:39.080
+I haven't selected the matter couples just because we don't want to create controls
+
+43
+00:02:39.080 --> 00:02:39.560
+for those.
+
+44
+00:02:41.520 --> 00:02:45.200
+And to create these new controls, we can either press control N or we could right
+
+45
+00:02:45.200 --> 00:02:48.879
+click, come up to new and add controls for selected.
+
+46
+00:02:50.159 --> 00:02:52.360
+And then at the bottom of the rig hierarchy here,
+
+47
+00:02:52.360 --> 00:02:54.560
+you can see all of these new controls that we've just created.
+
+48
+00:02:56.720 --> 00:02:59.600
+Now we're going to customize the look of the controls because they're not really
+
+49
+00:02:59.600 --> 00:03:01.920
+very usable at the moment in their current state.
+
+50
+00:03:03.040 --> 00:03:06.480
+So first of all, I'm just going to change the color of the left hand side to blue,
+
+51
+00:03:06.480 --> 00:03:08.160
+so we can see the difference in the viewport.
+
+52
+00:03:09.160 --> 00:03:14.640
+So if I scroll up a little bit, select all of our underscore L controls here.
+
+53
+00:03:15.640 --> 00:03:18.560
+I've shift select down to the ring finger here.
+
+54
+00:03:18.560 --> 00:03:21.040
+And then over in the shape properties, I'm just going to make them one of these
+
+55
+00:03:21.079 --> 00:03:26.919
+blue colors and change the shape to something like a box.
+
+56
+00:03:28.439 --> 00:03:32.239
+And what we'll do as well, we'll just scale those down slightly so that they
+
+57
+00:03:32.239 --> 00:03:35.039
+fit a little nicer around our mesh.
+
+58
+00:03:38.959 --> 00:03:43.359
+And what I'm going to do for the right hand side is keep the color red,
+
+59
+00:03:44.599 --> 00:03:46.680
+but also make a box thick.
+
+60
+00:03:47.520 --> 00:03:49.680
+And then we just get them in the viewport here.
+
+61
+00:03:50.319 --> 00:03:54.800
+Scale those down as well, just so they fit around our mesh.
+
+62
+00:03:57.319 --> 00:03:59.040
+So now we have our controls created.
+
+63
+00:03:59.520 --> 00:04:03.520
+The last thing we want to do is just reorganize the hierarchy a little bit so
+
+64
+00:04:03.520 --> 00:04:06.080
+that our controls are following their respective hands.
+
+65
+00:04:07.200 --> 00:04:11.520
+So selecting the parent of each of the finger chains here,
+
+66
+00:04:12.520 --> 00:04:16.439
+I'm going to click and hold and drag those underneath the hand L control for
+
+67
+00:04:16.439 --> 00:04:17.439
+the left hand side.
+
+68
+00:04:18.600 --> 00:04:19.600
+I just minimize that.
+
+69
+00:04:20.199 --> 00:04:24.920
+And then doing the same thing, clicking the parent of each, holding control,
+
+70
+00:04:24.920 --> 00:04:29.040
+clicking the parent of each chain of controls here and dragging those inside
+
+71
+00:04:29.040 --> 00:04:30.040
+the right hand side.
+
+72
+00:04:31.800 --> 00:04:38.080
+Now we'll see that when we move our right hand arm or right hand control,
+
+73
+00:04:38.079 --> 00:04:41.199
+our finger joints follow and we'll just double check the left side.
+
+74
+00:04:43.039 --> 00:04:44.680
+The same thing is happening with those.
+
+75
+00:04:48.560 --> 00:04:49.560
+So that's perfect.
+
+76
+00:04:52.800 --> 00:04:56.360
+Now that we have the components that we need, let's create a new control rig
+
+77
+00:04:56.360 --> 00:05:00.360
+asset to use as our function library and start building our custom function.
+
+78
+00:05:01.079 --> 00:05:05.560
+So on the left hand side here under the my blueprint tab, under the functions
+
+79
+00:05:06.560 --> 00:05:09.639
+heading, I'm just going to hit plus and that'll create a new function for us.
+
+80
+00:05:10.600 --> 00:05:14.680
+And because this is going to be like a simple FK chain, I'm just going to call
+
+81
+00:05:14.680 --> 00:05:15.680
+it easy FK.
+
+82
+00:05:18.800 --> 00:05:22.519
+Now we need to create a couple of input pins for this function.
+
+83
+00:05:22.959 --> 00:05:26.639
+And our input pins are going to be the controls that we just created.
+
+84
+00:05:26.639 --> 00:05:31.079
+So the finger controls and then the finger bones that we want the controls to
+
+85
+00:05:31.720 --> 00:05:32.600
+have control over.
+
+86
+00:05:32.879 --> 00:05:34.560
+So if I select the entry pin here,
+
+87
+00:05:38.080 --> 00:05:43.520
+come up to inputs on the top right, hit the plus, we can add a new
+
+88
+00:05:43.520 --> 00:05:46.080
+input that we'll call FK controls.
+
+89
+00:05:46.920 --> 00:05:47.680
+So hit enter.
+
+90
+00:05:48.200 --> 00:05:52.080
+And we're going to change this to a rig element key.
+
+91
+00:05:55.600 --> 00:05:59.520
+And because we want to have more than a single input, we'll change the input
+
+92
+00:05:59.520 --> 00:06:01.480
+type from single to array.
+
+93
+00:06:01.480 --> 00:06:05.439
+That means that we can get all of our FK controls at once and connect them
+
+94
+00:06:05.439 --> 00:06:06.439
+up to this entry pin.
+
+95
+00:06:07.960 --> 00:06:11.600
+And the second input is going to be our bones that we want to control.
+
+96
+00:06:12.439 --> 00:06:16.360
+So I'm just going to call that bones and automatically it reuses the previous
+
+97
+00:06:16.360 --> 00:06:17.720
+type of input pin that you created.
+
+98
+00:06:17.720 --> 00:06:19.400
+So we don't need to set that as an array.
+
+99
+00:06:21.560 --> 00:06:25.560
+Now what we want to do is create the logic to get the transforms of our
+
+100
+00:06:25.560 --> 00:06:29.960
+finger controls, our FK controls and use that information to set the
+
+101
+00:06:30.439 --> 00:06:31.639
+transforms of our bones.
+
+102
+00:06:33.839 --> 00:06:40.319
+So if I was to right click and search for get transforms, we want to use the
+
+103
+00:06:40.319 --> 00:06:45.560
+function here and that's denoted by the F symbol rather than the icon for a
+
+104
+00:06:45.560 --> 00:06:46.079
+node here.
+
+105
+00:06:48.679 --> 00:06:51.719
+And you can see that we have an array that we can plug straight in from our
+
+106
+00:06:51.719 --> 00:06:53.479
+items to our FK controls.
+
+107
+00:06:54.439 --> 00:06:58.439
+So that when we're outside in our normal rig graph and we were to drag in
+
+108
+00:06:58.439 --> 00:07:04.079
+this function in the FK controls pin here, we know that that's going to
+
+109
+00:07:04.079 --> 00:07:08.160
+plug into a get transforms function and that will get the information of those
+
+110
+00:07:08.160 --> 00:07:08.719
+controls.
+
+111
+00:07:10.160 --> 00:07:13.759
+Now we're going to use that if I just drag this over here to set the
+
+112
+00:07:13.759 --> 00:07:14.959
+transforms of our bones.
+
+113
+00:07:16.360 --> 00:07:20.279
+So if I search for set transforms and we need an array again because we're
+
+114
+00:07:20.279 --> 00:07:21.560
+setting multiple items.
+
+115
+00:07:23.680 --> 00:07:27.839
+So if we drop that into the rig graph here and connect the logic up, we
+
+116
+00:07:28.399 --> 00:07:31.839
+want to use the transforms of our controls and plug that straight into
+
+117
+00:07:31.839 --> 00:07:33.399
+the transforms of our bones.
+
+118
+00:07:36.119 --> 00:07:40.000
+And if we grab our bones input pin here, that's the information that's going to
+
+119
+00:07:40.000 --> 00:07:41.799
+be fed into this set transform array.
+
+120
+00:07:43.439 --> 00:07:49.799
+If I just connect up the logic from here to here and just clean this up with a
+
+121
+00:07:49.799 --> 00:07:54.359
+reroute node by double clicking just so it's a little easier to see things.
+
+122
+00:07:58.399 --> 00:08:00.879
+That's all it takes right now to set up our function.
+
+123
+00:08:01.399 --> 00:08:05.279
+So we're getting the transforms of our controls and then we're using that
+
+124
+00:08:05.279 --> 00:08:08.119
+information to set the transforms of our bones.
+
+125
+00:08:10.759 --> 00:08:14.679
+The last thing we need to do is make this function public so that we can use
+
+126
+00:08:14.679 --> 00:08:17.239
+it throughout all of the other control rigs in our project.
+
+127
+00:08:18.000 --> 00:08:20.719
+And that's done on the right hand side here under access specifier.
+
+128
+00:08:21.279 --> 00:08:24.799
+By default, it will be set to private, but we can change that to public.
+
+129
+00:08:25.559 --> 00:08:27.159
+And if we compile and save that.
+
+130
+00:08:28.560 --> 00:08:34.079
+If we were to come back to our finger control control rig here, right click
+
+131
+00:08:34.199 --> 00:08:36.519
+and search for easy FK.
+
+132
+00:08:37.039 --> 00:08:39.279
+You can see that we have access to what we just created.
+
+133
+00:08:40.319 --> 00:08:44.519
+If I zoom in on that, when I double click to open it, you'll see that brings us
+
+134
+00:08:44.519 --> 00:08:46.159
+to our custom function that we made here.
+
+135
+00:08:47.559 --> 00:08:51.279
+Now that we have a custom function created, let's build the logic to tell
+
+136
+00:08:51.279 --> 00:08:53.879
+the function the names of our bones and our controls.
+
+137
+00:08:54.639 --> 00:08:57.919
+To make things more procedural, we're going to build all of this logic
+
+138
+00:08:57.919 --> 00:08:59.480
+based on the names of our bones.
+
+139
+00:09:00.039 --> 00:09:03.439
+So we'll take an array of our finger bones and then generate the finger
+
+140
+00:09:03.439 --> 00:09:07.080
+controls by adding underscore CTRL to the end.
+
+141
+00:09:07.960 --> 00:09:10.879
+We'll then save this information in a variable so that we could use it in
+
+142
+00:09:10.879 --> 00:09:12.039
+the future if we needed to.
+
+143
+00:09:13.080 --> 00:09:16.320
+So first things first, let's create an array of our finger bones.
+
+144
+00:09:16.840 --> 00:09:20.519
+So I'll come over to the rig hierarchy and just find all of our finger bones here.
+
+145
+00:09:21.519 --> 00:09:25.840
+And remember, we're not using the metacarpals, so we can ignore those for now.
+
+146
+00:09:26.840 --> 00:09:30.559
+So we'll do the left arm and then the right side.
+
+147
+00:09:33.319 --> 00:09:36.519
+And we'll drag those in and choose create item array.
+
+148
+00:09:38.279 --> 00:09:40.439
+Now this will contain all the bones we just highlighted.
+
+149
+00:09:42.199 --> 00:09:44.120
+I'll just make ourselves a little bit of space over here.
+
+150
+00:09:46.039 --> 00:09:48.600
+Now we want to find our finger control names.
+
+151
+00:09:49.159 --> 00:09:53.040
+And to do this, we're going to create a variable, which is simply a container of
+
+152
+00:09:53.040 --> 00:09:59.040
+information and we'll set the information of the variable to be the bones names
+
+153
+00:09:59.240 --> 00:10:04.240
+plus adding underscore CTRL to the end so that we're matching the controls names.
+
+154
+00:10:05.360 --> 00:10:09.399
+Now we could create a variable over in my blueprint tab here by just hitting the
+
+155
+00:10:09.399 --> 00:10:14.120
+plus on a new variable, renaming it, whatever it might be.
+
+156
+00:10:14.519 --> 00:10:19.200
+If I can spell my variable and then changing the type of variable it is.
+
+157
+00:10:20.480 --> 00:10:25.399
+So for this, we'd want it to be a rig element key and then setting it to an
+
+158
+00:10:25.399 --> 00:10:27.000
+array because we need it to be an array.
+
+159
+00:10:27.080 --> 00:10:30.879
+You could either right click here or you could come up to the top here and
+
+160
+00:10:30.879 --> 00:10:33.320
+change it from array, sorry, from single to array.
+
+161
+00:10:35.240 --> 00:10:39.480
+And then we know that we have inside this array 30 elements.
+
+162
+00:10:39.560 --> 00:10:43.120
+So we know we have 30 finger bones that we're looking for, which means we're
+
+163
+00:10:43.120 --> 00:10:44.919
+also looking for 30 finger controls.
+
+164
+00:10:45.600 --> 00:10:51.279
+So inside the variable here, if I just compile first, you can see we don't have
+
+165
+00:10:51.279 --> 00:10:56.840
+any array elements just yet, but we could add 30 array elements and then come in
+
+166
+00:10:56.840 --> 00:10:59.360
+here and set these to be our control names.
+
+167
+00:11:00.360 --> 00:11:01.600
+That'll take quite a long time.
+
+168
+00:11:02.240 --> 00:11:05.399
+So I'm just going to bin that for now and delete that variable.
+
+169
+00:11:07.360 --> 00:11:11.720
+And something you can do is drag off our item array here and actually promote
+
+170
+00:11:11.720 --> 00:11:13.800
+this information to a variable itself.
+
+171
+00:11:14.840 --> 00:11:19.080
+And if we just delete this set variable node here, just because we're not going to need it.
+
+172
+00:11:20.840 --> 00:11:25.840
+The variable that we have here, again, if I compile, you'll see that that now has
+
+173
+00:11:25.920 --> 00:11:29.920
+30 elements and it contains all of the information of the array.
+
+174
+00:11:29.960 --> 00:11:33.840
+So we have all of our bone names in here and it sets the type to bone as well,
+
+175
+00:11:33.840 --> 00:11:34.639
+which is really useful.
+
+176
+00:11:35.080 --> 00:11:47.360
+So if I just rename this to be our FK control array, we're going to use the
+
+177
+00:11:47.360 --> 00:11:55.639
+information here and add underscore CTRL to the end to set the name of our controls.
+
+178
+00:11:58.039 --> 00:11:59.879
+Now this essentially just speeds us up a little bit.
+
+179
+00:11:59.879 --> 00:12:03.559
+So we don't have to create a new variable and then populate all the
+
+180
+00:12:03.559 --> 00:12:04.719
+30 array elements.
+
+181
+00:12:04.719 --> 00:12:09.279
+We could promote the item array to a variable and then it does a lot of that work for us.
+
+182
+00:12:09.719 --> 00:12:14.599
+Now if you have several different limbs you're trying to do this for and you've got
+
+183
+00:12:14.599 --> 00:12:18.439
+maybe hundreds of items in your array, you could see how this could speed you up quite a bit.
+
+184
+00:12:19.959 --> 00:12:24.559
+The other thing that's super useful about this is the variable will maintain the order
+
+185
+00:12:24.559 --> 00:12:25.959
+of the bones that we selected.
+
+186
+00:12:26.359 --> 00:12:30.519
+And this ensures that the controls and the bones are connected to each other in the right order.
+
+187
+00:12:30.519 --> 00:12:35.079
+Now the first thing we need to do is reset the variable so that we remove the information in there
+
+188
+00:12:35.079 --> 00:12:37.720
+and just have an array with 30 blank elements.
+
+189
+00:12:38.240 --> 00:12:42.240
+Now the reason we do this is so that we can populate all of our information ourselves.
+
+190
+00:12:42.240 --> 00:12:47.079
+We'll use the item array and add underscore CTRL to the end and then that will give us
+
+191
+00:12:47.079 --> 00:12:48.519
+the names of our controls.
+
+192
+00:12:50.279 --> 00:12:54.519
+So let's drag in our variable and choose get FK control array.
+
+193
+00:12:54.679 --> 00:13:01.879
+And if we drag off the value pin we can search for reset.
+
+194
+00:13:05.319 --> 00:13:09.399
+And if we just connect this up to our logic, what I'm going to do is hold S and left click
+
+195
+00:13:09.399 --> 00:13:14.639
+to get a sequence node just so we can break up the logic into two different flows and just
+
+196
+00:13:14.639 --> 00:13:15.799
+understand it a little better.
+
+197
+00:13:17.559 --> 00:13:19.399
+I'll then connect that up to our reset pin.
+
+198
+00:13:21.439 --> 00:13:23.519
+Let's move these out of the way because we don't need them just yet.
+
+199
+00:13:25.519 --> 00:13:31.519
+And what this is doing now is emptying out all the information inside the variable that we have.
+
+200
+00:13:32.519 --> 00:13:42.519
+And just as a bit of proof for that, if we search for a print node and connect up our reset array output pin
+
+201
+00:13:43.519 --> 00:13:48.519
+to the value of the print node, you'll see that as I hover over here we're not really getting any information out of it.
+
+202
+00:13:49.519 --> 00:13:57.519
+Whereas if I connect this straight up, you can see that as we hover over we've got all of the names of our bones in that array.
+
+203
+00:13:59.519 --> 00:14:01.519
+If I just reconnect this and get rid of that.
+
+204
+00:14:04.519 --> 00:14:10.519
+Our next step is to repopulate this variable with the control name information.
+
+205
+00:14:11.519 --> 00:14:19.519
+So I'm going to drag off our item array here that contains all of our bone names and search for or each.
+
+206
+00:14:20.519 --> 00:14:24.519
+And this will run over and do some logic for each item inside the array.
+
+207
+00:14:25.519 --> 00:14:27.519
+So if I just connect the executes up there.
+
+208
+00:14:30.519 --> 00:14:37.519
+And what we want to do here if I just open up element is out of the name tab we want to add or concatenate.
+
+209
+00:14:37.519 --> 00:14:38.519
+Underscore CTRL.
+
+210
+00:14:39.519 --> 00:14:40.519
+So for that we'll use the concatenate node.
+
+211
+00:14:42.519 --> 00:14:45.519
+And add underscore CTRL inside the beep in here.
+
+212
+00:14:50.519 --> 00:14:56.519
+Now that we have our array information and the name update information, we want to add these two together and add them to the array.
+
+213
+00:14:58.519 --> 00:15:06.519
+So if I right click and search for add and we scroll to the top here make sure under the array here we have our name and the name.
+
+214
+00:15:07.519 --> 00:15:11.519
+And we're going to click on the name tab heading and choose that add node there.
+
+215
+00:15:12.519 --> 00:15:21.519
+I connect up the logic and connect up our empty array here, our variable that contains just those 30 array elements.
+
+216
+00:15:22.519 --> 00:15:25.519
+We pop open element make sure we change this to control.
+
+217
+00:15:26.519 --> 00:15:28.519
+Because that's the output that we're looking for.
+
+218
+00:15:29.519 --> 00:15:30.519
+We're looking for our control names.
+
+219
+00:15:30.519 --> 00:15:37.519
+And then I'll just connect up the name pin from our concatenate or the result pin to the name pin of our add node.
+
+220
+00:15:38.519 --> 00:15:45.519
+Now the information outside of this new array if we search for a print again should be giving us our control names now.
+
+221
+00:15:46.519 --> 00:15:57.519
+Because what we've done is we've taken our variable with the bone names in it and we've reset it so we've removed all the information but maintained the fact that there are 30 array elements.
+
+222
+00:15:58.519 --> 00:16:07.519
+And then we've taken our array information so our bone information and for each of the elements in the array we have added underscore CTRL.
+
+223
+00:16:08.519 --> 00:16:15.519
+And then we've taken our empty variable or so empty array and added that to the underscore CTRL.
+
+224
+00:16:16.519 --> 00:16:25.519
+And if we hover over here you can see that all the names that we have inside the array now have that underscore CTRL at the end and that will be our control names.
+
+225
+00:16:26.519 --> 00:16:28.519
+We can just delete that again for now.
+
+226
+00:16:30.519 --> 00:16:36.519
+And now we should be able to connect up all our logic because we have our control names coming out of here and our bone names coming out of here.
+
+227
+00:16:37.519 --> 00:16:38.519
+So let's see what happens.
+
+228
+00:16:39.519 --> 00:16:49.519
+So if we connect our bones to the bones input pin and our custom function and then connect the control names to our FK controls input pin.
+
+229
+00:16:50.519 --> 00:16:54.519
+To connect this logic up we want to come off the for each completed pin.
+
+230
+00:16:55.519 --> 00:17:07.519
+And the reason we do that is because we want to we want the logic to run after we've completed this extra bit of logic per array element.
+
+231
+00:17:09.519 --> 00:17:14.519
+So now if I compile we can see we've got a little bit of an issue so let's see where that where that problem is.
+
+232
+00:17:15.519 --> 00:17:18.519
+So first things first let's create an array of our finger bones.
+
+233
+00:17:19.519 --> 00:17:22.519
+So I'll come over to the rig hierarchy and just find all of our finger bones here.
+
+234
+00:17:24.519 --> 00:17:28.519
+And remember we're not using the matter couples so we can ignore those for now.
+
+235
+00:17:29.519 --> 00:17:33.519
+So we'll do the left arm and then the right side.
+
+236
+00:17:36.519 --> 00:17:39.519
+And we'll drag those in and choose create item array.
+
+237
+00:17:40.519 --> 00:17:43.519
+Now this will contain all the bones we just highlighted.
+
+238
+00:17:45.519 --> 00:17:47.519
+I just make ourselves a little bit of space over here.
+
+239
+00:17:48.519 --> 00:17:56.519
+Now we want to find our finger control names and to do this we're going to create a variable which is simply a container of information.
+
+240
+00:17:57.519 --> 00:18:07.519
+And we'll set the information of the variable to be the bones names plus adding underscore CTRL to the end so that we're matching the controls names.
+
+241
+00:18:08.519 --> 00:18:17.519
+Now we could create a variable over in my blueprint tab here by just hitting the plus on a new variable renaming it whatever it might mean.
+
+242
+00:18:18.519 --> 00:18:22.519
+If I can spell my variable and then changing the type of variable it is.
+
+243
+00:18:23.519 --> 00:18:30.519
+So for this we'd want it to be a rig element key and then setting it to an array because we need it to be an array.
+
+244
+00:18:31.519 --> 00:18:36.519
+You could add the right click here or you could come up to the top here and change it from array sorry from single to array.
+
+245
+00:18:38.519 --> 00:18:48.519
+And then we know that we have inside this array 30 elements so we know we have 30 finger bones that we're looking for which means we're also looking for 30 finger controls.
+
+246
+00:18:49.519 --> 00:19:02.519
+So inside the variable here if I just compile first you can see we don't have any array elements just yet but we could add 30 array elements and then come in here and set these to be our control names.
+
+247
+00:19:03.519 --> 00:19:08.519
+That'll take quite a long time so I'm just going to bin that for now and delete that variable.
+
+248
+00:19:10.519 --> 00:19:16.519
+And something you can do is drag off our item array here and actually promote this information to a variable itself.
+
+249
+00:19:17.519 --> 00:19:22.519
+If we just delete this set variable node here just because we're not going to need it.
+
+250
+00:19:23.519 --> 00:19:32.519
+The variable that we have here again if I compile you'll see that that now has 30 elements and it contains all of the information of the array.
+
+251
+00:19:33.519 --> 00:19:37.519
+So we have all of our bone names in here and it sets the type to bone as well which is really useful.
+
+252
+00:19:39.519 --> 00:19:46.519
+So if I just rename this to be our FK control array.
+
+253
+00:19:47.519 --> 00:19:59.519
+We're going to use the information here and add underscore CTRL to the end to set the name of our controls.
+
+254
+00:20:02.519 --> 00:20:09.519
+Now this essentially just speeds us up a little bit so we don't have to create a new variable and then populate all these 30 array elements.
+
+255
+00:20:10.519 --> 00:20:13.519
+We could promote the item array to a variable and then it does a lot of that work for us.
+
+256
+00:20:14.519 --> 00:20:22.519
+Now if you have several different limbs you're trying to do this for and you've got maybe hundreds of items in your array you could see how this could speed you up quite a bit.
+
+257
+00:20:24.519 --> 00:20:34.519
+The other thing that's super useful about this is the variable will maintain the order of the bones that we selected and this ensures that the controls and the bones are connected to each other in the right order.
+
+258
+00:20:35.519 --> 00:20:49.519
+Now the first thing we need to do is reset the variable and now we should be able to connect up our logic to our custom function because we have our control names coming out of here and our bone names coming out of here and that's all the information we need to feed into it.
+
+259
+00:20:50.519 --> 00:21:01.519
+So let's test it out. Let's plug in the controls and then let's plug in the bones and the order of logic that we want to connect will be the execute pin from the completed of our four each.
+
+260
+00:21:01.519 --> 00:21:09.519
+And the reason we're doing this is because we want to run all of this information first and then once it's completed we then want to continue the flow of logic.
+
+261
+00:21:10.519 --> 00:21:21.519
+So if we compile and I just select some of these finger controls here and frame up on them with F we should be able to see that our finger controls are now driving our finger bones.
+
+262
+00:21:21.519 --> 00:21:38.519
+And because we set this up procedurally if we were to update this item array with more bones that have corresponding controls that would automatically update and feed into our custom function and then they would automatically connect and start driving the bones.
+

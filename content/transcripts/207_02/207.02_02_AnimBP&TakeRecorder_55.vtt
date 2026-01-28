@@ -1,0 +1,306 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.799
+Coming back to our zombie walk, you know, we're pretty happy with the lower body, but
+
+2
+00:00:05.799 --> 00:00:09.980
+I think maybe we should experiment a bit more with the upper body and with the arms.
+
+3
+00:00:09.980 --> 00:00:13.439
+So for that we're going to use the layered blend per bone node.
+
+4
+00:00:13.439 --> 00:00:18.480
+Now this allows us to selectively blend different animations together on different parts of
+
+5
+00:00:18.480 --> 00:00:19.480
+the body.
+
+6
+00:00:19.480 --> 00:00:23.980
+So we could split up the body into different groups of bones, giving us a really easy way
+
+7
+00:00:23.980 --> 00:00:29.039
+to separate things like the upper and lower body or the arms and the legs and just affect
+
+8
+00:00:29.039 --> 00:00:34.740
+those parts of the body with the animations that we want.
+
+9
+00:00:34.740 --> 00:00:40.439
+In our anim graph, I'm going to right click and search for layered blend per bone and
+
+10
+00:00:40.439 --> 00:00:43.640
+bring in our layered blend per bone node here.
+
+11
+00:00:43.640 --> 00:00:49.120
+I'll also bring in the creep walk, which is, if I remember rightly, the basis of our zombie
+
+12
+00:00:49.120 --> 00:00:54.039
+animation and connect that to the output pose and tick looping.
+
+13
+00:00:54.039 --> 00:01:00.839
+And if we compile, there we go, we have our creep walk playing.
+
+14
+00:01:00.839 --> 00:01:05.840
+I'm then going to bring in our full loop animation because if I double click this to open it
+
+15
+00:01:05.840 --> 00:01:10.159
+up, I know it has some upper body animation on there, but I think it adds some coolness
+
+16
+00:01:10.159 --> 00:01:12.799
+to the zombie walk.
+
+17
+00:01:12.799 --> 00:01:19.900
+So if I plug that into our blend pose is zero pin and set that to looping again and compile,
+
+18
+00:01:19.900 --> 00:01:24.340
+you can see that it's not yet having an effect on our animation.
+
+19
+00:01:24.340 --> 00:01:27.500
+And that's just because we haven't defined which bones we want the animation to play
+
+20
+00:01:27.500 --> 00:01:32.219
+on yet.
+
+21
+00:01:32.219 --> 00:01:35.500
+So selecting our layered blend per bone node again.
+
+22
+00:01:35.500 --> 00:01:39.219
+In the details panel under the config heading, we have layer setup.
+
+23
+00:01:39.219 --> 00:01:42.620
+And inside there, we've got index zero.
+
+24
+00:01:42.620 --> 00:01:46.060
+Now this is relating to our blend poses zero input pin.
+
+25
+00:01:46.820 --> 00:01:50.100
+If I was to hit add pin, you'll see we get a new index.
+
+26
+00:01:50.100 --> 00:01:53.260
+So when you want to blend multiple animations together, that's how you do it, but we'll
+
+27
+00:01:53.260 --> 00:01:55.379
+take a look at that in a bit.
+
+28
+00:01:55.379 --> 00:02:00.620
+So under this index heading, we have branch filters where we can add multiple branches
+
+29
+00:02:00.620 --> 00:02:04.980
+and split this animation into different parts of the body or apply it to different parts
+
+30
+00:02:04.980 --> 00:02:07.540
+of the body.
+
+31
+00:02:07.540 --> 00:02:12.939
+So if I hit a plus there, we add a new index and I'm going to give it the name of the first
+
+32
+00:02:12.939 --> 00:02:15.500
+bone in the chain that we want to affect.
+
+33
+00:02:15.500 --> 00:02:20.539
+And because we want to affect the upper body, I'm going to give it spine 04.
+
+34
+00:02:20.539 --> 00:02:24.020
+So that's going to affect the upper chest and everything above that.
+
+35
+00:02:24.020 --> 00:02:28.419
+So if I compile, you can see on the lower body, we have the creep walk playing.
+
+36
+00:02:28.419 --> 00:02:32.860
+And then the upper body, the fall loop, because we have our alpha set to one, that's going
+
+37
+00:02:32.860 --> 00:02:37.020
+to play 100% of the fall loop animation.
+
+38
+00:02:37.020 --> 00:02:42.740
+So if I was to change that to 0.5, for example, you can see that we're now blending half of
+
+39
+00:02:42.740 --> 00:02:49.900
+that animation and we've got some of that creep walk movement underneath.
+
+40
+00:02:49.900 --> 00:02:53.580
+Now this is looking kind of cool, but I think we can get something a little better if we
+
+41
+00:02:53.580 --> 00:02:56.719
+break the body up into a few more pieces.
+
+42
+00:02:56.719 --> 00:03:03.140
+So back into our layered blend per bone node, I'm going to add another pin here, duplicate
+
+43
+00:03:03.140 --> 00:03:09.180
+this fall loop animation with control D and connect that to our blend poses one pin because
+
+44
+00:03:09.180 --> 00:03:14.700
+I still like the way that this fall loop animation is affecting our pose and our animation, but
+
+45
+00:03:14.700 --> 00:03:19.740
+I want to break it up so that perhaps we have a different strength of this animation on maybe
+
+46
+00:03:19.740 --> 00:03:24.360
+the arms compared to what we have on the spine.
+
+47
+00:03:24.360 --> 00:03:28.900
+So we now have this new index here and under the branch filters, I'm going to add two new
+
+48
+00:03:28.900 --> 00:03:32.120
+branches, one for each arm.
+
+49
+00:03:32.120 --> 00:03:40.520
+So our start bone name is going to be clavicle L for the left arm and bone name for the right
+
+50
+00:03:40.520 --> 00:03:49.599
+arm clavicle R. So if I compile, as you can see, because our blend strength, our blend
+
+51
+00:03:49.599 --> 00:03:54.560
+weight should I say is set to one, we're getting 100% of that fall loop animation on the two
+
+52
+00:03:54.560 --> 00:03:58.800
+arms and 50% of the animation on the spine.
+
+53
+00:03:58.800 --> 00:04:04.280
+So I could tweak this again to something like 0.7 maybe and then compile.
+
+54
+00:04:04.280 --> 00:04:09.880
+So we still get some of that underlying creep walk animation on the arms, but we also have
+
+55
+00:04:09.880 --> 00:04:13.320
+the interesting pose from the fall loop.
+
+56
+00:04:13.320 --> 00:04:18.680
+Now this is looking kind of cool so far, but the head is maybe looking a little too stable
+
+57
+00:04:18.680 --> 00:04:22.600
+and I think with zombies they're always a little bit wobbly and maybe the head is like
+
+58
+00:04:22.600 --> 00:04:27.040
+snapping at you trying to bite you and something that I would think would work quite well for
+
+59
+00:04:27.040 --> 00:04:31.720
+that is the run forward animation because this has got a lot more movement in it and
+
+60
+00:04:31.720 --> 00:04:34.520
+a lot more action going on.
+
+61
+00:04:34.520 --> 00:04:40.240
+So if I add a new pin and plug that into blend poses to and just make sure we're looping
+
+62
+00:04:40.240 --> 00:04:47.680
+that animation, I'm going to cut off the head and just apply this run forward to the head.
+
+63
+00:04:47.680 --> 00:04:54.680
+So if I just shrink that down these two indexes and opened upon newest and add a new branch,
+
+64
+00:04:54.680 --> 00:05:00.439
+I'm going to use neck underscore 01 because I know that that's the first neck bone and
+
+65
+00:05:00.439 --> 00:05:04.639
+we're going to affect everything after that, the tip of the head.
+
+66
+00:05:04.639 --> 00:05:07.759
+So already you can see that's something kind of cool there.
+
+67
+00:05:07.759 --> 00:05:11.879
+It's maybe a little bit strong, but you can imagine him kind of snapping and biting at
+
+68
+00:05:11.879 --> 00:05:13.360
+you.
+
+69
+00:05:13.360 --> 00:05:17.360
+Maybe I can reduce it down to 0.8 perhaps.
+
+70
+00:05:17.360 --> 00:05:19.879
+Yeah that's looking kind of cool there.
+
+71
+00:05:19.879 --> 00:05:24.060
+So I think we could probably call the zombie animation done there.
+
+72
+00:05:24.060 --> 00:05:27.740
+Now you could do the same sort of thing with this animation where you could record it out
+
+73
+00:05:27.740 --> 00:05:30.579
+and create a loop of the animation again.
+
+74
+00:05:30.579 --> 00:05:34.699
+You could also open the animation sequencer and bake that down to a control rig which
+
+75
+00:05:34.699 --> 00:05:38.699
+will give you much more control over the loop making sure that there's no pop and you can
+
+76
+00:05:38.699 --> 00:05:41.819
+add in any cool little details that you want to add to really polish it up.
+

@@ -1,0 +1,454 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.700
+In this lesson, we're going to go and take a look at screen space and global illumination.
+
+2
+00:00:05.700 --> 00:00:07.799
+So let's get started.
+
+3
+00:00:07.799 --> 00:00:12.280
+So screen space global illumination can be activated within our project settings and
+
+4
+00:00:12.280 --> 00:00:14.120
+also within the Puzz process volume.
+
+5
+00:00:14.120 --> 00:00:18.120
+Let me point out where those are at and then we're going to look at a few things we can
+
+6
+00:00:18.120 --> 00:00:22.600
+do to actually do a little quality control and things to look out for, especially if
+
+7
+00:00:22.600 --> 00:00:25.839
+you're using it for ICVFX.
+
+8
+00:00:25.839 --> 00:00:29.600
+So in my scene here, what I want to do is first go into my project settings.
+
+9
+00:00:29.600 --> 00:00:35.039
+Again, you can activate this after the fact if you want to, but in your project settings,
+
+10
+00:00:35.039 --> 00:00:39.039
+if your intentions are to use it, it's good to actually have it on anyway.
+
+11
+00:00:39.039 --> 00:00:43.159
+So we would go underneath and take a look at our settings here.
+
+12
+00:00:43.159 --> 00:00:48.519
+You'll see under reflection method, we have screen space global illumination active.
+
+13
+00:00:48.519 --> 00:00:51.560
+We have overall we have ray tracing in here.
+
+14
+00:00:51.679 --> 00:00:57.960
+And that's because if we want to use GPU, if we want to use GPU light mask, we actually
+
+15
+00:00:57.960 --> 00:01:00.200
+want to turn this on and make sure that it is on.
+
+16
+00:01:00.200 --> 00:01:02.320
+If you don't have this on, it won't work.
+
+17
+00:01:02.320 --> 00:01:07.000
+So it's using ray tracing in this particular case, but we can also use screen space.
+
+18
+00:01:07.000 --> 00:01:13.240
+If we wanted to for our GI, you just have to be careful if you decide to do that, even
+
+19
+00:01:13.240 --> 00:01:16.920
+in your overrides, you have to keep those things in mind.
+
+20
+00:01:16.920 --> 00:01:24.280
+Screen space will give you a bit of a clipping that could occur if you're using it for ICVFX.
+
+21
+00:01:24.280 --> 00:01:28.359
+So you've got to be aware of that because when you move your camera, you can see glowing
+
+22
+00:01:28.359 --> 00:01:34.439
+objects and certain materials start to clip away and you'll have to do a bit of an over scan.
+
+23
+00:01:34.439 --> 00:01:36.200
+Let's talk about that.
+
+24
+00:01:36.200 --> 00:01:39.719
+So it's not necessarily the norm to use this type of effect.
+
+25
+00:01:39.719 --> 00:01:42.420
+And again, you can see the two areas where we can turn it on.
+
+26
+00:01:42.420 --> 00:01:47.219
+If you decide to use it in your scene and maybe you're not using GPU light mask and you're
+
+27
+00:01:47.219 --> 00:01:52.579
+using regular CPU bake, you again want to change that in your global illumination settings.
+
+28
+00:01:52.579 --> 00:01:55.420
+And they can also be done in your post process volume.
+
+29
+00:01:55.420 --> 00:01:58.780
+But just keep in mind, if your scene isn't very big, that might be okay.
+
+30
+00:01:58.780 --> 00:02:03.780
+But if it's a large scene, it takes a while to bake for updates needed by the director.
+
+31
+00:02:03.780 --> 00:02:06.420
+That might be a little bit of a problem.
+
+32
+00:02:06.420 --> 00:02:12.219
+So if you do decide to use it though, in that context, you want to go into your, your NDC
+
+33
+00:02:12.219 --> 00:02:15.939
+in your NDC, you want to go to your viewport over scan.
+
+34
+00:02:15.939 --> 00:02:20.379
+And in here, you want to make sure that you're making it just a little bit bigger than your
+
+35
+00:02:20.379 --> 00:02:21.379
+area of interest.
+
+36
+00:02:21.379 --> 00:02:25.819
+And this is going to be very important because as you move your camera around, like I said
+
+37
+00:02:25.819 --> 00:02:30.579
+before, your, if you don't do this, you can actually get clipping on the edges of your
+
+38
+00:02:30.579 --> 00:02:31.579
+camera.
+
+39
+00:02:31.579 --> 00:02:35.900
+So you want to make sure you over scan that just a bit so that that clipping does not occur
+
+40
+00:02:35.900 --> 00:02:38.419
+at the edge of your camera.
+
+41
+00:02:38.419 --> 00:02:43.339
+If we go to Unreal, we can see here a viewport over scan option here.
+
+42
+00:02:43.339 --> 00:02:45.859
+And we also have viewport screen percentages.
+
+43
+00:02:45.859 --> 00:02:48.179
+So we can actually change these as we need.
+
+44
+00:02:48.179 --> 00:02:49.459
+There's the main wall.
+
+45
+00:02:49.459 --> 00:02:54.419
+So we can enable this if we need to over scan and choose how much we want to shift things.
+
+46
+00:02:54.419 --> 00:02:57.959
+Same thing with the sidewall and same thing with the wild wall.
+
+47
+00:02:57.959 --> 00:03:00.239
+This is up to you how you do so.
+
+48
+00:03:00.239 --> 00:03:05.060
+Just keep this in mind that it is a good idea to over scan if you are going to use this
+
+49
+00:03:05.060 --> 00:03:06.939
+method.
+
+50
+00:03:06.939 --> 00:03:11.740
+Rating space also has several quality settings that you can enable using the following commands.
+
+51
+00:03:11.740 --> 00:03:18.180
+In using your console variable, you can use r.ssgi for quality and using number between
+
+52
+00:03:18.180 --> 00:03:20.060
+one and four to control that quality.
+
+53
+00:03:20.060 --> 00:03:23.740
+You'll see the number chart that I placed in the lecture here.
+
+54
+00:03:23.740 --> 00:03:31.419
+It says one is ray steps eight, ray count four, two, ray steps eight, ray count eight,
+
+55
+00:03:31.419 --> 00:03:39.459
+three, ray steps eight, ray count 16, and four here, ray steps 12, and ray count 32.
+
+56
+00:03:39.459 --> 00:03:46.739
+So the resolution command to render at half resolution is dart.ssgi for half res.
+
+57
+00:03:46.739 --> 00:03:52.979
+To use previous frames seeing color to achieve better quality results, you can use r.ssgi
+
+58
+00:03:52.979 --> 00:03:54.939
+for minimum illuminance.
+
+59
+00:03:54.939 --> 00:03:56.939
+So these are things that you can use.
+
+60
+00:03:57.180 --> 00:04:02.259
+Remember these number counts between one and four for quality control here is at the top,
+
+61
+00:04:02.259 --> 00:04:07.219
+but these ray counts you do need to keep in mind exactly what it is you're going for,
+
+62
+00:04:07.219 --> 00:04:10.900
+what your visuals are going to be, and if you're going to over scan overall.
+
+63
+00:04:10.900 --> 00:04:16.420
+Now again, using screens, physical illumination isn't the typical norm.
+
+64
+00:04:16.420 --> 00:04:22.180
+Typically you would use Lumen and just adjust your materials and build your scene accordingly.
+
+65
+00:04:22.180 --> 00:04:28.379
+This is an option for possibly maybe lower end machines or you're maybe running to situations
+
+66
+00:04:28.379 --> 00:04:30.300
+where the noise is a bit too much.
+
+67
+00:04:30.300 --> 00:04:35.620
+You may then want to switch to this and it's actually a pretty cheap way to use things.
+
+68
+00:04:35.620 --> 00:04:40.699
+And let me show you a few things to keep in mind if you decide to use it.
+
+69
+00:04:40.699 --> 00:04:43.420
+So in this case, we'll just pretend ours is on.
+
+70
+00:04:43.420 --> 00:04:48.780
+Right now we're currently using ray tracing for our GI and I'm in the secondary post
+
+71
+00:04:48.779 --> 00:04:50.500
+process volume reference.
+
+72
+00:04:50.500 --> 00:04:53.579
+If you are looking this and downloading this for the class,
+
+73
+00:04:53.579 --> 00:04:56.699
+I'm just using this particular lot one that's already been loaded.
+
+74
+00:04:56.699 --> 00:05:04.299
+So in here, you'll see that we can actually go to our advanced settings and when we have it on.
+
+75
+00:05:04.299 --> 00:05:07.139
+And let's see if we can just go ahead and pop this on real quick.
+
+76
+00:05:07.139 --> 00:05:11.219
+We want to Lumen, we're going to do a screen space in this case.
+
+77
+00:05:11.219 --> 00:05:12.859
+Let's see things shift a little bit.
+
+78
+00:05:12.859 --> 00:05:17.299
+You can correct your indirect lighting color and your indirect lighting intensity.
+
+79
+00:05:17.340 --> 00:05:18.819
+So these things can be controlled.
+
+80
+00:05:18.819 --> 00:05:21.060
+You see a little bit of a popping going on here.
+
+81
+00:05:21.060 --> 00:05:24.340
+And you also see a little bit of a color shift if I choose to.
+
+82
+00:05:24.340 --> 00:05:31.139
+Now this is contained within our post process volume, but this is up to you and it may conflict
+
+83
+00:05:31.139 --> 00:05:32.300
+a bit with our light.
+
+84
+00:05:32.300 --> 00:05:35.540
+But you have that option to be able to control this on a very low level.
+
+85
+00:05:35.540 --> 00:05:38.139
+And you'll see a little bit of brightness going on if you were to use it.
+
+86
+00:05:38.139 --> 00:05:39.980
+And these overrides work pretty well.
+
+87
+00:05:39.980 --> 00:05:41.340
+I'm going to set that to none.
+
+88
+00:05:41.340 --> 00:05:45.220
+I'm going to put that as method, turn that off in general and turn these off too.
+
+89
+00:05:45.220 --> 00:05:49.420
+But the advanced area is where you're going to get the ability to be able to control the
+
+90
+00:05:49.420 --> 00:05:52.100
+brightness of that if you decided to go in this direction.
+
+91
+00:05:53.660 --> 00:05:59.020
+Typically when you use SSGI, you want to make sure that you're using it in such a way so
+
+92
+00:05:59.020 --> 00:06:03.220
+that it's complimentary to previously baked items that you have in your scene.
+
+93
+00:06:03.620 --> 00:06:05.220
+That's typically what it's used with.
+
+94
+00:06:05.220 --> 00:06:06.980
+Does that mean you can't use it with ray tracing?
+
+95
+00:06:06.980 --> 00:06:08.580
+Well, you actually can.
+
+96
+00:06:08.580 --> 00:06:12.740
+And for some reason you're using ray tracing and you're noticing it's very slowing.
+
+97
+00:06:12.780 --> 00:06:14.139
+It's slowing down greatly.
+
+98
+00:06:14.420 --> 00:06:17.180
+Your brute force seems to be bringing things to a crawl.
+
+99
+00:06:17.500 --> 00:06:18.579
+Maybe you're not on stage.
+
+100
+00:06:18.579 --> 00:06:20.900
+Maybe it's just simply for virtual production or final pixel.
+
+101
+00:06:21.180 --> 00:06:25.660
+You can switch into your global illumination to be screen space in general.
+
+102
+00:06:25.740 --> 00:06:28.340
+And that would actually make things go a little bit smoother.
+
+103
+00:06:29.060 --> 00:06:32.740
+Just keep in mind the difference between those because you can keep ray trace reflections on
+
+104
+00:06:33.060 --> 00:06:35.379
+and use screen space in that particular scenario.
+
+105
+00:06:35.780 --> 00:06:38.420
+Again, you want to be able to block this out.
+
+106
+00:06:38.420 --> 00:06:41.300
+You want to make sure things are exactly the way that you want ahead of time.
+
+107
+00:06:41.500 --> 00:06:45.340
+So just be very deterministic, but typically it's used as a complementary tool
+
+108
+00:06:45.620 --> 00:06:48.620
+for your baking scenarios.
+
+109
+00:06:48.620 --> 00:06:49.860
+That's it with this lecture.
+
+110
+00:06:49.860 --> 00:06:53.540
+Here's a link here for you to dive in deeper on these particular topics.
+
+111
+00:06:54.379 --> 00:06:55.460
+Thanks again.
+
+112
+00:06:55.460 --> 00:06:58.660
+And in the next video, we're going to go and take a look at ICVFX
+
+113
+00:06:58.939 --> 00:07:01.340
+when it comes to ray tracing as a bit of a review.
+

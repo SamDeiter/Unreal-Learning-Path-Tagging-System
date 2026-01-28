@@ -1,0 +1,342 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.100
+The last thing that we're going to take a look at in the demonstration is the aim node.
+
+2
+00:00:06.100 --> 00:00:10.980
+And I just want to show you a different way to control where our gun is pointing.
+
+3
+00:00:10.980 --> 00:00:16.019
+Now this might be useful if you want to be able to lock onto or track something, or essentially
+
+4
+00:00:16.019 --> 00:00:22.140
+if you always want something to be aiming at something else and not have to sort of manually
+
+5
+00:00:22.140 --> 00:00:28.379
+animate the rotation to account for that.
+
+6
+00:00:28.379 --> 00:00:33.140
+So to get this setup, the first thing I'm going to do is just bring our forward solve
+
+7
+00:00:33.140 --> 00:00:37.979
+out here a little bit and search for a sequence node.
+
+8
+00:00:37.979 --> 00:00:41.379
+And this is just so we can kind of split the logic into two flows and understand things
+
+9
+00:00:41.379 --> 00:00:43.100
+a bit more clearly.
+
+10
+00:00:43.100 --> 00:00:47.500
+So first we'll plug in all the logic that we had and then down here I'm going to search
+
+11
+00:00:47.500 --> 00:00:52.500
+for an aim node.
+
+12
+00:00:52.500 --> 00:00:55.420
+Now we're just getting a warning there because we haven't set anything up yet, but we have
+
+13
+00:00:55.420 --> 00:00:57.980
+connected the logic.
+
+14
+00:00:57.979 --> 00:01:02.779
+So by default, the thing that the aim node is looking for is a bone.
+
+15
+00:01:02.779 --> 00:01:06.819
+But what we're going to do is actually utilize the setup we have for these controls where
+
+16
+00:01:06.819 --> 00:01:14.900
+we've set the limits and it's already controlling our bones and actually aim the control instead.
+
+17
+00:01:14.900 --> 00:01:18.659
+And to make things a little bit more mechanically accurate, we're actually going to split the
+
+18
+00:01:18.659 --> 00:01:24.739
+rotation between these two controls so that as we move this sort of aim control around
+
+19
+00:01:24.739 --> 00:01:26.819
+that we're going to create in a moment.
+
+20
+00:01:26.819 --> 00:01:34.939
+Our turret will move up and down in this axis with this control and rotate the entire body
+
+21
+00:01:34.939 --> 00:01:37.419
+with this control.
+
+22
+00:01:37.419 --> 00:01:41.539
+So we're essentially splitting the yaw and the pitch rotations between the turret base
+
+23
+00:01:41.539 --> 00:01:45.099
+control and the main gun control.
+
+24
+00:01:45.099 --> 00:01:49.739
+So first we'll set up the turret base because that's going to be first in the chain of bones
+
+25
+00:01:49.739 --> 00:01:51.139
+essentially.
+
+26
+00:01:51.139 --> 00:01:56.219
+So if we select our turret base control and just press this arrow here, I'm just going
+
+27
+00:01:56.219 --> 00:02:01.500
+to disconnect it so they don't get any funky results until we've set it up properly.
+
+28
+00:02:01.500 --> 00:02:08.659
+I'm going to pop open the axis, the target, the target space and secondary here.
+
+29
+00:02:08.659 --> 00:02:15.819
+So under the axis for this bone, for this control rather, we need turret base to be minus
+
+30
+00:02:15.819 --> 00:02:20.939
+one in y and zero in x.
+
+31
+00:02:20.939 --> 00:02:26.259
+And then we need to be one in z for our target.
+
+32
+00:02:26.259 --> 00:02:30.939
+And our target space is going to be the control that we're going to create that will affect
+
+33
+00:02:30.939 --> 00:02:33.579
+these, the aim of these.
+
+34
+00:02:33.579 --> 00:02:38.539
+So we're going to create it from the main gun bone.
+
+35
+00:02:38.539 --> 00:02:43.139
+So if I select the main gun, press control N, we'll get a new control.
+
+36
+00:02:43.139 --> 00:02:52.859
+And I'm just going to call this cannon aim control.
+
+37
+00:02:52.859 --> 00:03:00.299
+And with this control, we want it to be out in front of the cannon so that we can move
+
+38
+00:03:00.299 --> 00:03:02.979
+it around and have it point towards it.
+
+39
+00:03:02.979 --> 00:03:06.819
+So what I'm going to do in just the x axis because that's the axis that our bone is pointing
+
+40
+00:03:06.819 --> 00:03:12.500
+and the axis that this gun is currently aiming is I'm just going to drag that out to some
+
+41
+00:03:12.500 --> 00:03:15.939
+distance in front of the actual mesh.
+
+42
+00:03:15.939 --> 00:03:20.219
+And under the scale, I'll just set it to 10.
+
+43
+00:03:20.219 --> 00:03:28.699
+And let's just change the color and perhaps even the shape, something like a wedge might
+
+44
+00:03:28.699 --> 00:03:29.699
+be cool.
+
+45
+00:03:29.699 --> 00:03:35.860
+And one thing I forgot to do there before I compiled is actually set the offset transforms
+
+46
+00:03:35.860 --> 00:03:37.539
+from this control's current position.
+
+47
+00:03:37.539 --> 00:03:40.460
+So that's why it popped back to its original location.
+
+48
+00:03:40.460 --> 00:03:46.420
+So if I drag that back out again, right click, set offset transforms from current.
+
+49
+00:03:46.420 --> 00:03:51.900
+When I compile, this is the controls new offset transform.
+
+50
+00:03:51.900 --> 00:03:55.700
+So when we're going to use this as our aim control, so as we move it left and right,
+
+51
+00:03:55.700 --> 00:04:01.939
+up and down, we want our turret and our turret body to be pointing towards it.
+
+52
+00:04:01.939 --> 00:04:07.740
+So with that control selected, I'm going to pop open target space here.
+
+53
+00:04:07.740 --> 00:04:10.060
+Oh, whoops, not under secondary.
+
+54
+00:04:10.060 --> 00:04:15.659
+Target space here just under the primary heading and input that as our control.
+
+55
+00:04:15.659 --> 00:04:21.500
+And when we connect up the logic, if I just grab our sequence node here, hit compile,
+
+56
+00:04:21.500 --> 00:04:28.500
+what we'll hopefully see is that when we move it left and right, our control, which is controlling
+
+57
+00:04:28.500 --> 00:04:32.259
+the main body of the gun is actually rotating left and right with it.
+
+58
+00:04:32.659 --> 00:04:37.980
+And if we move it up and down, forwards and backwards, we're not getting any other movement.
+
+59
+00:04:37.980 --> 00:04:40.659
+There is a little bit just because it's off axis now.
+
+60
+00:04:40.659 --> 00:04:44.939
+But if I compile that, move it up and down, we don't get anything there.
+
+61
+00:04:44.939 --> 00:04:46.019
+Move it backwards and forwards.
+
+62
+00:04:46.019 --> 00:04:47.459
+We don't get anything there.
+
+63
+00:04:47.459 --> 00:04:51.259
+And that's just because we've set up the limits on this control already.
+
+64
+00:04:51.259 --> 00:04:56.339
+So we don't have to do anything extra with the bones to sort of clamp their rotation.
+
+65
+00:04:56.339 --> 00:05:00.779
+We're relying on the settings of these controls to do all of that for us.
+
+66
+00:05:00.779 --> 00:05:04.939
+Now let's set up the rotation for the actual gun turret itself.
+
+67
+00:05:04.939 --> 00:05:09.579
+I'm just going to bring this down here a little bit so we have enough space.
+
+68
+00:05:09.579 --> 00:05:14.699
+And drag off here, search for an aim node once more.
+
+69
+00:05:16.579 --> 00:05:18.939
+And our target is going to be the same control.
+
+70
+00:05:22.379 --> 00:05:27.500
+And under the target and axis, this time we're going to leave the settings as they are.
+
+71
+00:05:28.500 --> 00:05:33.220
+And selecting our, if I just compile that to make sure it's at zero,
+
+72
+00:05:33.220 --> 00:05:37.899
+selecting our main gun control, that's going to be what we want to use to aim
+
+73
+00:05:37.899 --> 00:05:41.100
+towards this cannon aim control.
+
+74
+00:05:41.100 --> 00:05:47.100
+So now if I move this left and right, we have the movement on the turret body.
+
+75
+00:05:47.100 --> 00:05:52.699
+And if I move it up and down, we should have the movement from the main gun.
+
+76
+00:05:53.699 --> 00:05:57.699
+And again, that's locked in terms of how much it can rotate.
+
+77
+00:05:59.699 --> 00:06:02.699
+Because of the settings that we created, or the values that we set up,
+
+78
+00:06:02.699 --> 00:06:05.699
+should I say, for that control itself.
+
+79
+00:06:05.699 --> 00:06:12.699
+So you could pin this somewhere in the world, and then as the rest of the mech is moving around,
+
+80
+00:06:12.699 --> 00:06:14.699
+it would always track this one location.
+
+81
+00:06:14.699 --> 00:06:18.699
+Or you know the mech could be standing still, and you could be moving this location,
+
+82
+00:06:19.699 --> 00:06:23.699
+unlocking it onto some sort of target that it's trying to aim and fire at.
+
+83
+00:06:25.699 --> 00:06:31.699
+Now one thing to note is that it's going to override the control of the turret base and the main gun controls.
+
+84
+00:06:31.699 --> 00:06:36.699
+But you could do something like set up a switch that would toggle between these two different control types,
+
+85
+00:06:36.699 --> 00:06:38.699
+depending on which one you'd like to use.
+

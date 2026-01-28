@@ -1,0 +1,246 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.000
+Hello and welcome to this video on Exercise 2.
+
+2
+00:00:05.000 --> 00:00:10.000
+And in this, we are going to be using a different animation so
+
+3
+00:00:10.000 --> 00:00:15.000
+that we can make our smart objects a little bit more modular and
+
+4
+00:00:15.000 --> 00:00:17.000
+a little bit more reusable.
+
+5
+00:00:17.000 --> 00:00:21.000
+Now there is a reason why we have so many different classes when we're
+
+6
+00:00:21.000 --> 00:00:23.000
+setting up a smart object.
+
+7
+00:00:23.000 --> 00:00:27.000
+And that is so that this can be scalable and modular.
+
+8
+00:00:27.000 --> 00:00:31.000
+So that we can write one piece of code such as the behavior.
+
+9
+00:00:31.000 --> 00:00:35.000
+Then we can set up different classes with different settings and
+
+10
+00:00:35.000 --> 00:00:41.000
+we can reuse that without having to write a whole new piece of code.
+
+11
+00:00:41.000 --> 00:00:45.000
+Now in this instance, we already have a chair actor,
+
+12
+00:00:45.000 --> 00:00:47.000
+which has an animation attached to it.
+
+13
+00:00:47.000 --> 00:00:53.000
+We are going to create a different definition and
+
+14
+00:00:53.000 --> 00:00:57.000
+have this be controlled by our config.
+
+15
+00:00:57.000 --> 00:01:01.000
+And we're going to play a different animation so it can function in a slightly different way.
+
+16
+00:01:01.000 --> 00:01:06.000
+So for example, at the moment we have a floor spot and we have a chair spot.
+
+17
+00:01:06.000 --> 00:01:09.000
+And as you can see, our chair spot is working fine,
+
+18
+00:01:09.000 --> 00:01:15.000
+but our floor spot has a completely inappropriate animation.
+
+19
+00:01:15.000 --> 00:01:21.000
+So I am back in the engine now and I have gone to slide exercise 2,
+
+20
+00:01:21.000 --> 00:01:23.000
+expose parameter.
+
+21
+00:01:23.000 --> 00:01:32.000
+Now this should also bring me to the folder for exercise 2 with the different files that we need to edit.
+
+22
+00:01:32.000 --> 00:01:37.000
+So if we have a look at the files, they're very similar to the ones we had in the previous exercise,
+
+23
+00:01:37.000 --> 00:01:40.000
+but at the point where we should have finished it.
+
+24
+00:01:40.000 --> 00:01:48.000
+We have our chair, we have our AI, we have our game behavior sitting down,
+
+25
+00:01:48.000 --> 00:01:51.000
+and we have our game behavior config sitting down.
+
+26
+00:01:51.000 --> 00:01:58.000
+And we have two definition files, one for chair and one for floor.
+
+27
+00:01:58.000 --> 00:02:05.000
+Now if I was to simulate, you'd see that both of our characters work.
+
+28
+00:02:05.000 --> 00:02:13.000
+They grab their appropriate spots, but our character on the left here is not sitting on the floor,
+
+29
+00:02:13.000 --> 00:02:15.000
+he's sitting in thin air.
+
+30
+00:02:16.000 --> 00:02:21.000
+So let's see how we might go about fixing that.
+
+31
+00:02:21.000 --> 00:02:35.000
+The first thing that I'd like you to do is to open up our GBC sitting down EX2.
+
+32
+00:02:36.000 --> 00:02:45.000
+And if you come up with this as a data only, just click on the open, open the full blueprint, the blue button at the top.
+
+33
+00:02:45.000 --> 00:02:50.000
+Now all we need to do in this is add a variable.
+
+34
+00:02:50.000 --> 00:02:57.000
+So under variables, I'm going to hit plus, and I'm going to call this variable montage.
+
+35
+00:02:57.000 --> 00:03:10.000
+And on the Boolean dropdown, I am going to look for Ami montage, and I am looking for a object reference.
+
+36
+00:03:10.000 --> 00:03:15.000
+Now if I hit compile, this will allow me to put a default value in.
+
+37
+00:03:15.000 --> 00:03:22.000
+Now under the default value in, I'm looking for sitting down.
+
+38
+00:03:22.000 --> 00:03:27.000
+Because that's our default sitting in a chair.
+
+39
+00:03:27.000 --> 00:03:33.000
+And that is all I need to do in this, but I am going to close that down.
+
+40
+00:03:33.000 --> 00:03:38.000
+And the next thing I'm going to do is I'm going to go into the gameplay behavior.
+
+41
+00:03:38.000 --> 00:03:45.000
+So that is GB sitting down underscore EX2.
+
+42
+00:03:45.000 --> 00:03:54.000
+Now you should see at the beginning of this file, we have a caption at the beginning here, prompting us to put some code in.
+
+43
+00:03:54.000 --> 00:04:00.000
+Now we want to get this value from the config file.
+
+44
+00:04:00.000 --> 00:04:14.000
+So I'm going to pull that out and I'm going to type in cast to, and I am looking for GBC, the config, and we want exercise to.
+
+45
+00:04:14.000 --> 00:04:18.000
+I'm going to plug that in here.
+
+46
+00:04:18.000 --> 00:04:22.000
+Now this will give us access to the config.
+
+47
+00:04:22.000 --> 00:04:26.000
+And if I jump out of here, I can search for montage.
+
+48
+00:04:26.000 --> 00:04:47.000
+So if I get the montage and we have a variable for the animation montage, which I'm going to plug in here, because this is the variable which is used throughout the system for updating it.
+
+49
+00:04:48.000 --> 00:05:02.000
+So all we're doing is going to the config and saving whatever is in the config to the variable here to be used in the gameplay behavior.
+
+50
+00:05:02.000 --> 00:05:06.000
+Now I can save and compile, shut that down.
+
+51
+00:05:06.000 --> 00:05:13.000
+We just have one thing left to do and that's if we open up the definition file for floor.
+
+52
+00:05:13.000 --> 00:05:20.000
+So that is SOD underscore floor underscore EX2.
+
+53
+00:05:20.000 --> 00:05:29.000
+Now you will see in our gameplay definition, we have an option for sitting down.
+
+54
+00:05:29.000 --> 00:05:33.000
+Now I can override this.
+
+55
+00:05:33.000 --> 00:05:38.000
+You can see that we have a montage for sitting on the floor.
+
+56
+00:05:38.000 --> 00:05:41.000
+And if I save that.
+
+57
+00:05:41.000 --> 00:05:50.000
+Now if we look at the BP floor spot in the smart object, I have already selected that definition file.
+
+58
+00:05:50.000 --> 00:05:56.000
+So we don't actually need to do anything within the floor spot.
+
+59
+00:05:56.000 --> 00:06:16.000
+And if I now push simulate, you'll find that the character selects the correct animation for the smart object that they are sitting in.
+
+60
+00:06:16.000 --> 00:06:20.000
+And that brings us to the end of exercise two.
+
+61
+00:06:20.000 --> 00:06:31.000
+In the next one, we are going to be looking at using multiple spots to create something slightly more complicated.
+

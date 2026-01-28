@@ -1,0 +1,382 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:08.000
+In this portion of our course, we will be delving into the custom body workflow for a seamless head and body integration.
+
+2
+00:00:08.000 --> 00:00:14.000
+This was the second DNA calibration workflow that was used with the Atomic Savage character.
+
+3
+00:00:14.000 --> 00:00:26.000
+Using the metahuman DNA file that was generated from the previous workflow, the custom body workflow allows us to align the head and custom body skeleton while eliminating seam issues.
+
+4
+00:00:27.000 --> 00:00:39.000
+The metahuman DNA that is generated from this workflow will be the final DNA, and this will be what is used to export the head LOD FBX files that will be brought into Unreal Engine.
+
+5
+00:00:39.000 --> 00:00:46.000
+Unlike the script we used in the previous section, this uses multiple scripts executed from a single script.
+
+6
+00:00:46.000 --> 00:00:54.000
+Since this workflow is more advanced than the previous one we just went through, the steps have been broken down into smaller sections.
+
+7
+00:00:54.000 --> 00:01:02.000
+So let's begin by looking at the steps of this workflow and then reviewing the script and assets that are needed for it to work.
+
+8
+00:01:03.000 --> 00:01:08.000
+In this section we will be looking at the steps for using the custom body workflow.
+
+9
+00:01:08.000 --> 00:01:16.000
+We will then review the script and all of the necessary files, folder paths and assets that are needed in order to execute it.
+
+10
+00:01:16.000 --> 00:01:21.000
+So let's start by looking at the workflow and what we are able to achieve with this.
+
+11
+00:01:22.000 --> 00:01:26.000
+The custom body workflow allows us to achieve the following.
+
+12
+00:01:26.000 --> 00:01:39.000
+It will position and scale the head rig for body integration, then it will update the neutral mesh if the nexium area has to be adjusted, and it will align the head joints with the body joints.
+
+13
+00:01:39.000 --> 00:01:46.000
+Then it checks the body and head skin weights to make sure that only the skin weights that belong to the metahuman DNA are present.
+
+14
+00:01:46.000 --> 00:01:52.000
+If it finds skin weights that do not belong to the metahuman DNA, it allows us to fix this.
+
+15
+00:01:52.000 --> 00:01:57.000
+It then merges the body and head skin weights for a seamless integration.
+
+16
+00:01:57.000 --> 00:02:08.000
+To validate the results, it constrains the head joint hierarchy to the body so that the user can check if there are any seam issues when the body is animated.
+
+17
+00:02:08.000 --> 00:02:16.000
+Finally, it will update the DNA file and export the head LODs as FBX with material placeholders.
+
+18
+00:02:16.000 --> 00:02:21.000
+We were able to achieve some of these steps in the previous workflow.
+
+19
+00:02:21.000 --> 00:02:30.000
+For instance, we have already scaled and translated the head and updated the neutral mesh with neck geometry that fits the body nexium area.
+
+20
+00:02:30.000 --> 00:02:33.000
+Now let's go over how to use the script.
+
+21
+00:02:33.000 --> 00:02:40.000
+First thing we will need to do is locate the custom body folder that has been provided in the source files folder of our course.
+
+22
+00:02:40.000 --> 00:02:43.000
+Inside of that folder, there are two folders.
+
+23
+00:02:43.000 --> 00:02:50.000
+The first folder is named Custom Body Integration, and the second folder is named Working.
+
+24
+00:02:50.000 --> 00:02:55.000
+Place both of these folders in the DNA Calibration Library folder.
+
+25
+00:02:55.000 --> 00:03:04.000
+Let's jump into Maya and go through this process, and then take a look at the files and assets this workflow needs in order to work.
+
+26
+00:03:04.000 --> 00:03:15.000
+Inside of Maya, to use the custom body workflow, the first thing we will need to do is locate the custom body folder in the source files folder.
+
+27
+00:03:15.000 --> 00:03:22.000
+Open up the custom body folder, and then open up the body head integration folder.
+
+28
+00:03:22.000 --> 00:03:31.000
+Copy the custom body integration and working folder, and then paste them into the DNA calibration folder.
+
+29
+00:03:31.000 --> 00:03:34.000
+Now I've already added these in here.
+
+30
+00:03:34.000 --> 00:03:39.000
+Let's go over each of these folders, starting with the custom body integration folder.
+
+31
+00:03:39.000 --> 00:03:46.000
+In this folder, if we open up the folder named Workflow, this is where the API interface is located.
+
+32
+00:03:46.000 --> 00:03:52.000
+In the script editor, paste the contents of the script in a new Python window.
+
+33
+00:03:52.000 --> 00:03:58.000
+The workflow folder also contains the neck falloff blending texture mask.
+
+34
+00:03:58.000 --> 00:04:03.000
+This is used to control the skin weight blending between the body and head mesh.
+
+35
+00:04:03.000 --> 00:04:07.000
+We also have the rig info JSON file over here.
+
+36
+00:04:07.000 --> 00:04:12.000
+This contains additional rig definition information required for this workflow,
+
+37
+00:04:12.000 --> 00:04:17.000
+and includes the bone mappings of the head and body joint hierarchies.
+
+38
+00:04:17.000 --> 00:04:21.000
+Now let's go back and take a look at the working folder.
+
+39
+00:04:21.000 --> 00:04:30.000
+The working folder contains the assets folder, the DNA files folder, the export folder, and the rigs folder.
+
+40
+00:04:30.000 --> 00:04:38.000
+The DNA files folder contains the metahuman DNA file for the original head rig that we wish to integrate with the body.
+
+41
+00:04:38.000 --> 00:04:48.000
+In our case, we will be using the atomic sDNA file, which was the final DNA that was generated from the previous DNA calibration workflow.
+
+42
+00:04:48.000 --> 00:04:56.000
+As we run commands, the in-between DNA files are generated, and will be added to this output folder in here.
+
+43
+00:04:56.000 --> 00:05:07.000
+Next, we have the assets folder. This is where you would place the new neutral mesh OBJ file for step 2 that contains the neck geometry changes for body integration.
+
+44
+00:05:07.000 --> 00:05:13.000
+This is where we place the fitted LOD0 head geometry OBJ file.
+
+45
+00:05:13.000 --> 00:05:18.000
+Finally, we have the rigs folder where the body rig Maya file has been placed.
+
+46
+00:05:18.000 --> 00:05:22.000
+I already have this body rig Maya scene open.
+
+47
+00:05:22.000 --> 00:05:30.000
+The skinned body combined mesh is the full body rig that has the metahuman skeleton and is what will be integrated with the head.
+
+48
+00:05:30.000 --> 00:05:38.000
+The namespace string body combined is what's used for importing the body rig Maya file into a new scene.
+
+49
+00:05:38.000 --> 00:05:45.000
+Next, we have the separated head named body underscore head and the body asset.
+
+50
+00:05:45.000 --> 00:05:55.000
+These are split versions of the full body skinned mesh, separated at the edge loop of the boundary where the head and body are combined on standard metahumans.
+
+51
+00:05:55.000 --> 00:06:05.000
+If you wish to use this workflow with your own character, ensure that all three meshes have the correct skin weights and use the same namespaces as these.
+
+52
+00:06:05.000 --> 00:06:10.000
+Now, before we move on, let's review what we just covered.
+
+53
+00:06:10.000 --> 00:06:18.000
+To use the custom body workflow, add the custom body integration and working folder to the DNA calibration folder.
+
+54
+00:06:18.000 --> 00:06:29.000
+In the custom body integration workflow folder, locate the API interface script and paste its contents into a new Python window in the script editor.
+
+55
+00:06:29.000 --> 00:06:40.000
+The workflow folder also contains the neck falloff blending texture mask, and this is used to control skin weight blending between the body and head mesh.
+
+56
+00:06:40.000 --> 00:06:48.000
+The rig info JSON file contains additional rig definition information that is required for this workflow.
+
+57
+00:06:48.000 --> 00:06:56.000
+The working folder contains the assets folder, the DNA files folder, the rigs folder and the export folder.
+
+58
+00:06:56.000 --> 00:07:01.000
+The DNA files folder contains the DNA file for the original head rig.
+
+59
+00:07:01.000 --> 00:07:05.000
+The output folder is where the in-between DNA files are added.
+
+60
+00:07:05.000 --> 00:07:14.000
+The assets folder is where the fitted head geometry OBJ file is placed and it should have the neck geometry changes for body integration.
+
+61
+00:07:14.000 --> 00:07:24.000
+The rig folder is where the body rig Maya file is located and should contain a skinned combined head and body and a separated head and body mesh.
+
+62
+00:07:24.000 --> 00:07:36.000
+Inside of the body rig Maya file, the body combined mesh is the full body rig skinned mesh that is being integrated with the head and has the metahuman skeleton.
+
+63
+00:07:36.000 --> 00:07:44.000
+The namespace string body combined is used for importing the body rig Maya file into a new scene.
+
+64
+00:07:44.000 --> 00:07:56.000
+The separated head and body are split versions of the full body skinned mesh and they are separated at the edge loop of the boundary where the head and body are combined on standard metahumans.
+
+65
+00:07:56.000 --> 00:08:03.000
+If using this workflow with your own character, ensure that all three meshes have the correct skin weights.
+
+66
+00:08:03.000 --> 00:08:09.000
+Now let's go over the DNA files that will be generated in the DNA file folder.
+
+67
+00:08:10.000 --> 00:08:15.000
+The DNA files folder is where we place our original metahuman DNA file.
+
+68
+00:08:15.000 --> 00:08:19.000
+This is the default head rig that a user wishes to integrate with the body.
+
+69
+00:08:19.000 --> 00:08:27.000
+In our case it is the atomic sDNA file which was the final DNA that was created from the previous script.
+
+70
+00:08:27.000 --> 00:08:38.000
+In the output folder the two in-between metahuman DNA files that will be added in here are the updated scale DNA file which is generated from step one
+
+71
+00:08:38.000 --> 00:08:42.000
+which bakes the new position and scale to the DNA.
+
+72
+00:08:42.000 --> 00:08:56.000
+And the updated neutral DNA file which is generated from step two which updates the head mesh neck geometry to fit the body using the new neutral OBJ file that is located in the assets folder.
+
+73
+00:08:56.000 --> 00:09:07.000
+Now that we have gone over the assets that this script will use, let's return to Maya and go over the API interface script setting paths.
+
+74
+00:09:07.000 --> 00:09:16.000
+Back in Maya in the script editor, in the Python window with the API interface script, let's go over the path settings.
+
+75
+00:09:16.000 --> 00:09:20.000
+Scroll down to line 91.
+
+76
+00:09:20.000 --> 00:09:27.000
+The first thing we will need to do is direct the root directory to point to the DNA calibration folder.
+
+77
+00:09:27.000 --> 00:09:30.000
+In my case it's on my C drive.
+
+78
+00:09:30.000 --> 00:09:34.000
+Now for the rest of these paths below, these have already been set.
+
+79
+00:09:34.000 --> 00:09:40.000
+If using these with your own character, you would leave the output and export folder as is.
+
+80
+00:09:40.000 --> 00:09:47.000
+On line 96 for the source DNA file path, you would add the name of the DNA file.
+
+81
+00:09:47.000 --> 00:09:52.000
+This is already pointing to the atomic s file we wish to use.
+
+82
+00:09:52.000 --> 00:09:58.000
+On line 97 for the body rig, this is the name of the body rig Maya file.
+
+83
+00:09:58.000 --> 00:10:10.000
+On line 98 for the new neutral mesh, which is the fitted head geometry OBJ file with the correct neck area, this is named atomic s new neutral.
+
+84
+00:10:10.000 --> 00:10:17.000
+Finally on line 103, the character name is the name of our character which is atomic s.
+
+85
+00:10:17.000 --> 00:10:24.000
+If we look at line 104 and 105, these are the namespaces the script will be looking for,
+
+86
+00:10:24.000 --> 00:10:33.000
+which is why it's important when assembling your own assets to keep these namespaces the same, otherwise you may run into errors.
+
+87
+00:10:33.000 --> 00:10:39.000
+Now let's do a quick review of what we just covered before we move on to the next section.
+
+88
+00:10:39.000 --> 00:10:47.000
+To use the API interface script, for the root directory enter the path that points to the DNA calibration folder.
+
+89
+00:10:47.000 --> 00:10:56.000
+For the source DNA, enter the path that points to the DNA file you wish to integrate with the body in the DNA files folder.
+
+90
+00:10:56.000 --> 00:11:02.000
+For the body rig, enter the path that points to the body rig Maya file in the rigs folder.
+
+91
+00:11:02.000 --> 00:11:08.000
+For the new neutral, enter the path that points to the new neutral mesh in the assets folder.
+
+92
+00:11:08.000 --> 00:11:14.000
+And lastly for the character name, this is the name that the new DNA files will include.
+
+93
+00:11:14.000 --> 00:11:17.000
+All of the other paths can be left as is.
+
+94
+00:11:17.000 --> 00:11:24.000
+Now that we have spent some time going over the workflow, the files the script will be using and the path settings,
+
+95
+00:11:24.000 --> 00:11:30.000
+let's move on to the next section and begin to execute the script one step at a time.
+

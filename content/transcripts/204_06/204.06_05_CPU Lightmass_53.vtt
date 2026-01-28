@@ -1,0 +1,1102 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.759
+In this lesson, we're going to go ahead and take a look at Lightmass, baking, CPU and GPU.
+
+2
+00:00:06.759 --> 00:00:09.040
+So let's get started.
+
+3
+00:00:09.040 --> 00:00:14.240
+So CPU, Lightmass and GPU can be used for baking.
+
+4
+00:00:14.240 --> 00:00:18.000
+We're going to mainly focus here up front on CPU baking.
+
+5
+00:00:18.000 --> 00:00:22.039
+And both of those are kind of the old school way to be able to bake out your lighting in
+
+6
+00:00:22.039 --> 00:00:23.039
+a scene.
+
+7
+00:00:23.039 --> 00:00:28.280
+Now, Lumen will update on the fly because the lights are dynamic and Lumen is dynamic
+
+8
+00:00:28.280 --> 00:00:31.560
+and updates in real time.
+
+9
+00:00:31.560 --> 00:00:37.000
+But when it comes to CPU baking, particularly we and GPU, you have to actually go in here
+
+10
+00:00:37.000 --> 00:00:41.679
+and set up your lights accordingly, bake out your lights, and then you'll get the desired
+
+11
+00:00:41.679 --> 00:00:43.920
+look and feel for your scene.
+
+12
+00:00:43.920 --> 00:00:45.880
+Now it's very important.
+
+13
+00:00:45.880 --> 00:00:49.320
+There's several ways that are several things you need to keep in mind when working with
+
+14
+00:00:49.320 --> 00:00:50.320
+this.
+
+15
+00:00:50.320 --> 00:00:51.320
+And I will point these out.
+
+16
+00:00:51.320 --> 00:00:55.920
+You want to anticipate your needs for sure when it comes to working with your scene ahead
+
+17
+00:00:55.920 --> 00:01:00.679
+of time because baking will take some time, especially if your scene is large.
+
+18
+00:01:00.679 --> 00:01:05.200
+Now GPU baking, GPU Lightmass baking does beat up the process.
+
+19
+00:01:05.200 --> 00:01:10.840
+But again, you have to come in with a strategy and a game plan to be able to actually work
+
+20
+00:01:10.840 --> 00:01:12.319
+a little bit more efficient.
+
+21
+00:01:12.319 --> 00:01:18.280
+And say you have to bake on set, immediately you want to make sure that you know exactly
+
+22
+00:01:18.280 --> 00:01:23.240
+what you need and want, especially if changes are coming in pretty hot and heavy.
+
+23
+00:01:23.239 --> 00:01:25.879
+Now Lumen is a more ideal approach.
+
+24
+00:01:25.879 --> 00:01:29.479
+But again, I want to cover this because there may be some times when you're like, Lumen's
+
+25
+00:01:29.479 --> 00:01:33.519
+doing great, but we just can't seem to get rid of noise in this particular area.
+
+26
+00:01:33.519 --> 00:01:38.319
+And that's when you can lean upon your CPU and GPU baking.
+
+27
+00:01:38.319 --> 00:01:42.199
+So you always want to start low and then go high.
+
+28
+00:01:42.199 --> 00:01:47.359
+And you want to keep things at a medium level when it comes to static lighting level scale.
+
+29
+00:01:47.359 --> 00:01:50.879
+This details gives you details of your Lightmass.
+
+30
+00:01:50.879 --> 00:01:55.679
+Remember of indirect, your indirect lighting bounces, keep that low.
+
+31
+00:01:55.679 --> 00:01:59.959
+That's a brightness of your scene overall, basically your GI, kind of how that indirect
+
+32
+00:01:59.959 --> 00:02:01.959
+lighting is bouncing around.
+
+33
+00:02:01.959 --> 00:02:04.280
+Indirect lighting quality, try to keep that high if you can.
+
+34
+00:02:04.280 --> 00:02:11.000
+This decreases artifact noise and indirect lighting smoothness, keep this low.
+
+35
+00:02:11.000 --> 00:02:15.039
+This blurs indirect lighting component in your light map.
+
+36
+00:02:15.039 --> 00:02:19.039
+So again, keeping these things in mind as you work through your process.
+
+37
+00:02:19.039 --> 00:02:24.159
+Now if you're unfamiliar with the baking process, maybe you're new to Unreal and you're more
+
+38
+00:02:24.159 --> 00:02:27.359
+on the Lumen phase, let me point out where these things can be found.
+
+39
+00:02:27.359 --> 00:02:31.359
+So in my world settings, you'll see that we have a Lightmass settings area.
+
+40
+00:02:31.359 --> 00:02:33.159
+You'll see Lightmass as the topic.
+
+41
+00:02:33.159 --> 00:02:34.879
+And from there, we would open this up.
+
+42
+00:02:34.879 --> 00:02:37.479
+We see our static lighting level scale.
+
+43
+00:02:37.479 --> 00:02:40.799
+Our scene's pretty small, so we don't have to adjust this too much.
+
+44
+00:02:40.799 --> 00:02:45.079
+There are some darker shadow areas in here that we can clean it with some lights moving
+
+45
+00:02:45.079 --> 00:02:46.120
+nearby.
+
+46
+00:02:46.120 --> 00:02:51.759
+But some of this is caused because of the thickness that is not included in some of
+
+47
+00:02:51.759 --> 00:02:52.759
+these rocks.
+
+48
+00:02:52.759 --> 00:02:54.200
+And that can be a little bit tricky.
+
+49
+00:02:54.200 --> 00:02:59.200
+So the same rule that we came across when it came to Lumen, it's kind of the same process
+
+50
+00:02:59.200 --> 00:03:00.200
+here.
+
+51
+00:03:00.200 --> 00:03:02.120
+We want to make sure we have thick pieces of geo.
+
+52
+00:03:02.120 --> 00:03:06.000
+And you'll notice that I've extruded them in Unreal using the modeling tool.
+
+53
+00:03:06.000 --> 00:03:07.439
+There's a bit of banding.
+
+54
+00:03:07.439 --> 00:03:09.920
+And I'm not worried about the EVs on the other side.
+
+55
+00:03:09.920 --> 00:03:12.680
+It's this side where I'm more concerned.
+
+56
+00:03:12.680 --> 00:03:15.599
+Now if you don't do that, you can get these dark areas.
+
+57
+00:03:15.599 --> 00:03:18.280
+And let me show you a little bit up close.
+
+58
+00:03:18.280 --> 00:03:23.159
+So if I go in here and bring in a rec light, anytime you bring in a new light, Unreal's
+
+59
+00:03:23.159 --> 00:03:28.439
+going to give you a warning and say, buddy, you really do need to rebuild your lighting.
+
+60
+00:03:28.439 --> 00:03:33.959
+And the two modes for your lights you're going to be in a constant, going to be in a constant
+
+61
+00:03:33.959 --> 00:03:38.439
+positioning for is you want to make sure that you set things to either static, and that's
+
+62
+00:03:38.439 --> 00:03:41.240
+for objects that don't move, and stationary.
+
+63
+00:03:41.240 --> 00:03:43.719
+And that can be for objects that do move in your scene.
+
+64
+00:03:43.719 --> 00:03:45.840
+But again, both lights do not move.
+
+65
+00:03:45.840 --> 00:03:49.759
+The stationary one is a bit more complicated than the static.
+
+66
+00:03:49.759 --> 00:03:51.280
+The static is the cheapest.
+
+67
+00:03:51.280 --> 00:03:52.479
+Stationary is the second to that.
+
+68
+00:03:52.479 --> 00:03:55.919
+And movable is the most expensive since it's dynamic.
+
+69
+00:03:55.919 --> 00:03:59.560
+Stationary allows you to change the intensity of the light and the color and your characters
+
+70
+00:03:59.560 --> 00:04:04.099
+and moving objects to be affected by that light with the shadows updating.
+
+71
+00:04:04.099 --> 00:04:07.719
+So in this light here, we can bring this into our scene.
+
+72
+00:04:07.719 --> 00:04:12.000
+And then we would have to go in here and make it so this light is bouncing around in our
+
+73
+00:04:12.000 --> 00:04:13.000
+environment.
+
+74
+00:04:13.000 --> 00:04:17.120
+And you can see we can remove some of those dark areas simply by moving things around.
+
+75
+00:04:17.120 --> 00:04:22.120
+Now again, you can increase the strength of this light, and you can remove some of that.
+
+76
+00:04:22.120 --> 00:04:27.480
+And you can also control your width and height when it comes to your scene in here.
+
+77
+00:04:27.480 --> 00:04:32.079
+And as you do, the energy will kind of be removed from the object as you increase the
+
+78
+00:04:32.079 --> 00:04:37.639
+size, because it is again, like a series of point lights inside of a rectangle or square,
+
+79
+00:04:37.639 --> 00:04:39.879
+depending on what shape you choose.
+
+80
+00:04:39.879 --> 00:04:42.879
+And it is the most expensive light, but you'll see we're removing some of those dark
+
+81
+00:04:42.879 --> 00:04:43.879
+areas.
+
+82
+00:04:43.879 --> 00:04:47.759
+Some of them may still persist in some regions, but that's a quick way to be able to get that
+
+83
+00:04:47.759 --> 00:04:48.759
+up and running.
+
+84
+00:04:48.759 --> 00:04:52.240
+But again, you want to keep things low when you're working in your scene.
+
+85
+00:04:52.240 --> 00:04:54.719
+So that's one way you can fix it.
+
+86
+00:04:54.719 --> 00:05:00.040
+And you can even bump up the saturation in some areas if it's persistent to maybe cheat
+
+87
+00:05:00.040 --> 00:05:02.719
+some of that or even correct your texturing.
+
+88
+00:05:02.719 --> 00:05:06.159
+But overall, your light map density needs to be of the same level.
+
+89
+00:05:06.159 --> 00:05:07.759
+Well, what does that mean?
+
+90
+00:05:07.759 --> 00:05:12.600
+So if we go to lit here and we go to optimization view modes, we want to go to our light map
+
+91
+00:05:12.600 --> 00:05:14.760
+density here.
+
+92
+00:05:14.760 --> 00:05:18.640
+And you can see it in here showing us different resolution types.
+
+93
+00:05:18.640 --> 00:05:22.560
+And you'll notice for teaching purposes, I've actually kept this one a bit high.
+
+94
+00:05:22.560 --> 00:05:25.320
+This could be definitely a lot higher.
+
+95
+00:05:25.320 --> 00:05:26.560
+I should say a bit low.
+
+96
+00:05:26.560 --> 00:05:30.560
+This could definitely be a lot higher so that they have the same resolution between the
+
+97
+00:05:30.560 --> 00:05:31.560
+rocks.
+
+98
+00:05:31.560 --> 00:05:37.960
+So if I went in here, I would want to change this override and make it from a 62 or excuse
+
+99
+00:05:37.960 --> 00:05:41.640
+me, a 62, a 64 and make that a bit higher.
+
+100
+00:05:41.639 --> 00:05:43.159
+You'll see the other one here.
+
+101
+00:05:43.159 --> 00:05:44.159
+He's a 128.
+
+102
+00:05:44.159 --> 00:05:47.800
+So we kind of probably want a 128 here too.
+
+103
+00:05:47.800 --> 00:05:51.919
+And the reason why we do that is it can prevent some of those dark regions that could occur
+
+104
+00:05:51.919 --> 00:05:57.800
+and blobby areas working with your again, your world settings for your light mass.
+
+105
+00:05:57.800 --> 00:05:59.279
+So let's go back into the light mass here.
+
+106
+00:05:59.279 --> 00:06:03.839
+And I just want to give you some quick tips there for those dark regions that may occur.
+
+107
+00:06:03.839 --> 00:06:09.539
+Now again, indirect lighting quality, we have control here, keep these numbers low initially.
+
+108
+00:06:09.540 --> 00:06:14.020
+You can also control your overall color for your environment.
+
+109
+00:06:14.020 --> 00:06:19.379
+Now all of these changes that I've just made, including if I chose to maybe change the color
+
+110
+00:06:19.379 --> 00:06:22.780
+of everything, it's going to affect my final bake.
+
+111
+00:06:22.780 --> 00:06:28.820
+When you are baking, make sure that you set your builds to, if we go here to production.
+
+112
+00:06:28.820 --> 00:06:29.820
+Now we're in preview.
+
+113
+00:06:29.820 --> 00:06:31.980
+That means the build is going to be pretty quickly.
+
+114
+00:06:31.980 --> 00:06:35.620
+But if you want to see that actual bounce, we want to set that to production.
+
+115
+00:06:35.620 --> 00:06:37.259
+Let's go ahead and go back to the slides.
+
+116
+00:06:39.860 --> 00:06:43.220
+So you also want to take into account what kind of light you're using, like we mentioned
+
+117
+00:06:43.220 --> 00:06:46.300
+before, static versus stationary.
+
+118
+00:06:46.300 --> 00:06:50.220
+Now if you decide that you need a movable light is a move in your scene, you need to
+
+119
+00:06:50.220 --> 00:06:56.220
+make sure that mesh distance fields are active within your project settings.
+
+120
+00:06:56.220 --> 00:07:03.540
+Now again, you can use CPU light mass for final pixel, as well as ICVFX.
+
+121
+00:07:03.540 --> 00:07:07.340
+And you can also use GPU light mass if you need it.
+
+122
+00:07:07.339 --> 00:07:11.979
+So keep in mind that Lumen will probably be your best bet, especially if you want updates
+
+123
+00:07:11.979 --> 00:07:13.419
+on the fly.
+
+124
+00:07:13.419 --> 00:07:18.419
+So keep those things in mind when you're working with Unreal.
+
+125
+00:07:18.419 --> 00:07:24.979
+Now your volumetric clouds are expensive and will need adjustment for CPU baking for believability.
+
+126
+00:07:24.979 --> 00:07:28.899
+So they will not render accurately at this time with ray tracing.
+
+127
+00:07:28.899 --> 00:07:32.219
+So if you choose that, that is still on the roadmap.
+
+128
+00:07:32.219 --> 00:07:35.379
+So keep that in mind.
+
+129
+00:07:35.379 --> 00:07:37.139
+So never forget the power of the rec light.
+
+130
+00:07:37.139 --> 00:07:38.579
+That's one reason I showed it to you.
+
+131
+00:07:38.579 --> 00:07:40.579
+It can fill those areas that you need.
+
+132
+00:07:40.579 --> 00:07:44.699
+And that even goes for Lumen, as you saw me do earlier, that will fill that space and
+
+133
+00:07:44.699 --> 00:07:50.500
+give and fake some of the bounce light that we may or may not be getting immediately.
+
+134
+00:07:50.500 --> 00:07:55.259
+So again, you can control on the point lights your source length and your source radius,
+
+135
+00:07:55.259 --> 00:08:02.419
+as well as your overall view and feel and shape for that with those properties.
+
+136
+00:08:02.419 --> 00:08:05.879
+So let me actually jump into Unreal real quick.
+
+137
+00:08:05.879 --> 00:08:12.480
+So if you do get a hot spot or say this, this is not highly reflective, but if it was,
+
+138
+00:08:12.480 --> 00:08:16.719
+I could go in here and soften that up using my soft source radius.
+
+139
+00:08:16.719 --> 00:08:18.719
+And unfortunately, it can pixelate your shadow.
+
+140
+00:08:18.719 --> 00:08:19.719
+So just be aware of that.
+
+141
+00:08:19.719 --> 00:08:21.519
+I just want to mention that too.
+
+142
+00:08:21.519 --> 00:08:26.560
+Remember also too, when it comes to light mass, make sure you use area shadows for stationary
+
+143
+00:08:26.560 --> 00:08:27.560
+light.
+
+144
+00:08:27.560 --> 00:08:33.360
+So if this is a stationary light and I keep it like this, say I want to use it to maybe
+
+145
+00:08:33.360 --> 00:08:39.840
+fill out some bounce light in here, I would again turn that on and then I would make a
+
+146
+00:08:39.840 --> 00:08:43.720
+fresh build bake in this environment.
+
+147
+00:08:43.720 --> 00:08:47.320
+So here are some pro tips when it comes to using CPU baking.
+
+148
+00:08:47.320 --> 00:08:49.000
+Try to make sure your geo is solid.
+
+149
+00:08:49.000 --> 00:08:53.279
+Now this is a golden rule working with Unreal as well as Lumen.
+
+150
+00:08:53.279 --> 00:08:56.519
+Having hollowed out pieces of geometry can be tricky.
+
+151
+00:08:56.519 --> 00:08:59.180
+So when intersected, it makes sense to Unreal.
+
+152
+00:08:59.179 --> 00:09:04.859
+Now you will see some times where you might see that rule broken.
+
+153
+00:09:04.859 --> 00:09:07.739
+There's like a cafe that I use every once in a while.
+
+154
+00:09:07.739 --> 00:09:09.739
+There's a thin floor.
+
+155
+00:09:09.739 --> 00:09:11.539
+There's thin walls.
+
+156
+00:09:11.539 --> 00:09:12.939
+It's really made for baking.
+
+157
+00:09:12.939 --> 00:09:14.539
+And it works okay.
+
+158
+00:09:14.539 --> 00:09:16.259
+It's not too bad.
+
+159
+00:09:16.259 --> 00:09:18.539
+And there really isn't much light leaking.
+
+160
+00:09:18.539 --> 00:09:22.959
+But as soon as I switch to Lumen, that's where things might be a little weird in some areas
+
+161
+00:09:22.959 --> 00:09:28.620
+and some corners of it because the mesh distance field isn't quite calculated incorrectly, especially
+
+162
+00:09:28.620 --> 00:09:34.259
+if I step out of that area or I rotate in such a way that those little thin areas are
+
+163
+00:09:34.259 --> 00:09:38.539
+revealed in some way, the mesh distance field gets a bit confused.
+
+164
+00:09:38.539 --> 00:09:42.340
+You want to keep your light map resolution for intersecting geo, which I mentioned before,
+
+165
+00:09:42.340 --> 00:09:44.700
+the same or at least in the same ballpark.
+
+166
+00:09:44.700 --> 00:09:50.460
+This will prevent any blobby shadows on the seams, any weird light leaking that might be
+
+167
+00:09:50.460 --> 00:09:51.460
+happening.
+
+168
+00:09:51.460 --> 00:09:53.659
+Can't seem to say leaking before the leaking, leaking.
+
+169
+00:09:53.659 --> 00:09:55.299
+I don't know what's happening.
+
+170
+00:09:55.299 --> 00:09:58.659
+Or in tears, you can use light mass portals, but can be expensive.
+
+171
+00:09:58.659 --> 00:10:00.500
+So use them deterministically.
+
+172
+00:10:00.500 --> 00:10:07.859
+Now, light mass portals that you heard me mention earlier and other classes, light mass portals
+
+173
+00:10:07.859 --> 00:10:12.259
+do not work with GPU light mass.
+
+174
+00:10:12.259 --> 00:10:15.219
+They only work with CPU.
+
+175
+00:10:15.219 --> 00:10:17.299
+For some reason, do not calculate correctly.
+
+176
+00:10:17.299 --> 00:10:22.620
+And they're basically put in front of opening of a cave or a window versus interior and
+
+177
+00:10:22.620 --> 00:10:23.620
+an exterior.
+
+178
+00:10:23.620 --> 00:10:27.899
+You're right for that cusp in that area where the values change, and that's what you would
+
+179
+00:10:27.899 --> 00:10:29.139
+use it for.
+
+180
+00:10:29.139 --> 00:10:33.299
+Rec lights were great for interiors as fill lights, but can be expensive.
+
+181
+00:10:33.299 --> 00:10:37.139
+And again, they are point lights over that surface, like a series of point lights.
+
+182
+00:10:37.139 --> 00:10:41.220
+So indirect lighting quality can be increased, but can be expensive with build times.
+
+183
+00:10:41.220 --> 00:10:42.379
+Keep that in mind.
+
+184
+00:10:42.379 --> 00:10:45.139
+Default maybe fine and turn off compressed light maps.
+
+185
+00:10:45.139 --> 00:10:53.019
+So you can do that again, inside of your world settings for light mass, and you can turn
+
+186
+00:10:53.019 --> 00:10:56.939
+that compress off right there.
+
+187
+00:10:56.939 --> 00:11:00.460
+Make sure the stationary lights are set to use area shadows, like I mentioned before
+
+188
+00:11:00.460 --> 00:11:01.460
+also.
+
+189
+00:11:01.460 --> 00:11:04.059
+So don't forget that.
+
+190
+00:11:04.059 --> 00:11:09.659
+Outside of ICV effects, though, you can show to your director different lighting scenarios.
+
+191
+00:11:09.659 --> 00:11:17.379
+Now you can use that level snapshot, but if you have a lot of static lights, it doesn't
+
+192
+00:11:17.379 --> 00:11:19.659
+really work really cleanly.
+
+193
+00:11:19.659 --> 00:11:26.339
+You can cheat a little bit and use a thing called a streaming level node.
+
+194
+00:11:26.339 --> 00:11:29.899
+And we can use a level blueprint, but you can only show off three at a time.
+
+195
+00:11:29.899 --> 00:11:32.019
+So that's a bit of the limitation.
+
+196
+00:11:32.019 --> 00:11:34.899
+So this is again, why lumens a little bit better.
+
+197
+00:11:34.899 --> 00:11:37.939
+Let me show you a little bit of how that works in engine.
+
+198
+00:11:37.939 --> 00:11:40.299
+And you can get an idea of what I'm talking about.
+
+199
+00:11:40.299 --> 00:11:42.379
+So in Unreal, I'm going to go to our class folder.
+
+200
+00:11:42.379 --> 00:11:44.139
+I'm going to go to maps.
+
+201
+00:11:44.139 --> 00:11:46.620
+And I'm going to go into here and click on base.
+
+202
+00:11:46.620 --> 00:11:47.899
+Now it's going to ask you to save.
+
+203
+00:11:47.899 --> 00:11:49.340
+I'm really not saving anything.
+
+204
+00:11:49.340 --> 00:11:50.980
+I'm going to click on base here.
+
+205
+00:11:50.980 --> 00:11:53.419
+I'm going to say, don't save.
+
+206
+00:11:53.419 --> 00:12:00.659
+Now when I open up this base file, you're going to notice that there's really not much
+
+207
+00:12:00.659 --> 00:12:01.819
+to write home about.
+
+208
+00:12:01.819 --> 00:12:05.100
+It's pretty much just a dark environment.
+
+209
+00:12:05.100 --> 00:12:11.100
+So what I did, let me click on my drawer and click here, what I did was I created a level
+
+210
+00:12:11.100 --> 00:12:12.779
+blueprint in here.
+
+211
+00:12:12.779 --> 00:12:14.379
+So let's go and open this up.
+
+212
+00:12:14.379 --> 00:12:17.860
+Let's open up our level blueprint.
+
+213
+00:12:17.860 --> 00:12:23.179
+And in this level blueprint, I loaded other scenes that I already baked out the lights.
+
+214
+00:12:23.179 --> 00:12:25.100
+I created a thing called a multigate.
+
+215
+00:12:25.100 --> 00:12:27.980
+You can also use a sequence if you wanted to.
+
+216
+00:12:27.980 --> 00:12:31.379
+That one works just fine.
+
+217
+00:12:31.379 --> 00:12:32.500
+So that's up to you.
+
+218
+00:12:32.500 --> 00:12:35.419
+If you want to use that, you can see sequence here.
+
+219
+00:12:35.419 --> 00:12:36.899
+Kind of works about the same way.
+
+220
+00:12:36.899 --> 00:12:40.659
+I just basically use the multigate, which is used for weapon swapping.
+
+221
+00:12:40.659 --> 00:12:42.139
+So I built this guy in here.
+
+222
+00:12:42.259 --> 00:12:49.819
+I had a hotkey to start it out, created a level switch here, Boolean, put it into the loop,
+
+223
+00:12:49.819 --> 00:12:53.500
+and I used a current level here, which is an integer.
+
+224
+00:12:53.500 --> 00:12:57.220
+And I put it into the start index so it actually knows my intentions.
+
+225
+00:12:57.220 --> 00:13:01.899
+From there, I created a unload stream level and a load stream level.
+
+226
+00:13:01.899 --> 00:13:07.259
+I started out with one of my choice, which is like the day one that I baked out daylighting.
+
+227
+00:13:07.259 --> 00:13:08.259
+And I cycled it through.
+
+228
+00:13:08.259 --> 00:13:09.259
+There's a night one.
+
+229
+00:13:09.259 --> 00:13:10.259
+You load it.
+
+230
+00:13:10.259 --> 00:13:11.259
+You unload it.
+
+231
+00:13:11.379 --> 00:13:12.379
+You unload it.
+
+232
+00:13:12.379 --> 00:13:13.379
+It's really that easy.
+
+233
+00:13:13.379 --> 00:13:14.899
+Load it, unload it.
+
+234
+00:13:14.899 --> 00:13:19.100
+And then make sure that you compile once you get everything in there that you need.
+
+235
+00:13:19.100 --> 00:13:23.860
+I do want to point out, though, as you click on this, you want to make sure you have make
+
+236
+00:13:23.860 --> 00:13:28.899
+visible after load, make visible after load, and make visible after load for all of the
+
+237
+00:13:28.899 --> 00:13:35.939
+load streaming little nodes that we have here, little sets that we have.
+
+238
+00:13:35.939 --> 00:13:39.620
+So in my multigate, you notice it's pretty simple.
+
+239
+00:13:39.620 --> 00:13:40.819
+Level switch here.
+
+240
+00:13:40.820 --> 00:13:42.940
+You make sure you turn on level switch.
+
+241
+00:13:42.940 --> 00:13:45.260
+Click on that little node there.
+
+242
+00:13:45.260 --> 00:13:46.860
+And we have current level.
+
+243
+00:13:46.860 --> 00:13:51.260
+You'll notice that's just set by default, but we are using an integer setting that to
+
+244
+00:13:51.260 --> 00:13:52.260
+that.
+
+245
+00:13:52.260 --> 00:13:54.740
+And then now you got to make sure you get the names right.
+
+246
+00:13:54.740 --> 00:13:55.740
+That's really super important.
+
+247
+00:13:55.740 --> 00:13:59.740
+So once you get the names right, we can now go in here in our scene.
+
+248
+00:13:59.740 --> 00:14:03.580
+And if I hit play, now, again, this is why it's not really used for ICVFX because you
+
+249
+00:14:03.580 --> 00:14:06.780
+can't do this with a switchboard setup and so forth.
+
+250
+00:14:06.780 --> 00:14:09.580
+But if you're doing virtual production, this actually works pretty well.
+
+251
+00:14:09.580 --> 00:14:16.700
+I can hit play and click in the environment and hit X. And I can load, hey, there's my
+
+252
+00:14:16.700 --> 00:14:18.500
+kind of nighttime area.
+
+253
+00:14:18.500 --> 00:14:24.379
+Here's my super blue, not sure just the super blue day planet of blueness.
+
+254
+00:14:24.379 --> 00:14:26.540
+And then we have our daytime in here.
+
+255
+00:14:26.540 --> 00:14:30.379
+And I'm just cycling through and we can fly through the environment too.
+
+256
+00:14:30.379 --> 00:14:36.500
+And we can see a comparable of these different environment lighting scenarios.
+
+257
+00:14:36.500 --> 00:14:37.500
+So you only get three.
+
+258
+00:14:37.500 --> 00:14:39.820
+Now, I have a really powerful computer.
+
+259
+00:14:39.820 --> 00:14:42.659
+It's an A6000 threadripper.
+
+260
+00:14:42.659 --> 00:14:47.139
+And I am at my max limit GPU-wise, so I can't do a fourth.
+
+261
+00:14:47.139 --> 00:14:48.620
+So just keep that in mind.
+
+262
+00:14:48.620 --> 00:14:51.580
+Let's go back to the slides.
+
+263
+00:14:51.580 --> 00:14:54.259
+So if you're interested, I'll walk you through each one of these.
+
+264
+00:14:54.259 --> 00:14:59.059
+Again, I do recommend level snapshot using Lumen, but this is another one that you can
+
+265
+00:14:59.059 --> 00:15:00.059
+use.
+
+266
+00:15:00.059 --> 00:15:04.059
+If you were to use level snapshot, make sure that you have primarily stationary lights
+
+267
+00:15:04.059 --> 00:15:05.980
+in your environment.
+
+268
+00:15:05.980 --> 00:15:10.740
+Lighting between bakes can be a little bit clunky for static lighting, but stationary
+
+269
+00:15:10.740 --> 00:15:13.580
+light seems to work OK with level snapshot.
+
+270
+00:15:13.580 --> 00:15:16.180
+But mostly you want to use that for Lumen.
+
+271
+00:15:16.180 --> 00:15:21.860
+And again, each step is walking you through how these work.
+
+272
+00:15:21.860 --> 00:15:22.860
+That's it for this video.
+
+273
+00:15:22.860 --> 00:15:27.980
+In the next video, we're going to take a look at GPU light mass in detail and how that works.
+
+274
+00:15:27.980 --> 00:15:28.460
+Thanks again.
+
+275
+00:15:35.980 --> 00:15:37.980
+Thank you.
+

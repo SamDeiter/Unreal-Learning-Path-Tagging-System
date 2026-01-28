@@ -1,0 +1,634 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:14.000
+Alright, if you've downloaded the 100.8 zip file and did a right-click extract all, you'll get a folder that if you open it, you'll find an Unreal Project file, a source files folder, content folder, and config folder.
+
+2
+00:00:14.000 --> 00:00:27.000
+I've got some extra folders in here, saved, intermediate, and derived data cache. These are generated when you launch the Unreal Project file, and they're used by Unreal to store various bits of technical and temporary data while the application is running.
+
+3
+00:00:27.000 --> 00:00:39.000
+Whenever Unreal creates a zip file, it will remove these three folders for the sake of saving space. So double-click on the project file, and we'll go into Unreal.
+
+4
+00:00:39.000 --> 00:00:49.000
+Now that we're in Unreal, you'll find that we're inside of a third-person template. If you look around, you'll see that it looks pretty familiar. I'm sure you've seen it many times before.
+
+5
+00:00:49.000 --> 00:00:58.000
+But what's different is that we have this generator in the center of the stage. This generator was built in a third-party DCC application, namely Maya.
+
+6
+00:00:58.000 --> 00:01:07.000
+What we're going to do is take a look at the process in which Maya exports out an FBX file, and we take that FBX file and import it into Unreal.
+
+7
+00:01:07.000 --> 00:01:13.000
+We'll also take a look at how all of the imported data correlates to what's saved on your hard drive.
+
+8
+00:01:13.000 --> 00:01:20.000
+When you open up this project, you're going to see that we have some folders inside of the content folder here.
+
+9
+00:01:20.000 --> 00:01:26.000
+The content browser and this hierarchy over here on the left reflects everything that's on your hard drive.
+
+10
+00:01:26.000 --> 00:01:32.000
+These four folders normally come with a template, third-person, splash, level prototyping, and characters.
+
+11
+00:01:32.000 --> 00:01:41.000
+But this asset folder is something we've added. If you open this, you'll find that there is a generator folder, and inside of that, you'll see that there's a blueprint,
+
+12
+00:01:41.000 --> 00:01:47.000
+which if you bring in, you'll see that we can add additional generators to the stage.
+
+13
+00:01:47.000 --> 00:01:53.000
+But we also see that there is a texture folder, a mesh folder, and materials folder.
+
+14
+00:01:53.000 --> 00:02:04.000
+These contain all of the various textures associated with the geometry, the meshes that make up this object, and this set of materials.
+
+15
+00:02:04.000 --> 00:02:10.000
+Now, all of this, like I said, is reflected on the hard drive of your computer.
+
+16
+00:02:10.000 --> 00:02:22.000
+So if you go to your file explorer and we go inside of the content folder, which is here, content folder, you'll find that there is an asset folder here.
+
+17
+00:02:22.000 --> 00:02:25.000
+And if you double-click on this, there's the generator folder.
+
+18
+00:02:25.000 --> 00:02:31.000
+And inside of that, here's the UAsset for the blueprint and the UAsset stored in the respective folders here.
+
+19
+00:02:31.000 --> 00:02:41.000
+All of these UAssets are basically extracted from the FBX file, converted into UAssets, and they're optimized for performance.
+
+20
+00:02:41.000 --> 00:02:46.000
+They're Unreal's proprietary format.
+
+21
+00:02:46.000 --> 00:02:49.000
+Now we're going to take a look at where this generator came from.
+
+22
+00:02:49.000 --> 00:02:51.000
+It was built in Maya.
+
+23
+00:02:51.000 --> 00:02:59.000
+So if you go into your file explorer, source files folder, generator, you'll find a Maya scene directory here.
+
+24
+00:02:59.000 --> 00:03:08.000
+Inside of scenes, you're going to find that there's a generator.ma file here and a generator.fbx file that it was exported from.
+
+25
+00:03:08.000 --> 00:03:10.000
+Don't double-click on this yet.
+
+26
+00:03:10.000 --> 00:03:16.000
+What we want to do is we want to launch Maya and we want to do what's called setProject.
+
+27
+00:03:16.000 --> 00:03:24.000
+When you set project and point to the folder where that scene directory exists, generator, it will set the workplace root.
+
+28
+00:03:24.000 --> 00:03:32.000
+So when you do a file open scene, it'll point specifically to the scene directory and show you where the generator.ma file is.
+
+29
+00:03:32.000 --> 00:03:36.000
+It'll also let Maya know where all the source images and textures are.
+
+30
+00:03:36.000 --> 00:03:40.000
+So let's take the generator and say open.
+
+31
+00:03:40.000 --> 00:03:46.000
+Once this is open, you'll find that it looks pretty much like the generator that's in Unreal.
+
+32
+00:03:46.000 --> 00:03:52.000
+It has all these various pieces of geometry associated with the generator.
+
+33
+00:03:52.000 --> 00:04:02.000
+It also has inside of HyperShade all of these individual materials that are associated to the project.
+
+34
+00:04:02.000 --> 00:04:05.000
+And Unreal allows you to export data multiple ways.
+
+35
+00:04:05.000 --> 00:04:11.000
+You can do a file export all in which it exports all the contents within the scene.
+
+36
+00:04:11.000 --> 00:04:17.000
+You can select specific objects and just do a export selection.
+
+37
+00:04:17.000 --> 00:04:28.000
+Or you can do a send to Unreal, set a specific Unreal project and point to its content folder, and it will save all the associated data in there.
+
+38
+00:04:28.000 --> 00:04:36.000
+I'm just going to do a traditional select all of the objects I want and do file export selection.
+
+39
+00:04:36.000 --> 00:04:44.000
+This brings up a dialog box and it allows you to choose between what kind of file format you want to export.
+
+40
+00:04:44.000 --> 00:04:50.000
+You've got a bunch of them that are in here, but what we want is fbx click export selection.
+
+41
+00:04:50.000 --> 00:04:55.000
+And now you'll get another dialog in which you can set some options.
+
+42
+00:04:55.000 --> 00:04:58.000
+We're going to leave all these general options alone.
+
+43
+00:04:58.000 --> 00:05:05.000
+But if you go under geometry, you want to make sure smoothing groups is turned on smooth mesh and referenced asset content.
+
+44
+00:05:05.000 --> 00:05:07.000
+No need to select triangulate here.
+
+45
+00:05:07.000 --> 00:05:13.000
+Everything coming into the engine is automatically triangulated so you don't need to do it here in Maya.
+
+46
+00:05:13.000 --> 00:05:15.000
+We don't have any animation.
+
+47
+00:05:15.000 --> 00:05:18.000
+We don't have any lights, but you do have textures.
+
+48
+00:05:18.000 --> 00:05:24.000
+So you'll likely want to embed media to include those textures in the fbx file.
+
+49
+00:05:24.000 --> 00:05:27.000
+Once we have that we select a name.
+
+50
+00:05:27.000 --> 00:05:33.000
+So I'm going to call mine generator to an export.
+
+51
+00:05:33.000 --> 00:05:39.000
+Once you're back in Unreal, I want you to right click in the content browser and create a new folder.
+
+52
+00:05:39.000 --> 00:05:44.000
+We'll call this new folder gen2 for our second generator.
+
+53
+00:05:44.000 --> 00:05:49.000
+We're going to look at some of the ways that you can import fbx files into Unreal.
+
+54
+00:05:49.000 --> 00:05:54.000
+So the first and most direct way is to just simply go into your file explorer,
+
+55
+00:05:54.000 --> 00:06:01.000
+find the generator-2.fbx file that you exported out of Maya, and drop it into the gen2 folder.
+
+56
+00:06:01.000 --> 00:06:07.000
+This will come up with an import dialog box, but before you click on import, I want you to notice something.
+
+57
+00:06:07.000 --> 00:06:14.000
+If you scroll down to the bottom, you're going to get some extra information, and it will tell you this is a Maya 2025 file,
+
+58
+00:06:14.000 --> 00:06:18.000
+and it's in a YUP world coordinate system.
+
+59
+00:06:18.000 --> 00:06:22.000
+Now if you remember, Unreal is a ZUP coordinate system.
+
+60
+00:06:22.000 --> 00:06:28.000
+So the importer will automatically apply a 90 degree rotation so that it's properly oriented.
+
+61
+00:06:28.000 --> 00:06:33.000
+So let's click import.
+
+62
+00:06:33.000 --> 00:06:37.000
+Once everything is imported, you'll see that we have all of our materials.
+
+63
+00:06:37.000 --> 00:06:43.000
+We have our static mesh components of the geometry, and we have our textures down here at the bottom.
+
+64
+00:06:43.000 --> 00:06:51.000
+If we were to grab all of our static meshes and drag them into the level, you'll see that we have our generator,
+
+65
+00:06:51.000 --> 00:06:55.000
+and we can rotate this around and take a better look.
+
+66
+00:06:55.000 --> 00:07:00.000
+You'll notice that all the individual component parts of the geometry are in the proper place,
+
+67
+00:07:00.000 --> 00:07:08.000
+and if you look over here in the Outliner, everything is listed as a separate actor, but there's an issue here.
+
+68
+00:07:08.000 --> 00:07:16.000
+This model was built at 000, and all of the pivot points of the separate component parts are also down at the base.
+
+69
+00:07:16.000 --> 00:07:19.000
+This might not be what you want.
+
+70
+00:07:19.000 --> 00:07:26.000
+If you want to have all of the pivots centered to the individual components, you're going to have to bring these into Unreal's modeling tools
+
+71
+00:07:26.000 --> 00:07:29.000
+and re-center all of those pivots.
+
+72
+00:07:29.000 --> 00:07:31.000
+That can be time-consuming.
+
+73
+00:07:31.000 --> 00:07:36.000
+You might also notice that the geometry is almost fully white.
+
+74
+00:07:36.000 --> 00:07:38.000
+There's a number of reasons for this.
+
+75
+00:07:38.000 --> 00:07:47.000
+It could be that the FBX exported from the DCC might be trying to export shaders that are not compatible with Unreal's material system.
+
+76
+00:07:47.000 --> 00:07:51.000
+If that's the case, you're going to have to reassign those materials.
+
+77
+00:07:51.000 --> 00:07:53.000
+But don't worry.
+
+78
+00:07:53.000 --> 00:08:00.000
+The material IDs and the individual UVs for the object are still intact, and those textures will pop into place really easy.
+
+79
+00:08:00.000 --> 00:08:06.000
+If you want a further explanation of how this is done, we have some other classes that talk about this.
+
+80
+00:08:06.000 --> 00:08:09.000
+Check those out if you're interested.
+
+81
+00:08:09.000 --> 00:08:13.000
+Now this import method does come with a few caveats.
+
+82
+00:08:13.000 --> 00:08:17.000
+As mentioned, everything is brought in as individual actors.
+
+83
+00:08:17.000 --> 00:08:24.000
+As long as all of these actors are selected, if you move the generator throughout the scene, everything is fine.
+
+84
+00:08:24.000 --> 00:08:30.000
+But if you were to deselect and try to reselect, you're only going to grab one actor at a time.
+
+85
+00:08:30.000 --> 00:08:36.000
+You'll either have to select all of the actors again in the Outliner, or you'll have to select them in the viewport.
+
+86
+00:08:36.000 --> 00:08:38.000
+And that can be a little bit challenging.
+
+87
+00:08:38.000 --> 00:08:41.000
+So we can address this in a couple of different ways.
+
+88
+00:08:41.000 --> 00:08:46.000
+The first off is we can right-click inside of the Outliner and create a group.
+
+89
+00:08:46.000 --> 00:08:54.000
+Once a group is created, I can move the generator throughout the scene, deselect and reselect with ease.
+
+90
+00:08:54.000 --> 00:08:58.000
+And it will select all the individual actors here.
+
+91
+00:08:58.000 --> 00:09:10.000
+The other option is to take all the selected components, go up to this icon, click, and say, convert selection to Blueprint class.
+
+92
+00:09:10.000 --> 00:09:21.000
+I'll normally use Harvest Components, and I will call this Generator Blueprint.
+
+93
+00:09:21.000 --> 00:09:29.000
+Once done, you'll be greeted with a viewport from the Blueprint, and everything looks great here.
+
+94
+00:09:29.000 --> 00:09:31.000
+So we can close this window.
+
+95
+00:09:31.000 --> 00:09:36.000
+And you'll find that you'll have a Generator Blueprint class item in your Content Browser.
+
+96
+00:09:36.000 --> 00:09:48.000
+From here, I can just drag instances of this Blueprint into the level, and instead of getting all of those individual actors, you'll get just a Blueprint inside of the Outliner.
+
+97
+00:09:48.000 --> 00:09:59.000
+And if you look at the Details panel for that, you'll also notice all of those individual components are maintained here in the Blueprint.
+
+98
+00:09:59.000 --> 00:10:06.000
+Now, the method that we just used to import in FBXs was fairly quick and efficient, but has its issues.
+
+99
+00:10:06.000 --> 00:10:10.000
+It's a multi-step process. You have to create Blueprints separately.
+
+100
+00:10:10.000 --> 00:10:14.000
+Your pivot points might not be in the exact place that you want them to be.
+
+101
+00:10:14.000 --> 00:10:19.000
+So we're going to use a different tool called Import into Level.
+
+102
+00:10:19.000 --> 00:10:23.000
+And to do that, we're going to have to get rid of these guys first.
+
+103
+00:10:23.000 --> 00:10:28.000
+So we'll go ahead and delete them.
+
+104
+00:10:28.000 --> 00:10:42.000
+And I'm going to get rid of all of this geometry as well.
+
+105
+00:10:42.000 --> 00:10:47.000
+For this next process, go up to File and choose Import into Level.
+
+106
+00:10:47.000 --> 00:10:53.000
+Select the Generator 2.FBX and place it in an appropriate folder.
+
+107
+00:10:53.000 --> 00:10:59.000
+This will bring up a new Import dialog box, and underneath the Scene tab, you're going to find the Root node.
+
+108
+00:10:59.000 --> 00:11:04.000
+If you open this, it's going to show you the hierarchy as it's depicted in the FBX file and in Maya.
+
+109
+00:11:04.000 --> 00:11:09.000
+There are no groups here, but if there were, you could turn on the Create Content Folder hierarchy,
+
+110
+00:11:09.000 --> 00:11:17.000
+and Unreal will create a series of folders in the Content Browser that reflect those groups and all of the objects inside of them.
+
+111
+00:11:17.000 --> 00:11:20.000
+I also usually turn on Import as Dynamic.
+
+112
+00:11:20.000 --> 00:11:25.000
+This will set the mobility of the incoming actor to Dynamic so that you can move it around on the stage.
+
+113
+00:11:25.000 --> 00:11:30.000
+There's also hierarchy type. There are three. There's Create Level Actors.
+
+114
+00:11:30.000 --> 00:11:34.000
+That's where all the components will be listed as level actors in the Outliner.
+
+115
+00:11:34.000 --> 00:11:39.000
+I don't want that. So we have Create One Actor with Components.
+
+116
+00:11:39.000 --> 00:11:43.000
+That sounds promising. And then there's Create One Blueprint Asset.
+
+117
+00:11:43.000 --> 00:11:51.000
+This will be similar to the demonstration that we previously gave, where the Import into Level command will actually create the blueprint for you
+
+118
+00:11:51.000 --> 00:11:54.000
+and place the individual objects into them.
+
+119
+00:11:54.000 --> 00:12:01.000
+I also will usually turn on Bake Pivot in Vertex. This will bake the pivot as it's seen in Maya.
+
+120
+00:12:01.000 --> 00:12:07.000
+So I'm going to go with Create One Actor with Components and Bake Pivot into Vertex.
+
+121
+00:12:08.000 --> 00:12:14.000
+The Static Mesh options here basically allow you to turn on and off different component parts of the geometry.
+
+122
+00:12:14.000 --> 00:12:16.000
+I just usually leave this all on.
+
+123
+00:12:16.000 --> 00:12:19.000
+You don't need to change anything over here on the right.
+
+124
+00:12:19.000 --> 00:12:24.000
+For Skeletal Meshes, we don't have any joints or any deforming geometry, so we can skip this.
+
+125
+00:12:24.000 --> 00:12:34.000
+And for Materials, I want to make sure that all my Material IDs are turned on so that when I Import this, I can reassign Textures as needed.
+
+126
+00:12:34.000 --> 00:12:36.000
+So let's Import.
+
+127
+00:12:38.000 --> 00:12:41.000
+Upon Importing, you're going to see something similar.
+
+128
+00:12:41.000 --> 00:12:46.000
+You're going to find your Materials, all your Static Meshes, and down at the bottom will be your Textures.
+
+129
+00:12:46.000 --> 00:12:52.000
+However, if you look over in the Outliner, you're going to find an Actor called Generator 2.
+
+130
+00:12:52.000 --> 00:12:56.000
+If you select it, you'll find our Generator hiding in the middle of the stage here.
+
+131
+00:12:56.000 --> 00:12:58.000
+We can go ahead and pull this out.
+
+132
+00:13:00.000 --> 00:13:02.000
+And we'll rotate it around.
+
+133
+00:13:03.000 --> 00:13:08.000
+And you'll find that the Actor has all of its individual component parts in the right place.
+
+134
+00:13:08.000 --> 00:13:17.000
+But if you go to the Details, you'll find that under the Actor are all the individual components, the Generator, Display, Modules, and so forth.
+
+135
+00:13:17.000 --> 00:13:22.000
+What's nice about this is that all the individual PIVots are now where they're supposed to be.
+
+136
+00:13:22.000 --> 00:13:28.000
+So if you do need to make some modifications or changes, the PIVots will be where you expect them.
+
+137
+00:13:29.000 --> 00:13:34.000
+Now, if you wanted to do something different, you could import this in as a Blueprint.
+
+138
+00:13:34.000 --> 00:13:42.000
+And instead of having a Generator 2 Actor, you'd have a Blueprint down here in your Content folder that you could bring into the scene.
+
+139
+00:13:42.000 --> 00:13:45.000
+Now, you'll also notice that there are a bunch of stars here.
+
+140
+00:13:45.000 --> 00:13:49.000
+This just means that all of these items have not yet been saved.
+
+141
+00:13:49.000 --> 00:13:56.000
+So if I do a File, Save All, all of that will go away.
+
+142
+00:13:56.000 --> 00:13:59.000
+And now all of these files are written to the hard drive.
+
+143
+00:13:59.000 --> 00:14:10.000
+And if we go to our File Explorer, we can go in and find in the Content folder under Assets, a Gen2 folder, where all of those UAssets have now been written.
+
+144
+00:14:13.000 --> 00:14:15.000
+Alright, let's continue.
+
+145
+00:14:16.000 --> 00:14:19.000
+Let's go ahead and conduct a little practical demonstration.
+
+146
+00:14:19.000 --> 00:14:24.000
+Say, for example, you want to change the appearance of the original Generator that's up on stage.
+
+147
+00:14:24.000 --> 00:14:26.000
+Maybe you want to alter its geometry.
+
+148
+00:14:26.000 --> 00:14:32.000
+If we go back to the original Asset folder for this Generator, we want to change something within its Meshes.
+
+149
+00:14:32.000 --> 00:14:38.000
+So we're going to look for what we want, and it would be, say, this Generator Static Mesh.
+
+150
+00:14:38.000 --> 00:14:46.000
+If we go back into Maya and select the Generator and switch over to Face Mode, and we can grab some individual faces here,
+
+151
+00:14:47.000 --> 00:14:55.000
+and pull them upward and say that's the change that we want to make.
+
+152
+00:14:55.000 --> 00:14:59.000
+We're going to save everything again, just so that we have a full version.
+
+153
+00:14:59.000 --> 00:15:09.000
+We do a File, Export Selection, and we'll do a Generator V3, and click Export Selection.
+
+154
+00:15:09.000 --> 00:15:12.000
+And now we go back into Unreal.
+
+155
+00:15:13.000 --> 00:15:18.000
+And we select this Generator and right-click and do a Import with New File.
+
+156
+00:15:18.000 --> 00:15:23.000
+We can select the V3 version of the Generator and click Open.
+
+157
+00:15:23.000 --> 00:15:31.000
+What this will do now is it will rewrite the UAsset file with the new data and the appearance of the Generator has changed.
+
+158
+00:15:31.000 --> 00:15:35.000
+Alright, this concludes this demonstration. Thanks again.
+

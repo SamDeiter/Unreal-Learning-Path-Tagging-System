@@ -1,0 +1,718 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.339
+Now that we have finished going through the custom body workflow and have all of the modified
+
+2
+00:00:06.339 --> 00:00:11.759
+assets for Atomic Savage, we are now ready to bring them into Unreal Engine and finalize
+
+3
+00:00:11.759 --> 00:00:12.919
+the rig.
+
+4
+00:00:12.919 --> 00:00:19.179
+We will dive into a hands-on exercise where we will bring the head LOD-FBX files and final
+
+5
+00:00:19.179 --> 00:00:25.019
+metahuman-DNA file into Unreal Engine and configure the metahuman blueprint and assign
+
+6
+00:00:25.019 --> 00:00:26.679
+the custom body.
+
+7
+00:00:26.679 --> 00:00:32.179
+We will also go over how to import the custom body into Unreal Engine and test the customized
+
+8
+00:00:32.179 --> 00:00:37.619
+face and body with animations to make sure everything is working correctly.
+
+9
+00:00:37.619 --> 00:00:42.600
+So let's dive into the hands-on exercise and start finalizing this custom metahuman
+
+10
+00:00:42.600 --> 00:00:43.840
+character.
+
+11
+00:00:43.840 --> 00:00:47.000
+In this section, we will go through a hands-on exercise.
+
+12
+00:00:47.000 --> 00:00:52.879
+We will primarily work in Unreal Engine to bring in the head LODs, the calibrated metahuman-DNA
+
+13
+00:00:52.880 --> 00:00:58.020
+file, we will configure the metahuman blueprint and assign the custom body.
+
+14
+00:00:58.020 --> 00:01:02.740
+As we work through this exercise, you will note that this is broken down into a step-by-step
+
+15
+00:01:02.740 --> 00:01:05.659
+process that is found in your slide deck.
+
+16
+00:01:05.659 --> 00:01:10.859
+As we complete portions of the practical exercise, I will review the completed steps.
+
+17
+00:01:10.859 --> 00:01:17.520
+So let's jump into Unreal Engine and begin to finalize our customized metahuman character.
+
+18
+00:01:17.520 --> 00:01:22.640
+Inside of Unreal Engine, we will begin to bring in our modified metahuman assets.
+
+19
+00:01:22.640 --> 00:01:27.519
+Let's get started by first duplicating the metahuman face skeletal mesh that we will
+
+20
+00:01:27.519 --> 00:01:29.319
+be updating.
+
+21
+00:01:29.319 --> 00:01:33.159
+I'm going to select Atomic Savage in our level.
+
+22
+00:01:33.159 --> 00:01:37.140
+This metahuman is named Atomic Savage Example.
+
+23
+00:01:37.140 --> 00:01:42.079
+To locate this character's face mesh, I'm going to go to the Details panel and locate
+
+24
+00:01:42.079 --> 00:01:45.519
+the head component and select it.
+
+25
+00:01:45.519 --> 00:01:52.620
+Then I can go to the face skeletal mesh and use the folder to browse to its location.
+
+26
+00:01:52.620 --> 00:01:59.020
+Now I'm going to right-click on the face skeletal mesh and select Duplicate.
+
+27
+00:01:59.020 --> 00:02:04.520
+We will need this copy later on when we reassign the grooms in the metahuman blueprint.
+
+28
+00:02:04.520 --> 00:02:08.280
+Now I'm going to save this.
+
+29
+00:02:08.280 --> 00:02:13.379
+And now I'm going to select the original skeletal mesh and double-click on it to open
+
+30
+00:02:13.379 --> 00:02:15.360
+it.
+
+31
+00:02:15.360 --> 00:02:21.360
+With this window open, the first step is to assign a source file path in order to re-import
+
+32
+00:02:21.360 --> 00:02:25.180
+the head LOD FBX files.
+
+33
+00:02:25.180 --> 00:02:29.740
+In the Asset Details panel, I will search for File.
+
+34
+00:02:29.740 --> 00:02:33.440
+What we want to locate is the Import Settings.
+
+35
+00:02:33.440 --> 00:02:41.220
+In the Asset Import Data File Path, we want to set the source file path for the FBX files.
+
+36
+00:02:41.220 --> 00:02:48.100
+I will click on this and this will open up the Exports folder and I'm going to select
+
+37
+00:02:48.099 --> 00:02:52.239
+LOD 0 and then select Open.
+
+38
+00:02:52.239 --> 00:02:57.000
+The next step is to re-import the head LODs as new files.
+
+39
+00:02:57.000 --> 00:03:02.599
+Now it is worth mentioning that users may encounter issues when re-importing the FBX
+
+40
+00:03:02.599 --> 00:03:05.539
+in the current 5.5 engine version.
+
+41
+00:03:05.539 --> 00:03:16.479
+So to work around this, in the command Prompt, I will paste the command interchange.featureflag.import.fbx
+
+42
+00:03:16.479 --> 00:03:21.780
+with the value set to 0 and hit Enter.
+
+43
+00:03:21.780 --> 00:03:28.719
+I will save everything and now I'm going to go up here to the Re-import Mesh with Dialog
+
+44
+00:03:28.719 --> 00:03:35.000
+drop-down and select Re-import Mesh with new file.
+
+45
+00:03:35.000 --> 00:03:43.819
+This will open up the Exports folder, I will select LOD 0 and select Open and the FBX
+
+46
+00:03:43.819 --> 00:03:46.919
+import options will appear.
+
+47
+00:03:46.919 --> 00:03:51.959
+Here I want to make sure that the face archetype is assigned as a skeleton.
+
+48
+00:03:51.959 --> 00:03:57.959
+In the Transform section, I will change the import rotation to 90 degrees since the head
+
+49
+00:03:57.959 --> 00:04:02.799
+FBX is in Y up and then select Import.
+
+50
+00:04:02.799 --> 00:04:07.120
+This may take a moment.
+
+51
+00:04:07.120 --> 00:04:10.639
+Now we have the head LOD 0 imported.
+
+52
+00:04:10.639 --> 00:04:16.939
+It may look strange at first and that is because we have to update the metahumanDNA file.
+
+53
+00:04:16.939 --> 00:04:19.259
+I'm going to save this.
+
+54
+00:04:19.259 --> 00:04:24.860
+Now we still need to re-import the other head LODs so I will clear my search in the Asset
+
+55
+00:04:24.860 --> 00:04:30.339
+Details panel and locate the LOD Settings section.
+
+56
+00:04:30.339 --> 00:04:36.659
+To re-import the lower LODs, I will go to the LOD import and drop this down.
+
+57
+00:04:36.660 --> 00:04:46.520
+I will select Re-import LOD Level 1 and then select the LOD 1 FBX and select Open.
+
+58
+00:04:46.520 --> 00:04:51.360
+And once the import process is complete, a notification will appear.
+
+59
+00:04:51.360 --> 00:04:54.840
+You can repeat this for all of the LODs if you wish.
+
+60
+00:04:54.840 --> 00:05:00.000
+If you are going to be working with LOD 0 only, ensure that you set the forced LOD to
+
+61
+00:05:00.000 --> 00:05:05.760
+0 in the metahuman blueprint and I've already done that for this character.
+
+62
+00:05:05.759 --> 00:05:11.379
+Now let's do a quick review of the steps we just went through before we move on.
+
+63
+00:05:11.379 --> 00:05:16.659
+In order to bring in the modified metahuman assets, to get started we will want to duplicate
+
+64
+00:05:16.659 --> 00:05:21.899
+the face skeletal mesh of the metahuman whose assets we will be updating.
+
+65
+00:05:21.899 --> 00:05:27.500
+To do this, locate the face skeletal mesh in the face folder of the metahuman characters
+
+66
+00:05:27.500 --> 00:05:28.819
+folder.
+
+67
+00:05:28.819 --> 00:05:33.539
+Then select the skeletal mesh, right click on it and select Duplicate.
+
+68
+00:05:33.540 --> 00:05:38.140
+This duplicate of the head skeletal mesh will be used when reassigning the groom binding
+
+69
+00:05:38.140 --> 00:05:39.700
+assets.
+
+70
+00:05:39.700 --> 00:05:45.080
+Once that is complete, the first step is to assign a source file path in order to re-import
+
+71
+00:05:45.080 --> 00:05:48.600
+the head LOD FBX files.
+
+72
+00:05:48.600 --> 00:05:53.680
+To assign a source file path, open up the face skeletal mesh and go to the Asset Details
+
+73
+00:05:53.680 --> 00:05:54.800
+panel.
+
+74
+00:05:54.800 --> 00:06:01.240
+In the Import Settings section, for the Asset Import Data file path, direct it to the folder
+
+75
+00:06:01.300 --> 00:06:07.860
+where the head LOD FBX files are located and then select the LOD0 FBX file.
+
+76
+00:06:07.860 --> 00:06:13.500
+The next step is to re-import the head LOD FBX as new files.
+
+77
+00:06:13.500 --> 00:06:19.500
+As mentioned, users may encounter issues when re-importing the head LOD FBX files in the
+
+78
+00:06:19.500 --> 00:06:22.220
+current 5.5 engine version.
+
+79
+00:06:22.220 --> 00:06:27.620
+To work around this, in the command Prompt, enter the Interchange Feature Flag Import
+
+80
+00:06:27.620 --> 00:06:32.240
+FBX command and set the value to 0 and hit Enter.
+
+81
+00:06:32.240 --> 00:06:38.139
+To re-import an LOD with a new file, go to the Re-import Mesh with Dialog option in the
+
+82
+00:06:38.139 --> 00:06:42.639
+toolbar and select Re-import Mesh with New File.
+
+83
+00:06:42.639 --> 00:06:48.240
+For the FBX import options, ensure that the face archetype skeleton is selected and then
+
+84
+00:06:48.240 --> 00:06:50.180
+select Import.
+
+85
+00:06:50.180 --> 00:06:56.240
+The head LOD0 will be re-imported and it may not look correct at first, but that is normal
+
+86
+00:06:56.259 --> 00:06:59.639
+as the DNA file has not been updated yet.
+
+87
+00:06:59.639 --> 00:07:03.800
+The next step is to re-import the lower LODs.
+
+88
+00:07:03.800 --> 00:07:10.800
+To re-import the lower LODs, in the Face Skeletal Mesh Asset, in the Asset Details panel, locate
+
+89
+00:07:10.800 --> 00:07:13.439
+the LOD Settings section.
+
+90
+00:07:13.439 --> 00:07:19.400
+Then in the LOD Import option, use the drop-down arrow to re-import each LOD.
+
+91
+00:07:19.400 --> 00:07:26.040
+As mentioned, if you intend to use LOD0 only and do not wish to re-import the lower LODs,
+
+92
+00:07:26.040 --> 00:07:31.480
+ensure that you change the forced LOD to 0 in the Metahuman Blueprint LOD Sync Component
+
+93
+00:07:31.480 --> 00:07:32.980
+Settings.
+
+94
+00:07:32.980 --> 00:07:38.800
+With the head LODs re-imported, the next step is to update the Metahuman DNA file.
+
+95
+00:07:38.800 --> 00:07:43.800
+So let's return to Unreal Engine and continue with the steps.
+
+96
+00:07:43.800 --> 00:07:49.420
+Back inside of Unreal Engine, let's navigate back to the main viewport.
+
+97
+00:07:49.420 --> 00:07:53.879
+We will see that the grooms on the Metahuman do not look correct, and we will fix that
+
+98
+00:07:53.879 --> 00:07:55.180
+in a moment.
+
+99
+00:07:55.180 --> 00:08:00.019
+What we want to do for the next step is to import the new DNA file.
+
+100
+00:08:00.019 --> 00:08:06.259
+To update the Metahuman DNA file, in the Content Browser, I'm going to select the original
+
+101
+00:08:06.259 --> 00:08:10.139
+Face Skeletal Mesh and right-click on it.
+
+102
+00:08:10.139 --> 00:08:16.980
+Over here I'm going to select Metahuman DNA and select Import New DNA File.
+
+103
+00:08:16.980 --> 00:08:24.500
+I'm going to navigate to the Exports folder, which is inside of my DNA calibration folder
+
+104
+00:08:24.620 --> 00:08:30.339
+in the Working folder, and then inside of the Export folder, I will select the Atomic
+
+105
+00:08:30.339 --> 00:08:35.779
+S Final DNA, and then select Open.
+
+106
+00:08:35.779 --> 00:08:41.440
+The DNA Import Options will open, and we just want to ensure that the correct Face Skeletal
+
+107
+00:08:41.440 --> 00:08:47.379
+Mesh is selected, and then we can select Import.
+
+108
+00:08:47.379 --> 00:08:49.940
+I'm going to save everything.
+
+109
+00:08:49.940 --> 00:08:55.220
+Now before we move on, let's review the steps we just covered.
+
+110
+00:08:55.220 --> 00:09:00.900
+To import the new Metahuman DNA file, select the Face Skeletal Mesh and right-click on
+
+111
+00:09:00.900 --> 00:09:01.900
+it.
+
+112
+00:09:01.900 --> 00:09:06.620
+Then select Metahuman DNA and choose Import New DNA File.
+
+113
+00:09:06.620 --> 00:09:11.300
+Locate and select the DNA file that has been updated, and select Open.
+
+114
+00:09:11.300 --> 00:09:16.860
+For the DNA Import Options, ensure that the Face Skeletal Mesh is assigned, and then select
+
+115
+00:09:16.860 --> 00:09:18.660
+Import.
+
+116
+00:09:18.659 --> 00:09:25.819
+Now let's return to Unreal Engine and continue with the next steps of this exercise.
+
+117
+00:09:25.819 --> 00:09:30.980
+Back inside of Unreal Engine, we have just finished updating the Metahuman DNA.
+
+118
+00:09:30.980 --> 00:09:35.779
+As we can see in the viewport, the grooms do not look correct, and that is because we
+
+119
+00:09:35.779 --> 00:09:38.579
+need to reassign the groom assets.
+
+120
+00:09:38.579 --> 00:09:43.659
+To do this, we will first select the duplicated skeletal mesh.
+
+121
+00:09:43.659 --> 00:09:47.419
+Then we want to open up the Metahuman Blueprint for our character.
+
+122
+00:09:47.419 --> 00:09:52.620
+We can do this by selecting the Metahuman in the viewport, and next to its name in the
+
+123
+00:09:52.620 --> 00:09:57.379
+Outliner, we can click on Edit Blueprint.
+
+124
+00:09:57.379 --> 00:10:00.860
+This will open up the Metahuman Blueprint for our character.
+
+125
+00:10:00.860 --> 00:10:03.659
+I will navigate to the viewport.
+
+126
+00:10:03.659 --> 00:10:10.419
+Now we want to re-bind all of the grooms, so I will select the eyelashes component first.
+
+127
+00:10:10.419 --> 00:10:18.459
+In the Details panel, I will navigate to the groom binding asset over here and open it.
+
+128
+00:10:18.459 --> 00:10:23.860
+With the duplicated face mesh still selected in the Content Browser, I'm going to assign
+
+129
+00:10:23.860 --> 00:10:28.699
+it here using this arrow as the source skeletal mesh.
+
+130
+00:10:28.699 --> 00:10:31.059
+I'm going to save this and close it.
+
+131
+00:10:31.059 --> 00:10:34.459
+We will have to repeat this for all of the grooms.
+
+132
+00:10:34.459 --> 00:10:37.500
+I will select the Peach Fuzz component.
+
+133
+00:10:37.500 --> 00:10:42.220
+Then in the Details panel, I will open up the groom binding asset and use the arrow
+
+134
+00:10:42.220 --> 00:10:46.779
+to assign the duplicated face mesh as the source skeletal mesh.
+
+135
+00:10:46.779 --> 00:10:49.620
+I will save this and close it.
+
+136
+00:10:49.620 --> 00:10:53.179
+I will repeat this for the eyebrows component.
+
+137
+00:10:53.179 --> 00:10:54.379
+Select it.
+
+138
+00:10:54.379 --> 00:11:00.860
+Open up the groom binding and assign the duplicated face mesh as the source skeletal mesh.
+
+139
+00:11:00.860 --> 00:11:02.940
+Save this and close it.
+
+140
+00:11:02.940 --> 00:11:07.019
+For the hair component, again, I will select it.
+
+141
+00:11:07.019 --> 00:11:12.740
+Then open up the groom binding asset and assign the duplicated face mesh as the original
+
+142
+00:11:12.740 --> 00:11:14.100
+skeletal mesh.
+
+143
+00:11:14.100 --> 00:11:18.100
+Now, this one will take a bit longer to process.
+
+144
+00:11:18.100 --> 00:11:21.860
+Once it is done, I will save this and close it.
+
+145
+00:11:21.860 --> 00:11:24.340
+And finally, we have the beard component.
+
+146
+00:11:24.340 --> 00:11:26.259
+I will select it.
+
+147
+00:11:26.259 --> 00:11:31.740
+Open up the groom binding asset and assign the duplicated face mesh.
+
+148
+00:11:31.740 --> 00:11:34.860
+Then save it and close it.
+
+149
+00:11:34.860 --> 00:11:38.139
+What you will notice is that the grooms look correct now.
+
+150
+00:11:38.139 --> 00:11:41.539
+However, the neck region does not.
+
+151
+00:11:41.539 --> 00:11:46.019
+And the reason for this is that the head and updated joint positions are constrained to
+
+152
+00:11:46.019 --> 00:11:50.180
+the original body so the skeletons are not aligned.
+
+153
+00:11:50.180 --> 00:11:53.419
+So the next step is to assign the custom body.
+
+154
+00:11:53.419 --> 00:11:58.060
+Now I've already imported the custom body into this project and will go over the steps
+
+155
+00:11:58.060 --> 00:12:00.779
+on how I imported it later on.
+
+156
+00:12:00.779 --> 00:12:04.220
+For now, let's go back to the main viewport.
+
+157
+00:12:04.220 --> 00:12:08.779
+In the content browser, we are going to locate the custom body.
+
+158
+00:12:08.779 --> 00:12:14.860
+In our course assets folder, there is a folder named AtomicSBody.
+
+159
+00:12:14.860 --> 00:12:20.379
+Inside of here, the skeletal mesh for the custom body is located here and it is named
+
+160
+00:12:20.379 --> 00:12:24.620
+AtomicSBodyExportSkinweights.
+
+161
+00:12:24.620 --> 00:12:29.259
+With this selected, we are going to go back to the metahuman blueprint.
+
+162
+00:12:30.220 --> 00:12:37.340
+Next select the body component and in the details panel, in the skeletal mesh section,
+
+163
+00:12:37.340 --> 00:12:41.019
+I'm going to use the arrow to assign the custom body.
+
+164
+00:12:41.019 --> 00:12:44.779
+We can see the skeletons are now aligned.
+
+165
+00:12:44.779 --> 00:12:48.819
+We can compile and save this.
+
+166
+00:12:48.819 --> 00:12:56.580
+And if we go back to our main viewport, we will see our finalized metahuman character.
+
+167
+00:12:56.580 --> 00:13:00.500
+Now let's do a quick review of what we just covered.
+
+168
+00:13:00.500 --> 00:13:05.780
+Once we have re-imported the head LODs and updated the metahuman DNA, the next step is
+
+169
+00:13:05.780 --> 00:13:07.940
+to re-bind the grooms.
+
+170
+00:13:07.940 --> 00:13:14.379
+To do this, inside of the metahuman blueprint, select each of the groom components, then
+
+171
+00:13:14.379 --> 00:13:20.139
+open up the groom binding asset, assign the duplicated face mesh as the source skeletal
+
+172
+00:13:20.139 --> 00:13:23.700
+mesh, and then compile and save.
+
+173
+00:13:23.700 --> 00:13:29.540
+To assign a custom body, in the metahuman blueprint, select the body component, then
+
+174
+00:13:29.540 --> 00:13:37.180
+in the details panel, assign the body skeletal mesh to the skeletal mesh asset, then compile
+
+175
+00:13:37.180 --> 00:13:39.420
+and save.
+
+176
+00:13:39.420 --> 00:13:45.100
+Now we just went through the steps of finalizing the customizations of our metahuman character.
+
+177
+00:13:45.100 --> 00:13:49.900
+For the hands-on exercise, I had already imported the custom body.
+
+178
+00:13:49.899 --> 00:13:54.740
+In the next section, I will go over the steps of how to import the custom body and configure
+
+179
+00:13:54.740 --> 00:13:59.299
+it so that it behaves correctly when it is assigned to the body component.
+

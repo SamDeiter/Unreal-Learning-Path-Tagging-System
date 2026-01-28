@@ -1,0 +1,726 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.719
+The last thing that we're going to take a look at in this course is a new type of control
+
+2
+00:00:04.719 --> 00:00:08.320
+that we haven't explored yet, and this is going to be the float control.
+
+3
+00:00:08.320 --> 00:00:13.640
+And we want to use it as a slider to make a simple open and close animation for our finger
+
+4
+00:00:13.640 --> 00:00:15.280
+controls.
+
+5
+00:00:15.280 --> 00:00:19.760
+So we're going to use this slider control and convert its translation values along
+
+6
+00:00:19.760 --> 00:00:23.519
+a single axis into rotation values for the finger controls.
+
+7
+00:00:23.519 --> 00:00:27.400
+And we'll do a simple bit of math to then multiply this value just to make sure that
+
+8
+00:00:27.400 --> 00:00:29.820
+it's given us some nice results.
+
+9
+00:00:29.820 --> 00:00:35.619
+And the main thing that we need to know going in is in what axis we want to rotate the fingers.
+
+10
+00:00:35.619 --> 00:00:42.100
+So in our case, this is going to be the Z axis, but we'll take a look at that in a moment.
+
+11
+00:00:42.100 --> 00:00:46.939
+So back inside the engine, let's first create our new float control.
+
+12
+00:00:46.939 --> 00:00:52.420
+So I'm just going to right click and come to new control here.
+
+13
+00:00:52.420 --> 00:00:59.100
+And in the details panel, we can change the value type of our control from Euler transform,
+
+14
+00:00:59.100 --> 00:01:06.060
+which is just a traditional control that you can transform with translation and rotation
+
+15
+00:01:06.060 --> 00:01:08.219
+and scale as well.
+
+16
+00:01:08.219 --> 00:01:10.740
+We're going to change that to a float.
+
+17
+00:01:10.740 --> 00:01:15.340
+And now you'll see that the control type changes inside the viewport here.
+
+18
+00:01:15.340 --> 00:01:20.700
+And when we move it, it sort of slides along this line that it's created.
+
+19
+00:01:20.700 --> 00:01:24.659
+So selecting that, I can only move in one axis.
+
+20
+00:01:24.659 --> 00:01:27.180
+Currently that is the X axis.
+
+21
+00:01:27.180 --> 00:01:31.980
+So if we wanted to change that, we could do with the primary axis here, change that to
+
+22
+00:01:31.980 --> 00:01:37.900
+Y and it will move only in the Y axis or Z and it will move only in the Z axis.
+
+23
+00:01:37.900 --> 00:01:41.780
+But the X axis works fine for us for now.
+
+24
+00:01:41.780 --> 00:01:47.980
+Now one thing you'll notice as well, we can't move this float control directly in the viewport.
+
+25
+00:01:47.980 --> 00:01:53.260
+So we'll have to create another control as its parent and then use that to move it.
+
+26
+00:01:53.260 --> 00:01:59.740
+So come back to create one more new control and we should probably name these.
+
+27
+00:01:59.740 --> 00:02:11.740
+So let's rename this slider parent and the actual float control will rename slider underscore
+
+28
+00:02:11.740 --> 00:02:13.620
+control.
+
+29
+00:02:13.620 --> 00:02:18.540
+Now we'll drop the slider control inside the slider parent.
+
+30
+00:02:18.540 --> 00:02:22.340
+And then this slider parent, since it's just a Euler transform control, we can actually
+
+31
+00:02:22.340 --> 00:02:25.219
+move that to wherever we'd like it to be.
+
+32
+00:02:25.219 --> 00:02:29.620
+So just for now, I'm just going to put it inside the, up around the waist between the
+
+33
+00:02:29.620 --> 00:02:35.939
+two hands because we're going to set this control up to make fists out of both hands.
+
+34
+00:02:35.939 --> 00:02:43.060
+So something I forgot to do there is actually set the offset transforms so that when we
+
+35
+00:02:43.060 --> 00:02:45.960
+compile it maintains its current location.
+
+36
+00:02:45.960 --> 00:02:50.379
+So we're going to choose set offset transform from current.
+
+37
+00:02:50.379 --> 00:02:54.699
+Now when we compile, that's where the slider parent stays.
+
+38
+00:02:54.699 --> 00:02:59.219
+And what I'm going to do is drop it inside the root control here so that anytime we move
+
+39
+00:02:59.219 --> 00:03:02.819
+our route, this slider is going to come with it.
+
+40
+00:03:02.819 --> 00:03:06.139
+And just so we don't get confused between the two controls, I'm actually going to set
+
+41
+00:03:06.139 --> 00:03:09.280
+the parent to not visible.
+
+42
+00:03:09.280 --> 00:03:13.460
+This means that whenever you use this in a sequence in the engine or whenever we're
+
+43
+00:03:13.460 --> 00:03:17.840
+previewing it in the viewport here, we can't actually see and interact with the slider
+
+44
+00:03:17.840 --> 00:03:20.359
+parent unless we make it visible again.
+
+45
+00:03:20.360 --> 00:03:26.160
+So that when we grab the slider control itself, we're not confusing what we're selecting.
+
+46
+00:03:26.160 --> 00:03:29.960
+So let's customize the look of the slider control a little bit.
+
+47
+00:03:29.960 --> 00:03:34.520
+So I'm just going to change the color to maybe like a purple kind of color.
+
+48
+00:03:34.520 --> 00:03:39.080
+And I'm going to change it to an arrow to solid.
+
+49
+00:03:39.080 --> 00:03:44.880
+And this is just to indicate the direction that the controller is going to move in.
+
+50
+00:03:44.880 --> 00:03:46.520
+And currently it's facing the wrong way.
+
+51
+00:03:46.520 --> 00:03:50.760
+So what we can do with this is come to our rotation channels here.
+
+52
+00:03:50.760 --> 00:03:54.200
+And in the Z, we'll put 90.
+
+53
+00:03:54.200 --> 00:03:58.680
+And in the X, I suspect is it minus 90?
+
+54
+00:03:58.680 --> 00:03:59.680
+Nope.
+
+55
+00:03:59.680 --> 00:04:03.280
+And I think it will be in the Y. So minus 90 in the Y.
+
+56
+00:04:03.280 --> 00:04:05.800
+There we go.
+
+57
+00:04:05.800 --> 00:04:12.120
+So now that when we grab our control, let's make it a little bit bigger as well actually.
+
+58
+00:04:12.120 --> 00:04:16.240
+Now that when you grab our control, we know in which direction it's going to move and
+
+59
+00:04:16.240 --> 00:04:21.160
+it just makes a little bit more sense visually.
+
+60
+00:04:21.160 --> 00:04:25.000
+Just as a quick tip, another way that we can actually adjust the position of this control,
+
+61
+00:04:25.000 --> 00:04:30.199
+or at least the rotation of it, is by holding control and pressing the full stop of the
+
+62
+00:04:30.199 --> 00:04:32.240
+period button.
+
+63
+00:04:32.240 --> 00:04:35.800
+That will then set us into the shape transform manipulating mode.
+
+64
+00:04:35.800 --> 00:04:39.720
+So if we wanted to just make sure that we were rotating in the correct direction and
+
+65
+00:04:39.720 --> 00:04:45.240
+not have to worry about using the actual physical sliders over here under the shape
+
+66
+00:04:45.240 --> 00:04:51.199
+transform, we could just do that in the shape transform manipulation mode.
+
+67
+00:04:51.199 --> 00:04:57.000
+So if you hold control and press period again, that will just exit that mode for us.
+
+68
+00:04:57.000 --> 00:05:01.639
+Now that we have the slider control looking how we want and positioned in the world where
+
+69
+00:05:01.639 --> 00:05:05.800
+we want, let's take a look at some of its details settings on the right hand side here
+
+70
+00:05:05.800 --> 00:05:11.680
+in the details panel and adjust some of the minimax settings because this line right here
+
+71
+00:05:11.680 --> 00:05:16.400
+at the moment is probably a little bit too long and if you were using this to animate,
+
+72
+00:05:16.400 --> 00:05:21.840
+it would feel probably quite cumbersome inside Sequencer.
+
+73
+00:05:21.840 --> 00:05:26.160
+So under the value heading here, we have some minimax settings.
+
+74
+00:05:26.160 --> 00:05:32.160
+Now you might find that this is actually kind of half hidden by default with the width of
+
+75
+00:05:32.160 --> 00:05:33.800
+this details panel.
+
+76
+00:05:33.800 --> 00:05:37.480
+So you can just drag that open a bit bigger and you'll be able to access minimax just
+
+77
+00:05:37.480 --> 00:05:38.480
+here.
+
+78
+00:05:38.800 --> 00:05:43.600
+Now you can see our maximum is set to 100 so I'm just going to bring that down to 20
+
+79
+00:05:43.600 --> 00:05:47.800
+and you can see in the viewport our line has become a lot shorter and this just means it's
+
+80
+00:05:47.800 --> 00:05:53.000
+going to be easier to manage and we don't need super super fine level of detail to go
+
+81
+00:05:53.000 --> 00:05:57.240
+all the way up to 100 units.
+
+82
+00:05:57.240 --> 00:06:00.640
+But you should adjust this value to whatever works best for your setup.
+
+83
+00:06:00.640 --> 00:06:05.319
+Now that the control is ready to go, let's make a start on the logic.
+
+84
+00:06:05.319 --> 00:06:09.759
+So we're going to set this up in a similar way to our alternate finger controls.
+
+85
+00:06:09.759 --> 00:06:12.279
+We're going to use a couple of get children nodes.
+
+86
+00:06:12.279 --> 00:06:20.519
+So if we search for get children, again we'll get two of these nodes and we're going to
+
+87
+00:06:20.519 --> 00:06:30.120
+look for our right hand control first, duplicate that with control D and then change that to
+
+88
+00:06:30.120 --> 00:06:32.639
+our left hand control.
+
+89
+00:06:32.639 --> 00:06:41.199
+And we're going to add these two together with an append as we did previously.
+
+90
+00:06:41.199 --> 00:06:45.839
+Again making sure that we tick recursive on each of these so that we find all of the children's
+
+91
+00:06:45.839 --> 00:06:51.159
+children and then we're going to pull off here and search for another four each node
+
+92
+00:06:51.159 --> 00:06:56.639
+because we're going to do some logic to each item in the array.
+
+93
+00:06:56.639 --> 00:07:00.560
+And next we want a set transform node because we're going to be setting the transform or
+
+94
+00:07:00.560 --> 00:07:03.399
+setting the rotation of these controls.
+
+95
+00:07:03.399 --> 00:07:10.439
+So if we right click search for set transform.
+
+96
+00:07:10.439 --> 00:07:14.439
+One thing that's important to change here is the space in which these transforms are
+
+97
+00:07:14.439 --> 00:07:15.920
+going to be made.
+
+98
+00:07:15.920 --> 00:07:18.120
+So we want to change it to local space.
+
+99
+00:07:18.120 --> 00:07:19.759
+We're currently set to global space.
+
+100
+00:07:19.759 --> 00:07:25.920
+And this is so that each control rotates around its local axis.
+
+101
+00:07:25.920 --> 00:07:29.879
+And under the item heading here I'm just going to change the type to control.
+
+102
+00:07:29.879 --> 00:07:36.480
+And this is more just for a bit of organization over anything else because when we connect
+
+103
+00:07:36.480 --> 00:07:42.000
+the elements to the item pin here, it doesn't do that.
+
+104
+00:07:42.000 --> 00:07:44.159
+I don't need to do that.
+
+105
+00:07:44.159 --> 00:07:49.120
+And next we need a set transform node to set the transforms of these controls.
+
+106
+00:07:49.120 --> 00:07:56.560
+So if we come across here, search for set transform and we're going to connect our element up
+
+107
+00:07:56.560 --> 00:08:00.680
+to the item pin here and then connect our executes.
+
+108
+00:08:00.680 --> 00:08:04.959
+One thing that's important to change on here, however, is the space that this node is functioning
+
+109
+00:08:04.959 --> 00:08:06.160
+in.
+
+110
+00:08:06.160 --> 00:08:09.319
+And we want to swap from global space to local space.
+
+111
+00:08:09.319 --> 00:08:15.199
+This is so that all the rotation happens around the local axis of each control.
+
+112
+00:08:15.199 --> 00:08:18.240
+So this is the logic for our finger controls.
+
+113
+00:08:18.240 --> 00:08:20.660
+We're finding the controls themselves.
+
+114
+00:08:20.660 --> 00:08:24.319
+We're running through each item in the array and then we're going to set the transform
+
+115
+00:08:24.639 --> 00:08:27.639
+as soon as we have the logic set up for the slider control.
+
+116
+00:08:27.639 --> 00:08:31.519
+The first thing we'll need is to bring our slider control into our rig graph and choose
+
+117
+00:08:31.519 --> 00:08:33.759
+get control.
+
+118
+00:08:33.759 --> 00:08:39.519
+And then we're going to be using the float value as our sort of translation input value
+
+119
+00:08:39.519 --> 00:08:44.000
+to drive the rotations of the finger controls.
+
+120
+00:08:44.000 --> 00:08:51.679
+So if we pull off float value and search for from Euler, what this does is it converts
+
+121
+00:08:51.759 --> 00:08:58.479
+the float value information, so that single transform information into rotation values.
+
+122
+00:08:58.479 --> 00:09:05.279
+If I just delete the conversion there, we don't need to convert this into all of our
+
+123
+00:09:05.279 --> 00:09:06.479
+rotation channels.
+
+124
+00:09:06.479 --> 00:09:09.399
+We just want to convert it into the Z rotation.
+
+125
+00:09:09.399 --> 00:09:14.719
+So I'm going to drag that into Z there and plug our result into the value pin here.
+
+126
+00:09:14.719 --> 00:09:21.120
+And then what we should see as I move this, if we connect the logic up first, just going
+
+127
+00:09:21.200 --> 00:09:27.200
+to add another sequence pin to hold S and left click.
+
+128
+00:09:31.200 --> 00:09:37.600
+What we should see as we move this control is that our finger bones or our finger controls
+
+129
+00:09:37.600 --> 00:09:39.759
+start to move, which is a great start.
+
+130
+00:09:39.759 --> 00:09:46.759
+But it's not quite right, so we need to do a little bit of maths to get this fixed.
+
+131
+00:09:47.080 --> 00:09:51.080
+Now the first thing you'll notice is our fingers are kind of rotating the wrong way.
+
+132
+00:09:51.960 --> 00:09:53.480
+I'll zoom in a little bit here.
+
+133
+00:09:56.519 --> 00:10:02.679
+So as we slide this slider over to the right, they're more extending than they are curling.
+
+134
+00:10:04.039 --> 00:10:05.799
+So we could fix this in one of two ways.
+
+135
+00:10:05.799 --> 00:10:11.080
+We could flip the value that's coming out of our float control, or on the actual control
+
+136
+00:10:11.080 --> 00:10:13.800
+max settings and min settings.
+
+137
+00:10:13.800 --> 00:10:19.800
+We could flip them the other way, so we could go from minus 20 to zero.
+
+138
+00:10:21.400 --> 00:10:25.320
+If I just compile that, we'll see that our control goes the other way now.
+
+139
+00:10:25.960 --> 00:10:31.480
+But our finger controls are curling instead of flexing.
+
+140
+00:10:33.960 --> 00:10:39.480
+Now something else we need to do as well is it feels like we need to increase how much they curl,
+
+141
+00:10:40.039 --> 00:10:42.039
+because they don't really curl enough for me.
+
+142
+00:10:43.240 --> 00:10:49.320
+So we could do this by just increasing the length of this line that we have for the float,
+
+143
+00:10:49.320 --> 00:10:52.039
+so coming to the minimum and making that number larger.
+
+144
+00:10:52.039 --> 00:10:54.120
+So we could go to minus 80 for example.
+
+145
+00:10:55.080 --> 00:11:01.480
+Or if we like the way it's set up currently, what we can do is multiply the value coming out of that float control.
+
+146
+00:11:02.279 --> 00:11:10.440
+By something like three, I think we found three works quite well here.
+
+147
+00:11:12.279 --> 00:11:17.879
+And we'll see that that just increases how much, or times is the rotation value by three essentially,
+
+148
+00:11:18.440 --> 00:11:20.920
+increases how much the finger controls curl.
+
+149
+00:11:23.320 --> 00:11:28.600
+Now the last thing we need to do here is just connect up our bones to our controls.
+
+150
+00:11:29.560 --> 00:11:34.600
+And we're going to do that in a similar way to how we were using the finger controls to find,
+
+151
+00:11:34.600 --> 00:11:39.080
+sorry, the finger bones to find our finger control names in previous setups.
+
+152
+00:11:39.080 --> 00:11:40.680
+But we'll do it in a slightly different way.
+
+153
+00:11:41.399 --> 00:11:46.200
+So this time we are searching for the hand controls rather than the hand bones.
+
+154
+00:11:47.000 --> 00:11:51.480
+So our names currently have underscore CTRL on the end.
+
+155
+00:11:51.480 --> 00:11:54.279
+And we can remove that instead of trying to add it.
+
+156
+00:11:54.279 --> 00:11:56.680
+So I'm just going to drag this out here to give us a little bit more space.
+
+157
+00:11:58.600 --> 00:12:05.399
+If I open the element pin here and come down to name, we can search for replace.
+
+158
+00:12:06.120 --> 00:12:09.960
+And under core, we'll get this replace node.
+
+159
+00:12:11.080 --> 00:12:15.000
+And now what we're going to search for, this is essentially a search and replace node.
+
+160
+00:12:15.720 --> 00:12:18.200
+What we're going to search for is underscore CTRL.
+
+161
+00:12:19.159 --> 00:12:22.440
+And we're going to replace it with none because we essentially want to remove it.
+
+162
+00:12:23.160 --> 00:12:31.320
+And then the next thing we're going to do is search for a set transform node.
+
+163
+00:12:35.560 --> 00:12:36.520
+Bring that over here.
+
+164
+00:12:39.000 --> 00:12:43.960
+And we want to get the transforms of our controls and set the transforms of our bones.
+
+165
+00:12:44.840 --> 00:12:50.120
+So I'm going to pull off the element pin here and search for get transform.
+
+166
+00:12:51.080 --> 00:12:55.320
+And that means for everything inside the array here, we're going to get the transform off.
+
+167
+00:12:57.799 --> 00:13:00.840
+And then I'm going to plug that into our set transform node here.
+
+168
+00:13:02.360 --> 00:13:09.639
+And for the children or the item of the transform here, I'm going to pop item open,
+
+169
+00:13:10.519 --> 00:13:14.759
+plug the name of our replace pin into the name of our transform pin.
+
+170
+00:13:15.399 --> 00:13:17.480
+And we want to make sure that the type is set to bones.
+
+171
+00:13:17.480 --> 00:13:18.680
+So it's searching for bones.
+
+172
+00:13:18.679 --> 00:13:24.839
+So once we connect this logic up and compile, what we should see is that our bones are now
+
+173
+00:13:24.839 --> 00:13:31.079
+being controlled by the joints. And this with this one control, we're able to make a fist or at least
+
+174
+00:13:31.879 --> 00:13:34.599
+drive the controls of the fingers.
+
+175
+00:13:37.719 --> 00:13:40.599
+And that's your setup. So we're searching for the hand controls.
+
+176
+00:13:41.239 --> 00:13:43.479
+We're adding them together inside a single array.
+
+177
+00:13:44.200 --> 00:13:49.560
+And then for each of those items, we are setting the controls rotation using the
+
+178
+00:13:49.560 --> 00:13:54.360
+the translation of the float control. And then we're going to use the same control names,
+
+179
+00:13:54.360 --> 00:13:59.080
+but just by removing underscore control to find our bone names.
+
+180
+00:14:00.200 --> 00:14:03.560
+And then we're going to use the transform of our controls
+
+181
+00:14:05.159 --> 00:14:07.080
+and set the transform of our bones.
+

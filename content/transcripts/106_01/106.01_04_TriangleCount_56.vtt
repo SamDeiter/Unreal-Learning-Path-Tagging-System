@@ -1,0 +1,314 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.000
+In this video, we'll explore Triangle Count with both LODs and Nanai.
+
+2
+00:00:07.000 --> 00:00:12.000
+Oftentimes, when using TCC tools that aren't designed for a real-time environment,
+
+3
+00:00:12.000 --> 00:00:14.000
+we can end up with very complex geometry.
+
+4
+00:00:14.000 --> 00:00:18.000
+Perhaps it's coming from a program like Revit where construction is the goal,
+
+5
+00:00:18.000 --> 00:00:23.000
+or 3ds Max where perhaps it's going to render with an offline tool such as V-Ray,
+
+6
+00:00:23.000 --> 00:00:27.000
+and therefore the size of the scene is not as important as it might be
+
+7
+00:00:27.000 --> 00:00:30.000
+in a real-time environment like Unreal Engine.
+
+8
+00:00:30.000 --> 00:00:36.000
+Be careful of the level of detail you actually need before you bring your assets into Unreal.
+
+9
+00:00:36.000 --> 00:00:40.000
+If we don't need to see every tread on a tire on a forklift, for example,
+
+10
+00:00:40.000 --> 00:00:46.000
+perhaps those tires could be simplified, similar when it comes to things like nuts, bolts, screws,
+
+11
+00:00:46.000 --> 00:00:49.000
+things that might be important for a manufacturing process,
+
+12
+00:00:49.000 --> 00:00:53.000
+but not necessarily for a real-time visualization of those products.
+
+13
+00:00:53.000 --> 00:00:58.000
+And yes, we will discuss Nanite where you can have millions of triangles at a time,
+
+14
+00:00:58.000 --> 00:01:04.000
+but for the moment, let's assume we're developing for a platform that does not support Nanite, like a mobile phone.
+
+15
+00:01:04.000 --> 00:01:11.000
+LODs stand for Level of Detail. Starting with LOD 0, we have the highest polyversion of this equipment,
+
+16
+00:01:11.000 --> 00:01:16.000
+going down to LOD 3 where we can see that it becomes simpler and simpler.
+
+17
+00:01:16.000 --> 00:01:20.000
+The idea of Levels of Detail is that you change the level of detail you're seeing
+
+18
+00:01:20.000 --> 00:01:26.000
+as you get further away from the object, meaning that something that is only taking up a few pixels on screen
+
+19
+00:01:26.000 --> 00:01:32.000
+will not be rendering at the same level that it would be if it is taking up most of your monitor.
+
+20
+00:01:32.000 --> 00:01:38.000
+There are a number of ways to generate LODs. You can do them, of course, in your DCC tool and import them.
+
+21
+00:01:38.000 --> 00:01:42.000
+You can do it manually in Unreal. We can set up the number of LODs we want,
+
+22
+00:01:42.000 --> 00:01:49.000
+change the triangle percentage, set up a few LOD groups, which already have certain settings for how they're set up,
+
+23
+00:01:49.000 --> 00:01:56.000
+and then we can even get into details related to screen size and when we switch from one LOD to another.
+
+24
+00:01:56.000 --> 00:02:05.000
+There's a handy Mesh LOD coloration mode in Unreal that allows us to visualize which LOD is active at any given moment.
+
+25
+00:02:05.000 --> 00:02:13.000
+Here in the LOD map, we have our forklift, and if we go to that visualization for Mesh LOD coloration,
+
+26
+00:02:13.000 --> 00:02:19.000
+we can see the color change as we zoom in and out, despite the fact that when we're in Lit Mode,
+
+27
+00:02:19.000 --> 00:02:23.000
+you really can't tell when we're switching from one LOD to another.
+
+28
+00:02:23.000 --> 00:02:30.000
+We can also see this visualized directly in the Static Mesh Editor window where we start with level 0,
+
+29
+00:02:30.000 --> 00:02:36.000
+and we go very quickly to level 1, 2, 3 as the screen size changes.
+
+30
+00:02:36.000 --> 00:02:41.000
+If we wanted to adjust any of this further, we could simply type in LOD, make this custom,
+
+31
+00:02:41.000 --> 00:02:48.000
+use however many LODs we want, then we could even do something like uncheck Auto Compute LOD Distances,
+
+32
+00:02:48.000 --> 00:02:53.000
+and then start to get very specific with the screen sizes that we swapped these two.
+
+33
+00:02:53.000 --> 00:03:04.000
+As a quick example of another adjustment we could make, let's go down to LOD Settings and add in a fifth LOD, hit Apply Changes,
+
+34
+00:03:04.000 --> 00:03:09.000
+and of course LOD 0 is 1, so we'll see a total of LOD 4,
+
+35
+00:03:09.000 --> 00:03:14.000
+but we won't see it until we say what screen size we should switch to it on.
+
+36
+00:03:14.000 --> 00:03:20.000
+So as we go .56, .42, maybe this one becomes .2.
+
+37
+00:03:20.000 --> 00:03:28.000
+And now 0, 1, 2, 3, 4, once we get to there as that screen size goes below 2.
+
+38
+00:03:28.000 --> 00:03:36.000
+And at any one of those we can also decimate it further and say actually when we're at .2,
+
+39
+00:03:36.000 --> 00:03:42.000
+I want to be at 20% triangles, and we could apply that.
+
+40
+00:03:42.000 --> 00:03:50.000
+Confirm we don't see too big of a difference, and now we're all the way down at less than 2,000 triangles.
+
+41
+00:03:50.000 --> 00:03:57.000
+If the platform you're targeting supports it, Nanite can be an excellent way to handle millions and millions of polygons
+
+42
+00:03:57.000 --> 00:04:00.000
+for your scene without hurting performance.
+
+43
+00:04:00.000 --> 00:04:06.000
+The basic way Nanite works is it's identifying what is visible on a pixel per pixel level for your project
+
+44
+00:04:06.000 --> 00:04:11.000
+and ensures not to draw more polygons than will actually be visible within that pixel.
+
+45
+00:04:11.000 --> 00:04:19.000
+Thus we can have something that started as 5.8 triangles as seen in the STAT RHI window in the top,
+
+46
+00:04:19.000 --> 00:04:24.000
+and then reduce that down to about 16,000 triangles just by enabling Nanite.
+
+47
+00:04:24.000 --> 00:04:27.000
+There's a number of different ways to enable Nanite.
+
+48
+00:04:27.000 --> 00:04:32.000
+You can right-click on an object, go to the Nanite window and change it there.
+
+49
+00:04:32.000 --> 00:04:36.000
+When we open up our static or skeletal mesh window, we can enable Nanite,
+
+50
+00:04:36.000 --> 00:04:39.000
+and yes, skeletal meshes are supported by Nanite well,
+
+51
+00:04:39.000 --> 00:04:45.000
+and yes, skeletal meshes are supported by Nanite as well, including trees and foliage now.
+
+52
+00:04:45.000 --> 00:04:49.000
+And when we're importing through the FBX Import Options dialog,
+
+53
+00:04:49.000 --> 00:04:53.000
+we also often have the option to generate a Nanite mesh at that time as well.
+
+54
+00:04:53.000 --> 00:04:56.000
+Always be sure to hit Apply Changes when you're done.
+
+55
+00:04:56.000 --> 00:04:58.000
+Otherwise, you won't see the change.
+
+56
+00:04:58.000 --> 00:05:01.000
+Let's go ahead and open up the Nanite map,
+
+57
+00:05:01.000 --> 00:05:06.000
+and we'll see we have a piece of geometry here where if we type STAT RHI,
+
+58
+00:05:06.000 --> 00:05:15.000
+it's 7 million, nearly 8 million triangles being drawn here with over 500 draw calls.
+
+59
+00:05:15.000 --> 00:05:16.000
+Pretty expensive.
+
+60
+00:05:16.000 --> 00:05:19.000
+Oh, and we have a few additional pieces of geometry as well.
+
+61
+00:05:19.000 --> 00:05:24.000
+So what we could do is find where these live.
+
+62
+00:05:24.000 --> 00:05:28.000
+Over here in Nanite, we have our different static meshes,
+
+63
+00:05:28.000 --> 00:05:34.000
+and I could simply right-click on all of these, tell them all to enable Nanite.
+
+64
+00:05:34.000 --> 00:05:38.000
+And then without changing anything about the complexity of the scene,
+
+65
+00:05:38.000 --> 00:05:45.000
+we now see we're drawing 13,000 polygons, and we're down to about 200 draw calls,
+
+66
+00:05:45.000 --> 00:05:50.000
+though that number is actually less because of all the other elements being drawn here in the editor.
+
+67
+00:05:50.000 --> 00:05:56.000
+If we'd like to visualize Nanite directly, we can go to Nanite Visualization Triangles
+
+68
+00:05:56.000 --> 00:06:06.000
+and see the sort of real-time, LOD pixel-level triangle adjustments happening
+
+69
+00:06:06.000 --> 00:06:08.000
+as we get closer and farther away.
+
+70
+00:06:08.000 --> 00:06:10.000
+No need to generate LODs.
+
+71
+00:06:10.000 --> 00:06:13.000
+Now, of course, many platforms don't support Nanite,
+
+72
+00:06:13.000 --> 00:06:16.000
+and Nanite can be a bit of a ram hog,
+
+73
+00:06:16.000 --> 00:06:20.000
+and of course, you have to package all these assets at their full quality,
+
+74
+00:06:20.000 --> 00:06:24.000
+so there's still a number of instances where a traditional LOD system might be best,
+
+75
+00:06:24.000 --> 00:06:30.000
+but there is something very satisfying about being able to get very close to geometry
+
+76
+00:06:30.000 --> 00:06:34.000
+and seeing as much detail as we can.
+
+77
+00:06:34.000 --> 00:06:35.000
+Thanks, Nanite.
+
+78
+00:06:35.000 --> 00:06:39.000
+In the next video, we'll look at the Unreal Engine modeling tools.
+

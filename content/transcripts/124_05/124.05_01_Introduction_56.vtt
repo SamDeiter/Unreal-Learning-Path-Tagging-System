@@ -1,0 +1,218 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.520
+Hello and welcome to this course, an introduction to smart objects.
+
+2
+00:00:07.520 --> 00:00:13.700
+We will be teaching this course in engine version 5.6 and all the project files that
+
+3
+00:00:13.700 --> 00:00:18.719
+come with it will be in this engine version.
+
+4
+00:00:18.719 --> 00:00:24.240
+Most of this is relevant from 5.2 onwards.
+
+5
+00:00:24.240 --> 00:00:28.400
+From this course we have a couple of outcomes that we would like to achieve.
+
+6
+00:00:28.559 --> 00:00:33.600
+Firstly, we would like you to have a good understanding of what smart objects are and
+
+7
+00:00:33.600 --> 00:00:39.359
+how they were, also that you can set them up and configure the smart objects for different situations
+
+8
+00:00:41.039 --> 00:00:47.599
+and understand and know how to implement them alongside the gameplay behavior system
+
+9
+00:00:48.239 --> 00:00:55.439
+and state trees. Finally, we would like you to have a good idea of where you can go in order
+
+10
+00:00:55.439 --> 00:01:00.159
+to expand your knowledge and do some more advanced things with smart objects.
+
+11
+00:01:02.399 --> 00:01:06.000
+In this video we are going to be going over a little bit of theory
+
+12
+00:01:06.000 --> 00:01:10.959
+before we jump into the engine and start putting things together.
+
+13
+00:01:12.879 --> 00:01:19.759
+First of all, what are smart objects? Well, smart objects are interactive objects you can
+
+14
+00:01:19.760 --> 00:01:28.160
+place in a level that both AI agents and the player can use. They hold information that is
+
+15
+00:01:28.160 --> 00:01:36.240
+needed for those interactions but not the actual execution logic. So in this project
+
+16
+00:01:36.240 --> 00:01:42.480
+we are going to be doing a lot of sitting down. So a nice example of a smart object
+
+17
+00:01:42.480 --> 00:01:49.280
+because we have to get the skeletal mesh to interact with the chair so that it
+
+18
+00:01:49.359 --> 00:01:57.040
+looks natural. But smart objects don't need to just be chairs, no, but anyway they can be
+
+19
+00:01:57.599 --> 00:02:04.879
+any number of things. At any point you would like your character, player or AI,
+
+20
+00:02:05.520 --> 00:02:12.639
+to interact with the world in a kind of natural way. That's where smart objects can come in handy.
+
+21
+00:02:13.119 --> 00:02:22.639
+They work by using a reservation system. At any one point a specific slot for a smart object
+
+22
+00:02:22.639 --> 00:02:33.599
+can either be free, claimed or occupied. So this will allow us to be able to select specific slots.
+
+23
+00:02:33.599 --> 00:02:39.039
+So you can only, you might only want to be able to select a free one but you might want to be able
+
+24
+00:02:39.199 --> 00:02:43.840
+select a free one but you might want to be able to override a claimed one for example.
+
+25
+00:02:48.639 --> 00:02:57.439
+At the core of the smart object system is the smart object subsystem. And this is what we
+
+26
+00:02:57.439 --> 00:03:06.479
+would talk to at any point that will allow us to go in search and filter for our specific smart
+
+27
+00:03:06.560 --> 00:03:14.000
+objects and be able to reserve them so that we can use them and release them and finished with them.
+
+28
+00:03:15.280 --> 00:03:21.199
+The main class that we're going to be working with is the smart object factor component.
+
+29
+00:03:22.000 --> 00:03:28.479
+And this is what we are going to be adding to our numerous chairs but can work with any
+
+30
+00:03:28.560 --> 00:03:38.000
+different smart object. The smart objects themselves do not contain any game pay logic.
+
+31
+00:03:38.879 --> 00:03:43.839
+You'll see that this whole thing is quite modular and we'll talk about that a little bit but this
+
+32
+00:03:43.839 --> 00:03:52.079
+allows us to reuse game pay logic in different places. So in this we would have a behavior
+
+33
+00:03:52.079 --> 00:03:58.000
+definition which would tell the players what to do such as play and animation or trigger and
+
+34
+00:03:59.119 --> 00:04:05.840
+the smart object subsystem has a lot of functionality that will allow us to filter and
+
+35
+00:04:06.719 --> 00:04:14.959
+search the smart objects that are in the world is mainly done spatially. So we can find
+
+36
+00:04:15.599 --> 00:04:22.879
+objects which are physically close to our agents but we also can use gameplay tags.
+
+37
+00:04:23.439 --> 00:04:29.839
+The full cycle works a little bit like this. The subsystem will search for a specific smart
+
+38
+00:04:29.839 --> 00:04:36.159
+object, claim a slot then depending on how you have the behaviors set up and your state tree
+
+39
+00:04:36.719 --> 00:04:42.399
+who would move to it, perform the behavior and then after the behavior is marked as done
+
+40
+00:04:42.959 --> 00:04:49.759
+it would release the slot again. So this process makes interactions structured hand-reliable.
+
+41
+00:04:53.279 --> 00:04:58.879
+Now there are three other classes that I would like to touch on before we get into the ended
+
+42
+00:04:59.600 --> 00:05:05.120
+and these are the core classes that we will be manipulating to put together our scene.
+
+43
+00:05:06.240 --> 00:05:12.319
+First one is definitions. This controls the slots, the entry points and the setup.
+
+44
+00:05:13.600 --> 00:05:19.439
+Then we have the config. Now this is a data object that will provide different parameters
+
+45
+00:05:19.439 --> 00:05:26.160
+for the behavior. We're going to use it to change the animation that's played.
+
+46
+00:05:27.519 --> 00:05:34.240
+Finally there is the behavior itself and this is what holds the actual instructions for what the
+
+47
+00:05:34.879 --> 00:05:41.279
+characters are going to do. As you can see in this illustration here, her behavior can be
+
+48
+00:05:41.279 --> 00:05:47.920
+referenced by multiple configs and a config can be referenced by multiple definitions.
+
+49
+00:05:49.680 --> 00:05:57.600
+It is worth saying a lot of the smart object functionality is exposed to blueprints.
+
+50
+00:05:58.480 --> 00:06:09.279
+However C++ still has a lot more power over this system. So if you find yourself limited by what
+
+51
+00:06:09.279 --> 00:06:14.879
+the smart object system does if you're working with blueprints, it might be worth jumping into
+
+52
+00:06:14.879 --> 00:06:20.000
+the C++ in order to tailor the system to your specific needs.
+
+53
+00:06:21.519 --> 00:06:27.439
+And that brings us to the end of our theory. Next up we will be jumping into the engine
+
+54
+00:06:27.439 --> 00:06:30.800
+and start putting some smart objects together.
+

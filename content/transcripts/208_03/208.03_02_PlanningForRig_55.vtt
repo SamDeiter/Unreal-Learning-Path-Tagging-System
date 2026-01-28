@@ -1,0 +1,226 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.200
+So, let's first take a look at planning for the control rig and some considerations to
+
+2
+00:00:06.200 --> 00:00:10.240
+make when you're thinking about how your mechanical mesh should be deforming.
+
+3
+00:00:10.240 --> 00:00:16.640
+So, it's useful to think of it as sort of rigid body versus organic skinning and thinking
+
+4
+00:00:16.640 --> 00:00:20.839
+about how each particular piece of the mesh needs to deform.
+
+5
+00:00:20.839 --> 00:00:26.199
+So mechanical meshes are typically rigid bodies and should be skinned to one bone each.
+
+6
+00:00:26.199 --> 00:00:32.039
+So, it's very likely that all of your mechanical meshes are broken into many different parts
+
+7
+00:00:32.039 --> 00:00:36.079
+and you know they're all connected and held together with screws and bolts and rivets
+
+8
+00:00:36.079 --> 00:00:39.000
+and they all have different pivot points.
+
+9
+00:00:39.000 --> 00:00:45.399
+So you want these solid parts to only be skinned to one bone so that they don't deform
+
+10
+00:00:45.399 --> 00:00:50.799
+in an unusual way and you know look all bendy when it's animating.
+
+11
+00:00:50.799 --> 00:00:55.120
+But that's not necessarily going to be true for every part of your skeletal mesh.
+
+12
+00:00:55.119 --> 00:00:59.879
+Things like springs should be weighted perfectly evenly between two bones so that when they
+
+13
+00:00:59.879 --> 00:01:04.280
+compress and contract they'll be deforming accurately.
+
+14
+00:01:04.280 --> 00:01:08.319
+And you may also have parts like cables or wires on your mesh that are carrying things
+
+15
+00:01:08.319 --> 00:01:14.319
+like hydraulic fluid or electrical cables and these obviously are going to need to deform
+
+16
+00:01:14.319 --> 00:01:18.439
+in a more organic way than this big chunk of solid metal.
+
+17
+00:01:18.439 --> 00:01:22.959
+So they may have several influences from different joints depending on you know how long they
+
+18
+00:01:22.959 --> 00:01:26.599
+are and how they might need to deform.
+
+19
+00:01:26.599 --> 00:01:31.879
+So it's really about considering and thinking how each part of the mesh needs to deform
+
+20
+00:01:31.879 --> 00:01:36.000
+and then just skinning them in the appropriate way to make the rigging in the engine a bit
+
+21
+00:01:36.000 --> 00:01:40.439
+more straightforward for yourself.
+
+22
+00:01:40.439 --> 00:01:45.359
+When it comes to orienting your bones it can be really helpful to orient them in the direction
+
+23
+00:01:45.359 --> 00:01:46.759
+of travel.
+
+24
+00:01:46.759 --> 00:01:51.119
+So typically we would use the X-axis to point down the bone in the direction that that mesh
+
+25
+00:01:51.119 --> 00:01:52.599
+would travel.
+
+26
+00:01:52.599 --> 00:01:56.359
+And this is just going to help speed up your rigging workflow in the engine.
+
+27
+00:01:56.359 --> 00:02:01.759
+So when you're thinking about things like pistons or any sort of telescopic type movement
+
+28
+00:02:01.759 --> 00:02:05.839
+being consistent with your axis that you're pointing down the bone can be really helpful.
+
+29
+00:02:05.839 --> 00:02:10.799
+And when it comes to meshes that act in the same way so like the tires of a car for example
+
+30
+00:02:10.799 --> 00:02:14.479
+they're all going to be rolling the same and sort of turning the same.
+
+31
+00:02:14.479 --> 00:02:19.479
+Setting up all of the bones with the same orientation and this could just be world orienting them
+
+32
+00:02:19.479 --> 00:02:24.879
+for example can be really helpful in simplifying the control rig logic again because you can
+
+33
+00:02:24.879 --> 00:02:29.599
+use the same logic for all of these tires instead of making sort of custom adjustments
+
+34
+00:02:29.599 --> 00:02:34.879
+per tire to account for any differences in their orientations.
+
+35
+00:02:34.879 --> 00:02:40.519
+Mirroring bone orientations by behavior can also be very helpful because if you have something
+
+36
+00:02:40.519 --> 00:02:45.280
+like a claw grabber that we have here we can set things up so that we can feed the same
+
+37
+00:02:45.280 --> 00:02:50.840
+logic into both bones and easily use one control to manipulate both of them.
+
+38
+00:02:50.840 --> 00:02:54.920
+So in this example with this sort of claw grabber that we have here the logic has been
+
+39
+00:02:54.920 --> 00:03:01.080
+set up so that we can move this teal colored controller left and right and as we do that
+
+40
+00:03:01.080 --> 00:03:05.479
+the claw will open and close without having to add any extra logic to account for the
+
+41
+00:03:05.479 --> 00:03:08.080
+differences in their orientation.
+
+42
+00:03:08.080 --> 00:03:12.319
+So we're just grabbing the transform values and converting it to rotations and feeding
+
+43
+00:03:12.319 --> 00:03:15.199
+that straight into the into the claw bones.
+
+44
+00:03:15.199 --> 00:03:19.039
+And there's only possible if you mirror by behavior.
+
+45
+00:03:19.039 --> 00:03:23.479
+Something that you might find with your skeleton hierarchy is that you end up having fewer
+
+46
+00:03:23.479 --> 00:03:29.399
+chains of bones and more individual children coming off a shed parent.
+
+47
+00:03:29.399 --> 00:03:34.280
+So in this example here we've got a car where we have a root and then each of the wheels
+
+48
+00:03:34.280 --> 00:03:40.039
+and the doors simply have a single bone to control those meshes.
+
+49
+00:03:40.039 --> 00:03:44.759
+And with this example of the suspension on the car chassis you can see that this rear
+
+50
+00:03:44.799 --> 00:03:51.599
+axle and everything that's fixed to it is a child of the same parent on the right here.
+
+51
+00:03:51.599 --> 00:03:58.120
+And that's because any meshes like suspension springs or damper arms here where each end
+
+52
+00:03:58.120 --> 00:04:03.680
+is fixed to a different mesh making those bones a child of the mesh that they're fixed
+
+53
+00:04:03.680 --> 00:04:08.199
+to is going to make things much easier when you're rigging an engine than if you had a
+
+54
+00:04:08.199 --> 00:04:10.479
+chain of bones here instead.
+
+55
+00:04:10.519 --> 00:04:16.159
+So with a mechanical rig you'll probably find that you have fewer chains of joints and more
+
+56
+00:04:16.159 --> 00:04:20.680
+single children coming from shed parents of the things that they're affixed to.
+

@@ -1,0 +1,178 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.000
+In this video, we'll start with our overview of Datasmith and explore how it often gets used.
+
+2
+00:00:07.000 --> 00:00:18.000
+Datasmith is one of the ways that Unreal Engine can ingest a wide range of DCC, digital content creation, model data, for a wide variety of industries.
+
+3
+00:00:18.000 --> 00:00:27.000
+Often, that data is not set up in its original tools for real-time rendering, and so it's important to set up a project as much as possible
+
+4
+00:00:27.000 --> 00:00:40.000
+to ingest the Datasmith data in a useful way. When importing 3D data from DCCs, it used to be very common to use more standard file formats like FBX or OBJ,
+
+5
+00:00:40.000 --> 00:00:46.000
+but that presented a number of issues with how different DCC applications would create those files.
+
+6
+00:00:46.000 --> 00:00:58.000
+Datasmith was created as a sort of one-stop shop to unify the way that DCC applications export their data so that they can come into Unreal Engine in a consistent format.
+
+7
+00:00:58.000 --> 00:01:08.000
+That being said, when data exists in other applications, especially for particular industries, the goal is not necessarily an optimized real-time scene,
+
+8
+00:01:08.000 --> 00:01:20.000
+so while Datasmith can take care of some of this work in the conversion process, it is important to have these considerations in mind when prepping to export from your DCC application of choice.
+
+9
+00:01:20.000 --> 00:01:34.000
+We want to make sure we're able to bring in key properties from our DCC projects, such as geometries, material, lighting, and animation, but again, we need to ensure that they can be optimized and run well inside of Unreal Engine.
+
+10
+00:01:34.000 --> 00:01:53.000
+It's important to consider the different purposes of why and how different data was created. For example, AEC data, such as in a program like Revit, is created for construction, and all of the detail of that might not be as relevant for a real-time environment that is intending to visualize that building.
+
+11
+00:01:54.000 --> 00:02:06.000
+One of the key components of Datasmith that we'll be discussing is the importance of being able to maintain consistent scene hierarchies and pivot point locations as we move from our DCC tool over into Unreal Engine.
+
+12
+00:02:06.000 --> 00:02:12.000
+The Datasmith file type is .uDatasmith, this is regardless of which program it comes from.
+
+13
+00:02:12.000 --> 00:02:35.000
+The Datasmith file extension is .uDatasmith, regardless of what DCC tool creates the file. It often requires its own special exporters, which can be installed the way most plugins for each DCC tool are, though many software applications are now starting to incorporate .uDatasmith as its own file type, such as Revit, without the need for a special plugin.
+
+14
+00:02:35.000 --> 00:02:51.000
+The hierarchy we'll see for Datasmith files include the .uDatasmith file, which primarily serves as an index, and then we'll have a folder, which includes .uDmesh files, as well as various textures, which are saved in their original format, such as JPEG or PNG.
+
+15
+00:02:51.000 --> 00:02:59.000
+When we import these via Datasmith, they all get turned into .uAsset files, unless you're using something like Datasmith Runtime.
+
+16
+00:02:59.000 --> 00:03:05.000
+When we import our Datasmith files into Unreal Engine, they become standard .uAsset files.
+
+17
+00:03:05.000 --> 00:03:22.000
+Note that CAD applications do not require special exporters, CAD files are natively read by the Datasmith importer, CAD services are converted into Polymeshs, and once again, all that data is converted in Unreal Engine into .uAsset files.
+
+18
+00:03:22.000 --> 00:03:28.000
+The Datasmith plugin exporters can be downloaded from the Unreal Engine site, right here.
+
+19
+00:03:28.000 --> 00:03:41.000
+On the website, you'll see a brief description of what the Datasmith export plugins are for, and then a large list of the different DCC applications supported, as well as various versions available at the time.
+
+20
+00:03:41.000 --> 00:03:48.000
+You'll also see links to archived versions, if you need to go back into an earlier version of Unreal.
+
+21
+00:03:49.000 --> 00:03:53.000
+You'll see Mac and Windows are often both included.
+
+22
+00:03:53.000 --> 00:04:13.000
+And some plugins, such as Revit, stop at 2023, not because they're no longer supported, but because for Revit 2024 and newer, that functionality is included directly in the application.
+
+23
+00:04:13.000 --> 00:04:18.000
+Note that there are some plugins that require you to go to a third party website.
+
+24
+00:04:18.000 --> 00:04:31.000
+When we import Datasmith files into Unreal Engine, we go to the Add Content button, scroll down to Datasmith, and then you'll see we have the option for both File Import and Direct Link Import.
+
+25
+00:04:31.000 --> 00:04:36.000
+Please note if you don't see this option that you'll have to enable Datasmith as a plugin.
+
+26
+00:04:36.000 --> 00:04:45.000
+Note when importing DeltaGen FBX files via Datasmith's import system, that Simplify Note hierarchy is on by default.
+
+27
+00:04:45.000 --> 00:04:51.000
+You might want to consider turning this off if you've properly set up your hierarchy and want to preserve it.
+
+28
+00:04:51.000 --> 00:04:55.000
+A brief word about Datasmith Direct Link.
+
+29
+00:04:55.000 --> 00:05:07.000
+Choosing this option allows you to create a direct link between your DCC application and Unreal Engine where changes that you make in your DCC application will be reflected in Unreal Engine in real time.
+
+30
+00:05:07.000 --> 00:05:18.000
+We recommend disabling Use Less CPU when in background so that Unreal Engine continues to update its viewport even when it is not the window in focus.
+
+31
+00:05:18.000 --> 00:05:32.000
+Note in this ArchiCAD example, a car is created and a chair is moved, and then after pressing the refresh button in the Datasmith plugin, we see Unreal Engine update both of these changes.
+
+32
+00:05:32.000 --> 00:05:44.000
+And so a standard Datasmith pipeline might include starting in a DCC tool such as 3ds Max, SketchUp, or Revit, .max files with PNGs, JPEGs, etc.
+
+33
+00:05:44.000 --> 00:05:53.000
+Then using the Datasmith feature or plugin to create a .uDatasmith file, which includes .udmesh files, JPEGs, PNGs, etc.
+
+34
+00:05:53.000 --> 00:06:01.000
+Or if you're in something like SolidWorks, Katia, Rhino, where you have such file types as 3dm, .dwg, etc.
+
+35
+00:06:01.000 --> 00:06:08.000
+You just save those as their native file types, and in both cases these come in via the Datasmith exporter.
+
+36
+00:06:08.000 --> 00:06:16.000
+That Datasmith scene comes into Unreal Engine with several organized folders full of .uAsset files, the same as anything else in Unreal Engine.
+
+37
+00:06:16.000 --> 00:06:29.000
+And then if you drag that Datasmith scene into your level, you'll now have a hierarchy of your parent actor, which is a Datasmith scene actor, along with the same hierarchy as your DCC tool.
+
+38
+00:06:29.000 --> 00:06:33.000
+Here is another diagram walking us through the Datasmith process.
+
+39
+00:06:33.000 --> 00:06:46.000
+In this case, we talk about importing, tessellating if necessary, confirming the hierarchy and hopefully matching it to our DCC tool, then using mesh tools such as modeling mode to adjust things as needed,
+
+40
+00:06:46.000 --> 00:06:56.000
+provide further optimization to ensure a smooth frame rate, and finally a beauty pass where we might add additional high quality materials, lighting, etc.
+
+41
+00:06:56.000 --> 00:07:08.000
+One note about materials, you'll find that if you go into the Datasmith content in the plugins folder, you'll see that there are a number of master materials that are already set up as Datasmith files get ingested.
+
+42
+00:07:08.000 --> 00:07:14.000
+You're also welcome to use these as master materials for your other Unreal Engine projects as well.
+
+43
+00:07:14.000 --> 00:07:21.000
+Feel free to review the material graphs for these to see some best practices at work for master materials.
+
+44
+00:07:21.000 --> 00:07:31.000
+In the next video, we'll take what we've learned to do a Datasmith import exercise bringing a Datasmith file into Unreal Engine together.
+

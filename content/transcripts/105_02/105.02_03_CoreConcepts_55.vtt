@@ -1,0 +1,450 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.799
+For those who watch the Quick Start class on Sequencer, this will seem a little familiar,
+
+2
+00:00:05.799 --> 00:00:10.439
+but for those who have not, let's take a little time to explore some Sequencer fundamentals.
+
+3
+00:00:10.439 --> 00:00:15.599
+So what is Sequencer? Simply put, it's Unreal Engine's non-linear editor and animation tool
+
+4
+00:00:15.599 --> 00:00:20.500
+designed to supply users with the production tools they'll need to produce animation, trigger
+
+5
+00:00:20.500 --> 00:00:25.560
+various events like luprinse code, and smoothly transition between gameplay and linear animated
+
+6
+00:00:25.559 --> 00:00:31.039
+content. Sequencer is commonly deployed to build shots, generate pre-visualization,
+
+7
+00:00:31.039 --> 00:00:37.519
+manage animation in Unreal, and construct film sequences in game cinematics. From a workflow
+
+8
+00:00:37.519 --> 00:00:42.719
+perspective, Sequencer leverages actors from the level and gives them a set of instructions. But
+
+9
+00:00:42.719 --> 00:00:47.679
+as the director, you must cast which actors are going to be used. Actors can be added to
+
+10
+00:00:47.679 --> 00:00:52.640
+Sequencer throughout the Outliner or Content Browser to create level sequence assemblies.
+
+11
+00:00:52.640 --> 00:00:59.439
+These level sequence assemblies are essentially a populated level sequence. So what's a level
+
+12
+00:00:59.439 --> 00:01:05.120
+sequence? Essentially, it's a virtual data container. It stores various actors and their
+
+13
+00:01:05.120 --> 00:01:11.359
+associated attributes, keyframe data, lights, cameras, and other edit information. Level
+
+14
+00:01:11.359 --> 00:01:17.040
+sequences can also contain other level sequences to create nested hierarchies capable of replicating
+
+15
+00:01:17.040 --> 00:01:23.560
+film sequences, shots, and departmental organization. They are represented in the level as a traditional
+
+16
+00:01:23.560 --> 00:01:29.080
+clapboard icon, and in Sequencer itself, level sequences are represented as traditional film
+
+17
+00:01:29.080 --> 00:01:34.920
+strips similar to what you'd see in a non-linear application like Adobe Premiere. Sequencer
+
+18
+00:01:34.920 --> 00:01:39.960
+is also capable of exporting edit decision lists and XML data to synchronize Sequencer
+
+19
+00:01:39.960 --> 00:01:46.280
+and your third-party non-linear editor together. As you begin your journey into creating content
+
+20
+00:01:46.400 --> 00:01:50.840
+for Unreal, one of the first concepts you'll need to learn is the idea of actor persistence
+
+21
+00:01:50.840 --> 00:01:56.200
+within your environment, or in Unreal what we call the level or sub-level. Essentially,
+
+22
+00:01:56.200 --> 00:02:01.359
+Unreal has three different ways actors can be controlled in Sequencer. This control determines
+
+23
+00:02:01.359 --> 00:02:05.719
+when actors are available to the animator for animating and how long they'll persist
+
+24
+00:02:05.719 --> 00:02:11.479
+in the level over time. Today, we're going to primarily examine two forms of persistence,
+
+25
+00:02:11.560 --> 00:02:18.159
+possessibles, and spawnable actors. Possessible actors persist in the level indefinitely and
+
+26
+00:02:18.159 --> 00:02:23.679
+can be controlled or shared by multiple level sequences. If you know you have specific actors
+
+27
+00:02:23.679 --> 00:02:28.039
+or characters that will be used regularly, keeping them as possessibles makes sense for
+
+28
+00:02:28.039 --> 00:02:33.120
+ease of access and repetitious use. It should be noted, however, that possessible characters
+
+29
+00:02:33.120 --> 00:02:39.560
+can only be controlled by one level sequence at a time. Spawnable actors only exist within
+
+30
+00:02:39.640 --> 00:02:44.599
+an active level sequence. They're identified within Sequencer and the Outliner by a lightning
+
+31
+00:02:44.599 --> 00:02:50.400
+bolt icon. This type of persistence is excellent for temporary actors who are needed for specific
+
+32
+00:02:50.400 --> 00:02:56.240
+needs within the shot. Perhaps some extra lights, or a background actor who shows up just for the
+
+33
+00:02:56.240 --> 00:03:02.759
+shot and then is no longer required. The idea of spawnables are appealing because it can keep
+
+34
+00:03:02.759 --> 00:03:07.520
+your level clean and its environment free of unnecessary actors when they're no longer required.
+
+35
+00:03:08.360 --> 00:03:14.960
+The last type of persistence is replaceable actors. This blueprint-driven form of persistence is
+
+36
+00:03:14.960 --> 00:03:20.320
+dictated by the binding lifetime track and allows you to swap out actors within Sequencer as needed.
+
+37
+00:03:20.320 --> 00:03:24.879
+Let's switch over to the engine and take a look at how these concepts work.
+
+38
+00:03:24.879 --> 00:03:31.800
+Alright, we'll begin inside our SEQ-105-02 map. Once it's loaded, you'll see that we have a lot
+
+39
+00:03:31.800 --> 00:03:38.200
+of actors inside this level. There's a road, a road sign, a really nice landscape and some trees,
+
+40
+00:03:38.200 --> 00:03:43.320
+and then there's a motorcycle. Anything placed into the level has the potential of becoming a
+
+41
+00:03:43.320 --> 00:03:48.600
+possessible actor by default when it's brought into Sequencer. Whatever it is, Sequencer can
+
+42
+00:03:48.600 --> 00:03:53.439
+possess that actor and give it instructions beyond the actor's original attributes in the level.
+
+43
+00:03:53.439 --> 00:03:58.320
+Once the level sequence is done with it, the possessible actor returns to its default state
+
+44
+00:03:58.400 --> 00:04:03.719
+as it originally was within the level. So let's take a look at this in a demonstration. So we'll
+
+45
+00:04:03.719 --> 00:04:12.000
+go and create a level sequence. We'll call this LSTest. Now this is a parent level sequence,
+
+46
+00:04:12.000 --> 00:04:17.199
+or what Epic likes to call it, a level sequence with shots. You can double-click on the icon and
+
+47
+00:04:17.199 --> 00:04:23.839
+go into the Sequencer UI and we're going to add a shot track. Now the shot track is unique in that
+
+48
+00:04:24.079 --> 00:04:29.039
+it allows you to nest level sequences inside of a level sequence. So to do that, just click on
+
+49
+00:04:29.039 --> 00:04:36.959
+the plus button and we'll say create new shot asset. This is shot 0010 underscore 01 or just shot 10
+
+50
+00:04:36.959 --> 00:04:43.199
+for short. Now this will create this filmstrip icon inside of your level sequence. This is basically
+
+51
+00:04:43.199 --> 00:04:48.639
+an empty level sequence and we're just going to trim it down a little bit, maybe make it 65 or so
+
+52
+00:04:48.639 --> 00:04:54.159
+odd frames long, move it over just a touch, and then we'll create a second level sequence and we'll
+
+53
+00:04:54.159 --> 00:05:03.680
+call this one shot 20. We'll do the same thing. We'll trim a little time off of it here and at the end.
+
+54
+00:05:05.439 --> 00:05:12.000
+Now these two empty level sequences can be entered by double-clicking on the filmstrip icon. So if I
+
+55
+00:05:12.000 --> 00:05:17.519
+want to go into shot 10, it's just double-click. And you can see that we're inside of shot 10,
+
+56
+00:05:17.519 --> 00:05:22.799
+nothing's in here. It's empty. But if you look at the breadcrumbs over here on the right, you have
+
+57
+00:05:22.799 --> 00:05:30.719
+LS test and shot 10. Now at this point, you're going to want to start to add actors into your scene
+
+58
+00:05:30.719 --> 00:05:36.079
+and I'll go ahead and select the Unreal bike and say add actor to sequence.
+
+59
+00:05:37.839 --> 00:05:43.279
+So now that the Unreal bike is in here, it's been possessed by shot 10. And I'm going to go
+
+60
+00:05:43.279 --> 00:05:51.039
+and just lay it down on its side, raise up the front just a little bit. And I don't even need to
+
+61
+00:05:51.039 --> 00:06:00.399
+set a keyframe on this. But when I go back to the LS test master, as long as my time marker is
+
+62
+00:06:00.399 --> 00:06:05.519
+inside this level sequence, the bike will be on the ground. But as soon as the time marker goes
+
+63
+00:06:05.519 --> 00:06:10.959
+outside of the level sequence, the bike returns back to its original state. Now,
+
+64
+00:06:12.879 --> 00:06:19.120
+I'll go into shot 20. And I will add the bike again to this shot.
+
+65
+00:06:22.399 --> 00:06:26.560
+I'm going to do something a little different with this one. I'll go ahead and bring it to the center
+
+66
+00:06:26.560 --> 00:06:31.759
+of the road, bring it closer to camera. And I'll rotate it around
+
+67
+00:06:32.560 --> 00:06:36.800
+and stand it upright. And I'll set a keyframe
+
+68
+00:06:39.519 --> 00:06:43.279
+and another keyframe. And I'll push it down the road.
+
+69
+00:06:46.879 --> 00:06:54.480
+I'll also go and change these keyframes to linear. Now if I press play and play this level sequence,
+
+70
+00:06:55.439 --> 00:07:05.759
+you'll see that the bike animates down the road. Now, when we go back into our master,
+
+71
+00:07:06.560 --> 00:07:12.480
+you can see that the bike is being possessed by the individual level sequences that are active. So
+
+72
+00:07:13.040 --> 00:07:19.680
+here, at the beginning of the sequence, the bike is in its natural default state.
+
+73
+00:07:19.759 --> 00:07:26.160
+As soon as it hits shot 10, it lays down on its side. Here it goes back to its default state.
+
+74
+00:07:26.160 --> 00:07:32.639
+And then in shot 20, it travels down the road. Now, these level sequences can be moved any
+
+75
+00:07:32.639 --> 00:07:39.199
+point in time. So if I want to make shot 21st, I can do that. And if I press play now,
+
+76
+00:07:40.480 --> 00:07:47.120
+we'll have the shot going down the road and then laying down on its side.
+
+77
+00:07:47.120 --> 00:07:54.560
+Now, something else to remember is that these level sequences, if they're stacked on top of each
+
+78
+00:07:54.560 --> 00:08:01.360
+other, the shot that's on top takes precedence. So in this case, shot 20 has the bike traveling down
+
+79
+00:08:01.360 --> 00:08:06.639
+the road. And then as soon as it hits shot 10, it goes and lays down on its side. And then when
+
+80
+00:08:06.639 --> 00:08:14.639
+the shot 10 is over, again, back to its default state. Now, when it comes time for spawnables,
+
+81
+00:08:14.639 --> 00:08:20.000
+it's a little bit different. Spawnables, if I go inside of this level sequence,
+
+82
+00:08:21.360 --> 00:08:28.719
+all we have is the Unreal bike. But I want to go ahead and add in another character or
+
+83
+00:08:28.719 --> 00:08:34.000
+another actor that I eventually want to turn into a spawnable. Well, if we go into the content
+
+84
+00:08:34.000 --> 00:08:42.080
+browser, and we go to say, our assets, characters, actually, we'll go into mannequin here.
+
+85
+00:08:42.400 --> 00:08:53.360
+Characters mesh, and we'll put mannequin into the level. Now, this has been added to the persistent
+
+86
+00:08:53.360 --> 00:09:02.560
+level. And if we look inside of sequencer, and we press play, he will just be there throughout
+
+87
+00:09:02.560 --> 00:09:08.640
+all shots. He's in the level just like the road sign is, the road, the trees, and so forth.
+
+88
+00:09:09.600 --> 00:09:16.559
+But if I go into shot 10, and I select mani, and I say add actor to sequencer,
+
+89
+00:09:17.600 --> 00:09:25.519
+now mani has been possessed by shot 10. I'm going to delete the control rig. And I'm going to move
+
+90
+00:09:25.519 --> 00:09:34.639
+mani into place. So I'll just rotate him around 90 degrees. I'll move him over next to his bike.
+
+91
+00:09:35.039 --> 00:09:41.519
+Now, in order to change this into a spawnable, you need to right click over mannequin and go to
+
+92
+00:09:41.519 --> 00:09:47.919
+convert selected bindings to spawnable actor. Now you'll see that mannequin has a little
+
+93
+00:09:47.919 --> 00:09:55.199
+lightning bolt icon next to him. And I can proceed by giving him some animation. So I'll click on
+
+94
+00:09:55.199 --> 00:10:00.319
+the plus button here and I'll look for a walk cycle and stretch it out.
+
+95
+00:10:01.120 --> 00:10:07.200
+And then I'll set some keyframes on mannequin as well.
+
+96
+00:10:11.040 --> 00:10:15.600
+And you know, he's walking down the road because maybe he's run out of gasoline for his motorcycle.
+
+97
+00:10:16.720 --> 00:10:20.240
+And we'll convert this to linear. So if I press play here,
+
+98
+00:10:20.240 --> 00:10:32.320
+mani will be walking down the road. Now let's go back again to the level sequence with shots.
+
+99
+00:10:33.759 --> 00:10:38.159
+You can see that mani is now disappeared out of the level. It's because he's been converted to
+
+100
+00:10:38.159 --> 00:10:45.600
+spawnable. So as the time marker moves, shot 10, mannequin manifests for shot 10.
+
+101
+00:10:46.560 --> 00:10:51.600
+And he has been spawned and he'll continue to be there as long as shot 10 is active.
+
+102
+00:10:51.600 --> 00:10:57.040
+But as soon as the time marker leaves shot 10, mannequin disappears, everything goes back to its
+
+103
+00:10:57.040 --> 00:11:03.519
+default state. And in shot 20, the motorcycle drives down the road. Now this is an advantage of
+
+104
+00:11:03.519 --> 00:11:10.639
+spawnables in that you can see it keeps our level clear of unnecessary actors. You know,
+
+105
+00:11:10.720 --> 00:11:16.480
+if you have a bunch of possessibles inside of the scene, they may clutter up, you know,
+
+106
+00:11:16.480 --> 00:11:21.120
+what you can see or what you're viewing inside of your level sequence. And you might have to
+
+107
+00:11:21.120 --> 00:11:26.879
+turn them on or off, shut off their visibility or move them out of the way of the camera. And that
+
+108
+00:11:26.879 --> 00:11:35.679
+can be a little bit annoying at times. So using spawnables is a direct way of just basically
+
+109
+00:11:35.679 --> 00:11:40.240
+turning them off for only what you need. And you can use spawnables for anything. You can use it for
+
+110
+00:11:40.639 --> 00:11:47.120
+actors like Manny, or you can use them to generate spawnable lights, additional cameras, and so forth.
+
+111
+00:11:48.319 --> 00:11:52.799
+All right, this completes this individual demo. And we're going to move on to our next module
+
+112
+00:11:52.799 --> 00:11:57.120
+in which we're talking about some core structures within Sight of Sequencer.
+

@@ -1,0 +1,266 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.200
+The first thing to take a look at will be rebuilding one of our IK arms using a more
+
+2
+00:00:05.200 --> 00:00:09.240
+tailored function, so the IK 2 bone function.
+
+3
+00:00:09.240 --> 00:00:14.560
+Now just by design, this IK 2 bone function is a simpler setup than the basic IK solver
+
+4
+00:00:14.560 --> 00:00:18.800
+we were using previously, so we won't need as many nodes in the rig graph and that will
+
+5
+00:00:18.800 --> 00:00:22.120
+enable us to work a bit more efficiently.
+
+6
+00:00:22.120 --> 00:00:26.839
+It's also specifically designed and can only be used for three joint chains, like arms
+
+7
+00:00:26.839 --> 00:00:31.679
+and legs, where you have the end of the chain or your effector, like your hand or your foot,
+
+8
+00:00:31.679 --> 00:00:35.920
+and then like a lower limb and an upper limb, where you only really need to worry about
+
+9
+00:00:35.920 --> 00:00:39.920
+controlling the end of the chain and then bending the chain at one point towards the
+
+10
+00:00:39.920 --> 00:00:42.920
+pole vector control like the elbow or the knee.
+
+11
+00:00:42.920 --> 00:00:50.879
+So inside the engine here, if I right click inside our rig graph and search for IK 2 bone,
+
+12
+00:00:50.879 --> 00:00:53.799
+this is our IK 2 bone function.
+
+13
+00:00:53.799 --> 00:00:58.879
+Now we can go over here and break down what information the function needs to work properly.
+
+14
+00:00:58.879 --> 00:01:04.719
+So similar to the basic IK solver, we're going to need a primary and a secondary axis,
+
+15
+00:01:04.719 --> 00:01:09.280
+which would be our axis pointing down the bone, the primary axis, and the secondary axis
+
+16
+00:01:09.280 --> 00:01:11.519
+is our up axis.
+
+17
+00:01:11.519 --> 00:01:16.759
+We also then need our pole vector control and our end control, so the end control will
+
+18
+00:01:16.759 --> 00:01:22.239
+be either your hand or your foot in this example, and then it also needs to know the three bones
+
+19
+00:01:22.239 --> 00:01:26.039
+in the chain that you need to be controlling.
+
+20
+00:01:26.039 --> 00:01:30.199
+So it's actually a very straightforward setup once you have your two controls created.
+
+21
+00:01:30.199 --> 00:01:34.759
+Now let's replace the logic for our left IK arm and use this function instead.
+
+22
+00:01:34.759 --> 00:01:40.060
+So I'm going to start off by removing the existing IK logic for our left arm.
+
+23
+00:01:40.060 --> 00:01:45.759
+So let's just bring this over here a little bit, and I'm going to alt click to disconnect
+
+24
+00:01:45.760 --> 00:01:52.680
+the basic IK and just drag that over here because we're not going to need it anymore,
+
+25
+00:01:52.680 --> 00:01:56.880
+and bring in our IK 2 bone function.
+
+26
+00:01:56.880 --> 00:02:00.920
+And we're going to start to input the information for our function here.
+
+27
+00:02:00.920 --> 00:02:08.840
+Now looking at the primary and secondary axes, we know from our previous basic IK setup that
+
+28
+00:02:08.840 --> 00:02:15.240
+the primary x axis is 1 and our secondary axis is y minus 1.
+
+29
+00:02:15.439 --> 00:02:20.680
+And just to double check that, we can see primary axis and secondary axis.
+
+30
+00:02:20.680 --> 00:02:25.280
+Now as a reminder, if you want to check on your own skeleton, if you come up to the option
+
+31
+00:02:25.280 --> 00:02:30.400
+box here and make sure display axes on selection is ticked, that way whenever you select one
+
+32
+00:02:30.400 --> 00:02:38.760
+of these bones here, you'll be able to see the orientation axis.
+
+33
+00:02:38.760 --> 00:02:44.800
+Now all we need to do is input the control information and the bone information.
+
+34
+00:02:44.840 --> 00:02:48.680
+So for our control, we have the pole vector node first.
+
+35
+00:02:48.680 --> 00:02:52.040
+Now you can use the drop down here that will just search for whatever type you have set here,
+
+36
+00:02:52.040 --> 00:02:54.120
+so it will search for controls.
+
+37
+00:02:54.120 --> 00:02:57.439
+And we want our pole vector L control.
+
+38
+00:02:57.439 --> 00:03:01.680
+Or you could come into the rig graph here and we need to find our end control, so that's
+
+39
+00:03:01.680 --> 00:03:04.640
+going to be our hand control.
+
+40
+00:03:04.640 --> 00:03:11.000
+And from the hierarchy, select it and hit this little arrow to input the information there.
+
+41
+00:03:11.000 --> 00:03:13.560
+Finally our bone change just needs adding.
+
+42
+00:03:13.599 --> 00:03:19.199
+So we're going to start with bone A from the furthest bone from our end control.
+
+43
+00:03:19.199 --> 00:03:21.319
+And that's going to be our upper arm.
+
+44
+00:03:21.319 --> 00:03:25.840
+And then bone B will be our lower arm and bone C will be our hand.
+
+45
+00:03:25.840 --> 00:03:32.599
+So if I search in here for upper arm, make sure we grab the left side here.
+
+46
+00:03:32.599 --> 00:03:38.000
+Bone B is going to be our lower arm and again make sure you grab the left side.
+
+47
+00:03:38.000 --> 00:03:43.120
+And bone C is going to be our hand L.
+
+48
+00:03:43.159 --> 00:03:49.960
+And really that's all this node needs, that's all the information it needs to be set up correctly.
+
+49
+00:03:49.960 --> 00:03:56.640
+So if I connect up the logic between our basic IK and our AIM node, just hit compile.
+
+50
+00:03:56.640 --> 00:04:06.759
+We should see, there we go, that our IK2 bone function is set up and working as expected.
+
+51
+00:04:06.759 --> 00:04:10.920
+And it really is that simple to set up once you have your controls set up and once you
+
+52
+00:04:10.919 --> 00:04:16.360
+know your primary and secondary axis.
+
+53
+00:04:16.360 --> 00:04:24.120
+And if I open up the function here, just by double clicking.
+
+54
+00:04:24.120 --> 00:04:31.839
+And if I double click to open up the function here, you'll see that it's comprised of a
+
+55
+00:04:31.839 --> 00:04:35.959
+whole network of nodes here doing all the logic and all the calculations behind the
+
+56
+00:04:35.959 --> 00:04:36.959
+scenes.
+
+57
+00:04:37.959 --> 00:04:42.639
+And when it's all wrapped up into a container like this, you don't have all of these nodes
+
+58
+00:04:42.639 --> 00:04:46.000
+and all of this spaghetti visible in the main grid graph.
+
+59
+00:04:46.000 --> 00:04:52.199
+And you can see how it really helped to clean up and simplify the setup of your control rig.
+
+60
+00:04:52.199 --> 00:04:56.319
+So as you can see, functions can be extremely powerful and really speed up a lot of your
+
+61
+00:04:56.319 --> 00:04:57.560
+rigging workflow.
+
+62
+00:04:57.560 --> 00:05:01.799
+And something great about them is that they work kind of like a blueprint.
+
+63
+00:05:01.799 --> 00:05:05.319
+So you could create a library of custom functions like this.
+
+64
+00:05:05.319 --> 00:05:09.159
+And as long as you make them public, you can use them across all of the control rigs within
+
+65
+00:05:09.159 --> 00:05:10.159
+your project.
+
+66
+00:05:10.159 --> 00:05:12.759
+And we're going to take a look at how to create one of these next.
+

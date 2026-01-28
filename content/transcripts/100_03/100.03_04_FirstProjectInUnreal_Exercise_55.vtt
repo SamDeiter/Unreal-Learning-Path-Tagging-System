@@ -1,0 +1,1290 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:08.519
+We have now reached the hands-on or the exercise portion of this tutorial.
+
+2
+00:00:08.519 --> 00:00:13.759
+And to do that, what we're going to be working with is a project called Box Hunter.
+
+3
+00:00:13.759 --> 00:00:17.719
+So Box Hunter is a game where the player is trying to collect boxes for points before
+
+4
+00:00:17.719 --> 00:00:19.039
+the time runs out.
+
+5
+00:00:19.039 --> 00:00:22.760
+And there's pickups that will give you more time, score, or jump ability.
+
+6
+00:00:22.760 --> 00:00:27.640
+There's also platforms that can be set up to move when the user steps on them or fall
+
+7
+00:00:27.640 --> 00:00:29.199
+or rotate.
+
+8
+00:00:29.199 --> 00:00:31.800
+And there's also logic that makes a full game loop.
+
+9
+00:00:31.800 --> 00:00:33.560
+So let's take a look at this now.
+
+10
+00:00:33.560 --> 00:00:36.879
+So if I come up here and press play, we can see here, here's my player.
+
+11
+00:00:36.879 --> 00:00:39.600
+I have a timer so I can grab time.
+
+12
+00:00:39.600 --> 00:00:44.359
+You can see the platform, that jump one will move, or I shouldn't say move, but it will
+
+13
+00:00:44.359 --> 00:00:47.120
+fall if I stay on it for too long.
+
+14
+00:00:47.120 --> 00:00:48.439
+The time one rotates.
+
+15
+00:00:48.439 --> 00:00:51.480
+So there's all types of different things that we can do here.
+
+16
+00:00:51.480 --> 00:00:53.239
+You can see, oh, it didn't make it.
+
+17
+00:00:53.239 --> 00:00:55.359
+So I have something that happens.
+
+18
+00:00:55.359 --> 00:00:58.120
+If I don't make it, I can go to the main menu here.
+
+19
+00:00:58.119 --> 00:01:03.239
+I can also start, or if let's just jump off the platform again really quick, I can go
+
+20
+00:01:03.239 --> 00:01:04.239
+to quit.
+
+21
+00:01:04.239 --> 00:01:05.599
+There we go, quit.
+
+22
+00:01:05.599 --> 00:01:07.159
+And it will actually quit the game for me.
+
+23
+00:01:07.159 --> 00:01:10.359
+So again, this makes an entire game loop.
+
+24
+00:01:10.359 --> 00:01:14.920
+And this is going to serve as the example project that we build off of.
+
+25
+00:01:14.920 --> 00:01:19.439
+Because oftentimes when we're working on game projects, we don't start from absolutely nothing.
+
+26
+00:01:19.439 --> 00:01:20.920
+We have something to work with.
+
+27
+00:01:20.920 --> 00:01:26.159
+So we're working with actors that we pull into the world and we manipulate their properties.
+
+28
+00:01:26.159 --> 00:01:29.159
+So this is a really great example of that.
+
+29
+00:01:29.159 --> 00:01:32.640
+Now that we know a little bit more about the project we'll be working with, let's go ahead
+
+30
+00:01:32.640 --> 00:01:36.759
+and create a new basic level.
+
+31
+00:01:36.759 --> 00:01:43.799
+And when we do that, we're going to want to also delete the static mesh actor that's added.
+
+32
+00:01:43.799 --> 00:01:45.879
+So let's pop over to the editor now.
+
+33
+00:01:45.879 --> 00:01:50.079
+So what I'm going to do is come up here to file, new level, and then we're going to select
+
+34
+00:01:50.079 --> 00:01:52.280
+this basic right here and hit create.
+
+35
+00:01:52.280 --> 00:01:56.640
+Now as soon as it does that, we're going to take this bottom floor right here and press
+
+36
+00:01:56.640 --> 00:02:01.680
+delete to make sure that we've deleted that because we don't actually need that.
+
+37
+00:02:01.680 --> 00:02:06.799
+So the next thing we want to do here is press the save button up here.
+
+38
+00:02:06.799 --> 00:02:08.680
+And we're going to look for our levels folder.
+
+39
+00:02:08.680 --> 00:02:19.719
+And we're going to call this, let's say level underscore zero two.
+
+40
+00:02:19.719 --> 00:02:24.759
+And then once that is done, what we're going to do next is we're going to come over to
+
+41
+00:02:24.759 --> 00:02:26.560
+our world settings here.
+
+42
+00:02:26.560 --> 00:02:30.479
+And we're going to make sure that our game mode is set to BP box.
+
+43
+00:02:30.479 --> 00:02:36.800
+Now the reason that I want to do that is because if I was to play this now, notice I don't
+
+44
+00:02:36.800 --> 00:02:37.800
+have anything.
+
+45
+00:02:37.800 --> 00:02:38.800
+I have no UI.
+
+46
+00:02:38.800 --> 00:02:41.479
+I don't even actually have a character.
+
+47
+00:02:41.479 --> 00:02:44.159
+I'm just kind of floating around in the air.
+
+48
+00:02:44.159 --> 00:02:49.840
+So what I'm going to do is come up here to my window and then we're going to come down
+
+49
+00:02:49.840 --> 00:02:55.159
+to world settings.
+
+50
+00:02:55.159 --> 00:03:01.919
+Now with that window selected, it's going to come up here in my tab drawer system right
+
+51
+00:03:01.919 --> 00:03:04.039
+beside my details panel.
+
+52
+00:03:04.039 --> 00:03:05.879
+And then we're going to look for our game mode.
+
+53
+00:03:05.879 --> 00:03:12.240
+And right here under game mode override, we're going to put this to BP box hunter game mode.
+
+54
+00:03:13.240 --> 00:03:14.240
+All right.
+
+55
+00:03:14.240 --> 00:03:17.439
+So just to recap, we came here to window world settings.
+
+56
+00:03:17.439 --> 00:03:21.320
+The reason we did that is because this window wasn't open and we needed access to it.
+
+57
+00:03:21.320 --> 00:03:27.240
+Once we did that, we came to our game mode override and then we selected the BP box hunter
+
+58
+00:03:27.240 --> 00:03:29.480
+game mode as our game mode override.
+
+59
+00:03:29.480 --> 00:03:36.080
+And that is going to give us a player and a UI.
+
+60
+00:03:36.080 --> 00:03:41.000
+So now we're going to start adding actors to our project.
+
+61
+00:03:41.000 --> 00:03:44.080
+Before we can add them, we need to be able to find them first.
+
+62
+00:03:44.080 --> 00:03:47.479
+So you can find actors a number of different ways.
+
+63
+00:03:47.479 --> 00:03:53.560
+First off, from the quickly add to your project, from this dropdown, we can do things like
+
+64
+00:03:53.560 --> 00:03:57.199
+place basic actors like blueprints or things like that.
+
+65
+00:03:57.199 --> 00:04:02.939
+We can place lights or basic shapes like a box or a cube.
+
+66
+00:04:02.939 --> 00:04:09.360
+We can also find actors using the filters inside of our content browser or the very
+
+67
+00:04:09.400 --> 00:04:11.240
+powerful search functionality.
+
+68
+00:04:11.240 --> 00:04:17.400
+So we can search for something by a name or we can enable the filters and we can also
+
+69
+00:04:17.400 --> 00:04:20.720
+enable the filters and use the search feature.
+
+70
+00:04:20.720 --> 00:04:25.960
+Now no matter what we have searched for, we are going to need to add it to our project
+
+71
+00:04:25.960 --> 00:04:29.560
+and we add things one of two ways.
+
+72
+00:04:29.560 --> 00:04:33.280
+The first way is if we're using the quickly place, once we've searched for something in
+
+73
+00:04:33.280 --> 00:04:38.120
+this example right here, we've searched for light, we then just click on the object or
+
+74
+00:04:38.199 --> 00:04:44.120
+I should say the actor that we want and it will be placed inside of the level viewport
+
+75
+00:04:44.120 --> 00:04:47.759
+somewhere in a relative location to our current camera.
+
+76
+00:04:47.759 --> 00:04:52.040
+When we are working with stuff in the content browser, once we find something that we want,
+
+77
+00:04:52.040 --> 00:04:57.000
+we simply drag and drop it right into the level.
+
+78
+00:04:57.000 --> 00:05:02.160
+Now once we have that actor placed, we're going to need to move it around and we can
+
+79
+00:05:02.160 --> 00:05:04.199
+do this a couple of different ways.
+
+80
+00:05:04.279 --> 00:05:09.680
+We can use the gizmo to position it in the world or we can select what we want in the
+
+81
+00:05:09.680 --> 00:05:15.479
+outliner and then in the details panel, we can use the location, rotation and scale.
+
+82
+00:05:15.479 --> 00:05:19.800
+So what we are going to do at this point is we are going to set up our level by making
+
+83
+00:05:19.800 --> 00:05:25.719
+sure that we have a player start, a platform, a depth volume and a wind volume.
+
+84
+00:05:25.719 --> 00:05:27.800
+So let's pop over to the editor now.
+
+85
+00:05:27.800 --> 00:05:34.000
+So we're going to hit control space and oops control space here and from our content, I'm
+
+86
+00:05:34.000 --> 00:05:38.600
+going to come down to blueprints and I'm going to grab my blueprint platform right here.
+
+87
+00:05:38.600 --> 00:05:43.199
+I'm just going to drag that in and with that in here, I'm going to take its location and
+
+88
+00:05:43.199 --> 00:05:47.839
+just set it to zero, zero, zero and all this is going to ensure is that when I press play,
+
+89
+00:05:47.839 --> 00:05:51.439
+the platform is right there ready for me to go.
+
+90
+00:05:51.439 --> 00:05:57.600
+Alright, so what we're going to do next is we're going to grab this wind volume and then
+
+91
+00:05:57.600 --> 00:05:58.600
+we're going to do the same thing.
+
+92
+00:05:58.600 --> 00:06:01.800
+We're going to take its location and set it to zero, zero, zero and then we're just going
+
+93
+00:06:01.800 --> 00:06:03.560
+to drag it over here like so.
+
+94
+00:06:03.560 --> 00:06:08.480
+I'm going to hit control space and then with the depth volume, something similar, I'm
+
+95
+00:06:08.480 --> 00:06:13.639
+going to go to zero, zero, zero but we're going to bring the depth volume down a little
+
+96
+00:06:13.639 --> 00:06:17.560
+bit and then we're going to hit space bar twice.
+
+97
+00:06:17.560 --> 00:06:26.160
+We're just going to scale this out like so and then scale it out like so and this is
+
+98
+00:06:26.160 --> 00:06:34.280
+just going to ensure that if the player happens to fall, you know, if I come here and I'm,
+
+99
+00:06:34.280 --> 00:06:40.080
+whoops, I fall off of this, there's a way to trigger the restart.
+
+100
+00:06:40.080 --> 00:06:50.240
+Okay, so next what we're going to do is we're going to talk now a little bit about our actor
+
+101
+00:06:50.240 --> 00:06:51.240
+details.
+
+102
+00:06:51.240 --> 00:06:55.920
+So each actor has a details that contain its properties.
+
+103
+00:06:55.920 --> 00:07:03.079
+For us though on the platform, we have some different actor details like on our pickup
+
+104
+00:07:03.079 --> 00:07:06.920
+types, we have a time, a score and a jump.
+
+105
+00:07:06.920 --> 00:07:12.120
+So the time will give us time to the timer score, will give us a score and jump will
+
+106
+00:07:12.120 --> 00:07:15.920
+increase or decrease the power of our jump.
+
+107
+00:07:15.920 --> 00:07:20.319
+Now we change those using this pickup type, we can click on the drop down menu and select
+
+108
+00:07:20.319 --> 00:07:24.160
+none or select any one of these pickups.
+
+109
+00:07:24.160 --> 00:07:30.200
+There's also some things here for rotate, duration falling and enable platform movement.
+
+110
+00:07:30.200 --> 00:07:35.120
+So down at the bottom we have our score, jump and time amounts so we can adjust these to
+
+111
+00:07:35.120 --> 00:07:42.600
+adjust the various score, time and jump amounts that our awarded player runs into those.
+
+112
+00:07:42.600 --> 00:07:49.120
+For rotate when the user jumps on this, it's going to make it actually rotate the platform.
+
+113
+00:07:49.120 --> 00:07:51.680
+We'll talk about that in just a second but I want to get to falling.
+
+114
+00:07:51.680 --> 00:07:58.600
+So falling when enabled will make this platform fall in between about half a second and a
+
+115
+00:07:58.600 --> 00:08:00.640
+little bit under a second.
+
+116
+00:08:00.640 --> 00:08:06.040
+One thing to note, you cannot have a falling and rotate enabled at the same time, it will
+
+117
+00:08:06.040 --> 00:08:08.400
+rotate but it will not fall.
+
+118
+00:08:08.399 --> 00:08:13.639
+What platform movement does, it actually works in conjunction with duration and platform
+
+119
+00:08:13.639 --> 00:08:18.079
+movement when enabled allows the platform to move in between two points.
+
+120
+00:08:18.079 --> 00:08:23.939
+So we'll see here in just a second, we have these points 1 and point 2 and when we enable
+
+121
+00:08:23.939 --> 00:08:29.879
+platform movement it's going to move between these two points based on the duration right
+
+122
+00:08:29.879 --> 00:08:30.879
+here.
+
+123
+00:08:30.879 --> 00:08:36.799
+So let's go over to the editor now and what I'm going to do is I am going to grab this
+
+124
+00:08:37.439 --> 00:08:42.839
+first blueprint, I'm going to make sure it just says none because that's the spawning
+
+125
+00:08:42.839 --> 00:08:43.839
+one there.
+
+126
+00:08:43.839 --> 00:08:48.599
+Then I'm going to hold alt and drag out one, I'm going to just hold down, oops, didn't
+
+127
+00:08:48.599 --> 00:08:52.279
+mean to do that, hold down alt again and drag out and add another one.
+
+128
+00:08:52.279 --> 00:08:59.199
+So this one we're going to set to jump, this one we're going to set to score and then let's
+
+129
+00:08:59.199 --> 00:09:01.199
+hold down alt and move like that.
+
+130
+00:09:01.600 --> 00:09:07.920
+We'll set this one to time and then I'm going to do this one more time, something like that,
+
+131
+00:09:07.920 --> 00:09:13.560
+maybe pull the wind volume up, there we go.
+
+132
+00:09:13.560 --> 00:09:20.000
+So what we have now is when I press play, I've got my score over here, I've got a jump
+
+133
+00:09:20.000 --> 00:09:28.120
+over here and then you can see I jumped really high and then I've got the time and then there
+
+134
+00:09:28.120 --> 00:09:31.320
+we go, I can win and things like that.
+
+135
+00:09:31.320 --> 00:09:36.480
+So what I'm going to do next is let's take a look at some of these platform properties.
+
+136
+00:09:36.480 --> 00:09:41.240
+So we're just going to grab this platform right here and I'm going to change this platform
+
+137
+00:09:41.240 --> 00:09:44.120
+type to none for the time being so we can have a look at it.
+
+138
+00:09:44.120 --> 00:09:45.639
+So let's take a look at what rotate does.
+
+139
+00:09:45.639 --> 00:09:51.080
+If I click rotate and press play and we jump onto this platform over here, you can see
+
+140
+00:09:51.080 --> 00:09:53.480
+the platform starts to rotate.
+
+141
+00:09:53.480 --> 00:10:01.399
+Not anything too crazy, just a cool little thing that the player has to account for.
+
+142
+00:10:01.399 --> 00:10:08.800
+And then if we do falling, what falling is going to do, oops, wrong one, let me just
+
+143
+00:10:08.800 --> 00:10:14.200
+play that again here, falling, it's this platform over here, is going to make the platform fall,
+
+144
+00:10:14.200 --> 00:10:21.080
+there we go and that can make a really great, you can have a bunch of these together so
+
+145
+00:10:21.080 --> 00:10:24.360
+that's a risk versus reward like there could be three or four of them and the player can
+
+146
+00:10:24.360 --> 00:10:30.320
+run across them and they have just enough time to get across them and before it falls
+
+147
+00:10:30.320 --> 00:10:32.080
+so it can be really fun.
+
+148
+00:10:32.080 --> 00:10:34.360
+And then we have this enable platform movement.
+
+149
+00:10:34.360 --> 00:10:39.160
+So to get the movement to work, we need to click on these little L1 so you can just click
+
+150
+00:10:39.160 --> 00:10:41.600
+on them and these represent the location.
+
+151
+00:10:41.600 --> 00:10:43.920
+So it's going to move between these.
+
+152
+00:10:43.920 --> 00:10:46.560
+If I press play here, we'll see here, see it's moving like that.
+
+153
+00:10:46.560 --> 00:10:50.240
+The other cool thing we can do with these two is we can also bring them up like that.
+
+154
+00:10:50.240 --> 00:10:59.799
+So it can go diagonally and then if I was to bring this down to say like one, bring
+
+155
+00:10:59.799 --> 00:11:08.440
+it down to one, oh my number lock wasn't on, there we go, to one, there we go.
+
+156
+00:11:08.440 --> 00:11:16.399
+You see it goes really fast or if I was to set it to like 15, it would go very slow.
+
+157
+00:11:16.399 --> 00:11:22.120
+So with that said, what I want everybody to do, I'm going to pause this tutorial for now
+
+158
+00:11:22.120 --> 00:11:24.720
+and make a little course.
+
+159
+00:11:24.720 --> 00:11:29.559
+So we want to have something that has a, you know, a starch, a few little obstacles to
+
+160
+00:11:29.559 --> 00:11:34.559
+the player to navigate around and when we come back, we will finish up with adding some
+
+161
+00:11:34.559 --> 00:11:41.439
+backgrounds and some additional things to make this look super unique and finish up with
+
+162
+00:11:41.439 --> 00:11:42.439
+publishing.
+
+163
+00:11:42.440 --> 00:11:47.720
+I will see you back here once you have added a few more platforms.
+
+164
+00:11:47.720 --> 00:11:54.280
+All right, so now that you have added a few boxes or I should say mini boxes to simulate
+
+165
+00:11:54.280 --> 00:12:01.840
+kind of a city or whatever futuristic landscape or environment you have envisioned, the next
+
+166
+00:12:01.840 --> 00:12:07.480
+thing that I want to talk about is adding some Niagara VFX admitters to simulate traffic
+
+167
+00:12:07.480 --> 00:12:11.360
+as this is going to be pretty common throughout any project workflow.
+
+168
+00:12:11.360 --> 00:12:15.320
+Now with our admitter, it's actually been set up so that when we placed it in the world
+
+169
+00:12:15.320 --> 00:12:19.560
+and we go over to the details panel, we're going to have some things like mesh scale,
+
+170
+00:12:19.560 --> 00:12:23.080
+the plane size, spawn count and velocity that we can adjust.
+
+171
+00:12:23.080 --> 00:12:27.120
+So what these do is the mesh scale scales the size of the box.
+
+172
+00:12:27.120 --> 00:12:32.200
+So it's going to give us a larger box on one of these axes, the X, Y or Z.
+
+173
+00:12:32.200 --> 00:12:38.659
+The plane size, this represents the size of the spawnable area that this is going to cover.
+
+174
+00:12:38.659 --> 00:12:42.740
+So if we want to spawn over a larger area, we're going to make this a much bigger number.
+
+175
+00:12:42.740 --> 00:12:46.500
+If we want to spawn over a smaller area, we're going to make this a much smaller number.
+
+176
+00:12:46.500 --> 00:12:51.500
+Spawn count affects how many of these are spawned and then velocity controls how fast
+
+177
+00:12:51.500 --> 00:12:53.980
+this is going to move in a given axis.
+
+178
+00:12:53.980 --> 00:12:56.980
+And you'll see we can use velocity to kind of make these look like they're starting in
+
+179
+00:12:56.980 --> 00:12:59.620
+one direction, kind of drifting off to another.
+
+180
+00:12:59.620 --> 00:13:01.740
+So let's pop over to the editor now.
+
+181
+00:13:01.740 --> 00:13:03.339
+Take a look at how we would add these.
+
+182
+00:13:03.339 --> 00:13:07.939
+So for this level here, what I'm going to do is maybe add some going across the back
+
+183
+00:13:07.940 --> 00:13:08.940
+here.
+
+184
+00:13:08.940 --> 00:13:12.300
+So I'm going to hit control space and we're going to come to our effects.
+
+185
+00:13:12.300 --> 00:13:16.020
+And right here we have our NS floating traffic.
+
+186
+00:13:16.020 --> 00:13:19.780
+So we're going to bring that in to, remember it's drag and drop.
+
+187
+00:13:19.780 --> 00:13:22.660
+And what I'm going to do now is I'm actually going to hit F to kind of focus in on this
+
+188
+00:13:22.660 --> 00:13:25.660
+because it was a little far away and kind of hard for me to see.
+
+189
+00:13:25.660 --> 00:13:28.700
+So it looks like it actually got placed kind of far away from me.
+
+190
+00:13:28.700 --> 00:13:31.420
+So I'm going to use my axes to kind of bring it in.
+
+191
+00:13:31.420 --> 00:13:33.100
+My play area is way over here.
+
+192
+00:13:33.100 --> 00:13:35.660
+So it actually got moved really far away from me.
+
+193
+00:13:35.699 --> 00:13:38.779
+So I'm going to just try to bring that back in like so.
+
+194
+00:13:38.779 --> 00:13:39.779
+There we go.
+
+195
+00:13:39.779 --> 00:13:41.779
+Let's go.
+
+196
+00:13:41.779 --> 00:13:43.059
+So this is my play area here.
+
+197
+00:13:43.059 --> 00:13:44.299
+So yeah, there we go.
+
+198
+00:13:44.299 --> 00:13:47.059
+Maybe we have some traffic like that.
+
+199
+00:13:47.059 --> 00:13:53.179
+Now it does, when this spawns in, it just spawns in.
+
+200
+00:13:53.179 --> 00:13:55.819
+It has no fade in or anything like that.
+
+201
+00:13:55.819 --> 00:14:00.419
+So you want to make sure that you're not showing necessarily the spawn in with these.
+
+202
+00:14:00.419 --> 00:14:04.699
+And the next thing that we're going to do is come down to its user parameters.
+
+203
+00:14:04.700 --> 00:14:06.820
+And let's like maybe adjust some of this.
+
+204
+00:14:06.820 --> 00:14:07.820
+So let's set that to like.
+
+205
+00:14:14.820 --> 00:14:16.820
+These are going to be some really big ones.
+
+206
+00:14:16.820 --> 00:14:17.940
+They should look really large.
+
+207
+00:14:17.940 --> 00:14:21.340
+I'm going to hit G here.
+
+208
+00:14:21.340 --> 00:14:21.740
+There we go.
+
+209
+00:14:21.740 --> 00:14:28.500
+We should have some really large looking flying bits of traffic there.
+
+210
+00:14:28.500 --> 00:14:32.460
+And then what we can do here is let's set our spawn count.
+
+211
+00:14:32.460 --> 00:14:33.820
+Maybe we set it to like 15.
+
+212
+00:14:33.820 --> 00:14:38.140
+So there's a bunch of them.
+
+213
+00:14:38.140 --> 00:14:40.700
+Okay 15 is maybe a little bit too much.
+
+214
+00:14:40.700 --> 00:14:43.940
+So we'll set that down to like maybe seven.
+
+215
+00:14:43.940 --> 00:14:46.180
+We might need to set this to like five.
+
+216
+00:14:46.180 --> 00:14:53.180
+Make them a little bit shorter.
+
+217
+00:14:53.180 --> 00:14:58.380
+Okay and then what we'll do is let's do this to like 3500 for their velocity or not their
+
+218
+00:14:58.380 --> 00:14:59.380
+oops.
+
+219
+00:14:59.380 --> 00:15:00.380
+Let's reset that.
+
+220
+00:15:00.740 --> 00:15:08.500
+I meant to change their velocity here to 3500 or I think that needs to be at 3500.
+
+221
+00:15:08.500 --> 00:15:12.299
+And then one of the other cool things we can do with this is like let's set this to 150.
+
+222
+00:15:12.299 --> 00:15:16.500
+So what's going to happen is they should end up looking like they're going up.
+
+223
+00:15:16.500 --> 00:15:20.500
+We might need to actually just increase this to like maybe.
+
+224
+00:15:20.500 --> 00:15:31.419
+Yeah there we go.
+
+225
+00:15:31.419 --> 00:15:37.299
+So now what I want everybody to do is just do something similar.
+
+226
+00:15:37.299 --> 00:15:40.580
+Spend some time now and you can see here that we've added a couple of traffic effects
+
+227
+00:15:40.580 --> 00:15:41.740
+to this level.
+
+228
+00:15:41.740 --> 00:15:46.419
+So just spend some time now adjusting the traffic to get something that you like, something
+
+229
+00:15:46.419 --> 00:15:49.539
+that looks kind of cool with your particular project.
+
+230
+00:15:49.579 --> 00:15:55.059
+And when you're done we will talk about working with the level lighting.
+
+231
+00:15:55.059 --> 00:15:59.259
+Now that you've added some visual effects and background objects let's talk about working
+
+232
+00:15:59.259 --> 00:16:01.139
+with our level lighting.
+
+233
+00:16:01.139 --> 00:16:07.219
+Now for this particular project the level lighting is fairly simple in its setup.
+
+234
+00:16:07.219 --> 00:16:14.179
+It makes use of a sky atmosphere, an exponential height fog, and a post processing volume as
+
+235
+00:16:14.179 --> 00:16:21.339
+well as a directional light to simulate the sun and a skylight to help with the bounce
+
+236
+00:16:21.339 --> 00:16:24.339
+light or the indirect light.
+
+237
+00:16:24.339 --> 00:16:28.819
+All of these things are needed to work together in order to give you the best result.
+
+238
+00:16:28.819 --> 00:16:32.059
+However that's not necessarily the way that you have to go about it.
+
+239
+00:16:32.059 --> 00:16:38.299
+In some instances such as if you were using say baked lighting and you had a light mass
+
+240
+00:16:38.299 --> 00:16:42.819
+importance volume or you were using a skydome actor.
+
+241
+00:16:42.820 --> 00:16:50.140
+You might not be using say volumetric clouds or be relying more on post process or properties
+
+242
+00:16:50.140 --> 00:16:57.100
+in the skydome to represent things like the atmosphere or the cloud interaction.
+
+243
+00:16:57.100 --> 00:17:02.660
+The setup that we're using in this particular project is going to result in the most accurate
+
+244
+00:17:02.660 --> 00:17:08.420
+form of lighting but that's going to come at a direct cost of performance.
+
+245
+00:17:08.420 --> 00:17:12.779
+So while this is going to look really great and be easy to work with it is going to be
+
+246
+00:17:12.779 --> 00:17:14.819
+expensive in terms of performance.
+
+247
+00:17:14.819 --> 00:17:18.099
+Let's just pop over to the ender now and see what we have to work with.
+
+248
+00:17:18.099 --> 00:17:23.019
+So easiest thing to do is hold down control alt and L. That's going to access a little
+
+249
+00:17:23.019 --> 00:17:27.059
+lighting gizmo that you can then manipulate by moving the mouse around.
+
+250
+00:17:27.059 --> 00:17:33.259
+And this is the method that I prefer working with when it comes to positioning my skylight,
+
+251
+00:17:33.259 --> 00:17:35.740
+getting that really cool lighting angle that I want.
+
+252
+00:17:35.740 --> 00:17:40.740
+If we kind of look up while we do this we can see that as I start to position it towards
+
+253
+00:17:40.819 --> 00:17:46.980
+the horizon I can get these really really great looking low cast light here.
+
+254
+00:17:46.980 --> 00:17:51.019
+And I'll just say that it is also going to be working with our shadows.
+
+255
+00:17:51.019 --> 00:17:56.380
+Clouds in the background we can see the clouds picking up those subtle colors and even right
+
+256
+00:17:56.380 --> 00:17:59.140
+there the shadows look really really the shadows.
+
+257
+00:17:59.140 --> 00:18:03.859
+The clouds are looking as though they are shadowed and they're picking up those darks
+
+258
+00:18:03.859 --> 00:18:05.859
+really really really well.
+
+259
+00:18:05.979 --> 00:18:10.619
+So some of the other things that we can adjust in this system so I'm going to come all the
+
+260
+00:18:10.619 --> 00:18:12.859
+way back up to the top here.
+
+261
+00:18:12.859 --> 00:18:16.019
+We can go to our exponential height fog.
+
+262
+00:18:16.019 --> 00:18:19.459
+So the exponential height fog is going to control well the fog.
+
+263
+00:18:19.459 --> 00:18:25.059
+So if I was to maybe turn the density of this down you can see here I'm making the fog less
+
+264
+00:18:25.059 --> 00:18:26.059
+dense.
+
+265
+00:18:26.059 --> 00:18:30.939
+I can also adjust the height of it as well so I can bring it up and make things below
+
+266
+00:18:30.939 --> 00:18:34.859
+a little bit harder to see or a little bit more included.
+
+267
+00:18:34.859 --> 00:18:41.219
+I also have a secondary fog here that I can do to add some more fog effects somewhere
+
+268
+00:18:41.219 --> 00:18:42.699
+else.
+
+269
+00:18:42.699 --> 00:18:47.619
+I can enable my volumetric fog which is going to give me this just really great and interesting
+
+270
+00:18:47.619 --> 00:18:51.059
+looking fog overlay on top of it.
+
+271
+00:18:51.059 --> 00:18:58.019
+It's also going to give the fog a more 3D look and make it appear more that it looks
+
+272
+00:18:58.019 --> 00:18:59.819
+like inside of nature.
+
+273
+00:18:59.819 --> 00:19:03.579
+We also have our post processing so one thing to know about post processing there are a
+
+274
+00:19:03.579 --> 00:19:12.339
+ton of settings in here but the most important one is going to be down here and it is called
+
+275
+00:19:12.339 --> 00:19:14.579
+and I am just not seeing it somewhere.
+
+276
+00:19:14.579 --> 00:19:15.819
+There we go.
+
+277
+00:19:15.819 --> 00:19:18.419
+Right underneath post process volume settings.
+
+278
+00:19:18.419 --> 00:19:19.859
+Infinite extent unbound.
+
+279
+00:19:19.859 --> 00:19:26.460
+So by enabling this what we do is if this is disabled which is the default it will this
+
+280
+00:19:26.460 --> 00:19:31.460
+post process volume will only work if the camera is inside of the post process volume.
+
+281
+00:19:31.460 --> 00:19:35.019
+That would mean we would have to scale the volume to fit this entire scene.
+
+282
+00:19:35.019 --> 00:19:40.259
+If we enable this what that means is that now this post process volume will be applied
+
+283
+00:19:40.259 --> 00:19:45.259
+to the scene no matter where we are in the scene and then by setting this this means
+
+284
+00:19:45.259 --> 00:19:48.740
+that I can now come up here and basically set anything that I want.
+
+285
+00:19:48.740 --> 00:19:55.420
+I can come up here to my temperature and adjust this however which way that I want and so
+
+286
+00:19:55.420 --> 00:19:57.100
+on and so forth.
+
+287
+00:19:57.099 --> 00:20:02.059
+Our sky atmosphere one of the things we can do is we can adjust things like the ground
+
+288
+00:20:02.059 --> 00:20:06.939
+radius or the atmosphere height to give us some different colors or a little bit more
+
+289
+00:20:06.939 --> 00:20:09.059
+control.
+
+290
+00:20:09.059 --> 00:20:16.339
+The only thing that I would really suggest you adjust in here is with the artistic direction
+
+291
+00:20:16.339 --> 00:20:21.259
+unless you are setting something up for some different type of planet or atmosphere that
+
+292
+00:20:21.259 --> 00:20:23.939
+is different than Earth.
+
+293
+00:20:23.940 --> 00:20:28.779
+If you are trying to adjust these properties up here like the atmosphere height or the
+
+294
+00:20:28.779 --> 00:20:34.340
+atmosphere ray length or something like that you might not get the results that you want
+
+295
+00:20:34.340 --> 00:20:36.940
+if you are trying to adjust the color.
+
+296
+00:20:36.940 --> 00:20:41.220
+Better results are going to be down here in the art direction by changing like the luminance
+
+297
+00:20:41.220 --> 00:20:45.700
+factor the height fog can contribution and things like that.
+
+298
+00:20:45.700 --> 00:20:51.460
+The sky light is going to control again our bounce light so we could increase the intensity
+
+299
+00:20:51.460 --> 00:20:55.860
+on this to give us a little bit more detail in our we can see it here in the building
+
+300
+00:20:55.860 --> 00:20:59.900
+is in the background it is just going to make them a little more intense.
+
+301
+00:20:59.900 --> 00:21:04.299
+Then our volumetric cloud this has a couple of controls that are in the actor here so
+
+302
+00:21:04.299 --> 00:21:07.700
+this is going to allow us to control like the layer height and things like that.
+
+303
+00:21:07.700 --> 00:21:11.900
+If we come over here to the material double click on it you can see here in the material
+
+304
+00:21:11.900 --> 00:21:16.460
+we have a whole bunch of other parameters that we can enable and adjust including things
+
+305
+00:21:16.460 --> 00:21:22.380
+like enabling storms and we have our cloud general layout and then the actual shape and
+
+306
+00:21:22.380 --> 00:21:28.539
+look of the cloud so a lot of parameters and things that we can adjust right here when
+
+307
+00:21:28.539 --> 00:21:32.100
+it comes with working with lights because again when we are working with lights especially
+
+308
+00:21:32.100 --> 00:21:36.299
+in an outdoor environment it is more than just working with a directional light it is
+
+309
+00:21:36.299 --> 00:21:41.460
+working with all of these different things in conjunction together to give us the final
+
+310
+00:21:41.460 --> 00:21:42.460
+image.
+
+311
+00:21:43.460 --> 00:21:51.460
+Alright so before we finish up the last thing that we need to do is modify some of our blueprint
+
+312
+00:21:51.460 --> 00:21:56.740
+code to point to our level that we want to load because right now if we were to play
+
+313
+00:21:56.740 --> 00:22:00.900
+this or publish it it is going to use the default level so this is pretty simple to
+
+314
+00:22:00.900 --> 00:22:05.940
+do what we are going to do is over here inside of the editor I am going to hit control space
+
+315
+00:22:05.940 --> 00:22:11.220
+and then I am going to look for our UI and we are going to look for our UB for widget
+
+316
+00:22:11.220 --> 00:22:17.259
+blueprint main menu we are just going to double click on that to open it up.
+
+317
+00:22:17.259 --> 00:22:21.980
+Once that is open we are going to come over here to the graph and the graph is pretty
+
+318
+00:22:21.980 --> 00:22:26.700
+simple we have a start and a quit so the start if we zoom in on it we have on start and then
+
+319
+00:22:26.700 --> 00:22:30.660
+open level and we have this by object reference so right here we are just going to click the
+
+320
+00:22:30.660 --> 00:22:34.940
+level that we want to open which is going to be level 2 or whatever your level name
+
+321
+00:22:34.940 --> 00:22:40.339
+is once you compile and save this that is the level that will be open so this is the
+
+322
+00:22:40.339 --> 00:22:46.579
+last thing that needs to be done in order for our project to be ready to publish.
+

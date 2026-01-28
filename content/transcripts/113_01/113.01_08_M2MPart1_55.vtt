@@ -1,0 +1,306 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.000
+In this section, we will primarily work in Unreal Engine to create a metahuman from a face scan.
+
+2
+00:00:07.000 --> 00:00:16.000
+As we work through this exercise, you will note that this is broken down into a step-by-step process that is found in your slide deck.
+
+3
+00:00:16.000 --> 00:00:22.000
+As we complete portions of the practical exercise, I will review the completed steps.
+
+4
+00:00:22.000 --> 00:00:27.000
+So, let's jump into Unreal Engine and begin creating a metahuman.
+
+5
+00:00:28.000 --> 00:00:32.000
+With Unreal Engine open, as mentioned at the beginning of the course,
+
+6
+00:00:32.000 --> 00:00:42.000
+the RealityScanFaceScanAsset has already been imported and is located under the Assets folder in the folder named ScanMesh.
+
+7
+00:00:42.000 --> 00:00:45.000
+If you wish to go through all of the steps I will show,
+
+8
+00:00:45.000 --> 00:00:56.000
+you can locate the original OBJ file and textures that have been provided in the Source Files folder named 11301 RealityScanAsset.
+
+9
+00:00:56.000 --> 00:01:01.000
+Now, I'm going to navigate to our Course Topics folder
+
+10
+00:01:01.000 --> 00:01:08.000
+and in here, I'm going to create a new folder to work in by pressing Ctrl Shift N.
+
+11
+00:01:08.000 --> 00:01:14.000
+I will name this EX for example and then open this up.
+
+12
+00:01:14.000 --> 00:01:19.000
+Inside of here, we will get started by importing the 3D mesh.
+
+13
+00:01:19.000 --> 00:01:23.000
+Start by going to the import over here,
+
+14
+00:01:23.000 --> 00:01:31.000
+then inside of the Source Files folder named 11301 RealityScanAsset,
+
+15
+00:01:31.000 --> 00:01:39.000
+in the RealityScan folder, select the FaceScanMesh and the textures and then select Open.
+
+16
+00:01:39.000 --> 00:01:46.000
+The Import Content option will appear and if you are working with an asset that has separate meshes,
+
+17
+00:01:46.000 --> 00:01:55.000
+for instance the eyes and the head are separate, go to Static Meshes and enable Combine Static Meshes.
+
+18
+00:01:55.000 --> 00:02:09.000
+Then go here and select Import.
+
+19
+00:02:09.000 --> 00:02:16.000
+Once the asset and textures are imported, open up the FaceMesh to inspect it.
+
+20
+00:02:16.000 --> 00:02:20.000
+Make sure it is facing the X-axis.
+
+21
+00:02:20.000 --> 00:02:30.000
+If it is not, you can re-import it and make the appropriate adjustments to the offset rotation in the import options.
+
+22
+00:02:30.000 --> 00:02:35.000
+The next step is to prepare the mesh.
+
+23
+00:02:35.000 --> 00:02:42.000
+Now, let's create a new material in order to apply the textures to our 3D head mesh.
+
+24
+00:02:42.000 --> 00:02:48.000
+Right click in the Content Browser and select Material.
+
+25
+00:02:48.000 --> 00:02:58.000
+I will name this M underscore RC for RealityCapture and then open this up.
+
+26
+00:02:58.000 --> 00:03:07.000
+Going back to the main viewport, I will undock the material so that I can add the textures to the material graph.
+
+27
+00:03:07.000 --> 00:03:16.000
+And from here, I will select the Albedo and Normal map and drag these into the material graph.
+
+28
+00:03:16.000 --> 00:03:22.000
+You don't necessarily need the Normal map but since we have it, let's use it.
+
+29
+00:03:22.000 --> 00:03:35.000
+Inside of this material, I will connect the Albedo to the Base Color and then connect the Normal map to the Normal.
+
+30
+00:03:35.000 --> 00:03:43.000
+You may find it helpful to adjust the specular in the event your material is a bit shiny.
+
+31
+00:03:43.000 --> 00:03:56.000
+So I will press 1 to create a constant and set the value to something like 0.3 and then I will connect this to the specular.
+
+32
+00:03:56.000 --> 00:04:02.000
+I will save this and go back to our main viewport.
+
+33
+00:04:02.000 --> 00:04:09.000
+With the new material selected, let's go to our Static Mesh window
+
+34
+00:04:09.000 --> 00:04:17.000
+and apply this to our 3D head mesh by assigning it over here.
+
+35
+00:04:17.000 --> 00:04:28.000
+Now, before we move on, let's review some of the steps we just completed.
+
+36
+00:04:28.000 --> 00:04:35.000
+For the Mesh to MetaHuman workflow, begin by importing the 3D head mesh and textures.
+
+37
+00:04:35.000 --> 00:04:45.000
+If working with a 3D model that has separate meshes, in the Static Mesh section of the import options, check on Combine Meshes.
+
+38
+00:04:45.000 --> 00:04:55.000
+Once imported, check to see that it is facing the X-axis, otherwise adjust the rotation offset in the import options and re-import it.
+
+39
+00:04:55.000 --> 00:05:06.000
+One note is that the import options will look different from previous versions of Unreal Engine 5.
+
+40
+00:05:06.000 --> 00:05:09.000
+The next step is to prepare the mesh.
+
+41
+00:05:09.000 --> 00:05:13.000
+Apply a material using an albedo texture.
+
+42
+00:05:13.000 --> 00:05:19.000
+It is helpful to use an albedo map in order to separate the sclera from the skin tone.
+
+43
+00:05:19.000 --> 00:05:30.000
+With the material results, the 3D face model should have the eyes open with a visible seam separation of the eyelid and eye to assist with the tracking marker placement.
+
+44
+00:05:30.000 --> 00:05:35.000
+The mouth should be closed and the face should have a relaxed neutral pose.
+
+45
+00:05:35.000 --> 00:05:43.000
+Something to note is that if the model does not have eyeballs, the empty sockets may generate artifacts in the mesh fitting.
+
+46
+00:05:43.000 --> 00:05:51.000
+Now, let's jump back into Unreal Engine and continue with the next steps.
+
+47
+00:05:51.000 --> 00:05:57.000
+The next step of this workflow is to create a metahuman identity asset.
+
+48
+00:05:57.000 --> 00:06:10.000
+There is an existing one you can inspect located in the course topics folder inside of the folder named Mesh to Metahuman Identity in the folder named Sample Metahuman ID.
+
+49
+00:06:10.000 --> 00:06:16.000
+This is already gone through the process of being generated using the 3D headscan data.
+
+50
+00:06:16.000 --> 00:06:32.000
+Let's go back to the Mesh to Metahuman Identity folder and create a new folder to work in by pressing Ctrl Shift N and name this EX for example.
+
+51
+00:06:33.000 --> 00:06:47.000
+Inside of here, right click in the content browser and select Metahuman Animator and then select Metahuman Identity.
+
+52
+00:06:47.000 --> 00:06:54.000
+The name you give this will be the name that will appear in the Metahuman Creator later on.
+
+53
+00:06:54.000 --> 00:06:58.000
+I will name this RC underscore scan.
+
+54
+00:06:58.000 --> 00:07:02.000
+Now, I will double click to open it.
+
+55
+00:07:02.000 --> 00:07:11.000
+I'm going to dock it up here and once this window opens, you may be prompted with an Epic Games sign in.
+
+56
+00:07:11.000 --> 00:07:16.000
+The next step is to populate the Metahuman Identity asset.
+
+57
+00:07:16.000 --> 00:07:26.000
+Go to the main toolbar, go to create components and drop this down, select from Mesh
+
+58
+00:07:27.000 --> 00:07:30.000
+and then search for the 3D mesh.
+
+59
+00:07:30.000 --> 00:07:38.000
+I will type in RC underscore scan and then scroll down to locate it.
+
+60
+00:07:38.000 --> 00:07:44.000
+Once it is selected, it may take a moment for it to load.
+
+61
+00:07:44.000 --> 00:07:50.000
+Once loaded, navigate to the front of the face scan.
+
+62
+00:07:51.000 --> 00:07:57.000
+In the top left panel, select the body component.
+
+63
+00:07:57.000 --> 00:08:03.000
+Right below, select the body type that you wish for this Metahuman to have.
+
+64
+00:08:03.000 --> 00:08:09.000
+In my case, I want to select the female medium normal body weight.
+
+65
+00:08:09.000 --> 00:08:15.000
+Now, before we move on, let's review the steps we just completed.
+
+66
+00:08:15.000 --> 00:08:26.000
+After importing and preparing the face scan model, the next step is to create a Metahuman Identity asset.
+
+67
+00:08:26.000 --> 00:08:35.000
+Right click in an empty space in the content browser, select Metahuman Animator and then Metahuman Identity.
+
+68
+00:08:35.000 --> 00:08:40.000
+The name you choose will be a placeholder for it in the Metahuman Creator.
+
+69
+00:08:41.000 --> 00:08:49.000
+Once you open up the Metahuman Identity asset, you may be prompted to sign in with your Epic Games account.
+
+70
+00:08:50.000 --> 00:09:00.000
+Inside of the Metahuman Identity asset window, the next step is to populate it with the 3D model and assign a body type.
+
+71
+00:09:00.000 --> 00:09:05.000
+Go to the main toolbar, go to create components and drop it down.
+
+72
+00:09:05.000 --> 00:09:09.000
+Select from mesh and then search for it.
+
+73
+00:09:09.000 --> 00:09:12.000
+It will take a moment to load in the viewport.
+
+74
+00:09:12.000 --> 00:09:19.000
+Next, select the body component and then select the body type you want your Metahuman to have.
+
+75
+00:09:19.000 --> 00:09:22.000
+Now, that's it for this section.
+
+76
+00:09:22.000 --> 00:09:30.000
+In the next video, we continue our hands-on exercise with the next steps of the Mesh to Metahuman workflow.
+

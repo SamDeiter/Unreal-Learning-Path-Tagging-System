@@ -1,0 +1,222 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.280
+Now that we've set up the fingers using a custom function, we're going to explore
+
+2
+00:00:05.280 --> 00:00:09.839
+an alternate setup that will use a couple of different nodes, the getChildren node and
+
+3
+00:00:09.839 --> 00:00:12.160
+the parent constraint node.
+
+4
+00:00:12.160 --> 00:00:17.160
+So instead of using a series of set and getTransform nodes, we're going to use the getChildren
+
+5
+00:00:17.160 --> 00:00:21.800
+node, which does exactly what it implies, it will find all of the children of a specific
+
+6
+00:00:21.800 --> 00:00:22.800
+reg element.
+
+7
+00:00:22.800 --> 00:00:27.600
+And in this case, we'll use our hand bones to find all of the finger bones below, and
+
+8
+00:00:27.600 --> 00:00:33.039
+again, use that information to find all of our finger controls as well.
+
+9
+00:00:33.039 --> 00:00:42.039
+So with our getChildren nodes, if I right click, search for getChildren, you can see
+
+10
+00:00:42.039 --> 00:00:47.880
+we can input a name here and essentially an item, a reg element, and it will find all
+
+11
+00:00:47.880 --> 00:00:50.120
+of the children of whatever we input here.
+
+12
+00:00:50.120 --> 00:00:55.040
+Now we do want to look for a bone, and we want to look for handL.
+
+13
+00:00:55.039 --> 00:00:59.280
+Now I'm going to duplicate this because we want to use, well, we want to find the bones
+
+14
+00:00:59.280 --> 00:01:01.479
+for both of our hands.
+
+15
+00:01:01.479 --> 00:01:04.560
+So if I find handR there.
+
+16
+00:01:04.560 --> 00:01:08.000
+Now what we want to do, just to make the logic a little bit more straightforward, is add
+
+17
+00:01:08.000 --> 00:01:10.519
+these two arrays together.
+
+18
+00:01:10.519 --> 00:01:19.719
+So if I right click and search for add under the array heading here, we'll plug the first
+
+19
+00:01:19.719 --> 00:01:25.640
+array in here, and then it's not add, what is it?
+
+20
+00:01:25.640 --> 00:01:29.319
+It is append.
+
+21
+00:01:29.319 --> 00:01:33.439
+So we want to append the two arrays together, which is just essentially tagging one onto
+
+22
+00:01:33.439 --> 00:01:35.719
+the end of the other.
+
+23
+00:01:35.719 --> 00:01:42.239
+So now that we have a big list of our bones underneath our hand, left and our handR.
+
+24
+00:01:42.239 --> 00:01:45.000
+Now something we need to activate is recursive.
+
+25
+00:01:45.760 --> 00:01:50.719
+What this will do is find all of the children of the hand's children.
+
+26
+00:01:50.719 --> 00:01:57.319
+So if I show you this as an example, under our handR, the real children are the pinky
+
+27
+00:01:57.319 --> 00:02:01.120
+metacarpal, the ring metacarpal, and the middle metacarpal.
+
+28
+00:02:01.120 --> 00:02:05.240
+So essentially the parents of our new smaller chains here.
+
+29
+00:02:05.240 --> 00:02:08.920
+And with recursive ticked, what that will do is search through all the way to the end
+
+30
+00:02:08.920 --> 00:02:11.920
+of the chain.
+
+31
+00:02:12.839 --> 00:02:18.599
+And making sure include parent is unticked means we won't affect the actual hand bone
+
+32
+00:02:18.599 --> 00:02:20.599
+itself.
+
+33
+00:02:27.319 --> 00:02:32.039
+Now what we want to do, something called a forEach, and this will loop through each
+
+34
+00:02:32.039 --> 00:02:33.279
+element of the array.
+
+35
+00:02:33.279 --> 00:02:39.000
+And we're going to connect our appended arrays together to this forEach.
+
+36
+00:02:39.000 --> 00:02:50.800
+And then we're going to create a parent constraint node.
+
+37
+00:02:55.800 --> 00:03:00.800
+And what we want to do here is plug in our child, which will be our bones.
+
+38
+00:03:01.600 --> 00:03:11.600
+And then our parent is going to come from the name of our forEach.
+
+39
+00:03:11.600 --> 00:03:16.280
+We'll use another concat node, underscore control.
+
+40
+00:03:16.280 --> 00:03:20.320
+So that means that for the end of all of our bone names here, we're going to add underscore
+
+41
+00:03:20.320 --> 00:03:21.800
+control.
+
+42
+00:03:21.800 --> 00:03:26.800
+And then inside the item of parents, we're going to drop the name in there, change that
+
+43
+00:03:26.800 --> 00:03:28.720
+to control.
+
+44
+00:03:28.719 --> 00:03:34.240
+And hopefully we should see if we connect up this logic to the main forward solve.
+
+45
+00:03:34.240 --> 00:03:39.759
+What I'll do here is just create a sequence just to make this a little clearer about how
+
+46
+00:03:39.759 --> 00:03:46.039
+this logic is working, just so we can compartmentalize things a little bit.
+
+47
+00:03:46.039 --> 00:03:54.120
+And what we should see now is that our finger control actually controls our bones.
+
+48
+00:03:54.120 --> 00:03:59.599
+So if I was to just disconnect here, just to make sure we're not seeing anything tricky,
+
+49
+00:03:59.599 --> 00:04:01.240
+nothing works yet.
+
+50
+00:04:01.240 --> 00:04:06.879
+And when we reconnect our logic back up, we can see that it works straight away.
+
+51
+00:04:06.879 --> 00:04:15.840
+So that's just another way to simply connect your controls with your bones.
+
+52
+00:04:15.840 --> 00:04:21.079
+By building all of the logic off the name of your bones, appending the two arrays together,
+
+53
+00:04:21.079 --> 00:04:25.919
+and then for each of the elements in the array, adding underscore control to the name so that
+
+54
+00:04:25.919 --> 00:04:31.000
+we can use that as our parent inside the parent constraint, and then adding the element of
+
+55
+00:04:31.000 --> 00:04:35.719
+the array, which is just the bone names themselves as the child of our parent constraint.
+

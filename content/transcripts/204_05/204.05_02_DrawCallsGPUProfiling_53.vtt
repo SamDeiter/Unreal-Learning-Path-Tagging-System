@@ -1,0 +1,854 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.820
+Hi everyone. In this lesson, we're going to go and take a look at the outline for this
+
+2
+00:00:04.820 --> 00:00:09.019
+series of courses. And then we're also going to take a look at profiling. So let's get
+
+3
+00:00:09.019 --> 00:00:11.279
+started.
+
+4
+00:00:11.279 --> 00:00:16.339
+So first up, we'll talk about profiling concepts. From there, we'll look at types of rendering.
+
+5
+00:00:16.339 --> 00:00:22.740
+We'll also look at concepts of thread profiling, how that works, calling concepts, calling methods,
+
+6
+00:00:22.740 --> 00:00:27.940
+GPU visualizer, GPU draw thread, the CPU draw thread and how that plays, as well as the
+
+7
+00:00:27.940 --> 00:00:34.000
+analyzing of draw calls in general, and looking at Unreal Insights. We'll then take a look
+
+8
+00:00:34.000 --> 00:00:39.179
+at optimization visualizers. We'll look at using visualizers, some quick notes on those,
+
+9
+00:00:39.179 --> 00:00:44.040
+and also a review of Lumen, Nanite and Virtual Shadow map visualizers, which we've covered
+
+10
+00:00:44.040 --> 00:00:49.060
+in other classes. And then we'll also look at a few pro tips and some secret little visualizers
+
+11
+00:00:49.060 --> 00:00:52.740
+that you can use to help with your workflow.
+
+12
+00:00:52.740 --> 00:00:57.659
+Next we'll look at Nanite and Virtual Shadows. Why use Nanite? Using it and Virtual Shadow
+
+13
+00:00:57.699 --> 00:01:02.819
+maps overview. We'll also look at a review of understanding LODs. Now again, I say review
+
+14
+00:01:02.819 --> 00:01:06.340
+because some of these are covered in your other classes. We'll look at editing and using
+
+15
+00:01:06.340 --> 00:01:13.340
+LODs, LOD colorization, using poly edit tools, swapping geo, merging geo and HLOTs and how
+
+16
+00:01:14.379 --> 00:01:20.620
+that works. And finally we'll end with review of texture material optimization, texture
+
+17
+00:01:20.620 --> 00:01:26.179
+optimization and material optimization when it comes to working with Unreal. Alright,
+
+18
+00:01:26.220 --> 00:01:31.500
+let's go and get started. Optimization for linear content, profiling geometry, we're
+
+19
+00:01:31.500 --> 00:01:36.800
+going to take a look now at profiling concepts. So some of the things you want to look at
+
+20
+00:01:36.800 --> 00:01:42.140
+is a pros and cons when it comes to the types of rendering. There's forward rendering and
+
+21
+00:01:42.140 --> 00:01:48.980
+that is your typical use or at least in the past that is used to create a VR scenario
+
+22
+00:01:48.980 --> 00:01:53.260
+because it was a little bit lighter, but unfortunately you would have some limitations on the type
+
+23
+00:01:53.260 --> 00:01:57.820
+of light that you would use, which would make things a little bit trickier. The overhead
+
+24
+00:01:57.820 --> 00:02:01.780
+or the idea behind it was that things could be a little bit lighter so you weren't using
+
+25
+00:02:01.780 --> 00:02:06.219
+the full capacity of all the things in the engine, but you're using just enough to be
+
+26
+00:02:06.219 --> 00:02:13.020
+able to create a nice, efficient VR scenario. There's also deferred rendering. So deferred
+
+27
+00:02:13.020 --> 00:02:17.939
+rendering is the old school way in which Unreal would bake your lighting. You would be fast,
+
+28
+00:02:17.939 --> 00:02:22.460
+is especially in small, medium scenes, and had lower realism compared to ray tracing
+
+29
+00:02:22.460 --> 00:02:29.420
+in Lumen. And it's largely a 2D operation. Calculates lighting with approximations is
+
+30
+00:02:29.420 --> 00:02:34.260
+complex to use. Now you'll notice in the first one forward, it says a number of features
+
+31
+00:02:34.260 --> 00:02:38.780
+are not yet supported, but you don't have to worry about that so much now. You can actually
+
+32
+00:02:38.780 --> 00:02:45.020
+use VR or build things in VR using Lumen. Lumen now supports VR, so you don't have to
+
+33
+00:02:45.020 --> 00:02:51.659
+actually set things in your project settings for forward rendering, which is kind of convenient.
+
+34
+00:02:51.659 --> 00:02:56.819
+So looking at ray tracing in Lumen, this is suited for complex effects, GI reflection,
+
+35
+00:02:56.819 --> 00:03:01.060
+refraction, and soft shadows. Now refraction is limited. You won't get the same as you
+
+36
+00:03:01.060 --> 00:03:06.139
+would with ray tracing. You'll have to fake some of it, but there will be some ability
+
+37
+00:03:06.139 --> 00:03:10.939
+that you have in here to simulate some of those options. But again, full caustics and
+
+38
+00:03:10.939 --> 00:03:14.939
+refraction, you're going to get from Path Tracer. It's easy to implement when it comes
+
+39
+00:03:14.939 --> 00:03:20.859
+to ray tracing in Lumen. It's more intuitive, reliable, realistic, and mimics light's behavior.
+
+40
+00:03:20.860 --> 00:03:25.660
+Only Lumen is optimized though, keep in mind to be able to be used with ICV effects. Ray
+
+41
+00:03:25.660 --> 00:03:31.820
+tracing leans more towards final pixel. That's because it takes a pretty big hit on your
+
+42
+00:03:31.820 --> 00:03:37.460
+GPU. Now Path Tracing is not suited for real time. It is not real time, or at least the
+
+43
+00:03:37.460 --> 00:03:42.260
+idea of real time was not in mind when it was created. It's for rendering final pixel
+
+44
+00:03:42.260 --> 00:03:48.900
+projects. Displays a more accurate light refraction and caustic effect, takes longer to render
+
+45
+00:03:49.060 --> 00:03:54.700
+than ray tracing in Lumen due to sample settings used for better quality, and renders each frame
+
+46
+00:03:54.700 --> 00:04:00.140
+independently. It isn't like previous renders, such as ray tracing in Lumen, where if you
+
+47
+00:04:00.140 --> 00:04:04.379
+rendered it in the movie render queue, it typically will reference the previous frame
+
+48
+00:04:04.379 --> 00:04:08.099
+to be able to make the new one. Path Tracer is a bit different, so you have to keep those
+
+49
+00:04:08.099 --> 00:04:12.900
+things in mind and test things out as you go. Now again, that's for another class when
+
+50
+00:04:12.900 --> 00:04:17.500
+we talk about path tracing, and we get into that in our ray tracing and path tracing courses.
+
+51
+00:04:19.419 --> 00:04:25.259
+So when to use them? Again, as I said before, rasterization forward is mainly used for AR
+
+52
+00:04:25.259 --> 00:04:29.979
+and VR, because it's dumbed down to be able to make things work a little bit more efficiently.
+
+53
+00:04:29.979 --> 00:04:35.659
+Rasterization or deferred baking lights, this one can be used in your typical game scenario
+
+54
+00:04:35.659 --> 00:04:41.859
+if you need, and can be used for virtual production if needed. Ray tracing also can be used for
+
+55
+00:04:41.859 --> 00:04:47.219
+virtual production, but it's mainly its focus is on final pixel, such as with movies and
+
+56
+00:04:47.220 --> 00:04:52.540
+so forth. Now we do have some of our ray tracing clients, such as automotive and architecture
+
+57
+00:04:52.540 --> 00:04:57.060
+that will use ray tracing quite often. But again, a lot of the times it's not necessarily
+
+58
+00:04:57.060 --> 00:05:01.380
+for interaction, although it can be used for interaction, you just have to optimize your
+
+59
+00:05:01.380 --> 00:05:06.780
+materials and your items in your scene accordingly, so you get the best frame rate that you possibly
+
+60
+00:05:06.780 --> 00:05:12.540
+can. Lumen is one of the more efficient ways to be able to work, and is now unreal out
+
+61
+00:05:12.540 --> 00:05:17.020
+of the box. As soon as you fire up unreal, you'll see that Lumen is working, and you'll
+
+62
+00:05:17.019 --> 00:05:20.740
+go in there and be able to check off some of the things to make it work appropriately.
+
+63
+00:05:20.740 --> 00:05:24.859
+We go into that into another class, when we talk about lighting optimization. But for
+
+64
+00:05:24.859 --> 00:05:32.620
+the most part, it is ready for ICVFX, and also games, as well as final pixel. Path tracing,
+
+65
+00:05:32.620 --> 00:05:38.299
+like we said before, is mainly for final pixel made for film and TV. And you can keep that
+
+66
+00:05:38.299 --> 00:05:44.139
+focus using it, because it really does give you some high realistic refractions and cost
+
+67
+00:05:44.139 --> 00:05:51.019
+basics, and it's really great to use. So let's go and take a look here at draw calls
+
+68
+00:05:51.019 --> 00:05:58.019
+for a moment. So draw calls here are very important to consider. A package of triangles,
+
+69
+00:05:58.019 --> 00:06:02.979
+and what it is, is a package of triangles being sent to the GPU. The GPU renders draw
+
+70
+00:06:02.979 --> 00:06:08.860
+calls by draw call, not triangle by triangle. So in other words, each mesh material is a
+
+71
+00:06:08.860 --> 00:06:14.139
+different draw call. So as you see here down below on this example, you'll see that this
+
+72
+00:06:14.139 --> 00:06:20.060
+skydome is a draw call. This piece of geo here is a draw call, the floor is a draw call,
+
+73
+00:06:20.060 --> 00:06:24.780
+this other piece of geo number four is a draw call number five. But as soon as you introduce
+
+74
+00:06:24.780 --> 00:06:29.740
+a new material, that becomes a new draw call. So the materials and the geometry are to be
+
+75
+00:06:29.740 --> 00:06:34.939
+considered. And each one, if you have too many or not optimized, you're not been using material
+
+76
+00:06:34.939 --> 00:06:40.699
+instances or merging when you can, you can end up having a really huge scene, which has a lot of
+
+77
+00:06:40.699 --> 00:06:47.579
+draw calls, and that's going to hit your frames. So think of it this way, if you don't do that,
+
+78
+00:06:47.579 --> 00:06:54.699
+if you don't merge geometry, if you don't optimize what materials you're using, if you don't do those
+
+79
+00:06:54.699 --> 00:07:04.139
+things, you can imagine it such as a single image copying a single one gig file versus copying one
+
+80
+00:07:04.139 --> 00:07:11.099
+million KB files. It's going to eat up time. It's going to processing. You want to be able to work
+
+81
+00:07:11.099 --> 00:07:16.539
+efficiently. And again, consider your materials, dumb down your textures as things in the distance,
+
+82
+00:07:17.099 --> 00:07:23.899
+merge geometry, which is, which you can find is okay to do so. It's not maybe something that
+
+83
+00:07:23.899 --> 00:07:28.379
+doesn't animate. It's not interactive. You don't have to interact with. So you have to think
+
+84
+00:07:28.379 --> 00:07:33.819
+deterministically. And that's with games as well as film. So let's take a look at what's being
+
+85
+00:07:33.819 --> 00:07:39.180
+processed here. And we're going to be using a console command called stat unit. Stat unit works
+
+86
+00:07:39.180 --> 00:07:44.939
+really well. This allows us to see our frame, a total time to finish each frame, our game information,
+
+87
+00:07:44.939 --> 00:07:52.620
+C++ and blueprint game play operations, our draw CPU render time and GPU render time. Now we've added
+
+88
+00:07:52.620 --> 00:07:57.500
+a few since this particular graphic, this gives you an overhead of some of the main things you'll
+
+89
+00:07:57.500 --> 00:08:02.300
+be looking at, for the most part. But there are some others, as you can see off to the right,
+
+90
+00:08:02.300 --> 00:08:06.139
+because this once you run this console command, it will show up to your right towards the top.
+
+91
+00:08:06.860 --> 00:08:16.300
+And you'll see a few others in here, such as our dinariz draws, prims, as well as a newer one called
+
+92
+00:08:16.300 --> 00:08:22.620
+our HIT. So let's actually break these down our hit. So frame number shows you the total time
+
+93
+00:08:22.620 --> 00:08:28.699
+your hardware took to render that particular frame. Game thread, this is a C++ as mentioned
+
+94
+00:08:28.699 --> 00:08:38.220
+earlier, blueprint physics and etc. Draw thread CPU render time GPU render time for GPU, R hit R,
+
+95
+00:08:38.220 --> 00:08:44.860
+you can just think of it R is easiest for me. Typically it's RHI thread time is synced to the
+
+96
+00:08:44.860 --> 00:08:52.059
+frame, and it will likely be similar to the frame time. And then RHI stands for render hardware
+
+97
+00:08:52.059 --> 00:08:58.059
+interface, if you're wondering. Next, we have the dinariz. It's not supported unless turned on.
+
+98
+00:08:58.780 --> 00:09:03.259
+This helps to optimize things, especially if testing packaging out. So you can actually turn it on if
+
+99
+00:09:03.259 --> 00:09:08.780
+you need to, and if you need to cater a particular export that you need to send things to and say,
+
+100
+00:09:08.780 --> 00:09:14.780
+hey, I want to see what things look like on Windows and on a Android pad or whatever, I figure with
+
+101
+00:09:14.780 --> 00:09:20.620
+their interfaces for Android. They have their own interface, which is Android. My bad. So sad that
+
+102
+00:09:20.620 --> 00:09:27.820
+I said that. Such a PC guy and a Mac dude. So we have a prims here, the current amount of triangles
+
+103
+00:09:27.820 --> 00:09:32.460
+being drawn. So all these things are set into place to be able to help you look at your calculations.
+
+104
+00:09:33.740 --> 00:09:39.660
+So to better understand how that works, I have a graphic here that shows you the CPU game, game
+
+105
+00:09:39.660 --> 00:09:46.940
+context. And then next we have the CPU mostly draw what to render. And finally the GPU brings all
+
+106
+00:09:46.940 --> 00:09:51.740
+these two guys together and gives you our final pixel. So you can kind of think of it that way.
+
+107
+00:09:51.740 --> 00:09:56.140
+And have another graphic up here, which kind of breaks that down just the same to make it a little
+
+108
+00:09:56.139 --> 00:10:02.460
+bit easier to understand. So in other words, the game threat computes the data in the world
+
+109
+00:10:02.460 --> 00:10:08.539
+to know where everything is. The draw thread calculates what is on screen and then what can be
+
+110
+00:10:08.539 --> 00:10:14.620
+called. And the GPU thread is set to draw calls for any meshes that were not called by the draw
+
+111
+00:10:14.620 --> 00:10:20.299
+threat. So the bottleneck you can hit long thread times can create bottlenecks and reduce frame
+
+112
+00:10:20.299 --> 00:10:25.100
+rates. So if you have stuff that's unnecessary, that you were bogged down, you're saying this is
+
+113
+00:10:25.100 --> 00:10:30.779
+the thing you have to think about if you're coming from a movie background where you're
+
+114
+00:10:30.779 --> 00:10:35.500
+throwing everything at Maya, unreal, you have to be deterministic. You can't throw this chicken
+
+115
+00:10:35.500 --> 00:10:42.139
+and the chicken, the kitchen sink at it, because you want to be able to think what is it that you
+
+116
+00:10:42.139 --> 00:10:47.899
+need? What are the hero objects? What is the primary focus? And you have to come in with a game plan
+
+117
+00:10:47.899 --> 00:10:52.700
+and focus on making the higher resolution, the higher poly for those items and things in the
+
+118
+00:10:52.700 --> 00:10:57.740
+background can take a hit in the texture department. You can merge when you need to, nobody's interacting
+
+119
+00:10:57.740 --> 00:11:02.220
+with it. And this also goes for games. You just got to think deterministically how you're going
+
+120
+00:11:02.220 --> 00:11:08.700
+to approach things. So you can think of the calling this way. You can see here that it's only
+
+121
+00:11:08.700 --> 00:11:13.660
+unreal, only draws what's in front of it as where that camera is moving. It's not going to, it doesn't
+
+122
+00:11:13.660 --> 00:11:19.580
+draw everything at the same time. It's just an efficient way for Unreal to work. Now there are
+
+123
+00:11:19.580 --> 00:11:24.460
+different calling methods and you can turn these in and you can use a calling distance volume if you
+
+124
+00:11:24.460 --> 00:11:30.139
+want to. And we're going to go briefly over that, not too much in the film department. You don't use
+
+125
+00:11:30.139 --> 00:11:35.020
+it as much and Unreal works pretty well without necessarily needing it, but there will be times
+
+126
+00:11:35.020 --> 00:11:42.460
+where you might need it on a more game centric workflow. We see here we have the view frustrum
+
+127
+00:11:42.460 --> 00:11:48.540
+calling uses the visible screen area of the camera field of view FOV to call objects not within this
+
+128
+00:11:48.539 --> 00:11:59.659
+space. Professtrum is a Pyramedal, I got to get that word right, Pyramedal shape that includes
+
+129
+00:11:59.659 --> 00:12:04.939
+endear and far clipping plane, which defines the closest and farthest of any object should be visible
+
+130
+00:12:04.939 --> 00:12:11.179
+within this space. All not to be, all not in view removed. So it's basically kind of, let me go back
+
+131
+00:12:11.179 --> 00:12:16.379
+to the last slide we talked about. It's again only going to draw what's in front of that camera or
+
+132
+00:12:16.379 --> 00:12:21.259
+that view. Even as you are working in the editor, if you're just using a perspective camera, it's
+
+133
+00:12:21.259 --> 00:12:26.220
+going to do the same thing, which is super convenient to work with. All right, so there's
+
+134
+00:12:26.220 --> 00:12:31.740
+precomputed visibility. Now all these things you can actually adjust in your settings if you need to,
+
+135
+00:12:31.740 --> 00:12:37.179
+and that can be helpful in the cases of lower level hardware. So let's go on to the next one here.
+
+136
+00:12:37.179 --> 00:12:43.179
+There's dynamic occlusion, dynamic occlusion system is what Unreal is primary working with right now
+
+137
+00:12:43.739 --> 00:12:50.219
+in Unreal 4 and 5 and comes with several calling methods to choose from. So again, you can query
+
+138
+00:12:50.219 --> 00:12:57.339
+these, you can change these. I prefer using the defaults. I really will rarely ever have to mess
+
+139
+00:12:57.339 --> 00:13:03.179
+with these because Unreal just does a really good job and really relies on you to be efficient
+
+140
+00:13:03.179 --> 00:13:09.179
+with the way that you are making and creating and crafting your scene. So just think efficiency,
+
+141
+00:13:09.179 --> 00:13:14.219
+just think hero objects are the ones that get the most texture, they get the most polycount,
+
+142
+00:13:14.219 --> 00:13:19.179
+they get the most love in your scene and everything from there can degrade and be lesser.
+
+143
+00:13:19.179 --> 00:13:25.739
+Now we all know that directors, we all know that game heads will actually want those things to
+
+144
+00:13:25.739 --> 00:13:30.779
+change on the fly, just be prepared to swap them out if needed to prevent bloat. But for the most
+
+145
+00:13:30.779 --> 00:13:35.899
+part, if there's a game plan, a game level design, if there's a game plan for the film, knowing what
+
+146
+00:13:35.899 --> 00:13:41.579
+the objectives are, you're going to be working pretty nicely with the system in place. You can
+
+147
+00:13:41.579 --> 00:13:47.019
+see here kind of how it works and how the camera frustrum is shown here and you can actually see
+
+148
+00:13:47.019 --> 00:13:51.899
+it. Now this in previous versions of Unreal doesn't always show up to the party. So if you find in
+
+149
+00:13:51.899 --> 00:13:57.340
+5.3 doesn't quite show up, don't worry about it. It's just a demonstration of what that view is
+
+150
+00:13:57.340 --> 00:14:01.980
+as it increases. I found in earlier versions of Unreal this wouldn't always show up and wouldn't
+
+151
+00:14:01.980 --> 00:14:07.899
+always update as you changed that frustrum. So we're going to go and take a look at some
+
+152
+00:14:07.899 --> 00:14:12.220
+profiling, some quick tools to be able to profile and see what's going on in your scene.
+
+153
+00:14:12.220 --> 00:14:17.580
+This includes the profile GPU. Let's go to Unreal to see that up close and I'll point out a few
+
+154
+00:14:17.580 --> 00:14:27.500
+things. So in Unreal, we're going to go and activate profile GPU. I'm going to hit enter.
+
+155
+00:14:27.899 --> 00:14:33.019
+You'll see it pop up. Mine kind of went off screen. Let me pull it over for you so you guys can take a
+
+156
+00:14:33.019 --> 00:14:38.700
+look. So what is happening here is Unreal's taking a snapshot just for a brief moment
+
+157
+00:14:38.700 --> 00:14:44.539
+of my scene and where I'm at. I do recommend if you are going to use this tool to make sure that you
+
+158
+00:14:44.539 --> 00:14:49.740
+create a bookmark of the areas that you want to analyze for that brief moment. This snapshot here
+
+159
+00:14:49.740 --> 00:14:55.580
+you can save if you need to and it will allow you to go in here and you can analyze each one of your
+
+160
+00:14:55.660 --> 00:15:01.660
+frames and see what might be giving you some trouble. The yellow areas are going to be where the
+
+161
+00:15:02.620 --> 00:15:07.020
+most trouble we're going to have. Now we don't have a lot of fog in here but if we had fog,
+
+162
+00:15:07.020 --> 00:15:12.860
+looks like I moved some things. If we had fog, it would be a bit or at least had it heavier.
+
+163
+00:15:12.860 --> 00:15:18.300
+That would be the bigger draw call or issue we may run into and I can do a quick search if I wanted
+
+164
+00:15:18.300 --> 00:15:24.780
+to in my scene for exponential height fog and I can see for that brief second what my millisecond
+
+165
+00:15:24.860 --> 00:15:30.860
+were giving me overall. You'll see that it took a snapshot here just a couple seconds here
+
+166
+00:15:31.419 --> 00:15:37.419
+and you can again how the bar works is it takes those scene elements and it gives you a computed
+
+167
+00:15:37.419 --> 00:15:43.419
+breakdown color coding where your trouble may be. So let's actually go and look at this a bit
+
+168
+00:15:43.419 --> 00:15:48.699
+closer in our slides and we're going to go and look at a few other ways to do profiling. Now again
+
+169
+00:15:48.699 --> 00:15:54.059
+you don't have to use this method. This is just one of many because it tells you right here
+
+170
+00:15:54.779 --> 00:16:02.699
+in our track here what duration, what milliseconds took up the most time to calculate and then
+
+171
+00:16:02.699 --> 00:16:07.659
+you can find out oh I can see where my issues may have occurred and in this case it's the
+
+172
+00:16:07.659 --> 00:16:13.659
+ray tracing dynamic update. We can open that up further and we can see where those issues may have
+
+173
+00:16:13.659 --> 00:16:19.979
+occurred. Now you can a clap scenes at any time but you'll notice then the build here is a ray
+
+174
+00:16:19.980 --> 00:16:25.580
+tracing dynamic geometry update here and this took up the most time. Basically we have a lot of
+
+175
+00:16:25.580 --> 00:16:32.220
+geo in here so if we needed to we could do a bit more merging if we needed and even use some cards
+
+176
+00:16:32.220 --> 00:16:38.460
+for some of our land items they don't have to be full on nanite geometry. All right let's go back
+
+177
+00:16:38.460 --> 00:16:46.379
+into the slides. So again the profile GPU command allows you to quickly identify the GPU cost of
+
+178
+00:16:46.379 --> 00:16:52.700
+the various passes sometimes down to the draw calls. The data is based on GPU time stamps and is
+
+179
+00:16:52.700 --> 00:17:00.139
+usually quite accurate. Certain optimizations can make the numbers less reliable and it is good to
+
+180
+00:17:00.139 --> 00:17:07.019
+be critical about any number. So in other words I wouldn't just use it by itself it's great for a
+
+181
+00:17:07.019 --> 00:17:11.740
+quick look where the trouble's at but you definitely want to look at such things as insights and a
+
+182
+00:17:11.740 --> 00:17:17.579
+few other things I'm going to show you to analyze things overall. Drivers tend to optimize shader
+
+183
+00:17:17.579 --> 00:17:24.779
+cost a few seconds after using the shader. This can be noticeable and it might be useful to wait a bit
+
+184
+00:17:24.779 --> 00:17:30.460
+or measure another time to get more confidence. So again the snapshot is a disadvantage here
+
+185
+00:17:30.460 --> 00:17:35.180
+because you might want to compare a couple of snapshots together to see what you're getting
+
+186
+00:17:35.180 --> 00:17:41.339
+and this is why I emphasize maybe using other ones on top of this because it's good for a quick
+
+187
+00:17:41.339 --> 00:17:50.139
+look but necessarily not necessarily for a deep dive on what's going on. So overall how to use it
+
+188
+00:17:50.139 --> 00:17:57.099
+we again we placed the camera we made sure that we bookmarked it we ran GPU a profile GPU we typed
+
+189
+00:17:57.099 --> 00:18:02.779
+that in the command line and it gives us a snapshot of what's going on and again good to bookmark like
+
+190
+00:18:02.779 --> 00:18:08.859
+I mentioned before. Floating your cursor over the largest of the recorded bars shows you what is
+
+191
+00:18:08.859 --> 00:18:14.139
+taking up the most hits again this larger bar here and it looks like it's going to be our fog.
+
+192
+00:18:14.859 --> 00:18:19.019
+I did say the color before it's mainly the larger bar versus the color
+
+193
+00:18:20.939 --> 00:18:26.139
+and in this case it's the volume metrics so in this case it definitely is hitting a bit more.
+
+194
+00:18:26.699 --> 00:18:32.939
+As you can see you can do a comparable as I move around you can see our our sections are seconds
+
+195
+00:18:32.939 --> 00:18:38.459
+here milliseconds and you'll see that 1.15 in this particular case is eating up the most time.
+
+196
+00:18:39.579 --> 00:18:43.740
+And again clicking on it gives you the duration time to the process listed below.
+
+197
+00:18:45.339 --> 00:18:50.779
+So let's go ahead and take a look at another one called stat GPU. This is going to give us a nice
+
+198
+00:18:50.779 --> 00:18:58.059
+overview gives us like an overlay and milliseconds showing us what's eating up most of our GPU processing
+
+199
+00:18:58.859 --> 00:19:04.939
+time and calculation and it will give us the minutes the min the max and the overall average
+
+200
+00:19:04.940 --> 00:19:10.620
+and then you can actually get a quick real-time response and see what is going on. Now you can
+
+201
+00:19:10.620 --> 00:19:17.420
+run the stat stat space GPU or you can simply go to stats advanced and you'll go all the way down
+
+202
+00:19:17.420 --> 00:19:22.779
+to GPU here on the bottom. Let's go and take a look at it in Unreal.
+
+203
+00:19:25.740 --> 00:19:34.460
+So I'm going to go to my Alpalog. I'm going to type in stat space GPU. Sometimes it might take a
+
+204
+00:19:34.460 --> 00:19:40.539
+little bit of time to come up. You can now see here it is calculating for us letting us know what's
+
+205
+00:19:40.539 --> 00:19:47.500
+eating up the most of our time. We have our space probes there just sitting there waiting for our
+
+206
+00:19:47.500 --> 00:19:55.420
+information. As we move around you can test and see what those calculations are. Pretty nice to be
+
+207
+00:19:55.420 --> 00:20:02.700
+able to have that. You can say oh you know what I am noticing that things are a little bit heavier
+
+208
+00:20:02.700 --> 00:20:11.420
+here when it comes to our Lumen scene probe gathering. I think a little bit heavier here
+
+209
+00:20:11.420 --> 00:20:18.460
+when it comes to our volumetric clouds maybe a bit. So that gives you a quick rundown of things.
+
+210
+00:20:18.460 --> 00:20:23.500
+So I go to my output log here. I'm going to hit my up arrow and we're going to turn that sucker off
+
+211
+00:20:23.500 --> 00:20:28.380
+and it's simply just inputting that one more time and I'll just then enter. There we go.
+
+212
+00:20:29.340 --> 00:20:33.900
+That's it with this one. In the next video we're going to take a look at CPU draw threads and we're
+
+213
+00:20:33.900 --> 00:20:44.300
+going to look at Unreal Insights. Thanks again.
+

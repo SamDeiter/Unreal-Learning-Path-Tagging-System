@@ -1,0 +1,234 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.000
+In this section, we're going to talk about our time data monitor and using that for adjusting sync and time code.
+
+2
+00:00:07.000 --> 00:00:12.000
+Now, the time data monitor is used to monitor the sync and time code of different devices.
+
+3
+00:00:12.000 --> 00:00:20.000
+It can also be used to synchronize devices using buffers and offsets to the incoming data by evaluating the time code properties of your devices.
+
+4
+00:00:20.000 --> 00:00:23.000
+Now, there are three evaluation types that you're going to typically run into.
+
+5
+00:00:23.000 --> 00:00:31.000
+Time code, which uses time code when evaluating your source. Platform time, which uses the engine's time when evaluating the source. Or none.
+
+6
+00:00:31.000 --> 00:00:35.000
+There's no special synchronization. It just uses whatever the latest sample time is.
+
+7
+00:00:35.000 --> 00:00:39.000
+Now, there are some source indicators that you're going to see in your time data monitor.
+
+8
+00:00:39.000 --> 00:00:42.000
+And those are green, which shows that your input is actually connected.
+
+9
+00:00:42.000 --> 00:00:48.000
+Yellow, where your input is connected, but there is no data available. And red, in which nothing is connected.
+
+10
+00:00:48.000 --> 00:00:51.000
+So let's jump into the engine and take a look.
+
+11
+00:00:51.000 --> 00:00:57.000
+Now, let's locate the time data monitor if you first want to go into window, virtual production, and time data monitor.
+
+12
+00:00:57.000 --> 00:01:03.000
+Once that comes up, you'll see here that we are synchronized through our AJA time code provider.
+
+13
+00:01:03.000 --> 00:01:11.000
+Now, we also have our OptiTrack active. And if I take a look at this, you see a timing diagram here showing a buffer and sample count.
+
+14
+00:01:11.000 --> 00:01:17.000
+Now, you'll see that we're synchronized currently, but you may see this pop on and off while we're having our discussion today.
+
+15
+00:01:17.000 --> 00:01:27.000
+So there are several evaluation types here. And if I click on this little clock here, you're going to see that I have a couple of options for evaluating my devices.
+
+16
+00:01:27.000 --> 00:01:34.000
+One of those that we generally want to use is time code. So we just make sure that this is active by switching over to time code.
+
+17
+00:01:34.000 --> 00:01:38.000
+Now, as I switch over to time code, there are some adjustments that we like to make.
+
+18
+00:01:38.000 --> 00:01:44.000
+Now, there are some additional evaluation types. Obviously, time code uses your time code when you're evaluating your source,
+
+19
+00:01:44.000 --> 00:01:51.000
+but the platform time that we switched away from, which was the little clock, that's using the engine's time when evaluating your source.
+
+20
+00:01:51.000 --> 00:01:59.000
+Obviously, if you don't want any synchronization, you can choose no synchronization, which has no special synchronization and just uses your latest sample time.
+
+21
+00:01:59.000 --> 00:02:06.000
+Now, there are some things to keep in mind as you go through here. Up in your time code provider, there is a global frame offset.
+
+22
+00:02:06.000 --> 00:02:10.000
+Now, you may notice that this has been popping on and off a little bit with our synchronization.
+
+23
+00:02:10.000 --> 00:02:14.000
+If our training diagram here has our sync kind of pop out just a little bit.
+
+24
+00:02:14.000 --> 00:02:20.000
+In order to help that along, we want to make sure that our global frame offset is set to three.
+
+25
+00:02:20.000 --> 00:02:24.000
+Now, that's going to offset us and pull us outside of our range.
+
+26
+00:02:24.000 --> 00:02:27.000
+What we need is a larger range for our buffer size.
+
+27
+00:02:27.000 --> 00:02:31.000
+And in order to fix that, we move right over here to where our buffer size says 10.
+
+28
+00:02:31.000 --> 00:02:38.000
+And we generally recommend that you change your tracking system buffer size from 10 to about 50.
+
+29
+00:02:38.000 --> 00:02:42.000
+And now you can see that our timing diagram is a lot wider here.
+
+30
+00:02:42.000 --> 00:02:46.000
+And time step and our adjustments are going to be pretty much okay here.
+
+31
+00:02:46.000 --> 00:02:52.000
+Now, if I take a look over my source indicators here, you'll notice that my indicators are showing that they are green.
+
+32
+00:02:52.000 --> 00:03:00.000
+Green tells me that my input is connected and yellow inputs, if they ever change to that color, tells me that the input is connected,
+
+33
+00:03:00.000 --> 00:03:06.000
+but there's no data available. And obviously, if it's red, then there's no connection at all.
+
+34
+00:03:06.000 --> 00:03:14.000
+Now, the top of the window shows your incoming sync and your timecode connection connected to your AJA timecode provider.
+
+35
+00:03:14.000 --> 00:03:17.000
+And this is what we set up in our media profile.
+
+36
+00:03:17.000 --> 00:03:26.000
+Now, in Unreal Engine 5.1, you may run into an issue where your media profile is not connecting to the time data monitor after loading the project through your version control.
+
+37
+00:03:26.000 --> 00:03:33.000
+Now, in order to fix this, you may need to set the media profile as your startup media profile in your project settings.
+
+38
+00:03:33.000 --> 00:03:36.000
+To do that, you just go under your edit project settings.
+
+39
+00:03:36.000 --> 00:03:40.000
+And if you type in media at the top, it'll bring up some options here.
+
+40
+00:03:40.000 --> 00:03:46.000
+The first one is you want to make sure that your general settings for your frame rate is using your AJA custom time step.
+
+41
+00:03:46.000 --> 00:03:54.000
+Your timecode provider should also be your AJA timecode provider and that your media profile is using your AJA media profile for your startup profile,
+
+42
+00:03:54.000 --> 00:03:58.000
+as well as choosing your source proxy and your media output proxy.
+
+43
+00:03:58.000 --> 00:04:03.000
+Make sure these are located in and save them into your .ini file.
+
+44
+00:04:03.000 --> 00:04:11.000
+Next, I want to point out that the Unreal Engine can receive capture frames from our camera on SDI as well as position and orientation of our camera.
+
+45
+00:04:11.000 --> 00:04:15.000
+There is another option here for our buffer visualizer.
+
+46
+00:04:15.000 --> 00:04:22.000
+So if I look in the time data monitor, there is a button here that looks like a little visualizer and that allows me to open our buffer visualizer.
+
+47
+00:04:22.000 --> 00:04:27.000
+Now the buffer visualizer is just an extension and it has a simple UI that has a couple of elements in here.
+
+48
+00:04:27.000 --> 00:04:32.000
+It tells me what's active, it tells me what's in my buffer and it tells me what I'm looking for in here.
+
+49
+00:04:32.000 --> 00:04:38.000
+Now the vertical line here that you see this green line, it represents the evaluation time.
+
+50
+00:04:38.000 --> 00:04:45.000
+The line is green when inside the buffer and red when it jumps outside the buffer because then it's outside your available samples.
+
+51
+00:04:45.000 --> 00:04:51.000
+Now the light gray rectangle that you see in here represents your current time samples available for the channel.
+
+52
+00:04:51.000 --> 00:04:57.000
+And the dark gray rectangle that you see above here represents the average of the time sampled available in your channel.
+
+53
+00:04:57.000 --> 00:05:06.000
+And then the white rectangle here is going to represent the standard deviation of your oldest time sample and newest time sample available.
+
+54
+00:05:06.000 --> 00:05:17.000
+During calibration, the time data monitor will modify the global offset of the timecode provider and buffer sizes of the sources so that all channels have enough samples in the range of the evaluation time.
+
+55
+00:05:17.000 --> 00:05:24.000
+You can adjust the timing offsets and buffers to make sure that the CG elements are in sync within the video source and tracking data.
+
+56
+00:05:24.000 --> 00:05:30.000
+Now a pro tip here, the bigger the white rectangle is, the more variation or jitter in the sample buffer.
+
+57
+00:05:30.000 --> 00:05:42.000
+When you see this larger variation, you'll probably need more buffer between the evaluation time and the newest time sample available to be sure you are always able to evaluate a sample at the desired time.
+
+58
+00:05:42.000 --> 00:05:48.000
+Next, we're going to go ahead and create our lens file creation in the next video in this course.
+

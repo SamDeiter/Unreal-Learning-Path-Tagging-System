@@ -1,0 +1,798 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.360
+In this lesson, we're going to take a look at Nanite and virtual shadowmaps.
+
+2
+00:00:06.360 --> 00:00:09.000
+So let's get started.
+
+3
+00:00:09.000 --> 00:00:11.880
+So many people ask, like, why Nanite?
+
+4
+00:00:11.880 --> 00:00:12.880
+Why use it?
+
+5
+00:00:12.880 --> 00:00:16.120
+Well, it's Unreal 5's virtualized geometry system.
+
+6
+00:00:16.120 --> 00:00:22.320
+Basically, it's a lot more complex than our regular LODs because we get a higher visual
+
+7
+00:00:22.320 --> 00:00:28.800
+fidelity because it's stored as a hierarchical system of smaller parts using triangles and
+
+8
+00:00:28.800 --> 00:00:31.960
+adds geometric complexity with less issues.
+
+9
+00:00:31.960 --> 00:00:37.920
+So it sorts it quite well, and it keeps that silhouette and the higher poly look and feel
+
+10
+00:00:37.920 --> 00:00:41.880
+for that object on a more consistent, believable basis.
+
+11
+00:00:41.880 --> 00:00:45.880
+So Nanite allows for higher visual fidelity and works well with Lumen.
+
+12
+00:00:45.880 --> 00:00:49.719
+So when you're using Nanite, try to use it with Lumen as much as possible.
+
+13
+00:00:49.719 --> 00:00:52.920
+It doesn't mean you can't use it with a regular baked system.
+
+14
+00:00:52.920 --> 00:00:58.000
+It just takes a lot of time, and you may be limited, especially if you need several different
+
+15
+00:00:58.000 --> 00:00:59.520
+higher poly objects.
+
+16
+00:00:59.520 --> 00:01:04.519
+You want to lean towards Lumen and virtual shadowmaps when using Nanite.
+
+17
+00:01:04.519 --> 00:01:08.920
+Outside of Lumen, again, like I said before, it can't take a while to bake those shadows.
+
+18
+00:01:08.920 --> 00:01:15.159
+Virtual shadowmaps are used for more high fidelity shadows versus baking shadows.
+
+19
+00:01:15.159 --> 00:01:17.879
+When you bake, you're sharing that information.
+
+20
+00:01:17.879 --> 00:01:19.280
+You're putting it into a texture.
+
+21
+00:01:19.280 --> 00:01:25.039
+It's baking it on the environment, especially for static objects and your static lighting.
+
+22
+00:01:25.040 --> 00:01:33.200
+It's not quite as visually unique and in the fact that it actually brings in more realism.
+
+23
+00:01:33.200 --> 00:01:39.400
+So the suspension of disbelief is better with Lumen, with Nanite, and with virtual shadowmaps.
+
+24
+00:01:39.400 --> 00:01:44.760
+So instant object count and draw calls are less of a limitation now, and instances are
+
+25
+00:01:44.760 --> 00:01:48.040
+in the millions versus what we had before.
+
+26
+00:01:48.040 --> 00:01:50.880
+So again, that beats LODs again.
+
+27
+00:01:50.879 --> 00:01:55.359
+So it's more visually accurate than displacement and has a less shadow artifacts.
+
+28
+00:01:55.359 --> 00:01:57.359
+But that doesn't mean you can't use displacement.
+
+29
+00:01:57.359 --> 00:02:01.759
+You can still add it to your object, which we'll talk about in just a second.
+
+30
+00:02:01.759 --> 00:02:06.919
+So the issues that come up with displacement is it's inaccurate because you're actually
+
+31
+00:02:06.919 --> 00:02:13.680
+pushing the object's visual look beyond the original bounds of the object.
+
+32
+00:02:13.680 --> 00:02:18.960
+Now if you do run into any kind of flickering or weird drawing issues happening, you can
+
+33
+00:02:18.960 --> 00:02:22.840
+actually go into the object itself and increase the bounds just a tad, just a little bit,
+
+34
+00:02:22.840 --> 00:02:24.080
+that's all it needs.
+
+35
+00:02:24.080 --> 00:02:25.920
+And you can maybe edit some of those.
+
+36
+00:02:25.920 --> 00:02:30.040
+But for the most part, Nanite makes it so that you don't necessarily have to lean so
+
+37
+00:02:30.040 --> 00:02:32.800
+hard on displacement.
+
+38
+00:02:32.800 --> 00:02:41.040
+So Nanite is great for a high resolution model and shadows keeping accuracy and working with
+
+39
+00:02:41.040 --> 00:02:42.719
+virtual shadowmaps.
+
+40
+00:02:42.719 --> 00:02:47.819
+So again, no, Nanite can be used for ICB effects, but baking takes a good amount of time outside
+
+41
+00:02:47.819 --> 00:02:49.379
+of virtual shadowmaps.
+
+42
+00:02:49.379 --> 00:02:54.739
+Lumen, Nanite, virtual shadowmaps are ideal for ICB effects, but also can be used for
+
+43
+00:02:54.739 --> 00:03:00.340
+games, but both you need to be very deterministic as you work with them.
+
+44
+00:03:00.340 --> 00:03:02.259
+So let's go and take a look in Unreal.
+
+45
+00:03:02.259 --> 00:03:07.259
+And I'm going to point out some of the features that we have in here to be able to edit some
+
+46
+00:03:07.259 --> 00:03:08.259
+of your Nanite qualities.
+
+47
+00:03:08.259 --> 00:03:14.539
+Now I'm not going to get too much into buttonology, but I will walk you through the overall synopsis
+
+48
+00:03:14.539 --> 00:03:15.620
+of what they are.
+
+49
+00:03:15.620 --> 00:03:20.340
+And I do have them listed in my notes too, so never fear if you think you will forget.
+
+50
+00:03:20.340 --> 00:03:24.060
+So let's go ahead and take a look in Unreal and we're going to take a look at Nanite overall.
+
+51
+00:03:24.060 --> 00:03:26.860
+I'm going to go and click on this particular rock.
+
+52
+00:03:26.860 --> 00:03:29.300
+Let's go and click on our magnifying glass.
+
+53
+00:03:29.300 --> 00:03:31.980
+Find that rock and we're going to actually mess with this copy here.
+
+54
+00:03:31.980 --> 00:03:32.980
+We have a copy in here.
+
+55
+00:03:32.980 --> 00:03:38.580
+I'm going to right click this particular one and we can see that we can easily and instantly
+
+56
+00:03:38.580 --> 00:03:40.700
+turn this into a Nanite object.
+
+57
+00:03:40.700 --> 00:03:42.860
+You can also disable it if you want to.
+
+58
+00:03:42.860 --> 00:03:45.780
+So this Nanite object, we can now double click on it.
+
+59
+00:03:45.780 --> 00:03:51.060
+Let's go full screen and we're in our scene and you'll see that we have some Nanite settings.
+
+60
+00:03:51.060 --> 00:03:55.060
+Let's isolate these a little bit better so we can actually talk about them.
+
+61
+00:03:55.060 --> 00:03:57.820
+So I'm just going to type in Nanite in general.
+
+62
+00:03:57.820 --> 00:04:00.700
+There you go.
+
+63
+00:04:00.700 --> 00:04:04.500
+Got to be able to type and you'll see all of our settings in place.
+
+64
+00:04:04.500 --> 00:04:09.060
+Now these allow you for a little bit more micro managing where you can actually edit things
+
+65
+00:04:09.060 --> 00:04:11.740
+according to the needs of that object.
+
+66
+00:04:11.740 --> 00:04:15.939
+You'll see obviously number one, we have enable Nanite support.
+
+67
+00:04:15.939 --> 00:04:21.860
+This is actually super important and will now automatically tick on before you had to
+
+68
+00:04:21.860 --> 00:04:23.660
+go in here and turn that on.
+
+69
+00:04:23.660 --> 00:04:26.500
+This makes it so that Nanite is going to be drawn correctly.
+
+70
+00:04:26.500 --> 00:04:30.819
+So Unreal automatically knows this is a Nanite object and it's ready to be drawn.
+
+71
+00:04:30.819 --> 00:04:36.139
+We have a preserved area one in here now and this one can help with foliage, especially
+
+72
+00:04:36.139 --> 00:04:41.579
+if you have like minute details that aren't rendering the way that you like.
+
+73
+00:04:41.579 --> 00:04:44.860
+You actually can turn that on to maybe help things out.
+
+74
+00:04:44.860 --> 00:04:46.860
+There's also explicit tangents.
+
+75
+00:04:46.860 --> 00:04:51.699
+Now this is used to help store model tangents per asset versus runtime.
+
+76
+00:04:51.699 --> 00:04:55.419
+So if you needed to for optimization purposes, you have that option.
+
+77
+00:04:55.419 --> 00:04:58.979
+There's also position precision here.
+
+78
+00:04:58.979 --> 00:05:00.579
+Can't say that correctly.
+
+79
+00:05:00.579 --> 00:05:07.339
+It's used to help calculate, generate the vertex positions of a Nanite mesh and can
+
+80
+00:05:07.339 --> 00:05:09.419
+be adjusted for optimization.
+
+81
+00:05:09.419 --> 00:05:11.459
+So if you need to, you can.
+
+82
+00:05:11.459 --> 00:05:17.099
+And then we also have normal precision and this is for optimizing the disc footprint
+
+83
+00:05:17.099 --> 00:05:22.860
+and enables choosing the precision mesh that should be used when generating vertex normal.
+
+84
+00:05:22.860 --> 00:05:26.779
+So you actually have that here to be able to choose.
+
+85
+00:05:26.779 --> 00:05:33.899
+So there's a few more here and we've actually expanded these and we try to make these better
+
+86
+00:05:33.899 --> 00:05:36.699
+and better with each build.
+
+87
+00:05:36.699 --> 00:05:41.579
+That hasn't changed a whole heck of a lot, but we have made it so that just to make your
+
+88
+00:05:41.579 --> 00:05:47.819
+life easier because if you have a huge world you're building or you're in this case optimizing
+
+89
+00:05:47.819 --> 00:05:52.659
+things for ICV effects, you can actually manage things, especially if things get a little bit
+
+90
+00:05:52.659 --> 00:05:54.059
+big.
+
+91
+00:05:54.060 --> 00:05:57.740
+So we have a minimum residency here, root geometry.
+
+92
+00:05:57.740 --> 00:06:02.300
+This sets the memory bite size and streams rest for optimization.
+
+93
+00:06:02.300 --> 00:06:04.060
+So you have that option there.
+
+94
+00:06:04.060 --> 00:06:07.379
+There's keep triangle percent.
+
+95
+00:06:07.379 --> 00:06:11.939
+This again used for to optimize the triangle usage.
+
+96
+00:06:11.939 --> 00:06:15.180
+And we also have trim relative error here.
+
+97
+00:06:15.180 --> 00:06:17.840
+This sets a maximum relative error amounts.
+
+98
+00:06:17.840 --> 00:06:21.139
+You can do so if you need to fall back target.
+
+99
+00:06:21.139 --> 00:06:23.579
+We talked a little bit about this in previous classes.
+
+100
+00:06:23.579 --> 00:06:27.099
+It's used to help generating the appropriate fallback mesh.
+
+101
+00:06:27.099 --> 00:06:32.579
+It determines which targeting system used when generating a fallback mesh overall.
+
+102
+00:06:32.579 --> 00:06:33.859
+Auto works pretty well.
+
+103
+00:06:33.859 --> 00:06:38.060
+You can automatically create a fallback mesh based on project settings.
+
+104
+00:06:38.060 --> 00:06:42.939
+The fallback triangle percent sets the percentage of triangles that remain when you're reducing
+
+105
+00:06:42.939 --> 00:06:45.299
+the source mesh for Nanite.
+
+106
+00:06:45.299 --> 00:06:50.699
+And then you also have a fallback relative error reduces until the specified error is
+
+107
+00:06:50.699 --> 00:06:54.060
+reached relative to the mesh size.
+
+108
+00:06:54.060 --> 00:06:58.180
+So you can actually again adjust these according to what you need.
+
+109
+00:06:58.180 --> 00:07:01.659
+So we have source import file name.
+
+110
+00:07:01.659 --> 00:07:03.539
+You'll see that one here.
+
+111
+00:07:03.539 --> 00:07:09.180
+So this one here is a source mesh used as a higher res LOD type loadout.
+
+112
+00:07:09.180 --> 00:07:11.419
+So you can actually find that if you need to.
+
+113
+00:07:11.419 --> 00:07:12.419
+There's a displacement.
+
+114
+00:07:12.419 --> 00:07:14.620
+What you get displacement options.
+
+115
+00:07:14.620 --> 00:07:15.740
+Yes, you do.
+
+116
+00:07:15.740 --> 00:07:21.740
+So you can you can say hey I want this for to be my UV channel for this displacement.
+
+117
+00:07:21.740 --> 00:07:25.579
+And then also a new feature where we have a displacement map.
+
+118
+00:07:25.579 --> 00:07:28.780
+So notice we are adding little bits here and there.
+
+119
+00:07:28.780 --> 00:07:31.340
+But just keep your eyes on that as it evolves.
+
+120
+00:07:31.340 --> 00:07:34.060
+But this is where it stands at this time.
+
+121
+00:07:34.060 --> 00:07:35.420
+You may not need any of these.
+
+122
+00:07:35.420 --> 00:07:40.900
+I haven't really found the need working in ICB effects and virtual production as well
+
+123
+00:07:40.900 --> 00:07:44.660
+as Final Pixel and games working with game clients.
+
+124
+00:07:44.660 --> 00:07:47.380
+This isn't always necessarily needed.
+
+125
+00:07:47.380 --> 00:07:51.460
+But you never know when somebody comes up with a new game idea that may break the bank.
+
+126
+00:07:51.460 --> 00:07:54.660
+So just keep those things in mind.
+
+127
+00:07:54.660 --> 00:07:58.780
+Again these are all within the slides for you to take a look at broken down.
+
+128
+00:07:58.780 --> 00:08:02.100
+So you can actually see each one of these and what they do so you can just keep them
+
+129
+00:08:02.100 --> 00:08:03.500
+in your memory.
+
+130
+00:08:03.500 --> 00:08:05.940
+So let's actually talk about a little bit about efficiency.
+
+131
+00:08:05.940 --> 00:08:08.740
+Now this has changed between 5.0.
+
+132
+00:08:08.740 --> 00:08:12.020
+I think this went away in 5.1 maybe 5.2.
+
+133
+00:08:12.019 --> 00:08:14.060
+So we used to have a Nanite debugger.
+
+134
+00:08:14.060 --> 00:08:15.379
+We don't have that anymore.
+
+135
+00:08:15.379 --> 00:08:19.060
+We have a thing called a Nanite Enable False.
+
+136
+00:08:19.060 --> 00:08:21.500
+This basically works just like the debugger.
+
+137
+00:08:21.500 --> 00:08:26.500
+It's basically just punching this into your search and you can instantly find out what
+
+138
+00:08:26.500 --> 00:08:28.459
+is Nanite and what is it.
+
+139
+00:08:28.459 --> 00:08:29.899
+Let me demonstrate.
+
+140
+00:08:29.899 --> 00:08:35.819
+So in Unreal with my content drawer open here, I can go in here and type in, I'm just going
+
+141
+00:08:35.819 --> 00:08:37.620
+to cheat and put paste.
+
+142
+00:08:37.620 --> 00:08:47.500
+Type in Nanite Enable 2 equal signs and false and it will show me everything that is not
+
+143
+00:08:47.500 --> 00:08:49.500
+necessarily Nanite.
+
+144
+00:08:49.500 --> 00:08:54.419
+You can see it's showing me all the things that I have not converted to a Nanite object.
+
+145
+00:08:54.419 --> 00:08:57.820
+We're missing some of the cliffs, actually most of the cliffs, and some of the other
+
+146
+00:08:57.820 --> 00:09:03.139
+pieces are missing such as simple pieces of geometry and shows everything within my project
+
+147
+00:09:03.139 --> 00:09:04.379
+that doesn't have it.
+
+148
+00:09:04.379 --> 00:09:08.299
+So if I convert just one thing, it will now disappear off the list.
+
+149
+00:09:08.299 --> 00:09:13.379
+So some of the updates, if you are in older versions of Unreal, not aware, we can actually
+
+150
+00:09:13.379 --> 00:09:19.259
+turn our terrain now into a Nanite object as well as we can do also with the trees and
+
+151
+00:09:19.259 --> 00:09:21.700
+your foliage, which is super helpful.
+
+152
+00:09:21.700 --> 00:09:25.700
+You simply can find that foliage where it lives and then now you have the option to
+
+153
+00:09:25.700 --> 00:09:30.860
+convert it to a Nanite object, which is actually pretty great.
+
+154
+00:09:30.860 --> 00:09:36.340
+In the terrain itself, I can click on the terrain and simply type in Nanite and you'll
+
+155
+00:09:36.340 --> 00:09:41.899
+see that we can enable Nanite in here and you'll see that there is a bit of micromanaging
+
+156
+00:09:41.899 --> 00:09:49.259
+in here such as Nanite LED index, Nanite skirt enabled as well as Nanite skirt depth.
+
+157
+00:09:49.259 --> 00:09:53.539
+So it's basically allowing you to control the draw method and you'll see here it says
+
+158
+00:09:53.539 --> 00:09:59.139
+LED level of the landscape when generating the Nanite mesh mostly there for debug reasons.
+
+159
+00:09:59.139 --> 00:10:04.019
+So most of these are mainly just to be able to check things out if you run into some performance
+
+160
+00:10:04.019 --> 00:10:06.019
+hits.
+
+161
+00:10:06.019 --> 00:10:08.100
+Now let's talk a little bit about virtual shadow maps.
+
+162
+00:10:08.100 --> 00:10:11.659
+We do get into them pretty deep in the other classes here.
+
+163
+00:10:11.659 --> 00:10:15.899
+So we're going to talk a bit about how they work overall and then how you can actually
+
+164
+00:10:15.899 --> 00:10:17.939
+maybe edit things a bit here.
+
+165
+00:10:17.939 --> 00:10:23.139
+So it significantly increases shadow resolution to match highly detailed Nanite geometry,
+
+166
+00:10:23.139 --> 00:10:25.939
+unlike shadow maps which are like a texture projection.
+
+167
+00:10:25.940 --> 00:10:29.860
+So we're not doing that in this particular case and you can see why they are the three
+
+168
+00:10:29.860 --> 00:10:34.140
+musketeers Nanite virtual shadow maps and Lumen they all work together.
+
+169
+00:10:34.140 --> 00:10:39.820
+Now what what what strength it brings to the table is a plausible soft shadows.
+
+170
+00:10:39.820 --> 00:10:44.060
+It gives you with reasonable controllable performance costs.
+
+171
+00:10:44.060 --> 00:10:48.300
+It provides a simple solution that works by default with limited amounts of adjustment
+
+172
+00:10:48.300 --> 00:10:54.460
+needed and replace the many stationary lights that we normally have in a regular baking
+
+173
+00:10:54.460 --> 00:10:58.100
+scenario techniques with a single unified path.
+
+174
+00:10:58.100 --> 00:11:01.580
+So anytime you're actually building your lights and a couple things I want to point
+
+175
+00:11:01.580 --> 00:11:05.780
+out when now we do get into light optimization here.
+
+176
+00:11:05.780 --> 00:11:10.300
+So I don't want to dive too deep into this but I do want to point out a few things.
+
+177
+00:11:10.300 --> 00:11:13.940
+You do want to make sure all your static lighting is off in your project settings.
+
+178
+00:11:13.940 --> 00:11:18.420
+And again you do want to use a virtual shadow maps but you got to remember I keep saying
+
+179
+00:11:18.420 --> 00:11:21.379
+this but it's made for Lumen not intended for unreal standard baking.
+
+180
+00:11:21.620 --> 00:11:25.899
+Unreal will let you know too if you have some things off that on that don't need to be.
+
+181
+00:11:25.899 --> 00:11:29.939
+If you want to switch to baking you must change your shadow settings in the project settings
+
+182
+00:11:29.939 --> 00:11:33.460
+and make sure that Lumen is completely off everywhere but you also need to make sure
+
+183
+00:11:33.460 --> 00:11:38.980
+your lights are no longer movable and the fact that if you want to be able to get your
+
+184
+00:11:38.980 --> 00:11:44.500
+light to be able to generate some GI with that baking type of method.
+
+185
+00:11:44.500 --> 00:11:48.980
+Now in our intro to lighting classes and other classes we talk about how you can use some
+
+186
+00:11:48.980 --> 00:11:56.379
+CVARS to adjust your shadows but you also can do so in the soft source options in some
+
+187
+00:11:56.379 --> 00:11:57.379
+of your lights.
+
+188
+00:11:57.379 --> 00:12:05.100
+Now again we get into that a bit more in our other classes for lighting so keep those things
+
+189
+00:12:05.100 --> 00:12:12.100
+in mind and you'll see here a soft angle source angle I should say I said soft source angle
+
+190
+00:12:12.100 --> 00:12:13.740
+but it's mainly this guy.
+
+191
+00:12:13.740 --> 00:12:18.899
+So this source angle allows us to go in here and soften that shadow and again we get into
+
+192
+00:12:18.899 --> 00:12:20.459
+this and our hardening.
+
+193
+00:12:20.459 --> 00:12:24.860
+We get into this a bit more in our optimizing for lighting class which is our next class
+
+194
+00:12:24.860 --> 00:12:29.500
+but I just wanted to point out how realistic and how nice these come out.
+
+195
+00:12:29.500 --> 00:12:33.179
+It's really great to get this on the fly and again all your lights need to be set movable
+
+196
+00:12:33.179 --> 00:12:34.179
+with that.
+
+197
+00:12:34.179 --> 00:12:40.779
+Here's your few links with some more resources talking about these particular topics.
+
+198
+00:12:40.779 --> 00:12:44.259
+That's it with this one and in the next video we're going to take a look at understanding
+
+199
+00:12:44.259 --> 00:12:45.580
+LODs.
+

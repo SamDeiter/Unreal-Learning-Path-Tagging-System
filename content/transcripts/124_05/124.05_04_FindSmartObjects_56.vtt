@@ -1,0 +1,446 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:08.080
+Hello and welcome to this next video. In this we're going to be doing some of the coding.
+
+2
+00:00:08.080 --> 00:00:16.240
+We are going to be jumping into the Find Smart Object task and we're going to be accessing
+
+3
+00:00:16.240 --> 00:00:21.960
+the Smart Object subsystem for the first time. Okay, so the first thing I would like you to
+
+4
+00:00:21.960 --> 00:00:29.719
+do is to come down to the STT underscore Find Smart Object and double click to open it.
+
+5
+00:00:30.600 --> 00:00:37.320
+So here we have it here. As you look at this you can see that we already have the Interstate
+
+6
+00:00:37.320 --> 00:00:43.640
+showing and that is if you were creating this from scratch you wouldn't have it. You'd have to
+
+7
+00:00:43.640 --> 00:00:50.359
+get it from the overrides here in the drop down. But because we are trying to make this a bit
+
+8
+00:00:50.359 --> 00:00:55.880
+silica we've already dragged it in and added it. We've also created a number of the variables.
+
+9
+00:00:56.600 --> 00:01:01.240
+Bear in mind these variables are in the appropriate categories so we have context
+
+10
+00:01:01.799 --> 00:01:08.599
+for the character and the AI controller and we have the claim handle and the slot handle for the
+
+11
+00:01:08.599 --> 00:01:15.879
+output. These are so that they can be accessed through the state tree as part of the task and
+
+12
+00:01:15.879 --> 00:01:23.399
+can be populated. So let's see what code we've already got. So if I scroll out and come over to
+
+13
+00:01:23.399 --> 00:01:30.280
+the end here you can see that we have some code already here. We've got our finished task.
+
+14
+00:01:30.840 --> 00:01:36.840
+And this is required for us to tell the state tree that we have succeeded in this task.
+
+15
+00:01:37.479 --> 00:01:45.799
+But before it we have a little bit of code that is going to allow us to grab the claim handle
+
+16
+00:01:46.039 --> 00:01:55.319
+and the smart object subsystem and get the slots transform and save it to our AI.
+
+17
+00:01:56.039 --> 00:02:04.599
+AI is the BP NPC chairfinder. Now this probably isn't the best modular way of doing this but
+
+18
+00:02:04.599 --> 00:02:10.439
+we are going to need the transform. Probably using interface in other instances but I think
+
+19
+00:02:10.520 --> 00:02:16.759
+this shows what's going on quite well. We're going to need the transform in order to hand it
+
+20
+00:02:16.759 --> 00:02:25.879
+to the motion warping. So that is where we are going to move the mesh using root motion so that
+
+21
+00:02:25.879 --> 00:02:35.800
+it can sit down and perfectly interact with the chair. So warping is going to allow us to move
+
+22
+00:02:35.800 --> 00:02:41.320
+the skeletal mesh and make it so that when it sits down it actually sits down on the chair.
+
+23
+00:02:42.040 --> 00:02:47.719
+So all this is doing is if we get to this point we are grabbing the chairfinder and saving the
+
+24
+00:02:47.719 --> 00:02:57.320
+transform of the mesh so that it knows where to sit. Okay I am going to jump to the beginning here
+
+25
+00:02:57.320 --> 00:03:03.480
+and go through piece by piece. Now bear in mind there's always a finished version of the code
+
+26
+00:03:03.479 --> 00:03:09.319
+in the finished version folder so if you do get stuck you can jump in and get it but I encourage
+
+27
+00:03:09.319 --> 00:03:17.959
+you to copy alongs so that you understand what each of these nodes do. The first thing that we want
+
+28
+00:03:17.959 --> 00:03:25.479
+to do is find the smart objects. Now I am going to right-hand click and we are not going to be able
+
+29
+00:03:25.479 --> 00:03:32.039
+to find the smart object from here because it is a node which is part of the smart object subsystem.
+
+30
+00:03:32.840 --> 00:03:43.479
+So I am going to type in smart object and sub and that will bring me a option to get the smart
+
+31
+00:03:43.479 --> 00:03:55.000
+object subsystem. And once I have that I can drag off and I can search for find smart objects.
+
+32
+00:03:55.639 --> 00:03:59.000
+We are going to be finding multiple in this case and then selecting one random.
+
+33
+00:04:00.599 --> 00:04:02.759
+So that's the code that I need.
+
+34
+00:04:05.479 --> 00:04:12.520
+We will need to get the character to plug that into the use actor. This is the actor that is using it.
+
+35
+00:04:14.199 --> 00:04:22.279
+And now the next thing we need to do is make a request. So I am going to drag off of the request
+
+36
+00:04:22.279 --> 00:04:29.959
+pin and I am going to type make and you will see the only one that comes up is the make smart
+
+37
+00:04:29.959 --> 00:04:33.319
+object request. I need to drag off this request pin.
+
+38
+00:04:38.599 --> 00:04:46.039
+And as you can see as part of this make smart object request we have two inputs the query box
+
+39
+00:04:47.000 --> 00:04:55.240
+and the filter. We will start with the query box. What the query box is going to be is the spatial
+
+40
+00:04:55.240 --> 00:05:02.759
+so the locational size which we are going to search for a smart object. And if we look over this
+
+41
+00:05:02.759 --> 00:05:09.160
+this is of a box structure. So we need to make a box. I am going to drag off from there.
+
+42
+00:05:10.120 --> 00:05:15.640
+I am going to type in make and you will see at the bottom here we have make box.
+
+43
+00:05:19.400 --> 00:05:26.360
+Now for this to be a box we just need to give it a minimum vector a maximum vector.
+
+44
+00:05:27.480 --> 00:05:35.960
+However we need this to be relative to the AI. So this is in world space. I am going to grab my
+
+45
+00:05:35.959 --> 00:05:44.839
+hacked again and I am going to get actor location.
+
+46
+00:05:47.719 --> 00:05:53.879
+Drag that in and for the minimum I am going to do is I am going to minus.
+
+47
+00:05:55.079 --> 00:06:05.000
+So I am going to subtract and on the subtraction I am going to right hand click on the second input
+
+48
+00:06:05.000 --> 00:06:14.519
+pin and I am going to change that to a float double precision. I will plug that into the minimum.
+
+49
+00:06:15.560 --> 00:06:22.279
+Let's change it. I will do both of them first. I come up and I am going to do a plus and I am
+
+50
+00:06:22.279 --> 00:06:29.240
+going to add that into a maximum. I am going to convert both of these to a float.
+
+51
+00:06:29.879 --> 00:06:36.040
+And then I am going to type in literal
+
+52
+00:06:38.120 --> 00:06:46.439
+low. We will plug this in to both of the boxes. We could make this variable.
+
+53
+00:06:47.400 --> 00:06:53.800
+Well what this is going to do is it is going to allow me to just type in the squeeze of the box.
+
+54
+00:06:54.360 --> 00:07:00.280
+And for this I am going to go big. So I am going to put that in 20,000.
+
+55
+00:07:00.840 --> 00:07:07.000
+So that we definitely find something. Now it is very reasonable for that to be a smaller amount
+
+56
+00:07:07.000 --> 00:07:13.560
+and could make a variable included in the inputs so that we could change it at the point that we
+
+57
+00:07:13.560 --> 00:07:17.800
+are searching. But this will do for us at the time being.
+
+58
+00:07:18.120 --> 00:07:26.759
+So that gives us our query box. Now next we have the filter.
+
+59
+00:07:26.759 --> 00:07:34.280
+For this I am going to drive off and type make again and you see it has detected the pin that I
+
+60
+00:07:34.280 --> 00:07:43.160
+have got and it is suggesting make smart object request filter.
+
+61
+00:07:48.520 --> 00:07:53.639
+Now with this you can see that we have two pins down the left hand side.
+
+62
+00:07:54.600 --> 00:08:02.120
+A user tags and plane priority. I am actually not going to change either of these.
+
+63
+00:08:03.000 --> 00:08:08.920
+But I do need to do some inputting. So I am going to do the drop down that we have here.
+
+64
+00:08:09.560 --> 00:08:12.519
+And you can see that we have a number of different options.
+
+65
+00:08:13.159 --> 00:08:19.799
+It includes elements such as should include claim spots and should include disabled spots.
+
+66
+00:08:20.439 --> 00:08:26.599
+But I am just going to leave it with should evaluate conditions.
+
+67
+00:08:28.839 --> 00:08:35.000
+Now what we do need an input for which this is not going to function without
+
+68
+00:08:35.000 --> 00:08:41.240
+is the behavior definition classes. So in order to do that I am going to drag off
+
+69
+00:08:41.240 --> 00:08:43.320
+and do a make or a worry.
+
+70
+00:08:46.680 --> 00:08:53.080
+And for the make or a I am just going to select the game play behavior smart object definition.
+
+71
+00:08:57.560 --> 00:09:05.399
+That is all we need for the smart object filter. However do bear in mind that if you did want to
+
+72
+00:09:05.399 --> 00:09:11.159
+make something more advanced you could make a more complicated filter here in order to
+
+73
+00:09:12.439 --> 00:09:14.439
+create something a bit more complicated.
+
+74
+00:09:16.679 --> 00:09:22.600
+Grad wise we will up just a little bit with the smart object just for formatting.
+
+75
+00:09:24.039 --> 00:09:30.919
+So I will drag that up a little bit more and try and get it all on screen so I can just leave it
+
+76
+00:09:30.919 --> 00:09:31.879
+there for a second.
+
+77
+00:09:36.039 --> 00:09:44.039
+So this is our first section to find smart objects in the local area.
+
+78
+00:09:51.240 --> 00:09:55.319
+Right with that done let me jump on to the next section.
+
+79
+00:09:56.840 --> 00:10:01.159
+Now what we need to do is figure out if we are not getting any smart
+
+80
+00:10:01.480 --> 00:10:06.199
+objects because we want to return a failed condition if we don't have any smart objects.
+
+81
+00:10:07.079 --> 00:10:14.439
+So this is relatively simple we've got a return pin here if I hold down B for plush
+
+82
+00:10:15.399 --> 00:10:26.039
+I can connect that up and plug in the condition and if it is false we want to finish the task
+
+83
+00:10:26.439 --> 00:10:29.879
+but we want to finish the task as a fail.
+
+84
+00:10:31.959 --> 00:10:37.639
+We are quite straightforward if we have no object returned to all then we fail to find our smart.
+
+85
+00:10:41.319 --> 00:10:46.759
+Now next we want to mark slot as claimed and get main handle.
+
+86
+00:10:48.679 --> 00:10:50.279
+So we have all results here.
+
+87
+00:10:50.839 --> 00:10:58.600
+With this I am going to write off and I am going to type in random so we get a random array item.
+
+88
+00:11:01.480 --> 00:11:07.159
+Now you can see from this we have a smart object request result structure.
+
+89
+00:11:08.199 --> 00:11:13.480
+I am going to right hand click and you can see we have an option to split the struct pin.
+
+90
+00:11:14.200 --> 00:11:18.519
+I am going to do that because what we need is the slot handle.
+
+91
+00:11:19.080 --> 00:11:24.039
+It is not the smart object handle but just the specific slot because we might have multiple
+
+92
+00:11:24.039 --> 00:11:27.320
+slots on the actor and we want to work with that slot.
+
+93
+00:11:28.680 --> 00:11:37.320
+So I am going to now draw right off of the slot handle and type in mark smart object as claimed.
+
+94
+00:11:37.879 --> 00:11:45.320
+So we haven't returned any so we can now grab this and mark it as claimed.
+
+95
+00:11:46.440 --> 00:11:50.680
+Again we need a use actor so I will get my character,
+
+96
+00:11:51.480 --> 00:11:57.400
+to round it over so you have a little green line there and that plugs in perfectly.
+
+97
+00:11:58.840 --> 00:12:01.720
+Now the claim handle is actually part of our outputs.
+
+98
+00:12:01.720 --> 00:12:03.480
+Now we have our claim handle.
+
+99
+00:12:04.039 --> 00:12:06.279
+We might as well do the same thing on the other side.
+
+100
+00:12:06.279 --> 00:12:10.600
+So I am going to drag the claim handle, place it over the output pin
+
+101
+00:12:11.399 --> 00:12:14.680
+and it will automatically connect it up like this.
+
+102
+00:12:15.560 --> 00:12:27.080
+So we now have grabbed a random one of the slots and we have slamed it and set that claim handle
+
+103
+00:12:27.080 --> 00:12:32.360
+so that it can be as part of an output for this task.
+
+104
+00:12:33.560 --> 00:12:43.480
+So we have our final piece of code and this brings us to our final piece of code.
+
+105
+00:12:43.480 --> 00:12:50.680
+So all we need to do now is connect that up and that is our entire code done and dust it.
+
+106
+00:12:52.680 --> 00:12:58.039
+Now we cannot test this until we have got the other codes and bits of running.
+
+107
+00:12:59.000 --> 00:13:01.159
+I would believe that all makes sense.
+
+108
+00:13:02.759 --> 00:13:05.879
+You need to save and compile to check that there are no errors
+
+109
+00:13:06.919 --> 00:13:08.360
+and I am going to go back to my lab.
+
+110
+00:13:09.240 --> 00:13:13.079
+So thank you very much that brings us to the end of our first piece of coding.
+
+111
+00:13:13.080 --> 00:13:23.080
+The next one we are going to finish off the task that actually runs the behavior.
+

@@ -1,0 +1,306 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:09.640
+Hello and welcome to the final video in our series of exercise 1, in this we are going
+
+2
+00:00:09.640 --> 00:00:14.240
+to be tidying up the end, we are going to be testing and getting the whole thing to
+
+3
+00:00:14.240 --> 00:00:19.760
+work. To get back in the engine the first thing I would like you to do is to come into
+
+4
+00:00:19.760 --> 00:00:28.080
+our config file, GBC sitting down, and we need to set our behaviour once, we are going
+
+5
+00:00:28.079 --> 00:00:37.759
+to sell that to GBC sitting down, file and say. And the next thing I would like you to
+
+6
+00:00:37.759 --> 00:00:44.159
+do is to come into the chair, and we are going to sort out this collision, so we already
+
+7
+00:00:44.159 --> 00:00:51.280
+have the interface here, so I am going to implement these events and put the code, the first one
+
+8
+00:00:51.280 --> 00:00:58.079
+is the turn off collision, implement and this is the straightforward, we are going to grab
+
+9
+00:00:58.079 --> 00:01:12.960
+our chair mesh, drag out, and set collision enabled, log that in and we are ok with no
+
+10
+00:01:12.960 --> 00:01:19.359
+collision, so we are just turning off the collision at this point, next up I want to
+
+11
+00:01:19.439 --> 00:01:25.840
+do the turn on collision, and this is a little bit more complicated, because we don't want to turn
+
+12
+00:01:25.840 --> 00:01:32.719
+the collision on immediately, because the actor will still be over it, it would push them away
+
+13
+00:01:32.719 --> 00:01:38.400
+and it would look a bit unnatural, so what I am going to do is I am going to add in a check to
+
+14
+00:01:38.400 --> 00:01:45.439
+see that the actor is far enough away before turning the collision back on again, so the first
+
+15
+00:01:45.439 --> 00:01:54.719
+thing is this character, right hand click and promote to a variable, then I am going to drag off
+
+16
+00:01:55.439 --> 00:02:07.359
+and I am going to do set timeout by event, and so this I am going to set to 0.5
+
+17
+00:02:08.080 --> 00:02:14.319
+and then I am going to make it loop, so this means any event which is attached to here,
+
+18
+00:02:15.199 --> 00:02:19.599
+it is going to happen twice a second, whilst this timer is on,
+
+19
+00:02:21.439 --> 00:02:27.599
+now I am going to want to turn off this timer, so I am going to save it to a variable and call it timeout,
+
+20
+00:02:27.840 --> 00:02:36.079
+so I am going to drag off this event, go add custom event,
+
+21
+00:02:37.919 --> 00:02:41.359
+and I am going to call this check distance,
+
+22
+00:02:46.719 --> 00:02:53.280
+and from this I am going to drag in the actor, get to it, and I am going to get the actor location,
+
+23
+00:02:57.759 --> 00:03:06.719
+and also select the actor location and go ctrl D in order to duplicate it,
+
+24
+00:03:09.280 --> 00:03:12.560
+then I can drag off and get the distance in vector,
+
+25
+00:03:14.159 --> 00:03:20.560
+so this is going to return me a float of the distance between the actor and the chair,
+
+26
+00:03:21.039 --> 00:03:32.240
+now if this is greater than 120, then I want to turn the collision back on,
+
+27
+00:03:33.120 --> 00:03:35.759
+so hold down B to bring up a branch,
+
+28
+00:03:36.960 --> 00:03:39.840
+lock that up in and connect that up,
+
+29
+00:03:40.319 --> 00:03:55.599
+then what I can do is I can get the chair and set collision enabled,
+
+30
+00:03:57.920 --> 00:04:02.240
+if it is true, and I want to set this back to collision enabled,
+
+31
+00:04:02.640 --> 00:04:10.960
+then finally I want to get the timer, and I will be applause this,
+
+32
+00:04:11.840 --> 00:04:13.120
+applause timer by hand,
+
+33
+00:04:17.600 --> 00:04:23.439
+so that should give us power code in order to turn it back on, just come away until the actor is
+
+34
+00:04:23.439 --> 00:04:31.120
+far enough away and then switch the collision back on, now there's one more thing that I need to do
+
+35
+00:04:31.120 --> 00:04:36.160
+and that's to call this, so I'm going to go back into gameplay behavior,
+
+36
+00:04:37.519 --> 00:04:46.160
+and after the final play montage, I'm going to drag in the reference to the smart object,
+
+37
+00:04:47.280 --> 00:04:51.840
+and I'm going to set, I'm going to turn,
+
+38
+00:04:52.399 --> 00:04:55.119
+and then I'm going to set the collision on,
+
+39
+00:05:02.560 --> 00:05:08.399
+now in order to get this to work, I also need to plug in the avatar to the actor here,
+
+40
+00:05:10.879 --> 00:05:13.359
+so that gives it all of the information in needs,
+
+41
+00:05:13.680 --> 00:05:23.600
+okay let's test this out, in fact in the world now I'm going to press simulate,
+
+42
+00:05:24.800 --> 00:05:27.759
+and we seem to have a problem, our character is wondering about,
+
+43
+00:05:28.319 --> 00:05:37.120
+but he is not noticing the chair, I know why this problem is, if I had push down p I can see the
+
+44
+00:05:37.120 --> 00:05:47.920
+navigation, and the actor is only going to go and do the behavior, if it is able to reach the
+
+45
+00:05:48.959 --> 00:05:56.399
+slot, but because of the way we have set up this, the navigation cannot find a route to get
+
+46
+00:05:56.399 --> 00:06:03.680
+close enough to do the slot, but it's a relatively easy fix, just going to jump back into the chair,
+
+47
+00:06:04.560 --> 00:06:10.319
+and in the viewport, and going to take the smart object, and move it forward,
+
+48
+00:06:11.360 --> 00:06:17.519
+and that way it should be picked up, now this will affect how the animation is played,
+
+49
+00:06:18.079 --> 00:06:21.439
+but because of the way the animation is set up it should still work,
+
+50
+00:06:23.840 --> 00:06:31.280
+so now if I push play, you can see our character immediately walks over to the chair and sits down,
+
+51
+00:06:31.919 --> 00:06:37.199
+waits three seconds, and stands the cover again, and nearly sits down again,
+
+52
+00:06:39.359 --> 00:06:46.479
+so that looks like it's working, however what I would like to do is to make sure this is
+
+53
+00:06:46.479 --> 00:06:55.359
+completely working, I'm going to bring up three chairs, and I'm dragging with alt button held down,
+
+54
+00:06:55.759 --> 00:07:04.879
+and I'm going to bring up six ai, and then I'm going to press simulate,
+
+55
+00:07:08.639 --> 00:07:14.720
+now this looks like it is working, probably three of them have the claim to spot at only one time,
+
+56
+00:07:16.240 --> 00:07:21.600
+however they're having a bit of trouble because the other ai are getting in the way,
+
+57
+00:07:22.480 --> 00:07:26.320
+so let's see if we can do something about that,
+
+58
+00:07:29.520 --> 00:07:34.800
+the first thing that I'm going to do is I'm going to go into our npc chair finder,
+
+59
+00:07:35.760 --> 00:07:44.640
+and on the movement component, I'm going to search for rvo, and turn on use rvo avoidance,
+
+60
+00:07:44.800 --> 00:07:56.560
+and I'm going to go into the test, and see if there's still any problems,
+
+61
+00:07:57.680 --> 00:08:05.279
+slightly better, what rvo avoidance does is it means that the characters will give a slight
+
+62
+00:08:05.279 --> 00:08:08.879
+push away from each other, so it's harder for them to get stuck,
+
+63
+00:08:09.040 --> 00:08:17.600
+now there's one more thing I'd like to do, and this needs to be done on the BP chair,
+
+64
+00:08:19.199 --> 00:08:24.800
+and for that I'm going to add in a nav modifier,
+
+65
+00:08:27.199 --> 00:08:32.080
+and in the nav modifier, I'm going to change the area class to a obstacle,
+
+66
+00:08:32.320 --> 00:08:40.240
+and in order to get this to work, I'm going to add in a sphere collision,
+
+67
+00:08:44.080 --> 00:08:46.240
+I'm going to expand it out to be about
+
+68
+00:08:47.600 --> 00:08:53.759
+Haiti, I'm going to drag it out in front of the chair, maybe a little bigger,
+
+69
+00:08:54.559 --> 00:09:06.799
+and if we have a look at the environment, you can now see we have a little costly area around
+
+70
+00:09:06.799 --> 00:09:15.120
+the chairs, and if I was to run in this, you're going to see that they're not going to want to
+
+71
+00:09:15.120 --> 00:09:23.439
+get close to the chairs anymore, unless they have to, so they will move away from the chairs,
+
+72
+00:09:23.759 --> 00:09:29.120
+for doing anything, and they won't cross in front of it, they'll give it a bit of space,
+
+73
+00:09:31.200 --> 00:09:34.000
+and this really does sort of meet and eat all lock,
+
+74
+00:09:36.159 --> 00:09:40.480
+and allows the characters to have a more natural walking in,
+
+75
+00:09:42.720 --> 00:09:49.360
+and with that we come to the end of exercise one, and we will be doing a couple of other little
+
+76
+00:09:49.360 --> 00:09:59.360
+bits and bobs, but nothing is going to be as complicated as this, so thank you very much.
+

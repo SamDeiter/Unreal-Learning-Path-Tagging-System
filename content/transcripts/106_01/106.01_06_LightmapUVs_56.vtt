@@ -1,0 +1,242 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.879
+In this video, we'll take a look at Lightmaps and their UVs.
+
+2
+00:00:05.879 --> 00:00:09.640
+If you don't plan on using Lumen in your project, then you'll probably still want
+
+3
+00:00:09.640 --> 00:00:12.460
+to keep it optimized by baking your lighting.
+
+4
+00:00:12.460 --> 00:00:16.719
+You can of course combine baked lighting with Lumen Reflections, but let's assume for a
+
+5
+00:00:16.719 --> 00:00:21.960
+moment that we are working again for a platform that needs to be hyper-optimized, doesn't
+
+6
+00:00:21.960 --> 00:00:26.600
+support Lumen or Nanite, again something like a mobile phone.
+
+7
+00:00:26.600 --> 00:00:30.800
+Lightmaps are a very cheap way to store complex direct and indirect lighting information,
+
+8
+00:00:30.800 --> 00:00:34.880
+and once lighting data has been baked, that light becomes basically free because nothing
+
+9
+00:00:34.880 --> 00:00:38.039
+needs to be processed at runtime from it.
+
+10
+00:00:38.039 --> 00:00:43.079
+Lightmap UVs are different from your texture UVs because a lightmap must have distinct,
+
+11
+00:00:43.079 --> 00:00:48.240
+separate UVs for every surface of an object even if a texture were to repeat because
+
+12
+00:00:48.240 --> 00:00:53.000
+shadows might come and hit an object from different angles even if the texture is the
+
+13
+00:00:53.000 --> 00:00:55.460
+same at those different angles.
+
+14
+00:00:55.460 --> 00:00:59.660
+You can generate UVs of an Unreal or set them up in your DCC tool.
+
+15
+00:00:59.660 --> 00:01:05.319
+A Lightmap Index in Unreal Engine by default will be set to Index 0, but that can also
+
+16
+00:01:05.319 --> 00:01:07.780
+be changed at a later time.
+
+17
+00:01:07.780 --> 00:01:13.079
+All Lightmap UVs have to fit in the 0-1 UV space with no overlap, otherwise you'll get
+
+18
+00:01:13.079 --> 00:01:17.319
+some very funky looking light baked data.
+
+19
+00:01:17.319 --> 00:01:21.840
+Over in our Lightmaps map, we see we have shadows coming off of these two dumpsters.
+
+20
+00:01:21.859 --> 00:01:25.980
+I'm also going to hold down L and bring in a simple light right here.
+
+21
+00:01:25.980 --> 00:01:28.980
+We'll give it a color to help it stand out more.
+
+22
+00:01:28.980 --> 00:01:29.980
+Why not?
+
+23
+00:01:29.980 --> 00:01:30.980
+Hot pink.
+
+24
+00:01:30.980 --> 00:01:36.700
+And if I go ahead and do a quick build of my scene, ignoring plenty of other things I
+
+25
+00:01:36.700 --> 00:01:43.620
+should be doing like a Lightmass Importance Volume, etc., etc.
+
+26
+00:01:43.620 --> 00:01:49.219
+We can see that Static Mesh Dump Lightmass No has a very high overlapping issue with
+
+27
+00:01:49.239 --> 00:01:55.439
+its UVs, and this can of course cause problems where we can see on the left dumpster, which
+
+28
+00:01:55.439 --> 00:02:01.599
+is Lightmass Yes, we have the pink light showing up correctly there, whereas on the Lightmass
+
+29
+00:02:01.599 --> 00:02:04.920
+No one, things are a little bit broken and wonky.
+
+30
+00:02:04.920 --> 00:02:07.319
+This should clearly be illuminated, but it's not.
+
+31
+00:02:07.319 --> 00:02:11.280
+If I jiggle my light here a little bit, you'll see it come back on, and that's from poorly
+
+32
+00:02:11.280 --> 00:02:12.479
+constructed UVs.
+
+33
+00:02:12.479 --> 00:02:14.860
+We can see issues over here as well.
+
+34
+00:02:14.860 --> 00:02:18.840
+This one is fine, but let's go ahead and see if we can fix this one too.
+
+35
+00:02:18.860 --> 00:02:21.939
+So we'll open up Lightmass No.
+
+36
+00:02:21.939 --> 00:02:26.099
+We'll find in our details, Lightmap UVs.
+
+37
+00:02:26.099 --> 00:02:30.939
+We can tell it to generate some Lightmap UVs, but before we do that, let's look at what
+
+38
+00:02:30.939 --> 00:02:31.939
+we have here.
+
+39
+00:02:31.939 --> 00:02:34.819
+So yes, this will cause some issues.
+
+40
+00:02:34.819 --> 00:02:37.659
+We do generate Lightmap UVs and we hit Apply.
+
+41
+00:02:37.659 --> 00:02:52.659
+We'll now see we have UV Channel 0 and UV Channel 1.
+
+42
+00:02:58.659 --> 00:03:06.659
+And now if we go ahead and rebuild our lighting, we'll see we actually still have some light.
+
+43
+00:03:07.659 --> 00:03:13.419
+We'll have the same problem, and that's because of where the Lightmap is currently set up.
+
+44
+00:03:13.419 --> 00:03:18.740
+So I did say earlier that Lightmaps are typically going to be on Channel 0, but because we generated
+
+45
+00:03:18.740 --> 00:03:22.539
+the Lightmaps after, it became Channel 1.
+
+46
+00:03:22.539 --> 00:03:26.280
+Generally the Lightmap is going to be the one with more visible geometry because it's
+
+47
+00:03:26.280 --> 00:03:27.960
+covering more surface area.
+
+48
+00:03:27.960 --> 00:03:33.740
+So all we need to do is change our Lightmap Coordinate Index from the default of 0 over
+
+49
+00:03:33.740 --> 00:03:34.740
+to 1.
+
+50
+00:03:35.740 --> 00:03:37.740
+Now, it should work.
+
+51
+00:03:37.740 --> 00:03:40.740
+Let's give it a try.
+
+52
+00:03:40.740 --> 00:03:42.060
+And there we are.
+
+53
+00:03:42.060 --> 00:03:47.060
+Pink Light on both sides, as well as our little shadows on the ground.
+
+54
+00:03:47.060 --> 00:03:53.340
+This is also baking lighting, and if we wanted this to be sharper, we could even change the
+
+55
+00:03:53.340 --> 00:03:55.340
+Lightmap Resolution of the ground.
+
+56
+00:03:55.340 --> 00:03:59.660
+Bring it up from 128 to 256 or even 512.
+
+57
+00:03:59.660 --> 00:04:03.620
+Also note that in order to bake the lighting successfully here, I had to create a Post-Process
+
+58
+00:04:03.620 --> 00:04:08.379
+Volume and Disable Lumen from Global Illumination.
+
+59
+00:04:08.379 --> 00:04:13.340
+Otherwise, Lumen will override everything in the scene.
+
+60
+00:04:13.340 --> 00:04:15.539
+In the next video, we'll explore collisions.
+

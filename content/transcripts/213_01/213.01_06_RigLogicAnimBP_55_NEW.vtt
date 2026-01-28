@@ -1,0 +1,450 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:08.480
+Rig logic and the metahuman face and body animation blueprints have a variety of functions.
+
+2
+00:00:08.480 --> 00:00:13.700
+Let's begin by answering the question, what is rig logic?
+
+3
+00:00:13.700 --> 00:00:21.300
+Rig logic is a runtime facial rig evaluation solver system developed by 3Lateral and it
+
+4
+00:00:21.300 --> 00:00:28.740
+relies on a universal set of rules for defining the muscular system of a human face.
+
+5
+00:00:28.739 --> 00:00:35.739
+For rig logic to work, it needs metahuman DNA, a proprietary file format that stores
+
+6
+00:00:35.739 --> 00:00:42.140
+the complete description of a metahuman's face rig and geometry.
+
+7
+00:00:42.140 --> 00:00:49.060
+Some important elements that make up the metahuman face rig include joint, skin weight, and blend
+
+8
+00:00:49.060 --> 00:00:55.700
+shape deformers, base and animated texture maps setups, the rig logic plugin and metahuman
+
+9
+00:00:55.700 --> 00:01:02.460
+DNA, the user interface of the face control rig, and built in LODs.
+
+10
+00:01:02.460 --> 00:01:09.740
+Simply put, rig logic allows for animations to be shared by all metahumans and LODs.
+
+11
+00:01:09.740 --> 00:01:15.540
+And it is responsible for activating blend shapes, corrective blend shapes, and joint
+
+12
+00:01:15.540 --> 00:01:21.900
+transformations while triggering animated maps during animation.
+
+13
+00:01:21.900 --> 00:01:27.219
+Let's jump into Unreal Engine for a moment to take a closer look at these animated maps
+
+14
+00:01:27.219 --> 00:01:34.260
+and see how they are activated by rig logic.
+
+15
+00:01:34.260 --> 00:01:41.700
+Inside of the metahuman blueprint, let's begin by selecting the face component.
+
+16
+00:01:41.700 --> 00:01:50.500
+Over here in the details panel, let's open up the head synthesized material instance.
+
+17
+00:01:50.500 --> 00:01:54.859
+Inside of here, we have a variety of parameters we can adjust.
+
+18
+00:01:54.859 --> 00:01:59.180
+The base color texture maps are located over here.
+
+19
+00:01:59.180 --> 00:02:06.659
+We have the main albedo texture, and then right below we have three blood flow maps.
+
+20
+00:02:06.659 --> 00:02:12.620
+If we open these blood flow maps up, we will see a bit of redness added to certain areas
+
+21
+00:02:12.620 --> 00:02:14.539
+of the face.
+
+22
+00:02:14.539 --> 00:02:20.180
+When the face muscles contract during certain expressions, causing the skin to wrinkle in
+
+23
+00:02:20.180 --> 00:02:26.500
+those areas, the blood flow is pushed towards the edge of the skin.
+
+24
+00:02:26.500 --> 00:02:32.379
+Each of these blood flow maps are triggered by specific facial poses.
+
+25
+00:02:32.379 --> 00:02:35.860
+Let's go back to the material instance.
+
+26
+00:02:35.860 --> 00:02:38.700
+Over here are the normal maps.
+
+27
+00:02:38.700 --> 00:02:44.500
+We have our main normal map, which is 8K for cinematic metahumans.
+
+28
+00:02:44.500 --> 00:02:48.260
+And right below are three animated wrinkle maps.
+
+29
+00:02:48.259 --> 00:02:54.060
+These normal maps work together with the blood flow maps and are set up in the same way so
+
+30
+00:02:54.060 --> 00:02:59.659
+that when certain muscles are activated for specific facial poses, wrinkles will appear
+
+31
+00:02:59.659 --> 00:03:02.019
+in those areas.
+
+32
+00:03:02.019 --> 00:03:08.579
+Rig logic activates all of these textures while also triggering blend shapes, corrective blend
+
+33
+00:03:08.579 --> 00:03:11.539
+shapes, and joint transforms.
+
+34
+00:03:11.539 --> 00:03:17.099
+To better see how these texture maps are set up to be triggered by Rig logic, let's scroll
+
+35
+00:03:17.099 --> 00:03:24.639
+to the bottom of this material instance, and then double click on this, and then double
+
+36
+00:03:24.639 --> 00:03:27.419
+click on this.
+
+37
+00:03:27.419 --> 00:03:32.060
+This will open up the M-head baked material.
+
+38
+00:03:32.060 --> 00:03:38.219
+This is the master material where everything is brought together and connected.
+
+39
+00:03:38.219 --> 00:03:45.180
+If we look at this section over here, where the normal maps are set up, we will see several
+
+40
+00:03:45.180 --> 00:03:47.500
+material functions.
+
+41
+00:03:47.500 --> 00:03:55.860
+If I double click on this material function, we will see more material functions.
+
+42
+00:03:55.860 --> 00:04:02.060
+And if we open up this material function, inside of here, we can see how some of the
+
+43
+00:04:02.060 --> 00:04:08.819
+animated wrinkle maps are set up to be triggered by specific facial expressions.
+
+44
+00:04:08.819 --> 00:04:15.140
+And all of these are activated and evaluated through the face post-process animation blueprint.
+
+45
+00:04:15.899 --> 00:04:23.659
+Now, before we move on, let's do a quick review of what we just covered.
+
+46
+00:04:23.659 --> 00:04:28.939
+The face component has materials that use animated wrinkle maps.
+
+47
+00:04:28.939 --> 00:04:34.620
+Rig logic is responsible for triggering when the face is animated.
+
+48
+00:04:34.620 --> 00:04:42.019
+The M-head baked material is the master material that contains several material functions set
+
+49
+00:04:42.019 --> 00:04:47.620
+up to trigger the different texture maps for specific facial poses.
+
+50
+00:04:47.620 --> 00:04:52.979
+One of the benefits of the way this is all set up is that you can use the existing blood
+
+51
+00:04:52.979 --> 00:05:00.019
+flow and normal wrinkle maps as a base for customizing your own textures, and then easily
+
+52
+00:05:00.019 --> 00:05:08.379
+replace the existing ones with yours in the head synthesized material instance.
+
+53
+00:05:08.379 --> 00:05:14.060
+The rig logic node lives in the face post-process animation blueprint.
+
+54
+00:05:14.060 --> 00:05:20.100
+If the blueprint is disabled, it will only trigger joint deformations, resulting in a
+
+55
+00:05:20.100 --> 00:05:24.540
+boost in performance but at the expense of quality.
+
+56
+00:05:24.540 --> 00:05:30.339
+The images on the right are examples of what a smile looks like when the face post-process
+
+57
+00:05:30.339 --> 00:05:32.899
+is enabled and disabled.
+
+58
+00:05:32.899 --> 00:05:39.419
+With complex expressions, some joints are affected by more than one expression, resulting
+
+59
+00:05:39.419 --> 00:05:42.739
+in multiplied deformations.
+
+60
+00:05:42.739 --> 00:05:48.500
+Corrective blend shapes on the metahuman face have been defined to correct the joint overlap
+
+61
+00:05:48.500 --> 00:05:55.219
+for complex expressions such as the smile.
+
+62
+00:05:55.219 --> 00:06:00.899
+The face post-process blueprint is also where the neck correctives for the head component
+
+63
+00:06:00.899 --> 00:06:02.779
+are set up.
+
+64
+00:06:02.779 --> 00:06:07.739
+The animated gif all the way on the right shows these at work.
+
+65
+00:06:07.739 --> 00:06:13.859
+When the neck moves, the volume in these areas of deformation are preserved so that it looks
+
+66
+00:06:13.859 --> 00:06:15.539
+natural.
+
+67
+00:06:15.539 --> 00:06:22.619
+When disabled, we will see a boost in performance but at the expense of quality.
+
+68
+00:06:22.619 --> 00:06:29.699
+The body animation blueprint contains corrective poses through a pose driver setup.
+
+69
+00:06:29.699 --> 00:06:37.180
+These trigger specific combinations of poses and joints that correct certain skeleton poses.
+
+70
+00:06:37.180 --> 00:06:43.099
+We can see these corrective poses at work in the animated gif on the left.
+
+71
+00:06:43.099 --> 00:06:50.219
+When the upper arm is rotated, the volume is preserved by these corrective poses.
+
+72
+00:06:50.219 --> 00:06:56.219
+Using the pose driver connect tool set in Autodesk Maya, you can author your own corrective
+
+73
+00:06:56.220 --> 00:07:01.020
+poses and import those into Unreal Engine.
+
+74
+00:07:01.020 --> 00:07:06.020
+And we touch on this in the metahuman DNA calibration courses.
+
+75
+00:07:06.020 --> 00:07:13.220
+There are cases where individual body correctives can be adjusted when retargeting animations
+
+76
+00:07:13.220 --> 00:07:16.780
+from skeletons that have different proportions.
+
+77
+00:07:16.780 --> 00:07:23.660
+So let's jump into Unreal Engine for a moment to take a look at this process.
+
+78
+00:07:23.660 --> 00:07:29.340
+Inside of the animation sequence window, I have applied an animation to Lena's skeletal
+
+79
+00:07:29.340 --> 00:07:30.340
+mesh.
+
+80
+00:07:30.340 --> 00:07:36.020
+I'm going to bring the upper arms closer to view so that we can see the changes that
+
+81
+00:07:36.020 --> 00:07:44.060
+will occur once we make some adjustments to the skeleton retargeting options of the correctives.
+
+82
+00:07:44.060 --> 00:07:49.900
+In the skeleton tree panel on the left, I'm going to go to the cogwheel and select show
+
+83
+00:07:49.900 --> 00:07:52.940
+retargeting options.
+
+84
+00:07:52.939 --> 00:07:59.060
+For the main joints such as the spines, the upper and lower arms, and so on, I have changed
+
+85
+00:07:59.060 --> 00:08:07.060
+the retargeting options for those to skeleton and left all of the correctives set to animation.
+
+86
+00:08:07.060 --> 00:08:12.779
+If we search for the upper arm in the skeleton tree search bar, the upper arm joints will
+
+87
+00:08:12.779 --> 00:08:14.779
+be displayed.
+
+88
+00:08:14.779 --> 00:08:20.860
+This here is one of the many correctives for the left upper arm.
+
+89
+00:08:20.860 --> 00:08:26.060
+And these down here are correctives for the right upper arm.
+
+90
+00:08:26.060 --> 00:08:34.500
+If I select all of the correctives for the left upper arm and right click on them and
+
+91
+00:08:34.500 --> 00:08:41.860
+select recursively set translation retargeting to skeleton, the volume in the upper arm area
+
+92
+00:08:41.860 --> 00:08:44.220
+will be lost.
+
+93
+00:08:44.220 --> 00:08:49.120
+Using this setting is helpful for the main joints when retargeting animations from different
+
+94
+00:08:49.120 --> 00:08:53.200
+skeletons and skeletons of different proportions.
+
+95
+00:08:53.200 --> 00:09:00.159
+Now if I right click and select recursively set translation retargeting to animation,
+
+96
+00:09:00.159 --> 00:09:03.720
+we can see the volume returns.
+
+97
+00:09:03.720 --> 00:09:11.679
+Before we move on, let's do a quick review of the steps we just covered.
+
+98
+00:09:11.679 --> 00:09:17.600
+We just went through an example showing how we can adjust the bone translation retargeting
+
+99
+00:09:17.600 --> 00:09:22.480
+options settings for the body correctives.
+
+100
+00:09:22.480 --> 00:09:28.920
+By changing the retargeting options for the main joints to skeleton, this takes differences
+
+101
+00:09:28.920 --> 00:09:35.440
+in skeleton proportions out of the equation so that animations can be applied to different
+
+102
+00:09:35.440 --> 00:09:38.080
+skeletons.
+
+103
+00:09:38.080 --> 00:09:44.800
+Leaving the correctives to animation preserves the volume in areas of deformation regardless
+
+104
+00:09:44.799 --> 00:09:48.719
+of differences in skeleton proportions.
+
+105
+00:09:48.719 --> 00:09:56.199
+To do this, in the skeleton tree, go to the cogwheel and check on show retargeting options.
+
+106
+00:09:56.199 --> 00:10:03.079
+From there you can either change the translation retargeting of individual joints, or select
+
+107
+00:10:03.079 --> 00:10:11.759
+a group of joints, then right click and select recursively set to and choose either skeleton,
+
+108
+00:10:12.039 --> 00:10:15.559
+animation, animation scaled and so on.
+
+109
+00:10:15.559 --> 00:10:22.200
+The bone retargeting options are helpful when retargeting and applying animation data from
+
+110
+00:10:22.200 --> 00:10:25.480
+skeletons of different proportions.
+
+111
+00:10:25.480 --> 00:10:31.600
+Now let's move on to the next section of our course where we explore a few different ways
+
+112
+00:10:31.600 --> 00:10:33.439
+we can animate metahumans.
+

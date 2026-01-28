@@ -1,0 +1,602 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.240
+In this video, we're going to be talking about a review for understanding LEDs and how they
+
+2
+00:00:06.240 --> 00:00:07.240
+work.
+
+3
+00:00:07.240 --> 00:00:11.960
+Now, let there be a note here that working with LEDs, you primarily want to work with
+
+4
+00:00:11.960 --> 00:00:13.919
+them when it comes to baking.
+
+5
+00:00:13.919 --> 00:00:18.199
+You can use them with lumen, but you do run the risk, especially if you're mixing it with
+
+6
+00:00:18.199 --> 00:00:20.920
+Nettite, of hitting some performance costs.
+
+7
+00:00:20.920 --> 00:00:23.320
+And you kind of want to avoid that.
+
+8
+00:00:23.320 --> 00:00:27.199
+Let's go ahead and take a look a little bit at understanding how they work.
+
+9
+00:00:27.199 --> 00:00:33.640
+And I will be bringing in some caveats here to remind you that, well, as cool as LEDs
+
+10
+00:00:33.640 --> 00:00:41.159
+are, they are primarily being used and should be used when it comes to baking scenarios.
+
+11
+00:00:41.159 --> 00:00:45.480
+So the workflow with it, you always want to choose your LEDs wisely.
+
+12
+00:00:45.480 --> 00:00:52.960
+If I was baking, say GPU baking, and my ICVFX environment required it, and maybe my game
+
+13
+00:00:52.960 --> 00:01:01.320
+workflow that my, maybe we're porting stuff off out to the iPad or the phone, and we chose
+
+14
+00:01:01.320 --> 00:01:07.159
+not to use lumen, just be able to control things a little bit better.
+
+15
+00:01:07.159 --> 00:01:13.240
+I can choose whether I want low quality in Quixel, high quality, and if I was in lumen
+
+16
+00:01:13.240 --> 00:01:14.920
+to use Nettite.
+
+17
+00:01:14.920 --> 00:01:19.040
+So all these things need to be determined exactly what you need ahead of time.
+
+18
+00:01:19.040 --> 00:01:21.620
+It's a bit different when it comes to ICVFX.
+
+19
+00:01:21.620 --> 00:01:28.020
+You have to actually determine in your stage, what is the priority areas or the hero object
+
+20
+00:01:28.020 --> 00:01:34.500
+areas and how high those resolutions are going to be based on distance from the camera.
+
+21
+00:01:34.500 --> 00:01:40.380
+Now I know that changes from week to week and from shot to shot working with the director.
+
+22
+00:01:40.380 --> 00:01:41.740
+So just keep those things in mind.
+
+23
+00:01:41.740 --> 00:01:47.140
+You may want to grab a good amount of nanites if you needed based on your decisions, but
+
+24
+00:01:47.140 --> 00:01:48.140
+not too much.
+
+25
+00:01:48.140 --> 00:01:49.939
+You don't want to bloat your scene.
+
+26
+00:01:49.939 --> 00:01:53.459
+You don't want to bring things to a crawl, but you'll at least have the option to import
+
+27
+00:01:53.459 --> 00:01:56.420
+them if you needed to bring them into your scene.
+
+28
+00:01:56.420 --> 00:02:00.140
+So just keep in mind, you need to be very deterministic.
+
+29
+00:02:00.140 --> 00:02:06.780
+And I would recommend on being very strategic on where you place things and try to determine
+
+30
+00:02:06.780 --> 00:02:10.659
+ahead of time what the goals are and visually what you want to go for.
+
+31
+00:02:10.659 --> 00:02:14.419
+And again, this does change and you can import these later on too.
+
+32
+00:02:14.419 --> 00:02:19.020
+Now if you're using LODs, you can actually generate your LODs after the fact.
+
+33
+00:02:19.020 --> 00:02:20.860
+And that's actually pretty helpful.
+
+34
+00:02:20.860 --> 00:02:25.100
+So if you bring it in and you determine that you need a few more to represent objects in
+
+35
+00:02:25.100 --> 00:02:30.100
+the distance, you can totally do that in a baking scenario.
+
+36
+00:02:30.100 --> 00:02:33.620
+All right, let's go to the next slide.
+
+37
+00:02:33.620 --> 00:02:38.020
+And in here, let's go and talk about a bit of controlling your LODs.
+
+38
+00:02:38.020 --> 00:02:42.180
+Now again, this is a bit of a review from some of the other classes, which talk about
+
+39
+00:02:42.180 --> 00:02:43.180
+working with LODs.
+
+40
+00:02:43.180 --> 00:02:46.780
+But I'm going to dive a little slightly deeper in the fact that I'm going to point out some
+
+41
+00:02:46.780 --> 00:02:51.699
+things that you can do and you can control for your environment.
+
+42
+00:02:51.699 --> 00:02:55.620
+So let's go and hop into Unreal and take a look at a few things.
+
+43
+00:02:55.620 --> 00:02:58.460
+So here in Unreal, I'm kind of breaking the norm here.
+
+44
+00:02:58.460 --> 00:03:02.340
+I have several different versions of types of geometry here.
+
+45
+00:03:02.340 --> 00:03:06.139
+I have one that is LOD, another one is Nenite.
+
+46
+00:03:06.139 --> 00:03:10.819
+Again, that's not typical and you do need to be prepared and watch out for any performance
+
+47
+00:03:10.819 --> 00:03:11.819
+hits.
+
+48
+00:03:11.819 --> 00:03:15.500
+But I'm basically for lecture purposes, I have two different kinds.
+
+49
+00:03:15.500 --> 00:03:19.900
+So this one out here in the distance, let's actually look at the magnifying glass here
+
+50
+00:03:19.900 --> 00:03:21.379
+with a folder.
+
+51
+00:03:21.379 --> 00:03:25.180
+And we'll see that we have one that is Nenite.
+
+52
+00:03:25.180 --> 00:03:27.180
+That's this particular one.
+
+53
+00:03:27.180 --> 00:03:28.180
+And one that is not.
+
+54
+00:03:28.180 --> 00:03:32.379
+And automatically, you'll know exactly which one is which, simply by clicking and seeing
+
+55
+00:03:32.379 --> 00:03:33.539
+which one is active.
+
+56
+00:03:33.539 --> 00:03:35.340
+So this one's using LODs.
+
+57
+00:03:35.340 --> 00:03:38.060
+Let's double click on this one and take a closer look.
+
+58
+00:03:38.060 --> 00:03:43.259
+Now again, when working with LODs, you want to work with it primarily with a baking scenario
+
+59
+00:03:43.259 --> 00:03:51.340
+because it educators to it and you have less of a problem when it comes to generating your
+
+60
+00:03:51.340 --> 00:03:53.899
+virtual shadow maps and Lumen.
+
+61
+00:03:53.899 --> 00:03:58.859
+And overall, the performance is been made in such a way so that Lumen, virtual shadow
+
+62
+00:03:58.859 --> 00:04:02.259
+maps and Nenite all work together smoothly.
+
+63
+00:04:02.259 --> 00:04:04.899
+So if you do a mixed bag, you could run into some problems.
+
+64
+00:04:04.899 --> 00:04:05.899
+Just remember that.
+
+65
+00:04:05.899 --> 00:04:09.620
+So say we're in a GPU baking scenario here.
+
+66
+00:04:09.620 --> 00:04:13.900
+So working with this, I have things set to an LOD auto.
+
+67
+00:04:13.900 --> 00:04:17.340
+Now in here, we have one, two, three, four, five.
+
+68
+00:04:17.340 --> 00:04:20.660
+We can determine these and choose these in our settings.
+
+69
+00:04:20.660 --> 00:04:22.660
+So you can see that they're all in here.
+
+70
+00:04:22.660 --> 00:04:28.459
+And at any time, if I wanted to, I can custom these and isolate the ones that I don't want.
+
+71
+00:04:28.459 --> 00:04:32.300
+And Unruh will shuffle accordingly to my needs.
+
+72
+00:04:32.300 --> 00:04:37.500
+So working in here as we scroll down, let's actually close some of the material options
+
+73
+00:04:37.500 --> 00:04:38.500
+here.
+
+74
+00:04:38.500 --> 00:04:42.459
+So I can see that we have the LODs we can choose from and edit as we clicked on that
+
+75
+00:04:42.459 --> 00:04:43.459
+custom.
+
+76
+00:04:43.459 --> 00:04:47.459
+Allow me to switch materials if I need to, control my triangles.
+
+77
+00:04:47.459 --> 00:04:53.500
+And because we have auto, custom compute distances, I now have, I can control exactly
+
+78
+00:04:53.500 --> 00:04:57.180
+what the distance is on things going to be drawn.
+
+79
+00:04:57.180 --> 00:04:59.899
+And that's actually kind of nice to be able to have that.
+
+80
+00:04:59.899 --> 00:05:05.100
+You'll see we have triangle control, percentage triangles, max triangle count for each set
+
+81
+00:05:05.100 --> 00:05:07.699
+of LOD that I have in place.
+
+82
+00:05:07.699 --> 00:05:12.459
+The only problem or the thing you should look out for in this particular case when working
+
+83
+00:05:12.459 --> 00:05:16.819
+with it, and this is mainly for reduction, you need to determine exactly what it is
+
+84
+00:05:16.819 --> 00:05:18.939
+your LODs are sitting at.
+
+85
+00:05:18.939 --> 00:05:23.300
+And you'll see here the percentage per triangle is set up nicely by default.
+
+86
+00:05:23.300 --> 00:05:26.939
+If you change these, you need to remember what these numbers are.
+
+87
+00:05:26.939 --> 00:05:30.980
+So keep those things in mind if you decide to change those as we go.
+
+88
+00:05:30.980 --> 00:05:36.339
+As I move my camera out and in, you'll see the LOD zero to LOD one, to LOD two, to LOD
+
+89
+00:05:36.339 --> 00:05:38.419
+three, all set up pretty nicely.
+
+90
+00:05:38.419 --> 00:05:43.819
+And Unreal does a really good job of setting this up in defaults to be able to actually
+
+91
+00:05:43.819 --> 00:05:45.219
+control what's happening.
+
+92
+00:05:45.219 --> 00:05:49.019
+Now, again, you can customize this if you want to or not.
+
+93
+00:05:49.019 --> 00:05:53.059
+As you notice, I close it, all those other options go away.
+
+94
+00:05:53.059 --> 00:05:55.139
+So you can control the max.
+
+95
+00:05:55.139 --> 00:06:00.099
+You'll notice you can also control it on the lumen front, you can control the max lumen
+
+96
+00:06:00.099 --> 00:06:01.620
+cards for that object.
+
+97
+00:06:01.620 --> 00:06:03.299
+And that actually can be pretty helpful.
+
+98
+00:06:03.299 --> 00:06:04.299
+That's a quick note.
+
+99
+00:06:04.300 --> 00:06:10.020
+That's something I'll bring up later on when we get into lumen and lighting optimization.
+
+100
+00:06:10.020 --> 00:06:12.180
+So you can also control the group.
+
+101
+00:06:12.180 --> 00:06:14.980
+What this is, it allows Unreal to get a head start.
+
+102
+00:06:14.980 --> 00:06:17.740
+And what your intentions are, is this a foliage object?
+
+103
+00:06:17.740 --> 00:06:18.819
+Is it high detail?
+
+104
+00:06:18.819 --> 00:06:20.139
+Is it a large prop?
+
+105
+00:06:20.139 --> 00:06:24.540
+And Unreal will actually try to adjust things according to that object in 3D space.
+
+106
+00:06:24.540 --> 00:06:26.860
+So it kind of just gives you a quick heads up.
+
+107
+00:06:26.860 --> 00:06:30.019
+Now it isn't like a all sweeping, amazing.
+
+108
+00:06:30.019 --> 00:06:35.859
+It'll get you a great large head start, but it actually helps Unreal calculate and know
+
+109
+00:06:35.859 --> 00:06:38.859
+exactly what your intentions are for that object.
+
+110
+00:06:38.859 --> 00:06:42.500
+Now you can choose the number of LEDs ahead of time too.
+
+111
+00:06:42.500 --> 00:06:43.779
+We have five.
+
+112
+00:06:43.779 --> 00:06:49.339
+Once you increase this number, you want to apply your changes and it will be set in there.
+
+113
+00:06:49.339 --> 00:06:54.339
+All these things can be done as well as you loading your own LEDs for import.
+
+114
+00:06:54.339 --> 00:06:59.459
+So if you need to actually swap them out, you can re-import a new version that you have.
+
+115
+00:06:59.459 --> 00:07:04.219
+It'll actually re-import existing, but you can also choose which ones that you need and
+
+116
+00:07:04.219 --> 00:07:06.099
+want.
+
+117
+00:07:06.099 --> 00:07:10.979
+So it's nice to be able to do this at any time and even build out your system.
+
+118
+00:07:10.979 --> 00:07:17.299
+So if I go back to custom here, you'll notice as I bring in custom, we actually have some
+
+119
+00:07:17.299 --> 00:07:20.539
+of our scenes such as screen size ready to go.
+
+120
+00:07:20.539 --> 00:07:23.379
+Now you'll notice the screen size is grayed out.
+
+121
+00:07:23.379 --> 00:07:26.219
+So this is necessary to be turned on.
+
+122
+00:07:26.220 --> 00:07:30.260
+To do so, you actually have to turn off your auto compute.
+
+123
+00:07:30.260 --> 00:07:32.460
+So you'll see auto compute down below.
+
+124
+00:07:32.460 --> 00:07:37.140
+If I turn this off, you'll notice now that the production or I should say screen size
+
+125
+00:07:37.140 --> 00:07:39.300
+control is now available.
+
+126
+00:07:39.300 --> 00:07:44.740
+So I can choose how much percentage on that screen size I'm going to do with these properties.
+
+127
+00:07:44.740 --> 00:07:49.700
+It's basically an override to say, hey, I want this to show up at a particular time kind
+
+128
+00:07:49.700 --> 00:07:50.700
+of.
+
+129
+00:07:50.700 --> 00:07:51.940
+You can think of it that way.
+
+130
+00:07:51.940 --> 00:07:55.460
+So this is all controllable within here.
+
+131
+00:07:55.459 --> 00:07:59.939
+We also have the ability to colorize and look at how things are being sorted.
+
+132
+00:07:59.939 --> 00:08:04.979
+It's probably best that we do this in Unreal outside of the mesh editor.
+
+133
+00:08:04.979 --> 00:08:08.620
+So let's go ahead and turn that on.
+
+134
+00:08:08.620 --> 00:08:10.299
+So I'm going to go to my view modes here.
+
+135
+00:08:10.299 --> 00:08:13.459
+And we're going to go down to our level of detail colorization.
+
+136
+00:08:13.459 --> 00:08:16.939
+And we're going to go to mesh LED colorization.
+
+137
+00:08:16.939 --> 00:08:20.379
+You'll again see some that are grayed out because they're already in Nenite.
+
+138
+00:08:20.379 --> 00:08:24.500
+But for the most part, you'll see it pop in and out through the different color levels
+
+139
+00:08:24.540 --> 00:08:25.819
+of detail.
+
+140
+00:08:25.819 --> 00:08:30.300
+It's actually pretty cool, but it shows you then that it's working and sorting according
+
+141
+00:08:30.300 --> 00:08:31.300
+to what you need.
+
+142
+00:08:31.300 --> 00:08:33.460
+I just can't drive right now.
+
+143
+00:08:33.460 --> 00:08:38.779
+So if we go forward, you'll actually see it pop in and out and it's sorting through the
+
+144
+00:08:38.779 --> 00:08:40.259
+levels of detail.
+
+145
+00:08:40.259 --> 00:08:44.580
+Again, if you missed where I clicked on it, it's under lit.
+
+146
+00:08:44.580 --> 00:08:49.899
+And then we have level of detail colorization and you can put that on.
+
+147
+00:08:49.899 --> 00:08:50.899
+That's it with this one.
+
+148
+00:08:50.899 --> 00:08:54.939
+In the next video, we're going to be talking about merging geometry and looking at that
+
+149
+00:08:54.939 --> 00:08:55.939
+up close.
+
+150
+00:08:55.939 --> 00:08:56.620
+Thanks again.
+

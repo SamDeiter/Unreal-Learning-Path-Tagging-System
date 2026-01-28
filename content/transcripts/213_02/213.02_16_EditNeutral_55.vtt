@@ -1,0 +1,190 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.000
+In this section, we will go over the Propagate changes from Scene to DNA script.
+
+2
+00:00:07.000 --> 00:00:14.000
+This script allows us to save the deltas between the current and new vertex and joint positions of meshes,
+
+3
+00:00:14.000 --> 00:00:18.000
+and then saves those changes to the DNA file.
+
+4
+00:00:18.000 --> 00:00:24.000
+We will look at two simple use case scenarios using this script to edit the neutral pose.
+
+5
+00:00:24.000 --> 00:00:29.000
+In the first scenario, we will make some simple changes to the vertex positions,
+
+6
+00:00:29.000 --> 00:00:36.000
+and in the second scenario, we will make some minor modeling changes using the joints and skin clusters.
+
+7
+00:00:36.000 --> 00:00:42.000
+So, let's jump into Maya and begin by taking a look at the script and going over the workflow.
+
+8
+00:00:42.000 --> 00:00:50.000
+Inside of Maya, I have taken the Propagate changes from Scene to DNA script from the examples folder,
+
+9
+00:00:50.000 --> 00:00:55.000
+and I have pasted it in the script editor in a new Python window.
+
+10
+00:00:55.000 --> 00:00:58.000
+This has step-by-step instructions at the beginning.
+
+11
+00:00:58.000 --> 00:01:09.000
+To summarize the workflow for using this script, begin by loading the DNA file in a new Maya scene using the DNA viewer run in Maya script.
+
+12
+00:01:09.000 --> 00:01:16.000
+Then, save the current vertex and joint positions, make modifications to the neutral pose,
+
+13
+00:01:16.000 --> 00:01:24.000
+and once finished, set the new vertex and joint positions, and update the DNA file to include those changes.
+
+14
+00:01:24.000 --> 00:01:30.000
+To use the script, we will have to input the paths of the files we want to use.
+
+15
+00:01:30.000 --> 00:01:40.000
+If we scroll down to line 50, here we will input the name of the DNA file we are going to use.
+
+16
+00:01:40.000 --> 00:01:47.000
+If I go to the DNA files folder, this is the same name of the DNA file I want to use.
+
+17
+00:01:47.000 --> 00:01:52.000
+You can use Ada or Taro as those are already in the DNA files folder.
+
+18
+00:01:52.000 --> 00:01:59.000
+Next, we will need to specify the root directory where the DNA calibration repository is located.
+
+19
+00:01:59.000 --> 00:02:02.000
+In my case, it's in my C drive.
+
+20
+00:02:02.000 --> 00:02:08.000
+Something to note is that the backward slash needs to be replaced with a forward slash.
+
+21
+00:02:08.000 --> 00:02:15.000
+The output path is created through commands, and it will by default be named output.
+
+22
+00:02:15.000 --> 00:02:19.000
+This is where our modified DNA file will be saved.
+
+23
+00:02:19.000 --> 00:02:24.000
+Some of these paths we do not need to worry about as they are already set up for us,
+
+24
+00:02:24.000 --> 00:02:29.000
+such as the path of the DNA files folder and the analog GUI folder.
+
+25
+00:02:29.000 --> 00:02:36.000
+As mentioned earlier, if we wish to use the newer version of MetaHumans with the additional face controls,
+
+26
+00:02:36.000 --> 00:02:45.000
+we would change the path of the GUI and additional assembly script to point to those assets in the MH4 folder.
+
+27
+00:02:45.000 --> 00:02:53.000
+You would add MH4 forward slash here for the GUI, and then do the same for the assembly script path.
+
+28
+00:02:53.000 --> 00:02:59.000
+If you do not use the older version of MetaHuman, you can replace the GUI file
+
+29
+00:02:59.000 --> 00:03:07.000
+and the additional assembly script file from the MH4 folder with those in the main data folder
+
+30
+00:03:07.000 --> 00:03:12.000
+so that you do not have to keep updating the paths for these, which is what I have done.
+
+31
+00:03:12.000 --> 00:03:16.000
+This is the only input that is needed for this script.
+
+32
+00:03:16.000 --> 00:03:22.000
+Now, before we use this script, let's do a quick review of what we just covered.
+
+33
+00:03:22.000 --> 00:03:29.000
+We can use the Propagate changes from Scene to DNA script to edit the neutral pose.
+
+34
+00:03:29.000 --> 00:03:34.000
+This script records the current vertex and joint positions for all meshes.
+
+35
+00:03:34.000 --> 00:03:42.000
+Once changes are made, it saves the delta between those two states and updates the DNA file.
+
+36
+00:03:42.000 --> 00:03:44.000
+The workflow is as follows.
+
+37
+00:03:44.000 --> 00:03:50.000
+First, run the commands that save the current vertex and joint positions of the head mesh.
+
+38
+00:03:50.000 --> 00:03:54.000
+Then, make modifications to the neutral mesh.
+
+39
+00:03:54.000 --> 00:04:00.000
+When finished, run the rest of the commands to set the new vertex and joint positions,
+
+40
+00:04:00.000 --> 00:04:05.000
+and then update the DNA file to include those changes.
+
+41
+00:04:05.000 --> 00:04:12.000
+For the script input, on line 50, enter the name of the DNA file you wish to edit.
+
+42
+00:04:12.000 --> 00:04:18.000
+For the root directory, enter the path that points to the DNA calibration folder
+
+43
+00:04:18.000 --> 00:04:22.000
+and make sure you use a forward slash.
+
+44
+00:04:22.000 --> 00:04:27.000
+Then, update the paths for the GUI and additional assembly script
+
+45
+00:04:27.000 --> 00:04:33.000
+to point to the MH4 folder if using the newer versions of MetaHumans.
+
+46
+00:04:33.000 --> 00:04:38.000
+Now that we have an idea of the workflow and what input we need to use,
+
+47
+00:04:38.000 --> 00:04:45.000
+in the next section we will go through executing the various commands and will edit the neutral pose.
+

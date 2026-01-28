@@ -1,0 +1,870 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.000
+In this lesson, let's go and take a look at some key points when it comes to Lumen, as
+
+2
+00:00:06.000 --> 00:00:09.320
+well as some optimizing and editing that we can do.
+
+3
+00:00:09.320 --> 00:00:11.000
+So let's get started.
+
+4
+00:00:11.000 --> 00:00:13.919
+One of the things you want to make sure you do when working with Lumen is you want to
+
+5
+00:00:13.919 --> 00:00:19.879
+make sure that you're turning off any static lighting that may be on by default.
+
+6
+00:00:19.879 --> 00:00:26.240
+So we have allow static lighting, and we also have ambient occlusion static fraction bake
+
+7
+00:00:26.240 --> 00:00:27.240
+lighting.
+
+8
+00:00:27.240 --> 00:00:29.280
+We want to turn these off because we're not using baking.
+
+9
+00:00:29.280 --> 00:00:35.439
+This is for better AO built into Lumen, and we're not leaning on any other kind of defaults
+
+10
+00:00:35.439 --> 00:00:36.640
+in here for lighting.
+
+11
+00:00:36.640 --> 00:00:39.480
+And to make sure you're not using the old default.
+
+12
+00:00:39.480 --> 00:00:43.719
+So again, turning those off, and you'll find these in your project settings, you want to
+
+13
+00:00:43.719 --> 00:00:50.640
+turn off your ambient occlusion static fraction, and you want to turn off your allow static
+
+14
+00:00:50.640 --> 00:00:51.640
+lighting.
+
+15
+00:00:51.640 --> 00:00:52.640
+Turn those off.
+
+16
+00:00:52.640 --> 00:00:56.799
+So the bottom graphic here is what you want to shoot for.
+
+17
+00:00:56.799 --> 00:01:02.879
+You also can adjust and fix any mesh distance field issues that you may be coming into where
+
+18
+00:01:02.879 --> 00:01:05.679
+it doesn't quite look as clean as you want.
+
+19
+00:01:05.679 --> 00:01:11.640
+So in under rendering in our project settings, we can go to our distance field voxel density
+
+20
+00:01:11.640 --> 00:01:13.479
+and increase that as we need to.
+
+21
+00:01:13.479 --> 00:01:18.759
+But keep in mind as you increase that, it does get a bit expensive GPU wise.
+
+22
+00:01:18.759 --> 00:01:24.840
+So just note to self, also in each individual object, you can actually go into the distance
+
+23
+00:01:24.840 --> 00:01:31.200
+field resolution scale and increase it if you feel that that shadow needs better representation.
+
+24
+00:01:31.200 --> 00:01:35.120
+Typically out of the box, it does a really good job, but we haven't implemented these
+
+25
+00:01:35.120 --> 00:01:40.040
+in here so that if you need to adjust them, you can and you can go to these two areas.
+
+26
+00:01:40.040 --> 00:01:46.080
+One, the project settings into inside of the object itself.
+
+27
+00:01:46.080 --> 00:01:50.240
+So again, like I say all the time, it's good to practice to pair Lumen with that night
+
+28
+00:01:50.240 --> 00:01:53.920
+for a high visual fidelity, as well as virtual shadow maps.
+
+29
+00:01:53.920 --> 00:01:57.920
+So you want to make sure you're working with all of these and you're going to get a bit
+
+30
+00:01:57.920 --> 00:02:04.799
+more realistic of a scene and be able to put more into the scene as you build it out.
+
+31
+00:02:04.799 --> 00:02:07.040
+So hardware ray tracing.
+
+32
+00:02:07.040 --> 00:02:11.599
+So it supports a larger range of geometry like we mentioned before, more types than
+
+33
+00:02:11.599 --> 00:02:12.599
+software ray tracing.
+
+34
+00:02:12.599 --> 00:02:17.800
+In particular, it supports tracing against skin dimensions, which is really important.
+
+35
+00:02:17.800 --> 00:02:24.280
+Software ray tracing also scales up better to higher qualities and it intersects against
+
+36
+00:02:24.280 --> 00:02:30.080
+the actual triangles and has the option to evaluate lighting at the ray hit instead of
+
+37
+00:02:30.080 --> 00:02:31.560
+the lower quality surface catch.
+
+38
+00:02:31.560 --> 00:02:33.840
+And this is something that we mentioned before.
+
+39
+00:02:33.840 --> 00:02:35.720
+So make sure you keep that in mind.
+
+40
+00:02:35.720 --> 00:02:42.400
+This is really important because you can actually get a better quality overall visual representation
+
+41
+00:02:42.400 --> 00:02:46.160
+for your scene and you'll see software ray tracing mode here.
+
+42
+00:02:46.159 --> 00:02:50.840
+There's a detail tracing and there's a hit lighting reflection.
+
+43
+00:02:50.840 --> 00:02:54.519
+So you can actually bump these up to get better visuals overall.
+
+44
+00:02:54.519 --> 00:02:58.319
+And again, you can find this under engine rendering, which we talked about in the beginning
+
+45
+00:02:58.319 --> 00:03:00.479
+of the course.
+
+46
+00:03:00.479 --> 00:03:03.599
+So optimizing and editing in Unreal.
+
+47
+00:03:03.599 --> 00:03:08.759
+So what happens when it comes to Lumen is a Lumen captures the material properties for
+
+48
+00:03:08.759 --> 00:03:11.400
+each mesh from multiple angles.
+
+49
+00:03:11.400 --> 00:03:17.319
+It's called cards and it digest this information so that it lets Lumen know exactly how that
+
+50
+00:03:17.319 --> 00:03:22.280
+geometry is built and how to get it at the best possible representation in your real
+
+51
+00:03:22.280 --> 00:03:24.240
+time 3D scenario.
+
+52
+00:03:24.240 --> 00:03:29.520
+Now you can increase these cards or I should say you should be able to not only increase
+
+53
+00:03:29.520 --> 00:03:31.240
+the cards, but you can actually see them.
+
+54
+00:03:31.240 --> 00:03:37.960
+So this first output log, I should say CVAR in here, they can put into your output log
+
+55
+00:03:37.960 --> 00:03:40.719
+or your console variables.
+
+56
+00:03:40.719 --> 00:03:42.719
+You can actually see the cards in place.
+
+57
+00:03:42.719 --> 00:03:44.520
+And let me show you what I mean.
+
+58
+00:03:44.520 --> 00:03:49.040
+Let's go ahead and go to Unreal and implement this.
+
+59
+00:03:49.040 --> 00:03:51.719
+So I'm going to go ahead and just go simply to the output log.
+
+60
+00:03:51.719 --> 00:03:55.480
+I'm going to go and place this in here and hit enter.
+
+61
+00:03:55.480 --> 00:03:59.680
+And we can now see the cards here that are being digested.
+
+62
+00:03:59.680 --> 00:04:06.319
+And it's actually calculating and using these little volumetric boxes here to give us the
+
+63
+00:04:06.319 --> 00:04:11.519
+needed visuals in our scene.
+
+64
+00:04:11.519 --> 00:04:14.239
+It's actually taking that information from each piece of geometry.
+
+65
+00:04:14.239 --> 00:04:20.519
+And you can see it in here masked out and captured within each cube that these cards
+
+66
+00:04:20.519 --> 00:04:24.480
+are evaluating and looking at our overall scene.
+
+67
+00:04:24.480 --> 00:04:29.279
+Now if you ever forget what these do and you're like card placement, show me where the cards
+
+68
+00:04:29.279 --> 00:04:34.439
+are to help Lumen do its work, you can also put a question mark and then Unreal will give
+
+69
+00:04:34.439 --> 00:04:37.079
+you a brief breakdown of what it does.
+
+70
+00:04:37.079 --> 00:04:38.879
+Now in this particular case it has failed.
+
+71
+00:04:38.879 --> 00:04:40.719
+It doesn't do it all the time.
+
+72
+00:04:40.719 --> 00:04:45.199
+But this allows you to actually see, you can put a question mark around most of all the
+
+73
+00:04:45.199 --> 00:04:48.339
+CVARs and it'll tell you what it does.
+
+74
+00:04:48.339 --> 00:04:56.000
+So the surface cache here can be used to see areas that don't have surface cache on coverage.
+
+75
+00:04:56.000 --> 00:05:01.600
+They are colored pink in the surface cache and view mode of the level editor.
+
+76
+00:05:01.600 --> 00:05:06.160
+And you can see this if we switch to that in Unreal, you can see some of this going on
+
+77
+00:05:06.160 --> 00:05:07.160
+with the cliffs.
+
+78
+00:05:07.160 --> 00:05:10.600
+Now one thing I want to point out here, there's a lot of errors on this particular piece of
+
+79
+00:05:10.600 --> 00:05:11.600
+geometry.
+
+80
+00:05:11.600 --> 00:05:17.120
+And the reason why is because this piece of geometry is not built in a modular fashion,
+
+81
+00:05:17.120 --> 00:05:18.120
+which it should be.
+
+82
+00:05:18.120 --> 00:05:22.720
+So when you build things for Lumen, you want to make sure that you're building an actual
+
+83
+00:05:22.720 --> 00:05:29.040
+wall, a wall in pieces, the floor, the ceiling, and you want to build it logically like something's
+
+84
+00:05:29.040 --> 00:05:30.879
+actually built, like LEGO.
+
+85
+00:05:30.879 --> 00:05:33.639
+You can think of it that way.
+
+86
+00:05:33.639 --> 00:05:40.639
+And that gives you the best possible calculation with less light leaking or any obscure shadow
+
+87
+00:05:40.639 --> 00:05:42.279
+areas going on.
+
+88
+00:05:42.279 --> 00:05:44.079
+So that's how you want to approach that.
+
+89
+00:05:44.079 --> 00:05:48.040
+And that's why you're seeing a lot of errors on this particular piece of geometry.
+
+90
+00:05:48.040 --> 00:05:51.899
+Let's go to Unreal and turn this on briefly and you can see what I'm talking about.
+
+91
+00:05:51.899 --> 00:05:58.120
+So in here, we'll go to our lit mode and we're going to go to Lumen and you can see surface
+
+92
+00:05:58.120 --> 00:05:59.959
+cache.
+
+93
+00:05:59.959 --> 00:06:09.839
+So again, it tells you visualizes Lumen surface cache and pink is missing surface cache coverage
+
+94
+00:06:09.839 --> 00:06:12.719
+yellow called meshes.
+
+95
+00:06:12.719 --> 00:06:19.759
+So if we click on this, you'll see there are a few areas where we're getting some errors,
+
+96
+00:06:19.759 --> 00:06:20.759
+but they're not major.
+
+97
+00:06:20.759 --> 00:06:23.079
+We don't have to worry about them too much.
+
+98
+00:06:23.079 --> 00:06:28.959
+There's just some areas where it's not quite getting as digested and being processed exactly
+
+99
+00:06:28.959 --> 00:06:30.319
+the way that we want.
+
+100
+00:06:30.319 --> 00:06:31.879
+But overall, it's not too bad.
+
+101
+00:06:31.879 --> 00:06:36.120
+And we can go ahead and turn that off.
+
+102
+00:06:36.120 --> 00:06:39.919
+The reason why this is doing a bit better, obviously, dramatically better compared to
+
+103
+00:06:39.919 --> 00:06:44.799
+that room that I showed you example of is because we've built this in separate pieces.
+
+104
+00:06:44.799 --> 00:06:49.639
+But there are thin pieces of geometry in here due to the fact that these are been have been
+
+105
+00:06:49.639 --> 00:06:53.759
+scanned, the nature of scanning, these guys are hollow.
+
+106
+00:06:53.759 --> 00:06:58.679
+If I really needed to, I could take them into a DCC, thicken them out and do a little UV
+
+107
+00:06:59.560 --> 00:07:03.639
+and then I could do the same thing even in Unreal using the modeling tools because you'll
+
+108
+00:07:03.639 --> 00:07:06.040
+see that they are quite thin.
+
+109
+00:07:06.040 --> 00:07:11.600
+And you can see in the backside a lot of light leaking that is occurring because they are
+
+110
+00:07:11.600 --> 00:07:17.680
+thin having solid geometry is always the best if you possibly can get that implemented.
+
+111
+00:07:17.680 --> 00:07:23.160
+So this occurs a lot of the times when you have a complicated piece of geometry and you
+
+112
+00:07:23.160 --> 00:07:27.480
+can actually help yourself out if you break those pieces up a bit and again, build it
+
+113
+00:07:27.520 --> 00:07:28.480
+like Legos.
+
+114
+00:07:28.480 --> 00:07:32.360
+But you can also increase the Lumen card in here.
+
+115
+00:07:32.360 --> 00:07:36.640
+You can make it so you have more cards per task in here.
+
+116
+00:07:36.640 --> 00:07:40.280
+So you can see max Lumen mesh cards.
+
+117
+00:07:40.280 --> 00:07:47.200
+We can increase that max Lumen mesh cards to a higher number of value.
+
+118
+00:07:47.200 --> 00:07:54.160
+Now, again, this is up to you and how you edit your piece of geometry and how it was built,
+
+119
+00:07:54.160 --> 00:07:55.319
+how it was scanned.
+
+120
+00:07:55.360 --> 00:07:59.480
+There's multiple factors in here to be able to get your scene to look a bit better if
+
+121
+00:07:59.480 --> 00:08:04.800
+for some reason you're noticing that things aren't quite looking as cleanly as you'd
+
+122
+00:08:04.800 --> 00:08:09.839
+want them to because these areas will not bounce light and will appear black in your
+
+123
+00:08:09.839 --> 00:08:13.159
+reflections and you kind of want to avoid that.
+
+124
+00:08:13.159 --> 00:08:15.319
+Now, again, I repeat this quite often.
+
+125
+00:08:15.319 --> 00:08:19.399
+Use Nenite as much as possible with Lumen for best results.
+
+126
+00:08:19.399 --> 00:08:24.759
+If you decide to mix it up and use Nenites and you're using LUDs, you can get a performance
+
+127
+00:08:24.759 --> 00:08:27.079
+effect because they're not really made for that.
+
+128
+00:08:27.079 --> 00:08:31.879
+I mean, you can use Nenite for a regular baking scenario, but if you do on the flip side,
+
+129
+00:08:31.879 --> 00:08:34.879
+use LUD and Nenite, you've got to be careful with that.
+
+130
+00:08:34.879 --> 00:08:39.960
+We've had some gaming clients run into issues with that, especially for larger environments.
+
+131
+00:08:39.960 --> 00:08:45.480
+So for the best performance, again, Lumen, virtual shadow maps and Nenite are going to
+
+132
+00:08:45.480 --> 00:08:47.279
+be your best approach.
+
+133
+00:08:47.279 --> 00:08:52.000
+So in other words, Nenite accelerates the mesh captures used to keep the surface catch
+
+134
+00:08:52.000 --> 00:08:55.039
+in sync with the triangle scene.
+
+135
+00:08:55.039 --> 00:08:59.960
+So after the surface catch is populated with material properties, Lumen calculates direct
+
+136
+00:08:59.960 --> 00:09:02.159
+and indirect lighting for these surface positions.
+
+137
+00:09:02.159 --> 00:09:07.720
+So you can see how they really like each other.
+
+138
+00:09:07.720 --> 00:09:13.960
+So projects with extreme overlapping instances can control the method Lumen uses with the
+
+139
+00:09:13.960 --> 00:09:17.159
+project settings, software ray tracing mode.
+
+140
+00:09:17.159 --> 00:09:19.200
+And Lumen provides two options to choose from.
+
+141
+00:09:19.200 --> 00:09:22.520
+So we have detailed tracing and we have global tracing.
+
+142
+00:09:22.520 --> 00:09:27.000
+So one is detailed tracing gives you higher visual fidelity.
+
+143
+00:09:27.000 --> 00:09:32.160
+And then the global tracing is a bit more dumbed down and gives you some faster traces
+
+144
+00:09:32.160 --> 00:09:33.240
+in here.
+
+145
+00:09:33.240 --> 00:09:39.000
+It's the for the fastest traces you can possibly get with your global distance field.
+
+146
+00:09:39.000 --> 00:09:43.320
+So you can think of it as performance versus your visuals.
+
+147
+00:09:43.320 --> 00:09:46.360
+You again, this is a case by case, whatever you might need.
+
+148
+00:09:46.360 --> 00:09:53.279
+So that things look the best in the scenario that you've built.
+
+149
+00:09:53.279 --> 00:09:57.480
+If you're noticing in your shadows as you're moving around in your environment, maybe from
+
+150
+00:09:57.480 --> 00:10:02.800
+a larger distance and maybe more geared towards virtual production, less maybe advice to be
+
+151
+00:10:02.800 --> 00:10:05.639
+effects, it just depends on where your camera is at.
+
+152
+00:10:05.639 --> 00:10:10.360
+But if you're noticing your shadows seem to disappear, fade in and out, what you can do
+
+153
+00:10:10.360 --> 00:10:15.120
+in each light, you can disable your ray tracing cast shadows.
+
+154
+00:10:15.320 --> 00:10:17.200
+So let me show you where that's at in your light.
+
+155
+00:10:17.200 --> 00:10:18.399
+If you forgot.
+
+156
+00:10:18.399 --> 00:10:23.039
+So in Unreal, if I click on my directional light, I can actually go down here to my advanced
+
+157
+00:10:23.039 --> 00:10:24.200
+area here.
+
+158
+00:10:24.200 --> 00:10:30.240
+And you'll see that we have a few things in the ray tracing department that has been set
+
+159
+00:10:30.240 --> 00:10:31.240
+up.
+
+160
+00:10:31.240 --> 00:10:32.240
+It's down here.
+
+161
+00:10:32.240 --> 00:10:33.240
+I'm clicking the wrong area.
+
+162
+00:10:33.240 --> 00:10:36.279
+So you'll see my cast ray traced shadows is disabled.
+
+163
+00:10:36.279 --> 00:10:37.879
+So you can turn that off.
+
+164
+00:10:37.879 --> 00:10:42.360
+If you're, if it seems like you're getting a shadow conflict where your shadows are popping
+
+165
+00:10:42.440 --> 00:10:46.919
+in and out based on your camera coming closer or farther away from an object.
+
+166
+00:10:46.919 --> 00:10:50.120
+So that's something you can do if you do run into that issue.
+
+167
+00:10:53.000 --> 00:10:56.480
+Now we also go over this particular tool on another class.
+
+168
+00:10:56.480 --> 00:11:01.159
+If you needed to, you can also use a level snapshot so you can update what your visuals
+
+169
+00:11:01.159 --> 00:11:03.519
+are in your scene on the fly.
+
+170
+00:11:03.519 --> 00:11:08.960
+And the director and your production team is going to love it because then you can,
+
+171
+00:11:08.960 --> 00:11:09.960
+you don't have to commit.
+
+172
+00:11:09.960 --> 00:11:11.320
+You can actually change it.
+
+173
+00:11:11.320 --> 00:11:14.680
+And I have a few of those in my scene and let me show you real quick briefly.
+
+174
+00:11:14.680 --> 00:11:18.240
+Again, we do have a class that talks about this in detail, but I'm just going to show
+
+175
+00:11:18.240 --> 00:11:22.120
+you kind of how cool it is.
+
+176
+00:11:22.120 --> 00:11:25.360
+So I'm going to go in here and open up my level snapshot.
+
+177
+00:11:25.360 --> 00:11:29.879
+Now opening up my level snapshot, it shows me some really older ones we have here.
+
+178
+00:11:29.879 --> 00:11:32.280
+I'm not going to worry about them right now.
+
+179
+00:11:32.280 --> 00:11:36.040
+So what I'm going to do is go ahead and make a new one.
+
+180
+00:11:36.040 --> 00:11:38.640
+So we're going to go and take a level snapshot of what we have.
+
+181
+00:11:38.640 --> 00:11:40.040
+We'll give it a description.
+
+182
+00:11:40.039 --> 00:11:42.399
+I'll just call this awesome.
+
+183
+00:11:42.399 --> 00:11:43.399
+Just awesome.
+
+184
+00:11:43.399 --> 00:11:44.399
+Nothing else.
+
+185
+00:11:44.399 --> 00:11:45.399
+And we'll hit create.
+
+186
+00:11:45.399 --> 00:11:49.559
+Now I'm not going to get into all the details for the interface.
+
+187
+00:11:49.559 --> 00:11:56.399
+And then what we can do is make another one just simply by moving our camera around or
+
+188
+00:11:56.399 --> 00:11:57.399
+I should say light.
+
+189
+00:11:57.399 --> 00:11:58.399
+Excuse me.
+
+190
+00:11:58.399 --> 00:11:59.399
+I say camera.
+
+191
+00:11:59.399 --> 00:12:00.399
+I did.
+
+192
+00:12:00.399 --> 00:12:01.399
+I did say camera.
+
+193
+00:12:01.399 --> 00:12:02.399
+Make that a bit brighter.
+
+194
+00:12:02.399 --> 00:12:08.399
+And we'll take a snapshot of that, maybe even changing it so it's a little more dramatic.
+
+195
+00:12:08.399 --> 00:12:18.919
+Barely peeking the light in the side snapshot.
+
+196
+00:12:18.919 --> 00:12:23.799
+Another awesome.
+
+197
+00:12:23.799 --> 00:12:28.360
+And we'll say create level snapshot.
+
+198
+00:12:28.360 --> 00:12:33.000
+So you can flip through these once you've made them and you can actually play with them
+
+199
+00:12:33.000 --> 00:12:37.120
+a bit and do whatever you want, which is actually kind of cool.
+
+200
+00:12:37.120 --> 00:12:40.320
+So I can say, hey, I want to show off what this one looks like.
+
+201
+00:12:40.320 --> 00:12:42.440
+You can double click on it.
+
+202
+00:12:42.440 --> 00:12:43.440
+Restore level snapshot.
+
+203
+00:12:43.440 --> 00:12:44.759
+It will show me.
+
+204
+00:12:44.759 --> 00:12:48.519
+And then you can always go back to the one that you had before.
+
+205
+00:12:48.519 --> 00:12:50.440
+Double click on it.
+
+206
+00:12:50.440 --> 00:12:51.440
+Restore level snapshot.
+
+207
+00:12:51.440 --> 00:12:52.440
+And it'll restore it.
+
+208
+00:12:52.440 --> 00:12:55.840
+It'll actually shuffle even the geometry if you change your geometry.
+
+209
+00:12:55.840 --> 00:13:00.960
+Now you'll notice my geometry degraded here because I had changed a few things.
+
+210
+00:13:00.960 --> 00:13:04.000
+So it went back to where that texture material was before.
+
+211
+00:13:04.000 --> 00:13:08.080
+So it tries to keep all that stuff in memory.
+
+212
+00:13:08.080 --> 00:13:09.080
+That's it with this lesson.
+
+213
+00:13:09.080 --> 00:13:13.799
+Here's a few links that will help you get you in the right direction talking about those
+
+214
+00:13:13.799 --> 00:13:16.279
+details in Lumen.
+
+215
+00:13:16.279 --> 00:13:20.120
+And the next lesson, we're going to take a look at light mass and baking the old school
+
+216
+00:13:20.120 --> 00:13:25.120
+way in Unreal using CPU and GPU light mass.
+
+217
+00:13:25.120 --> 00:13:25.440
+Thanks again.
+

@@ -1,0 +1,394 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:08.000
+Niagara is Unreal Engine 5's visual effects editor, but it's so much more than that.
+
+2
+00:00:08.000 --> 00:00:16.000
+Niagara can also be used for gameplay interactions, and even updated without the need of an engineer.
+
+3
+00:00:16.000 --> 00:00:23.000
+That's right, you can actually add your own modules to Niagara to develop your own behaviors using a node-based system,
+
+4
+00:00:23.000 --> 00:00:31.000
+and you can add functionality that wasn't there, or adjust functionality that is already existing to better meet your needs.
+
+5
+00:00:31.000 --> 00:00:41.000
+That's right, this entire thing is built to be improved upon, but it's also pretty easy for the average user to understand.
+
+6
+00:00:41.000 --> 00:00:44.000
+Let's pop into Unreal and have a look at it now.
+
+7
+00:00:44.000 --> 00:00:48.000
+So, in order to get the most out of Niagara, we're going to need to create a Niagara system.
+
+8
+00:00:48.000 --> 00:00:53.000
+To do that, I'm going to hit Control Space, and then inside of our content browser here, I'm going to right-click,
+
+9
+00:00:53.000 --> 00:00:57.000
+and from our Create Basic Assets, I'm going to select Niagara System.
+
+10
+00:00:57.000 --> 00:01:04.000
+Now, because Niagara is such a robust toolset, it is often daunting to start out from a blank slate.
+
+11
+00:01:04.000 --> 00:01:11.000
+So, there is a wizard system that gives you some examples or some templates to work from.
+
+12
+00:01:11.000 --> 00:01:16.000
+The templates that we have right here, this is going to do blowing particles or fountain,
+
+13
+00:01:16.000 --> 00:01:24.000
+or maybe we have some particles hanging in the air, or maybe we want an upward burst of meshes or something like that.
+
+14
+00:01:24.000 --> 00:01:31.000
+This is going to give us a great way to get started so that we can quickly build out some effects to our liking.
+
+15
+00:01:31.000 --> 00:01:38.000
+Lightweight has to deal with a system that requires less rendering resources.
+
+16
+00:01:38.000 --> 00:01:43.000
+Learning content is, these are some things that go along with our learning content
+
+17
+00:01:43.000 --> 00:01:51.000
+and also show you how to do things like sub-UV animation, particles with unique IDs, or particles that spawn in a grid.
+
+18
+00:01:51.000 --> 00:01:56.000
+And then last but not least, we have the Niagara Fluids examples.
+
+19
+00:01:56.000 --> 00:02:02.000
+That is right. With the Niagara Editor, you can create real-time water and smoke,
+
+20
+00:02:02.000 --> 00:02:06.000
+and these can even interact with things inside of your scene using collision.
+
+21
+00:02:06.000 --> 00:02:10.000
+While this is very, very complicated, now to the scope of this talk,
+
+22
+00:02:10.000 --> 00:02:14.000
+you can actually look at all of these examples simply by just selecting it and then creating it
+
+23
+00:02:14.000 --> 00:02:16.000
+and have a look at how all of this is built up.
+
+24
+00:02:16.000 --> 00:02:20.000
+Now, for this one, what we're going to be doing is we're just going to take a look at a quick fountain.
+
+25
+00:02:20.000 --> 00:02:26.000
+So, I'm going to hit Create, I'm going to say NS underscore example,
+
+26
+00:02:26.000 --> 00:02:31.000
+and let's double-click on it to open it up.
+
+27
+00:02:31.000 --> 00:02:35.000
+Alright, so the Niagara Editor should look a little bit familiar
+
+28
+00:02:35.000 --> 00:02:39.000
+because like with many of the other editors, it's set up in a similar manner.
+
+29
+00:02:39.000 --> 00:02:44.000
+Across the top, we have our file, edit, asset, window, tools, and help menus.
+
+30
+00:02:44.000 --> 00:02:46.000
+And then we have the main toolbar.
+
+31
+00:02:46.000 --> 00:02:52.000
+The features you'll want to be most concerned with here are your save and browse to asset in the content browser.
+
+32
+00:02:52.000 --> 00:02:58.000
+The compile button, what this does is this compiles our Niagara system
+
+33
+00:02:58.000 --> 00:03:02.000
+in order to make sure that everything is working and nothing is incorrect
+
+34
+00:03:02.000 --> 00:03:06.000
+or values are not bad or need to be adjusted.
+
+35
+00:03:06.000 --> 00:03:09.000
+We have our thumbnail button which generates an image thumbnail
+
+36
+00:03:09.000 --> 00:03:11.000
+to make this easier to see in the content browser.
+
+37
+00:03:11.000 --> 00:03:16.000
+If I click that now, what should happen when I hit Control Space is we should see that example.
+
+38
+00:03:16.000 --> 00:03:18.000
+So, it's just showing us right there.
+
+39
+00:03:18.000 --> 00:03:23.000
+The bounds shows us the rendering bounds of this object.
+
+40
+00:03:23.000 --> 00:03:26.000
+This is particularly important when we're using something like a GPU particle
+
+41
+00:03:26.000 --> 00:03:29.000
+which needs a fixed bound size for rendering.
+
+42
+00:03:29.000 --> 00:03:33.000
+We have the ability to look at different debugs.
+
+43
+00:03:33.000 --> 00:03:41.000
+Our simulation allows us to select if it's autoplay, reset on change, or resimulate when paused.
+
+44
+00:03:41.000 --> 00:03:49.000
+The baker allows us to actually bake this particle into a series of still images that we can then replay.
+
+45
+00:03:49.000 --> 00:03:54.000
+What this does is this takes some of the complex calculation out of this particle effect
+
+46
+00:03:54.000 --> 00:03:56.000
+and makes it cheaper to run.
+
+47
+00:03:56.000 --> 00:03:58.000
+Then we have our scalability.
+
+48
+00:03:58.000 --> 00:04:03.000
+Our preview viewport over here is going to work very similar to the other preview viewports.
+
+49
+00:04:03.000 --> 00:04:09.000
+We can adjust the things like real time or show our stats or our field of view.
+
+50
+00:04:09.000 --> 00:04:16.000
+We can also come here and adjust the view and maybe change to an orthographic, a top right or a side view.
+
+51
+00:04:16.000 --> 00:04:18.000
+We can adjust our lighting.
+
+52
+00:04:18.000 --> 00:04:25.000
+We can also show things like our execution order or our memory consumption for this particular particle.
+
+53
+00:04:25.000 --> 00:04:31.000
+Then we can change the background here in case the epic headquarters is distracting.
+
+54
+00:04:31.000 --> 00:04:36.000
+Over here we have our parameters, local modules, and user parameters.
+
+55
+00:04:36.000 --> 00:04:42.000
+Parameters are things that come by default with this system.
+
+56
+00:04:42.000 --> 00:04:44.000
+For example, age is going to be something or loop count.
+
+57
+00:04:44.000 --> 00:04:49.000
+These are all things that every system is going to need in order to act correctly.
+
+58
+00:04:49.000 --> 00:05:00.000
+Our location, I always say location, but I mean our local modules are bits of code that we have written specific for this particular effect.
+
+59
+00:05:00.000 --> 00:05:07.000
+Basically, if we're trying something out and we want to maybe see how it's going to work or something like that,
+
+60
+00:05:07.000 --> 00:05:09.000
+we can do that inside of here.
+
+61
+00:05:09.000 --> 00:05:12.000
+We don't have to expose that to everything else.
+
+62
+00:05:12.000 --> 00:05:14.000
+Should we just be making an experiment?
+
+63
+00:05:14.000 --> 00:05:17.000
+Now, user parameters, this one is very cool.
+
+64
+00:05:17.000 --> 00:05:26.000
+What this allows us to do is expose various parameters inside of our effects so that when we place this in the world,
+
+65
+00:05:26.000 --> 00:05:29.000
+we can adjust those parameters accordingly.
+
+66
+00:05:29.000 --> 00:05:41.000
+Now, our timeline allows us to adjust, I shouldn't say adjust, allows us to see how this particle is playing in relation to others that might be in this system.
+
+67
+00:05:41.000 --> 00:05:47.000
+Remember, we can have multiple Niagara admittors and a single Niagara system.
+
+68
+00:05:47.000 --> 00:05:50.000
+This timeline can help with the timing of those.
+
+69
+00:05:50.000 --> 00:05:56.000
+We can set this up because we can pull the little trail heads of these around.
+
+70
+00:05:56.000 --> 00:06:01.000
+We could have maybe one fountain that goes off and then another fountain that goes off.
+
+71
+00:06:01.000 --> 00:06:06.000
+We can control the timing of those using these.
+
+72
+00:06:06.000 --> 00:06:11.000
+What you cannot do with this timeline is control any of the properties of your material.
+
+73
+00:06:11.000 --> 00:06:22.000
+Say you wanted to do something like have your particle start at zero and then ramp up the amount of particles it spawns and then stop, say, at five seconds.
+
+74
+00:06:22.000 --> 00:06:24.000
+That is not something you can do.
+
+75
+00:06:24.000 --> 00:06:27.000
+You cannot do keyframed events down here.
+
+76
+00:06:27.000 --> 00:06:31.000
+Script stats will show us the script stats for this.
+
+77
+00:06:31.000 --> 00:06:33.000
+It's a way for us to get some performance information.
+
+78
+00:06:33.000 --> 00:06:40.000
+Curves will show us any property that we have marked as a curve and then it will allow us to edit that curve.
+
+79
+00:06:40.000 --> 00:06:42.000
+It just makes it a little bit easier to edit.
+
+80
+00:06:42.000 --> 00:06:49.000
+Then we have our log here, which will point out any issues should the system not compile correctly.
+
+81
+00:06:49.000 --> 00:06:51.000
+Next, we have our details panel.
+
+82
+00:06:51.000 --> 00:07:02.000
+Our details panel, like the details panel in most of the editor, is going to be context sensitive and it's going to change based off what I have selected.
+
+83
+00:07:03.000 --> 00:07:14.000
+Now, inside of the system overview, this is where we're going to be spending a lot of time, particularly on this Niagara Admitter.
+
+84
+00:07:14.000 --> 00:07:21.000
+When we click the Admitter, what we're going to get in the details panel is all of the details that are available that we have set inside of here.
+
+85
+00:07:21.000 --> 00:07:31.000
+If we want to narrow this down, all we need to do is simply select either one of these drop down areas or the individual module that is in that area to select.
+
+86
+00:07:31.000 --> 00:07:45.000
+This is simply a way for you to either look at everything that's in there or have a more zoomed in look at what is going on to get rid of some of the noise.
+
+87
+00:07:45.000 --> 00:07:58.000
+To add or remove something, we can right click on this and we can delete it or if we click on this plus sign, we can then add different modules and things like that to our Admitter.
+
+88
+00:07:58.000 --> 00:08:06.000
+One of the other things I want to show you before we wrap up is if we come here to say like our spawn rate and we click on this, we're going to look for this,
+
+89
+00:08:06.000 --> 00:08:16.000
+make and then we want, I'm sorry, not make, new user and there we go, read from new user parameters.
+
+90
+00:08:16.000 --> 00:08:21.000
+So if I hit that and I come over to my user parameters, you're going to see we have this spawn rate set at 90.
+
+91
+00:08:21.000 --> 00:08:28.000
+So let's just compile and save that. I'm going to move this out of the way here and hit control space and just bring this into my level.
+
+92
+00:08:28.000 --> 00:08:31.000
+So with that there, check out my spawn rate.
+
+93
+00:08:31.000 --> 00:08:34.000
+I can set that to maybe like a spawn rate of one or 10.
+
+94
+00:08:34.000 --> 00:08:42.000
+And that's how I expose a parameter for someone to use when this is placed inside of the world.
+
+95
+00:08:42.000 --> 00:08:45.000
+So they don't actually have to come here and open up the particle editor.
+
+96
+00:08:45.000 --> 00:08:49.000
+They can just adjust the spawn rate right in here like you would any other actor.
+
+97
+00:08:49.000 --> 00:08:54.000
+So that is Unreal Engine's particle editor Niagara.
+
+98
+00:08:54.000 --> 00:08:59.000
+It's very, very, very simple to use, but takes a long time to master.
+

@@ -1,0 +1,210 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.000
+In this video, we'll explore a Skeletal Mesh import pipeline.
+
+2
+00:00:05.000 --> 00:00:08.000
+Skeletal meshes are different from static meshes.
+
+3
+00:00:08.000 --> 00:00:12.000
+Like a static mesh, there is a mesh object for the visuals,
+
+4
+00:00:12.000 --> 00:00:18.000
+but it also has a hierarchical bone skeleton that can drive the animation of the vertices that make that mesh.
+
+5
+00:00:18.000 --> 00:00:22.000
+The vertices are often weighted to different bones and different amounts,
+
+6
+00:00:22.000 --> 00:00:29.000
+and skeletal meshes are usually used, but not always just for created animated characters and organic shapes.
+
+7
+00:00:29.000 --> 00:00:35.000
+And again, everything from the skeleton to the textures to the animation data and the physics body data
+
+8
+00:00:35.000 --> 00:00:38.000
+can be created over in your DCC tool of choice,
+
+9
+00:00:38.000 --> 00:00:45.000
+but Unreal Engine can often generate this on the fly and even let you edit it using the Skeletal Mesh Editor tools.
+
+10
+00:00:45.000 --> 00:00:50.000
+When we import a Skeletal Mesh into Unreal, if we leave the Skeleton field blank,
+
+11
+00:00:50.000 --> 00:00:54.000
+it will use the Skeleton that comes with the FBX file or generate one,
+
+12
+00:00:54.000 --> 00:01:01.000
+but we can also select an existing Skeleton if we would like to ensure that this Skeletal Mesh will conform to an existing Skeleton.
+
+13
+00:01:01.000 --> 00:01:08.000
+Once we have a Skeletal Mesh in our project, we can begin to animate it, and I'll show you a few different ways of doing that now.
+
+14
+00:01:08.000 --> 00:01:14.000
+If we open up the map called Gaunt, we'll see a Skeletal Mesh Actor imported via FBX.
+
+15
+00:01:14.000 --> 00:01:20.000
+We see it came with a physics asset, its skeleton, as well as textures and materials.
+
+16
+00:01:20.000 --> 00:01:26.000
+The physics asset again gives us a sense of how it will collide with geometry,
+
+17
+00:01:26.000 --> 00:01:33.000
+similar to the collisions we were looking at before, and like those collisions, this is simplified.
+
+18
+00:01:33.000 --> 00:01:39.000
+If we take a look at its skeleton, we can see a fairly standard set of bones here.
+
+19
+00:01:39.000 --> 00:01:49.000
+If we'd like to, we could visualize all the bones and even start to adjust to see how they move
+
+20
+00:01:49.000 --> 00:01:57.000
+and how adjusting one bone affects parents and children.
+
+21
+00:01:57.000 --> 00:02:04.000
+However, if we want to see this with an animation right now, we'll find that if we choose Animation Asset, nothing is available
+
+22
+00:02:04.000 --> 00:02:08.000
+because there are no animations set up for this particular Skeleton.
+
+23
+00:02:08.000 --> 00:02:13.000
+Luckily, if you recall earlier, I did bring in this Zombie Animation Pack,
+
+24
+00:02:13.000 --> 00:02:23.000
+and we should also have some animations from our third-person template down here, for example, Run Forward.
+
+25
+00:02:23.000 --> 00:02:31.000
+So there's a very robust animation retargeting pipeline in Unreal Engine now, so allow me to demonstrate that for a moment.
+
+26
+00:02:31.000 --> 00:02:37.000
+So I'll sort this by animation sequence, and I can just select any of these to begin, right-click,
+
+27
+00:02:37.000 --> 00:02:44.000
+and yes, I could do Replace Skeleton, which could give me mixed results, but I'm going to go ahead and choose Retarget Animations.
+
+28
+00:02:44.000 --> 00:02:51.000
+And so right now, we can see the source Skeletal Mesh for these animations is actually the UE4 Manny.
+
+29
+00:02:51.000 --> 00:02:54.000
+Let's stick with UE5 to keep things simple for now.
+
+30
+00:02:54.000 --> 00:03:00.000
+I think we can see a UE5 Manny right there, so I'll go Retarget Animations, there he is, UE5 Manny,
+
+31
+00:03:00.000 --> 00:03:04.000
+and the target Skeletal Mesh is going to be gone.
+
+32
+00:03:04.000 --> 00:03:11.000
+So we see the two standing side by side, and yes, I could do all of these animations one by one,
+
+33
+00:03:11.000 --> 00:03:16.000
+but to start, I'm going to export a retarget asset.
+
+34
+00:03:16.000 --> 00:03:21.000
+And this retarget asset, I'll put into my temp folder,
+
+35
+00:03:21.000 --> 00:03:33.000
+and it will create this auto-generated retargeting system that will try to match Manny's movements to Gaunt.
+
+36
+00:03:35.000 --> 00:03:41.000
+And if I wanted to test this briefly, I could open up any of these animations
+
+37
+00:03:41.000 --> 00:03:47.000
+and see how the two of them respond together to the same animations,
+
+38
+00:03:47.000 --> 00:03:53.000
+even though they actually have different skeletons, and we can see it's working pretty well.
+
+39
+00:03:53.000 --> 00:03:58.000
+Let's also try one of the more standard ones, like a walking animation,
+
+40
+00:03:58.000 --> 00:04:01.000
+although I guess that is a little bit zombie focused.
+
+41
+00:04:01.000 --> 00:04:07.000
+Another idle animation, that's an idle animation, sure.
+
+42
+00:04:07.000 --> 00:04:11.000
+And yes, from there, I could select any number of these animations.
+
+43
+00:04:11.000 --> 00:04:16.000
+I'll just do the attack ones here, and I can do export selected animations,
+
+44
+00:04:16.000 --> 00:04:18.000
+put them in my temp folder.
+
+45
+00:04:18.000 --> 00:04:22.000
+I have the option here to do some prefixes and suffixes,
+
+46
+00:04:22.000 --> 00:04:27.000
+and just go ahead and leave it as is, and do export.
+
+47
+00:04:27.000 --> 00:04:35.000
+Now I have these animations, as we can see by the thumbnails, targeted to our Gaunt character,
+
+48
+00:04:35.000 --> 00:04:39.000
+and I can even test them here in the editor by selecting one of them
+
+49
+00:04:39.000 --> 00:04:46.000
+and then going to update animation in editor.
+
+50
+00:04:47.000 --> 00:04:50.000
+It's looking pretty good there.
+
+51
+00:04:50.000 --> 00:04:56.000
+In the next video, we'll look at some future considerations for our FBX workflow.
+
+52
+00:04:57.000 --> 00:05:01.000
+Thank you for watching.
+

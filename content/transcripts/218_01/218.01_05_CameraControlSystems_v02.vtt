@@ -1,0 +1,422 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.459
+Now in this section, we're going to talk about camera control systems and then create a virtual
+
+2
+00:00:05.459 --> 00:00:09.620
+live link subject so that we can do it ourselves if you don't have one of these camera control
+
+3
+00:00:09.620 --> 00:00:16.600
+systems. Camera control systems can stream lens data directly into Unreal Engine using any one
+
+4
+00:00:16.600 --> 00:00:20.879
+of the optional peripheral devices that you can pick up from vendors such as Preston's hand
+
+5
+00:00:20.879 --> 00:00:26.600
+view it. Now to calculate lens distortion, the lens file asset needs to know both the focal length
+
+6
+00:00:26.640 --> 00:00:32.079
+and focus distance of the lens that's being used. There are several available hardware options
+
+7
+00:00:32.079 --> 00:00:36.400
+that are capable of streaming Fizz data from production cameras to Unreal Engine through a
+
+8
+00:00:36.400 --> 00:00:43.439
+live link plugin. The Master Lock It, Preston MDR and the DCS plugin are all viable options,
+
+9
+00:00:43.439 --> 00:00:48.400
+but most vendors should have an optional plugin that you can download from their website and
+
+10
+00:00:48.400 --> 00:00:54.439
+use in conjunction with Unreal Engine. Now some hardware connects to smart lenses made by Zeiss
+
+11
+00:00:54.439 --> 00:00:58.839
+and Cook. Other devices connect directly to focus systems such as the Preston and these are
+
+12
+00:00:58.839 --> 00:01:04.200
+commonly used by first ASCs for adjusting or pulling focus and controlling the aperture or
+
+13
+00:01:04.200 --> 00:01:10.519
+iris of the camera. Now the DCS lens data translator can convert smart lens data in
+
+14
+00:01:10.519 --> 00:01:17.079
+addition to streaming lens data from different focus systems. Additionally, RE also has a
+
+15
+00:01:17.079 --> 00:01:23.799
+hand focus system and the RE-CAM metadata plugin for streaming that Fizz data. Note this is
+
+16
+00:01:23.799 --> 00:01:30.519
+required using the pre-built 5.0 plugin and it is up to RE to determine when this plugin will be
+
+17
+00:01:30.519 --> 00:01:36.120
+updated for 5.1. Additional notes here that you want to be aware of is that distortion of a real
+
+18
+00:01:36.120 --> 00:01:41.560
+lens needs to be emulated by the CG lens to have the same distortion characteristics when adding
+
+19
+00:01:41.560 --> 00:01:48.599
+AR or CG extensions that are not seen in camera view, but are added as a composite layer. These
+
+20
+00:01:48.599 --> 00:01:53.719
+distortion parameters will change as the focus is changed during a tape and by streaming the Fizz
+
+21
+00:01:53.799 --> 00:01:59.719
+data, the camera in the Unreal Engine can be updated in real time by the lens file and apply
+
+22
+00:01:59.719 --> 00:02:05.640
+these values to the CG composite elements. If you don't have this, your post team is likely to throw
+
+23
+00:02:05.640 --> 00:02:12.039
+away everything that you've shot and redo this in post. So if we want to pull our camera control
+
+24
+00:02:12.039 --> 00:02:16.759
+systems for calibration and we want to do this on our own, we're going to need a live link virtual
+
+25
+00:02:16.759 --> 00:02:22.039
+subject. So let's jump over to the Unreal Engine. Now if you don't have access to per-refrials for
+
+26
+00:02:22.039 --> 00:02:27.400
+streaming, a virtual live link subject blueprint can be used to manually input focus, aperture,
+
+27
+00:02:27.400 --> 00:02:32.919
+and focal length values with the following steps. To begin, we're going to move over to our calibration
+
+28
+00:02:32.919 --> 00:02:39.639
+folder and we are going to create a folder for lens files. Let's go new folder, lens files,
+
+29
+00:02:39.639 --> 00:02:47.639
+and inside that folder, we are going to create a new blueprint. So let's go ahead and right click
+
+30
+00:02:47.639 --> 00:02:52.039
+here and go to live link because we need a virtual subject. So we're going to create a blueprint
+
+31
+00:02:52.039 --> 00:02:58.359
+virtual subject. So again, right click, move up to our live link and go to blueprint virtual subject.
+
+32
+00:02:58.919 --> 00:03:04.759
+Now the role that we're going to choose for this is going to be our live link camera role. So we're
+
+33
+00:03:04.759 --> 00:03:10.039
+going to choose this from our drop-down menu and go ahead and click OK. Now this is going to give us
+
+34
+00:03:10.039 --> 00:03:17.319
+our blueprint, which we are going to rename BP for blueprint, live link virtual subject or LLVS
+
+35
+00:03:17.799 --> 00:03:24.519
+and we're going to give this the black magic Zeiss underscore 25 for our lens name. We want to do
+
+36
+00:03:24.519 --> 00:03:29.719
+that so that we know what subject this is actually controlling with our lens camera combination.
+
+37
+00:03:30.439 --> 00:03:35.159
+Once that's done, we can go ahead and double click on this to open it up so that we can start building
+
+38
+00:03:35.159 --> 00:03:40.759
+our blueprint. Now as we get started in here, you are going to want to create a few variables.
+
+39
+00:03:41.560 --> 00:03:44.919
+So we're going to move up to the upper left hand corner here and you're going to see this option
+
+40
+00:03:44.919 --> 00:03:49.559
+called variables and I'm going to start with hitting this plus button. My first variable,
+
+41
+00:03:49.559 --> 00:03:55.719
+I'm going to change this type from Boolean to float and I'm going to rename this variable
+
+42
+00:03:55.719 --> 00:04:01.879
+the focus. So this is the F in our fizz for focus. Now I want to make sure that this is
+
+43
+00:04:01.879 --> 00:04:06.519
+instance editable. So I'm just going to go ahead and click on this little eyeball and that makes
+
+44
+00:04:06.519 --> 00:04:12.199
+it instance editable. Now I'm going to need a few more versions of this. So let's go ahead and
+
+45
+00:04:12.199 --> 00:04:18.519
+duplicate this by hitting control D and let's rename this one to iris and do control D one more
+
+46
+00:04:18.519 --> 00:04:24.199
+time and let's call this one zoom. So now we have focus iris and zoom or as we like to call them for
+
+47
+00:04:24.199 --> 00:04:31.319
+short fizz. Now we need to go into our event graph and from here we need to create some event
+
+48
+00:04:31.319 --> 00:04:37.159
+options. So we're going to start out here with our event on initialize. Let's move this up to the
+
+49
+00:04:37.159 --> 00:04:41.560
+corner so we can kind of focus on it. I'm going to drag out from my executable and I'm going to
+
+50
+00:04:41.560 --> 00:04:47.319
+create a new node and this one I'm going to type in update virtual subject and I want to select
+
+51
+00:04:47.319 --> 00:04:52.600
+the subject from my static data. So I'm going to choose update virtual subject static data.
+
+52
+00:04:53.480 --> 00:04:59.480
+Now with my static data I do want to hover over my static data pin and I want to right click on this
+
+53
+00:04:59.480 --> 00:05:05.959
+and split my structure pin. Splitting my structure pin is going to give me a number of options to
+
+54
+00:05:05.959 --> 00:05:09.560
+work with and I want to make sure that these options that I want to work with are enabled.
+
+55
+00:05:10.040 --> 00:05:16.360
+So the first one I want to enable here is the static data is focal length supported. Next I want
+
+56
+00:05:16.360 --> 00:05:21.800
+to make sure that my static data is aperture supported and finally let's make sure that my
+
+57
+00:05:21.800 --> 00:05:29.000
+static data is focus distance supported. Now I have my virtual subject ready to go and I need to
+
+58
+00:05:29.000 --> 00:05:34.759
+create a few more options here. So I'm going to do the same thing over on my event on update
+
+59
+00:05:34.759 --> 00:05:39.319
+and in my event on update I'm going to drag this out and I'm going to go ahead and search again
+
+60
+00:05:39.399 --> 00:05:46.040
+for update virtual subject but I'm going to look this time for my frame data. So in this version
+
+61
+00:05:46.040 --> 00:05:52.279
+I'm going to on my update choose my frame data. Now just like before I'm going to move this over
+
+62
+00:05:52.279 --> 00:05:56.519
+and I'm going to hover over my frame data and I'm going to right click on this I'm going to split
+
+63
+00:05:56.519 --> 00:06:02.759
+this structure pin. Now I've split my structure pin and I can see that I've got a couple options
+
+64
+00:06:02.759 --> 00:06:08.039
+here frame data focal length frame data aperture and frame data focus distance. Now I'm going to
+
+65
+00:06:08.040 --> 00:06:11.879
+start with my focus distance and what I'm going to do here is I'm just going to drag for my focus
+
+66
+00:06:11.879 --> 00:06:17.400
+distance and I'm going to look for a variable and that variable is going to end up being my focus.
+
+67
+00:06:18.439 --> 00:06:23.560
+So I'm going to get my focus my focus is the variable that I created so let's go ahead and
+
+68
+00:06:23.560 --> 00:06:29.879
+grab that. Now I can also drag one of these in so let's drag in my iris and let's get my iris
+
+69
+00:06:30.600 --> 00:06:34.600
+and you can see it's the same kind of node I'm going to connect that to my data aperture.
+
+70
+00:06:35.400 --> 00:06:40.600
+Now again I can always drag this off and I can always search so I'm looking for my zoom and I
+
+71
+00:06:40.600 --> 00:06:45.960
+can just get my zoom and now I have my variables controlling my focal length. So each of these
+
+72
+00:06:45.960 --> 00:06:52.520
+variables actually grab all of my focus distance my aperture and my focal length. Once this is done
+
+73
+00:06:52.520 --> 00:06:57.800
+and assembled all I really need to do right now is go ahead and hit compile and then save and that's
+
+74
+00:06:57.800 --> 00:07:03.560
+pretty much it for our virtual live link subject creation. Now we need to make sure that this
+
+75
+00:07:03.560 --> 00:07:08.439
+subject is accessible so I'm going to go ahead and close my blueprint and you can see I've got my
+
+76
+00:07:08.439 --> 00:07:13.399
+virtual subject in here and I'm going to move over to the right side of my screen to my live link
+
+77
+00:07:13.399 --> 00:07:17.639
+section. If you don't have your live link tab you just go under window you can move on down to
+
+78
+00:07:17.639 --> 00:07:23.319
+virtual production and open up this live link tab that'll give you this option in here and now I
+
+79
+00:07:23.319 --> 00:07:29.079
+need to create and add a virtual subject to my source. So inside my live link tab I'm going to go
+
+80
+00:07:29.079 --> 00:07:33.000
+ahead and hit this source button and I'm going to go add virtual subject. I'm going to go ahead and
+
+81
+00:07:33.000 --> 00:07:38.120
+click that button. Now I'm going to give myself a virtual subject name and so I want to make sure
+
+82
+00:07:38.120 --> 00:07:43.639
+that I rename this subject so I'm going to call this live link virtual subject black magic Zeiss
+
+83
+00:07:43.639 --> 00:07:49.399
+25 and that's going to give me my live link virtual subject and then I'm going to choose the
+
+84
+00:07:49.399 --> 00:07:53.159
+virtual subject that we just created so I'm going to choose the blueprint that we created here.
+
+85
+00:07:54.120 --> 00:07:58.199
+That's going to allow me to add the subject name telling me what this is that I'm using
+
+86
+00:07:58.199 --> 00:08:03.319
+and add that to my source here. Now you can see I've got my black magic subject name in here
+
+87
+00:08:03.319 --> 00:08:09.159
+and that's going to give me the option to control my focus iris and zoom in my live link virtual
+
+88
+00:08:09.159 --> 00:08:15.319
+camera. Now in order to make this work you'll see over here I've got my NBC camera. I'm going to move
+
+89
+00:08:15.319 --> 00:08:22.279
+up to my outliner and select my camera. With my camera selected I need to add in a new option so
+
+90
+00:08:22.279 --> 00:08:27.719
+let's look at our details panel. Now in my details panel I should have a tracked object in here and
+
+91
+00:08:27.720 --> 00:08:31.720
+I don't have my tracking setup just yet but we're going to need that in order to track our camera
+
+92
+00:08:31.720 --> 00:08:36.759
+for our option. What I'm going to do is I'm going to need to first create my live link fizz data in
+
+93
+00:08:36.759 --> 00:08:41.960
+order to control that so hit this add button and in my add button I'm going to type in live link
+
+94
+00:08:41.960 --> 00:08:45.639
+and you can see I've got two options live link skeletal animation and live link controller so
+
+95
+00:08:45.639 --> 00:08:50.519
+I'm going to use controller and this is a live link component controller so I'm going to call this
+
+96
+00:08:50.519 --> 00:08:57.319
+ll underscore cc for live link component controller black magic underscore zice and this is my fizz
+
+97
+00:08:57.319 --> 00:09:01.240
+data so I'm just going to type fizz on the end of this. I'm going to hit enter and I'm going to choose
+
+98
+00:09:01.240 --> 00:09:06.840
+my subject representation. For this you can see I've got my black magic zice 25 I'm going to choose
+
+99
+00:09:06.840 --> 00:09:12.039
+my camera roll and this is actually going to control my camera roll so now my fizz data is
+
+100
+00:09:12.039 --> 00:09:16.199
+going to be controlled from my camera and that's going to actually control and allow me to make
+
+101
+00:09:16.200 --> 00:09:22.600
+those changes so that any of my focus iris and zoom are going to be set in here. Now if you have
+
+102
+00:09:22.600 --> 00:09:27.160
+forgotten how to do a tracked object in here you just want to make sure that your source is active
+
+103
+00:09:27.160 --> 00:09:32.920
+and you want to load in a source for your opti track and then connect that source and make sure
+
+104
+00:09:32.920 --> 00:09:38.040
+that's set for your preset. That's it for creating your virtual live link subject. Next we're going
+
+105
+00:09:38.039 --> 00:09:45.879
+to talk about one more little tool before we do our lens calibration.
+

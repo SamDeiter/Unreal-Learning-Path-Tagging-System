@@ -1,0 +1,534 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:08.000
+For our final exercise, we'll look at a couple different sets of objects in our scene and discuss the best ways to combine them.
+
+2
+00:00:08.000 --> 00:00:12.000
+Let's go ahead and open up the map called bulky stairs.
+
+3
+00:00:12.000 --> 00:00:21.000
+Here we'll see another simple house, which of course is another Datasmith file, and we want to zoom in on the stairs in the back.
+
+4
+00:00:21.000 --> 00:00:35.000
+Now we could profile this a little bit, look at statRHI, see that we've got about 400,000 triangles being drawn as well as about 1,400 draw calls,
+
+5
+00:00:35.000 --> 00:00:38.000
+and we could start to try to figure out what's causing this.
+
+6
+00:00:38.000 --> 00:00:41.000
+But of course, the name of the map gives us a little bit of a clue.
+
+7
+00:00:41.000 --> 00:00:48.000
+Still, if we go over to our optimization view modes and look at shader complexity and quads,
+
+8
+00:00:48.000 --> 00:00:51.000
+we can see some areas that are a little bit more upset.
+
+9
+00:00:51.000 --> 00:00:56.000
+These red areas, it's because of the translucent glass, translucent materials are expensive.
+
+10
+00:00:56.000 --> 00:01:03.000
+Over here, it's some combination of the high detail of the couch and possibly the materials as well.
+
+11
+00:01:03.000 --> 00:01:11.000
+And then over here in the stairs, we see these relatively straight, simple lines seem to be very, very complex.
+
+12
+00:01:11.000 --> 00:01:16.000
+So, right now again, we're kind of keeping an eye on our triangles and draw primitives.
+
+13
+00:01:16.000 --> 00:01:23.000
+And if we want to confirm that what's going on is what we think is going on, only go ahead and type stair.
+
+14
+00:01:23.000 --> 00:01:32.000
+Or if things are named properly, we can actually just find there that selecting any of these objects will show us that the parent object is stair.
+
+15
+00:01:32.000 --> 00:01:37.000
+And we can right click and we can do select immediate children, ctrl alt D.
+
+16
+00:01:37.000 --> 00:01:42.000
+Now by default, this will just go one below, but if we do ctrl alt D several times,
+
+17
+00:01:42.000 --> 00:01:47.000
+we'll eventually select everything connected to the stairs.
+
+18
+00:01:47.000 --> 00:01:52.000
+And so again, keeping an eye on our triangles here, which we can already see are quite high,
+
+19
+00:01:52.000 --> 00:01:56.000
+even though we're really just looking at the stairs, frustrum calling and whatnot still helping us out.
+
+20
+00:01:56.000 --> 00:02:02.000
+If I were to right click in here and go to visibility and do show only selected,
+
+21
+00:02:02.000 --> 00:02:10.000
+I'm still seeing 400,000 triangles, even more if I zoom out, nearly 700,000 triangles at times.
+
+22
+00:02:10.000 --> 00:02:14.000
+And 6470 draw calls.
+
+23
+00:02:14.000 --> 00:02:25.000
+Now that is too much for these stairs, unless these stairs are the star of your project and you really don't want to deal with optimizing this in any capacity at all,
+
+24
+00:02:25.000 --> 00:02:28.000
+which depending on your computer might be okay.
+
+25
+00:02:28.000 --> 00:02:31.000
+But for the heck of it, let's try optimizing this a little bit.
+
+26
+00:02:31.000 --> 00:02:38.000
+Now because this is the main thing we want to focus on, one of the first things I'll do is I'll go over to my levels tab here,
+
+27
+00:02:38.000 --> 00:02:47.000
+which can also be found under window levels, and I'm actually going to add a new empty level.
+
+28
+00:02:47.000 --> 00:02:56.000
+What this will allow me to do, just stairs, is separate out the stairs from everything else in the project and make it very easy to select this.
+
+29
+00:02:56.000 --> 00:03:02.000
+I could also do this by just creating a group.
+
+30
+00:03:02.000 --> 00:03:08.000
+And then once again isolating when needed, but this will allow me to just focus on the stairs a little easier.
+
+31
+00:03:08.000 --> 00:03:14.000
+So I can do move selected actors to level to bring all the stairs over here.
+
+32
+00:03:14.000 --> 00:03:22.000
+Ah yes, and sometimes you'll see a message like this if you're dealing with a datasmith file, because of course we're breaking up the band, so to speak.
+
+33
+00:03:22.000 --> 00:03:28.000
+So if I go ahead and say yes, we are kind of keeping the stairs as its own separate object.
+
+34
+00:03:28.000 --> 00:03:37.000
+But the benefit now is we go back to lit mode and unisolate everything, show all actors control H.
+
+35
+00:03:37.000 --> 00:03:51.000
+We now have the ability to focus just on the stairs by toggling off the persistent level, noting that we'll probably want to be in an unlit view mode or maybe even a wireframe mode to examine this as we make changes.
+
+36
+00:03:51.000 --> 00:03:56.000
+So as we can see, we have about 200,000 triangles.
+
+37
+00:03:56.000 --> 00:04:02.000
+We have a higher max, but I think that's from when we were seeing the rest of the scene, and then over 2400 draw calls.
+
+38
+00:04:02.000 --> 00:04:08.000
+So that of course, if you think that sounds like too many, that is in fact too many.
+
+39
+00:04:08.000 --> 00:04:16.000
+So the first simplest thing we can do is we can select all of this and because this is now in its own empty level, we can just do control A.
+
+40
+00:04:16.000 --> 00:04:24.000
+And then we can go to actor, merge 2425 actors and just try hitting merge.
+
+41
+00:04:24.000 --> 00:04:41.000
+And we'll go find a folder to put this in, stair merging, and we'll call this sm underscore stair simple underscore V1 sm for static mesh of course.
+
+42
+00:04:41.000 --> 00:04:52.000
+And that happened pretty quick. We can see in this folder that we have not created anything other than a new piece of geometry and the size is still rather large.
+
+43
+00:04:52.000 --> 00:05:02.000
+So all that we've done really is combined everything into one object, but by just having this one new object in here, let's try dragging it into the scene.
+
+44
+00:05:02.000 --> 00:05:22.000
+We'll find, if we can find it, yes, the pivot points a little bit of a strange place, that if we compare these two, the merged object and the original 2400, we'll have a significant difference in performance.
+
+45
+00:05:22.000 --> 00:05:26.000
+So let's turn off the parent actor there for stairs.
+
+46
+00:05:27.000 --> 00:05:34.000
+And we'll see here, while our triangle count remains quite high, our draw call count has reduced significantly.
+
+47
+00:05:34.000 --> 00:05:38.000
+Compare that to the stairs being on.
+
+48
+00:05:38.000 --> 00:05:41.000
+Again, similar triangles, but a much higher draw call count.
+
+49
+00:05:41.000 --> 00:05:46.000
+And do note that some of the draw calls here are actually due to the editor and the UI.
+
+50
+00:05:46.000 --> 00:05:54.000
+There should really only be a few because of the two materials here, and this being one single static mesh component.
+
+51
+00:05:54.000 --> 00:06:09.000
+Now, if we were to take this a step further and enable Nanite, we would actually see a significant reduction in the triangles.
+
+52
+00:06:09.000 --> 00:06:14.000
+Here, we're now down to about 6000.
+
+53
+00:06:14.000 --> 00:06:18.000
+Draw calls stay similar, although it does look like there's been a reduction there as well.
+
+54
+00:06:18.000 --> 00:06:33.000
+But this is the magic of Nanite. We retain all the detail assuming we're in a scenario where we need to see those nuts and bolts, but we're never drawing too many triangles at once.
+
+55
+00:06:33.000 --> 00:06:37.000
+We can take this further if we wanted to.
+
+56
+00:06:37.000 --> 00:06:46.000
+If we decided that we did not want to have the full detail of this for any reason, we could go ahead and open up that mesh.
+
+57
+00:06:46.000 --> 00:06:55.000
+And if we type in the word triangle, we have two similar options here.
+
+58
+00:06:55.000 --> 00:07:01.000
+One is for when we're using a traditional LED workflow and one is for Nanite. They essentially do the same thing.
+
+59
+00:07:01.000 --> 00:07:08.000
+We can basically say, don't have all 200,000 Nanite triangles. Let's have 20% of that.
+
+60
+00:07:08.000 --> 00:07:11.000
+And it won't activate until we hit apply.
+
+61
+00:07:11.000 --> 00:07:20.000
+Let's keep an eye on some of the higher detail elements right here. We'll see if these still remain very curved or if they'll feel more faceted.
+
+62
+00:07:20.000 --> 00:07:31.000
+So if I just scroll down here, we'll find where it says apply.
+
+63
+00:07:31.000 --> 00:07:40.000
+There we are. Apply changes. And we'll see Nanite vertices and Nanite triangles reduce. And we can indeed see that this is faceted now.
+
+64
+00:07:40.000 --> 00:07:47.000
+Of course, it's fine from a certain distance away. It's just a question of whether or not you need to see that level of detail.
+
+65
+00:07:47.000 --> 00:08:01.000
+Now we can also from here try the traditional LED workflow. We could disable Nanite, hit apply changes, and then we're back to the original triangles and vertices post merge.
+
+66
+00:08:01.000 --> 00:08:12.000
+But again, we can go down to our reduction settings and we could once again go to something like 20 and apply changes.
+
+67
+00:08:12.000 --> 00:08:21.000
+And there we are once again seeing a slightly more faceted surface there, though it's worth noting the cylinders still feel very smooth.
+
+68
+00:08:21.000 --> 00:08:31.000
+And if that's okay, we might treat this as an LOD zero, but then add a few more LODs, let's say four, and apply changes.
+
+69
+00:08:31.000 --> 00:08:38.000
+And we'll be starting from that level of triangles and going down from there.
+
+70
+00:08:38.000 --> 00:08:50.000
+And now we can see as we zoom out the automatic LOD changes, we could of course manually adjust the screen sizes that these appear at.
+
+71
+00:08:50.000 --> 00:08:59.000
+If we go ahead and uncheck auto compute LOD distances, then we can change the screen size at which each of these will appear.
+
+72
+00:08:59.000 --> 00:09:10.000
+But now if for any reason we can't use Nanite, for example, if we're on a mobile platform, this becomes a very robust way to clean up how the stairs look.
+
+73
+00:09:10.000 --> 00:09:13.000
+Now for only two materials, we're probably okay stopping there.
+
+74
+00:09:13.000 --> 00:09:23.000
+But if we did want to reduce this to a single material, the next thing we would want to do is go over to actor, merge actors, and then we could just click on simplify.
+
+75
+00:09:23.000 --> 00:09:26.000
+But let's look at some of the settings at our disposal.
+
+76
+00:09:26.000 --> 00:09:29.000
+Merge, simplify, batch and approximate.
+
+77
+00:09:29.000 --> 00:09:30.000
+I'll go to simplify.
+
+78
+00:09:30.000 --> 00:09:39.000
+And you'll see that we have the ability to basically decide how big from a screen size perspective this should exist, 1200 being the maximum.
+
+79
+00:09:39.000 --> 00:09:48.000
+And then we can change some things like merge distance and most importantly, at least when I usually use this, the ability to have Nanite on and off and the material settings.
+
+80
+00:09:48.000 --> 00:09:55.000
+So I like to increase this texture size from the default usually 1024 by 1024 to 4096 by 4096.
+
+81
+00:09:55.000 --> 00:10:00.000
+So when these get combined, we're going to see sharper relief of where everything goes.
+
+82
+00:10:00.000 --> 00:10:04.000
+We can reduce that texture if we need to later, but that's where I'd like to start.
+
+83
+00:10:04.000 --> 00:10:09.000
+I don't think for something as simple as this will need a normal map or a metallic map.
+
+84
+00:10:09.000 --> 00:10:12.000
+These are very similar materials just using a different color.
+
+85
+00:10:12.000 --> 00:10:20.000
+In fact, I think they share the same Sketchup reference master material, right with only the color being different.
+
+86
+00:10:20.000 --> 00:10:33.000
+So this will be the highest quality that we can create or the most triangles, I guess you could say from this particular option with simplify because this is intended to be a proxy mesh.
+
+87
+00:10:33.000 --> 00:10:39.000
+Let's see what happens when I click merge actors, noting that we can also replace the actor we already have if we want to.
+
+88
+00:10:39.000 --> 00:10:49.000
+But I'll just go here and say SM Stair. Stair symbol B2.
+
+89
+00:10:49.000 --> 00:10:59.000
+And it now says creating mesh proxy, noting also that we are generating a collision for this with create collision on by default.
+
+90
+00:10:59.000 --> 00:11:05.000
+And here we are. You'll notice right away a significant reduction in the triangle count.
+
+91
+00:11:05.000 --> 00:11:16.000
+But as I mentioned, this is about as high of a triangle count you can get using those particular merge settings using the maximum screen size of 1200 that it will create for.
+
+92
+00:11:16.000 --> 00:11:27.000
+But it's also created this new material with a 4k texture that very deftly maps where all these different elements should be based on the UV mapping.
+
+93
+00:11:27.000 --> 00:11:40.000
+And the two materials in the original. So this will be a very highly optimized object with a single material.
+
+94
+00:11:40.000 --> 00:11:51.000
+And great if you need to be working on a much older device such as I don't know a 2015 smartphone perhaps.
+
+95
+00:11:51.000 --> 00:12:00.000
+So we'll put these two side by side. Actually, maybe we'll put all three side by side.
+
+96
+00:12:00.000 --> 00:12:08.000
+And start to compare them. So we have these stairs over here.
+
+97
+00:12:08.000 --> 00:12:16.000
+Lots of detail here, including these tiny, tiny elements. Oh, those are just sprites.
+
+98
+00:12:16.000 --> 00:12:28.000
+I'll go into game mode so we don't see the sprites. So lots of detail here. We'll also turn on a wireframe mode.
+
+99
+00:12:28.000 --> 00:12:40.000
+Lots and lots of detail there. Much less detail here in the proxy mesh. And then back to more detail here.
+
+100
+00:12:40.000 --> 00:12:48.000
+Worth noting in the proxy mesh that much of the geometry that is disappeared has now been replaced with the texture.
+
+101
+00:12:48.000 --> 00:12:55.000
+So we can actually see, despite there being no geometry here again just to see it in wireframe.
+
+102
+00:12:55.000 --> 00:13:01.000
+It's actually projected.
+
+103
+00:13:01.000 --> 00:13:13.000
+The absence of that geometry as texture settings when baking the material. So it might be helpful to see this in full lit mode with our main level turned back on.
+
+104
+00:13:13.000 --> 00:13:20.000
+And just to compare these two side by side, you'll notice from a distance, they're actually fairly comparable.
+
+105
+00:13:20.000 --> 00:13:26.000
+But as we get closer to them, we start to notice more and more of the differences.
+
+106
+00:13:26.000 --> 00:13:35.000
+But at a glance, you know, if you're running up these stairs, this might be enough and you don't need the full detail of the nuts and bolts here.
+
+107
+00:13:35.000 --> 00:13:43.000
+And certainly, or probably not, the full full detail of everything in the original setup.
+
+108
+00:13:43.000 --> 00:13:48.000
+Now let's find an example where combining materials and merging will make a lot more sense.
+
+109
+00:13:48.000 --> 00:13:53.000
+We have another map in here called Sports Bike.
+
+110
+00:13:53.000 --> 00:14:05.000
+And if we frame in on what we've got here, we can see once again, we have a lot of triangles, a lot of detail, a lot of draw calls and more materials.
+
+111
+00:14:05.000 --> 00:14:15.000
+So let's see what happens if we use the same settings we just used for our stairs, but for a smaller, more contained object with more materials.
+
+112
+00:14:15.000 --> 00:14:26.000
+For this, I'll select Headset 2 and once again, Control-Alt-D several times until everything here is selected, 86 out of the 94 actors in the scene.
+
+113
+00:14:26.000 --> 00:14:30.000
+And I'll go to Actor, Merge Actors, Merge Actor Settings.
+
+114
+00:14:30.000 --> 00:14:35.000
+And this time, I'll just replace Source Actors just so we can see what happens when we do that.
+
+115
+00:14:35.000 --> 00:14:43.000
+Noting again, we've got a very high number of triangles, almost a thousand draw calls just from this one scene, although we've got other things happening in the background as well.
+
+116
+00:14:43.000 --> 00:14:53.000
+I'll keep that screen size of 1200 and I will go ahead and make sure the Material Settings are once again at 4K by 4K.
+
+117
+00:14:53.000 --> 00:14:57.000
+Let's go ahead and choose Merge Actors.
+
+118
+00:14:57.000 --> 00:15:01.000
+I'll put this over in my Temp folder.
+
+119
+00:15:01.000 --> 00:15:05.000
+Call this one Sports Bike.
+
+120
+00:15:05.000 --> 00:15:10.000
+Proxy is fine. I can call it Static Mesh if I want.
+
+121
+00:15:10.000 --> 00:15:28.000
+And we should see the existing 84 objects swapped out with a single object now with far less than the million or so triangles and 800 plus draw calls.
+
+122
+00:15:28.000 --> 00:15:36.000
+And now here we are with a very colorful looking texture combining those various materials with the UV mapping.
+
+123
+00:15:36.000 --> 00:15:41.000
+Again, I generally like to start at 4K and then just bring the resolution down if needed.
+
+124
+00:15:41.000 --> 00:15:44.000
+MIPS, of course, can also help with that.
+
+125
+00:15:44.000 --> 00:15:48.000
+And we can see there's already 13 MIPS applied to this as a power of two texture.
+
+126
+00:15:48.000 --> 00:15:54.000
+So as we zoom out or just check in here, we're basically getting different LODs for the texture anyway.
+
+127
+00:15:54.000 --> 00:16:05.000
+And we can see that the proxy we generated is actually more triangles than the stairs because it is in a more contained area and therefore can reach a higher triangle count.
+
+128
+00:16:05.000 --> 00:16:27.000
+And here we are with our simplified object with a single material and a decent level of detail, which may be acceptable for us, depending again on our application and how close we need to get to it.
+
+129
+00:16:28.000 --> 00:16:33.000
+Note, of course, some of the inaccuracy with what we're seeing here with statRHI.
+
+130
+00:16:33.000 --> 00:16:38.000
+Because if we open this up, we can see it is actually only 22,000 triangles.
+
+131
+00:16:38.000 --> 00:16:48.000
+And once again, if we wanted to, we could enable Nanite or set up a number of LODs to stream.
+
+132
+00:16:48.000 --> 00:16:54.000
+From 22,000 max triangles to less than 3,000.
+
+133
+00:16:57.000 --> 00:17:08.000
+I hope this has been a useful exercise. In our final video, we'll review future considerations for our Datasmith projects.
+

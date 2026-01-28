@@ -1,0 +1,658 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.879
+In this lesson, we're going to go ahead and take a look at Final Pixel and ICBFX workflows
+
+2
+00:00:05.879 --> 00:00:07.759
+when it comes to ray tracing.
+
+3
+00:00:07.759 --> 00:00:12.359
+This is a bit of a review from previous classes, but let's go ahead and get started.
+
+4
+00:00:12.359 --> 00:00:15.320
+So here are a few things to keep in mind when working with ray tracing.
+
+5
+00:00:15.320 --> 00:00:18.219
+One, you want to keep the ray tracing environment small.
+
+6
+00:00:18.219 --> 00:00:24.199
+So you only use ray tracing in a small region for performance costs.
+
+7
+00:00:24.199 --> 00:00:29.160
+And the reason why you do that is mainly because of the photon bounces that go around, they
+
+8
+00:00:29.160 --> 00:00:31.719
+can get costly if your scene is quite huge.
+
+9
+00:00:31.719 --> 00:00:34.799
+And you will see your frame rates drop.
+
+10
+00:00:34.799 --> 00:00:38.719
+It can be mixed with baking as needed so you could bake in the background and then do ray
+
+11
+00:00:38.719 --> 00:00:44.120
+tracing in a small contained area in your post-process volume.
+
+12
+00:00:44.120 --> 00:00:49.159
+With ray tracing, keeping in mind your polycount is very key.
+
+13
+00:00:49.159 --> 00:00:53.920
+You want to make sure you avoid having really tiny details like if you have a lot of foliage
+
+14
+00:00:53.920 --> 00:00:56.480
+and a lot of plants, it doesn't mean you can't do it.
+
+15
+00:00:56.479 --> 00:01:01.959
+It's just the photons bouncing back from those cards going back to the camera can get expensive
+
+16
+00:01:01.959 --> 00:01:03.599
+as things get heavier.
+
+17
+00:01:03.599 --> 00:01:07.879
+So you might want to put some maybe some alpha cards in the background to maybe fake some
+
+18
+00:01:07.879 --> 00:01:11.000
+of those trees in the distance and so forth.
+
+19
+00:01:11.000 --> 00:01:17.479
+Keep textures simple and roughness wise because that also can bring things to a crawl because
+
+20
+00:01:17.479 --> 00:01:22.679
+then you're getting the photons trying to determine the material ID and material information
+
+21
+00:01:22.679 --> 00:01:24.319
+on those objects.
+
+22
+00:01:24.479 --> 00:01:32.599
+The higher the rough, the more complicated that's going to be for ray tracing to calculate
+
+23
+00:01:32.599 --> 00:01:39.559
+that and get it back to the camera so that it has a fair representation of that object.
+
+24
+00:01:39.559 --> 00:01:47.359
+So also you want to keep your, when you do use your textures, you can use virtual texturing.
+
+25
+00:01:47.359 --> 00:01:52.439
+Your texture overhead, just make sure the priority areas are their main concern or the main thing
+
+26
+00:01:52.480 --> 00:01:55.200
+so that your textures aren't really high everywhere.
+
+27
+00:01:55.200 --> 00:02:02.400
+Material nodes, you can use a switch replacing or manual based kind of like a static switch
+
+28
+00:02:02.400 --> 00:02:03.400
+parameter.
+
+29
+00:02:03.400 --> 00:02:07.079
+This is in previous classes I talked about how can you use either or when it comes to
+
+30
+00:02:07.079 --> 00:02:08.079
+ray tracing.
+
+31
+00:02:08.079 --> 00:02:09.079
+This is more per shot.
+
+32
+00:02:09.079 --> 00:02:13.120
+This is one that manages things as you're working in your workflow.
+
+33
+00:02:13.120 --> 00:02:17.400
+Overall, as your camera moves around in your environment, avoid physical lights intersecting
+
+34
+00:02:17.400 --> 00:02:18.400
+into geo.
+
+35
+00:02:18.400 --> 00:02:21.680
+That's really important because as you do that noise can be persistent.
+
+36
+00:02:21.920 --> 00:02:29.680
+Say I got a simple light in my scene, it's a rec light and I'm pushing it through a wall,
+
+37
+00:02:29.680 --> 00:02:33.680
+accidentally maybe it's clipping, you're going to see some noise show up on those materials
+
+38
+00:02:33.680 --> 00:02:35.120
+if you're not careful.
+
+39
+00:02:35.120 --> 00:02:40.360
+Use reflection probes and CVARS to manage hybrid output for best performances.
+
+40
+00:02:40.360 --> 00:02:45.200
+So you can run that and make it so that Unreal is going to lean on those for your shinier
+
+41
+00:02:45.200 --> 00:02:48.640
+objects and reflective transparent surfaces.
+
+42
+00:02:48.639 --> 00:02:52.519
+Use CVARS for better performance overall, also in your movie RenderCube.
+
+43
+00:02:52.519 --> 00:02:56.479
+So we go over that in our rendering classes, but these are things to keep in mind when
+
+44
+00:02:56.479 --> 00:03:01.479
+working with ray tracing because ray tracing overall can be expensive.
+
+45
+00:03:01.479 --> 00:03:06.279
+Let's go and take a peek a little bit in Unreal and you can kind of see what I'm talking about.
+
+46
+00:03:06.279 --> 00:03:11.279
+So in my scene here, this does have ray tracing on, but I'm using two different post process
+
+47
+00:03:11.279 --> 00:03:15.319
+volumes to demonstrate some blood information from a previous class.
+
+48
+00:03:15.319 --> 00:03:19.280
+We're going to pull in a new post process volume and we're going to contain it within
+
+49
+00:03:19.280 --> 00:03:23.479
+the area of our metal objects here.
+
+50
+00:03:23.479 --> 00:03:28.519
+So pull this guy in into my scene, let me go and increase his size a bit.
+
+51
+00:03:28.519 --> 00:03:35.039
+So again, you want to handle the ray tracing for that particular region in a very dialed
+
+52
+00:03:35.039 --> 00:03:37.199
+down and controlled set.
+
+53
+00:03:37.199 --> 00:03:43.799
+Now also photons bouncing around in an interior can get a bit more expensive.
+
+54
+00:03:43.800 --> 00:03:48.200
+Ray tracing in an interior can be a bit more expensive versus outdoors.
+
+55
+00:03:48.200 --> 00:03:53.520
+Outdoors things are a lot easier to calculate, but when you have multiple things in an enclosed
+
+56
+00:03:53.520 --> 00:03:59.240
+area, you're getting some photons bouncing back faster back to the camera and you do
+
+57
+00:03:59.240 --> 00:04:01.040
+need to manage things accordingly.
+
+58
+00:04:01.040 --> 00:04:04.840
+So just be careful how many items you have in there and your material complexity if you
+
+59
+00:04:04.840 --> 00:04:07.200
+choose to go that route.
+
+60
+00:04:07.199 --> 00:04:13.959
+So in here, I'm going to activate ray tracing in my post process volume in my GI settings
+
+61
+00:04:13.959 --> 00:04:14.959
+here.
+
+62
+00:04:14.959 --> 00:04:16.240
+Let me close a few things we don't need.
+
+63
+00:04:16.240 --> 00:04:18.399
+So let's go to global illumination.
+
+64
+00:04:18.399 --> 00:04:21.759
+Let's set this to ray tracing.
+
+65
+00:04:21.759 --> 00:04:24.480
+You can see that it's active there.
+
+66
+00:04:24.480 --> 00:04:29.199
+In my ray tracing, I'm going to set this to, you can even mix these if you want to do,
+
+67
+00:04:29.199 --> 00:04:30.560
+that's Lumen right there for reflections.
+
+68
+00:04:30.560 --> 00:04:34.599
+We're going to set that to ray tracing in this particular case.
+
+69
+00:04:34.600 --> 00:04:36.040
+And I'm going to show you what I mean.
+
+70
+00:04:36.040 --> 00:04:43.200
+So we can run this CVAR right here called ray tracing dot reflection, reflection captures.
+
+71
+00:04:43.200 --> 00:04:47.720
+Right now it says zero, but if you want to lean on things and do more of a hybrid set,
+
+72
+00:04:47.720 --> 00:04:50.080
+I can put a one in here and enter.
+
+73
+00:04:50.080 --> 00:04:52.360
+And it's going to allow me to have a bit of a fallback.
+
+74
+00:04:52.360 --> 00:04:55.120
+You will see a bunch of noise in here.
+
+75
+00:04:55.120 --> 00:04:56.120
+You see that.
+
+76
+00:04:56.120 --> 00:05:00.120
+And we can actually adjust the roughness in here and it being ray tracing.
+
+77
+00:05:00.120 --> 00:05:01.879
+We're going to probably need to.
+
+78
+00:05:01.879 --> 00:05:05.600
+We can also set in hybrid in here in our scene.
+
+79
+00:05:05.600 --> 00:05:08.480
+And you'll see reflection ray tracing hybrid.
+
+80
+00:05:08.480 --> 00:05:10.560
+And we can also set that to one.
+
+81
+00:05:10.560 --> 00:05:13.719
+I'll hit one here and hit enter.
+
+82
+00:05:13.719 --> 00:05:15.279
+And you're going to see an active, there you go.
+
+83
+00:05:15.279 --> 00:05:16.839
+You see a quick changer.
+
+84
+00:05:16.839 --> 00:05:23.360
+So that hybrid is also referencing what we put in before, which was a reflection captures.
+
+85
+00:05:23.360 --> 00:05:25.399
+So I put my reflection capture here.
+
+86
+00:05:25.399 --> 00:05:27.000
+We can set that to zero.
+
+87
+00:05:27.000 --> 00:05:32.360
+What that does is sets a fallback for some of our reflectivity in our materials here.
+
+88
+00:05:32.360 --> 00:05:34.079
+And it allows you to get a better result.
+
+89
+00:05:34.079 --> 00:05:37.279
+Now it works a bit better when it comes to translucency.
+
+90
+00:05:37.279 --> 00:05:40.680
+I'm really just using it in my metal aspects here.
+
+91
+00:05:40.680 --> 00:05:46.639
+But again, I'm using it in a contained area and that hybrid is using some of those reflection
+
+92
+00:05:46.639 --> 00:05:52.839
+captures as a reference, as you saw that shift as I brought it into my scene.
+
+93
+00:05:52.839 --> 00:05:56.600
+So let's turn a few other things on to actually see some better results.
+
+94
+00:05:56.600 --> 00:06:00.360
+So on ray tracing, I'm going to turn on my max bounces.
+
+95
+00:06:00.360 --> 00:06:03.120
+And I'm going to set this to simple final gather.
+
+96
+00:06:03.120 --> 00:06:05.240
+You'll see that shift there for a second here.
+
+97
+00:06:05.240 --> 00:06:07.160
+Final gather can bring a bit of noise.
+
+98
+00:06:07.160 --> 00:06:10.080
+So we may even want to switch this to brute force.
+
+99
+00:06:10.080 --> 00:06:13.280
+This will give us better results and we can set these numbers a bit higher.
+
+100
+00:06:13.280 --> 00:06:18.080
+Making this eight and if your computer supports it, samples for pixel can be 16 also.
+
+101
+00:06:18.080 --> 00:06:20.900
+This could also be four in our case.
+
+102
+00:06:20.900 --> 00:06:25.760
+And then we can set this to six to eight as a starter point.
+
+103
+00:06:25.759 --> 00:06:29.800
+Then underneath our reflectivity here, we have ray tracing.
+
+104
+00:06:29.800 --> 00:06:33.800
+So we can actually manage our ray tracing here.
+
+105
+00:06:33.800 --> 00:06:36.959
+Things have slowed down a little bit here because we do have a lot of reflective surfaces.
+
+106
+00:06:36.959 --> 00:06:40.719
+I'll even notice my particles are slowing down just a bit there.
+
+107
+00:06:40.719 --> 00:06:45.000
+I can control my max roughness if I wanted to samples for pixel shadows.
+
+108
+00:06:45.000 --> 00:06:46.000
+We have hard shadows.
+
+109
+00:06:46.000 --> 00:06:49.360
+I can set those to area shadows to be a bit better.
+
+110
+00:06:49.360 --> 00:06:52.120
+And then I can lower my roughness if I wanted to.
+
+111
+00:06:52.120 --> 00:06:55.879
+You can see you can get rid of some of the noise that may be occurring or you can increase
+
+112
+00:06:55.879 --> 00:06:57.079
+it back to where it was.
+
+113
+00:06:57.079 --> 00:07:02.000
+And you will see the noise persist if you are not careful.
+
+114
+00:07:02.000 --> 00:07:04.879
+So let's set that back to default for a second there.
+
+115
+00:07:04.879 --> 00:07:10.399
+And again, as we move in our scene, we can see some of the results of our work.
+
+116
+00:07:10.399 --> 00:07:16.319
+So again, using brute force is ideal in your post process volume.
+
+117
+00:07:16.319 --> 00:07:20.160
+And you can start low and then go high if you need to.
+
+118
+00:07:20.160 --> 00:07:21.600
+brute force and final gather.
+
+119
+00:07:21.600 --> 00:07:26.880
+Again, there's always going to be a bit of a noise and either one, but brute force is
+
+120
+00:07:26.880 --> 00:07:28.640
+going to give you less.
+
+121
+00:07:28.640 --> 00:07:36.400
+You can also use stat D3D12RAT and GPU stats to track performance for ray tracing global
+
+122
+00:07:36.400 --> 00:07:39.320
+illumination to work with a skylight enabled.
+
+123
+00:07:39.320 --> 00:07:45.440
+The experimental console variable ray tracing global illumination evaluate sky can be turned
+
+124
+00:07:45.440 --> 00:07:46.680
+on.
+
+125
+00:07:46.680 --> 00:07:52.920
+This actually works pretty well most of the time to make sure that the sky is being evaluated
+
+126
+00:07:52.920 --> 00:07:55.920
+accordingly.
+
+127
+00:07:55.920 --> 00:08:03.319
+So again, using that reflection captures hybrid CVAR and sorting materials, which can increase
+
+128
+00:08:03.319 --> 00:08:04.960
+things performance wise.
+
+129
+00:08:04.960 --> 00:08:09.319
+So you can use all three of these to actually help out.
+
+130
+00:08:09.319 --> 00:08:14.240
+Now here's some ideal CVARs for final renders to be placed in the render queue.
+
+131
+00:08:14.240 --> 00:08:15.920
+So these definitely can help out.
+
+132
+00:08:15.920 --> 00:08:21.280
+Now, do you need all these not necessarily all at one time experiment with them first?
+
+133
+00:08:21.280 --> 00:08:25.640
+Don't plug all these in in your movie render queue before you know whether you really do
+
+134
+00:08:25.640 --> 00:08:26.759
+need them.
+
+135
+00:08:26.759 --> 00:08:28.080
+So just be very deterministic.
+
+136
+00:08:28.080 --> 00:08:31.560
+It's like, you know, you can say, Hey, this is my depth of field quality.
+
+137
+00:08:31.560 --> 00:08:32.560
+Not that good.
+
+138
+00:08:32.560 --> 00:08:34.120
+Then I'll use this ice cream percentage.
+
+139
+00:08:34.120 --> 00:08:37.440
+I need to increase that so make things look a little better.
+
+140
+00:08:37.440 --> 00:08:40.560
+Motion blur quality, but all that looks, it needs, it looks great the way it is.
+
+141
+00:08:40.560 --> 00:08:41.840
+I don't need to change it.
+
+142
+00:08:41.840 --> 00:08:44.560
+So you have to be very deterministic through here.
+
+143
+00:08:44.559 --> 00:08:48.479
+You can also change your speaking of shadow quality on this one.
+
+144
+00:08:48.479 --> 00:08:53.039
+You can also change your ray tracing shadow quality within the light itself.
+
+145
+00:08:53.039 --> 00:08:56.279
+But a lot of times you don't necessarily need that or the eyes not even going to pick it
+
+146
+00:08:56.279 --> 00:08:57.279
+up.
+
+147
+00:08:57.279 --> 00:09:01.439
+It does change it ever so slightly the quality wise of your shadow.
+
+148
+00:09:01.439 --> 00:09:05.639
+But for the most part, most of those shadows should work just fine in the default setting.
+
+149
+00:09:05.639 --> 00:09:11.759
+They do cost GPU wise if you were to mess with those.
+
+150
+00:09:11.759 --> 00:09:17.399
+Now just for shocking purposes, I kept in this part of the lecture, what's talks about
+
+151
+00:09:17.399 --> 00:09:24.279
+if you wanted to use ray tracing and to turn it on and off as you're using GPU light mass.
+
+152
+00:09:24.279 --> 00:09:25.279
+And that's fine.
+
+153
+00:09:25.279 --> 00:09:27.000
+You just got to make sure you run that CVAR.
+
+154
+00:09:27.000 --> 00:09:31.759
+I gave you earlier, what turns off all ray tracing effects in your scene.
+
+155
+00:09:31.759 --> 00:09:36.519
+Once you've, once you've rendered things in GPU light mass, now you can turn ray tracing
+
+156
+00:09:36.519 --> 00:09:38.559
+on and off if you need to.
+
+157
+00:09:38.559 --> 00:09:43.879
+And you'll have to dump some of your baked information back and forth.
+
+158
+00:09:43.879 --> 00:09:44.879
+It's a little bit of a hassle.
+
+159
+00:09:44.879 --> 00:09:46.919
+And this is why Lumen's a little bit better.
+
+160
+00:09:46.919 --> 00:09:51.919
+But these workflows are there if for some reason you need to use them.
+
+161
+00:09:51.919 --> 00:09:52.919
+That's it with this lecture.
+
+162
+00:09:52.919 --> 00:09:57.639
+Here's a link here where you can dive in a bit deeper on these subjects.
+
+163
+00:09:57.639 --> 00:09:58.639
+Thanks again.
+
+164
+00:09:58.639 --> 00:10:01.799
+And in the next lecture, we're going to go and take a look at optimizing fog effects.
+

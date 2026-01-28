@@ -1,0 +1,222 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.759
+Hello and welcome to MetaHuman Fitting and DNA Calibration.
+
+2
+00:00:05.759 --> 00:00:11.320
+My name is Gabriela Crusenio-Tacis and I will be your host for this course.
+
+3
+00:00:11.320 --> 00:00:19.080
+In this course, we will be going over recommended workflows that can be used to modify and customize
+
+4
+00:00:19.080 --> 00:00:24.760
+the neutral pose of the MetaHuman face using the MetaHuman Framework Toolset.
+
+5
+00:00:24.760 --> 00:00:28.879
+Due to the number of workflows that are involved on this topic,
+
+6
+00:00:28.879 --> 00:00:32.320
+this class has been split up into two courses.
+
+7
+00:00:32.320 --> 00:00:36.799
+The next course, MetaHuman DNA Calibration and Finalization,
+
+8
+00:00:36.799 --> 00:00:44.719
+will be the continuation of this course where we explore more advanced use cases using DNA calibration
+
+9
+00:00:44.719 --> 00:00:50.480
+and go over how we can bring the modified assets back into Unreal Engine.
+
+10
+00:00:50.480 --> 00:00:56.640
+It is worth noting that the DNA calibration workflows we will be covering in both courses
+
+11
+00:00:56.640 --> 00:01:03.920
+have changed in later Engine versions and we will be exploring those changes in a future update.
+
+12
+00:01:03.920 --> 00:01:11.359
+In this course, we begin by exploring the complexity of the MetaHuman face and MetaHuman Framework Tools
+
+13
+00:01:11.359 --> 00:01:19.040
+such as the DNA calibration repository that can be used for making adjustments to the neutral pose.
+
+14
+00:01:19.120 --> 00:01:27.600
+We then touch upon expectations as to how far customizations can be pushed before encountering issues.
+
+15
+00:01:27.600 --> 00:01:36.240
+Next, we will cover common workflows for fitting MetaHuman topology to scan our sculpted meshes.
+
+16
+00:01:36.240 --> 00:01:40.240
+From there, we move on to two hands-on exercises.
+
+17
+00:01:40.240 --> 00:01:48.880
+In the first one, we will export a MetaHuman identity conformed mesh from Unreal Engine to be used for additional fitting.
+
+18
+00:01:48.879 --> 00:01:54.959
+And for the second one, we will use the mesh to MetaHuman workflow with the template mesh option
+
+19
+00:01:54.959 --> 00:02:00.319
+to generate a MetaHuman identity that will be solved based on geometry.
+
+20
+00:02:00.319 --> 00:02:07.120
+From there, we will delve into best practices for fitting the additional head geometry assets.
+
+21
+00:02:07.120 --> 00:02:11.759
+Then we move on to the DNA calibration section of this course.
+
+22
+00:02:11.759 --> 00:02:16.000
+We will cover setting up the DNA calibration repository
+
+23
+00:02:16.000 --> 00:02:20.479
+and we'll get acquainted with the files and scripts that we will be using.
+
+24
+00:02:20.479 --> 00:02:27.840
+We will use the example script from the repository to modify the neutral pose inside of Autodesk Maya.
+
+25
+00:02:27.840 --> 00:02:34.639
+We will make some minor adjustments directly on the head mesh and with the joints and skin clusters.
+
+26
+00:02:34.639 --> 00:02:40.879
+Then we will update the MetaHuman DNA and export the head LODs as FBX.
+
+27
+00:02:40.879 --> 00:02:45.360
+Finally, we will wrap up this course with some final recommendations
+
+28
+00:02:45.360 --> 00:02:48.720
+and I will share some tips and resources for you to use
+
+29
+00:02:48.720 --> 00:02:53.760
+as you continue your work and training with MetaHumans.
+
+30
+00:02:53.760 --> 00:03:02.400
+This course will be using the project MEH9130055 and there are two level maps.
+
+31
+00:03:02.400 --> 00:03:11.920
+Both maps are located in the content browser under the courses folder labeled MEH21302
+
+32
+00:03:11.919 --> 00:03:19.519
+in the course maps folder. The first map is named MEH21302MAPS
+
+33
+00:03:20.159 --> 00:03:24.479
+which should load automatically. S stands for Standard MetaHuman.
+
+34
+00:03:25.279 --> 00:03:28.879
+In this map we have two versions of the preset LENA.
+
+35
+00:03:28.879 --> 00:03:33.039
+We have the original version and the version that has been modified
+
+36
+00:03:33.039 --> 00:03:37.039
+using the 2023 UnrealFest DNA calibration script.
+
+37
+00:03:37.599 --> 00:03:43.199
+The second map is named MEH21302MAPC for Custom.
+
+38
+00:03:44.400 --> 00:03:46.479
+I will double click on this to open it.
+
+39
+00:03:48.479 --> 00:03:52.159
+This map has a stylized MetaHuman named Atomic Savage
+
+40
+00:03:52.719 --> 00:03:57.519
+that has been customized using more advanced DNA calibration scripts.
+
+41
+00:03:58.399 --> 00:04:03.759
+The assets that we will be using in this project are located in the course assets folder.
+
+42
+00:04:04.719 --> 00:04:11.519
+The folder named ATOMICSAnom contains a body animation that has been retargeted to this character.
+
+43
+00:04:12.319 --> 00:04:18.480
+The folder named CONFORMEDMASH contains the fitted conformed mesh that we will use for
+
+44
+00:04:18.480 --> 00:04:25.439
+one of the hands-on exercises. The folder named SEQUENCES contains two level sequences you can
+
+45
+00:04:25.439 --> 00:04:31.839
+play that include a body and face animation. The ATOMICS sequence can be used in the map
+
+46
+00:04:31.919 --> 00:04:38.479
+with ATOMICSavage and the sequence labeled LENADNA can be used in the map with the modified version
+
+47
+00:04:38.479 --> 00:04:46.079
+of LENA. The source files folder named 21302 FITTADNA assets will contain the assets that
+
+48
+00:04:46.079 --> 00:04:51.120
+have been used for the modified MetaHumans in both maps if you wish to inspect them.
+
+49
+00:04:52.559 --> 00:04:57.120
+If at any point you need to reference the location of the course maps,
+
+50
+00:04:57.120 --> 00:05:01.199
+they can be found at the beginning of the slide deck after the training outline.
+
+51
+00:05:02.239 --> 00:05:06.719
+As we go through this course you will find that many slides in this presentation
+
+52
+00:05:06.719 --> 00:05:12.799
+contain a lot of information and I will summarize all of that. But if at any point you want to read
+
+53
+00:05:12.799 --> 00:05:19.919
+what is on each of those slides, feel free to pause and dive right in. Now let's begin with the first
+
+54
+00:05:19.919 --> 00:05:28.079
+portion of this course by exploring the complexity of the MetaHuman face, DNA calibration, and expectations
+
+55
+00:05:28.079 --> 00:05:32.079
+for achieving likeness.
+

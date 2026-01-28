@@ -1,0 +1,406 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.419
+In this video, we'll go over some of the tessellation options available when importing
+
+2
+00:00:05.419 --> 00:00:08.160
+CAD files into Unreal Engine.
+
+3
+00:00:08.160 --> 00:00:12.560
+If you're working from CAD or computer-aided design programs, we should talk about the
+
+4
+00:00:12.560 --> 00:00:15.200
+tessellation options available to you.
+
+5
+00:00:15.200 --> 00:00:17.719
+These are for NURBS services only.
+
+6
+00:00:17.719 --> 00:00:23.000
+NURBS of course stands for Non-Uniform Rational Beast Splines and are often extremely curvy
+
+7
+00:00:23.000 --> 00:00:27.900
+geometry that is generated in a different way from traditional meshes with polygons
+
+8
+00:00:27.900 --> 00:00:29.719
+and triangles.
+
+9
+00:00:29.719 --> 00:00:34.179
+Because Unreal Engine does not support NURBS directly, we'll have to tessellate and triangulate
+
+10
+00:00:34.179 --> 00:00:37.019
+NURBS as they come into Unreal Engine.
+
+11
+00:00:37.019 --> 00:00:41.700
+Essentially, we'll need to determine how the bodies and the surfaces will be processed,
+
+12
+00:00:41.700 --> 00:00:46.019
+and then we'll be creating a static mesh, which is Unreal Engine's file type used as
+
+13
+00:00:46.019 --> 00:00:48.460
+a base for further processing.
+
+14
+00:00:48.460 --> 00:00:52.579
+Here you'll want to ensure you have enough detail for your targeted applications, not
+
+15
+00:00:52.579 --> 00:00:57.379
+so much that you end up overburdening your system in getting a frame rate loss, but also
+
+16
+00:00:57.380 --> 00:01:03.080
+not so little that we're not seeing the appropriate level of geometry detail necessary.
+
+17
+00:01:03.080 --> 00:01:06.960
+This will be dependent on the individual model elements.
+
+18
+00:01:06.960 --> 00:01:10.600
+Here in the Datasmith Import options, we have a few things we can change here.
+
+19
+00:01:10.600 --> 00:01:13.040
+We can talk about the tolerance, the edge length.
+
+20
+00:01:13.040 --> 00:01:15.879
+We'll discuss each of these in the following slides.
+
+21
+00:01:15.879 --> 00:01:20.680
+So let's take a closer look at tessellation and how we process the converting of 3D precise
+
+22
+00:01:20.680 --> 00:01:26.520
+surfaces defined by algorithms and vectors into meshes.
+
+23
+00:01:26.519 --> 00:01:31.939
+The three primary settings we'll be investigating are Cord Tolerance, Max Edge Length, and
+
+24
+00:01:31.939 --> 00:01:34.299
+Normal Tolerance.
+
+25
+00:01:34.299 --> 00:01:38.299
+Cord Tolerance defines the distance between the reference cat surface and the resulting
+
+26
+00:01:38.299 --> 00:01:41.420
+triangular surface in UE5.
+
+27
+00:01:41.420 --> 00:01:45.539
+Meshes do not actually have curves in their geometry, everything has to get straightened
+
+28
+00:01:45.539 --> 00:01:50.259
+out at some point, so this is one of the first instances where we decide where something
+
+29
+00:01:50.259 --> 00:01:53.179
+becomes straight that otherwise should be curved.
+
+30
+00:01:53.180 --> 00:02:00.200
+If we take a look at the seat, we have references of 0.1mm Cord Tolerance, 0.5mm Cord Tolerance,
+
+31
+00:02:00.200 --> 00:02:05.800
+and 10mm Cord Tolerance, which as we can see creates progressively more triangles if we
+
+32
+00:02:05.800 --> 00:02:08.240
+have a smaller Cord Tolerance.
+
+33
+00:02:08.240 --> 00:02:10.040
+And we'll see this as a bit of a pattern.
+
+34
+00:02:10.040 --> 00:02:14.719
+The smaller we make these numbers for tolerance, the higher our triangle count will be.
+
+35
+00:02:14.719 --> 00:02:16.640
+Now, are any of these correct?
+
+36
+00:02:16.640 --> 00:02:21.960
+It depends entirely on your application and how important this particular seat is.
+
+37
+00:02:21.960 --> 00:02:26.379
+If you are doing a driving simulator and it needs to run on a mobile phone and you're
+
+38
+00:02:26.379 --> 00:02:30.100
+spending a lot of time close to the seat, you probably want the seat to be pretty high
+
+39
+00:02:30.100 --> 00:02:34.460
+quality but you're going to be limited by the processing power of the phone.
+
+40
+00:02:34.460 --> 00:02:38.500
+If you have a seat that is going to be far away and it's not an important part of your
+
+41
+00:02:38.500 --> 00:02:43.659
+scene and you're on a very heavy PC, maybe in that case you might actually use an even
+
+42
+00:02:43.659 --> 00:02:48.560
+smaller triangle count than what you'd be using on a phone, it all depends on the priority
+
+43
+00:02:48.580 --> 00:02:53.900
+you want to give it and what kind of frames per second you're willing to sacrifice.
+
+44
+00:02:53.900 --> 00:02:59.259
+This will also give us a sense of harder edges or softer edges.
+
+45
+00:02:59.259 --> 00:03:04.659
+Maximum edge length defines the maximum length of any edge in the triangle.
+
+46
+00:03:04.659 --> 00:03:09.659
+Looking at our seat example again, we can see that as the number is lower, 10mm versus
+
+47
+00:03:09.659 --> 00:03:14.620
+20 versus 40, the lower number has the highest number of triangles and we can see in the
+
+48
+00:03:14.680 --> 00:03:20.680
+wire frame the density of that versus the higher tolerance of 40mm which only produces
+
+49
+00:03:20.680 --> 00:03:22.800
+21,000 triangles.
+
+50
+00:03:22.800 --> 00:03:28.080
+Now we have a few different ways that we can get into fine tuning exactly how this is set
+
+51
+00:03:28.080 --> 00:03:29.080
+up.
+
+52
+00:03:29.080 --> 00:03:33.400
+We have various CVARS and I'll give you a few examples of them when we do the exercise
+
+53
+00:03:33.400 --> 00:03:42.080
+but ds4datasmith.cadtranslator.disableCADCURNALTESCELATION0 is a way that we can actually start to affect
+
+54
+00:03:42.080 --> 00:03:44.599
+this setting more directly.
+
+55
+00:03:44.599 --> 00:03:50.500
+It's on by default and needs to be deactivated in order to use CADCURNALTESCELATION0.
+
+56
+00:03:50.500 --> 00:03:55.939
+And once more here with normal tolerance we see how this defines the maximum angle between
+
+57
+00:03:55.939 --> 00:04:01.539
+adjacent triangles and using our seat example we can see 5 degrees versus 10 degrees versus
+
+58
+00:04:01.539 --> 00:04:08.299
+40 degrees with the larger tolerance resulting in fewer triangles and a smaller tolerance
+
+59
+00:04:08.299 --> 00:04:14.379
+resulting in more triangles because it is trying to be more accurate with how the curvilinear
+
+60
+00:04:14.379 --> 00:04:18.699
+surfaces get translated into meshes.
+
+61
+00:04:18.699 --> 00:04:24.000
+Once again what makes the most sense for your project will be application specific.
+
+62
+00:04:24.000 --> 00:04:28.879
+And of course don't forget that you can also set up LODs or Nanite which we'll talk about
+
+63
+00:04:28.879 --> 00:04:33.959
+later on which allow us to have various levels of detail when we're closer or farther away
+
+64
+00:04:33.959 --> 00:04:36.040
+from the object.
+
+65
+00:04:36.040 --> 00:04:41.240
+Now let's do a short exercise where we import a CAD file into Unreal Engine and retestulate
+
+66
+00:04:41.240 --> 00:04:44.420
+the components to add additional detail.
+
+67
+00:04:44.420 --> 00:04:50.980
+Over in Unreal Engine 5.6 I'm going to open my content drawer and in a folder I will import
+
+68
+00:04:50.980 --> 00:04:57.019
+a CAD model in CAD files, CATIA, TurboCharger, Darshart, and Kibar.
+
+69
+00:04:57.019 --> 00:05:02.699
+We have one here called assembly matap.catproduct, catproduct file.
+
+70
+00:05:02.699 --> 00:05:06.340
+And if we go ahead and open this up you'll see that we will not be presented with an
+
+71
+00:05:06.339 --> 00:05:12.159
+import dialog box, it will import on its own and we have static meshes here as well as
+
+72
+00:05:12.159 --> 00:05:14.199
+a simple white material.
+
+73
+00:05:14.199 --> 00:05:17.079
+So we go ahead and open up hybrid body 1.
+
+74
+00:05:17.079 --> 00:05:20.279
+We can hover over it for a moment and see some details of it.
+
+75
+00:05:20.279 --> 00:05:26.399
+And we can see here that we've got 3,640 triangles and so our goal is to increase that.
+
+76
+00:05:26.399 --> 00:05:29.759
+We can see a little bit of some hard edges here, right?
+
+77
+00:05:29.759 --> 00:05:32.399
+So let's see if we can make those feel a little softer.
+
+78
+00:05:32.459 --> 00:05:36.659
+This is a hero object that we're going to be inspecting very closely inside our Unreal
+
+79
+00:05:36.659 --> 00:05:38.339
+Engine application.
+
+80
+00:05:38.339 --> 00:05:43.459
+Now I do want to note that we have reimport mesh with dialog and this normally would be
+
+81
+00:05:43.459 --> 00:05:45.259
+a great way to do what we want to do.
+
+82
+00:05:45.259 --> 00:05:50.699
+It does not work in this case but fear not, we do have the ability to retesolate by right
+
+83
+00:05:50.699 --> 00:05:55.620
+clicking on the object here and choosing retesolate.
+
+84
+00:05:55.620 --> 00:06:01.299
+Now keeping an eye on this again, 3,640 we can start to bring these numbers down as we
+
+85
+00:06:01.319 --> 00:06:05.560
+saw in our previous examples if we want to bring the triangle count up.
+
+86
+00:06:05.560 --> 00:06:12.560
+So let's try .1 for chord tolerance and let's try making the normal tolerance 10 degrees
+
+87
+00:06:12.560 --> 00:06:13.560
+instead of 20.
+
+88
+00:06:13.560 --> 00:06:18.560
+We'll leave these options as they are, leave max edge length at zero and go ahead and hit
+
+89
+00:06:18.560 --> 00:06:20.319
+tessellate.
+
+90
+00:06:20.319 --> 00:06:21.319
+And there we go.
+
+91
+00:06:21.319 --> 00:06:27.840
+We see it goes up to 11,446 and now these are much softer edges.
+
+92
+00:06:27.859 --> 00:06:31.859
+We could continue to bring it up further if we wanted to and if we wanted to remove some
+
+93
+00:06:31.859 --> 00:06:38.859
+of those dark shadows for Nanite we could either disable Nanite or go ahead and uncheck
+
+94
+00:06:39.379 --> 00:06:41.819
+support ray tracing.
+
+95
+00:06:41.819 --> 00:06:46.819
+Lastly just to give you a little preview of some of the Datasmith CAD translator C-Vars
+
+96
+00:06:46.819 --> 00:06:50.779
+we have access to, there's quite a few of them and if you want to know about any of
+
+97
+00:06:50.779 --> 00:06:55.659
+these in particular you can just click on them and then just add a question mark to
+
+98
+00:06:55.660 --> 00:07:01.480
+the end and open that up in the output log, scroll down to the bottom here and we can
+
+99
+00:07:01.480 --> 00:07:05.640
+see there it says disable to use the CAD import library tessellator.
+
+100
+00:07:05.640 --> 00:07:10.080
+The default is that it's enabled so once again we could add zero to disable it.
+
+101
+00:07:10.080 --> 00:07:14.080
+In the next video we'll go even deeper into understanding triangle count.
+

@@ -1,0 +1,394 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.500
+We just finished looking at the groom component.
+
+2
+00:00:05.500 --> 00:00:11.599
+In this section, we will delve into the LOD sync component and then take a close look
+
+3
+00:00:11.599 --> 00:00:14.200
+at the metahuman component.
+
+4
+00:00:14.200 --> 00:00:22.039
+So let's jump into Unreal Engine and begin by exploring the LOD sync component.
+
+5
+00:00:22.039 --> 00:00:28.379
+Each of the components that make up a metahuman use different types of geometry and different
+
+6
+00:00:28.379 --> 00:00:31.719
+numbers of LODs.
+
+7
+00:00:31.719 --> 00:00:37.859
+If we look at the face skeletal mesh, the face and groom components will have up to
+
+8
+00:00:37.859 --> 00:00:41.500
+eight individual LODs.
+
+9
+00:00:41.500 --> 00:00:52.019
+If we set this to LOD 7, we can see a change in the grooms, the geometry, and skeleton.
+
+10
+00:00:52.020 --> 00:01:01.280
+Now if we take a look at the body skeletal mesh, over here we will have up to four LODs.
+
+11
+00:01:01.280 --> 00:01:07.680
+When we switch this to LOD 4, we can see a change in the skeletal mesh geometry and a
+
+12
+00:01:07.680 --> 00:01:12.680
+more simplified skeleton without correctives.
+
+13
+00:01:12.680 --> 00:01:16.560
+Now let's return to our metahuman blueprint.
+
+14
+00:01:16.560 --> 00:01:23.159
+Over here, the LOD sync component is what manages and synchronizes the LODs across all
+
+15
+00:01:23.159 --> 00:01:28.960
+of the different metahuman components so that they switch at the same time.
+
+16
+00:01:28.960 --> 00:01:34.780
+As we saw, the face and groom components have up to eight individual LODs.
+
+17
+00:01:34.780 --> 00:01:41.859
+The body, feet, legs, and torso have up to four individual LODs.
+
+18
+00:01:41.859 --> 00:01:47.599
+This means that for every two LOD quality changes on the face and grooms, there will
+
+19
+00:01:47.599 --> 00:01:53.200
+be one LOD quality change for the body, feet, legs, and torso.
+
+20
+00:01:53.200 --> 00:02:00.620
+In the details panel of the LOD sync component, the custom LOD mapping option is where you
+
+21
+00:02:00.620 --> 00:02:04.060
+can control how LODs switch.
+
+22
+00:02:04.060 --> 00:02:07.400
+We can see how this is set up for the body component.
+
+23
+00:02:07.400 --> 00:02:15.920
+For every two LOD quality changes, the body will switch from LOD 0 to LOD 1 and so on.
+
+24
+00:02:15.920 --> 00:02:22.700
+The number of LOD settings is where you can set the maximum number of LODs that are available.
+
+25
+00:02:22.700 --> 00:02:25.420
+By default, it will be set to eight.
+
+26
+00:02:25.420 --> 00:02:32.280
+The forced LOD setting is where we can set an LOD to be used by all metahuman components.
+
+27
+00:02:32.280 --> 00:02:35.400
+By default, this is set to negative one.
+
+28
+00:02:35.400 --> 00:02:41.200
+If for example we only want to use LOD 0, we would enter 0.
+
+29
+00:02:41.200 --> 00:02:45.560
+The minimum LOD setting is where you can set the minimum LOD.
+
+30
+00:02:45.560 --> 00:02:52.700
+So for example, if you set this for LOD 2 to be the minimum LOD when synchronizing components,
+
+31
+00:02:52.700 --> 00:02:56.599
+LOD 0 and 1 will be skipped.
+
+32
+00:02:56.599 --> 00:03:02.939
+Now before we move on, let's do a quick review of what we just covered.
+
+33
+00:03:02.939 --> 00:03:09.819
+The LOD sync component is responsible for managing and synchronizing the LODs across
+
+34
+00:03:09.819 --> 00:03:16.020
+the different metahuman blueprint components so that they switch at the same time.
+
+35
+00:03:16.020 --> 00:03:21.620
+As we just saw, the face and grooms have up to eight individual LODs.
+
+36
+00:03:21.620 --> 00:03:26.539
+The body, feet, legs, and torso have up to four.
+
+37
+00:03:26.539 --> 00:03:32.219
+We saw in the custom LOD mapping that for every two LOD quality changes on the face
+
+38
+00:03:32.219 --> 00:03:39.699
+and grooms, there is only one LOD quality change for the body, feet, legs, and torso.
+
+39
+00:03:39.699 --> 00:03:45.539
+In the LOD sync settings, you can set the maximum number of available LODs in the number
+
+40
+00:03:45.539 --> 00:03:47.659
+of LODs setting.
+
+41
+00:03:47.659 --> 00:03:50.360
+By default, this is set to eight.
+
+42
+00:03:50.360 --> 00:03:56.419
+You can also set an LOD to be used across all metahuman components with the forced LOD
+
+43
+00:03:56.419 --> 00:03:57.719
+setting.
+
+44
+00:03:57.719 --> 00:04:01.819
+And by default, this is set to negative one.
+
+45
+00:04:01.819 --> 00:04:10.620
+Now let's return to Unreal Engine and take a look at the metahuman component.
+
+46
+00:04:10.620 --> 00:04:15.620
+The metahuman component was added in engine version 5.4.
+
+47
+00:04:15.620 --> 00:04:21.180
+This allows us to turn on and off animation features for each LOD.
+
+48
+00:04:21.180 --> 00:04:27.019
+We can control at what LOD certain things are evaluated at, such as the body and neck
+
+49
+00:04:27.019 --> 00:04:35.500
+correctives, rig logic, procedurally running control rigs, and rigid body simulation.
+
+50
+00:04:35.500 --> 00:04:40.859
+In the body parts settings, which apply to the torso, legs, and feet, we can control
+
+51
+00:04:40.859 --> 00:04:47.779
+the maximum LOD level that the procedural control rig and rigid body simulation is applied
+
+52
+00:04:47.779 --> 00:04:51.060
+to the physics asset that has been assigned.
+
+53
+00:04:51.060 --> 00:04:56.979
+For example, for the control rig LOD threshold setting of the hoodie, if we set this to two,
+
+54
+00:04:57.939 --> 00:05:03.980
+physics simulation will only be enabled for LOD zero, one, and two on this body part with
+
+55
+00:05:03.980 --> 00:05:05.759
+control rig.
+
+56
+00:05:05.759 --> 00:05:11.340
+For the rigid body LOD threshold, we can control the maximum level to simulate the
+
+57
+00:05:11.340 --> 00:05:13.900
+rigid bodies of the hoodie.
+
+58
+00:05:13.900 --> 00:05:20.520
+If we were to set this to one, the hoodie will simulate for LOD zero and one.
+
+59
+00:05:20.520 --> 00:05:26.200
+Another thing we can do is to enable and disable body and neck correctives.
+
+60
+00:05:26.199 --> 00:05:31.839
+Enemies are responsible for preserving the volume of the skin, resulting in higher quality
+
+61
+00:05:31.839 --> 00:05:35.279
+animations and more believable movement.
+
+62
+00:05:35.279 --> 00:05:39.279
+However, this comes at the cost of performance.
+
+63
+00:05:39.279 --> 00:05:44.959
+By default, the body and neck correctives and the neck procedural control rig are only
+
+64
+00:05:44.959 --> 00:05:48.000
+applied at LOD zero.
+
+65
+00:05:48.000 --> 00:05:53.560
+If we disable the body and neck correctives, we will see a boost in performance at the
+
+66
+00:05:53.560 --> 00:05:55.659
+cost of quality.
+
+67
+00:05:55.660 --> 00:06:01.040
+For the neck corrective LOD threshold, we can control the maximum level where these
+
+68
+00:06:01.040 --> 00:06:03.900
+post drivers are evaluated.
+
+69
+00:06:03.900 --> 00:06:10.380
+We can also control the maximum level where the neck procedural control rig is evaluated.
+
+70
+00:06:10.380 --> 00:06:16.620
+For example, if we change that value to two, correctives will be evaluated for LOD zero,
+
+71
+00:06:16.620 --> 00:06:18.740
+one, and two.
+
+72
+00:06:18.740 --> 00:06:27.819
+The face animation LOD threshold controls the maximum LOD level where rig logic is evaluated.
+
+73
+00:06:27.819 --> 00:06:36.060
+If we change the threshold to two, rig logic will be evaluated at LOD zero, one, and two.
+
+74
+00:06:36.060 --> 00:06:42.180
+When this is set to negative one, rig logic will always be evaluated and will disable
+
+75
+00:06:42.180 --> 00:06:48.620
+LODing, which results in a boost in quality but lower performance.
+
+76
+00:06:48.620 --> 00:06:57.220
+Now let's do a quick review of the metahuman component before we move on.
+
+77
+00:06:57.220 --> 00:07:03.980
+The metahuman component allows us to enable and disable animation features for each LOD.
+
+78
+00:07:03.980 --> 00:07:11.579
+We can control the LOD level we want correctives, rig logic, procedurally running control rigs,
+
+79
+00:07:11.579 --> 00:07:15.899
+and rigid body simulation to be evaluated at.
+
+80
+00:07:15.899 --> 00:07:21.620
+When correctives are enabled, the volume of the skin is preserved during animation at
+
+81
+00:07:21.620 --> 00:07:24.259
+the expense of performance.
+
+82
+00:07:24.259 --> 00:07:29.979
+Disabling correctives will result in a boost in performance but at the cost of quality.
+
+83
+00:07:29.979 --> 00:07:35.620
+For clothing with physics properties such as the hoodie sweater, we can set the maximum
+
+84
+00:07:35.620 --> 00:07:42.659
+LOD level we want physics to be simulated for this asset using the rigid body LOD threshold
+
+85
+00:07:42.659 --> 00:07:44.479
+setting.
+
+86
+00:07:44.480 --> 00:07:51.360
+We can also set the maximum LOD we want physics to be simulated when used with control rig
+
+87
+00:07:51.360 --> 00:07:55.160
+by adjusting the control rig LOD threshold.
+
+88
+00:07:55.160 --> 00:08:04.120
+For example, if we set this to two, simulation will be enabled for LOD zero, one, and two.
+
+89
+00:08:04.120 --> 00:08:11.000
+The facial animation LOD threshold allows us to set the maximum LOD level for rig logic
+
+90
+00:08:11.000 --> 00:08:13.360
+to be evaluated.
+
+91
+00:08:13.360 --> 00:08:19.759
+Setting this to zero or one will mean that rig logic will only be evaluated at this LOD
+
+92
+00:08:19.759 --> 00:08:21.360
+level.
+
+93
+00:08:21.360 --> 00:08:27.680
+The LOD threshold for the neck correctives and neck procedural control rig controls the
+
+94
+00:08:27.680 --> 00:08:32.159
+maximum LOD at which correctives are evaluated.
+
+95
+00:08:32.159 --> 00:08:38.519
+Deactivating these or setting the LOD threshold to a lower value will result in a boost in
+
+96
+00:08:38.519 --> 00:08:42.480
+performance but at the expense of quality.
+
+97
+00:08:43.080 --> 00:08:50.279
+Now let's move on to uncover what role rig logic and the metahuman animation blueprints
+
+98
+00:08:50.279 --> 00:08:53.080
+have on quality and performance.
+

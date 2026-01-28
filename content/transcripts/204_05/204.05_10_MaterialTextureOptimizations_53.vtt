@@ -1,0 +1,758 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.839
+In this lesson, we're going to take a look at texture and material optimizations.
+
+2
+00:00:05.839 --> 00:00:07.000
+So let's get started.
+
+3
+00:00:07.000 --> 00:00:12.000
+So textures should be treated based on priority and the shot.
+
+4
+00:00:12.000 --> 00:00:15.839
+And that really goes for pretty much everything you put into Unreal.
+
+5
+00:00:15.839 --> 00:00:20.440
+You have to think of it as a real-time tool and not an offline renderer tool for those
+
+6
+00:00:20.440 --> 00:00:22.480
+that are working in film.
+
+7
+00:00:22.480 --> 00:00:28.080
+So your final pixel highest resolution textures should be used on Hero Objects.
+
+8
+00:00:28.079 --> 00:00:30.599
+This is the same rule that we have with games.
+
+9
+00:00:30.599 --> 00:00:33.079
+So for ICVFX, less is more.
+
+10
+00:00:33.079 --> 00:00:38.159
+For resolution to gain performance, and the highest is not always needed based on focus.
+
+11
+00:00:38.159 --> 00:00:44.519
+Basically, your actor is the focus and everything behind that actor, if it's directly behind
+
+12
+00:00:44.519 --> 00:00:46.480
+them, needs to have a higher resolution.
+
+13
+00:00:46.480 --> 00:00:49.359
+But if it's farther back, you can lower the resolution.
+
+14
+00:00:49.359 --> 00:00:50.840
+I'll give you an example.
+
+15
+00:00:50.840 --> 00:00:55.920
+If I had a mountain range and my texture for it was 8K, and it's in the way in the distance,
+
+16
+00:00:55.920 --> 00:00:57.119
+I don't need 8K.
+
+17
+00:00:57.119 --> 00:01:04.480
+I can lower that to an easy 4K or even 2K if I'm using fog to hide some of the missing
+
+18
+00:01:04.480 --> 00:01:05.479
+details.
+
+19
+00:01:05.479 --> 00:01:10.359
+So that's actually really helpful to consider and think of things on that level.
+
+20
+00:01:10.359 --> 00:01:15.319
+For large scenes that have lots of high resolution textures, say you have a terrain, and maybe
+
+21
+00:01:15.319 --> 00:01:21.000
+you're using virtual production, less of ICVFX, but more of a kind of maybe even a final pixel
+
+22
+00:01:21.000 --> 00:01:26.599
+scenario, you can use virtual texturing so that only the highest resolution of the texture
+
+23
+00:01:26.599 --> 00:01:31.799
+is loaded per where the camera and the focus series are at.
+
+24
+00:01:31.799 --> 00:01:34.559
+In Unreal, we also have mitmap control.
+
+25
+00:01:34.559 --> 00:01:38.879
+So if you run into problems with blurring or repeating patterns such as more, you can
+
+26
+00:01:38.879 --> 00:01:40.319
+actually adjust that.
+
+27
+00:01:40.319 --> 00:01:42.759
+Let me go ahead and take a look at that in Unreal.
+
+28
+00:01:42.759 --> 00:01:47.000
+It's a bit of a review, but hopefully it'll let you know or remind you where things are
+
+29
+00:01:47.000 --> 00:01:48.479
+located.
+
+30
+00:01:48.479 --> 00:01:52.959
+So let's go ahead and double click on this particular texture.
+
+31
+00:01:52.959 --> 00:01:55.159
+In this texture, let's go and zoom out a bit.
+
+32
+00:01:55.159 --> 00:02:00.439
+You'll see in the details for it that we have a mitgen settings.
+
+33
+00:02:00.439 --> 00:02:03.039
+This is where we can do some corrective work.
+
+34
+00:02:03.039 --> 00:02:07.119
+If we're noticing there's some blurring or a moray pattern happening.
+
+35
+00:02:07.119 --> 00:02:10.639
+We can also tell what texture group we want this object to be in.
+
+36
+00:02:10.639 --> 00:02:14.959
+This helps with a bit of compiling and maybe a little bit more centric for games for the
+
+37
+00:02:14.959 --> 00:02:15.959
+final packaging.
+
+38
+00:02:15.959 --> 00:02:20.519
+But for the most part, you can actually have Unreal kind of skip a step of picking through
+
+39
+00:02:20.520 --> 00:02:23.719
+your compiling of your object and knowing your intentions.
+
+40
+00:02:23.719 --> 00:02:27.540
+And if anything is dependent upon that can be a bit helpful.
+
+41
+00:02:27.540 --> 00:02:29.860
+So those are some things to consider.
+
+42
+00:02:29.860 --> 00:02:33.080
+Let's go back to the slides and look at a few more things.
+
+43
+00:02:33.080 --> 00:02:38.439
+Another tool that we have at our fingertips is a thing called edit via property matrix.
+
+44
+00:02:38.439 --> 00:02:42.719
+Now this property matrix makes it so that we can lock down resolution to a particular
+
+45
+00:02:42.719 --> 00:02:45.219
+type or I should say number.
+
+46
+00:02:45.219 --> 00:02:49.280
+If you're noticing that things are getting a little bit heavy into your scene, let's jump
+
+47
+00:02:49.319 --> 00:02:53.640
+into Unreal and I'll point out where those things are at.
+
+48
+00:02:53.640 --> 00:02:57.479
+So several of these textures will say are maybe a little bit too high.
+
+49
+00:02:57.479 --> 00:02:58.719
+I can go and select them.
+
+50
+00:02:58.719 --> 00:03:01.759
+We'll do shift and click here.
+
+51
+00:03:01.759 --> 00:03:05.240
+I'm going to right click in here and go to my asset actions.
+
+52
+00:03:05.240 --> 00:03:09.920
+And then I'm going to go to my edit selection in property matrix.
+
+53
+00:03:09.920 --> 00:03:13.920
+Once you open up the property matrix, you have access to many things.
+
+54
+00:03:13.920 --> 00:03:18.759
+One of them you can look at the texture overall and you can see, hey, you know, I want to
+
+55
+00:03:18.759 --> 00:03:22.719
+change the tiling method, kind of a little bit of a sweeping control there.
+
+56
+00:03:22.719 --> 00:03:26.519
+We even have importing settings here and we have adjustments.
+
+57
+00:03:26.519 --> 00:03:28.899
+You'll see there's a simple layout.
+
+58
+00:03:28.899 --> 00:03:34.239
+This is basically an expansion of the details that you get in the texture we were just in.
+
+59
+00:03:34.239 --> 00:03:41.079
+We also have compression here that we can control as well as LOD level of detail.
+
+60
+00:03:41.080 --> 00:03:51.200
+So if we open this up just a little bit more, you can see all these details.
+
+61
+00:03:51.200 --> 00:03:55.640
+You'll see right here a maximum texture size.
+
+62
+00:03:55.640 --> 00:04:01.020
+So we can lock that down and we can do it for as many as we need or have selected.
+
+63
+00:04:01.020 --> 00:04:04.560
+So that's actually pretty helpful for a bit of optimization.
+
+64
+00:04:04.560 --> 00:04:09.240
+So here are some notes for a bit more linear content leaning towards ICVFX.
+
+65
+00:04:09.240 --> 00:04:15.879
+If you're not using decals, make sure that you disable them in your project settings
+
+66
+00:04:15.879 --> 00:04:18.120
+because they do use a little bit of memory.
+
+67
+00:04:18.120 --> 00:04:21.220
+And don't use video elements as they cost.
+
+68
+00:04:21.220 --> 00:04:26.199
+Use flip books instead, animated through a material parameter or EXR.
+
+69
+00:04:26.199 --> 00:04:31.319
+So we have a fairly new system which has been updated for EXR where you can actually use
+
+70
+00:04:31.319 --> 00:04:37.199
+high resolution EXR images and put them on a plate, which is actually pretty great.
+
+71
+00:04:37.199 --> 00:04:40.680
+Both are good methods to have synchronized animated sequences.
+
+72
+00:04:40.680 --> 00:04:47.120
+So I recommend that if at all possible, especially if you're working with ICVFX because the video,
+
+73
+00:04:47.120 --> 00:04:54.360
+the latter is a bit more cumbersome to actually get going in that particular scenario.
+
+74
+00:04:54.360 --> 00:04:58.519
+For elements in the background, you can bake textures also, but check with production leads
+
+75
+00:04:58.519 --> 00:05:01.120
+to see if changes may be needed later.
+
+76
+00:05:01.120 --> 00:05:06.719
+It's not always used, but that's basically due to the on fly edits you get when you're
+
+77
+00:05:06.720 --> 00:05:07.720
+on stage.
+
+78
+00:05:07.720 --> 00:05:12.680
+Since going backwards is tricky, so make sure that you maybe keep the original copy with
+
+79
+00:05:12.680 --> 00:05:13.680
+you.
+
+80
+00:05:13.680 --> 00:05:18.200
+So this is up to you and best to make a copy of all items whenever possible.
+
+81
+00:05:18.200 --> 00:05:20.760
+And you'll see a bake within the material itself.
+
+82
+00:05:20.760 --> 00:05:24.200
+You can actually bake them automatically, those textures.
+
+83
+00:05:24.200 --> 00:05:27.640
+You can also use virtual texturing for large scenes for overhead.
+
+84
+00:05:27.640 --> 00:05:30.720
+Let me show you a little bit of that in just a second.
+
+85
+00:05:30.720 --> 00:05:34.840
+But also you can also pack RGB into UV channels.
+
+86
+00:05:34.839 --> 00:05:39.719
+We go over this in some of our foundational material classes, but that's pretty simple.
+
+87
+00:05:39.719 --> 00:05:44.239
+You actually will be making the texture have different channels and in it you can have
+
+88
+00:05:44.239 --> 00:05:47.279
+roughness, you can have an alpha.
+
+89
+00:05:47.279 --> 00:05:52.439
+The only problem with that is you have to think ahead of time of what you want.
+
+90
+00:05:52.439 --> 00:05:56.559
+So let's go and pop into Unreal real quick and I'll show you the virtual texturing a
+
+91
+00:05:56.559 --> 00:06:00.000
+bit of what you can do.
+
+92
+00:06:00.000 --> 00:06:01.799
+So let's go ahead and pick on this particular texture.
+
+93
+00:06:02.040 --> 00:06:06.040
+I'm going to go and get my magnifying glass here and say these three textures, I need
+
+94
+00:06:06.040 --> 00:06:11.439
+to make them be a bit more virtual texture friendly.
+
+95
+00:06:11.439 --> 00:06:15.080
+Now before you do that though, you don't want to make sure in your project settings that
+
+96
+00:06:15.080 --> 00:06:16.360
+you actually have it on.
+
+97
+00:06:16.360 --> 00:06:18.519
+I have it on, so I'm kind of cheating.
+
+98
+00:06:18.519 --> 00:06:24.439
+So let's go to a virtual texturing and you'll see that I have enabled my virtual texturing
+
+99
+00:06:24.439 --> 00:06:26.000
+support.
+
+100
+00:06:26.000 --> 00:06:27.000
+Really handy.
+
+101
+00:06:27.000 --> 00:06:31.000
+Now it's good to turn these on too, especially if you're having problems with your viewers
+
+102
+00:06:31.120 --> 00:06:32.240
+and they're not coming up.
+
+103
+00:06:32.240 --> 00:06:33.879
+They can support you a bit.
+
+104
+00:06:33.879 --> 00:06:38.879
+So virtual texturing is active and I'm going to go in here and now with these three selected
+
+105
+00:06:38.879 --> 00:06:43.439
+I can right click and I can convert these to virtual textures.
+
+106
+00:06:43.439 --> 00:06:48.399
+Now when you do, it's going to ask you what resolution you want and it's going to give
+
+107
+00:06:48.399 --> 00:06:49.399
+you a whole list.
+
+108
+00:06:49.399 --> 00:06:50.399
+This gets pretty tricky.
+
+109
+00:06:50.399 --> 00:06:55.399
+So you have to figure out what is the texture that you need and want and you need to find
+
+110
+00:06:55.399 --> 00:06:59.519
+it and that way if you don't want to do all of them, you have the option and you can
+
+111
+00:06:59.560 --> 00:07:02.439
+choose what that texture size threshold is going to be.
+
+112
+00:07:02.439 --> 00:07:07.799
+It's actually pretty handy to do this, especially for large worlds that you're dealing with.
+
+113
+00:07:07.799 --> 00:07:14.599
+And again, how virtual texturing works is it only renders what is needed and the highest
+
+114
+00:07:14.599 --> 00:07:18.759
+fidelity images based on the positioning of your camera.
+
+115
+00:07:18.759 --> 00:07:23.000
+So it's like virtual shadow maps, virtual texturing and even Nanite works like that,
+
+116
+00:07:23.000 --> 00:07:26.359
+but on a triangle basis.
+
+117
+00:07:26.360 --> 00:07:29.920
+Now we won't dive too much into this part, but I want to remind everyone about these
+
+118
+00:07:29.920 --> 00:07:35.360
+nodes, especially if you're working with ray tracing and it also works with path tracer,
+
+119
+00:07:35.360 --> 00:07:39.280
+where you can actually use a ray trace quality switch replace.
+
+120
+00:07:39.280 --> 00:07:45.199
+You can either do that or you can make a parameter, a switch parameter.
+
+121
+00:07:45.199 --> 00:07:49.960
+Now that switch parameter allows you to switch between a texture or a simple number that
+
+122
+00:07:49.960 --> 00:07:55.480
+you're using, but the quality switch replace when it comes to ray tracing does this for
+
+123
+00:07:55.560 --> 00:07:59.600
+you automatically based on where you're at in the scene.
+
+124
+00:07:59.600 --> 00:08:06.520
+And it just gives you that nice automatic switch between a high quality and a low quality
+
+125
+00:08:06.520 --> 00:08:12.920
+based on where you are at with your camera and your position in the world.
+
+126
+00:08:12.920 --> 00:08:16.520
+So again, here's the static switch parameter option.
+
+127
+00:08:16.520 --> 00:08:19.160
+And this basically is active.
+
+128
+00:08:19.160 --> 00:08:23.319
+Once you create an instance material, you'll be able to see this and you can turn it on
+
+129
+00:08:23.360 --> 00:08:30.360
+or off being able to have another scalar parameter in there to be able to control
+
+130
+00:08:30.360 --> 00:08:33.360
+things, the values of each one that is up to you.
+
+131
+00:08:33.360 --> 00:08:37.639
+This is covered in other classes, but I did want to put a reminder in here because this
+
+132
+00:08:37.639 --> 00:08:43.840
+is important to consider, especially if you feel that your texture resolution isn't always
+
+133
+00:08:43.840 --> 00:08:50.000
+needed in a particular area, such as rough or simple metallic, you can actually switch those.
+
+134
+00:08:53.360 --> 00:08:59.640
+So things to consider and really think about when you're being deterministic for your shots,
+
+135
+00:08:59.640 --> 00:09:02.240
+specifically for IC VFX.
+
+136
+00:09:02.240 --> 00:09:05.240
+So your parent materials need to be used with instances.
+
+137
+00:09:05.240 --> 00:09:09.879
+This is really important because then you're actually not recompiling that material over
+
+138
+00:09:09.879 --> 00:09:14.920
+and over again, and you can make an instant change with that instance material.
+
+139
+00:09:14.920 --> 00:09:18.520
+Kind of a lot of instances in that almost got a tongue twister there.
+
+140
+00:09:18.559 --> 00:09:24.240
+So we have also you want to make sure you use material functions as much as possible.
+
+141
+00:09:24.240 --> 00:09:28.799
+So these will make it so you don't have a noodle fest, make things cleaner and allow
+
+142
+00:09:28.799 --> 00:09:30.360
+you to get where you need to go.
+
+143
+00:09:30.360 --> 00:09:36.559
+And you can connect your instances to these and so forth and just make things a lot easier
+
+144
+00:09:36.559 --> 00:09:38.559
+overall.
+
+145
+00:09:38.559 --> 00:09:41.559
+You also can use material layers.
+
+146
+00:09:41.559 --> 00:09:42.759
+It's up to you.
+
+147
+00:09:42.759 --> 00:09:45.639
+I don't recommend using substrate at this time.
+
+148
+00:09:45.679 --> 00:09:49.840
+We do put a warning on that because it is still in beta.
+
+149
+00:09:49.840 --> 00:09:51.840
+It's not ready for prime time.
+
+150
+00:09:51.840 --> 00:09:55.879
+Also, when you go to substrate, you can't go back to regular materials.
+
+151
+00:09:55.879 --> 00:09:57.759
+So it's kind of an all or nothing.
+
+152
+00:09:57.759 --> 00:10:03.039
+But you can use your material layers in this particular case with Unreal default.
+
+153
+00:10:03.039 --> 00:10:06.840
+And I didn't want to make that mention though for substrate because substrate gives you some
+
+154
+00:10:06.840 --> 00:10:10.960
+options in there for that to keep things a little bit cleaner when it comes to layers.
+
+155
+00:10:10.960 --> 00:10:14.120
+And I didn't want you to get too excited looking at material layers.
+
+156
+00:10:14.120 --> 00:10:19.679
+Try to stay within old school at this time with 5.3 and a couple of versions coming up.
+
+157
+00:10:19.679 --> 00:10:21.360
+But substrates almost there.
+
+158
+00:10:21.360 --> 00:10:22.720
+Not quite there yet.
+
+159
+00:10:22.720 --> 00:10:24.759
+The goal is for better real time performance.
+
+160
+00:10:24.759 --> 00:10:26.159
+You have to think of it this way.
+
+161
+00:10:26.159 --> 00:10:31.000
+What is the best performance you can get for that camera for ICVFX and your hero objects
+
+162
+00:10:31.000 --> 00:10:32.600
+are the priority.
+
+163
+00:10:32.600 --> 00:10:37.960
+You can bake textures if you want, but keep in mind, you can't actually make those changes
+
+164
+00:10:37.960 --> 00:10:39.279
+once you've baked.
+
+165
+00:10:39.279 --> 00:10:43.720
+So you might want to make sure if you are going to bake that you at least have the originals
+
+166
+00:10:43.720 --> 00:10:48.960
+nearby so that if the director does change his mind, you can quickly switch them out.
+
+167
+00:10:48.960 --> 00:10:52.840
+Keep higher textures and material complexity limited to hero objects like we mentioned
+
+168
+00:10:52.840 --> 00:10:57.759
+before and use material parameter collections to help simplify material control, which we
+
+169
+00:10:57.759 --> 00:11:01.320
+cover in some of our material classes.
+
+170
+00:11:01.320 --> 00:11:04.519
+Final pixel parent materials need to be used with instances.
+
+171
+00:11:04.519 --> 00:11:05.680
+Very important.
+
+172
+00:11:05.680 --> 00:11:08.160
+Less worry with frame rate on less editing.
+
+173
+00:11:08.160 --> 00:11:09.840
+So you're not worried about frame rate so much.
+
+174
+00:11:09.840 --> 00:11:12.639
+You're looking for the final results.
+
+175
+00:11:12.639 --> 00:11:18.680
+But again, looking for better final results requires that you also do keep in mind the
+
+176
+00:11:18.680 --> 00:11:20.720
+concept of hero objects.
+
+177
+00:11:20.720 --> 00:11:24.920
+Again higher textures for hero objects as we said before, use material functions to group
+
+178
+00:11:24.920 --> 00:11:28.120
+common features together and can use material layers.
+
+179
+00:11:28.120 --> 00:11:32.440
+Again, this is a new system and you can use it when necessary.
+
+180
+00:11:32.440 --> 00:11:38.600
+Use material parameter collections to help simplify material control.
+
+181
+00:11:38.600 --> 00:11:42.680
+Here's a few links that will help you get in the right direction.
+
+182
+00:11:42.680 --> 00:11:47.360
+And if you want to dive in deeper, here's a few more additional resources and a link
+
+183
+00:11:47.360 --> 00:11:49.200
+for game optimization.
+
+184
+00:11:49.200 --> 00:11:54.759
+If you want to dive in there, some more resources here for optimization and some credits here
+
+185
+00:11:54.759 --> 00:11:58.920
+of some of the people that I've worked with to pull this all together.
+
+186
+00:11:58.920 --> 00:11:59.920
+That's it with this one.
+
+187
+00:11:59.920 --> 00:12:02.040
+I hope you enjoyed this series of courses.
+
+188
+00:12:02.040 --> 00:12:05.920
+In the next video, we're going to do a recap of everything we've talked about.
+
+189
+00:12:05.920 --> 00:12:06.240
+Thanks again.
+

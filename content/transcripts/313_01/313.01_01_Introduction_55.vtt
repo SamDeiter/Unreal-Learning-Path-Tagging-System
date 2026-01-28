@@ -1,0 +1,218 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.960
+Hello and welcome to Metahuman DNA Calibration and Finalization.
+
+2
+00:00:06.960 --> 00:00:12.099
+My name is Gabriela Cresenio-Tacas and I will be your host for this course.
+
+3
+00:00:12.099 --> 00:00:17.879
+This course is a continuation of the Metahuman Fitting and DNA Calibration course.
+
+4
+00:00:17.879 --> 00:00:24.240
+We will delve into more advanced use case scenarios for using the DNA Calibration library
+
+5
+00:00:24.240 --> 00:00:29.879
+to modify the Metahuman Neutral Pose and explore workflows for integrating it with
+
+6
+00:00:29.879 --> 00:00:32.079
+a custom Metahuman body.
+
+7
+00:00:32.079 --> 00:00:38.640
+We will also dive into best practices for finalizing Metahuman customizations in Unreal Engine.
+
+8
+00:00:38.640 --> 00:00:44.479
+It is worth mentioning that with newer engine versions some of these workflows have changed
+
+9
+00:00:44.479 --> 00:00:48.159
+and we will explore the new workflows in a future update.
+
+10
+00:00:48.159 --> 00:00:54.120
+Now let's take a look at what we will be covering in this course.
+
+11
+00:00:54.120 --> 00:00:59.239
+We will get started by touching upon advanced use cases where DNA calibration has been
+
+12
+00:00:59.240 --> 00:01:03.679
+used to make changes to the Metahuman head and body.
+
+13
+00:01:03.679 --> 00:01:11.120
+One case is the 2023 Unreal Fest DNA Calibration deep dive and the other is how the stylized
+
+14
+00:01:11.120 --> 00:01:18.359
+character Atomic Savage was customized with multiple workflows using DNA calibration.
+
+15
+00:01:18.359 --> 00:01:23.560
+We will then look at all of the steps that were taken to customize Atomic Savage from
+
+16
+00:01:23.560 --> 00:01:27.120
+the initial concept to the finalized rig.
+
+17
+00:01:27.120 --> 00:01:32.240
+From there I will break down some of the workflows in greater detail and walk you through how
+
+18
+00:01:32.240 --> 00:01:35.719
+you might apply these workflows to your own characters.
+
+19
+00:01:35.719 --> 00:01:41.760
+The first workflow we will delve into includes a modified version of the Unreal Fest Calibration
+
+20
+00:01:41.760 --> 00:01:42.960
+script.
+
+21
+00:01:42.960 --> 00:01:48.560
+We will go over how to edit the Metahuman Neutral Pose by transferring the details from the
+
+22
+00:01:48.560 --> 00:01:54.159
+fitted head geometry assets that we looked at in the previous course to a Metahuman
+
+23
+00:01:54.159 --> 00:01:59.119
+identity and then save those changes to the Metahuman DNA file.
+
+24
+00:01:59.119 --> 00:02:03.920
+For the second workflow we will go over how we can merge the modified Metahuman Neutral
+
+25
+00:02:03.920 --> 00:02:09.319
+Pose with a custom Metahuman body for seamless integration.
+
+26
+00:02:09.319 --> 00:02:14.439
+From there we will go through all of the steps for bringing the customized assets back into
+
+27
+00:02:14.439 --> 00:02:17.859
+Unreal Engine with a hands-on exercise.
+
+28
+00:02:17.860 --> 00:02:25.100
+We will go over how to re-import the head-LOD-FBX files, update the Metahuman DNA file and the
+
+29
+00:02:25.100 --> 00:02:30.900
+Metahuman Blueprint, and then we will look at how to import and assign a custom Metahuman
+
+30
+00:02:30.900 --> 00:02:33.180
+body skeletal mesh.
+
+31
+00:02:33.180 --> 00:02:37.780
+We will then wrap up this course with some final recommendations and I will share some
+
+32
+00:02:37.780 --> 00:02:45.480
+tips and resources for you to use as you continue your training with Metahumans.
+
+33
+00:02:45.479 --> 00:02:54.459
+This course will be using the project MEH9130055 and the level map should load automatically.
+
+34
+00:02:54.459 --> 00:03:03.759
+The map is located in the content browser under the courses folder labeled MEH31301.
+
+35
+00:03:03.759 --> 00:03:12.399
+In the course maps folder and it is named MEH31301MAPEX for example.
+
+36
+00:03:12.400 --> 00:03:17.520
+This map contains the non-modified version of the atomic savage character and we will
+
+37
+00:03:17.520 --> 00:03:22.400
+be using this map to configure all of the customizations we will be bringing into the
+
+38
+00:03:22.400 --> 00:03:25.759
+engine for the hands-on portion of our course.
+
+39
+00:03:25.759 --> 00:03:30.580
+If you want to inspect the fully assembled version of this character, that is located
+
+40
+00:03:30.580 --> 00:03:42.120
+under the course folder named MEH21302 in the course maps folder and it is named MEH21302MAPC
+
+41
+00:03:42.120 --> 00:03:43.840
+for customized.
+
+42
+00:03:43.840 --> 00:03:48.439
+Now all of the scripts and assets we will be using throughout this course are located
+
+43
+00:03:48.439 --> 00:03:55.400
+in the source files folder of our course named 31301DNACalibAssets.
+
+44
+00:03:55.400 --> 00:04:00.680
+Inside of that folder you will find two scripts and their associated assets and in the folder
+
+45
+00:04:00.680 --> 00:04:06.319
+named POSEDRIVERCONNECT you will find the RBF solvers that we will bring into the engine
+
+46
+00:04:06.319 --> 00:04:08.879
+later on.
+
+47
+00:04:08.879 --> 00:04:13.560
+If you need to reference the location of the course map that can be found at the beginning
+
+48
+00:04:13.560 --> 00:04:17.000
+of the slide deck after the training outline.
+
+49
+00:04:17.000 --> 00:04:21.620
+Now as we go through this course you will find that many slides in this presentation
+
+50
+00:04:21.620 --> 00:04:27.000
+contain a lot of information and I will summarize all of that for you but if at any point you
+
+51
+00:04:27.000 --> 00:04:32.079
+want to read what is on each of those slides feel free to pause and dive right in.
+
+52
+00:04:32.079 --> 00:04:37.000
+Now let's get started with the first portion of this course where we look at some advanced
+
+53
+00:04:37.000 --> 00:04:44.160
+use case scenarios for making changes to the metahuman face and body using the DNA calibration
+
+54
+00:04:44.160 --> 00:04:44.959
+library.
+

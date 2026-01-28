@@ -1,0 +1,1238 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.799
+In this lesson, we're going to take a look at optimization visualizers.
+
+2
+00:00:04.799 --> 00:00:06.600
+So let's get started.
+
+3
+00:00:06.600 --> 00:00:10.679
+So using the visualizers can help you analyze your scene and
+
+4
+00:00:10.679 --> 00:00:12.759
+kind of see what's going on under the hood.
+
+5
+00:00:12.759 --> 00:00:17.320
+Now the optimization view modes you'll see here as the pull down here under lit,
+
+6
+00:00:17.320 --> 00:00:19.160
+and you'll see optimization view modes.
+
+7
+00:00:19.160 --> 00:00:22.199
+There's a lot of these that have to reference not all of it,
+
+8
+00:00:22.199 --> 00:00:26.320
+but some of it has to reference when it comes to old school baking.
+
+9
+00:00:26.320 --> 00:00:31.359
+And that in particular is such things as stationary light overlap.
+
+10
+00:00:31.359 --> 00:00:34.320
+When it comes to aluminum, you don't really have to worry about that.
+
+11
+00:00:34.320 --> 00:00:37.759
+And light map density is a bit more on the baking side also.
+
+12
+00:00:37.759 --> 00:00:39.920
+But you do want to look at your light complexity.
+
+13
+00:00:39.920 --> 00:00:43.159
+You do want to look at your shader complexity and quads too.
+
+14
+00:00:43.159 --> 00:00:46.879
+Because that's very important to see how dense your geometry is and
+
+15
+00:00:46.879 --> 00:00:50.920
+how complex your shaders are, which may be giving you a bit of a slow down when
+
+16
+00:00:50.920 --> 00:00:52.679
+it comes to your scene.
+
+17
+00:00:52.679 --> 00:00:54.480
+Now I'll walk you through a little bit of these.
+
+18
+00:00:54.479 --> 00:00:57.279
+This is a bit of review if you've taken the lighting courses.
+
+19
+00:00:57.279 --> 00:01:00.519
+But I'm definitely going to point out some things you do need to consider.
+
+20
+00:01:00.519 --> 00:01:04.519
+So you'll see that there's light complexity for debugging dynamic light overlap.
+
+21
+00:01:04.519 --> 00:01:08.840
+There is light map density, which we'll talk briefly about that if you are using
+
+22
+00:01:08.840 --> 00:01:09.879
+the baking route.
+
+23
+00:01:09.879 --> 00:01:12.079
+I do recommend you try to find your home or
+
+24
+00:01:12.079 --> 00:01:15.840
+try to find your workflows a little bit more towards aluminum.
+
+25
+00:01:15.840 --> 00:01:19.159
+The baking is great, but there are some limitations for realism.
+
+26
+00:01:19.159 --> 00:01:23.280
+But on the flip side on aluminum, there are moments where noise is still persistent.
+
+27
+00:01:23.280 --> 00:01:26.000
+And it is evolving and getting better, stronger, faster.
+
+28
+00:01:27.519 --> 00:01:30.680
+So let's go ahead and jump into Unreal.
+
+29
+00:01:30.680 --> 00:01:33.920
+And again, you'll have stationary overlap, shader complexity and
+
+30
+00:01:33.920 --> 00:01:36.120
+shader complexity quads and quad overdraw.
+
+31
+00:01:36.120 --> 00:01:38.320
+I'm going to look at these with you and
+
+32
+00:01:38.320 --> 00:01:42.400
+point out things to be considered when it comes to baking versus just using Lumen.
+
+33
+00:01:42.400 --> 00:01:43.079
+So let's go and do that.
+
+34
+00:01:45.960 --> 00:01:48.359
+So in our scene here, we have lit and
+
+35
+00:01:48.359 --> 00:01:51.040
+then we have our optimization view modes.
+
+36
+00:01:51.040 --> 00:01:53.600
+We can look first up at our light complexity.
+
+37
+00:01:53.600 --> 00:01:57.200
+Now again, this leans a little bit more towards baking because pretty much when
+
+38
+00:01:57.200 --> 00:01:59.200
+you're in Lumen, all your lights are movable.
+
+39
+00:01:59.200 --> 00:02:03.280
+If I click on this light here, I want to make sure that it is movable in my scene.
+
+40
+00:02:03.280 --> 00:02:07.840
+This will allow me in my scene to be able to actually adjust my lighting on the fly.
+
+41
+00:02:07.840 --> 00:02:09.680
+And things will react wonderfully.
+
+42
+00:02:09.680 --> 00:02:15.080
+This is great for ICV effects and visual effects when it comes to virtual production.
+
+43
+00:02:15.080 --> 00:02:17.200
+Because you can actually get some updates on the fly and
+
+44
+00:02:17.200 --> 00:02:19.200
+show it to your directors and so forth.
+
+45
+00:02:19.199 --> 00:02:22.519
+And also pretty handy when it comes to games because then you don't have to worry
+
+46
+00:02:22.519 --> 00:02:24.159
+about baking out everything.
+
+47
+00:02:24.159 --> 00:02:25.359
+So just keep that in mind.
+
+48
+00:02:25.359 --> 00:02:30.000
+So that one's kind of a little bit more, you know your lights are complex because
+
+49
+00:02:30.000 --> 00:02:33.959
+you know they're all movable, which is the highest one to work with.
+
+50
+00:02:33.959 --> 00:02:37.839
+And the mesh distance field is on, so it's going to be a bit high already.
+
+51
+00:02:37.839 --> 00:02:41.399
+And again, light map density also has to do with baking.
+
+52
+00:02:41.399 --> 00:02:44.799
+So we still have kept it in there because we still have studios that choose to use
+
+53
+00:02:44.799 --> 00:02:48.919
+that for the case that maybe they have a lot of complicated materials.
+
+54
+00:02:48.919 --> 00:02:51.079
+And there seems to be a lot of noise coming through.
+
+55
+00:02:51.079 --> 00:02:55.000
+They actually want to be able to bake still because Lumen still has a little
+
+56
+00:02:55.000 --> 00:02:59.759
+bit of issue with that because when it comes to your, when it comes to like
+
+57
+00:02:59.759 --> 00:03:03.719
+things with high rough and so forth, it's borrowing some of the technology from
+
+58
+00:03:03.719 --> 00:03:07.799
+ray tracing, but there will be areas, maybe some shadow areas that maybe get a little
+
+59
+00:03:07.799 --> 00:03:10.479
+bit of noise and you can adjust those.
+
+60
+00:03:10.479 --> 00:03:14.439
+And we talk a bit about that in our foundation intro to lighting class.
+
+61
+00:03:14.439 --> 00:03:15.639
+We talk about Lumen.
+
+62
+00:03:15.639 --> 00:03:17.599
+So this is the light map density.
+
+63
+00:03:17.599 --> 00:03:21.280
+Now note itself, you'll notice it will pop up here.
+
+64
+00:03:21.280 --> 00:03:26.639
+You'll notice that there's a higher resolution on the ground versus the wall.
+
+65
+00:03:26.639 --> 00:03:30.799
+Now, if you were to use baking, I'm going to let you know you need to make sure that
+
+66
+00:03:30.799 --> 00:03:36.079
+both of these are close in ballpark when it comes to your resolution.
+
+67
+00:03:36.079 --> 00:03:40.079
+Now these are pretty different when it comes to Lumen and that's okay because
+
+68
+00:03:40.079 --> 00:03:40.759
+we're not baking.
+
+69
+00:03:40.759 --> 00:03:42.120
+We're using Lumen on the fly.
+
+70
+00:03:42.120 --> 00:03:46.240
+It's giving us our updated shadows and using virtual shadow maps versus light
+
+71
+00:03:46.240 --> 00:03:47.680
+making information.
+
+72
+00:03:47.680 --> 00:03:54.560
+But if we were baking, we would want this to maybe be a little bit higher or the
+
+73
+00:03:54.560 --> 00:03:56.159
+ground to be a little bit lesser.
+
+74
+00:03:56.159 --> 00:04:00.320
+And that what that prevents is you may get some blobby shadows if you don't.
+
+75
+00:04:00.320 --> 00:04:04.240
+So in our case, we're doing just fine because we're using Lumen, but
+
+76
+00:04:04.240 --> 00:04:07.680
+just note to self if you were to use baking, that may be an issue.
+
+77
+00:04:07.680 --> 00:04:09.160
+So just be careful of that.
+
+78
+00:04:09.160 --> 00:04:12.480
+Also, we have stationary light overlap here.
+
+79
+00:04:12.480 --> 00:04:15.480
+This will tell you if any stationary lights are near, we have none because
+
+80
+00:04:15.479 --> 00:04:18.199
+everything's movable, so it doesn't apply to us.
+
+81
+00:04:18.199 --> 00:04:20.639
+In our particular case, there's shader complexity.
+
+82
+00:04:20.639 --> 00:04:25.800
+Now this one's always important to analyze because we can see that our land is
+
+83
+00:04:25.800 --> 00:04:27.800
+very complex.
+
+84
+00:04:27.800 --> 00:04:29.120
+Is it in the danger zone?
+
+85
+00:04:29.120 --> 00:04:34.519
+It's kind of in the medium, just something to keep in mind that that is complex.
+
+86
+00:04:34.519 --> 00:04:42.079
+So, but you'll see the terrain and the plant and even our alien probe here.
+
+87
+00:04:42.120 --> 00:04:46.680
+All these are at a relatively decent usability.
+
+88
+00:04:46.680 --> 00:04:49.560
+They're not going to burden us too much.
+
+89
+00:04:49.560 --> 00:04:51.359
+So we have shader complexity in quads.
+
+90
+00:04:51.359 --> 00:04:56.120
+This will tell you what your shader complexity is plus if there's high levels
+
+91
+00:04:56.120 --> 00:04:57.159
+of geometry.
+
+92
+00:04:57.159 --> 00:05:00.719
+We'll see that these orbs are pretty dense.
+
+93
+00:05:00.719 --> 00:05:03.159
+So the ones in the back room can be less.
+
+94
+00:05:03.159 --> 00:05:07.399
+Some of the looks one right here, he looks pretty, pretty thick.
+
+95
+00:05:07.399 --> 00:05:09.159
+So we definitely can optimize that.
+
+96
+00:05:09.200 --> 00:05:13.080
+So this scene is available for you to play with as we talk about some of these tools.
+
+97
+00:05:13.080 --> 00:05:17.320
+And we'll talk about geometry when it comes to merging and how you can actually make
+
+98
+00:05:17.320 --> 00:05:21.960
+these a bit lighter and make it so that they still sell and fool the audience.
+
+99
+00:05:21.960 --> 00:05:23.600
+And that's kind of what's important.
+
+100
+00:05:23.600 --> 00:05:27.280
+You want to smoke and mirrors people even in games and film.
+
+101
+00:05:27.280 --> 00:05:34.040
+You want people to believe that your scene is doing what it's intended and none is the
+
+102
+00:05:34.040 --> 00:05:36.560
+wiser that you're actually fooling the audience.
+
+103
+00:05:36.560 --> 00:05:38.200
+So we'll talk about that later.
+
+104
+00:05:38.199 --> 00:05:43.039
+We have quad overdraw overall tells you where the dense meshes are at in here.
+
+105
+00:05:43.039 --> 00:05:47.279
+And there's a good amount on these orbs, but you'll notice the ones up above are a lot cleaner.
+
+106
+00:05:47.279 --> 00:05:51.480
+These I merged and made a lower levels of detail.
+
+107
+00:05:51.480 --> 00:05:54.519
+Now see it's a proxy and that actually is better.
+
+108
+00:05:54.519 --> 00:05:57.240
+And no one new knows that until I pointed out.
+
+109
+00:05:59.120 --> 00:05:59.839
+Cool.
+
+110
+00:05:59.839 --> 00:06:00.079
+All right.
+
+111
+00:06:00.079 --> 00:06:02.919
+So there's a few other things here you see texture streaming accuracy.
+
+112
+00:06:02.919 --> 00:06:07.480
+You can check for these primitive distance mesh UV density, material,
+
+113
+00:06:07.480 --> 00:06:08.360
+texture scales.
+
+114
+00:06:08.360 --> 00:06:13.759
+You can actually use these tools also to check for your even also your virtual
+
+115
+00:06:13.759 --> 00:06:15.200
+texture pending MIPS.
+
+116
+00:06:15.200 --> 00:06:19.319
+We don't go over to this too much in this particular class, but these are also things
+
+117
+00:06:19.319 --> 00:06:21.319
+you can use for streaming accuracy.
+
+118
+00:06:21.319 --> 00:06:25.160
+We will talk about getting virtual textures up and running here in just a bit.
+
+119
+00:06:25.160 --> 00:06:27.920
+But again, these can also be used to check a few things.
+
+120
+00:06:27.920 --> 00:06:31.720
+But for the most part, I'm going to show you that workflow working with virtual
+
+121
+00:06:31.720 --> 00:06:33.200
+texturing and things to look out for them.
+
+122
+00:06:34.199 --> 00:06:36.159
+So I'm going to go to lit mode here.
+
+123
+00:06:36.159 --> 00:06:36.920
+Cool.
+
+124
+00:06:36.920 --> 00:06:39.800
+So let's go ahead and get back to the slides.
+
+125
+00:06:39.800 --> 00:06:42.399
+So quad overdraw best practices.
+
+126
+00:06:42.399 --> 00:06:46.199
+Use the quad overdraw viewport mode to profile the scene.
+
+127
+00:06:46.199 --> 00:06:52.919
+Any green or worse should be avoided to keep costs low.
+
+128
+00:06:52.919 --> 00:06:53.919
+So blue is ideal.
+
+129
+00:06:53.919 --> 00:06:58.399
+So if you get like this really dense green, that's not so great or is this solid?
+
+130
+00:06:58.399 --> 00:06:59.560
+That's what made my worse.
+
+131
+00:07:00.560 --> 00:07:05.519
+You know that it's a really dense geometry and you probably could lower it.
+
+132
+00:07:05.519 --> 00:07:07.959
+Now, again, this depends on the output.
+
+133
+00:07:07.959 --> 00:07:08.959
+Where are you going?
+
+134
+00:07:08.959 --> 00:07:10.560
+Are you working in games or you're working in film?
+
+135
+00:07:10.560 --> 00:07:15.040
+If you're working in film and it's just virtual production, you want some final
+
+136
+00:07:15.040 --> 00:07:17.639
+pixel work done, you may not have to worry about that.
+
+137
+00:07:17.639 --> 00:07:21.399
+But if you're going to the LED volume wall, you want to go ahead and think about
+
+138
+00:07:21.399 --> 00:07:25.079
+how you're going to maintain that because you want to make sure that you don't
+
+139
+00:07:25.079 --> 00:07:29.079
+have too heavy of geometry as your cameras moving around because you have to take
+
+140
+00:07:29.079 --> 00:07:33.079
+an account to draw calls not only on the geometry, but also on your material.
+
+141
+00:07:33.079 --> 00:07:40.599
+If a mount only fills 100 PX by 100 PX on an LED wall, then that mountain doesn't
+
+142
+00:07:40.599 --> 00:07:43.800
+need to consist of 2 million triangles.
+
+143
+00:07:43.800 --> 00:07:46.799
+You can even have a facade.
+
+144
+00:07:46.799 --> 00:07:49.360
+You can have it so that's on a card if you needed to.
+
+145
+00:07:49.360 --> 00:07:52.759
+The same optimization practices apply for textures.
+
+146
+00:07:52.759 --> 00:07:57.959
+The GPU might not load an 8K texture until it's in the camera's direct view.
+
+147
+00:07:57.959 --> 00:08:00.839
+So you have to determine where that direct view is.
+
+148
+00:08:00.839 --> 00:08:05.439
+And if you do need a full piece of geometry, you may even have hollowed out geometry,
+
+149
+00:08:05.439 --> 00:08:08.839
+a card which is bent, but there's an alpha on top of it.
+
+150
+00:08:08.839 --> 00:08:11.439
+We used to use that trick all the time for plants.
+
+151
+00:08:11.439 --> 00:08:17.240
+Just bend that card, have some vertices and edges to be able to manipulate it.
+
+152
+00:08:17.240 --> 00:08:20.639
+So now the plant looks like it's more robust than it actually is.
+
+153
+00:08:20.639 --> 00:08:25.639
+It's just bending a card and adding more systems to it or more divisions to it.
+
+154
+00:08:26.639 --> 00:08:34.639
+Best practices avoid too much translucency, especially large translucent areas and overlapping translucency.
+
+155
+00:08:34.639 --> 00:08:36.639
+So just be careful with that.
+
+156
+00:08:36.639 --> 00:08:42.639
+Use masked materials instead of translucent when possible due to the lower performance
+
+157
+00:08:42.639 --> 00:08:47.639
+cost and avoid dense meshes built for your screen size.
+
+158
+00:08:47.639 --> 00:08:51.639
+So again, like I said before, build to your shot.
+
+159
+00:08:52.639 --> 00:08:54.639
+So quick notes.
+
+160
+00:08:54.639 --> 00:09:00.639
+Buffer overview can give you a quick visual rundown of the different G buffers being rendered.
+
+161
+00:09:00.639 --> 00:09:03.639
+Let's go and take a look at that really quick in Unreal.
+
+162
+00:09:05.639 --> 00:09:10.639
+All right, so if we go to lit again and I go into here and look at buffer visualization,
+
+163
+00:09:10.639 --> 00:09:12.639
+you can look at the overview.
+
+164
+00:09:12.639 --> 00:09:17.639
+And this kind of gives us an overall view of our scene showing our subsurface colors,
+
+165
+00:09:17.639 --> 00:09:26.639
+specular base, world normal, separate translucency, RGB, what does our opacity look like?
+
+166
+00:09:26.639 --> 00:09:28.639
+What does our shading model looks like?
+
+167
+00:09:28.639 --> 00:09:29.639
+Metallic.
+
+168
+00:09:29.639 --> 00:09:34.639
+And it's really nice to get a quick rundown of everything in your scene.
+
+169
+00:09:34.639 --> 00:09:40.639
+Since we're in Lumen, let's take a brief look at Lumen visualizers, nanite and virtual shadow maps.
+
+170
+00:09:40.639 --> 00:09:43.639
+Now we've did this for some of our foundational classes.
+
+171
+00:09:43.639 --> 00:09:50.639
+When it comes to lighting, introduction to lighting, and we jump into that in some of our other lighting classes going forward.
+
+172
+00:09:50.639 --> 00:09:54.639
+But I'm going to walk you through a little bit of this so you can understand how this actually works.
+
+173
+00:09:54.639 --> 00:09:58.639
+So in our scene, let's go back to Unreal.
+
+174
+00:09:58.639 --> 00:10:03.639
+We're going to go ahead and go to lit and we're going to go to nanite visualization.
+
+175
+00:10:03.639 --> 00:10:08.639
+Now if I do an overview, you'll notice we don't have anything to look at.
+
+176
+00:10:08.639 --> 00:10:10.639
+But let's go and turn that off for a second.
+
+177
+00:10:10.639 --> 00:10:19.639
+And let's actually convert some of these to nanite because nanite works really well when it comes to using Lumen and virtual shadow maps.
+
+178
+00:10:19.639 --> 00:10:22.639
+So making things nanite is not a bad idea.
+
+179
+00:10:22.639 --> 00:10:24.639
+We have a piece of geometry up front here.
+
+180
+00:10:24.639 --> 00:10:26.639
+Let's actually find where he's at.
+
+181
+00:10:26.639 --> 00:10:32.639
+And let's actually right click on this particular piece of geometry and go to nanite and turn that on.
+
+182
+00:10:33.639 --> 00:10:38.639
+So when we turn that on, we can also pick on this guy, find where he's at.
+
+183
+00:10:38.639 --> 00:10:39.639
+I think it's pretty much the same one.
+
+184
+00:10:39.639 --> 00:10:40.639
+Yep, it is.
+
+185
+00:10:40.639 --> 00:10:47.639
+So let's go and grab this piece of geometry here and convert that to a nanite object.
+
+186
+00:10:47.639 --> 00:10:48.639
+Right click.
+
+187
+00:10:48.639 --> 00:10:50.639
+And it's really that easy to turn on nanite.
+
+188
+00:10:50.639 --> 00:10:58.639
+Now there's a few hoops and other versions of Unreal, but in this particular version of Unreal, it's pretty straightforward.
+
+189
+00:10:58.639 --> 00:11:00.639
+Now for some reason you're not sure it's nanite.
+
+190
+00:11:00.639 --> 00:11:01.639
+You can go back and check it.
+
+191
+00:11:01.639 --> 00:11:06.639
+It didn't populate the tick box when I clicked on it, but it actually was on.
+
+192
+00:11:06.639 --> 00:11:08.639
+So we see that that's on.
+
+193
+00:11:08.639 --> 00:11:13.639
+So now when we go to our viewer here, we go to lit and we go down to nanite visualize.
+
+194
+00:11:13.639 --> 00:11:14.639
+We go to overview.
+
+195
+00:11:14.639 --> 00:11:19.639
+It's going to show us the calculations for these as I move around in 3D space.
+
+196
+00:11:19.639 --> 00:11:27.639
+It's going to show my triangles being calculated and you'll see them flip and flick as I get closer and farther away to them,
+
+197
+00:11:27.639 --> 00:11:38.639
+which is actually Unreal sort of it and only pulling up the best possible visual fidelity images on that object based on my positioning in 3D space.
+
+198
+00:11:38.639 --> 00:11:42.639
+So being able to view these ahead of time is really great.
+
+199
+00:11:42.639 --> 00:11:48.639
+So the overview you can use or you can choose to go in here and say, hey, I want to look at these individually.
+
+200
+00:11:48.639 --> 00:11:54.639
+You can something I want to emphasize though, when you're working with a scene such as this,
+
+201
+00:11:54.639 --> 00:12:03.639
+you do want to work with nanite and you do want to work with virtual shadow maps and you do want to work with Lumen.
+
+202
+00:12:03.639 --> 00:12:04.639
+They're the three musketeers.
+
+203
+00:12:04.639 --> 00:12:09.639
+We made them so they work really nice together and they're efficient.
+
+204
+00:12:09.639 --> 00:12:11.639
+So keep those things in mind.
+
+205
+00:12:11.639 --> 00:12:14.639
+Working with them are really great.
+
+206
+00:12:14.639 --> 00:12:21.639
+If you don't do that and choose to use LODs with your virtual shadow maps and with your Lumen,
+
+207
+00:12:21.639 --> 00:12:23.639
+you could get a hit a bit on your performance.
+
+208
+00:12:23.639 --> 00:12:39.639
+And again, the reason why is Lumen and virtual shadow maps and nanite all work together efficiently to only bring to the camera what the highest visual fidelity based on the position of you in the 3D world.
+
+209
+00:12:39.639 --> 00:12:43.639
+And it is one of the most efficient ways to tackle things.
+
+210
+00:12:43.639 --> 00:12:46.639
+Now I want to point something out really quick here.
+
+211
+00:12:46.639 --> 00:12:48.639
+This is more of a migrate issue.
+
+212
+00:12:48.639 --> 00:12:55.639
+It's a little bit segue, just a tad and then we'll get back into the view modes for like Lumen and so forth.
+
+213
+00:12:55.639 --> 00:13:02.639
+Now you may have noticed in the earlier shots, like some of my rocks looking a little bit dull and not quite having the texture information.
+
+214
+00:13:02.639 --> 00:13:07.639
+That's really just a transitioning between 5.2 and 5.3 because those had worked before.
+
+215
+00:13:07.639 --> 00:13:10.639
+They had made a blended material for me to use.
+
+216
+00:13:10.639 --> 00:13:17.639
+Unfortunately, sometimes when you update in migrate, a object which is merged, you do want to do that.
+
+217
+00:13:17.639 --> 00:13:21.639
+You do want to double check that because it may not work anymore.
+
+218
+00:13:21.639 --> 00:13:25.639
+And in that case, you could repull your geometry in and reemerge them.
+
+219
+00:13:25.639 --> 00:13:30.639
+In this particular case, the blend material doesn't quite work with this particular piece of geometry.
+
+220
+00:13:30.639 --> 00:13:33.639
+So if we find this piece of geometry, we find them here.
+
+221
+00:13:33.639 --> 00:13:35.639
+This is the merged piece of rock.
+
+222
+00:13:35.639 --> 00:13:37.639
+It's several different things together.
+
+223
+00:13:37.639 --> 00:13:40.639
+At this point, I can just remove it and just replace it.
+
+224
+00:13:40.639 --> 00:13:42.639
+So just be aware that that may occur sometimes.
+
+225
+00:13:42.639 --> 00:13:49.639
+That's a little bit of the texture optimization stuff, but I'll emphasize, reemphasize those things with Ron as I talked to you about them.
+
+226
+00:13:49.639 --> 00:13:55.639
+Because it's something to consider where things can go a little bit south as you go to a new version.
+
+227
+00:13:55.639 --> 00:13:59.639
+And there's a there's a merged material that may be a little bit more complicated.
+
+228
+00:13:59.639 --> 00:14:03.639
+That becomes a problem when it comes to migrating sometimes.
+
+229
+00:14:03.639 --> 00:14:05.639
+You want to keep those materials pretty simple.
+
+230
+00:14:05.639 --> 00:14:09.639
+And also when you're updating your files, take a look at those and see those things in there.
+
+231
+00:14:12.639 --> 00:14:16.639
+So let's analyze this real quick here again, using some of those viewers.
+
+232
+00:14:16.639 --> 00:14:18.639
+The next one we have here is Lumen.
+
+233
+00:14:18.639 --> 00:14:20.639
+So we can do an overview of Lumen too.
+
+234
+00:14:20.639 --> 00:14:26.639
+This is going to show us a few things that will show our geometry normals and those things are being processed by Lumen.
+
+235
+00:14:26.639 --> 00:14:31.639
+We have reflection and view hardware ray tracing.
+
+236
+00:14:31.639 --> 00:14:38.639
+And then we have Lumen seen pink missing surface catch coverage, yellow, cold surface catch.
+
+237
+00:14:38.639 --> 00:14:40.639
+So you'll see any issues that may be occurring.
+
+238
+00:14:40.639 --> 00:14:46.639
+So even though those are being marked and tagged here, we're actually not really having any major problems with them.
+
+239
+00:14:46.639 --> 00:14:50.639
+But again, Lumen tries to bring those things to your attention.
+
+240
+00:14:50.639 --> 00:14:52.639
+And let me explain what that means.
+
+241
+00:14:52.639 --> 00:14:58.639
+So areas that don't have surface catch coverage are colored pink in the surface catch view mode.
+
+242
+00:14:58.639 --> 00:15:03.639
+Now these areas will not bounce light and will appear black in reflections.
+
+243
+00:15:03.639 --> 00:15:09.639
+Issues like this can be fixed by increasing the number of cards used with Max Lumen mesh cards.
+
+244
+00:15:09.639 --> 00:15:11.639
+But not always.
+
+245
+00:15:11.639 --> 00:15:17.639
+So if you do run into more problems with them, it's best to maybe break them down into smaller pieces.
+
+246
+00:15:17.639 --> 00:15:19.639
+Just be aware of that.
+
+247
+00:15:19.639 --> 00:15:23.639
+Now again, that's a bit more on the lighting optimization, which we'll get into another class.
+
+248
+00:15:23.639 --> 00:15:28.639
+But I wanted to point out what that meant.
+
+249
+00:15:28.639 --> 00:15:33.639
+And finally we have here, we can go ahead and look at our virtual shadow maps.
+
+250
+00:15:33.639 --> 00:15:35.639
+I'll look at our shadow masks in here.
+
+251
+00:15:35.639 --> 00:15:39.639
+We can actually take a look at how things are being digested in our scene.
+
+252
+00:15:39.639 --> 00:15:41.639
+If we're going to have any issues.
+
+253
+00:15:41.639 --> 00:15:49.639
+Overall, what you're looking for is just a visual representation for areas that you see that are not doing their job.
+
+254
+00:15:49.639 --> 00:15:52.639
+You'll notice everything is actually working the way that we want.
+
+255
+00:15:52.639 --> 00:15:55.639
+You'll see the colorization happening as we move around.
+
+256
+00:15:55.639 --> 00:16:01.639
+That is unreal, making sure that it gives us the best possible shadow quality the closer we get into our scene.
+
+257
+00:16:01.639 --> 00:16:06.639
+Things in the distance, you'll see they're a bit lighter and we don't have to worry about them as much.
+
+258
+00:16:06.639 --> 00:16:12.639
+But for the most part, it's really just making sure and it's not giving you clear data.
+
+259
+00:16:12.639 --> 00:16:14.639
+It's just giving you a visual representation.
+
+260
+00:16:14.639 --> 00:16:17.639
+And you have to look at all these kind of with a grain of salt.
+
+261
+00:16:17.639 --> 00:16:19.639
+You can look at them.
+
+262
+00:16:19.639 --> 00:16:21.639
+They'll give you a visual representation.
+
+263
+00:16:21.639 --> 00:16:30.639
+The Lumen one is a bit more easy to read and understand versus some of maybe when it comes to our virtual shadow maps.
+
+264
+00:16:30.639 --> 00:16:37.639
+It's a little more, it's doing the same thing and the fact that it's showing how it's digesting as we're moving around our scene.
+
+265
+00:16:37.639 --> 00:16:39.639
+You'll see the color process.
+
+266
+00:16:39.639 --> 00:16:41.639
+It's basically showing you how it's handling these cards.
+
+267
+00:16:41.639 --> 00:16:44.639
+We're way out past the water at this point.
+
+268
+00:16:44.639 --> 00:16:46.639
+But it's only drawing what is needed.
+
+269
+00:16:46.639 --> 00:16:53.639
+The white stuff is like the most minimalist and you'll see the blue it's calculating almost on an LED type of level.
+
+270
+00:16:53.639 --> 00:16:59.639
+We do get into this in more in our lighting class, but I just wanted to point out what's going on when you look at this visualizer.
+
+271
+00:16:59.639 --> 00:17:05.639
+And again, we will actually review some of this in that optimization workflow.
+
+272
+00:17:05.639 --> 00:17:07.639
+Again, we'll go back into virtual shadow maps here.
+
+273
+00:17:07.639 --> 00:17:09.639
+We'll look at our virtual page here.
+
+274
+00:17:09.639 --> 00:17:13.639
+And this again shows you as it's calling upon them as needed.
+
+275
+00:17:13.639 --> 00:17:25.639
+You can think of this as almost like a nanite type of workflow where it's only pulling up and sorting these on a page by page almost like card information on how it's sorting and doing the data for the shadows.
+
+276
+00:17:25.640 --> 00:17:30.640
+It just shows you in real time how it's shuffling through things.
+
+277
+00:17:30.640 --> 00:17:37.640
+And then finally we have catch page here and it's kind of again the same type of idea.
+
+278
+00:17:37.640 --> 00:17:40.640
+All right.
+
+279
+00:17:40.640 --> 00:17:45.640
+Another pro tip you can see here is you can actually use a tool called show advanced mesh edges.
+
+280
+00:17:45.640 --> 00:17:50.640
+This will actually show or put an overlay of a wire mesh over all of your geometry.
+
+281
+00:17:50.640 --> 00:17:52.640
+It's actually pretty convenient, pretty nice.
+
+282
+00:17:52.640 --> 00:17:56.640
+Let me show you how to get there in Unreal and how to use it.
+
+283
+00:17:56.640 --> 00:18:03.640
+So you want to click on under show, go to advanced and you'll see mesh edges right here.
+
+284
+00:18:03.640 --> 00:18:10.640
+That's actually pretty cool and puts it on these objects, but you'll notice it's not putting on the nanite objects.
+
+285
+00:18:10.640 --> 00:18:12.640
+I just wanted to make that point.
+
+286
+00:18:12.640 --> 00:18:17.640
+The non-nanite objects, we don't have it set right now to recognize them.
+
+287
+00:18:18.640 --> 00:18:24.640
+Nanite objects we don't have it set to recognize them, but the non-nanite is actually putting the mesh over that.
+
+288
+00:18:24.640 --> 00:18:28.640
+So just letting you know it's actually kind of nice as you're in the middle of building.
+
+289
+00:18:28.640 --> 00:18:35.640
+But as soon as you convert things to nanite, it's going to not show up to the party, but it is kind of a cool tool.
+
+290
+00:18:35.640 --> 00:18:38.640
+So I just want to show you that real quick.
+
+291
+00:18:38.640 --> 00:18:43.640
+So overall, let's go back to same...let's turn that off real quick.
+
+292
+00:18:43.640 --> 00:18:46.640
+Let's go back to our show.
+
+293
+00:18:46.640 --> 00:18:51.640
+We'll go to our advanced and then turn off that mesh edges.
+
+294
+00:18:51.640 --> 00:18:56.640
+So again, things to consider when working with your visualizers and overall your scenes.
+
+295
+00:18:56.640 --> 00:19:00.640
+Again, like I said, and I say this over and over again, and I will say this continually,
+
+296
+00:19:00.640 --> 00:19:06.640
+because we've had clients run into problems where they're using LODs, they're using Lumen, and they're using virtual shadow maps.
+
+297
+00:19:06.640 --> 00:19:13.640
+And that becomes a very big performance hit specifically with games as well as virtual production, depending on the scale of your scene.
+
+298
+00:19:13.640 --> 00:19:19.640
+So try to keep things kind of in the three musketeers vein where you're working with Lumen.
+
+299
+00:19:19.640 --> 00:19:22.640
+You're working with virtual shadow maps and you're working with nanite.
+
+300
+00:19:22.640 --> 00:19:24.640
+That is the best approach for that.
+
+301
+00:19:24.640 --> 00:19:27.640
+So again, I want to emphasize that as you're working.
+
+302
+00:19:27.640 --> 00:19:31.640
+Now we'll talk about in the next few videos, we'll talk about how to merge geometry,
+
+303
+00:19:31.640 --> 00:19:40.640
+manage that, and I'll show you how you can actually merge even nanite and make things a bit more acceptable and smoother when you're working.
+
+304
+00:19:40.640 --> 00:19:46.640
+Right now we're working at a really nice cool 69 frames per second, so we're doing pretty great.
+
+305
+00:19:46.640 --> 00:19:52.640
+But again, as things start to increase in a popular scene, you have to consider those things.
+
+306
+00:19:52.640 --> 00:19:54.640
+That's it with this one.
+
+307
+00:19:54.640 --> 00:20:00.640
+Here's a link giving you some more a deeper dive into what we talked about.
+
+308
+00:20:00.640 --> 00:20:07.640
+In the next video, we're going to take a look at nanite up close and we're going to look at virtual shadow maps and managing those overall.
+
+309
+00:20:10.640 --> 00:20:15.640
+Thank you.
+

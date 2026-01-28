@@ -1,0 +1,278 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.280
+In this video, we'll dive deeper into Triangle Count.
+
+2
+00:00:05.280 --> 00:00:10.160
+Looking more at Triangle Count, as we just saw, various DCC and CAD applications have
+
+3
+00:00:10.160 --> 00:00:14.800
+their own ways of processing geometry, some of which allow more control over the density
+
+4
+00:00:14.800 --> 00:00:17.179
+of your mesh, while others do not.
+
+5
+00:00:17.179 --> 00:00:21.080
+You should always keep your Triangle Count in check, especially if you do not plan on
+
+6
+00:00:21.080 --> 00:00:22.679
+using Nanite.
+
+7
+00:00:23.440 --> 00:00:29.960
+LODs, or levels of detail, can be generated in your DCC tool or automatically by Unreal
+
+8
+00:00:29.960 --> 00:00:36.920
+Engine simply by selecting an LOD group or by specifying a number of LODs.
+
+9
+00:00:36.920 --> 00:00:42.560
+The idea behind LODs is that you will see higher poly, more detailed versions of a model
+
+10
+00:00:42.560 --> 00:00:47.840
+as you are closer to it and it takes up more screen space and a simpler, less triangle dense
+
+11
+00:00:48.200 --> 00:00:54.320
+version of your model as you get farther away and its space on the screen becomes smaller.
+
+12
+00:00:54.320 --> 00:01:00.160
+The more LODs you have, the heavier your geometry will be, especially in terms of its RAM usage,
+
+13
+00:01:00.160 --> 00:01:04.439
+so take care with deciding how many that you actually need.
+
+14
+00:01:04.439 --> 00:01:09.359
+Note that while you're testing in Unreal Engine, you can temporarily disable certain LODs or
+
+15
+00:01:09.359 --> 00:01:15.700
+even set a minimum LOD to determine what's actually necessary for your scene.
+
+16
+00:01:15.700 --> 00:01:21.700
+Here we can see in LOD settings the opportunity to set the number of LODs that we have, as
+
+17
+00:01:21.700 --> 00:01:26.400
+well as the decimated percent of Triangles that we are going to see.
+
+18
+00:01:26.400 --> 00:01:34.020
+So for example, if our mesh had 10,000 Triangles, then at this level we'd be seeing 8,500 Triangles.
+
+19
+00:01:34.020 --> 00:01:37.500
+Don't forget to always apply your changes after you've adjusted.
+
+20
+00:01:37.500 --> 00:01:42.780
+And note that we have a Mesh LOD coloration view mode that actually will show different
+
+21
+00:01:42.780 --> 00:01:45.900
+LODs as different colors.
+
+22
+00:01:45.900 --> 00:01:50.500
+When fine-tuning these parameters, consider the details that need to be viewed on distant
+
+23
+00:01:50.500 --> 00:01:53.780
+objects and what is not as necessary.
+
+24
+00:01:53.780 --> 00:01:58.939
+And also feel free to consider adjusting the advanced option of the screen size, which
+
+25
+00:01:58.939 --> 00:02:04.140
+will affect when we make a switch from one LOD to another.
+
+26
+00:02:04.140 --> 00:02:09.819
+If you are using a platform that can support it, Nanite is the newest Unreal Engine 5 technology
+
+27
+00:02:09.979 --> 00:02:14.299
+able to handle millions of polygons without breaking a sweat.
+
+28
+00:02:14.299 --> 00:02:19.099
+It does this by determining what's actually visible at a per pixel level and never drawing
+
+29
+00:02:19.099 --> 00:02:21.939
+more Triangles than what's actually needed.
+
+30
+00:02:21.939 --> 00:02:26.299
+Here we can see a comparison of the same scene with and without Nanite.
+
+31
+00:02:26.299 --> 00:02:32.539
+Without Nanite, Unreal Engine has to process 5.8 million Triangles, whereas with Nanite,
+
+32
+00:02:32.539 --> 00:02:36.299
+that becomes reduced to just 16.7 thousand.
+
+33
+00:02:36.300 --> 00:02:42.100
+As we've already seen, in Unreal Engine 5.6, most new geometry that gets imported has Nanite
+
+34
+00:02:42.100 --> 00:02:44.180
+enabled by default.
+
+35
+00:02:44.180 --> 00:02:49.100
+However, there are plenty of opportunities to toggle Nanite on and off.
+
+36
+00:02:49.100 --> 00:02:54.500
+You can do this sometimes in the import dialog or just by right clicking on an object and
+
+37
+00:02:54.500 --> 00:03:00.300
+choosing Nanite enabled or disabled here, or when you're opening, for example, the static
+
+38
+00:03:00.300 --> 00:03:04.460
+mesh window, you also have access to toggle Nanite on and off there.
+
+39
+00:03:04.460 --> 00:03:09.939
+Once again, it will not apply until you apply your changes.
+
+40
+00:03:09.939 --> 00:03:14.860
+Let's take a brief look at the Nanite scene in the project, which can be found under Maps
+
+41
+00:03:14.860 --> 00:03:16.340
+and Nanite.
+
+42
+00:03:16.340 --> 00:03:20.659
+Here we can see a building as well as a more natural rock formation.
+
+43
+00:03:20.659 --> 00:03:30.140
+And if we type in stat RHI, which can also be found up here under viewport stats RHI,
+
+44
+00:03:30.139 --> 00:03:38.219
+we can see that we're currently drawing between 13 and 16 million triangles.
+
+45
+00:03:38.219 --> 00:03:40.419
+Now let's try enabling Nanite.
+
+46
+00:03:40.419 --> 00:03:41.539
+We'll do it one at a time.
+
+47
+00:03:41.539 --> 00:03:47.959
+We can open up SM Cliffs by finding it in the browser here and just go to Nanite, hit
+
+48
+00:03:47.959 --> 00:03:51.179
+the checkbox or hit enable.
+
+49
+00:03:51.179 --> 00:04:00.099
+And this will take a moment to process.
+
+50
+00:04:00.099 --> 00:04:05.699
+And while the rock looks the same, we now see a drop in the total number of triangles.
+
+51
+00:04:05.699 --> 00:04:09.459
+Let's try the same thing with the building, which can be tricky because as we can see
+
+52
+00:04:09.459 --> 00:04:13.500
+here, this building is made up of lots of individual parts.
+
+53
+00:04:13.500 --> 00:04:19.659
+So what we want to do is we want to find the top level of classic building, find it over
+
+54
+00:04:19.659 --> 00:04:25.899
+here, and then that entire geometries folder is going to want to be set to be Nanite.
+
+55
+00:04:25.899 --> 00:04:32.979
+So we can control A to select all of them, choose Nanite, and say enable Nanite on all
+
+56
+00:04:32.979 --> 00:04:34.739
+44 meshes.
+
+57
+00:04:34.739 --> 00:04:36.379
+We don't have to save it right away.
+
+58
+00:04:36.379 --> 00:04:41.819
+We can test to see if it's doing what we expected to in our scene as all the geometry
+
+59
+00:04:41.819 --> 00:04:42.979
+reloads.
+
+60
+00:04:42.979 --> 00:04:48.579
+And we can see as this is happening, a significant reduction in our triangles drawn.
+
+61
+00:04:48.579 --> 00:04:52.419
+We're now down to only 7,000.
+
+62
+00:04:52.420 --> 00:04:59.300
+And yet, we can see all the detail is maintained.
+
+63
+00:04:59.300 --> 00:05:05.200
+We can see this in our viewport by going to Nanite visualization triangles.
+
+64
+00:05:05.200 --> 00:05:11.340
+And we can see the way that these triangles change as we get closer and further away for
+
+65
+00:05:11.340 --> 00:05:18.300
+a cleaner view, type stat RHI again to remove that window.
+
+66
+00:05:18.300 --> 00:05:29.660
+And we can see the way that Nanite, automagically, handles real time LOD without needing to manually
+
+67
+00:05:29.660 --> 00:05:32.980
+set anything else up.
+
+68
+00:05:32.980 --> 00:05:38.259
+In the next video, we'll examine how various DCC tools handle scene hierarchies and how
+
+69
+00:05:38.259 --> 00:05:40.379
+best to preserve them in Unreal Engine.
+

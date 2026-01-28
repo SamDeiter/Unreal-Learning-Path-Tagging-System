@@ -14,17 +14,28 @@
     <script src="js/xapiwrapper.min.js"></script>
     <script src="js/tracking.js"></script>
     <script>
-      // Firebase configuration for ue5-learning-paths project
-      const firebaseConfig = {
-        apiKey: "REDACTED_FIREBASE_API_KEY",
-        authDomain: "ue5-learning-paths.firebaseapp.com",
-        projectId: "ue5-learning-paths",
-        storageBucket: "ue5-learning-paths.firebasestorage.app",
-        messagingSenderId: "687715963885",
-        appId: "1:687715963885:web:d34c7a26f7471ff0d54de4",
+      // Firebase configuration - loaded from external config file
+      // NEVER commit firebase-config.js to git - it contains API keys
+      let firebaseConfig = null;
+
+      async function loadFirebaseConfig() {
+        try {
+          const response = await fetch("firebase-config.json");
+          if (!response.ok) throw new Error("Config not found");
+          firebaseConfig = await response.json();
+          firebase.initializeApp(firebaseConfig);
+          window.db = firebase.firestore();
+          console.log("Firebase initialized successfully");
+        } catch (e) {
+          console.warn("Firebase config not loaded - running in offline mode:", e.message);
+          // Create a mock db for offline usage
+          window.db = { collection: () => ({ add: () => Promise.resolve() }) };
+        }
+      }
+      loadFirebaseConfig();
+      const db = {
+        collection: (name) => window.db?.collection?.(name) || { add: () => Promise.resolve() },
       };
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
 
       // Rate limiting - max 10 queries per 5 minutes
       const queryHistory = [];
@@ -34,10 +45,7 @@
       function isRateLimited() {
         const now = Date.now();
         // Remove old entries
-        while (
-          queryHistory.length > 0 &&
-          queryHistory[0] < now - RATE_WINDOW_MS
-        ) {
+        while (queryHistory.length > 0 && queryHistory[0] < now - RATE_WINDOW_MS) {
           queryHistory.shift();
         }
         return queryHistory.length >= RATE_LIMIT;
@@ -90,8 +98,7 @@
       <header>
         <h1>🎮 UE5 Learning Path Builder</h1>
         <p class="subtitle">
-          Enter your problem, get a structured learning path from existing
-          content
+          Enter your problem, get a structured learning path from existing content
         </p>
       </header>
 
@@ -106,31 +113,19 @@
 
         <!-- Input Method Buttons -->
         <div class="input-methods">
-          <button
-            class="input-method-btn text-btn"
-            onclick="showInputPanel('text')"
-          >
+          <button class="input-method-btn text-btn" onclick="showInputPanel('text')">
             <span class="method-icon">📝</span>
             <span class="method-label">Describe Issue</span>
           </button>
-          <button
-            class="input-method-btn log-btn"
-            onclick="showInputPanel('log')"
-          >
+          <button class="input-method-btn log-btn" onclick="showInputPanel('log')">
             <span class="method-icon">📋</span>
             <span class="method-label">Paste Error Log</span>
           </button>
-          <button
-            class="input-method-btn screenshot-btn"
-            onclick="showInputPanel('screenshot')"
-          >
+          <button class="input-method-btn screenshot-btn" onclick="showInputPanel('screenshot')">
             <span class="method-icon">📷</span>
             <span class="method-label">Add Screenshot</span>
           </button>
-          <button
-            class="input-method-btn tags-btn"
-            onclick="showInputPanel('tags')"
-          >
+          <button class="input-method-btn tags-btn" onclick="showInputPanel('tags')">
             <span class="method-icon">🏷️</span>
             <span class="method-label">Browse Tags</span>
           </button>
@@ -145,9 +140,7 @@
               id="textInput"
               placeholder="Describe your UE5 problem..."
             />
-            <button class="add-ingredient-btn" onclick="addTextIngredient()">
-              + Add
-            </button>
+            <button class="add-ingredient-btn" onclick="addTextIngredient()">+ Add</button>
           </div>
           <div class="input-panel" id="logPanel" style="display: none">
             <textarea
@@ -156,10 +149,7 @@
               placeholder="Paste crash log or error output..."
               rows="4"
             ></textarea>
-            <button
-              class="add-ingredient-btn log-add"
-              onclick="addLogIngredient()"
-            >
+            <button class="add-ingredient-btn log-add" onclick="addLogIngredient()">
               + Extract & Add
             </button>
           </div>
@@ -180,11 +170,7 @@
                 <span class="dropzone-icon">📁</span>
                 <span class="dropzone-text">Click or drag to upload</span>
               </div>
-              <div
-                class="screenshot-preview"
-                id="screenshotPreview"
-                style="display: none"
-              >
+              <div class="screenshot-preview" id="screenshotPreview" style="display: none">
                 <img id="previewImage" alt="Preview" />
                 <button
                   class="remove-preview"
@@ -209,9 +195,7 @@
           <!-- Tags Panel (dynamic suggestions based on basket) -->
           <div class="input-panel" id="tagsPanel" style="display: none">
             <div class="tag-cloud" id="tagCloud">
-              <span style="color: var(--text-muted)"
-                >Loading suggestions...</span
-              >
+              <span style="color: var(--text-muted)">Loading suggestions...</span>
             </div>
           </div>
         </div>
@@ -225,12 +209,7 @@
         </div>
 
         <!-- Generate Button -->
-        <button
-          class="generate-btn"
-          id="generateBtn"
-          onclick="generateFromBasket()"
-          disabled
-        >
+        <button class="generate-btn" id="generateBtn" onclick="generateFromBasket()" disabled>
           🚀 Generate Learning Path
         </button>
       </section>
@@ -240,13 +219,7 @@
         <h2 style="color: var(--text); margin-bottom: 1rem; font-size: 1.25rem">
           📚 Popular Learning Paths
         </h2>
-        <p
-          style="
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-          "
-        >
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem">
           Click any card to load a pre-built path instantly
         </p>
         <div class="gallery-grid" id="galleryGrid">
@@ -257,9 +230,7 @@
       <div class="loading" id="loading">
         <div class="spinner"></div>
         <p class="loading-text">🤖 AI is curating your path...</p>
-        <p class="loading-subtext">
-          Finding the best content and timestamps for you
-        </p>
+        <p class="loading-subtext">Finding the best content and timestamps for you</p>
       </div>
 
       <section class="path-section" id="pathSection">
@@ -267,9 +238,7 @@
           <!-- Main content column -->
           <div class="path-main">
             <div class="path-header">
-              <button class="back-btn" onclick="goBackToSearch()">
-                ← Back to Search
-              </button>
+              <button class="back-btn" onclick="goBackToSearch()">← Back to Search</button>
               <h2 class="path-title" id="pathTitle">🎯 Your Learning Path</h2>
               <p class="path-query" id="pathQuery"></p>
               <div class="path-tags" id="pathTags"></div>
@@ -280,17 +249,11 @@
             </div>
 
             <div class="progress-section mobile-only">
-              <span class="progress-text" id="progressTextMobile"
-                >Progress: 0/4 steps</span
-              >
+              <span class="progress-text" id="progressTextMobile">Progress: 0/4 steps</span>
               <div class="progress-bar">
                 <div class="progress-fill" id="progressFillMobile"></div>
               </div>
-              <button
-                class="complete-btn"
-                onclick="sharePath()"
-                style="background: var(--primary)"
-              >
+              <button class="complete-btn" onclick="sharePath()" style="background: var(--primary)">
                 Share Path 🔗
               </button>
             </div>
@@ -309,12 +272,8 @@
               <!-- Step tree will be populated by JS -->
             </nav>
             <div class="sidebar-actions">
-              <button class="sidebar-btn" onclick="sharePath()">
-                🔗 Share Path
-              </button>
-              <button class="sidebar-btn secondary" onclick="goBackToSearch()">
-                ← New Search
-              </button>
+              <button class="sidebar-btn" onclick="sharePath()">🔗 Share Path</button>
+              <button class="sidebar-btn secondary" onclick="goBackToSearch()">← New Search</button>
             </div>
           </aside>
         </div>
@@ -324,9 +283,7 @@
         <div class="footer-content">
           <div class="footer-main">
             <p>Powered by <strong>UE5 Learning Path Tagging System</strong></p>
-            <p class="footer-sub">
-              Content curated from YouTube, Epic Docs, and Community
-            </p>
+            <p class="footer-sub">Content curated from YouTube, Epic Docs, and Community</p>
           </div>
           <div class="footer-meta">
             <span class="build-info" id="buildInfo">v0.1.86</span>
@@ -334,15 +291,11 @@
           </div>
         </div>
         <div class="footer-links">
-          <a
-            href="https://github.com/SamDeiter/Unreal-Learning-Path-Tagging-System"
-            target="_blank"
+          <a href="https://github.com/SamDeiter/Unreal-Learning-Path-Tagging-System" target="_blank"
             >GitHub</a
           >
           <span>•</span>
-          <a href="https://dev.epicgames.com/documentation" target="_blank"
-            >Epic Docs</a
-          >
+          <a href="https://dev.epicgames.com/documentation" target="_blank">Epic Docs</a>
         </div>
       </footer>
     </div>

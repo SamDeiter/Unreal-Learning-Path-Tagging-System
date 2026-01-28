@@ -1,0 +1,310 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.000
+Now let's take a look at the offset transform node.
+
+2
+00:00:04.000 --> 00:00:08.519
+We're going to utilize this to get the leg pump bones moving automatically when we
+
+3
+00:00:08.519 --> 00:00:09.939
+rotate the leg.
+
+4
+00:00:09.939 --> 00:00:15.320
+And we'll do that by converting the rotation values of one of the leg bones into translation
+
+5
+00:00:15.320 --> 00:00:16.320
+values.
+
+6
+00:00:16.320 --> 00:00:21.719
+And then apply those offsets to the leg pump bone using the offset transform node.
+
+7
+00:00:21.719 --> 00:00:24.560
+So let's take a look and see how that gets set up.
+
+8
+00:00:24.560 --> 00:00:28.920
+So what we want to do here is as we move this leg,
+
+9
+00:00:28.920 --> 00:00:33.640
+if I just hide the bones to make it a little easier to see.
+
+10
+00:00:33.640 --> 00:00:40.000
+Yeah, as we move this leg and move this foot control, we want this leg pump piston out
+
+11
+00:00:40.000 --> 00:00:44.120
+here to actually automatically extend.
+
+12
+00:00:44.120 --> 00:00:49.719
+So that it looks like it's connected mechanically and it's functioning in an interesting way.
+
+13
+00:00:49.719 --> 00:00:52.380
+So let's get that set up.
+
+14
+00:00:52.380 --> 00:00:58.439
+Because we want to convert the rotation information of one of the bones into translation
+
+15
+00:00:59.439 --> 00:01:00.439
+information.
+
+16
+00:01:00.439 --> 00:01:03.879
+The first thing we need to do is find the rotation values.
+
+17
+00:01:03.879 --> 00:01:08.039
+So I'm going to find the bone that we want to convert the rotation data from.
+
+18
+00:01:08.039 --> 00:01:10.879
+And that'll just be the top of our chain here.
+
+19
+00:01:10.879 --> 00:01:13.439
+So leg F R O 1.
+
+20
+00:01:13.439 --> 00:01:16.200
+I'm going to drag that into the rig graph and choose get bone.
+
+21
+00:01:16.200 --> 00:01:20.159
+Now that'll give us the information about that bones transforms.
+
+22
+00:01:20.159 --> 00:01:23.920
+So the rotation, the translation and the scale.
+
+23
+00:01:23.920 --> 00:01:29.200
+And to convert this rotation into translation information, we're going to use a two Euler
+
+24
+00:01:29.200 --> 00:01:33.200
+node.
+
+25
+00:01:33.200 --> 00:01:38.120
+And this will essentially break up each of the axes or rather break up the rotation into
+
+26
+00:01:38.120 --> 00:01:41.000
+each of the axes that we have here.
+
+27
+00:01:41.000 --> 00:01:50.000
+And if I connect this straight up to a offset transform node.
+
+28
+00:01:50.079 --> 00:01:58.000
+The item as our leg pump bone, which will be this one just here.
+
+29
+00:01:58.000 --> 00:02:04.159
+And connect up just one of these axes, which is going to be the X axis that we want to
+
+30
+00:02:04.159 --> 00:02:05.159
+affect here.
+
+31
+00:02:05.159 --> 00:02:12.360
+So if I just pop open the offset transform here and open the translation.
+
+32
+00:02:12.360 --> 00:02:17.439
+So it's the X axis that we want to affect with the translation for the pump bone.
+
+33
+00:02:17.439 --> 00:02:26.120
+It is actually the Y rotation, if I just show you this here, that Y rotation axis as the
+
+34
+00:02:26.120 --> 00:02:31.159
+leg is rotating up and down.
+
+35
+00:02:31.159 --> 00:02:35.000
+Those are the values that we want to take to feed into the offset transform.
+
+36
+00:02:35.000 --> 00:02:41.199
+So we'll grab our Y rotation, plug it into the X translation.
+
+37
+00:02:41.199 --> 00:02:47.280
+And if I connect that logic up just here, we'll see that instantly we get some movement
+
+38
+00:02:47.280 --> 00:02:53.199
+from the leg pump bone there.
+
+39
+00:02:53.199 --> 00:02:57.560
+So as we're moving this, we can see that our leg pump bone is moving.
+
+40
+00:02:57.560 --> 00:03:00.319
+So we have the logic set up correctly at least.
+
+41
+00:03:00.319 --> 00:03:04.920
+We can see that it's not quite right though, because it's kind of penetrating with its
+
+42
+00:03:04.920 --> 00:03:07.800
+own mesh.
+
+43
+00:03:07.800 --> 00:03:12.159
+In order to fix this, what we need to do is add the initial rotation values of the bone
+
+44
+00:03:12.159 --> 00:03:14.319
+that we're getting the transforms from.
+
+45
+00:03:14.319 --> 00:03:16.800
+So this bone here.
+
+46
+00:03:17.320 --> 00:03:22.400
+Back onto the leg pump bone so that it sets its initial position back to zero.
+
+47
+00:03:22.400 --> 00:03:24.719
+And I'll show you that with a demonstration here.
+
+48
+00:03:24.719 --> 00:03:29.439
+So if you select the bone that we're using for the rotation, we can see that we're using
+
+49
+00:03:29.439 --> 00:03:35.680
+the Y axis and its initial value is 44.639769.
+
+50
+00:03:35.680 --> 00:03:43.920
+So if I drag off here and choose add, we can type 44.639769.
+
+51
+00:03:43.919 --> 00:03:47.119
+And as soon as we connect this back up, we should see that shoot back to zero back to
+
+52
+00:03:47.119 --> 00:03:49.759
+its initial position.
+
+53
+00:03:49.759 --> 00:03:56.239
+So now when we move it, the leg pump moves forwards and backwards when we're moving the
+
+54
+00:03:56.239 --> 00:03:57.239
+leg.
+
+55
+00:03:57.239 --> 00:04:02.599
+But it still has a slight issue where it's kind of, if we go too high with this leg,
+
+56
+00:04:02.599 --> 00:04:08.839
+so if the leg rotates too far upwards, it's actually penetrating back inside again.
+
+57
+00:04:08.840 --> 00:04:14.039
+So we can actually clamp these values next to say, okay, you're not allowed to go past
+
+58
+00:04:14.039 --> 00:04:21.959
+zero as your minimum and we'll cap it a maximum of around about 35 as well, I think.
+
+59
+00:04:21.959 --> 00:04:27.519
+So to do that, if I just make a bit more space here and drag out of this result pin, search
+
+60
+00:04:27.519 --> 00:04:30.280
+for clamp.
+
+61
+00:04:30.280 --> 00:04:34.959
+This is a handy node for when you need to just limit the translation of something that's
+
+62
+00:04:34.959 --> 00:04:38.639
+being driven by, you know, something else.
+
+63
+00:04:38.639 --> 00:04:42.919
+So if we connect up the logic there, we're now going to say your minimum is zero.
+
+64
+00:04:42.919 --> 00:04:46.439
+If we leave it as the maximum zero, you see that that no longer moves.
+
+65
+00:04:46.439 --> 00:04:52.319
+But if we set our maximum to something like 35, whatever's suitable for your machine,
+
+66
+00:04:52.319 --> 00:04:57.279
+you can see as soon as we hit that extent of 35, it stops moving.
+
+67
+00:04:57.279 --> 00:05:03.680
+And when we go backwards, there's no longer any sort of negative movement or the tip of
+
+68
+00:05:03.680 --> 00:05:08.840
+this penetrating into the base of the mesh.
+
+69
+00:05:08.840 --> 00:05:13.280
+So that's a relatively quick solution that you can use to convert rotation information
+
+70
+00:05:13.280 --> 00:05:18.920
+to translation information and then use that to drive the movement of another bone.
+
+71
+00:05:18.920 --> 00:05:23.759
+So you would get the transforms of the bones that you want to use to drive, use a two Euler
+
+72
+00:05:23.759 --> 00:05:29.639
+node to break down the rotation into its individual axes, and then make sure that if you want
+
+73
+00:05:29.639 --> 00:05:36.360
+the bone that you're offsetting to have its initial position at zero, make sure you're
+
+74
+00:05:36.360 --> 00:05:41.560
+either adding or minusing your initial values of this bone that we're using.
+
+75
+00:05:41.560 --> 00:05:44.360
+And then if you want to clamp the values because you know it's going to have limited range
+
+76
+00:05:44.360 --> 00:05:48.800
+of motion, you can do the clamp node and then plug that into the offset node.
+
+77
+00:05:48.800 --> 00:05:50.800
+So it's fairly straightforward.
+

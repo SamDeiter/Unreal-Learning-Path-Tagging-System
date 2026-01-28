@@ -1,0 +1,1122 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.000
+Welcome to another Unreal Engine training course.
+
+2
+00:00:04.000 --> 00:00:08.000
+Today we'll be looking at animation blueprints and take recorder.
+
+3
+00:00:08.000 --> 00:00:13.000
+So we'll be looking at animation blueprint blending and the different ways that you can approach blending animations for your character.
+
+4
+00:00:13.000 --> 00:00:22.000
+And we'll actually use some of these methods to make a new weird zombie walk that'll be comprised of blending some pre-existing animations together to create something new.
+
+5
+00:00:23.000 --> 00:00:30.000
+We're also going to see how to simulate physics on the player character, so you can do cool things like make your characters arm dangle when they've been shot.
+
+6
+00:00:30.000 --> 00:00:40.000
+And then we'll see how to set up physics on other skeletal meshes so that you can see them react with the environment and with the player character and capture a recording of this using take recorder.
+
+7
+00:00:40.000 --> 00:00:47.000
+And then we'll see how we can preview that back and edit the animation once it's been recorded and save that out as a new animation.
+
+8
+00:00:48.000 --> 00:00:57.000
+We're going to jump straight into the engine, looking at some of the different nodes we can use to blend our animations together and kick off the beginnings of our zombie walk.
+
+9
+00:00:57.000 --> 00:01:01.000
+Our animation blending is all done inside an animation blueprint.
+
+10
+00:01:01.000 --> 00:01:09.000
+And we're using the third person template project here so that we've got a full animation blueprint already set up for our money character.
+
+11
+00:01:09.000 --> 00:01:16.000
+And we're just going to use it as a base to preview all the blending that we can do inside the animation blueprint.
+
+12
+00:01:16.000 --> 00:01:22.000
+So if I just search for ABP underscore, that'll give us our animation blueprints in the project.
+
+13
+00:01:22.000 --> 00:01:25.000
+And I'm just going to open up ABP money here.
+
+14
+00:01:25.000 --> 00:01:29.000
+All of the blend logic is set up within the anim graph.
+
+15
+00:01:29.000 --> 00:01:32.000
+So let's just open that up by double clicking here.
+
+16
+00:01:32.000 --> 00:01:43.000
+And this is where you would set up your animation logic for what animation should be playing on your character when they're moving and sort of your blend settings and how an animation might blend from one to another.
+
+17
+00:01:44.000 --> 00:01:49.000
+So first of all, we're going to look at three common blending nodes that you can use inside the animation graph.
+
+18
+00:01:49.000 --> 00:01:54.000
+And apply additives is going to be the first one we look at and just see how that works.
+
+19
+00:01:54.000 --> 00:02:01.000
+So if I go right click and search for apply additive, and grab that there.
+
+20
+00:02:01.000 --> 00:02:11.000
+I'm going to disconnect the output pose and just bring that over here because we're going to see, you know, we're going to plug a few animations in and see what they look like when we apply something additively.
+
+21
+00:02:12.000 --> 00:02:24.000
+So the apply additive node allows you to blend a pose or an animation on top of a base animation that's playing and then control the strength of this additive animation with the alpha value.
+
+22
+00:02:24.000 --> 00:02:29.000
+So kind of like how an animation layer works in mayor or blender. If you've used that before.
+
+23
+00:02:29.000 --> 00:02:36.000
+So if the alpha is set to zero, it means that there'll be no blend or no additive animation played on top of your base animation.
+
+24
+00:02:36.000 --> 00:02:42.000
+And if it's set to one, it means that it'll be blending the two animations fully together.
+
+25
+00:02:42.000 --> 00:02:48.000
+So with this node, the base animation always plays and the additive animation plays on top.
+
+26
+00:02:48.000 --> 00:02:53.000
+So we can connect a few animations up here just to see how that looks.
+
+27
+00:02:53.000 --> 00:03:01.000
+Because we want to create a sort of zombie walk, let's come over to asset browser here and bring in this walk forward.
+
+28
+00:03:01.000 --> 00:03:04.000
+So this is going to be our base animation.
+
+29
+00:03:04.000 --> 00:03:07.000
+So if we just connect these up, just make sure that things are working properly.
+
+30
+00:03:07.000 --> 00:03:10.000
+And we have our character walking there.
+
+31
+00:03:10.000 --> 00:03:14.000
+Now one thing you'll notice is the character stops walking so that this animation doesn't loop.
+
+32
+00:03:14.000 --> 00:03:22.000
+And just to make it easy for us to preview animations in this window, I'm going to come over to the details panel and tick loop animation.
+
+33
+00:03:22.000 --> 00:03:26.000
+And hopefully we should see that that's now looping perfect.
+
+34
+00:03:26.000 --> 00:03:30.000
+And next I'll bring in the animation that we want to apply additively.
+
+35
+00:03:30.000 --> 00:03:33.000
+So let's bring in the walk forward.
+
+36
+00:03:33.000 --> 00:03:34.000
+Oh, no, that's wrong.
+
+37
+00:03:34.000 --> 00:03:38.000
+The walk in place because we don't want to walk forwards, do we?
+
+38
+00:03:38.000 --> 00:03:41.000
+So I'm going to do the same with this animation.
+
+39
+00:03:41.000 --> 00:03:44.000
+I'm going to select to intake looping so that it's always looping.
+
+40
+00:03:44.000 --> 00:03:49.000
+And I'll plug it into the additive pin that we have on our node here.
+
+41
+00:03:49.000 --> 00:03:52.000
+And when I compile, we can see that things change.
+
+42
+00:03:52.000 --> 00:03:54.000
+But this is a little broken.
+
+43
+00:03:54.000 --> 00:03:56.000
+It's not necessarily what we want here.
+
+44
+00:03:56.000 --> 00:04:02.000
+So an animation that you're applying additively essentially needs to be told that that's how it's being used.
+
+45
+00:04:02.000 --> 00:04:05.000
+It needs to be set up as an additive animation.
+
+46
+00:04:05.000 --> 00:04:14.000
+So if I open the animation up here, you can see in the asset details panel, if I scroll down, we have additive settings as a heading.
+
+47
+00:04:14.000 --> 00:04:16.000
+And we've been set to no additive.
+
+48
+00:04:16.000 --> 00:04:21.000
+So by default, all animations that you bring in with the default settings will be set to no additive.
+
+49
+00:04:21.000 --> 00:04:30.000
+Now, if we change this drop down to local space, just move our window out slightly here, we can see that already we've got some better results here.
+
+50
+00:04:30.000 --> 00:04:35.000
+But I think we can improve this slightly if we change the base pose type.
+
+51
+00:04:35.000 --> 00:04:47.000
+So the additive animation's calculation is being done by comparing the additive animation's current pose right now with the skeleton reference pose.
+
+52
+00:04:48.000 --> 00:04:58.000
+And what this is doing is calculating the difference of the delta between where all the joints are now and where they would be in the character's default pose when it doesn't have an animation applied to it.
+
+53
+00:04:58.000 --> 00:05:05.000
+But what we want to do is compare the difference between our base animation and our additive animation.
+
+54
+00:05:05.000 --> 00:05:12.000
+So calculating the difference between the two poses of the two animations to get some more appropriate results.
+
+55
+00:05:12.000 --> 00:05:24.000
+So if I change our drop down box here to selected animation frame, we can actually choose our walk forward animation that we have set up as our base animation.
+
+56
+00:05:24.000 --> 00:05:32.000
+And you can see already, now that it's comparing between the base animation and the additive animation, we get some better results.
+
+57
+00:05:32.000 --> 00:05:38.000
+So the arms are no longer inside the body and the legs are doing something a bit funky and kind of zombie like, which is pretty cool.
+
+58
+00:05:39.000 --> 00:05:49.000
+So if I just save that and close that animation, something you'll notice as well, when you do set an animation to be additive, it changes to a green color.
+
+59
+00:05:49.000 --> 00:05:59.000
+So you can pretty easily see at a glance inside your anim graph, which animations are additive and which ones aren't, and that can help you troubleshoot if you're getting some weird results.
+
+60
+00:05:59.000 --> 00:06:09.000
+So if I change the strength of the alpha value here to 0.5, for example, we should see that the strength of the additive animation just isn't as strong now.
+
+61
+00:06:09.000 --> 00:06:15.000
+Now to 0.1, up to 1, sorry, and we'll add it back on 100%.
+
+62
+00:06:15.000 --> 00:06:21.000
+So because the alpha here is an input pin, you can actually promote this to a variable.
+
+63
+00:06:21.000 --> 00:06:28.000
+And with your event graph, you could set up some logic that drives the strength of the alpha depending on, you know, whatever logic you might want to set up for it.
+
+64
+00:06:28.000 --> 00:06:41.000
+So that you could get this additive animation to apply at runtime basically, depending on perhaps like a health effect of the character and have that update dynamically at runtime.
+
+65
+00:06:42.000 --> 00:06:47.000
+The second blending animation we're going to take a look at is the two-way blend node.
+
+66
+00:06:47.000 --> 00:06:51.000
+So if I right-click and search for two-way blend here.
+
+67
+00:06:52.000 --> 00:07:03.000
+Now this node works a little differently than the apply additive in the fact that it cross-blends two animations together rather than applying one animation over the top of a base animation.
+
+68
+00:07:03.000 --> 00:07:07.000
+Now this means that there's no base animation that always plays here.
+
+69
+00:07:07.000 --> 00:07:12.000
+We're transitioning essentially from animation A to animation B.
+
+70
+00:07:12.000 --> 00:07:18.000
+And what that also means is that neither animation need to be set up as an additive animation.
+
+71
+00:07:18.000 --> 00:07:21.000
+So let's take a look and see how that works.
+
+72
+00:07:21.000 --> 00:07:29.000
+So if I unplug this, connect these up to A and B and connect them to our output pose.
+
+73
+00:07:29.000 --> 00:07:35.000
+I'll just double-click our walk-in place again and change our additive settings back to no additive.
+
+74
+00:07:35.000 --> 00:07:36.000
+Save that.
+
+75
+00:07:36.000 --> 00:07:43.000
+And when I compile, you can see that when the alpha is set to zero, animation A is always playing.
+
+76
+00:07:43.000 --> 00:07:50.000
+And if I was to set this to one, compile, now animation B is the only one that's playing.
+
+77
+00:07:50.000 --> 00:07:57.000
+And the flow of logic kind of indicates and tells you or gives a good indication of the strength of each animation that's playing.
+
+78
+00:07:57.000 --> 00:08:02.000
+So if I was to put 0.2, compile that.
+
+79
+00:08:02.000 --> 00:08:05.000
+Prodominantly, we've got the walk forward playing.
+
+80
+00:08:05.000 --> 00:08:12.000
+We've also got with this lighter gray line here some influence from the walk-in place animation.
+
+81
+00:08:14.000 --> 00:08:20.000
+And the third blending node we're going to take a look at is the blend bone by channel node.
+
+82
+00:08:20.000 --> 00:08:26.000
+So if I just search for that here, blend bone by channel.
+
+83
+00:08:27.000 --> 00:08:34.000
+Now this node allows you to assign specific bones that you want to apply the blend to.
+
+84
+00:08:34.000 --> 00:08:41.000
+So if we look across the details panel over here on the right, you can see that we have under the blend heading, bone definitions.
+
+85
+00:08:41.000 --> 00:08:47.000
+And if we hit the plus here, this is where you would specify which bones it is you want to apply the blend to.
+
+86
+00:08:47.000 --> 00:08:53.000
+Now this is good if you want to just apply the blend to a couple of specific bones.
+
+87
+00:08:53.000 --> 00:09:00.000
+But if you want to add it to entire bone chains, for example, like the entire left leg or the left arm or whatever,
+
+88
+00:09:00.000 --> 00:09:04.000
+you'd be better off using a layered blend per bone node.
+
+89
+00:09:04.000 --> 00:09:06.000
+But we'll be looking at that a little later on.
+
+90
+00:09:07.000 --> 00:09:12.000
+So for now, we can specify our source bone and our target bone.
+
+91
+00:09:12.000 --> 00:09:15.000
+So our source bone is where we're going to take the transforms from.
+
+92
+00:09:15.000 --> 00:09:19.000
+And our target bone is the bone where we're going to apply the transforms.
+
+93
+00:09:19.000 --> 00:09:30.000
+So if we were to do just the leg, for example, I search for the L as our source and also the L as our target.
+
+94
+00:09:30.000 --> 00:09:36.000
+If I connect all the logic up here, so we have our walk forward and our walk in place.
+
+95
+00:09:36.000 --> 00:09:40.000
+Also set our alpha to one.
+
+96
+00:09:40.000 --> 00:09:49.000
+You can see that on our left leg here, at least our left thigh bone, we've got the walk in place animation playing 100%.
+
+97
+00:09:49.000 --> 00:09:54.000
+If you wanted to propagate that down to the whole leg, we would just add more bone definitions.
+
+98
+00:09:55.000 --> 00:10:04.000
+So if I hit the plus here, and our next one, we'll add the calf is our source and the same again, calf L as our target.
+
+99
+00:10:04.000 --> 00:10:07.000
+And I'll add one more just for the foot.
+
+100
+00:10:07.000 --> 00:10:13.000
+So foot L as our source and foot L up here is our target.
+
+101
+00:10:13.000 --> 00:10:21.000
+And when we compile, you'll see that our walk in place animation is playing on the left leg 100%.
+
+102
+00:10:21.000 --> 00:10:26.000
+And the walk forward animation is playing on the rest of the body.
+
+103
+00:10:26.000 --> 00:10:32.000
+So let's sort of DJ these animations and blend nodes and see if we can get something looking a little bit zombie-ish.
+
+104
+00:10:32.000 --> 00:10:40.000
+We can actually piggyback some of these nodes together to apply different blends on top of one another and get some pretty fun results.
+
+105
+00:10:40.000 --> 00:10:43.000
+So I'm going to kick off with the two way blend node.
+
+106
+00:10:43.000 --> 00:10:45.000
+Let's just stick these back in here.
+
+107
+00:10:45.000 --> 00:10:52.000
+I feel like that was a pretty good position where we can get some awkwardness kind of coming in from these two animations blended together.
+
+108
+00:10:52.000 --> 00:10:57.000
+I'm going to bring the second animation in the walk in place a little bit stronger.
+
+109
+00:10:57.000 --> 00:11:02.000
+And you know what I might do as well? Let's grab these.
+
+110
+00:11:02.000 --> 00:11:12.000
+I'm going to offset the walks a little bit so that we get some sort of awkwardness with the foot placements and change the cadence of the walk a little bit.
+
+111
+00:11:12.000 --> 00:11:20.000
+So I'm going to slow down the standard walk to let's try 0.8.
+
+112
+00:11:20.000 --> 00:11:24.000
+You see that starts to feel a little bit awkward and weird.
+
+113
+00:11:24.000 --> 00:11:33.000
+And I might even speed up the walk in place by increasing the play rate to let's just say 20%.
+
+114
+00:11:33.000 --> 00:11:35.000
+And that's starting to look kind of funky there.
+
+115
+00:11:35.000 --> 00:11:42.000
+So you get that awkwardness with the legs and the cadence of the zombie walk kind of coming in a little bit there.
+
+116
+00:11:42.000 --> 00:11:44.000
+But let's try adding another layer to that.
+
+117
+00:11:44.000 --> 00:11:55.000
+So I'm going to bring in the apply additive node and I might even bring in a different animation like the run forward for example.
+
+118
+00:11:55.000 --> 00:12:01.000
+Now this one, if we're applying additively, you can see it's already been set up as an additive animation.
+
+119
+00:12:01.000 --> 00:12:10.000
+So under local space, we'll change it to the walk forward animation that we're using as our base.
+
+120
+00:12:10.000 --> 00:12:17.000
+Now it's not exactly going to be this because we edited it slightly and made this sort of zombie-ish feel to it.
+
+121
+00:12:17.000 --> 00:12:26.000
+But I'm going to plug in the output of our two-way blend as the base of our apply additive and connect those up and see how that kind of feels.
+
+122
+00:12:26.000 --> 00:12:32.000
+Now obviously there's a little bit strong there, but let's just make that animation loop again.
+
+123
+00:12:32.000 --> 00:12:40.000
+And we'll reduce the alpha quite a bit, maybe 0.2 and see how that kind of feels.
+
+124
+00:12:40.000 --> 00:12:47.000
+Yeah, so you're kind of getting some of that weird staggeriness that a zombie might have, that weird cadence to the walk, that awkward feeling.
+
+125
+00:12:47.000 --> 00:12:50.000
+That looks kind of cool.
+
+126
+00:12:51.000 --> 00:13:05.000
+What we can do with this now is record it within the animation blueprint and save it as its own animation and then take a look at some other ways we can blend some other animations on top of it to just add a little more to it and get the sort of top half feeling and a little more zombie-ish.
+
+127
+00:13:05.000 --> 00:13:07.000
+So to record, it's actually quite simple.
+
+128
+00:13:07.000 --> 00:13:10.000
+Over in your preview window here, you have a record option.
+
+129
+00:13:10.000 --> 00:13:15.000
+So if we just press that, it'll ask you, you know, where do you want to save it and what do you want to call it.
+
+130
+00:13:15.000 --> 00:13:25.000
+So we'll just call it Creep Walk and we'll leave the default settings as they are and just hit OK.
+
+131
+00:13:25.000 --> 00:13:27.000
+And this will keep recording until you hit stop.
+
+132
+00:13:27.000 --> 00:13:42.000
+So I'm just going to go for like five or six seconds of something here so that we can essentially open the animation up and trim it down to a point where we think we can kind of make a loop with it and then see that it'll be an animation that we can use for our character.
+
+133
+00:13:43.000 --> 00:13:49.000
+So if we come back out to our content browser, just in the base content, content folders where we save that.
+
+134
+00:13:49.000 --> 00:13:57.000
+So opening up our Creep Walk, we can see that we now don't have all that animation blueprint logic running.
+
+135
+00:13:57.000 --> 00:14:05.000
+It's just an animation sequence that plays on its own, which just makes things a lot more optimized if we want to do any more blending with it.
+
+136
+00:14:05.000 --> 00:14:14.000
+So what I'm going to try and do is find two poses that are quite similar throughout the animation to make a sort of a loop out of it.
+
+137
+00:14:14.000 --> 00:14:21.000
+Now I can see the first pose is kind of similar to this one here.
+
+138
+00:14:21.000 --> 00:14:30.000
+So I think what I might do is hover over here and right click and we can remove from frame 108 to 213.
+
+139
+00:14:30.000 --> 00:14:33.000
+So basically remove everything after frame 108 here.
+
+140
+00:14:33.000 --> 00:14:42.000
+So if I choose to do that and if I hit play, you can see that, all right, it's not quite perfect, but we've got a bit of a loop going on here.
+
+141
+00:14:42.000 --> 00:14:49.000
+I could even cut out maybe a little bit more at the beginning to keep some of that momentum going.
+
+142
+00:14:49.000 --> 00:14:56.000
+So if I right click and remove from 0 to 6 and see what that looks like, that's a little bit better.
+
+143
+00:14:56.000 --> 00:15:03.000
+So there is a bit of a hitch, but this is sort of decent start to the lower half of the body zombie walk.
+
+144
+00:15:03.000 --> 00:15:15.000
+So what we can do now is use this animation as a base to experiment with another node that allows us to blend more than just two animations together and see if we can get the upper half of the body feeling good.
+
+145
+00:15:15.000 --> 00:15:18.000
+The blend multi node is what we're going to take a look at.
+
+146
+00:15:18.000 --> 00:15:24.000
+And this is something that allows you to blend as many as many animations together as you want.
+
+147
+00:15:24.000 --> 00:15:28.000
+So if I just search for blend multi.
+
+148
+00:15:28.000 --> 00:15:39.000
+Now by default, this works a bit more like the two way blend where depending on your alpha values, it takes sort of an average of all of the input animations and blends them together.
+
+149
+00:15:39.000 --> 00:15:46.000
+Now in the details panel up here, you can however toggle the node to behave additively with the additive node tick box just here.
+
+150
+00:15:46.000 --> 00:15:50.000
+So if that's something that you need, it does have the flexibility to work that way too.
+
+151
+00:15:50.000 --> 00:15:56.000
+Now let's see if we can blend a few different animations together and get this upper body feeling cool.
+
+152
+00:15:56.000 --> 00:16:02.000
+So I'm just going to bring in our creep walk that we saved.
+
+153
+00:16:02.000 --> 00:16:07.000
+And I'm also going to bring in the let's have a look.
+
+154
+00:16:07.000 --> 00:16:12.000
+I think the fall loop because that has some arm animation in it.
+
+155
+00:16:12.000 --> 00:16:17.000
+I'll just unhook that so we're not using any of the old blend nodes.
+
+156
+00:16:17.000 --> 00:16:25.000
+And plug in our creep walk just to the first input pin here and our fall loop to the second input pin.
+
+157
+00:16:25.000 --> 00:16:30.000
+Now when we connect it by default, both of the alphas are set to zero.
+
+158
+00:16:30.000 --> 00:16:38.000
+So if we set the alpha of pose one to one, you'll see that our creep walk plays.
+
+159
+00:16:38.000 --> 00:16:46.000
+And if you were also to set the alpha of pose one, our falling loop to one,
+
+160
+00:16:46.000 --> 00:16:50.000
+you'll see that the animations play sort of 50 50 strength on top of one another.
+
+161
+00:16:50.000 --> 00:16:54.000
+Now something I have forgotten to do here is just to make sure that these are looping.
+
+162
+00:16:54.000 --> 00:16:58.000
+So we keep seeing the animation loop.
+
+163
+00:16:58.000 --> 00:17:01.000
+There we go.
+
+164
+00:17:01.000 --> 00:17:09.000
+Now to add another pin to this, you would just right click the node in empty space and choose add blend pin.
+
+165
+00:17:09.000 --> 00:17:12.000
+And here we can grab another animation.
+
+166
+00:17:12.000 --> 00:17:16.000
+Well, just double click this and make sure it's not additive anymore.
+
+167
+00:17:16.000 --> 00:17:23.000
+So turn that to no additive and save that and plug the inter pose to.
+
+168
+00:17:23.000 --> 00:17:31.000
+If I was to also set that to one, we'll see that all these animations are playing at the same strength on top of one another.
+
+169
+00:17:31.000 --> 00:17:33.000
+And I have also forgotten to set it to loop again.
+
+170
+00:17:33.000 --> 00:17:35.000
+So let's do that.
+
+171
+00:17:35.000 --> 00:17:36.000
+There we go.
+
+172
+00:17:36.000 --> 00:17:39.000
+So all these animations playing at the same strength on top of one another.
+
+173
+00:17:39.000 --> 00:17:49.000
+So now you can play with these alphas and try and get something that is, oh, well, or we can play with them and get something that's a little unusual or zombie on the top half.
+
+174
+00:17:49.000 --> 00:17:57.000
+So let's just bring the creep walk down to point five.
+
+175
+00:17:57.000 --> 00:18:08.000
+And our fall loop, we're probably going to want to maintain is like the strongest alpha because we want that upper body mo, upper body animation.
+
+176
+00:18:09.000 --> 00:18:15.000
+And then this run, just going to bring that right down in terms of its strength.
+
+177
+00:18:15.000 --> 00:18:17.000
+I mean, it's kind of cool.
+
+178
+00:18:17.000 --> 00:18:22.000
+We get some interesting kind of wobble to it there, which is quite interesting.
+
+179
+00:18:22.000 --> 00:18:23.000
+And the arms are a bit out.
+
+180
+00:18:23.000 --> 00:18:27.000
+So they're looking a little bit like, so I'm steady.
+
+181
+00:18:27.000 --> 00:18:33.000
+And I think even with the run, I might just bring the play rate down.
+
+182
+00:18:34.000 --> 00:18:38.000
+Just so we don't have the legs going as fast.
+
+183
+00:18:38.000 --> 00:18:40.000
+That's something that's looking kind of fun.
+
+184
+00:18:40.000 --> 00:18:51.000
+So you can blend as many animations together as you want with this, but do be mindful that the more animations you add to this node, the less optimized your animation blueprint is going to be.
+
+185
+00:18:51.000 --> 00:18:54.000
+So do have optimization in mind when you're setting this up.
+
+186
+00:18:54.000 --> 00:18:59.000
+And if there's any way you can reduce how many animations you're blending necessarily.
+
+187
+00:18:59.000 --> 00:19:05.000
+I'm just going to do the same process with this again, where we recorded the animation and we tried to get a loop out of it.
+
+188
+00:19:05.000 --> 00:19:07.000
+So hit my record button.
+
+189
+00:19:07.000 --> 00:19:09.000
+I'll leave it under content there.
+
+190
+00:19:09.000 --> 00:19:12.000
+And this is feeling a bit sneaky.
+
+191
+00:19:12.000 --> 00:19:15.000
+So I'm just going to call it sneaky walk.
+
+192
+00:19:15.000 --> 00:19:17.000
+And here, okay, there.
+
+193
+00:19:17.000 --> 00:19:19.000
+And again, we'll let that run five or six seconds.
+
+194
+00:19:19.000 --> 00:19:24.000
+So we get some sort of loop and we increase the chance of us finding the same sort of pose again.
+
+195
+00:19:24.000 --> 00:19:28.000
+And if I hit stop, we can actually open it here with the little pop up.
+
+196
+00:19:28.000 --> 00:19:30.000
+So I might just do that.
+
+197
+00:19:30.000 --> 00:19:35.000
+And then again, just looking for two sort of similar poses.
+
+198
+00:19:35.000 --> 00:19:38.000
+Maybe something like that.
+
+199
+00:19:38.000 --> 00:19:41.000
+And something like this here.
+
+200
+00:19:41.000 --> 00:19:46.000
+So if I remove zero to 14.
+
+201
+00:19:46.000 --> 00:19:51.000
+And then maybe those ones there.
+
+202
+00:19:51.000 --> 00:19:55.000
+That's not too bad.
+
+203
+00:19:55.000 --> 00:19:59.000
+If we just save that there.
+
+204
+00:19:59.000 --> 00:20:13.000
+Now that we've created this sort of sneaking walk loop, let's take a little bit of a sidestep and just look at some other blending nodes that you can think of being as a bit more like a switch for blending based on an input value at runtime.
+
+205
+00:20:13.000 --> 00:20:16.000
+So this could be a bool that you're flipping.
+
+206
+00:20:16.000 --> 00:20:21.000
+So the character knows when they're falling and that they should blend into the falling animation.
+
+207
+00:20:21.000 --> 00:20:33.000
+Or it could be, for example, a sort of maybe a health status update on your character when they've taken some damage, you know, we trigger a blend to a different animation that shows how that character has been affected.
+
+208
+00:20:33.000 --> 00:20:36.000
+Let's take a look at the blend poses by bull first.
+
+209
+00:20:36.000 --> 00:20:44.000
+So this blends from one animation to another based on an input value that turns the bull on and off sort of like a switch.
+
+210
+00:20:44.000 --> 00:20:46.000
+So by default, these switches turned off.
+
+211
+00:20:46.000 --> 00:20:50.000
+So under your false pose, you would want your base animation.
+
+212
+00:20:50.000 --> 00:20:57.000
+And under your true pose, you would want the animation that you want to switch to depending on your logic.
+
+213
+00:20:57.000 --> 00:21:02.000
+I'm going to do a really simple setup here that shows you exactly how this works.
+
+214
+00:21:02.000 --> 00:21:11.000
+So if we grab our walk in place animation and our full loop animation and again set these both to loop.
+
+215
+00:21:11.000 --> 00:21:17.000
+Our default pose or our base pose that we want to play our base animation would be the walking in place animation.
+
+216
+00:21:17.000 --> 00:21:24.000
+If I just connect that up, you can see by default our bull is set to false and compile that.
+
+217
+00:21:24.000 --> 00:21:26.000
+You can see our walk in place animation plays.
+
+218
+00:21:26.000 --> 00:21:35.000
+If I plug in the full loop, you'll see that nothing changes until I set it to true and then we blend to full loop.
+
+219
+00:21:35.000 --> 00:21:46.000
+So this active value, we can actually have turn on and off based on a variable that we have that detects whether or not the player is on the ground.
+
+220
+00:21:46.000 --> 00:21:49.000
+So we have one setup already called is falling.
+
+221
+00:21:49.000 --> 00:21:54.000
+So I'm just going to left click and drag that in and get is falling.
+
+222
+00:21:54.000 --> 00:22:03.000
+And as soon as I plug that in and activate and deactivate this or set it to true or false, you can see that let's compile first actually.
+
+223
+00:22:03.000 --> 00:22:11.000
+You can see that we automatically flip between our two different states or our true and our false poses.
+
+224
+00:22:11.000 --> 00:22:24.000
+So if I set that back to default back to false by default and we go and play, you'll see that the only two animations we have plugged into our character at the moment are our walking place animation.
+
+225
+00:22:24.000 --> 00:22:33.000
+And then when we're not on the ground, so if I fall off the edge here, you'll see that our falling animation plays.
+
+226
+00:22:33.000 --> 00:22:40.000
+And the same thing happens if I jump because it's this variable is just detecting whether or not we're on the ground.
+
+227
+00:22:40.000 --> 00:22:47.000
+And if we're not on the ground, then it will play the fall loop animation.
+
+228
+00:22:47.000 --> 00:22:53.000
+The blend poses by int or integer node allows you to do the same thing as blending by ball.
+
+229
+00:22:53.000 --> 00:23:01.000
+But instead of just flipping a switch on and off and swapping between two different animations, you can hook up as many animations as you need here.
+
+230
+00:23:01.000 --> 00:23:02.000
+Hence the term integer.
+
+231
+00:23:02.000 --> 00:23:07.000
+And you can kind of think of this as a way of switching between different states.
+
+232
+00:23:07.000 --> 00:23:12.000
+So if I hook up a few different animations here, you can see how the switch works.
+
+233
+00:23:12.000 --> 00:23:16.000
+So I'll just drag in three or four animations.
+
+234
+00:23:16.000 --> 00:23:18.000
+Cheve we have here.
+
+235
+00:23:18.000 --> 00:23:26.000
+I will make sure that one of them isn't additive just because this doesn't work with additive animations.
+
+236
+00:23:26.000 --> 00:23:30.000
+And I'll just connect them up to our blend poses by int node.
+
+237
+00:23:30.000 --> 00:23:36.000
+Remember to add more blend pose input pins, you would right click add blend pin.
+
+238
+00:23:36.000 --> 00:23:41.000
+So again, doing that for however many animations you need to add here.
+
+239
+00:23:41.000 --> 00:23:46.000
+And when I connected up, you'll see that by default the active child index, the integer is zero.
+
+240
+00:23:46.000 --> 00:23:51.000
+So that searches for our blend pose zero animation that we have plugged in.
+
+241
+00:23:51.000 --> 00:23:56.000
+And you can just change that and compile.
+
+242
+00:23:56.000 --> 00:24:02.000
+And depending on what number you choose, it'll pick from the list of animations that you have.
+
+243
+00:24:02.000 --> 00:24:10.000
+Now you can promote this active child index to a variable and set that variable based on something like the player's health, for example.
+
+244
+00:24:10.000 --> 00:24:18.000
+So you could maybe trigger something like an injured run when their health is low or whatever logic is that you need for your character.
+
+245
+00:24:18.000 --> 00:24:22.000
+To do that, you would right click promote to variable.
+
+246
+00:24:22.000 --> 00:24:29.000
+And then you'd name it and set up your variable logic inside your event graph.
+
+247
+00:24:29.000 --> 00:24:37.000
+Lastly, we'll look at blending poses by enumeration, which works in a very similar way to blending by integer.
+
+248
+00:24:37.000 --> 00:24:45.000
+An enumeration is essentially just a named list that doesn't contain any information other than the list itself.
+
+249
+00:24:45.000 --> 00:24:55.000
+And these can be used all over the engine in many different ways and are essentially just a really great way of keeping track of something that might have a few different states, like the player character, for example.
+
+250
+00:24:55.000 --> 00:25:10.000
+So an animation enum could just be a list of names of animations that we recognize of all the different states that the character might be able to blend between, instead of using integers and trying to remember what animation the integer relates to.
+
+251
+00:25:10.000 --> 00:25:13.000
+So let's take a look at how we set one up.
+
+252
+00:25:13.000 --> 00:25:21.000
+If we come back to our content browser here, I right click go to blueprint and choose enumeration.
+
+253
+00:25:21.000 --> 00:25:26.000
+Now I'll just rename this to player states.
+
+254
+00:25:26.000 --> 00:25:30.000
+And if I double click to open this up.
+
+255
+00:25:30.000 --> 00:25:40.000
+Inside here, we can give a description for our enumerator or our enum, which we'll just quickly put in.
+
+256
+00:25:40.000 --> 00:25:42.000
+The different states of the player.
+
+257
+00:25:42.000 --> 00:25:45.000
+Oh, the different.
+
+258
+00:25:45.000 --> 00:25:51.000
+And we can add an enumerator, which is essentially just a name in the list.
+
+259
+00:25:51.000 --> 00:25:55.000
+So we'll put walk in here.
+
+260
+00:25:55.000 --> 00:26:00.000
+We'll add a second called run.
+
+261
+00:26:00.000 --> 00:26:04.000
+And a third called jump.
+
+262
+00:26:04.000 --> 00:26:14.000
+And if we save that now back inside our animation blueprint, if we'd right click and search for player states, you'll see under the blend heading here,
+
+263
+00:26:14.000 --> 00:26:19.000
+we've got blend poses by player states.
+
+264
+00:26:19.000 --> 00:26:24.000
+Now we can't see the list of our names that we added just a moment ago.
+
+265
+00:26:24.000 --> 00:26:29.000
+But if you right click at the bottom of the list here, you can see each of the names that we just added.
+
+266
+00:26:29.000 --> 00:26:33.000
+So you can right click and add those in there.
+
+267
+00:26:33.000 --> 00:26:41.000
+And then just as we would have set it with the the bool with the blend via integer, we can bring our animations in.
+
+268
+00:26:41.000 --> 00:26:45.000
+So whatever we got, we've got run, walk.
+
+269
+00:26:45.000 --> 00:26:49.000
+In fact, I'll use walk in place instead.
+
+270
+00:26:49.000 --> 00:26:51.000
+And we've got jump.
+
+271
+00:26:51.000 --> 00:26:54.000
+I'll bring that in as well.
+
+272
+00:26:54.000 --> 00:26:58.000
+And then remember to set these all to loop.
+
+273
+00:26:58.000 --> 00:27:03.000
+And then I'll plug these in and connect it up to our output pose.
+
+274
+00:27:03.000 --> 00:27:08.000
+And you can see by default, it picks our first, first pose.
+
+275
+00:27:08.000 --> 00:27:13.000
+But you can change this value to cycle through each.
+
+276
+00:27:13.000 --> 00:27:17.000
+And obviously we're just changing this by an integer here.
+
+277
+00:27:17.000 --> 00:27:28.000
+But this active enum value, you could set using a variable inside your event graph, so that when certain logic triggers, you would enter the jump pose.
+
+278
+00:27:28.000 --> 00:27:31.000
+And when certain logic triggers, you would enter the run.
+
+279
+00:27:31.000 --> 00:27:38.000
+So you could set it up that so when you hold shift, we trigger the run pose enum.
+
+280
+00:27:38.000 --> 00:27:43.000
+And then that would activate this and put that through to our output pose.
+

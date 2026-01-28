@@ -1,0 +1,254 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.200
+In this video, we'll examine how various DCC applications handle scene hierarchies
+
+2
+00:00:06.200 --> 00:00:09.460
+and how best to preserve them in Unreal Engine.
+
+3
+00:00:09.460 --> 00:00:14.160
+As we've already seen, Datasmith creates a hierarchy of parent and child relationships
+
+4
+00:00:14.160 --> 00:00:20.400
+in Unreal Engine to mirror a similar setup that started in the DCC tool.
+
+5
+00:00:20.400 --> 00:00:24.719
+Whenever possible, consider adopting various naming conventions and using tools in your
+
+6
+00:00:24.719 --> 00:00:29.479
+DCC application to automate hierarchies and keep things organized.
+
+7
+00:00:29.479 --> 00:00:35.439
+Consider using layers, groups, blocks, adjusting your pivot points, or using dummy or null
+
+8
+00:00:35.439 --> 00:00:40.239
+objects which are quite similar to empty actors in Unreal Engine.
+
+9
+00:00:40.239 --> 00:00:42.519
+Let's start with 3ds Max.
+
+10
+00:00:42.519 --> 00:00:46.980
+Consider using the layers tool which works exactly the same way in Unreal Engine as it
+
+11
+00:00:46.980 --> 00:00:49.159
+does in 3ds Max.
+
+12
+00:00:49.159 --> 00:00:54.620
+All objects in each layer will be preserved when it comes over into Unreal.
+
+13
+00:00:54.619 --> 00:00:59.500
+If you'd like to preserve the parent-child-actor relationship in the Outliner, if you'd like
+
+14
+00:00:59.500 --> 00:01:04.979
+to preserve a parent-child-actor relationship in the Unreal Engine Outliner, use the group
+
+15
+00:01:04.979 --> 00:01:12.099
+tool in 3ds Max to provide an empty actor for the child meshes to be attached to.
+
+16
+00:01:12.099 --> 00:01:16.340
+Ensure the pivot points are in the correct place and liberally use the rename tool to
+
+17
+00:01:16.340 --> 00:01:19.340
+ensure you know what each object is.
+
+18
+00:01:19.340 --> 00:01:24.980
+Be careful exporting any objects in 3ds Max that have been scaled or mirrored.
+
+19
+00:01:24.980 --> 00:01:31.700
+If you have, use the reset XForm tool in the Utilities menu prior to exporting.
+
+20
+00:01:31.700 --> 00:01:36.740
+Also note instances are preserved from 3ds Max and will result in a single static mesh
+
+21
+00:01:36.740 --> 00:01:39.659
+over in Unreal Engine 5.
+
+22
+00:01:39.659 --> 00:01:44.500
+Here in Sketchup Pro, we can already see an example of when it can be important to rename
+
+23
+00:01:44.500 --> 00:01:47.500
+your actors to ensure that you know what they are.
+
+24
+00:01:47.500 --> 00:01:50.659
+If we didn't know what these are over in Sketchup, we're certainly not going to know
+
+25
+00:01:50.659 --> 00:01:54.219
+what they are when they translate over to Unreal Engine.
+
+26
+00:01:54.219 --> 00:01:58.420
+The way the hierarchies work is a group is used as a top parent under the Data Smith
+
+27
+00:01:58.420 --> 00:02:04.260
+scene, then come the components, then come the various objects that are part of the component.
+
+28
+00:02:04.260 --> 00:02:08.580
+If an object is separate and not part of a component or a group, it will lie directly
+
+29
+00:02:08.580 --> 00:02:11.900
+under the Data Smith scene in the hierarchy.
+
+30
+00:02:11.900 --> 00:02:15.819
+Be sure to name your objects, components, and groups according to a naming convention
+
+31
+00:02:15.819 --> 00:02:17.019
+that works for you.
+
+32
+00:02:17.019 --> 00:02:22.060
+Otherwise, as we can see, things get very messy very quickly.
+
+33
+00:02:22.060 --> 00:02:26.739
+Like 3ds Max, components that have the same definition will become instanced in Unreal
+
+34
+00:02:26.739 --> 00:02:31.979
+Engine 5 and only have a single static mesh definition per object.
+
+35
+00:02:31.979 --> 00:02:38.219
+And again, like 3ds Max, layers will be preserved, which is primarily helpful for selecting groups
+
+36
+00:02:38.219 --> 00:02:44.340
+of actors at once and toggling on and off different categories of objects.
+
+37
+00:02:44.340 --> 00:02:46.700
+In Revit, the hierarchy works like this.
+
+38
+00:02:46.700 --> 00:02:51.900
+A level is used as a top parent under the Data Smith scene, then come the family types,
+
+39
+00:02:51.900 --> 00:02:54.699
+then come the components inside of that family.
+
+40
+00:02:54.699 --> 00:02:59.379
+The layer list that Unreal Engine will give you after a Revit file will be based on family
+
+41
+00:02:59.379 --> 00:03:00.819
+types.
+
+42
+00:03:00.819 --> 00:03:04.939
+Note that because of the nature of Revit, you'll be somewhat more limited in terms of how you
+
+43
+00:03:04.939 --> 00:03:08.580
+can rename or rearrange different assets.
+
+44
+00:03:08.580 --> 00:03:14.219
+Note that families also count as instance geometry and will create one mesh in Unreal
+
+45
+00:03:14.219 --> 00:03:18.500
+Engine that gets used by all family objects in the scene.
+
+46
+00:03:18.500 --> 00:03:23.860
+Note that a family will create a single static mesh in Unreal Engine, which then becomes instanced
+
+47
+00:03:23.860 --> 00:03:28.860
+throughout the scene, just like 3ds Max and SketchUp Pro.
+
+48
+00:03:28.860 --> 00:03:34.380
+For Rhino, our layers become the top parent in UE5, then the defined blocks, then the
+
+49
+00:03:34.379 --> 00:03:36.780
+various components of that block.
+
+50
+00:03:36.780 --> 00:03:43.659
+Note that Rhino groups do not affect the hierarchy in UE5, unlike 3ds Max.
+
+51
+00:03:43.659 --> 00:03:48.579
+In Rhino, we recommend using blocks as much as possible, as they'll also help with establishing
+
+52
+00:03:48.579 --> 00:03:49.579
+pivot points.
+
+53
+00:03:49.579 --> 00:03:55.379
+Otherwise, the pivot point of every object will be set to 000, resulting in objects that
+
+54
+00:03:55.379 --> 00:03:58.019
+are very far away from their origin.
+
+55
+00:03:58.019 --> 00:04:03.300
+Again, be sure to rename layers and individual objects in Rhino so when they come to Unreal
+
+56
+00:04:03.300 --> 00:04:06.060
+Engine they still make sense.
+
+57
+00:04:06.060 --> 00:04:09.980
+And note there's a robust scripting community for Rhino, and there are scripts out there
+
+58
+00:04:09.980 --> 00:04:15.540
+that will rename objects based on layers, groups, or anything else you might like.
+
+59
+00:04:15.540 --> 00:04:19.340
+Here are two Python scripts as examples.
+
+60
+00:04:19.340 --> 00:04:23.540
+Note that instanced blocks in Rhino result in a single static mesh definition for the
+
+61
+00:04:23.540 --> 00:04:28.660
+components of that block, again carrying on this trend that one piece of geometry can
+
+62
+00:04:28.660 --> 00:04:32.900
+then be instanced many times when it makes its way back over to Unreal.
+
+63
+00:04:32.899 --> 00:04:38.579
+In the next video, we'll explore the modeling tools available to us in Unreal Engine.
+

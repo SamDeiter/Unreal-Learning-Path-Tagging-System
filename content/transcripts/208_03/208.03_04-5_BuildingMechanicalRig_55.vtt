@@ -1,0 +1,322 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.639
+The last thing we're going to take a look at is how we would add some dynamic movement
+
+2
+00:00:05.639 --> 00:00:11.720
+to parts of our mesh, and namely that's going to be the cables of this mech character.
+
+3
+00:00:11.720 --> 00:00:14.480
+For that we'll use the addJiggle function first.
+
+4
+00:00:14.480 --> 00:00:16.399
+So let's see how we set that up.
+
+5
+00:00:16.399 --> 00:00:22.679
+So we're going to add jiggle to some of our toe cables here.
+
+6
+00:00:22.679 --> 00:00:25.719
+And for that we need to find the addJiggle function.
+
+7
+00:00:25.719 --> 00:00:28.879
+So let's just add one of those to the graph.
+
+8
+00:00:28.879 --> 00:00:34.600
+Oops, so I search for addJiggle.
+
+9
+00:00:34.600 --> 00:00:38.159
+And the jiggle function takes in two bits of information.
+
+10
+00:00:38.159 --> 00:00:44.879
+It takes in a child to jiggle, which is the bone or the rig element that you want to jiggle.
+
+11
+00:00:44.879 --> 00:00:50.120
+And it takes a control input, which is a control that we're going to create at the origin of
+
+12
+00:00:50.120 --> 00:00:54.879
+this bone that we're jiggling, because it's essentially going to use a spring interpolate
+
+13
+00:00:54.880 --> 00:01:00.080
+node to calculate a vector from the bone's current position to the control's current
+
+14
+00:01:00.080 --> 00:01:03.440
+position and add like an offset delay.
+
+15
+00:01:03.440 --> 00:01:07.719
+And you get control over the strength and critical damping to make the bone jiggle more
+
+16
+00:01:07.719 --> 00:01:13.640
+or jiggle less, giving you control over that delay.
+
+17
+00:01:13.640 --> 00:01:19.079
+So to set this up, let's give the function a control and a child to jiggle.
+
+18
+00:01:19.079 --> 00:01:26.319
+So with the foot here or the cable that we're trying to jiggle, the toe cord, I think it
+
+19
+00:01:26.319 --> 00:01:29.799
+would be the end one, yeah, toe cord 3, FR02L.
+
+20
+00:01:29.799 --> 00:01:31.519
+So that's going to be the bone that we want to jiggle.
+
+21
+00:01:31.519 --> 00:01:35.039
+So I'll just put that in there as a child to jiggle.
+
+22
+00:01:35.039 --> 00:01:43.920
+And I'm going to press control N to create a new control at the location of that bone.
+
+23
+00:01:43.920 --> 00:01:49.879
+And I'm going to parent it underneath the foot control that we have here, the Lego 4.
+
+24
+00:01:49.879 --> 00:01:54.480
+And that means that when we remove the leg or the foot, that control is going to come
+
+25
+00:01:54.480 --> 00:01:56.159
+with it.
+
+26
+00:01:56.159 --> 00:02:02.640
+Now if we select this control as our control to use our target, our vector target, and
+
+27
+00:02:02.640 --> 00:02:09.159
+then connect this up to the main logic here, what we should see when we move this foot
+
+28
+00:02:09.159 --> 00:02:14.039
+is that we now have jiggle on that bone there.
+
+29
+00:02:14.039 --> 00:02:18.599
+So it really is that quick and that simple to actually get jiggle or some sort of dynamic
+
+30
+00:02:18.599 --> 00:02:25.479
+movement set up on something like a cable on your mesh.
+
+31
+00:02:25.479 --> 00:02:30.079
+Now you have control over stuff like the stiffness, which is the strength here, and the damping,
+
+32
+00:02:30.079 --> 00:02:31.560
+the critical damping here.
+
+33
+00:02:31.560 --> 00:02:36.359
+So we could up that to 4, for example, to customize the look of this.
+
+34
+00:02:37.360 --> 00:02:42.960
+And we can see that it becomes a little bit faster now, a little bit more stiff, a bit
+
+35
+00:02:42.960 --> 00:02:43.960
+more rigid.
+
+36
+00:02:43.960 --> 00:02:48.760
+And if we increase the damping to 1, for example, you'll see that it doesn't have as much jiggle,
+
+37
+00:02:48.760 --> 00:02:52.760
+it doesn't have as much overshoot, it just slowly comes to rest.
+
+38
+00:02:52.760 --> 00:02:58.520
+So you can tweak these values until you get something suitable for your control rig and
+
+39
+00:02:58.520 --> 00:03:03.360
+for your character, depending on how big the chord is, how much you want it to move, and
+
+40
+00:03:03.360 --> 00:03:05.400
+things like that.
+
+41
+00:03:05.439 --> 00:03:09.840
+Now if you have a lot of cables like we do on here that we want to jiggle, what we could
+
+42
+00:03:09.840 --> 00:03:19.120
+do is if we select each one, let's try that again, select each one of these and press
+
+43
+00:03:19.120 --> 00:03:27.560
+control N to create a control for each of them and make sure they go inside the leg
+
+44
+00:03:27.560 --> 00:03:28.560
+control.
+
+45
+00:03:29.080 --> 00:03:41.599
+We can actually do a little bit more logic here to get them all moving together.
+
+46
+00:03:41.599 --> 00:03:44.680
+So we can do an item name search.
+
+47
+00:03:44.680 --> 00:03:51.560
+And what this is going to do is allow us to search for a partial name, so in this case
+
+48
+00:03:51.560 --> 00:03:56.159
+we'll do toe cord because that's the name of our controls.
+
+49
+00:03:56.159 --> 00:03:59.439
+And it'll also allow us to search for a type.
+
+50
+00:03:59.439 --> 00:04:03.319
+And in this case we're going to search for control.
+
+51
+00:04:03.319 --> 00:04:08.199
+And this essentially gives us an array with all of the controls inside the hierarchy that
+
+52
+00:04:08.199 --> 00:04:11.240
+contain toe cord in the name.
+
+53
+00:04:11.240 --> 00:04:16.480
+So what we're going to do is search for a four each, which is just saying, okay, for
+
+54
+00:04:16.480 --> 00:04:25.639
+each of the elements in this array, if I give us a bit more space, shrink that down a touch.
+
+55
+00:04:25.639 --> 00:04:32.680
+We're going to use this as the control for our control to jiggle.
+
+56
+00:04:32.680 --> 00:04:39.759
+And for the child, what we're going to do is use the name of the control, or actually
+
+57
+00:04:39.759 --> 00:04:48.240
+going to use a chop node to remove the last five characters from the name.
+
+58
+00:04:48.240 --> 00:04:51.240
+That way we'll be able to find the bones names.
+
+59
+00:04:51.240 --> 00:04:58.600
+If I put five on there, we'll take the remainder pin, plug that into our child to jiggle name
+
+60
+00:04:58.600 --> 00:05:09.319
+here, and then connect up the logic so that we're using that for each, and then using
+
+61
+00:05:09.319 --> 00:05:13.519
+the jiggle function.
+
+62
+00:05:13.519 --> 00:05:17.800
+And now what should happen is if we move this, you see that all of them start to jiggle and
+
+63
+00:05:17.800 --> 00:05:19.199
+all of them start to move.
+
+64
+00:05:19.759 --> 00:05:26.000
+And we've really not had to do a lot of logic here or make a lot of controls or anything
+
+65
+00:05:26.000 --> 00:05:31.000
+like that, or at least much manual work.
+
+66
+00:05:31.000 --> 00:05:36.919
+And to make this even more sort of organic and realistic, you could actually randomize
+
+67
+00:05:36.919 --> 00:05:46.039
+the strength of each one of these by using a random float.
+
+68
+00:05:46.040 --> 00:05:52.879
+And what we'll do is grab the index of this, which will grab an individual control that
+
+69
+00:05:52.879 --> 00:06:00.240
+we have in this array, and we'll plug that into the strength.
+
+70
+00:06:00.240 --> 00:06:08.000
+And we can say, okay, we want a minimum strength of two and a maximum strength of six, for
+
+71
+00:06:08.000 --> 00:06:09.000
+example.
+
+72
+00:06:09.000 --> 00:06:16.000
+If I compile that, what we should see now is that all of our feet bones, or our feet
+
+73
+00:06:16.160 --> 00:06:23.560
+cables, should I say, all react ever so slightly differently between random strengths of two
+
+74
+00:06:23.560 --> 00:06:26.680
+and six when we move the foot.
+
+75
+00:06:26.680 --> 00:06:31.800
+And it just gives you that little bit more of sort of organic movement, realistic movement,
+
+76
+00:06:31.800 --> 00:06:38.680
+and not seeing everything sort of mirrored or moving in unison together.
+
+77
+00:06:38.680 --> 00:06:43.120
+So that's a great way to add some dynamic movement to the cables on your mesh.
+
+78
+00:06:43.120 --> 00:06:47.879
+And as you can see, it's actually quite fast to get working.
+
+79
+00:06:47.879 --> 00:06:51.759
+Next we'll take a look at the chain dynamics to just see a different way of adding some
+
+80
+00:06:51.759 --> 00:06:52.759
+dynamic movement.
+

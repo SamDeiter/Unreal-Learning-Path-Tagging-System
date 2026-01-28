@@ -1,0 +1,586 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.719
+In this lesson, we're going to go and take a look at GPU light mass in detail for optimization.
+
+2
+00:00:07.719 --> 00:00:09.599
+And it's going to be a bit of a review.
+
+3
+00:00:09.599 --> 00:00:12.280
+So let's go ahead and tackle that.
+
+4
+00:00:12.280 --> 00:00:18.000
+So GPU light mass, it basically improves on the current light baking system, or I should
+
+5
+00:00:18.000 --> 00:00:20.559
+say the older light baking system.
+
+6
+00:00:20.559 --> 00:00:25.560
+It uses a progressive light mapper with optional real time preview in the viewport.
+
+7
+00:00:25.560 --> 00:00:28.560
+So offering multiple modes for building lighting.
+
+8
+00:00:28.559 --> 00:00:32.920
+You can do a full bake, or you can bake what you see, which will help speed things up.
+
+9
+00:00:32.920 --> 00:00:38.519
+It significantly increases the speed of light bakes for complex scenes, producing a more
+
+10
+00:00:38.519 --> 00:00:43.719
+physically accurate result than CPU based light mass, but it has more limitations.
+
+11
+00:00:43.719 --> 00:00:47.879
+There's a few things we'll talk about on the back end of this on what those limitations
+
+12
+00:00:47.879 --> 00:00:49.879
+might be.
+
+13
+00:00:49.879 --> 00:00:54.799
+So in review, again, we were reviewing this, the other foundational courses talk about
+
+14
+00:00:54.799 --> 00:00:56.200
+this.
+
+15
+00:00:56.200 --> 00:00:58.640
+First up, you do need to turn it on to your plugins.
+
+16
+00:00:58.640 --> 00:01:02.680
+But from there, you also want to make sure your DirectX 12 should be on by default.
+
+17
+00:01:02.680 --> 00:01:04.439
+But you do need to enable ray tracing.
+
+18
+00:01:04.439 --> 00:01:05.939
+That needs to be on.
+
+19
+00:01:05.939 --> 00:01:11.159
+Virtual texturing and virtual texture light maps can show you your interactive preview
+
+20
+00:01:11.159 --> 00:01:12.439
+as you're working.
+
+21
+00:01:12.439 --> 00:01:17.240
+If you're working in ICVFX, you don't necessarily need these unless virtual texturing you're
+
+22
+00:01:17.240 --> 00:01:18.240
+using them.
+
+23
+00:01:18.240 --> 00:01:24.680
+But for the most part, that update, as you see the bar build things is not really necessary.
+
+24
+00:01:24.680 --> 00:01:30.200
+The GPU light mask window is now after you do all this accessible to be able to look
+
+25
+00:01:30.200 --> 00:01:33.400
+at your stuff and to do a quality control pass.
+
+26
+00:01:33.400 --> 00:01:35.760
+So some of the settings here we're going to briefly talk about.
+
+27
+00:01:35.760 --> 00:01:37.600
+We're not going to get too much into buttonology.
+
+28
+00:01:37.600 --> 00:01:40.840
+This is a review, but I'm going to start talking about some of the key features and things
+
+29
+00:01:40.840 --> 00:01:41.840
+to look out for.
+
+30
+00:01:41.840 --> 00:01:45.640
+One, again, you have the option to full bake or partially bake.
+
+31
+00:01:45.640 --> 00:01:50.880
+Make sure you turn off your compressed light maps in your scene.
+
+32
+00:01:50.879 --> 00:01:54.560
+Here you GI samples and stationary light shadow samples.
+
+33
+00:01:54.560 --> 00:01:57.399
+You can control that as a sweeping control.
+
+34
+00:01:57.399 --> 00:02:01.679
+I like to do those on individual level because it's a case by case.
+
+35
+00:02:01.679 --> 00:02:06.039
+Volumetric light map, a simplified option version of the CPU volumetric light map control.
+
+36
+00:02:06.039 --> 00:02:11.840
+So you have a little bit of quality control there and iridescence cashing here.
+
+37
+00:02:11.840 --> 00:02:16.159
+So helps with interior scenes may not be needed to be adjusted.
+
+38
+00:02:16.159 --> 00:02:19.400
+The default works pretty well.
+
+39
+00:02:19.400 --> 00:02:23.480
+So workflows here, you have a denoiser here.
+
+40
+00:02:23.480 --> 00:02:27.520
+No denoising is applied to the lighting render.
+
+41
+00:02:27.520 --> 00:02:30.719
+And this can be useful for to determine a number of GI samples.
+
+42
+00:02:30.719 --> 00:02:34.360
+So it's up to you how you edit those.
+
+43
+00:02:34.360 --> 00:02:36.400
+We can look at the settings in just a bit here.
+
+44
+00:02:36.400 --> 00:02:40.120
+On completion denoises the results of the light build.
+
+45
+00:02:40.120 --> 00:02:42.520
+So it makes it a bit cleaner for you.
+
+46
+00:02:42.520 --> 00:02:45.240
+During the interactive preview, you can also have this here.
+
+47
+00:02:45.240 --> 00:02:47.000
+It will denoise it on the fly.
+
+48
+00:02:47.000 --> 00:02:51.560
+You have those options, either none on completion or interactively.
+
+49
+00:02:51.560 --> 00:02:56.199
+And you can see it do its job.
+
+50
+00:02:56.199 --> 00:02:58.840
+Now let's go back into Unreal and we'll get back to this slide.
+
+51
+00:02:58.840 --> 00:03:02.120
+And we're going to take a look at those settings up close.
+
+52
+00:03:02.120 --> 00:03:06.319
+So in my scene here, you'll see that my build is active and ready to go.
+
+53
+00:03:06.319 --> 00:03:08.400
+There's a viewport real time is on.
+
+54
+00:03:08.400 --> 00:03:10.280
+If I wanted to, I could turn that off.
+
+55
+00:03:10.280 --> 00:03:12.280
+I'm just leaving mine on for now.
+
+56
+00:03:12.280 --> 00:03:14.520
+There's a full bake or you can just bake what you see.
+
+57
+00:03:14.520 --> 00:03:16.800
+Again, that option is available for you.
+
+58
+00:03:16.800 --> 00:03:19.760
+And the denoiser, I have mine the default set on completion.
+
+59
+00:03:19.760 --> 00:03:23.439
+And again, you can say no or you can have it during the interactive.
+
+60
+00:03:23.439 --> 00:03:27.240
+So you really do want to try to use that denoiser if you can.
+
+61
+00:03:27.240 --> 00:03:30.960
+You'll see it says Intel open image denoiser, which works really well.
+
+62
+00:03:30.960 --> 00:03:31.960
+We have GI samples.
+
+63
+00:03:31.960 --> 00:03:37.360
+Most of these default work pretty great and it is pretty darn fast and compared to the
+
+64
+00:03:37.360 --> 00:03:38.840
+CPU build.
+
+65
+00:03:38.840 --> 00:03:41.439
+So all of these are at your fingertips.
+
+66
+00:03:41.439 --> 00:03:46.040
+Now let's talk about a few things when it comes to some pro tips and some optimizing.
+
+67
+00:03:46.039 --> 00:03:50.879
+So final pixel, it's helpful to speed up things and get them ready to go if you need it.
+
+68
+00:03:50.879 --> 00:03:57.079
+But again, I would lean more towards the lumen or even a path tracer if you're going for
+
+69
+00:03:57.079 --> 00:04:02.439
+a better visual overall control because there are limitations with reflections and reflective
+
+70
+00:04:02.439 --> 00:04:03.439
+properties.
+
+71
+00:04:03.439 --> 00:04:08.120
+They just won't quite look right, especially if they're clear and you can see characters
+
+72
+00:04:08.120 --> 00:04:09.680
+walking past them.
+
+73
+00:04:09.680 --> 00:04:14.799
+It's a little bit of a stretch and you'll have to do some tweaking to try to get it.
+
+74
+00:04:14.800 --> 00:04:17.920
+And there's still high levels of limitations there.
+
+75
+00:04:17.920 --> 00:04:21.960
+And the fact that the reflections won't look realistic, they'll be screen spaced.
+
+76
+00:04:21.960 --> 00:04:27.520
+So you might want to switch to path tracer or even ray tracing or lumen in that case
+
+77
+00:04:27.520 --> 00:04:30.280
+to be able to get the better visuals in that area.
+
+78
+00:04:30.280 --> 00:04:34.920
+ICVFX, it can be perfect for making quick lighting changes and can be combined with
+
+79
+00:04:34.920 --> 00:04:38.160
+ray tracing, but you'll have to play with that workflow a bit.
+
+80
+00:04:38.160 --> 00:04:39.160
+I'll mention it.
+
+81
+00:04:39.160 --> 00:04:43.480
+But again, I do want to encourage everyone to try to lean towards lumen if you can because
+
+82
+00:04:43.480 --> 00:04:47.120
+lumen is going to give you the best results, but there may be a shot where you have lots
+
+83
+00:04:47.120 --> 00:04:49.160
+of noise and you can't get past it.
+
+84
+00:04:49.160 --> 00:04:55.560
+Then you can actually maybe use this light mass GPU on that case and be able to tweak
+
+85
+00:04:55.560 --> 00:04:56.560
+things accordingly.
+
+86
+00:04:56.560 --> 00:05:01.400
+After you do a build, you want to make sure that you go to ray tracing and you turn off
+
+87
+00:05:01.400 --> 00:05:02.900
+all those effects.
+
+88
+00:05:02.900 --> 00:05:07.640
+Let's actually look at a build that I just made and run this CVAR and you can see what
+
+89
+00:05:07.640 --> 00:05:09.300
+I'm talking about.
+
+90
+00:05:09.300 --> 00:05:13.439
+So once I have this build set up and you see that we've built this, ignore this up here,
+
+91
+00:05:13.439 --> 00:05:15.319
+it's a little bit of an error.
+
+92
+00:05:15.319 --> 00:05:19.800
+It's an older conversion from an older version of Unreal, which will continually tell me
+
+93
+00:05:19.800 --> 00:05:21.879
+it needs to be rebuilt, but it's already done.
+
+94
+00:05:21.879 --> 00:05:25.680
+So I'm going to go to my output here and I'm going to do control V. And I'm going to go
+
+95
+00:05:25.680 --> 00:05:27.680
+ahead and get rid of all my ray tracing effects.
+
+96
+00:05:27.680 --> 00:05:32.639
+And this is going to give me the true bake because remember, GPU light masses using some
+
+97
+00:05:32.639 --> 00:05:35.360
+of that ray tracing to be able to speed up our process.
+
+98
+00:05:35.360 --> 00:05:39.759
+Unfortunately, some of that can still be into here and will give us kind of false results.
+
+99
+00:05:39.759 --> 00:05:41.000
+So I'm going to hit enter.
+
+100
+00:05:41.000 --> 00:05:44.839
+And when you do that, you now actually make it so that the ray tracing is gone.
+
+101
+00:05:44.839 --> 00:05:48.839
+Now I may have already run this command in the past and that's fine.
+
+102
+00:05:48.839 --> 00:05:55.120
+But for the most part, that removes any errors that may be occurring in here and no ray tracing
+
+103
+00:05:55.120 --> 00:05:56.639
+is going to be set in.
+
+104
+00:05:56.639 --> 00:05:59.439
+So again, you want to run that CVAR when you can.
+
+105
+00:05:59.439 --> 00:06:04.319
+Again, that makes it so that that is we're not using any kind of ray tracing.
+
+106
+00:06:04.319 --> 00:06:08.720
+We're turning it off so that it doesn't interfere with our final results with our scene.
+
+107
+00:06:08.720 --> 00:06:12.960
+Now again, you can turn them on if you need to, and you can turn them off if you need
+
+108
+00:06:12.960 --> 00:06:13.960
+to.
+
+109
+00:06:13.960 --> 00:06:21.560
+You'll see it's turned them on and I will turn it off again just so that you know we are
+
+110
+00:06:21.560 --> 00:06:22.880
+in the mode we need to.
+
+111
+00:06:22.880 --> 00:06:24.440
+You can see the shift there.
+
+112
+00:06:24.440 --> 00:06:27.520
+So that's probably just because I ran that console out in the past.
+
+113
+00:06:27.520 --> 00:06:28.520
+Cool.
+
+114
+00:06:28.520 --> 00:06:29.520
+Awesome.
+
+115
+00:06:29.520 --> 00:06:35.520
+So when running GPU light mass, you may run into a TDR delay situation happening.
+
+116
+00:06:35.519 --> 00:06:41.240
+If you do, make sure you go into your windows and you want to go to your local machine here
+
+117
+00:06:41.240 --> 00:06:43.159
+and then you want to set your TDR delay.
+
+118
+00:06:43.159 --> 00:06:46.599
+You want to modify that and set it to like 60 if you need to.
+
+119
+00:06:46.599 --> 00:06:49.439
+You can even go a bit higher if you need to.
+
+120
+00:06:49.439 --> 00:06:52.120
+Never mind here where it says an old reference link.
+
+121
+00:06:52.120 --> 00:06:57.319
+This is still valid and it's basically just the TDR information that we're using.
+
+122
+00:06:57.319 --> 00:06:58.479
+And yep.
+
+123
+00:06:58.479 --> 00:07:01.159
+Here's some limitations and things you need to consider.
+
+124
+00:07:01.159 --> 00:07:02.879
+So light mass portals are not supported.
+
+125
+00:07:02.879 --> 00:07:04.599
+We talked about that before.
+
+126
+00:07:04.600 --> 00:07:08.960
+Real depth offset is still not supported yet.
+
+127
+00:07:08.960 --> 00:07:11.320
+Lighting channels not supported.
+
+128
+00:07:11.320 --> 00:07:17.120
+Use light mass importance volumes to help with volumetric light maps.
+
+129
+00:07:17.120 --> 00:07:22.080
+This is really important to consider because using a light mass importance volume is used
+
+130
+00:07:22.080 --> 00:07:27.720
+in a regular CPU baking environment and you can find that under volumes but you really
+
+131
+00:07:27.720 --> 00:07:31.879
+do need it for GPU light mass especially for characters moving around because it actually
+
+132
+00:07:31.879 --> 00:07:37.319
+helps unreal digest that information for characters moving around for updated shadows.
+
+133
+00:07:37.319 --> 00:07:42.240
+Now typically in CPU you want to use that because you have priority areas especially
+
+134
+00:07:42.240 --> 00:07:46.480
+for a larger scene or maybe you're working with terrain but it's really key when it comes
+
+135
+00:07:46.480 --> 00:07:48.560
+to the GPU light mass.
+
+136
+00:07:48.560 --> 00:07:52.000
+World position offset is not supported.
+
+137
+00:07:52.000 --> 00:07:57.040
+Texture encoding and denoising are run on CPU and are not affected by multi GPUs.
+
+138
+00:07:57.040 --> 00:08:00.159
+You can consider that if you are using the system.
+
+139
+00:08:00.160 --> 00:08:05.720
+Very skylight currently not supported but on the roadmap and custom settings and properties
+
+140
+00:08:05.720 --> 00:08:10.560
+of the lights some things such as indirect lighting intensity source texture and a few
+
+141
+00:08:10.560 --> 00:08:13.920
+other things are not fully supported and quite there yet.
+
+142
+00:08:13.920 --> 00:08:21.040
+You see a list of limitations found here which can also help you in the direction for 5.3.
+
+143
+00:08:21.040 --> 00:08:25.600
+Also light channels are not supported so make note of that also.
+
+144
+00:08:25.600 --> 00:08:26.960
+That's it with this section.
+
+145
+00:08:26.959 --> 00:08:31.719
+In the next section we're going to go ahead and take a look at screen space global illumination.
+
+146
+00:08:31.719 --> 00:08:32.240
+Thanks again.
+

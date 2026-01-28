@@ -1,0 +1,206 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.160
+In this video, we'll explore various optimization techniques to ensure that our Datasmith project
+
+2
+00:00:06.160 --> 00:00:10.320
+can run at an acceptable frame rate for our application.
+
+3
+00:00:10.320 --> 00:00:14.960
+When considering the work that goes into achieving performance, we often have to consider how
+
+4
+00:00:14.960 --> 00:00:17.920
+that balances against quality and features.
+
+5
+00:00:17.920 --> 00:00:22.160
+It is often thought of as a triangle where you can sit somewhere within here, but you
+
+6
+00:00:22.160 --> 00:00:25.600
+cannot achieve all three of these equally.
+
+7
+00:00:25.600 --> 00:00:30.160
+With enough knowledge of engine optimization tools, you may find that you're able to buy
+
+8
+00:00:30.160 --> 00:00:33.439
+back performance.
+
+9
+00:00:33.439 --> 00:00:37.960
+Draw calls is one aspect of optimization that you'll hear often discussed.
+
+10
+00:00:37.960 --> 00:00:42.880
+Draw calls represent a package of triangles sent to the GPU, and the GPU renders draw
+
+11
+00:00:42.880 --> 00:00:46.799
+call by draw call, not triangle by triangle.
+
+12
+00:00:46.799 --> 00:00:51.840
+Note that each mesh and material represents a different draw call, which means that if
+
+13
+00:00:51.840 --> 00:00:56.160
+you have three objects, even if they have the same material, they will still represent
+
+14
+00:00:56.160 --> 00:01:02.180
+three draw calls, and one object with two materials will represent two draw calls.
+
+15
+00:01:02.180 --> 00:01:07.280
+You can profile draw calls at any time using statRHI, this is the same command we used
+
+16
+00:01:07.280 --> 00:01:12.439
+earlier when looking at Nanite and Triangles drawn, and that's a particularly useful statistics
+
+17
+00:01:12.439 --> 00:01:18.600
+window to keep an eye on as you can see both triangle count and draw calls side by side.
+
+18
+00:01:18.599 --> 00:01:24.199
+Once again, every project is different, but as a rule of thumb, desktop and console experiences
+
+19
+00:01:24.199 --> 00:01:31.319
+often want between 2,000 and 4,000 draw calls as a maximum, virtual reality 800 to 1200,
+
+20
+00:01:31.319 --> 00:01:34.679
+and mobile devices 200 to 400.
+
+21
+00:01:34.679 --> 00:01:39.359
+One of the ways Unreal Engine tries to auto-optimize the scene, and you can play to the strengths
+
+22
+00:01:39.359 --> 00:01:44.840
+of this, is Unreal Engine will attempt to not render what it can't see in the scene,
+
+23
+00:01:44.840 --> 00:01:49.359
+and this can mean both the camera frustrum, what the camera can actually see in the current
+
+24
+00:01:49.359 --> 00:01:53.840
+screen space, as well as objects that are hidden by other objects.
+
+25
+00:01:53.840 --> 00:01:58.400
+So in this case, we can't see the motorcycle behind the wall, so that could get cold, but
+
+26
+00:01:58.400 --> 00:02:03.960
+then we also can't see the motorcycle behind the camera, and so that also gets cold.
+
+27
+00:02:03.960 --> 00:02:09.140
+If you have very high triangle count objects, especially with a lot of draw calls, consider
+
+28
+00:02:09.140 --> 00:02:13.640
+separating them from each other so they are rarely seen at the same time.
+
+29
+00:02:13.639 --> 00:02:16.599
+Changing actors is a way to reduce draw calls.
+
+30
+00:02:16.599 --> 00:02:20.879
+You can select a number of static meshes in your scene, and then generate a single static
+
+31
+00:02:20.879 --> 00:02:22.439
+mesh from them.
+
+32
+00:02:22.439 --> 00:02:26.619
+You can preserve the geometry, which would mean you have no reduction in triangle count,
+
+33
+00:02:26.619 --> 00:02:30.959
+but if there are shared materials, that will reduce draw calls without changing anything
+
+34
+00:02:30.959 --> 00:02:33.199
+else about the objects.
+
+35
+00:02:33.199 --> 00:02:37.079
+Note this can be an issue for very large objects, we're looking at a corner of the
+
+36
+00:02:37.079 --> 00:02:42.799
+object will still require rendering the entire thing, as those other previous elements which
+
+37
+00:02:42.800 --> 00:02:48.200
+were separate are no longer called out, and it can be an issue for animated actors where
+
+38
+00:02:48.200 --> 00:02:52.580
+you're dealing with skeletal meshes and bones and animation data.
+
+39
+00:02:52.580 --> 00:02:57.160
+Another option you have when you're combining actors is to generate proxies.
+
+40
+00:02:57.160 --> 00:03:01.480
+In this case, instead of the geometry being preserved, it's simplified and can result
+
+41
+00:03:01.480 --> 00:03:05.439
+in a lower quality mesh based on parameters that you choose.
+
+42
+00:03:05.439 --> 00:03:10.320
+As part of that, you can even combine the materials into one single texture and material
+
+43
+00:03:10.320 --> 00:03:11.780
+family.
+
+44
+00:03:11.780 --> 00:03:16.240
+One option you have during this process is to combine all the materials.
+
+45
+00:03:16.240 --> 00:03:18.400
+This is something worth playing with.
+
+46
+00:03:18.400 --> 00:03:22.840
+There are many options when generating proxies, so be sure to experiment with them in order
+
+47
+00:03:22.840 --> 00:03:26.500
+to ensure that you achieve the results that you're after.
+
+48
+00:03:26.500 --> 00:03:31.120
+For our final exercise, we'll review a number of objects in a scene and figure out the best
+
+49
+00:03:31.120 --> 00:03:32.120
+way to combine them.
+
+50
+00:03:32.120 --> 00:03:33.120
+Thank you.
+
+51
+00:03:33.120 --> 00:03:34.120
+Bye.
+

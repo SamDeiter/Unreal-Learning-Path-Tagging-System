@@ -1,0 +1,970 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.960
+Blending is not only reserved for animations, but you can blend using physics too to get
+
+2
+00:00:05.960 --> 00:00:09.880
+some really unique results, and this can be used for things like maybe something hits
+
+3
+00:00:09.880 --> 00:00:13.560
+into your character and affects the animation that they're playing.
+
+4
+00:00:13.560 --> 00:00:18.000
+Or you can use it for things like a ponytail on your character, or a chain on a skeletal
+
+5
+00:00:18.000 --> 00:00:19.000
+mesh.
+
+6
+00:00:19.000 --> 00:00:24.120
+We'll be looking at two of the primary physics blending functions that we have inside the
+
+7
+00:00:24.120 --> 00:00:25.120
+animation blueprint.
+
+8
+00:00:25.839 --> 00:00:31.760
+We set all bodies below simulate physics and set all bodies below physics blend weight.
+
+9
+00:00:31.760 --> 00:00:36.359
+Now the primary difference between these two is, as you can imagine, the blend weight version
+
+10
+00:00:36.359 --> 00:00:40.960
+allows you to control the strength of the physics that you're applying to your character
+
+11
+00:00:40.960 --> 00:00:43.120
+or to your skeletal mesh.
+
+12
+00:00:43.120 --> 00:00:48.359
+So the first set all bodies below simulate physics is great for things like ponytails
+
+13
+00:00:48.359 --> 00:00:52.400
+or chains or anything that you want to be like a completely limp ragdoll.
+
+14
+00:00:52.399 --> 00:00:57.359
+The blend weight option allows you to control how strong that physics blend is going to
+
+15
+00:00:57.359 --> 00:01:02.600
+be on top of your animation, which is great for slight changes to reactions where something
+
+16
+00:01:02.600 --> 00:01:08.400
+might hit your character or if you want an arm to dangle if they've been shot, for example.
+
+17
+00:01:08.400 --> 00:01:12.519
+So we'll take a look in the engine and see how you set these two things up.
+
+18
+00:01:12.519 --> 00:01:16.640
+For physics to work with your character, you need to have a physics asset.
+
+19
+00:01:16.640 --> 00:01:21.640
+Now these are already set up for our character engine, but you can create one by right clicking
+
+20
+00:01:21.640 --> 00:01:26.040
+your character, coming up to create and choosing physics asset.
+
+21
+00:01:26.040 --> 00:01:30.120
+If you choose create and assign, this is going to assign, well, this is going to create the
+
+22
+00:01:30.120 --> 00:01:32.599
+new physics asset and then assign it to your character.
+
+23
+00:01:32.599 --> 00:01:38.680
+But if I open ours up here, you'll see that if we come over to the far right side, this
+
+24
+00:01:38.680 --> 00:01:42.060
+will give us access to our assigned physics asset.
+
+25
+00:01:42.060 --> 00:01:46.280
+This is where you get access to all of the physics collision bodies on your character,
+
+26
+00:01:46.280 --> 00:01:50.280
+where you can create and edit and simulate these different bodies to see how your character
+
+27
+00:01:50.280 --> 00:01:52.400
+is going to react with physics.
+
+28
+00:01:52.400 --> 00:01:56.480
+And you add these to each of your joints and then you would manipulate the size of these
+
+29
+00:01:56.480 --> 00:01:59.159
+so that they encompass most of your mesh.
+
+30
+00:01:59.159 --> 00:02:02.480
+And these will be the actual assets that are reacting with the collision rather than the
+
+31
+00:02:02.480 --> 00:02:04.000
+actual mesh of the character.
+
+32
+00:02:04.000 --> 00:02:09.759
+And once you've set it up, if you hit these two little arrows at the top, you can simulate
+
+33
+00:02:09.759 --> 00:02:19.039
+and test how the collision bodies are reacting with one another.
+
+34
+00:02:19.039 --> 00:02:23.239
+So once you've created your physics asset and you've edited it and tested the simulation
+
+35
+00:02:23.239 --> 00:02:28.919
+to make sure it works okay, you're now ready to start simulating the physics on this skeletal
+
+36
+00:02:28.919 --> 00:02:29.919
+mesh.
+
+37
+00:02:29.919 --> 00:02:34.399
+So I'm going to show you how to set that up on two of our characters here and show you
+
+38
+00:02:34.399 --> 00:02:37.840
+how to set it up in two slightly different ways to show how one might react with your
+
+39
+00:02:37.840 --> 00:02:41.719
+character and one might not.
+
+40
+00:02:41.719 --> 00:02:43.799
+So the setup is actually quite simple.
+
+41
+00:02:43.799 --> 00:02:49.000
+If I drag two of our characters into the level here, I can set one up so that it reacts
+
+42
+00:02:49.280 --> 00:02:54.080
+to the player's capsule so we can run into this character and we can set the other up
+
+43
+00:02:54.080 --> 00:02:56.879
+so that it doesn't essentially.
+
+44
+00:02:56.879 --> 00:03:01.319
+But on both of these, in order for the physics to work, what I'm going to do is shift select
+
+45
+00:03:01.319 --> 00:03:08.360
+both and in the details panel, I'll search for simulate physics and just enable that.
+
+46
+00:03:08.360 --> 00:03:14.240
+And then with one of our characters, Quinn here, I'll search for collision and change
+
+47
+00:03:14.320 --> 00:03:19.240
+the preset from physics actor to rag doll.
+
+48
+00:03:19.240 --> 00:03:24.120
+Now using rag doll, it means that our player character won't be able to interact with the
+
+49
+00:03:24.120 --> 00:03:27.960
+physics component or the physics asset of Quinn.
+
+50
+00:03:27.960 --> 00:03:33.960
+Whereas with Manny here, if we keep our collision preset to physics actor, we will be able to
+
+51
+00:03:33.960 --> 00:03:34.960
+interact with them.
+
+52
+00:03:34.960 --> 00:03:38.080
+We will be able to run into them and sort of knock them around.
+
+53
+00:03:38.080 --> 00:03:43.520
+So if I hit play here, you can see that instantly both of our characters fall over and the physics
+
+54
+00:03:43.600 --> 00:03:45.560
+is reacting to the world.
+
+55
+00:03:45.560 --> 00:03:50.719
+And if I try and nudge Quinn or knock her around, you can see that we're not able to interact
+
+56
+00:03:50.719 --> 00:03:52.160
+with her.
+
+57
+00:03:52.160 --> 00:03:59.160
+Whereas if we nudge Manny around, you can see that our collision capsule is reacting with
+
+58
+00:03:59.360 --> 00:04:02.800
+Manny's physics asset.
+
+59
+00:04:02.800 --> 00:04:06.719
+Now that we can see that happening on a couple of different skeletal measures just sitting
+
+60
+00:04:06.719 --> 00:04:11.240
+in the level, let's see how we can add that to our player character.
+
+61
+00:04:11.280 --> 00:04:17.280
+So there might be a scenario where you want physics to act on your character because they've
+
+62
+00:04:17.280 --> 00:04:22.319
+been shot in the arm and you want the arm to dangle, for example.
+
+63
+00:04:22.319 --> 00:04:26.040
+To get this set up, we need to do the same two things that we did with our skeletal measures
+
+64
+00:04:26.040 --> 00:04:28.400
+in the level to our player character.
+
+65
+00:04:28.400 --> 00:04:32.800
+So we need to activate simulate physics and we need to set our collision type for the
+
+66
+00:04:32.800 --> 00:04:34.319
+character mesh.
+
+67
+00:04:34.319 --> 00:04:38.960
+Now this is something that we'll do inside our player character blueprint.
+
+68
+00:04:39.000 --> 00:04:43.839
+So if we come back to our content browser, go to third person and blueprints and open
+
+69
+00:04:43.839 --> 00:04:47.680
+up our third person and blueprint here.
+
+70
+00:04:47.680 --> 00:04:51.000
+So we're going to be using the two functions that we looked at a minute ago.
+
+71
+00:04:51.000 --> 00:04:55.919
+We want to do settle bodies below simulate physics and settle bodies below physics blend
+
+72
+00:04:55.919 --> 00:04:56.919
+weight.
+
+73
+00:04:56.919 --> 00:04:58.519
+We'll look at the two separately.
+
+74
+00:04:58.519 --> 00:05:04.000
+So first of all, let's set our collision profile for our character mesh.
+
+75
+00:05:04.000 --> 00:05:07.759
+I'm going to click and drag and bring in our character mesh from the components tab on
+
+76
+00:05:07.759 --> 00:05:08.759
+the left here.
+
+77
+00:05:08.759 --> 00:05:15.439
+And I'm going to pull off that output pin and search for set collision profile name,
+
+78
+00:05:15.439 --> 00:05:19.639
+which we have here.
+
+79
+00:05:19.639 --> 00:05:24.879
+Now this allows us to set the collision profile via the name.
+
+80
+00:05:24.879 --> 00:05:29.680
+And if we select our mesh here and search for collision, we can see that we have several
+
+81
+00:05:29.680 --> 00:05:33.120
+different presets that we could type in here.
+
+82
+00:05:33.120 --> 00:05:39.840
+Now we could change the characters mesh collision preset by default, but this is typically something
+
+83
+00:05:39.840 --> 00:05:43.720
+you'd want to activate as a certain point within your game.
+
+84
+00:05:43.720 --> 00:05:46.920
+So it's best to set it up within the event graph logic.
+
+85
+00:05:46.920 --> 00:05:52.199
+But what we want to do is set up ragdoll on our collision profile name here.
+
+86
+00:05:52.199 --> 00:05:55.240
+So what I'm going to do is type that in.
+
+87
+00:05:55.240 --> 00:05:57.879
+And it's case sensitive.
+
+88
+00:05:57.879 --> 00:06:01.040
+So make sure that you're typing it correctly with the correct cases.
+
+89
+00:06:02.040 --> 00:06:05.360
+And I'll just compile that.
+
+90
+00:06:05.360 --> 00:06:16.920
+I'm now going to right click and search for set all bodies below physics, simulate physics.
+
+91
+00:06:16.920 --> 00:06:23.040
+Now this will allow us to specify a bone name from where we want the physics to begin.
+
+92
+00:06:23.040 --> 00:06:27.759
+So just connect these two together.
+
+93
+00:06:27.759 --> 00:06:32.519
+And then in our bone name, I'm just going to pull off here and search for make literal
+
+94
+00:06:32.519 --> 00:06:33.519
+name.
+
+95
+00:06:33.519 --> 00:06:36.680
+And this will allow us to just type a name inside here of a bone that we know we want
+
+96
+00:06:36.680 --> 00:06:41.039
+to use as a starting point for our physics.
+
+97
+00:06:41.039 --> 00:06:45.839
+So here I'm just going to put, let's say, spine 01.
+
+98
+00:06:45.839 --> 00:06:54.519
+And we want to tick new simulation so that it activates every time we trigger the event
+
+99
+00:06:54.519 --> 00:06:56.839
+logic.
+
+100
+00:06:56.839 --> 00:06:59.599
+And we're going to trigger it with a keypad press.
+
+101
+00:06:59.599 --> 00:07:06.839
+So if I right click and just press number one on my keyboard, I can search for, or I
+
+102
+00:07:06.839 --> 00:07:08.399
+can pick up this number one.
+
+103
+00:07:08.399 --> 00:07:12.279
+And when we press, what we'll do is we'll set the collision profile name and we'll set
+
+104
+00:07:12.279 --> 00:07:16.639
+all bodies below spine 01 to simulate physics.
+
+105
+00:07:16.639 --> 00:07:22.079
+Now something I have noticed there, actually, is that that shouldn't be a capital letter.
+
+106
+00:07:22.079 --> 00:07:25.559
+So hopefully that'll correct that.
+
+107
+00:07:25.560 --> 00:07:33.480
+So if we jump into our test level again and hit play, you can see that nothing has changed
+
+108
+00:07:33.480 --> 00:07:34.720
+on our character yet.
+
+109
+00:07:34.720 --> 00:07:40.600
+But as soon as I press one, you can see that our character slumps over and all of the bones
+
+110
+00:07:40.600 --> 00:07:47.519
+going from spine 01, all the bone chains after spine 01 are now fully simulated.
+
+111
+00:07:47.519 --> 00:07:54.680
+So we can run around and physics will just be reacting to however our character is moving.
+
+112
+00:07:54.680 --> 00:07:57.079
+Now this can give you some pretty cool results.
+
+113
+00:07:57.079 --> 00:08:00.759
+But what if you want to control the strength of the physics?
+
+114
+00:08:00.759 --> 00:08:06.920
+So if I hit escape and come back to our character blueprint here, just going to zoom in a little
+
+115
+00:08:06.920 --> 00:08:13.040
+bit and give ourselves a bit more space.
+
+116
+00:08:13.040 --> 00:08:19.960
+We're going to take a look at, or we're going to add on the physics blend weight function
+
+117
+00:08:19.960 --> 00:08:21.519
+that we looked at earlier.
+
+118
+00:08:21.519 --> 00:08:33.319
+So if I right click, search for set all bodies below physics blend weight.
+
+119
+00:08:33.319 --> 00:08:37.120
+We can just connect this on the end because we already have our make literal name.
+
+120
+00:08:37.120 --> 00:08:39.279
+We can plug that in.
+
+121
+00:08:39.279 --> 00:08:45.600
+And let's just experiment and try like a 0.5 blend weight and see what difference we get.
+
+122
+00:08:45.600 --> 00:08:50.799
+So hopefully what we'll have here is the animation of our character running around and jumping
+
+123
+00:08:50.799 --> 00:08:52.079
+around will still play.
+
+124
+00:08:52.079 --> 00:08:56.599
+But we'll get a little bit of physics or 50% of the strength of what we normally would
+
+125
+00:08:56.599 --> 00:08:59.719
+have for the physics playing on top.
+
+126
+00:08:59.719 --> 00:09:03.679
+So if I hit one, we can see they relax.
+
+127
+00:09:03.679 --> 00:09:08.399
+And as they run around, you can see the arms are kind of trying to run almost as if they're
+
+128
+00:09:08.399 --> 00:09:10.319
+a little bit drunk.
+
+129
+00:09:10.319 --> 00:09:15.679
+And when I jump, you can see the underlying animation is still kind of reacting and is
+
+130
+00:09:15.679 --> 00:09:18.439
+still animating there.
+
+131
+00:09:18.440 --> 00:09:25.160
+And so you can use this as like hit reactions or like I say, if your character loses an
+
+132
+00:09:25.160 --> 00:09:29.680
+arm or gets shot in the arm and you want that to just dangle so they can't use it anymore
+
+133
+00:09:29.680 --> 00:09:33.880
+or use it at 50% percent strength or whatever.
+
+134
+00:09:33.880 --> 00:09:37.600
+This is great for that kind of setup.
+
+135
+00:09:37.600 --> 00:09:41.480
+Now that we have an understanding of physics and how to get that set up on our skeletal
+
+136
+00:09:41.480 --> 00:09:46.640
+meshes, we're going to record this as an animation and then play it back through sequencer using
+
+137
+00:09:46.640 --> 00:09:48.280
+take recorder.
+
+138
+00:09:48.279 --> 00:09:54.360
+And this is great for sort of pre-baking physics animations into a predictable sequence.
+
+139
+00:09:54.360 --> 00:09:59.319
+So I've set up a big Pachinko machine obstacle course for our two skeletal meshes and when
+
+140
+00:09:59.319 --> 00:10:05.500
+I hit play or hit simulate, you can see that they all and interact with the blocks on their
+
+141
+00:10:05.500 --> 00:10:08.519
+way down.
+
+142
+00:10:08.519 --> 00:10:15.639
+And you can see that each time we play it, they do something slightly different.
+
+143
+00:10:15.639 --> 00:10:20.240
+So what we're going to do is record one of these and have that as like a reliable playback
+
+144
+00:10:20.240 --> 00:10:24.319
+for a physics animation.
+
+145
+00:10:24.319 --> 00:10:30.639
+We'll be recording using take recorder and you can access that via window, cinematics,
+
+146
+00:10:30.639 --> 00:10:32.480
+take recorder.
+
+147
+00:10:32.480 --> 00:10:37.279
+Now since version 5.1, this is defaultly enabled in the engine, but if you're using an earlier
+
+148
+00:10:37.279 --> 00:10:41.000
+version, you might find that you have to enable it as a plugin.
+
+149
+00:10:41.000 --> 00:10:46.240
+And you would do that by entering the access in the settings here, go into plugins and
+
+150
+00:10:46.240 --> 00:10:50.159
+just searching for take recorder and activating it there.
+
+151
+00:10:50.159 --> 00:10:53.440
+You probably need to restart your engine, but after that you should be able to access
+
+152
+00:10:53.440 --> 00:10:55.879
+take recorder through the options above.
+
+153
+00:10:55.879 --> 00:11:01.159
+Now take recorder is a great tool that allows you to record and save shots of whatever is
+
+154
+00:11:01.159 --> 00:11:03.039
+happening in your level.
+
+155
+00:11:03.039 --> 00:11:08.440
+Now this might be animation of a character or objects in the level or physics simulations
+
+156
+00:11:08.440 --> 00:11:12.800
+like we're about to do now, or you might even have a mocap actor connected directly
+
+157
+00:11:12.800 --> 00:11:16.000
+to the engine and you want to capture their performance.
+
+158
+00:11:16.000 --> 00:11:20.000
+So it's a really strong virtual production tool that allows you to iterate quite quickly
+
+159
+00:11:20.000 --> 00:11:23.000
+and quite easily in a lot of different ways.
+
+160
+00:11:23.000 --> 00:11:24.000
+So how does it work?
+
+161
+00:11:24.000 --> 00:11:29.680
+Well if we take a look at the UI first, up here you can set the name of your capture
+
+162
+00:11:29.680 --> 00:11:33.280
+and then determine which take you're on quite easily at the top.
+
+163
+00:11:33.280 --> 00:11:36.720
+And this big red button is how you'd start your recording.
+
+164
+00:11:36.840 --> 00:11:41.279
+Up the top left here you can use this icon to clear out any pending takes which would
+
+165
+00:11:41.279 --> 00:11:45.759
+delete any tracks that you have in an open sequence at the bottom.
+
+166
+00:11:45.759 --> 00:11:49.000
+This icon allows you to review your last recording.
+
+167
+00:11:49.000 --> 00:11:52.440
+So once you've captured something you could press that icon and then it'll open the sequence
+
+168
+00:11:52.440 --> 00:11:56.759
+that it recorded into and allow you to play it straight away.
+
+169
+00:11:56.759 --> 00:12:00.800
+This icon will allow you to record into an existing sequence.
+
+170
+00:12:00.800 --> 00:12:03.440
+So if you've got something else you want to happen in the level and that's set up in
+
+171
+00:12:03.440 --> 00:12:07.400
+a sequence you could record into that sequence and have the two things happen at the same
+
+172
+00:12:07.400 --> 00:12:08.400
+time.
+
+173
+00:12:08.400 --> 00:12:12.200
+And with this little drop down box here you can pick one of those sequences that you have
+
+174
+00:12:12.200 --> 00:12:16.400
+in the content browser to record into.
+
+175
+00:12:16.400 --> 00:12:20.840
+Here you can access the takes browser which is essentially where you'll be saving all
+
+176
+00:12:20.840 --> 00:12:25.520
+of your recorded takes.
+
+177
+00:12:25.520 --> 00:12:31.200
+This toggles the sequence for you on and off and this settings cog will open up the general
+
+178
+00:12:31.240 --> 00:12:33.640
+settings for the take recorder.
+
+179
+00:12:33.640 --> 00:12:38.960
+So where you can specify things like where you're saving your takes, timecode settings,
+
+180
+00:12:38.960 --> 00:12:44.200
+audio settings, animation settings and there's a useful thing down here called countdown
+
+181
+00:12:44.200 --> 00:12:49.400
+which by default is normally set to three seconds but for our setup here I've set it
+
+182
+00:12:49.400 --> 00:12:53.680
+to zero seconds just so we can capture everything from the beginning a little more easily without
+
+183
+00:12:53.680 --> 00:12:56.440
+having to wait for a countdown.
+
+184
+00:12:56.440 --> 00:12:59.920
+Now let's go ahead and see if we can capture a take.
+
+185
+00:12:59.919 --> 00:13:04.279
+But before we can record anything with take recorder we have to specify what is we want
+
+186
+00:13:04.279 --> 00:13:08.120
+to record it won't just capture the whole scene for you.
+
+187
+00:13:08.120 --> 00:13:12.559
+So if we come up to the take recorder UI here and hit plus source this is where we can choose
+
+188
+00:13:12.559 --> 00:13:18.399
+things that we have inside our level and we have Mali and we have Quinn.
+
+189
+00:13:18.399 --> 00:13:22.319
+So I'll just add those two as a source.
+
+190
+00:13:22.319 --> 00:13:27.399
+Now you can set up presets here so if you're constantly finding that you're trying to capture
+
+191
+00:13:27.399 --> 00:13:32.559
+the same few assets or same few actors you could save these as a preset and then each
+
+192
+00:13:32.559 --> 00:13:36.360
+time you load this up you can load that preset in and it means you won't have to load them
+
+193
+00:13:36.360 --> 00:13:39.240
+in individually each time.
+
+194
+00:13:39.240 --> 00:13:44.360
+Now if I come over to simulate and then quickly hit record when we're simulating you'll see
+
+195
+00:13:44.360 --> 00:13:49.439
+that we're capturing your two animations here and then I press stop and that'll save the
+
+196
+00:13:49.439 --> 00:13:50.439
+sequence.
+
+197
+00:13:50.439 --> 00:13:55.240
+Now the sequence isn't immediately available to preview but we can access it by reviewing
+
+198
+00:13:55.240 --> 00:14:00.519
+our last recording or with our drop down box here based on the name and take that we'd
+
+199
+00:14:00.519 --> 00:14:02.080
+set up earlier.
+
+200
+00:14:02.080 --> 00:14:06.519
+So if we just review our last sequence we can see that as we scrub through we have the
+
+201
+00:14:06.519 --> 00:14:11.440
+animation playing on our two characters where we're no longer relying on the unpredictability
+
+202
+00:14:11.440 --> 00:14:16.360
+of the physics we just have the animations baked onto these two characters here.
+
+203
+00:14:16.360 --> 00:14:21.680
+Now the way that these sequences are set up is you record into a master sequence and each
+
+204
+00:14:21.679 --> 00:14:27.839
+actor that you add as a source gets their own subsequence which means that you could
+
+205
+00:14:27.839 --> 00:14:33.919
+double click to open these subsequences and edit all the content individually.
+
+206
+00:14:33.919 --> 00:14:40.159
+Now before you can do any editing you'll find that the sequences by default come locked
+
+207
+00:14:40.159 --> 00:14:44.439
+so if you just click the lock up there that will allow you to move them around, retime
+
+208
+00:14:44.439 --> 00:14:49.639
+things, you can even add and edit animations inside here using control rig and anything
+
+209
+00:14:49.639 --> 00:14:54.399
+that you'd normally be able to do with animations inside a sequencer.
+
+210
+00:14:54.399 --> 00:14:57.879
+Whenever you've finished making any sort of animation edits you could always right click
+
+211
+00:14:57.879 --> 00:15:02.360
+your character and then bake animation sequence so that you have that as its own animation
+
+212
+00:15:02.360 --> 00:15:06.159
+sequence that you could use somewhere else in the project.
+
+213
+00:15:06.159 --> 00:15:09.759
+And to return to take recorder to capture something new you just hit the back arrow
+
+214
+00:15:09.759 --> 00:15:12.360
+at the top here.
+
+215
+00:15:12.360 --> 00:15:18.039
+All that will do is reset your sequencer and start you off with a new take.
+
+216
+00:15:18.039 --> 00:15:22.679
+So something else you can do with take recorder is record live gameplay so if we were to hit
+
+217
+00:15:22.679 --> 00:15:30.039
+plus source and add our player to our capture list I'll toggle off the two skeleton meshes
+
+218
+00:15:30.039 --> 00:15:35.839
+that we were capturing before and if I hit play and then record you can see that we're
+
+219
+00:15:35.839 --> 00:15:38.480
+now capturing our character's performance.
+
+220
+00:15:38.480 --> 00:15:42.559
+So if there was some sort of locomotion thing you wanted to capture of your character moving
+
+221
+00:15:42.559 --> 00:15:46.159
+around the level and you wanted to show off all your animation blueprint work that you
+
+222
+00:15:46.799 --> 00:15:48.879
+had this would be a great way to do that.
+
+223
+00:15:48.879 --> 00:15:57.600
+If I hit escape we can review this capture and scrub through and just see the animation
+
+224
+00:15:57.600 --> 00:16:01.439
+playing and you can do the same sort of things here.
+
+225
+00:16:01.439 --> 00:16:06.480
+So with this we could throw in a control rig, we could edit the animation, change the timings,
+
+226
+00:16:06.480 --> 00:16:10.679
+clean it up and then bake it out again once you're happy with it and you can use it elsewhere
+
+227
+00:16:10.679 --> 00:16:16.000
+in the project.
+
+228
+00:16:16.000 --> 00:16:19.399
+Just before wrapping up I wanted to share this slide that has some useful links on here
+
+229
+00:16:19.399 --> 00:16:23.960
+for things like more information on blend nodes within the engine, how to set up your
+
+230
+00:16:23.960 --> 00:16:28.399
+physics assets in the editor, also how to connect a mocap solution to the engine so
+
+231
+00:16:28.399 --> 00:16:32.639
+you can preview your actors inside, as well as a pretty useful link for some more information
+
+232
+00:16:32.639 --> 00:16:36.080
+on physics driven animation inside the engine.
+
+233
+00:16:36.080 --> 00:16:40.320
+So just to wrap up we've covered quite a few different things in this course.
+
+234
+00:16:40.320 --> 00:16:44.320
+We've seen a handful of different ways in how we can blend animations together, whether
+
+235
+00:16:44.320 --> 00:16:49.000
+that's blending them additively or cross blending them and then choosing different parts of
+
+236
+00:16:49.000 --> 00:16:52.200
+our skeletal mesh to blend these animations with.
+
+237
+00:16:52.200 --> 00:16:55.960
+Then we took a brief look at state machines and saw how one of those might be constructed
+
+238
+00:16:55.960 --> 00:17:00.200
+and even branched out into blending with physics, before then seeing how we can capture everything
+
+239
+00:17:00.200 --> 00:17:05.120
+with take recorder and save our animations out to use elsewhere in the project.
+
+240
+00:17:05.120 --> 00:17:09.039
+So thank you very much for listening and working along if you did and if you want to keep developing
+
+241
+00:17:09.039 --> 00:17:13.080
+be sure to check out the other animation courses we have available and best of luck with animation
+
+242
+00:17:13.079 --> 00:17:13.919
+blending in the future.
+

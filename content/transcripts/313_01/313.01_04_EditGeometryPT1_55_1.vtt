@@ -1,0 +1,238 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:08.000
+In this section, we will be delving into the first DNA calibration workflow that was used with Atomic Savage.
+
+2
+00:00:08.000 --> 00:00:15.000
+The Atomic S DNA Calib script is a modified version of the UnrealFest calibration script.
+
+3
+00:00:15.000 --> 00:00:24.000
+This script allows us to edit the metahuman neutral pose by transferring the details from the fitted head geometry assets to the metahuman identity,
+
+4
+00:00:24.000 --> 00:00:28.000
+and then saves those changes to the metahuman DNA file.
+
+5
+00:00:28.000 --> 00:00:36.000
+We will first go over the script input, the path settings, the constants, and how to execute the script.
+
+6
+00:00:36.000 --> 00:00:39.000
+So let's get started by reviewing the workflow.
+
+7
+00:00:39.000 --> 00:00:44.000
+The script we will be using is named Atomic S DNA Calib.
+
+8
+00:00:44.000 --> 00:00:55.000
+If you want to follow along, you can find the script and all of the associated assets that are needed to run it in the folder named Atomic S located in the source files folder.
+
+9
+00:00:55.000 --> 00:01:04.000
+This script allows us to move, scale, and transform the rig to adequate positions using the values that were identified with the locator.
+
+10
+00:01:04.000 --> 00:01:14.000
+It saves the current vertex and surface joint positions as a JSON file, then it updates the neutral mesh using the fitted head geometry OBJ files,
+
+11
+00:01:14.000 --> 00:01:24.000
+it sets the new vertex positions and snaps the surface joints to their new positions, then it updates the DNA file to include the change in deltas.
+
+12
+00:01:24.000 --> 00:01:29.000
+Now as we go over how to use the script, we will primarily work in Maya.
+
+13
+00:01:29.000 --> 00:01:33.000
+As we complete portions of this workflow, I will review the completed steps.
+
+14
+00:01:33.000 --> 00:01:39.000
+So let's jump into Maya and begin by looking at the script and the assets that we will be using.
+
+15
+00:01:39.000 --> 00:01:45.000
+Inside of Maya, let's begin by going over the script and assets that we will be using for this workflow.
+
+16
+00:01:45.000 --> 00:01:58.000
+To locate the script and assets in the source files folder, navigate to the DNA Calib assets folder, then to the Atomic S from geometry folder.
+
+17
+00:01:58.000 --> 00:02:07.000
+They will be inside of the folder named Atomic S. The Atomic S DNA Calib script is in the script folder.
+
+18
+00:02:07.000 --> 00:02:11.000
+I have added it in the script editor in a new Python window.
+
+19
+00:02:11.000 --> 00:02:19.000
+Now let's go over the setting paths that this script will use in order to locate specific assets from the work directory folder.
+
+20
+00:02:19.000 --> 00:02:26.000
+On line 10, for the root directory, enter the path that points to the DNA calibration folder.
+
+21
+00:02:26.000 --> 00:02:29.000
+In my case, it's on my C drive.
+
+22
+00:02:29.000 --> 00:02:37.000
+The work directory refers to the location of the Atomic S folder which contains the assets that this script will use.
+
+23
+00:02:37.000 --> 00:02:39.000
+I have placed this on my D drive.
+
+24
+00:02:39.000 --> 00:02:43.000
+Next, add quotations to the Maya version you are using.
+
+25
+00:02:43.000 --> 00:02:47.000
+In my case, I'm using 2023.
+
+26
+00:02:47.000 --> 00:03:07.000
+Now, if we scroll past all of these surface joints and all the way down here past this code to line 657, this section has the setting paths that will be used.
+
+27
+00:03:07.000 --> 00:03:11.000
+We already have an output folder and a temp folder.
+
+28
+00:03:11.000 --> 00:03:22.000
+Inside of the output folder, I have added a folder that contains the exported FBX and final DNA generated from this script.
+
+29
+00:03:22.000 --> 00:03:30.000
+For the character DNA, the path is pointed to the DNA called Atomic Savage in the DNA folder.
+
+30
+00:03:30.000 --> 00:03:33.000
+Below is a list of the neutral meshes.
+
+31
+00:03:33.000 --> 00:03:39.000
+These are the names of the fitted head geometry OBJ files in the model folder.
+
+32
+00:03:39.000 --> 00:03:44.000
+There is also a copy of the prepared body skeleton Maya scene in here.
+
+33
+00:03:44.000 --> 00:03:55.000
+The temp folder is where the JSON file will be added when the vertex and surface joints are saved and it also contains a copy of the prepared body skeleton Maya scene.
+
+34
+00:03:56.000 --> 00:04:03.000
+Over here, on line 699, this will be the name and path of the final DNA.
+
+35
+00:04:03.000 --> 00:04:09.000
+And here is the path to the prepared body skeleton Maya file, which is in the temp folder.
+
+36
+00:04:09.000 --> 00:04:20.000
+For the scene files, the GUI and additional assembly script paths have already been set to point to the MH4 folder for the latest version of MetaHuman.
+
+37
+00:04:20.000 --> 00:04:25.000
+If we go over here to line 712, these are the constants.
+
+38
+00:04:25.000 --> 00:04:34.000
+For the fitted geometry OBJ files in the model folder, the mesh mapping names correspond to the name of the assets as they appear in Maya.
+
+39
+00:04:34.000 --> 00:04:39.000
+On line 731, this is the name of the character.
+
+40
+00:04:39.000 --> 00:04:49.000
+Now, you can technically just run this entire script, but we are going to go through this one step at a time so that we can better understand what each command does.
+
+41
+00:04:49.000 --> 00:04:54.000
+Now, before we move on, let's do a quick review of what we just covered.
+
+42
+00:04:54.000 --> 00:05:01.000
+To use this script, for the root directory input, enter the path that points to the DNA calibration folder.
+
+43
+00:05:01.000 --> 00:05:07.000
+For the work directory, enter the path that points to the atomic S folder.
+
+44
+00:05:07.000 --> 00:05:11.000
+Ensure you add quotations to the Maya version you are using.
+
+45
+00:05:11.000 --> 00:05:19.000
+The paths for the GUI and additional assembly script are already directed to the MH4 folder for the updated rigs.
+
+46
+00:05:19.000 --> 00:05:22.000
+Now, let's go over the path settings.
+
+47
+00:05:22.000 --> 00:05:27.000
+The first setting path that is used for this script is the character DNA.
+
+48
+00:05:27.000 --> 00:05:31.000
+This path points to the atomic S DNA folder.
+
+49
+00:05:31.000 --> 00:05:34.000
+Next is the setting path for the new neutral meshes.
+
+50
+00:05:34.000 --> 00:05:39.000
+This path points to the model folder with the fitted head geometry assets.
+
+51
+00:05:39.000 --> 00:05:46.000
+Finally, the body file path points to the temp folder where the prepared body skeleton Maya scene is located.
+
+52
+00:05:46.000 --> 00:05:52.000
+I am mentioning these paths in the event you decide to use your own custom metahuman character.
+
+53
+00:05:52.000 --> 00:05:57.000
+You will want to ensure that the location of your assets match the paths that the script is using.
+
+54
+00:05:57.000 --> 00:06:00.000
+This includes the naming of constants.
+
+55
+00:06:00.000 --> 00:06:02.000
+Let's take a look at those.
+
+56
+00:06:02.000 --> 00:06:11.000
+For the fitted geometry assets in the model folder, the mesh mapping names correspond to the names of the assets as they appear in Maya.
+
+57
+00:06:11.000 --> 00:06:22.000
+For example, if I add the head LOD0 obj file to a Maya scene, in the Outliner, its name will appear as head LOD0 identity solve.
+
+58
+00:06:22.000 --> 00:06:30.000
+This is important because if the naming is not the same, then the assets will not be loaded into the Maya scene when they are needed.
+
+59
+00:06:30.000 --> 00:06:40.000
+Now that we have gone over the assets and the input paths that are needed for the script, let's move on to the next section where we will execute the script.
+

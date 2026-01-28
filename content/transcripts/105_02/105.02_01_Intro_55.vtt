@@ -1,0 +1,274 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.480
+Hello everyone, and welcome to today's class on Sequencer, Introduction for Linear Content.
+
+2
+00:00:07.480 --> 00:00:11.240
+My name is Brian Poole, and I'll be your authorized Unreal instructor throughout this
+
+3
+00:00:11.240 --> 00:00:12.919
+course.
+
+4
+00:00:12.919 --> 00:00:17.800
+This class is a follow-up from the Quickstart Sequencer class on shock construction.
+
+5
+00:00:17.800 --> 00:00:22.199
+We will readdress some of the content from that class, but we'll also go beyond those
+
+6
+00:00:22.199 --> 00:00:27.440
+lessons by examining more advanced workflows.
+
+7
+00:00:27.440 --> 00:00:30.040
+Here's a quick look at what we'll be covering today.
+
+8
+00:00:30.040 --> 00:00:34.920
+In overview, we'll begin by asking the question of what is virtual production, and what are
+
+9
+00:00:34.920 --> 00:00:39.200
+the benefits of using Unreal Engine for linear content.
+
+10
+00:00:39.200 --> 00:00:44.280
+Then we'll re-examine some of the core concepts of sequencer's capabilities like what is
+
+11
+00:00:44.280 --> 00:00:49.880
+sequencer, what is a level sequence, and we'll discuss actor persistence types.
+
+12
+00:00:49.880 --> 00:00:54.000
+That will be followed by an examination of core structures in sequencer, define a few
+
+13
+00:00:54.000 --> 00:00:59.679
+terms, and compare Unreal Sequencer to the structure of film production.
+
+14
+00:00:59.679 --> 00:01:05.159
+Next we'll take a look at sequencer's interface, discuss event management, curve editing, and
+
+15
+00:01:05.159 --> 00:01:07.120
+setting up level sequence templates.
+
+16
+00:01:07.120 --> 00:01:12.159
+Plus, we'll spend some time learning about Unreal cameras and their components, take
+
+17
+00:01:12.159 --> 00:01:16.599
+recorder, live link face, and VCAM.
+
+18
+00:01:16.599 --> 00:01:21.480
+In hands-on, shock creation and assembly, we'll focus on how to actually set up a nested
+
+19
+00:01:21.480 --> 00:01:26.000
+level sequence assembly, how it's different from using just a single camera cuts track
+
+20
+00:01:26.000 --> 00:01:32.880
+alone, and how it ties to the shot track, sub-scene tracks, and other advanced functionality.
+
+21
+00:01:32.880 --> 00:01:36.600
+This will be followed by a practical exercise.
+
+22
+00:01:36.600 --> 00:01:41.159
+And then finally, in final recommendations, we'll talk about level organization, folder
+
+23
+00:01:41.159 --> 00:01:46.760
+structures, and sequencer best practices, and then look into potential tips and resources.
+
+24
+00:01:46.760 --> 00:01:51.320
+Alright, let's get started.
+
+25
+00:01:51.319 --> 00:01:59.679
+These class will be utilizing the SEQ-10502 map level in the SEQ-90505 project file.
+
+26
+00:01:59.679 --> 00:02:04.199
+It can be downloaded under content, courses, course maps.
+
+27
+00:02:04.199 --> 00:02:09.479
+The project file you've downloaded contains items associated with four different courses.
+
+28
+00:02:09.479 --> 00:02:13.879
+We will be examining the course SEQ-10502.
+
+29
+00:02:13.879 --> 00:02:17.639
+Our goal for this course is to expand our knowledge of sequencer by understanding the
+
+30
+00:02:17.639 --> 00:02:22.319
+basics of creating multiple shots using nested level sequences.
+
+31
+00:02:22.319 --> 00:02:27.759
+This project will utilize a level, multiple level sequences, and contain a character,
+
+32
+00:02:27.759 --> 00:02:32.039
+multiple cameras, camera cuts tracks, and a shot track.
+
+33
+00:02:32.039 --> 00:02:37.079
+This approach is the more advanced of two sequencer assembly methods, whereas the first
+
+34
+00:02:37.079 --> 00:02:42.439
+method only leverages a single level sequence and a single camera cuts track, this version
+
+35
+00:02:42.439 --> 00:02:49.039
+showcases nested level sequences for more advanced shot creation and flexibility.
+
+36
+00:02:49.039 --> 00:02:52.719
+After you've downloaded the zip file and extracted its contents, you should see the
+
+37
+00:02:52.719 --> 00:02:56.840
+SEQ-90501-55 project file.
+
+38
+00:02:56.840 --> 00:03:01.159
+This file was created in Unreal 5.5, so if you have an early version of the engine, you
+
+39
+00:03:01.159 --> 00:03:02.159
+should upgrade.
+
+40
+00:03:02.159 --> 00:03:06.400
+If you have a later version of Unreal, you'll have to convert the project file to Unreal
+
+41
+00:03:06.400 --> 00:03:12.240
+5.6 or higher by following the prompts Unreal provides for you upon launching this project.
+
+42
+00:03:13.000 --> 00:03:16.640
+The primary map should automatically load, but in case it doesn't, let's take a look
+
+43
+00:03:16.640 --> 00:03:20.080
+as to where you can find it.
+
+44
+00:03:20.080 --> 00:03:22.840
+Inside the content folder, there is a course folder.
+
+45
+00:03:22.840 --> 00:03:25.640
+This folder contains a course maps folder.
+
+46
+00:03:25.640 --> 00:03:30.360
+Within here, you'll find maps for all four courses within this project.
+
+47
+00:03:30.360 --> 00:03:36.320
+In case your level didn't open upon launch, let's double click on the SEQ-10502 map.
+
+48
+00:03:36.320 --> 00:03:39.520
+This will bring up Rural Australia.
+
+49
+00:03:39.520 --> 00:03:43.360
+This is a really great map with some very realistic models and textures.
+
+50
+00:03:43.360 --> 00:03:47.920
+What's even better is that it's highly optimized and can run on most computers and GPUs with
+
+51
+00:03:47.920 --> 00:03:49.080
+ease.
+
+52
+00:03:49.080 --> 00:03:54.920
+This map can be found on FAP in case you're interested in having it in your own library.
+
+53
+00:03:54.920 --> 00:03:58.560
+If you're curious as to where the assets are for this level, they're located in the
+
+54
+00:03:58.560 --> 00:04:01.879
+assets folder inside Rural Australia.
+
+55
+00:04:01.879 --> 00:04:06.080
+And if we take a look over here in the Outliner, everything is nicely organized into folders
+
+56
+00:04:06.080 --> 00:04:11.120
+and named beautifully with a dedicated naming convention.
+
+57
+00:04:11.120 --> 00:04:15.560
+The level sequence we'll be examining and ultimately recreating is located in the course
+
+58
+00:04:15.560 --> 00:04:19.720
+folder inside of the SEQ-10502 folder.
+
+59
+00:04:19.720 --> 00:04:26.480
+Then open course topics, shot creation folder, and finally the multi-shot EX folder.
+
+60
+00:04:26.480 --> 00:04:32.000
+Our level sequence is SEQ-multi-shot EX.
+
+61
+00:04:32.000 --> 00:04:35.639
+If you'd like to take a look, double click on the level sequence icon.
+
+62
+00:04:35.680 --> 00:04:39.919
+This will open the Sequencer UI and you'll be allowed to view the sequence by clicking
+
+63
+00:04:39.919 --> 00:04:44.360
+on the camera icon in the shots track and then pressing play.
+
+64
+00:04:44.360 --> 00:04:50.319
+This will show you the three level sequence shots being played back-to-back in sequence.
+
+65
+00:04:50.319 --> 00:04:54.680
+In our next module, we'll take a look at a brief overview of using Sequencer for virtual
+
+66
+00:04:54.680 --> 00:04:58.319
+production and for the creation of linear content.
+
+67
+00:04:58.319 --> 00:05:03.159
+Then we'll move on to core concepts and structure behind Sequencer and understand how Sequencer
+
+68
+00:05:03.160 --> 00:05:04.360
+fundamentals operate.
+

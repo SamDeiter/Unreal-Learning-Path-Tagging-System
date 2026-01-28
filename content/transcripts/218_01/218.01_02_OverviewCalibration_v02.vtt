@@ -1,0 +1,150 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.000
+Now let's begin with another view of calibration.
+
+2
+00:00:04.000 --> 00:00:07.000
+So you're probably wondering, why is calibration required?
+
+3
+00:00:07.000 --> 00:00:12.000
+Well, in order to create accurate compositions from CG renders and live video in Unreal Engine,
+
+4
+00:00:12.000 --> 00:00:19.000
+a virtual camera that accurately simulates the physical camera used to capture the real-world video footage is required.
+
+5
+00:00:19.000 --> 00:00:23.000
+This is also really useful if you're going to do any kind of set extension.
+
+6
+00:00:23.000 --> 00:00:27.000
+If you don't do lens calibration before you do any of your set extension,
+
+7
+00:00:27.000 --> 00:00:35.000
+you're not going to have the data necessary to pass on to the departments requiring that information in order to complete your shots.
+
+8
+00:00:35.000 --> 00:00:41.000
+The virtual camera position and orientation in these situations must closely match the position and orientation
+
+9
+00:00:41.000 --> 00:00:45.000
+of the physical camera and the physical camera tracking information
+
+10
+00:00:45.000 --> 00:00:55.000
+that must match the exact timing of the video feed to ensure each video frame is accurately synced to the position and orientation of the camera at any given time.
+
+11
+00:00:55.000 --> 00:01:05.000
+Now, when completed correctly, it is possible to evaluate the calibrated lens file for any focus and zoom position by interpolating between the stored focus and zoom points.
+
+12
+00:01:05.000 --> 00:01:14.000
+Now as we go through the calibration process, the camera calibration and OpenCV lens distortion plugins allow Unreal Engine to model the physical lens distortion needed
+
+13
+00:01:14.000 --> 00:01:24.000
+to accurately align the virtual camera to the physical camera and introduces the lens file asset used to store all of the calibration data for camera and lenses.
+
+14
+00:01:24.000 --> 00:01:30.000
+One thing to note is that the calibrated lens data can vary depending on the camera's focus and zoom.
+
+15
+00:01:30.000 --> 00:01:38.000
+In order to achieve a high quality calibration, multiple focus and zoom points should be captured during the calibration process.
+
+16
+00:01:38.000 --> 00:01:42.000
+Now, before we get started, I do want to jump into Unreal Engine.
+
+17
+00:01:42.000 --> 00:01:53.000
+There are a few folders that we need in our calibration folder in order to actually put things in order and keep them organized as we calibrate our camera for the engine.
+
+18
+00:01:53.000 --> 00:01:58.000
+Now, you'll see here that I'm over in my content browser and I already have an existing calibration folder.
+
+19
+00:01:58.000 --> 00:02:05.000
+I also have my media profile and my media profile bundle folder located within my calibration folder.
+
+20
+00:02:05.000 --> 00:02:11.000
+So you see here I've got my media profile and my media profile inner assets.
+
+21
+00:02:11.000 --> 00:02:16.000
+Now, the folders I need in my calibration folder are my Aruco wall textures.
+
+22
+00:02:16.000 --> 00:02:23.000
+So I'm going to go ahead and create a brand new folder and I'm going to name this Aruco Wall Textures.
+
+23
+00:02:23.000 --> 00:02:28.000
+This is going to be used to store our Aruco wall textures in our next course.
+
+24
+00:02:28.000 --> 00:02:32.000
+Next, we're going to need another new folder. We're going to call this one Checkerboard.
+
+25
+00:02:32.000 --> 00:02:38.000
+We're going to need this when we create our Checkerboard for calibration of our lens distortion map.
+
+26
+00:02:38.000 --> 00:02:42.000
+Next, we need to get another folder here that we're going to call Lens Files.
+
+27
+00:02:42.000 --> 00:02:48.000
+Now, this is where we're going to keep all the lens files that we create for each individual camera and lens combination.
+
+28
+00:02:48.000 --> 00:02:54.000
+Any time that you create a new lens and camera combination, you will need a new lens file.
+
+29
+00:02:54.000 --> 00:02:58.000
+And finally, we're going to create a new folder for NotalPoint.
+
+30
+00:02:58.000 --> 00:03:02.000
+And this is where we store the objects we use for NotalPoint calibration.
+
+31
+00:03:02.000 --> 00:03:07.000
+Now, if you want to stay organized and just keep these separate, you can go ahead and create a new folder
+
+32
+00:03:07.000 --> 00:03:15.000
+and call this Media Profiles and move your inner assets along with your media bundle, media source, media output,
+
+33
+00:03:15.000 --> 00:03:19.000
+and media profile in one single location.
+
+34
+00:03:19.000 --> 00:03:25.000
+It is recommended, though, when you do create your media profiles that you generate this folder before you do that.
+
+35
+00:03:25.000 --> 00:03:30.000
+Now, in order to make sure that you have this working correctly, you'll notice that this folder is now empty
+
+36
+00:03:30.000 --> 00:03:35.000
+and a duplicate was created inside this Media Profiles folder.
+
+37
+00:03:35.000 --> 00:03:41.000
+So, that's it for this section. In our next section, we will discuss some of our camera configurations.
+

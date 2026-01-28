@@ -1,0 +1,574 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.759
+In this lesson, we're going to take a look at HLODs and how they work with your levels
+
+2
+00:00:04.759 --> 00:00:05.759
+of detail.
+
+3
+00:00:05.759 --> 00:00:07.160
+So, let's get started.
+
+4
+00:00:07.160 --> 00:00:11.160
+So, HLODs, you may ask, what exactly are they?
+
+5
+00:00:11.160 --> 00:00:15.160
+Well, they're a hierarchical level of detail.
+
+6
+00:00:15.160 --> 00:00:20.480
+It's a way to combine pre-existing SeticMesh actors into a single HLOD proxy mesh and
+
+7
+00:00:20.480 --> 00:00:23.800
+material with at-list textures.
+
+8
+00:00:24.320 --> 00:00:30.440
+So, using HLOD may lead to increased performances as they reduce draw calls down to one call
+
+9
+00:00:30.440 --> 00:00:34.640
+per proxy mesh, which is pretty convenient.
+
+10
+00:00:34.640 --> 00:00:39.000
+When generating HLOD proxy meshes, there are several parameters you can adjust which help
+
+11
+00:00:39.000 --> 00:00:44.560
+define how static mesh actors are grouped together as clusters that will ultimately
+
+12
+00:00:44.560 --> 00:00:47.280
+be built into proxy meshes.
+
+13
+00:00:47.280 --> 00:00:51.480
+Now, you don't have to use this tool, but it is available.
+
+14
+00:00:51.479 --> 00:00:55.739
+It's a little bit more on the old-school side, and you may find that Nenite fits the
+
+15
+00:00:55.739 --> 00:00:58.279
+bill just fine.
+
+16
+00:00:58.279 --> 00:01:03.179
+But to be able to create it, you do want to start out by going into your proxy meshes.
+
+17
+00:01:03.179 --> 00:01:06.840
+You can find them under your world settings.
+
+18
+00:01:06.840 --> 00:01:12.519
+So these proxy meshes are created from clusters of static meshes, like we mentioned.
+
+19
+00:01:12.519 --> 00:01:15.039
+Each cluster is going to be one draw call.
+
+20
+00:01:15.039 --> 00:01:17.400
+That's the benefit you get from this.
+
+21
+00:01:17.400 --> 00:01:21.600
+Clusters can't be merged into bigger clusters at a greater distance.
+
+22
+00:01:21.600 --> 00:01:25.600
+So use them for wide shots or open worlds.
+
+23
+00:01:25.600 --> 00:01:30.760
+No, HLOD layers can now be used to house Geo also with World Partition.
+
+24
+00:01:30.760 --> 00:01:34.040
+So you can use them with World Partition also.
+
+25
+00:01:34.040 --> 00:01:36.760
+But I want to put a note here for World Partition.
+
+26
+00:01:36.760 --> 00:01:40.939
+If you decide to use it with your team, keep in mind there are still some things evolving
+
+27
+00:01:40.939 --> 00:01:45.580
+with it, such as linking your World Partition updates with Perforce.
+
+28
+00:01:45.579 --> 00:01:49.260
+There can be some workarounds that you may have to tackle in that.
+
+29
+00:01:49.260 --> 00:01:56.859
+And we're not going to cover that here, but I want you to be aware of it.
+
+30
+00:01:56.859 --> 00:02:03.659
+So creating it, we're going to go to our world settings and load Hiercal LOD setup.
+
+31
+00:02:03.659 --> 00:02:06.739
+We're going to generate a single cluster if needed.
+
+32
+00:02:06.739 --> 00:02:12.419
+And this can be set to HLOD in the HLOD Outletter also, which we'll take a look at in just a
+
+33
+00:02:12.419 --> 00:02:13.419
+bit.
+
+34
+00:02:13.419 --> 00:02:20.099
+So let's hop into Unreal and take a quick look too.
+
+35
+00:02:20.099 --> 00:02:26.659
+From there, you want to open your Hiercal LOD Outletter and select the HLOD setup asset.
+
+36
+00:02:26.659 --> 00:02:28.419
+And that can be default.
+
+37
+00:02:28.419 --> 00:02:33.979
+So you don't necessarily have to do any heavy lifting on this particular case.
+
+38
+00:02:33.979 --> 00:02:38.899
+We did have an older version if you were used to it, where HLOD would list a lot more options
+
+39
+00:02:38.899 --> 00:02:40.019
+than it does now.
+
+40
+00:02:40.019 --> 00:02:42.099
+It's been pared down quite a bit.
+
+41
+00:02:42.099 --> 00:02:43.979
+But you want to generate your clusters.
+
+42
+00:02:43.979 --> 00:02:47.460
+And when you generate your clusters, you're going to be able to get the items that you
+
+43
+00:02:47.460 --> 00:02:49.699
+need.
+
+44
+00:02:49.699 --> 00:02:54.740
+Now if the actor's changing anyway, it's going to prompt you.
+
+45
+00:02:54.740 --> 00:02:57.939
+It'll tell you, hey, man, you need to generate those proxy meshes again.
+
+46
+00:02:57.939 --> 00:03:00.299
+Because that's kind of important.
+
+47
+00:03:00.299 --> 00:03:04.299
+Things have changed to update the HLOD cluster.
+
+48
+00:03:04.299 --> 00:03:07.659
+Only use build all if you have to.
+
+49
+00:03:07.659 --> 00:03:11.019
+As it can dirty your scene, and Unreal will let you know.
+
+50
+00:03:11.140 --> 00:03:13.540
+I'll say, hey, buddy, are you sure about this?
+
+51
+00:03:13.540 --> 00:03:16.020
+This may not be the right choice for you.
+
+52
+00:03:16.020 --> 00:03:21.140
+We're going to actually look at an HLOD volume also in place with an HLOD in my scene that
+
+53
+00:03:21.140 --> 00:03:22.939
+I've given to you.
+
+54
+00:03:22.939 --> 00:03:27.540
+Let's go ahead and jump into Unreal and look at the setup I have, as well as look at the
+
+55
+00:03:27.540 --> 00:03:33.540
+HLOD Outliner breakdown that shows some of the things that have been generated and some
+
+56
+00:03:33.540 --> 00:03:38.100
+overall sweeping control that you've gotten in your scene.
+
+57
+00:03:38.180 --> 00:03:41.659
+In Unreal, I'm going to go to my beach HLOD sample.
+
+58
+00:03:41.659 --> 00:03:43.139
+Let's go and click on that.
+
+59
+00:03:43.139 --> 00:03:48.099
+I'm going to say, don't save what we were doing.
+
+60
+00:03:48.099 --> 00:03:52.859
+Get that to come up.
+
+61
+00:03:52.859 --> 00:03:55.139
+We'll see it generate, get in there.
+
+62
+00:03:55.139 --> 00:04:00.099
+Now, let's go and take a look at things overall.
+
+63
+00:04:00.099 --> 00:04:04.939
+Let's open up our HLOD Outliner.
+
+64
+00:04:04.939 --> 00:04:06.419
+Let me pull it over.
+
+65
+00:04:06.419 --> 00:04:11.339
+You see that I have generated some HLOD objects in here.
+
+66
+00:04:11.339 --> 00:04:16.219
+We have a LOD actor here that has all the parts for that particular probe.
+
+67
+00:04:16.219 --> 00:04:18.379
+We have another one in here.
+
+68
+00:04:18.379 --> 00:04:23.899
+Unreal's clustering these, so let me know what has become an HLOD object.
+
+69
+00:04:23.899 --> 00:04:27.300
+Anytime you don't want these in here, you can delete that cluster.
+
+70
+00:04:27.300 --> 00:04:30.019
+You're like, hey, I don't really need this one.
+
+71
+00:04:30.019 --> 00:04:31.019
+This one's fine.
+
+72
+00:04:31.019 --> 00:04:32.779
+Nanite's handling it just fine.
+
+73
+00:04:32.779 --> 00:04:35.180
+I can go ahead and delete that.
+
+74
+00:04:35.180 --> 00:04:39.939
+You can also, as we go and open these up, look at these on an individual level.
+
+75
+00:04:39.939 --> 00:04:45.019
+You'll see there's advanced settings here, and it just shows you the transform options.
+
+76
+00:04:45.019 --> 00:04:49.220
+It isn't as robust as it used to be, or we used to have a bit more, or you have a little
+
+77
+00:04:49.220 --> 00:04:51.860
+bit more material control and a few other things.
+
+78
+00:04:51.860 --> 00:04:55.019
+Those don't quite pop up like they used to.
+
+79
+00:04:55.019 --> 00:04:57.980
+Things have been pretty pared down here.
+
+80
+00:04:57.980 --> 00:05:00.460
+You'll notice at the bottom here, we have a yellow message here.
+
+81
+00:05:00.459 --> 00:05:06.459
+These actors represented in the HLOD have changed, generate proxy meshes to update.
+
+82
+00:05:06.459 --> 00:05:10.099
+Since I've tweaked with this file a bit, I would have to just generate another proxy
+
+83
+00:05:10.099 --> 00:05:13.339
+meshes here for any updates or changes that I've made.
+
+84
+00:05:13.339 --> 00:05:14.339
+Keep that in mind.
+
+85
+00:05:14.339 --> 00:05:16.139
+Again, build all.
+
+86
+00:05:16.139 --> 00:05:19.699
+You kind of want to avoid if you don't really have to do it.
+
+87
+00:05:19.699 --> 00:05:28.099
+There's also regenerates your clusters, but no proxy meshes for meshes in the level.
+
+88
+00:05:28.100 --> 00:05:31.700
+This is your initial button that you would click, and then from there, any changes you
+
+89
+00:05:31.700 --> 00:05:35.500
+can do for your generated proxy meshes are found here.
+
+90
+00:05:35.500 --> 00:05:44.740
+Now, another thing I want to point out, there's a thing called an HLOD volume.
+
+91
+00:05:44.740 --> 00:05:46.240
+Type in volume here.
+
+92
+00:05:46.240 --> 00:05:47.400
+There's a lot here.
+
+93
+00:05:47.400 --> 00:05:52.100
+You'll see that I've drug in an HLOD proxy volume.
+
+94
+00:05:52.100 --> 00:05:59.500
+This actually acts as a container to hold a cluster of HLODs that we have built in.
+
+95
+00:05:59.500 --> 00:06:06.300
+I can actually use this as a priority area until Unreal to read a group of pieces of
+
+96
+00:06:06.300 --> 00:06:10.060
+geometry as one draw call.
+
+97
+00:06:10.060 --> 00:06:13.700
+You'll see this HLOD volume here.
+
+98
+00:06:13.700 --> 00:06:15.939
+This actually works pretty well.
+
+99
+00:06:15.939 --> 00:06:20.460
+This HLOD volume, you'll see, also has a few more options.
+
+100
+00:06:20.459 --> 00:06:22.539
+It tells you to include overlapping actors.
+
+101
+00:06:22.539 --> 00:06:24.779
+I can definitely tick that box on.
+
+102
+00:06:24.779 --> 00:06:28.739
+There are a few that are overlapping a bit in my scene.
+
+103
+00:06:28.739 --> 00:06:35.099
+We have a few generic brush settings in here, but we also have include actor in HLOD.
+
+104
+00:06:35.099 --> 00:06:37.819
+It's going to, you want to make sure that's turned on.
+
+105
+00:06:37.819 --> 00:06:41.620
+There's some advance with the brush settings, but it's nothing to write home about.
+
+106
+00:06:41.620 --> 00:06:44.339
+But overall, you can see how things work.
+
+107
+00:06:44.339 --> 00:06:47.459
+Now, down below, you will see a level instancing.
+
+108
+00:06:47.459 --> 00:06:49.899
+We're not doing that in this particular case.
+
+109
+00:06:49.899 --> 00:06:54.779
+Level instancing allows you to grab maybe a group of rocks, these particular ones.
+
+110
+00:06:54.779 --> 00:06:59.659
+If I wanted to, I can turn them into a level instance actor.
+
+111
+00:06:59.659 --> 00:07:02.819
+In this case, we're not covering that in this particular class.
+
+112
+00:07:02.819 --> 00:07:05.939
+It's a little bit more building of your game world.
+
+113
+00:07:05.939 --> 00:07:10.579
+From here, we're mainly going to be focusing on our HLODs.
+
+114
+00:07:10.579 --> 00:07:13.779
+I just wanted to point that out if you're wondering what that does.
+
+115
+00:07:13.779 --> 00:07:18.139
+This basically allows you to have instanced pieces of large.
+
+116
+00:07:18.180 --> 00:07:25.060
+You have a huge open world area and there's some rock formations and large landscapes and
+
+117
+00:07:25.060 --> 00:07:27.379
+just things that you've kind of mushed together.
+
+118
+00:07:27.379 --> 00:07:31.180
+And you have all these pieces of geometry to manage them.
+
+119
+00:07:31.180 --> 00:07:35.539
+You can actually create a level instance to make things a little bit lighter and unreal
+
+120
+00:07:35.539 --> 00:07:40.979
+will instance those pieces of geometry as an instance part of your level and make things,
+
+121
+00:07:40.979 --> 00:07:46.180
+it makes things a little bit more organized and categorized and reading the geometry smoother
+
+122
+00:07:46.220 --> 00:07:51.740
+so that your big world that you've created doesn't become too much of a bog in your scene.
+
+123
+00:07:52.980 --> 00:08:01.780
+So here, again, we have an HLOD volume and again, it is calculating everything in my scene the way that I want.
+
+124
+00:08:04.939 --> 00:08:10.460
+And if we did a comparable like we just talked about, I could grab this pieces of geometry here,
+
+125
+00:08:10.460 --> 00:08:15.620
+right click and you'll see level and I can create an instance level if I wanted to.
+
+126
+00:08:15.620 --> 00:08:19.660
+And in there, I can have living an HLOD if I wanted.
+
+127
+00:08:20.379 --> 00:08:23.259
+And then it would simply be able to be loaded in here.
+
+128
+00:08:23.259 --> 00:08:26.379
+Now there's a difference when you're working with those.
+
+129
+00:08:26.379 --> 00:08:28.459
+We're working in our levels here.
+
+130
+00:08:28.459 --> 00:08:33.980
+If I was working in a world partition, I would not be working in levels.
+
+131
+00:08:33.980 --> 00:08:36.100
+So there's a give and take situation there.
+
+132
+00:08:36.100 --> 00:08:39.980
+And we do have a class talking about that in which one of my colleagues really breaks
+
+133
+00:08:39.980 --> 00:08:41.779
+that down a bit easier for you.
+
+134
+00:08:41.779 --> 00:08:46.139
+But I just wanted to explain if there's any confusion about how that system works.
+
+135
+00:08:46.899 --> 00:08:53.740
+So to break it down even further, they are used by the hierarchical level of detail HLOD system
+
+136
+00:08:53.740 --> 00:08:56.620
+to group actors into a single HLOD cluster.
+
+137
+00:08:56.819 --> 00:08:59.500
+So again, like I said before, it puts them in a cluster.
+
+138
+00:08:59.860 --> 00:09:05.259
+When generating clusters, the Unreal Engine will override its normal generation process
+
+139
+00:09:06.059 --> 00:09:09.620
+in difference to manually placed volume.
+
+140
+00:09:09.620 --> 00:09:14.139
+So basically going to look at them as a priority area, like I mentioned before.
+
+141
+00:09:15.139 --> 00:09:16.740
+That's it with this lesson.
+
+142
+00:09:16.740 --> 00:09:20.980
+Here's a few links here that allow you to dive in a bit deeper on these topics.
+
+143
+00:09:21.580 --> 00:09:25.860
+In the next section, we're going to take a look at texture and material optimization.
+

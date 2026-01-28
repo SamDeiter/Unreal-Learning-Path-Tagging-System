@@ -1,0 +1,414 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.500
+To set up the IK3 bone function, we're going to need two new controls, one for the foot
+
+2
+00:00:06.500 --> 00:00:14.160
+and one for the pole vector, and tell the function which bones we want to affect.
+
+3
+00:00:14.160 --> 00:00:21.920
+Let's give ourselves a little bit more space here and search for the IK3 bone function.
+
+4
+00:00:21.920 --> 00:00:26.100
+Now you can see that this function takes a lot of information in, which is predominantly
+
+5
+00:00:26.100 --> 00:00:31.900
+about the axes of our bones, a pole vector node, and then the bones that we're trying
+
+6
+00:00:31.900 --> 00:00:35.240
+to affect along with a foot control.
+
+7
+00:00:35.240 --> 00:00:39.140
+We're not going to create a thigh control today because a foot control will be all we
+
+8
+00:00:39.140 --> 00:00:41.020
+need.
+
+9
+00:00:41.020 --> 00:00:46.620
+So the first thing we're going to do is figure out our primary and our secondary axes.
+
+10
+00:00:46.620 --> 00:00:51.340
+So if we hover over the function, we can see that the primary axis is the axis pointing
+
+11
+00:00:51.340 --> 00:00:56.580
+down the bone, which is typically X, and the secondary axis is our up axis, which is
+
+12
+00:00:56.580 --> 00:00:59.500
+typically Z, or sometimes none.
+
+13
+00:00:59.500 --> 00:01:01.660
+So I pop these open.
+
+14
+00:01:01.660 --> 00:01:07.020
+To figure this out, what we can do if I come to character and bones, then all hierarchy,
+
+15
+00:01:07.020 --> 00:01:10.020
+we'll be able to see all the bones in the viewport here.
+
+16
+00:01:10.020 --> 00:01:15.300
+And the bones that we want to affect will be sort of the upper thigh, lower thigh, the
+
+17
+00:01:15.300 --> 00:01:18.820
+lower leg, and a foot down here.
+
+18
+00:01:18.819 --> 00:01:25.739
+So if I select that from the viewport, we can see that's our leg FR01L.
+
+19
+00:01:25.739 --> 00:01:32.859
+And to see the orientation axes on this, if you come up to the option box at the top and
+
+20
+00:01:32.859 --> 00:01:37.859
+choose display axes on selection, this is not usually turned on by default, so you should
+
+21
+00:01:37.859 --> 00:01:39.979
+have to turn that on.
+
+22
+00:01:39.979 --> 00:01:47.299
+And then if we zoom right into that control, the bones, sorry, we can see that the Z axis,
+
+23
+00:01:47.299 --> 00:01:55.539
+the X axis is pointing along our bone, and the Z axis is the one that's pointing up.
+
+24
+00:01:55.539 --> 00:02:01.500
+So our primary axis is pointing along the bone, that's X, and secondary axis will change
+
+25
+00:02:01.500 --> 00:02:08.460
+that to be Z.
+
+26
+00:02:08.460 --> 00:02:14.819
+Now we don't have any all vector node yet, and we don't have a foot control.
+
+27
+00:02:14.819 --> 00:02:18.259
+But what we do have are the bones in the chain.
+
+28
+00:02:18.259 --> 00:02:24.859
+And if we pop each one of these open, we can actually fill this information in now.
+
+29
+00:02:24.859 --> 00:02:29.459
+So bone A is going to be the most, the uppermost bone in our chain, which is going to be the
+
+30
+00:02:29.459 --> 00:02:32.620
+leg FR01L.
+
+31
+00:02:32.620 --> 00:02:37.459
+So with that selected, we can hit this little arrow and fill that information in there.
+
+32
+00:02:37.459 --> 00:02:42.180
+And then just go down the chain and add each of those.
+
+33
+00:02:43.180 --> 00:02:51.980
+And if I find O4, the foot base just here, we can plug that in as well.
+
+34
+00:02:51.980 --> 00:02:59.260
+So leg 01, 02, 03, and 04, that represents the chain of our leg.
+
+35
+00:02:59.260 --> 00:03:03.020
+Now that we have our bone information set up, we can create the foot control.
+
+36
+00:03:03.020 --> 00:03:07.860
+And we're going to do that based off of the leg 04 bone.
+
+37
+00:03:07.860 --> 00:03:13.660
+So if I browse to that, I can right click, go to New, Control.
+
+38
+00:03:13.660 --> 00:03:16.940
+And down the bottom here, you'll see we've got New, Control with the same name, just
+
+39
+00:03:16.940 --> 00:03:19.900
+out of the hierarchy of the skeleton.
+
+40
+00:03:19.900 --> 00:03:21.460
+And we'll customize the look of this again.
+
+41
+00:03:21.460 --> 00:03:29.220
+So I'll make this a box, and I will just scale it up a little.
+
+42
+00:03:29.220 --> 00:03:32.900
+Maybe that's a bit too big.
+
+43
+00:03:32.900 --> 00:03:35.940
+And so it's not quite so awkward to animate with.
+
+44
+00:03:35.939 --> 00:03:44.460
+What I'm going to do under the offset heading here is reset the rotation of the Y channel,
+
+45
+00:03:44.460 --> 00:03:48.740
+or the Y axis, to zero.
+
+46
+00:03:48.740 --> 00:03:53.860
+Just so that if we were to translate this up and down, or move it forwards and backwards,
+
+47
+00:03:53.860 --> 00:03:56.579
+it's just easier to animate within that sense.
+
+48
+00:03:56.579 --> 00:04:04.460
+And now we can put the information into our IK3 bone function.
+
+49
+00:04:04.820 --> 00:04:20.579
+So we're going to do a little bit of math to make sure that we get this control in the
+
+50
+00:04:20.579 --> 00:04:25.939
+right location, to make sure that it's on the same plane as the leg joints.
+
+51
+00:04:25.939 --> 00:04:31.139
+Luckily, there is a function that already exists to help us do this.
+
+52
+00:04:31.139 --> 00:04:36.939
+So what I'm going to do, if I just drag this out here, give us more space again, right-click,
+
+53
+00:04:36.939 --> 00:04:40.779
+search for compute pole vector.
+
+54
+00:04:40.779 --> 00:04:45.379
+Now this is going to ask us for the three bones that we want to use as our plane to
+
+55
+00:04:45.379 --> 00:04:49.539
+create the pole vector's location from.
+
+56
+00:04:49.539 --> 00:04:53.819
+And the output transforms are going to give us that location.
+
+57
+00:04:53.819 --> 00:04:56.060
+So first of all, we need to create a new control.
+
+58
+00:04:56.459 --> 00:05:04.259
+So if I right-click in a blank space, select new control, and just rename this leg underscore
+
+59
+00:05:04.259 --> 00:05:08.860
+pv underscore ctrl.
+
+60
+00:05:08.860 --> 00:05:11.699
+So this is going to be a leg pole vector control.
+
+61
+00:05:11.699 --> 00:05:16.500
+I'll just change this so we can see it more easily in the viewport, to a sort of green
+
+62
+00:05:16.500 --> 00:05:18.060
+sort of color.
+
+63
+00:05:18.060 --> 00:05:24.100
+And I think what we'll probably do is just scale that up to maybe five, for example.
+
+64
+00:05:24.140 --> 00:05:26.180
+So this is our new control.
+
+65
+00:05:26.180 --> 00:05:29.379
+But again, it's not in the correct location.
+
+66
+00:05:29.379 --> 00:05:33.820
+So we need to feed this compute pole vector function the three bones that we want to use
+
+67
+00:05:33.820 --> 00:05:36.100
+to calculate its position.
+
+68
+00:05:36.100 --> 00:05:42.939
+And that's going to be our fr02, 03, and 04.
+
+69
+00:05:42.939 --> 00:05:50.700
+So if I plug in 02, plug in 03, and then plug in 04, that's sort of our thigh, knee, and foot
+
+70
+00:05:50.700 --> 00:05:51.700
+bones.
+
+71
+00:05:52.699 --> 00:06:01.180
+And if I then connect up that logic, what we'll do is use this transform information to set
+
+72
+00:06:01.180 --> 00:06:05.219
+the position of this pole vector control.
+
+73
+00:06:05.219 --> 00:06:12.139
+So I'm going to drag that into our rig graph and choose set control, connect up the logic,
+
+74
+00:06:12.139 --> 00:06:15.699
+and connect up the transform pin to the value pin.
+
+75
+00:06:15.699 --> 00:06:21.539
+And you can see that positions our pole vector control along the plane of those three bones
+
+76
+00:06:21.540 --> 00:06:24.620
+and we know that it's perfectly aligned.
+
+77
+00:06:24.620 --> 00:06:28.819
+One thing that I'm going to do is just increase this offset factor value so that we're a little
+
+78
+00:06:28.819 --> 00:06:30.620
+further away from the mesh.
+
+79
+00:06:30.620 --> 00:06:35.420
+And it means it's easier not to get lost inside the mesh.
+
+80
+00:06:35.420 --> 00:06:39.980
+Now we don't want this running all the time because if we're setting the transform of
+
+81
+00:06:39.980 --> 00:06:43.340
+our control, we won't be able to move this and animate it.
+
+82
+00:06:43.340 --> 00:06:48.300
+So if we right click the control where it is now and choose set offset transform from
+
+83
+00:06:48.300 --> 00:06:50.820
+current.
+
+84
+00:06:50.819 --> 00:06:57.899
+That sets its new sort of zero pose like freezing transforms in mayor.
+
+85
+00:06:57.899 --> 00:07:04.699
+So we can now delete this small bit of logic, compile, and we'll see that this pole vector
+
+86
+00:07:04.699 --> 00:07:11.100
+control is now positioned in the world along the plane of those three bones.
+
+87
+00:07:11.100 --> 00:07:16.899
+So now if we were to grab that, input that into our IK3 bone, we can then connect up
+
+88
+00:07:16.899 --> 00:07:19.060
+the logic.
+
+89
+00:07:19.060 --> 00:07:23.300
+And those are small pop there, but that's something we can fix.
+
+90
+00:07:23.300 --> 00:07:28.579
+But we now have control using the pole vector over where that knee is pointing.
+
+91
+00:07:28.579 --> 00:07:34.379
+And we also have the foot control, which means that we can move this round and place it wherever
+
+92
+00:07:34.379 --> 00:07:35.579
+we need to.
+
+93
+00:07:35.579 --> 00:07:40.620
+And then tie leg is reacting and automatically moving where it needs to.
+
+94
+00:07:40.620 --> 00:07:44.740
+Now that small pop is just due to the fact that we're actually allowing the bones to stretch
+
+95
+00:07:44.740 --> 00:07:48.259
+to 1.5 their original length.
+
+96
+00:07:48.300 --> 00:07:55.019
+So if we set that back down to 1, that'll fix that and bring those bones back in line.
+
+97
+00:07:55.019 --> 00:08:03.500
+So we now have the rig set up with the rotator controls for the gun and for the gun body,
+
+98
+00:08:03.500 --> 00:08:09.259
+as well as our IK leg setup using the IK3 bone function.
+
+99
+00:08:09.259 --> 00:08:11.860
+The next thing we're going to look at is a little bit more exciting.
+
+100
+00:08:11.860 --> 00:08:17.139
+We're going to take a look at the piston function so that whenever we're moving these, the legs
+
+101
+00:08:17.139 --> 00:08:21.019
+around, you can see the pistons inside here just underneath.
+
+102
+00:08:21.019 --> 00:08:24.699
+We'll make sure that they're functioning properly and always pointing towards one another and
+
+103
+00:08:24.699 --> 00:08:27.979
+not deforming in the strange way that they are now.
+
