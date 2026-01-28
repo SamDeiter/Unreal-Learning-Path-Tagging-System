@@ -1,0 +1,634 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.919
+Hi everyone. In this lesson, we're going to take a look at foliage optimization when it
+
+2
+00:00:05.919 --> 00:00:11.759
+comes to some material control, as well as foliage optimization when it comes to using
+
+3
+00:00:11.759 --> 00:00:17.620
+world partition. So let's get started. So you can edit the material as well as looking
+
+4
+00:00:17.620 --> 00:00:23.039
+at the end call distance in the parameter for the foliage. And you can combine these
+
+5
+00:00:23.039 --> 00:00:29.480
+in such a way we can actually control how they show up in your scene. Now this is catering
+
+6
+00:00:29.480 --> 00:00:34.359
+a bit more towards interactive experiences and final pixel because you're controlling
+
+7
+00:00:34.359 --> 00:00:42.159
+what the material does as well as that call distance. So when you do this, this can be
+
+8
+00:00:42.159 --> 00:00:48.320
+reduced by adding a start call distance parameter inside that material and then setting up the
+
+9
+00:00:48.320 --> 00:00:52.859
+material appropriately for it. To be able to do this, we would actually create a per
+
+10
+00:00:52.859 --> 00:01:00.100
+instance fade amount note. So when connecting that to an opacity or masking value, you
+
+11
+00:01:00.100 --> 00:01:07.099
+can use it to fade instances over a distance before they reach the call distance end and
+
+12
+00:01:07.099 --> 00:01:10.780
+are removed from rendering. Now again, you have to be careful with this because you may
+
+13
+00:01:10.780 --> 00:01:15.500
+get a little bit of noise when you use it. So just use it wisely if you were to try it
+
+14
+00:01:15.500 --> 00:01:19.299
+out. I'm going to demonstrate a little bit how it's set up in the material in just a
+
+15
+00:01:19.299 --> 00:01:26.140
+second. But we also want to look at here that you can control this setting overall.
+
+16
+00:01:26.140 --> 00:01:31.299
+And it is a bit more game centric. And there's a couple ways. So if we look at the previous
+
+17
+00:01:31.299 --> 00:01:35.620
+slide, you'll see here we have a texture sample. This is in kind of its more simplest form.
+
+18
+00:01:35.620 --> 00:01:42.259
+A per instance fade amount controlled here, a multiply and then a general constant that
+
+19
+00:01:42.259 --> 00:01:47.179
+you can actually adjust the numbers. You'll see it eventually goes into another multiply,
+
+20
+00:01:47.180 --> 00:01:53.140
+which has the information for that object. And then it goes into the opacity mask. If
+
+21
+00:01:53.140 --> 00:01:58.780
+we go to the next slide, you'll see here that there's a there's a switch parameter in place.
+
+22
+00:01:58.780 --> 00:02:03.120
+And in that switch parameter, you can control the inputs. And from there, you can actually
+
+23
+00:02:03.120 --> 00:02:08.980
+have it. So every aspect of this material is being pulled through with that opacity mask
+
+24
+00:02:08.980 --> 00:02:14.260
+to be able to pop in the material when needed. You'll see the per distance fade amount, a
+
+25
+00:02:14.259 --> 00:02:21.099
+dither temporal a a and then a multiply. Let's go and take a peek at it in an unreal.
+
+26
+00:02:21.099 --> 00:02:27.019
+So as we see in unreal, I have a material called m a read this particular material is using
+
+27
+00:02:27.019 --> 00:02:31.500
+all of the reads in our scene. So if you do want to check and you are doing this just
+
+28
+00:02:31.500 --> 00:02:36.500
+a quick pro tip, we can go in here and click on finding where that materials at, you can
+
+29
+00:02:36.500 --> 00:02:41.419
+right click. And then you can go in here under asset actions, go in here and say select actor
+
+30
+00:02:41.419 --> 00:02:48.060
+using this asset. So we can see like, all of our let's get out of foliage mode for that
+
+31
+00:02:48.060 --> 00:02:53.419
+to work correctly. We can see that all of our assets are being used by it. So if I click
+
+32
+00:02:53.419 --> 00:02:59.500
+on that magnifying glass, right click on it, and then go to asset actions, select actors
+
+33
+00:02:59.500 --> 00:03:03.979
+using this asset, you'll see that all of them are being selected. So we know that's we're
+
+34
+00:03:03.979 --> 00:03:11.099
+in the right spot. So in here, what I have here is the per instance fade amount. I'm
+
+35
+00:03:11.180 --> 00:03:17.500
+using this input data to be able to actually control here our alpha threshold results here
+
+36
+00:03:17.500 --> 00:03:24.340
+for our dither temporal AA. Now you can make it random coming from our scene here where
+
+37
+00:03:24.340 --> 00:03:30.699
+we have two different material attributes. And in here we have the different types of
+
+38
+00:03:30.699 --> 00:03:35.340
+setup. There's somewhat similar, but a little bit different in the fact that one on the
+
+39
+00:03:35.340 --> 00:03:42.099
+top is a bit more complex. And the one on the bottom has also its own dependencies.
+
+40
+00:03:42.099 --> 00:03:45.580
+So they are a little bit different. And this is just the way the nature of how this was
+
+41
+00:03:45.580 --> 00:03:49.840
+made. So taking into account the normal is the roughness of specular. And you'll also
+
+42
+00:03:49.840 --> 00:03:55.980
+see this normal rough specular opacity mask. These dependencies are in here. And what we're
+
+43
+00:03:55.980 --> 00:04:00.300
+doing is we're doing a true and false here switch parameter. So if we ever wanted to
+
+44
+00:04:00.300 --> 00:04:06.020
+turn these on or off, we can in an instance material. So what we're doing here then is
+
+45
+00:04:06.020 --> 00:04:11.380
+we're grabbing the multiply and we're bringing it right into that opacity mask. Now you can
+
+46
+00:04:11.380 --> 00:04:16.900
+choose to turn this on and off to see what visual results you get using an instance material.
+
+47
+00:04:16.900 --> 00:04:20.620
+And this particular case, I'm just going to show you what we have. And I'm going to go
+
+48
+00:04:20.620 --> 00:04:24.939
+ahead and hit apply. And I'm going to show you how you can adjust some of the properties
+
+49
+00:04:25.180 --> 00:04:31.420
+and how the coal within the foliage tool can help and work with this particular offset.
+
+50
+00:04:31.420 --> 00:04:36.219
+So now let's go ahead and I'm going to move this off to the side. And we're going to go
+
+51
+00:04:36.219 --> 00:04:41.060
+back into the foliage tool with the foliage tool active, I'm going to make sure that all
+
+52
+00:04:41.060 --> 00:04:47.860
+the ones that are using that particular shader are all on with them all on. And I'm just
+
+53
+00:04:47.860 --> 00:04:50.899
+going to select them all, we're going to go ahead and be able to control the coal all
+
+54
+00:04:50.899 --> 00:04:56.419
+at one time. So we're going to scroll down to our coal volume and our coal volume in
+
+55
+00:04:56.419 --> 00:05:00.819
+the first slot, whatever number you punch in here will go automatically to the max.
+
+56
+00:05:00.819 --> 00:05:06.259
+But what we can do is type in like maybe 500 or 200 in the max here and then over here
+
+57
+00:05:06.259 --> 00:05:12.699
+in the minimum, we can go ahead and put like 100. Now as I move around, you'll see it smoothly
+
+58
+00:05:12.699 --> 00:05:17.899
+pop in and out in our scene specifically the outdoor indoor. And actually let's hit apply
+
+59
+00:05:18.019 --> 00:05:22.339
+for our material to make sure it is applied. There you go. So it's good. And you'll notice
+
+60
+00:05:22.339 --> 00:05:27.659
+if you look really good, ignore my circular, circular painting little icon here, but you'll
+
+61
+00:05:27.659 --> 00:05:35.539
+see the foliage start to come in and out of scene. There you go. You can see it kind of go away.
+
+62
+00:05:35.539 --> 00:05:41.779
+And it's actually not too bad. Get it kind of nicely fades in. And the shader is helping a
+
+63
+00:05:41.779 --> 00:05:47.099
+little bit here. But is the shader an end all beyond? Is it actually something you initially
+
+64
+00:05:47.140 --> 00:05:52.220
+have to use? No, but it is another option, especially for virtual production, and maybe even
+
+65
+00:05:52.220 --> 00:05:57.220
+final pixel, but it's really geared more towards games. But this allows you to control the fade
+
+66
+00:05:57.220 --> 00:06:02.620
+distance within this object. Depending on your dependencies that you want to punch in, you
+
+67
+00:06:02.620 --> 00:06:08.100
+can either make it have it random like we talked about, or you can make it so that you control
+
+68
+00:06:08.460 --> 00:06:16.300
+it yourself by pulling in a scalar parameter, if you will. We can also use a thing called a coal
+
+69
+00:06:16.300 --> 00:06:21.340
+volume. Now, I don't typically use these because they are pretty old school and they work okay.
+
+70
+00:06:21.340 --> 00:06:25.819
+There is a tendency if you're not careful with your numbers, you will get some popping going on.
+
+71
+00:06:25.819 --> 00:06:31.340
+It might be better to use that material option that I told you about and use the coal distance
+
+72
+00:06:31.340 --> 00:06:37.699
+based inside of the tool itself of painting foliage. But you do have the ability to actually
+
+73
+00:06:37.699 --> 00:06:43.420
+create one and put them in place. Let me point you where they're at. But I'll let you play with it
+
+74
+00:06:43.420 --> 00:06:49.580
+and decide if you feel this may fit your needs. Now, again, this is catering more towards
+
+75
+00:06:49.580 --> 00:06:54.939
+interactivity as well as final pixel, but not so much ICV effects. I would probably stay away
+
+76
+00:06:54.939 --> 00:06:59.980
+from it because it can turn out looking pretty fake if you're not careful, especially if your
+
+77
+00:06:59.980 --> 00:07:07.020
+camera is aggressive or moves a little bit faster than needed. But that's mostly on a more linear
+
+78
+00:07:07.020 --> 00:07:12.460
+direction going forward and going backward, which rarely does happen in ICV effects. A lot of times
+
+79
+00:07:12.459 --> 00:07:17.099
+your camera is going to move mainly side to side to give the illusion and not give up the
+
+80
+00:07:18.219 --> 00:07:23.819
+reality that you are on a volume. To simply get to it and put it in place, let's go and close
+
+81
+00:07:23.819 --> 00:07:28.379
+the Foldage tool for a moment. I'm going to go in here and go to selection here for a second.
+
+82
+00:07:28.939 --> 00:07:34.219
+In my selection mode, I'm going to go in here and simply I can just type in volume if I want to or
+
+83
+00:07:34.219 --> 00:07:39.099
+just type in call. Or you can do the same thing here on the top down here by just clicking in the
+
+84
+00:07:39.100 --> 00:07:46.300
+space, get content and start typing. So there's my cold distance volume. I can pull him into space
+
+85
+00:07:46.300 --> 00:07:52.220
+and then now that he is in place, let's go and grab him because he went took off into another land.
+
+86
+00:07:53.340 --> 00:07:58.620
+That cold distance volume, we're going to actually make it so that we can space out exactly what
+
+87
+00:07:58.620 --> 00:08:02.379
+areas we want him to be in. I'm going to hit the F key to find out where he's at. There he goes,
+
+88
+00:08:02.379 --> 00:08:07.020
+just off camera. So I'm going to pull him down a little bit, pull him into here. And again,
+
+89
+00:08:07.019 --> 00:08:12.459
+these values are up to you. You can make them extreme. If for some reason you have a lot of
+
+90
+00:08:12.459 --> 00:08:17.339
+stuff and you don't need to get to those areas just yet, that may be a case where you may be using it
+
+91
+00:08:17.339 --> 00:08:23.180
+with ICB effects, or there may be a case where you're interactively, you want to be able to control
+
+92
+00:08:23.180 --> 00:08:27.500
+how much is on your screen at one particular time. So we'll push this into the ground
+
+93
+00:08:28.779 --> 00:08:36.539
+and simply control its environment here and what you want it to do. Now, again, each one of these
+
+94
+00:08:36.539 --> 00:08:43.740
+is based on your needs. So there's never a one size fits all. And you want to make it encased
+
+95
+00:08:43.740 --> 00:08:49.579
+as far as you want that reaction to happen. So it's basically like you wouldn't use any volume,
+
+96
+00:08:51.259 --> 00:08:55.419
+except for post process where you can actually make an infinite extent of bound. In this particular
+
+97
+00:08:55.419 --> 00:09:00.620
+case, you kind of want to control exactly when things come in. You'll see that we have it enabled
+
+98
+00:09:00.620 --> 00:09:08.060
+right now. And you'll see there's some advanced settings, which allow you to align a brush vertices
+
+99
+00:09:08.060 --> 00:09:14.539
+if you want to do a little bit of editing on a brush level. But up above here, we can see that
+
+100
+00:09:14.539 --> 00:09:20.060
+we have cold distance control, we have an index, we can choose that size if we want to, and we can
+
+101
+00:09:20.060 --> 00:09:24.860
+add different volumes if we want to, or I should say distance control. So each one's going to be a
+
+102
+00:09:24.860 --> 00:09:30.060
+bit different. It's up to you. Now you would change that size. And then you would change the cold
+
+103
+00:09:30.139 --> 00:09:36.219
+distance based on your needs. Now you want to do it in descending order if you can, making it so that
+
+104
+00:09:36.219 --> 00:09:41.500
+it is drawn appropriately based on where your camera's at versus where you're positioning
+
+105
+00:09:41.500 --> 00:09:47.979
+this particular call and when you want things to show up into the party. All right, cool. Let's go
+
+106
+00:09:47.979 --> 00:09:53.500
+back into our slides. And you see some suggested numbers I give you here that you can experiment
+
+107
+00:09:53.500 --> 00:09:59.820
+with. You'll see the size 10, 200. And again, we're increasing our distance here. And you can
+
+108
+00:09:59.820 --> 00:10:06.460
+choose how you want things to go. We have a 50 and a 500, besides 200, we could easily set this a
+
+109
+00:10:06.460 --> 00:10:10.700
+little bit higher to like 1000. And you can experiment with it by sending some of these two lower
+
+110
+00:10:10.700 --> 00:10:15.980
+numbers to see how it changes in transitions. And you'll notice there may be a little bit of popping
+
+111
+00:10:15.980 --> 00:10:22.139
+when working with it. You now can also control the density of the foliage being rendered during
+
+112
+00:10:22.139 --> 00:10:29.340
+runtime with the command foliage density scale. Below you can see the density of the foliage change
+
+113
+00:10:29.340 --> 00:10:37.980
+as a foliage density density scale setting is set to 0.1 and 1.0. So let's take a look at some
+
+114
+00:10:37.980 --> 00:10:43.500
+material limitations that can occur. So distance fields for mass materials are generated for the
+
+115
+00:10:43.500 --> 00:10:49.740
+visible part of the material. So mass materials create significant overdraw. So you got to keep
+
+116
+00:10:49.740 --> 00:10:55.980
+that in mind, especially when we're working with lumen. So for foliage, an example, an instance
+
+117
+00:10:55.980 --> 00:11:06.940
+painted using the foliage mode, like you're dragging it in per se, to affect lumen, it must be nanite.
+
+118
+00:11:06.940 --> 00:11:11.500
+So go into that object. If you're going to paint it, you need to actually go into that physical
+
+119
+00:11:11.500 --> 00:11:16.940
+object and make sure one that it's nanite. And we also need to make sure the distance field
+
+120
+00:11:17.260 --> 00:11:24.620
+lights and visible ray tracing are enabled. So let's go ahead and do that. And you want to do that in
+
+121
+00:11:24.620 --> 00:11:33.980
+that asset itself. So I just drug the asset in here so I can go in here and go distance field
+
+122
+00:11:33.980 --> 00:11:42.460
+effects, this and field lighting bingo ray tracing. So you want to make sure it's visible and ray
+
+123
+00:11:42.460 --> 00:11:47.019
+tracing. So these are really important, especially if you're grabbing stuff from the marketplace,
+
+124
+00:11:47.019 --> 00:11:53.019
+you want to double check these. Some of these may be already on, but you do want to triple check
+
+125
+00:11:53.019 --> 00:11:59.500
+whenever, especially if you did not originally make this asset. So also we need to make sure it's
+
+126
+00:11:59.500 --> 00:12:05.180
+nanite. So let me click this out for a second, find where this guy is at, and then right click
+
+127
+00:12:05.180 --> 00:12:09.500
+and double check just as easy as we talked about the other classes, turn on nanite. This is going
+
+128
+00:12:09.500 --> 00:12:15.899
+to be your best steps to be able to make sure this is drawn efficiently and that we can paint on this
+
+129
+00:12:15.899 --> 00:12:22.940
+object and bring it into our foliage tool and work with it there. So let's take a brief look at world
+
+130
+00:12:22.940 --> 00:12:30.620
+partition. So in world partition in your map, the default grid size for foliage instances is 256,
+
+131
+00:12:30.620 --> 00:12:38.539
+256 meters. This is separate from the world partition grid size. So to change the default
+
+132
+00:12:38.539 --> 00:12:45.179
+size of the instance foliage grid for the new maps, you want to go into your project settings
+
+133
+00:12:45.179 --> 00:12:50.379
+to simply type in foliage, and then you can set the grid size, which you need, so that things are
+
+134
+00:12:50.379 --> 00:12:57.500
+being filled out accordingly. Now you want to open those project settings by opening the edit menu
+
+135
+00:12:57.500 --> 00:13:03.259
+and select project settings in the search box. Like I said, you want to do foliage, then you want to
+
+136
+00:13:03.259 --> 00:13:08.539
+change that instance foliage grid size value to your desired value in centimeters. And this is
+
+137
+00:13:08.539 --> 00:13:12.939
+really depends on the size of your world, and it's a bit more on the virtual production and
+
+138
+00:13:12.939 --> 00:13:23.580
+final pixel side. But you would change that. You'll see an example, we have 25,600 centimeters is equal
+
+139
+00:13:23.580 --> 00:13:31.899
+to 256 meters. So you kind of have to do the math there and be able to figure out where and how you
+
+140
+00:13:31.899 --> 00:13:38.220
+want that foliage equally represented in your scene. Now again, the default grid size can be
+
+141
+00:13:38.220 --> 00:13:46.379
+changed for existing maps using the world partition builder command let. Now keep in mind, in the case
+
+142
+00:13:46.379 --> 00:13:51.179
+of ICVFX, you probably won't be using world partition, because it's a little bit more of open
+
+143
+00:13:51.179 --> 00:13:55.899
+world, a little bit more gamey, a little bit more final pixel and virtual production. But to be able
+
+144
+00:13:55.899 --> 00:14:01.579
+to actually expand on some of these, you'll see, I'm giving you some information here. So in
+
+145
+00:14:01.580 --> 00:14:07.740
+Windows, we can open a command prompt window at the prompt begin by navigating to the location
+
+146
+00:14:07.740 --> 00:14:15.420
+of the Unreal editor dot exe executable file. And in the above example, you'll see, or I should say
+
+147
+00:14:15.420 --> 00:14:23.020
+off to the right, your builds home on real five engine engine binaries when 64. Next, you want to
+
+148
+00:14:23.020 --> 00:14:29.900
+begin the command with the name of the exe file that will run the command let unreal editor dot
+
+149
+00:14:29.899 --> 00:14:34.379
+exe. And you're going to add the name of the project. That's where you're going to put it and
+
+150
+00:14:34.379 --> 00:14:40.379
+add the name of the target map where you're going to your focus area. Now finish the command with
+
+151
+00:14:40.379 --> 00:14:47.419
+the name of the command let and the following arguments. So again, we have run world partition
+
+152
+00:14:47.419 --> 00:14:53.819
+builder command let is the name of the command. Builder equals world partition foliage builder
+
+153
+00:14:54.460 --> 00:15:00.300
+is the name of the builder within the command let. And then we have grid size is the new value of
+
+154
+00:15:00.300 --> 00:15:09.420
+the instance foliage grid size and centimeters. An example again, the value is five, five thousand
+
+155
+00:15:09.420 --> 00:15:17.900
+one or 51,000, I should say 200 is equal to 512 meters. This is why you do art. I don't do math.
+
+156
+00:15:18.620 --> 00:15:24.139
+That's it with this lecture. Feel free to click on the link that I've provided to dive deeper into
+
+157
+00:15:24.139 --> 00:15:28.379
+some of the things when it comes to foliage. In the next video, we're going to take a look at
+
+158
+00:15:28.379 --> 00:15:31.019
+Niagara optimization as a whole. Thanks again.
+
