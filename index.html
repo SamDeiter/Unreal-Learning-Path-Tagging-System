@@ -31,6 +31,15 @@
         box-sizing: border-box;
       }
 
+      /* Utility Classes */
+      .hidden {
+        display: none !important;
+      }
+      .has-items {
+        background: var(--accent-purple);
+        color: white;
+      }
+
       body {
         font-family:
           "Inter",
@@ -1278,6 +1287,8 @@
         position: relative;
         width: 100%;
         min-height: 250px;
+        max-height: 350px;
+        overflow: hidden;
       }
 
       /* Bar Charts - Improved */
@@ -1704,80 +1715,34 @@
           <div class="course-grid" id="courseGrid"></div>
         </main>
 
-        <!-- Learning Path Panel - Building Experience -->
+        <!-- Learning Path Panel - Simple & Clean -->
         <aside class="path-panel">
           <div class="path-header">
-            <span class="header-icon">🛠️</span>
-            <h2>Build Your Path</h2>
+            <h2>🛠️ Build Your Path</h2>
+            <span class="path-count" id="pathCount">0</span>
           </div>
 
-          <!-- Editable Path Name -->
-          <div class="path-name-wrapper">
-            <input
-              type="text"
-              class="path-name-input"
-              id="pathNameInput"
-              placeholder="Name your learning path..."
-              value="My Learning Path"
-            />
-          </div>
-
-          <!-- Progress Bar -->
-          <div class="path-progress" id="pathProgress">
-            <div class="progress-bar">
-              <div
-                class="progress-fill"
-                id="progressFill"
-                style="width: 0%"
-              ></div>
-            </div>
-            <div class="progress-text">
-              <span id="progressCount">0 courses</span>
-              <span id="progressMilestone" class="milestone-hint"></span>
-            </div>
-          </div>
-
-          <!-- Timeline List -->
-          <div class="path-timeline" id="pathList">
+          <div class="path-list" id="pathList">
             <div class="path-empty" id="pathEmpty">
               <div class="empty-icon">🎯</div>
               <div class="empty-title">Start Building</div>
               <div class="empty-hint">
-                Click <span class="hint-add">+</span> on courses to add them
-                here
+                Click <span class="hint-add">+</span> on any course
               </div>
             </div>
           </div>
 
-          <!-- Summary Stats -->
-          <div class="path-stats-bar" id="pathSummary" style="display: none">
-            <div class="stat-pill">
-              <span class="stat-icon">📹</span>
-              <span id="summaryVideos">0</span> videos
-            </div>
-            <div class="stat-pill">
-              <span class="stat-icon">⏱️</span>
-              <span id="summaryDuration">0h</span>
-            </div>
+          <div class="path-summary" id="pathSummary" style="display: none">
+            <span>📹 <strong id="summaryVideos">0</strong> videos</span>
+            <span>⏱️ <strong id="summaryDuration">0h</strong></span>
           </div>
 
-          <!-- Milestone Message -->
-          <div
-            class="milestone-message"
-            id="milestoneMessage"
-            style="display: none"
-          >
-            <span class="milestone-icon">🎉</span>
-            <span class="milestone-text" id="milestoneText"></span>
-          </div>
-
-          <!-- Actions -->
           <div class="path-actions" id="pathActions" style="display: none">
             <button class="btn btn-export" id="exportVideos">
-              <span>📹</span> Export Videos
+              📹 Export Videos
             </button>
             <button class="btn btn-export-secondary" id="exportPath">
-              <span>📋</span> Export JSON
+              📋 Export JSON
             </button>
             <button class="btn btn-clear" id="clearPath">Clear All</button>
           </div>
@@ -2639,98 +2604,56 @@
         renderCourses();
       }
 
-      // Render learning path - Building Experience
+      // Render learning path - Simple version
       function renderPath() {
         const list = document.getElementById("pathList");
         const summary = document.getElementById("pathSummary");
         const actions = document.getElementById("pathActions");
-        const progressFill = document.getElementById("progressFill");
-        const progressCount = document.getElementById("progressCount");
-        const progressMilestone = document.getElementById("progressMilestone");
-        const milestoneMessage = document.getElementById("milestoneMessage");
-        const milestoneText = document.getElementById("milestoneText");
-
+        const countEl = document.getElementById("pathCount");
         const count = selectedPath.length;
-        const maxCourses = 10; // Target path size for 100% progress
-        const progressPercent = Math.min((count / maxCourses) * 100, 100);
 
-        // Update progress bar
-        progressFill.style.width = `${progressPercent}%`;
-        progressCount.textContent = `${count} course${count !== 1 ? "s" : ""}`;
-
-        // Milestone hints
-        const milestones = [
-          { at: 0, hint: "Add your first course!", next: 1 },
-          { at: 1, hint: "Great start!", next: 3 },
-          { at: 3, hint: "Building momentum!", next: 5 },
-          { at: 5, hint: "Halfway there!", next: 7 },
-          { at: 7, hint: "Almost complete!", next: 10 },
-          { at: 10, hint: "Path complete! 🎉", next: null },
-        ];
-
-        const currentMilestone = milestones.filter((m) => count >= m.at).pop();
-        progressMilestone.textContent = currentMilestone
-          ? currentMilestone.next
-            ? `${currentMilestone.next - count} more for next milestone`
-            : ""
-          : "";
-
-        // Show milestone message for key achievements
-        if (count === 1 || count === 3 || count === 5 || count === 10) {
-          milestoneMessage.style.display = "flex";
-          const messages = {
-            1: "🎉 First course added! You're on your way.",
-            3: "🚀 3 courses! Your path is taking shape.",
-            5: "💪 Halfway to a complete learning path!",
-            10: "🏆 Perfect! You've built a complete learning path!",
-          };
-          milestoneText.textContent = messages[count] || "";
-        } else {
-          milestoneMessage.style.display = "none";
-        }
+        // Update count badge
+        countEl.textContent = count;
+        countEl.classList.toggle("has-items", count > 0);
 
         if (count === 0) {
-          // Show empty state
           list.innerHTML = `
-            <div class="path-empty" id="pathEmpty">
+            <div class="path-empty">
               <div class="empty-icon">🎯</div>
               <div class="empty-title">Start Building</div>
-              <div class="empty-hint">Click <span class="hint-add">+</span> on courses to add them here</div>
+              <div class="empty-hint">Click <span class="hint-add">+</span> on any course</div>
             </div>
           `;
-          summary.style.display = "none";
-          actions.style.display = "none";
-          milestoneMessage.style.display = "none";
+          summary.classList.add("hidden");
+          actions.classList.add("hidden");
           return;
         }
 
         // Show summary and actions
-        summary.style.display = "flex";
-        actions.style.display = "flex";
+        summary.classList.remove("hidden");
+        actions.classList.remove("hidden");
 
-        // Calculate path stats
+        // Calculate stats
         const totalVideos = selectedPath.reduce(
           (sum, c) => sum + (c.video_count || 0),
           0,
         );
         const estHours = Math.round(totalVideos * 0.15);
-
         document.getElementById("summaryVideos").textContent = totalVideos;
         document.getElementById("summaryDuration").textContent =
           estHours > 0 ? `~${estHours}h` : "< 1h";
 
-        // Render timeline items
+        // Render items
         list.innerHTML = selectedPath
           .map(
             (course, i) => `
-            <div class="path-item" draggable="true" data-index="${i}">
-              <span class="drag-handle">⋮⋮</span>
-              <div class="path-number">${i + 1}</div>
-              <div class="path-item-title">${course.title}</div>
-              <span class="path-item-level ${(course.tags.level || "").toLowerCase()}">${course.tags.level || ""}</span>
-              <button class="path-item-remove" onclick="removeCourse('${course.code}')" title="Remove">×</button>
-            </div>
-          `,
+          <div class="path-item">
+            <span class="path-number">${i + 1}</span>
+            <span class="path-item-title">${course.title}</span>
+            <span class="path-item-level ${(course.tags.level || "").toLowerCase()}">${course.tags.level || ""}</span>
+            <button class="path-item-remove" onclick="removeCourse('${course.code}')">×</button>
+          </div>
+        `,
           )
           .join("");
       }
