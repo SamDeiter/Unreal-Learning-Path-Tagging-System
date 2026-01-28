@@ -1463,6 +1463,68 @@
         font-weight: 600;
         margin-top: 0.75rem;
       }
+
+      /* Section Description */
+      .section-desc {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: -0.5rem 0 1rem 0;
+      }
+
+      /* Tag Cloud */
+      .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .cloud-tag {
+        padding: 0.35rem 0.75rem;
+        border-radius: 16px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        font-weight: 500;
+        cursor: default;
+        transition: all 0.2s;
+      }
+
+      .cloud-tag:hover {
+        border-color: var(--accent-purple);
+        transform: translateY(-1px);
+      }
+
+      .cloud-tag.size-1 {
+        font-size: 0.7rem;
+        opacity: 0.7;
+      }
+      .cloud-tag.size-2 {
+        font-size: 0.75rem;
+        opacity: 0.8;
+      }
+      .cloud-tag.size-3 {
+        font-size: 0.85rem;
+      }
+      .cloud-tag.size-4 {
+        font-size: 0.95rem;
+        color: var(--accent-blue);
+      }
+      .cloud-tag.size-5 {
+        font-size: 1.1rem;
+        color: var(--accent-purple);
+        font-weight: 600;
+      }
+
+      .cloud-tag .tag-count {
+        font-size: 0.65em;
+        opacity: 0.6;
+        margin-left: 0.25rem;
+      }
     </style>
   </head>
   <body>
@@ -1498,13 +1560,10 @@
     <!-- Coverage Dashboard View -->
     <div id="dashboardView" class="view-container">
       <div class="dashboard-header">
-        <h2>📊 Coverage Dashboard</h2>
-        <div class="header-actions">
-          <div id="lastUpdated" class="last-updated"></div>
-          <button class="refresh-btn" onclick="showRefreshModal()">
-            🔄 Refresh Data
-          </button>
-        </div>
+        <div id="lastUpdated" class="last-updated"></div>
+        <button class="refresh-btn" onclick="showRefreshModal()">
+          🔄 Refresh Data
+        </button>
       </div>
       <div class="dashboard-grid">
         <!-- Summary Cards -->
@@ -1542,6 +1601,15 @@
               <canvas id="statusChart"></canvas>
             </div>
           </div>
+        </div>
+
+        <!-- Tag Cloud - Top 100 Tags -->
+        <div class="coverage-section">
+          <h2>🏷️ Tag Cloud</h2>
+          <p class="section-desc">
+            The 100 most used tags that power this learning system
+          </p>
+          <div id="tagCloud" class="tag-cloud"></div>
         </div>
 
         <!-- Coverage Recommendations -->
@@ -2090,6 +2158,53 @@
             },
           },
         });
+
+        // Render Tag Cloud - Top 100 Tags
+        const allTags = {};
+        courses.forEach((c) => {
+          // Collect all tag types
+          if (c.tags) {
+            if (c.tags.topic)
+              allTags[c.tags.topic] = (allTags[c.tags.topic] || 0) + 1;
+            if (c.tags.industry)
+              allTags[c.tags.industry] = (allTags[c.tags.industry] || 0) + 1;
+            if (c.tags.level)
+              allTags[c.tags.level] = (allTags[c.tags.level] || 0) + 1;
+          }
+          // AI-generated tags
+          if (c.ai_tags) {
+            (c.ai_tags.keywords || []).forEach((k) => {
+              allTags[k] = (allTags[k] || 0) + 1;
+            });
+            (c.ai_tags.concepts || []).forEach((k) => {
+              allTags[k] = (allTags[k] || 0) + 1;
+            });
+          }
+        });
+
+        // Sort by frequency and take top 100
+        const sortedTags = Object.entries(allTags)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 100);
+
+        // Calculate size buckets
+        const maxCount = sortedTags[0]?.[1] || 1;
+        const getSize = (count) => {
+          const ratio = count / maxCount;
+          if (ratio > 0.7) return 5;
+          if (ratio > 0.4) return 4;
+          if (ratio > 0.2) return 3;
+          if (ratio > 0.1) return 2;
+          return 1;
+        };
+
+        document.getElementById("tagCloud").innerHTML = sortedTags
+          .map(
+            ([tag, count]) => `
+            <span class="cloud-tag size-${getSize(count)}">${tag}<span class="tag-count">(${count})</span></span>
+          `,
+          )
+          .join("");
 
         // Generate Coverage Recommendations
         const recommendations = [];
