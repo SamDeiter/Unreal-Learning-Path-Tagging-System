@@ -1,0 +1,794 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.520
+Now that we know a little bit more about what Niagara is and how we can use it to create
+
+2
+00:00:05.520 --> 00:00:08.880
+effects, let's go ahead and take a look at creating our first effect.
+
+3
+00:00:08.880 --> 00:00:12.679
+And what we're going to be doing is we're going to be creating this smoke right here.
+
+4
+00:00:12.679 --> 00:00:16.879
+Now we're going to focus just on the Niagara aspect of that.
+
+5
+00:00:16.879 --> 00:00:19.839
+And because of that, what we're going to be doing is we're going to actually be working
+
+6
+00:00:19.839 --> 00:00:23.800
+with some content that exists inside of the starter content.
+
+7
+00:00:23.800 --> 00:00:28.160
+So if you haven't done so or if you're not sure about this, what you can do is you come
+
+8
+00:00:28.160 --> 00:00:32.159
+up here to add and go add feature or content pack.
+
+9
+00:00:32.159 --> 00:00:37.000
+And then from the wizard that comes up, go over here to content and then select starter
+
+10
+00:00:37.000 --> 00:00:39.560
+content and press add to project.
+
+11
+00:00:39.560 --> 00:00:44.359
+Once you've done that in your content browser, you will now have this collection of starter
+
+12
+00:00:44.359 --> 00:00:50.760
+content and the piece of content that we're going to be focusing in on is this smoke material
+
+13
+00:00:50.760 --> 00:00:51.760
+right here.
+
+14
+00:00:51.760 --> 00:00:56.640
+Now, this is from the old Cascade example, which is the old way to do effects inside
+
+15
+00:00:56.640 --> 00:00:58.399
+of Unreal Engine.
+
+16
+00:00:58.399 --> 00:01:02.679
+There are two nodes that I want to call out because this material is actually really set
+
+17
+00:01:02.679 --> 00:01:05.920
+up great to work with smoke, especially a lit smoke.
+
+18
+00:01:05.920 --> 00:01:07.879
+The first thing is this particle color.
+
+19
+00:01:07.879 --> 00:01:14.079
+Notice that it has the RGB multiplied by the texture sample that represents its base color
+
+20
+00:01:14.079 --> 00:01:17.079
+and it also has the alpha done the same thing.
+
+21
+00:01:17.079 --> 00:01:20.680
+The reason that this is important is if we want to work with this data inside of Niagara,
+
+22
+00:01:20.680 --> 00:01:24.040
+we need to make sure that this particle color node is connected.
+
+23
+00:01:24.040 --> 00:01:29.680
+The other thing, depth fade, this node makes it so that when this particle intersects geometry,
+
+24
+00:01:29.680 --> 00:01:30.680
+there's a nice fade.
+
+25
+00:01:30.680 --> 00:01:33.560
+This can be really expensive, especially if you have a lot of particles or your particles
+
+26
+00:01:33.560 --> 00:01:36.719
+are very large, so just keep that in mind.
+
+27
+00:01:36.719 --> 00:01:42.120
+Some of the other things to note about this material is its blend mode is set to translucent.
+
+28
+00:01:42.120 --> 00:01:49.160
+This will allow us to get this smoke that looks kind of semi see-through and will also
+
+29
+00:01:49.159 --> 00:01:55.079
+react with our level lighting by changing our lighting mode to volumetric directional.
+
+30
+00:01:55.079 --> 00:01:58.679
+Last but not least, we increase the shadow density scale to 3.0.
+
+31
+00:01:58.679 --> 00:02:01.159
+This is purely an artistic choice.
+
+32
+00:02:01.159 --> 00:02:05.239
+Just to make things look a little bit cooler, please feel free to mess around with any of
+
+33
+00:02:05.239 --> 00:02:09.960
+the numbers in there to see how they'll affect the smoke in different ways.
+
+34
+00:02:09.960 --> 00:02:14.479
+To get started now, what we're going to do is we're going to create a new Niagara system.
+
+35
+00:02:14.479 --> 00:02:18.639
+Then what we're going to do is from the wizard that comes up, we're going to select the lightweight
+
+36
+00:02:18.639 --> 00:02:19.639
+fountain.
+
+37
+00:02:19.639 --> 00:02:22.799
+Let's go ahead and do that now.
+
+38
+00:02:22.799 --> 00:02:27.559
+Inside the editor here, I'm going to come up to my content folder, right-click, Niagara
+
+39
+00:02:27.559 --> 00:02:31.959
+system, and then template, fountain, create.
+
+40
+00:02:31.959 --> 00:02:38.199
+I'm going to call this smoke.
+
+41
+00:02:38.199 --> 00:02:40.239
+NS for Niagara system, smoke.
+
+42
+00:02:40.239 --> 00:02:42.679
+Let's go ahead and double-click on it to open it up.
+
+43
+00:02:42.679 --> 00:02:46.919
+Then what we're going to do is we're going to look for this m smoke sub-UV.
+
+44
+00:02:46.919 --> 00:02:51.759
+This material right here is the material that we are going to place on our effects.
+
+45
+00:02:51.759 --> 00:02:54.079
+To do that, what we're going to do is we're going to hit control space.
+
+46
+00:02:54.079 --> 00:02:57.159
+Then I'm going to come down here for our starter content.
+
+47
+00:02:57.159 --> 00:03:01.879
+If we go to particles and then materials, we can actually find it right there.
+
+48
+00:03:01.879 --> 00:03:04.000
+Those are m smoke sub-UV.
+
+49
+00:03:04.000 --> 00:03:06.279
+We can add this a number of ways.
+
+50
+00:03:06.279 --> 00:03:08.879
+Easiest way is we can actually just drag and drop this.
+
+51
+00:03:08.879 --> 00:03:10.759
+I need to click on that first.
+
+52
+00:03:10.759 --> 00:03:13.799
+We can drag and drop it now over here.
+
+53
+00:03:13.800 --> 00:03:14.920
+It will line up.
+
+54
+00:03:14.920 --> 00:03:21.000
+We can see it, if I was to pause here, we can see here it's not really lining up.
+
+55
+00:03:21.000 --> 00:03:27.760
+That is because a sub-UV is actually playing a series of images to give the illusion of
+
+56
+00:03:27.760 --> 00:03:29.320
+motion.
+
+57
+00:03:29.320 --> 00:03:36.600
+By default, it thinks that we, one by one, it thinks there's a mapping of one image to
+
+58
+00:03:36.600 --> 00:03:38.600
+one piece of geometry.
+
+59
+00:03:38.600 --> 00:03:39.600
+That's just not the case.
+
+60
+00:03:39.599 --> 00:03:42.519
+This is actually a 64 by 64.
+
+61
+00:03:42.519 --> 00:03:47.519
+That means that we have eight images in the x-axis and eight images in the y-axis.
+
+62
+00:03:47.519 --> 00:03:54.319
+To fix our problem here, what we do is we come over in the details panel to sub-UV.
+
+63
+00:03:54.319 --> 00:03:59.400
+We just change our sub-image size to 8 by 8.
+
+64
+00:03:59.400 --> 00:04:02.879
+If you don't know where that is, you just need to click on the sprite renderer right
+
+65
+00:04:02.879 --> 00:04:05.560
+down here and then our sub-UV size.
+
+66
+00:04:05.560 --> 00:04:07.599
+We're going to go 8 by 8.
+
+67
+00:04:07.599 --> 00:04:12.000
+It's going to give us these nice looking little clouds that we're going to now adjust
+
+68
+00:04:12.000 --> 00:04:16.199
+to give us something that looks a little bit more like smoke.
+
+69
+00:04:16.199 --> 00:04:20.759
+First off, we're going to adjust our spawn rate, our lifetime, and our size.
+
+70
+00:04:20.759 --> 00:04:23.000
+These are all going to be found in the same spot.
+
+71
+00:04:23.000 --> 00:04:30.959
+What we're going to do is we're going to come up here to our particle spawn.
+
+72
+00:04:30.959 --> 00:04:34.920
+Our lifetime right now, it's between 1.4 and 1.75.
+
+73
+00:04:34.920 --> 00:04:37.519
+I'm actually going to change this to direct set.
+
+74
+00:04:37.519 --> 00:04:43.120
+We're going to give this a lifetime of 5.
+
+75
+00:04:43.120 --> 00:04:47.039
+Then what we're going to do here is we're going to go to our...
+
+76
+00:04:47.039 --> 00:04:48.839
+Up one more, there's our spawn rate right there.
+
+77
+00:04:48.839 --> 00:04:54.199
+We're going to change this to 20.
+
+78
+00:04:54.199 --> 00:04:58.599
+Then what we're going to do is we're going to come down to our initialized particle one
+
+79
+00:04:58.599 --> 00:05:02.839
+more time and we're going to go to our sprite attributes here.
+
+80
+00:05:02.839 --> 00:05:07.439
+Instead of random uniform under sprite size mode, we're going to say uniform and change
+
+81
+00:05:07.439 --> 00:05:09.160
+this to 64.
+
+82
+00:05:09.160 --> 00:05:15.000
+This is going to give us a uniform sprite size instead of a random sprite size.
+
+83
+00:05:15.000 --> 00:05:17.120
+Again, we changed our spawn rate to 20.
+
+84
+00:05:17.120 --> 00:05:25.680
+We set our lifetime here to 5 and our uniform sprite size to 64.
+
+85
+00:05:25.680 --> 00:05:30.560
+What we're going to do next is we're going to change our velocity, adjust the size that
+
+86
+00:05:30.560 --> 00:05:36.360
+the particles are spawned from, and then disable our gravity force because it's working against
+
+87
+00:05:36.360 --> 00:05:37.360
+us right now.
+
+88
+00:05:38.280 --> 00:05:41.319
+Let's go ahead and do that now.
+
+89
+00:05:41.319 --> 00:05:44.800
+First off, let's go ahead and disable our gravity force because that's really going
+
+90
+00:05:44.800 --> 00:05:47.800
+to work against us right now.
+
+91
+00:05:47.800 --> 00:05:52.280
+Then what we're going to do here is under our add velocity, we're not going to do that
+
+92
+00:05:52.280 --> 00:05:55.439
+in a cone, we're just going to change that to linear.
+
+93
+00:05:55.439 --> 00:05:58.439
+That's going to give us access to our x, y, and z axis right here.
+
+94
+00:05:58.439 --> 00:06:01.400
+You can see here we've already got quite a difference there.
+
+95
+00:06:01.400 --> 00:06:04.120
+Let's change this to maybe like 80 for right now.
+
+96
+00:06:04.120 --> 00:06:08.360
+Give us a smoke that is kind of fast moving up.
+
+97
+00:06:08.360 --> 00:06:12.000
+Then what we're going to do here is we're going to go to our shape location and we're
+
+98
+00:06:12.000 --> 00:06:14.959
+going to increase this to say 20.
+
+99
+00:06:14.959 --> 00:06:19.040
+You can see here that kind of spreads the smoke out a little bit.
+
+100
+00:06:19.040 --> 00:06:20.840
+It gives it kind of a wider surface area.
+
+101
+00:06:20.840 --> 00:06:23.720
+It looks like it's spawning for something a little bit larger.
+
+102
+00:06:23.720 --> 00:06:24.959
+Okay.
+
+103
+00:06:24.959 --> 00:06:31.759
+Next, what we're going to do is we need to adjust our alpha channel because right now
+
+104
+00:06:31.759 --> 00:06:37.480
+when the smoke comes in, it is full alpha and it actually is kind of jarring.
+
+105
+00:06:37.480 --> 00:06:40.399
+Let's check this out.
+
+106
+00:06:40.399 --> 00:06:44.480
+What we want to do here is it's got this nice fade out, but it doesn't have this really
+
+107
+00:06:44.480 --> 00:06:47.240
+great fade in.
+
+108
+00:06:47.240 --> 00:06:48.719
+Basically what we want is something like this.
+
+109
+00:06:48.719 --> 00:06:52.439
+We want a fade with, we don't have any fade.
+
+110
+00:06:52.439 --> 00:06:56.680
+It's actually backwards, but we want a fade with a nice fade right here.
+
+111
+00:06:56.680 --> 00:07:01.000
+We want to change this so that it fades in and fades out.
+
+112
+00:07:01.040 --> 00:07:08.079
+To do that, what we're going to do is we are going to come to our scale color.
+
+113
+00:07:08.079 --> 00:07:10.839
+We should have this scale alpha.
+
+114
+00:07:10.839 --> 00:07:15.759
+If you don't, you can just come here and just look for a curve.
+
+115
+00:07:15.759 --> 00:07:21.000
+If you don't have one, actually this one up here, sorry, a float from curve.
+
+116
+00:07:21.000 --> 00:07:23.000
+That will add this little input right here.
+
+117
+00:07:23.000 --> 00:07:26.079
+What we're going to do is at 0.5, we're going to add this.
+
+118
+00:07:26.079 --> 00:07:29.079
+We're going to actually set its value to 1.
+
+119
+00:07:29.079 --> 00:07:34.240
+Then we're going to set the beginning values to 0 and 0.
+
+120
+00:07:34.240 --> 00:07:36.519
+We have this curve that goes like this.
+
+121
+00:07:36.519 --> 00:07:42.199
+That's going to give us something that fades in and then it fades out.
+
+122
+00:07:42.199 --> 00:07:49.680
+The next thing that we want to do is we are going to add our controls to animate our sub-UV.
+
+123
+00:07:49.680 --> 00:07:53.120
+Right now, if we look at our smoke, it's actually not really doing anything.
+
+124
+00:07:53.120 --> 00:07:54.319
+It's just kind of hanging out there.
+
+125
+00:07:54.319 --> 00:07:56.839
+It looks really cool, but it's not actually animating.
+
+126
+00:07:56.839 --> 00:08:02.279
+If we come down here to particle update and we look for something called sub-UV, we have
+
+127
+00:08:02.279 --> 00:08:05.359
+this sub-UV animation.
+
+128
+00:08:05.359 --> 00:08:09.519
+As soon as we click on that, what's going to happen is it's going to put it on there,
+
+129
+00:08:09.519 --> 00:08:11.599
+but we get this error right here.
+
+130
+00:08:11.599 --> 00:08:14.919
+Under our sprite renderer, we need to select sprite renderer.
+
+131
+00:08:14.919 --> 00:08:20.559
+Once we do that, we are going to get, and it's very subtle, but you should see the smoke
+
+132
+00:08:20.559 --> 00:08:23.879
+looking like it is actually playing some animation.
+
+133
+00:08:23.879 --> 00:08:28.560
+This just gives it a little bit more realism and a little bit more life.
+
+134
+00:08:28.560 --> 00:08:33.439
+We might need to maybe come down here and come to our spawn rate and maybe change this
+
+135
+00:08:33.439 --> 00:08:37.439
+to 15.
+
+136
+00:08:37.439 --> 00:08:40.720
+We can see the smoke moving around and things like that.
+
+137
+00:08:40.720 --> 00:08:42.840
+That's really cool.
+
+138
+00:08:42.840 --> 00:08:47.919
+What we're going to do next is we are going to expose some parameters.
+
+139
+00:08:47.919 --> 00:08:53.080
+This is a really great feature of Niagara because you can expose many different parameters
+
+140
+00:08:53.080 --> 00:08:54.480
+to your user.
+
+141
+00:08:54.480 --> 00:08:57.080
+First off, let's go to our spawn rate here.
+
+142
+00:08:57.080 --> 00:08:59.360
+Right next to our spawn rate, we're going to click on this.
+
+143
+00:08:59.360 --> 00:09:02.920
+We're going to look for user.
+
+144
+00:09:02.920 --> 00:09:05.040
+We have this read from new user parameter.
+
+145
+00:09:05.040 --> 00:09:07.080
+I'm going to click on that.
+
+146
+00:09:07.080 --> 00:09:10.200
+If I come over here to my user parameters, this might be set on parameters.
+
+147
+00:09:10.200 --> 00:09:11.680
+Make sure you click on user parameters.
+
+148
+00:09:11.680 --> 00:09:13.160
+You can see the spawn rate.
+
+149
+00:09:13.160 --> 00:09:15.840
+If I'm just going to save this and I'm going to just pull this in the level, you don't
+
+150
+00:09:15.840 --> 00:09:17.600
+have to do this part right now.
+
+151
+00:09:17.600 --> 00:09:20.680
+What we're going to do is we're going to look for this, browse to this.
+
+152
+00:09:20.679 --> 00:09:23.199
+If I drag this into the level, check this out.
+
+153
+00:09:23.199 --> 00:09:27.959
+When I come down to the Niagara system user parameters here, I'm going to save this spawn
+
+154
+00:09:27.959 --> 00:09:34.839
+rate so I can set this to something really crazy, 89.
+
+155
+00:09:34.839 --> 00:09:40.759
+What we want to do now is let's spend some time exposing some various parameters and
+
+156
+00:09:40.759 --> 00:09:43.799
+things like that, such as maybe like the sphere radius here.
+
+157
+00:09:43.799 --> 00:09:48.359
+Right-click user parameter.
+
+158
+00:09:48.359 --> 00:09:50.359
+We have our sphere radius.
+
+159
+00:09:50.600 --> 00:10:00.360
+We want our add velocity, read from new user parameter, compile and save.
+
+160
+00:10:00.360 --> 00:10:04.600
+We have all of this cool stuff that we can now do inside of here.
+
+161
+00:10:04.600 --> 00:10:08.480
+You know, we'll offset this.
+
+162
+00:10:08.480 --> 00:10:13.120
+It's blowing backwards now.
+
+163
+00:10:13.120 --> 00:10:15.200
+All types of really, really cool stuff that we could do.
+
+164
+00:10:15.200 --> 00:10:17.600
+Well, that was a little bit too much.
+
+165
+00:10:17.600 --> 00:10:20.159
+There we go.
+
+166
+00:10:20.959 --> 00:10:24.279
+Now, spend a little bit of time doing that.
+
+167
+00:10:24.279 --> 00:10:31.439
+When we come back, what we'll do is we will take a look at how we can adjust this for
+
+168
+00:10:31.439 --> 00:10:32.439
+level lighting.
+
+169
+00:10:32.439 --> 00:10:33.439
+All right.
+
+170
+00:10:33.439 --> 00:10:37.360
+We're going to take a pause right here and then we're going to come back and we're going
+
+171
+00:10:37.360 --> 00:10:42.039
+to set this up to work with level lighting.
+
+172
+00:10:42.039 --> 00:10:49.959
+Now that you have added a couple of controls, let's put this in a level and show you how
+
+173
+00:10:49.960 --> 00:10:52.560
+it can easily work with your level lighting.
+
+174
+00:10:52.560 --> 00:10:56.280
+So, let's just pop back over here to Unreal.
+
+175
+00:10:56.280 --> 00:10:59.960
+What I'm going to do for now is I'm actually going to close this and I'm going to do a
+
+176
+00:10:59.960 --> 00:11:01.480
+file new level.
+
+177
+00:11:01.480 --> 00:11:06.800
+What I'm going to do is completely empty level and hit create and we're not going to save
+
+178
+00:11:06.800 --> 00:11:07.800
+that.
+
+179
+00:11:07.800 --> 00:11:12.519
+Then what I'm going to do is hit control space, grab my smoke and just bring it in.
+
+180
+00:11:12.519 --> 00:11:16.480
+Then here in my transform, I'm just going to zero these values out and hit F to kind
+
+181
+00:11:16.480 --> 00:11:18.040
+of focus in on this.
+
+182
+00:11:18.039 --> 00:11:21.000
+It looks like it's lit now, but if I go into game mode, I'm not going to see anything.
+
+183
+00:11:21.000 --> 00:11:26.240
+So, if I hold down L and click, I'm going to add a light and I'm just going to, again,
+
+184
+00:11:26.240 --> 00:11:30.120
+zero it, it transforms and I'm going to change it to a red light.
+
+185
+00:11:30.120 --> 00:11:33.639
+Then what I'm going to do is hold down alt and bring over another one.
+
+186
+00:11:33.639 --> 00:11:38.079
+I'm going to change this one to green and you can see here that as soon as I do that,
+
+187
+00:11:38.079 --> 00:11:43.919
+I get this nice yellow and that is because it is actually mixing the two colors there.
+
+188
+00:11:43.919 --> 00:11:46.879
+So you can see there's my green and it becomes more red.
+
+189
+00:11:46.879 --> 00:11:55.120
+And that's because of our material setup being set to allow translucency and also our lighting
+
+190
+00:11:55.120 --> 00:11:57.600
+being set up to work with volumetric non-directional.
+
+191
+00:11:57.600 --> 00:12:02.279
+You can see how powerful some of those settings can be to give us something that looks like
+
+192
+00:12:02.279 --> 00:12:03.279
+this.
+
+193
+00:12:03.279 --> 00:12:08.879
+And let's see, maybe we need, I think we might need one more light back here.
+
+194
+00:12:08.879 --> 00:12:12.879
+I think we were just hitting like a weird light frustum thing there.
+
+195
+00:12:12.879 --> 00:12:15.000
+So actually set this one to blue.
+
+196
+00:12:16.000 --> 00:12:17.559
+So there we go, there's blue.
+
+197
+00:12:17.559 --> 00:12:21.440
+And then we're getting white because that's the combination of everything.
+
+198
+00:12:21.440 --> 00:12:26.240
+So that's really, really cool that it's kind of really true to mixing everything together.
+
