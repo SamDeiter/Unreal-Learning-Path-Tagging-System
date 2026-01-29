@@ -1013,12 +1013,12 @@ function showCourseDetail(code) {
             <ul>${ai.ue5_features?.map((f) => `<li>${f}</li>`).join("") || "<li>None</li>"}</ul>
           </div>
           <div class="modal-section">
-            <h4>Subtopics (AI)</h4>
-            <ul>${ai.subtopics?.map((s) => `<li>${s}</li>`).join("") || "<li>None</li>"}</ul>
-          </div>
-          <div class="modal-section">
             <h4>Difficulty Notes (AI)</h4>
             <p style="font-size: 0.875rem; color: var(--text-secondary);">${ai.difficulty_notes || "No notes"}</p>
+          </div>
+          <div class="modal-section">
+            <h4>Subtopics (AI)</h4>
+            <ul>${ai.subtopics?.map((s) => `<li>${s}</li>`).join("") || "<li>None</li>"}</ul>
           </div>
         `;
   }
