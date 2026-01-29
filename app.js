@@ -804,7 +804,7 @@ function renderCourses() {
             </button>
             ${course.has_ai_tags ? '<div class="ai-badge" title="AI-enriched: This course has AI-analyzed metadata including keywords, concepts, and learning objectives">AI ✨</div>' : ""}
             <div class="course-code">${course.code || "N/A"}</div>
-            <div class="course-title" onclick="openModal('${course.code}')">${course.title}</div>
+            <div class="course-title" onclick="showCourseDetail('${course.code}')">${course.title}</div>
             <div class="course-tags">
               <span class="tag tag-level">${course.tags.level || "Unknown"}</span>
               <span class="tag tag-topic">${course.tags.topic || "Other"}</span>
