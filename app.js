@@ -347,15 +347,18 @@ function renderDashboard() {
   if (chartInstances.status) {
     chartInstances.status.destroy();
   }
+  const aiAnalyzed = courses.filter((c) => c.has_ai_tags).length;
+  const needsAnalysis = courses.length - aiAnalyzed;
+  const noVideosCount = courses.filter((c) => c.video_count === 0).length;
   chartInstances.status = new Chart(document.getElementById("statusChart"), {
     type: "doughnut",
     data: {
       labels: ["With Videos", "No Videos", "AI Analyzed", "Needs Analysis"],
       datasets: [
         {
-          label: "Videos",
-          data: [withVideos, courses.length - withVideos],
-          backgroundColor: ["#3fb950", "rgba(139, 148, 158, 0.3)"],
+          label: "Content Status",
+          data: [withVideos, noVideosCount, aiAnalyzed, needsAnalysis],
+          backgroundColor: ["#3fb950", "#8b949e", "#58a6ff", "#d29922"],
           borderColor: "#161b22",
           borderWidth: 3,
         },
@@ -798,13 +801,13 @@ function renderCourses() {
     .map((course) => {
       const isSelected = selectedPath.find((p) => p.code === course.code);
       return `
-          <div class="course-card ${isSelected ? "selected" : ""}">
+          <div class="course-card ${isSelected ? "selected" : ""}" onclick="showCourseDetail('${course.code}')" style="cursor: pointer;">
             <button class="card-add-btn ${isSelected ? "remove" : ""}" onclick="event.stopPropagation(); toggleCourse('${course.code}')" title="${isSelected ? "Remove from path" : "Add to path"}">
               ${isSelected ? "✓" : "+"}
             </button>
             ${course.has_ai_tags ? '<div class="ai-badge" title="AI-enriched: This course has AI-analyzed metadata including keywords, concepts, and learning objectives">AI ✨</div>' : ""}
             <div class="course-code">${course.code || "N/A"}</div>
-            <div class="course-title" onclick="showCourseDetail('${course.code}')">${course.title}</div>
+            <div class="course-title">${course.title}</div>
             <div class="course-tags">
               <span class="tag tag-level">${course.tags.level || "Unknown"}</span>
               <span class="tag tag-topic">${course.tags.topic || "Other"}</span>
