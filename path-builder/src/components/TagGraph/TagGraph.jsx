@@ -268,6 +268,7 @@ function TagGraph({ tags = [], edges = [] }) {
           "text-outline-color": "#0d1117",
           "transition-property": "opacity, background-color, border-color",
           "transition-duration": "200ms",
+          "z-index": 10, // Ensure nodes render above edges
         },
       },
       // Default edge styling
@@ -280,6 +281,7 @@ function TagGraph({ tags = [], edges = [] }) {
           opacity: "data(opacity)",
           "transition-property": "opacity, line-color, width",
           "transition-duration": "200ms",
+          "z-index": 1, // Edges behind nodes
         },
       },
       // Nodes without connections (isolated after filtering)
@@ -706,20 +708,34 @@ function TagGraph({ tags = [], edges = [] }) {
               </button>
             </div>
             <div className="pinned-stats">
-              <div className="stat-row">
+              <div className="stat-row" title="Number of courses that include this tag">
                 <span className="stat-label">Count:</span>
                 <span className="stat-value">{pinnedData.count}</span>
+                <span className="stat-hint">courses with this tag</span>
               </div>
-              <div className="stat-row">
+              <div
+                className="stat-row"
+                title="Number of other tags that appear together with this tag"
+              >
                 <span className="stat-label">Connections:</span>
                 <span className="stat-value">{pinnedData.neighborCount}</span>
+                <span className="stat-hint">related tags</span>
               </div>
             </div>
             {pinnedData.topConnections.length > 0 && (
               <div className="pinned-connections">
-                <h4>Top Connections</h4>
+                <h4 title="Tags that most frequently appear together with this tag">
+                  Top Connections
+                </h4>
+                <p className="connections-hint">
+                  Tags that often appear together (weight = co-occurrence strength)
+                </p>
                 {pinnedData.topConnections.map((conn) => (
-                  <div key={conn.id} className="pinned-connection-item">
+                  <div
+                    key={conn.id}
+                    className="pinned-connection-item"
+                    title={`Weight ${conn.weight.toFixed(0)}: How strongly ${conn.label} is associated with ${pinnedData.label}`}
+                  >
                     <span className="conn-name">{conn.label}</span>
                     <span className="conn-strength">{conn.weight.toFixed(0)}</span>
                   </div>
