@@ -357,19 +357,22 @@ function TagGraph({ tags = [], edges = [] }) {
       // Animation
       animate: "end",
       animationDuration: 500,
-      // Physics - INCREASED SIGNIFICANTLY for better spacing
-      idealEdgeLength: 250, // Increased for more space between connected nodes
-      nodeRepulsion: 30000, // Doubled for stronger repulsion
+      // Physics - AGGRESSIVE spacing to prevent clustering
+      idealEdgeLength: 400, // Much larger for clear separation
+      nodeRepulsion: 80000, // Very high repulsion to push nodes apart
       nestingFactor: 0.1,
-      gravity: 0.1, // Reduced further to spread out more
-      numIter: 2500,
+      gravity: 0.05, // Very low gravity - let nodes spread wide
+      numIter: 3000, // More iterations for stable layout
       // Padding
       tile: true,
-      tilingPaddingVertical: 80, // Increased padding
-      tilingPaddingHorizontal: 80, // Increased padding
-      nodeDimensionsIncludeLabels: true, // Include labels in spacing calc
+      tilingPaddingVertical: 100,
+      tilingPaddingHorizontal: 100,
+      nodeDimensionsIncludeLabels: true,
       // Randomize positions on start for variety
       randomize: true,
+      // Additional spacing params
+      edgeElasticity: 0.1, // Softer edges for more flexibility
+      componentSpacing: 150, // Space between disconnected components
     }),
     []
   );
