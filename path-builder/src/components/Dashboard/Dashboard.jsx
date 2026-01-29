@@ -16,34 +16,34 @@ function Dashboard() {
     const totalCourses = courses.length;
     const totalVideos = courses.reduce((sum, c) => sum + (c.video_count || 0), 0);
     const coursesWithVideos = courses.filter((c) => c.video_count > 0).length;
-    const aiEnriched = courses.filter((c) => c.ai_enhanced || c.ai_enriched).length;
+    const aiEnriched = courses.filter((c) => c.has_ai_tags).length;
 
     return { totalCourses, totalVideos, coursesWithVideos, aiEnriched };
   }, [courses]);
 
-  // Calculate topic distribution (from tags)
+  // Calculate topic distribution (from courses)
   const topicDistribution = useMemo(() => {
-    if (!tags || tags.length === 0) return [];
+    if (!courses || courses.length === 0) return [];
 
-    // Group by category (first part of category_path)
-    const categories = {};
-    tags.forEach((tag) => {
-      const category = tag.category_path?.split("/")[0] || "Other";
-      categories[category] = (categories[category] || 0) + (tag.count || 1);
+    // Group courses by topic
+    const topics = {};
+    courses.forEach((course) => {
+      const topic = course.tags?.topic || "Other";
+      topics[topic] = (topics[topic] || 0) + 1;
     });
 
     // Convert to array and sort
-    return Object.entries(categories)
+    return Object.entries(topics)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-  }, [tags]);
+      .slice(0, 12);
+  }, [courses]);
 
   // Calculate level distribution
   const levelDistribution = useMemo(() => {
     const levels = { Beginner: 0, Intermediate: 0, Advanced: 0 };
     courses.forEach((course) => {
-      const level = course.level || "Intermediate";
+      const level = course.tags?.level || "Intermediate";
       if (levels[level] !== undefined) {
         levels[level]++;
       }
@@ -61,7 +61,7 @@ function Dashboard() {
   const industryDistribution = useMemo(() => {
     const industries = {};
     courses.forEach((course) => {
-      const industry = course.industry || "General";
+      const industry = course.tags?.industry || "General";
       industries[industry] = (industries[industry] || 0) + 1;
     });
     return industries;
@@ -74,7 +74,7 @@ function Dashboard() {
     // Find topics with low coverage (less than 3 courses)
     const topicCounts = {};
     courses.forEach((course) => {
-      const topic = course.topic || "General";
+      const topic = course.tags?.topic || "General";
       topicCounts[topic] = (topicCounts[topic] || 0) + 1;
     });
 
@@ -92,8 +92,8 @@ function Dashboard() {
     // Find missing level progressions
     const topicLevels = {};
     courses.forEach((course) => {
-      const topic = course.topic || "General";
-      const level = course.level || "Intermediate";
+      const topic = course.tags?.topic || "General";
+      const level = course.tags?.level || "Intermediate";
       if (!topicLevels[topic]) topicLevels[topic] = new Set();
       topicLevels[topic].add(level);
     });
@@ -115,12 +115,18 @@ function Dashboard() {
   // Sort courses for table
   const sortedCourses = useMemo(() => {
     return [...courses].sort((a, b) => {
-      let aVal = a[sortField] || "";
-      let bVal = b[sortField] || "";
+      let aVal, bVal;
 
-      if (sortField === "video_count") {
+      // Handle nested tag fields
+      if (["level", "topic", "industry"].includes(sortField)) {
+        aVal = a.tags?.[sortField] || "";
+        bVal = b.tags?.[sortField] || "";
+      } else if (sortField === "video_count") {
         aVal = a.video_count || 0;
         bVal = b.video_count || 0;
+      } else {
+        aVal = a[sortField] || "";
+        bVal = b[sortField] || "";
       }
 
       if (typeof aVal === "string") {
@@ -379,19 +385,15 @@ function Dashboard() {
                   <td className="code-cell">{course.code || "—"}</td>
                   <td className="title-cell">{course.title || course.name || "Untitled"}</td>
                   <td>
-                    <span className={getLevelClass(course.level)}>
-                      {(course.level || "Intermediate").toUpperCase()}
+                    <span className={getLevelClass(course.tags?.level)}>
+                      {(course.tags?.level || "Intermediate").toUpperCase()}
                     </span>
                   </td>
-                  <td>{course.topic || "General"}</td>
-                  <td>{course.industry || "General"}</td>
+                  <td>{course.tags?.topic || "General"}</td>
+                  <td>{course.tags?.industry || "General"}</td>
                   <td className="videos-cell">{course.video_count || 0}</td>
                   <td className="ai-cell">
-                    {course.ai_enhanced || course.ai_enriched ? (
-                      <span className="ai-check">✓</span>
-                    ) : (
-                      "—"
-                    )}
+                    {course.has_ai_tags ? <span className="ai-check">✓</span> : "—"}
                   </td>
                 </tr>
               ))}
