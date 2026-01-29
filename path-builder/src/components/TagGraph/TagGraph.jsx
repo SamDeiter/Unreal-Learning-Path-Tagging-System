@@ -358,26 +358,29 @@ function TagGraph({ tags = [], edges = [] }) {
       name: "cose-bilkent",
       // Animation
       animate: "end",
-      animationDuration: 800,
-      // Physics - EXTREME spacing for All tags view
-      idealEdgeLength: 600, // Very large edge length
-      nodeRepulsion: 200000, // Extreme repulsion to prevent clustering
+      animationDuration: 1000,
+      // Physics - LARGE spacing to prevent label overlap
+      idealEdgeLength: 800, // Very large - ensures connected nodes are far apart
+      nodeRepulsion: 300000, // Very high repulsion
       nestingFactor: 0.1,
-      gravity: 0.02, // Near-zero gravity - let nodes spread very wide
-      gravityRange: 1.5, // Limit gravity effect range
-      numIter: 4000, // More iterations for many nodes
-      // Padding
+      gravity: 0.015, // Very low gravity - let graph spread wide
+      gravityRange: 2.0,
+      numIter: 5000, // More iterations for better convergence
+      // Padding for nodes
       tile: true,
-      tilingPaddingVertical: 150,
-      tilingPaddingHorizontal: 150,
-      nodeDimensionsIncludeLabels: true,
-      // Randomize positions on start for variety
+      tilingPaddingVertical: 200, // Large padding between tiled components
+      tilingPaddingHorizontal: 200,
+      nodeDimensionsIncludeLabels: true, // CRITICAL: Include label size in spacing
+      // Randomize positions
       randomize: true,
-      // Spacing controls
-      edgeElasticity: 0.05, // Very soft edges
-      componentSpacing: 200, // Large separation between components
-      nodeOverlap: 50, // Minimum spacing between nodes
-      quality: "proof", // Highest quality layout
+      // Anti-overlap - LARGE VALUES
+      edgeElasticity: 0.02, // Very soft edges
+      componentSpacing: 300, // Large space between disconnected components
+      nodeOverlap: 150, // Large minimum space between nodes (accounts for labels)
+      // Fit to viewport
+      fit: true,
+      padding: 80,
+      quality: "proof",
     }),
     []
   );
