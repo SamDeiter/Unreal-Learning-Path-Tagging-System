@@ -1001,20 +1001,20 @@ function showCourseDetail(code) {
     const ai = course.ai_analysis;
     bodyHTML += `
           <div class="modal-section">
-            <h4>Subtopics (AI)</h4>
-            <ul>${ai.subtopics?.map((s) => `<li>${s}</li>`).join("") || "<li>None</li>"}</ul>
-          </div>
-          <div class="modal-section">
-            <h4>UE5 Features (AI)</h4>
-            <ul>${ai.ue5_features?.map((f) => `<li>${f}</li>`).join("") || "<li>None</li>"}</ul>
+            <h4>Prerequisites (AI)</h4>
+            <ul>${ai.prerequisites?.map((p) => `<li>${p}</li>`).join("") || "<li>None</li>"}</ul>
           </div>
           <div class="modal-section">
             <h4>Learning Objectives (AI)</h4>
             <ul>${ai.learning_objectives?.map((o) => `<li>${o}</li>`).join("") || "<li>None</li>"}</ul>
           </div>
           <div class="modal-section">
-            <h4>Prerequisites (AI)</h4>
-            <ul>${ai.prerequisites?.map((p) => `<li>${p}</li>`).join("") || "<li>None</li>"}</ul>
+            <h4>UE5 Features (AI)</h4>
+            <ul>${ai.ue5_features?.map((f) => `<li>${f}</li>`).join("") || "<li>None</li>"}</ul>
+          </div>
+          <div class="modal-section">
+            <h4>Subtopics (AI)</h4>
+            <ul>${ai.subtopics?.map((s) => `<li>${s}</li>`).join("") || "<li>None</li>"}</ul>
           </div>
           <div class="modal-section">
             <h4>Difficulty Notes (AI)</h4>
