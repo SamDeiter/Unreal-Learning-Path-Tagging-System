@@ -913,10 +913,9 @@ document.getElementById("exportPath").addEventListener("click", () => {
   a.click();
 });
 
-// Clear path function (called from inline onclick) - C2 confirmation
+// Clear path function (called from inline onclick)
 function clearPath() {
   if (selectedPath.length === 0) return;
-  if (!confirm(`Clear all ${selectedPath.length} courses from your path?`)) return;
 
   selectedPath = [];
   savePath(); // C3 - persist to localStorage
