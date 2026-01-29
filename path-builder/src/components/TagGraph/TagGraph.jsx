@@ -21,6 +21,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape from "cytoscape";
 import coseBilkent from "cytoscape-cose-bilkent";
+import { resolveCollisions } from "./layoutUtils";
 import "./TagGraph.css";
 
 // Register the cose-bilkent layout algorithm
@@ -145,7 +146,10 @@ function TagGraph({ tags = [], edges = [] }) {
     // Filter edges by weight threshold AND only include edges between top tags
     const filteredEdges = edges.filter(
       (e) =>
-        e.weight >= minWeightFilter && topTagIds.has(e.sourceTagId) && topTagIds.has(e.targetTagId)
+        e.weight >= minWeightFilter &&
+        topTagIds.has(e.sourceTagId) &&
+        topTagIds.has(e.targetTagId) &&
+        e.sourceTagId !== e.targetTagId
     );
 
     // Build edge set for checking node connectivity
@@ -156,17 +160,28 @@ function TagGraph({ tags = [], edges = [] }) {
     });
 
     // Convert to Cytoscape elements format
-    const nodes = topTags.map((tag) => ({
-      data: {
-        id: tag.id,
-        label: tag.label,
-        count: tag.count,
-        // Pre-compute node size for styling
-        size: getNodeSize(tag.count, minCount, maxCount),
-        // Track if node has visible connections
-        hasConnections: connectedNodeIds.has(tag.id),
-      },
-    }));
+    const nodes = topTags.map((tag) => {
+      const nodeSize = getNodeSize(tag.count, minCount, maxCount);
+      // Calculate width needed for label (approx 7px per character + padding)
+      const labelWidth = Math.max(tag.label.length * 7 + 40, nodeSize);
+      // Height includes node + label below (node + spacing + text height)
+      const totalHeight = nodeSize + 30;
+
+      return {
+        data: {
+          id: tag.id,
+          label: tag.label,
+          count: tag.count,
+          // Pre-compute node size for styling
+          size: nodeSize,
+          // Layout dimensions (include label bounds)
+          width: labelWidth,
+          height: totalHeight,
+          // Track if node has visible connections
+          hasConnections: connectedNodeIds.has(tag.id),
+        },
+      };
+    });
 
     const edgeElements = filteredEdges.map((edge) => ({
       data: {
@@ -299,7 +314,7 @@ function TagGraph({ tags = [], edges = [] }) {
           "background-color": "#a371f7",
           "border-color": "#8957e5",
           "border-width": 3,
-          "z-index": 999,
+          "z-index": 12,
         },
       },
       // Neighbor nodes (connected to highlighted node)
@@ -309,6 +324,7 @@ function TagGraph({ tags = [], edges = [] }) {
           "background-color": "#3fb950",
           "border-color": "#238636",
           opacity: 1,
+          "z-index": 11,
         },
       },
       // Dimmed nodes (not in focus neighborhood)
@@ -324,7 +340,7 @@ function TagGraph({ tags = [], edges = [] }) {
         style: {
           "line-color": "#a371f7",
           opacity: 1,
-          "z-index": 998,
+          "z-index": 2,
         },
       },
       // Dimmed edges
@@ -341,7 +357,7 @@ function TagGraph({ tags = [], edges = [] }) {
           "background-color": "#f0883e",
           "border-color": "#d29922",
           "border-width": 4,
-          "z-index": 1000,
+          "z-index": 13,
         },
       },
     ],
@@ -356,34 +372,36 @@ function TagGraph({ tags = [], edges = [] }) {
   const layoutConfig = useMemo(
     () => ({
       name: "cose-bilkent",
-      // Animation
-      animate: "end",
-      animationDuration: 1000,
-      // Physics - LARGE spacing to prevent label overlap
-      idealEdgeLength: 800, // Very large - ensures connected nodes are far apart
-      nodeRepulsion: 300000, // Very high repulsion
+
+      // Physics - Standard spacing (Collision resolution will handle overlaps)
+      idealEdgeLength: 150,
+      nodeRepulsion: 10000,
       nestingFactor: 0.1,
-      gravity: 0.015, // Very low gravity - let graph spread wide
-      gravityRange: 2.0,
-      numIter: 5000, // More iterations for better convergence
+      gravity: 0.2,
+      gravityRange: 3.0,
+      numIter: 2500,
       // Padding for nodes
       tile: true,
-      tilingPaddingVertical: 200, // Large padding between tiled components
-      tilingPaddingHorizontal: 200,
-      nodeDimensionsIncludeLabels: true, // CRITICAL: Include label size in spacing
-      // Randomize positions
+      tilingPaddingVertical: 50,
+      tilingPaddingHorizontal: 50,
+      nodeDimensionsIncludeLabels: true,
+      // Randomize positions on start
       randomize: true,
-      // Anti-overlap - LARGE VALUES
-      edgeElasticity: 0.02, // Very soft edges
-      componentSpacing: 300, // Large space between disconnected components
-      nodeOverlap: 150, // Large minimum space between nodes (accounts for labels)
+      // Anti-overlap
+      edgeElasticity: 0.45,
+      componentSpacing: 60,
+      nodeOverlap: 20, // Reduced - let collision pass handle it
       // Fit to viewport
       fit: true,
-      padding: 80,
-      quality: "proof",
+      padding: 30,
+      quality: "default",
+      // Add layout stop handler for collision resolution
+      stop: undefined, // Will be overridden in effect
     }),
     []
   );
+
+  // ... (rest of component)
 
   // -------------------------------------------------------------------------
   // CYTOSCAPE INSTANCE HANDLER
@@ -562,6 +580,56 @@ function TagGraph({ tags = [], edges = [] }) {
       }
     }
   }, []);
+
+  // -------------------------------------------------------------------------
+  // COLLISION RESOLUTION
+  // Runs after any layout stops to fix overlaps
+  // -------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (!cyReady || !cyRef.current) return;
+    const cy = cyRef.current;
+
+    const handleLayoutStop = () => {
+      // Avoid infinite loops - strictly check we aren't triggering another layout
+      // node.position() does NOT trigger layoutstop, so this is safe.
+
+      const nodes = cy.nodes();
+      if (nodes.length === 0) return;
+
+      // Run collision resolution
+      // Using a larger padding here guarantees separation even with labels
+      const newPositions = resolveCollisions(nodes, {
+        padding: 30, // Generous padding for labels
+        gridSize: 200,
+        maxIterations: 50,
+        stiffness: 0.1,
+      });
+
+      // Apply new positions in a batch
+      cy.batch(() => {
+        nodes.forEach((node) => {
+          const id = node.id();
+          if (newPositions[id]) {
+            node.position(newPositions[id]);
+          }
+        });
+      });
+    };
+
+    // Attach listener
+    cy.on("layoutstop", handleLayoutStop);
+
+    // Initial run check - if layout finished before we attached
+    if (cy.elements().length > 0) {
+      // Might missed the first event, so run it once now just in case
+      handleLayoutStop();
+    }
+
+    return () => {
+      cy.off("layoutstop", handleLayoutStop);
+    };
+  }, [cyReady, isLayoutRunning]);
 
   // -------------------------------------------------------------------------
   // RENDER
