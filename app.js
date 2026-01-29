@@ -30,13 +30,21 @@ document.addEventListener("click", (e) => {
 // Global state
 let courses = [];
 let taxonomy = {};
-let selectedPath = [];
+let selectedPath = JSON.parse(localStorage.getItem("ue5_learning_path") || "[]");
 let filters = {
   search: "",
   levels: [],
   topics: [],
   industries: [],
   aiOnly: false,
+};
+
+// Chart instances (to destroy before recreating)
+let chartInstances = {
+  topic: null,
+  level: null,
+  industry: null,
+  status: null,
 };
 
 // Load data
@@ -51,7 +59,10 @@ async function loadData() {
     initFilters();
     renderStats(data.statistics);
     renderCourses();
+    updateLevelPillCounts(); // M8: show counts on level pills
     renderDashboard(); // Add dashboard rendering
+    renderPath(); // Restore saved path UI
+    updateTabBadge(); // Show path count in tab
   } catch (err) {
     console.error("Failed to load data:", err);
     document.getElementById("courseGrid").innerHTML =
@@ -66,6 +77,92 @@ function switchTab(tab) {
   });
   document.getElementById("dashboardView").style.display = tab === "dashboard" ? "block" : "none";
   document.getElementById("builderView").style.display = tab === "builder" ? "block" : "none";
+  // Remember last tab (Q7)
+  localStorage.setItem("ue5_last_tab", tab);
+}
+
+// Toast notification system (M6)
+function showToast(message, duration = 2500) {
+  // Remove existing toast
+  const existing = document.querySelector(".toast-notification");
+  if (existing) existing.remove();
+
+  const toast = document.createElement("div");
+  toast.className = "toast-notification";
+  toast.textContent = message;
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-green, #3fb950);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    z-index: 10000;
+    animation: toastSlideUp 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), duration);
+}
+
+// Update tab badge with path count (Q3)
+function updateTabBadge() {
+  const builderTab = document.querySelector('[data-tab="builder"]');
+  const count = selectedPath.length;
+  if (count > 0) {
+    builderTab.innerHTML = `🛠️ Path Builder <span class="tab-badge">${count}</span>`;
+  } else {
+    builderTab.innerHTML = "🛠️ Path Builder";
+  }
+}
+
+// M8: Add counts to level pills
+function updateLevelPillCounts() {
+  if (!courses || !courses.length) return;
+  const counts = {
+    Beginner: courses.filter((c) => c.tags && c.tags.level === "Beginner").length,
+    Intermediate: courses.filter((c) => c.tags && c.tags.level === "Intermediate").length,
+    Advanced: courses.filter((c) => c.tags && c.tags.level === "Advanced").length,
+  };
+  document.querySelectorAll(".level-pill").forEach((pill) => {
+    const level = pill.dataset.level;
+    const count = counts[level] || 0;
+    // Preserve the dot and add count
+    const dot = pill.querySelector(".pill-dot");
+    if (dot) {
+      pill.innerHTML = "";
+      pill.appendChild(dot);
+      pill.insertAdjacentHTML("beforeend", ` ${level} <span class="pill-count">(${count})</span>`);
+    }
+  });
+}
+
+// Save path to localStorage
+function savePath() {
+  localStorage.setItem("ue5_learning_path", JSON.stringify(selectedPath));
+  updateTabBadge();
+  updatePathButtons();
+}
+
+// Update path button states (Q5)
+function updatePathButtons() {
+  const exportBtn = document.getElementById("exportPath");
+  const clearBtn = document.querySelector(".btn-clear");
+  const isEmpty = selectedPath.length === 0;
+
+  if (exportBtn) {
+    exportBtn.disabled = isEmpty;
+    exportBtn.style.opacity = isEmpty ? "0.5" : "1";
+    exportBtn.style.cursor = isEmpty ? "not-allowed" : "pointer";
+  }
+  if (clearBtn) {
+    clearBtn.disabled = isEmpty;
+    clearBtn.style.opacity = isEmpty ? "0.5" : "1";
+    clearBtn.style.cursor = isEmpty ? "not-allowed" : "pointer";
+  }
 }
 
 // Render Coverage Dashboard
@@ -83,19 +180,19 @@ function renderDashboard() {
   const withVideos = courses.filter((c) => c.video_count > 0).length;
 
   document.getElementById("dashboardSummary").innerHTML = `
-          <div class="summary-card">
+          <div class="summary-card" title="Total number of courses in the learning library">
             <div class="value">${courses.length}</div>
             <div class="label">Total Courses</div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card" title="Total video files across all courses">
             <div class="value">${totalVideos}</div>
             <div class="label">Video Files</div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card" title="Courses that have at least one video file available">
             <div class="value">${withVideos}</div>
             <div class="label">Courses with Videos</div>
           </div>
-          <div class="summary-card">
+          <div class="summary-card" title="Courses processed by AI to extract keywords, concepts, and enriched tags from video transcripts for better search and recommendations">
             <div class="value">${aiCount}</div>
             <div class="label">AI-Enriched</div>
           </div>
@@ -113,8 +210,11 @@ function renderDashboard() {
   Chart.defaults.color = "#8b949e";
   Chart.defaults.borderColor = "#30363d";
 
-  // Topic Horizontal Bar Chart
-  new Chart(document.getElementById("topicChart"), {
+  // Topic Horizontal Bar Chart - destroy old instance first
+  if (chartInstances.topic) {
+    chartInstances.topic.destroy();
+  }
+  chartInstances.topic = new Chart(document.getElementById("topicChart"), {
     type: "bar",
     data: {
       labels: sortedTopics.map(([t]) => t),
@@ -125,7 +225,6 @@ function renderDashboard() {
           borderColor: "#58a6ff",
           borderWidth: 1,
           borderRadius: 4,
-          barThickness: 20,
         },
       ],
     },
@@ -162,7 +261,11 @@ function renderDashboard() {
     if (levelCounts[level] !== undefined) levelCounts[level]++;
   });
 
-  new Chart(document.getElementById("levelChart"), {
+  // Destroy old level chart instance
+  if (chartInstances.level) {
+    chartInstances.level.destroy();
+  }
+  chartInstances.level = new Chart(document.getElementById("levelChart"), {
     type: "doughnut",
     data: {
       labels: Object.keys(levelCounts),
@@ -205,7 +308,11 @@ function renderDashboard() {
   });
   const sortedIndustries = Object.entries(industryCounts).sort((a, b) => b[1] - a[1]);
 
-  new Chart(document.getElementById("industryChart"), {
+  // Destroy old industry chart instance
+  if (chartInstances.industry) {
+    chartInstances.industry.destroy();
+  }
+  chartInstances.industry = new Chart(document.getElementById("industryChart"), {
     type: "bar",
     data: {
       labels: sortedIndustries.map(([i]) => i),
@@ -216,7 +323,6 @@ function renderDashboard() {
           borderColor: "#a371f7",
           borderWidth: 1,
           borderRadius: 4,
-          barThickness: 20,
         },
       ],
     },
@@ -237,8 +343,11 @@ function renderDashboard() {
     },
   });
 
-  // Status Doughnut Chart
-  new Chart(document.getElementById("statusChart"), {
+  // Status Doughnut Chart - destroy old instance first
+  if (chartInstances.status) {
+    chartInstances.status.destroy();
+  }
+  chartInstances.status = new Chart(document.getElementById("statusChart"), {
     type: "doughnut",
     data: {
       labels: ["With Videos", "No Videos", "AI Analyzed", "Needs Analysis"],
@@ -719,10 +828,13 @@ function toggleCourse(code) {
   const index = selectedPath.findIndex((p) => p.code === code);
   if (index >= 0) {
     selectedPath.splice(index, 1);
+    showToast(`✓ Removed: ${course.title.slice(0, 30)}...`);
   } else {
     selectedPath.push(course);
+    showToast(`✓ Added: ${course.title.slice(0, 30)}...`);
   }
 
+  savePath(); // C3 - persist to localStorage
   renderPath();
   renderCourses();
 }
@@ -741,6 +853,7 @@ function renderPath() {
     list.innerHTML = `<span class="path-empty-inline">Click <span class="hint-add">+</span> on courses to add</span>`;
     document.getElementById("summaryVideos").textContent = "0";
     document.getElementById("summaryDuration").textContent = "0h";
+    updatePathButtons(); // Q5 - disable buttons when empty
     return;
   }
 
@@ -800,9 +913,14 @@ document.getElementById("exportPath").addEventListener("click", () => {
   a.click();
 });
 
-// Clear path function (called from inline onclick)
+// Clear path function (called from inline onclick) - C2 confirmation
 function clearPath() {
+  if (selectedPath.length === 0) return;
+  if (!confirm(`Clear all ${selectedPath.length} courses from your path?`)) return;
+
   selectedPath = [];
+  savePath(); // C3 - persist to localStorage
+  showToast("Path cleared");
   renderPath();
   renderCourses();
 }
