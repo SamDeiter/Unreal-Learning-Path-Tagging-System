@@ -1,0 +1,945 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:10.860
+In this video, we're going to talk about how to create a Blueprint in Unreal in which
+
+2
+00:00:10.860 --> 00:00:15.420
+we can populate it with Static Meshes and to be able to edit them quickly and duplicate
+
+3
+00:00:15.420 --> 00:00:18.540
+them and make changes all across the board.
+
+4
+00:00:18.540 --> 00:00:21.200
+So let's get started.
+
+5
+00:00:21.200 --> 00:00:25.140
+So first we're going to create a Blueprint Actor, and let me show you how this works.
+
+6
+00:00:25.140 --> 00:00:29.900
+We also have a step-by-step in the notes, which takes you through some of these details.
+
+7
+00:00:30.560 --> 00:00:31.560
+So let's go and do that.
+
+8
+00:00:34.460 --> 00:00:39.680
+In Unreal, we have a seed here, and we want to be able to maybe make a set of stalactites
+
+9
+00:00:39.680 --> 00:00:42.320
+type of objects sticking through the ground.
+
+10
+00:00:42.320 --> 00:00:45.000
+I'm probably using that word incorrectly.
+
+11
+00:00:45.000 --> 00:00:49.760
+There's stalagmites, stalagdites, I forget which one sticks up and which one sticks down.
+
+12
+00:00:49.760 --> 00:00:52.080
+But in this case, there are spikes.
+
+13
+00:00:52.080 --> 00:00:53.720
+So let's just say spikes.
+
+14
+00:00:53.720 --> 00:00:56.920
+So these spikes, I'm going to have different versions of them, and I want to be able to
+
+15
+00:00:56.980 --> 00:01:02.020
+actually change and edit them and not only change them individually, but also maybe change
+
+16
+00:01:02.020 --> 00:01:03.020
+them all across the board.
+
+17
+00:01:03.020 --> 00:01:05.940
+And it's actually pretty simple to do that.
+
+18
+00:01:05.940 --> 00:01:11.020
+Unreal itself has an amazing instancing system within it in which you can duplicate things,
+
+19
+00:01:11.020 --> 00:01:17.460
+and it really does look at the last one, and it allows for a quick calculation of that
+
+20
+00:01:17.460 --> 00:01:18.460
+object.
+
+21
+00:01:18.460 --> 00:01:22.460
+Now it does require a draw call, so many times emerging is more ideal.
+
+22
+00:01:22.460 --> 00:01:26.700
+But when we're using Blueprints, it allows us to house different items within there,
+
+23
+00:01:26.720 --> 00:01:31.200
+duplicate them, and maybe even change them all across the board so that Blueprint instance
+
+24
+00:01:31.200 --> 00:01:36.400
+is being able to affect all different ones or separate ones as you work.
+
+25
+00:01:36.400 --> 00:01:37.400
+So let me show you how to do that.
+
+26
+00:01:37.400 --> 00:01:38.400
+It's actually not that difficult.
+
+27
+00:01:38.400 --> 00:01:40.400
+So we're going to go to our Blueprints here.
+
+28
+00:01:40.400 --> 00:01:44.280
+I'm going to make a brand new NT Blueprint.
+
+29
+00:01:44.280 --> 00:01:49.680
+You can select an object and say, hey, I'm going to make this instantly into a Blueprint.
+
+30
+00:01:49.680 --> 00:01:54.400
+The only disadvantage you get with this is you can lose some of your scale, rotation,
+
+31
+00:01:54.400 --> 00:01:57.820
+and translation within how's within that Blueprint.
+
+32
+00:01:57.820 --> 00:02:01.660
+I like to be able to have the option of it still being there plus having it here within
+
+33
+00:02:01.660 --> 00:02:03.260
+the details.
+
+34
+00:02:03.260 --> 00:02:05.260
+So I like to do it here, do it raw.
+
+35
+00:02:05.260 --> 00:02:10.020
+So I'm going to go in and right click here, and I'm going to create a new Blueprint class.
+
+36
+00:02:10.020 --> 00:02:13.140
+We'll just choose Actor because Actor is the most diversified.
+
+37
+00:02:13.140 --> 00:02:19.020
+So if we needed to program right within this and edit it and make maybe special features,
+
+38
+00:02:19.020 --> 00:02:23.900
+maybe you want to control how they work, maybe you want them to be more random, we can do
+
+39
+00:02:24.000 --> 00:02:26.200
+so if we have an empty Actor.
+
+40
+00:02:26.200 --> 00:02:30.720
+So it allows us to use our Blueprint programming scripting language to be able to make it more
+
+41
+00:02:30.720 --> 00:02:31.720
+robust.
+
+42
+00:02:31.720 --> 00:02:32.720
+So this is the most diversified.
+
+43
+00:02:32.720 --> 00:02:34.720
+So we're going to hit on Actor.
+
+44
+00:02:34.720 --> 00:02:44.720
+We're going to call this Blueprint underscore Spire control, and you can call it whatever
+
+45
+00:02:44.720 --> 00:02:46.960
+you want if you're following along.
+
+46
+00:02:46.960 --> 00:02:47.960
+So I'm going to double click on this.
+
+47
+00:02:47.960 --> 00:02:51.040
+We're going to pop this up.
+
+48
+00:02:51.040 --> 00:02:53.560
+And what we want to do is add a component.
+
+49
+00:02:53.560 --> 00:02:56.100
+So component we want to add is our Spire.
+
+50
+00:02:56.100 --> 00:02:57.660
+Unreal is pretty smart.
+
+51
+00:02:57.660 --> 00:03:01.740
+In older versions of Unreal, you would do add a component and have to hunt it down.
+
+52
+00:03:01.740 --> 00:03:06.260
+But many times if you haven't already selected, you can add a component and it'll actually
+
+53
+00:03:06.260 --> 00:03:09.940
+recognize the one that you have selected, but not all the time.
+
+54
+00:03:09.940 --> 00:03:12.280
+So sometimes there is a little bit of refresh.
+
+55
+00:03:12.280 --> 00:03:14.020
+So we'll have to do Static Mesh.
+
+56
+00:03:14.020 --> 00:03:17.100
+And you'll see here we can do an Static Mesh.
+
+57
+00:03:17.100 --> 00:03:20.420
+We want to do this one, not the Instance one because these are great too.
+
+58
+00:03:20.420 --> 00:03:22.820
+They just give you a lot more options.
+
+59
+00:03:22.820 --> 00:03:27.680
+If you have things already, say you've merged stuff such as a hierarchal instance Static
+
+60
+00:03:27.680 --> 00:03:29.840
+Mesh, it will actually allow you to populate it.
+
+61
+00:03:29.840 --> 00:03:32.400
+But we just want to do a Static Mesh in general.
+
+62
+00:03:32.400 --> 00:03:33.400
+It's fine.
+
+63
+00:03:33.400 --> 00:03:35.080
+And that works just fine because we don't have thousands of these.
+
+64
+00:03:35.080 --> 00:03:39.020
+And if we did have a ton of them, we'd want to probably lean more towards foliage at that
+
+65
+00:03:39.020 --> 00:03:40.020
+point.
+
+66
+00:03:40.020 --> 00:03:41.020
+So I'm going to go Static Mesh here.
+
+67
+00:03:41.020 --> 00:03:48.240
+I'm going to call this Spire 01.
+
+68
+00:03:48.240 --> 00:03:49.480
+And we'll hit Enter.
+
+69
+00:03:49.480 --> 00:03:54.620
+Now if we go to our, now we're not going to create anything within our Event Graph.
+
+70
+00:03:54.620 --> 00:03:56.600
+And we have that option that we can.
+
+71
+00:03:56.600 --> 00:04:03.100
+But you'll see with this Spire selected, we have a Static Mesh component ready to go.
+
+72
+00:04:03.100 --> 00:04:08.940
+If I wanted to be able to program in here some more, I can grab my Static Mesh from
+
+73
+00:04:08.940 --> 00:04:10.900
+my, say it's populated in my environment.
+
+74
+00:04:10.900 --> 00:04:15.260
+And I can drag that Static Mesh reference in here if I needed to.
+
+75
+00:04:15.260 --> 00:04:18.400
+But we're not going to go that far into the weeds here.
+
+76
+00:04:18.400 --> 00:04:20.500
+So I'm going to go in here and grab that Spire.
+
+77
+00:04:20.500 --> 00:04:25.260
+I can grab any Spire that I want.
+
+78
+00:04:25.260 --> 00:04:30.800
+And I'll grab this first one here.
+
+79
+00:04:30.800 --> 00:04:34.220
+And you'll see that it's now connected within our Blueprint.
+
+80
+00:04:34.220 --> 00:04:37.060
+I'm going to go to my Viewport and we'll see that Spire is there.
+
+81
+00:04:37.060 --> 00:04:38.060
+And that's perfect.
+
+82
+00:04:38.060 --> 00:04:39.940
+That's exactly what we need.
+
+83
+00:04:39.940 --> 00:04:44.580
+So we need to actually make sure we also have the correct material for him.
+
+84
+00:04:44.580 --> 00:04:48.380
+So you'll see default material came in when we brought him in because we built this guide
+
+85
+00:04:48.380 --> 00:04:52.400
+before Mixer had the option to be able to export immediately.
+
+86
+00:04:52.400 --> 00:04:59.560
+So what we can do is grab that material that we need for this Spire.
+
+87
+00:04:59.560 --> 00:05:00.720
+And we're going to connect it to him.
+
+88
+00:05:00.720 --> 00:05:02.080
+Now we're just going to grab one in the scene.
+
+89
+00:05:02.080 --> 00:05:03.080
+I'm going to hit the magnifying glass.
+
+90
+00:05:03.080 --> 00:05:05.360
+I'm going to cheat a little bit.
+
+91
+00:05:05.360 --> 00:05:10.040
+And we're going to grab this and just drag it into this particular character.
+
+92
+00:05:10.040 --> 00:05:11.500
+That's perfect.
+
+93
+00:05:11.500 --> 00:05:14.040
+So I'm cheating a little bit and that's fine just to speed things up.
+
+94
+00:05:14.040 --> 00:05:16.000
+I'm going to rotate this.
+
+95
+00:05:16.000 --> 00:05:17.000
+It's good cheating.
+
+96
+00:05:17.420 --> 00:05:20.420
+And I'm going to now hit my Spacebar.
+
+97
+00:05:20.420 --> 00:05:25.580
+And I'm going to set this rotation to a world and keep my finger on the Alt key and drag
+
+98
+00:05:25.580 --> 00:05:30.260
+and duplicate just one more within this Blueprint environment.
+
+99
+00:05:30.260 --> 00:05:36.940
+So let me hit Alt drag this through.
+
+100
+00:05:36.940 --> 00:05:38.340
+Actually I need to create another one.
+
+101
+00:05:38.340 --> 00:05:40.340
+So sorry I was thinking in the Viewport.
+
+102
+00:05:40.340 --> 00:05:41.340
+So we don't want to do that.
+
+103
+00:05:41.340 --> 00:05:44.340
+What I do here and just do another static mesh.
+
+104
+00:05:45.040 --> 00:05:47.040
+So what you got not enough coffee.
+
+105
+00:05:47.040 --> 00:05:49.320
+You can grab a static mesh and we'll call this guy.
+
+106
+00:05:49.320 --> 00:05:51.320
+And we don't want this guy to be parented underneath him.
+
+107
+00:05:51.320 --> 00:05:53.080
+So we want to make it separate.
+
+108
+00:05:53.080 --> 00:06:00.000
+We don't want to attach it in any way so we can move him and move him right on top there.
+
+109
+00:06:00.000 --> 00:06:01.640
+And it'll actually separate this.
+
+110
+00:06:01.640 --> 00:06:03.120
+Let's give it a name.
+
+111
+00:06:03.120 --> 00:06:05.760
+We'll call this static mesh 02.
+
+112
+00:06:05.760 --> 00:06:06.760
+Or 02.
+
+113
+00:06:06.760 --> 00:06:07.760
+That's perfect.
+
+114
+00:06:07.760 --> 00:06:09.120
+There we go.
+
+115
+00:06:09.120 --> 00:06:12.320
+And we'll move this one over.
+
+116
+00:06:12.320 --> 00:06:13.520
+Oh it's not populated yet.
+
+117
+00:06:13.540 --> 00:06:17.540
+Let's go and populate it with the same static mesh.
+
+118
+00:06:26.300 --> 00:06:28.300
+Spire I should say.
+
+119
+00:06:30.420 --> 00:06:33.100
+So what happens when you attack and move things around.
+
+120
+00:06:33.100 --> 00:06:34.100
+Grab the same material.
+
+121
+00:06:34.100 --> 00:06:35.100
+Put it in there.
+
+122
+00:06:35.100 --> 00:06:38.100
+Rotate it a bit so it looks a little bit different here.
+
+123
+00:06:39.620 --> 00:06:40.620
+I hit spacebar and accident.
+
+124
+00:06:40.620 --> 00:06:42.620
+It took into the material and that's fine.
+
+125
+00:06:42.720 --> 00:06:44.720
+Let's rotate this though a little bit more.
+
+126
+00:06:44.720 --> 00:06:46.720
+There we go.
+
+127
+00:06:46.720 --> 00:06:49.720
+It looks a little bit different material wise.
+
+128
+00:06:49.720 --> 00:06:50.720
+Rotate that down.
+
+129
+00:06:50.720 --> 00:06:52.720
+Let's scale that down a bit.
+
+130
+00:06:52.720 --> 00:06:54.720
+So let's switch that to vocal.
+
+131
+00:06:54.720 --> 00:06:56.720
+We'll scale that down just a tad.
+
+132
+00:07:00.720 --> 00:07:04.720
+And we'll move this one a little bit past there.
+
+133
+00:07:04.720 --> 00:07:06.720
+Make them kind of reflect on top of each other.
+
+134
+00:07:08.720 --> 00:07:10.720
+And we'll do one more.
+
+135
+00:07:10.720 --> 00:07:11.720
+Just for the heck of it.
+
+136
+00:07:11.820 --> 00:07:13.820
+We'll do this guy here.
+
+137
+00:07:13.820 --> 00:07:15.820
+And if you need to you can also duplicate it.
+
+138
+00:07:15.820 --> 00:07:19.820
+So I just showed you how you can load them if you need it to be unique.
+
+139
+00:07:19.820 --> 00:07:21.820
+But you can also duplicate it there.
+
+140
+00:07:21.820 --> 00:07:23.820
+So with that duplication selected.
+
+141
+00:07:23.820 --> 00:07:25.820
+Then I'll move this one over.
+
+142
+00:07:25.820 --> 00:07:27.820
+And that's a little bit faster.
+
+143
+00:07:27.820 --> 00:07:29.820
+But I wanted to show you that you can also load them one more time.
+
+144
+00:07:29.820 --> 00:07:31.820
+Just in case you might have missed that the first time.
+
+145
+00:07:31.820 --> 00:07:33.820
+Move that down.
+
+146
+00:07:33.820 --> 00:07:35.820
+And let's actually scale this one up.
+
+147
+00:07:37.820 --> 00:07:39.820
+Every time I look at this it reminds me of chicken fingers.
+
+148
+00:07:39.920 --> 00:07:41.920
+I'm not sure why.
+
+149
+00:07:41.920 --> 00:07:43.920
+So we'll go ahead and grab this here.
+
+150
+00:07:43.920 --> 00:07:45.920
+And move this up there.
+
+151
+00:07:45.920 --> 00:07:47.920
+Alright so just a little quick clump of spires here.
+
+152
+00:07:49.920 --> 00:07:51.920
+We can play with.
+
+153
+00:07:51.920 --> 00:07:53.920
+Cool.
+
+154
+00:07:53.920 --> 00:07:55.920
+So this fellow we can hit compile.
+
+155
+00:07:55.920 --> 00:07:57.920
+We can find out where he's at by hitting browse.
+
+156
+00:07:57.920 --> 00:07:59.920
+There's our new spire set.
+
+157
+00:07:59.920 --> 00:08:01.920
+That we've made.
+
+158
+00:08:01.920 --> 00:08:03.920
+And this is the cool thing about the power of this.
+
+159
+00:08:03.920 --> 00:08:05.920
+So I can move this spires in here.
+
+160
+00:08:05.920 --> 00:08:07.920
+And I can scale them down.
+
+161
+00:08:08.020 --> 00:08:10.020
+We can also do that within the blueprint itself.
+
+162
+00:08:10.020 --> 00:08:12.020
+So I'll just do it here.
+
+163
+00:08:12.020 --> 00:08:14.020
+Scale that down.
+
+164
+00:08:14.020 --> 00:08:16.020
+My scale's a little funky so let's go and change that real quick here.
+
+165
+00:08:20.020 --> 00:08:22.020
+Scale that down.
+
+166
+00:08:22.020 --> 00:08:24.020
+There we go. One more fluid.
+
+167
+00:08:26.020 --> 00:08:30.020
+And now I have a set of spires that I can control.
+
+168
+00:08:30.020 --> 00:08:32.020
+Let me control so you won't see it too far.
+
+169
+00:08:34.020 --> 00:08:36.020
+Set of spires that I can place in the world any way that I want.
+
+170
+00:08:38.020 --> 00:08:40.020
+I'll go to my camera here.
+
+171
+00:08:40.020 --> 00:08:42.020
+You can see it's a false set here.
+
+172
+00:08:42.020 --> 00:08:44.020
+There we go.
+
+173
+00:08:44.020 --> 00:08:46.020
+And the cool thing about this.
+
+174
+00:08:46.020 --> 00:08:48.020
+Is now I can pull this here.
+
+175
+00:08:50.020 --> 00:08:52.020
+And I can hit alt and move this over.
+
+176
+00:08:52.020 --> 00:08:54.020
+Rotate this one.
+
+177
+00:08:54.020 --> 00:08:56.020
+About one, two.
+
+178
+00:08:56.020 --> 00:08:58.020
+And we'll do this on an object basis rotation.
+
+179
+00:08:58.020 --> 00:09:00.020
+So let's do that.
+
+180
+00:09:00.020 --> 00:09:02.020
+Kind of rotate.
+
+181
+00:09:02.020 --> 00:09:04.020
+It's kind of the same thing.
+
+182
+00:09:04.020 --> 00:09:06.020
+It's all good.
+
+183
+00:09:06.120 --> 00:09:08.120
+And then we'll move this over.
+
+184
+00:09:10.120 --> 00:09:12.120
+And.
+
+185
+00:09:12.120 --> 00:09:14.120
+Go back to the world.
+
+186
+00:09:16.120 --> 00:09:18.120
+We can rotate this any way that we desire.
+
+187
+00:09:18.120 --> 00:09:20.120
+Give it a little bit of a different angle.
+
+188
+00:09:23.120 --> 00:09:25.120
+And I can change these to make them individual.
+
+189
+00:09:25.120 --> 00:09:29.120
+So with this one set here I can simply go into one.
+
+190
+00:09:29.120 --> 00:09:31.120
+I can go into the blueprint itself.
+
+191
+00:09:31.120 --> 00:09:33.120
+And I can change the angle.
+
+192
+00:09:33.120 --> 00:09:35.120
+And I can change the angle.
+
+193
+00:09:35.220 --> 00:09:37.220
+And I can go into the blueprint itself.
+
+194
+00:09:37.220 --> 00:09:39.220
+And edit it here.
+
+195
+00:09:39.220 --> 00:09:41.220
+And the cool thing about this is if you want to change all of them you can.
+
+196
+00:09:41.220 --> 00:09:43.220
+So I can hit the space bar.
+
+197
+00:09:45.220 --> 00:09:47.220
+Let me move just a tad here.
+
+198
+00:09:47.220 --> 00:09:49.220
+You can see it moving real time.
+
+199
+00:09:51.220 --> 00:09:53.220
+Let me shrink this down just a little bit more.
+
+200
+00:09:53.220 --> 00:09:55.220
+So you can see this actively happening.
+
+201
+00:09:55.220 --> 00:09:57.220
+Because it's getting cut off.
+
+202
+00:09:59.220 --> 00:10:01.220
+So as I rotate this you'll see both of them change.
+
+203
+00:10:01.220 --> 00:10:03.220
+And that's actually kind of nice.
+
+204
+00:10:03.320 --> 00:10:05.320
+So if you want to say hey I need to change all of them.
+
+205
+00:10:05.320 --> 00:10:07.320
+You can make a quick change for that.
+
+206
+00:10:07.320 --> 00:10:09.320
+And I can hit compile.
+
+207
+00:10:09.320 --> 00:10:11.320
+And it'll update them all on the fly.
+
+208
+00:10:13.320 --> 00:10:15.320
+But the benefit also of doing this is the fact that I can go in here.
+
+209
+00:10:15.320 --> 00:10:17.320
+Select this particular blueprint.
+
+210
+00:10:17.320 --> 00:10:19.320
+And I can go individually here.
+
+211
+00:10:21.320 --> 00:10:23.320
+And I can also rotate them without affecting the other ones.
+
+212
+00:10:23.320 --> 00:10:25.320
+Which is really convenient to be able to do that.
+
+213
+00:10:27.320 --> 00:10:29.320
+Scale it down and you'll notice we're keeping this blueprint still unique.
+
+214
+00:10:29.420 --> 00:10:31.420
+So you can have a bunch of these in the scene.
+
+215
+00:10:31.420 --> 00:10:33.420
+Do some quick editing.
+
+216
+00:10:33.420 --> 00:10:35.420
+And it allows you to be able to control and edit things the way that you want.
+
+217
+00:10:35.420 --> 00:10:37.420
+And this is a really great way to maintain your scenes look and feel.
+
+218
+00:10:37.420 --> 00:10:39.420
+And I kept it pretty simple.
+
+219
+00:10:39.420 --> 00:10:41.420
+This can actually go for houses.
+
+220
+00:10:41.420 --> 00:10:43.420
+If you need a door open it over here.
+
+221
+00:10:43.420 --> 00:10:45.420
+But they're all the same type of copy of each other.
+
+222
+00:10:45.420 --> 00:10:47.420
+And all you're doing is changing them quickly on the fly.
+
+223
+00:10:47.420 --> 00:10:49.420
+Either as a whole or individually.
+
+224
+00:10:49.420 --> 00:10:51.420
+And keeping them kind of like in a group setting with the other ones.
+
+225
+00:10:51.420 --> 00:10:53.420
+And you can also do that with the other ones.
+
+226
+00:10:53.420 --> 00:10:55.420
+And I can also do that with the other ones.
+
+227
+00:10:55.420 --> 00:10:57.420
+And I can also do that with the other ones.
+
+228
+00:10:57.520 --> 00:10:59.520
+And keeping them kind of like in a group setting with these blueprints.
+
+229
+00:10:59.520 --> 00:11:01.520
+It's really great.
+
+230
+00:11:01.520 --> 00:11:03.520
+And it allows you to add some more functionality.
+
+231
+00:11:03.520 --> 00:11:05.520
+So if I wanted to make this more random.
+
+232
+00:11:05.520 --> 00:11:07.520
+Which is some of our other classes.
+
+233
+00:11:07.520 --> 00:11:09.520
+Which talks about the introduction to blueprints for virtual production.
+
+234
+00:11:09.520 --> 00:11:11.520
+You can actually go in there and make it more random.
+
+235
+00:11:11.520 --> 00:11:13.520
+So it rotates randomly as you move things around.
+
+236
+00:11:13.520 --> 00:11:15.520
+And shovel things around.

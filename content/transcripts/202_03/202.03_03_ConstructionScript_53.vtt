@@ -1,0 +1,701 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:08.520
+Hello and welcome to this video on the scatter tool exercise, where we will be using the
+
+2
+00:00:08.520 --> 00:00:11.160
+construction script.
+
+3
+00:00:11.160 --> 00:00:13.440
+Now there is no project which comes with this course.
+
+4
+00:00:13.440 --> 00:00:18.660
+What I will be using is the third person template from the games category.
+
+5
+00:00:18.660 --> 00:00:24.040
+I'm going to make sure that I have the starter content ticked on, because we're going to
+
+6
+00:00:24.040 --> 00:00:27.800
+be using some of the meshes which come with this.
+
+7
+00:00:27.800 --> 00:00:29.320
+I'll just push create.
+
+8
+00:00:29.320 --> 00:00:37.120
+And once that's loaded up, you should get a project which looks something like this.
+
+9
+00:00:37.120 --> 00:00:41.080
+The only thing that I'm going to do slightly differently, so I'm going to come down, I'm
+
+10
+00:00:41.080 --> 00:00:46.520
+going to select the content drawer, and I will dock that in the viewport.
+
+11
+00:00:46.520 --> 00:00:51.840
+We're going to be working with assets quite a lot, so I'd like them to be visible.
+
+12
+00:00:51.840 --> 00:00:57.360
+For this first scattering tool, what we will do is we'll develop a tool that enables a
+
+13
+00:00:57.360 --> 00:01:01.740
+random scattering of meshes throughout the scene.
+
+14
+00:01:01.740 --> 00:01:07.000
+This tool will provide options for adjusting the scatter distance and selecting the meshes
+
+15
+00:01:07.000 --> 00:01:13.440
+that we want to use, also determining the number of meshes that you want it to generate.
+
+16
+00:01:13.440 --> 00:01:18.100
+And all of this we're going to do on construction script.
+
+17
+00:01:18.100 --> 00:01:23.460
+So to start with, I'm going to right-hand click and I'm going to select a blueprint
+
+18
+00:01:23.460 --> 00:01:26.000
+class.
+
+19
+00:01:26.000 --> 00:01:34.040
+For this, I am going to select the actor class.
+
+20
+00:01:34.040 --> 00:01:42.320
+I'm going to call this BP underscore scatter tool.
+
+21
+00:01:42.320 --> 00:01:52.640
+I'm going to double click to open this up.
+
+22
+00:01:52.640 --> 00:01:58.400
+Now the first thing that I'm going to want to do is select the tab for construction script
+
+23
+00:01:58.400 --> 00:02:01.120
+up here in the center.
+
+24
+00:02:01.120 --> 00:02:08.880
+Now it's going to bring us to this page where we just have one purple node popping out here.
+
+25
+00:02:08.880 --> 00:02:17.920
+And to start with, I'm going to drag off and search for print string.
+
+26
+00:02:17.920 --> 00:02:20.720
+Then just compile and save.
+
+27
+00:02:20.720 --> 00:02:25.040
+This is just so that we can see when the construction script fires.
+
+28
+00:02:25.040 --> 00:02:30.640
+I'm going to jump back into the map and I'll drag this into the level.
+
+29
+00:02:30.640 --> 00:02:35.520
+And straight away you can see that we have a massive great big list of hello down the
+
+30
+00:02:35.520 --> 00:02:37.080
+left-hand side here.
+
+31
+00:02:37.080 --> 00:02:41.880
+So that's just to demonstrate when it triggers.
+
+32
+00:02:41.880 --> 00:02:47.980
+The construction script will trigger whenever the actor is placed in the level or whenever
+
+33
+00:02:48.060 --> 00:02:54.500
+anything is updated, such as his transform here as I drag it around.
+
+34
+00:02:54.500 --> 00:02:57.060
+Okay, we can jump back into the tool.
+
+35
+00:02:57.060 --> 00:02:58.940
+I'm going to delete this print string.
+
+36
+00:02:58.940 --> 00:03:05.140
+We don't need that anymore.
+
+37
+00:03:05.140 --> 00:03:10.900
+And I'm going to generate some variables, because how we're going to control what the
+
+38
+00:03:10.900 --> 00:03:16.380
+script does is by exposing some variables.
+
+39
+00:03:16.380 --> 00:03:30.020
+So the first one we want, if we push plus here, first one is going to be spawnable meshes.
+
+40
+00:03:30.020 --> 00:03:39.380
+And this is going to be of the type static mesh.
+
+41
+00:03:39.380 --> 00:03:44.820
+Just search for static.
+
+42
+00:03:44.820 --> 00:03:48.380
+And you'll see we here we have an option for static mesh.
+
+43
+00:03:48.380 --> 00:03:52.740
+I'm just going to select the object reference.
+
+44
+00:03:52.740 --> 00:03:56.060
+You see it turns blue because this is a reference.
+
+45
+00:03:56.060 --> 00:03:58.460
+Now there's a couple more things I need to do with this.
+
+46
+00:03:58.460 --> 00:04:03.820
+So the first thing is, we're going to want to allow numerous static meshes to be added
+
+47
+00:04:03.820 --> 00:04:05.420
+to this tool.
+
+48
+00:04:05.420 --> 00:04:11.020
+So rather than it being just a single static mesh that's referenced, in the drop down,
+
+49
+00:04:11.020 --> 00:04:13.580
+I'm going to select an array.
+
+50
+00:04:13.580 --> 00:04:18.860
+This will allow us to add multiple meshes.
+
+51
+00:04:18.860 --> 00:04:22.940
+And the last thing I'm going to do is you can see that we have an option here for instance
+
+52
+00:04:22.940 --> 00:04:24.980
+editable.
+
+53
+00:04:24.980 --> 00:04:31.460
+Now if I tick this to be true, you'll see down in the bottom left hand side here that
+
+54
+00:04:31.460 --> 00:04:34.220
+an eye is exposed.
+
+55
+00:04:34.220 --> 00:04:41.940
+This is just a quick indication so that we can see which of the variables are made instance
+
+56
+00:04:41.940 --> 00:04:42.940
+editable.
+
+57
+00:04:43.740 --> 00:04:50.680
+We can also see if I hit compile and jump back into the level in the details panel,
+
+58
+00:04:50.680 --> 00:04:57.980
+we can now see that we have the spawnable meshes as a array that we can add elements
+
+59
+00:04:57.980 --> 00:05:03.020
+into on within the actors details.
+
+60
+00:05:03.020 --> 00:05:07.580
+So I could come in here and I'm going to add in the bush.
+
+61
+00:05:07.580 --> 00:05:10.100
+So the SM underscore bush.
+
+62
+00:05:10.740 --> 00:05:16.220
+So we already have one asset up ready.
+
+63
+00:05:16.220 --> 00:05:21.940
+Now we're going to need a couple more.
+
+64
+00:05:21.940 --> 00:05:30.460
+Next up, if I'm going to add an extra variable, and this is going to be the radius.
+
+65
+00:05:30.460 --> 00:05:34.900
+This is the radius in which the meshes will be scattered.
+
+66
+00:05:34.900 --> 00:05:39.880
+So in a drop down here, I'm going to select a float.
+
+67
+00:05:39.880 --> 00:05:46.120
+Now allow us to enter a value for how large the ray scatter radius will be.
+
+68
+00:05:46.120 --> 00:05:48.560
+Now this we don't want to be an array.
+
+69
+00:05:48.560 --> 00:05:54.600
+So I'm going to convert that back to a single and I'm going to click on the eye this time.
+
+70
+00:05:54.600 --> 00:05:59.280
+So that's going to make this instance editable as well.
+
+71
+00:05:59.280 --> 00:06:03.000
+Now we need another variable.
+
+72
+00:06:03.000 --> 00:06:07.400
+And this is going to be the spawn amount.
+
+73
+00:06:07.400 --> 00:06:10.800
+This is how many meshes will be spawned.
+
+74
+00:06:10.800 --> 00:06:13.920
+Now this is not going to need a decimal point.
+
+75
+00:06:13.920 --> 00:06:18.120
+So I'm just going to do a drop down and I'm going to change this into an integer.
+
+76
+00:06:18.120 --> 00:06:22.800
+And again, I'm going to click on the eye to make that instance editable.
+
+77
+00:06:22.800 --> 00:06:33.840
+If I hit compile and jump back into the level, you can now see that all of these variables are now accessible within the menu.
+
+78
+00:06:33.840 --> 00:06:42.240
+If I wanted to set a default amount, if I can jump into radius, you can see here we have a default value in the details panel.
+
+79
+00:06:42.240 --> 00:06:46.360
+I could start off by making that 300.
+
+80
+00:06:46.360 --> 00:06:51.360
+And if you have the spawn amount, I'm going to start off by making that five.
+
+81
+00:06:51.360 --> 00:06:53.200
+Compile.
+
+82
+00:06:53.200 --> 00:06:59.520
+And you'll now see that the values are updated within the details panel.
+
+83
+00:06:59.520 --> 00:07:01.600
+However, they can be overwritten.
+
+84
+00:07:01.600 --> 00:07:06.880
+At any point, I could update it to 10 or increase the radius.
+
+85
+00:07:06.880 --> 00:07:13.080
+So this is how we're going to control how the tool spawns the meshes.
+
+86
+00:07:13.080 --> 00:07:15.520
+Let's jump back into the tool here.
+
+87
+00:07:15.520 --> 00:07:18.320
+And we're going to do the work on the construction script.
+
+88
+00:07:18.320 --> 00:07:24.320
+So I'm going to grab the spawn amount to start with.
+
+89
+00:07:24.320 --> 00:07:29.400
+I'm going to drop that down and select get.
+
+90
+00:07:29.400 --> 00:07:37.720
+I'm going to drag off the construction script and look for a for loop.
+
+91
+00:07:37.720 --> 00:07:41.600
+See the bottom here, we have a for loop.
+
+92
+00:07:41.600 --> 00:07:50.720
+Now I'm going to connect the spawn amount into the last index and the first index I'm going to change to one.
+
+93
+00:07:50.720 --> 00:07:57.720
+This function will repeat dependent on the value of the spawn amount.
+
+94
+00:07:57.720 --> 00:08:00.960
+If this would be set to zero, it wouldn't repeat at all.
+
+95
+00:08:00.960 --> 00:08:02.720
+Let's say this would be set to five.
+
+96
+00:08:02.720 --> 00:08:05.240
+It's going to go around five times.
+
+97
+00:08:05.240 --> 00:08:12.000
+The reason we've changed the index to one is because a for loop standardly starts at zero,
+
+98
+00:08:12.000 --> 00:08:16.360
+meaning that if we set the amount to five, we would get six out.
+
+99
+00:08:16.360 --> 00:08:23.520
+It's just to reduce it down by one.
+
+100
+00:08:23.520 --> 00:08:34.920
+Next up, we are going to add a static mesh component.
+
+101
+00:08:34.920 --> 00:08:40.680
+So this is just going to create a static mesh component as part of this actor.
+
+102
+00:08:40.680 --> 00:08:43.560
+And we want to do this for each iteration here.
+
+103
+00:08:43.560 --> 00:08:47.760
+So we've connected it to the loop body.
+
+104
+00:08:47.760 --> 00:08:50.560
+Now I want to set the transform.
+
+105
+00:08:50.560 --> 00:08:52.760
+I'm going to need to do some calculations on this.
+
+106
+00:08:52.760 --> 00:08:59.240
+So the first thing I'm going to do is come up to this orange pin, which is a transform.
+
+107
+00:08:59.240 --> 00:09:03.440
+It's a struct of location, rotation and scale.
+
+108
+00:09:03.440 --> 00:09:09.120
+I'm going to right hand click and hit the split struct pin.
+
+109
+00:09:09.120 --> 00:09:17.560
+And that's going to give me the individual pin for both the location, rotation and scale.
+
+110
+00:09:17.560 --> 00:09:20.000
+I'm going to split this down even further.
+
+111
+00:09:20.000 --> 00:09:26.800
+What I'm going to do is I'm going to right hand click on the location and split the struct pin again,
+
+112
+00:09:26.800 --> 00:09:33.200
+giving me an individual pin for each X, Y and Z.
+
+113
+00:09:33.200 --> 00:09:43.560
+And we want to randomly place these.
+
+114
+00:09:43.600 --> 00:09:50.680
+To do this, we're going to use the random unit vector.
+
+115
+00:09:50.680 --> 00:09:59.640
+And what this will do is it will generate me a random vector between minus one and one on each X, Y and Z.
+
+116
+00:09:59.640 --> 00:10:02.760
+So it's going to be a very small vector.
+
+117
+00:10:02.760 --> 00:10:06.040
+And afterwards, what I'm going to do is I'm just going to multiply this.
+
+118
+00:10:06.040 --> 00:10:10.080
+I type in star, grab multiply.
+
+119
+00:10:10.080 --> 00:10:12.520
+I'm going to change this to a float.
+
+120
+00:10:12.520 --> 00:10:18.560
+So I right hand click and select float single precision.
+
+121
+00:10:18.560 --> 00:10:22.680
+I can drag in our radius and plug that in.
+
+122
+00:10:22.680 --> 00:10:34.160
+So what that's done is that has generated a random vector and then it's multiplied it by the radius so that we've made it bigger.
+
+123
+00:10:34.160 --> 00:10:38.200
+However, at the moment, this is going to generate it in any direction.
+
+124
+00:10:38.200 --> 00:10:41.600
+So I'm going to split the output here.
+
+125
+00:10:41.600 --> 00:10:45.920
+So I come in again and go split struct pin.
+
+126
+00:10:45.920 --> 00:10:57.280
+I'm going to plug the X and the Y in, but I'm going to ignore the Z so that we know that this is going to be on a flat plane.
+
+127
+00:10:57.280 --> 00:11:04.400
+The final thing I'd like to do is I would like to randomize the rotation a bit, but not on all of the axes.
+
+128
+00:11:04.400 --> 00:11:10.360
+So what I'm going to do is I'm going to right hand click on our rotation and split this pin.
+
+129
+00:11:10.360 --> 00:11:14.680
+So we have another three floats.
+
+130
+00:11:14.680 --> 00:11:24.040
+And I am going to search for the function random.
+
+131
+00:11:24.040 --> 00:11:26.640
+Rotator.
+
+132
+00:11:26.640 --> 00:11:31.200
+I'm going to split this struct pin here.
+
+133
+00:11:31.200 --> 00:11:36.760
+I'm just going to grab the Z and add that in.
+
+134
+00:11:36.760 --> 00:11:52.360
+So you can see what this is doing is it's going in and it's giving us a random location only on the X and Y, and it's also randomizing the Z rotation.
+
+135
+00:11:52.360 --> 00:11:55.600
+Finally, we've added a static mesh component.
+
+136
+00:11:55.600 --> 00:11:58.680
+However, we haven't actually set the mesh.
+
+137
+00:11:58.680 --> 00:12:00.200
+So let's do that now.
+
+138
+00:12:00.200 --> 00:12:13.240
+So if we drag off and we type in set static mesh, it's important that you drag off of the blue pin to get this.
+
+139
+00:12:13.240 --> 00:12:20.840
+Come up here.
+
+140
+00:12:20.880 --> 00:12:28.960
+Now, if we drag in the spawnable meshes and get the spawnable meshes.
+
+141
+00:12:28.960 --> 00:12:35.040
+Now, since this is an array, we may have multiple entries in this spawnable meshes.
+
+142
+00:12:35.040 --> 00:12:39.160
+So therefore, we want to randomize the one that we get.
+
+143
+00:12:39.160 --> 00:12:44.120
+So I'm going to drag off and I'm going to type get a copy.
+
+144
+00:12:44.120 --> 00:12:46.960
+I'm going to plug that in.
+
+145
+00:12:46.960 --> 00:12:59.000
+What this is allowing us to do is to use an index, a number of the array to get one of the copies of the meshes from this spawnable mesh.
+
+146
+00:12:59.000 --> 00:13:07.680
+Now, we want to randomize this value, but in order to randomize this value, we first need to get the length of this array.
+
+147
+00:13:07.680 --> 00:13:14.280
+So I'm going to drag off and type in length.
+
+148
+00:13:14.280 --> 00:13:27.880
+Now, I can grab a random integer value in range.
+
+149
+00:13:27.880 --> 00:13:33.160
+Now, we want to.
+
+150
+00:13:33.160 --> 00:13:36.840
+Now, we want to actually use this length as the max.
+
+151
+00:13:36.840 --> 00:13:47.800
+So I'm going to hold down the control key and drag that so it plugs into them.
+
+152
+00:13:47.800 --> 00:13:55.400
+And I am going to make minimum one.
+
+153
+00:13:55.400 --> 00:14:03.920
+In order to get this to match up with the array, I am going to need to subtract one.
+
+154
+00:14:03.920 --> 00:14:11.320
+After I've done this, I'll drag that in and press compile.
+
+155
+00:14:11.320 --> 00:14:22.720
+So if we look at what we've done here, first thing is, is we are going to loop around for the amount dependent on the spawn amount variable.
+
+156
+00:14:22.720 --> 00:14:32.440
+And then once we've done that, we're going to add a static mesh component and we're randomizing the location within the radius.
+
+157
+00:14:32.440 --> 00:14:39.240
+And we are going to randomize the rotator so that it looks a little bit more natural.
+
+158
+00:14:39.240 --> 00:14:52.760
+Finally, we are setting the static mesh by grabbing the array and we're getting a value of the array of a random value based on how long the array is.
+
+159
+00:14:52.760 --> 00:14:55.160
+And we're going to set that mesh.
+
+160
+00:14:55.160 --> 00:14:58.440
+Let compile and save and jump back in.
+
+161
+00:14:58.440 --> 00:15:01.880
+We can already see that this is working.
+
+162
+00:15:01.880 --> 00:15:10.720
+So we have because we only have one mesh and see that we have only bushes that are being created in here.
+
+163
+00:15:10.720 --> 00:15:23.760
+However, if I was to hold down alt and drag off a second version and add something extra to the spawnable meshes, in this case, I'm going to select the chair.
+
+164
+00:15:23.760 --> 00:15:27.160
+We got the SM underscore chair.
+
+165
+00:15:27.160 --> 00:15:35.800
+And all that for the time being, we can now see that this is randomizing the chairs as well.
+
+166
+00:15:35.800 --> 00:15:51.600
+And there are a number of other settings, like we could increase the spawn amount to considerably larger and we could reduce the radius to compress it down.
+
+167
+00:15:51.640 --> 00:15:55.280
+So you can see here, this is straight away on construction script.
+
+168
+00:15:55.280 --> 00:16:02.760
+We're just randomizing out these meshes.
+
+169
+00:16:02.760 --> 00:16:05.680
+So that is our first tool.
+
+170
+00:16:05.680 --> 00:16:11.520
+Hopefully, you've managed to follow along and create that.
+
+171
+00:16:11.520 --> 00:16:21.320
+In the next video, we're going to be advancing the tool a little bit more so that it queries the environment, allowing us to stick the objects
+
+172
+00:16:21.320 --> 00:16:23.760
+that we're scattering to the ground.
+
+173
+00:16:23.760 --> 00:16:30.880
+As you can see here, if I drag this over, it's not paying any attention to where the ground is at all.
+
+174
+00:16:30.880 --> 00:16:33.880
+OK, so thanks for sticking with us.
+
+175
+00:16:33.880 --> 00:16:35.280
+I'll see you in the next video.

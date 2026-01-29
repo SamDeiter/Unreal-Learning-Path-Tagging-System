@@ -1,0 +1,313 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.000
+Hello, in this video we are going to be finishing off the scatter tool.
+
+2
+00:00:06.000 --> 00:00:12.000
+And to do this we're going to demonstrate exposing a function.
+
+3
+00:00:12.000 --> 00:00:23.000
+This function is going to allow us to click a button and it will bake out any of the meshes that we have to exist as separate actors within the world.
+
+4
+00:00:23.000 --> 00:00:27.000
+So again we're back here to the scatter tool.
+
+5
+00:00:27.000 --> 00:00:32.000
+And for this function I'm actually going to be jumping into the event graph.
+
+6
+00:00:32.000 --> 00:00:41.000
+So as we go here you can see the event graph. We standardly have the events that were triggered during gameplay.
+
+7
+00:00:41.000 --> 00:00:49.000
+However I am going to create an extra event here. Right-hand click and search for custom.
+
+8
+00:00:49.000 --> 00:00:55.000
+And you can see here we have the option for add custom event.
+
+9
+00:00:55.000 --> 00:01:06.000
+I'm going to select that. And I'm going to name this event Bake Out Meshes.
+
+10
+00:01:06.000 --> 00:01:16.000
+With the event selected I am going to come up to its details and I'm going to tick the box for call in editor.
+
+11
+00:01:16.000 --> 00:01:22.000
+And now I'm going to come in and I'm going to add a print string that just says hello.
+
+12
+00:01:22.000 --> 00:01:27.000
+Compile and save and jump back to the world.
+
+13
+00:01:27.000 --> 00:01:36.000
+Now if I select my actor you can see here down in the details panel I have a option to bake our meshes.
+
+14
+00:01:36.000 --> 00:01:40.000
+When I push that button you can see the hello appear in the top left hand corner.
+
+15
+00:01:40.000 --> 00:01:42.000
+So we know that that's working.
+
+16
+00:01:42.000 --> 00:01:49.000
+So this is what we're referring to when we expose an event or function.
+
+17
+00:01:49.000 --> 00:01:53.000
+So call in editor.
+
+18
+00:01:53.000 --> 00:01:59.000
+Okay so let's delete that.
+
+19
+00:01:59.000 --> 00:02:01.000
+Now we're going to need to do a couple of things here.
+
+20
+00:02:01.000 --> 00:02:05.000
+So I'm going to jump back to the construction script.
+
+21
+00:02:05.000 --> 00:02:15.000
+I'm going to need a list of the meshes that we have created so that we can quickly go through them in order to save them out.
+
+22
+00:02:15.000 --> 00:02:23.000
+I'm going to do that by adding a new variable.
+
+23
+00:02:23.000 --> 00:02:38.000
+And that variable I'm going to call MeshesToBake.
+
+24
+00:02:38.000 --> 00:02:49.000
+And this is going to be of a static mesh component.
+
+25
+00:02:49.000 --> 00:02:51.000
+It's going to be an object reference.
+
+26
+00:02:51.000 --> 00:02:54.000
+So I search there for static mesh component.
+
+27
+00:02:54.000 --> 00:02:59.000
+I'm selecting an object reference.
+
+28
+00:02:59.000 --> 00:03:06.000
+Now because we're going to have multiple of these I'm going to need to change it to an array.
+
+29
+00:03:06.000 --> 00:03:14.000
+So up here, drop down, and we're not going to need this to be instance editable because it's a working variable.
+
+30
+00:03:14.000 --> 00:03:19.000
+We're not going to set it at any point manually.
+
+31
+00:03:19.000 --> 00:03:31.000
+Now if I drag in the meshes to bake and get, drag off and type in add.
+
+32
+00:03:31.000 --> 00:03:36.000
+That's going to allow me to add to this array.
+
+33
+00:03:36.000 --> 00:03:39.000
+And what I want to add is the static mesh component.
+
+34
+00:03:39.000 --> 00:03:44.000
+So I'll drag off the back of the static mesh component and connect that up.
+
+35
+00:03:44.000 --> 00:03:47.000
+So you can see what we're doing here.
+
+36
+00:03:47.000 --> 00:03:52.000
+We're just saving this static mesh component to the meshes to bake.
+
+37
+00:03:52.000 --> 00:03:55.000
+So we'll have a reference list.
+
+38
+00:03:55.000 --> 00:04:04.000
+I'm going to compile and go back to the event graph.
+
+39
+00:04:04.000 --> 00:04:11.000
+I'm going to grab our meshes to bake and get another reference.
+
+40
+00:04:11.000 --> 00:04:14.000
+I'm going to do a for each.
+
+41
+00:04:14.000 --> 00:04:20.000
+This is going to allow me access to a for each loop.
+
+42
+00:04:20.000 --> 00:04:23.000
+And I'm going to connect that up to the event.
+
+43
+00:04:23.000 --> 00:04:31.000
+So what that's going to do is for every entry into the meshes to bake array.
+
+44
+00:04:31.000 --> 00:04:39.000
+It will loop, it will action whatever is connected to this execution pin on the loop body.
+
+45
+00:04:39.000 --> 00:04:48.000
+And this is going to be a reference to the specific mesh.
+
+46
+00:04:48.000 --> 00:05:04.000
+Next, what I'm going to want to do is drag off and I want to spawn Pacta from class.
+
+47
+00:05:04.000 --> 00:05:16.000
+It's going to allow us to spawn an actor, drop down search for static mesh, starting mesh actor.
+
+48
+00:05:16.000 --> 00:05:22.000
+And so this is just going to create a static mesh actor in the world.
+
+49
+00:05:22.000 --> 00:05:29.000
+And we've got a couple of options here, but the main one we care about is the transform.
+
+50
+00:05:29.000 --> 00:05:36.000
+Because we want this, when we bake this out, we want this to appear in the place where the mesh was generated.
+
+51
+00:05:36.000 --> 00:05:41.000
+So in order to do that, I'm going to drag off of the array.
+
+52
+00:05:41.000 --> 00:05:51.000
+I'm going to type in get world transform.
+
+53
+00:05:51.000 --> 00:05:57.000
+And so this is going to find the transform of where the component is in the world.
+
+54
+00:05:57.000 --> 00:06:03.000
+So it's not, we're not going to get the relative transform, we're going to get the world transform.
+
+55
+00:06:03.000 --> 00:06:06.000
+And we'll plug that directly in.
+
+56
+00:06:06.000 --> 00:06:12.000
+Now there's only one last thing we need to do. As with any static mesh actor, we need to set the mesh.
+
+57
+00:06:12.000 --> 00:06:20.000
+So I'm going to drag off and type set static mesh.
+
+58
+00:06:20.000 --> 00:06:25.000
+It will automatically detect the static mesh component.
+
+59
+00:06:25.000 --> 00:06:29.000
+And I can connect that up.
+
+60
+00:06:29.000 --> 00:06:34.000
+And the mesh that we're looking for is here.
+
+61
+00:06:34.000 --> 00:06:42.000
+So if I drag off of the element again, go get static mesh, you can see it here at the bottom.
+
+62
+00:06:42.000 --> 00:06:49.000
+Allow me to get the static mesh. And I can plug that in.
+
+63
+00:06:49.000 --> 00:06:58.000
+So again, what we've done here is we started off with a for each loop for each of the meshes to bake.
+
+64
+00:06:58.000 --> 00:07:07.000
+We've then spawned the actor and we spawned it by class because you can't, the title can be misleading here.
+
+65
+00:07:07.000 --> 00:07:11.000
+When you first grab it is going to be spawned by class.
+
+66
+00:07:11.000 --> 00:07:15.000
+Then we've got the world transform, plugged it into the world transform.
+
+67
+00:07:15.000 --> 00:07:19.000
+And after that, we have set the static mesh.
+
+68
+00:07:19.000 --> 00:07:25.000
+If I hit compile and save.
+
+69
+00:07:25.000 --> 00:07:30.000
+I jump back into the world.
+
+70
+00:07:30.000 --> 00:07:37.000
+We can now see, I'm going to reduce the numbers down. I'll use this small one for the time being.
+
+71
+00:07:37.000 --> 00:07:44.000
+If I grab this, if I push the bake our meshes button.
+
+72
+00:07:44.000 --> 00:07:51.000
+Then we can see that we have singular actors for each of the meshes.
+
+73
+00:07:51.000 --> 00:08:01.000
+That would allow us to use this as a bit of a stamp rather than having it so that it automatically updates every time that it's moved.
+
+74
+00:08:01.000 --> 00:08:04.000
+You can just get something that you like.
+
+75
+00:08:04.000 --> 00:08:10.000
+And then after you've set it up, you can just bake it out.
+
+76
+00:08:10.000 --> 00:08:15.000
+Great. So that brings us to the end of the scattering tool.
+
+77
+00:08:15.000 --> 00:08:19.000
+We have it all up and running. Hopefully you've been able to follow that. OK.
+
+78
+00:08:19.000 --> 00:08:26.000
+In the next video, we're going to be looking at the editor utility widgets.

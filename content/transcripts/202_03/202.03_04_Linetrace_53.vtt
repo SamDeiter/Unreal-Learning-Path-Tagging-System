@@ -1,0 +1,341 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.000
+Hello and welcome to the second video on Construction Script.
+
+2
+00:00:06.000 --> 00:00:11.000
+In this video we'll be looking at building on the scattered tool we've already made
+
+3
+00:00:11.000 --> 00:00:17.000
+in order to use a line trace so that we can query the environment
+
+4
+00:00:17.000 --> 00:00:23.000
+and we can then add the static mesh component in line with the ground.
+
+5
+00:00:24.000 --> 00:00:31.000
+So here I am back in the engine. I'm going to open up my scattered tool again.
+
+6
+00:00:31.000 --> 00:00:39.000
+I'm back here on the Construction Script because we're still working on the Construction Script at this point.
+
+7
+00:00:39.000 --> 00:00:43.000
+Now I'm going to want to keep the for loop.
+
+8
+00:00:43.000 --> 00:00:50.000
+That is absolutely fine so I will move that over to the left hand side.
+
+9
+00:00:50.000 --> 00:00:58.000
+However, before I add the static mesh component, I'm going to want to do something called a line trace.
+
+10
+00:00:58.000 --> 00:01:04.000
+So I'm going to drag out and I'm going to search for line trace.
+
+11
+00:01:04.000 --> 00:01:10.000
+And you can see here we have line trace by channel.
+
+12
+00:01:10.000 --> 00:01:14.000
+So I'll just add this in between the two sections.
+
+13
+00:01:14.000 --> 00:01:25.000
+And what a line trace is going to do is it's going to draw a line between the start vector and the end vector down here.
+
+14
+00:01:25.000 --> 00:01:35.000
+And then it's going to return any data on any collisions that it hits on the visibility channel.
+
+15
+00:01:35.000 --> 00:01:40.000
+And we can get the data out of this out hit here.
+
+16
+00:01:40.000 --> 00:01:47.000
+Now all we're going to need to do is calculate the start and the end location.
+
+17
+00:01:47.000 --> 00:01:58.000
+I'm going to do that by coming over here and grabbing my random unit vector multiplied by radius.
+
+18
+00:01:58.000 --> 00:02:04.000
+And I'm going to press Ctrl and X to cut that out.
+
+19
+00:02:04.000 --> 00:02:15.000
+And then I'll come back over this side and press Ctrl and V.
+
+20
+00:02:15.000 --> 00:02:24.000
+Now this is great for giving us the X and the Y, but I'm going to manually want to make the Z.
+
+21
+00:02:24.000 --> 00:02:32.000
+So I'm going to do that by dragging off the X and I'm going to type make vector.
+
+22
+00:02:32.000 --> 00:02:35.000
+So that's going to do the opposite of splitting a vector.
+
+23
+00:02:35.000 --> 00:02:41.000
+It's going to put together a vector.
+
+24
+00:02:41.000 --> 00:02:45.000
+This time I can just leave the Z out.
+
+25
+00:02:45.000 --> 00:02:50.000
+So we're forcing Z to be zero.
+
+26
+00:02:50.000 --> 00:02:54.000
+So up to this point we've been working in relative space.
+
+27
+00:02:54.000 --> 00:03:02.000
+So that means we've only had to calculate the transform from the root of our actor.
+
+28
+00:03:02.000 --> 00:03:07.000
+However, when we do a line trace, this will be done in world space.
+
+29
+00:03:07.000 --> 00:03:16.000
+So I'm going to need to calculate the world locations where we start from and where we end at.
+
+30
+00:03:16.000 --> 00:03:22.000
+In order to calculate the world transform from the relative transform,
+
+31
+00:03:22.000 --> 00:03:31.000
+all I need to do is take the relative and then add on the actor's location to that.
+
+32
+00:03:31.000 --> 00:03:34.000
+So I'm going to get the actor location.
+
+33
+00:03:34.000 --> 00:03:40.000
+I'll type in actor location and here's get actor location.
+
+34
+00:03:40.000 --> 00:03:45.000
+And then I'm going to add these two together, drag off, push add.
+
+35
+00:03:45.000 --> 00:03:48.000
+And connect them up.
+
+36
+00:03:48.000 --> 00:03:54.000
+So this is now going to give me the world location of this.
+
+37
+00:03:54.000 --> 00:04:01.000
+Now, because I'm drawing a line, we're going to want to have a start and end position of this.
+
+38
+00:04:01.000 --> 00:04:06.000
+However, I'm starting with a singular vector.
+
+39
+00:04:06.000 --> 00:04:12.000
+So the start position, I would ideally like to be above the actor that we're working on.
+
+40
+00:04:12.000 --> 00:04:16.000
+And the end position, I would like to be below.
+
+41
+00:04:16.000 --> 00:04:22.000
+So when you place the actor, it's going to look above it and draw a line directly down below the ground.
+
+42
+00:04:22.000 --> 00:04:30.000
+So I'm going to do that by dragging off this and pushing plus and selecting add.
+
+43
+00:04:30.000 --> 00:04:37.000
+And then I'm going to add 400 on the Z axis.
+
+44
+00:04:37.000 --> 00:04:41.000
+And that will give me my start location.
+
+45
+00:04:41.000 --> 00:04:43.000
+Now I'm going to do the opposite here.
+
+46
+00:04:43.000 --> 00:04:46.000
+I'm going to subtract.
+
+47
+00:04:46.000 --> 00:04:51.000
+So I'm going to subtract 400 on the Z axis.
+
+48
+00:04:51.000 --> 00:04:56.000
+And that will give us our end.
+
+49
+00:04:56.000 --> 00:05:03.000
+Now I'm going to disconnect by holding down alt and left clicking everything after this line trace.
+
+50
+00:05:03.000 --> 00:05:10.000
+And for the draw debug, I'm going to select for duration.
+
+51
+00:05:10.000 --> 00:05:14.000
+This is just so I can demonstrate how it will work in the engine.
+
+52
+00:05:14.000 --> 00:05:23.000
+So if I hit compile and then jump back into the engine, you can now see we just have a lot of red lines.
+
+53
+00:05:23.000 --> 00:05:33.000
+So if I was to grab this cube, move it here and then move our actor.
+
+54
+00:05:33.000 --> 00:05:38.000
+We can see a lot of red lines except for under the cube where it's green.
+
+55
+00:05:38.000 --> 00:05:47.000
+So if I would shift this, every one of the line traces, you're going from 400 above and it's attempting to go 400 below.
+
+56
+00:05:47.000 --> 00:05:51.000
+If I'd shift the camera, you can see it here.
+
+57
+00:05:51.000 --> 00:06:01.000
+So for every line, it is going to return us the data of where the red squares are here.
+
+58
+00:06:01.000 --> 00:06:03.000
+And that's great.
+
+59
+00:06:03.000 --> 00:06:12.000
+So if I was to go back to my scatter tool, I'm going to turn off the draw debug so that none.
+
+60
+00:06:12.000 --> 00:06:22.000
+And I'm going to come over to our add static mesh component.
+
+61
+00:06:22.000 --> 00:06:30.000
+Now I am only going to want to add a static mesh component if the line traces actually hit something.
+
+62
+00:06:30.000 --> 00:06:36.000
+So the way I'm going to do that is I'm going to hold down the B key and left click.
+
+63
+00:06:36.000 --> 00:06:40.000
+That's going to create me a branch.
+
+64
+00:06:40.000 --> 00:06:44.000
+And I'm going to connect the return value to the condition.
+
+65
+00:06:44.000 --> 00:06:53.000
+So that means this code will only continue down the true path if we've actually hit something.
+
+66
+00:06:53.000 --> 00:07:00.000
+OK, so now we have to add in the static mesh location.
+
+67
+00:07:00.000 --> 00:07:09.000
+To do that, I'm going to right click on the transform and select recombined struct pins.
+
+68
+00:07:09.000 --> 00:07:16.000
+And that's going to give me a yellow input.
+
+69
+00:07:16.000 --> 00:07:23.000
+And now if you look at the line trace by channel, you can see that we have one blue out hit pin.
+
+70
+00:07:23.000 --> 00:07:25.000
+Now this is a struct.
+
+71
+00:07:25.000 --> 00:07:35.000
+So if I right click on that and select split struct pin, we're going to see that we get a lot more options.
+
+72
+00:07:35.000 --> 00:07:43.000
+The one that we want in this instance is the out hit location.
+
+73
+00:07:43.000 --> 00:07:46.000
+Now I can't connect that directly in.
+
+74
+00:07:46.000 --> 00:07:58.000
+That's because, as we mentioned before, line trace is in world space and the static mesh component is going to be relative to the root of the actor.
+
+75
+00:07:58.000 --> 00:08:05.000
+So in order to fix this, what I'm going to have to do is drag off the out hit location.
+
+76
+00:08:05.000 --> 00:08:11.000
+And then I'm going to search for subtract.
+
+77
+00:08:11.000 --> 00:08:15.000
+And plug that into the relative transform location.
+
+78
+00:08:15.000 --> 00:08:19.000
+And then I'm going to get the actor location.
+
+79
+00:08:19.000 --> 00:08:30.000
+So what I'm effectively doing is minusing the actor's location from the out hit location to give us the relative transform.
+
+80
+00:08:30.000 --> 00:08:40.000
+And now if we jump back into the world, you can see that this is all conforming to the ground below it.
+
+81
+00:08:40.000 --> 00:08:50.000
+So if I increase the radius to about 600 and the spawn amount, let's say 400.
+
+82
+00:08:50.000 --> 00:09:06.000
+Now you can see how that has just distributed and placed meshes on the ground around it.
+
+83
+00:09:06.000 --> 00:09:09.000
+OK, so thank you for watching.
+
+84
+00:09:09.000 --> 00:09:15.000
+In the next video, we're going to add some more functionality to the scatter tool.
+
+85
+00:09:15.000 --> 00:09:27.000
+We're going to make it so that with a button push, we can bake out all of these static mesh components to actors in their own rights.

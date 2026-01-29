@@ -1,0 +1,113 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.400
+Now that we've covered some weight map based examples, let's talk about height map based examples.
+
+2
+00:00:06.400 --> 00:00:10.400
+So you can see how we approach a height based material.
+
+3
+00:00:10.400 --> 00:00:19.000
+You can see how it works by showing a specific material when the landscape slope reaches a certain angle here.
+
+4
+00:00:19.000 --> 00:00:28.400
+So it means that the flatter areas will be covered in a grass texture and all surfaces that have the slope will have a dirt or rock texture assigned like in this example.
+
+5
+00:00:28.400 --> 00:00:34.800
+So the above image shows that the grass material function will be shown from zero.
+
+6
+00:00:34.800 --> 00:00:37.800
+So we can see the zero on the grass there.
+
+7
+00:00:37.800 --> 00:00:46.200
+And then as the slope of the landscape approaches point five, it will then blend to the dirt, which we can see point five.
+
+8
+00:00:46.200 --> 00:00:55.000
+And then once the slope reaches an angle greater than point five, we can see it goes straight to one there, which is the rock in this example.
+
+9
+00:00:55.000 --> 00:01:01.600
+So the material setup you'll use are these three nodes specifically.
+
+10
+00:01:01.600 --> 00:01:14.200
+We've got the material function, which are little snippets of the material graphs that can be saved in your content browser and you can reuse these functions across multiple materials.
+
+11
+00:01:14.200 --> 00:01:23.000
+We'll also need to have a make break material attributes, which these nodes are used for when you have a layered material workflow.
+
+12
+00:01:23.000 --> 00:01:34.800
+And it allows you to not only use one aspect of the material that is being sampled, but for example, you may have a material layer that defines some kind of nice looking generic material such as steel.
+
+13
+00:01:34.800 --> 00:01:40.600
+And then you may want to use the roughness and base color attributes from that layer in your final material.
+
+14
+00:01:40.600 --> 00:01:50.600
+So rather than using the whole thing, you can use it in such cases where you might break the material attributes node to split up all of the incoming attributes of the material layer.
+
+15
+00:01:50.600 --> 00:01:56.200
+And then just picking to plug in the layers that you want.
+
+16
+00:01:56.200 --> 00:02:04.200
+And then just to cover the world aligned blend, which is the material expression, the world aligned blend.
+
+17
+00:02:04.200 --> 00:02:09.400
+This function takes in a vector and compares it against the world space surface normal.
+
+18
+00:02:09.400 --> 00:02:19.000
+So the function provides zero to one alpha output where zero represents perpendicular vectors and then one represents parallel vectors.
+
+19
+00:02:19.000 --> 00:02:28.400
+So if you think about it in a slightly different way, when using the Z axis, your in world vector value is going to be zero zero one.
+
+20
+00:02:28.400 --> 00:02:32.700
+So we're talking about the one in the Z axis there.
+
+21
+00:02:32.700 --> 00:02:40.900
+So if that it will output black and white texture where the white represents flat and black represents a slope.
+
+22
+00:02:40.900 --> 00:02:46.100
+So this value can be biased and sharpened to create clean lines between alpha values.
+
+23
+00:02:46.100 --> 00:02:53.100
+And we can we have a few other controls here that will allow us to get the results that we want.
+
+24
+00:02:53.100 --> 00:02:58.500
+So here's an extremely simplified process of how we might create this.
+
+25
+00:02:58.500 --> 00:03:05.700
+So when making a height based landscape material, the order in which the layers are put together is going to be super important here.
+
+26
+00:03:05.700 --> 00:03:11.200
+So for example, we have rock and then dirt and then grass.
+
+27
+00:03:11.200 --> 00:03:16.200
+So this makes sense as rock breaks down into dirt and grass grows into dirt.
+
+28
+00:03:16.200 --> 00:03:26.700
+So really, really simplified process here, but hopefully gives you an idea of how that height based result may look inside your editor here.

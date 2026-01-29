@@ -1,0 +1,113 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.480
+At this point it would be useful to touch upon some LOD settings you might be able to
+
+2
+00:00:05.480 --> 00:00:08.100
+get access to in your foliage.
+
+3
+00:00:08.100 --> 00:00:14.560
+So foliage does not support the use of level of detail or LOD meshes but there are a few
+
+4
+00:00:14.560 --> 00:00:15.620
+other restrictions.
+
+5
+00:00:15.620 --> 00:00:22.240
+So you should ensure that your static mesh has only one entry in the elements array which
+
+6
+00:00:22.240 --> 00:00:24.140
+is visible under log zero.
+
+7
+00:00:24.140 --> 00:00:29.580
+So that's the first step, make sure your static mesh only has one entry in the elements array
+
+8
+00:00:29.580 --> 00:00:31.860
+under the LOD.
+
+9
+00:00:31.860 --> 00:00:37.480
+The light and shadow maps are shared between all LOD levels so LODs need to use the same
+
+10
+00:00:37.480 --> 00:00:39.720
+unwrapping on their UVs.
+
+11
+00:00:39.720 --> 00:00:45.420
+So currently the entire cluster of instances change LODs simultaneously.
+
+12
+00:00:45.420 --> 00:00:50.100
+So there may be support for distance based fading per instance in the future but it's
+
+13
+00:00:50.100 --> 00:00:52.420
+not currently supported.
+
+14
+00:00:52.420 --> 00:01:01.220
+So lightmap coordinate index must be set to a valid UV channel that has a unique UV unwrapping.
+
+15
+00:01:01.220 --> 00:01:07.200
+The static mesh editors generate UVs feature is an option here where you could just use
+
+16
+00:01:07.200 --> 00:01:12.280
+in the static mesh editor window you can generate unique UVs and that will allow you to access
+
+17
+00:01:12.280 --> 00:01:18.240
+the window from the window menu and quickly generate some unwrapping there.
+
+18
+00:01:18.240 --> 00:01:22.400
+With the lightmap resolution this must be a small enough number so that all the shadow
+
+19
+00:01:22.400 --> 00:01:28.140
+maps and for instances in a single cluster can be tiled together without exceeding the
+
+20
+00:01:28.140 --> 00:01:32.360
+maximum texture resolution which is 1496 by 1496.
+
+21
+00:01:32.360 --> 00:01:36.440
+So the shadow maps must be considered there.
+
+22
+00:01:36.440 --> 00:01:41.280
+Again it depends if you're using a static solution or a fully dynamic global illumination
+
+23
+00:01:41.280 --> 00:01:46.400
+system like Lumen but again you're going to have to make these trade-offs and with all
+
+24
+00:01:46.560 --> 00:01:51.680
+LOD settings you need to make the trade-offs depending on what project you're working on.
+
+25
+00:01:51.680 --> 00:01:56.640
+And then to make the foliage fade you just need to use a per distance fade node like
+
+26
+00:01:56.640 --> 00:01:59.680
+this image here for a material setup.
+
+27
+00:01:59.680 --> 00:02:05.660
+So hopefully that gives you some good initial LOD settings to start thinking about when
+
+28
+00:02:05.660 --> 00:02:07.480
+working with foliage in your projects.

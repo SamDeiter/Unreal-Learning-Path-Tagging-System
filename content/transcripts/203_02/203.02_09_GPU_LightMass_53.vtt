@@ -1,0 +1,821 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.740
+In this lesson, we're going to take a look at GPU lightmass and take an overview on how
+
+2
+00:00:05.740 --> 00:00:06.740
+it works.
+
+3
+00:00:06.740 --> 00:00:09.040
+So let's get started.
+
+4
+00:00:09.040 --> 00:00:12.400
+So the first thing we're going to ask, you're probably going to ask is what exactly is this?
+
+5
+00:00:12.400 --> 00:00:17.120
+Well this is using a light baking system, but we're going to be leaning on our GPU to
+
+6
+00:00:17.120 --> 00:00:18.120
+be able to build.
+
+7
+00:00:18.120 --> 00:00:22.520
+We're not going to be using the CPU based lightmass system, so it improves upon that.
+
+8
+00:00:22.520 --> 00:00:27.560
+It leverages DirectX 12 DXR ray tracing capabilities to speed things up.
+
+9
+00:00:27.560 --> 00:00:31.640
+It significantly reduces the time it takes to build a complex scene.
+
+10
+00:00:31.640 --> 00:00:37.680
+It achieves speeds on a single host comparable to distributed swarm render, which we saw
+
+11
+00:00:37.680 --> 00:00:40.680
+that earlier where you can actually use a swarm agent.
+
+12
+00:00:40.680 --> 00:00:46.520
+It makes it so that we're leaning on the GPU versus the CPU to be able to do so.
+
+13
+00:00:46.520 --> 00:00:51.040
+So it's using a progressive lightmapper with optional real-time preview in the viewport.
+
+14
+00:00:51.040 --> 00:00:52.640
+So you can actually see it going on.
+
+15
+00:00:52.640 --> 00:00:56.440
+You want to make sure your virtual texturing is on if you want to be able to see this display
+
+16
+00:00:56.440 --> 00:00:58.560
+correctly.
+
+17
+00:00:58.560 --> 00:01:05.000
+Offering multiple modes for building lighting, full bake and bake what you see, significantly
+
+18
+00:01:05.000 --> 00:01:10.480
+increases the speed of lightbakes for complex scenes, producing a more physically accurate
+
+19
+00:01:10.480 --> 00:01:15.280
+result than CPU based lightmass.
+
+20
+00:01:15.280 --> 00:01:18.680
+Let's go ahead and take a look at this up close and we're going to convert a lumen scene
+
+21
+00:01:18.680 --> 00:01:23.240
+into a GPU lightmass bake scene and I'll show you some of the ins and outs and things you
+
+22
+00:01:23.240 --> 00:01:24.800
+have to look out for.
+
+23
+00:01:24.800 --> 00:01:28.200
+So let's go and jump into Unreal.
+
+24
+00:01:28.200 --> 00:01:31.920
+In my Unreal scene, I'm going to go ahead and open up my project settings.
+
+25
+00:01:31.920 --> 00:01:35.280
+In here, we want to make sure we turn on allow static lighting.
+
+26
+00:01:35.280 --> 00:01:39.360
+We turned that off before, but we're going to turn that on now.
+
+27
+00:01:39.360 --> 00:01:44.560
+We want to go into rendering and then convert everything to a non-lumen scenario.
+
+28
+00:01:44.560 --> 00:01:45.560
+What does that mean?
+
+29
+00:01:45.560 --> 00:01:50.040
+Well, I'm changing my dynamic global illumination method to screen space.
+
+30
+00:01:50.040 --> 00:01:53.940
+That way when we bake, we might, we should be able to actually get some, a little bit
+
+31
+00:01:53.940 --> 00:01:59.940
+of glow for those lamps in our scene and kind of capture some of that lumen realism.
+
+32
+00:01:59.940 --> 00:02:03.940
+Still going to be at a disadvantage as you can already see the preview shadows here are
+
+33
+00:02:03.940 --> 00:02:09.200
+kind of blobby, but once we do a bake on full production, we'll get pretty close, although
+
+34
+00:02:09.200 --> 00:02:13.820
+we will not get the real time update we would get with lumen as we move the light around
+
+35
+00:02:13.820 --> 00:02:16.940
+because our light has changed mobility too.
+
+36
+00:02:16.940 --> 00:02:20.660
+It needs to be changed to stationary versus movable.
+
+37
+00:02:20.660 --> 00:02:29.300
+So once we set all this reflection method to screen space, as well as our shadow method
+
+38
+00:02:29.300 --> 00:02:34.980
+to shadow maps, we also want to make sure in our post-process volume, once we've got
+
+39
+00:02:34.980 --> 00:02:41.940
+all this down, and again, you want to be under rendering, changing it from lumen to a screen
+
+40
+00:02:41.940 --> 00:02:46.700
+space, you want to go to our post-process volume and do the same.
+
+41
+00:02:46.700 --> 00:02:50.640
+Change the global illumination method to screen space and change the reflection method to
+
+42
+00:02:50.640 --> 00:02:52.340
+screen space.
+
+43
+00:02:52.340 --> 00:02:57.040
+We're going to go ahead and restart.
+
+44
+00:02:57.040 --> 00:03:02.960
+So once you've rebooted and you've also turned on allow static lighting and you also have
+
+45
+00:03:02.960 --> 00:03:08.560
+ray tracing active, again, I do recommend, and I'm going to emphasize this, is you turn
+
+46
+00:03:08.560 --> 00:03:12.560
+on virtual texturing for some support for your view port modes.
+
+47
+00:03:12.560 --> 00:03:17.240
+Now it may not be as dependent as it used to be to be able to have that on, but you
+
+48
+00:03:17.320 --> 00:03:21.840
+will see some progress bars hopefully showing up in your scene to be able to see things
+
+49
+00:03:21.840 --> 00:03:22.840
+as they go.
+
+50
+00:03:22.840 --> 00:03:26.000
+Now it's really not necessary.
+
+51
+00:03:26.000 --> 00:03:30.120
+It's just a fancy thing to be there, but you can also turn those off if you don't want
+
+52
+00:03:30.120 --> 00:03:31.120
+those at any time.
+
+53
+00:03:31.120 --> 00:03:33.000
+You can turn them off if you don't need them.
+
+54
+00:03:33.000 --> 00:03:36.440
+I don't really care if they're on because I get the percentages at the bottom.
+
+55
+00:03:36.440 --> 00:03:39.380
+It tells me how it's going and there's our build lighting.
+
+56
+00:03:39.380 --> 00:03:42.040
+So let me walk you through some of these settings.
+
+57
+00:03:42.040 --> 00:03:47.800
+Now you'll notice immediately there's quite a difference between this and Lumen.
+
+58
+00:03:47.800 --> 00:03:51.560
+We'll also notice though that the materials are handled a bit better though with baking,
+
+59
+00:03:51.560 --> 00:03:56.700
+but we are getting that banding from screen space reflections.
+
+60
+00:03:56.700 --> 00:04:00.300
+So there is a difference between a give or take between both of these.
+
+61
+00:04:00.300 --> 00:04:04.440
+You also notice that there are some little bit of light leaking going on.
+
+62
+00:04:04.440 --> 00:04:12.020
+So we have to again make sure that our lightmap resolution is to the level that we want for
+
+63
+00:04:12.100 --> 00:04:17.020
+each item and also make sure that the floor is not paper thin.
+
+64
+00:04:17.020 --> 00:04:21.660
+Now if it's paper thin and not thick, you can see it is paper thin.
+
+65
+00:04:21.660 --> 00:04:25.940
+That can be an issue sometimes where you will get some bleeding of shadows and light.
+
+66
+00:04:25.940 --> 00:04:30.700
+So we would probably have to go back and rebuild this floor and make it thick like it actually
+
+67
+00:04:30.700 --> 00:04:32.300
+is in the real world.
+
+68
+00:04:32.300 --> 00:04:37.260
+These are things a lot of people don't consider when working and baking items.
+
+69
+00:04:37.260 --> 00:04:43.780
+And it's also a good idea to have thick and actual geometry you can punch into when it
+
+70
+00:04:43.780 --> 00:04:44.880
+comes to Lumen too.
+
+71
+00:04:44.880 --> 00:04:48.100
+So overall it's just a very good practice to have.
+
+72
+00:04:48.100 --> 00:04:52.040
+You'll see in the mode here we have a full bake or bake what you see.
+
+73
+00:04:52.040 --> 00:04:53.240
+This is beneficial.
+
+74
+00:04:53.240 --> 00:04:57.220
+If you don't want to go through the whole system there, you can actually do partial.
+
+75
+00:04:57.220 --> 00:05:02.300
+You can press your lightmap so we can actually turn this off and run this again.
+
+76
+00:05:02.300 --> 00:05:06.180
+Right now that's one of the reasons we are getting a little bit of a blobby shadow or
+
+77
+00:05:06.180 --> 00:05:10.300
+not as accurate as we had for Lumen.
+
+78
+00:05:10.300 --> 00:05:17.540
+You can also have denoise on completion and you can turn that on or off if you want to.
+
+79
+00:05:17.540 --> 00:05:19.500
+And the denoise are overall.
+
+80
+00:05:19.500 --> 00:05:23.740
+There's a global illumination samples and says 512.
+
+81
+00:05:23.740 --> 00:05:28.340
+I always start at the default and then as I need I can increase things and you'll see
+
+82
+00:05:28.340 --> 00:05:33.460
+there's a stationary shadow samples here, light shadow samples and you can increase
+
+83
+00:05:33.460 --> 00:05:34.460
+that.
+
+84
+00:05:34.580 --> 00:05:39.660
+Which is usually pretty decent, but again on a more macro level you can actually go
+
+85
+00:05:39.660 --> 00:05:44.420
+to each one of these pieces of geometry and increase those light maps as you need them.
+
+86
+00:05:44.420 --> 00:05:47.220
+So those keep those things in mind.
+
+87
+00:05:47.220 --> 00:05:51.620
+And there's also use iridescent here.
+
+88
+00:05:51.620 --> 00:05:54.980
+Make sure I say it correctly.
+
+89
+00:05:54.980 --> 00:06:00.580
+This is catching should be enabled with interior scenes to achieve more physically accurate
+
+90
+00:06:00.580 --> 00:06:01.580
+GI intensities.
+
+91
+00:06:01.580 --> 00:06:03.440
+So just keep those in mind.
+
+92
+00:06:03.440 --> 00:06:07.600
+Now we're using screen space, but we all still getting a glowing material and that's
+
+93
+00:06:07.600 --> 00:06:09.920
+a nice thing about working with screen space.
+
+94
+00:06:09.920 --> 00:06:11.880
+You can give off a little bit of light.
+
+95
+00:06:11.880 --> 00:06:14.920
+You'll see a little bit here, but you also see a change when I move my camera.
+
+96
+00:06:14.920 --> 00:06:19.480
+So again, another reminder about the limitations with screen space.
+
+97
+00:06:19.480 --> 00:06:23.360
+OK, so let's look at a few more things here.
+
+98
+00:06:23.360 --> 00:06:29.200
+You'll see a quality multiplier so we can increase that if we need to for volumetric
+
+99
+00:06:29.200 --> 00:06:34.840
+light map that helps with our moving characters with our volumetric environment detail cell
+
+100
+00:06:34.840 --> 00:06:35.840
+size we can.
+
+101
+00:06:35.840 --> 00:06:37.520
+So it's basically kind of a dumbed down.
+
+102
+00:06:37.520 --> 00:06:43.200
+Think of it as a dumbed down version of our regular CPU light mass in our world settings.
+
+103
+00:06:43.200 --> 00:06:49.200
+This is a kind of a dumbed down, easier to get to type of interface kind of gives you
+
+104
+00:06:49.200 --> 00:06:54.320
+the meat of your control versus all the little ins and outs you actually can go straight
+
+105
+00:06:54.320 --> 00:06:57.440
+to and then it'll favor the GPU.
+
+106
+00:06:57.680 --> 00:07:06.200
+Now, GPU does not support certain things such as a light mass portal.
+
+107
+00:07:06.200 --> 00:07:10.960
+So if we created a light mass portal and put it here in front of the window so we have
+
+108
+00:07:10.960 --> 00:07:15.880
+a difference between the light area of the outside and the darker area in the interior,
+
+109
+00:07:15.880 --> 00:07:17.240
+it will not support that.
+
+110
+00:07:17.240 --> 00:07:21.840
+So CPU light baking supports that more than this does.
+
+111
+00:07:21.840 --> 00:07:27.160
+OK, so there's just a few more items here you can mess with.
+
+112
+00:07:27.160 --> 00:07:30.640
+You can do aggressive leak prevention.
+
+113
+00:07:30.640 --> 00:07:33.240
+We could turn that on to prevent any leaking going on.
+
+114
+00:07:33.240 --> 00:07:36.120
+Now remember your light maps and the thickness of geometry.
+
+115
+00:07:36.120 --> 00:07:40.240
+Those can also play a factor for some issues that may occur.
+
+116
+00:07:40.240 --> 00:07:46.200
+So there's also you'll notice a first bounce ray guiding all these things as we turn them
+
+117
+00:07:46.200 --> 00:07:50.000
+on and we adjust them and say hey I want to be able to play with these settings.
+
+118
+00:07:50.000 --> 00:07:52.960
+You'll notice this particular one is grayed out.
+
+119
+00:07:52.960 --> 00:07:56.220
+So I wouldn't worry about this one too much but it does do the number of samples used
+
+120
+00:07:56.220 --> 00:08:00.860
+for first bounce ray guiding which are thrown away before sample lighting.
+
+121
+00:08:00.860 --> 00:08:02.700
+I don't normally mess with this one.
+
+122
+00:08:02.700 --> 00:08:04.340
+So I think you're OK keeping that gray.
+
+123
+00:08:04.340 --> 00:08:06.940
+You don't necessarily have to turn that or activate that one on.
+
+124
+00:08:06.940 --> 00:08:10.060
+You'll see there's a real time workload factor.
+
+125
+00:08:10.060 --> 00:08:14.100
+Again this tries to help with your workload for your heavy scenes.
+
+126
+00:08:14.100 --> 00:08:17.220
+There's a non real time workload factor.
+
+127
+00:08:17.220 --> 00:08:21.020
+This is baking speed multiplied with real time.
+
+128
+00:08:21.020 --> 00:08:23.400
+When real time is disabled in the viewer.
+
+129
+00:08:23.400 --> 00:08:27.840
+So if you turn that off in your viewer you actually can have that.
+
+130
+00:08:27.840 --> 00:08:29.280
+So it's kind of speeds things up a little bit.
+
+131
+00:08:29.280 --> 00:08:33.120
+And then you also have your light map tile pool size.
+
+132
+00:08:33.120 --> 00:08:37.040
+The default should work fine but feel free to bump that up.
+
+133
+00:08:37.040 --> 00:08:42.160
+And again this gives you GPU light mass manages your pool size for calculations and invisible
+
+134
+00:08:42.160 --> 00:08:43.160
+tiles.
+
+135
+00:08:43.160 --> 00:08:45.600
+So it really tries to help you with that.
+
+136
+00:08:45.600 --> 00:08:47.760
+Now my first pick is aluminum.
+
+137
+00:08:47.760 --> 00:08:48.960
+That's my first pick.
+
+138
+00:08:48.960 --> 00:08:52.040
+But I wanted to walk you through these because there will be scenarios where you may have
+
+139
+00:08:52.040 --> 00:08:58.520
+to do this particularly with virtual production particularly like say you're working in ICV
+
+140
+00:08:58.520 --> 00:09:03.320
+effects and just your machines just don't like lumen or your materials very particular
+
+141
+00:09:03.320 --> 00:09:05.200
+and lumen gives you too much noise.
+
+142
+00:09:05.200 --> 00:09:08.680
+You could go this route but be very deterministic.
+
+143
+00:09:08.680 --> 00:09:09.920
+Test it out ahead of time.
+
+144
+00:09:09.920 --> 00:09:11.800
+See what you're going to get ahead of time.
+
+145
+00:09:11.800 --> 00:09:13.960
+If you don't you won't know.
+
+146
+00:09:13.960 --> 00:09:15.760
+So you don't want to be stuck on stage.
+
+147
+00:09:15.760 --> 00:09:20.380
+You don't be stuck in front of your art director and you don't know your options.
+
+148
+00:09:20.380 --> 00:09:25.180
+So this again this class is really mainly to help you with that and decide what you
+
+149
+00:09:25.180 --> 00:09:27.900
+need based on what you have.
+
+150
+00:09:27.900 --> 00:09:33.780
+I do want to mention a cute a couple more points that you have here underneath lighting.
+
+151
+00:09:33.780 --> 00:09:36.660
+You'll notice you can also use error coloring.
+
+152
+00:09:36.660 --> 00:09:43.220
+This will color areas which are you're getting like some errors in your computation.
+
+153
+00:09:43.220 --> 00:09:47.580
+It'll color those areas for you so you can find it in your light map.
+
+154
+00:09:47.580 --> 00:09:49.820
+Also there's show lighting stats.
+
+155
+00:09:49.820 --> 00:09:53.100
+You can actually get that in here and this will tell you what's going on.
+
+156
+00:09:53.100 --> 00:09:58.900
+It'll tell you your metrics and stuff and tell you how your performance is doing.
+
+157
+00:09:58.900 --> 00:10:01.220
+All right awesome sauce.
+
+158
+00:10:01.220 --> 00:10:04.500
+So again let's reiterate some of the things that you cannot do.
+
+159
+00:10:04.500 --> 00:10:07.660
+So lightmass portals are not supported.
+
+160
+00:10:07.660 --> 00:10:10.860
+Pixel depth offset is not supported.
+
+161
+00:10:10.860 --> 00:10:12.980
+Lighting channels are not supported.
+
+162
+00:10:12.980 --> 00:10:14.820
+So keep that in mind.
+
+163
+00:10:14.820 --> 00:10:18.620
+Use lightmass importance volumes to help with volumetric light maps which you heard me talk
+
+164
+00:10:18.620 --> 00:10:20.140
+about before.
+
+165
+00:10:20.140 --> 00:10:23.180
+It uses as a focal area for your moving items.
+
+166
+00:10:23.180 --> 00:10:26.420
+It's very crucial in this case with GPU lightmass.
+
+167
+00:10:26.420 --> 00:10:31.780
+Also you will logically need that for your terrain if you have terrain.
+
+168
+00:10:31.780 --> 00:10:37.940
+Texture encoding and denoising a run on the CPU and are not affected by the multi GPU.
+
+169
+00:10:37.940 --> 00:10:41.980
+But you did see some of those options for it because they're still talking to each other
+
+170
+00:10:41.980 --> 00:10:45.580
+but mainly you're leaning on your GPU for speed.
+
+171
+00:10:45.620 --> 00:10:50.220
+We have stationary skylight currently not supported but on the roadmap.
+
+172
+00:10:50.220 --> 00:10:53.740
+And then we have custom settings and properties of lights.
+
+173
+00:10:53.740 --> 00:10:59.620
+So what that means is when you have maybe you've injected a custom light in there and
+
+174
+00:10:59.620 --> 00:11:06.620
+maybe you're even editing some of those deep dive test it out first I recommend.
+
+175
+00:11:06.620 --> 00:11:13.820
+So like if I'm working with direct lighting let me show you real quick here.
+
+176
+00:11:13.820 --> 00:11:16.220
+You'll notice in Unreal we do have a section.
+
+177
+00:11:16.220 --> 00:11:20.060
+Oh I zoomed down my camera next and I meant to wheel scroll over here.
+
+178
+00:11:20.060 --> 00:11:24.420
+You'll notice lightmass this is no longer.
+
+179
+00:11:24.420 --> 00:11:28.860
+Now this is CPU based mostly but you can help out with a few things.
+
+180
+00:11:28.860 --> 00:11:35.340
+So your light source will still work light source angle your indirect lighting saturation
+
+181
+00:11:35.340 --> 00:11:38.900
+test that out to make sure it's giving you what you want.
+
+182
+00:11:38.900 --> 00:11:41.460
+Shadow exponent.
+
+183
+00:11:41.620 --> 00:11:46.220
+These were originally created with CPU light baking in mind.
+
+184
+00:11:46.220 --> 00:11:52.380
+But you always for good measure you always want to make sure that your stationary light
+
+185
+00:11:52.380 --> 00:11:56.580
+that your excuse me your area shadows for stationary light that is on that's going to
+
+186
+00:11:56.580 --> 00:11:58.540
+give you a better shadow quality.
+
+187
+00:11:58.540 --> 00:12:01.660
+And when you do this you'll have to do a remake.
+
+188
+00:12:01.660 --> 00:12:04.060
+You can also do such things as light shafts.
+
+189
+00:12:04.060 --> 00:12:09.780
+But again test things out as you go because there are some of these customizations which
+
+190
+00:12:09.780 --> 00:12:14.820
+may not work a one to one to what you have with the CPU bake.
+
+191
+00:12:14.820 --> 00:12:20.300
+And there's lots of customization in CPU versus GPU.
+
+192
+00:12:20.300 --> 00:12:26.300
+So if you are very specific on a particular look and feel and a tool test it out first
+
+193
+00:12:26.300 --> 00:12:35.180
+and do a comparable because such things as like we said the light mass that we saw here.
+
+194
+00:12:35.180 --> 00:12:39.020
+That's actually we can get this out of the way.
+
+195
+00:12:39.020 --> 00:12:45.100
+We saw that the light mass portals.
+
+196
+00:12:45.100 --> 00:12:47.380
+These little guys aren't supported.
+
+197
+00:12:47.380 --> 00:12:53.340
+So there are a few things that are very particular for CPU baking and also pixel depth offset
+
+198
+00:12:53.340 --> 00:12:54.740
+is not supported.
+
+199
+00:12:54.740 --> 00:12:57.540
+So just keep those things in mind.
+
+200
+00:12:57.540 --> 00:13:00.820
+Here's a link for additional information on these topics.
+
+201
+00:13:00.820 --> 00:13:05.100
+Feel free to dive in and take a look.
+
+202
+00:13:05.100 --> 00:13:10.940
+In the next video we're going to do an interactive session here where I will be lighting a character.
+
+203
+00:13:10.940 --> 00:13:15.180
+He's a bit more stylized not really a metahuman but we're going to have some fun with him
+
+204
+00:13:15.180 --> 00:13:19.420
+and you feel free to follow along as I go through that workflow.
+
+205
+00:13:19.420 --> 00:13:19.620
+That's it.

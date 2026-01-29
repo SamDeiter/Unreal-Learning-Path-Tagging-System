@@ -1,0 +1,221 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:10.000
+Hello and welcome to this video on tool theory, where we will be laying some groundwork on how to think about creating tools.
+
+2
+00:00:10.000 --> 00:00:29.000
+When we talk about tools in Unreal Engine, we are standardly talking about tools that will be used either in the editor or as an extension to the editor, like something connecting to an external package or application like Blender or Maya.
+
+3
+00:00:29.000 --> 00:00:38.000
+What we're not really talking about is tools that would be used at runtime, that would be part of the game themselves.
+
+4
+00:00:38.000 --> 00:00:47.000
+This means we're going to be looking at some functions and some parts of the engine which will just not be available at runtime.
+
+5
+00:00:47.000 --> 00:00:54.000
+There are a number of reasons why we might make a tool, but they usually fall into one of these categories.
+
+6
+00:00:54.000 --> 00:00:58.000
+The first one being to speed up your workflow.
+
+7
+00:00:58.000 --> 00:01:11.000
+If we ever found that we were doing a manual task over and over again, and it was quite time consuming, this is a good example of something where a simple tool might save you a lot of time.
+
+8
+00:01:11.000 --> 00:01:20.000
+So tools are often used to speed up workflow and remove boring and repetitive tasks.
+
+9
+00:01:20.000 --> 00:01:27.000
+The second reason why in games tools are often made is to enforce a specific pipeline.
+
+10
+00:01:27.000 --> 00:01:39.000
+With large projects, it's very important that things like naming conventions and placement and creation of assets are done consistently in the same way.
+
+11
+00:01:39.000 --> 00:01:43.000
+Tools are great for forcing this on people.
+
+12
+00:01:43.000 --> 00:01:56.000
+Creating your own custom importers that will check and reject anything that doesn't fit the specific needs is another great use for tools.
+
+13
+00:01:56.000 --> 00:02:04.000
+Thirdly, you might use a tool to make sure the work is done more accurately.
+
+14
+00:02:04.000 --> 00:02:16.000
+Sometimes a task will require placement of assets or configurations which are very difficult for a human to do manually, but a computer can do easily.
+
+15
+00:02:16.000 --> 00:02:21.000
+In this case, sometimes tools are used.
+
+16
+00:02:21.000 --> 00:02:30.000
+Another thing that tools are good at are automatically monitoring things or identifying issues.
+
+17
+00:02:30.000 --> 00:02:39.000
+It's very common to write a tool which might create a log or will look over a scene for problems or things that need to be corrected.
+
+18
+00:02:39.000 --> 00:02:47.000
+Something that can be done very fast by a computer, but would be incredibly difficult for a human.
+
+19
+00:02:47.000 --> 00:02:51.000
+When designing a tool, there are two main things that you need to know.
+
+20
+00:02:51.000 --> 00:02:58.000
+You want to know what would trigger this tool to be used and the function that it would carry out.
+
+21
+00:02:58.000 --> 00:03:11.000
+Selecting an appropriate trigger is often obvious dependent on the function, but it's good to have them in a convenient and obvious place so that they can be easily found and used.
+
+22
+00:03:11.000 --> 00:03:13.000
+Some examples of these are
+
+23
+00:03:13.000 --> 00:03:24.000
+Construction script. Construction script will trigger at the point an actor is placed into the world or it is shifted around or forced to update.
+
+24
+00:03:24.000 --> 00:03:36.000
+This is great for randomization or where the actor would need to query the world in order to set itself up appropriately.
+
+25
+00:03:36.000 --> 00:03:38.000
+Next one is exposed functions.
+
+26
+00:03:38.000 --> 00:03:45.000
+This is where we take a function from inside a actor and mark it as exposed.
+
+27
+00:03:45.000 --> 00:03:52.000
+Therefore, we would be able to trigger it using a button within the details panel.
+
+28
+00:03:52.000 --> 00:04:01.000
+This is great if you have an optional event that you might want to trigger on actor.
+
+29
+00:04:01.000 --> 00:04:05.000
+Next we have custom menus and buttons.
+
+30
+00:04:05.000 --> 00:04:23.000
+Here we are talking about editor utility widgets, where by using Unreal Engine's UMG interface, we could create our own menu systems for complicated tools, which can be docked into the editor.
+
+31
+00:04:23.000 --> 00:04:31.000
+Tick. So tick is an event which usually runs on every frame of the of the game.
+
+32
+00:04:31.000 --> 00:04:39.000
+Now, now since we are not creating tools during gameplay, tick is a little bit different in this case.
+
+33
+00:04:39.000 --> 00:04:46.000
+Now tick can be accessed via tools such as an editor utility widget.
+
+34
+00:04:46.000 --> 00:04:52.000
+Tick is often considered quite dangerous because it runs on every frame of the game.
+
+35
+00:04:52.000 --> 00:05:00.000
+If you put anything complicated, which would require quite a lot of computation, it could end up hanging the engine.
+
+36
+00:05:00.000 --> 00:05:12.000
+And unlike in a game where you can just escape out the game and fix it, this would take over the entire editor and it can be very hard to to get back from.
+
+37
+00:05:12.000 --> 00:05:19.000
+This is best used for monitoring things and triggering other programs off the back of that.
+
+38
+00:05:19.000 --> 00:05:23.000
+Custom buttons or menus added to the editor.
+
+39
+00:05:23.000 --> 00:05:28.000
+There are numerous ways to add extra buttons or menus to the editor.
+
+40
+00:05:28.000 --> 00:05:44.000
+You can either do this by using Python scripts or the editor utility actors and the editor utility assets will automatically create a menu entry.
+
+41
+00:05:44.000 --> 00:05:47.000
+The command line can also be used to trigger a tool.
+
+42
+00:05:47.000 --> 00:05:55.000
+These tools can either be in the form of C vowels or triggering a Python script to run.
+
+43
+00:05:59.000 --> 00:06:05.000
+And finally, it's also possible to trigger a tool on the startup of the engine.
+
+44
+00:06:05.000 --> 00:06:15.000
+So in this course, we are going to be looking at a number of different trigger points to give you an idea of how different tools can be created.
+
+45
+00:06:15.000 --> 00:06:27.000
+The most common assets used for making tools are the actors itself, where we can just place or create functionality within them in order to fulfill some function.
+
+46
+00:06:27.000 --> 00:06:30.000
+Editor utility widgets.
+
+47
+00:06:30.000 --> 00:06:37.000
+These are tailor made interfaces that operate within the editor will allow us to make our own menu systems.
+
+48
+00:06:37.000 --> 00:06:40.000
+Actor action utilities.
+
+49
+00:06:40.000 --> 00:06:46.000
+These are functions that will be activated by right clicking on an actor in the level.
+
+50
+00:06:46.000 --> 00:06:49.000
+And asset action utilities.
+
+51
+00:06:49.000 --> 00:06:55.000
+These are functions activated by right clicking on the assets in the content browser.
+
+52
+00:06:55.000 --> 00:07:03.000
+In these exercises, we will use actors, editor utility widgets and an asset action utility.
+
+53
+00:07:03.000 --> 00:07:07.000
+So that covers all the theory we really need to go over at this point.
+
+54
+00:07:07.000 --> 00:07:12.000
+In the next video, we're going to be starting on our first exercise.
+
+55
+00:07:25.000 --> 00:07:28.000
+You.

@@ -1,0 +1,369 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.800
+Next, let's dig into some mesh optimizations.
+
+2
+00:00:04.800 --> 00:00:08.400
+So the first thing we want to talk about is some system units.
+
+3
+00:00:08.400 --> 00:00:11.440
+So no matter what DCC you use, you just
+
+4
+00:00:11.440 --> 00:00:13.320
+need to make sure your system units are set up
+
+5
+00:00:13.320 --> 00:00:15.000
+before creating items.
+
+6
+00:00:15.000 --> 00:00:17.680
+We mostly use 3ds Max for this example,
+
+7
+00:00:17.680 --> 00:00:20.560
+but it applies to whatever DCC you're using.
+
+8
+00:00:20.560 --> 00:00:25.040
+In Unreal, we use centimeters for its default unit
+
+9
+00:00:25.040 --> 00:00:25.680
+of measurement.
+
+10
+00:00:25.680 --> 00:00:29.320
+So having the right scale is a good user experience.
+
+11
+00:00:29.320 --> 00:00:32.280
+The wrong side or mismatched scales
+
+12
+00:00:32.280 --> 00:00:37.280
+can break any immersion you have built, especially in VR.
+
+13
+00:00:37.280 --> 00:00:40.200
+So making sure you keep system units in mind
+
+14
+00:00:40.200 --> 00:00:42.320
+is a good way to start.
+
+15
+00:00:42.320 --> 00:00:43.920
+And then we're looking at draw calls.
+
+16
+00:00:43.920 --> 00:00:47.000
+So Unreal Engine's mobile renderers
+
+17
+00:00:47.000 --> 00:00:49.560
+are efficient at rendering large numbers of vertices.
+
+18
+00:00:49.560 --> 00:00:53.280
+So draw calls are what you need to optimize
+
+19
+00:00:53.280 --> 00:00:57.120
+if you've got a lot of rendered meshes in your scene.
+
+20
+00:00:57.120 --> 00:01:02.400
+So the image here shows how having a different material
+
+21
+00:01:02.400 --> 00:01:06.000
+assigned to different sets of triangles
+
+22
+00:01:06.000 --> 00:01:08.840
+will give an additional draw call.
+
+23
+00:01:08.840 --> 00:01:12.560
+So the more materials you have in your scene,
+
+24
+00:01:12.560 --> 00:01:14.200
+the more draw calls you'll have.
+
+25
+00:01:14.200 --> 00:01:19.400
+So your aim is to have no more than 120 draw calls on high
+
+26
+00:01:19.400 --> 00:01:21.400
+and 50 on low.
+
+27
+00:01:21.400 --> 00:01:24.240
+It's a rough approximate, but obviously your mileage
+
+28
+00:01:24.240 --> 00:01:26.320
+may vary there.
+
+29
+00:01:26.320 --> 00:01:29.240
+And when we're looking at normal mapping of meshes,
+
+30
+00:01:29.240 --> 00:01:31.400
+on the lower end hardware, normal maps
+
+31
+00:01:31.400 --> 00:01:36.240
+can be used to greatly enhance the quality of reflections
+
+32
+00:01:36.240 --> 00:01:39.320
+and lighting on the surface of the material.
+
+33
+00:01:39.320 --> 00:01:42.920
+However, subtle shapes like body panels on a car
+
+34
+00:01:42.920 --> 00:01:46.800
+can exceed the 8-bit deltas normally used for these maps,
+
+35
+00:01:46.800 --> 00:01:50.440
+which results in visible banding on the final render.
+
+36
+00:01:50.440 --> 00:01:54.200
+So you can use 16-bit normal maps to compensate for this,
+
+37
+00:01:54.200 --> 00:01:57.240
+but the pixel costs for the 16-bit normals
+
+38
+00:01:57.240 --> 00:02:00.360
+then extends the vertex cost of a higher density mesh.
+
+39
+00:02:00.360 --> 00:02:03.560
+So 16-bit normals are uncompressed in the engine,
+
+40
+00:02:03.560 --> 00:02:06.160
+which means they are also eight times the size
+
+41
+00:02:06.160 --> 00:02:08.640
+of a regular normal map there.
+
+42
+00:02:08.640 --> 00:02:11.320
+So it's a little bit hard to see the effect
+
+43
+00:02:11.320 --> 00:02:15.440
+that this has on reflection, but if we move into the next slide
+
+44
+00:02:15.440 --> 00:02:20.040
+here, you can see how jagged the reflection is when
+
+45
+00:02:20.040 --> 00:02:21.760
+it's on versus being off.
+
+46
+00:02:21.760 --> 00:02:25.520
+So it's useful to keep these settings in mind
+
+47
+00:02:25.520 --> 00:02:26.480
+in your projects.
+
+48
+00:02:27.560 --> 00:02:30.800
+And then we'll also lastly just talk about
+
+49
+00:02:30.800 --> 00:02:32.760
+limiting overdraw in our projects.
+
+50
+00:02:32.760 --> 00:02:35.200
+So overdraw is something that comes up
+
+51
+00:02:35.200 --> 00:02:38.280
+when dealing with transparency or opacity,
+
+52
+00:02:38.280 --> 00:02:42.360
+and it refers to your GP having to draw a mesh,
+
+53
+00:02:42.360 --> 00:02:45.080
+draw a bunch of transparent see-through areas, sorry,
+
+54
+00:02:45.080 --> 00:02:47.680
+that do not display on the texture information.
+
+55
+00:02:47.680 --> 00:02:50.720
+So you tend to find this a lot on foliage,
+
+56
+00:02:50.720 --> 00:02:54.480
+which you can see here, and it has the leaves map
+
+57
+00:02:54.480 --> 00:02:55.960
+to the different planes.
+
+58
+00:02:55.960 --> 00:02:57.800
+All pixels must be evaluated,
+
+59
+00:02:57.800 --> 00:02:59.400
+even the ones that show nothing.
+
+60
+00:02:59.400 --> 00:03:03.560
+So this will cause the GPU to do a lot of extra work
+
+61
+00:03:03.560 --> 00:03:05.920
+that it just has to disregard.
+
+62
+00:03:06.800 --> 00:03:09.680
+It doesn't actually result in anything.
+
+63
+00:03:09.680 --> 00:03:13.840
+So we want to limit by doing some of the following steps.
+
+64
+00:03:13.840 --> 00:03:17.120
+So you want to see that you can limit the amount
+
+65
+00:03:17.120 --> 00:03:18.880
+of transparent objects that overlap.
+
+66
+00:03:18.880 --> 00:03:21.200
+So by optimizing your mesh like this,
+
+67
+00:03:21.200 --> 00:03:23.600
+you can imagine if there was many different cards
+
+68
+00:03:23.600 --> 00:03:25.680
+of foliage all on top of each other,
+
+69
+00:03:25.680 --> 00:03:26.960
+and you had a card here,
+
+70
+00:03:26.960 --> 00:03:29.280
+well, it wouldn't be trying to render through something.
+
+71
+00:03:29.280 --> 00:03:30.800
+Whereas on the left-hand side,
+
+72
+00:03:30.800 --> 00:03:34.400
+you may have something on the bottom right-hand side there,
+
+73
+00:03:34.400 --> 00:03:36.960
+and it might be trying to render the first pass
+
+74
+00:03:36.960 --> 00:03:39.240
+and then render the pixels behind that.
+
+75
+00:03:39.240 --> 00:03:41.000
+So you want to limit the amount
+
+76
+00:03:41.000 --> 00:03:42.920
+of transparent objects that overlap.
+
+77
+00:03:42.920 --> 00:03:45.960
+And then you can see that you can get away with using geo here
+
+78
+00:03:45.960 --> 00:03:47.520
+instead of having the transparency.
+
+79
+00:03:47.520 --> 00:03:50.520
+So add the extra vertices to the meshes
+
+80
+00:03:50.520 --> 00:03:53.520
+so that they fit the transparency information better.
+
+81
+00:03:53.520 --> 00:03:56.320
+That'll be the best approach moving forward with foliage.
+
+82
+00:03:56.320 --> 00:04:00.440
+So you can use the shader complexity view modes,
+
+83
+00:04:00.440 --> 00:04:02.400
+which I'll touch upon in a second,
+
+84
+00:04:02.400 --> 00:04:04.800
+and you can see how bad overdraw may be.
+
+85
+00:04:04.800 --> 00:04:06.680
+But no matter how hard you try,
+
+86
+00:04:06.680 --> 00:04:08.680
+you'll not completely eliminate overdraw.
+
+87
+00:04:08.680 --> 00:04:11.160
+So don't waste too much time trying,
+
+88
+00:04:11.160 --> 00:04:14.320
+but it's just good to keep these mesh practices in mind
+
+89
+00:04:14.320 --> 00:04:16.360
+when you're first creating your assets.
+
+90
+00:04:16.360 --> 00:04:19.280
+So just try and limit as much as possible
+
+91
+00:04:19.280 --> 00:04:21.160
+and just follow these steps
+
+92
+00:04:21.160 --> 00:04:24.640
+as you go through the mesh creation process.

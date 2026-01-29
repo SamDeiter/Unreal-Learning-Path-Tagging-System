@@ -1,0 +1,413 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.040
+Let's now look at how we might capture some layered facial performances.
+
+2
+00:00:07.040 --> 00:00:13.240
+So if you familiarize yourself with the animation blueprint of the MetaHuman, so we're in the
+
+3
+00:00:13.240 --> 00:00:19.100
+face and in BP here that you can see is loaded, we can actually make a couple of additions
+
+4
+00:00:19.100 --> 00:00:24.800
+that allow a bit more user-friendly for when we're working inside of Unreal Engine.
+
+5
+00:00:24.800 --> 00:00:29.920
+So the first thing we want to do here, and we'll get closer into these details here in
+
+6
+00:00:29.920 --> 00:00:35.560
+a second, but just to give you an overview, the first thing we want to do is add the weighted
+
+7
+00:00:35.560 --> 00:00:39.960
+moving average with an alpha node to act as a denoiser.
+
+8
+00:00:39.960 --> 00:00:45.320
+And the second thing we'll do is that we'll add in a layered switch for selecting the
+
+9
+00:00:45.320 --> 00:00:47.600
+driving animation.
+
+10
+00:00:47.600 --> 00:00:54.640
+So if we look at the first setup here, we want to add the weighted moving average.
+
+11
+00:00:54.640 --> 00:00:58.600
+So all we need to do is promote the alpha, which you can see here.
+
+12
+00:00:58.600 --> 00:01:03.360
+So just drag your cursor from the green pin and drag it out and then let go.
+
+13
+00:01:03.360 --> 00:01:06.080
+And then you want to create a variable.
+
+14
+00:01:06.080 --> 00:01:10.880
+In this instance, we called it WMA alpha, but essentially you can rename it to whatever
+
+15
+00:01:10.880 --> 00:01:11.880
+you'd like.
+
+16
+00:01:11.880 --> 00:01:15.800
+You just want to make sure you compile your blueprint.
+
+17
+00:01:15.800 --> 00:01:18.400
+Once you've created a new variable, make sure you save it.
+
+18
+00:01:18.400 --> 00:01:21.320
+And then the default value here is going to be 0.8.
+
+19
+00:01:21.320 --> 00:01:23.400
+So just compile and save.
+
+20
+00:01:23.400 --> 00:01:27.320
+And then we have that alpha setup there.
+
+21
+00:01:27.320 --> 00:01:34.340
+And then we also want to make sure that we have the switch set up to switch between the
+
+22
+00:01:34.340 --> 00:01:39.260
+live link face data and also the body animation in the neck.
+
+23
+00:01:39.260 --> 00:01:46.800
+So this will allow us to alter the neck performance if we want to with the metahuman.
+
+24
+00:01:46.800 --> 00:01:53.900
+So essentially we begin by duplicating the layer blend per bone, body pose and use cache
+
+25
+00:01:53.900 --> 00:01:55.160
+body pose.
+
+26
+00:01:55.160 --> 00:01:57.440
+So you can see that we've got that duplicated there.
+
+27
+00:01:57.440 --> 00:02:02.760
+We want to rename the new body pose to face pose and then connect it to the open modify
+
+28
+00:02:02.760 --> 00:02:05.160
+curve in teeth controls.
+
+29
+00:02:05.160 --> 00:02:06.160
+I appreciate it.
+
+30
+00:02:06.160 --> 00:02:07.440
+Just listen to my voice.
+
+31
+00:02:07.440 --> 00:02:10.160
+It's going to be a little bit difficult to follow here.
+
+32
+00:02:10.160 --> 00:02:13.620
+Essentially we're just copying what we can see in the box here.
+
+33
+00:02:13.620 --> 00:02:18.480
+So in the layer blend per bone, we want to drag out from the blend pose 0 and create
+
+34
+00:02:18.480 --> 00:02:23.920
+the use cache pose, which is a face pose, and then duplicate that.
+
+35
+00:02:23.920 --> 00:02:28.580
+And then we just want to repeat the connections from the original layered blend per bone node
+
+36
+00:02:28.580 --> 00:02:30.420
+in the duplicated node.
+
+37
+00:02:30.420 --> 00:02:35.560
+So then we want to create a blend node, promote it to the alpha and to a variable and name
+
+38
+00:02:35.560 --> 00:02:39.800
+it LLFace, a live link face or anim neck switch.
+
+39
+00:02:39.800 --> 00:02:44.280
+And then we want to connect the original layered blend per bone nodes to the blend node, which
+
+40
+00:02:44.280 --> 00:02:48.100
+is the original to A and then duplicate to B.
+
+41
+00:02:48.100 --> 00:02:52.040
+And then we just want to connect the blend node to the local component node in the AR
+
+42
+00:02:52.040 --> 00:02:53.040
+kit.
+
+43
+00:02:53.160 --> 00:02:56.760
+And then once you've done all that, we can compile and save.
+
+44
+00:02:56.760 --> 00:03:03.480
+And then if we switch over to the event graph in this face and in BP, we can essentially
+
+45
+00:03:03.480 --> 00:03:09.200
+create an update here to the editor switch, which will allow us to preview the facial
+
+46
+00:03:09.200 --> 00:03:15.280
+performance without having to simulate the meta human, which is really nice update here.
+
+47
+00:03:15.280 --> 00:03:22.840
+So if we create an update in editor as a bull, so you can see we've created a new bull here
+
+48
+00:03:22.840 --> 00:03:24.460
+that's called update in editor.
+
+49
+00:03:24.460 --> 00:03:30.240
+And if you just drag it out and select the get option, we'll create a get version of
+
+50
+00:03:30.240 --> 00:03:31.240
+this variable.
+
+51
+00:03:31.240 --> 00:03:36.080
+A little shortcut there is if you hold down control on your keyboard and left mouse drag
+
+52
+00:03:36.080 --> 00:03:40.520
+from the bull into the graph, it will automatically create a get.
+
+53
+00:03:40.520 --> 00:03:46.240
+And if you hold alt and left mouse drag from your variable into the event graph, you will
+
+54
+00:03:46.240 --> 00:03:48.320
+create a set variable.
+
+55
+00:03:48.320 --> 00:03:52.800
+So in case you want to speed up that process, that's a little shortcut for you.
+
+56
+00:03:52.800 --> 00:03:58.560
+So we essentially, after creating this get node, we want to create a set update animation
+
+57
+00:03:58.560 --> 00:03:59.560
+in editor.
+
+58
+00:03:59.560 --> 00:04:04.840
+So first of all, we want to right click and create a get owning component, drag off that
+
+59
+00:04:04.840 --> 00:04:10.320
+and then type in set update animation in editor, and then you'll be able to create that.
+
+60
+00:04:10.320 --> 00:04:14.760
+And then we just want to create a branch from this bull, go in from the blueprint update
+
+61
+00:04:14.760 --> 00:04:21.200
+animation, check that bull, connect the bull into the update state as well.
+
+62
+00:04:21.200 --> 00:04:26.320
+We will go into the update state and then false will return into the branch that was
+
+63
+00:04:26.320 --> 00:04:30.460
+already created in the set ARKit head rotation.
+
+64
+00:04:30.460 --> 00:04:34.500
+And then still in the event graph, we want to go to the end of the chain and find this
+
+65
+00:04:34.500 --> 00:04:37.540
+ARKit set up here.
+
+66
+00:04:37.540 --> 00:04:39.380
+And we want to copy this.
+
+67
+00:04:39.380 --> 00:04:44.140
+And then we want to move into our construction script that you can see here on the right.
+
+68
+00:04:44.140 --> 00:04:50.720
+So we'll copy this, paste this or control C from the event graph, control V into the
+
+69
+00:04:50.720 --> 00:04:52.080
+construction script.
+
+70
+00:04:52.080 --> 00:04:56.120
+And then at the end of the construction, after the create a dynamic material instance, you
+
+71
+00:04:56.120 --> 00:05:02.080
+can plug that ARKit set up in there and then just plug that into the same node that we
+
+72
+00:05:02.080 --> 00:05:05.960
+were outputting the retarget set up there.
+
+73
+00:05:05.960 --> 00:05:09.600
+So we've just inserted this into the construction script.
+
+74
+00:05:09.600 --> 00:05:15.200
+Here it's important to note that we're looking at the event graph on the left hand side here
+
+75
+00:05:15.200 --> 00:05:18.880
+and then the construction scripts on the right hand side.
+
+76
+00:05:18.880 --> 00:05:25.320
+So first we want to locate the ARKit set up node at the terminus of the event graph
+
+77
+00:05:25.320 --> 00:05:28.920
+here, which is the image that you can see here on the left hand side.
+
+78
+00:05:28.920 --> 00:05:31.100
+And then we want to copy the set up node.
+
+79
+00:05:31.100 --> 00:05:34.640
+So we can hit control C to copy it.
+
+80
+00:05:34.640 --> 00:05:38.960
+And then in the construction script, so switching over to this tab here, you can then paste
+
+81
+00:05:38.960 --> 00:05:39.960
+it.
+
+82
+00:05:39.960 --> 00:05:44.260
+So that's control V to paste the ARKit set up node.
+
+83
+00:05:44.260 --> 00:05:50.580
+And then you just want to connect it to the create dynamic material instance node that
+
+84
+00:05:50.580 --> 00:05:51.580
+you can see here.
+
+85
+00:05:51.580 --> 00:05:57.460
+So we go from the output of the material instance and then into the retarget set up to complete
+
+86
+00:05:57.460 --> 00:05:58.960
+the set up.
+
+87
+00:05:58.960 --> 00:06:03.920
+And then lastly here, we want to go into the function, which is ARKit set up.
+
+88
+00:06:03.920 --> 00:06:04.960
+So that's what we're looking for.
+
+89
+00:06:04.960 --> 00:06:08.140
+You can find the functions on the left hand side of the blueprint.
+
+90
+00:06:08.140 --> 00:06:13.220
+So again, we want to create the update and editor a Boolean if we haven't already got
+
+91
+00:06:14.180 --> 00:06:24.900
+to then create a get into a set and we can drag in from the cast to face on in blueprints.
+
+92
+00:06:24.900 --> 00:06:32.580
+So drag off there, we can create a as face anim BP pin searching for the set update and
+
+93
+00:06:32.580 --> 00:06:37.840
+editor and this creates a set update and editor node with a connected target and then also
+
+94
+00:06:37.840 --> 00:06:43.640
+connect the get update and editor and set live link face head to the set update and
+
+95
+00:06:43.640 --> 00:06:44.640
+editor.
+
+96
+00:06:44.640 --> 00:06:49.600
+And then you can compile and save and that is your complete set up for just modifying
+
+97
+00:06:49.600 --> 00:06:55.500
+the meta human blueprint for a little bit more quality of life settings available to
+
+98
+00:06:55.500 --> 00:06:57.680
+you inside the editor.
+
+99
+00:06:57.680 --> 00:07:01.960
+And then to get everything recorded, we'll use the take recorder again, or you can add
+
+100
+00:07:01.960 --> 00:07:07.680
+the meta human blueprint actor to the source as you've done previously.
+
+101
+00:07:07.720 --> 00:07:13.980
+You can uncheck the meta human BP actor recorded properties here and then only check back on
+
+102
+00:07:13.980 --> 00:07:19.880
+the face recorded properties, the animation track and the transform track and that will
+
+103
+00:07:19.880 --> 00:07:24.960
+give you the facial capture information you need for the performance.

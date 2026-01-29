@@ -1,0 +1,665 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.000
+Hi everyone. In this lesson, we're going to take a look at the outline for Lightning Cinematic Fundamentals.
+
+2
+00:00:06.000 --> 00:00:16.000
+From there, we're going to go ahead and jump into Unreal and look a bit at the slides when it comes to setting up a Lumen scene and controlling your exposure.
+
+3
+00:00:16.000 --> 00:00:18.000
+So let's get started.
+
+4
+00:00:18.000 --> 00:00:22.000
+So first up, we're going to take a look at Exposure Control and Tools.
+
+5
+00:00:22.000 --> 00:00:30.000
+From there, we'll look at setting up a simple scene in Lumen. We'll look at engine scalability, Lumen material limitations, and Lumen CVars.
+
+6
+00:00:30.000 --> 00:00:38.000
+Next, we'll look at environment light baked lighting, which is our first way to work with lighting, which we first established before Lumen.
+
+7
+00:00:38.000 --> 00:00:44.000
+We'll look at the initial setup as an option, working with lights in detail and adding AO baking.
+
+8
+00:00:44.000 --> 00:00:48.000
+Next, we'll look at light maps and light mass under that same topic of baked lighting.
+
+9
+00:00:48.000 --> 00:00:56.000
+We'll look at the best settings for light mass and light mass importance volume, light map UVs, and solver quality.
+
+10
+00:00:56.000 --> 00:01:04.000
+Next, we'll look at reflections underneath baking also, and when to use them, reflection types, scenarios, building quality, and tips.
+
+11
+00:01:04.000 --> 00:01:10.000
+Reflections can also be used for ray tracing, so this can actually help a bit.
+
+12
+00:01:10.000 --> 00:01:21.000
+View modes and visualizers. We'll next look at looking at volumetric light maps, light mass tips, screen space, global illumination, using it, and some of its limitations.
+
+13
+00:01:21.000 --> 00:01:28.000
+We'll next look at GPU light mass, the overview, what it is, and setting it up.
+
+14
+00:01:28.000 --> 00:01:33.000
+And finally, we'll look at an exercise where we will be lighting a character.
+
+15
+00:01:33.000 --> 00:01:36.000
+So let's go ahead and get started.
+
+16
+00:01:36.000 --> 00:01:41.000
+So let's go ahead and take a look at realistic lighting and exposure control and tools.
+
+17
+00:01:41.000 --> 00:01:50.000
+So what we'll do first is I'll walk you through a Lumen focus on setting things up just as a reminder of some of the things we covered in our first class.
+
+18
+00:01:50.000 --> 00:02:00.000
+So here are some of the steps listed in my lecture, some of the things you can consider putting on, and it's very important to make sure that these are on when working with Unreal.
+
+19
+00:02:00.000 --> 00:02:09.000
+I'm specifically going to talk about looking at your Lumen details for lighting mode and software ray tracing mode, which we'll point out in just a second.
+
+20
+00:02:09.000 --> 00:02:15.000
+Let's go and jump into Unreal and I'll point some of these details out so you can keep them in mind.
+
+21
+00:02:15.000 --> 00:02:27.000
+Here I have a cafe scene, and if you want to open it up, it is actually found underneath if we go to our Lumen folder here for the class, which is labeled for our class here.
+
+22
+00:02:27.000 --> 00:02:34.000
+From here, you'll see that I have a Lumen indoor sample scene, and that's pretty much what we have here.
+
+23
+00:02:34.000 --> 00:02:41.000
+So in my scene, one of the things you want to keep in mind is how we're going to set this up initially, which we'll do in just a second.
+
+24
+00:02:41.000 --> 00:02:46.000
+But I want to point out some things first up that you need to do when working with Lumen.
+
+25
+00:02:46.000 --> 00:02:49.000
+So say we're getting ready to look at a Lumen scene.
+
+26
+00:02:49.000 --> 00:02:53.000
+Let's go to our project settings here and pull these across here.
+
+27
+00:02:53.000 --> 00:02:55.000
+Sorry, it was a bit off screen.
+
+28
+00:02:55.000 --> 00:02:58.000
+We're going to go underneath rendering.
+
+29
+00:02:58.000 --> 00:03:01.000
+In rendering, we want to make sure that we're working with Lumen.
+
+30
+00:03:01.000 --> 00:03:07.000
+We also want to make sure that we are using hardware ray tracing when available.
+
+31
+00:03:07.000 --> 00:03:12.000
+And once you have that set in, you also want to make sure you're supporting hardware ray tracing.
+
+32
+00:03:12.000 --> 00:03:17.000
+You'll see one on first, and then the other will be available.
+
+33
+00:03:17.000 --> 00:03:24.000
+With that, you also, if you're grabbing stuff from the marketplace, make sure you have virtual shadow maps on, as well as mesh distance fields.
+
+34
+00:03:24.000 --> 00:03:32.000
+Now, these things won't be on by default if you're grabbing stuff from the marketplace, but it's very important to consider these things.
+
+35
+00:03:32.000 --> 00:03:41.000
+And you can look at mesh distance field by simply typing in mesh distance field, and you'll see generate mesh distance field.
+
+36
+00:03:41.000 --> 00:03:44.000
+And you want to have that with Unreal.
+
+37
+00:03:44.000 --> 00:03:52.000
+So again, some of these things will be on by default, but it's actually also good to check to make sure if you grab something from the marketplace that some of these things aren't turned off
+
+38
+00:03:52.000 --> 00:03:56.000
+and maybe catering to the old baking method.
+
+39
+00:03:56.000 --> 00:04:04.000
+We have ray tracing lit mode. You'll see it says surface catch, but you can also set this to a higher set by default and hit lighting for reflections.
+
+40
+00:04:04.000 --> 00:04:08.000
+This can also be set in the post process volume.
+
+41
+00:04:08.000 --> 00:04:14.000
+You'll also see under safe software ray tracing mode, it says detailed tracing or global tracing.
+
+42
+00:04:14.000 --> 00:04:19.000
+Of course, one is more expensive, such as detailed tracing versus global tracing.
+
+43
+00:04:19.000 --> 00:04:23.000
+This just depends on your system and whether you can handle that.
+
+44
+00:04:23.000 --> 00:04:27.000
+So keep things in mind and be very deterministic.
+
+45
+00:04:27.000 --> 00:04:33.000
+One of the things or at least the two things you do need to also consider on my list is shader model six.
+
+46
+00:04:33.000 --> 00:04:37.000
+Shader model six should be on when working with Unreal.
+
+47
+00:04:37.000 --> 00:04:47.000
+I like to turn both of these on. I may not need this Vulkan one, but just in case I bring in a shader that may need that support, I make sure that I put these in here.
+
+48
+00:04:47.000 --> 00:04:54.000
+Also, you want to make sure that virtual text screen is on. This will help with some of the visualizers.
+
+49
+00:04:54.000 --> 00:05:00.000
+So in this case, we don't really need it because we're not going to get into the visualizers that we covered in the first class.
+
+50
+00:05:00.000 --> 00:05:03.000
+But you do want to be able to turn that on when you can.
+
+51
+00:05:03.000 --> 00:05:06.000
+I already have my on, so we're in luck there.
+
+52
+00:05:06.000 --> 00:05:14.000
+But if you don't have it on, do turn it on. If you want to check Lumen, you want to check your your your shadow maps.
+
+53
+00:05:14.000 --> 00:05:19.000
+I shouldn't say shadow maps, your virtual shadow maps, and you want to make sure that those are in the right direction.
+
+54
+00:05:19.000 --> 00:05:21.000
+We already covered some of that in the first class.
+
+55
+00:05:21.000 --> 00:05:31.000
+But in here, you can also double check just in case, again, if you're pulling things in from a marketplace or you're inheriting a scene that you think may not have that on.
+
+56
+00:05:31.000 --> 00:05:35.000
+But those are actually good support for your visualizers.
+
+57
+00:05:35.000 --> 00:05:41.000
+Let me close this for a second and let's go ahead and go to a scene that is a starting point for us.
+
+58
+00:05:41.000 --> 00:05:45.000
+So there's our Lumen indoor start. Let's go and click on that.
+
+59
+00:05:45.000 --> 00:05:48.000
+So this one just has a few things in here, maybe a few lights.
+
+60
+00:05:48.000 --> 00:05:56.000
+Let's go and get some of the things in this scene and make sure we're really bare bones.
+
+61
+00:05:56.000 --> 00:06:04.000
+So let's go ahead and take a look at our lights and we're going to turn off our sky atmosphere.
+
+62
+00:06:04.000 --> 00:06:08.000
+Get rid of that volume, which a cloud gone. Good.
+
+63
+00:06:08.000 --> 00:06:10.000
+Let's see if there's any other lights that we need.
+
+64
+00:06:10.000 --> 00:06:16.000
+There are some glowing items in our scene and there's also a post process volume.
+
+65
+00:06:16.000 --> 00:06:19.000
+Let's get rid of that post process volume for a moment.
+
+66
+00:06:19.000 --> 00:06:23.000
+And then we can track down if there's any other lights in here.
+
+67
+00:06:23.000 --> 00:06:26.000
+And we should be good to go.
+
+68
+00:06:26.000 --> 00:06:28.000
+Double check the assets and we should be OK.
+
+69
+00:06:28.000 --> 00:06:36.000
+Now, the only lights we're getting is from Lumen because these items here, each one has a glowing material.
+
+70
+00:06:36.000 --> 00:06:42.000
+Our first class talked about this, how you can actually set up a glowing material in your scene.
+
+71
+00:06:42.000 --> 00:06:44.000
+So that is actually giving us some light.
+
+72
+00:06:44.000 --> 00:06:49.000
+Now, the problems you can run into if this item or object that's glowing is very small,
+
+73
+00:06:49.000 --> 00:06:53.000
+you can get a lot more noise and there might be some issues.
+
+74
+00:06:53.000 --> 00:07:03.000
+For now, we can leave this as is and let's actually open up our environment light mixer.
+
+75
+00:07:04.000 --> 00:07:07.000
+There it is off screen. I was just double checking to make sure it's open.
+
+76
+00:07:07.000 --> 00:07:09.000
+It looks like it already was.
+
+77
+00:07:09.000 --> 00:07:12.000
+We want to first create our sky light.
+
+78
+00:07:12.000 --> 00:07:14.000
+Then we want to create our atmospheric light.
+
+79
+00:07:14.000 --> 00:07:21.000
+Again, you're going to get this error because some of these lights do have dependencies to be able to get some of these to work together with it,
+
+80
+00:07:21.000 --> 00:07:25.000
+to give that believability that you need. And that's why that first one comes up.
+
+81
+00:07:25.000 --> 00:07:28.000
+It needs at least the sky atmosphere to be working correctly.
+
+82
+00:07:28.000 --> 00:07:30.000
+We're going to create an atmospheric light.
+
+83
+00:07:30.000 --> 00:07:34.000
+I'm going to create a sky atmosphere and then I'm going to create a volume at your cloud.
+
+84
+00:07:34.000 --> 00:07:37.000
+And eventually we'll do a height fog.
+
+85
+00:07:37.000 --> 00:07:40.000
+Now we have these all set up in place.
+
+86
+00:07:40.000 --> 00:07:44.000
+Now you'll notice our cafe doesn't seem to have anything to write home about.
+
+87
+00:07:44.000 --> 00:07:46.000
+It's kind of standard stuff.
+
+88
+00:07:46.000 --> 00:07:48.000
+And there's an HDR backdrop out here.
+
+89
+00:07:48.000 --> 00:07:51.000
+And you can use HDR backdrops. It's up to you.
+
+90
+00:07:51.000 --> 00:07:53.000
+There's no requirement for your scene.
+
+91
+00:07:53.000 --> 00:08:00.000
+It's really how you need it for what you're doing because we're inside a cafe so we can maybe give a little suspension of disbelief.
+
+92
+00:08:00.000 --> 00:08:10.000
+But just be aware that if you go outside or you're going to be looking at these and you do want to sell the idea and this pretty much looks this is pretty generic.
+
+93
+00:08:10.000 --> 00:08:13.000
+So just keep that in mind.
+
+94
+00:08:13.000 --> 00:08:19.000
+Let's go and grab our directional light.
+
+95
+00:08:19.000 --> 00:08:22.000
+With our directional light now, let's go and move this over.
+
+96
+00:08:22.000 --> 00:08:24.000
+I'm going to move it where you can see where it's pointing.
+
+97
+00:08:24.000 --> 00:08:27.000
+We can see it's in the opposite direction of our cafe.
+
+98
+00:08:27.000 --> 00:08:32.000
+So let's rotate that so it's shining in our environment.
+
+99
+00:08:32.000 --> 00:08:35.000
+We can bump that out if we bump that up if we want to.
+
+100
+00:08:35.000 --> 00:08:42.000
+Let's check our skylight and always especially if you're grabbing stuff from the marketplace, make sure that real time capture is on.
+
+101
+00:08:42.000 --> 00:08:47.000
+If you turn that off, you're not going to get the quality that you need when it comes to your environment.
+
+102
+00:08:47.000 --> 00:09:00.000
+Specifically when you're in a little bit different scenario here, such as maybe you have low light and it's coming in into your environment, that gives you some extra bouncing going on.
+
+103
+00:09:00.000 --> 00:09:02.000
+We do want to make sure that your lights are movable.
+
+104
+00:09:02.000 --> 00:09:05.000
+Very important to do so.
+
+105
+00:09:05.000 --> 00:09:10.000
+Because that movable, you'll see a skylight directional, both movable, are going to work with lumen.
+
+106
+00:09:10.000 --> 00:09:17.000
+So these are all just some reminders when it comes to working with lumen.
+
+107
+00:09:17.000 --> 00:09:23.000
+Next, we want to go in here and let's increase our light just a bit.
+
+108
+00:09:23.000 --> 00:09:26.000
+We'll make this probably about a 20.
+
+109
+00:09:26.000 --> 00:09:28.000
+Like it's kind of a foggy day.
+
+110
+00:09:28.000 --> 00:09:31.000
+Now our fog is going to influence this a bit too.
+
+111
+00:09:31.000 --> 00:09:40.000
+So if your fog is a lot more in your scene and magnified, we get into this in atmospheric lighting, but that can also influence how things are going to be viewed.
+
+112
+00:09:40.000 --> 00:09:47.000
+Because like in the real world, that light's going to bounce around those water particles.
+
+113
+00:09:47.000 --> 00:09:55.000
+We can also soften our shadows if we're getting some very edgy areas here, such as right over here on the desk.
+
+114
+00:09:55.000 --> 00:09:59.000
+And if we move away, you'll see that get a little bit more edgier here.
+
+115
+00:09:59.000 --> 00:10:05.000
+In our first class, we talked about using CVars to maybe control some of that shadow quality.
+
+116
+00:10:05.000 --> 00:10:16.000
+But what we can do with this directional light selected, we can go to the source angle and maybe increase that just a little bit there to soften that up if we get any hard edges.
+
+117
+00:10:16.000 --> 00:10:19.000
+And oh, that looks much better.
+
+118
+00:10:19.000 --> 00:10:21.000
+So that's helpful for our scene.
+
+119
+00:10:21.000 --> 00:10:23.000
+You may at time get some noise.
+
+120
+00:10:23.000 --> 00:10:29.000
+Now there are some CVars to solve this, but like we talked about in the first class, you can also visit the material.
+
+121
+00:10:29.000 --> 00:10:35.000
+And when you visit the material, you can control just how strong some of the roughness will be.
+
+122
+00:10:35.000 --> 00:10:41.000
+And when you lower roughness and get things a little more shiny, you can see some of the noise dissipate.
+
+123
+00:10:41.000 --> 00:10:47.000
+Now this is a something you have to dial down or dial up or revisit the texture to be able to get that going.
+
+124
+00:10:47.000 --> 00:10:51.000
+But this is all up to you how this works.
+
+125
+00:10:51.000 --> 00:10:55.000
+Now there will be always a little bit of noise with Lumen because it is evolving.
+
+126
+00:10:55.000 --> 00:10:57.000
+So just keep those things in mind.
+
+127
+00:10:57.000 --> 00:11:07.000
+Control your roughness and how things are working and you can be the master of your own environment.
+
+128
+00:11:07.000 --> 00:11:09.000
+Now we want to bring in a post process volume.
+
+129
+00:11:09.000 --> 00:11:12.000
+This is really important because it's our quality control.
+
+130
+00:11:12.000 --> 00:11:14.000
+So let's go ahead and do that.
+
+131
+00:11:14.000 --> 00:11:15.000
+Now there's a couple of ways to do that.
+
+132
+00:11:15.000 --> 00:11:17.000
+You can type in volumes here.
+
+133
+00:11:17.000 --> 00:11:20.000
+You can look for them or you can just simply go in here under volumes.
+
+134
+00:11:20.000 --> 00:11:21.000
+And find it.
+
+135
+00:11:21.000 --> 00:11:26.000
+You can also search at the top of this by just typing in volumes.
+
+136
+00:11:26.000 --> 00:11:29.000
+And we'll do post process.
+
+137
+00:11:29.000 --> 00:11:32.000
+I should do be more specific in your search.
+
+138
+00:11:32.000 --> 00:11:36.000
+Grab that post process volume is now in our scene.
+
+139
+00:11:36.000 --> 00:11:45.000
+And if you're wondering what just happened, I accidentally hit space bar, which shows you like everything.
+
+140
+00:11:45.000 --> 00:11:48.000
+That's the hot key for the place actors.
+
+141
+00:11:48.000 --> 00:11:50.000
+Learn something new every day, even on accident.
+
+142
+00:11:50.000 --> 00:11:52.000
+So I'm going to go and move this over here.
+
+143
+00:11:52.000 --> 00:11:57.000
+My post process volume needs to be set to infinite extend unbound.
+
+144
+00:11:57.000 --> 00:12:00.000
+So let's go and do that.
+
+145
+00:12:00.000 --> 00:12:07.000
+So when you do set this, scroll a little too far, you can have it so it will control everything.
+
+146
+00:12:07.000 --> 00:12:10.000
+You can also build a box around an area if you needed.
+
+147
+00:12:10.000 --> 00:12:11.000
+But Lumen is pretty efficient.
+
+148
+00:12:11.000 --> 00:12:15.000
+It doesn't necessarily have to be locked down like when you're working with ray tracing.
+
+149
+00:12:16.000 --> 00:12:21.000
+Ray tracing, you really do want a specific area because it's a bit more expensive.
+
+150
+00:12:21.000 --> 00:12:29.000
+We're just borrowing some of that technology from ray tracing and getting some of those light information bouncing around those photons back to the camera.
+
+151
+00:12:29.000 --> 00:12:31.000
+So but it is work.
+
+152
+00:12:31.000 --> 00:12:38.000
+It works a lot smoother and a lot more trimmer than when you if you would work with ray tracing.
+
+153
+00:12:38.000 --> 00:12:41.000
+So we want to make sure that Lumen is on.
+
+154
+00:12:41.000 --> 00:12:43.000
+Now we do have it in the project defaults.
+
+155
+00:12:43.000 --> 00:12:49.000
+But again, you want to turn it on under your global illumination and you want to turn it on under your reflections.
+
+156
+00:12:49.000 --> 00:12:54.000
+Let's turn these on for now or revisit some of these quality control settings later.
+
+157
+00:12:54.000 --> 00:12:57.000
+Just as a quick review.
+
+158
+00:12:57.000 --> 00:13:02.000
+We also want to go to global illumination Lumen here for lighting quality, scene detail.
+
+159
+00:13:02.000 --> 00:13:06.000
+All these things can be bumped up to help a few things going in the right direction.
+
+160
+00:13:06.000 --> 00:13:13.000
+And I'll give you some CVARS to help with a little bit with cleanup and show you the console tool that we have, which is pretty great.
+
+161
+00:13:13.000 --> 00:13:16.000
+All right.
+
+162
+00:13:16.000 --> 00:13:18.000
+So that's it with this video.
+
+163
+00:13:18.000 --> 00:13:25.000
+What we're going to do now is take another look at the next video at the post process volume here.
+
+164
+00:13:25.000 --> 00:13:32.000
+We're going to edit exposure as well as we're going to look at a few Lumen settings that we can do to get things in the right direction.
+
+165
+00:13:32.000 --> 00:13:34.000
+Thanks again.
+
+166
+00:13:36.000 --> 00:13:38.000
+Thanks for watching.

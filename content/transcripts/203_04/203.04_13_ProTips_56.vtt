@@ -1,0 +1,181 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.560
+When multiple denoises are available in your project,
+
+2
+00:00:04.560 --> 00:00:09.520
+Unreal uses console variables to decide which one path tracer relies on.
+
+3
+00:00:09.520 --> 00:00:14.360
+You can use r.pathTracing.spatialDenoiser.type
+
+4
+00:00:14.360 --> 00:00:20.600
+and toggle between spatial, zero, and temporal, one denoising.
+
+5
+00:00:20.600 --> 00:00:24.400
+You can use r.pathTracing.denoiser.name
+
+6
+00:00:24.400 --> 00:00:27.280
+to pick the spatial denoiser you prefer.
+
+7
+00:00:27.280 --> 00:00:33.800
+So for example, NNE denoiser, the default, or OIDN.
+
+8
+00:00:33.800 --> 00:00:40.240
+For temporal denoising, use r.pathTracing.temporaldenoiser.name
+
+9
+00:00:40.240 --> 00:00:44.400
+to choose between the options like NFOR, which is the default,
+
+10
+00:00:44.400 --> 00:00:47.600
+NNE denoiser, or OptiX.
+
+11
+00:00:47.600 --> 00:00:52.560
+These tips simply give you finer control over which denoising method is applied,
+
+12
+00:00:52.560 --> 00:00:56.280
+helping you balance speed, stability, and image quality.
+
+13
+00:00:56.320 --> 00:01:00.120
+Here are some additional CVars for targeting your final image quality.
+
+14
+00:01:00.120 --> 00:01:05.000
+Note, if you ever change a CVar's value and are unsure of the original default,
+
+15
+00:01:05.000 --> 00:01:08.000
+you can type the CVar into Unreal's command line
+
+16
+00:01:08.000 --> 00:01:10.520
+and hover over the text to see a tooltip
+
+17
+00:01:10.520 --> 00:01:15.200
+which should also show the original default value for that particular CVar.
+
+18
+00:01:16.880 --> 00:01:21.360
+Path Tracer now includes initial support for rendering heterogeneous volumes,
+
+19
+00:01:21.360 --> 00:01:24.040
+things like smoke, fire, and clouds.
+
+20
+00:01:24.040 --> 00:01:27.840
+You can create these volumes using the Niagara Fluids plugin
+
+21
+00:01:27.840 --> 00:01:32.800
+or by adding a heterogeneous volume actor directly in your scene.
+
+22
+00:01:32.800 --> 00:01:37.280
+These actors use sparse volume textures, for example, VDB files,
+
+23
+00:01:37.280 --> 00:01:40.680
+which can be imported and rendered natively in Path Tracer.
+
+24
+00:01:40.680 --> 00:01:44.680
+This means complex volumetric effects like simulated smoke plumes,
+
+25
+00:01:44.680 --> 00:01:50.280
+rolling clouds, can now be rendered with full path trace lighting and shadows.
+
+26
+00:01:50.280 --> 00:01:53.800
+As of the latest update, Path Tracer supports both static
+
+27
+00:01:53.800 --> 00:01:56.320
+and moving heterogeneous volumes,
+
+28
+00:01:56.320 --> 00:02:00.520
+giving artists far more greater flexibility for cinematic and visual effect work.
+
+29
+00:02:01.600 --> 00:02:04.320
+Now, before you dive too deep into path tracing,
+
+30
+00:02:04.320 --> 00:02:07.520
+keep in mind a few limitations.
+
+31
+00:02:07.520 --> 00:02:11.080
+First, heterogeneous volumes are only partially supported.
+
+32
+00:02:11.080 --> 00:02:13.440
+This includes effects like smoke and fire.
+
+33
+00:02:13.440 --> 00:02:17.480
+The sky atmosphere system isn't yet fully compatible with this feature,
+
+34
+00:02:17.480 --> 00:02:21.120
+so the results may vary depending on your scene setup.
+
+35
+00:02:21.160 --> 00:02:24.920
+Next, with Motion Blur, for the most accurate Motion Blur,
+
+36
+00:02:24.920 --> 00:02:30.760
+use the Movie Render Queue and enable Reference Motion Blur in the Path Tracing module.
+
+37
+00:02:30.760 --> 00:02:34.160
+This will give you a smoother, more physically accurate result,
+
+38
+00:02:34.160 --> 00:02:37.560
+though at a higher performance cost per frame.
+
+39
+00:02:37.560 --> 00:02:41.040
+In this mode, no post-processing vector blur is used.
+
+40
+00:02:41.040 --> 00:02:46.240
+Denoising happens after all spatial and temporal samples are accumulated.
+
+41
+00:02:46.240 --> 00:02:50.120
+So, for the best result, apply a higher temporal samples
+
+42
+00:02:50.120 --> 00:02:54.680
+and be mindful of the tick rate limitations when working with Sequencer.
+
+43
+00:02:54.680 --> 00:02:58.840
+And lastly, volumetric clouds are also only partially supported.
+
+44
+00:02:58.840 --> 00:03:03.160
+They can be captured through the skylight or represented natively
+
+45
+00:03:03.160 --> 00:03:06.680
+when referencing atmosphere mode is enabled in the post-processing settings.

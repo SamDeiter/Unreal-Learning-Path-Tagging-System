@@ -1,0 +1,889 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.900
+In this lesson, we're going to take a look at view modes and visualizers.
+
+2
+00:00:04.900 --> 00:00:07.580
+So let's get started.
+
+3
+00:00:07.580 --> 00:00:10.340
+One of them you can look at underneath optimization view modes.
+
+4
+00:00:10.340 --> 00:00:12.660
+You'll find that underneath our show.
+
+5
+00:00:12.660 --> 00:00:15.920
+And in there you'll see light complexity.
+
+6
+00:00:15.920 --> 00:00:20.860
+Light complexity will let us know if our lights are movable, stationary, or static and cover
+
+7
+00:00:20.860 --> 00:00:24.220
+them associated to their complexity.
+
+8
+00:00:24.220 --> 00:00:29.060
+Overlapping movable lights are the most expensive to work with.
+
+9
+00:00:29.060 --> 00:00:34.760
+You can resize the radius will help when it comes to stationary lights and them overlapping
+
+10
+00:00:34.760 --> 00:00:40.500
+each other because you can only do four overlapping at a time when it comes to baking.
+
+11
+00:00:40.500 --> 00:00:42.300
+Static lights are basically free.
+
+12
+00:00:42.300 --> 00:00:44.560
+They're really cheap to work with.
+
+13
+00:00:44.560 --> 00:00:47.240
+And so you can put as many as necessary.
+
+14
+00:00:47.240 --> 00:00:52.920
+But also keep in mind your geometry and how long things are going to take to bake.
+
+15
+00:00:52.920 --> 00:00:55.320
+Let's go and take a look at that up close and unreal.
+
+16
+00:00:55.320 --> 00:01:01.400
+And I'll bring up a few points that are also known in lumen.
+
+17
+00:01:01.400 --> 00:01:07.920
+So in our scene here, we can quickly check here what it looks like for a light complexity.
+
+18
+00:01:07.920 --> 00:01:10.680
+So I'm going to go under lit here.
+
+19
+00:01:10.680 --> 00:01:13.160
+And we're going to go down, not show.
+
+20
+00:01:13.160 --> 00:01:15.000
+If I said show, please excuse me.
+
+21
+00:01:15.000 --> 00:01:16.560
+We want to do lit.
+
+22
+00:01:16.560 --> 00:01:20.440
+So under lit, we want to go in here and we want to take a look at our optimization view
+
+23
+00:01:20.440 --> 00:01:21.440
+modes.
+
+24
+00:01:21.440 --> 00:01:23.080
+And there you'll see light complexity.
+
+25
+00:01:23.080 --> 00:01:26.160
+This shows us where the complexity of our light is at.
+
+26
+00:01:26.160 --> 00:01:33.880
+And we see one light here, which is stationary, has quite a few areas here that it's taken
+
+27
+00:01:33.880 --> 00:01:36.640
+into account that are kind of expensive.
+
+28
+00:01:36.640 --> 00:01:41.240
+Now some of the geometry is coming in black because it's using a level instance to be
+
+29
+00:01:41.240 --> 00:01:42.640
+able to build it.
+
+30
+00:01:42.640 --> 00:01:44.560
+But you can see these lights.
+
+31
+00:01:44.560 --> 00:01:48.680
+Here's another one here, also stationary, how they affect each other as I move them
+
+32
+00:01:48.680 --> 00:01:49.680
+around.
+
+33
+00:01:49.680 --> 00:01:54.280
+These stationaries show me where the overlap is happening with another stationary light,
+
+34
+00:01:54.280 --> 00:01:57.220
+case in point, this rec light.
+
+35
+00:01:57.220 --> 00:02:02.600
+So if I have more than four overlapping, and I'll demonstrate over here in this green area.
+
+36
+00:02:02.600 --> 00:02:10.200
+If I go to say my point light, I'm pulling one and I'll pull in two and I pull in three.
+
+37
+00:02:10.200 --> 00:02:14.960
+And then if I pull in a fourth one, you'll see that one of them has an X going on.
+
+38
+00:02:15.960 --> 00:02:20.800
+not really doing and pulling the weight like he's supposed to.
+
+39
+00:02:20.800 --> 00:02:24.440
+He's not quite working like he should as a stationary light.
+
+40
+00:02:24.440 --> 00:02:30.480
+He's more moved into movable just for this to be more manageable because these four overlapping
+
+41
+00:02:30.480 --> 00:02:33.000
+plus we have a directional light in place.
+
+42
+00:02:33.000 --> 00:02:35.900
+So we've kind of hit our limit.
+
+43
+00:02:35.900 --> 00:02:40.000
+So these three are being counted plus our directional light.
+
+44
+00:02:40.000 --> 00:02:44.440
+So what we can do to remedy that is one, if again, this is a baking scenario, I can lower
+
+45
+00:02:44.440 --> 00:02:50.800
+the the attenuation or I can move it out of an area of influence.
+
+46
+00:02:50.800 --> 00:02:54.000
+And when you do, you'll actually see the X go away.
+
+47
+00:02:54.000 --> 00:02:57.520
+This guy's going to stick around for a bit because we have quite a bit of lights in here,
+
+48
+00:02:57.520 --> 00:03:05.320
+two directional lights, several wrecks, as well as as well as a few others in here.
+
+49
+00:03:05.320 --> 00:03:08.020
+So that's something to consider.
+
+50
+00:03:08.020 --> 00:03:13.080
+But this will tell you the complexity of it all.
+
+51
+00:03:13.080 --> 00:03:15.640
+Another mode we have is called light map density.
+
+52
+00:03:15.640 --> 00:03:22.520
+Let's take a look at that up close and some things to keep in mind when working with this.
+
+53
+00:03:22.520 --> 00:03:26.400
+So let me go ahead and remove these lights that we just created.
+
+54
+00:03:26.400 --> 00:03:27.400
+Don't need them.
+
+55
+00:03:27.400 --> 00:03:31.320
+And you'll see the colors change as I get rid of them.
+
+56
+00:03:31.320 --> 00:03:33.520
+Red is very high.
+
+57
+00:03:33.520 --> 00:03:34.520
+White is really high.
+
+58
+00:03:34.520 --> 00:03:42.600
+And green, as you can tell, is pretty light on the importance or complexity scale.
+
+59
+00:03:42.600 --> 00:03:45.240
+So let's go from optimization view modes here.
+
+60
+00:03:45.240 --> 00:03:49.480
+And we're going to go to our light map density.
+
+61
+00:03:49.480 --> 00:03:55.340
+Now the light map density shows me how my settings are set for each one of these pieces
+
+62
+00:03:55.340 --> 00:03:56.840
+of geometry.
+
+63
+00:03:56.840 --> 00:04:00.480
+So let's pick something that's not merged or in a level instance, something that's a
+
+64
+00:04:00.480 --> 00:04:02.420
+little more singular.
+
+65
+00:04:02.420 --> 00:04:06.960
+So I'm going to grab this here and I'm going to scroll to the area where it shows us where
+
+66
+00:04:06.960 --> 00:04:09.040
+a light map information is at.
+
+67
+00:04:09.040 --> 00:04:11.040
+Now for some reason you can't find it.
+
+68
+00:04:11.040 --> 00:04:15.160
+You'll find it right underneath the lighting and you can also do a search for light map
+
+69
+00:04:15.160 --> 00:04:18.020
+and you'll see the resolution set here.
+
+70
+00:04:18.020 --> 00:04:19.920
+You can see this is pretty low.
+
+71
+00:04:19.920 --> 00:04:23.660
+And I'm fortunate enough that I'm not getting any blobby shadows.
+
+72
+00:04:23.660 --> 00:04:28.320
+But if I was, I might want to increase this to be the same light map resolution as the
+
+73
+00:04:28.320 --> 00:04:29.320
+ground.
+
+74
+00:04:29.320 --> 00:04:33.600
+We're fortunate enough because both of these, even though this is a smaller item, have the
+
+75
+00:04:33.600 --> 00:04:35.240
+same light map resolution.
+
+76
+00:04:35.240 --> 00:04:37.000
+So we're doing okay.
+
+77
+00:04:37.000 --> 00:04:40.280
+But if for some reason this is really high resolution.
+
+78
+00:04:40.400 --> 00:04:44.880
+Let's say the arch is set to like, I don't know, we have like, I shouldn't say really
+
+79
+00:04:44.880 --> 00:04:47.480
+high, but you know, you don't want to go too high with these.
+
+80
+00:04:47.480 --> 00:04:48.600
+You want to keep it reasonable.
+
+81
+00:04:48.600 --> 00:04:52.680
+So say this is like a one, a 512.
+
+82
+00:04:52.680 --> 00:04:54.500
+It's a real little, little over the top.
+
+83
+00:04:54.500 --> 00:04:55.500
+It could be one, one, 28.
+
+84
+00:04:55.500 --> 00:04:56.500
+Okay.
+
+85
+00:04:56.500 --> 00:04:59.200
+But it's a five, so it's really getting close on click really good.
+
+86
+00:04:59.200 --> 00:05:02.880
+But then down on the ground, it's only, it's left at 64.
+
+87
+00:05:02.880 --> 00:05:07.320
+As soon as this object hits this area and they connect with each other, I could get
+
+88
+00:05:07.320 --> 00:05:13.200
+a blobby shadow just because it, Unreal's trying to bake that light map on there.
+
+89
+00:05:13.200 --> 00:05:18.960
+And it is trying to evaluate the difference between these two resolutions for that light
+
+90
+00:05:18.960 --> 00:05:19.960
+map.
+
+91
+00:05:19.960 --> 00:05:27.200
+So just keep those things in mind if you are baking that those might be an issue.
+
+92
+00:05:27.200 --> 00:05:31.520
+In this previous scene, let's take a brief look again at some of the visualizers like
+
+93
+00:05:31.520 --> 00:05:35.720
+we talked about in the first class when it comes to Lumen.
+
+94
+00:05:35.720 --> 00:05:40.600
+So we have lit here and over here we have Nanite visualization.
+
+95
+00:05:40.600 --> 00:05:46.120
+So if I do an overview, I've now converted, I right clicked in the content browser and
+
+96
+00:05:46.120 --> 00:05:50.660
+I converted all of these chairs into a Nanite object.
+
+97
+00:05:50.660 --> 00:05:54.440
+So you can view that ahead of time if you want to.
+
+98
+00:05:54.440 --> 00:05:57.600
+So we can say, hey, let's look at our Nanite visualization.
+
+99
+00:05:57.600 --> 00:06:02.240
+Now you can look at mass, the triangles, how they're clustered together, what's going on
+
+100
+00:06:02.240 --> 00:06:06.960
+with the primitives, how the calculations working, instances of those objects, the overdraw
+
+101
+00:06:06.960 --> 00:06:14.520
+that might occur if it's really high detail, material ID that's involved, UV, light map,
+
+102
+00:06:14.520 --> 00:06:19.000
+UV going on, so if you are using that, and evaluate world position offset.
+
+103
+00:06:19.000 --> 00:06:22.640
+So all these things can be listed within the overview.
+
+104
+00:06:22.640 --> 00:06:27.600
+So if I click on overview, you'll see that each one of these are in each different category.
+
+105
+00:06:27.600 --> 00:06:31.920
+This is the nice thing about overview, you can just pick and look at what you need.
+
+106
+00:06:31.920 --> 00:06:34.400
+In this case, we'll focus on the triangles.
+
+107
+00:06:34.400 --> 00:06:39.240
+So if I move around, you'll notice in some instances, and in this case, the chair is
+
+108
+00:06:39.240 --> 00:06:44.560
+really simple, but if let's go and switch the triangles here, you will see those triangles
+
+109
+00:06:44.560 --> 00:06:49.100
+flip and recalculate based on distance of the camera from the object.
+
+110
+00:06:49.100 --> 00:06:51.400
+So I'll go to triangles here for the whole thing.
+
+111
+00:06:51.400 --> 00:06:55.360
+And in this case, since these chairs are super simple, you're not going to see it as much,
+
+112
+00:06:55.360 --> 00:07:01.040
+but you would see it on high resolutions, scanned rock objects, you'll see those triangles
+
+113
+00:07:01.040 --> 00:07:04.400
+shift according to the distance we are to the object.
+
+114
+00:07:04.400 --> 00:07:06.280
+And you may see a little bit of it.
+
+115
+00:07:06.280 --> 00:07:09.000
+You see the top of the chairs kind of shift a little bit.
+
+116
+00:07:09.000 --> 00:07:14.480
+That is unreal trying to give us the best possible geometry based on distance using
+
+117
+00:07:14.480 --> 00:07:19.240
+Nanite, and Nanite is a lot more efficient because it gives you a higher resolution at
+
+118
+00:07:19.240 --> 00:07:22.760
+lower cost when it comes to your geometry.
+
+119
+00:07:22.760 --> 00:07:24.980
+So it's pretty cool to be able to see that ahead of time.
+
+120
+00:07:24.980 --> 00:07:30.040
+We also talked about in the first class, the lumen overview, which shows our geometry normals,
+
+121
+00:07:30.040 --> 00:07:36.120
+our reflection view with our hardware ray tracing involved here, lumen pink missing
+
+122
+00:07:36.120 --> 00:07:38.440
+surface catch coverage.
+
+123
+00:07:38.440 --> 00:07:43.440
+So it tells you where the errors or situations you might have or issues you may have in your
+
+124
+00:07:43.440 --> 00:07:45.080
+scene.
+
+125
+00:07:45.080 --> 00:07:48.040
+So it's actually pretty cool to be able to take a look at that really quick.
+
+126
+00:07:48.040 --> 00:07:51.280
+We also have our virtual shadow maps.
+
+127
+00:07:51.280 --> 00:07:53.280
+So in here we can look at the shadow mask.
+
+128
+00:07:53.280 --> 00:07:58.160
+It shows you how things are being amassed into our scene, almost as if you're seeing
+
+129
+00:07:58.160 --> 00:07:59.980
+a real time update bake.
+
+130
+00:07:59.980 --> 00:08:04.040
+But in this case, when it comes to virtual shadow maps, they are updating on the fly
+
+131
+00:08:04.040 --> 00:08:07.500
+and they're actually not picked at all.
+
+132
+00:08:07.500 --> 00:08:09.380
+We have a clip map level.
+
+133
+00:08:09.380 --> 00:08:14.340
+You could see it sorting and popping in as we go through here and you can see that it's
+
+134
+00:08:14.340 --> 00:08:20.920
+working and doing and digesting things based on location.
+
+135
+00:08:20.920 --> 00:08:22.240
+Next we have virtual page.
+
+136
+00:08:22.240 --> 00:08:25.640
+Again, this works kind of like we saw with the Nanite.
+
+137
+00:08:25.640 --> 00:08:30.320
+So you can see it bring in what we need based on our positioning and it's trying to sort
+
+138
+00:08:30.320 --> 00:08:37.600
+through the data and the objects in the scene and where our light is positioned.
+
+139
+00:08:37.600 --> 00:08:43.520
+We also have the catch page, which simply is showing us how things are being catched
+
+140
+00:08:43.520 --> 00:08:51.360
+and called upon.
+
+141
+00:08:51.360 --> 00:08:56.040
+Going back to the topic of light mass and volumetric light maps.
+
+142
+00:08:56.040 --> 00:09:01.920
+Light maps, light mass in this case, creates a volumetric area in which objects can be
+
+143
+00:09:01.920 --> 00:09:02.920
+calculated.
+
+144
+00:09:02.920 --> 00:09:05.120
+Again, this is a baking scenario.
+
+145
+00:09:05.120 --> 00:09:11.360
+These volumetric light maps allow objects to be calculated in the shadows to update
+
+146
+00:09:11.360 --> 00:09:12.720
+for stationary lights.
+
+147
+00:09:12.720 --> 00:09:16.320
+You can actually see this ahead of time in a baking scenario.
+
+148
+00:09:16.320 --> 00:09:19.000
+Let me show you what I mean.
+
+149
+00:09:19.000 --> 00:09:27.040
+So in Unreal, I can go in here and I can show, take a look at these components here.
+
+150
+00:09:27.040 --> 00:09:29.920
+Now at any time you can choose, I'll just briefly talk about this.
+
+151
+00:09:29.920 --> 00:09:35.080
+You can see Lumen and Nanite have some extra areas to be able to visualize things.
+
+152
+00:09:35.080 --> 00:09:36.760
+You'll see an overall visualizer.
+
+153
+00:09:36.760 --> 00:09:38.400
+We can add some more advanced stuff.
+
+154
+00:09:38.400 --> 00:09:39.400
+So don't get confused.
+
+155
+00:09:39.400 --> 00:09:47.400
+It's easy to get lost with this, but we're going to focus mainly on showing where that
+
+156
+00:09:47.480 --> 00:09:51.520
+light mass mapping is happening.
+
+157
+00:09:51.520 --> 00:09:54.800
+So let's go back over there.
+
+158
+00:09:54.800 --> 00:09:58.920
+We're going to visualize.
+
+159
+00:09:58.920 --> 00:10:07.520
+I'm going to go to that light map area.
+
+160
+00:10:07.520 --> 00:10:10.280
+Volumetric light map right there.
+
+161
+00:10:10.280 --> 00:10:12.520
+And it shows you the calculations.
+
+162
+00:10:12.520 --> 00:10:15.200
+It shows you all of this.
+
+163
+00:10:15.200 --> 00:10:20.160
+These spheres are points of calculation in here in our world so that our shadows can
+
+164
+00:10:20.160 --> 00:10:28.400
+correctly update and work according to our geometry and our objects in our scene.
+
+165
+00:10:28.400 --> 00:10:29.400
+Pretty cool.
+
+166
+00:10:29.400 --> 00:10:32.360
+Now you can increase that resolution if you want to.
+
+167
+00:10:32.360 --> 00:10:33.360
+I like to use it.
+
+168
+00:10:33.360 --> 00:10:37.720
+I think at default it works pretty darn well, but you'll see down here, there's a detailed
+
+169
+00:10:37.720 --> 00:10:39.040
+cell size.
+
+170
+00:10:39.040 --> 00:10:41.840
+As you increase that, you can increase some of the quality.
+
+171
+00:10:42.680 --> 00:10:45.560
+But it also is going to require a bit more brick memory.
+
+172
+00:10:45.560 --> 00:10:47.840
+You can also increase that if needed.
+
+173
+00:10:47.840 --> 00:10:50.000
+You can smooth things out if you need to.
+
+174
+00:10:50.000 --> 00:10:53.220
+Again, this is the volumetric light map.
+
+175
+00:10:53.220 --> 00:10:58.440
+This again helps with our characters and how they're working in our world and how those
+
+176
+00:10:58.440 --> 00:11:03.320
+shadows are being established.
+
+177
+00:11:03.320 --> 00:11:06.040
+Let's look at some tips and tricks real quick here for light mass.
+
+178
+00:11:06.040 --> 00:11:10.780
+So indirect quality lighting doesn't work on preview quality presets.
+
+179
+00:11:10.780 --> 00:11:15.260
+You want to make sure that if you want to get exactly what you planned and you want
+
+180
+00:11:15.260 --> 00:11:20.340
+to get the highest resolution for your bake, and you want to make sure you have a good
+
+181
+00:11:20.340 --> 00:11:25.220
+representation of what you've chosen, you really do want to make sure you have it on
+
+182
+00:11:25.220 --> 00:11:26.220
+production.
+
+183
+00:11:26.220 --> 00:11:31.340
+But you can start off low and do preview and medium and high, but eventually find yourself
+
+184
+00:11:31.340 --> 00:11:35.300
+at production if you're noticing you're missing some of the details that you know you put
+
+185
+00:11:35.300 --> 00:11:38.980
+in there, such as increasing your indirect lighting quality and so forth.
+
+186
+00:11:40.980 --> 00:11:46.740
+So ways to improve and optimize light baking, better UVs for light maps, override light
+
+187
+00:11:46.740 --> 00:11:48.000
+map resolution per object.
+
+188
+00:11:48.000 --> 00:11:51.780
+So your hero objects will have a higher resolution.
+
+189
+00:11:51.780 --> 00:11:56.880
+Optimization view modes, check things with that, show light components, and compressed
+
+190
+00:11:56.880 --> 00:11:59.820
+light maps are set to off.
+
+191
+00:11:59.820 --> 00:12:04.400
+Now briefly, I want to go back to view modes for a second because I want to point out one
+
+192
+00:12:04.400 --> 00:12:09.040
+more thing.
+
+193
+00:12:09.040 --> 00:12:14.240
+So in Unreal, underneath our optimization view modes, you'll notice there's also the
+
+194
+00:12:14.240 --> 00:12:20.360
+overlap which we talked about, but there's also shader complexity, as well as shader
+
+195
+00:12:20.360 --> 00:12:24.360
+complexity, quads and quad overdraw.
+
+196
+00:12:24.360 --> 00:12:30.220
+Quad overdraw will show us exactly where our density is at in our scene and where things
+
+197
+00:12:30.220 --> 00:12:33.160
+might be getting pulled a bit stronger with our memory.
+
+198
+00:12:33.160 --> 00:12:37.800
+In this case, this isn't too bad because we still have our spheres, which are a little
+
+199
+00:12:37.840 --> 00:12:40.560
+bit dense. And back here, we could definitely merge these.
+
+200
+00:12:40.760 --> 00:12:43.880
+We go over that in our optimization course.
+
+201
+00:12:44.440 --> 00:12:47.040
+But you'll notice we're doing pretty well.
+
+202
+00:12:47.080 --> 00:12:52.060
+As soon as we introduce trees or other items, we definitely want to look at maybe
+
+203
+00:12:52.060 --> 00:12:57.880
+switching to lumen and then also switching those larger, higher poly objects to nanite.
+
+204
+00:13:00.080 --> 00:13:04.720
+Here I have a screen showing some ways in which you can better get better results using
+
+205
+00:13:04.920 --> 00:13:08.040
+light baking, such as number of indirect lighting bounces.
+
+206
+00:13:08.280 --> 00:13:12.640
+You'll see there's five here and we'll also see the indirect lighting quality set to 20
+
+207
+00:13:12.960 --> 00:13:16.440
+and indirect lighting. So this is point zero point five.
+
+208
+00:13:16.440 --> 00:13:19.160
+And you get some really nice stuff going on here.
+
+209
+00:13:19.520 --> 00:13:24.920
+Now, the more you increase your bounces, keep in mind, you may not see a difference if
+
+210
+00:13:24.920 --> 00:13:30.400
+you go past like 10 because the eye is not going to pick up those bounce upon another
+
+211
+00:13:30.400 --> 00:13:31.640
+bounce upon another bounce.
+
+212
+00:13:32.120 --> 00:13:35.320
+So it'll be very minute changes.
+
+213
+00:13:37.480 --> 00:13:40.400
+You can also make a static object glow.
+
+214
+00:13:40.920 --> 00:13:46.160
+So if you have like some simple lights in a city scene, you can actually bake that in
+
+215
+00:13:46.160 --> 00:13:51.840
+there. If you wanted to, you could even do that for on the real cheap, bake it ahead
+
+216
+00:13:51.840 --> 00:13:57.240
+of time and still use lumen if you are afraid of noise and the objects, you know, are
+
+217
+00:13:57.240 --> 00:14:02.560
+static, such as maybe a car and a neon light that would actually work pretty well.
+
+218
+00:14:03.080 --> 00:14:07.160
+But just keep in mind, if your characters walk in front of that bake, they're not going
+
+219
+00:14:07.160 --> 00:14:10.240
+to get that light. So just be aware of it.
+
+220
+00:14:11.520 --> 00:14:15.880
+Here's a link here diving deeper into those topics that we talked about in the next
+
+221
+00:14:15.880 --> 00:14:18.600
+lesson. We're going to take a look at screen space GI.
+
+222
+00:14:19.080 --> 00:14:19.560
+Thanks again.

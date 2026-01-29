@@ -1,0 +1,249 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.000
+Next, we want to provide a few tips and tricks for your rendering inside of Unreal Engine 5,
+
+2
+00:00:06.000 --> 00:00:10.000
+so that it helps give you some efficiencies in your workflow.
+
+3
+00:00:10.000 --> 00:00:16.000
+So kicking off with Lumen here, Lumen currently doesn't fully support mirror reflections.
+
+4
+00:00:16.000 --> 00:00:20.000
+So it's limited, but on the roadmap, so at the time of viewing,
+
+5
+00:00:20.000 --> 00:00:24.000
+you can just check the support of Lumen on the reflections here.
+
+6
+00:00:24.000 --> 00:00:27.000
+And Lumen does not support static lights either.
+
+7
+00:00:27.000 --> 00:00:31.000
+So you're in a, whereas if you are using baked lighting,
+
+8
+00:00:31.000 --> 00:00:36.000
+you could change your light modes to static, stationary, movable.
+
+9
+00:00:36.000 --> 00:00:39.000
+Lumen just handles the same light type for all.
+
+10
+00:00:39.000 --> 00:00:44.000
+So disabling allow static lighting can help with some overhead
+
+11
+00:00:44.000 --> 00:00:49.000
+and make sure your Lumen AO process is working with no visual hindrances.
+
+12
+00:00:49.000 --> 00:00:53.000
+Lumen supports material ambient occlusion, ideal for characters,
+
+13
+00:00:53.000 --> 00:00:56.000
+cheaper than a bent normal for characters.
+
+14
+00:00:56.000 --> 00:01:01.000
+So with Lumen, temporal super resolution, which is TSR,
+
+15
+00:01:01.000 --> 00:01:04.000
+may blur out the world position offset effect.
+
+16
+00:01:04.000 --> 00:01:07.000
+To remedy that, you can go to your project settings,
+
+17
+00:01:07.000 --> 00:01:12.000
+go down to the render tab, into optimizations, velocity pass,
+
+18
+00:01:12.000 --> 00:01:15.000
+and switch to right during base pass.
+
+19
+00:01:15.000 --> 00:01:20.000
+And making foliage movable in the foliage editor can also correct the blurring caused
+
+20
+00:01:20.000 --> 00:01:23.000
+by the world position offset, which is the wind effect.
+
+21
+00:01:23.000 --> 00:01:27.000
+And then there's just an image to show you about the velocity pass option
+
+22
+00:01:27.000 --> 00:01:29.000
+that you'd change there.
+
+23
+00:01:30.000 --> 00:01:34.000
+With path tracer, we're talking about denoising.
+
+24
+00:01:34.000 --> 00:01:40.000
+So even with high sample counts, path tracer will always have a bit of residual noise
+
+25
+00:01:40.000 --> 00:01:41.000
+in the rendered frame.
+
+26
+00:01:41.000 --> 00:01:45.000
+So denoising option in the post-processing volume settings will make use of
+
+27
+00:01:45.000 --> 00:01:50.000
+Intel's open image denoise library to remove noise from the last sample.
+
+28
+00:01:50.000 --> 00:01:56.000
+So the denoiser runs on the CPU and is not currently designed for interactive denoising.
+
+29
+00:01:56.000 --> 00:02:00.000
+So rather to help improve the quality of long running frames,
+
+30
+00:02:00.000 --> 00:02:04.000
+it does not currently guarantee temporal consistency.
+
+31
+00:02:04.000 --> 00:02:08.000
+And relatively high samples per pixel are required for stable output.
+
+32
+00:02:08.000 --> 00:02:13.000
+So temporal stability can also be improved by increasing the temporal sample count
+
+33
+00:02:13.000 --> 00:02:16.000
+in the anti-aliasing settings in the movie render queue.
+
+34
+00:02:16.000 --> 00:02:21.000
+And then also animated items may still have flickering shadows.
+
+35
+00:02:21.000 --> 00:02:25.000
+So setting spatial and temporal sampling counts to 10 can help.
+
+36
+00:02:25.000 --> 00:02:29.000
+So path tracer is still evolving, many changes per engine version.
+
+37
+00:02:29.000 --> 00:02:33.000
+So it's always useful checking the path tracer documentation,
+
+38
+00:02:33.000 --> 00:02:39.000
+which we've got in a slide in a second for you to check the latest on path tracer.
+
+39
+00:02:40.000 --> 00:02:46.000
+Here are a few common console variables that you may use for when you approach ray tracing.
+
+40
+00:02:46.000 --> 00:02:51.000
+We've got some meta human specific CVAR settings here in orange,
+
+41
+00:02:51.000 --> 00:02:56.000
+which you may want to tweak, but you can also find a list of these online.
+
+42
+00:02:56.000 --> 00:03:01.000
+But again, the render queue supports console variables.
+
+43
+00:03:01.000 --> 00:03:04.000
+So if you want to set any of these when you're outputting,
+
+44
+00:03:04.000 --> 00:03:09.000
+and if you file types, you can set these on the project.
+
+45
+00:03:09.000 --> 00:03:13.000
+And then you've also got some sky and atmosphere systems that you can tweak here.
+
+46
+00:03:13.000 --> 00:03:16.000
+So worth digging into all of these, playing around,
+
+47
+00:03:16.000 --> 00:03:23.000
+seeing what you can set and really define the look and feel of what your project requires.
+
+48
+00:03:25.000 --> 00:03:29.000
+The GPU timeouts, so the TDR delay settings,
+
+49
+00:03:29.000 --> 00:03:36.000
+type regedit into the Windows search bar to navigate to this category,
+
+50
+00:03:36.000 --> 00:03:41.000
+select the TDR delay from the list, right click modify,
+
+51
+00:03:41.000 --> 00:03:43.000
+and you can select the base's decimal.
+
+52
+00:03:43.000 --> 00:03:49.000
+So change the value data to 1690 or 120, and then hit OK.
+
+53
+00:03:49.000 --> 00:03:53.000
+And if the TDR delay doesn't exist in the category list,
+
+54
+00:03:53.000 --> 00:03:56.000
+move your pointer to the open folder, right click,
+
+55
+00:03:56.000 --> 00:04:02.000
+select new select D word, which is 32 bit value from the options menu,
+
+56
+00:04:02.000 --> 00:04:04.000
+and then select the base's decimal.
+
+57
+00:04:04.000 --> 00:04:09.000
+Hit the value data to 1690 or 120 again, and then hit OK.
+
+58
+00:04:09.000 --> 00:04:13.000
+So all of the documentation that you need for any of these tips and tricks
+
+59
+00:04:13.000 --> 00:04:18.000
+can be found on the resources below.
+
+60
+00:04:18.000 --> 00:04:22.000
+And then just for the credits of the slides again, this was Kevin and Sean.
+
+61
+00:04:22.000 --> 00:04:26.000
+We got further documentation on some sequence of workflows,
+
+62
+00:04:26.000 --> 00:04:30.000
+and then also some additional documentation on the movie render queue.

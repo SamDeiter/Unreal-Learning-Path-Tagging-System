@@ -1,0 +1,389 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:10.920
+Next, we're going to work on the crowd controller class.
+
+2
+00:00:10.920 --> 00:00:14.680
+So I'm going to the third person example map tab.
+
+3
+00:00:14.680 --> 00:00:20.160
+I'm still in this third person BP blueprints folder.
+
+4
+00:00:20.160 --> 00:00:28.520
+And I'm going to right click in an empty space in the content browser, go to blueprint class.
+
+5
+00:00:28.520 --> 00:00:36.400
+And I'm not going to use any of these common classes because this is pretty specific.
+
+6
+00:00:36.400 --> 00:00:44.200
+And I'm actually going to expand the all classes section right here.
+
+7
+00:00:44.200 --> 00:00:49.800
+And I'm going to type in crowd and see which options come up.
+
+8
+00:00:49.800 --> 00:00:53.480
+So AI controller, that looks promising.
+
+9
+00:00:53.480 --> 00:00:58.320
+Detour crowd AI controller, that's the one we're actually going to use.
+
+10
+00:00:58.320 --> 00:01:07.960
+And I just happen to know that this specific blueprint works with the navmesh, which is what we need.
+
+11
+00:01:07.960 --> 00:01:14.360
+So click on detour crowd AI controller, hit select.
+
+12
+00:01:14.360 --> 00:01:21.000
+And we will call this crowd controller.
+
+13
+00:01:21.000 --> 00:01:22.600
+There we go.
+
+14
+00:01:22.600 --> 00:01:28.520
+And then double click on that.
+
+15
+00:01:28.520 --> 00:01:31.240
+And go to your event graph.
+
+16
+00:01:31.240 --> 00:01:37.400
+And if for some reason you don't have this event graph tab, I'll close it.
+
+17
+00:01:37.400 --> 00:01:45.600
+Then another way you can get to it is just double click event graph on the left underneath graphs.
+
+18
+00:01:45.600 --> 00:01:49.440
+And it's back.
+
+19
+00:01:49.440 --> 00:01:54.960
+So let's talk about this type of blueprint class.
+
+20
+00:01:54.960 --> 00:02:00.880
+Now, AI controller, that class is the parent class of what we selected.
+
+21
+00:02:00.880 --> 00:02:10.560
+We selected the detour crowd AI controller and an AI controller think artificial intelligence when you hear that.
+
+22
+00:02:10.560 --> 00:02:15.760
+And this class, it fakes being a person.
+
+23
+00:02:15.760 --> 00:02:17.880
+It doesn't listen to human input.
+
+24
+00:02:17.880 --> 00:02:24.000
+It listens to the environment, to game logic, and it reacts accordingly.
+
+25
+00:02:24.000 --> 00:02:27.480
+Now detour crowd AI controller, it's a child of that.
+
+26
+00:02:27.480 --> 00:02:36.320
+It has a pathfinding component, which talks to the navmesh for pathfinding and collision avoidance for the agents that it's controlling.
+
+27
+00:02:36.320 --> 00:02:39.960
+So let's hook this up.
+
+28
+00:02:39.960 --> 00:02:41.280
+So I'm back in the engine.
+
+29
+00:02:41.280 --> 00:02:43.960
+I don't need event tick.
+
+30
+00:02:43.960 --> 00:02:48.880
+I just need functionality that happens once we hit play.
+
+31
+00:02:48.880 --> 00:02:52.000
+So I'm going to delete event tick.
+
+32
+00:02:52.000 --> 00:02:55.280
+We don't need that.
+
+33
+00:02:55.280 --> 00:03:03.520
+And then I'm going to drag off of the execution wire for our very first node.
+
+34
+00:03:03.520 --> 00:03:13.920
+And overall, what we're going to do is we're going to tell any spawned non-player character to find a random spot within a radius of the navmesh.
+
+35
+00:03:14.480 --> 00:03:18.440
+You know, and then move to that and then repeat over and over again.
+
+36
+00:03:18.440 --> 00:03:22.960
+So first things first, let's just type in move to.
+
+37
+00:03:22.960 --> 00:03:25.360
+Let's see what options we have.
+
+38
+00:03:25.360 --> 00:03:37.440
+Now, I'm going to pay attention to these options that are underneath the navigation category, because I know that those know how to talk to the navmesh, which is what we want.
+
+39
+00:03:37.440 --> 00:03:39.920
+Now, we're moving to locations.
+
+40
+00:03:39.920 --> 00:03:42.840
+We're not moving to a specific actor.
+
+41
+00:03:42.840 --> 00:03:51.160
+So that tells me move to location or simple move to location would be what I'd want to try.
+
+42
+00:03:51.160 --> 00:03:58.720
+Now, the simple move to location, it has fewer inputs than move to location and it gets the job done.
+
+43
+00:03:58.720 --> 00:04:03.480
+So let's use that one.
+
+44
+00:04:03.480 --> 00:04:06.040
+OK.
+
+45
+00:04:06.040 --> 00:04:08.160
+Now, we have two inputs.
+
+46
+00:04:08.160 --> 00:04:10.320
+The first one is controller.
+
+47
+00:04:10.320 --> 00:04:16.720
+Now, that is wanting to know, OK, which blueprint class is controlling all of these crowd agents?
+
+48
+00:04:16.720 --> 00:04:23.040
+And it just so happens that this blueprint class is the one that is doing that.
+
+49
+00:04:23.040 --> 00:04:40.000
+So in order to tell this node that this blueprint is the one that is the controller, you just left click drag off of the blue dot, type in self and get a reference to this blueprint.
+
+50
+00:04:40.000 --> 00:04:44.080
+OK, so that's the first input.
+
+51
+00:04:44.080 --> 00:04:49.400
+The second input goal is talking about a goal location.
+
+52
+00:04:49.400 --> 00:04:51.800
+It's a vector.
+
+53
+00:04:51.800 --> 00:05:03.880
+Now, this goal location, we are going to get our current crowd agent, find its location and then move it to a spot within a certain radius on the navmesh.
+
+54
+00:05:03.880 --> 00:05:07.920
+And then that will be the new location that we use.
+
+55
+00:05:07.920 --> 00:05:14.680
+So let's just right click in an empty space.
+
+56
+00:05:14.680 --> 00:05:19.920
+Type in get controlled pawn.
+
+57
+00:05:19.920 --> 00:05:26.320
+OK, so get controlled pawn, so that will get all of our crowd characters.
+
+58
+00:05:26.320 --> 00:05:29.120
+So if you have two crowd characters, it will get two.
+
+59
+00:05:29.120 --> 00:05:32.720
+If you have ninety nine, it will get ninety nine.
+
+60
+00:05:32.720 --> 00:05:47.640
+And then the next node to get its current location, it's a context sensitive node, meaning I have to drag off of this node in order for it to appear in the list of possible options.
+
+61
+00:05:47.640 --> 00:05:53.440
+And then let's type get actor.
+
+62
+00:05:53.440 --> 00:05:58.960
+There we go, get actor location.
+
+63
+00:05:59.000 --> 00:06:01.200
+And click that.
+
+64
+00:06:01.200 --> 00:06:04.720
+So we have our crowd person, we have its location.
+
+65
+00:06:04.720 --> 00:06:14.560
+If we were to hook in the return value into the goal, nothing would effectively happen because we would be saying, hey, where is our crowd person?
+
+66
+00:06:14.560 --> 00:06:20.080
+Where is it? OK, move it to the spot that it already is, which is really boring.
+
+67
+00:06:20.080 --> 00:06:26.000
+So I'm going to move these nodes over to the left because we've got a couple more coming.
+
+68
+00:06:26.000 --> 00:06:30.960
+So next, if I left click drag off of the return value.
+
+69
+00:06:30.960 --> 00:06:39.800
+And type in. Get random reachable point in radius.
+
+70
+00:06:39.800 --> 00:06:44.800
+Notice it's under the navigation category, so it's working with the navmesh.
+
+71
+00:06:44.840 --> 00:06:52.120
+Click on that and make sure you change the radius to be something other than zero centimeters.
+
+72
+00:06:52.120 --> 00:06:56.800
+So I'm going to do three thousand centimeters.
+
+73
+00:06:56.800 --> 00:07:04.680
+We'll try that. And then now we can hook in this new random location into the goal.
+
+74
+00:07:04.680 --> 00:07:10.080
+And let's compile and save that, but it doesn't work quite yet.
+
+75
+00:07:10.080 --> 00:07:14.320
+We need to tell our non-player character to listen to our controller class.
+
+76
+00:07:14.320 --> 00:07:26.520
+They don't talk to each other yet. So if we go to the crowd character class and go up to class defaults up at the top.
+
+77
+00:07:26.520 --> 00:07:37.800
+Under pawn. We want to make sure that the AI controller class is not set to the original AI controller, but is set to crowd controller.
+
+78
+00:07:37.800 --> 00:07:44.680
+So the name that you see here should match whatever you typed for your crowd controller class.
+
+79
+00:07:44.680 --> 00:07:50.760
+OK, so switch that to crowd controller, compile and save.
+
+80
+00:07:50.760 --> 00:08:00.360
+And you'll notice the details panel when you have class defaults looks different than if you are selecting a component or something.
+
+81
+00:08:00.360 --> 00:08:09.600
+So the detail panel is context sensitive. According to whatever you have selected.
+
+82
+00:08:09.600 --> 00:08:19.160
+So let's go back to third person example and let's drag in a couple crowd characters.
+
+83
+00:08:19.160 --> 00:08:24.280
+OK. And then let's hit play.
+
+84
+00:08:24.280 --> 00:08:29.720
+OK, they moved once and then they stopped.
+
+85
+00:08:29.720 --> 00:08:36.520
+So let's view that one more time and maybe we'll add in a couple more characters.
+
+86
+00:08:36.520 --> 00:08:42.520
+Just so it's a little easier to catch.
+
+87
+00:08:42.520 --> 00:08:45.160
+OK, so let's hit play.
+
+88
+00:08:45.160 --> 00:08:48.400
+OK, they moved and stopped.
+
+89
+00:08:48.400 --> 00:08:51.320
+That one went a little further than that one.
+
+90
+00:08:51.320 --> 00:08:56.120
+OK. So I will hit escape.
+
+91
+00:08:56.120 --> 00:09:02.480
+Now, if for some reason this did not work for you, I would say, OK, double check the radius.
+
+92
+00:09:02.480 --> 00:09:08.640
+So if you go to the crowd controller, this radius, make sure that is not set to zero.
+
+93
+00:09:08.640 --> 00:09:23.040
+Make sure in your crowd character class under class defaults that the AI controller class is set to your controller class.
+
+94
+00:09:23.080 --> 00:09:27.600
+And then, you know, make sure you actually do have a nav mesh in the level.
+
+95
+00:09:27.600 --> 00:09:33.840
+And those would be the first three things I would double check if it did not work.
+
+96
+00:09:33.840 --> 00:09:41.000
+So we've got our crowd characters set up and the crowd agents and the controller classes that talk to each other.
+
+97
+00:09:41.000 --> 00:09:47.280
+They work with the nav mesh. And in the next video, we'll make further adjustments to the movement and the speed of the characters.

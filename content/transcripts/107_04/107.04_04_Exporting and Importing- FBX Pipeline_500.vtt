@@ -1,0 +1,345 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:10.320
+So let's talk a little bit about how you go about exporting and importing your FBXs and
+
+2
+00:00:10.320 --> 00:00:12.520
+the best pipelines to follow.
+
+3
+00:00:12.520 --> 00:00:18.000
+So the main rules of the skeleton are essentially the same rules apply to any skeleton setup.
+
+4
+00:00:18.000 --> 00:00:24.800
+You should have one root bone in your mesh or your skeleton, should we say, that connects
+
+5
+00:00:24.800 --> 00:00:25.800
+to everything else.
+
+6
+00:00:25.800 --> 00:00:32.360
+Root goes from zero zero to a central bone, e.g. a hip bone if you're using a humanoid
+
+7
+00:00:32.360 --> 00:00:37.000
+skeleton and this helps with root motion, which we'll talk about a little bit about
+
+8
+00:00:37.000 --> 00:00:38.000
+later.
+
+9
+00:00:38.000 --> 00:00:43.280
+Your blending is based on a fully connected skeleton, so the hierarchy is key here and
+
+10
+00:00:43.280 --> 00:00:48.840
+even if you're not making a humanoid character, even with a vehicle, just making sure you
+
+11
+00:00:48.840 --> 00:00:52.080
+follow a good hierarchy is super important here.
+
+12
+00:00:52.120 --> 00:00:58.360
+When we talk about floating bones in new skeletons, the best practice is when creating your skeletons
+
+13
+00:00:58.360 --> 00:01:04.040
+not to use inline twist bones and instead you should parent the wrist bone to them and
+
+14
+00:01:04.040 --> 00:01:06.080
+then creating a leaf bone.
+
+15
+00:01:06.080 --> 00:01:11.580
+So typically this is used with organic skeletons, but it's useful to keep in mind there.
+
+16
+00:01:11.580 --> 00:01:16.760
+And then also when talking about hierarchy, especially when we're talking about automotive,
+
+17
+00:01:16.760 --> 00:01:18.360
+it is really, really important.
+
+18
+00:01:18.360 --> 00:01:24.040
+So always start with that root bone, usually at the center of gravity, wherever that might
+
+19
+00:01:24.040 --> 00:01:29.520
+be on the automotive vehicle, for example, even if your model's pivot was built around
+
+20
+00:01:29.520 --> 00:01:33.960
+zero zero zero, you want to extend from the root outward.
+
+21
+00:01:33.960 --> 00:01:41.360
+So super important to keep in mind when talking about hierarchies and bones.
+
+22
+00:01:41.360 --> 00:01:47.080
+When we look at a pre-made animation pipeline, you're looking at the model, the rig and the
+
+23
+00:01:47.160 --> 00:01:52.520
+animations inside of your DCC app, and then you import your animations into UE5.
+
+24
+00:01:52.520 --> 00:01:56.320
+So we may end up with the sequencer animation tracks.
+
+25
+00:01:56.320 --> 00:01:59.000
+These are from baked animation assets.
+
+26
+00:01:59.000 --> 00:02:02.920
+They're all blended, weighted, maybe additive animations.
+
+27
+00:02:02.920 --> 00:02:08.840
+And then you can modify the animations either using the sub editor, which is our old method,
+
+28
+00:02:08.840 --> 00:02:15.840
+or edit in sequence option, which you can edit with the FK control rig or baked to control rig.
+
+29
+00:02:15.880 --> 00:02:21.000
+That just gives you a little bit more freedom and flexibility over your approach there.
+
+30
+00:02:21.000 --> 00:02:23.640
+The in-editor animation pipeline.
+
+31
+00:02:23.640 --> 00:02:26.000
+So you model and weigh in your DCC app.
+
+32
+00:02:26.000 --> 00:02:31.120
+So then whenever it comes to rigging and animating, you would actually use Unreal Engine 5 for this.
+
+33
+00:02:31.120 --> 00:02:36.760
+So you can use a control rig and you can build out all your animation controls here.
+
+34
+00:02:36.760 --> 00:02:38.920
+And it's turned on by default in Unreal Engine 5.
+
+35
+00:02:38.920 --> 00:02:43.040
+So if you're using any of the early access versions, just make sure you're in enable
+
+36
+00:02:43.040 --> 00:02:44.240
+control rig.
+
+37
+00:02:44.240 --> 00:02:47.120
+But from this point onwards, it will be on by default now.
+
+38
+00:02:47.120 --> 00:02:51.040
+So you shouldn't need to do anything to get access to control rig.
+
+39
+00:02:51.040 --> 00:02:53.000
+The sequence of key framing.
+
+40
+00:02:53.000 --> 00:02:55.560
+Control rig is animated using the level sequence.
+
+41
+00:02:55.560 --> 00:03:00.240
+And then you build an empty level as a work area or you can animate directly in the scene.
+
+42
+00:03:00.240 --> 00:03:04.960
+So we'll talk about sequence in a little bit more detail in a few slides here to give
+
+43
+00:03:04.960 --> 00:03:09.080
+you a better idea about what sequence there is.
+
+44
+00:03:09.120 --> 00:03:14.400
+When it gets to the mayor export, we can select the items we want to export inside of mayor.
+
+45
+00:03:14.400 --> 00:03:16.920
+So your mesh and your joint chain root.
+
+46
+00:03:16.920 --> 00:03:18.320
+And we can export selected.
+
+47
+00:03:18.320 --> 00:03:21.920
+So just file export selected and select the FBX type.
+
+48
+00:03:21.920 --> 00:03:24.400
+Set the file type, sorry, to FBX.
+
+49
+00:03:24.400 --> 00:03:26.800
+And you want to make sure the animation checkbox is there.
+
+50
+00:03:26.800 --> 00:03:29.220
+You want to include smooth and deforms.
+
+51
+00:03:29.220 --> 00:03:31.480
+Do you want to bake the animation?
+
+52
+00:03:31.480 --> 00:03:36.880
+So using Alembic to bake complex deformation, beyond blend shape and linear skinning.
+
+53
+00:03:36.880 --> 00:03:42.160
+So just a quick note here that a smooth mesh should be disabled and the smoothing groups
+
+54
+00:03:42.160 --> 00:03:43.160
+should be enabled.
+
+55
+00:03:43.160 --> 00:03:49.200
+So there's an image there of the type of properties you want to be setting just to give you an idea.
+
+56
+00:03:49.200 --> 00:03:52.600
+When it comes to 3ds Max, it's pretty much the same.
+
+57
+00:03:52.600 --> 00:03:55.800
+The Max and Mayor exporters have very few differences.
+
+58
+00:03:55.800 --> 00:03:58.000
+So we've included an image anyway.
+
+59
+00:03:58.000 --> 00:04:02.280
+But they're relatively on parity there.
+
+60
+00:04:02.280 --> 00:04:05.400
+And then Blender, we send it to the UE plugin.
+
+61
+00:04:05.400 --> 00:04:10.680
+So Epix created a plugin that allows you to export an FBX, which doesn't even include
+
+62
+00:04:10.680 --> 00:04:13.880
+meshes, but you can also export your rigs there.
+
+63
+00:04:13.880 --> 00:04:18.280
+And Epix playlist goes over installing and using the plugin, which will save you a lot
+
+64
+00:04:18.280 --> 00:04:19.720
+of time in your setup.
+
+65
+00:04:19.720 --> 00:04:26.080
+So to export your FBXs in Blender, you want to go to export and then FBX.
+
+66
+00:04:26.080 --> 00:04:29.920
+You want to make sure the fixed transform tickbox is applied there.
+
+67
+00:04:29.920 --> 00:04:33.840
+And armature, you want to disable add leaf bones.
+
+68
+00:04:33.840 --> 00:04:35.320
+The smoothing groups don't exist.
+
+69
+00:04:35.320 --> 00:04:39.760
+So auto smooth and split, apply modifiers, and then just make sure you uncheck the baked
+
+70
+00:04:39.760 --> 00:04:40.760
+animation.
+
+71
+00:04:40.760 --> 00:04:45.000
+And so you should be OK to go on the Blender from there.
+
+72
+00:04:45.000 --> 00:04:49.280
+So in Blender, forward is minus y.
+
+73
+00:04:49.280 --> 00:04:53.160
+So in Unreal, forward is actually positive x.
+
+74
+00:04:53.160 --> 00:04:58.540
+So you just want to make sure that your exports are set up in the right orientation here.
+
+75
+00:04:58.540 --> 00:05:03.240
+When you export the FBX, you want the default settings for the majority of this.
+
+76
+00:05:03.240 --> 00:05:09.080
+But also Shade and Auto Smooth for smoothing groups is selected there.
+
+77
+00:05:09.080 --> 00:05:11.160
+And you want to keep the scene model scale in mind.
+
+78
+00:05:11.160 --> 00:05:18.000
+So Blender defaults to a one meter per unit scale, whereas UE5 is one centimeter per unit.
+
+79
+00:05:18.000 --> 00:05:19.760
+So you just want to make sure.
+
+80
+00:05:19.760 --> 00:05:23.160
+So you're not trying to do any override scaling inside of Unreal.
+
+81
+00:05:23.160 --> 00:05:28.460
+You just want to make sure the units are set up correctly inside of Blender.
+
+82
+00:05:28.460 --> 00:05:32.280
+When we're exporting to Unreal, you need to provide the project's export settings only
+
+83
+00:05:32.320 --> 00:05:33.320
+once.
+
+84
+00:05:33.320 --> 00:05:37.000
+And it's not necessary to set the project again for subsequent export operations.
+
+85
+00:05:37.000 --> 00:05:40.960
+So enjoy exporting all your FBX animations.
+
+86
+00:05:40.960 --> 00:05:42.200
+And we'll move on to the next section.

@@ -1,0 +1,353 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:11.120
+Okay, so before we hop into actually setting up our natural light and scene, I wanted to
+
+2
+00:00:11.120 --> 00:00:16.720
+give an overview of Lumen and essentially take a look at and highlight some of the features
+
+3
+00:00:16.720 --> 00:00:18.400
+that it comes with.
+
+4
+00:00:18.400 --> 00:00:24.920
+So Lumen is a default lighting system inside of Unreal Engine 5, which is a fully dynamic
+
+5
+00:00:24.920 --> 00:00:28.160
+global illumination system, like I mentioned before.
+
+6
+00:00:28.160 --> 00:00:33.960
+It gives us performance reflections and they're actually supported in clear coat materials,
+
+7
+00:00:33.960 --> 00:00:36.600
+which are important for car paint.
+
+8
+00:00:36.600 --> 00:00:40.480
+It's compatible with large open worlds, and as I said before, it's all real time, so there's
+
+9
+00:00:40.480 --> 00:00:44.320
+no light baking, everything happening and streaming on the GPU.
+
+10
+00:00:44.320 --> 00:00:48.200
+It works really well on both outdoor and indoor scenes.
+
+11
+00:00:48.200 --> 00:00:51.640
+And one thing that's actually really nice is that emissive materials can contribute
+
+12
+00:00:51.640 --> 00:00:54.520
+to lighting the scene itself.
+
+13
+00:00:54.560 --> 00:00:58.920
+One of the limitations of Lumen is that the global illumination and sky shadowing will
+
+14
+00:00:58.920 --> 00:01:03.520
+give you lower quality with translucent materials and volumetric fog.
+
+15
+00:01:03.520 --> 00:01:08.800
+If you use world position offset in a material to displace some verts on a mesh, it can cause
+
+16
+00:01:08.800 --> 00:01:11.000
+artifacts.
+
+17
+00:01:11.000 --> 00:01:14.240
+There's no support for lighting channels.
+
+18
+00:01:14.240 --> 00:01:17.760
+It gives you poor mirror-like reflections, so that's something where you'd want to turn
+
+19
+00:01:17.760 --> 00:01:23.400
+on hardware ray tracing specifically for, which we'll take a look at.
+
+20
+00:01:23.400 --> 00:01:28.120
+This deformation in general with hardware ray tracing will give you high cost with skeletal
+
+21
+00:01:28.120 --> 00:01:37.000
+mesh, so anything like skeletal mesh animations, it'll have a high cost rendering those out.
+
+22
+00:01:37.000 --> 00:01:41.280
+And it's really only supported on high end PCs and next-gen consoles and not supported
+
+23
+00:01:41.280 --> 00:01:44.600
+on mobile or VR.
+
+24
+00:01:44.600 --> 00:01:48.320
+So that's something to keep in mind if you wanted to move your project to Lumen-based
+
+25
+00:01:48.320 --> 00:01:52.960
+scene, stuff to keep in mind in terms of the limitations.
+
+26
+00:01:53.000 --> 00:01:58.320
+Lumen will be enabled by default, but if for whatever reason you're changing from an old
+
+27
+00:01:58.320 --> 00:02:04.880
+project that wasn't using Lumen or for whatever reason it wasn't set up as default by Unreal
+
+28
+00:02:04.880 --> 00:02:09.360
+Engine, we're going to take a look at how we actually set this up.
+
+29
+00:02:09.360 --> 00:02:13.760
+So once again, hop back into the project and see how we'd enable these settings.
+
+30
+00:02:13.760 --> 00:02:18.840
+So to enable Lumen, all you'd have to do is go to Edit Project Settings.
+
+31
+00:02:18.840 --> 00:02:22.000
+Inside of this window, I'm just going to maximize it.
+
+32
+00:02:22.000 --> 00:02:27.400
+We're going to go to the Render tab inside of Engine.
+
+33
+00:02:27.400 --> 00:02:30.640
+I'm going to scroll down to Global Illumination.
+
+34
+00:02:30.640 --> 00:02:34.520
+So the Global Illumination setting needs to be set to Lumen if you want to use it, but
+
+35
+00:02:34.520 --> 00:02:39.400
+here's where if you wanted to use any other system, like standalone ray tracing or anything
+
+36
+00:02:39.400 --> 00:02:43.760
+like that, you could use that.
+
+37
+00:02:43.760 --> 00:02:49.080
+It's important to note as well that the reflection method in this case is set to Lumen.
+
+38
+00:02:49.080 --> 00:02:52.040
+And one thing that you want to do to make sure that Lumen works correctly is make sure
+
+39
+00:02:52.040 --> 00:02:57.240
+that Generate Mesh Distance Fields is turned off.
+
+40
+00:02:57.240 --> 00:03:01.600
+Now some additional settings that might give you some better results.
+
+41
+00:03:01.600 --> 00:03:06.760
+Within Lumen, you'll want to use hardware ray tracing when available.
+
+42
+00:03:06.760 --> 00:03:13.000
+So this is important to note that if you have a high-end GPU like an RTX card, this is somewhere
+
+43
+00:03:13.240 --> 00:03:14.240
+where you can use it.
+
+44
+00:03:14.240 --> 00:03:17.520
+If not, it's not worth digging this.
+
+45
+00:03:17.520 --> 00:03:21.720
+And inside of the hardware ray tracing, make sure that Support Hardware Ray Tracing is
+
+46
+00:03:21.720 --> 00:03:26.400
+actually ticked so that you get all the benefits from that as well.
+
+47
+00:03:26.400 --> 00:03:31.680
+Now importantly, you can change the behavior of all these things using post-process volume
+
+48
+00:03:31.680 --> 00:03:34.900
+so you don't have to change them project-wide every time.
+
+49
+00:03:34.900 --> 00:03:38.760
+So in order to do that, all we have to do is create a post-process volume.
+
+50
+00:03:38.760 --> 00:03:40.720
+So I'm going to go to the Place Actor tab here.
+
+51
+00:03:41.440 --> 00:03:46.000
+I'm going to search for Post, and I'll drag in a post-process volume.
+
+52
+00:03:46.000 --> 00:03:49.800
+Now in order, we already have one here, so I'm just going to go ahead and quickly delete
+
+53
+00:03:49.800 --> 00:03:50.800
+that.
+
+54
+00:03:50.800 --> 00:03:54.840
+And actually, that's actually changing some of our lighting settings here.
+
+55
+00:03:54.840 --> 00:03:59.760
+So let's go ahead and just use this one.
+
+56
+00:03:59.760 --> 00:04:03.400
+And there's a couple of things that you need to know to make sure that this post-process
+
+57
+00:04:03.400 --> 00:04:08.700
+volume actually affects your entire scene and not just the volume that it's represented.
+
+58
+00:04:08.700 --> 00:04:12.020
+So I'm going to go ahead and search here for Unbound.
+
+59
+00:04:12.020 --> 00:04:15.260
+And you can see here there's a tick box for infinite extent.
+
+60
+00:04:15.260 --> 00:04:20.140
+So make sure that that's ticked to ensure that that post-process becomes a global post-process
+
+61
+00:04:20.140 --> 00:04:22.980
+and affects the entire scene.
+
+62
+00:04:22.980 --> 00:04:28.620
+So in the case of the edits that we want to do for Lumen, or if you wanted to change any
+
+63
+00:04:28.620 --> 00:04:32.300
+of the settings, you want to go to the Global Illumination tab here.
+
+64
+00:04:32.300 --> 00:04:37.860
+And if you wanted to change it for other reasons, you could change it here.
+
+65
+00:04:37.860 --> 00:04:43.580
+And if you want to change the Insider Reflections, you can change the method as well to Lumen.
+
+66
+00:04:43.580 --> 00:04:46.580
+Okay.
+
+67
+00:04:46.580 --> 00:04:53.980
+And one last thing is that if you want to improve some of the quality of your scene,
+
+68
+00:04:53.980 --> 00:04:59.220
+and we're going to be talking quite minimized gains here as we go, but if you wanted to
+
+69
+00:04:59.220 --> 00:05:04.820
+update the final gather quality, if you want to bring this number up, it will reduce the
+
+70
+00:05:04.820 --> 00:05:07.940
+noise that you see in the scene, but it will greatly increase the cost.
+
+71
+00:05:07.940 --> 00:05:13.660
+So if you want to set this to 2, make sure that maybe the graininess that you might see
+
+72
+00:05:13.660 --> 00:05:18.300
+if you get really close gets fixed.
+
+73
+00:05:18.300 --> 00:05:27.020
+And really, I doubt it'll be easy to appreciate inside of the video that I'm making here.
+
+74
+00:05:27.020 --> 00:05:33.940
+But if you bring this value up, you'll see better quality and reduction of noise.
+
+75
+00:05:34.020 --> 00:05:39.340
+But again, just make sure you understand that this will significantly increase the cost
+
+76
+00:05:39.340 --> 00:05:47.100
+of rendering the scene and thus give you better, or sorry, poorer frame rates.
+
+77
+00:05:47.100 --> 00:05:51.660
+One last thing to note is that this is going to be mostly like the look of how Lumen actually
+
+78
+00:05:51.660 --> 00:05:52.660
+works.
+
+79
+00:05:52.660 --> 00:05:57.100
+It's going to be dictated by both the quality of the materials, the rest of the scene, and
+
+80
+00:05:57.100 --> 00:05:58.780
+also your exposure.
+
+81
+00:05:58.780 --> 00:06:04.660
+So if you, for example, have different exposure settings, you'll see Lumen adjust to that.
+
+82
+00:06:04.660 --> 00:06:11.900
+So just keep in mind that your exposure settings are going to affect the way the lighting scene
+
+83
+00:06:11.900 --> 00:06:12.900
+works as a whole.
+
+84
+00:06:12.900 --> 00:06:16.580
+So by default, I'm just going to tick game settings so it adjusts for me.
+
+85
+00:06:16.580 --> 00:06:19.340
+But just something to keep in mind once again.
+
+86
+00:06:19.340 --> 00:06:22.140
+Okay, I think we've covered everything we need to cover for Lumen.
+
+87
+00:06:22.140 --> 00:06:26.540
+I think we're ready to actually start setting up a natural lighting scene.
+
+88
+00:06:26.540 --> 00:06:27.540
+So let's go ahead and do that.

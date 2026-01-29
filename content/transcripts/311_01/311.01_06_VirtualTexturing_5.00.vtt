@@ -1,0 +1,369 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.280
+Let's now take a look at virtual texturing.
+
+2
+00:00:04.280 --> 00:00:07.800
+And so let's first talk about what virtual texturing is.
+
+3
+00:00:07.800 --> 00:00:14.580
+So you can see how we have this option to enable virtual texture support, which you'll
+
+4
+00:00:14.580 --> 00:00:21.880
+sometimes see it used as RVT, which is runtime virtual texturing and streaming virtual texturing,
+
+5
+00:00:21.880 --> 00:00:23.320
+which is SVT.
+
+6
+00:00:23.320 --> 00:00:29.440
+So the runtime virtual texturing provides an efficient way to render complex procedure
+
+7
+00:00:29.440 --> 00:00:31.200
+generated or layered material.
+
+8
+00:00:31.200 --> 00:00:37.240
+So it makes runtime virtual texturing ideal for rendering complex materials and landscapes.
+
+9
+00:00:37.240 --> 00:00:43.080
+And it enables improved rendering performance and workflows for landscape splines, which
+
+10
+00:00:43.080 --> 00:00:47.720
+we'll cover in a little while here, decals for meshes and materials, along with general
+
+11
+00:00:47.720 --> 00:00:50.240
+landscape and object blending.
+
+12
+00:00:50.240 --> 00:00:55.800
+So the streaming virtual texturing reduces texture memory overhead when using very large
+
+13
+00:00:56.200 --> 00:01:04.880
+sizes, which includes support for virtual texturing lightmaps and UDIM, which is U-Dimension.
+
+14
+00:01:04.880 --> 00:01:09.680
+The streaming virtual textures is an alternate way to stream textures from disk compared
+
+15
+00:01:09.680 --> 00:01:13.240
+to existing MIP-based texture streaming.
+
+16
+00:01:13.240 --> 00:01:18.760
+And it follows what we'll do is we'll show how we can follow using runtime virtual texturing.
+
+17
+00:01:19.600 --> 00:01:26.200
+So if we enable the virtual texture support here by going to the rendering tab in your
+
+18
+00:01:26.200 --> 00:01:32.200
+project settings and go to virtual texturing and then click the enable virtual texturing
+
+19
+00:01:32.200 --> 00:01:36.720
+option, then we'll be able to make a new runtime virtual texture.
+
+20
+00:01:36.720 --> 00:01:41.600
+So once we've enabled that option, we can now go to a existing material that we want
+
+21
+00:01:41.600 --> 00:01:43.360
+to use virtual texturing.
+
+22
+00:01:43.360 --> 00:01:48.880
+So for this example, we've opened up the mat underscore virtual texturing underscore
+
+23
+00:01:48.880 --> 00:01:50.440
+start material.
+
+24
+00:01:50.440 --> 00:01:54.760
+So that's mat underscore virtual texturing underscore start material.
+
+25
+00:01:54.760 --> 00:02:00.680
+And now we can add a break material attributes node, which we discussed previously, and a
+
+26
+00:02:00.680 --> 00:02:05.000
+virtual texture feature switch, which you can see here as well.
+
+27
+00:02:05.000 --> 00:02:09.600
+So you want to connect the output of the base color layer blend node to the base color input
+
+28
+00:02:09.600 --> 00:02:11.960
+of the break material attribute nodes.
+
+29
+00:02:11.960 --> 00:02:16.160
+And then we also want to connect the normal, the layer blend to the normal input of the
+
+30
+00:02:16.160 --> 00:02:23.440
+break material attribute, and then also connect a scalar input with a value of 0.5 to the
+
+31
+00:02:23.440 --> 00:02:28.400
+roughness, which you can see here into the break material attributes node as well.
+
+32
+00:02:28.400 --> 00:02:34.000
+Then we can add a runtime virtual texture output node to the graph and then connect
+
+33
+00:02:34.000 --> 00:02:38.320
+the output of the base color to the layer blend to the base color input of the runtime
+
+34
+00:02:38.360 --> 00:02:43.640
+virtual texture output node, and then connect the output of the normal layer blend to the
+
+35
+00:02:43.640 --> 00:02:47.480
+normal input of the runtime virtual texture output node.
+
+36
+00:02:47.480 --> 00:02:53.400
+Then again, connect the 0.5 to the roughness input, add a constants node with a value of
+
+37
+00:02:53.400 --> 00:02:58.720
+1 and connect that to the opacity input, and then add a constants node with a value of
+
+38
+00:02:58.720 --> 00:03:04.320
+0 and connect that to the specular output.
+
+39
+00:03:04.320 --> 00:03:09.920
+Now we want to add a runtime virtual texture sample node and make a material attributes
+
+40
+00:03:09.920 --> 00:03:15.600
+node to the graph, connect the output on the runtime virtual texture sample to the respective
+
+41
+00:03:15.600 --> 00:03:21.160
+inputs on the make material attributes nodes, then connect the output of the make material
+
+42
+00:03:21.160 --> 00:03:26.520
+attributes node to the yes input of the virtual feature switch node.
+
+43
+00:03:26.520 --> 00:03:32.720
+Then when completed, your material should look like this image here.
+
+44
+00:03:32.720 --> 00:03:38.240
+Now we can add the runtime virtual texture volume to the level and then with the runtime
+
+45
+00:03:38.240 --> 00:03:43.600
+virtual texture volume selected, go to the transformation from bound section and set
+
+46
+00:03:43.600 --> 00:03:46.960
+the source actor to the landscape that is placed in the level.
+
+47
+00:03:46.960 --> 00:03:53.920
+So you just want to make sure you assign that landscape there and then press the copy rotation
+
+48
+00:03:53.920 --> 00:03:58.180
+and copy bounds buttons to make the volume as big as the landscape actor.
+
+49
+00:03:58.180 --> 00:04:03.620
+And then under the virtual texture input, select the virtual texture that was created
+
+50
+00:04:03.620 --> 00:04:04.620
+in our first step.
+
+51
+00:04:04.620 --> 00:04:07.740
+So just make sure you assign that virtual texture there.
+
+52
+00:04:07.740 --> 00:04:13.380
+Now select the landscape actor in the level and then in the details panel of the landscape,
+
+53
+00:04:13.380 --> 00:04:19.580
+go to the virtual texture section, press the plus icon and add a new input to the array
+
+54
+00:04:19.580 --> 00:04:24.420
+and then input the virtual texture that was created in the first step.
+
+55
+00:04:24.420 --> 00:04:28.260
+And then once all that has been completed, you should now see landscape material being
+
+56
+00:04:28.260 --> 00:04:30.140
+rendered in the viewport.
+
+57
+00:04:30.140 --> 00:04:34.540
+So you can see here the left hand side of the image shows that the landscape will look
+
+58
+00:04:34.540 --> 00:04:38.780
+like using non-virtual texture and then on the right hand side, we've got an image showing
+
+59
+00:04:38.780 --> 00:04:41.620
+what the landscape looks like using the virtual texture.
+
+60
+00:04:41.620 --> 00:04:46.460
+So if your landscape has black parts in it after the virtual texture, just try rebuilding
+
+61
+00:04:46.460 --> 00:04:50.900
+the landscape material, saving everything and then it should function correctly for
+
+62
+00:04:50.900 --> 00:04:51.900
+you.
+
+63
+00:04:51.900 --> 00:04:56.340
+We can also adjust the size of each of the tiles to make up the virtual texture.
+
+64
+00:04:56.340 --> 00:05:00.460
+So this can help if the textual density of the landscape is low.
+
+65
+00:05:00.460 --> 00:05:04.580
+To adjust this, all you need to do is open up the virtual texture and adjust the size
+
+66
+00:05:04.580 --> 00:05:10.820
+of the virtual texture in the tiles and then also the size of each virtual texture tile.
+
+67
+00:05:10.820 --> 00:05:15.980
+So keep in mind that when adjusting the virtual texture, the size has to be a power of two.
+
+68
+00:05:15.980 --> 00:05:21.340
+If in doubt, the tool will give you advice on what settings to use here.
+
+69
+00:05:21.340 --> 00:05:24.840
+And then we can also use virtual texturing with landscape splines.
+
+70
+00:05:24.840 --> 00:05:30.940
+So this is what it will look like when applied to a landscape spline.
+
+71
+00:05:30.940 --> 00:05:32.980
+Then you can bake it down into a landscape.
+
+72
+00:05:32.980 --> 00:05:36.620
+To make this work, you first have to add some splines to your landscape.
+
+73
+00:05:36.620 --> 00:05:42.140
+So you can do this by holding down control and left clicking on the landscape to create
+
+74
+00:05:42.140 --> 00:05:43.980
+a spline.
+
+75
+00:05:43.980 --> 00:05:50.780
+And then in the details panel, under the landscape spline, press the segments button to select
+
+76
+00:05:50.860 --> 00:05:52.540
+all the landscape splines.
+
+77
+00:05:52.540 --> 00:05:56.300
+And then if done correctly, you should now see a new option in the details panel called
+
+78
+00:05:56.300 --> 00:05:59.260
+landscape spline mesh.
+
+79
+00:05:59.260 --> 00:06:04.900
+If your landscape spline mesh is selected, press the plus icon to add the new static
+
+80
+00:06:04.900 --> 00:06:06.500
+mesh to the array.
+
+81
+00:06:06.500 --> 00:06:12.860
+And so for the mesh under the way using SM underscore street as a static mesh and then
+
+82
+00:06:12.860 --> 00:06:18.460
+uncheck center horizontally and change the forward axis to Y.
+
+83
+00:06:18.460 --> 00:06:21.660
+Finally, make sure to uncheck cast shadow.
+
+84
+00:06:21.660 --> 00:06:25.580
+And so the shadowing was done for more of an aesthetic reason.
+
+85
+00:06:25.580 --> 00:06:29.180
+Doesn't necessarily need to be done for this to work.
+
+86
+00:06:29.180 --> 00:06:35.500
+With the M underscore street material open, which is what was assigned to static mesh,
+
+87
+00:06:35.500 --> 00:06:41.140
+go to the material section and then the material now needs to be set up like we did the landscape.
+
+88
+00:06:41.140 --> 00:06:48.260
+So first make the material use material attributes, then bring the runtime virtual texturing output
+
+89
+00:06:48.420 --> 00:06:53.060
+and sample nodes, connect them like you can see in this image here.
+
+90
+00:06:53.060 --> 00:06:57.580
+And then you will end up with a result that looks something like this.
+
+91
+00:06:57.580 --> 00:07:03.340
+So you can see how we've got the normal spline on the left hand side and then also the virtual
+
+92
+00:07:03.340 --> 00:07:05.860
+texturing spline on the right hand side.

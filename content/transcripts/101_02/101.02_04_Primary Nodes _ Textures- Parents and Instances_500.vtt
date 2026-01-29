@@ -1,0 +1,369 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:09.720
+Next up, let's go over the primary nodes and textures you'll be using in your projects.
+
+2
+00:00:09.720 --> 00:00:15.840
+So we'll talk about the primary PBR inputs here, the base color or Albedo maps, metallic
+
+3
+00:00:15.840 --> 00:00:20.520
+roughness and specular, and also talk about the textures, what Unreal supports and what
+
+4
+00:00:20.520 --> 00:00:24.440
+the kind of best workflow is for using textures inside of Unreal.
+
+5
+00:00:24.440 --> 00:00:28.640
+We'll talk about texture pyramids or MIP maps as they're referred to, and then import in
+
+6
+00:00:28.640 --> 00:00:32.840
+your textures how to get your content into Unreal.
+
+7
+00:00:32.840 --> 00:00:37.640
+So the primary PBR inputs are the base color, and we'll go through creating a material
+
+8
+00:00:37.640 --> 00:00:41.880
+at the end, so you don't need to worry specifically if you're unfamiliar with this interface,
+
+9
+00:00:41.880 --> 00:00:45.440
+but essentially we've got a base color going in, which is just this blue color, and then
+
+10
+00:00:45.440 --> 00:00:51.240
+we can set some metallic specular or roughness values depending on how we want this material
+
+11
+00:00:51.240 --> 00:00:52.240
+to look.
+
+12
+00:00:52.240 --> 00:00:54.960
+So this is all handled on the editor side.
+
+13
+00:00:54.960 --> 00:01:00.040
+So the base color or Albedo map, as we refer to it, is a flat color without specularity
+
+14
+00:01:00.040 --> 00:01:01.140
+or shading.
+
+15
+00:01:01.140 --> 00:01:05.360
+So roughness is key to define the look of a material, and it's selling the real world
+
+16
+00:01:05.360 --> 00:01:06.360
+equivalent.
+
+17
+00:01:06.360 --> 00:01:11.880
+So the Albedo map is a linear RGB, which is a vector 3, which is actually what we saw
+
+18
+00:01:11.880 --> 00:01:12.880
+in that previous slide.
+
+19
+00:01:12.880 --> 00:01:15.600
+So this is a vector 3, so it has three numerical values.
+
+20
+00:01:15.600 --> 00:01:21.200
+So that's a vector 3 going in there, and the values between 0 and 1.
+
+21
+00:01:21.240 --> 00:01:27.120
+So we want to avoid any pure black in Albedo, and we want to avoid any pure white, as they
+
+22
+00:01:27.120 --> 00:01:29.800
+don't really exist in nature.
+
+23
+00:01:29.800 --> 00:01:35.720
+So to get the metallic feel, essentially metallic is a grayscale value that ranges from 0 to
+
+24
+00:01:35.720 --> 00:01:38.720
+1, and really it's either 1 or 0.
+
+25
+00:01:38.720 --> 00:01:40.160
+It's either on or off.
+
+26
+00:01:40.160 --> 00:01:44.960
+You don't really use any mid-grounds here, but when on, which is number 1, it yields
+
+27
+00:01:44.960 --> 00:01:46.840
+100% specular reflection.
+
+28
+00:01:47.480 --> 00:01:55.000
+So you can see the sliding scale of 0 to 1 there, 1 being the most specular and 0 being
+
+29
+00:01:55.000 --> 00:01:58.880
+the most absorbent of the reflection.
+
+30
+00:01:58.880 --> 00:02:03.760
+And then the roughness map is a grayscale value again that ranges from 0 to 1, but the
+
+31
+00:02:03.760 --> 00:02:10.040
+ranges from smooth is like a mirror-like surface, which is 0, which you can see on the left
+
+32
+00:02:10.040 --> 00:02:14.200
+here, to a rougher matte surface, which is on the right side there.
+
+33
+00:02:14.560 --> 00:02:19.880
+So unlike with metallic, this really can be dialed into whatever value you'd like.
+
+34
+00:02:19.880 --> 00:02:26.020
+As long as that value is between 0 and 1, you can say 0.35, for example, and really
+
+35
+00:02:26.020 --> 00:02:30.360
+dial in that roughness for whatever you're trying to achieve there.
+
+36
+00:02:30.360 --> 00:02:36.360
+So specular then is a grayscale value that ranges from 0 to 1, and it's a good rule of
+
+37
+00:02:36.360 --> 00:02:41.080
+thumb is to set the specular value to 0.5 and fine-tune it from the roughness value
+
+38
+00:02:41.080 --> 00:02:42.080
+instead.
+
+39
+00:02:42.960 --> 00:02:46.960
+Have it on by default and set it to 0.5 so no node connection is needed for it.
+
+40
+00:02:46.960 --> 00:02:52.360
+And in some cases, you may decide to edit the roughness value or use a bitmap to that
+
+41
+00:02:52.360 --> 00:02:53.360
+effect.
+
+42
+00:02:53.360 --> 00:02:58.920
+So you can achieve this by using stylized looks over the top of glossiness.
+
+43
+00:02:58.920 --> 00:03:03.440
+It's not always needed when using a roughness value, but it's worth considering the specularity
+
+44
+00:03:03.440 --> 00:03:08.040
+in balance with the other inputs of your material there.
+
+45
+00:03:09.000 --> 00:03:11.000
+And so Unreal Engine supported formats.
+
+46
+00:03:11.000 --> 00:03:16.000
+In an uncompressed file format, Unreal does support BMPs, Targets, PSDs.
+
+47
+00:03:16.000 --> 00:03:21.000
+It's worth noting that depending on the export of the Targets, if you're setting a 32-bit
+
+48
+00:03:21.000 --> 00:03:25.040
+there, you can get an alpha out of that Targets.
+
+49
+00:03:25.040 --> 00:03:31.680
+And then compressed versions, you can have a PNG, JPEG, DDS, and HDR.
+
+50
+00:03:31.680 --> 00:03:36.720
+For optimization purposes, it's best to work with PNG due to its lightweight file size
+
+51
+00:03:36.720 --> 00:03:39.840
+and the ability to have transparency info when needed.
+
+52
+00:03:39.840 --> 00:03:45.160
+But it's worth considering the different formats depending on the project's requirements there.
+
+53
+00:03:45.160 --> 00:03:50.740
+And so when looking at guidelines, textures should always be a power of 2.
+
+54
+00:03:50.740 --> 00:03:59.040
+So when we import our textures, maybe it's 16 by 16 or 8192 by 8192, and any variation,
+
+55
+00:03:59.040 --> 00:04:02.360
+you know, 64 by 64, et cetera.
+
+56
+00:04:02.360 --> 00:04:04.680
+But the textures don't have to be square.
+
+57
+00:04:04.680 --> 00:04:07.400
+It's mainly that they're a power of 2 that's the important point.
+
+58
+00:04:07.400 --> 00:04:10.520
+So if you wanted 16 by 128, that's fine.
+
+59
+00:04:10.520 --> 00:04:15.720
+So they're all acceptable examples as long as they're power of 2.
+
+60
+00:04:15.720 --> 00:04:18.600
+And textures can affect the streaming and memory management.
+
+61
+00:04:18.600 --> 00:04:21.760
+So it's important to keep this in mind, especially on that previous slide where we were talking
+
+62
+00:04:21.760 --> 00:04:23.800
+about the different file formats.
+
+63
+00:04:23.800 --> 00:04:29.120
+Making sure you're considering the memory management of what the project's output is.
+
+64
+00:04:29.120 --> 00:04:33.160
+That's super useful, especially at the start of the project when trying to define your
+
+65
+00:04:33.160 --> 00:04:34.160
+pipeline there.
+
+66
+00:04:34.840 --> 00:04:38.360
+And high frequency textures can cause anti-aliasing and artifacts.
+
+67
+00:04:38.360 --> 00:04:44.080
+So a couple of examples of the different import settings used for maybe streamed or non-streamed
+
+68
+00:04:44.080 --> 00:04:48.240
+textures and also how to scale the number of mipmaps, for example.
+
+69
+00:04:48.240 --> 00:04:52.960
+So whether you have alpha channels or not, the size of the textures, the method that
+
+70
+00:04:52.960 --> 00:05:00.920
+they're imported at, they can all be dialed in for the project's requirements essentially.
+
+71
+00:05:01.000 --> 00:05:06.000
+And on the texture pyramid side, which is the mipmaps, mipmaps are another custom setting.
+
+72
+00:05:06.000 --> 00:05:12.200
+So we can set these, when you use the textures inside the material editor, you can see that
+
+73
+00:05:12.200 --> 00:05:17.640
+you can set these values on the material editor in the expression sample.
+
+74
+00:05:17.640 --> 00:05:24.160
+And then you can also double click any textures and set the texture group from here as well.
+
+75
+00:05:24.160 --> 00:05:28.640
+So useful to keep in mind when working with texture pyramids.
+
+76
+00:05:28.640 --> 00:05:34.600
+And then when you're importing your textures, so you can see from the previous slide, we
+
+77
+00:05:34.600 --> 00:05:36.080
+have this drop down here.
+
+78
+00:05:36.080 --> 00:05:38.840
+That's what we're referring to on the mipmap side.
+
+79
+00:05:38.840 --> 00:05:44.520
+But then also when we import the textures, you can either use the import button in the
+
+80
+00:05:44.520 --> 00:05:49.520
+content browser or you can go to file, import, or you can simply just drag and drop the file
+
+81
+00:05:49.520 --> 00:05:54.000
+from the Windows Explorer into the content browser and that will import it just fine.
+
+82
+00:05:54.000 --> 00:05:55.760
+All textures are converted to UAssets.
+
+83
+00:05:55.760 --> 00:06:00.960
+So when we're looking at Unreal file formats, even if it was a PNG that you're importing,
+
+84
+00:06:00.960 --> 00:06:04.480
+the PNG then gets turned into a UAsset on the import.
+
+85
+00:06:04.480 --> 00:06:08.720
+You can open a texture using this texture editor that you can see on the right hand
+
+86
+00:06:08.720 --> 00:06:12.600
+side here with a double click of that texture that you've just imported.
+
+87
+00:06:12.600 --> 00:06:16.640
+And so here we can change any compression settings, anything we need to.
+
+88
+00:06:16.640 --> 00:06:22.120
+There's a lot of just scalability optionality here that you can dial in for your relevant
+
+89
+00:06:22.480 --> 00:06:27.920
+projects and you can even import at higher resolution and downscale it inside the engine
+
+90
+00:06:27.920 --> 00:06:28.920
+if you need to.
+
+91
+00:06:28.920 --> 00:06:34.600
+So we can also enable or disable linear color space here, which is the sRGB as well.
+
+92
+00:06:34.600 --> 00:06:38.400
+So all these things hopefully useful to keep in mind when starting your projects.

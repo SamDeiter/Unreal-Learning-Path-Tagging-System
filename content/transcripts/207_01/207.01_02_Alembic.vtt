@@ -1,0 +1,257 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.000
+So what is an Alembic cache or an Alembic file?
+
+2
+00:00:04.000 --> 00:00:07.000
+It's a baked geometric animation.
+
+3
+00:00:07.000 --> 00:00:16.000
+So that's basically saying that it's a way to bake down or to store the information of your rigged mesh to the geometry itself and import just the geometry, not the skeleton.
+
+4
+00:00:16.000 --> 00:00:22.000
+Now, something important to note is that Unreal only supports meshes that have faces with three or four sides.
+
+5
+00:00:22.000 --> 00:00:29.000
+So if you're getting errors when you're importing, it's worth checking your mesh just to ensure that it has no faces with more than four sides.
+
+6
+00:00:29.000 --> 00:00:33.000
+The support for Alembic files comes with a plugin built into UE5.
+
+7
+00:00:33.000 --> 00:00:39.000
+So this should come already loaded, but if not, just search for Alembic inside your plugin window.
+
+8
+00:00:39.000 --> 00:00:43.000
+Just tick the box to activate it and you'll get access to the import options.
+
+9
+00:00:43.000 --> 00:00:48.000
+Now, you can also bring in multiple assets with an Alembic file, not just the animation itself.
+
+10
+00:00:48.000 --> 00:00:53.000
+And you can combine or you can merge these on import depending on how you want to set up your scene.
+
+11
+00:00:53.000 --> 00:00:59.000
+And the main use for an Alembic file or an Alembic animation would be for use in cinematics.
+
+12
+00:00:59.000 --> 00:01:07.000
+So when you want a pre-baked animation that you can get a great video render with and you don't need any procedural elements to the character's movement or the skeleton,
+
+13
+00:01:07.000 --> 00:01:10.000
+they can be quite computationally expensive.
+
+14
+00:01:10.000 --> 00:01:13.000
+So they're not recommended for use with mobile devices.
+
+15
+00:01:13.000 --> 00:01:17.000
+And they work with most of your external DCC programs that have the ability to export an Alembic cache.
+
+16
+00:01:17.000 --> 00:01:21.000
+So they work with Mair, 3ds Max, Blender, etc.
+
+17
+00:01:21.000 --> 00:01:25.000
+When exporting an Alembic file, there are a couple of options that we just wanted to highlight.
+
+18
+00:01:25.000 --> 00:01:30.000
+So if we take a look at Mair's workflow here, you have two different export options.
+
+19
+00:01:30.000 --> 00:01:35.000
+So you can choose to export everything in the scene, including any baked Alembic caches you might have,
+
+20
+00:01:35.000 --> 00:01:39.000
+along with any of the meshes that you've got in the scene and export everything all as one file.
+
+21
+00:01:39.000 --> 00:01:45.000
+Or you can just select a specific mesh or a group of meshes and use the export selection method here.
+
+22
+00:01:45.000 --> 00:01:48.000
+Now, if you select the option box on either of these methods,
+
+23
+00:01:48.000 --> 00:01:51.000
+you'll get a handful of settings that come up and you can change for the export.
+
+24
+00:01:51.000 --> 00:01:57.000
+But again, there's just a couple that we wanted to highlight that we thought might be useful for importing into Unreal.
+
+25
+00:01:57.000 --> 00:02:02.000
+Now, you can choose your frame range, which is to say you can set when the animation starts and ends.
+
+26
+00:02:02.000 --> 00:02:07.000
+So you can get the exact section that you want, or you can choose to export the whole animation itself.
+
+27
+00:02:07.000 --> 00:02:09.000
+There's also the UV write option.
+
+28
+00:02:09.000 --> 00:02:15.000
+So for material purposes, you want to make sure that you check this option so that it saves the correct UVs you've made
+
+29
+00:02:15.000 --> 00:02:19.000
+and allows you to apply materials correctly in the engine later on.
+
+30
+00:02:19.000 --> 00:02:22.000
+And there's also the write face sets option.
+
+31
+00:02:22.000 --> 00:02:30.000
+So you want to make sure that with your meshes that you have, you apply the materials to them at the face value in your DCC.
+
+32
+00:02:30.000 --> 00:02:35.000
+So that is to say, go through and select all of the individual faces of the mesh or the meshes
+
+33
+00:02:35.000 --> 00:02:41.000
+and apply the materials to those faces directly so that Unreal can bring them in as elements on your mesh
+
+34
+00:02:41.000 --> 00:02:43.000
+and apply the materials correctly for you.
+
+35
+00:02:43.000 --> 00:02:49.000
+Now, this is specifically for use when importing as a geometry cache, which we'll cover in a moment.
+
+36
+00:02:49.000 --> 00:02:55.000
+When it comes to importing your Alembic file into the engine, you can define how you want to import it in a few different ways.
+
+37
+00:02:55.000 --> 00:03:04.000
+So if you choose to import your Alembic cache as a static mesh, what you'll get is one static mesh per frame of animation that you have
+
+38
+00:03:04.000 --> 00:03:08.000
+based on the frame start and end values under the sampling heading just here.
+
+39
+00:03:09.000 --> 00:03:17.000
+Now, if you exported several meshes within your Alembic file, you can tick the merge meshes option, which will create one single static mesh.
+
+40
+00:03:17.000 --> 00:03:27.000
+Now, if you disable this option, each mesh within that Alembic file will be imported into the engine as an individual static mesh itself for every frame that you have.
+
+41
+00:03:27.000 --> 00:03:36.000
+Now, bear in mind, if you do have multiple meshes and you choose to merge them, the origin or the pivot point of all the meshes will snap to world zero as they merge.
+
+42
+00:03:36.000 --> 00:03:44.000
+So if this is something that you don't want, make sure to tick propagate matrix transforms and the meshes will retain their position in world space when they merge together.
+
+43
+00:03:44.000 --> 00:03:48.000
+Now, you also have the option to import as a skeletal mesh.
+
+44
+00:03:48.000 --> 00:03:57.000
+This will create several base poses taken from the animation and use them as morph targets to blend between to achieve the correct animation frame.
+
+45
+00:03:57.000 --> 00:04:00.000
+Now, this is done as part of the animation compression.
+
+46
+00:04:00.000 --> 00:04:10.000
+And before you hit import, you have the option to define the percentage or the number of base poses and to tweak that level of compression and get the animation looking how you want it.
+
+47
+00:04:10.000 --> 00:04:14.000
+And lastly, you can import as the geometry cache.
+
+48
+00:04:14.000 --> 00:04:22.000
+Now, this is an experimental feature at the moment and that creates a new type of animation asset that allows the playback of vertex varying sequences.
+
+49
+00:04:22.000 --> 00:04:28.000
+So the animation will come in as one file and be played back as a flip book of frames.
+
+50
+00:04:28.000 --> 00:04:32.000
+One thing to note is that the performance of this will depend on the complexity of your mesh.
+
+51
+00:04:32.000 --> 00:04:38.000
+So if you have a very complex mesh, then it's going to be much less performant than a simpler mesh.
+
+52
+00:04:38.000 --> 00:04:47.000
+And with the geometry cache, you also get some extra options to import things like motion vectors of the vertices, which can be really useful to calculate motion blur.
+
+53
+00:04:47.000 --> 00:04:56.000
+Now, you also have the ability to choose the frame range you'd like to import under the sampling heading that we looked at a second ago, as well as choose to import the materials with your meshes that you bring in.
+
+54
+00:04:56.000 --> 00:05:01.000
+You have a few different ways you can control the playback of the animation once you've imported into the engine.
+
+55
+00:05:01.000 --> 00:05:10.000
+Now, if you have an Alembic asset like a geometry crash in your level, for example, you have the option to check what's called the running option here.
+
+56
+00:05:10.000 --> 00:05:12.000
+And that is essentially an autoplay option.
+
+57
+00:05:12.000 --> 00:05:18.000
+So when the level starts, if this is checked, this animation will play automatically.
+
+58
+00:05:18.000 --> 00:05:22.000
+You could also set the animation to looping just by checking the looping option.
+
+59
+00:05:22.000 --> 00:05:27.000
+As you can imagine, that just makes the animation continuously loop until the level's over.
+
+60
+00:05:27.000 --> 00:05:37.000
+You could also add the asset to your level blueprint and just set up any parameters that you want in there to say when the animation is allowed to play.
+
+61
+00:05:37.000 --> 00:05:40.000
+And another option you have is to use a sequencer track.
+
+62
+00:05:40.000 --> 00:05:42.000
+So this has a very simple setup.
+
+63
+00:05:42.000 --> 00:05:51.000
+And just by adding the mesh to the sequence, you can add a geometry cache track and have your animation play when you scrub through or when you trigger the sequence.
+
+64
+00:05:51.000 --> 00:06:01.000
+And you can also add a geometry cache component, which might be material or property or any sort of other miscellaneous data that you might want to control during the sequence.

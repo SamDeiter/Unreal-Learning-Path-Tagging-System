@@ -1,0 +1,337 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.080
+Now, in this section, we will look at modification tracks, which will serve as a precursor to
+
+2
+00:00:06.080 --> 00:00:12.520
+what we will use in Unreal Engine to control sequencer editorial transitions.
+
+3
+00:00:12.520 --> 00:00:16.740
+Starting out, there are two modification tracks that we are going to focus on.
+
+4
+00:00:16.740 --> 00:00:21.680
+And the first is the level visibility tracks.
+
+5
+00:00:21.680 --> 00:00:27.280
+Level visibility tracks can control the visibility of any level or sublevel, and is used to switch
+
+6
+00:00:27.280 --> 00:00:34.160
+between various lighting setups or comps, different staging layouts, and effects.
+
+7
+00:00:34.160 --> 00:00:38.160
+Level visibility tracks can also be used in conjunction with the material parameter based
+
+8
+00:00:38.160 --> 00:00:43.600
+transitions controlled through sequencer to create cinematic transitions like the crossfade,
+
+9
+00:00:43.600 --> 00:00:49.760
+to achieve a perceived passage of time, create match cuts, or make location changes.
+
+10
+00:00:49.760 --> 00:00:54.440
+One thing to note though is that if your levels are very heavy, you might see a delay as the
+
+11
+00:00:54.440 --> 00:00:58.400
+assets load into the level.
+
+12
+00:00:58.400 --> 00:01:02.960
+The next modification track that we are going to look at is the material parameter collection,
+
+13
+00:01:02.960 --> 00:01:03.960
+or MPC.
+
+14
+00:01:03.960 --> 00:01:09.140
+And in order to get deeper access to the myriad of properties a static or skeletal mesh actor
+
+15
+00:01:09.140 --> 00:01:13.440
+may have, you'll want to access its mesh components.
+
+16
+00:01:13.440 --> 00:01:17.920
+Exposing the mesh components can help you keyframe specific properties in sequencer
+
+17
+00:01:17.920 --> 00:01:21.640
+such as an asset's material settings.
+
+18
+00:01:21.640 --> 00:01:26.000
+Properties like material elements can be exposed and controlled transitionally and
+
+19
+00:01:26.000 --> 00:01:28.500
+blended through sequencer.
+
+20
+00:01:28.500 --> 00:01:32.920
+Or material switcher properties can be exposed and allow a user to switch between materials
+
+21
+00:01:32.920 --> 00:01:36.520
+applied to the mesh through sequencer keyframes.
+
+22
+00:01:36.520 --> 00:01:41.400
+One thing to note, the switch is an on or off option and cannot be blended like you
+
+23
+00:01:41.400 --> 00:01:44.800
+can with material elements.
+
+24
+00:01:44.800 --> 00:01:50.120
+Now let's jump into the engine and take a look at the modification tracks in action.
+
+25
+00:01:50.120 --> 00:01:54.240
+So let's move over into the mod tracks folder and take a look what's set up for you in this
+
+26
+00:01:54.240 --> 00:01:57.880
+folder.
+
+27
+00:01:57.880 --> 00:02:02.880
+Inside this folder you will find two material parameter collection assets, two level sequence
+
+28
+00:02:02.880 --> 00:02:08.960
+examples and a folder containing two more level sequences that will be used as sub-sequences
+
+29
+00:02:08.960 --> 00:02:15.040
+to demonstrate animated action in the modification tracks examples.
+
+30
+00:02:15.040 --> 00:02:21.960
+The parameters collected in the MPC Car Paint will be used in the Material Parameters level
+
+31
+00:02:21.960 --> 00:02:24.040
+sequence.
+
+32
+00:02:24.040 --> 00:02:28.000
+But we're going to start out with the level visibility track level sequence.
+
+33
+00:02:28.000 --> 00:02:31.880
+Double click to open the level visibility track.
+
+34
+00:02:31.880 --> 00:02:36.840
+And then lock the camera to the cinematic viewport so that we can see what's happening
+
+35
+00:02:36.840 --> 00:02:42.800
+within our camera.
+
+36
+00:02:42.800 --> 00:02:46.240
+Next move over to the levels tab.
+
+37
+00:02:46.240 --> 00:02:48.440
+It's next to the outliner.
+
+38
+00:02:48.440 --> 00:02:55.400
+Turn that on so that you can see the persistent level, broadcast, desert, oasis and rally
+
+39
+00:02:55.400 --> 00:02:57.800
+sublevels.
+
+40
+00:02:57.800 --> 00:03:01.680
+The broadcast sublevel is not going to be affected by the level visibility track.
+
+41
+00:03:01.680 --> 00:03:06.040
+But before we play through this level sequence, let's move down to the sequencer controls
+
+42
+00:03:06.040 --> 00:03:09.380
+and turn on playback looping.
+
+43
+00:03:09.380 --> 00:03:14.060
+This way the desert and oasis sublevels will turn on and off as we play through our transition
+
+44
+00:03:14.060 --> 00:03:16.220
+a few times.
+
+45
+00:03:16.220 --> 00:03:19.980
+This will give you a chance to make sure that you can see the eyeball icon in the levels
+
+46
+00:03:19.980 --> 00:03:25.080
+tab turn on or off for each sublevel.
+
+47
+00:03:25.080 --> 00:03:29.240
+If we stop and move through the level sequence more deliberately, pay attention to what's
+
+48
+00:03:29.240 --> 00:03:32.860
+happening in the viewport.
+
+49
+00:03:32.860 --> 00:03:38.860
+If we move first from the desert into the active desert scene and then from the desert
+
+50
+00:03:39.020 --> 00:03:45.500
+into the oasis scene, you will see assets appear in the sublevels as you move from section
+
+51
+00:03:45.500 --> 00:03:47.300
+to section.
+
+52
+00:03:47.300 --> 00:03:52.540
+Note, for any of this to work, the sublevel track requires an array to be added to the
+
+53
+00:03:52.540 --> 00:03:58.600
+properties of that level visibility track and the sublevel name must be manually typed
+
+54
+00:03:58.600 --> 00:04:01.840
+into the index field.
+
+55
+00:04:01.840 --> 00:04:07.000
+Spelling is a factor here, so be careful to get the name exactly correct.
+
+56
+00:04:07.000 --> 00:04:12.560
+Of the array in the visibility field, you will be able to switch between hidden and
+
+57
+00:04:12.560 --> 00:04:19.360
+visible inside the pulldown menu.
+
+58
+00:04:19.360 --> 00:04:25.620
+This is how you switch between each section, but each switch requires another copy of each
+
+59
+00:04:25.620 --> 00:04:27.880
+of the visibility tracks themselves.
+
+60
+00:04:27.880 --> 00:04:34.880
+You'll notice a breakpoint between these as the two tracks are turned on and off.
+
+61
+00:04:34.880 --> 00:04:44.860
+Alright, now let's look at the material parameter collections as a modification track.
+
+62
+00:04:44.860 --> 00:04:50.260
+First double-click to open the material parameters level sequence.
+
+63
+00:04:50.260 --> 00:04:55.740
+This level sequence is going to use the same action subsequence track, but by adding a material
+
+64
+00:04:55.740 --> 00:05:01.480
+parameter track to the level sequence from the tracks button, the material parameters
+
+65
+00:05:01.480 --> 00:05:05.760
+have been exposed to sequencer, allowing access to the parameters to make changes that can
+
+66
+00:05:05.760 --> 00:05:07.840
+be keyframed in sequencer.
+
+67
+00:05:07.840 --> 00:05:12.760
+Again, by adding these tracks from the track menu in the material parameter collection
+
+68
+00:05:12.760 --> 00:05:17.760
+and choosing the MPC car paint that we've got, we are able to keyframe these on our
+
+69
+00:05:17.760 --> 00:05:21.240
+timeline and make changes to our transitions.
+
+70
+00:05:21.240 --> 00:05:24.960
+In this collection, we have loaded a vector parameter.
+
+71
+00:05:24.980 --> 00:05:29.240
+By using the plus button and choosing the vector color.
+
+72
+00:05:29.240 --> 00:05:35.980
+This color option exposes the RGB values and allows us to choose a 0 to 1 value to modify
+
+73
+00:05:35.980 --> 00:05:37.580
+the car paint.
+
+74
+00:05:37.580 --> 00:05:41.640
+As you can see the keyframes here change the value of the car paint.
+
+75
+00:05:41.640 --> 00:05:46.700
+And as we did before, let's lock our camera to our viewport and make sure the looping
+
+76
+00:05:46.700 --> 00:05:50.660
+is enabled in sequencer and play the level sequence.
+
+77
+00:05:50.660 --> 00:05:55.260
+As the SUV travels through the level, you can see the keyframed car paint blend from
+
+78
+00:05:55.260 --> 00:05:57.280
+one color to the next.
+
+79
+00:05:57.280 --> 00:06:01.160
+If you are interested in how to create material parameter collections, there is a materials
+
+80
+00:06:01.160 --> 00:06:03.920
+course that is available for this specific topic.
+
+81
+00:06:03.920 --> 00:06:08.160
+I encourage you to check that out as you continue your Unreal Engine training.
+
+82
+00:06:08.160 --> 00:06:12.260
+Alright, that's it for sequencer modification tracks.
+
+83
+00:06:12.260 --> 00:06:17.660
+In our next section, we're going to take a look at using modification tracks for editorial control.
+
+84
+00:06:20.660 --> 00:06:22.660
+Thanks for watching!

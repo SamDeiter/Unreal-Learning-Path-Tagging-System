@@ -1,0 +1,933 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:09.500
+So I think we're now ready to tackle natural daytime light and scene.
+
+2
+00:00:09.500 --> 00:00:13.160
+So let's take a look at the things that we're going to have to have required versus some
+
+3
+00:00:13.160 --> 00:00:17.000
+of the things that are optional to get a good setup for natural lighting.
+
+4
+00:00:17.000 --> 00:00:20.780
+And the elements that you're going to need are a light source for the sun.
+
+5
+00:00:20.780 --> 00:00:22.880
+So generally, this is going to be a directional light.
+
+6
+00:00:22.880 --> 00:00:27.640
+An atmosphere will be linked to the sun and adapt to its position.
+
+7
+00:00:27.640 --> 00:00:31.960
+A post-processing volume, which will allow us to tweak part of the lighting settings,
+
+8
+00:00:31.960 --> 00:00:37.000
+as well as other rendering aspects like exposure and bloom and things like that.
+
+9
+00:00:37.000 --> 00:00:41.040
+And then optionally, we can add a skylight that will contribute to the global illumination,
+
+10
+00:00:41.040 --> 00:00:44.120
+which I actually think is a really nice touch on your scene.
+
+11
+00:00:44.120 --> 00:00:47.640
+So we'll be adding one of those to our scenes.
+
+12
+00:00:47.640 --> 00:00:51.040
+A sky dome for background visuals if you need them.
+
+13
+00:00:51.040 --> 00:00:53.120
+Some volumetric clouds.
+
+14
+00:00:53.120 --> 00:00:58.120
+And if you need to, because you're using a static lighting solution, you will need
+
+15
+00:00:58.120 --> 00:00:59.960
+a light mass importance volume.
+
+16
+00:00:59.960 --> 00:01:03.800
+So again, we're not going to use this since we're going to be using Lumen, which is all
+
+17
+00:01:03.800 --> 00:01:04.800
+real time.
+
+18
+00:01:04.800 --> 00:01:08.380
+But if you are using a static solution, understand that you will need a light mass importance
+
+19
+00:01:08.380 --> 00:01:10.920
+volume to get the most out of the scene.
+
+20
+00:01:10.920 --> 00:01:15.960
+Now one other thing I want to touch on before we jump into the engine is that different
+
+21
+00:01:15.960 --> 00:01:17.740
+templates are made for different needs.
+
+22
+00:01:17.740 --> 00:01:22.600
+So if you're starting your project and you're in the AAC industry, make sure you do go to
+
+23
+00:01:22.600 --> 00:01:27.160
+the AAC tab and start your project from there because it will have some more advanced lighting
+
+24
+00:01:27.160 --> 00:01:30.600
+setups than say some of the game systems or templates that we have.
+
+25
+00:01:30.600 --> 00:01:35.160
+So yeah, not all templates are created equals and the levels within them use different setups
+
+26
+00:01:35.160 --> 00:01:39.240
+depending on the level that you start using.
+
+27
+00:01:39.240 --> 00:01:44.680
+So you have like the basic level, which uses a legacy daylight setup, the time of day,
+
+28
+00:01:44.680 --> 00:01:50.160
+which uses a newer approach, and then empty levels in case you want to start things from
+
+29
+00:01:50.160 --> 00:01:51.160
+scratch.
+
+30
+00:01:51.480 --> 00:01:53.400
+Now in our case, we're going to start things from scratch.
+
+31
+00:01:53.400 --> 00:01:58.040
+So let's go ahead and pop into the engine.
+
+32
+00:01:58.040 --> 00:01:59.360
+And essentially, we're going to recreate this.
+
+33
+00:01:59.360 --> 00:02:02.520
+So I've loaded up the Corbero Day map.
+
+34
+00:02:02.520 --> 00:02:07.200
+If you want to access that, all you have to do is go to levels and then open up Corbero
+
+35
+00:02:07.200 --> 00:02:08.200
+Day.
+
+36
+00:02:08.200 --> 00:02:13.120
+And you see we have a nice little setup that we're going to delete and recreate.
+
+37
+00:02:13.120 --> 00:02:16.960
+So I'm going to go ahead and delete every single one of these actors that contribute
+
+38
+00:02:16.960 --> 00:02:17.960
+to the lighting.
+
+39
+00:02:17.960 --> 00:02:20.200
+There we go.
+
+40
+00:02:20.240 --> 00:02:22.240
+We are lightless.
+
+41
+00:02:22.240 --> 00:02:25.800
+Let's go ahead and start looking at how we can add all the things that we need.
+
+42
+00:02:25.800 --> 00:02:28.040
+So I'm going to go to the place actors tab here.
+
+43
+00:02:28.040 --> 00:02:32.760
+And first and foremost, we're going to need sun direction or sunlight.
+
+44
+00:02:32.760 --> 00:02:34.120
+Let's go ahead and drag a directional light.
+
+45
+00:02:34.120 --> 00:02:38.880
+I'm going to rotate it to make this a little bit more interesting, like so.
+
+46
+00:02:38.880 --> 00:02:40.240
+There we go.
+
+47
+00:02:40.240 --> 00:02:41.240
+We have a directional light.
+
+48
+00:02:41.240 --> 00:02:42.280
+That's a good start.
+
+49
+00:02:42.280 --> 00:02:45.720
+Now you'll notice that by default, Lumen is doing a lot of stuff already calculating
+
+50
+00:02:45.720 --> 00:02:51.080
+our global illumination, indirect bounce lighting, all of that good stuff out of the box from
+
+51
+00:02:51.080 --> 00:02:52.080
+Unreal.
+
+52
+00:02:52.080 --> 00:02:55.440
+Now, the next thing I'm going to need is an atmosphere.
+
+53
+00:02:55.440 --> 00:02:59.360
+So I'm going to go ahead and add an atmosphere since you can see the backdrop is very dark.
+
+54
+00:02:59.360 --> 00:03:01.360
+So we add an atmosphere here.
+
+55
+00:03:01.360 --> 00:03:03.840
+And you might notice it tells you, hey, you need to rebuild lighting.
+
+56
+00:03:03.840 --> 00:03:07.360
+And that's because I haven't changed this light here to moveable.
+
+57
+00:03:07.360 --> 00:03:09.440
+So I'm going to go ahead and do that.
+
+58
+00:03:09.440 --> 00:03:13.280
+But also I'm just going to refresh this by just going inside the scenario and moveable
+
+59
+00:03:13.320 --> 00:03:17.320
+just so that it actually understands that the directional light is actually moveable.
+
+60
+00:03:17.320 --> 00:03:20.840
+It's just a quick refresh.
+
+61
+00:03:20.840 --> 00:03:23.960
+The next thing I'm going to do, I'm just going to bring that up there.
+
+62
+00:03:23.960 --> 00:03:26.560
+The next thing I'm going to add is an exponential high fog.
+
+63
+00:03:26.560 --> 00:03:28.600
+So let's go ahead and search for high fog.
+
+64
+00:03:28.600 --> 00:03:29.600
+There we go.
+
+65
+00:03:29.600 --> 00:03:32.600
+Got it there.
+
+66
+00:03:32.600 --> 00:03:40.680
+The next thing I'm going to add is a skylight.
+
+67
+00:03:40.680 --> 00:03:43.120
+Once again, I'm going to set that to moveable.
+
+68
+00:03:43.120 --> 00:03:47.280
+That's what I'll leave at the bottom, actually.
+
+69
+00:03:47.280 --> 00:03:50.720
+And last but not least, I think I'm going to add some volumetric clouds to get some
+
+70
+00:03:50.720 --> 00:03:56.400
+nice clouds looking here.
+
+71
+00:03:56.400 --> 00:03:57.400
+And there we go.
+
+72
+00:03:57.400 --> 00:04:01.720
+We have our entire setup that we had before.
+
+73
+00:04:01.720 --> 00:04:03.880
+And it's just incredibly easy.
+
+74
+00:04:03.880 --> 00:04:07.240
+Out of the box Unreal Engine handles all of this for us.
+
+75
+00:04:07.280 --> 00:04:13.360
+So one thing to note is that, as you can see, I had to manually drag all of these out.
+
+76
+00:04:13.360 --> 00:04:15.400
+Now there's an easier way to actually build all of this.
+
+77
+00:04:15.400 --> 00:04:22.160
+So we're going to go ahead and delete everything once again and use the environment light mixer.
+
+78
+00:04:22.160 --> 00:04:26.480
+So it's a really nice little system that allows you to create everything that you need for
+
+79
+00:04:26.480 --> 00:04:29.240
+a natural lighting setup within one window.
+
+80
+00:04:29.240 --> 00:04:33.840
+So I'm going to go to window, environment light mixer.
+
+81
+00:04:33.840 --> 00:04:40.280
+And here I have essentially nothing yet because we have nothing that contributes to that global
+
+82
+00:04:40.280 --> 00:04:41.760
+lighting system.
+
+83
+00:04:41.760 --> 00:04:45.960
+So let's go ahead and start by creating a skylight, creating an atmospheric light.
+
+84
+00:04:45.960 --> 00:04:49.520
+We'll create a sky atmosphere, volumetric clouds, and a height of fog.
+
+85
+00:04:49.520 --> 00:04:52.840
+So we literally just created everything that we had before.
+
+86
+00:04:52.840 --> 00:04:56.280
+And you can see everything's kind of stacked up here, but you can see we've got everything
+
+87
+00:04:56.280 --> 00:04:58.080
+that we created earlier.
+
+88
+00:04:58.080 --> 00:05:05.680
+But one thing I am going to add is a little bit of rotation to this light once again,
+
+89
+00:05:05.680 --> 00:05:07.160
+just to get to the same place that we were.
+
+90
+00:05:07.160 --> 00:05:10.680
+So you can see with the environment light mixer really quickly without having to know
+
+91
+00:05:10.680 --> 00:05:12.480
+the names of all those things.
+
+92
+00:05:12.480 --> 00:05:15.160
+And Real already has a little setup for you.
+
+93
+00:05:15.160 --> 00:05:19.520
+Now what I really love about the environment light mixer is that in the past I would have
+
+94
+00:05:19.520 --> 00:05:24.080
+had to actually start clicking around these and changing the values individually to adjust
+
+95
+00:05:24.080 --> 00:05:25.880
+the scene to my taste.
+
+96
+00:05:25.880 --> 00:05:29.400
+Now what I love about the environment light mixer is that everything is here at a glance.
+
+97
+00:05:29.400 --> 00:05:35.520
+So I can change the intensity of the directional light if I want to.
+
+98
+00:05:35.520 --> 00:05:38.360
+I can change the color of the directional light.
+
+99
+00:05:38.360 --> 00:05:42.760
+All the properties that contribute to the lighting of this light can be edited within
+
+100
+00:05:42.760 --> 00:05:46.480
+the environment light mixer and can be seen at a glance with all the other things that
+
+101
+00:05:46.480 --> 00:05:48.800
+contribute to the overall lighting of the scene.
+
+102
+00:05:48.800 --> 00:05:52.600
+So this is something that I really love because I get to just not have to click around as
+
+103
+00:05:52.600 --> 00:05:55.320
+much and edit everything at a glance.
+
+104
+00:05:55.320 --> 00:06:00.440
+So really, really cool little system there with the environment light mixer.
+
+105
+00:06:00.440 --> 00:06:02.800
+Once again, we're going to delete because we're going to take a look at some of the
+
+106
+00:06:02.800 --> 00:06:03.800
+other setups that we have.
+
+107
+00:06:03.800 --> 00:06:05.960
+So let's go ahead and delete this.
+
+108
+00:06:05.960 --> 00:06:08.800
+And the next one I'm going to drag in is one of the ones that we talked about we were going
+
+109
+00:06:08.800 --> 00:06:11.740
+to take a look at, but we didn't look at earlier.
+
+110
+00:06:11.740 --> 00:06:13.720
+So this one's the Sun and Sky Blueprint.
+
+111
+00:06:13.720 --> 00:06:17.280
+So I'm going to go ahead and drag it in and you might be blinded by the strength of the
+
+112
+00:06:17.280 --> 00:06:18.640
+light.
+
+113
+00:06:18.640 --> 00:06:21.840
+And the reason for this is that if we look at the actual blueprint under the details
+
+114
+00:06:22.840 --> 00:06:25.360
+Oh, sorry, it's the direction that I'm looking for.
+
+115
+00:06:25.360 --> 00:06:28.600
+And the intensity is 75,000 lux.
+
+116
+00:06:28.600 --> 00:06:30.600
+It's trying to emulate the Sun essentially.
+
+117
+00:06:30.600 --> 00:06:36.000
+But the default exposure settings that we have here, we go to lit, you'll notice that
+
+118
+00:06:36.000 --> 00:06:39.920
+by default we had game settings.
+
+119
+00:06:39.920 --> 00:06:44.940
+And if you untick it, by default you have an EV100 of zero.
+
+120
+00:06:44.940 --> 00:06:48.680
+So I'm actually going to go ahead and bring this all the way up and I'm going to move
+
+121
+00:06:48.680 --> 00:06:50.560
+to about 12.
+
+122
+00:06:50.560 --> 00:06:53.720
+And now you'll be able to see that our lighting makes a little bit more sense and we can see
+
+123
+00:06:53.720 --> 00:06:57.160
+what we're doing.
+
+124
+00:06:57.160 --> 00:07:03.200
+Now you can actually change these values inside of the post process volume under exposure.
+
+125
+00:07:03.200 --> 00:07:08.880
+We'll take a look a bit more depth, a little bit more in depth later along the line.
+
+126
+00:07:08.880 --> 00:07:12.920
+I just want to show you how to actually use these tools right now.
+
+127
+00:07:12.920 --> 00:07:16.280
+So when it comes to the Sun and Sky, one thing that's really cool about it is that it's set
+
+128
+00:07:16.280 --> 00:07:22.440
+up as an actual geographical analog of the real world.
+
+129
+00:07:22.440 --> 00:07:32.880
+So you'll notice that we have a latitude and longitude here and also a time zone, date
+
+130
+00:07:32.880 --> 00:07:34.920
+and solar time.
+
+131
+00:07:34.920 --> 00:07:38.640
+So what's really nice about this is that if you say, for example, want to recreate the
+
+132
+00:07:38.640 --> 00:07:44.600
+lighting at a particular point on Earth, let's say Chicago, a certain latitude and longitude,
+
+133
+00:07:44.640 --> 00:07:50.400
+you could enter those values and the Blueprint is going to update and change everything about
+
+134
+00:07:50.400 --> 00:07:56.240
+the atmosphere, directional light and skylight that is inside of this Blueprint to match
+
+135
+00:07:56.240 --> 00:08:02.760
+the lighting conditions of that latitude and longitude at that day, at that time.
+
+136
+00:08:02.760 --> 00:08:04.320
+So it's a really, really nice system.
+
+137
+00:08:04.320 --> 00:08:08.360
+Let's say again, you live in Chicago and want to get the lighting right for the same thing
+
+138
+00:08:08.360 --> 00:08:14.160
+that's outside your house on the 21st of September, this Blueprint has you covered for that.
+
+139
+00:08:14.200 --> 00:08:19.000
+It's actually really, really nice to be able to have essentially a digital analog of the
+
+140
+00:08:19.000 --> 00:08:22.000
+lighting setup of a particular location on Earth.
+
+141
+00:08:23.520 --> 00:08:26.080
+And I guess really useful for the AEC industry.
+
+142
+00:08:27.400 --> 00:08:30.800
+Now, the last thing I wanted to look at is the HDRI backdrop.
+
+143
+00:08:31.840 --> 00:08:36.840
+Once again, I'm going to delete and you'll notice that when I drag the HDRI backdrop,
+
+144
+00:08:36.840 --> 00:08:37.840
+I can't see anything.
+
+145
+00:08:38.120 --> 00:08:44.080
+Remember, we edited the exposure to be much, much darker to compensate for that.
+
+146
+00:08:44.320 --> 00:08:48.400
+Since guys, I'm just going to click back to game settings and you'll see I've dragged
+
+147
+00:08:48.400 --> 00:08:49.400
+in my HDRI backdrop.
+
+148
+00:08:49.400 --> 00:08:54.120
+I'm just going to move it down a little bit so we don't get that crazy Z-fighting.
+
+149
+00:08:55.840 --> 00:09:00.360
+But you can see here that by default, I get the lighting contribution from this HDRI
+
+150
+00:09:00.360 --> 00:09:04.360
+image to my scene, which is really, really nice.
+
+151
+00:09:04.360 --> 00:09:09.360
+Now, one problem with this is that it does not come with a directional light setup.
+
+152
+00:09:09.800 --> 00:09:11.360
+So that's something that you have to do manually.
+
+153
+00:09:11.600 --> 00:09:17.840
+So if you bring in a directional light, you can rotate it, get essentially the right
+
+154
+00:09:17.840 --> 00:09:22.440
+light you need. I suggest you try to sort of follow the direction that the scene is
+
+155
+00:09:22.440 --> 00:09:24.080
+actually telling you to do.
+
+156
+00:09:24.560 --> 00:09:26.000
+So it'd probably be something more like this.
+
+157
+00:09:27.360 --> 00:09:29.560
+Assuming the sun's about that direction.
+
+158
+00:09:31.760 --> 00:09:35.000
+I can't actually see it on the scene, so I presume that's actually where it is.
+
+159
+00:09:37.280 --> 00:09:39.680
+So now we actually have a directional light.
+
+160
+00:09:40.680 --> 00:09:45.600
+Now, importantly, if you wanted to change the actual backdrop that you're using, you
+
+161
+00:09:45.600 --> 00:09:48.320
+can use your personal texture that you have yourself.
+
+162
+00:09:48.880 --> 00:09:50.440
+In our case, we're using this cube map.
+
+163
+00:09:50.800 --> 00:09:56.600
+If we go to the HDRI section here, we can drag in a different one to get different
+
+164
+00:09:56.600 --> 00:10:04.200
+results. Now, this is a nighttime setup, so it's essentially a moonlit scene, which
+
+165
+00:10:04.200 --> 00:10:09.200
+means that we would have to manually adjust it once again, our directional light to
+
+166
+00:10:09.200 --> 00:10:11.280
+match the values of the HDRI.
+
+167
+00:10:11.440 --> 00:10:14.840
+So in our case, we're just going to change the intensity to something like one, to
+
+168
+00:10:14.840 --> 00:10:18.080
+something more akin to moonlight, and maybe change the color.
+
+169
+00:10:18.880 --> 00:10:25.960
+We might even sample some of the colors of the scene here to get the correct look.
+
+170
+00:10:29.120 --> 00:10:36.240
+So this now feels like a moonlit environment using that information from the HDRI.
+
+171
+00:10:36.240 --> 00:10:43.760
+So they're the two sort of more out there blueprints in terms of lighting setups.
+
+172
+00:10:44.640 --> 00:10:49.120
+Let's go ahead and recreate that original lighting setup manually.
+
+173
+00:10:49.120 --> 00:10:51.480
+So let's go ahead and delete the HDRI backdrop.
+
+174
+00:10:52.160 --> 00:10:54.440
+And with the environment light mixer, we'll do it really quickly.
+
+175
+00:10:54.640 --> 00:11:00.760
+So create skylight, atmospheric light, sky atmosphere, volumetric fogs, volumetric
+
+176
+00:11:00.760 --> 00:11:01.680
+clouds, and high fog.
+
+177
+00:11:02.680 --> 00:11:09.000
+And I'm just going to quickly select my directional light here and rotate it till
+
+178
+00:11:09.000 --> 00:11:10.960
+we get a nice look. There we go.
+
+179
+00:11:13.560 --> 00:11:18.560
+Perfect. So the last thing I want to take a look at here is some settings to improve
+
+180
+00:11:18.560 --> 00:11:21.120
+your reflection information inside of your scene.
+
+181
+00:11:22.000 --> 00:11:27.320
+Now, by default, the setup that Lumen has might not give you the best reflections for
+
+182
+00:11:27.320 --> 00:11:30.000
+AAC work. So let's go ahead and take a look at this.
+
+183
+00:11:30.000 --> 00:11:31.400
+I'm going to bring a sphere in.
+
+184
+00:11:33.720 --> 00:11:34.720
+Bring it up.
+
+185
+00:11:36.960 --> 00:11:40.000
+And I'm going to go ahead and assign a material to it.
+
+186
+00:11:40.040 --> 00:11:41.520
+It's going to be a Chrome ball.
+
+187
+00:11:42.040 --> 00:11:46.640
+If you don't have access to this, it might be because you don't have access to engine
+
+188
+00:11:46.640 --> 00:11:51.360
+folders. In order to access the engine folders, all you have to do is go to the settings
+
+189
+00:11:51.360 --> 00:11:55.040
+here and make sure that show engine content is available.
+
+190
+00:11:55.080 --> 00:11:58.560
+Now, I have a Chrome ball here and you see the reflection that I'm seeing here.
+
+191
+00:11:58.600 --> 00:12:00.160
+It is reflecting what's behind me.
+
+192
+00:12:00.160 --> 00:12:01.160
+So that's a good start.
+
+193
+00:12:01.480 --> 00:12:04.640
+You can see the quality of the reflection isn't exactly amazing.
+
+194
+00:12:05.400 --> 00:12:14.000
+So if you have a good, powerful GPU that can handle hardware ray tracing, there's some
+
+195
+00:12:14.000 --> 00:12:16.200
+settings that you can actually change to make this much better.
+
+196
+00:12:16.520 --> 00:12:17.960
+So let's go ahead and take a look at those.
+
+197
+00:12:17.960 --> 00:12:20.840
+So I'm going to go to my project settings.
+
+198
+00:12:20.840 --> 00:12:24.080
+I'm going to make them a little bit smaller so we can see what's actually happening when
+
+199
+00:12:24.080 --> 00:12:25.080
+we change things.
+
+200
+00:12:25.600 --> 00:12:27.320
+But we're going to go to the rendering tab.
+
+201
+00:12:30.440 --> 00:12:31.440
+There we go.
+
+202
+00:12:34.640 --> 00:12:36.960
+I'll actually change the scene a little bit so we can see.
+
+203
+00:12:37.200 --> 00:12:41.720
+And I'm going to scroll down until I get to my glowing illumination system, which is going
+
+204
+00:12:41.720 --> 00:12:42.720
+to be set to lumen.
+
+205
+00:12:42.880 --> 00:12:45.440
+And then my reflections here, which are set to lumen.
+
+206
+00:12:46.440 --> 00:12:48.440
+So I'm going to go to the render tab.
+
+207
+00:12:48.480 --> 00:12:51.440
+And I'm going to go to the reflections here, which are set to lumen.
+
+208
+00:12:52.160 --> 00:13:05.640
+Now, you'll notice that under the lumen setup, we want to be using use hardware ray tracing
+
+209
+00:13:05.640 --> 00:13:06.640
+when available.
+
+210
+00:13:06.960 --> 00:13:08.240
+Let's go ahead and tick that.
+
+211
+00:13:08.680 --> 00:13:13.720
+And you'll notice that instantly increases the quality of our reflection quite drastically.
+
+212
+00:13:14.520 --> 00:13:18.800
+And there's another couple of things that we can do to gain a little bit of quality here.
+
+213
+00:13:19.360 --> 00:13:22.640
+First of all, is that the ray light in mode here is set to surface cache.
+
+214
+00:13:23.600 --> 00:13:29.120
+I actually want to hit light in for reflection so you can see a little bit of a better result
+
+215
+00:13:29.120 --> 00:13:32.160
+here. And next is the software ray tracing mode.
+
+216
+00:13:32.200 --> 00:13:34.120
+I'm actually going to change this to detailed tracing.
+
+217
+00:13:34.200 --> 00:13:37.320
+And once again, you might see a slight gain in the quality of the reflection.
+
+218
+00:13:37.400 --> 00:13:39.480
+So much nicer reflection than what we had by default.
+
+219
+00:13:41.000 --> 00:13:42.240
+That's something to keep in mind.
+
+220
+00:13:43.960 --> 00:13:46.200
+When using lumen for AUC.
+
+221
+00:13:48.400 --> 00:13:52.320
+Now, these settings that I've just changed here, some of them can actually be accessed directly
+
+222
+00:13:52.320 --> 00:13:55.000
+through the post-process volume.
+
+223
+00:13:55.400 --> 00:13:59.960
+So if I scroll down and find my reflection settings.
+
+224
+00:14:01.200 --> 00:14:02.120
+Same thing here, right?
+
+225
+00:14:02.200 --> 00:14:07.360
+You can change your reflection method, the quality of the reflections and the ray light in
+
+226
+00:14:07.360 --> 00:14:11.160
+mode, which is set by the project default, which is what we just set earlier.
+
+227
+00:14:11.200 --> 00:14:15.720
+But if you wanted to change it to surface cache or hit light in from the post-process volume,
+
+228
+00:14:16.120 --> 00:14:17.000
+you can do that from here.
+
+229
+00:14:18.360 --> 00:14:22.440
+OK, so I think that about does it for this natural lighting setup.
+
+230
+00:14:23.200 --> 00:14:27.800
+After this, we're going to look at some additional tools that will help us debug and visualize
+
+231
+00:14:27.800 --> 00:14:32.680
+our scene in different ways to help us kind of read what might be wrong or what might be
+
+232
+00:14:33.280 --> 00:14:36.920
+able to be enhanced. And then we'll take a look at some artificial lighting as well.
+
+233
+00:14:37.360 --> 00:14:38.400
+So stay tuned for that.

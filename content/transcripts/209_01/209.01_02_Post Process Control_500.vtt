@@ -1,0 +1,617 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:09.000
+So diving into look at post-process control, we're going to be covering the topics that I just mentioned in the previous slide there.
+
+2
+00:00:09.000 --> 00:00:16.000
+And so jumping into color control flow, this is how the color grading workflow works in Unreal Engine.
+
+3
+00:00:16.000 --> 00:00:25.000
+So you want to turn off your auto exposure in the project settings, and the project settings can be found under the edit tab at the top of your editor there.
+
+4
+00:00:25.000 --> 00:00:29.000
+And then you want to set the temperature, which is your white balance.
+
+5
+00:00:29.000 --> 00:00:36.000
+Once you've set the white balance, you then go into the tone mapper and look at the film and the global project settings.
+
+6
+00:00:36.000 --> 00:00:45.000
+We can color correct per shot and just make sure all of our colors are set to the right levels before we go in and edit anything else.
+
+7
+00:00:45.000 --> 00:00:52.000
+Then you can go into your shadows, mids and highs if needed, and then also then your in-camera adjustments.
+
+8
+00:00:52.000 --> 00:01:00.000
+So we've got global post-process controls using a post-process volume, which we will dig into in a few slides here.
+
+9
+00:01:00.000 --> 00:01:07.000
+And then you can also layer in multiple post-process volumes if you want some blending happening throughout the scenes.
+
+10
+00:01:07.000 --> 00:01:11.000
+You can also edit it per camera as well.
+
+11
+00:01:11.000 --> 00:01:15.000
+So if you'd like some global settings setting, you can use post-process volumes.
+
+12
+00:01:15.000 --> 00:01:19.000
+If you want it per shot, you can do in-camera adjustments there.
+
+13
+00:01:20.000 --> 00:01:29.000
+So the post-process control look and feel, we have the ability to edit color, tone, shadows, mid-tones, highlights and miscellaneous effects.
+
+14
+00:01:29.000 --> 00:01:33.000
+You've got chromatic aberrations and lens flares and you can add dirt masks.
+
+15
+00:01:33.000 --> 00:01:37.000
+And you can see all the properties here on the right hand side.
+
+16
+00:01:37.000 --> 00:01:41.000
+The best thing to do is to just dive into these settings and play around.
+
+17
+00:01:41.000 --> 00:01:51.000
+You'll find a workflow that works for you and you'll generally then go into edit similar properties once you set some kind of visual standard.
+
+18
+00:01:51.000 --> 00:01:59.000
+A useful thing to do when editing these properties, because there are so many properties in the post-process control,
+
+19
+00:01:59.000 --> 00:02:05.000
+something I like to do is make sure favoriting is enabled in your project settings.
+
+20
+00:02:05.000 --> 00:02:10.000
+So again, go to edit project settings and just type in favorite.
+
+21
+00:02:10.000 --> 00:02:13.000
+And what you can actually do is enable favorites.
+
+22
+00:02:13.000 --> 00:02:16.000
+This may be on by default in the project template that you've got.
+
+23
+00:02:16.000 --> 00:02:18.000
+So if it's already on, that's fine.
+
+24
+00:02:18.000 --> 00:02:21.000
+And then what you can actually do is you can hover over one of these properties.
+
+25
+00:02:21.000 --> 00:02:24.000
+You can right click and say add to favorites.
+
+26
+00:02:24.000 --> 00:02:31.000
+And so you can create a set of favorites of variables that you edit on a consistent basis.
+
+27
+00:02:31.000 --> 00:02:35.000
+And they'll go straight to the top of the list on the details panel.
+
+28
+00:02:35.000 --> 00:02:47.000
+So you have some quick go to options there, which I find really handy when editing similar per camera shots that need certain values editing.
+
+29
+00:02:47.000 --> 00:02:50.000
+We also have the color control flow here.
+
+30
+00:02:50.000 --> 00:03:00.000
+So ACS, industry standard for film and TV, the closest approximation of the entire color gamut, which is available to the human eye.
+
+31
+00:03:00.000 --> 00:03:05.000
+It maps to HDR rendered outputs and LDR displays and you use it for a project wide look.
+
+32
+00:03:05.000 --> 00:03:14.000
+So you can see the diagram on the right hand side here of what exactly the film tone mapper properties are editing.
+
+33
+00:03:14.000 --> 00:03:18.000
+You have the five variables here.
+
+34
+00:03:18.000 --> 00:03:22.000
+And for each of the variables, you'll see the representation on the diagram.
+
+35
+00:03:22.000 --> 00:03:29.000
+So the slope is looking at the overall slope of this S curve coming through the diagram here.
+
+36
+00:03:29.000 --> 00:03:32.000
+You've got the toe, which is the bottom of the S curve.
+
+37
+00:03:32.000 --> 00:03:39.000
+You've got the shoulder, which is the top right, the black clip, which is this far left side and then the white clip, which is the far right side.
+
+38
+00:03:39.000 --> 00:03:46.000
+So if you're familiar with any color grading software, you'll you'll no doubt be familiar with these variable variables and properties.
+
+39
+00:03:46.000 --> 00:03:56.000
+But just to give you a bit of an overview and just really dig into when you're editing these variable variables, what exactly they're doing here.
+
+40
+00:03:56.000 --> 00:04:01.000
+We've also got to make sure that we have our studio office lighting conditions set up.
+
+41
+00:04:01.000 --> 00:04:07.000
+So the monitor, you want it to be 100 percent sRGB, rec 709.
+
+42
+00:04:07.000 --> 00:04:09.000
+We've got high contrast ratio.
+
+43
+00:04:09.000 --> 00:04:13.000
+So maybe 2000 to one or something in that region there.
+
+44
+00:04:13.000 --> 00:04:19.000
+Peak luminance at 100 and the black level at 0.05.
+
+45
+00:04:19.000 --> 00:04:23.000
+And then you just want to calibrate it with some built in calibration tool.
+
+46
+00:04:23.000 --> 00:04:40.000
+So when we go back to that flow diagram that we said at the very start, when we just disable the exposure and when we're talking about setting these white balance levels, you just want to make sure everything is set up correctly before you start digging in.
+
+47
+00:04:40.000 --> 00:04:49.000
+Also, you know, if you have any effects on your monitor, maybe you've got some sepia to help with blue light or anything like that.
+
+48
+00:04:49.000 --> 00:04:56.000
+Making sure all these things are just disabled before you start your color grading process.
+
+49
+00:04:56.000 --> 00:05:00.000
+So some best practices for VR here.
+
+50
+00:05:00.000 --> 00:05:02.000
+You want to set SSAO low.
+
+51
+00:05:02.000 --> 00:05:06.000
+You want to set the bloom low or off completely.
+
+52
+00:05:06.000 --> 00:05:09.000
+You want to set SSR low or off completely.
+
+53
+00:05:09.000 --> 00:05:14.000
+Lens of lens flares don't work in VR.
+
+54
+00:05:14.000 --> 00:05:20.000
+So you probably want to turn those off and also just turn it off motion blur because that can affect the VR experience.
+
+55
+00:05:20.000 --> 00:05:23.000
+So you don't really want image effects.
+
+56
+00:05:23.000 --> 00:05:26.000
+You don't really want a dirt mask or film grain on the VR.
+
+57
+00:05:26.000 --> 00:05:34.000
+You just want the the viewers kind of purest experience through through the VR headset.
+
+58
+00:05:34.000 --> 00:05:42.000
+When you add a post process volume into the level, you'll find this property infinite extent unbound.
+
+59
+00:05:42.000 --> 00:05:49.000
+And again, this might be something you parent as a variable because you end up going to these quite often.
+
+60
+00:05:49.000 --> 00:05:59.000
+If you tick unbound, then it means that even if that post process in your scene is a small box, it will affect the entire map.
+
+61
+00:05:59.000 --> 00:06:05.000
+So it's not that you have to then scale that post process across the entire scene.
+
+62
+00:06:05.000 --> 00:06:10.000
+You can just make sure it's unbound and unbound essentially just means affect the entire world.
+
+63
+00:06:10.000 --> 00:06:20.000
+And depending on then the priority, you can then have other post process volumes blending in and blending out of this this main post process.
+
+64
+00:06:20.000 --> 00:06:25.000
+But yet the unbound essentially just means it affects the entire world.
+
+65
+00:06:25.000 --> 00:06:29.000
+And when we talk about these screen effects, you can find these screen effects here.
+
+66
+00:06:29.000 --> 00:06:34.000
+It's also useful to go over the different ways we can approach LUTs in our work.
+
+67
+00:06:34.000 --> 00:06:38.000
+So LUT is essentially a lookup table and this approach is a legacy approach.
+
+68
+00:06:39.000 --> 00:06:42.000
+But it's worth exploring just so you know the pipeline here.
+
+69
+00:06:42.000 --> 00:06:47.000
+So a simple definition of a LUT is a set of instructions for remapping pixel values.
+
+70
+00:06:47.000 --> 00:06:50.000
+So you can see Sean's image here.
+
+71
+00:06:50.000 --> 00:06:58.000
+He's put a red violet around this on this scene, whether it be in camera or on a post process volume.
+
+72
+00:06:58.000 --> 00:07:00.000
+And it gives it a certain look and feel.
+
+73
+00:07:00.000 --> 00:07:03.000
+So they're essentially lookup color tables.
+
+74
+00:07:03.000 --> 00:07:08.000
+So you get a snapshot of your scene, some kind of high res screen capture.
+
+75
+00:07:08.000 --> 00:07:13.000
+If you are doing high res screen capture, there's a tool at the top of your editor window to do that.
+
+76
+00:07:13.000 --> 00:07:18.000
+Just in that viewport where you can select the drop down arrow and go to high res screenshot.
+
+77
+00:07:18.000 --> 00:07:26.000
+You can select that or you can also capture them whilst you're in the world just using high res shot.
+
+78
+00:07:26.000 --> 00:07:30.000
+So you can look for a console variable there if you want to do a bit of research on that.
+
+79
+00:07:30.000 --> 00:07:35.000
+In Photoshop, you'd run the needed filters to get the contrast and color, etc.
+
+80
+00:07:35.000 --> 00:07:36.000
+The way that you want it.
+
+81
+00:07:36.000 --> 00:07:39.000
+Then you can drag it into a neutral color table provided.
+
+82
+00:07:39.000 --> 00:07:42.000
+Make sure that the mode is 16 bit.
+
+83
+00:07:42.000 --> 00:07:46.000
+Import it into Unreal Engine and then set the LOD and the texture.
+
+84
+00:07:46.000 --> 00:07:56.000
+So you want to when you have imported this into the editor, you want to set the LOD in the texture to no mipmap.
+
+85
+00:07:56.000 --> 00:07:58.000
+So what that means is double click the texture.
+
+86
+00:07:58.000 --> 00:08:03.000
+Go to the LOD and just make sure it says no mipmap there.
+
+87
+00:08:03.000 --> 00:08:06.000
+Assign the texture group, color lookup tables.
+
+88
+00:08:06.000 --> 00:08:11.000
+So again, these properties are both in the texture properties when you import them.
+
+89
+00:08:11.000 --> 00:08:15.000
+So import the texture and double click the texture to edit these variables.
+
+90
+00:08:15.000 --> 00:08:21.000
+And then in the post process volume under the mist tab, put the 3D look in the color gradient look section.
+
+91
+00:08:21.000 --> 00:08:26.000
+So again, if you were using this approach, you can maybe favorite this variable and then you'd know exactly where it is.
+
+92
+00:08:27.000 --> 00:08:32.000
+You can also just search for LUT in the details panel and that will appear for you.
+
+93
+00:08:32.000 --> 00:08:36.000
+So just a note for this approach, this is a game centric method.
+
+94
+00:08:36.000 --> 00:08:43.000
+It is not HDR efficient for virtual production output as the LUT clamps the bit depth at 8 bit.
+
+95
+00:08:43.000 --> 00:08:49.000
+So probably not a process you want to use a lot of the time or if at all.
+
+96
+00:08:49.000 --> 00:08:56.000
+But it's also worth highlighting for those wanting to know about this this feature if if need be.
+
+97
+00:08:56.000 --> 00:09:00.000
+So there's also another approach for LUTs, which is a 3D volume.
+
+98
+00:09:00.000 --> 00:09:03.000
+So you create the image to embody a 3D LUT.
+
+99
+00:09:03.000 --> 00:09:06.000
+The size of the LUT data must be known.
+
+100
+00:09:06.000 --> 00:09:11.000
+So for this example, we will assume that the LUT is 33 by 33 by 33.
+
+101
+00:09:11.000 --> 00:09:13.000
+So the size is 33.
+
+102
+00:09:13.000 --> 00:09:19.000
+And then the dimension should have a width of size by size and the height of the size.
+
+103
+00:09:19.000 --> 00:09:23.000
+So the total number of pixels is going to be size by size by size.
+
+104
+00:09:23.000 --> 00:09:29.000
+So what that means is the arrangement of the pixel values must follow a specific pattern.
+
+105
+00:09:29.000 --> 00:09:36.000
+So this image at the top here shows one zero eight nine by 33.
+
+106
+00:09:36.000 --> 00:09:40.000
+You see this image here on the top with the approximate pattern.
+
+107
+00:09:40.000 --> 00:09:46.000
+So the pixel values are RGB and the expression for each pixel is this following formula here.
+
+108
+00:09:46.000 --> 00:09:52.000
+So you get a good idea about how we've generated this this lookup table here.
+
+109
+00:09:52.000 --> 00:09:57.000
+So if these pixel values were written into open XEXR, the image file,
+
+110
+00:09:57.000 --> 00:10:05.000
+it would represent the identity LUT, which reproduces the color that is given for variable values in the range 0 to 1.
+
+111
+00:10:06.000 --> 00:10:12.000
+So to make the LUT interesting, each of these values must contain the desired output of the 3D LUT.
+
+112
+00:10:12.000 --> 00:10:17.000
+So by using an image processing program that supports your desired LUT file type,
+
+113
+00:10:17.000 --> 00:10:26.000
+you can index the file LUT with the identity pixel locations given above to find the actual pixel value needed at each location.
+
+114
+00:10:26.000 --> 00:10:33.000
+So once the proper floating point values are known for each pixel, then the image should be written as an open EXR image.
+
+115
+00:10:33.000 --> 00:10:38.000
+So Nuke can be used to produce this and help fill in the color gaps.
+
+116
+00:10:38.000 --> 00:10:44.000
+So maybe dig into this approach a little bit more over the legacy version of the lookup tables,
+
+117
+00:10:44.000 --> 00:10:49.000
+especially if you're using any approaches such as virtual production.
+
+118
+00:10:49.000 --> 00:10:55.000
+And if you are using Nuke, you can now take the LUT and use this code in Nuke to fill the color gaps,
+
+119
+00:10:55.000 --> 00:11:02.000
+which essentially just means fill those pixels and that's to be used as a HDR in order to create a 3D LUT.
+
+120
+00:11:02.000 --> 00:11:08.000
+So otherwise use a DCC to make sure you export it at a 16-bit HDR image.
+
+121
+00:11:08.000 --> 00:11:14.000
+And in most cases, it's not needed if you know Nuke as it has excellent control and exporters.
+
+122
+00:11:14.000 --> 00:11:20.000
+So if you are using Nuke, open a blank script in Nuke and paste that text into the node region.
+
+123
+00:11:20.000 --> 00:11:25.000
+It should make a small set of nodes that can be used as an input for whatever color correction you are doing.
+
+124
+00:11:25.000 --> 00:11:30.000
+So provided the code there and you can just copy and paste as needed.
+
+125
+00:11:31.000 --> 00:11:41.000
+Once created and edited in a design DCC, you can right click on the imported EXR and select create volume texture.
+
+126
+00:11:41.000 --> 00:11:49.000
+So when you're in Unreal, just right click, create volume texture, and then double click on the volume texture it has created.
+
+127
+00:11:49.000 --> 00:11:53.000
+So then we open this 3D volume texture here.
+
+128
+00:11:53.000 --> 00:11:58.000
+And then the volume texture will need to be edited to match the 3D LUT size value.
+
+129
+00:11:58.000 --> 00:12:03.000
+So X is 33 and Y is 33. The shape will be more cube like.
+
+130
+00:12:03.000 --> 00:12:07.000
+So don't worry about the bad size here in the bottom right hand side of the image.
+
+131
+00:12:07.000 --> 00:12:15.000
+To properly embody the floating point data, the 3D LUT without quantization or encoding, change the compression settings.
+
+132
+00:12:15.000 --> 00:12:20.000
+So again, on the right hand side, you've got some adjustments that you can make here.
+
+133
+00:12:20.000 --> 00:12:26.000
+And you want to change the compression settings to HDR, which is RGB, no sRGB.
+
+134
+00:12:26.000 --> 00:12:31.000
+And then you can save the volume texture asset so that it can be used in a material.
+
+135
+00:12:31.000 --> 00:12:35.000
+Then you want to make sure the material domain is set to a post-process volume.
+
+136
+00:12:35.000 --> 00:12:41.000
+In the material editor, you can create a texture sample parameter volume node from the menu.
+
+137
+00:12:41.000 --> 00:12:51.000
+And by providing a UVW coordinate to the UV parameter of the param volume node, it will index the volume texture to provide a lookup value.
+
+138
+00:12:52.000 --> 00:12:56.000
+So pretty straightforward material editor graph here.
+
+139
+00:12:56.000 --> 00:13:04.000
+And if you set it up in the following way using what we said above, you should be able to get the desired result there.
+
+140
+00:13:06.000 --> 00:13:16.000
+And then just a quick note that by indexing the LUT via the UVW parameter, you might need some slight adjustments to ensure that it behaves like a 3D LUT.
+
+141
+00:13:16.000 --> 00:13:28.000
+So the indexing shown here performs the operation by first scaling it by size minus one and then divided by size and then adding 0.5 to size in all three indices.
+
+142
+00:13:28.000 --> 00:13:34.000
+So a break for float component and make float three allow for control.
+
+143
+00:13:34.000 --> 00:13:37.000
+So you can see that in the image here.
+
+144
+00:13:41.000 --> 00:13:44.000
+The scalar parameters are to handle the size of the 3D LUT.
+
+145
+00:13:44.000 --> 00:13:51.000
+The input texture will have a specific size and in this case it's 33 by 33 by 33 as we said before.
+
+146
+00:13:51.000 --> 00:14:01.000
+And the value is labeled 32 by 33 is a fraction of n minus one divided by n, where n is the size of the LUT.
+
+147
+00:14:01.000 --> 00:14:04.000
+So the other value is 0.5 by n.
+
+148
+00:14:04.000 --> 00:14:09.000
+And the reason they are needed is to get the texture sampling to work properly.
+
+149
+00:14:10.000 --> 00:14:15.000
+In this material, example applies to a 3D LUT to the post processing input.
+
+150
+00:14:15.000 --> 00:14:20.000
+Other cases are possible, but the correct indexing is required for all uses.
+
+151
+00:14:20.000 --> 00:14:28.000
+So in the example material shown, note that the texture sample parameter volume was renamed to apply 3D LUT.
+
+152
+00:14:28.000 --> 00:14:34.000
+Now load the post process volume material with an instance material.
+
+153
+00:14:34.000 --> 00:14:37.000
+And so to do that, you just save out this material.
+
+154
+00:14:37.000 --> 00:14:48.000
+You would then go to your content browser where the material save, right click, create material instance and then use that instance material on the post process volume.

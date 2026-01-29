@@ -1,0 +1,201 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:08.360
+All right, animation retargeting.
+
+2
+00:00:08.360 --> 00:00:09.760
+Let's get started.
+
+3
+00:00:09.760 --> 00:00:14.520
+So retargeting, it allows animations to be reused between characters with the same skeleton
+
+4
+00:00:14.520 --> 00:00:18.960
+and they could have vastly different proportions.
+
+5
+00:00:18.960 --> 00:00:25.280
+Now Unreal, it uses a concept called a rig, which I would have called bone mapping, and
+
+6
+00:00:25.280 --> 00:00:29.680
+it acts as the translator from one character to another.
+
+7
+00:00:29.680 --> 00:00:33.600
+The character's proportions may be different, but the skeletons need to be similar enough
+
+8
+00:00:33.600 --> 00:00:36.700
+to be mapped to the same bone mapping.
+
+9
+00:00:36.700 --> 00:00:42.360
+And what I mean by that is no inserted or missing bones in the middle of the chain.
+
+10
+00:00:42.360 --> 00:00:47.800
+I mean you could have a winged angel character and, you know, if the angel has a similar
+
+11
+00:00:47.800 --> 00:00:53.000
+skeletal structure to a human that you already have in the level, except the only difference
+
+12
+00:00:53.000 --> 00:00:56.480
+is it has wings, that is fine.
+
+13
+00:00:56.640 --> 00:01:02.800
+You would not be able to retarget motion from a biped character to say a cat that walks
+
+14
+00:01:02.800 --> 00:01:04.920
+on all fours.
+
+15
+00:01:04.920 --> 00:01:09.800
+But you could retarget from a quadruped to another quadruped.
+
+16
+00:01:09.800 --> 00:01:14.660
+And I also want to mention the concept of the bind pose.
+
+17
+00:01:14.660 --> 00:01:18.760
+And just for now, I want you to know that if the original pose of your character is
+
+18
+00:01:18.760 --> 00:01:25.600
+different than the one that you are retargeting to, it will affect the fidelity of the animation.
+
+19
+00:01:25.720 --> 00:01:32.720
+And there's ways to work around that, but keep that in mind when you are retargeting.
+
+20
+00:01:32.720 --> 00:01:38.040
+Okay, so I want us to go ahead and dive into Unreal.
+
+21
+00:01:40.040 --> 00:01:49.440
+So I'm here in the engine, and what you can do to follow along is go to File, New Project,
+
+22
+00:01:49.440 --> 00:01:55.320
+select the Games Template, hit Next, and grab the Third Person Template.
+
+23
+00:01:56.040 --> 00:01:58.200
+It's got some good animations for this demo.
+
+24
+00:01:58.200 --> 00:01:59.200
+Hit Next.
+
+25
+00:01:59.200 --> 00:02:02.720
+Find a good folder path for your project.
+
+26
+00:02:02.720 --> 00:02:06.480
+I called this project Retargeting Crowds.
+
+27
+00:02:06.480 --> 00:02:08.880
+You can call it whatever you like.
+
+28
+00:02:08.880 --> 00:02:11.320
+Hit Create Project.
+
+29
+00:02:11.320 --> 00:02:16.640
+I will close the dialog window because I already have a project.
+
+30
+00:02:16.640 --> 00:02:23.640
+And then the next thing I would like you to do is go to your Epic Games launcher and select
+
+31
+00:02:23.640 --> 00:02:26.080
+the Marketplace tab.
+
+32
+00:02:26.080 --> 00:02:33.520
+And then in the Search Products section, type in Infinity Blade.
+
+33
+00:02:33.520 --> 00:02:39.240
+Now we're looking for the Infinity Blade Warriors pack.
+
+34
+00:02:39.240 --> 00:02:43.840
+And these characters were designed specifically for the skeleton that isn't Unreal, so this
+
+35
+00:02:43.840 --> 00:02:47.600
+is perfect for a retargeting example.
+
+36
+00:02:47.600 --> 00:02:52.840
+Now I already own this pack, so you might have a different button right here.
+
+37
+00:02:52.840 --> 00:02:58.480
+Go ahead and click on that, but then you'll have the option to add to project.
+
+38
+00:02:58.480 --> 00:03:01.120
+And then it says, no compatible projects.
+
+39
+00:03:01.120 --> 00:03:02.120
+It's actually okay.
+
+40
+00:03:02.120 --> 00:03:07.800
+There's no blueprint functionality that would clash with code or anything like that.
+
+41
+00:03:07.800 --> 00:03:12.040
+So just select Show All Projects.
+
+42
+00:03:12.040 --> 00:03:13.680
+Grab your project.
+
+43
+00:03:13.680 --> 00:03:16.440
+And I know the red letters look a little scary.
+
+44
+00:03:16.440 --> 00:03:17.440
+It's okay.
+
+45
+00:03:17.440 --> 00:03:22.360
+Just select 4.26, Add to Project, and I promise it will actually be okay.
+
+46
+00:03:23.360 --> 00:03:25.360
+And we'll let that come in.
+
+47
+00:03:29.360 --> 00:03:31.200
+So I'm back in the engine.
+
+48
+00:03:31.200 --> 00:03:35.360
+I'm going to click the Show or Hide Sources panel.
+
+49
+00:03:35.360 --> 00:03:41.600
+And then on the left, you'll notice we now have an Infinity Blade Warriors folder.
+
+50
+00:03:41.600 --> 00:03:45.360
+And next up, we will talk about the Retarget Manager.

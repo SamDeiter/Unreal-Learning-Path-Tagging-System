@@ -1,0 +1,581 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:10.780
+Next up we'll talk about creating a blueprint for pre-computed lighting and what we'll
+
+2
+00:00:10.780 --> 00:00:15.280
+cover here is we'll talk about some level streaming and we'll give you an overview
+
+3
+00:00:15.280 --> 00:00:22.220
+of the walkthrough and how you may go about setting up different lighting scenarios.
+
+4
+00:00:22.220 --> 00:00:27.780
+So in an empty map here I've just called my map level streaming and for this purpose
+
+5
+00:00:28.580 --> 00:00:32.860
+it's important to know about naming conventions and what we're streaming here.
+
+6
+00:00:32.860 --> 00:00:36.580
+It's completely up to you what you call them but you just need to make sure they're consistent.
+
+7
+00:00:36.580 --> 00:00:41.220
+So the first thing I'll do just to show you an example of this even though this isn't
+
+8
+00:00:41.220 --> 00:00:46.940
+necessarily lighting I'm going to show you a post-process example here.
+
+9
+00:00:46.940 --> 00:00:52.780
+So what I'll do is I'll just make sure this isn't ticked by default, yours shouldn't
+
+10
+00:00:52.780 --> 00:00:59.180
+be ticked by default and then I will first type unbound into my post-process and I will
+
+11
+00:00:59.180 --> 00:01:05.540
+tick that and it essentially just means the post-process affects the entire world and
+
+12
+00:01:05.540 --> 00:01:12.100
+then I will go to scene color tint which is under the miscellaneous tab inside of color
+
+13
+00:01:12.100 --> 00:01:19.120
+grading I'm just going to give this a color say of pink and then just so you know what
+
+14
+00:01:19.120 --> 00:01:24.640
+properties have changed what's a useful button to click is the settings option here and if
+
+15
+00:01:24.640 --> 00:01:29.120
+you show only modified properties I like this functionality when you're trying to dial in
+
+16
+00:01:29.120 --> 00:01:32.840
+certain properties that you've already adjusted it kind of cleans up the menu a little bit
+
+17
+00:01:32.840 --> 00:01:35.720
+so up to you if you want to use that.
+
+18
+00:01:35.720 --> 00:01:41.160
+What I will do is I will go to the levels tab and if you don't have this levels tab open
+
+19
+00:01:41.160 --> 00:01:45.300
+by default you can just go to a window and then you just want to make sure levels is
+
+20
+00:01:45.380 --> 00:01:51.220
+selected there and you can drop it in whichever window you would like and then I will go to
+
+21
+00:01:51.220 --> 00:01:58.060
+levels and create new I'm going to create an empty level and I'll create it and my
+
+22
+00:01:58.060 --> 00:02:03.300
+first map was called level streaming which you'll see at the top there so I'm still
+
+23
+00:02:03.300 --> 00:02:09.460
+going to call this level streaming and then I'll call this underscore pink for example
+
+24
+00:02:09.540 --> 00:02:12.060
+which is the pink level.
+
+25
+00:02:12.060 --> 00:02:17.620
+Now I've got this level currently selected you can see this highlighted blue now if you
+
+26
+00:02:17.620 --> 00:02:22.180
+think about this in terms of like almost like a layer in Photoshop or any other program
+
+27
+00:02:22.180 --> 00:02:26.740
+that you use this is the currently selected layer if I double click the persistent level
+
+28
+00:02:26.740 --> 00:02:33.380
+again which is our level streaming we've got a persistent level here so now I've got almost
+
+29
+00:02:33.380 --> 00:02:39.300
+like a sub layer of this persistent level so with it double clicked I'm going to select
+
+30
+00:02:39.300 --> 00:02:46.260
+my post process volume I'm going to hit ctrl and m and that actually moves the volume onto
+
+31
+00:02:46.980 --> 00:02:54.020
+the pink level streaming if I change the visibility of this level now if I hide it that's removed
+
+32
+00:02:54.020 --> 00:03:00.100
+that post process volume so if I toggle it on and I toggle it off that will hide and unhide it.
+
+33
+00:03:00.100 --> 00:03:06.020
+Now if I go to file save all even if this level is visible when I click play so I'm just going
+
+34
+00:03:06.020 --> 00:03:12.340
+to hit alt and p I'm playing this level now but you can't see the pink now that's because
+
+35
+00:03:12.340 --> 00:03:18.340
+this level is not loaded by default if you wanted it loaded by default you could right click change
+
+36
+00:03:18.340 --> 00:03:24.740
+the streaming method and go to always loaded and therefore it removes the little dot next to it
+
+37
+00:03:24.740 --> 00:03:31.300
+and when I hit alt and p to play it's now loaded so I don't want this loaded by default so I'm just
+
+38
+00:03:31.300 --> 00:03:36.260
+going to right click change streaming method and go back to the blueprint version of streaming method
+
+39
+00:03:36.260 --> 00:03:40.420
+because that's what this tutorial is about and you'll see the little dot there and whenever
+
+40
+00:03:40.420 --> 00:03:45.460
+you're working with lighting as of course this is a post process volume at the moment but if you're
+
+41
+00:03:45.460 --> 00:03:52.660
+working with lighting it's good to take the toggle lighting scenario and that makes Unreal account
+
+42
+00:03:52.660 --> 00:03:58.500
+for some pre-computed lighting scenarios and so if you had like a daytime scene a nighttime scene
+
+43
+00:03:59.220 --> 00:04:04.820
+a golden hour scene for example you could toggle the different lighting scenarios and it would be
+
+44
+00:04:04.820 --> 00:04:11.620
+pre-baked into that and all light maps would be stored inside of this stream level instead of
+
+45
+00:04:11.620 --> 00:04:16.420
+baking it on the asset so if you're wanting to just toggle lighting scenarios that's a really
+
+46
+00:04:16.420 --> 00:04:23.460
+powerful tool to have. I'm just going to file save all and now what I want to do is I want to
+
+47
+00:04:24.340 --> 00:04:30.740
+create maybe two or three more versions of this pink level so I can show you how we're toggling
+
+48
+00:04:30.740 --> 00:04:36.340
+through these different scenarios so I'll again go to levels I'll create a new level I'm going to
+
+49
+00:04:36.340 --> 00:04:44.420
+select empty level again I'll pre-select something that was a pink one and I'm just going to rename
+
+50
+00:04:44.420 --> 00:04:53.220
+it to green for example and I'll do that and then I'll do a last one create new empty level
+
+51
+00:04:53.220 --> 00:04:59.700
+I'll again get the naming convention and what colors should we go for there let's go for orange
+
+52
+00:05:01.060 --> 00:05:08.660
+so I'll save that and I go to file save all and then we want to go back and find our post-process
+
+53
+00:05:08.660 --> 00:05:14.340
+volume so if I go to the outliner and I find the post-process volume sometimes it's good just to
+
+54
+00:05:14.340 --> 00:05:20.660
+create a naming convention as well so maybe I'll call this pp underscore pink so I know which
+
+55
+00:05:20.740 --> 00:05:28.020
+post-process volume it is now the pink post-process volume is on the pink level as we saw before
+
+56
+00:05:28.500 --> 00:05:35.380
+now if I have say a different level selected so now the orange level is selected and I duplicate
+
+57
+00:05:36.260 --> 00:05:43.140
+this post-process volume and if I hide now the pink level you'll still see that post-process volume
+
+58
+00:05:43.140 --> 00:05:49.780
+quite faintly here on the left hand side if I turn off the visibility on that pink level that
+
+59
+00:05:50.660 --> 00:05:55.540
+post-process volume disappeared and because I duplicated this post-process volume with the
+
+60
+00:05:55.540 --> 00:06:01.060
+orange level selected this post-process volume is now on this level so instead of hitting control
+
+61
+00:06:01.060 --> 00:06:06.820
+and m like we did before I've just duplicated it onto the current streaming level so I'll go to
+
+62
+00:06:06.820 --> 00:06:14.580
+my scene tint I'll go to orange select new and then what I'll do is I'll duplicate this again by
+
+63
+00:06:14.580 --> 00:06:20.500
+holding down alt on my keyboard and I'll do the different method this way so I'll double click
+
+64
+00:06:20.500 --> 00:06:27.300
+now on my green level and I'll hit control and m to move it onto the green level I'll change this
+
+65
+00:06:27.300 --> 00:06:34.980
+to green and if I hide my orange level now I've got my green post-process volume so let's just
+
+66
+00:06:34.980 --> 00:06:40.580
+save all and let's just check these are working so I've got my green I'll hide my green I've got
+
+67
+00:06:40.660 --> 00:06:45.540
+my orange and I've got my pink so this is just a really nice way of just pre-visualizing these
+
+68
+00:06:45.540 --> 00:06:50.740
+level streaming methods that we're going to be using now they're all going to be blueprint driven
+
+69
+00:06:50.740 --> 00:06:54.900
+so again just right click you don't need to change this it should be there by default but change
+
+70
+00:06:54.900 --> 00:06:59.140
+streaming method just make sure they're all on blueprint we don't want them loaded by default
+
+71
+00:06:59.780 --> 00:07:05.780
+so if I went to file save all and I just hit alt and p to play again no no colors are currently
+
+72
+00:07:05.780 --> 00:07:13.620
+selected so now let's jump into blueprints and actually get some streaming setup we will go to
+
+73
+00:07:13.620 --> 00:07:20.660
+blueprints at the top here and we will open our level blueprint and we will just pin this to the
+
+74
+00:07:20.660 --> 00:07:26.340
+top bar now it's important to note that each one of these levels also has its own level blueprint
+
+75
+00:07:26.340 --> 00:07:31.540
+if you wanted to house any code on there we're going to put all the code on the persistent level
+
+76
+00:07:31.540 --> 00:07:37.860
+this persistent level is loaded and visible by default so you generally want to put any key
+
+77
+00:07:37.860 --> 00:07:43.620
+information onto this persistent level streaming level but you can house blueprint code on level
+
+78
+00:07:43.620 --> 00:07:48.420
+streaming if you want I've also just quickly noticed that the toggle lighting scenario so if
+
+79
+00:07:48.420 --> 00:07:53.140
+these were all three lighting scenarios that you had lighting on that you wanted to bake you just
+
+80
+00:07:53.140 --> 00:07:59.460
+want to make sure those three are toggled there but let's jump into blueprints now we can just
+
+81
+00:07:59.460 --> 00:08:06.100
+delete what's currently there we don't need that and I'm just going to right click and press the
+
+82
+00:08:06.100 --> 00:08:11.060
+hash key on my keyboard you can press whatever input type you like but I'm just going to use
+
+83
+00:08:11.060 --> 00:08:17.700
+the hash key and again like previous examples you can change the input key if you want by selecting
+
+84
+00:08:18.420 --> 00:08:23.060
+this button here it goes orange and if I press c on my keyboard for example that input would
+
+85
+00:08:23.060 --> 00:08:28.740
+change to c so I always just start with hash just because it's the quickest input to find and then
+
+86
+00:08:28.740 --> 00:08:34.260
+you can change it from there pretty pretty easily so I'll just save and compile just make sure
+
+87
+00:08:34.260 --> 00:08:42.100
+everything's still working now the two functions that we want to be working with today is unload
+
+88
+00:08:42.100 --> 00:08:49.460
+which is unload stream level by name so this unload stream level by name and then we also want to
+
+89
+00:08:49.460 --> 00:08:55.380
+have a load stream level by name so if you type load you'll have load stream level by name as well
+
+90
+00:08:56.260 --> 00:09:01.700
+so these are the two levels that we want to be working with here so this will unload a stream
+
+91
+00:09:01.700 --> 00:09:07.700
+level this will load a stream level and the level name that it will load and unload is if we go back
+
+92
+00:09:07.700 --> 00:09:14.020
+into our tab it's these levels that aren't currently loaded so let's start with the green example
+
+93
+00:09:14.020 --> 00:09:18.260
+so the way I like to do this I like to right click on the stream level I like to find it in
+
+94
+00:09:18.260 --> 00:09:24.500
+the content browser when it finds it in the content browser I'll single click just to go into rename
+
+95
+00:09:24.500 --> 00:09:31.460
+mode or you can right click rename or you can even hit f2 on it but I'll hit ctrl c to get the
+
+96
+00:09:31.460 --> 00:09:39.540
+name and I'll go back into the level streaming and in load I'll go to a paste there so ctrl and v
+
+97
+00:09:40.820 --> 00:09:45.460
+just to paste that name in I copy and paste the names rather than manually typing them out
+
+98
+00:09:45.460 --> 00:09:49.780
+because these level names need to be exactly what the other level name is called so if you
+
+99
+00:09:49.780 --> 00:09:55.620
+misspell anything it could break your game so I'm just going to go to
+
+100
+00:09:56.820 --> 00:10:01.380
+unpressed hash key I'm just going to load this level just see let's see what it's doing
+
+101
+00:10:02.100 --> 00:10:08.180
+you can play around with the make visible after load I like to tick that and just compile and
+
+102
+00:10:08.180 --> 00:10:13.940
+save and if we go to level streaming now hit alt and p we're playing the game now I'm going
+
+103
+00:10:13.940 --> 00:10:20.820
+to hit the hash key and now I've loaded the green level in and you'll see that on this side here
+
+104
+00:10:20.820 --> 00:10:24.900
+the level is now visible so we've got the persistent level still loaded and now we're
+
+105
+00:10:24.900 --> 00:10:30.020
+streaming in this sub data so you can imagine now quite quickly that if you had a nighttime scene
+
+106
+00:10:30.020 --> 00:10:35.620
+a daytime scene and a golden hour scene you could then cycle through these different levels to test
+
+107
+00:10:35.620 --> 00:10:41.460
+out the different lighting scenarios that you might have in your experience here so we'll use
+
+108
+00:10:41.460 --> 00:10:47.780
+a multi-gate to toggle through each of these level streaming functions now so I'll just give
+
+109
+00:10:47.780 --> 00:10:53.780
+myself a bit of space and going back to a multi-gate that we've used previously I'll select
+
+110
+00:10:53.780 --> 00:11:02.740
+multi-gate here so I've got a multi-gate and I will load first the green and then I'll copy
+
+111
+00:11:03.460 --> 00:11:11.300
+by ctrl c ctrl v and I'll ctrl c ctrl v again I'll add a pin I'll go to the different out
+
+112
+00:11:11.460 --> 00:11:19.380
+outputs so again we're just reusing functionality that we've used previously now I will promote the
+
+113
+00:11:19.380 --> 00:11:28.180
+loop output to a variable as well we'll call this scene switch and again we can just rename this
+
+114
+00:11:28.180 --> 00:11:34.740
+variable up here if you want to rename it I'll give it a category I like to always keep things
+
+115
+00:11:34.740 --> 00:11:41.140
+organized here especially as your level blueprints start getting bigger so we'll just call this
+
+116
+00:11:41.140 --> 00:11:51.460
+streaming and you can also I just control uh compile and save sorry and then you can also
+
+117
+00:11:51.460 --> 00:11:59.620
+promote this to a variable we'll call this starting scene index or you can call this whatever makes
+
+118
+00:11:59.620 --> 00:12:07.460
+most sense to you in your level here and then we'll give it the category as well streaming so again
+
+119
+00:12:07.460 --> 00:12:13.060
+we're just repeating a lot of functionality we previously learned here and so we've we're streaming
+
+120
+00:12:13.060 --> 00:12:18.900
+the green level in first and then we'll go back into our level streaming we'll find our orange
+
+121
+00:12:18.900 --> 00:12:25.540
+level next I'm going to ctrl c and I'll ctrl v the next name into there and of course because
+
+122
+00:12:25.540 --> 00:12:31.140
+we've kept the same naming convention I could just type pink in here but just for uniformity
+
+123
+00:12:31.140 --> 00:12:37.380
+I'll just copy the pink name and I'll paste this name now an important key to note to
+
+124
+00:12:37.940 --> 00:12:44.900
+make here is we're loading in the levels but we're not unloading the previous level so let's go
+
+125
+00:12:44.900 --> 00:12:50.260
+ahead and use this unload stream level by name function now so I just want to drag that in there
+
+126
+00:12:50.980 --> 00:12:57.380
+I'm going to ctrl c and ctrl v and the reason why I need two is because I just want to make sure if
+
+127
+00:12:57.380 --> 00:13:03.940
+the green is loaded orange and pink are not loaded so I'm just going to grab orange paste here and
+
+128
+00:13:03.940 --> 00:13:10.900
+again copying and pasting will save you a lot of time and misspellings and then I'll just ctrl c
+
+129
+00:13:10.900 --> 00:13:16.100
+ctrl v and now it's just trying to work as efficiently with the keyboard as we can by
+
+130
+00:13:16.100 --> 00:13:27.220
+ctrl c ctrl v so if orange is loaded we want to unload the green and the pink if pink is loaded
+
+131
+00:13:27.380 --> 00:13:36.020
+we want to unload orange and green so green visible orange and pink not orange visible
+
+132
+00:13:36.020 --> 00:13:43.060
+green and pink not and then pink visible orange and green not and so as long as you have the loop
+
+133
+00:13:43.060 --> 00:13:49.380
+selected by default again you don't have to but what it will do is it'll make that infinitely
+
+134
+00:13:50.340 --> 00:13:57.700
+repeat itself so I just want to compile and save I go back into my level streaming I'll hit
+
+135
+00:13:57.700 --> 00:14:03.060
+alt and p now there's nothing loaded by default and you could set something on begin play if you
+
+136
+00:14:03.060 --> 00:14:08.100
+wanted but I'm just going to press the hash key I'm going to press the hash key again I'm going
+
+137
+00:14:08.100 --> 00:14:13.860
+to press the hash key again and we'll just keep cycling and so that's a really nice functionality
+
+138
+00:14:13.860 --> 00:14:20.020
+to test different lighting scenarios out within your maps the last thing I'll do just as a bit
+
+139
+00:14:20.020 --> 00:14:27.140
+of bonus cleanup I'm just going to select everything I'll hit ctrl I'll just hit c on the keyboard
+
+140
+00:14:27.140 --> 00:14:33.540
+sorry and we'll just call this level streaming setup or something like that it gives it a title
+
+141
+00:14:34.100 --> 00:14:39.940
+I can move this title around I'll maybe give it a bit of a comment color I'll maybe drop the alpha
+
+142
+00:14:39.940 --> 00:14:44.900
+just to make things look a little bit nicer maybe I'll change the font size as well because
+
+143
+00:14:44.900 --> 00:14:50.180
+this is quite a big powerful functionality in the level it just keeps things nice and organized
+
+144
+00:14:50.180 --> 00:14:54.660
+so hopefully that gives you a good idea about how you might use level streaming and
+
+145
+00:14:54.660 --> 00:15:08.100
+a pre-computed lighting within your levels

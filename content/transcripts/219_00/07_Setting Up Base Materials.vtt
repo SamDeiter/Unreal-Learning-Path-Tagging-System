@@ -1,0 +1,1293 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:09.640
+In this video, we're going to talk about setting up base materials and how we can get that
+
+2
+00:00:09.640 --> 00:00:14.160
+foundation down and make sure that's a doorway to be able to create instance materials, which
+
+3
+00:00:14.160 --> 00:00:19.960
+is going to help with our overall draw calls and overhead for our scenes.
+
+4
+00:00:19.960 --> 00:00:22.520
+So let's get started.
+
+5
+00:00:22.520 --> 00:00:27.120
+Some of the topics we're going to cover is a simple material setup and instancing those
+
+6
+00:00:27.120 --> 00:00:29.680
+materials.
+
+7
+00:00:29.680 --> 00:00:33.600
+First up, let's go and take a look at our spire material that we have set up and how
+
+8
+00:00:33.600 --> 00:00:37.320
+we can actually open up some of these parameters to be able to have full control of how they
+
+9
+00:00:37.320 --> 00:00:38.320
+look and feel.
+
+10
+00:00:38.320 --> 00:00:42.520
+And we'll keep this pretty simple because we do have a materials class, but this for
+
+11
+00:00:42.520 --> 00:00:47.040
+the most part just reminds you of the theory and the practice of this and how this actually
+
+12
+00:00:47.040 --> 00:00:50.700
+will help your overall scenes.
+
+13
+00:00:50.700 --> 00:00:53.200
+So let's go and take a look at this in Unreal.
+
+14
+00:00:53.200 --> 00:00:58.420
+So in our Unreal scene here, we have our spire here that we can play with.
+
+15
+00:00:58.420 --> 00:01:00.020
+So let's go and take a look at his material.
+
+16
+00:01:00.020 --> 00:01:02.220
+I'm going to double click on this material.
+
+17
+00:01:02.220 --> 00:01:06.980
+And we keep these concepts pretty simple, but so that you understand why and the purpose
+
+18
+00:01:06.980 --> 00:01:07.980
+of this.
+
+19
+00:01:07.980 --> 00:01:09.900
+So you'll see that we have a specular.
+
+20
+00:01:09.900 --> 00:01:12.980
+He's always going to be active and set to a 0.5.
+
+21
+00:01:12.980 --> 00:01:16.620
+The one thing you do need to keep in mind when working with a specular material is it
+
+22
+00:01:16.620 --> 00:01:19.060
+can interfere with the strength of your roughness.
+
+23
+00:01:19.060 --> 00:01:24.020
+So sometimes just lowering this to a simple zero can be kind of helpful.
+
+24
+00:01:25.020 --> 00:01:32.260
+So all your texture information, as in your roughness and surface information is pulled
+
+25
+00:01:32.260 --> 00:01:36.740
+from your roughness texture or whatever number of variables you're working with.
+
+26
+00:01:36.740 --> 00:01:38.600
+Now this is the material editor.
+
+27
+00:01:38.600 --> 00:01:43.220
+At this point, you should be familiar with this concept, as in, excuse me, with this
+
+28
+00:01:43.220 --> 00:01:45.640
+tool and how it works.
+
+29
+00:01:45.640 --> 00:01:48.900
+And in here, you'll see that we have several different modes for our material.
+
+30
+00:01:48.900 --> 00:01:51.860
+I'm just clicking right here, left clicking in the grid.
+
+31
+00:01:51.860 --> 00:01:57.380
+You can see that you can choose whether it's a simple surface, defer decal, light function,
+
+32
+00:01:57.380 --> 00:01:59.020
+volume, post-process.
+
+33
+00:01:59.020 --> 00:02:03.660
+Those are actually pretty heavy lifters in changing the dependencies of how this material
+
+34
+00:02:03.660 --> 00:02:04.820
+is going to look.
+
+35
+00:02:04.820 --> 00:02:09.540
+And also we have a blend mode, which will allow us to even push further how our visuals
+
+36
+00:02:09.540 --> 00:02:11.860
+are going to be for our material.
+
+37
+00:02:11.860 --> 00:02:13.060
+So we're going to keep things pretty simple.
+
+38
+00:02:13.060 --> 00:02:16.060
+We're going to have a surface opaque default lit.
+
+39
+00:02:16.060 --> 00:02:17.060
+All that's good.
+
+40
+00:02:17.060 --> 00:02:22.180
+Now remember, as you change things, such as turn things and make them more translucent,
+
+41
+00:02:22.180 --> 00:02:23.580
+they can't get expensive.
+
+42
+00:02:23.580 --> 00:02:28.540
+So keeping your materials in mind of exactly what you want, what your output is, is really
+
+43
+00:02:28.540 --> 00:02:33.500
+important because as your material gets more complicated, such as with translucency, things
+
+44
+00:02:33.500 --> 00:02:35.140
+can get expensive.
+
+45
+00:02:35.140 --> 00:02:40.240
+Now what we can do to maybe help that out a bit, because the draw calls look at each
+
+46
+00:02:40.240 --> 00:02:44.480
+one of your materials, is we can help out those draw calls a bit with some instancing.
+
+47
+00:02:44.480 --> 00:02:47.360
+And instancing can be very helpful.
+
+48
+00:02:47.360 --> 00:02:55.200
+Now you can have multiple instances off a parent or master mold material.
+
+49
+00:02:55.200 --> 00:02:59.240
+You can have multiple instances derived from it.
+
+50
+00:02:59.240 --> 00:03:02.400
+And you can have it so like there's 50, you can even go as far as 100.
+
+51
+00:03:02.400 --> 00:03:05.040
+That's a limitation based on your GPU.
+
+52
+00:03:05.040 --> 00:03:09.520
+But to be able to do that, to open this up, to open this master material, master mold
+
+53
+00:03:10.520 --> 00:03:15.320
+To open it up, to be able to do that, we have to actually open up our parameters.
+
+54
+00:03:15.320 --> 00:03:19.520
+So we have to go to each one of these textures, right click it here, and do a thing called
+
+55
+00:03:19.520 --> 00:03:20.960
+convert to parameter.
+
+56
+00:03:20.960 --> 00:03:26.540
+And we'll call this the albedo.
+
+57
+00:03:26.540 --> 00:03:31.360
+And when you create these, you can also have the option when you open up these parameters
+
+58
+00:03:31.360 --> 00:03:32.760
+to add a group.
+
+59
+00:03:32.760 --> 00:03:37.200
+So we can call this the albedo.
+
+60
+00:03:37.200 --> 00:03:39.320
+And I'm keeping this pretty simple.
+
+61
+00:03:39.320 --> 00:03:44.280
+In the most part, what we might want to do is maybe introduce a multiply.
+
+62
+00:03:44.280 --> 00:03:51.080
+In that multiply, we maybe have a scalar parameter, which is a more upgraded version of this constant
+
+63
+00:03:51.080 --> 00:03:52.400
+parameter here.
+
+64
+00:03:52.400 --> 00:03:57.800
+To get there, you can either right click a constant parameter and convert to a parameter.
+
+65
+00:03:57.800 --> 00:03:59.960
+Then we'll change it to a scalar parameter.
+
+66
+00:03:59.960 --> 00:04:04.360
+Or simply keep your finger on the S key and the left click and you'll create a scalar
+
+67
+00:04:04.360 --> 00:04:05.680
+parameter.
+
+68
+00:04:05.680 --> 00:04:10.520
+And then in here, we could call this a, you know, I'm going to maybe change the color
+
+69
+00:04:10.520 --> 00:04:14.240
+output of this individual texture.
+
+70
+00:04:14.240 --> 00:04:19.200
+Maybe introduce a three constant vector.
+
+71
+00:04:19.200 --> 00:04:20.200
+This will be for color.
+
+72
+00:04:20.200 --> 00:04:25.120
+We can keep it black and we can pull this albedo in here.
+
+73
+00:04:25.120 --> 00:04:27.480
+You can get a preview what it's going to look like.
+
+74
+00:04:27.480 --> 00:04:32.960
+You can see if we right click, start preview mode, you can see that we're all black.
+
+75
+00:04:32.960 --> 00:04:36.840
+So you have to watch out between add and multiply what you're going to get.
+
+76
+00:04:36.840 --> 00:04:39.600
+And in this case, we would set this to white.
+
+77
+00:04:39.600 --> 00:04:45.360
+And they'll see your color information come through.
+
+78
+00:04:45.360 --> 00:04:48.180
+And if you wanted to, let's stop that preview.
+
+79
+00:04:48.180 --> 00:04:51.880
+We can control maybe how strong that's going to be.
+
+80
+00:04:51.880 --> 00:05:01.920
+So with this multiply in place, we can maybe pull in the strength of that albedo.
+
+81
+00:05:02.000 --> 00:05:08.560
+By temporarily disconnecting this, moving this over here.
+
+82
+00:05:13.600 --> 00:05:16.160
+Simply make another multiply.
+
+83
+00:05:16.160 --> 00:05:19.560
+Put this in here.
+
+84
+00:05:19.560 --> 00:05:21.280
+This in here.
+
+85
+00:05:21.280 --> 00:05:23.680
+And then connect that right here.
+
+86
+00:05:23.680 --> 00:05:26.240
+And you'll see that it's dark at first, right?
+
+87
+00:05:26.240 --> 00:05:33.280
+So this parameter, we can set that to one or even higher if we wanted to.
+
+88
+00:05:33.280 --> 00:05:37.280
+And let's add this to the base.
+
+89
+00:05:37.280 --> 00:05:40.120
+And you'll see now it's still a bit dark, right?
+
+90
+00:05:40.120 --> 00:05:42.840
+Not quite exactly what we're looking for.
+
+91
+00:05:42.840 --> 00:05:47.920
+So as you increase your multiply, you'll see that it's going to magnify things.
+
+92
+00:05:47.920 --> 00:05:51.440
+So the nice thing about working with a scalar, we can keep things within a range.
+
+93
+00:05:51.440 --> 00:05:54.440
+So I can say, hey, man, I want my default to be 10.
+
+94
+00:05:54.440 --> 00:05:55.440
+I want my slider.
+
+95
+00:05:55.440 --> 00:05:56.680
+Or actually, that might be too strong.
+
+96
+00:05:56.680 --> 00:05:58.640
+We'll do like maybe a five.
+
+97
+00:05:58.640 --> 00:06:03.640
+And I want my slider minimum to be zero and my maximum to be five.
+
+98
+00:06:03.640 --> 00:06:06.360
+So this all depends how you want to pull this through.
+
+99
+00:06:06.360 --> 00:06:10.160
+But this gives you the magnification based on whatever color you've chosen.
+
+100
+00:06:10.160 --> 00:06:11.520
+And that's one way you can do it.
+
+101
+00:06:11.520 --> 00:06:12.680
+So there's multiple ways.
+
+102
+00:06:12.680 --> 00:06:16.240
+And whenever you make these, make sure you comment them out.
+
+103
+00:06:16.240 --> 00:06:18.480
+So you can say, hey, I want to comment this right here.
+
+104
+00:06:18.480 --> 00:06:20.480
+We'll leave the C key.
+
+105
+00:06:20.480 --> 00:06:23.240
+We'll leave this guy out just temporarily.
+
+106
+00:06:23.280 --> 00:06:26.760
+And we'll just say here, color experiments.
+
+107
+00:06:30.200 --> 00:06:32.920
+And there's multiple ways to actually match this up.
+
+108
+00:06:32.920 --> 00:06:34.800
+I just did this super generically.
+
+109
+00:06:34.800 --> 00:06:39.520
+And in our classes, you'll see me talk about, as well as other instructors,
+
+110
+00:06:39.520 --> 00:06:40.480
+how to set this up.
+
+111
+00:06:40.480 --> 00:06:41.920
+And this is just a quick way.
+
+112
+00:06:41.920 --> 00:06:43.480
+You could even just add.
+
+113
+00:06:43.480 --> 00:06:47.120
+But this multiply and add kind of act a little bit like Photoshop,
+
+114
+00:06:47.120 --> 00:06:48.200
+allowing us to stack.
+
+115
+00:06:48.200 --> 00:06:52.240
+But you have to keep in mind what kind of color output you're going to get.
+
+116
+00:06:52.280 --> 00:06:54.400
+And you can get that through a preview by right clicking,
+
+117
+00:06:54.400 --> 00:06:58.080
+which you saw me do just a minute ago for previews and so forth.
+
+118
+00:06:58.080 --> 00:07:00.600
+We could even lower this to maybe two if we wanted.
+
+119
+00:07:02.160 --> 00:07:03.320
+That's too dark.
+
+120
+00:07:03.320 --> 00:07:04.320
+Let's do something like that.
+
+121
+00:07:07.400 --> 00:07:07.920
+Or four.
+
+122
+00:07:07.920 --> 00:07:09.520
+There we go.
+
+123
+00:07:09.520 --> 00:07:10.360
+That's fine.
+
+124
+00:07:10.360 --> 00:07:11.080
+All right.
+
+125
+00:07:11.080 --> 00:07:13.000
+So that gives you a little bit of control.
+
+126
+00:07:13.000 --> 00:07:14.800
+Gives you an idea of how that works.
+
+127
+00:07:14.800 --> 00:07:16.000
+And you can also keep it simple.
+
+128
+00:07:16.000 --> 00:07:18.800
+This just depends on how much control you want of this object.
+
+129
+00:07:18.800 --> 00:07:22.200
+But if we are going to do this, again, we have to actually open up the parameters.
+
+130
+00:07:22.200 --> 00:07:23.400
+Convert that to a parameter.
+
+131
+00:07:23.400 --> 00:07:25.640
+Call this color overlay.
+
+132
+00:07:28.720 --> 00:07:30.360
+And we've got to put them in a group.
+
+133
+00:07:30.360 --> 00:07:32.840
+We're going to put them in that albedo group.
+
+134
+00:07:32.840 --> 00:07:34.600
+Do the same thing with the scalar parameter.
+
+135
+00:07:34.600 --> 00:07:35.960
+Want to give it a name, though.
+
+136
+00:07:35.960 --> 00:07:37.680
+We'll call this intensity color.
+
+137
+00:07:37.680 --> 00:07:39.560
+So color intensity.
+
+138
+00:07:39.560 --> 00:07:42.160
+Let's just put that there.
+
+139
+00:07:42.160 --> 00:07:44.320
+And just put that into an albedo group.
+
+140
+00:07:46.800 --> 00:07:49.120
+And then again, we want to open up each one of these.
+
+141
+00:07:49.120 --> 00:07:52.800
+Convert to a parameter.
+
+142
+00:07:52.800 --> 00:07:55.080
+Rough.
+
+143
+00:07:55.080 --> 00:07:56.360
+Yes.
+
+144
+00:07:56.360 --> 00:07:59.880
+And normally, you could put a multiply in here.
+
+145
+00:07:59.880 --> 00:08:02.240
+And you can choose scalar parameter.
+
+146
+00:08:02.240 --> 00:08:05.640
+I'll do this slightly quickly here.
+
+147
+00:08:05.640 --> 00:08:07.720
+Rough intensity.
+
+148
+00:08:07.720 --> 00:08:11.040
+Because you should have had these classes at this point.
+
+149
+00:08:11.040 --> 00:08:12.040
+Move that in there.
+
+150
+00:08:12.040 --> 00:08:13.760
+We'll set his limitation to.
+
+151
+00:08:13.760 --> 00:08:14.960
+And you can cheat a little bit.
+
+152
+00:08:14.960 --> 00:08:17.880
+Because when it comes to roughness, it's typically a 0 to 1.
+
+153
+00:08:17.880 --> 00:08:19.560
+That's really how it works.
+
+154
+00:08:19.560 --> 00:08:21.720
+But you can cheat a little bit with Unreal.
+
+155
+00:08:21.720 --> 00:08:24.280
+If we introduce a multiply, we can go a little bit higher.
+
+156
+00:08:24.280 --> 00:08:26.640
+And I actually like to work with a little bit higher numbers.
+
+157
+00:08:26.640 --> 00:08:30.160
+Instead of getting carpal tunnel and typing in 0.00.5,
+
+158
+00:08:30.160 --> 00:08:31.760
+that's the intensity I'm looking for.
+
+159
+00:08:31.760 --> 00:08:33.640
+You can cheat when it comes to the multiply
+
+160
+00:08:33.640 --> 00:08:35.280
+in this particular case.
+
+161
+00:08:35.280 --> 00:08:37.520
+And metallic, not so much.
+
+162
+00:08:37.520 --> 00:08:40.560
+So I'm going to go in here and put a 10.
+
+163
+00:08:40.560 --> 00:08:46.760
+We'll do a 5 as default. If we want to increase that,
+
+164
+00:08:46.760 --> 00:08:51.720
+we can set the minimum to 0 and maximum to 10.
+
+165
+00:08:51.720 --> 00:08:54.240
+So then we can go higher.
+
+166
+00:08:54.240 --> 00:08:55.080
+That's there.
+
+167
+00:08:55.080 --> 00:08:56.760
+And we probably have to mute this a bit,
+
+168
+00:08:56.760 --> 00:08:57.920
+because it's probably still too high.
+
+169
+00:08:57.920 --> 00:08:58.840
+But that's fine.
+
+170
+00:08:58.840 --> 00:09:00.600
+And we just set that to roughness there.
+
+171
+00:09:04.000 --> 00:09:07.640
+And we also have ambient occlusion.
+
+172
+00:09:07.640 --> 00:09:08.240
+We'll leave that.
+
+173
+00:09:08.240 --> 00:09:09.360
+We'll leave normal.
+
+174
+00:09:09.360 --> 00:09:11.880
+Now, normal, if you want to control this,
+
+175
+00:09:11.880 --> 00:09:15.160
+is a little bit counterintuitive artist-wise.
+
+176
+00:09:15.160 --> 00:09:18.800
+But what you want to do is use a flatten normal.
+
+177
+00:09:18.800 --> 00:09:23.080
+Sometimes I'll be lazy in my flatten normal.
+
+178
+00:09:23.080 --> 00:09:25.320
+I'll just simply put in a scalar and flatten this.
+
+179
+00:09:25.320 --> 00:09:27.800
+But the only problem is it works in a negative space.
+
+180
+00:09:27.800 --> 00:09:29.160
+So it gets a little weird.
+
+181
+00:09:29.160 --> 00:09:31.480
+So we'd have to actually flip that so it goes back
+
+182
+00:09:31.480 --> 00:09:32.200
+to a positive.
+
+183
+00:09:32.200 --> 00:09:34.920
+So since this works in an opposite direction,
+
+184
+00:09:34.920 --> 00:09:38.240
+so negative is pushing forward the way you maybe
+
+185
+00:09:38.240 --> 00:09:41.480
+have intended it, going positive numbers goes negative,
+
+186
+00:09:41.480 --> 00:09:43.560
+that's going to be counterintuitive.
+
+187
+00:09:43.560 --> 00:09:45.920
+So you have to actually use a 1 minus node.
+
+188
+00:09:50.480 --> 00:09:52.000
+Back, there it is.
+
+189
+00:09:52.000 --> 00:09:54.240
+I literally typed a node.
+
+190
+00:09:54.240 --> 00:09:58.520
+And I can put that in my flatness here.
+
+191
+00:09:58.520 --> 00:10:01.320
+And I would connect this to my scalar parameter.
+
+192
+00:10:06.720 --> 00:10:08.160
+And we'll call it normal intensity.
+
+193
+00:10:08.160 --> 00:10:10.320
+And I keep in this pretty basic.
+
+194
+00:10:10.320 --> 00:10:12.720
+Regularly, you would create a whole UV set
+
+195
+00:10:12.720 --> 00:10:15.360
+where you can control how many times the UVs are tiling.
+
+196
+00:10:15.360 --> 00:10:19.200
+In this case, since UV is very specific with his UVs,
+
+197
+00:10:19.200 --> 00:10:20.680
+we probably should do that.
+
+198
+00:10:20.680 --> 00:10:23.000
+Otherwise, you could really ugly fast.
+
+199
+00:10:23.000 --> 00:10:25.440
+But if you have a more encompassing texture
+
+200
+00:10:25.440 --> 00:10:28.280
+that is more generic and not really dependent on UVs,
+
+201
+00:10:28.280 --> 00:10:30.080
+you can actually play with that a bit more.
+
+202
+00:10:30.080 --> 00:10:32.760
+So I'm going to go and move this to the normal.
+
+203
+00:10:32.760 --> 00:10:35.720
+And in that normal, we bring that into the normal.
+
+204
+00:10:36.040 --> 00:10:38.600
+And in that normal, we bring that into the normal space
+
+205
+00:10:38.600 --> 00:10:40.400
+there.
+
+206
+00:10:40.400 --> 00:10:41.400
+There we go.
+
+207
+00:10:41.400 --> 00:10:43.040
+And again, we can control the intensity.
+
+208
+00:10:43.040 --> 00:10:47.800
+In this case, we can set the intensity to, say, 5
+
+209
+00:10:47.800 --> 00:10:50.800
+if you want to go really strong, minimum 0.
+
+210
+00:10:50.800 --> 00:10:52.300
+And then, say, we want to invert it.
+
+211
+00:10:52.300 --> 00:10:55.680
+We could do a negative 5 for actually,
+
+212
+00:10:55.680 --> 00:10:56.560
+I did that backwards.
+
+213
+00:10:56.560 --> 00:10:57.040
+Here we go.
+
+214
+00:10:57.040 --> 00:10:58.160
+Minimum is negative 5.
+
+215
+00:10:58.160 --> 00:11:00.800
+My bad.
+
+216
+00:11:00.800 --> 00:11:02.440
+That's negative 5.
+
+217
+00:11:02.440 --> 00:11:07.360
+And the maximum is going to be just a little 5.
+
+218
+00:11:07.360 --> 00:11:09.120
+There we go.
+
+219
+00:11:09.120 --> 00:11:10.720
+Cool.
+
+220
+00:11:10.720 --> 00:11:13.000
+And if you ever wanted to bring in your geometry,
+
+221
+00:11:13.000 --> 00:11:15.240
+just make sure you select your geometry in your content
+
+222
+00:11:15.240 --> 00:11:16.040
+browser.
+
+223
+00:11:16.040 --> 00:11:17.840
+With it selected, just click on the teapot,
+
+224
+00:11:17.840 --> 00:11:19.800
+and it will load it in this viewer.
+
+225
+00:11:19.800 --> 00:11:22.000
+All right, so with this all set up,
+
+226
+00:11:22.000 --> 00:11:25.800
+we want to make sure, again, we open up the parameters.
+
+227
+00:11:25.800 --> 00:11:27.080
+And this will be a normal.
+
+228
+00:11:28.080 --> 00:11:29.720
+We're going to create a normal group.
+
+229
+00:11:37.400 --> 00:11:39.600
+And we'll just add this to the normal group, too.
+
+230
+00:11:45.640 --> 00:11:47.120
+And we'll create a roughness group.
+
+231
+00:11:52.560 --> 00:11:55.200
+Add this roughness intensity to that roughness group.
+
+232
+00:11:58.080 --> 00:12:00.120
+Also, make sure this guy is connected to the roughness
+
+233
+00:12:00.120 --> 00:12:00.600
+group.
+
+234
+00:12:00.600 --> 00:12:02.360
+There he is.
+
+235
+00:12:02.360 --> 00:12:04.160
+For some reason, I thought I didn't do that.
+
+236
+00:12:04.160 --> 00:12:05.660
+And we'll just leave Albedo by himself,
+
+237
+00:12:05.660 --> 00:12:08.320
+because nobody cares about him right now.
+
+238
+00:12:08.320 --> 00:12:09.080
+So there we go.
+
+239
+00:12:09.080 --> 00:12:10.200
+We even got commenting.
+
+240
+00:12:10.200 --> 00:12:11.600
+We got this all set up.
+
+241
+00:12:11.600 --> 00:12:14.440
+And I would hit Say.
+
+242
+00:12:14.440 --> 00:12:16.040
+So I'm just going to apply in this case
+
+243
+00:12:16.040 --> 00:12:18.560
+so I can rebuild this for another course.
+
+244
+00:12:18.560 --> 00:12:23.000
+And I'm going to pull this across here.
+
+245
+00:12:23.000 --> 00:12:25.760
+And then now I can right click this particular piece
+
+246
+00:12:25.760 --> 00:12:26.280
+of geometry.
+
+247
+00:12:26.280 --> 00:12:27.680
+It looks like it's a little bright.
+
+248
+00:12:27.680 --> 00:12:29.480
+So we can probably go over that a little bit.
+
+249
+00:12:29.480 --> 00:12:30.080
+It's all shiny.
+
+250
+00:12:30.080 --> 00:12:32.800
+I actually kind of like it.
+
+251
+00:12:32.800 --> 00:12:35.240
+But we can change that in the instance, believe it or not.
+
+252
+00:12:35.240 --> 00:12:36.720
+So we'll do that in the instance.
+
+253
+00:12:36.720 --> 00:12:38.600
+And you can see the update on the fly.
+
+254
+00:12:38.600 --> 00:12:41.040
+So let's move this off to the side.
+
+255
+00:12:41.040 --> 00:12:42.240
+I'm going to right click here.
+
+256
+00:12:42.240 --> 00:12:45.800
+And we'll do Create Material Instance.
+
+257
+00:12:45.800 --> 00:12:50.720
+And we're going to call this mi for Material Instance.
+
+258
+00:12:50.720 --> 00:12:52.080
+We go across.
+
+259
+00:12:52.080 --> 00:12:56.160
+Let's get rid of that suffix.
+
+260
+00:12:56.160 --> 00:12:57.760
+Enter.
+
+261
+00:12:57.760 --> 00:12:58.760
+Open it up.
+
+262
+00:12:58.760 --> 00:13:00.520
+Now when we open this, you're automatically
+
+263
+00:13:00.520 --> 00:13:03.040
+going to notice the interface is quite different.
+
+264
+00:13:03.040 --> 00:13:04.480
+So I'm going to turn on my Albedo.
+
+265
+00:13:04.480 --> 00:13:06.640
+And that means I can switch any texture I want.
+
+266
+00:13:06.640 --> 00:13:09.360
+So maybe I'm working with this texture in Mixer, 3D Co,
+
+267
+00:13:09.360 --> 00:13:13.080
+or some other substance painter.
+
+268
+00:13:13.080 --> 00:13:17.440
+And Color Intensity, Color Overlay.
+
+269
+00:13:17.440 --> 00:13:19.800
+We got the Normal, Normal Intensity, Roughness,
+
+270
+00:13:19.800 --> 00:13:21.040
+and Rough Intensity.
+
+271
+00:13:21.040 --> 00:13:23.360
+All of this can be controlled on the fly.
+
+272
+00:13:23.360 --> 00:13:25.360
+So the Color Intensity, we can choose
+
+273
+00:13:25.360 --> 00:13:28.800
+the darkness of it if we wanted to.
+
+274
+00:13:28.800 --> 00:13:31.400
+And we can choose what color we want for it.
+
+275
+00:13:37.760 --> 00:13:38.260
+Apply.
+
+276
+00:13:42.760 --> 00:13:45.920
+And we can choose, make sure that's working here.
+
+277
+00:13:49.000 --> 00:13:49.960
+Maybe double check.
+
+278
+00:13:49.960 --> 00:13:51.280
+Got the parameter open.
+
+279
+00:13:51.280 --> 00:13:53.640
+Multiply Albedo.
+
+280
+00:13:53.640 --> 00:13:54.640
+We're good.
+
+281
+00:13:59.960 --> 00:14:00.440
+Cool.
+
+282
+00:14:02.960 --> 00:14:03.880
+Go back to our real-time spire here.
+
+283
+00:14:03.880 --> 00:14:06.880
+And we're going to Control Normal Intensity.
+
+284
+00:14:06.880 --> 00:14:09.880
+We can lower the Normal Intensity or increase it.
+
+285
+00:14:09.880 --> 00:14:11.560
+Now you'll notice nothing's happening here,
+
+286
+00:14:11.560 --> 00:14:13.680
+because I forgot I have to actually apply it.
+
+287
+00:14:13.680 --> 00:14:15.160
+So let's go on to Reset.
+
+288
+00:14:15.160 --> 00:14:17.880
+And we're going to go back to the real-time spire.
+
+289
+00:14:17.880 --> 00:14:19.480
+And we're going to have to actually apply it.
+
+290
+00:14:19.480 --> 00:14:22.680
+So let's go ahead and slap it on this guy.
+
+291
+00:14:22.680 --> 00:14:24.800
+And we can control the Color Intensity.
+
+292
+00:14:24.800 --> 00:14:27.080
+Now you'll see the updates.
+
+293
+00:14:27.080 --> 00:14:29.600
+We can choose the color that we want.
+
+294
+00:14:29.600 --> 00:14:31.760
+So in this case, we'll say, hey, man,
+
+295
+00:14:31.760 --> 00:14:36.080
+I want this to be more white in nature.
+
+296
+00:14:36.080 --> 00:14:39.000
+I want to give it a little red to it.
+
+297
+00:14:39.000 --> 00:14:40.480
+There we go.
+
+298
+00:14:40.480 --> 00:14:43.520
+Green, blue.
+
+299
+00:14:43.520 --> 00:14:45.360
+I had to check my work there, because I
+
+300
+00:14:45.360 --> 00:14:47.480
+noticed that I needed to go back a little bit.
+
+301
+00:14:47.480 --> 00:14:48.800
+I thought, why isn't it working?
+
+302
+00:14:48.800 --> 00:14:50.080
+Because I have to apply it.
+
+303
+00:14:50.080 --> 00:14:51.480
+It's crazy.
+
+304
+00:14:51.480 --> 00:14:54.520
+And then you can see all the color changes here.
+
+305
+00:14:54.520 --> 00:14:58.000
+And as we change those colors, let's get something that's
+
+306
+00:14:58.000 --> 00:14:59.760
+really going to show up on screen.
+
+307
+00:14:59.760 --> 00:15:02.320
+Blood, pinkish red.
+
+308
+00:15:02.320 --> 00:15:05.600
+And we can now change the strength of that,
+
+309
+00:15:05.600 --> 00:15:06.600
+which is pretty nice.
+
+310
+00:15:06.600 --> 00:15:08.360
+And even in Sequencer, if you wanted to,
+
+311
+00:15:08.360 --> 00:15:11.280
+you can open these parameters and animate this,
+
+312
+00:15:11.280 --> 00:15:12.960
+which is actually pretty cool.
+
+313
+00:15:12.960 --> 00:15:14.360
+And then we have Normal Intensity.
+
+314
+00:15:14.360 --> 00:15:16.720
+We can decrease the Normal Intensity or increase it.
+
+315
+00:15:16.720 --> 00:15:17.560
+You'll see it there.
+
+316
+00:15:17.560 --> 00:15:21.080
+We can go Negative or Positive, Inverting.
+
+317
+00:15:21.080 --> 00:15:23.560
+There's the Roughness Intensity.
+
+318
+00:15:23.560 --> 00:15:25.040
+You can see it there.
+
+319
+00:15:25.040 --> 00:15:28.480
+Working my full spectrum of my slider here.
+
+320
+00:15:33.320 --> 00:15:38.320
+And we can also choose to turn off my roughness
+
+321
+00:15:39.800 --> 00:15:41.720
+if we don't want to use it at all.
+
+322
+00:15:41.720 --> 00:15:46.000
+Decrease my roughness so there's no changes in it whatsoever.
+
+323
+00:15:46.720 --> 00:15:50.240
+And all that's available for you to play with.

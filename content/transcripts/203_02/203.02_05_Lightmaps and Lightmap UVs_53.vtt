@@ -1,0 +1,525 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.260
+In this lesson, we're going to talk about light mass and light maps.
+
+2
+00:00:05.260 --> 00:00:07.440
+So let's get started.
+
+3
+00:00:07.440 --> 00:00:11.320
+So again, we're in the baking scenario here if you were to use it.
+
+4
+00:00:11.320 --> 00:00:16.400
+Now again, sometimes you may use it, sometimes you may not, but mostly Lumen does a really
+
+5
+00:00:16.400 --> 00:00:17.400
+good job.
+
+6
+00:00:17.400 --> 00:00:21.400
+But say you didn't want some of the noise that came with Lumen, you can definitely take
+
+7
+00:00:21.400 --> 00:00:26.600
+this approach for certain shots or for a particular game if you wanted to.
+
+8
+00:00:26.600 --> 00:00:28.600
+It's still fully supported.
+
+9
+00:00:28.600 --> 00:00:33.240
+Now how it works is, and I notice I have here it says kicking it old school, is kind of
+
+10
+00:00:33.240 --> 00:00:35.360
+our offline GI renderer.
+
+11
+00:00:35.360 --> 00:00:38.440
+Its performance cost is virtually zero at runtime.
+
+12
+00:00:38.440 --> 00:00:41.200
+The building process gets longer as your scene becomes more complex.
+
+13
+00:00:41.200 --> 00:00:43.600
+So you have to keep that in mind.
+
+14
+00:00:43.600 --> 00:00:49.720
+And also that your shadows won't be as realistic as they would using virtual shadow maps.
+
+15
+00:00:49.720 --> 00:00:55.680
+Because as we talked about in the first class, your shadows, the visual fidelity of those
+
+16
+00:00:55.680 --> 00:01:02.120
+shadows are determining on how close distance you are to that object and puts it in a cache
+
+17
+00:01:02.120 --> 00:01:04.560
+and it will call upon it when needed.
+
+18
+00:01:04.560 --> 00:01:07.960
+Unfortunately, when it comes to light mass, when it builds your shadows, it's going to
+
+19
+00:01:07.960 --> 00:01:11.920
+be kind of an all or nothing scenario where it's going to bake it and they're all going
+
+20
+00:01:11.920 --> 00:01:17.120
+to share space on a particular type of texture map that's actually put into our scene and
+
+21
+00:01:17.120 --> 00:01:20.920
+almost like a blanket specifically for static objects.
+
+22
+00:01:20.920 --> 00:01:26.800
+So you can adjust light mass settings at the actor level or more globally in the world
+
+23
+00:01:26.800 --> 00:01:27.800
+settings panel.
+
+24
+00:01:27.800 --> 00:01:31.280
+And we're going to talk about this in just a second.
+
+25
+00:01:31.280 --> 00:01:36.120
+And again, you can see the options here where it says shadow maps and virtual shadow maps.
+
+26
+00:01:36.120 --> 00:01:41.600
+Again, virtual shadow maps for Lumen, shadow maps for baked lighting.
+
+27
+00:01:41.600 --> 00:01:43.360
+I do want to make a note here on the bottom here.
+
+28
+00:01:43.360 --> 00:01:48.560
+It says Nanite is made for Lumen and not really for Unreal light mass baking.
+
+29
+00:01:48.560 --> 00:01:54.000
+You can use it, but you could slow things down if your geometry is really complicated.
+
+30
+00:01:54.000 --> 00:02:00.760
+So make sure you turn Nanite off when baking and that you are using shadow maps for baking
+
+31
+00:02:00.760 --> 00:02:05.120
+or you will crash or take forever to bake non-Nanite.
+
+32
+00:02:05.120 --> 00:02:06.280
+Just keep that in mind.
+
+33
+00:02:06.280 --> 00:02:10.720
+GPU light baking can be used if Nanite is needed.
+
+34
+00:02:10.720 --> 00:02:13.200
+Now also want to make the statement here.
+
+35
+00:02:13.200 --> 00:02:19.480
+If you have non-Nanite objects and they're in your scene, you're using Lumen, it's better
+
+36
+00:02:19.480 --> 00:02:22.720
+to try to keep that within Lumen.
+
+37
+00:02:22.720 --> 00:02:25.040
+Keep it Nanite if you can.
+
+38
+00:02:25.040 --> 00:02:26.440
+And using virtual shadow maps.
+
+39
+00:02:26.440 --> 00:02:30.040
+It's like the three Musketeers, which I kind of mentioned in the first class.
+
+40
+00:02:30.040 --> 00:02:36.520
+Lumen, Nanite and virtual shadow maps all play nice together and it's best to work in those
+
+41
+00:02:36.520 --> 00:02:40.760
+scenarios.
+
+42
+00:02:40.760 --> 00:02:45.800
+So let's look at some settings in light mass that can get you started in the right direction.
+
+43
+00:02:45.800 --> 00:02:48.440
+Now this is found under the world settings.
+
+44
+00:02:48.440 --> 00:02:49.440
+Let me point you in the right direction.
+
+45
+00:02:49.440 --> 00:02:52.860
+Then we're going to go back to the slide.
+
+46
+00:02:52.860 --> 00:02:58.800
+So in Unreal you go to your world settings and again you'll see where we have our light
+
+47
+00:02:58.800 --> 00:03:00.400
+mass settings here.
+
+48
+00:03:00.400 --> 00:03:04.120
+And there are several different things and several approaches you can take.
+
+49
+00:03:04.120 --> 00:03:10.160
+But in the beginning I have to really emphasize start low and then go high.
+
+50
+00:03:10.200 --> 00:03:14.720
+Some people when they are working with baking will crank all these up really high at first
+
+51
+00:03:14.720 --> 00:03:16.360
+and throw everything at it.
+
+52
+00:03:16.360 --> 00:03:20.560
+But Unreal you want to be very deterministic because you're working in a real time setting.
+
+53
+00:03:20.560 --> 00:03:22.480
+The same goes with Lumen.
+
+54
+00:03:22.480 --> 00:03:27.440
+So always start low then go high and test your settings, your computer, what it can
+
+55
+00:03:27.440 --> 00:03:31.720
+handle as you go and also in relation to your scene.
+
+56
+00:03:31.720 --> 00:03:35.040
+Let's go back to the slides and look at some of these settings that I have pointed out
+
+57
+00:03:35.040 --> 00:03:36.640
+for you.
+
+58
+00:03:36.640 --> 00:03:40.480
+So you'll see initially we have static lighting level scale set to one.
+
+59
+00:03:40.480 --> 00:03:42.560
+This is your light mass detail.
+
+60
+00:03:42.560 --> 00:03:48.800
+We also have number of indirect sky bounces, three to ten, and it actually helps handle
+
+61
+00:03:48.800 --> 00:03:50.380
+scene brightness.
+
+62
+00:03:50.380 --> 00:03:53.020
+We have indirect lighting quality, one to four.
+
+63
+00:03:53.020 --> 00:03:58.480
+This increases your final gather rate count and reduces artifacts that may occur.
+
+64
+00:03:58.480 --> 00:04:00.960
+You also have indirect lighting smoothness.
+
+65
+00:04:00.960 --> 00:04:03.080
+You have a one to a 1.3.
+
+66
+00:04:03.080 --> 00:04:06.200
+This blurs indirect lighting results, reducing noise.
+
+67
+00:04:06.200 --> 00:04:08.240
+So that can be very helpful.
+
+68
+00:04:08.240 --> 00:04:10.200
+We also have compressed light maps.
+
+69
+00:04:10.200 --> 00:04:13.800
+You want to disable this if you want a bit more realism in your scene.
+
+70
+00:04:13.800 --> 00:04:16.560
+You'll see in my example here that it has it checked on.
+
+71
+00:04:16.560 --> 00:04:21.400
+But try to turn that off if you're going to be using a baking scenario to get a bit better
+
+72
+00:04:21.400 --> 00:04:26.360
+with your shadows so that they don't look, I guess the best way to put it is they look
+
+73
+00:04:26.360 --> 00:04:29.040
+very edgy.
+
+74
+00:04:29.040 --> 00:04:32.600
+They look very almost like a video, an old Atari video game.
+
+75
+00:04:33.120 --> 00:04:35.560
+So you start to get like those blocky edges.
+
+76
+00:04:35.560 --> 00:04:36.560
+We don't want that.
+
+77
+00:04:36.560 --> 00:04:40.360
+We want a smooth transition into our shadows if we're using baking.
+
+78
+00:04:43.360 --> 00:04:47.160
+So you also want to have, which I mentioned earlier, is a light mass importance volume.
+
+79
+00:04:47.160 --> 00:04:52.760
+This is very important to put into your scene, particularly if you're going to have a terrain.
+
+80
+00:04:52.760 --> 00:04:58.600
+This allows Unreal to know what your priority area is and what you're focusing on when you
+
+81
+00:04:58.600 --> 00:05:00.600
+decide to do rendering.
+
+82
+00:05:01.600 --> 00:05:07.600
+So the volume that focuses the detail in direct lighting, photons coming from the light mass.
+
+83
+00:05:07.600 --> 00:05:11.320
+Use it to determine the area of gameplay or area of importance.
+
+84
+00:05:11.320 --> 00:05:14.160
+This is very important for your visuals.
+
+85
+00:05:14.160 --> 00:05:16.360
+It is a detailed GI.
+
+86
+00:05:16.360 --> 00:05:18.240
+It restricts that area.
+
+87
+00:05:18.240 --> 00:05:22.680
+So it's honoring your settings and the area outside of the importance volume will only
+
+88
+00:05:22.680 --> 00:05:26.320
+get the low quality GI once bounce.
+
+89
+00:05:26.320 --> 00:05:30.160
+So you're making it so that it's honoring what you've put in and you're telling Unreal,
+
+90
+00:05:30.720 --> 00:05:33.720
+Hey, prioritize this and use my settings that I have in place.
+
+91
+00:05:36.720 --> 00:05:39.720
+So light map UVs, why are they important?
+
+92
+00:05:39.720 --> 00:05:47.720
+So when it comes to baking, these UVs allow Unreal to place self shadowing on this object
+
+93
+00:05:47.720 --> 00:05:53.720
+and also shadow relationships to other objects in the scene, particularly if they are static.
+
+94
+00:05:54.720 --> 00:05:59.720
+Now, self shadowing still does occur for objects that are being lit, say they're moving.
+
+95
+00:06:00.720 --> 00:06:05.720
+Things are being lit by stationary light because a stationary light is made to be able to handle
+
+96
+00:06:05.720 --> 00:06:10.720
+moving objects, but there's only four overlapping at a time, which I mentioned earlier.
+
+97
+00:06:10.720 --> 00:06:16.720
+So to create believable self shadowing is why they're in place and object casted shadows.
+
+98
+00:06:17.720 --> 00:06:21.720
+It can be important so you can make your own UV light maps.
+
+99
+00:06:21.720 --> 00:06:28.720
+You can make a secondary copy your UVs in a your DCC and you can make one with proper
+
+100
+00:06:29.280 --> 00:06:34.280
+padding and put it in there as a secondary UV channel and Unreal will recognize that.
+
+101
+00:06:34.280 --> 00:06:38.280
+And you can also tell Unreal to look at that if there's a problem with that.
+
+102
+00:06:39.280 --> 00:06:43.280
+You want to make sure if you do do that, there's no overlapping, there's adequate padding,
+
+103
+00:06:43.280 --> 00:06:45.280
+and you also hide those seams.
+
+104
+00:06:46.280 --> 00:06:50.280
+It also can be auto-generated by Unreal, and I've never really had a problem with it auto-generated.
+
+105
+00:06:51.280 --> 00:06:56.280
+It does a really good job, but there may be times where you specifically, if you are using baking,
+
+106
+00:06:56.840 --> 00:07:00.840
+you want to make your own UVs because you want the shadows to look really good on this
+
+107
+00:07:00.840 --> 00:07:04.840
+hero object and you want to make sure that it's you're in full control.
+
+108
+00:07:05.840 --> 00:07:06.840
+But again, we have a solution for this.
+
+109
+00:07:07.840 --> 00:07:08.840
+This is a heavy workflow.
+
+110
+00:07:09.840 --> 00:07:10.840
+You can use lumen.
+
+111
+00:07:11.840 --> 00:07:14.840
+The only thing with lumen is you need to watch out for the noise that may occur.
+
+112
+00:07:15.840 --> 00:07:18.840
+So light map UVs made with two light sources.
+
+113
+00:07:19.840 --> 00:07:20.840
+You can see some samples here.
+
+114
+00:07:21.840 --> 00:07:24.840
+Light is baked to a light map texture and you'll see it bakes it in almost like I said
+
+115
+00:07:25.400 --> 00:07:28.400
+before, like an AO occlusion is self shadowing.
+
+116
+00:07:29.400 --> 00:07:30.400
+It's baked right into the texture.
+
+117
+00:07:31.400 --> 00:07:36.400
+The base color texture here, light map is multiplied on top of that base texture.
+
+118
+00:07:37.400 --> 00:07:40.400
+So you can kind of see the logic and the process of what Unreal does.
+
+119
+00:07:41.400 --> 00:07:44.400
+The end result relies entirely on a texture for displaying lighting.
+
+120
+00:07:45.400 --> 00:07:47.400
+So again, we talked about solver quality.
+
+121
+00:07:48.400 --> 00:07:49.400
+So don't forget about this.
+
+122
+00:07:50.400 --> 00:07:54.400
+When you're working initially in your scene, you may want preview and you might want to
+
+123
+00:07:54.960 --> 00:07:57.960
+try medium or high, but production is going to give you the best results of the
+
+124
+00:07:58.960 --> 00:07:59.960
+bounces that you need and want.
+
+125
+00:08:00.960 --> 00:08:05.960
+Here's a link for more additional resources on light mass and global illumination.
+
+126
+00:08:06.960 --> 00:08:08.960
+That's it with this one.
+
+127
+00:08:09.960 --> 00:08:12.960
+In the next video, we're going to talk about reflection baking, how to work with
+
+128
+00:08:13.960 --> 00:08:18.960
+these reflection probes and assets that we have in Unreal to be able to get things
+
+129
+00:08:19.960 --> 00:08:20.960
+in the right direction.
+
+130
+00:08:21.960 --> 00:08:22.960
+Thanks again.
+
+131
+00:08:24.400 --> 00:08:25.960
+.

@@ -1,0 +1,373 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.120
+Next, let's take a look at a few material optimizations.
+
+2
+00:00:05.120 --> 00:00:09.960
+So let's look at parent materials first of all, and this is a really nice high level
+
+3
+00:00:09.960 --> 00:00:15.280
+way to just optimize any kind of material what they have in your project.
+
+4
+00:00:15.280 --> 00:00:20.720
+So it'll really help your whole team work faster and also allow you to make sweeping
+
+5
+00:00:20.720 --> 00:00:25.080
+changes just by editing one material instead of a series of materials.
+
+6
+00:00:25.080 --> 00:00:29.680
+So a material instance works with a parent-child relationship.
+
+7
+00:00:29.680 --> 00:00:34.360
+So the material instance gets all the properties from the material they are linked to, and
+
+8
+00:00:34.360 --> 00:00:37.560
+it's the exact same workflow that many other systems use.
+
+9
+00:00:37.560 --> 00:00:42.540
+So you select items from the parent, pass down into the child, and then the child can
+
+10
+00:00:42.540 --> 00:00:44.720
+decide what we want to use.
+
+11
+00:00:44.720 --> 00:00:49.360
+And you can even use material instances as the start of the chain if you should want.
+
+12
+00:00:49.360 --> 00:00:55.160
+I never use this as it can become confusing, but it's possible to potentially not cause
+
+13
+00:00:55.160 --> 00:00:56.160
+any issues.
+
+14
+00:00:56.320 --> 00:01:03.120
+You have parent materials at the top here, and you have the building parent and the glass parent.
+
+15
+00:01:03.120 --> 00:01:09.320
+So as you can see, you don't really want, you want a different master material based
+
+16
+00:01:09.320 --> 00:01:13.120
+on the properties that you are wanting the child to inherit.
+
+17
+00:01:13.120 --> 00:01:19.980
+So we wouldn't have a master material that could account for a glass type opacity as
+
+18
+00:01:19.980 --> 00:01:21.080
+well as a solid.
+
+19
+00:01:21.080 --> 00:01:25.600
+So we'd make two different parent materials here, and then when you make your parent material,
+
+20
+00:01:25.600 --> 00:01:27.680
+you can right click on this material.
+
+21
+00:01:27.680 --> 00:01:31.520
+And one of the top options on the right click should be create material instance.
+
+22
+00:01:31.520 --> 00:01:36.520
+And then you can create various instances based on that, that parent material.
+
+23
+00:01:36.520 --> 00:01:40.440
+And then you can go in and change maybe just the texture that's been used on a parameter
+
+24
+00:01:40.440 --> 00:01:45.540
+so that you can assign a variety of different textures, which all have similar properties.
+
+25
+00:01:45.540 --> 00:01:51.360
+So that's a really good way to start optimizing your project when thinking about materials.
+
+26
+00:01:51.360 --> 00:01:54.240
+Next we have quality expression nodes.
+
+27
+00:01:54.240 --> 00:01:59.720
+So we can use the available switch nodes to control the functionality and quality of our
+
+28
+00:01:59.720 --> 00:02:00.720
+material.
+
+29
+00:02:00.720 --> 00:02:03.920
+So we've got a series of different switch nodes, and we'll just go through a few of
+
+30
+00:02:03.920 --> 00:02:04.920
+them here.
+
+31
+00:02:04.920 --> 00:02:10.200
+So we've got a shading path switch, which is useful for specifying what part of your
+
+32
+00:02:10.200 --> 00:02:13.600
+material logic should be used for the render path.
+
+33
+00:02:13.600 --> 00:02:18.960
+You have a quality switch, which is used when the engine's quality levels are controlling
+
+34
+00:02:18.960 --> 00:02:20.840
+material logic.
+
+35
+00:02:20.840 --> 00:02:26.960
+We have a feature level switch, which is useful when setting up material for the use on the
+
+36
+00:02:26.960 --> 00:02:27.960
+different devices.
+
+37
+00:02:27.960 --> 00:02:33.100
+And then we also have a static switch or a static switch parameter, which is used to
+
+38
+00:02:33.100 --> 00:02:38.000
+exclude the entire branches of your material in a base material or potentially control
+
+39
+00:02:38.000 --> 00:02:40.820
+through a material instance.
+
+40
+00:02:40.820 --> 00:02:43.760
+We also have a vertex interpolator.
+
+41
+00:02:43.760 --> 00:02:49.420
+So a vertex interpolator node allows for better control of the value interpolation between
+
+42
+00:02:49.500 --> 00:02:51.460
+the vertex and the pixel work.
+
+43
+00:02:51.460 --> 00:02:57.100
+So offloading the work from the pixel shader to the vertex shader is a performance win
+
+44
+00:02:57.100 --> 00:02:58.420
+in some cases.
+
+45
+00:02:58.420 --> 00:03:06.700
+So in this example, we want to title the texture in the material instance and notice the 96
+
+46
+00:03:06.700 --> 00:03:12.900
+instruction count, which really helps with optimizing in this instance.
+
+47
+00:03:12.900 --> 00:03:18.500
+And then another example, it's the same material, but with the UV tile moved to the vertex
+
+48
+00:03:18.580 --> 00:03:20.140
+shader from the pixel shader.
+
+49
+00:03:20.140 --> 00:03:25.180
+So if you check out the instruction count, it's down to 95 now.
+
+50
+00:03:25.180 --> 00:03:31.280
+So while it's not a huge saving, this spreads out across your projects.
+
+51
+00:03:31.280 --> 00:03:37.460
+If you have many, many materials in your project, those extra instruction counts can all mount
+
+52
+00:03:37.460 --> 00:03:38.660
+up to a huge saving.
+
+53
+00:03:38.660 --> 00:03:44.300
+So sometimes it's about these smaller wins that we can get when applied across a larger
+
+54
+00:03:44.300 --> 00:03:48.620
+project, especially if you're making a parent material into a material instances, these
+
+55
+00:03:48.620 --> 00:03:51.220
+will all add up into your project.
+
+56
+00:03:51.220 --> 00:03:55.060
+And then we'll see an example of the default versus interpolated.
+
+57
+00:03:55.060 --> 00:03:58.200
+So here we see the material applied to that static mesh.
+
+58
+00:03:58.200 --> 00:04:03.820
+And you can't really tell the difference between either one of these material types.
+
+59
+00:04:03.820 --> 00:04:09.540
+So it not only works with items that have their calculations done in the vertex shader,
+
+60
+00:04:09.540 --> 00:04:16.140
+you can try using this to offload UV tiling calculations or anything along those lines.
+
+61
+00:04:16.140 --> 00:04:22.380
+And you might get a lot of mileage using this approach when working with certain materials in your projects.
+
+62
+00:04:22.380 --> 00:04:24.620
+We've also got texture area masking.
+
+63
+00:04:24.620 --> 00:04:27.780
+So there are a number of different ways you can do masking.
+
+64
+00:04:27.780 --> 00:04:31.620
+You can either do texture masking or vertex masking.
+
+65
+00:04:31.620 --> 00:04:37.020
+Texture masking is using a texture to define the area that should be masked.
+
+66
+00:04:37.020 --> 00:04:42.740
+Whereas vertex masking uses the object's vertices to define the areas that should be masked.
+
+67
+00:04:42.740 --> 00:04:50.700
+So vertex masking gives a few different advantages on mobile over texture masking.
+
+68
+00:04:50.700 --> 00:04:56.580
+So vertex masking, there are no bound by resolution or texture maps for masks.
+
+69
+00:04:56.580 --> 00:05:02.980
+It also reduces instruction count by not needing to sample additional material.
+
+70
+00:05:02.980 --> 00:05:10.300
+And it also reduces the number of used textures, which is a massive win, especially on mobile.
+
+71
+00:05:10.300 --> 00:05:18.020
+So if we look at the vertex area masking, there are a number of different ways you can do the approaches.
+
+72
+00:05:18.020 --> 00:05:24.780
+So you can see that the instruction count between vertex area masking and your texture masking,
+
+73
+00:05:24.780 --> 00:05:27.060
+that you'll get different results.
+
+74
+00:05:27.060 --> 00:05:31.540
+And it depends what you're looking for in your projects here.
+
+75
+00:05:31.540 --> 00:05:34.860
+And then moving on to area masking, we have a few tips.
+
+76
+00:05:34.860 --> 00:05:42.020
+So when importing a mesh with vertex color, make sure to set the vertex color import option to replace.
+
+77
+00:05:42.020 --> 00:05:43.180
+It defaults to ignore.
+
+78
+00:05:43.180 --> 00:05:47.140
+So you want to make sure the vertex color will not show up there.
+
+79
+00:05:47.140 --> 00:05:54.860
+And then you can mix and match vertex colors and texture mask data just to make sure it keeps things consistent.
+
+80
+00:05:54.860 --> 00:05:57.660
+And then also talking about quality improvements.
+
+81
+00:05:57.700 --> 00:06:04.860
+Just lastly, on the material side, by default, materials for mobile rendering will be set up to be as cheap to render as possible,
+
+82
+00:06:04.860 --> 00:06:10.900
+especially if you set your project settings to mobile when opening the project to begin with.
+
+83
+00:06:10.900 --> 00:06:15.380
+Because of this, materials that use cubemaps might not look as good as they could.
+
+84
+00:06:15.380 --> 00:06:19.460
+So to fix this, you can enable a couple of different flags here.
+
+85
+00:06:19.460 --> 00:06:20.620
+There's actually three different flags.
+
+86
+00:06:20.660 --> 00:06:28.020
+So you want to use full precision, which makes the material use the highest precision level on the device.
+
+87
+00:06:28.020 --> 00:06:30.620
+And it offers instead of medium.
+
+88
+00:06:30.620 --> 00:06:39.700
+And then you've got this pre-integrated GF for simple IBL, which uses GF Lite lookup.
+
+89
+00:06:39.700 --> 00:06:46.580
+And then you also got the high quality reflections, which provides parallax correction on reflections
+
+90
+00:06:46.580 --> 00:06:51.620
+and also removes the two reflection pro blending limit.
+
+91
+00:06:51.620 --> 00:06:56.060
+So this will make your material a little bit more expensive to render.
+
+92
+00:06:56.060 --> 00:07:05.220
+So don't only use it if this is maybe the key thing in your scene or that you really want to get these extra details into your project.
+
+93
+00:07:05.220 --> 00:07:12.780
+So on the above image here, the reflection is on the door, as we can see it turning on and off.

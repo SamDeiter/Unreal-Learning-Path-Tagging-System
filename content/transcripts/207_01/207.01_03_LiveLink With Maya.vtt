@@ -1,0 +1,385 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.760
+Now let's take a look at Unreal Engine's Live Link plugin with Maya.
+
+2
+00:00:04.760 --> 00:00:08.880
+Now we'll look at an overview of the concept, understanding the pipeline and just how we
+
+3
+00:00:08.880 --> 00:00:10.640
+go about setting it up.
+
+4
+00:00:10.640 --> 00:00:15.560
+Live Link, if you've not heard of it before, is a way to stream your animation from Maya
+
+5
+00:00:15.560 --> 00:00:17.500
+into Unreal Engine.
+
+6
+00:00:17.500 --> 00:00:22.120
+Now this allows you to animate directly inside Maya and through the use of Live Link preview
+
+7
+00:00:22.120 --> 00:00:24.880
+what it will look like inside the engine in real time.
+
+8
+00:00:24.880 --> 00:00:28.040
+Now this is great because you get to see how your character looks with all the materials
+
+9
+00:00:28.040 --> 00:00:33.000
+and the lighting and any extra elements on them like cloth that might be applied to them
+
+10
+00:00:33.000 --> 00:00:36.480
+without having to go through the export and import process.
+
+11
+00:00:36.480 --> 00:00:42.360
+When it comes to understanding the pipeline of Live Link, you have a plugin for both Maya
+
+12
+00:00:42.360 --> 00:00:47.040
+and for Unreal that you either need to download or just simply activate.
+
+13
+00:00:47.040 --> 00:00:51.400
+And in Maya you would define the skeleton that you're using and the character's data
+
+14
+00:00:51.400 --> 00:00:54.200
+that you want to send over to Unreal Engine.
+
+15
+00:00:54.200 --> 00:00:59.000
+And then this goes through the Unreal message bus, which is basically a direct channel to
+
+16
+00:00:59.000 --> 00:01:02.880
+the Live Link client within your Unreal project.
+
+17
+00:01:02.880 --> 00:01:05.960
+Now the Live Link client manages a couple of things.
+
+18
+00:01:05.960 --> 00:01:10.140
+So it manages the sources of data that are coming in, which represent the connections
+
+19
+00:01:10.140 --> 00:01:15.900
+to other programs like Maya or MotionBuilder that can send data to Live Link.
+
+20
+00:01:15.900 --> 00:01:19.720
+And it also manages the subjects, which is to say the individual streams of data within
+
+21
+00:01:19.720 --> 00:01:20.720
+the client.
+
+22
+00:01:20.880 --> 00:01:25.560
+An example of that would be animation information going through for one character.
+
+23
+00:01:25.560 --> 00:01:29.880
+Now this information is then used in conjunction with a Live Link animation node inside your
+
+24
+00:01:29.880 --> 00:01:36.240
+animation blueprint to convert that data into animation data on the character in the engine.
+
+25
+00:01:36.240 --> 00:01:41.200
+Some of the component features of Live Link in Unreal Engine 5 are the Live Link controller
+
+26
+00:01:41.200 --> 00:01:44.200
+and the skeletal animation components.
+
+27
+00:01:44.200 --> 00:01:48.680
+Now the controller component is a quick way of taking the Live Link data and applying
+
+28
+00:01:48.680 --> 00:01:50.800
+that to an actor in your scene.
+
+29
+00:01:50.800 --> 00:01:55.800
+So as you can see in the example we've got below, this might be taking the transform
+
+30
+00:01:55.800 --> 00:02:00.400
+information and applying that to a camera to aid something like a virtual production
+
+31
+00:02:00.400 --> 00:02:02.760
+environment that you're in.
+
+32
+00:02:02.760 --> 00:02:05.080
+We've also got the skeletal animation component.
+
+33
+00:02:05.080 --> 00:02:10.680
+So this sits inside your blueprint and gives you access to the onLiveLinkUpdated event,
+
+34
+00:02:10.680 --> 00:02:15.320
+which effectively takes place of your tick event, but it runs at editor time as well.
+
+35
+00:02:15.320 --> 00:02:19.280
+So you don't need to be playing or simulating to make use of that data.
+
+36
+00:02:19.280 --> 00:02:23.200
+You can also access the Live Link data via several blueprint nodes to gather and use
+
+37
+00:02:23.200 --> 00:02:28.160
+various bits of information like curve data or metadata and different types of transform
+
+38
+00:02:28.160 --> 00:02:29.960
+information.
+
+39
+00:02:29.960 --> 00:02:33.760
+So now that we've taken a look at some of the features that overview the pipeline of
+
+40
+00:02:33.760 --> 00:02:38.560
+Live Link, let's take a look at how to actually get it set up and connect Maya with Unreal
+
+41
+00:02:38.560 --> 00:02:42.960
+Engine to see your animation streaming live.
+
+42
+00:02:42.960 --> 00:02:46.800
+So the first thing you'll need to do is go to the Epic Games Marketplace and download
+
+43
+00:02:46.800 --> 00:02:49.920
+the Unreal Live Link for Autodesk Maya plugin.
+
+44
+00:02:49.920 --> 00:02:53.240
+Once you've downloaded this, you need to install it to Maya.
+
+45
+00:02:53.240 --> 00:02:57.680
+Now to load your plugin in Maya, if you've not done this before, if you go to Windows,
+
+46
+00:02:57.680 --> 00:03:01.400
+down to settings and preferences, and then into your plugin manager, you'll get a list
+
+47
+00:03:01.400 --> 00:03:06.600
+of plugins that are already installed on your machine that you can sort of load, activate
+
+48
+00:03:06.600 --> 00:03:08.320
+or deactivate.
+
+49
+00:03:08.320 --> 00:03:11.640
+But if you've not had one installed before and you need to install something new like
+
+50
+00:03:11.720 --> 00:03:16.160
+the Maya Live Link plugin, you should have a browse option.
+
+51
+00:03:16.160 --> 00:03:20.160
+Now if you click the browse option and find the folder where the plugin was saved, you
+
+52
+00:03:20.160 --> 00:03:26.680
+need to load two different plugins, one called Maya Live Link plugin and then the date, which
+
+53
+00:03:26.680 --> 00:03:34.440
+may not be 2017 anymore, .ml and then the Maya Live Link UI Python plugin.
+
+54
+00:03:34.440 --> 00:03:38.760
+Now once your plugins are installed and loaded, to access the Live Link UI, you would use
+
+55
+00:03:38.760 --> 00:03:42.040
+the melinput command, Maya Live Link UI.
+
+56
+00:03:42.040 --> 00:03:46.080
+Now you'd put that into your mel line at the bottom of the screen or into your script editor.
+
+57
+00:03:46.080 --> 00:03:49.560
+You can then save that as a button to your shelf just to make accessing it easier each
+
+58
+00:03:49.560 --> 00:03:50.720
+time.
+
+59
+00:03:50.720 --> 00:03:55.240
+Now this UI is where you'd add or remove subjects whose data you want to send over to Live Link
+
+60
+00:03:55.240 --> 00:03:57.680
+in your Unreal Engine project.
+
+61
+00:03:57.680 --> 00:04:01.680
+Now to do that, you just choose add selection and you'd select your mesh and root bone of
+
+62
+00:04:01.680 --> 00:04:04.560
+the character you'd like to stream to Unreal.
+
+63
+00:04:04.560 --> 00:04:08.400
+But before you can do that, we need to ensure that the plugin is enabled in your Unreal
+
+64
+00:04:08.400 --> 00:04:10.080
+project.
+
+65
+00:04:10.080 --> 00:04:14.840
+So by default, the Live Link plugin should be available in a UE5 project, but if it's
+
+66
+00:04:14.840 --> 00:04:18.760
+not for any reason and you're using an older version of the engine maybe, you can download
+
+67
+00:04:18.760 --> 00:04:22.960
+it in the same way that you did with the Maya plugin using the Epic Marketplace.
+
+68
+00:04:22.960 --> 00:04:26.680
+Now you can check if it's loaded by going to your plugins window and searching for Live
+
+69
+00:04:26.680 --> 00:04:29.600
+Link and just making sure that it's ticked.
+
+70
+00:04:29.600 --> 00:04:33.880
+And once you have it loaded, you'll have access to a new window inside Window, Virtual Production
+
+71
+00:04:33.880 --> 00:04:36.460
+called Live Link.
+
+72
+00:04:36.460 --> 00:04:40.980
+And inside this window, this is where you'll be controlling the Live Link sources and it'll
+
+73
+00:04:40.980 --> 00:04:45.740
+show you a connection to your DCC like Maya or Motion Builder.
+
+74
+00:04:45.740 --> 00:04:49.820
+Now something to be aware of and something you should check in your project settings
+
+75
+00:04:49.820 --> 00:04:53.680
+would be the use less CPU when in background option.
+
+76
+00:04:53.680 --> 00:04:57.620
+Now if that's turned on, it will inhibit the use of the Live Link when you're working in
+
+77
+00:04:57.620 --> 00:04:58.620
+Maya.
+
+78
+00:04:58.620 --> 00:05:01.940
+So if you're tapped out working in Maya, you won't be able to see the animation streaming
+
+79
+00:05:01.940 --> 00:05:02.940
+live.
+
+80
+00:05:02.940 --> 00:05:05.260
+So make sure you disable that.
+
+81
+00:05:05.260 --> 00:05:09.300
+Now to add your source, which would be the information coming from Maya, for example,
+
+82
+00:05:09.300 --> 00:05:14.140
+you just hit the plus source button, go to Message Bus Source, and you should see a list
+
+83
+00:05:14.140 --> 00:05:17.700
+of sources matching the selections that you added in Maya.
+
+84
+00:05:17.700 --> 00:05:21.200
+Now that the Live Link connection is made, you can start to preview the animation on
+
+85
+00:05:21.200 --> 00:05:26.260
+your character by opening up the corresponding skeletal mesh inside Unreal Engine.
+
+86
+00:05:26.260 --> 00:05:29.660
+And you should have a new option underneath the animation preview controller drop down
+
+87
+00:05:30.660 --> 00:05:35.500
+Live Link Preview Controller just inside your Preview Scene Settings tab.
+
+88
+00:05:35.500 --> 00:05:39.460
+Now if you select this and then change the Live Link subject name just underneath to
+
+89
+00:05:39.460 --> 00:05:43.460
+match that of your character in Maya, you should see your skeletal mesh begin to match
+
+90
+00:05:43.460 --> 00:05:45.740
+the animation of your Maya character.
+
+91
+00:05:45.740 --> 00:05:49.500
+Now something that can be useful as well is to tick the Enable Camera Sync option in the
+
+92
+00:05:49.500 --> 00:05:54.260
+same Preview Scene Settings tab so that when you move your camera in Maya, the camera in
+
+93
+00:05:54.260 --> 00:05:56.260
+Unreal should mimic that.
+
+94
+00:05:56.260 --> 00:05:57.260
+And that should be it.
+
+95
+00:05:57.260 --> 00:06:00.820
+You should now be able to animate your character in Maya and preview it on your skeletal mesh
+
+96
+00:06:00.820 --> 00:06:02.020
+in your Unreal project.

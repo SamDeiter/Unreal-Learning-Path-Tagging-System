@@ -1,0 +1,1069 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.560
+In this lesson, we're going to take a look at a few more things with Lumen, and then
+
+2
+00:00:05.560 --> 00:00:09.760
+we're going to go and jump in and look at exposure control when it comes to setting
+
+3
+00:00:09.760 --> 00:00:11.360
+up your scene.
+
+4
+00:00:11.360 --> 00:00:13.800
+So let's get started.
+
+5
+00:00:13.800 --> 00:00:18.160
+So we built our scene out and we brought in a post-process volume controlling some of
+
+6
+00:00:18.160 --> 00:00:21.920
+the quality in here as we need.
+
+7
+00:00:21.920 --> 00:00:27.800
+Now again, a review of some of that, we can actually, if your scene supports it, and remember
+
+8
+00:00:28.040 --> 00:00:33.640
+some of these are GPU expensive and if you increase them, you need to keep in mind what
+
+9
+00:00:33.640 --> 00:00:35.480
+your GPU can handle.
+
+10
+00:00:35.480 --> 00:00:41.040
+So I can increase my lighting quality as well as my scene detail if I wish.
+
+11
+00:00:41.040 --> 00:00:46.040
+Now my system is a bit stronger than some others and I can go in here and even increase
+
+12
+00:00:46.040 --> 00:00:49.120
+my final gather if I need to.
+
+13
+00:00:49.120 --> 00:00:53.000
+Now as we do this, you can remove some of the noise, but you have to keep in mind some
+
+14
+00:00:53.000 --> 00:00:57.880
+of your materials, which was mentioned in other classes before, where you can actually
+
+15
+00:00:57.880 --> 00:01:00.080
+adjust the material roughness.
+
+16
+00:01:00.080 --> 00:01:03.840
+And when you adjust the material roughness, you're able to remove some of the noise.
+
+17
+00:01:03.840 --> 00:01:08.640
+Now some of the noise may still persist so that you can still use some C-Vars to clean
+
+18
+00:01:08.640 --> 00:01:09.640
+that up.
+
+19
+00:01:09.640 --> 00:01:14.040
+But keep in mind that Lumen is still evolving as it grows and gets stronger, faster and
+
+20
+00:01:14.040 --> 00:01:15.040
+better.
+
+21
+00:01:15.040 --> 00:01:20.840
+You will need to be very deterministic about your shots, your materials and your angles.
+
+22
+00:01:20.840 --> 00:01:25.080
+And you'll notice here in this particular shot, there's a little bit, just a little
+
+23
+00:01:25.080 --> 00:01:29.140
+bit of noise over here on these rough areas compared to over here where it's a little
+
+24
+00:01:29.140 --> 00:01:34.040
+bit higher, where there's a lot more bouncing and refracted areas.
+
+25
+00:01:34.040 --> 00:01:37.860
+We also want to go in here and go to our project settings.
+
+26
+00:01:37.860 --> 00:01:42.040
+In my project settings, I want to go in here and look at my static light.
+
+27
+00:01:42.040 --> 00:01:46.920
+The reason why I want to do this and make sure that static light options are off is
+
+28
+00:01:46.960 --> 00:01:54.480
+I want to make sure that they're not pulling anything unnecessary in my scene.
+
+29
+00:01:54.480 --> 00:01:58.920
+So I'm going to turn off my allow static lighting.
+
+30
+00:01:58.920 --> 00:02:02.600
+I'm also going to make sure that I turn off my ambient occlusion static fraction.
+
+31
+00:02:02.600 --> 00:02:06.080
+And you'll see mine's already off.
+
+32
+00:02:06.080 --> 00:02:07.940
+Now this will require a restart.
+
+33
+00:02:07.940 --> 00:02:12.820
+So let me go ahead and restart this and we'll go back into our scene.
+
+34
+00:02:12.820 --> 00:02:17.940
+Now you'll notice if we float over that tick box that we turned off, Unreal will give
+
+35
+00:02:17.940 --> 00:02:21.320
+you a breakdown saying you should really turn this off.
+
+36
+00:02:21.320 --> 00:02:26.960
+That way it allows the bent normals and the luminal global illumination to actually calculate
+
+37
+00:02:26.960 --> 00:02:28.900
+those correctly.
+
+38
+00:02:28.900 --> 00:02:31.340
+And it really just is not needed.
+
+39
+00:02:31.340 --> 00:02:33.780
+And you're saving some overhead there.
+
+40
+00:02:33.780 --> 00:02:35.300
+So you want to make sure you turn that off.
+
+41
+00:02:35.300 --> 00:02:41.780
+Now that was covered in the first class, but I just wanted to remind everyone about that.
+
+42
+00:02:42.780 --> 00:02:46.060
+So let me go ahead and close these two windows.
+
+43
+00:02:46.060 --> 00:02:51.300
+So we have our scene in here and we're looking pretty good, but we want to maybe try to get
+
+44
+00:02:51.300 --> 00:02:55.980
+it so that our exposure is really at a level that makes sense.
+
+45
+00:02:55.980 --> 00:03:00.420
+So from ground up, you can say, let me close this window too.
+
+46
+00:03:00.420 --> 00:03:03.180
+Don't need it at this time.
+
+47
+00:03:03.180 --> 00:03:05.620
+So what we want to do is go into our content drawer.
+
+48
+00:03:05.660 --> 00:03:12.260
+I'm going to click on engine and I'm going to type in calibrator.
+
+49
+00:03:12.260 --> 00:03:18.980
+I'm going to pull in my SM color calibrator.
+
+50
+00:03:18.980 --> 00:03:24.620
+I'll pull this into my scene and I'll drag this one outside for a moment.
+
+51
+00:03:24.620 --> 00:03:29.900
+This is going to give us the best possible results for our exposure and allow us to be
+
+52
+00:03:29.900 --> 00:03:35.340
+able to pull in what we need.
+
+53
+00:03:35.340 --> 00:03:38.740
+Now, before we do that, I do want to mention scalability.
+
+54
+00:03:38.740 --> 00:03:44.780
+This is very important when working with Unreal to determine what your computer can handle.
+
+55
+00:03:44.780 --> 00:03:49.820
+Now in older settings, it was found up at the top and older versions of Unreal, but
+
+56
+00:03:49.820 --> 00:03:56.740
+you can now find underneath your settings here, scalability, engine settings.
+
+57
+00:03:56.740 --> 00:04:02.900
+Everything I have is set to epic, but if I wanted to, I can also set things to cinematic.
+
+58
+00:04:02.900 --> 00:04:06.580
+My computer can handle that.
+
+59
+00:04:06.580 --> 00:04:09.580
+But you can also have auto here.
+
+60
+00:04:09.580 --> 00:04:14.820
+Now when you set auto, Unreal will determine based on your computer, the best settings
+
+61
+00:04:14.820 --> 00:04:21.420
+that are needed and can accommodate what you have under the hood.
+
+62
+00:04:21.420 --> 00:04:22.700
+Now let's go back to the slides.
+
+63
+00:04:22.700 --> 00:04:27.300
+I'm going to take a look at a few points I want to make clear and some things you have
+
+64
+00:04:27.300 --> 00:04:30.740
+to adjust before we go forward.
+
+65
+00:04:30.740 --> 00:04:35.220
+So in our project settings, there's a few things we need to make sure that we turn off.
+
+66
+00:04:35.220 --> 00:04:36.220
+One of them is bloom.
+
+67
+00:04:36.220 --> 00:04:39.460
+We want to make sure that bloom is turned off.
+
+68
+00:04:39.460 --> 00:04:40.460
+And AO.
+
+69
+00:04:40.460 --> 00:04:41.460
+Now you can turn them on.
+
+70
+00:04:41.460 --> 00:04:44.460
+I usually turn them on to turn them off or make them zero.
+
+71
+00:04:44.460 --> 00:04:50.140
+And that way, if I need to go back to them and turn them back on, I can easily do so.
+
+72
+00:04:50.140 --> 00:04:53.980
+Also turn off auto exposure that's in the project settings.
+
+73
+00:04:53.980 --> 00:04:57.500
+Any vignetting that you have in your post-process volume.
+
+74
+00:04:57.500 --> 00:05:00.680
+And turn off your extended default luminance range.
+
+75
+00:05:00.680 --> 00:05:02.180
+That will require a restart.
+
+76
+00:05:02.180 --> 00:05:04.240
+So just keep that in mind.
+
+77
+00:05:04.240 --> 00:05:09.120
+Some people may want to keep this on so that you still have a little bit of a auto calculation
+
+78
+00:05:09.120 --> 00:05:11.520
+for your distance and your luminance.
+
+79
+00:05:11.520 --> 00:05:15.160
+I prefer to actually turn that off.
+
+80
+00:05:15.160 --> 00:05:19.280
+But it's really up to you as you decide to dive into these deeper.
+
+81
+00:05:19.280 --> 00:05:22.920
+Let's go ahead and take a look at some of these things in Unreal and mess with these
+
+82
+00:05:22.920 --> 00:05:24.920
+settings.
+
+83
+00:05:25.920 --> 00:05:32.280
+Okay, so let's go ahead and go into the project settings and change some of those things.
+
+84
+00:05:32.280 --> 00:05:36.280
+One, let's go and type in bloom.
+
+85
+00:05:36.280 --> 00:05:38.080
+So you can see I have bloom turned off.
+
+86
+00:05:38.080 --> 00:05:43.400
+And you want to have this one turned off initially.
+
+87
+00:05:43.400 --> 00:05:47.740
+Next we want to go in here and type in AO.
+
+88
+00:05:47.740 --> 00:05:51.280
+So we want to make sure that our, or you can just type in ambient inclusion.
+
+89
+00:05:51.280 --> 00:05:54.500
+Maybe a little bit easier so you don't get a thousand things.
+
+90
+00:05:54.500 --> 00:05:58.200
+Turn off your default ambient occlusion as well as the baked one.
+
+91
+00:05:58.200 --> 00:06:00.480
+You don't need that.
+
+92
+00:06:00.480 --> 00:06:03.620
+And you want to keep things pretty pure, especially if you are baking.
+
+93
+00:06:03.620 --> 00:06:06.620
+You want to make it so you're starting off from scratch.
+
+94
+00:06:06.620 --> 00:06:11.300
+You can go in here and change a few things later on as you go.
+
+95
+00:06:11.300 --> 00:06:19.780
+Next we want to also go in here and change our extended.
+
+96
+00:06:19.780 --> 00:06:23.380
+Make sure we spell that correctly.
+
+97
+00:06:23.380 --> 00:06:27.380
+We need default luminance range in the auto exposure settings.
+
+98
+00:06:27.380 --> 00:06:28.540
+We want to make sure you turn that off.
+
+99
+00:06:28.540 --> 00:06:30.820
+We also want to make sure auto exposure isn't on.
+
+100
+00:06:30.820 --> 00:06:35.820
+I almost forgot about that one.
+
+101
+00:06:35.820 --> 00:06:39.140
+So auto exposure, you want to turn that off so you're in control.
+
+102
+00:06:39.140 --> 00:06:41.740
+And I'll show you how you can actually reactivate that.
+
+103
+00:06:41.740 --> 00:06:45.860
+But within the post process volume, which is actually pretty nice.
+
+104
+00:06:45.860 --> 00:06:51.980
+Also, if you did inherit something from the marketplace, you want to go into your post
+
+105
+00:06:51.980 --> 00:06:56.220
+process volume.
+
+106
+00:06:56.220 --> 00:07:01.620
+And in here, you want to go in here and you want to look for vignetting because someone
+
+107
+00:07:01.620 --> 00:07:04.140
+may have turned it on and you may not even know.
+
+108
+00:07:04.140 --> 00:07:06.620
+And you can see in this case, we have it on.
+
+109
+00:07:06.620 --> 00:07:08.260
+We can turn that off.
+
+110
+00:07:08.260 --> 00:07:12.620
+We don't want to have that on.
+
+111
+00:07:12.620 --> 00:07:14.260
+That makes it so you have a pure scene.
+
+112
+00:07:14.260 --> 00:07:18.020
+You know exactly what it is you're getting exposure wise.
+
+113
+00:07:18.060 --> 00:07:22.700
+And it's pretty beneficial.
+
+114
+00:07:22.700 --> 00:07:26.860
+So now we want to go ahead and take a look at our exposure and see the amount and judge
+
+115
+00:07:26.860 --> 00:07:35.220
+exactly what we have with those settings, everything else in place.
+
+116
+00:07:35.220 --> 00:07:40.860
+Now that we're in unreal, I'm going to go and move over to the outside where our calibrator
+
+117
+00:07:40.860 --> 00:07:42.860
+is at where we left it.
+
+118
+00:07:42.900 --> 00:07:48.020
+And I'm going to look at the third gray square from the right side here.
+
+119
+00:07:48.020 --> 00:07:51.500
+And we're going to use a thing called a pixel inspector.
+
+120
+00:07:51.500 --> 00:07:59.020
+This pixel inspector will allow us to go in here and to be able to judge exactly what
+
+121
+00:07:59.020 --> 00:08:03.340
+it is on our color exposure.
+
+122
+00:08:03.340 --> 00:08:08.040
+Pretty much looking at our exposure, I should say, and looking at the color in that pixel,
+
+123
+00:08:08.040 --> 00:08:10.640
+the luminance of it, I should say.
+
+124
+00:08:10.640 --> 00:08:16.240
+And it's going to tell us exactly where we stand with things.
+
+125
+00:08:16.240 --> 00:08:19.600
+Now you'll see it here right where it says debug.
+
+126
+00:08:19.600 --> 00:08:23.200
+You'll go down to pixel inspector.
+
+127
+00:08:23.200 --> 00:08:24.200
+Want to click on pixel inspector.
+
+128
+00:08:24.200 --> 00:08:25.200
+Let me drag it over.
+
+129
+00:08:25.200 --> 00:08:33.000
+We're going to turn on the start pixel inspector and we see there is a luminance here that
+
+130
+00:08:33.000 --> 00:08:36.200
+we want to focus on.
+
+131
+00:08:36.200 --> 00:08:38.640
+And it says luminance before tone map.
+
+132
+00:08:39.640 --> 00:08:45.640
+I'm going to float over and it's going to give me what that is for that particular pixel.
+
+133
+00:08:45.640 --> 00:08:48.640
+And we can see that it's 7.5.
+
+134
+00:08:48.640 --> 00:08:51.640
+But that's not exactly what we need.
+
+135
+00:08:51.640 --> 00:08:59.640
+If we go back to the notes here, you'll see that we're looking for a 0.18 or 18% gray.
+
+136
+00:08:59.640 --> 00:09:05.640
+This is going to be coming back as a 50% in our gray sRGB.
+
+137
+00:09:05.640 --> 00:09:10.640
+This really does depend on the scene, but we can actually adjust things and correct
+
+138
+00:09:10.640 --> 00:09:12.640
+things to what we need.
+
+139
+00:09:12.640 --> 00:09:15.640
+Let's go back into Unreal and do that.
+
+140
+00:09:15.640 --> 00:09:21.640
+With the pixel inspector active, we can now use it so that we can analyze that scene again.
+
+141
+00:09:21.640 --> 00:09:23.640
+So let's go and do that.
+
+142
+00:09:23.640 --> 00:09:25.640
+Go to debug again.
+
+143
+00:09:25.640 --> 00:09:28.640
+I'm going to go to our pixel inspector.
+
+144
+00:09:28.640 --> 00:09:30.640
+And again, you click on the magnifying glass.
+
+145
+00:09:30.640 --> 00:09:32.640
+We can now inspect where our luminance is at.
+
+146
+00:09:32.640 --> 00:09:35.640
+Now we can see that our luminance is pretty high.
+
+147
+00:09:35.640 --> 00:09:39.640
+So to be able to fix that, we're going to go in here and adjust our strength of our light.
+
+148
+00:09:39.640 --> 00:09:42.640
+And we're going to lower this to like a 4.5.
+
+149
+00:09:42.640 --> 00:09:45.640
+You can even keep it at 5 if you want to.
+
+150
+00:09:45.640 --> 00:09:48.640
+But we can now check with the pixel inspector.
+
+151
+00:09:48.640 --> 00:09:52.640
+And we're pretty close with our luminance before tone map.
+
+152
+00:09:52.640 --> 00:09:56.640
+So we can actually get this just to 4 and see what we get.
+
+153
+00:09:56.640 --> 00:09:59.640
+And then do that again.
+
+154
+00:10:02.640 --> 00:10:05.640
+Pretty close, but not quite there.
+
+155
+00:10:07.640 --> 00:10:09.640
+And we'll get that intensity adjusted.
+
+156
+00:10:09.640 --> 00:10:11.640
+So we'll do a 3.5.
+
+157
+00:10:13.640 --> 00:10:14.640
+There we go.
+
+158
+00:10:14.640 --> 00:10:16.640
+3.5 it is.
+
+159
+00:10:16.640 --> 00:10:21.640
+Now with that set up, I can now go in here and control my exposure.
+
+160
+00:10:21.640 --> 00:10:29.640
+So I've adjusted the light here and I can go in here and now in my scene, go to my post
+
+161
+00:10:29.640 --> 00:10:32.640
+process volume and turn on a few things.
+
+162
+00:10:32.640 --> 00:10:38.640
+Now if we look at exposure up close, you'll notice we do have a default bloom intensity
+
+163
+00:10:38.640 --> 00:10:39.640
+and threshold.
+
+164
+00:10:39.640 --> 00:10:42.640
+So I can turn these off if I want to.
+
+165
+00:10:42.640 --> 00:10:44.640
+It's up to you how you do this.
+
+166
+00:10:44.640 --> 00:10:49.640
+Realize when you do turn on bloom and crank that up, it could actually make things a bit
+
+167
+00:10:49.640 --> 00:10:50.640
+blown out.
+
+168
+00:10:50.640 --> 00:10:52.640
+We'll close mobile because we're not in mobile.
+
+169
+00:10:52.640 --> 00:10:54.640
+We'll close bloom for now.
+
+170
+00:10:54.640 --> 00:10:56.640
+And we're going to mainly focus here.
+
+171
+00:10:56.640 --> 00:10:59.640
+Now there's several different ways that you can choose your exposure.
+
+172
+00:10:59.640 --> 00:11:04.640
+There's an auto exposure, which I prefer, because then I can lock it down within a range.
+
+173
+00:11:04.640 --> 00:11:09.640
+Let me show you what I'm talking about, particularly the minimum brightness and maximum brightness.
+
+174
+00:11:09.640 --> 00:11:15.640
+So if I do adjust that and turn on auto exposure, I can keep my minimum and my maximum within
+
+175
+00:11:15.640 --> 00:11:20.640
+a particular range and it will help adjust according to my settings and what I have in
+
+176
+00:11:20.640 --> 00:11:21.640
+place.
+
+177
+00:11:21.640 --> 00:11:27.640
+Now, I, a lot of the times, will set this simply to one because then everything works
+
+178
+00:11:27.640 --> 00:11:33.640
+as a simple EV slider and I can choose whether I want it dark or I want it bright right there
+
+179
+00:11:33.640 --> 00:11:34.640
+within my scene.
+
+180
+00:11:34.640 --> 00:11:39.640
+And I'm in full control of everything and I know exactly where my exposure lies and
+
+181
+00:11:39.640 --> 00:11:41.640
+how I've set it.
+
+182
+00:11:41.640 --> 00:11:47.640
+You can also choose to do auto exposure basic and a few things will be grayed out as you
+
+183
+00:11:47.640 --> 00:11:52.640
+go and change between these, as well as you can also do manual, which is pretty straightforward.
+
+184
+00:11:52.640 --> 00:11:57.640
+We're just mainly messing with this again, like an EV breakdown, but you'll notice some
+
+185
+00:11:57.640 --> 00:12:02.640
+of these are grayed out and no longer such as the minimum brightness and maximum brightness
+
+186
+00:12:02.640 --> 00:12:05.640
+are no longer adjustable when you're in manual.
+
+187
+00:12:05.640 --> 00:12:07.640
+But again, I like auto exposure.
+
+188
+00:12:07.640 --> 00:12:09.640
+Call me an old school game head for me.
+
+189
+00:12:09.640 --> 00:12:12.640
+That helps me be able to adjust this.
+
+190
+00:12:12.640 --> 00:12:18.640
+And if I did want to create a minimum and maximum to get that auto to be able to control
+
+191
+00:12:18.640 --> 00:12:22.640
+within a range, I have that choice.
+
+192
+00:12:22.640 --> 00:12:24.640
+It's really up to you how you want to do it.
+
+193
+00:12:24.640 --> 00:12:29.640
+And we can set these to default and you can see the auto exposure kind of adjusting itself
+
+194
+00:12:29.640 --> 00:12:31.640
+as I go from one room to the next.
+
+195
+00:12:31.640 --> 00:12:33.640
+I look in different areas.
+
+196
+00:12:36.640 --> 00:12:41.640
+You will notice too, off to the right here, we have a thing called a exposure compensation
+
+197
+00:12:41.640 --> 00:12:42.640
+curve.
+
+198
+00:12:42.640 --> 00:12:44.640
+You can load these and build the curves yourself.
+
+199
+00:12:44.640 --> 00:12:46.640
+There are some default ones that come in here.
+
+200
+00:12:46.640 --> 00:12:52.640
+If I double click on this, this curve now is able to be adjusted and will affect my scene.
+
+201
+00:12:54.640 --> 00:12:58.640
+Now, some of it might be very minimal when you move these around, but it's up to you
+
+202
+00:12:58.640 --> 00:13:03.640
+how you adjust it and how you move things and how you edit things accordingly.
+
+203
+00:13:03.640 --> 00:13:07.640
+If I grab the whole line here and move it up and down.
+
+204
+00:13:08.640 --> 00:13:11.640
+You'll see things slightly change.
+
+205
+00:13:11.640 --> 00:13:13.640
+You got a little brighter and I'll move this down.
+
+206
+00:13:13.640 --> 00:13:14.640
+You'll see it get darker.
+
+207
+00:13:14.640 --> 00:13:16.640
+So it does have an influence.
+
+208
+00:13:16.640 --> 00:13:18.640
+It just may seem a little bit weak in here.
+
+209
+00:13:18.640 --> 00:13:20.640
+It's up to you how you adjust that curve.
+
+210
+00:13:20.640 --> 00:13:22.640
+I'm going to turn the curve off.
+
+211
+00:13:22.640 --> 00:13:23.640
+We don't need it.
+
+212
+00:13:23.640 --> 00:13:25.640
+And they can definitely see the dramatic change.
+
+213
+00:13:25.640 --> 00:13:26.640
+There is a exposure meter mask.
+
+214
+00:13:26.640 --> 00:13:28.640
+You could also load if you wanted to.
+
+215
+00:13:28.640 --> 00:13:32.640
+But all these things are at your fingertips to be able to control your exposure.
+
+216
+00:13:33.640 --> 00:13:37.640
+There are a few materials to keep in mind when working with Unreal 2.
+
+217
+00:13:37.640 --> 00:13:43.640
+So this particular one has a very distinct material in here for our glass.
+
+218
+00:13:43.640 --> 00:13:46.640
+There's a frosted glass effect in here.
+
+219
+00:13:46.640 --> 00:13:52.640
+You will see the noise because lumen and some materials may not play necessarily nicely.
+
+220
+00:13:52.640 --> 00:13:54.640
+It may give you a bit higher noise.
+
+221
+00:13:54.640 --> 00:13:55.640
+So keep that in mind.
+
+222
+00:13:55.640 --> 00:14:01.640
+And this particular material, if you slide over, is a spiral blur texture, scene texture.
+
+223
+00:14:01.640 --> 00:14:04.640
+So you can experiment with some of these materials.
+
+224
+00:14:04.640 --> 00:14:08.640
+Some of them I'm not really sure some that will work and not work.
+
+225
+00:14:08.640 --> 00:14:09.640
+You have to.
+
+226
+00:14:09.640 --> 00:14:10.640
+It's always a case by case.
+
+227
+00:14:10.640 --> 00:14:14.640
+And also lumen is constantly evolving, getting better and stronger.
+
+228
+00:14:14.640 --> 00:14:18.640
+But you can definitely see the noise coming through on this blurred effect.
+
+229
+00:14:18.640 --> 00:14:24.640
+In this particular case, you may want to just use an alpha mask that is a bit more 50 50 gray.
+
+230
+00:14:24.640 --> 00:14:30.640
+And per using it within the material, because we definitely are getting a bit of noise there.
+
+231
+00:14:32.640 --> 00:14:38.640
+Here is a list of CVARS that you can use to be able to run and experiment with your scene.
+
+232
+00:14:38.640 --> 00:14:39.640
+And they are available to you.
+
+233
+00:14:39.640 --> 00:14:45.640
+But let me show you some quick tips and tricks when working with these CVARS in Unreal.
+
+234
+00:14:45.640 --> 00:14:51.640
+A lot of people aren't aware in Unreal you have the ability to actually call upon the CVARS at any time,
+
+235
+00:14:51.640 --> 00:14:55.640
+because they do disappear if you just work in your output log down below.
+
+236
+00:14:55.640 --> 00:15:01.640
+But you can use a tool that we have set up for you that allows us to be able to go in here.
+
+237
+00:15:02.640 --> 00:15:05.640
+And let me go ahead and find this guy.
+
+238
+00:15:06.640 --> 00:15:10.640
+This is just an added added bonus that I'm adding to this course.
+
+239
+00:15:13.640 --> 00:15:15.640
+We got to turn him on.
+
+240
+00:15:15.640 --> 00:15:17.640
+So if I go to plugins here.
+
+241
+00:15:17.640 --> 00:15:20.640
+We turn on console.
+
+242
+00:15:20.640 --> 00:15:23.640
+You'll see there's a thing called a console variable editor.
+
+243
+00:15:23.640 --> 00:15:26.640
+Let me turn mine on and give it a restart.
+
+244
+00:15:26.640 --> 00:15:29.640
+And you can actually see kind of how cool it is.
+
+245
+00:15:30.640 --> 00:15:37.640
+Now that I've restarted, I'm going to go in here under windows and pull up a thing called console variables.
+
+246
+00:15:37.640 --> 00:15:42.640
+This console variables allows me to add any console variable that I have in my commands.
+
+247
+00:15:42.640 --> 00:15:45.640
+Say I've worked on a few and I've added a few.
+
+248
+00:15:45.640 --> 00:15:47.640
+I can place them in the console variables.
+
+249
+00:15:47.640 --> 00:15:49.640
+Worked on a few and I've added a few.
+
+250
+00:15:49.640 --> 00:15:57.640
+I can place them here and I can even save those presets that I already have in place and call upon them whenever I need them.
+
+251
+00:15:57.640 --> 00:15:58.640
+It's really nice.
+
+252
+00:15:58.640 --> 00:16:06.640
+So you don't have to worry about punching stuff into the command line here and seeing it disappear or no longer working as an on when you close in real.
+
+253
+00:16:06.640 --> 00:16:09.640
+You can actually load it through your console variables.
+
+254
+00:16:09.640 --> 00:16:10.640
+Very handy.
+
+255
+00:16:10.640 --> 00:16:14.640
+And also if you get stuck and you're like, I'm not sure which Lumen ones I have.
+
+256
+00:16:14.640 --> 00:16:17.640
+I have maybe I don't have Sean's a magical PDF.
+
+257
+00:16:17.640 --> 00:16:23.640
+You can go into your console variable search table here that is built under help here.
+
+258
+00:16:23.640 --> 00:16:27.640
+If you go down just about four lines here, you'll see console variables.
+
+259
+00:16:27.640 --> 00:16:35.640
+Click on that and you're going to get quickly navigated to an area where you can look up that console variable that you need.
+
+260
+00:16:35.640 --> 00:16:36.640
+Pretty nice.
+
+261
+00:16:36.640 --> 00:16:38.640
+And I can simply just type in Lumen.
+
+262
+00:16:38.640 --> 00:16:42.640
+So everything that has to do with Lumen is now going to come up into my search.
+
+263
+00:16:44.640 --> 00:16:48.640
+And it gives you a description for each item to which is really helpful.
+
+264
+00:16:50.640 --> 00:16:52.640
+Well, that's it for this class.
+
+265
+00:16:52.640 --> 00:17:02.640
+Here's some more information that you can click on to be able to actually dive a bit more into auto exposure and other exposure properties when working with unreal.
+
+266
+00:17:02.640 --> 00:17:10.640
+In the next section, we're going to take a look at the old school way to bake your lights in using the bake lighting system in unreal.
+
+267
+00:17:14.640 --> 00:17:16.640
+You.

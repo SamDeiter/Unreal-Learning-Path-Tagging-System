@@ -1,0 +1,457 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:05.000
+Next, let's talk about how to optimize your textures.
+
+2
+00:00:05.000 --> 00:00:11.000
+So here we'll talk about a few settings that you can use for when you import textures into Unreal Engine.
+
+3
+00:00:11.000 --> 00:00:19.000
+And so the first thing being that in HMI, you should use a max texture size of 2048, but 1024 is better.
+
+4
+00:00:19.000 --> 00:00:24.000
+So you can see that we've got a few different settings on our texture images here,
+
+5
+00:00:24.000 --> 00:00:29.000
+but max texture, especially on mobile, should really be 2048.
+
+6
+00:00:29.000 --> 00:00:32.000
+1024 is more ideal.
+
+7
+00:00:32.000 --> 00:00:38.000
+Again, it depends on your project and what you really want to emphasize in your project settings.
+
+8
+00:00:38.000 --> 00:00:45.000
+So having your textures in a power of two means that they can pack into memory more efficiently.
+
+9
+00:00:45.000 --> 00:00:50.000
+So Unreal Engine will always want you to import textures.
+
+10
+00:00:50.000 --> 00:00:53.000
+You can see the series of numbers here in some form of power of two.
+
+11
+00:00:53.000 --> 00:00:59.000
+The textures don't have to be square, but they do need to maintain this kind of ratio.
+
+12
+00:00:59.000 --> 00:01:06.000
+So you can import non power of two textures, but you will lose all the performance benefits and optimization.
+
+13
+00:01:06.000 --> 00:01:11.000
+So if you don't import power of two textures, you won't get any texture streaming.
+
+14
+00:01:11.000 --> 00:01:13.000
+You won't get any MIP mapping.
+
+15
+00:01:13.000 --> 00:01:17.000
+And then any non power of two textures will also be full resolution at all times.
+
+16
+00:01:17.000 --> 00:01:23.000
+So there's no performance gain if you don't import the power of two.
+
+17
+00:01:23.000 --> 00:01:31.000
+So non power of two textures will perform poorly on mobile devices and it will pack into memory less efficiently.
+
+18
+00:01:31.000 --> 00:01:36.000
+So just keeping these things in mind when you're creating your textures.
+
+19
+00:01:36.000 --> 00:01:39.000
+Next, we'll talk about texture compression settings.
+
+20
+00:01:40.000 --> 00:01:46.000
+So in HMI, you should use a variety of different texture compression settings
+
+21
+00:01:46.000 --> 00:01:49.000
+dependent on the texture that you're trying to import.
+
+22
+00:01:49.000 --> 00:01:53.000
+So every texture that you import will be compressed in some way
+
+23
+00:01:53.000 --> 00:01:57.000
+unless you tell Unreal Engine not to compress it in a certain way.
+
+24
+00:01:57.000 --> 00:02:05.000
+So we apply texture compression to textures to lessen the memory footprint of the project across a variety of platforms.
+
+25
+00:02:05.000 --> 00:02:13.000
+So most textures are going to be either DXT1, which is the default by Unreal Engine.
+
+26
+00:02:13.000 --> 00:02:19.000
+As you can see at the top there, the default DXT1 essentially just means it's not got an alpha.
+
+27
+00:02:19.000 --> 00:02:24.000
+If it comes in at DXT5, it means it's got an alpha channel assigned to it.
+
+28
+00:02:24.000 --> 00:02:28.000
+So changing the compression settings will also change other settings for the texture.
+
+29
+00:02:29.000 --> 00:02:36.000
+So sRGB will be disabled or remain enabled depending on how you've compressed that texture.
+
+30
+00:02:36.000 --> 00:02:43.000
+So taking an example on the normal map settings, we will, if we set a normal map compression,
+
+31
+00:02:43.000 --> 00:02:50.000
+it will disable the sRGB as gamma correction. It's just not needed for normal maps.
+
+32
+00:02:50.000 --> 00:02:55.000
+So for HMI, the following texture compression methods should be used.
+
+33
+00:02:55.000 --> 00:03:01.000
+So we've got our normal maps. We've got a cube map, IBL or HDR.
+
+34
+00:03:01.000 --> 00:03:07.000
+We've got the EXR that will need to have their MIP maps manually set to off.
+
+35
+00:03:07.000 --> 00:03:12.000
+So if you are doing EXR, just make sure you turn those MIP maps off.
+
+36
+00:03:12.000 --> 00:03:18.000
+We've got grayscale on the right hand side here to help with banding, but make sure you use this sparingly.
+
+37
+00:03:18.000 --> 00:03:22.000
+And then we've also got UI texture compression setting.
+
+38
+00:03:22.000 --> 00:03:28.000
+It's more important to make sure that the UI texture size can be divided by four with no remainder.
+
+39
+00:03:28.000 --> 00:03:31.000
+If not, images will just not be compressed.
+
+40
+00:03:31.000 --> 00:03:41.000
+So for example, 96 by 88 image would be OK as both 96 and 88, sorry, have no remainders when divided by four.
+
+41
+00:03:41.000 --> 00:03:49.000
+However, if it was 97 by 89 image, it would not be OK as both 97 and 89 have remainders when divided by four.
+
+42
+00:03:49.000 --> 00:03:56.000
+So again, it's just keeping these texture compression settings in mind as we move through the projects.
+
+43
+00:03:56.000 --> 00:04:01.000
+But hopefully that gives you a good overview of the texture compression.
+
+44
+00:04:01.000 --> 00:04:04.000
+And so let's move into texture groups now.
+
+45
+00:04:04.000 --> 00:04:12.000
+So texture groups will help determine what MIP or LOD resolution will be shown,
+
+46
+00:04:13.000 --> 00:04:19.000
+what type of filter should be applied when the texture is magnified or minified by the GPU,
+
+47
+00:04:19.000 --> 00:04:26.000
+and how the GPU should also blend between two MIP levels when viewing a grazing angle.
+
+48
+00:04:26.000 --> 00:04:32.000
+So every texture in your project should be placed in one of the texture groups.
+
+49
+00:04:32.000 --> 00:04:38.000
+So the existing groups are named in relation to what the textures that they control are.
+
+50
+00:04:38.000 --> 00:04:49.000
+And then the so for example, an naming group would be normal maps for objects placed in the world should be set to the world normal group.
+
+51
+00:04:49.000 --> 00:04:53.000
+A normal map for characters, for example, should be set to a character normal map group.
+
+52
+00:04:53.000 --> 00:04:59.000
+So you can change these in the default engine I&I.
+
+53
+00:04:59.000 --> 00:05:03.000
+So you could also change main engine properties.
+
+54
+00:05:03.000 --> 00:05:14.000
+But if you go to where your project is on the desktop files, you'll find in the config folder, you'll find an any called default engine.
+
+55
+00:05:14.000 --> 00:05:17.000
+So you can mod some of these directly from there.
+
+56
+00:05:17.000 --> 00:05:24.000
+And so they should be under the same settings. Just make sure that each texture is in a texture group.
+
+57
+00:05:24.000 --> 00:05:32.000
+So it's useful to do this from when your project starts, especially if you're thinking about memory and performance,
+
+58
+00:05:32.000 --> 00:05:35.000
+we should always be at the start of our projects anyway.
+
+59
+00:05:35.000 --> 00:05:45.000
+And so you can a few things to keep in mind on that specific point is that you can knock back the LOD bias down to one.
+
+60
+00:05:45.000 --> 00:05:53.000
+Now that you're once they are assigned to groups, so that they'll be automatically set to the next smaller MIP.
+
+61
+00:05:53.000 --> 00:06:02.000
+So this can, for example, take a 4K texture down to a 2K texture without even needing to reimport it or change in any of the source artwork,
+
+62
+00:06:02.000 --> 00:06:05.000
+which is super useful when working directly in the project.
+
+63
+00:06:05.000 --> 00:06:18.000
+So just make sure that each texture is put in a group and you can save many hours of work and rework even to help the performance and memory at these specific points.
+
+64
+00:06:19.000 --> 00:06:24.000
+When we're talking about further optimizations and the RGB mass packing,
+
+65
+00:06:24.000 --> 00:06:29.000
+RGB mass packing is just a way to cut down on the amount of textures and memory use.
+
+66
+00:06:29.000 --> 00:06:35.000
+So it works by essentially just storing different textures in the RGB channel.
+
+67
+00:06:35.000 --> 00:06:39.000
+And sometimes you can add them to the alpha channel as well as a texture.
+
+68
+00:06:39.000 --> 00:06:46.000
+So with HMI, you should not use the alpha as it increases the memory and it's not really worth the extra channel.
+
+69
+00:06:46.000 --> 00:06:54.000
+So if you are wanting to pack your textures in the material settings, you can then when you have a texture sample node, for example,
+
+70
+00:06:54.000 --> 00:06:58.000
+you can just pull off the ARPIN and only get what's on the red channel.
+
+71
+00:06:58.000 --> 00:07:03.000
+Similarly with green and then blue, as you can see, these are all packed into the same texture.
+
+72
+00:07:03.000 --> 00:07:11.000
+So instead of importing three different textures here, we import one texture, which has an RGB channel.
+
+73
+00:07:11.000 --> 00:07:16.000
+And you can pull off the required information based on the different channels there.
+
+74
+00:07:16.000 --> 00:07:21.000
+So really nice way to optimize a project if you're not doing that already.
+
+75
+00:07:22.000 --> 00:07:32.000
+And then when we talk about RGB mass packing, so inside the material, we then have the RGB pack texture in the material graph.
+
+76
+00:07:32.000 --> 00:07:36.000
+And then we can just pull off the different pins, as I just said a minute ago.
+
+77
+00:07:36.000 --> 00:07:40.000
+So you will only get black and white information from each of the channel.
+
+78
+00:07:40.000 --> 00:07:44.000
+So storing colored data isn't possible.
+
+79
+00:07:44.000 --> 00:07:51.000
+The workflow is best when you don't really need anything that's super high fidelity,
+
+80
+00:07:51.000 --> 00:07:56.000
+but you're OK with just this information that you can see on the right hand channel here.
+
+81
+00:07:56.000 --> 00:08:04.000
+So a few settings to keep in mind, you want to disable sRGB on your RGB pack texture so they are not gamma corrected.
+
+82
+00:08:04.000 --> 00:08:10.000
+And then make sure that your texture sampler is set, the type is set to masks.
+
+83
+00:08:11.000 --> 00:08:13.000
+Next up, we have MIP mapping.
+
+84
+00:08:13.000 --> 00:08:16.000
+And essentially you can think of MIP mapping as level of detail for your texture.
+
+85
+00:08:16.000 --> 00:08:23.000
+So MIP maps generation happens during when you import the texture into Unreal Engine,
+
+86
+00:08:23.000 --> 00:08:26.000
+and it just creates a MIP map chain for that texture.
+
+87
+00:08:26.000 --> 00:08:31.000
+So the MIP map chain consists of multiple levels of the same image.
+
+88
+00:08:31.000 --> 00:08:36.000
+Each image is then half the resolution of the level before, as you can see in the image.
+
+89
+00:08:36.000 --> 00:08:42.000
+So essentially as a texture gets further and further away, it will use a smaller MIP map.
+
+90
+00:08:42.000 --> 00:08:47.000
+So if you are very close up to a certain texture, say we're working with 4K textures,
+
+91
+00:08:47.000 --> 00:08:51.000
+which we wouldn't be in this instance, but to just give you the wide range of scale.
+
+92
+00:08:51.000 --> 00:08:58.000
+So there'd be no reason to display a 4K texture when that object is taking up, you know,
+
+93
+00:08:58.000 --> 00:09:01.000
+maybe a hundred pixels on the screen in the background.
+
+94
+00:09:01.000 --> 00:09:06.000
+So most of the time you're seeing the second or third MIP.
+
+95
+00:09:06.000 --> 00:09:10.000
+So the first MIP is only really ever shown when the camera is extremely close to the texture,
+
+96
+00:09:10.000 --> 00:09:14.000
+and then it stacks back from there as you pull the camera further back.
+
+97
+00:09:14.000 --> 00:09:16.000
+So there's nothing you need to do to set this up.
+
+98
+00:09:16.000 --> 00:09:19.000
+Unreal handles all of this behind the scenes for you.
+
+99
+00:09:19.000 --> 00:09:23.000
+And if you do have any MIPs that you see that are shimmering,
+
+100
+00:09:23.000 --> 00:09:27.000
+you can adjust the way the MIPs are generated in the MIP Gen settings.
+
+101
+00:09:27.000 --> 00:09:33.000
+So when we talk about the settings, there's three that you want to keep in mind here.
+
+102
+00:09:33.000 --> 00:09:38.000
+Simple average, which uses a two by two kernel size.
+
+103
+00:09:38.000 --> 00:09:42.000
+You've got sharpen, which uses an eight by eight kernel
+
+104
+00:09:42.000 --> 00:09:47.000
+and some negative weights to sharpen in addition to a four by four Gaussian kernel.
+
+105
+00:09:47.000 --> 00:09:54.000
+And then sharpen zero is not sharpening, but it still uses the quality down sampling filter.
+
+106
+00:09:54.000 --> 00:10:00.000
+So using sharpen values four or five is a good place to start testing
+
+107
+00:10:00.000 --> 00:10:04.000
+and check your MIP issues based on that.
+
+108
+00:10:04.000 --> 00:10:07.000
+And then here you can see a visualization.
+
+109
+00:10:07.000 --> 00:10:10.000
+It's an example of how MIP mapping looks like in action.
+
+110
+00:10:10.000 --> 00:10:15.000
+So you notice that the highest MIP is not used everywhere.
+
+111
+00:10:15.000 --> 00:10:22.000
+And keep that in mind, especially when you start a brazing textures into, you know, 8K and beyond.
+
+112
+00:10:22.000 --> 00:10:26.000
+Just making sure that the real estate that's on the screen,
+
+113
+00:10:26.000 --> 00:10:30.000
+the objects that you're wanting to look at, have the relevant MIPs assigned to it
+
+114
+00:10:30.000 --> 00:10:34.000
+just to get that the most performance out of your scene there.

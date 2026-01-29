@@ -1,0 +1,281 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.040
+So stepping up the complexity a tiny bit here, we'll talk about creating masked materials
+
+2
+00:00:06.040 --> 00:00:11.040
+with some nodes. So we want to cover the process of how you might create a masked material.
+
+3
+00:00:11.040 --> 00:00:16.380
+We'll talk about using minus nodes and clamps, and we'll also use the lerp node to linear
+
+4
+00:00:16.380 --> 00:00:21.040
+interpolate between two different channels of the material that we want. We can talk
+
+5
+00:00:21.040 --> 00:00:26.060
+about masking textures for materials using one texture, and we'll also talk about using
+
+6
+00:00:26.060 --> 00:00:31.940
+the RBG RGB channels to almost get a more performant texture based on a specific channel
+
+7
+00:00:31.940 --> 00:00:36.580
+rather than the overall texture. So let's jump into this. So we've got the process.
+
+8
+00:00:36.580 --> 00:00:41.140
+There are two ways that can be achieved when we're talking about masked materials. So with
+
+9
+00:00:41.140 --> 00:00:46.380
+an outside alpha embedded in a texture, or you can do it in a standalone texture that
+
+10
+00:00:46.380 --> 00:00:51.780
+has an alpha data plugged into opacity. You can also do this through the color channels,
+
+11
+00:00:51.780 --> 00:00:57.620
+which we were talking about with the RGB material setup. So when you create a texture
+
+12
+00:00:57.620 --> 00:01:04.340
+sample, you'll have an alpha pin on the texture sample, which is the main output, and then
+
+13
+00:01:04.340 --> 00:01:09.620
+it's the RGB, and then you've got an A. So anything imported with some kind of opacity,
+
+14
+00:01:09.620 --> 00:01:15.080
+a 32 bit alpha channel, you can use that alpha to plug into one opacity of the material.
+
+15
+00:01:15.080 --> 00:01:19.460
+You can even just pull in a specific channel, whether it's the green channel, the red channel,
+
+16
+00:01:19.460 --> 00:01:25.300
+the blue channel, to have an alphaed material as well, depends on what you packed into that
+
+17
+00:01:25.300 --> 00:01:29.380
+texture sheet to begin with. But suffice to say, there's a number of ways that we can
+
+18
+00:01:29.380 --> 00:01:34.060
+achieve creating a masked material. And it's up to your kind of preference and also just
+
+19
+00:01:34.060 --> 00:01:39.300
+workflow of how you're trying to pack textures together on the approach that you want. When
+
+20
+00:01:39.300 --> 00:01:45.260
+we're looking at a material setup that we want for thinking about masked materials,
+
+21
+00:01:45.260 --> 00:01:50.460
+we'll use the minus nodes and some clamps here as well. So we'll create or use a black
+
+22
+00:01:50.460 --> 00:01:56.260
+and white texture, which we provided in the project, and you can create a texture sample.
+
+23
+00:01:56.260 --> 00:02:00.860
+So a nice little shortcut here is if you do use the texture that was given in the project
+
+24
+00:02:00.860 --> 00:02:05.340
+or anything that's already in your content browser, you can have that selected in your
+
+25
+00:02:05.340 --> 00:02:10.180
+content browser. Don't double click it, you can just select it. You can come into the
+
+26
+00:02:10.180 --> 00:02:15.100
+material and if you press T on your keyboard and left click, it will first of all create
+
+27
+00:02:15.100 --> 00:02:20.380
+a texture sample, but it'll also automatically apply the texture that you had selected in
+
+28
+00:02:20.380 --> 00:02:25.140
+your content browser. So it's just a nice quicker way of working. Again, you could always
+
+29
+00:02:25.140 --> 00:02:30.780
+just press T or just right click, add a texture sample and then select the texture after the
+
+30
+00:02:30.780 --> 00:02:34.700
+fact. It doesn't matter either way, but it's just a little bit more streamlined way of
+
+31
+00:02:34.700 --> 00:02:40.700
+working. Next, we want to create a one minus if we need to flip the masking effect. So
+
+32
+00:02:40.740 --> 00:02:45.300
+this is our one minus and it'll essentially just flip to the opposite. So if you've got
+
+33
+00:02:45.300 --> 00:02:51.100
+Alfred on the outside and the solid colors on the inside, the one minus will then flip
+
+34
+00:02:51.100 --> 00:02:56.780
+it to translucent outside and opaque on the inside. So it'll just basically flip the effect
+
+35
+00:02:56.780 --> 00:03:02.180
+that you're going for, which you can see this one minus doing there. So instead of importing
+
+36
+00:03:02.180 --> 00:03:06.540
+a brand new texture that does the same thing, but in the opposite way, we can actually just
+
+37
+00:03:06.580 --> 00:03:11.380
+dial that in based on the material, which, you know, reduces the amount of texture samples
+
+38
+00:03:11.380 --> 00:03:16.820
+you might need in your project, which is really useful for having that flexibility. So we've
+
+39
+00:03:16.820 --> 00:03:21.980
+done this to make some kind of gold trim on the material. Next, we'll create a clamp to
+
+40
+00:03:21.980 --> 00:03:27.980
+keep things in range if parameters are introduced for control. So if someone programs into your
+
+41
+00:03:27.980 --> 00:03:31.980
+shader, they will see that they have a clamp to keep things in a nice certain range. So
+
+42
+00:03:32.020 --> 00:03:37.420
+that's just more of a quality control type of clamp that we've put in there to make sure
+
+43
+00:03:37.420 --> 00:03:42.900
+we're getting the desired effect. We can also use Lerp nodes, which is a linear interpolate.
+
+44
+00:03:42.900 --> 00:03:48.340
+So you can just right click, add Lerp. You'll likely see that it's called linear interpolate
+
+45
+00:03:48.340 --> 00:03:54.580
+as well. And so we'll create a Lerp node and run the one minus into the alpha input of
+
+46
+00:03:54.580 --> 00:03:59.420
+the Lerp. And then we want to duplicate that process for the material texture. So when
+
+47
+00:03:59.420 --> 00:04:04.460
+we talk about duplicating the process, you can actually select these nodes, Ctrl C to
+
+48
+00:04:04.460 --> 00:04:09.780
+copy, Ctrl V to paste, and just work a little bit more efficiently there. So you just want
+
+49
+00:04:09.780 --> 00:04:14.260
+to notice that there's not a metal texture for the wood. So we can plug in a constant
+
+50
+00:04:14.260 --> 00:04:19.540
+into the Lerp. So this is the setup that we're going for here. You can see that we've got
+
+51
+00:04:19.540 --> 00:04:25.180
+that const going into the A, we've got the texture sample going into the B, and where
+
+52
+00:04:25.180 --> 00:04:29.900
+the alpha is actually based on this texture sample here. And then when we talk about masking
+
+53
+00:04:29.900 --> 00:04:35.060
+textures for materials using one texture, you can actually see that we've got, if you
+
+54
+00:04:35.060 --> 00:04:39.060
+go into your texture and you click through the RGB channels, you'll see there's different
+
+55
+00:04:39.060 --> 00:04:44.380
+information packed into the various channels. And we can actually just pull off, say the
+
+56
+00:04:44.380 --> 00:04:50.300
+green pin or the red pin in this instance, to get specific information from that channel.
+
+57
+00:04:50.300 --> 00:04:57.420
+So if in your external app, you've either painted or included some information onto
+
+58
+00:04:57.420 --> 00:05:05.260
+a specific channel, instead of just using the main RGB channel, if you're layering stuff,
+
+59
+00:05:05.260 --> 00:05:10.420
+for example, in Photoshop, you can just pull off that information in the RGB channel, or
+
+60
+00:05:10.420 --> 00:05:16.700
+even the alpha channel, and use that. And so we call that texture packing. You can pack
+
+61
+00:05:16.700 --> 00:05:22.420
+multiple textures into one texture when importing it into Unreal. And it's just a slightly more
+
+62
+00:05:22.420 --> 00:05:27.420
+efficient way to work if you especially if you're trying to keep the texture sample instructions
+
+63
+00:05:27.420 --> 00:05:33.700
+down to a minimum. So go ahead and follow through those steps, you can create a mass
+
+64
+00:05:33.700 --> 00:05:38.260
+material, play around with the type of masking approach that you'd like. Again, we kind of
+
+65
+00:05:38.260 --> 00:05:42.980
+noted two or three different ways that you could create a mass material based on the
+
+66
+00:05:42.980 --> 00:05:47.580
+samples. And again, it's going to be project specific, depending on what you're trying
+
+67
+00:05:47.580 --> 00:05:52.580
+to achieve. But hopefully that gives a good overview to the mass materials. And also just
+
+68
+00:05:52.580 --> 00:05:57.660
+to add at the end of this that we want to credit to Frick for the scene shown in the
+
+69
+00:05:57.660 --> 00:06:03.540
+RGB channel. And then we've also got a documentation on how to mask materials if you'd like to
+
+70
+00:06:03.540 --> 00:06:05.300
+dig into that topic further.

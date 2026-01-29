@@ -1,0 +1,245 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:10.120
+Now that we're familiar with placing actors and navigating Unreal Engine, let's talk
+
+2
+00:00:10.120 --> 00:00:15.720
+about working with materials and how we actually get some desired results from Unreal Engine.
+
+3
+00:00:15.720 --> 00:00:20.160
+So the topics we'll cover here are the real-time material concepts, we'll talk about what PBR
+
+4
+00:00:20.160 --> 00:00:26.880
+is and we'll also talk about parent materials and also material instances. So parent materials
+
+5
+00:00:26.880 --> 00:00:32.680
+being the primary PBR inputs, the node settings and exposing the different parameters and
+
+6
+00:00:32.680 --> 00:00:37.800
+then with material instances, it will talk about almost being a childhood version of
+
+7
+00:00:37.800 --> 00:00:42.640
+this parent material which is a more simplified interface and we can create multiple versions
+
+8
+00:00:42.640 --> 00:00:49.640
+of lighter, in this instance, more optimized materials based on that parent.
+
+9
+00:00:49.640 --> 00:00:54.360
+Real-time material concepts, essentially starting off as what is a material? It is essentially
+
+10
+00:00:54.360 --> 00:01:00.040
+an asset applied to a mesh to control its visual look. In its simplest form, think of
+
+11
+00:01:00.040 --> 00:01:04.080
+it as paint with various properties such as color and finish. So if we see on the right
+
+12
+00:01:04.080 --> 00:01:09.360
+hand side here, we'll see our paint brush and our bucket and tin, should we call it,
+
+13
+00:01:09.360 --> 00:01:16.280
+and we'll be able to paint a certain surface and let's say we decide that this surface is glass.
+
+14
+00:01:16.280 --> 00:01:22.680
+Now the eye looks at the glass and glass has reflective properties and it reflects a lot of
+
+15
+00:01:22.840 --> 00:01:28.080
+light as well. So you'll see the surface next to it bounces off that light and it creates some
+
+16
+00:01:28.080 --> 00:01:33.760
+reflection and inside of Unreal Engine, we define these properties of what we want glass to look
+
+17
+00:01:33.760 --> 00:01:40.400
+like. Whereas when we have chalk, if we set certain parameters on the material to say we want this to
+
+18
+00:01:40.400 --> 00:01:45.840
+be chalk, it disperses the light, it's much more of a matte material, there's not as much bounce
+
+19
+00:01:45.840 --> 00:01:51.640
+going off the light and especially in one direction. So there's a clear difference between how we want
+
+20
+00:01:51.640 --> 00:01:55.800
+glass to look and how we want chalk to look and we can define that all within Unreal Engine. So
+
+21
+00:01:55.800 --> 00:02:02.160
+material defines how the light interacts with the surface it is applied to essentially. And then
+
+22
+00:02:02.160 --> 00:02:07.780
+talking about PBR, PBR is a unified lighting and shading system. So it's a better approximation
+
+23
+00:02:07.780 --> 00:02:13.880
+of light and materials for physical interaction. So it's very intuitive and consistent, you get
+
+24
+00:02:13.880 --> 00:02:20.640
+specific results from using PBR, it's physically accurate and uses real-world physical measurements.
+
+25
+00:02:20.840 --> 00:02:26.280
+So PBR is a combination of you creating the materials, setting up the lighting how you
+
+26
+00:02:26.280 --> 00:02:30.840
+want it to be set up and also the exposure used within the scenes which is controlled
+
+27
+00:02:30.840 --> 00:02:36.200
+through the post-process. Looking at the material editor as an overview, you'll see a whole bunch
+
+28
+00:02:36.200 --> 00:02:43.480
+of nodes here connected into this master section here. So we can set up various parameters, maybe
+
+29
+00:02:43.480 --> 00:02:48.960
+we want to change the texture coordinates of a texture and we want to offset the texture maybe
+
+30
+00:02:49.120 --> 00:02:56.440
+and then maybe we want to add some contrast through a linear interpolate and we want to
+
+31
+00:02:56.440 --> 00:03:01.800
+set a base color for certain samples and maybe we want to add a normal map to it. Again these
+
+32
+00:03:01.800 --> 00:03:08.160
+materials can get super complex, we'll go over a basic material setup in a few slides here. But
+
+33
+00:03:08.160 --> 00:03:12.000
+you can see there's a lot going on under the hood when we can set up materials, a lot of
+
+34
+00:03:12.000 --> 00:03:17.680
+power and flexibility. You can also decide on certain material properties down on the
+
+35
+00:03:17.680 --> 00:03:23.600
+bottom left heel. So what type of material domain is it, is it a surface, what type of blend mode
+
+36
+00:03:23.600 --> 00:03:28.040
+do you want, do you want an opaque material, do you want a transparent material, what kind of
+
+37
+00:03:28.040 --> 00:03:31.960
+material do you want to set up and then also what shading model do you want it to use and there's
+
+38
+00:03:31.960 --> 00:03:37.280
+a lot more functionality as you scroll down the list in the material editor to get the desired
+
+39
+00:03:37.280 --> 00:03:43.520
+results of what you want there. When we're talking about PBR, the primary inputs you're talking about
+
+40
+00:03:43.520 --> 00:03:48.400
+are base color, metallic and roughness. So base color is some kind of flat color without
+
+41
+00:03:48.400 --> 00:03:56.240
+specularity, it's a linear RGB which is a vector 3 and the values are between 0 and 1. The metallic
+
+42
+00:03:56.240 --> 00:04:01.040
+input, so you'll see these base colors, you'll see metallic and you'll see roughness down here on the
+
+43
+00:04:01.040 --> 00:04:07.520
+right hand side but the metallic is a grayscale value that will range from 0 to 1 and more often
+
+44
+00:04:07.520 --> 00:04:14.880
+than not you really want the metallic value to be either 1 or 0. So when 1, its specular reflection
+
+45
+00:04:14.880 --> 00:04:21.040
+is at 100% so it's the most metallic version, 0 is the least metallic version. And then roughness,
+
+46
+00:04:21.600 --> 00:04:28.400
+grayscale value that ranges from 0 to 1 and you can actually transition through this area on 1
+
+47
+00:04:28.400 --> 00:04:34.880
+in the roughness so you could have you know 0.35 for example but it ranges from smooth, mirror-like
+
+48
+00:04:34.880 --> 00:04:39.280
+to a rougher more matted surface. So depending on the roughness of the material that you want
+
+49
+00:04:39.280 --> 00:04:44.480
+you can manipulate that property to have the desired result that you want.
+
+50
+00:04:45.200 --> 00:04:50.800
+We have a lot of different parameters available to us, we can right click anywhere in the material
+
+51
+00:04:50.800 --> 00:04:55.760
+editor and again I'll be creating a basic material in a few slides here but you can right click
+
+52
+00:04:55.760 --> 00:05:02.640
+anywhere in the material editor and create you know vector parameters, anything you need
+
+53
+00:05:03.440 --> 00:05:09.680
+as well as change the parameter values on each of the nodes that you create. So say you created
+
+54
+00:05:09.680 --> 00:05:16.000
+this vector 3 parameter here, you could select it and then set the colour, a lot of powerful
+
+55
+00:05:16.000 --> 00:05:20.640
+functionality which I'll be going through in a second and so and then you can create a material
+
+56
+00:05:20.640 --> 00:05:26.480
+instance that we spoke about at the start. So material instance is still a version of this
+
+57
+00:05:26.480 --> 00:05:32.880
+master material but it's got certain parameters exposed like brightness for example which we can
+
+58
+00:05:32.880 --> 00:05:38.480
+manipulate based on the parent properties but it's just a much more optimized unified way of
+
+59
+00:05:38.480 --> 00:05:43.200
+working. So let's go into Unreal, let's create a basic material, let's show you the different
+
+60
+00:05:43.200 --> 00:05:52.320
+options and then let's create a material instance for that as well.
+
+61
+00:05:56.480 --> 00:05:56.720
+you

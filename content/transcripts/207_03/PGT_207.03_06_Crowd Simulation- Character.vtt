@@ -1,0 +1,397 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:10.820
+Okay, so moving right along, we are going to use the retargeted characters for crowd
+
+2
+00:00:10.820 --> 00:00:12.160
+simulation.
+
+3
+00:00:12.160 --> 00:00:18.960
+So these characters will randomly move from point A to point B within a designated region,
+
+4
+00:00:18.960 --> 00:00:23.000
+useful for crowd scenes because we can record the results.
+
+5
+00:00:23.000 --> 00:00:25.920
+And then there's no need to re-simulate over and over again.
+
+6
+00:00:25.920 --> 00:00:31.520
+Once we record, we can reuse it however we want.
+
+7
+00:00:31.520 --> 00:00:37.120
+So first thing is to set up the navigation region.
+
+8
+00:00:37.120 --> 00:00:41.960
+And let's go to Unreal to do that.
+
+9
+00:00:41.960 --> 00:00:46.800
+So I'm going to look at the place actors tab in the top left.
+
+10
+00:00:46.800 --> 00:00:52.280
+And I will just type in the word nav because we're going to bring in the nav mesh bounds
+
+11
+00:00:52.280 --> 00:00:55.040
+of volume.
+
+12
+00:00:55.040 --> 00:00:57.840
+Now we don't see anything green yet.
+
+13
+00:00:57.840 --> 00:01:04.600
+And sometimes if I don't make sure that my viewport is active, this next hotkey to make
+
+14
+00:01:04.600 --> 00:01:07.520
+the navigation region visible doesn't always work.
+
+15
+00:01:07.520 --> 00:01:12.060
+So you know, just kind of click around in there and make sure the viewport is active.
+
+16
+00:01:12.060 --> 00:01:19.380
+Then you should be able to hit P. And look, we are now seeing the happy green region for
+
+17
+00:01:19.380 --> 00:01:22.160
+our crowds to walk around.
+
+18
+00:01:22.160 --> 00:01:27.440
+So it's a very small space right now, but we can adjust it.
+
+19
+00:01:27.440 --> 00:01:31.800
+We can scale up the region.
+
+20
+00:01:31.800 --> 00:01:38.100
+Let's make it a bit larger.
+
+21
+00:01:38.100 --> 00:01:45.760
+Keep going a bit more until we are happy with the results.
+
+22
+00:01:45.760 --> 00:01:48.240
+So something like that.
+
+23
+00:01:48.240 --> 00:01:56.680
+Either way, to see the region, if we can't remember P for pathfinding or P for navigation,
+
+24
+00:01:56.680 --> 00:01:59.800
+you can go up to show in the viewport.
+
+25
+00:01:59.800 --> 00:02:05.160
+And then you'll notice that navigation has the P hotkey.
+
+26
+00:02:05.160 --> 00:02:09.600
+It will tell you, or you can just click on the checkbox either way.
+
+27
+00:02:09.600 --> 00:02:15.400
+And looking at the stairs right here, I know the green slope looks a little different than
+
+28
+00:02:15.400 --> 00:02:21.840
+the stairs, but the characters will actually be able to go up the stairs and onto the platform.
+
+29
+00:02:21.840 --> 00:02:24.520
+So there's that.
+
+30
+00:02:24.520 --> 00:02:27.780
+And then there's also another volume I want to point out to you.
+
+31
+00:02:27.780 --> 00:02:30.900
+It's called the nav modifier volume.
+
+32
+00:02:30.900 --> 00:02:37.960
+So let's say I don't want these crowd agents getting near the main actors of a scene, or
+
+33
+00:02:37.960 --> 00:02:42.980
+maybe I don't want them bottlenecking in this narrow hallway right here between the cube
+
+34
+00:02:42.980 --> 00:02:44.620
+and the platform.
+
+35
+00:02:44.620 --> 00:02:49.780
+So I'll drag in the nav mesh volume.
+
+36
+00:02:49.780 --> 00:02:52.860
+And let me move it over.
+
+37
+00:02:52.860 --> 00:02:54.700
+Okay.
+
+38
+00:02:54.700 --> 00:03:01.420
+And make sure it's low enough so that it's actually intersecting with the ground.
+
+39
+00:03:01.420 --> 00:03:07.660
+Just hit F to zoom in on that volume and I'll just adjust it a little bit.
+
+40
+00:03:07.660 --> 00:03:11.960
+So if I don't have it low enough, then it's not going to do anything.
+
+41
+00:03:11.960 --> 00:03:15.080
+That path is still green down there.
+
+42
+00:03:15.080 --> 00:03:16.080
+But now we're good.
+
+43
+00:03:16.080 --> 00:03:22.080
+And if I want to, I can make that a little more narrow and then more of this top portion
+
+44
+00:03:22.080 --> 00:03:24.920
+of the cube is available.
+
+45
+00:03:24.920 --> 00:03:27.500
+Something like that.
+
+46
+00:03:27.500 --> 00:03:31.720
+You can tweak it more.
+
+47
+00:03:31.720 --> 00:03:36.720
+Now I'm going to use the term agent and crowd interchangeably, so we're going to make a
+
+48
+00:03:36.720 --> 00:03:43.560
+class for the agent, crowd, extra that's roaming around in the scene.
+
+49
+00:03:43.560 --> 00:03:47.920
+And to do that, we are going to duplicate the third person character class that already
+
+50
+00:03:47.920 --> 00:03:53.080
+exists and then we're going to strip out a bunch of behavior so it doesn't listen to
+
+51
+00:03:53.080 --> 00:03:54.520
+the user input.
+
+52
+00:03:54.520 --> 00:04:00.720
+We want it to have a different random motion that we will set up later.
+
+53
+00:04:00.720 --> 00:04:07.880
+So let's go back to Unreal.
+
+54
+00:04:07.880 --> 00:04:14.560
+If I go to the third person BP folder and then go to blueprints and then if I click
+
+55
+00:04:14.560 --> 00:04:21.680
+on the third person character and control W to duplicate, I'm going to call this crowd
+
+56
+00:04:21.680 --> 00:04:26.000
+character.
+
+57
+00:04:26.000 --> 00:04:28.400
+So we've got the main third person character.
+
+58
+00:04:28.400 --> 00:04:31.860
+We now also have a crowd character.
+
+59
+00:04:31.860 --> 00:04:40.480
+Double click on your new blueprint class and let's dock the tab up at the top.
+
+60
+00:04:40.480 --> 00:04:42.480
+And you should be in the event graph tab.
+
+61
+00:04:42.480 --> 00:04:49.440
+If for some reason you're in the construction script or the viewport, just move over to
+
+62
+00:04:49.440 --> 00:04:54.880
+the event graph tab and you should see all of these notes.
+
+63
+00:04:54.880 --> 00:04:57.360
+And again, we're not doing a ton of coding.
+
+64
+00:04:57.360 --> 00:05:04.440
+We're just going to delete things and we're simplifying this class.
+
+65
+00:05:04.440 --> 00:05:10.600
+And I'm just going to left marquee drag over all of these nodes because we don't want the
+
+66
+00:05:10.600 --> 00:05:14.240
+mouse or the keyboard to be moving our crowd.
+
+67
+00:05:14.240 --> 00:05:16.040
+So I'm just going to hit delete.
+
+68
+00:05:16.040 --> 00:05:17.040
+Yep.
+
+69
+00:05:17.040 --> 00:05:20.320
+I know that might seem a little scary, but it's fine.
+
+70
+00:05:20.320 --> 00:05:22.000
+Delete all of those.
+
+71
+00:05:22.040 --> 00:05:28.200
+And then if I go over to the viewport tab, we don't really need a camera for these crowd
+
+72
+00:05:28.200 --> 00:05:29.580
+characters.
+
+73
+00:05:29.580 --> 00:05:34.760
+So you can delete the camera boom and the follow camera.
+
+74
+00:05:34.760 --> 00:05:37.840
+Delete both of those.
+
+75
+00:05:37.840 --> 00:05:40.560
+And you could also delete these two variables.
+
+76
+00:05:40.560 --> 00:05:42.960
+We are not going to be using those either.
+
+77
+00:05:42.960 --> 00:05:51.720
+So delete and delete base lookup rate and then compile and save.
+
+78
+00:05:51.720 --> 00:05:55.880
+And then one more thing to point out while I'm in this class, there's this component
+
+79
+00:05:55.880 --> 00:05:59.000
+called character movement.
+
+80
+00:05:59.000 --> 00:06:04.060
+Now this is what enables different movement modes like running and flying and swimming
+
+81
+00:06:04.060 --> 00:06:05.700
+and walking.
+
+82
+00:06:05.700 --> 00:06:08.880
+And there's a lot of other features too.
+
+83
+00:06:08.880 --> 00:06:15.960
+And the one I want to point out, it has to do with movement avoidance.
+
+84
+00:06:15.960 --> 00:06:19.140
+And so this feature is called RVO avoidance.
+
+85
+00:06:19.140 --> 00:06:24.180
+And if we turn that on, we could control how far away the characters are before they try
+
+86
+00:06:24.180 --> 00:06:26.020
+to avoid each other.
+
+87
+00:06:26.020 --> 00:06:32.540
+So right now it's if we were to turn this on, it would be 500 centimeters and then the
+
+88
+00:06:32.540 --> 00:06:36.220
+characters would turn and move away from each other.
+
+89
+00:06:36.220 --> 00:06:42.100
+And you can crank up the avoidance weight and then the characters will really run away
+
+90
+00:06:42.100 --> 00:06:44.020
+much more fervently.
+
+91
+00:06:44.460 --> 00:06:49.820
+And it's useful for games, especially if you have an enemy character, things like that.
+
+92
+00:06:49.820 --> 00:06:55.040
+But for the purposes of what we're doing, which is more cinematic, we're actually okay
+
+93
+00:06:55.040 --> 00:06:57.580
+with the behavior that we're going to be setting up.
+
+94
+00:06:57.580 --> 00:07:00.160
+But I just wanted to point that out to you.
+
+95
+00:07:00.160 --> 00:07:03.700
+You might need it in the future.
+
+96
+00:07:03.700 --> 00:07:09.640
+Okay, so we made a class for the crowd character.
+
+97
+00:07:09.640 --> 00:07:13.400
+In the next video, we're going to make another blueprint class.
+
+98
+00:07:13.400 --> 00:07:20.880
+And this is going to specify the movement from point A to point B along the navigation mesh.
+
+99
+00:07:20.880 --> 00:07:22.880
+So let's do that.

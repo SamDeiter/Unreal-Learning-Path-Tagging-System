@@ -1,0 +1,313 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.900
+Next, we'll look at how to set up our Live Link facial performance inside of Unreal Engine.
+
+2
+00:00:06.900 --> 00:00:10.020
+So to get started, we need a couple of things first.
+
+3
+00:00:10.020 --> 00:00:15.400
+We need to make sure that we have a computer that is running Unreal Engine.
+
+4
+00:00:15.400 --> 00:00:21.760
+If you have Unreal Engine 4.25 or later, the plugins will become automatically active.
+
+5
+00:00:21.760 --> 00:00:26.960
+However, you might need to go in and enable the plugins which we'll touch upon in a second.
+
+6
+00:00:26.960 --> 00:00:34.320
+You also need some kind of iOS device on either iPhone X or later, or an iPad Pro and later,
+
+7
+00:00:34.320 --> 00:00:37.400
+so that we can have this Live Link functionality.
+
+8
+00:00:37.400 --> 00:00:43.120
+And we've got a link to the documentation if you need to understand how to set up blend shapes
+
+9
+00:00:43.120 --> 00:00:49.360
+for the different characters produced by the ARKit's facial recognition there.
+
+10
+00:00:49.360 --> 00:00:54.240
+So we've essentially got five plugins that we want to enable here.
+
+11
+00:00:54.400 --> 00:00:58.560
+If you're unsure where to find plugins, just go to Edit at the top of your editor,
+
+12
+00:00:58.560 --> 00:01:04.400
+go down to the Plugins box, and you can type in in this search box the plugins that you're looking for.
+
+13
+00:01:04.400 --> 00:01:08.880
+So first of all, type in Live Link. We want to just enable these three Live Link plugins.
+
+14
+00:01:09.680 --> 00:01:14.080
+Once you start enabling one plugin, it'll ask you if you want to restart your editor.
+
+15
+00:01:14.080 --> 00:01:19.760
+Don't restart it just yet. Just make sure you enable all the plugins first and then restart your editor.
+
+16
+00:01:19.840 --> 00:01:22.720
+So we've got three Live Link plugins and then we've got these two
+
+17
+00:01:23.520 --> 00:01:29.920
+ARKit and the ARKit Face support here. So let's just enable all of these plugins.
+
+18
+00:01:29.920 --> 00:01:36.320
+Then it'll ask you to restart your editor, hit Yes, and then after the restart,
+
+19
+00:01:36.320 --> 00:01:41.120
+all the plugins will automatically be enabled. You could sanity check this and just double check
+
+20
+00:01:41.120 --> 00:01:45.520
+that you've ticked all the right ones after the restart, but just make sure these plugins are
+
+21
+00:01:45.520 --> 00:01:51.440
+loaded before you continue. The next few steps are a little bit more complicated.
+
+22
+00:01:51.440 --> 00:01:57.920
+Just make sure you take your time in this section, go step by step, maybe refamiliarize yourself with
+
+23
+00:01:57.920 --> 00:02:03.680
+the information. We've got a few pages of debugging as well after this section, if things aren't
+
+24
+00:02:03.680 --> 00:02:10.320
+connecting correctly, but essentially you just need to get your computer talking to your iOS device.
+
+25
+00:02:10.320 --> 00:02:15.840
+So we need to figure out how to get Live Link connected between our iOS device and the computer.
+
+26
+00:02:15.840 --> 00:02:21.440
+So we can go to the project settings, so go edit project settings in your editor,
+
+27
+00:02:22.240 --> 00:02:29.440
+and then we've got this UDP messaging section. We want to look up the computer Unicast endpoint here
+
+28
+00:02:30.000 --> 00:02:38.080
+and find that, and this will be used as a subject target in a second here. So the Unicast endpoint
+
+29
+00:02:38.080 --> 00:02:44.720
+is the number that we're looking for here. Now we want to launch Live Link Face app on our iOS device.
+
+30
+00:02:44.720 --> 00:02:52.480
+We want to then tap the gear icon to open the settings and tap the Live Link settings option
+
+31
+00:02:52.480 --> 00:03:02.640
+and then add the target here, the IPv4 address to the targets, the IPv4 address that we just found.
+
+32
+00:03:02.640 --> 00:03:07.120
+I'll show you how to grab that in a second here if you're unsure how to find your
+
+33
+00:03:07.120 --> 00:03:12.080
+computer's local IPv4 address, but that's essentially what we want. And then the Live
+
+34
+00:03:12.080 --> 00:03:17.600
+Link Face calibration, we want to tap the calibration settings, enable calibration and countdown,
+
+35
+00:03:17.600 --> 00:03:23.920
+and then the calibration icon will appear on the screen there. Now back over in Unreal Engine,
+
+36
+00:03:23.920 --> 00:03:27.600
+we'll need to open our Live Link window. So again, we can go to Windows,
+
+37
+00:03:27.600 --> 00:03:34.480
+Live Link. I believe Live Link is inside the virtual production sub tab there, but again,
+
+38
+00:03:34.480 --> 00:03:38.960
+if you are using a more recent version of Unreal Engine, you can just type out Live Link and it'll
+
+39
+00:03:38.960 --> 00:03:44.480
+open up that window and then you can pin it to your editor somewhere. And then we want to select
+
+40
+00:03:44.480 --> 00:03:50.320
+the source subject as the iOS device, which is this section here. So this should automatically
+
+41
+00:03:50.320 --> 00:03:57.200
+be detected. If you're not getting this green light, you could just hold on a second to check
+
+42
+00:03:57.200 --> 00:04:02.320
+out some debugging tips in a second, or you could repeat the previous step. But at this point,
+
+43
+00:04:02.320 --> 00:04:08.560
+we need to be able to see this green light happening here. And then if we have, say,
+
+44
+00:04:08.560 --> 00:04:14.080
+in this example, we're going to use a MetaHuman for the facial performance. So we've got our
+
+45
+00:04:14.080 --> 00:04:22.160
+MetaHuman in the level here, locate the default tab in the details panels, which you can see here
+
+46
+00:04:22.160 --> 00:04:28.560
+in the default section, select your Live Link face subject, which is the iOS device, and then
+
+47
+00:04:29.360 --> 00:04:35.520
+check on the Live Link face head for rotation. So you can use PlanEdit to view
+
+48
+00:04:36.240 --> 00:04:42.720
+facial performances out of the box here. And then at this stage, it's probably useful for us to
+
+49
+00:04:42.720 --> 00:04:50.240
+get familiar with the interface of the Live Link app setup. So in a similar fashion to how we did
+
+50
+00:04:50.240 --> 00:04:56.720
+the take recorder, we've got an option here to open the settings dialog. We've got an option here
+
+51
+00:04:56.720 --> 00:05:02.640
+that toggles sending facial animation data to all Live Link targets. And then in number three,
+
+52
+00:05:02.640 --> 00:05:07.840
+we've got a toggle for the video display, the facial tracking on and off. Again, we've got a
+
+53
+00:05:07.840 --> 00:05:14.240
+nice big red button which starts and stops the recording. In number five, we've got open a list
+
+54
+00:05:14.240 --> 00:05:20.400
+of all takes previously recorded by the app. Number six is showing the current slate and take,
+
+55
+00:05:21.040 --> 00:05:27.200
+similar to how take recorder operated here. And then number seven basically just displays,
+
+56
+00:05:27.200 --> 00:05:33.920
+essentially indicates that the app can detect your face and capture everything correctly.
+
+57
+00:05:33.920 --> 00:05:39.840
+So again, we've got some great documentation, which is well worth a read, how to approach
+
+58
+00:05:39.840 --> 00:05:45.680
+facial recordings in Unreal Engine, which is worth a read as you're doing this.
+
+59
+00:05:46.560 --> 00:05:51.040
+So as promised, we've got a couple of slides here for some debugging information,
+
+60
+00:05:51.040 --> 00:05:56.240
+just to see if things weren't connecting with Live Link correctly, how you might go about
+
+61
+00:05:56.240 --> 00:06:00.800
+fixing this. So as we stated at the top here, we just want to make sure that the plugins are
+
+62
+00:06:00.800 --> 00:06:06.560
+enabled. Just go ahead and double check that plugins are enabled correctly. Restart your editor as
+
+63
+00:06:06.560 --> 00:06:11.040
+well when you're enabling plugins, you want to make sure that the iOS device and computer are
+
+64
+00:06:11.040 --> 00:06:16.640
+directly connected, which means no signal repeaters as well. And we want to verify both
+
+65
+00:06:16.640 --> 00:06:23.680
+iOS device and computer IPv4 addresses connected. So you can either find out your IP by going on
+
+66
+00:06:23.680 --> 00:06:31.840
+What's My IP, which is a URL that you can follow, or opening the command prompt in Windows, you can
+
+67
+00:06:31.840 --> 00:06:39.680
+type in IP config. And that will give you your IPv4 address at the bottom here, which you can see
+
+68
+00:06:40.320 --> 00:06:46.640
+located there. We want to verify our own the same subnet and also verify computer IPv4 addresses in
+
+69
+00:06:46.640 --> 00:06:53.040
+the settings of the Live Link face app. So just make sure those two addresses match. The static
+
+70
+00:06:53.040 --> 00:07:00.800
+endpoint port number is optional. So you could try if you still have an issues to add that port
+
+71
+00:07:00.800 --> 00:07:07.920
+number, but it is completely optional. And then we also want to check in the UDP messaging section.
+
+72
+00:07:08.800 --> 00:07:15.280
+We want to add UDP messaging for stability here, and then verify a single instance of Unreal is
+
+73
+00:07:15.280 --> 00:07:21.840
+active. Then we want to just make sure our firewall is disabled here. Check any whitelist
+
+74
+00:07:21.840 --> 00:07:27.200
+devices and incoming rules, and also verify that the app is on and actively capturing data.
+
+75
+00:07:27.200 --> 00:07:34.320
+If all else fails, reset or restart all devices and just try again. The UDP messaging is located
+
+76
+00:07:34.320 --> 00:07:38.960
+in the plugin section of the Unreal Engine project settings, as we said before. And here
+
+77
+00:07:38.960 --> 00:07:46.000
+is some information on the different endpoints of what you might be looking for if devices aren't
+
+78
+00:07:46.000 --> 00:07:52.000
+connecting correctly.

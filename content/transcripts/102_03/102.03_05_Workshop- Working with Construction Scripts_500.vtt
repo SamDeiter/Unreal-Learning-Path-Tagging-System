@@ -1,0 +1,1045 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:10.160
+So, let's dig a little bit deeper into blueprints and let's talk about construction scripts.
+
+2
+00:00:10.160 --> 00:00:17.360
+So, a construction script is a type of automation, which is a reason for a construction script.
+
+3
+00:00:17.360 --> 00:00:19.200
+It's part of the event graph.
+
+4
+00:00:19.200 --> 00:00:26.080
+It's got use and limitations and we will also put these lessons into practice in a workshop
+
+5
+00:00:26.080 --> 00:00:29.480
+example just to really drive home what a construction script is.
+
+6
+00:00:30.360 --> 00:00:33.320
+What is a construction script and why should we use it?
+
+7
+00:00:33.320 --> 00:00:39.880
+So, construction script is a special event that actor-based blueprints inherit and allows
+
+8
+00:00:39.880 --> 00:00:43.160
+them to perform logic before being visible.
+
+9
+00:00:43.160 --> 00:00:47.320
+So, whenever we compile our blueprint, the construction script will fire.
+
+10
+00:00:47.320 --> 00:00:50.120
+So, it can fire at editor time as well.
+
+11
+00:00:50.840 --> 00:00:55.960
+This means that when we have editable variables that are exposed and you can edit
+
+12
+00:00:56.760 --> 00:01:02.760
+in the blueprint classes, it allows you to dynamically modify this blueprint based on
+
+13
+00:01:02.760 --> 00:01:04.440
+logic and exposed parameters.
+
+14
+00:01:04.440 --> 00:01:10.520
+So, in this example here, we're creating a series of conditions that when we hit compile
+
+15
+00:01:10.520 --> 00:01:18.040
+and we move the blueprint, we can actually add some mesh functionality in the editor
+
+16
+00:01:18.040 --> 00:01:19.720
+rather than at runtime.
+
+17
+00:01:19.720 --> 00:01:24.760
+So, construction scripts can take a little bit of getting your head around, especially
+
+18
+00:01:24.760 --> 00:01:29.400
+if you're not from a programming background, but they have some really, really powerful
+
+19
+00:01:29.400 --> 00:01:35.320
+outcomes especially when building scenes and building sets and trying to think about how
+
+20
+00:01:35.320 --> 00:01:37.000
+to speed up the workflow.
+
+21
+00:01:37.000 --> 00:01:42.440
+Construction scripts can be a really powerful way of just really optimizing these pipelines.
+
+22
+00:01:42.440 --> 00:01:48.840
+So, the visual script and event graph is the event graph that runs during gameplay
+
+23
+00:01:49.800 --> 00:01:51.160
+including play and editor.
+
+24
+00:01:51.160 --> 00:01:55.160
+So, as we were referring to before, these three windows in your blueprint graph, you've
+
+25
+00:01:55.160 --> 00:01:59.960
+got your viewport, which you can see the visual representation of the blueprint.
+
+26
+00:01:59.960 --> 00:02:04.120
+You've got your event graph, which houses all the main blueprints in this firing at
+
+27
+00:02:04.120 --> 00:02:04.620
+runtime.
+
+28
+00:02:05.320 --> 00:02:09.560
+Your construction script is where you'll be putting any code that you want to happen
+
+29
+00:02:10.760 --> 00:02:13.960
+every time you interact on the editor level as well.
+
+30
+00:02:14.680 --> 00:02:22.120
+So, we can look at collision damage, movement, player interaction, events, spawning actors
+
+31
+00:02:23.720 --> 00:02:25.080
+in the event graph.
+
+32
+00:02:25.080 --> 00:02:29.000
+So, this is all stuff that's happening at runtime.
+
+33
+00:02:29.000 --> 00:02:33.720
+So, when the players are interacting with things, firing off events, spawning things,
+
+34
+00:02:33.720 --> 00:02:37.480
+these are all happening during the experience that you're creating.
+
+35
+00:02:38.120 --> 00:02:42.760
+The construction script, however, runs before the game is running.
+
+36
+00:02:43.080 --> 00:02:45.080
+Including in the level editor viewport.
+
+37
+00:02:45.080 --> 00:02:51.960
+So, we can add components here, we can change parameters, we can assign asset reference,
+
+38
+00:02:51.960 --> 00:02:54.280
+we can build geometry and other components.
+
+39
+00:02:54.280 --> 00:03:00.040
+When I was talking about improving processes and pipelines and thinking about tools that
+
+40
+00:03:00.040 --> 00:03:06.280
+you can use at editor time to improve your pipelines and processes, the construction
+
+41
+00:03:06.280 --> 00:03:08.840
+script is a really, really strong way of doing this.
+
+42
+00:03:08.840 --> 00:03:12.440
+So, by default, the construction script runs at the following time.
+
+43
+00:03:12.680 --> 00:03:17.400
+When the actor is first placed in the level, so if you drag and drop a blueprint into a
+
+44
+00:03:17.400 --> 00:03:19.800
+level, the construction script will fire.
+
+45
+00:03:19.800 --> 00:03:23.720
+So, by dragging and dropping from the content browser, that's what will happen.
+
+46
+00:03:23.720 --> 00:03:28.040
+When the blueprint class is compiled, so again, when we compile and save, the construction
+
+47
+00:03:28.040 --> 00:03:29.080
+script will fire.
+
+48
+00:03:29.640 --> 00:03:36.280
+And even when you instance the actor is moved around the level, talking about that inheritance
+
+49
+00:03:36.280 --> 00:03:41.080
+from before, the construction script will fire across these instance actors.
+
+50
+00:03:41.080 --> 00:03:48.360
+So, you can stop this by setting a run construction script to false in the class, if you don't
+
+51
+00:03:48.360 --> 00:03:54.120
+want that construction script firing, but it will by default fire on instance actors.
+
+52
+00:03:54.120 --> 00:03:57.640
+And then when the level is loaded with an instance actor in it.
+
+53
+00:03:57.640 --> 00:04:06.760
+So, it will also fire when you hit play, but the powerful functionality is strong during
+
+54
+00:04:06.760 --> 00:04:07.560
+editor time.
+
+55
+00:04:07.560 --> 00:04:15.080
+So, it's one thing talking about the functionality of construction scripts and especially knowing
+
+56
+00:04:15.080 --> 00:04:16.280
+how complex they can be.
+
+57
+00:04:17.160 --> 00:04:23.320
+The theory is great and good to know, but let's dive into creating a blueprint with
+
+58
+00:04:23.320 --> 00:04:27.560
+some construction script functionality so you can see exactly what's happening here.
+
+59
+00:04:27.560 --> 00:04:31.240
+So, we're in our editor, we're just in a default map.
+
+60
+00:04:31.240 --> 00:04:32.680
+It can be whatever map you need.
+
+61
+00:04:32.840 --> 00:04:37.960
+What we're going to do though is we're going to create a new blueprint class.
+
+62
+00:04:37.960 --> 00:04:42.920
+So, I'm going to in my content, I'm going to have a BP folder.
+
+63
+00:04:43.800 --> 00:04:46.280
+Again, just to keep organized, you don't need to do this.
+
+64
+00:04:46.280 --> 00:04:50.200
+It's not going to break anything if you don't, but I like to have a blueprint folder.
+
+65
+00:04:50.840 --> 00:04:54.200
+I'm going to right click inside of this empty space.
+
+66
+00:04:54.200 --> 00:04:57.160
+I'm going to go to blueprint class at the top here.
+
+67
+00:04:57.480 --> 00:05:05.480
+And I will select actor, which is going to be nine times out of ten, most likely the
+
+68
+00:05:05.480 --> 00:05:06.360
+type of functionality.
+
+69
+00:05:06.360 --> 00:05:09.240
+You just want an actor-based blueprint for this example.
+
+70
+00:05:09.800 --> 00:05:15.960
+And I'm just going to call this BP underscore construction example.
+
+71
+00:05:16.840 --> 00:05:18.760
+It doesn't matter what you call this.
+
+72
+00:05:19.800 --> 00:05:24.920
+Something to highlight is I like to use BP underscore as a naming convention.
+
+73
+00:05:24.920 --> 00:05:29.240
+And again, whatever prefix you want for your blueprints, that's fine.
+
+74
+00:05:29.240 --> 00:05:33.240
+As long as they're consistent across the team that you're working with or across the projects
+
+75
+00:05:33.240 --> 00:05:37.800
+that you're working on, I would keep a consistent prefix there.
+
+76
+00:05:38.680 --> 00:05:42.200
+But either way, we'll double click this blueprint to open it.
+
+77
+00:05:43.000 --> 00:05:46.360
+And then the first thing we want to do is go to our construction script.
+
+78
+00:05:46.360 --> 00:05:52.840
+So, our construction script is on the top of the window here, just inside this viewport.
+
+79
+00:05:52.840 --> 00:05:56.680
+So, clicking construction script and you should see this construction script.
+
+80
+00:05:56.680 --> 00:05:58.920
+So, I'm just left mouse dragging over that.
+
+81
+00:05:58.920 --> 00:06:02.360
+Now, to move around my blueprint, I'm just holding down right mouse button.
+
+82
+00:06:02.360 --> 00:06:06.760
+I want to create a variable, first of all.
+
+83
+00:06:06.760 --> 00:06:10.120
+So, I'm going to go to my variables tab on the left-hand side here.
+
+84
+00:06:10.120 --> 00:06:11.400
+I'm going to click plus.
+
+85
+00:06:12.200 --> 00:06:15.400
+And I'm going to call this how many bushes.
+
+86
+00:06:15.400 --> 00:06:19.160
+So, I'm not going to put a space in my variable name.
+
+87
+00:06:19.160 --> 00:06:23.960
+But what I am going to do is I'm going to capitalize each letter.
+
+88
+00:06:23.960 --> 00:06:25.960
+And I'll show you why I do that in a second.
+
+89
+00:06:25.960 --> 00:06:29.560
+So, I've just hit enter and then click on Boolean.
+
+90
+00:06:29.560 --> 00:06:33.480
+And what I want to do is I want to make sure it's an integer.
+
+91
+00:06:33.480 --> 00:06:35.000
+So, just an integer there.
+
+92
+00:06:35.720 --> 00:06:41.400
+Now, what I'll do is I'll hold down control while hovering over the variable.
+
+93
+00:06:41.400 --> 00:06:44.120
+And then I'm going to go into left mouse drag and let go.
+
+94
+00:06:44.920 --> 00:06:49.080
+Now, you'll see that it's got spacing between how many bushes.
+
+95
+00:06:49.080 --> 00:06:52.520
+And it makes the naming convention easy to read.
+
+96
+00:06:52.520 --> 00:06:55.320
+Now, you could do spaces.
+
+97
+00:06:55.320 --> 00:06:56.600
+You don't need to do this, by the way.
+
+98
+00:06:56.600 --> 00:07:01.880
+But just to show you, you could do a space of how many bushes and hold control and drag it across.
+
+99
+00:07:01.880 --> 00:07:03.240
+And that's still fine.
+
+100
+00:07:03.240 --> 00:07:08.520
+But it's just good practice not to have spaces in your variable names.
+
+101
+00:07:08.520 --> 00:07:11.640
+It'll still work, but it's just not really good practice.
+
+102
+00:07:12.280 --> 00:07:15.880
+What you can also do is just not capitalize it.
+
+103
+00:07:15.880 --> 00:07:22.440
+But what you'll see very quickly, if I just say how many bushes, one.
+
+104
+00:07:23.880 --> 00:07:25.240
+And I'll drag and drop that in.
+
+105
+00:07:25.240 --> 00:07:27.480
+It just makes it harder to read.
+
+106
+00:07:27.480 --> 00:07:32.440
+So, that variable versus that variable, it's just better to capitalize, in my opinion.
+
+107
+00:07:32.440 --> 00:07:35.160
+So, just some good naming conventions there.
+
+108
+00:07:35.160 --> 00:07:37.080
+I'm just going to delete what I created.
+
+109
+00:07:37.080 --> 00:07:38.680
+And again, let's just compile and save.
+
+110
+00:07:38.680 --> 00:07:40.920
+Just let's get into the habit of compiling and saving.
+
+111
+00:07:41.800 --> 00:07:45.160
+So, what we want to do, we first want to make sure it's visible.
+
+112
+00:07:45.160 --> 00:07:50.920
+So, we're going to click this variable and then compile and save.
+
+113
+00:07:51.880 --> 00:07:56.760
+And then what I'm also going to do, just for organization, I'm going to create a category.
+
+114
+00:07:56.760 --> 00:08:02.680
+And maybe I'll call this construction script.
+
+115
+00:08:04.680 --> 00:08:07.400
+And now it's got a category called construction script here.
+
+116
+00:08:07.480 --> 00:08:15.640
+So, if you start creating blueprints, you'll find yourself creating maybe 20, 30 variables.
+
+117
+00:08:15.640 --> 00:08:19.800
+And if you don't start organizing from when you first create a blueprint,
+
+118
+00:08:19.800 --> 00:08:25.080
+and get some weirdly, excuse me, and you just want to keep things organized as you go.
+
+119
+00:08:25.080 --> 00:08:26.680
+So, again, let's compile and save.
+
+120
+00:08:26.680 --> 00:08:29.320
+And let's just get into the habit of compile, save, compile, save.
+
+121
+00:08:30.440 --> 00:08:34.200
+And then what we want to do is on our variable, we'll type 5.
+
+122
+00:08:34.680 --> 00:08:39.320
+So, in this example, we're going to create a series of bushes from a construction script.
+
+123
+00:08:39.320 --> 00:08:42.200
+And so, I want to create 5 in this example.
+
+124
+00:08:42.200 --> 00:08:45.480
+So, let's drag off and create a for loop.
+
+125
+00:08:45.480 --> 00:08:49.640
+So, from this execution pin on the constructor, I'm just going to left mouse drag
+
+126
+00:08:49.640 --> 00:08:53.880
+and type for loop and select the for loop.
+
+127
+00:08:54.920 --> 00:08:56.920
+I'm going to move that into position.
+
+128
+00:08:56.920 --> 00:08:59.640
+And on the first index, I'll type 1.
+
+129
+00:08:59.640 --> 00:09:04.600
+And on the last index, I'll drag and drop how many bushes into that.
+
+130
+00:09:04.600 --> 00:09:09.000
+So, it's between 1 and 5 because 5 is on our variable here.
+
+131
+00:09:09.560 --> 00:09:17.160
+So, what we want to do is we want to add some kind of random vectors to these bushes.
+
+132
+00:09:17.160 --> 00:09:19.560
+So, they get randomly placed around.
+
+133
+00:09:19.560 --> 00:09:22.440
+So, I'm going to right click in empty space.
+
+134
+00:09:22.440 --> 00:09:25.160
+I'm going to type random unit vector.
+
+135
+00:09:26.120 --> 00:09:28.680
+Select that first one, random unit vector.
+
+136
+00:09:28.680 --> 00:09:31.240
+I'm just going to hit enter on my keyboard.
+
+137
+00:09:31.240 --> 00:09:33.400
+And then, I'm going to multiply this.
+
+138
+00:09:33.400 --> 00:09:35.320
+So, I'm going to drag off the yellow pin.
+
+139
+00:09:35.320 --> 00:09:40.680
+I'm going to hold down shift and number 8 on my keyboard for a multiply sign.
+
+140
+00:09:40.680 --> 00:09:42.840
+It's a little star sign on my keyboard.
+
+141
+00:09:43.720 --> 00:09:45.000
+And then, multiply.
+
+142
+00:09:45.000 --> 00:09:46.840
+You can type in multiply.
+
+143
+00:09:46.840 --> 00:09:52.840
+But for any kind of math driven stuff, if you want to type, you know, equals or hold down shift
+
+144
+00:09:52.840 --> 00:09:56.840
+and equals, which is a plus key, you can do the math base command.
+
+145
+00:09:56.840 --> 00:10:01.560
+So, I'm just going to hold down shift and number 8, which is the star key on my keyboard.
+
+146
+00:10:01.560 --> 00:10:04.360
+I'm going to multiply there.
+
+147
+00:10:04.360 --> 00:10:11.160
+And then, we want to create a float to a variable and call it modifier.
+
+148
+00:10:11.160 --> 00:10:17.080
+So, I want to then right click the node here on the bottom left.
+
+149
+00:10:17.080 --> 00:10:23.000
+I'll convert the pin and I'll convert it to a float, which is a single precision one.
+
+150
+00:10:23.000 --> 00:10:23.880
+So, there we go.
+
+151
+00:10:23.880 --> 00:10:26.440
+We got our float variable here.
+
+152
+00:10:26.440 --> 00:10:30.280
+Now, what I'll do is I'll get my green float box here.
+
+153
+00:10:30.280 --> 00:10:32.520
+I'm going to drag off it to the left.
+
+154
+00:10:32.520 --> 00:10:35.080
+I'm going to create a variable.
+
+155
+00:10:35.080 --> 00:10:37.720
+So, I want to promote it to a variable.
+
+156
+00:10:37.720 --> 00:10:41.640
+So, I'll click that and it's automatically highlighted this text here.
+
+157
+00:10:41.640 --> 00:10:45.480
+So, if you've clicked off it, just click on it again or right click to rename.
+
+158
+00:10:45.480 --> 00:10:47.240
+But I'm just going to call this modifier.
+
+159
+00:10:50.760 --> 00:10:54.360
+And again, I'm going to set this category just to keep things organized.
+
+160
+00:10:54.360 --> 00:10:56.920
+So, I'll just go to construction scripts.
+
+161
+00:10:56.920 --> 00:11:00.040
+I'll compile and save just to make sure we're still happy here.
+
+162
+00:11:00.680 --> 00:11:02.600
+I'm going to move this modifier.
+
+163
+00:11:03.640 --> 00:11:08.040
+And that's our getting to our basic functionality now.
+
+164
+00:11:08.040 --> 00:11:11.400
+So, keeping things organized, compiling and saving.
+
+165
+00:11:11.400 --> 00:11:20.440
+And then, what we want to do is we want to find the different x, y, and z values of this vector.
+
+166
+00:11:20.440 --> 00:11:21.880
+So, I'm just going to drag off here.
+
+167
+00:11:22.760 --> 00:11:24.600
+I'm going to break the vector.
+
+168
+00:11:24.600 --> 00:11:27.160
+I'll just create a break vector here.
+
+169
+00:11:27.160 --> 00:11:28.040
+You don't need the 3f.
+
+170
+00:11:28.040 --> 00:11:31.800
+I'll just break the vector and move that into position.
+
+171
+00:11:32.440 --> 00:11:38.040
+And now, what I'll do is I'll drag off x and make vector as well.
+
+172
+00:11:38.040 --> 00:11:40.280
+So, I just want to make the vector again.
+
+173
+00:11:40.280 --> 00:11:44.040
+Now, why am I breaking and then making it straight back?
+
+174
+00:11:44.040 --> 00:11:48.360
+So, if I drag and drop into the y here, now I've got my x and y coordinates.
+
+175
+00:11:48.360 --> 00:11:51.000
+What you'll notice is we've broken the z.
+
+176
+00:11:51.960 --> 00:11:55.080
+We don't want to connect the z because if we're placing these brushes,
+
+177
+00:11:55.080 --> 00:11:58.040
+we want them placing along a flat surface.
+
+178
+00:11:59.080 --> 00:12:04.120
+In Unreal Engine, x and y are the two horizontal vectors.
+
+179
+00:12:04.120 --> 00:12:05.880
+z is the vertical vector.
+
+180
+00:12:05.880 --> 00:12:08.840
+So, we don't want anything being changed in z.
+
+181
+00:12:09.880 --> 00:12:16.280
+So, we've got that set up and then we want to create an add static mesh component.
+
+182
+00:12:16.280 --> 00:12:19.800
+So, off the loop body, I'm going to drag off here.
+
+183
+00:12:19.800 --> 00:12:23.000
+I'm going to add static mesh component.
+
+184
+00:12:23.000 --> 00:12:24.680
+So, again, this is a construction script.
+
+185
+00:12:24.680 --> 00:12:25.160
+Sorry.
+
+186
+00:12:25.160 --> 00:12:30.920
+We can add static mesh components at compile time.
+
+187
+00:12:30.920 --> 00:12:35.000
+So, we can see these appearing in the editor without playing,
+
+188
+00:12:35.000 --> 00:12:36.760
+which is really powerful functionality.
+
+189
+00:12:37.480 --> 00:12:42.280
+So, from relative transform, we can go into the return value of the mate vector
+
+190
+00:12:42.280 --> 00:12:45.240
+and it will automatically convert that for us.
+
+191
+00:12:45.240 --> 00:12:46.600
+So, we want to make sure that.
+
+192
+00:12:46.600 --> 00:12:49.720
+So, it goes from a yellow pin, which is a vector.
+
+193
+00:12:50.120 --> 00:12:53.960
+Into an orange variable, which is the transform value.
+
+194
+00:12:54.760 --> 00:12:59.800
+And then that sets up our basic construction script.
+
+195
+00:12:59.800 --> 00:13:03.640
+So, we'll still need to assign a mesh.
+
+196
+00:13:03.640 --> 00:13:07.000
+So, let's save, compile.
+
+197
+00:13:08.280 --> 00:13:13.720
+And let's make sure our modifier is at least one, for example, let's say.
+
+198
+00:13:14.440 --> 00:13:16.600
+We'll expose this as well, just in case.
+
+199
+00:13:16.600 --> 00:13:19.400
+Well, actually, I'll show you what happens if we don't expose it.
+
+200
+00:13:19.480 --> 00:13:21.160
+So, let's just save.
+
+201
+00:13:21.160 --> 00:13:26.280
+I'm going to drag and drop this next to my map example,
+
+202
+00:13:26.280 --> 00:13:28.440
+just so it's easy to switch between the two.
+
+203
+00:13:29.240 --> 00:13:33.720
+I'm going to find a static mesh in my content browser.
+
+204
+00:13:33.720 --> 00:13:35.640
+So, I'm just going to go to the content.
+
+205
+00:13:35.640 --> 00:13:38.600
+You can pick whichever mesh you'd like to use here.
+
+206
+00:13:38.600 --> 00:13:41.080
+I'm just going to filter by static mesh.
+
+207
+00:13:41.960 --> 00:13:44.600
+I'm just going to find something to use.
+
+208
+00:13:44.600 --> 00:13:45.560
+Maybe it's a pillar.
+
+209
+00:13:46.520 --> 00:13:47.960
+Let's use a bush, for example.
+
+210
+00:13:48.600 --> 00:13:50.680
+This will work with any static mesh, though.
+
+211
+00:13:50.680 --> 00:13:52.840
+I go back into my construction script.
+
+212
+00:13:52.840 --> 00:13:55.160
+I go to the add static mesh component,
+
+213
+00:13:55.160 --> 00:14:01.240
+and I'm going to put a mesh into here.
+
+214
+00:14:01.240 --> 00:14:03.320
+And then I'll compile and save.
+
+215
+00:14:04.680 --> 00:14:08.680
+Now, what I'm going to do is I go back to my blueprint folder.
+
+216
+00:14:08.680 --> 00:14:12.760
+If you've added any filters here, you just want to remove them by clicking them.
+
+217
+00:14:12.840 --> 00:14:18.680
+And then what you can do is you can drag and drop into the scene.
+
+218
+00:14:21.480 --> 00:14:23.960
+So, what we'll do is we'll duplicate this.
+
+219
+00:14:25.080 --> 00:14:30.360
+And so, you'll see that, first of all, how many bushes is five here.
+
+220
+00:14:31.160 --> 00:14:36.120
+And what you'll notice is we don't see the modifier functionality.
+
+221
+00:14:36.120 --> 00:14:39.000
+So, if I go back into the construction script,
+
+222
+00:14:39.320 --> 00:14:45.480
+on modifier, I can promote this variable and expose it.
+
+223
+00:14:45.480 --> 00:14:47.160
+So, variable is now public.
+
+224
+00:14:47.160 --> 00:14:52.760
+If I compile and save, now you'll see that modifier value,
+
+225
+00:14:53.480 --> 00:14:59.000
+which is going to be really powerful because now we can add light color properties,
+
+226
+00:14:59.000 --> 00:15:02.280
+or we could change many different variables at runtime.
+
+227
+00:15:02.280 --> 00:15:04.200
+You can change these per instance.
+
+228
+00:15:04.200 --> 00:15:07.640
+So, if I say how many bushes and I want two, for example,
+
+229
+00:15:08.360 --> 00:15:10.120
+that still stays at five.
+
+230
+00:15:10.120 --> 00:15:12.440
+Five is still there because it's an instance.
+
+231
+00:15:12.440 --> 00:15:16.360
+When we're talking about instancing on the level script,
+
+232
+00:15:17.160 --> 00:15:20.520
+each one of these can house its own variable data now,
+
+233
+00:15:20.520 --> 00:15:23.240
+which is really cool and powerful functionality.
+
+234
+00:15:24.040 --> 00:15:27.720
+Then the last thing we want to do is just change the modifier value.
+
+235
+00:15:27.720 --> 00:15:33.960
+So, say you want two bushes and say the modifier is 50, for example, or maybe 100.
+
+236
+00:15:34.920 --> 00:15:39.720
+That will still have two bushes, but now there are 100 units apart.
+
+237
+00:15:39.720 --> 00:15:43.960
+So, for example, in this five-bush one, let's say 300,
+
+238
+00:15:43.960 --> 00:15:47.080
+and that will make five bushes 300 units apart.
+
+239
+00:15:47.080 --> 00:15:50.520
+So, you can see all the powerful functionality.
+
+240
+00:15:50.520 --> 00:15:55.960
+And the constructor will fire every time we move the blueprint around,
+
+241
+00:15:55.960 --> 00:15:58.680
+which we mentioned in our previous slides.
+
+242
+00:15:58.680 --> 00:16:01.800
+The constructor fires whenever you move it in the blueprint.
+
+243
+00:16:01.880 --> 00:16:04.200
+So, this is really powerful functionality,
+
+244
+00:16:04.200 --> 00:16:07.240
+especially when you're trying to place grass along a hill.
+
+245
+00:16:07.240 --> 00:16:09.080
+You can just keep duplicating.
+
+246
+00:16:09.080 --> 00:16:13.400
+So, I'm going to hold Alt and left mouse drag on the widget.
+
+247
+00:16:13.400 --> 00:16:16.040
+And you can imagine the powerful use here,
+
+248
+00:16:16.040 --> 00:16:21.640
+where maybe you have exposed the static mesh property, for example,
+
+249
+00:16:21.640 --> 00:16:24.120
+or maybe you expose the scale.
+
+250
+00:16:24.120 --> 00:16:31.720
+So, you can, as they're constructing, maybe you scale a mesh between 0.2 units
+
+251
+00:16:31.800 --> 00:16:34.440
+and maybe three units.
+
+252
+00:16:34.440 --> 00:16:37.560
+So, not only are they randomizing the location,
+
+253
+00:16:37.560 --> 00:16:40.200
+but they're also randomizing the scale.
+
+254
+00:16:40.200 --> 00:16:44.520
+You could even randomize the rotation so they get different values.
+
+255
+00:16:44.520 --> 00:16:47.640
+You could add slight pitches and change the yaw
+
+256
+00:16:47.640 --> 00:16:54.040
+so that they just have a very random feel to the place in the bushes.
+
+257
+00:16:54.040 --> 00:16:57.240
+So, again, constructor can be super powerful.
+
+258
+00:16:57.240 --> 00:17:01.000
+I hope that was a good introduction to the construction script.
+
+259
+00:17:01.400 --> 00:17:04.280
+It's definitely worth playing around and really figuring out
+
+260
+00:17:04.280 --> 00:17:07.160
+how to use that construction script because, again,
+
+261
+00:17:07.160 --> 00:17:10.520
+it can improve those processes massively.

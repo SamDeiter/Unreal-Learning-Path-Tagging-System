@@ -1,0 +1,141 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.160
+Path tracing produces physically accurate lighting but can suffer from sampling noise
+
+2
+00:00:06.160 --> 00:00:12.100
+and convergence artifacts, especially with limited samples or complex materials.
+
+3
+00:00:12.100 --> 00:00:17.660
+Reducing these artifacts improves image quality, stability, and realism without necessarily
+
+4
+00:00:17.660 --> 00:00:20.760
+increasing render times dramatically.
+
+5
+00:00:20.760 --> 00:00:25.680
+Our two primary means of reducing noise and increasing visual output is through sample
+
+6
+00:00:25.680 --> 00:00:28.940
+count and denoising.
+
+7
+00:00:28.940 --> 00:00:34.980
+Fireflies are isolated, overly bright pixels that appear as tiny white or colored specks
+
+8
+00:00:34.980 --> 00:00:36.980
+in a path tracing image.
+
+9
+00:00:36.980 --> 00:00:42.820
+They usually show up in reflections, refractions, or glossy surfaces, and flicker or sparkle
+
+10
+00:00:42.820 --> 00:00:44.500
+between frames.
+
+11
+00:00:44.500 --> 00:00:49.420
+You can think of them as render noise spikes caused by a rare but extremely high energy
+
+12
+00:00:49.420 --> 00:00:51.060
+light sample.
+
+13
+00:00:51.060 --> 00:00:55.100
+While path tracing attempts to minimize the most common sources of these effects, they
+
+14
+00:00:55.100 --> 00:00:58.100
+can still occur in some scenarios.
+
+15
+00:00:58.100 --> 00:01:02.860
+One of the most common methods for controlling the quality of path tracing is through a post-processing
+
+16
+00:01:02.860 --> 00:01:04.180
+volume.
+
+17
+00:01:04.180 --> 00:01:08.660
+Under the path tracing rollup, there are various parameters we can adjust to control the balance
+
+18
+00:01:08.660 --> 00:01:11.500
+between performance and visual quality.
+
+19
+00:01:11.500 --> 00:01:16.660
+Note, the parameters in our post-processing volume, as well as several others, can still
+
+20
+00:01:16.660 --> 00:01:18.900
+be controlled through CVARs.
+
+21
+00:01:18.900 --> 00:01:23.780
+This is a great way for us to lower the quality of path tracing for real-time editor performance
+
+22
+00:01:23.940 --> 00:01:29.700
+but still increase the visual quality using those CVAR parameter overrides when using
+
+23
+00:01:29.700 --> 00:01:32.220
+Movie Render Queue.
+
+24
+00:01:32.220 --> 00:01:37.060
+Speaking of Movie Render Queue, even with high sample counts, Path Tracer will always
+
+25
+00:01:37.060 --> 00:01:41.080
+have a bit of residual noise in the rendered frame.
+
+26
+00:01:41.080 --> 00:01:48.320
+By using the denoiser option in the post-processing volume, Unreal will utilize Intel's Open Image
+
+27
+00:01:48.320 --> 00:01:53.620
+Denoise library to remove the noise from the last sample.
+
+28
+00:01:53.620 --> 00:01:59.260
+The denoise option is near the bottom of the path tracing rollup within the post-processing
+
+29
+00:01:59.260 --> 00:02:00.260
+volume.
+
+30
+00:02:00.260 --> 00:02:05.060
+To enable it, simply check both boxes and it should be on.
+
+31
+00:02:05.060 --> 00:02:11.340
+Finally, on-screen are the current denoising algorithms implemented by Path Tracer through
+
+32
+00:02:11.340 --> 00:02:14.340
+various plugins within Unreal Engine.
+
+33
+00:02:14.340 --> 00:02:19.380
+Included in the slides are links to the various support docs that go deeper into using these
+
+34
+00:02:19.380 --> 00:02:21.960
+denoisers.
+
+35
+00:02:21.960 --> 00:02:25.480
+In the next section, we're going to cover editing some of our settings for Path Tracer.

@@ -1,0 +1,129 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.760
+As promised, let's touch upon a few optimization view modes that we can look at here. So our
+
+2
+00:00:06.760 --> 00:00:12.400
+first one is going to be lighting complexity. And what is lighting complexity and how do
+
+3
+00:00:12.400 --> 00:00:17.800
+we use it? So we can actually get to the view modes as well I should say, by from the editor,
+
+4
+00:00:17.800 --> 00:00:22.060
+you can go to show on the top of the editor window, and you'll be able to see these different
+
+5
+00:00:22.060 --> 00:00:27.600
+view modes. So one of the properties will be optimization view modes. And then you can
+
+6
+00:00:27.600 --> 00:00:33.080
+go and find lighting complexity. Now in more recent versions of Unreal Engine, so I think
+
+7
+00:00:33.080 --> 00:00:38.960
+it's Unreal Engine 5.1 onwards, you can actually just click show and you can actually type in the
+
+8
+00:00:38.960 --> 00:00:44.040
+box. If you typed in lighting complexity, it would find the lighting complexity option. So
+
+9
+00:00:44.040 --> 00:00:50.760
+that's useful to keep in mind. But lighting complexity shows how many non static lights
+
+10
+00:00:50.760 --> 00:00:56.800
+are affecting your geometry. So the more non static lights you have affecting a surface,
+
+11
+00:00:56.800 --> 00:01:02.520
+the more expensive it'll be. So red means the area will have performance issues when it's run,
+
+12
+00:01:02.520 --> 00:01:06.520
+so you can see it gets a little bit expensive on the right hand side here. And ideally,
+
+13
+00:01:06.520 --> 00:01:11.480
+on this left hand side, you want these darker blues to brighter greens for the lighting
+
+14
+00:01:11.480 --> 00:01:17.120
+complexity. As you move lights around increase or decrease the radius, you can see the cost
+
+15
+00:01:17.120 --> 00:01:25.080
+that the lights have and that will change the complexity. So on the shading complexity,
+
+16
+00:01:25.080 --> 00:01:29.920
+if lighting complexity showed how many non static lights are affecting the geometry,
+
+17
+00:01:29.920 --> 00:01:35.120
+the more this on the shader complexity side, the shader complexity is showing how many
+
+18
+00:01:35.120 --> 00:01:43.320
+shader instructions it has to run to render each pixel. So green means that it only took a few,
+
+19
+00:01:43.320 --> 00:01:51.560
+whilst white can mean 1000 plus render passes. So ideally, you want to see all of this green
+
+20
+00:01:51.560 --> 00:01:57.400
+information, green or dark green is more ideal. And you can see that when we're looking at
+
+21
+00:01:57.400 --> 00:02:03.440
+transparency, whether it be on the headlights or the car windshield, it'll get worse, the more
+
+22
+00:02:03.440 --> 00:02:08.980
+translucent objects we have to look at. So we want to reduce the material complexity and make sure
+
+23
+00:02:08.980 --> 00:02:13.520
+we're not wasting too much transparent space. And we can also take on practices that we learned in
+
+24
+00:02:13.520 --> 00:02:20.080
+the previous mesh optimization series that can reduce some transparency as well. Lastly,
+
+25
+00:02:20.080 --> 00:02:27.160
+we'll talk about quad overdraw. And quad overdraw, if we think about GPUs work on a two by two quad
+
+26
+00:02:27.160 --> 00:02:34.960
+granularity, which means thin and small triangles, small and two by two, these can result in lots
+
+27
+00:02:34.960 --> 00:02:40.480
+more work to calculate than bigger pixels on the screen or bigger triangles on the screen. So you
+
+28
+00:02:40.480 --> 00:02:46.560
+can lessen the impact on this by making use of LRDs that get rid of smaller triangles that can't
+
+29
+00:02:46.560 --> 00:02:52.200
+be seen from a distance. But also we want to make sure we have as much blue sharp as possible. So
+
+30
+00:02:52.200 --> 00:02:58.520
+the more green into the pinks and purples, it gets super expensive. So this is a relatively
+
+31
+00:02:58.520 --> 00:03:03.160
+okay image. But if you could pull your camera back from this car, you'd want to make sure you
+
+32
+00:03:03.160 --> 00:03:07.840
+had LRDs in place to reduce some of the complexity of this mesh here.

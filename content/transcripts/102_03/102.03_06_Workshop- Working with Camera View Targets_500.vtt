@@ -1,0 +1,409 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:10.520
+Next up, let's create a camera switch blueprint and with the blueprint what we'll do is we'll
+
+2
+00:00:10.520 --> 00:00:15.740
+set up a view target with some kind of blending going on so you can figure out how to set
+
+3
+00:00:15.740 --> 00:00:18.320
+cameras and blend from one camera to another.
+
+4
+00:00:18.320 --> 00:00:24.040
+We'll use a flip-flop node which is essentially a pick A and then pick B output and then repeat
+
+5
+00:00:24.040 --> 00:00:29.740
+itself so it goes A, B, A, B. We'll talk about arrays and how to use arrays so that's
+
+6
+00:00:30.140 --> 00:00:36.180
+a series of cameras in an array and then we'll talk about the multi gate node which can essentially
+
+7
+00:00:36.180 --> 00:00:39.140
+fire a different output with each input coming in.
+
+8
+00:00:39.140 --> 00:00:46.420
+So say you have a flow of information coming into a gate you can say okay output gate one,
+
+9
+00:00:46.420 --> 00:00:52.420
+output gate two, output gate three and it's essentially just helps figure out your flow
+
+10
+00:00:52.420 --> 00:00:55.300
+within Blueprint.
+
+11
+00:00:55.300 --> 00:01:00.620
+And again we're going to create a new Blueprint so I'm just going to right click and going
+
+12
+00:01:00.620 --> 00:01:07.980
+to go to Blueprint and I'm going to select actor first and I'm going to type BP underscore
+
+13
+00:01:07.980 --> 00:01:11.500
+camera switch.
+
+14
+00:01:11.500 --> 00:01:15.660
+Then the name doesn't necessarily matter so whichever you'd like to do I'm going to hit
+
+15
+00:01:15.660 --> 00:01:18.660
+enter to open it or you can double click.
+
+16
+00:01:18.660 --> 00:01:22.280
+I'm just going to make sure I save it first and foremost.
+
+17
+00:01:22.280 --> 00:01:29.280
+So the first thing we want to do is figure out how to change the view target with a blend.
+
+18
+00:01:29.280 --> 00:01:35.440
+So we want to blend maybe from the player character to a different camera that's based
+
+19
+00:01:35.440 --> 00:01:36.440
+in the scene.
+
+20
+00:01:36.440 --> 00:01:38.760
+So I'm going to go to the event graph.
+
+21
+00:01:38.760 --> 00:01:45.160
+I'm going to find some new space just right clicking and moving around.
+
+22
+00:01:45.160 --> 00:01:52.200
+I'm going to first get player controller and the player controller so this bottom option
+
+23
+00:01:52.200 --> 00:01:54.600
+here get player controller.
+
+24
+00:01:54.600 --> 00:02:00.360
+Want to select that and the camera data for the player inside of Unreal is housed on the
+
+25
+00:02:00.360 --> 00:02:05.560
+controller so whenever you want to interact with the player's camera you want the controller
+
+26
+00:02:05.560 --> 00:02:06.560
+here.
+
+27
+00:02:06.560 --> 00:02:12.260
+So we're going to drag off the blue line here and we'll type set view target with blend.
+
+28
+00:02:12.260 --> 00:02:17.280
+So I'll hit enter there and so we've got a view target from there.
+
+29
+00:02:17.360 --> 00:02:23.760
+Now what we want to do is we want to figure out what camera we want to be setting the blend to.
+
+30
+00:02:23.760 --> 00:02:28.840
+Now if I had done this in the level blueprint I could just directly select a camera from
+
+31
+00:02:28.840 --> 00:02:32.480
+the level but there's no way to select a camera currently.
+
+32
+00:02:32.480 --> 00:02:39.520
+If I go into my map and if I go to the cinematics tab here on the place actors so make sure
+
+33
+00:02:39.520 --> 00:02:43.160
+you have place actors which is just a select mode.
+
+34
+00:02:43.240 --> 00:02:50.280
+I can find a camera actor, I can right click, I can pilot the camera and I can just put
+
+35
+00:02:50.280 --> 00:02:55.000
+it into some kind of location where I say I want to blend to this camera.
+
+36
+00:02:55.000 --> 00:03:02.520
+Now if I want to eject out of there now just by pressing that eject button on the top left
+
+37
+00:03:02.520 --> 00:03:07.680
+I'll call my camera something I'm going to call this wide shot even well it's a medium
+
+38
+00:03:07.680 --> 00:03:12.520
+close up but let's call it a wide shot on the bushes.
+
+39
+00:03:12.520 --> 00:03:18.000
+So I've given my camera a name but even if I have this selected I can't now add it to
+
+40
+00:03:18.000 --> 00:03:19.000
+my blueprint.
+
+41
+00:03:19.000 --> 00:03:26.000
+If I right click I can't add it to my blueprint whereas if I went to my level blueprint so
+
+42
+00:03:26.000 --> 00:03:32.240
+I go to blueprints up here open level blueprints and if I right click in some empty space I
+
+43
+00:03:32.240 --> 00:03:38.340
+have a direct reference to the bushes camera because this is the level blueprint.
+
+44
+00:03:38.340 --> 00:03:44.020
+This untitled here is referencing this untitled map name and so I have direct control so if
+
+45
+00:03:44.020 --> 00:03:49.620
+you're only doing something level specific it's a much cleaner and faster workflow just
+
+46
+00:03:49.620 --> 00:03:55.860
+to start adding stuff inside of this blueprint whereas if you want to do it through a blueprint
+
+47
+00:03:55.860 --> 00:03:59.700
+we're going to have to create a reference inside of this camera switch.
+
+48
+00:03:59.700 --> 00:04:03.780
+So what I'm going to do is I'm going to open up the BP camera switch if you don't already
+
+49
+00:04:04.780 --> 00:04:09.700
+I'm going to go to variables I'm going to click plus variable here and I'm just going
+
+50
+00:04:09.700 --> 00:04:16.340
+to call this maybe camera ref one it doesn't matter necessarily what you call this as long
+
+51
+00:04:16.340 --> 00:04:22.540
+as it's a consistent name so I'm just going to go to camera ref one as we've done previously
+
+52
+00:04:22.540 --> 00:04:27.660
+let's just give it a category straight away so I know I can keep everything organized
+
+53
+00:04:27.660 --> 00:04:32.460
+so I'm just going to give it a category of cameras and what I want to do is change the
+
+54
+00:04:32.460 --> 00:04:41.340
+variable type to a cine camera so the cine camera variable type is this actor and now
+
+55
+00:04:41.340 --> 00:04:45.660
+what I'm going to do is I'm going to create a soft object reference so if I hover over
+
+56
+00:04:45.660 --> 00:04:51.780
+cine camera actor you can create an object reference I prefer to use soft object reference
+
+57
+00:04:51.780 --> 00:04:58.540
+the reason for that is because the top object reference is a hard reference.
+
+58
+00:04:58.540 --> 00:05:05.460
+takes longer to process hard references and if the hard reference gets broken it can crash your
+
+59
+00:05:05.460 --> 00:05:10.900
+projects whereas if you use a soft object reference Unreal knows which reference it
+
+60
+00:05:10.900 --> 00:05:15.740
+should be using but it won't cause as many issues so moving forward just a good tip and
+
+61
+00:05:15.740 --> 00:05:20.060
+workflow practice is to create soft object references where you can so I'm going to click
+
+62
+00:05:20.060 --> 00:05:27.180
+create soft object reference I'm going to expose this variable as we did on our bush blueprint so
+
+63
+00:05:27.220 --> 00:05:35.060
+and then I'm going to compile and save and now if I go back into my map and I say let's drag and
+
+64
+00:05:35.060 --> 00:05:42.060
+drop the camera switch actor in here I just move it into a location and sometimes what I do as well
+
+65
+00:05:42.060 --> 00:05:47.940
+this isn't functional this is purely aesthetic so it's up to you if you do this but the BP
+
+66
+00:05:47.940 --> 00:05:53.620
+underscore camera switch I'm going to add a component on this component I'm going to type
+
+67
+00:05:53.620 --> 00:06:02.900
+billboard I'm going to add a billboard and by default it's called billboard I'm just going to
+
+68
+00:06:02.900 --> 00:06:10.340
+call this icon now if you want to assign custom sprites you can do by default this is a dinosaur
+
+69
+00:06:10.340 --> 00:06:15.820
+head which is a legacy Unreal Engine sprite but what I'm going to do is oh I'm going to drag and
+
+70
+00:06:15.820 --> 00:06:21.180
+drop the icon over the default scene root so I want to replace the scene root with this icon now
+
+71
+00:06:21.180 --> 00:06:26.180
+when I compile and save I have this little dinosaur head in my map so again you could
+
+72
+00:06:26.180 --> 00:06:30.900
+create your own icons for this camera switch blueprint and so you know exactly where this
+
+73
+00:06:30.900 --> 00:06:37.740
+blueprint is placed completely optional has no functional consequence other than usability but
+
+74
+00:06:37.740 --> 00:06:42.500
+that's a really good good tip to use what we'll see here though is we have a camera ref one here
+
+75
+00:06:42.500 --> 00:06:47.540
+which is what we called our first variable and it's got non selected now it's going to be very
+
+76
+00:06:47.540 --> 00:06:52.700
+easy to select the the first wide shot from this list if I click down the list because I've only
+
+77
+00:06:52.700 --> 00:06:58.140
+got one camera if you've got a map with say a hundred cameras you could search the specific
+
+78
+00:06:58.140 --> 00:07:02.460
+reference but if you're not sure what name you need you can also just pick the actor from the
+
+79
+00:07:02.460 --> 00:07:07.700
+scene so I'm going to select the pick actor from scene and I'm going to click that so now we've
+
+80
+00:07:07.700 --> 00:07:15.060
+assigned wide shot bushes to camera ref ref one what we want to do now is we want to add some kind
+
+81
+00:07:15.220 --> 00:07:22.980
+of event that fires when we load up the level so for now what I'll do is I'll just go and begin
+
+82
+00:07:22.980 --> 00:07:28.940
+play so if I actually just play this map to show you what happens first and foremost if I click play
+
+83
+00:07:28.940 --> 00:07:36.740
+nothing happens I've just got a fly around viewport I've just got some default game mode if I go back
+
+84
+00:07:36.740 --> 00:07:42.060
+and I've just hit escape there just to come out of it so if I go to BP camera switch I'm going to
+
+85
+00:07:42.060 --> 00:07:50.700
+right-click type begin play hit enter and then I'm going to drag off begin play set view target
+
+86
+00:07:50.700 --> 00:07:57.660
+which is I'm going to compile and save now we just need to set a new view target now I'm going to
+
+87
+00:07:57.660 --> 00:08:04.380
+hold ctrl and left mouse drag to camera f1 and because it's a soft reference we could create a
+
+88
+00:08:04.380 --> 00:08:08.980
+hard reference which would have been blue to blue but because it's a soft reference we first need
+
+89
+00:08:08.980 --> 00:08:15.700
+to drag off and resolve this so just type resolve hit enter now it creates a blueprint
+
+90
+00:08:15.700 --> 00:08:22.220
+blue pin sorry so this soft object reference resolves itself to say yes I exist now this is
+
+91
+00:08:22.220 --> 00:08:28.860
+the reference if it was a hard reference you could get validity issues if the camera reference gets
+
+92
+00:08:28.860 --> 00:08:34.460
+lost at any point by that I mean if that for example doesn't get filled out by someone and
+
+93
+00:08:34.460 --> 00:08:41.660
+it says a none that's a hard object reference to no cameras which can cause a project to crash
+
+94
+00:08:41.660 --> 00:08:47.340
+whereas if it's a soft object reference even if it was none you'd be fine unreal would just it
+
+95
+00:08:47.340 --> 00:08:53.740
+wouldn't work because there's nothing plugged in but it also would prevent stability issues but we
+
+96
+00:08:53.740 --> 00:08:59.740
+do know what our camera is we want to create wide shot bush we have a camera f plugged in here we
+
+97
+00:08:59.740 --> 00:09:06.420
+have our set view target I'm going to compile and save and now I'm going to play and we instantly
+
+98
+00:09:06.420 --> 00:09:11.940
+have that wide shot of the bushes and that's because it's fired on begin play so we can add
+
+99
+00:09:11.940 --> 00:09:17.660
+some more complex functionality for now but for now it's quite a lot of powerful blueprint
+
+100
+00:09:17.660 --> 00:09:22.340
+functionality going on we've got some kind of camera switch manager going on we've created a
+
+101
+00:09:22.340 --> 00:09:28.700
+camera reference and we've also got variables connected to this blueprint which can add some
+
+102
+00:09:28.700 --> 00:09:31.540
+starting functionality for a camera switch blueprint

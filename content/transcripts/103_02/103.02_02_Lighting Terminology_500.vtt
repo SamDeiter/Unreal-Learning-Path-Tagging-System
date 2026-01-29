@@ -1,0 +1,285 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:10.080
+Okay, so before we get into the engine, I want to go over some basic terminologies and
+
+2
+00:00:10.080 --> 00:00:14.560
+concepts that you'll be hearing me use throughout the duration of the course.
+
+3
+00:00:14.560 --> 00:00:19.440
+And I just want to make sure that we have a common language and ground when I talk about
+
+4
+00:00:19.440 --> 00:00:20.940
+these things.
+
+5
+00:00:20.940 --> 00:00:26.240
+So we'll be taking a look at what direct lighting versus indirect lighting and shadows are.
+
+6
+00:00:26.240 --> 00:00:32.000
+So in this case, direct lighting is the light that goes directly from the light source onto
+
+7
+00:00:32.000 --> 00:00:36.400
+the surface without any interference, which means that it receives the full spectrum of
+
+8
+00:00:36.400 --> 00:00:39.720
+the light in terms of color.
+
+9
+00:00:39.720 --> 00:00:42.160
+Now indirect lighting is slightly different to that.
+
+10
+00:00:42.160 --> 00:00:46.800
+It's when lighting's been bounced off a surface and lights another object.
+
+11
+00:00:46.800 --> 00:00:52.640
+Now when lighting hits that surface, that surface absorbs some of the light and the
+
+12
+00:00:52.640 --> 00:00:55.680
+light that gets bounced out is actually tinted.
+
+13
+00:00:55.680 --> 00:01:01.680
+So indirect lighting contributes to the overall mood and light intensity of the scene and
+
+14
+00:01:01.680 --> 00:01:03.720
+color as well.
+
+15
+00:01:03.720 --> 00:01:09.480
+And then the shadows are important to understand that it's essentially a real engine takes
+
+16
+00:01:09.480 --> 00:01:15.400
+a snapshot of a mesh from the light's point of view and projects the shadow information
+
+17
+00:01:15.400 --> 00:01:17.840
+onto another surface from that point of view.
+
+18
+00:01:17.840 --> 00:01:22.560
+So as long as we're all agreed on this, I think as I start talking about these concepts
+
+19
+00:01:22.560 --> 00:01:26.120
+when we talk about lighting later down the line, I think we'll all understand what it
+
+20
+00:01:26.120 --> 00:01:27.120
+is I'm referring to.
+
+21
+00:01:27.120 --> 00:01:33.360
+And I also want to take a look at the types of lighting systems that exist in the engine.
+
+22
+00:01:33.360 --> 00:01:38.600
+For this course, we're going to be using real time dynamic global illumination since Unreal
+
+23
+00:01:38.600 --> 00:01:44.400
+Engine 5 comes with Lumen, which is an incredibly powerful and strong real time global illumination
+
+24
+00:01:44.400 --> 00:01:45.400
+system.
+
+25
+00:01:45.400 --> 00:01:50.200
+But I just wanted to go over the other options that you have as well to make sure that you
+
+26
+00:01:50.200 --> 00:01:51.860
+understand everything that's available.
+
+27
+00:01:51.860 --> 00:01:58.480
+So Unreal Engine has a baked or static lighting system, which is pre-computed.
+
+28
+00:01:58.480 --> 00:02:02.420
+This is created using Unreal Engine's Lightmass system.
+
+29
+00:02:02.420 --> 00:02:07.940
+And it's similar to rendering with lighting setups like V-Ray, Corona, et cetera.
+
+30
+00:02:07.940 --> 00:02:10.980
+And it's really high quality, but it's baked.
+
+31
+00:02:10.980 --> 00:02:12.840
+So it cannot be altered at runtime.
+
+32
+00:02:12.840 --> 00:02:17.680
+So once you bake it, it takes quite a long time to bake if you're using the CPU.
+
+33
+00:02:17.680 --> 00:02:21.460
+And then once that's done, you cannot edit it at runtime, which means you can't have
+
+34
+00:02:21.460 --> 00:02:28.580
+a light swing, for example, and update lighting in real time if you were using a purely static
+
+35
+00:02:28.580 --> 00:02:29.580
+system.
+
+36
+00:02:29.580 --> 00:02:34.180
+There's other systems like real time dynamic lighting, which is what we're going to be
+
+37
+00:02:34.180 --> 00:02:35.180
+using.
+
+38
+00:02:35.180 --> 00:02:38.100
+Now, historically, this had no global illumination system.
+
+39
+00:02:38.100 --> 00:02:39.840
+So you only had direct light.
+
+40
+00:02:39.840 --> 00:02:42.900
+So there was no bounce light effect in the scene or anything like that for this type
+
+41
+00:02:42.900 --> 00:02:44.080
+of lighting.
+
+42
+00:02:44.080 --> 00:02:47.460
+But nowadays with Lumen and Unreal Engine 5, we do have that.
+
+43
+00:02:47.460 --> 00:02:52.080
+So we're going to be sticking to this sort of method, which means no baking times, nothing
+
+44
+00:02:52.080 --> 00:02:56.820
+to wait for, everything you see is happening in real time, and it's final straight away.
+
+45
+00:02:56.820 --> 00:03:01.020
+Now, as I say, Unreal Engine can use both static and dynamic lighting.
+
+46
+00:03:01.020 --> 00:03:06.500
+Traditionally, for architectural visualization and AEC industries in general, these projects
+
+47
+00:03:06.500 --> 00:03:09.860
+were typically stationary and baked.
+
+48
+00:03:09.860 --> 00:03:14.180
+But again, nowadays with Unreal Engine 5, we're going to be using Lumen, so we don't have
+
+49
+00:03:14.180 --> 00:03:16.660
+to worry so much about that.
+
+50
+00:03:16.660 --> 00:03:22.500
+The last type of system is hardware ray tracing.
+
+51
+00:03:22.500 --> 00:03:27.180
+So it's a lighting type that it's real time, just like the dynamic stuff.
+
+52
+00:03:27.180 --> 00:03:31.980
+However, it uses hardware ray tracing to calculate global illumination.
+
+53
+00:03:31.980 --> 00:03:37.140
+So all that bounce light and indirect lighting can also be calculated at runtime.
+
+54
+00:03:37.140 --> 00:03:40.420
+It requires very strong GPUs.
+
+55
+00:03:40.420 --> 00:03:43.460
+So you might have heard the Nvidia RTX card.
+
+56
+00:03:43.460 --> 00:03:45.900
+So that's something you're going to require if you're going to be using straight up ray
+
+57
+00:03:45.900 --> 00:03:46.900
+tracing.
+
+58
+00:03:46.900 --> 00:03:53.500
+Lumen uses software ray tracing, which means you don't need such a high end GPU.
+
+59
+00:03:53.500 --> 00:03:56.340
+So that's what we're going to stick to.
+
+60
+00:03:56.340 --> 00:04:00.020
+So those are the concepts that we need to go over.
+
+61
+00:04:00.020 --> 00:04:03.540
+In terms of terminology, I also want to take a quick look at the types of lights that we're
+
+62
+00:04:03.540 --> 00:04:07.700
+going to be seeing inside of the engine.
+
+63
+00:04:07.700 --> 00:04:13.460
+So the types of lights that we have available to us are directional lights, point lights,
+
+64
+00:04:13.460 --> 00:04:16.380
+spot lights, rectangular lights.
+
+65
+00:04:16.380 --> 00:04:21.540
+And now we start to get into the more interesting ones, which are the skylight, which will be
+
+66
+00:04:21.540 --> 00:04:27.500
+able to capture the scene as a whole and provide indirect lighting for the entire scene.
+
+67
+00:04:27.500 --> 00:04:32.260
+And then these last two, HDRI backdrops in sun and sky, they actually are plugins that
+
+68
+00:04:32.260 --> 00:04:39.180
+you have to enable, but they give you essentially a set of blueprints that combine a few lighting
+
+69
+00:04:39.660 --> 00:04:45.020
+concepts that we see here to give you a particular setup that might be useful for you.
+
+70
+00:04:45.020 --> 00:04:49.220
+So we will take a look at how to enable these and load them, but we'll be doing that inside
+
+71
+00:04:49.220 --> 00:04:50.220
+of the engine.

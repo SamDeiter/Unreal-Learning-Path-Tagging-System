@@ -1,0 +1,613 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:09.600
+As we close out the course, we thought it might be useful to go over some lighting terminology
+
+2
+00:00:09.600 --> 00:00:13.900
+and the types of lighting so that it gives you a better idea about this PBR workflow
+
+3
+00:00:13.900 --> 00:00:16.400
+and how you can use it in your scenes.
+
+4
+00:00:16.400 --> 00:00:21.440
+So the topics will cover the lighting definitions and the behavior of the lights, we'll talk
+
+5
+00:00:21.440 --> 00:00:26.240
+about static versus dynamic and the different light types you can have in your scenes.
+
+6
+00:00:26.240 --> 00:00:33.400
+So lighting terminology, we essentially have three different types of lighting definitions
+
+7
+00:00:33.400 --> 00:00:34.400
+and behaviors.
+
+8
+00:00:34.400 --> 00:00:38.880
+We have the direct lighting, we have indirect or bounce lighting and then the shadows.
+
+9
+00:00:38.880 --> 00:00:43.000
+So if you look at our top right hand image here, the direct lighting, you'll see that
+
+10
+00:00:43.000 --> 00:00:48.060
+the light is directly falling upon the surface without any interference and the light travels
+
+11
+00:00:48.060 --> 00:00:53.360
+directly to the surface that the surface receives the full color of spectrum of light.
+
+12
+00:00:53.360 --> 00:01:01.000
+So the indirect lighting therefore is if you drop down and you see the second image, you'll
+
+13
+00:01:01.000 --> 00:01:05.560
+see that there's some indirect lighting going on just on the underside of that surface.
+
+14
+00:01:05.560 --> 00:01:11.600
+So lighting that has been reflected by other surfaces nearby, as light bounces off these
+
+15
+00:01:11.600 --> 00:01:17.120
+surfaces, light waves are absorbed or reflected based on the surface properties and passed
+
+16
+00:01:17.120 --> 00:01:19.040
+onto the surface you are looking at.
+
+17
+00:01:19.040 --> 00:01:23.700
+So indirect lighting contributes to the mood and overall light intensity.
+
+18
+00:01:23.700 --> 00:01:27.960
+So when you have this balance between not only the direct lighting and the indirect
+
+19
+00:01:27.960 --> 00:01:30.920
+lighting, you get a much nicer result.
+
+20
+00:01:30.920 --> 00:01:34.360
+But then let's talk about these shadows a little bit on the underside here.
+
+21
+00:01:34.360 --> 00:01:38.600
+So shadows happen when Unreal Engine takes a snapshot of a mesh actor from the light's
+
+22
+00:01:38.600 --> 00:01:43.000
+point of view and projects that information onto another mesh on the opposite side.
+
+23
+00:01:43.000 --> 00:01:47.980
+So we still have control and functionality assigned to shadows and we can change the
+
+24
+00:01:48.020 --> 00:01:50.940
+properties of shadows inside the engine as well.
+
+25
+00:01:50.940 --> 00:01:54.340
+So that's just an overview of the different types of lighting we're looking at.
+
+26
+00:01:54.340 --> 00:01:59.080
+So when we're talking about static versus dynamic lighting, we have a few different
+
+27
+00:01:59.080 --> 00:02:00.200
+options available here.
+
+28
+00:02:00.200 --> 00:02:05.000
+So the bait lighting is pre-computed rendered lighting.
+
+29
+00:02:05.000 --> 00:02:09.420
+So we bake lighting using Unreal Engine's Lightmass Radiosity Baker.
+
+30
+00:02:09.420 --> 00:02:16.220
+It's similar to render if you've used V-Ray or Corona, anything like this is similar to
+
+31
+00:02:16.260 --> 00:02:21.320
+those types of approaches where it's pre-baked and it is used to create high quality indirect
+
+32
+00:02:21.320 --> 00:02:23.500
+lighting using lighting shadow maps.
+
+33
+00:02:23.500 --> 00:02:30.660
+So it's always baked lighting and it cannot be altered at runtime and it has little impact
+
+34
+00:02:30.660 --> 00:02:31.920
+on the real-time performance.
+
+35
+00:02:31.920 --> 00:02:36.940
+So if you want the most optimized scenes, the bait lighting is the approach you want
+
+36
+00:02:36.940 --> 00:02:38.660
+to take there.
+
+37
+00:02:38.660 --> 00:02:43.020
+Real-time or dynamic lighting is lighting that is updated each frame.
+
+38
+00:02:43.020 --> 00:02:46.260
+So it's fully dynamic and can be moved around and modified at runtime.
+
+39
+00:02:46.260 --> 00:02:52.540
+It has no global illumination component, only the direct light and it's also expensive to
+
+40
+00:02:52.540 --> 00:02:57.280
+use because it affects the real-time performance because we're rendering each frame.
+
+41
+00:02:57.280 --> 00:03:02.740
+So Unreal Engine can use a blend of both static and dynamic lighting for archviz projects
+
+42
+00:03:02.740 --> 00:03:08.200
+or where assets are typically stationary, the bait static lighting is mostly used.
+
+43
+00:03:08.200 --> 00:03:15.160
+So say you had a scene where you used 85% static lighting, maybe 15% dynamic lighting
+
+44
+00:03:15.160 --> 00:03:18.800
+and then you can have those little bits of dynamic effects where you need them, but the
+
+45
+00:03:18.800 --> 00:03:21.480
+majority of the scene might be static.
+
+46
+00:03:21.480 --> 00:03:27.040
+And then touch upon ray tracing, this type of lighting is used as real-time global illumination
+
+47
+00:03:27.040 --> 00:03:30.480
+updated with all lights to set to movable.
+
+48
+00:03:30.480 --> 00:03:36.640
+So if they are animated, the global illumination GI updates on the fly.
+
+49
+00:03:36.640 --> 00:03:40.400
+The main lighting types, when we were looking at our place actors tab, which is the place
+
+50
+00:03:40.400 --> 00:03:44.640
+actors section, you'll see that the lights has its own tab as we touched upon before
+
+51
+00:03:44.640 --> 00:03:48.480
+where you can find the directional lights, point lights, spotlights, rect lights, just
+
+52
+00:03:48.480 --> 00:03:50.360
+a rectangle light and a skylight.
+
+53
+00:03:50.360 --> 00:03:55.160
+So these are the main different types of lighting that you'll have access to.
+
+54
+00:03:55.160 --> 00:03:59.160
+You can use a directional light for something like a sunlight or a moonlight.
+
+55
+00:03:59.160 --> 00:04:03.960
+And again, with each one of these light properties in the details panel, then you can modify
+
+56
+00:04:03.960 --> 00:04:04.960
+any properties.
+
+57
+00:04:04.960 --> 00:04:08.560
+Maybe you want to change the color or the shadow color that they're creating.
+
+58
+00:04:08.560 --> 00:04:12.400
+Maybe you want to change the intensity or even the rotation of the sunlight.
+
+59
+00:04:12.400 --> 00:04:15.160
+You can do all that through the details panel.
+
+60
+00:04:15.160 --> 00:04:19.080
+The point lights, single points of light in a scene.
+
+61
+00:04:19.080 --> 00:04:22.060
+And you can also edit these to extend the capsule.
+
+62
+00:04:22.060 --> 00:04:27.840
+So by default, point lights come with a spherical radius and you can actually change the point
+
+63
+00:04:27.840 --> 00:04:33.280
+light to be more of a cylindrical radius if you want it to be more like a fluorescent
+
+64
+00:04:33.600 --> 00:04:35.480
+tube light, for example.
+
+65
+00:04:35.480 --> 00:04:40.560
+So point lights have their own functionality and very powerful.
+
+66
+00:04:40.560 --> 00:04:44.480
+And maybe for a lot of the time, you might have lots of point lights in a scene.
+
+67
+00:04:44.480 --> 00:04:48.960
+Maybe you have a hundred point lights in the scene and maybe, you know, eighty five of
+
+68
+00:04:48.960 --> 00:04:50.960
+the point lights are statically lit.
+
+69
+00:04:50.960 --> 00:04:55.000
+And then you have, you know, the fifteen remaining that are dynamically lit.
+
+70
+00:04:55.000 --> 00:04:59.500
+And the important thing about both point lights and spotlights as we move on to spotlights,
+
+71
+00:04:59.500 --> 00:05:03.860
+you don't want too many overlapping dynamic spotlights or point lights.
+
+72
+00:05:03.860 --> 00:05:10.220
+So if you're using dynamic lighting, make sure the dynamic point lights are spaced apart
+
+73
+00:05:10.220 --> 00:05:15.860
+and they're not all too crumped together and overlapping each other with their radiuses.
+
+74
+00:05:15.860 --> 00:05:20.560
+So talking about spotlights, spotlights are very similar functionality as point lights,
+
+75
+00:05:20.560 --> 00:05:27.100
+but they just are more in a cone shape and they spot the light and then similar with
+
+76
+00:05:27.100 --> 00:05:28.420
+a rectangle light.
+
+77
+00:05:28.420 --> 00:05:33.180
+So you can have this box light that is useful for maybe archviz projects or anything that
+
+78
+00:05:33.180 --> 00:05:36.860
+you're doing that you need a big wall light essentially.
+
+79
+00:05:36.860 --> 00:05:40.740
+And then you got the skylight, which is a HDR image based ambient light, which just
+
+80
+00:05:40.740 --> 00:05:44.540
+gives you an overall lift to the scene.
+
+81
+00:05:44.540 --> 00:05:49.340
+So if we're looking at a daylight setup, the main components here, we have direct light,
+
+82
+00:05:49.340 --> 00:05:54.860
+we have sun, we have skylight and we have the sky sphere or dome mesh visuals.
+
+83
+00:05:54.860 --> 00:06:00.580
+So other components might be a light mass importance volume, a post-process volume,
+
+84
+00:06:00.580 --> 00:06:08.180
+atmospheric, you know, the fog or sky atmosphere or the sphere reflection captures, which will
+
+85
+00:06:08.180 --> 00:06:12.860
+process any reflective surfaces and create the relevant reflections for those surfaces.
+
+86
+00:06:12.860 --> 00:06:18.420
+So you can see a really nice diagram here of all these different components kind of
+
+87
+00:06:18.420 --> 00:06:23.300
+layered in to create the intended result that you want.
+
+88
+00:06:23.300 --> 00:06:28.020
+And so you use a combination of all the different lights to create your scenes.
+
+89
+00:06:28.020 --> 00:06:32.580
+So just to give those lights a little bit more context, if we're in our scene here,
+
+90
+00:06:32.580 --> 00:06:37.220
+I'm going to speed up my camera and I'm going to zoom out a little bit to give us more view
+
+91
+00:06:37.220 --> 00:06:38.220
+here.
+
+92
+00:06:38.220 --> 00:06:43.020
+So you'll see that the angle of the shadows, for example, is coming from this chair.
+
+93
+00:06:43.020 --> 00:06:49.980
+Now in your outliner, you'll be able to find the different lights if you've choose a custom
+
+94
+00:06:49.980 --> 00:06:51.740
+preset.
+
+95
+00:06:51.780 --> 00:06:55.140
+You might have more properties than this depending on the Unreal template, especially in Unreal
+
+96
+00:06:55.140 --> 00:07:03.020
+5, you'll have the daytime real time components here as well.
+
+97
+00:07:03.020 --> 00:07:07.340
+But if we're just looking at the light source, for example, for now, which is a directional
+
+98
+00:07:07.340 --> 00:07:12.460
+light, which we can drag into the scene with a directional light, just drag and drop.
+
+99
+00:07:12.460 --> 00:07:15.380
+For example, you can see the rotation on the yaw.
+
+100
+00:07:15.380 --> 00:07:21.180
+So as I change the rotation, you'll see the sky, the sun moving rotation.
+
+101
+00:07:21.180 --> 00:07:27.220
+So I could rotate this to a different direction, for example, if I wanted to change the pitch
+
+102
+00:07:27.220 --> 00:07:35.540
+to get deeper shadows, for example, I want to just undo that value.
+
+103
+00:07:35.540 --> 00:07:40.940
+It's on 66, so let's call it minus 80 for now.
+
+104
+00:07:40.940 --> 00:07:47.020
+And then you'll see the sun rising, so minus 40 might give a deeper shadow.
+
+105
+00:07:47.020 --> 00:07:50.780
+So you can see already that the sun is almost setting in the sky.
+
+106
+00:07:50.780 --> 00:07:56.340
+And then maybe I scroll down and change the light color to more like a warmer evening
+
+107
+00:07:56.340 --> 00:07:58.300
+hue, for example.
+
+108
+00:07:58.300 --> 00:08:00.060
+So that's essentially a directional light.
+
+109
+00:08:00.060 --> 00:08:04.220
+And then we've got the skylight here, which again, we can give it an overall color, we
+
+110
+00:08:04.220 --> 00:08:07.060
+can show how it affects the world.
+
+111
+00:08:07.060 --> 00:08:09.900
+You can change the intensity in any one of these.
+
+112
+00:08:09.900 --> 00:08:13.820
+We've got the post-process volume as well, if you want to change any post-processing
+
+113
+00:08:13.820 --> 00:08:14.820
+effects.
+
+114
+00:08:14.820 --> 00:08:20.140
+And then a light mass importance volume can be found from the place actors.
+
+115
+00:08:20.140 --> 00:08:24.820
+And you only really need to use a light mass importance volume if you're using baked lighting.
+
+116
+00:08:24.820 --> 00:08:29.820
+So if you want your scene to be baked and pre-rendered, what you can do is you can place
+
+117
+00:08:29.820 --> 00:08:31.900
+this volume in your scene.
+
+118
+00:08:31.900 --> 00:08:34.940
+So you can just drag and drop the importance volume.
+
+119
+00:08:34.940 --> 00:08:39.660
+It comes in as a small cube for now.
+
+120
+00:08:39.660 --> 00:08:44.740
+And if you scroll down to the brush settings here, you can make these boxes bigger, depending
+
+121
+00:08:44.740 --> 00:08:49.740
+on the scene, and only highlight the main bits of areas that you need lighting in.
+
+122
+00:08:49.740 --> 00:08:54.980
+And it basically says to Unreal, control this scene and just only focus on the lighting
+
+123
+00:08:54.980 --> 00:08:59.020
+within this box, and everything else can just be rendered usually.
+
+124
+00:08:59.020 --> 00:09:04.460
+So including your light mass importance volume for baked lighting is also useful.
+
+125
+00:09:04.460 --> 00:09:08.260
+And then just touch upon the point light and the skylight here.
+
+126
+00:09:08.260 --> 00:09:13.860
+I'll zoom in, and we have a point light, which we can move around the scene.
+
+127
+00:09:13.980 --> 00:09:19.540
+It's dynamic by default, and it's casting nice shadows.
+
+128
+00:09:19.540 --> 00:09:24.380
+We can maybe change the intensity or the color or the radius.
+
+129
+00:09:24.380 --> 00:09:28.700
+So you may want to bring the radius down so it's a smaller light or a bigger light.
+
+130
+00:09:28.700 --> 00:09:33.980
+Again, just playing with some of these properties will be the most beneficial, I think.
+
+131
+00:09:33.980 --> 00:09:40.060
+And so the main thing to take away from these lights are the mobility here, which we were
+
+132
+00:09:40.060 --> 00:09:41.100
+referring to before.
+
+133
+00:09:41.100 --> 00:09:45.780
+So you can either have static lighting where it gets baked in, and this light will then
+
+134
+00:09:45.780 --> 00:09:48.020
+not be able to move at runtime.
+
+135
+00:09:48.020 --> 00:09:53.200
+If I have movable, this is fully dynamic so I can animate this in my scene.
+
+136
+00:09:53.200 --> 00:09:58.340
+For example, I can move it around and create real-time shadows, again, based on those lighting
+
+137
+00:09:58.340 --> 00:09:59.620
+types that we spoke about.
+
+138
+00:09:59.620 --> 00:10:03.720
+But the important note here is a stationary light option.
+
+139
+00:10:03.720 --> 00:10:07.940
+And if we hover over it, a stationary light will only have shadowing and bounce light
+
+140
+00:10:07.940 --> 00:10:10.340
+from static geometry baked by light mass.
+
+141
+00:10:10.340 --> 00:10:15.960
+So part of this light is baked, but all of the lighting will be dynamic.
+
+142
+00:10:15.960 --> 00:10:18.900
+So it can change color, it can change intensity.
+
+143
+00:10:18.900 --> 00:10:25.980
+So it can't move, but it can allow partially-baked lighting, and it can also change at runtime.
+
+144
+00:10:25.980 --> 00:10:29.940
+So if we wanted to move this light...
+
+145
+00:10:29.940 --> 00:10:34.020
+So say we didn't want to move the light around the scene, but it was just there, but we did
+
+146
+00:10:34.020 --> 00:10:38.900
+want to change this light from orange to blue at runtime, we could do that with a stationary
+
+147
+00:10:38.900 --> 00:10:39.900
+light.
+
+148
+00:10:40.060 --> 00:10:45.540
+It's worth noting the three different light types, and by default, you probably want static.
+
+149
+00:10:45.540 --> 00:10:50.660
+If you do want movable, just make sure you're using these sparingly.
+
+150
+00:10:50.660 --> 00:10:56.100
+And stationary is a nice balance between the two if you want some dynamic elements, but
+
+151
+00:10:56.100 --> 00:10:57.580
+you don't need to move it around.
+
+152
+00:10:57.580 --> 00:11:01.980
+So hopefully that helps give a good overview of the different lighting types inside of
+
+153
+00:11:01.980 --> 00:11:02.380
+Unreal.
