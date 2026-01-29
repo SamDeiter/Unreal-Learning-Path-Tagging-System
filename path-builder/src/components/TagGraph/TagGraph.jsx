@@ -356,23 +356,26 @@ function TagGraph({ tags = [], edges = [] }) {
       name: "cose-bilkent",
       // Animation
       animate: "end",
-      animationDuration: 500,
-      // Physics - AGGRESSIVE spacing to prevent clustering
-      idealEdgeLength: 400, // Much larger for clear separation
-      nodeRepulsion: 80000, // Very high repulsion to push nodes apart
+      animationDuration: 800,
+      // Physics - EXTREME spacing for All tags view
+      idealEdgeLength: 600, // Very large edge length
+      nodeRepulsion: 200000, // Extreme repulsion to prevent clustering
       nestingFactor: 0.1,
-      gravity: 0.05, // Very low gravity - let nodes spread wide
-      numIter: 3000, // More iterations for stable layout
+      gravity: 0.02, // Near-zero gravity - let nodes spread very wide
+      gravityRange: 1.5, // Limit gravity effect range
+      numIter: 4000, // More iterations for many nodes
       // Padding
       tile: true,
-      tilingPaddingVertical: 100,
-      tilingPaddingHorizontal: 100,
+      tilingPaddingVertical: 150,
+      tilingPaddingHorizontal: 150,
       nodeDimensionsIncludeLabels: true,
       // Randomize positions on start for variety
       randomize: true,
-      // Additional spacing params
-      edgeElasticity: 0.1, // Softer edges for more flexibility
-      componentSpacing: 150, // Space between disconnected components
+      // Spacing controls
+      edgeElasticity: 0.05, // Very soft edges
+      componentSpacing: 200, // Large separation between components
+      nodeOverlap: 50, // Minimum spacing between nodes
+      quality: "proof", // Highest quality layout
     }),
     []
   );
