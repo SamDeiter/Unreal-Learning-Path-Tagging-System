@@ -802,7 +802,7 @@ function renderCourses() {
             <button class="card-add-btn ${isSelected ? "remove" : ""}" onclick="event.stopPropagation(); toggleCourse('${course.code}')" title="${isSelected ? "Remove from path" : "Add to path"}">
               ${isSelected ? "✓" : "+"}
             </button>
-            ${course.has_ai_tags ? '<div class="ai-badge">AI ✨</div>' : ""}
+            ${course.has_ai_tags ? '<div class="ai-badge" title="AI-enriched: This course has AI-analyzed metadata including keywords, concepts, and learning objectives">AI ✨</div>' : ""}
             <div class="course-code">${course.code || "N/A"}</div>
             <div class="course-title" onclick="openModal('${course.code}')">${course.title}</div>
             <div class="course-tags">
