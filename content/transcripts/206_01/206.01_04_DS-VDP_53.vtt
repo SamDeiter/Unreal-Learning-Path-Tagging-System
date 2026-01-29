@@ -1,0 +1,609 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.400
+Visual Data Prep lets you prepare your data for use in Unreal Engine 5 without coding.
+
+2
+00:00:08.000 --> 00:00:15.500
+Its purpose is to let you filter data by using actions and operators to quickly go through redundant and repetitive tasks.
+
+3
+00:00:16.300 --> 00:00:24.000
+Visual Data Prep is based on an asset you create in your scene. Let us see how you can treat the go-kart through this process.
+
+4
+00:00:24.600 --> 00:00:28.000
+Repeat the earlier procedure to start a new level.
+
+5
+00:00:28.800 --> 00:00:35.200
+If you look inside the Content Browser, you'll see that you already have a VDP go-kart folder.
+
+6
+00:00:35.800 --> 00:00:42.600
+In that folder there's already a Data Prep asset but you'll create your own to learn more about the process.
+
+7
+00:00:43.300 --> 00:00:49.700
+Right-click inside of that folder and choose Data Prep Asset, Data Prep Asset again.
+
+8
+00:00:50.600 --> 00:00:54.200
+Name the new asset MyVDPAsset.
+
+9
+00:00:54.900 --> 00:01:02.100
+Double-click it to open the Visual Data Prep Editor. You can dock it next to the Main Editor tab to maximize the space.
+
+10
+00:01:03.100 --> 00:01:09.000
+You are now in a new interface and you can stay in here until you have fully edited your incoming file.
+
+11
+00:01:09.300 --> 00:01:13.800
+Nothing goes through to the Main Editor until you have made that decision.
+
+12
+00:01:14.500 --> 00:01:20.500
+We'll explore the interface as we go along. The first order of business is to load the Datasmith file.
+
+13
+00:01:20.700 --> 00:01:28.700
+In this case, we'll load up the same go-kart we have experimented with earlier. This is done in the Input section of the UI.
+
+14
+00:01:29.500 --> 00:01:37.100
+Remember that this Data Prep tool is for Datasmith-only type of data, so the incoming files have to be Datasmith-ready.
+
+15
+00:01:37.900 --> 00:01:44.100
+You can load up one file at a time or multiple files in a folder. We'll use just the one for now.
+
+16
+00:01:44.700 --> 00:01:48.300
+Select the go-kart.3dm file from earlier,
+
+17
+00:01:50.900 --> 00:01:55.000
+Nothing happens just yet, the file is simply added to a list.
+
+18
+00:01:55.600 --> 00:02:02.400
+Click the Import button to import the file into the interface. It loads up and you can see the card in the viewport.
+
+19
+00:02:03.000 --> 00:02:08.200
+To the right is a panel similar to the World Outliner that shows actors and hierarchies,
+
+20
+00:02:08.900 --> 00:02:16.000
+and to the left is a panel similar to the Content Browser that shows incoming Static Mesh Assets and materials.
+
+21
+00:02:16.500 --> 00:02:24.200
+Again, all that you see happens only inside this interface and hasn't made the jump to the regular editor just yet.
+
+22
+00:02:25.300 --> 00:02:31.600
+The idea is to look at this incoming file and decide how you can prep it and optimize it in a way that works for you.
+
+23
+00:02:32.200 --> 00:02:37.000
+For example, look at all these tubes that make the car frame.
+
+24
+00:02:37.800 --> 00:02:41.900
+They are all different pieces, in fact 29 of them in all.
+
+25
+00:02:42.400 --> 00:02:47.800
+There's no good reason for these to remain separate objects. You might consider merging them as one.
+
+26
+00:02:48.500 --> 00:02:53.700
+This is where the magic happens. You can select all these tubes based on some selection criteria,
+
+27
+00:02:54.000 --> 00:02:59.600
+and then add an action to merge them together. This is how you start building your recipes.
+
+28
+00:03:00.200 --> 00:03:07.300
+Let's try this. From the criteria list on the left, drag an Actor Label filter into the recipe space.
+
+29
+00:03:07.800 --> 00:03:12.000
+This is similar to adding a node to a blueprint or to the Material Editor.
+
+30
+00:03:12.500 --> 00:03:19.700
+You can then define your search parameters. In this case, you want to select all labels that have Chassis in their title.
+
+31
+00:03:19.900 --> 00:03:22.700
+These represent all the tubes in the Outliner.
+
+32
+00:03:23.500 --> 00:03:31.800
+You can also set the search to work with an exact match or use wildcards if you prefer, such as Chassis Star for example.
+
+33
+00:03:32.800 --> 00:03:39.200
+To test if your selection is working, you can right-click the selection node and choose Preview Filter.
+
+34
+00:03:39.600 --> 00:03:44.700
+Fall is well, you'll see the actors selected in the Outliner and in the viewport.
+
+35
+00:03:45.500 --> 00:03:48.200
+You can similarly clear the filtering.
+
+36
+00:03:49.000 --> 00:03:53.800
+Before you merge these objects, let's double-check if they are detailed enough first.
+
+37
+00:03:54.300 --> 00:03:59.500
+Zoom in to see if their curvatures are smooth enough or if you need to adjust the tessellation.
+
+38
+00:04:00.400 --> 00:04:03.800
+You can also use the regular Y-Frame mode,
+
+39
+00:04:06.200 --> 00:04:09.400
+or the one in the rendering menu to that effect.
+
+40
+00:04:10.300 --> 00:04:16.200
+The tessellation doesn't look great and some triangles are long and thin. Let's fix that.
+
+41
+00:04:17.400 --> 00:04:25.400
+In the regular editor, you'd have had to treat each tube or static mesh separately or at least use a Python script to adjust them.
+
+42
+00:04:26.100 --> 00:04:31.200
+Here, you already made your selection, so it's just a question of adding a new operator.
+
+43
+00:04:31.800 --> 00:04:41.600
+Scroll down the Operations list and drag the Datasmith Tessellation option and set it below the selection filter you have created to add a new action step.
+
+44
+00:04:42.700 --> 00:04:48.700
+Set the tessellation values to, let's say, 0.1, 5 and 40.
+
+45
+00:04:49.700 --> 00:04:57.200
+Next, you'll test these values. If you don't like them, you can change them and rinse repeat, so to speak.
+
+46
+00:04:57.800 --> 00:05:03.700
+All of this within the comfort of this interface, which lets us easily iterate on changes.
+
+47
+00:05:04.100 --> 00:05:08.500
+Click the Execute button on the main toolbar to test the recipe.
+
+48
+00:05:09.400 --> 00:05:15.600
+Note the added triangulation to the tubes. It's better, but maybe not good enough just yet.
+
+49
+00:05:16.100 --> 00:05:23.700
+So simply change the tessellation values to 0.05, 2 and 30.
+
+50
+00:05:25.800 --> 00:05:27.800
+And execute again.
+
+51
+00:05:28.900 --> 00:05:37.100
+Now that's a lot more detailed. Keep on changing the values until you're satisfied, but I think these values work well here.
+
+52
+00:05:37.800 --> 00:05:43.400
+Now that we're happy with the details, it's time to merge the tubes that make the frame together.
+
+53
+00:05:44.000 --> 00:05:52.700
+Add a Merge operator as the next action step and name the newly merged static mesh mg.chassis.
+
+54
+00:05:53.400 --> 00:06:02.600
+If you execute the recipe one more time, you will notice that all the tubes in the Outliner have now been replaced by a single mesh named mg.chassis.
+
+55
+00:06:03.300 --> 00:06:09.100
+However, there are some other bits and pieces that you may consider adding to this chassis piece.
+
+56
+00:06:09.300 --> 00:06:15.900
+The seat, for example, is made of two pieces that may as well be combined with the tubular frame.
+
+57
+00:06:17.000 --> 00:06:24.500
+These platforms at the front and at the rear housing the pedals and motor can be made part of the chassis as well.
+
+58
+00:06:25.200 --> 00:06:38.000
+Here's the problem however. If you consider the seat and try the same procedure that you used earlier and try to cram an actor labeled Filter right underneath the chassis filter, this will not work.
+
+59
+00:06:38.500 --> 00:06:44.100
+To prove the point, re-import the scene so it is reset to the original version,
+
+60
+00:06:45.500 --> 00:06:50.700
+and then try to execute the recipe again. You'll notice that nothing happens.
+
+61
+00:06:51.200 --> 00:06:59.800
+The way Visual Data Prep works is that it evaluates steps in an action from top to bottom before it moves on to the next action to the right.
+
+62
+00:07:00.400 --> 00:07:04.700
+Here, it started with the chassis filter and made that selection.
+
+63
+00:07:05.200 --> 00:07:14.700
+Then it moved to the next step and tried to find the actor's named seat from within the current selection, the chassis tube selection, and it didn't find any.
+
+64
+00:07:15.700 --> 00:07:21.700
+What we need here is an additive way to making the selection, not one that depends on a previous selection.
+
+65
+00:07:22.200 --> 00:07:33.800
+So remove the second filter, you won't need it. However, you need to edit the first filter and switch its characteristics from Single to Array.
+
+66
+00:07:34.900 --> 00:07:37.900
+Leave the criteria to Contains for now.
+
+67
+00:07:38.600 --> 00:07:42.800
+Add four elements to this array and name them accordingly.
+
+68
+00:07:43.300 --> 00:07:45.700
+The first element would be Chassis,
+
+69
+00:07:46.500 --> 00:07:48.700
+the second would be Seat,
+
+70
+00:07:49.500 --> 00:07:55.100
+the third would be Platt, which takes care of both front and back platforms,
+
+71
+00:07:56.300 --> 00:08:01.900
+and we'll simply add the MechDrive name representing the axles to the list.
+
+72
+00:08:02.500 --> 00:08:09.300
+And so, pretty much every component other than the steering wheel and the four wheel parts is now accounted for.
+
+73
+00:08:10.300 --> 00:08:17.600
+All these parts will now be tessellated with the help of the node you created earlier and merged into one object named Chassis.
+
+74
+00:08:18.100 --> 00:08:25.400
+Test your work again, using the Execute button, and note that the Outliner is much simpler to make out now.
+
+75
+00:08:26.300 --> 00:08:32.200
+It also shows a few null objects that are now unused. We'll get rid of those in a moment.
+
+76
+00:08:33.000 --> 00:08:43.500
+For housekeeping purposes, you can give the action you created a name, simply select the top of the node and press F2 to rename this one as Chassis.
+
+77
+00:08:44.100 --> 00:08:54.000
+Let's keep going and look at the steering wheel. It's made of two parts, the steering wheel itself and an inner or core part.
+
+78
+00:08:56.400 --> 00:09:03.200
+You can select both using the same technique used earlier with a label filter set to ST Wheel.
+
+79
+00:09:04.000 --> 00:09:09.000
+You can also use tessellation and possibly use different values from earlier.
+
+80
+00:09:09.400 --> 00:09:18.100
+But if you wanted to use the same values as before, you can copy nodes from one action to another by Ctrl-dragging them.
+
+81
+00:09:19.100 --> 00:09:29.000
+You can of course make changes as you see fit. I believe I'll set this action to use tessellation values of 0.1, 1 and 40.
+
+82
+00:09:29.700 --> 00:09:35.700
+If anything, it shows that you can have different tessellation values for different parts in your scene.
+
+83
+00:09:36.700 --> 00:09:39.800
+Merge these objects into one steering wheel.
+
+84
+00:09:44.300 --> 00:09:46.100
+Rename the action.
+
+85
+00:09:49.000 --> 00:09:54.600
+And execute the recipe to test it out.
+
+86
+00:09:58.800 --> 00:10:04.800
+Next, we must deal with the wheel assemblies, each made of five different parts.
+
+87
+00:10:06.600 --> 00:10:15.300
+The difficulty here lies in the fact that these components share the same names, so it's near impossible to differentiate them using a label filter.
+
+88
+00:10:15.700 --> 00:10:21.700
+But you can use the label filter to set the tessellations before you move on to combining the assemblies.
+
+89
+00:10:22.100 --> 00:10:35.400
+So use a label selection that is based on the Wheel filter, which encompasses all the wheel parts, and add a tessellation node with the values of 0.1, 2 and 20.
+
+90
+00:10:36.200 --> 00:10:44.800
+This will adjust the triangulation on all four wheels and their components, but you still need to separate these four areas of the car.
+
+91
+00:10:45.500 --> 00:10:50.400
+You have a couple of ways to do that. Let's start with the front left wheel assembly.
+
+92
+00:10:50.900 --> 00:11:00.400
+Select the top parent named Wheel. Obviously, there are three more similar objects named Wheel in the scene, so using the label filter here is not an option.
+
+93
+00:11:01.000 --> 00:11:07.400
+However, note that if you select this top parent, its properties are displayed in the Details panel.
+
+94
+00:11:07.800 --> 00:11:11.900
+You cannot edit these properties, but you can certainly learn from them.
+
+95
+00:11:12.400 --> 00:11:20.500
+At the bottom of the Details panel, expand the Advanced rollout and then the Tags rollout.
+
+96
+00:11:22.400 --> 00:11:31.600
+Note the RhinoID tag listed there. This tag is part of the Rhino file and has been assigned as a unique ID to this particular object.
+
+97
+00:11:32.400 --> 00:11:40.000
+Look at the first few strings of letters and digits. They read 5944 to start the sequence,
+
+98
+00:11:40.400 --> 00:11:44.900
+which is a different string than you will find on another object with the same name.
+
+99
+00:11:46.100 --> 00:11:52.200
+And so instead of filtering through labels, you can filter through tags.
+
+100
+00:11:53.800 --> 00:11:58.100
+Add a Tag value filter as a new action,
+
+101
+00:12:00.600 --> 00:12:08.900
+and type in the first four characters or digits, 5944, for the top parent of the front left wheel assembly.
+
+102
+00:12:09.500 --> 00:12:13.700
+You can opt for a longer string, which would be safer still.
+
+103
+00:12:14.400 --> 00:12:24.800
+Ensure the filtering is set to Contains. However, this only would select the top parent or null object at this time. You also need the hierarchy underneath.
+
+104
+00:12:25.400 --> 00:12:31.800
+To select the hierarchy, add a Select Hierarchy operator from the Selection Transforms list.
+
+105
+00:12:32.500 --> 00:12:43.600
+Depending on the complexity of the hierarchy, you can choose immediate children or all descendants. In this case, it won't make a big difference because it's a simple one-level hierarchy.
+
+106
+00:12:44.400 --> 00:12:51.700
+You can now add a Merge operator and name the resulting object MGWheelFrontLeft.
+
+107
+00:12:52.000 --> 00:13:02.400
+To deal with the front right wheel, you can simply copy the last action with a Control-drag, but obviously you need to change the Merge object name to MGWheelFrontRight.
+
+108
+00:13:03.400 --> 00:13:14.400
+But more importantly, you also need to change the Tag value to cater for that other top parent named wheel, in this case with a string 4DC1.
+
+109
+00:13:14.400 --> 00:13:21.500
+Repeat the procedure for the rear wheels, choosing the correct tags and output names.
+
+110
+00:13:25.900 --> 00:13:30.700
+In terms of housekeeping, you can rename actions as you've learned before.
+
+111
+00:13:30.700 --> 00:13:38.100
+But you can also group actions that belong together, in this case, everything related to the wheel assemblies.
+
+112
+00:13:41.800 --> 00:13:48.800
+From this point on, you can apply the same procedure to the front right wheel.
+
+113
+00:13:48.900 --> 00:13:54.900
+From this point on, you can apply global actions, ones that affect all objects in the scene.
+
+114
+00:13:55.300 --> 00:14:05.700
+For example, you can add a Set Mobility operator to set all objects to be movable, as it is likely you want to animate these objects in your project.
+
+115
+00:14:06.300 --> 00:14:12.900
+Another global operator you might consider is an LOG-Modifier operator.
+
+116
+00:14:13.000 --> 00:14:20.000
+Mind you, you certainly can add local LOD operators with different values to various objects and various actions.
+
+117
+00:14:20.400 --> 00:14:27.600
+Here, we'll simply add a global one based on a manually adjusted LOD system, as opposed to using a preset.
+
+118
+00:14:28.600 --> 00:14:34.200
+Add a new Set LODs operator,
+
+119
+00:14:34.300 --> 00:14:37.900
+and adjust it to use three LOD levels.
+
+120
+00:14:38.700 --> 00:14:44.900
+Be sure to disable the Auto Screen Size option if you plan to define your own values.
+
+121
+00:14:45.700 --> 00:14:55.900
+Set the first LOD, LOD0, to use 100% triangles at 1 or 100% of screen space. This is your starting point.
+
+122
+00:14:56.000 --> 00:15:06.000
+Set LOD1 to 50% triangles at 0.8 or 80% of screen space. This means triangles will be decimated by half when actors occupy less than 80% of screen space.
+
+123
+00:15:07.000 --> 00:15:14.000
+And set the last LOD level to 20% of triangles at 0.8 or 80% of screen space.
+
+124
+00:15:14.100 --> 00:15:20.500
+This means triangles will be decimated by half when actors occupy less than 80% of screen space.
+
+125
+00:15:21.300 --> 00:15:28.100
+And set the last LOD level to 20% of triangles at 25% screen space.
+
+126
+00:15:28.500 --> 00:15:35.300
+This will kick in as the lowest level of detail by decimating triangles five times when the actor is small on screen.
+
+127
+00:15:36.000 --> 00:15:40.300
+Finally, let's see what we can do with material replacements.
+
+128
+00:15:40.700 --> 00:15:51.000
+If you check the panel representing the Content Browser, there are only five materials associated with this Rhino model. They can easily be replaced using this recipe.
+
+129
+00:15:51.700 --> 00:15:59.300
+Add a Substitute Material operator to the recipe. Note that there is another option to substitute materials by table.
+
+130
+00:15:59.700 --> 00:16:08.100
+This option works well when dealing with a high number of imported materials, but you won't need it here where you have only a few to deal with.
+
+131
+00:16:08.800 --> 00:16:17.200
+To substitute an incoming material with a new one, simply type or copy-paste the name of that material inside the node.
+
+132
+00:16:17.900 --> 00:16:21.700
+You can then choose which material you want to use instead.
+
+133
+00:16:22.700 --> 00:16:30.700
+You can then duplicate the substitution node as an additional step and work on substituting a different material.
+
+134
+00:16:39.100 --> 00:16:42.400
+Complete the material list,
+
+135
+00:16:54.400 --> 00:17:00.700
+exit wireframe mode if it's still enabled and execute once again to test the results.
+
+136
+00:17:01.400 --> 00:17:06.700
+This time, you can see how much simpler the Outliner is and how the car looks in the viewport.
+
+137
+00:17:07.700 --> 00:17:13.500
+If you enable Mesh Slot Coloration, you can see that they're working as designed.
+
+138
+00:17:14.600 --> 00:17:18.300
+And the only thing left is to commit the changes to the main editor.
+
+139
+00:17:18.600 --> 00:17:23.100
+Switch back to Lit mode. One last bit of housekeeping that you can do.
+
+140
+00:17:23.400 --> 00:17:30.500
+You can do away with all these unused null actors by adding a Compact Scene Graph operator to the recipe.
+
+141
+00:17:31.100 --> 00:17:35.800
+This will delete any non-renderable actors that are not being used anymore.
+
+142
+00:17:36.700 --> 00:17:46.900
+Similarly, if you're happy with your end results and you don't need the original static meshes or materials that came with the cat files,
+
+143
+00:17:47.300 --> 00:17:53.000
+basically most assets listed in the Content Browser on the left that are not in use anymore,
+
+144
+00:17:53.500 --> 00:17:58.000
+you can add a Delete Unused Assets operator to the recipe.
+
+145
+00:17:58.800 --> 00:18:01.700
+This would make your project inside of Unreal much lighter.
+
+146
+00:18:01.800 --> 00:18:05.000
+Execute the recipe one last time to see the end results.
+
+147
+00:18:05.800 --> 00:18:13.000
+When you're ready to commit, make sure you save your work, essentially saving the recipe that you put in place,
+
+148
+00:18:13.500 --> 00:18:17.000
+and then click the Commit button on the main toolbar.
+
+149
+00:18:17.700 --> 00:18:21.600
+Only then will the scene get transferred to the main Unreal Editor.
+
+150
+00:18:22.100 --> 00:18:27.500
+Remember that the Data Prep Recipe you created is essentially an asset in the Content Browser,
+
+151
+00:18:27.500 --> 00:18:32.900
+and as any other asset, you can migrate it to another project if you wish to use it again elsewhere.
+
+152
+00:18:33.600 --> 00:18:34.900
+Save your work.

@@ -1,0 +1,245 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:09.600
+First, let's review why you need data preparation. Unlike when you're working in games where you build assets one at a time,
+
+2
+00:00:09.800 --> 00:00:19.100
+when your goal is construction or manufacturing, it often means that your project or design is most likely already fully assembled and arranged in a certain way.
+
+3
+00:00:19.500 --> 00:00:28.300
+In that respect, you may have hundreds or thousands of objects already set up that you need to import into Unreal in a meaningful way,
+
+4
+00:00:28.400 --> 00:00:33.400
+preserving hierarchies and pivot points. This is where Datasmith excels.
+
+5
+00:00:33.900 --> 00:00:43.600
+Your existing pipeline may include DCC software that require a dedicated plugin to export to Datasmith, which you can download from the Unreal Engine website.
+
+6
+00:00:44.000 --> 00:00:54.200
+If you are using CAD applications like Solidworks or KTIA to name a couple, then these files will be read natively by Datasmith and you do not need to convert them.
+
+7
+00:00:54.900 --> 00:01:03.300
+Let's look at importing a Datasmith file into Unreal Engine to get a feel for that procedure, and then we'll talk about how the information is processed.
+
+8
+00:01:04.000 --> 00:01:09.100
+By this time, you should have downloaded and extracted the project files that have been provided to you.
+
+9
+00:01:09.600 --> 00:01:14.700
+Find the project named VisualDataPrep.vueProject and launch it.
+
+10
+00:01:15.300 --> 00:01:19.900
+It opens in Unreal Engine and the Content Browser has a set of subfolders in it.
+
+11
+00:01:20.500 --> 00:01:26.200
+We'll take a quick look at basic Datasmith ingestion and then proceed to learn about automation.
+
+12
+00:01:26.700 --> 00:01:28.700
+Start a new level.
+
+13
+00:01:31.100 --> 00:01:37.700
+Create a folder in the Content Browser named Tutorial, which we'll use as a working folder.
+
+14
+00:01:39.500 --> 00:01:47.800
+To import a Datasmith file, use the Add to Project button on the main toolbar and the Import Datasmith File option.
+
+15
+00:01:48.500 --> 00:01:56.000
+Keep in mind the Datasmith menu section may or may not be available by default based on the template you chose to start the project.
+
+16
+00:01:56.300 --> 00:02:02.400
+If the option doesn't appear, then you need to enable one or more Datasmith plugins in the Plugins dialog.
+
+17
+00:02:03.100 --> 00:02:12.300
+Using Datasmith File Import, browse to select the file gocard.3dm under the project's Assets-Ryno subfolder.
+
+18
+00:02:13.300 --> 00:02:19.800
+For a location to store the file, select the tutorial folder you just created and click OK.
+
+19
+00:02:20.800 --> 00:02:24.400
+Next, you are asked to select the type of information you wish to import.
+
+20
+00:02:24.800 --> 00:02:30.000
+This file has no lights, cameras or animations in it, so you can disable these options.
+
+21
+00:02:30.700 --> 00:02:38.500
+You can also adjust tessellation options in this dialog to control the conversion of nerve surfaces into triangulated geometry,
+
+22
+00:02:38.900 --> 00:02:47.200
+but this affects all imported parts globally. Leave these to their default settings. Later, you'll learn ways to use them on selected parts.
+
+23
+00:02:47.900 --> 00:02:51.100
+Click Import to bring the model in.
+
+24
+00:02:53.900 --> 00:02:57.500
+Reset the position of the floor to drop it a notch.
+
+25
+00:02:58.400 --> 00:03:03.000
+You might also consider moving the SunSky system to see better.
+
+26
+00:03:05.700 --> 00:03:11.600
+The information is now inside of Unreal Engine and neatly organized in folders in the Content Browser.
+
+27
+00:03:13.200 --> 00:03:20.600
+Note the little stars on the thumbnail, an indication that even though it was imported, the data is not saved yet.
+
+28
+00:03:21.600 --> 00:03:29.600
+Click the Save All button in the Content Browser to remedy that. If your level is not saved yet, you'll be asked to give it a name.
+
+29
+00:03:29.900 --> 00:03:35.100
+Call it My Cart and save it to the Tutorial Working folder.
+
+30
+00:03:38.500 --> 00:03:49.100
+The data is now in the engine and you can start adjusting it. For example, you could consider re-tessellating a few parts that look rough when seen up close.
+
+31
+00:03:49.900 --> 00:03:59.800
+Set the camera speed appropriately and investigate the tires, wheels and tubular chassis parts, or the steering wheel for that matter.
+
+32
+00:04:00.400 --> 00:04:03.000
+You'll notice they could use a little help.
+
+33
+00:04:06.900 --> 00:04:12.200
+You can also temporarily switch to wireframe mode to better see the problem areas.
+
+34
+00:04:16.100 --> 00:04:18.000
+Let's test the wheels.
+
+35
+00:04:18.500 --> 00:04:24.500
+Their instances are based on a single Static Mesh, as you can see here in the Content Browser.
+
+36
+00:04:25.200 --> 00:04:30.200
+Double-click the wheel or rim Static Mesh to open it in the Static Mesh Editor.
+
+37
+00:04:30.700 --> 00:04:36.500
+To view the topology, a classic trick is to enable Complex Collision mode.
+
+38
+00:04:40.800 --> 00:04:46.300
+To re-tessellate this part, use the Re-Tessellate action from the Asset menu.
+
+39
+00:04:48.200 --> 00:04:52.500
+Expand the panel and you can adjust the values to adjust the detail.
+
+40
+00:04:53.400 --> 00:05:02.200
+Try a Core Tolerance of 0.05, a Maximum Edge Length of 2 and leave the Normal Tolerance to 20.
+
+41
+00:05:02.500 --> 00:05:07.100
+These parameters are covered in more detail in the Basic Datasmith Ingestion class.
+
+42
+00:05:07.700 --> 00:05:14.300
+Click Tessellate to bring about the necessary changes to the Static Mesh, which now looks much more detailed.
+
+43
+00:05:15.000 --> 00:05:18.600
+Save the information and close the Static Mesh Editor.
+
+44
+00:05:21.600 --> 00:05:28.100
+The wheels now look much better, but of course, you'd need to do this for every other part of the go-kart that needs it,
+
+45
+00:05:28.200 --> 00:05:35.200
+like the tires, the jagged looking tubes that make the chassis, the steering wheel and so on.
+
+46
+00:05:35.800 --> 00:05:40.600
+Of course, if the goal was to use the same tessellation values for all meshes,
+
+47
+00:05:40.700 --> 00:05:44.900
+then you could have done that at import time, that process would have been global.
+
+48
+00:05:45.300 --> 00:05:53.900
+But if you're planning different tessellation values for different meshes or groups of meshes, then you'd need to deal with those individually in the Static Mesh Editor.
+
+49
+00:05:54.500 --> 00:06:02.300
+Also, you would need to consider creating LODs for the various parts, and that is also done usually one Static Mesh at a time.
+
+50
+00:06:02.700 --> 00:06:08.700
+And that would require another trip to the Static Mesh Editor to set LODs manually or by LOD group.
+
+51
+00:06:09.200 --> 00:06:16.000
+None of it is hard per se, just time consuming, especially if you have too many Static Meshes.
+
+52
+00:06:16.600 --> 00:06:24.300
+Finally, you may need to consider replacing incoming materials with better ones that you may have already in your PBR library.
+
+53
+00:06:24.600 --> 00:06:28.500
+Again, not a hard task but one that could take time.
+
+54
+00:06:29.100 --> 00:06:35.300
+In this case, it is easy enough to select all the chassis parts that are neatly organized in the Outliner,
+
+55
+00:06:35.500 --> 00:06:39.600
+and replace their materials in one sweep.
+
+56
+00:06:41.200 --> 00:06:47.400
+Also keep in mind that this particular example is a simple one with only a few meshes and materials to consider,
+
+57
+00:06:47.700 --> 00:06:52.400
+and yet you can appreciate the nature of the repetitive tasks awaiting you.
+
+58
+00:06:53.000 --> 00:06:57.400
+So you can extrapolate and guess how time consuming a larger project might be.
+
+59
+00:06:57.900 --> 00:07:01.300
+And so, let's look at how we can automate these tasks.
+
+60
+00:07:01.500 --> 00:07:06.600
+We'll first look at Python scripting and then move to the Visual Data Prep tool.
+
+61
+00:07:07.300 --> 00:07:11.500
+Click the Save All button to save the project before moving on.

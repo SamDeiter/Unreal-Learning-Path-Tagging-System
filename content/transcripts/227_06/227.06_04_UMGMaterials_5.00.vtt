@@ -1,0 +1,985 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.040
+Next up, let's talk about how we communicate between UMG and materials.
+
+2
+00:00:07.040 --> 00:00:12.460
+So we want to go back into our widget display from a previous class.
+
+3
+00:00:12.460 --> 00:00:19.380
+We want to open the right menu display widget and we'll be upgrading these new icons here.
+
+4
+00:00:19.380 --> 00:00:25.220
+So this is what you'll probably see on the right display menu from a previous tutorial
+
+5
+00:00:25.220 --> 00:00:28.780
+where we've had the temperature, airspeed, car speed and light.
+
+6
+00:00:28.780 --> 00:00:39.360
+All we want to do is add a horizontal box to the bottom, add the text, which is something along the lines of the current temperature to 72 degrees,
+
+7
+00:00:39.360 --> 00:00:43.080
+and then the image, which is the temp image.
+
+8
+00:00:43.080 --> 00:00:49.360
+And then when we want, we change the brush to an image as you've done previously,
+
+9
+00:00:49.360 --> 00:00:57.160
+and set the hot and cold material instance, which we created at the start of the tutorial here.
+
+10
+00:00:57.160 --> 00:01:01.960
+So you can tweak those visuals to whatever you'd like.
+
+11
+00:01:01.960 --> 00:01:05.660
+The visuals don't so much matter as much as the actual functionality.
+
+12
+00:01:05.660 --> 00:01:08.840
+Of course, the visuals are important for the user experience.
+
+13
+00:01:08.840 --> 00:01:14.080
+But for today's functionality and purposes, we'll talk about blueprinting.
+
+14
+00:01:14.080 --> 00:01:17.080
+So these are the three sections that we're going to be creating.
+
+15
+00:01:17.080 --> 00:01:21.540
+So again, we'll jump into the editor to show you exactly what's going on here.
+
+16
+00:01:21.580 --> 00:01:28.540
+But based on the previous variable creation, you should get a pretty good feel about what we're going to be doing here.
+
+17
+00:01:28.540 --> 00:01:31.540
+So we've got three sections, which is the pre construct.
+
+18
+00:01:31.540 --> 00:01:35.500
+We've got the air slider and we've got the temp slider.
+
+19
+00:01:35.500 --> 00:01:39.620
+We will create two functions called update text and update image.
+
+20
+00:01:39.620 --> 00:01:48.700
+And then we'll use three variables, which is the UI, the airspeed flow, and then also the display reference, which is the vehicle blueprint.
+
+21
+00:01:48.700 --> 00:01:51.420
+So let's jump in and break those down for you.
+
+22
+00:01:51.420 --> 00:01:55.220
+So in our editor, let's create all of our variables that we'll need.
+
+23
+00:01:55.220 --> 00:02:01.260
+So we'll go to create a new variable and we'll create a material reference variable.
+
+24
+00:02:01.260 --> 00:02:08.020
+So material ref and this will be our material instance, which will be a sign in.
+
+25
+00:02:08.020 --> 00:02:14.340
+So let's just go ahead and change this to material.
+
+26
+00:02:14.340 --> 00:02:18.780
+And we'll just hit material there and then also object reference.
+
+27
+00:02:18.780 --> 00:02:20.420
+So that's our material.
+
+28
+00:02:20.420 --> 00:02:30.900
+And then we want to create a new variable and this will be display vehicle reference.
+
+29
+00:02:30.900 --> 00:02:38.980
+And if I spell vehicle correctly, vehicle compile and save just to make sure.
+
+30
+00:02:38.980 --> 00:02:43.860
+And then we'll do the display vehicle.
+
+31
+00:02:43.860 --> 00:02:47.620
+And you'll notice that we can get a reference to our blueprint here.
+
+32
+00:02:47.660 --> 00:02:51.180
+So display vehicle and that'll be an object reference.
+
+33
+00:02:51.180 --> 00:02:56.140
+Let's make sure we begin to categorize these because as you can see, there's a lot of variables going on now.
+
+34
+00:02:56.140 --> 00:03:03.380
+So you can actually select one, go to category and let's type in reference here.
+
+35
+00:03:03.380 --> 00:03:06.620
+So we've got a reference and then material reference.
+
+36
+00:03:06.620 --> 00:03:08.940
+We can now select it, drop down.
+
+37
+00:03:08.940 --> 00:03:11.500
+And from this drop down, you'll see references now an option.
+
+38
+00:03:11.500 --> 00:03:14.780
+So we've got our two reference variables.
+
+39
+00:03:14.780 --> 00:03:18.140
+Now let's create our three float values that we said we wanted.
+
+40
+00:03:18.140 --> 00:03:25.220
+So we've got temp UI, which again is a float value.
+
+41
+00:03:25.220 --> 00:03:30.620
+We've got airspeed UI.
+
+42
+00:03:30.620 --> 00:03:33.580
+Speed UI.
+
+43
+00:03:33.580 --> 00:03:36.940
+And then we've got our vehicle speed UI.
+
+44
+00:03:43.180 --> 00:03:44.020
+There we go.
+
+45
+00:03:44.020 --> 00:03:45.540
+Let's categorize these as well.
+
+46
+00:03:45.540 --> 00:03:47.260
+So let's call these user input.
+
+47
+00:03:54.500 --> 00:04:00.180
+So I do put a space on that category name as well.
+
+48
+00:04:00.180 --> 00:04:03.340
+Just so that's like that.
+
+49
+00:04:03.340 --> 00:04:05.860
+So we've got five variables created.
+
+50
+00:04:05.860 --> 00:04:10.100
+The categories don't so much matter as the material, the display vehicle.
+
+51
+00:04:10.100 --> 00:04:13.780
+Make sure these variables are the variable type.
+
+52
+00:04:13.780 --> 00:04:17.460
+And then we've got the three UI elements there.
+
+53
+00:04:17.460 --> 00:04:21.060
+So let's start off with the pre construct.
+
+54
+00:04:21.060 --> 00:04:25.780
+And so let's just right click, event, pre construct.
+
+55
+00:04:25.780 --> 00:04:29.500
+So we'll select that and we'll go to a sequence.
+
+56
+00:04:29.500 --> 00:04:33.420
+And a sequence essentially just fires a series of actions in order.
+
+57
+00:04:33.420 --> 00:04:37.940
+We'll go zero one and then you can add more to the pins if you want.
+
+58
+00:04:37.940 --> 00:04:39.820
+But for this purpose, we don't need that.
+
+59
+00:04:39.820 --> 00:04:42.380
+So I'm just going to compile, save.
+
+60
+00:04:42.380 --> 00:04:49.340
+And then we'll get the material image, dynamic material of the temp image
+
+61
+00:04:49.340 --> 00:04:49.980
+that we have.
+
+62
+00:04:49.980 --> 00:04:54.780
+So we have our temp image here, which is a variable that has previously
+
+63
+00:04:54.780 --> 00:04:57.380
+been created in the tutorial.
+
+64
+00:04:57.380 --> 00:05:04.820
+So we'll hold down Control and we'll get dynamic material from this.
+
+65
+00:05:04.820 --> 00:05:07.540
+And we'll drag that out there.
+
+66
+00:05:07.540 --> 00:05:10.860
+And then we'll set this as our material reference.
+
+67
+00:05:10.860 --> 00:05:16.740
+I'm going to hold down Shift and Alt, sorry, and drag.
+
+68
+00:05:16.740 --> 00:05:17.580
+Material instance.
+
+69
+00:05:17.580 --> 00:05:19.740
+Oh, so this is a dynamic material instance.
+
+70
+00:05:19.740 --> 00:05:21.940
+So I'm just going to delete this.
+
+71
+00:05:21.940 --> 00:05:23.420
+I'm going to compile, save.
+
+72
+00:05:23.420 --> 00:05:27.660
+And what we'll do is we'll change this from material to material instance.
+
+73
+00:05:27.660 --> 00:05:29.980
+So we need a material instance up there instead.
+
+74
+00:05:29.980 --> 00:05:32.220
+So let's go object type.
+
+75
+00:05:32.220 --> 00:05:35.940
+Let's see now hold down Alt and drag out there.
+
+76
+00:05:35.940 --> 00:05:37.740
+And that plugs in nicely to there.
+
+77
+00:05:37.740 --> 00:05:40.260
+So you just want to make sure you change that from material
+
+78
+00:05:40.540 --> 00:05:41.060
+instance.
+
+79
+00:05:41.060 --> 00:05:42.860
+Compile and save.
+
+80
+00:05:42.860 --> 00:05:45.060
+We'll just keep compiling and saving as we go.
+
+81
+00:05:45.060 --> 00:05:49.220
+And then next we want to get actor of class.
+
+82
+00:05:49.220 --> 00:05:52.860
+So get actor of class.
+
+83
+00:05:52.860 --> 00:05:56.740
+And we want to get the display vehicle from here.
+
+84
+00:05:56.740 --> 00:06:00.780
+Display vehicle.
+
+85
+00:06:00.780 --> 00:06:06.220
+And we can hold down Alt and drag and just drag that into there.
+
+86
+00:06:06.220 --> 00:06:07.460
+So something like that.
+
+87
+00:06:07.460 --> 00:06:09.460
+Compile, save.
+
+88
+00:06:09.820 --> 00:06:12.020
+Then we move on to the next section.
+
+89
+00:06:12.020 --> 00:06:17.420
+So we want to update the air speed based on the variable that we created before.
+
+90
+00:06:17.420 --> 00:06:23.780
+So let's right click, air spin.
+
+91
+00:06:23.780 --> 00:06:26.780
+Let's see, we want to get the value change on the air spin box.
+
+92
+00:06:26.780 --> 00:06:30.940
+So let's try air speed.
+
+93
+00:06:35.620 --> 00:06:38.540
+Let's do on value changed.
+
+94
+00:06:38.540 --> 00:06:43.260
+So let's get on value changed here.
+
+95
+00:06:43.260 --> 00:06:44.580
+So that's there.
+
+96
+00:06:44.580 --> 00:06:47.300
+So we'll get the air speed UI.
+
+97
+00:06:47.300 --> 00:06:51.100
+We'll drag out this holding down Alt.
+
+98
+00:06:51.100 --> 00:06:54.060
+Left mouse drag there.
+
+99
+00:06:54.060 --> 00:06:58.100
+And we'll get the, we'll set the air speed UI first of all based on that slider.
+
+100
+00:06:58.100 --> 00:06:59.220
+So that's correct.
+
+101
+00:06:59.220 --> 00:07:04.260
+And then we want to actually get the vehicle display reference from here.
+
+102
+00:07:04.260 --> 00:07:08.100
+So I'm just going to hold down control and get this.
+
+103
+00:07:08.100 --> 00:07:10.980
+Now you can actually right click these.
+
+104
+00:07:10.980 --> 00:07:16.460
+And if you just right click on the actual text, you can convert to a valid get.
+
+105
+00:07:16.460 --> 00:07:21.740
+Now, the reason why we do this is we want to make sure that this vehicle exists.
+
+106
+00:07:21.740 --> 00:07:27.620
+If for whatever reason you have this value on a slider and the vehicle does not exist
+
+107
+00:07:27.620 --> 00:07:36.500
+in the game, in the scene, sorry, the, it potentially just crashed the application.
+
+108
+00:07:36.500 --> 00:07:44.700
+So we want to, by getting a valid reference of the vehicle, it ensures that that vehicle does exist.
+
+109
+00:07:44.700 --> 00:07:52.380
+So we want to drag off the vehicle and we want to type in display and we want to set display air speed.
+
+110
+00:07:52.380 --> 00:07:53.260
+So we'll set this.
+
+111
+00:07:53.260 --> 00:07:58.060
+And this was a vehicle, a variable that we created on the vehicle previously.
+
+112
+00:07:58.060 --> 00:08:03.140
+So if it's valid, we want to set the variable and that can just be dragged in through there.
+
+113
+00:08:03.140 --> 00:08:05.220
+So that's essentially that.
+
+114
+00:08:05.220 --> 00:08:08.900
+We'll save, compile, move on to the next section.
+
+115
+00:08:08.900 --> 00:08:14.620
+Now we want to do the temperature slider because we create a temp UI slider there.
+
+116
+00:08:14.620 --> 00:08:17.540
+So let's get the temperature slider again.
+
+117
+00:08:17.540 --> 00:08:19.740
+Let's do on value changed.
+
+118
+00:08:19.740 --> 00:08:22.420
+So left click on value changed.
+
+119
+00:08:22.420 --> 00:08:29.260
+Now we, first of all, on the value change and we want to, like we did with the speed UI, let's do the temp UI.
+
+120
+00:08:29.260 --> 00:08:32.580
+So let's hold down alt, left mouse drag.
+
+121
+00:08:32.620 --> 00:08:34.820
+So we'll set that up like this.
+
+122
+00:08:34.820 --> 00:08:39.660
+And then we just want to make sure the temperature is set on the vehicle.
+
+123
+00:08:39.660 --> 00:08:42.580
+And that's the function that we created before.
+
+124
+00:08:42.580 --> 00:08:45.420
+So let's get a reference to the vehicle.
+
+125
+00:08:45.420 --> 00:08:49.140
+And now when we drag out the vehicle, we'll type in set temp.
+
+126
+00:08:49.140 --> 00:08:51.860
+And that's essentially the function that we created.
+
+127
+00:08:51.860 --> 00:08:56.060
+If you recall from the vehicle, we create this set temp function here.
+
+128
+00:08:56.060 --> 00:08:58.900
+And that's exactly what we're calling here.
+
+129
+00:08:58.940 --> 00:09:06.020
+So in a hood, we want to go back there and we just want to plug in that value there.
+
+130
+00:09:06.020 --> 00:09:07.620
+So we have something like that.
+
+131
+00:09:07.620 --> 00:09:12.380
+And then in the material reference, so we want to grab the material reference.
+
+132
+00:09:12.380 --> 00:09:18.700
+We want to set the scalar parameter value set.
+
+133
+00:09:18.700 --> 00:09:20.020
+Let's see.
+
+134
+00:09:20.020 --> 00:09:22.940
+Parameter.
+
+135
+00:09:22.940 --> 00:09:26.020
+Let's see what's available to us.
+
+136
+00:09:26.020 --> 00:09:28.300
+So we want to.
+
+137
+00:09:30.420 --> 00:09:33.220
+We definitely want to set a scalar parameter.
+
+138
+00:09:33.220 --> 00:09:35.980
+Let's see where that's at.
+
+139
+00:09:35.980 --> 00:09:41.540
+Let's just move on from that for a second, because we definitely want to set a material instance.
+
+140
+00:09:41.540 --> 00:09:46.660
+But let's just keep going with the set text of the actual UI.
+
+141
+00:09:46.660 --> 00:09:55.220
+So we want to find the text of the UI, which as we created before,
+
+142
+00:09:55.220 --> 00:09:57.460
+we've got the temperature here.
+
+143
+00:09:57.460 --> 00:10:02.180
+So we just want to make sure that this is a variable of some form.
+
+144
+00:10:02.180 --> 00:10:05.220
+And now we can go to the graph.
+
+145
+00:10:05.220 --> 00:10:11.380
+We want to then, was that the temp display?
+
+146
+00:10:11.380 --> 00:10:13.180
+Yep, temp display text.
+
+147
+00:10:13.180 --> 00:10:14.100
+So we've got that.
+
+148
+00:10:14.100 --> 00:10:17.060
+And then we want to set the text.
+
+149
+00:10:17.060 --> 00:10:20.300
+So set text.
+
+150
+00:10:20.300 --> 00:10:21.220
+We've got that.
+
+151
+00:10:21.220 --> 00:10:26.700
+And then to get the actual text, we want to, first of all, get the temperature UI, which
+
+152
+00:10:26.700 --> 00:10:29.940
+is the value that we've just created.
+
+153
+00:10:29.940 --> 00:10:32.420
+We want to get the mid-range.
+
+154
+00:10:32.420 --> 00:10:38.700
+There we go.
+
+155
+00:10:38.700 --> 00:10:45.700
+And we want to set that as 100.
+
+156
+00:10:45.700 --> 00:10:48.260
+And then we want to round up.
+
+157
+00:10:48.300 --> 00:10:52.060
+So we'll do seal.
+
+158
+00:10:52.060 --> 00:10:57.700
+And then we can actually then put that to the temperature.
+
+159
+00:10:57.700 --> 00:11:01.780
+So we can then go to format this text, format text.
+
+160
+00:11:01.780 --> 00:11:04.500
+Let's give ourselves a bit more space here.
+
+161
+00:11:04.500 --> 00:11:06.140
+Move this back.
+
+162
+00:11:06.140 --> 00:11:12.580
+So what we want to do is we essentially want to format the text like temperature.
+
+163
+00:11:12.580 --> 00:11:15.540
+So we have the temperature here, but we want to pull in this value.
+
+164
+00:11:15.540 --> 00:11:18.860
+So what you can do is you can do the squiggly brackets.
+
+165
+00:11:18.860 --> 00:11:22.460
+So hold down Shift and bracket on your keyboard.
+
+166
+00:11:22.460 --> 00:11:25.620
+So Shift bracket.
+
+167
+00:11:25.620 --> 00:11:27.860
+Let's do a temp like this.
+
+168
+00:11:27.860 --> 00:11:31.380
+And then because we got these two brackets, we now get temp here.
+
+169
+00:11:31.380 --> 00:11:34.180
+And then we can format the text like that.
+
+170
+00:11:34.180 --> 00:11:41.340
+And our two values on the range A are 60 and 95 there.
+
+171
+00:11:41.340 --> 00:11:44.220
+So that's essentially how we format the text.
+
+172
+00:11:44.220 --> 00:11:49.140
+Now we need to figure out how to actually set the scalar parameter value,
+
+173
+00:11:49.140 --> 00:11:53.180
+as that doesn't seem to be working correctly.
+
+174
+00:11:53.180 --> 00:11:57.340
+So let's just go ahead and maybe even create that material instance again.
+
+175
+00:11:57.340 --> 00:12:00.460
+So I'm just going to delete the material reference.
+
+176
+00:12:00.460 --> 00:12:02.940
+I'm going to delete this material reference.
+
+177
+00:12:02.940 --> 00:12:04.860
+And then I'll delete that material reference.
+
+178
+00:12:04.860 --> 00:12:06.900
+I'm going to compile and save.
+
+179
+00:12:06.900 --> 00:12:10.380
+And let's just try creating this material again.
+
+180
+00:12:10.380 --> 00:12:17.340
+So promote variable material inst ref, or something like this.
+
+181
+00:12:17.340 --> 00:12:18.860
+Let's try that.
+
+182
+00:12:18.860 --> 00:12:20.980
+I'm going to compile, save.
+
+183
+00:12:20.980 --> 00:12:23.540
+And let's see if this now updates.
+
+184
+00:12:23.540 --> 00:12:27.380
+I'm going to hold down Control off my new material ref.
+
+185
+00:12:27.380 --> 00:12:28.980
+Set scalar.
+
+186
+00:12:28.980 --> 00:12:31.140
+OK, so it's got a parameter value now.
+
+187
+00:12:31.140 --> 00:12:35.860
+So it must just be the way we'd created our material instance before.
+
+188
+00:12:35.860 --> 00:12:39.180
+So I've just created a new material reference.
+
+189
+00:12:39.220 --> 00:12:44.220
+Just dragging off here, promote to variable, call that a new variable.
+
+190
+00:12:44.220 --> 00:12:48.540
+We'll make sure we put it back into that references category as well.
+
+191
+00:12:48.540 --> 00:12:49.540
+So that's there.
+
+192
+00:12:49.540 --> 00:12:51.580
+And then we can just drag this out here.
+
+193
+00:12:51.580 --> 00:12:57.220
+So yeah, it must just have been the way we created our material instance.
+
+194
+00:12:57.220 --> 00:12:59.180
+So let's just slot that in there.
+
+195
+00:12:59.180 --> 00:13:07.380
+And then let's call that temperature, or whatever you named in the material,
+
+196
+00:13:07.380 --> 00:13:07.900
+temp.
+
+197
+00:13:07.900 --> 00:13:09.860
+So actually, let's call this temp.
+
+198
+00:13:09.860 --> 00:13:13.020
+So if you named yours temperature, call it temperature.
+
+199
+00:13:13.020 --> 00:13:15.380
+And in my temp, so we've got temp.
+
+200
+00:13:15.380 --> 00:13:19.220
+And then the value can just be the temp UI.
+
+201
+00:13:19.220 --> 00:13:22.460
+So let's get the temp UI again.
+
+202
+00:13:22.460 --> 00:13:24.700
+So I'm just going to copy and paste.
+
+203
+00:13:24.700 --> 00:13:26.620
+I'm going to divide this by 100.
+
+204
+00:13:26.620 --> 00:13:32.340
+So again, using that divide sign, or you can type in divide.
+
+205
+00:13:32.380 --> 00:13:38.100
+And then we'll again do this by 100 as we did before.
+
+206
+00:13:38.100 --> 00:13:41.580
+And then we'll clamp the flow.
+
+207
+00:13:41.580 --> 00:13:43.860
+So clamp float.
+
+208
+00:13:43.860 --> 00:13:46.380
+And then the min and max at 1 is fine.
+
+209
+00:13:46.380 --> 00:13:47.580
+So then we'll just do that.
+
+210
+00:13:47.580 --> 00:13:52.180
+So we want a value between 0 and 1 going out to the temp.
+
+211
+00:13:52.180 --> 00:13:54.340
+So we'll compile and save.
+
+212
+00:13:54.340 --> 00:13:58.100
+And that's the setup for the temp slider.
+
+213
+00:13:58.100 --> 00:13:59.460
+Let's just start commenting these.
+
+214
+00:14:00.260 --> 00:14:02.740
+I can select everything.
+
+215
+00:14:02.740 --> 00:14:08.580
+And we can hit C. And we can do temp slider functionality,
+
+216
+00:14:08.580 --> 00:14:10.140
+or whatever you want to call it, really.
+
+217
+00:14:10.140 --> 00:14:14.220
+But holding down C, pressing C, sorry,
+
+218
+00:14:14.220 --> 00:14:17.660
+when you have certain nodes selected,
+
+219
+00:14:17.660 --> 00:14:21.180
+let's say air speed functionality,
+
+220
+00:14:21.180 --> 00:14:22.380
+you can just comment things.
+
+221
+00:14:22.380 --> 00:14:24.380
+This is purely for aesthetic purposes
+
+222
+00:14:24.380 --> 00:14:26.100
+and organization purposes.
+
+223
+00:14:26.100 --> 00:14:28.220
+You can move the box around.
+
+224
+00:14:28.220 --> 00:14:30.820
+You can change the colors if you want.
+
+225
+00:14:30.820 --> 00:14:33.580
+Sometimes I like to drop the alpha a little bit just
+
+226
+00:14:33.580 --> 00:14:36.860
+to make that functionality stand out.
+
+227
+00:14:36.860 --> 00:14:39.980
+Whatever you'd like to do there, you can change the font size.
+
+228
+00:14:39.980 --> 00:14:43.100
+You can even copy the color and then paste the color
+
+229
+00:14:43.100 --> 00:14:44.540
+if you want.
+
+230
+00:14:44.540 --> 00:14:46.020
+Purely aesthetic reasons.
+
+231
+00:14:46.020 --> 00:14:48.260
+So that's that.
+
+232
+00:14:48.260 --> 00:14:52.140
+So I'm going to compile, save, move on to the next section.
+
+233
+00:14:52.140 --> 00:14:55.100
+And then the last variable that we've not used yet
+
+234
+00:14:55.100 --> 00:14:56.940
+is this car speed UI.
+
+235
+00:14:56.940 --> 00:14:59.580
+So let's go ahead and just add that.
+
+236
+00:14:59.580 --> 00:15:02.460
+So we essentially want the speed.
+
+237
+00:15:02.460 --> 00:15:07.420
+So the speed slider on value changed.
+
+238
+00:15:07.420 --> 00:15:10.220
+I think I might have already set this up previously.
+
+239
+00:15:10.220 --> 00:15:11.900
+But this is what you need here.
+
+240
+00:15:11.900 --> 00:15:13.660
+So let's just drag this down here.
+
+241
+00:15:13.660 --> 00:15:16.740
+I'll just recreate it so you know exactly what's going on.
+
+242
+00:15:16.740 --> 00:15:17.820
+Let me compile and save.
+
+243
+00:15:17.820 --> 00:15:21.820
+So car speed slider, we want the on value changed here.
+
+244
+00:15:21.820 --> 00:15:25.260
+And then we've just got the car speed UI holding down
+
+245
+00:15:25.340 --> 00:15:28.700
+Alt, left mouse dragging, just making sure all that's
+
+246
+00:15:28.700 --> 00:15:30.220
+plugged in like that.

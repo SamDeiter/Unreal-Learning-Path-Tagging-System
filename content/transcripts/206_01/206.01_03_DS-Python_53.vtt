@@ -1,0 +1,221 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.920
+We've just seen how a traditional approach to ingesting data via Datasmith takes you through an import process,
+
+2
+00:00:07.220 --> 00:00:14.520
+desolating geometry in the case of CAD data, adding LODs, replacing materials to name a few actions.
+
+3
+00:00:14.920 --> 00:00:19.920
+Now we'll look at automating some of these repetitive tasks through Python scripting.
+
+4
+00:00:20.420 --> 00:00:23.420
+Start a new level,
+
+5
+00:00:24.520 --> 00:00:28.520
+and reset the position of the floor to drop it a notch.
+
+6
+00:00:28.520 --> 00:00:33.520
+Move the SunSky system away from the center of the scene.
+
+7
+00:00:34.020 --> 00:00:41.520
+Next, open Windows Explorer and browse to where you've extracted the zip archive you downloaded for this class.
+
+8
+00:00:42.020 --> 00:00:50.020
+Go to Assets, Rhino. Here you'll find a few Python Script sample files to experiment with.
+
+9
+00:00:50.520 --> 00:00:54.020
+We'll start with a file named dsImport.py script.
+
+10
+00:00:54.020 --> 00:01:00.020
+It's a text file, so open it in Notepad or Notepad+.
+
+11
+00:01:00.520 --> 00:01:08.520
+This simple script is about importing and reconstructing a Datasmith scene without going through the Datasmith standard import process.
+
+12
+00:01:09.020 --> 00:01:17.020
+Near the top, it points to a file on disk. You will need to change the path as it certainly points to the wrong one at this stage.
+
+13
+00:01:17.520 --> 00:01:24.020
+In your Windows File Explorer, copy the path where your go-kart.3dm file resides.
+
+14
+00:01:24.520 --> 00:01:34.520
+Paste that path to replace the d-rhinofiles-gokart path listed in the script. Make sure you only replace the path and not the file name.
+
+15
+00:01:35.020 --> 00:01:44.520
+Once you have done that, it is important to also replace the backslashes with double backslashes, as this is how Python understands paths.
+
+16
+00:01:45.520 --> 00:01:52.520
+The rest of the script is straightforward, but note the section where you can change the tessellation of all incoming cat parts.
+
+17
+00:01:53.020 --> 00:01:57.520
+This is the same as changing these parameters in the Datasmith Import dialog.
+
+18
+00:01:58.520 --> 00:02:05.020
+Set the Core Tolerance to 0.05 and the Maximum Edge Length to 1.
+
+19
+00:02:05.520 --> 00:02:11.020
+You can also define a subfolder where you store the incoming information in the Content Browser.
+
+20
+00:02:11.020 --> 00:02:16.020
+Note the path listed as Game.DSImport near the end of the script.
+
+21
+00:02:16.520 --> 00:02:26.020
+Game refers to the top level of the Content Browser, which in this case means that a new folder named DSImport will be created for you directly under Content.
+
+22
+00:02:26.520 --> 00:02:32.020
+Underneath that, a subfolder named after the Datasmith file will also be created.
+
+23
+00:02:33.020 --> 00:02:36.520
+Make sure you save your script before you try to run it.
+
+24
+00:02:36.520 --> 00:02:44.020
+In UE5, use the Tools menu to locate and run the option listed as Execute Python Script.
+
+25
+00:02:45.020 --> 00:02:49.520
+Locate the file you have just saved, DSImport, and run it.
+
+26
+00:02:51.020 --> 00:02:59.020
+And there you have it. You have just imported a Datasmith file and adjusted some of its properties literally with the click of a button.
+
+27
+00:02:59.520 --> 00:03:01.020
+Let's take it up a notch.
+
+28
+00:03:01.020 --> 00:03:13.020
+By specifying tessellation values at import time, you ended up with detailed triangulation that may be important when you're nearby, but a bit much when viewed from a distance.
+
+29
+00:03:13.520 --> 00:03:19.520
+In Wireframe mode, you can see that you have much better details than you had earlier with default tessellation.
+
+30
+00:03:20.020 --> 00:03:27.520
+You can remedy this by adding LODs to the various parts. However, there are quite a few static meshes in the scene.
+
+31
+00:03:27.520 --> 00:03:32.020
+So instead, we'll use another script to automate that action.
+
+32
+00:03:32.520 --> 00:03:38.020
+As a side note, you can also batch create LODs using the Property Matrix,
+
+33
+00:03:40.520 --> 00:03:44.020
+but scripting is arguably a more elegant method.
+
+34
+00:03:44.520 --> 00:03:50.520
+Open the script named LogByPresetHD.py and take a look at it.
+
+35
+00:03:50.520 --> 00:04:00.020
+At the very top, you can see that it's using the same path in the Content Browser that the first script generated, so one script is building on top of the other.
+
+36
+00:04:00.520 --> 00:04:07.020
+Next, you can see that this script is calling upon the LOD group named HighDetail.
+
+37
+00:04:07.520 --> 00:04:18.020
+If you wish to use a different one, then you can replace HighDetail with SmallProp or Deco or any other LOD group you have available on your site.
+
+38
+00:04:18.020 --> 00:04:28.520
+And that's all you need really. From here, you can simply save and execute the script in your project to have all assets processed with added LODs.
+
+39
+00:04:29.020 --> 00:04:39.520
+This will take a few moments as the script goes into a loop to find assets and apply LODs, and it does so to every static mesh found in the designated folder.
+
+40
+00:04:39.820 --> 00:04:54.020
+To test it out, you can temporarily switch from Lit Mode to Level of Detail Coloration, MeshLotColoration, and zoom in and out to see the effect.
+
+41
+00:04:54.520 --> 00:04:59.020
+Finally, we'll look at replacing materials via Python scripting.
+
+42
+00:04:59.520 --> 00:05:05.020
+There are currently five materials applied to the various parts of this vehicle.
+
+43
+00:05:05.020 --> 00:05:19.020
+One way to replace a material manually is to right-click it in the Content Browser and then go to Asset Actions and then select all assets using this material or this asset, so you can edit them in bulk.
+
+44
+00:05:19.520 --> 00:05:28.020
+And even then, you may not see the assigned material in the Details panel because one or more null objects may also be selected.
+
+45
+00:05:28.020 --> 00:05:37.020
+You'd need to deselect those to access the material to be replaced, and then of course, you'd need to do that for every other material that needs to be replaced.
+
+46
+00:05:37.520 --> 00:05:42.520
+Again, this kind of repetitive behavior is easily done through scripting.
+
+47
+00:05:43.020 --> 00:05:49.520
+Open the file named SimpleReplaceMaterials.py that has been provided to you.
+
+48
+00:05:50.020 --> 00:05:57.020
+The way it operates is simple. It takes a few seconds to load the file and then it will load the file.
+
+49
+00:05:57.520 --> 00:06:04.520
+It takes a named material in one folder and then replaces it by another material in another folder.
+
+50
+00:06:05.020 --> 00:06:16.520
+So Metal Red that is part of the Datasmith ingestion will be replaced by MiCaliperRed that is part of the Automotive Materials library.
+
+51
+00:06:17.020 --> 00:06:22.020
+The same holds true for the other materials that were ingested and need replacements.
+
+52
+00:06:22.520 --> 00:06:31.020
+If you run the script, you can see how much faster it operates as opposed to having to do this type of work manually.
+
+53
+00:06:31.520 --> 00:06:41.520
+Python scripting can be very powerful and although it's rather easy to understand the syntax, you still need to have some basic programming skills to make the best of it.
+
+54
+00:06:42.320 --> 00:06:46.520
+Save your work and the level as MyCardPython,
+
+55
+00:06:46.520 --> 00:06:58.020
+and next we'll look at Visual Data Prep that enables you to do this type of work and more, but in a very visual way, which is ideal for non-programmers.

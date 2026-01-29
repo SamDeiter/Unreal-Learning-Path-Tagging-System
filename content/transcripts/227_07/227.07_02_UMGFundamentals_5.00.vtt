@@ -1,0 +1,273 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:08.000
+As a quick introduction to the section, let's talk about what Unreal Motion graphics are and what we expect to see as the outcome today.
+
+2
+00:00:08.000 --> 00:00:17.000
+So you'll see we have a scene here. The UMG elements are this UI element on the left, this UI element on the right, and then the top.
+
+3
+00:00:17.000 --> 00:00:23.000
+And the top area is what we'll be focusing on today. So we have a little button here that we'll use to cycle through some cameras.
+
+4
+00:00:23.000 --> 00:00:29.000
+You can see in this top image we have a few cameras up here which we'll cycle between so we can get different angles of the car.
+
+5
+00:00:29.000 --> 00:00:34.000
+And then we'll also click this light button to turn the headlights on and off.
+
+6
+00:00:34.000 --> 00:00:44.000
+So that's essentially what we'll be covering in today's course. We'll talk about extending the UI, creating the change of cameras, and also toggling these lights on and off.
+
+7
+00:00:44.000 --> 00:00:49.000
+So let's get stuck into the blueprint. Starting off with setting up the blueprint.
+
+8
+00:00:49.000 --> 00:00:54.000
+The things we'll want to do, we'll want to find this car blueprint which is called Display Vehicle.
+
+9
+00:00:55.000 --> 00:00:58.000
+I'll be jumping into my editor in a second here to show you exactly what I'm doing.
+
+10
+00:00:58.000 --> 00:01:01.000
+But I'm finding this Display Vehicle blueprint which you can see here.
+
+11
+00:01:01.000 --> 00:01:05.000
+And then we'll be adding a scene component which is the holder for the light.
+
+12
+00:01:05.000 --> 00:01:12.000
+And then we'll place two spotlights on this vehicle which will be movable because of the dynamically lit nature.
+
+13
+00:01:12.000 --> 00:01:16.000
+We'll put them in the front headlights and then we'll be accessing these in UMG later on.
+
+14
+00:01:16.000 --> 00:01:22.000
+So I'll jump into my editor here. And you can see that the scene starts out with this vehicle in the middle here.
+
+15
+00:01:22.000 --> 00:01:30.000
+I'm just going to hit Ctrl and B on my keyboard. So pressing Ctrl and B actually navigates to the blueprint in the browser.
+
+16
+00:01:30.000 --> 00:01:33.000
+You can do this for any of the actors in the scene.
+
+17
+00:01:33.000 --> 00:01:37.000
+If you've got other things placed in there, you can just press Ctrl and B.
+
+18
+00:01:37.000 --> 00:01:44.000
+If you had any static meshes or anything that belongs in the content browser, hitting Ctrl and B will find that in the browser.
+
+19
+00:01:44.000 --> 00:01:47.000
+And then we can actually double click that and open it up.
+
+20
+00:01:47.000 --> 00:01:51.000
+You can also just click Edit in Blueprint here if you want to directly open the blueprint.
+
+21
+00:01:51.000 --> 00:01:57.000
+But I always like to go from the content browser. So I'll double click that and then it'll load up.
+
+22
+00:01:57.000 --> 00:02:03.000
+And I just like to pin my blueprint to the top of the screen here just so I can toggle between the two.
+
+23
+00:02:03.000 --> 00:02:07.000
+We'll see that we can go to our event graph at the top.
+
+24
+00:02:07.000 --> 00:02:10.000
+Actually the viewport is what we want because we're adding the headlights.
+
+25
+00:02:10.000 --> 00:02:17.000
+So we'll click on the viewport and you'll see that we have the front of the vehicle here and we just want to add two headlights here.
+
+26
+00:02:17.000 --> 00:02:22.000
+So as mentioned, I'm just going to go to Add and then Scene.
+
+27
+00:02:22.000 --> 00:02:27.000
+And this is essentially just an empty actor. You see that it's not got anything assigned to it.
+
+28
+00:02:27.000 --> 00:02:32.000
+But I'm just going to rename this Light Holder like this.
+
+29
+00:02:32.000 --> 00:02:37.000
+And I'll maybe just move it out. The location doesn't really matter too much.
+
+30
+00:02:37.000 --> 00:02:44.000
+But essentially we're just going to child two lights from this light holder so that when we move the light holder, the two spotlights would move with it.
+
+31
+00:02:44.000 --> 00:02:50.000
+So I'm just going to add and I'm just going to type Spot here and then I'll click Add Spotlight.
+
+32
+00:02:50.000 --> 00:02:56.000
+And because I had this light holder selected, the spotlight has now childed to this.
+
+33
+00:02:56.000 --> 00:03:01.000
+If you didn't have it selected, you can go in and re-child things.
+
+34
+00:03:01.000 --> 00:03:09.000
+So if I just added it here, for example, if you came in with it like this, you could just get this spotlight and go to your light holder there.
+
+35
+00:03:09.000 --> 00:03:12.000
+And then you could just re-child it. I just dragged and dropped that asset.
+
+36
+00:03:12.000 --> 00:03:15.000
+So we won't try to make things look too pretty today.
+
+37
+00:03:15.000 --> 00:03:18.000
+We're just going mainly for functionality.
+
+38
+00:03:18.000 --> 00:03:21.000
+But you'll see that I'm kind of roughly moving this into place.
+
+39
+00:03:21.000 --> 00:03:28.000
+Maybe I want to drop my grid down here to get it even more in line with the headlight.
+
+40
+00:03:28.000 --> 00:03:34.000
+You could even just toggle the grid off if you wanted just to really dial in those values.
+
+41
+00:03:34.000 --> 00:03:37.000
+But essentially we've got the spotlight here.
+
+42
+00:03:37.000 --> 00:03:40.000
+I'm just going to rename this. So right click, Rename.
+
+43
+00:03:40.000 --> 00:03:43.000
+And I'm going to call this Spotlight.
+
+44
+00:03:43.000 --> 00:03:51.000
+I'll call this L because I'm going to name it from the front of, well, from looking out at the vehicle.
+
+45
+00:03:51.000 --> 00:03:53.000
+So I'm just going to name this L.
+
+46
+00:03:53.000 --> 00:03:55.000
+And then what I'm going to do is I'm going to right click.
+
+47
+00:03:55.000 --> 00:03:56.000
+I'm going to duplicate.
+
+48
+00:03:56.000 --> 00:04:00.000
+And before we click off that, I'm just going to rename that.
+
+49
+00:04:00.000 --> 00:04:03.000
+You can just again, just right click, Rename.
+
+50
+00:04:03.000 --> 00:04:06.000
+Or you can actually hit the F2 key to rename that.
+
+51
+00:04:06.000 --> 00:04:11.000
+So I'm going to select the right hand headlight here.
+
+52
+00:04:11.000 --> 00:04:14.000
+I'm just going to move this into position.
+
+53
+00:04:14.000 --> 00:04:20.000
+Again, maybe just toggling off this grid just for the time being just to dial it in.
+
+54
+00:04:20.000 --> 00:04:21.000
+And then we've got our two lights.
+
+55
+00:04:21.000 --> 00:04:23.000
+So I'm just going to compile and save.
+
+56
+00:04:23.000 --> 00:04:29.000
+I'll go back into my map and we can see that the headlights are casting some kind of light here.
+
+57
+00:04:29.000 --> 00:04:32.000
+We could dial in these values if we wanted to.
+
+58
+00:04:32.000 --> 00:04:34.000
+You could either make them a lot brighter.
+
+59
+00:04:34.000 --> 00:04:40.000
+So if I raise the intensity there and compiled it, you can see that this headlight is brighter than the other.
+
+60
+00:04:40.000 --> 00:04:44.000
+You'll of course want two consistent intensity headlights.
+
+61
+00:04:44.000 --> 00:04:48.000
+So what I might do is I might copy this once I'm really happy with the value there.
+
+62
+00:04:48.000 --> 00:04:51.000
+I'm just going to right click and paste that value there.
+
+63
+00:04:51.000 --> 00:04:53.000
+So it's the exact same value.
+
+64
+00:04:53.000 --> 00:04:55.000
+You can just copy the actual value and paste it.
+
+65
+00:04:55.000 --> 00:05:01.000
+Again, you can dial in the color of the LEDs on the headlights, whatever you'd like to do there.
+
+66
+00:05:01.000 --> 00:05:04.000
+But that's essentially our setup.
+
+67
+00:05:04.000 --> 00:05:11.000
+Once you've dialed in the values that you want for these lights, essentially we just want to be able to see them so that we know when they're toggling on and off.
+
+68
+00:05:11.000 --> 00:05:15.000
+So once we can see that, we can move on to the next section.

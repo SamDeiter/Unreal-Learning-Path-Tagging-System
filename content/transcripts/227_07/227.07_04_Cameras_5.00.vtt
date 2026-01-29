@@ -1,0 +1,485 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.000
+So here's our camera section for the UMG fundamentals.
+
+2
+00:00:04.000 --> 00:00:06.000
+So let's see what we're trying to set up here.
+
+3
+00:00:06.000 --> 00:00:09.000
+So we can have a series of cameras, as mentioned at the outset,
+
+4
+00:00:09.000 --> 00:00:13.000
+that we'll have around the car, and then we'll just cycle through them.
+
+5
+00:00:13.000 --> 00:00:16.000
+So the amount of cameras doesn't matter,
+
+6
+00:00:16.000 --> 00:00:21.000
+but just place a few cameras around your scene looking at the car.
+
+7
+00:00:21.000 --> 00:00:24.000
+So let's jump into Unreal and add those now.
+
+8
+00:00:24.000 --> 00:00:28.000
+So I'll just go to my place actors, and we'll go to cameras,
+
+9
+00:00:28.000 --> 00:00:31.000
+and we'll add a cine camera actor.
+
+10
+00:00:31.000 --> 00:00:36.000
+So I'm just going to move these around the scene and kind of look at the car.
+
+11
+00:00:36.000 --> 00:00:42.000
+I'm going to change the world to local, so I can kind of rotate in.
+
+12
+00:00:42.000 --> 00:00:45.000
+And you may want to change some lens settings here.
+
+13
+00:00:46.000 --> 00:00:51.000
+You know, if you want some wider shots of the car,
+
+14
+00:00:51.000 --> 00:00:54.000
+obviously the focal length may change in that respect.
+
+15
+00:00:54.000 --> 00:00:56.000
+So just add a few cameras here.
+
+16
+00:00:56.000 --> 00:00:59.000
+I'm just going to change the world to grid again.
+
+17
+00:01:00.000 --> 00:01:03.000
+You just want some kind of nice wide shot.
+
+18
+00:01:03.000 --> 00:01:09.000
+So we don't, I'm not again going to be too focused on what these cameras are looking at,
+
+19
+00:01:09.000 --> 00:01:11.000
+some kind of cool angles.
+
+20
+00:01:11.000 --> 00:01:13.000
+Maybe, maybe I can't resist.
+
+21
+00:01:13.000 --> 00:01:19.000
+Let's just get a nice low shot from the back there.
+
+22
+00:01:21.000 --> 00:01:22.000
+Yeah, cool.
+
+23
+00:01:22.000 --> 00:01:24.000
+Okay, enough with the cameras.
+
+24
+00:01:24.000 --> 00:01:25.000
+We've got four cameras in the scene.
+
+25
+00:01:25.000 --> 00:01:27.000
+Again, the number doesn't matter here.
+
+26
+00:01:27.000 --> 00:01:32.000
+We essentially just want to create some kind of functionality to cycle through them.
+
+27
+00:01:32.000 --> 00:01:35.000
+So we want to go back into our UMG.
+
+28
+00:01:35.000 --> 00:01:39.000
+Before that, I'm just going to save, save all before we continue.
+
+29
+00:01:39.000 --> 00:01:41.000
+And then I'm going to jump into the UMG.
+
+30
+00:01:41.000 --> 00:01:46.000
+So essentially the setup will be this in the UMG graph editor.
+
+31
+00:01:46.000 --> 00:01:49.000
+So we're going to pre construct again, like we had last time,
+
+32
+00:01:49.000 --> 00:01:52.000
+we're going to add a few materials here.
+
+33
+00:01:52.000 --> 00:01:55.000
+We'll get the cameras, promote them to a variable.
+
+34
+00:01:55.000 --> 00:01:56.000
+We've got an on clicked event.
+
+35
+00:01:56.000 --> 00:01:59.000
+So we'll get the next camera and the pre construct event.
+
+36
+00:01:59.000 --> 00:02:03.000
+We'll gather all the cameras, store them in a button press and do all the heavy lifting.
+
+37
+00:02:03.000 --> 00:02:08.000
+So just to note that the order of the cameras is based on the order that I just place them in
+
+38
+00:02:08.000 --> 00:02:10.000
+and what you place them in the scene.
+
+39
+00:02:10.000 --> 00:02:12.000
+So the system doesn't number and label them.
+
+40
+00:02:12.000 --> 00:02:14.000
+We could do that later on.
+
+41
+00:02:14.000 --> 00:02:20.000
+But for the purposes of this scene, let's just go ahead and add the functionality that we need.
+
+42
+00:02:20.000 --> 00:02:25.000
+So we'll jump back into the editor here and we'll jump into the light cam UMG.
+
+43
+00:02:25.000 --> 00:02:27.000
+We'll go back into our event graph.
+
+44
+00:02:27.000 --> 00:02:31.000
+And we've also, we've got this display vehicle here.
+
+45
+00:02:31.000 --> 00:02:35.000
+So on the pre construct, what we want to do this time is get all actors of class.
+
+46
+00:02:35.000 --> 00:02:40.000
+So the mistake that I made previously, this is now why we want all actors of class
+
+47
+00:02:40.000 --> 00:02:44.000
+because it'll return an array and that'll give us a list of cameras.
+
+48
+00:02:44.000 --> 00:02:48.000
+So we want Cine camera actor here.
+
+49
+00:02:48.000 --> 00:02:50.000
+So I added Cine camera actors.
+
+50
+00:02:50.000 --> 00:02:54.000
+If you just added a normal camera actor, you would just add camera actor.
+
+51
+00:02:54.000 --> 00:02:57.000
+But from this map, I added a Cine camera actor.
+
+52
+00:02:57.000 --> 00:03:00.000
+So that's what I'm looking for in this UMG.
+
+53
+00:03:00.000 --> 00:03:03.000
+So again, compile and save, just get into the habit of that.
+
+54
+00:03:03.000 --> 00:03:06.000
+And I'm going to drag off the array here, set.
+
+55
+00:03:06.000 --> 00:03:10.000
+I'm going to call this list of cameras.
+
+56
+00:03:10.000 --> 00:03:15.000
+And you'll see that it has got Cine camera actor here as a variable type, which is what we want to see.
+
+57
+00:03:15.000 --> 00:03:21.000
+Again, if it's turned to actor for some reason, it might just be because I hadn't assigned the actor class when I promoted the variable before.
+
+58
+00:03:21.000 --> 00:03:25.000
+So you just want to make sure that that's all hooked in correctly.
+
+59
+00:03:25.000 --> 00:03:30.000
+And now we want to add an event to the on clicked to the camera button.
+
+60
+00:03:30.000 --> 00:03:32.000
+So let's go to the designer.
+
+61
+00:03:32.000 --> 00:03:35.000
+Let's go to the camera button here.
+
+62
+00:03:35.000 --> 00:03:37.000
+I'm going to scroll down.
+
+63
+00:03:37.000 --> 00:03:41.000
+And if I have the camera button selected, on clicked is going to be there.
+
+64
+00:03:41.000 --> 00:03:46.000
+So I'm going to add on clicked here.
+
+65
+00:03:46.000 --> 00:03:49.000
+And so we want first an integer.
+
+66
+00:03:49.000 --> 00:03:54.000
+So I'm going to add a variable here and I'm going to call that integer current camera.
+
+67
+00:03:54.000 --> 00:03:57.000
+Again, just capitalizing my letters.
+
+68
+00:03:57.000 --> 00:03:59.000
+I'm going to go to the Boolean.
+
+69
+00:03:59.000 --> 00:04:00.000
+Add an integer.
+
+70
+00:04:00.000 --> 00:04:02.000
+And so that's an integer.
+
+71
+00:04:02.000 --> 00:04:05.000
+So I'm going to get the integer and going to get it.
+
+72
+00:04:05.000 --> 00:04:09.000
+And then I want to also set this integer as well.
+
+73
+00:04:09.000 --> 00:04:12.000
+So holding down alt, I'm going to set it.
+
+74
+00:04:12.000 --> 00:04:17.000
+I'm going to drag the construct, the click into the set cameras.
+
+75
+00:04:17.000 --> 00:04:20.000
+Now we essentially want to get the current camera, add one to it.
+
+76
+00:04:20.000 --> 00:04:26.000
+So it goes to the next camera from the list of cameras and then assign the current camera.
+
+77
+00:04:26.000 --> 00:04:29.000
+So we want to increment this.
+
+78
+00:04:29.000 --> 00:04:34.000
+So there is an increment integer, but we just want the add for now.
+
+79
+00:04:34.000 --> 00:04:37.000
+So we're just going to add one to the integer like that.
+
+80
+00:04:37.000 --> 00:04:39.000
+And then I'm going to get the list of cameras.
+
+81
+00:04:39.000 --> 00:04:42.000
+So I'm going to hold down control, list of cameras.
+
+82
+00:04:42.000 --> 00:04:47.000
+I'm going to get the length of this because the length gets the number of cameras in the array.
+
+83
+00:04:47.000 --> 00:04:51.000
+So if I've got four in my scene, it'll get an array of four.
+
+84
+00:04:51.000 --> 00:04:53.000
+It doesn't go one, two, three, four though.
+
+85
+00:04:53.000 --> 00:04:55.000
+It'll go zero, one, two, three.
+
+86
+00:04:55.000 --> 00:05:00.000
+So just know that arrays always start at zero.
+
+87
+00:05:00.000 --> 00:05:06.000
+And we'll get the percentage sign here, which is this.
+
+88
+00:05:06.000 --> 00:05:13.000
+We'll drag that into there and we'll just put that into there and then also get that.
+
+89
+00:05:13.000 --> 00:05:17.000
+So we're saying now we have the next camera in the array.
+
+90
+00:05:17.000 --> 00:05:18.000
+That's essentially what that's doing.
+
+91
+00:05:18.000 --> 00:05:25.000
+It's saying get the current camera, cycle to the next camera and say this is the camera that we want.
+
+92
+00:05:25.000 --> 00:05:28.000
+So now what we can do is we can get the player controller.
+
+93
+00:05:28.000 --> 00:05:30.000
+So get player controller.
+
+94
+00:05:30.000 --> 00:05:32.000
+So that's this here.
+
+95
+00:05:32.000 --> 00:05:38.000
+And then I want to drag off the player controller and say set view targets with blend.
+
+96
+00:05:38.000 --> 00:05:41.000
+So we'll set that.
+
+97
+00:05:41.000 --> 00:05:46.000
+We can change the blend time to one that I'll blend over one second.
+
+98
+00:05:46.000 --> 00:05:51.000
+If you want to change that blend to five or whatever you want to do, you can add that.
+
+99
+00:05:51.000 --> 00:05:54.000
+You can change the blend type easy and easy now.
+
+100
+00:05:54.000 --> 00:06:00.000
+And you can also change the exponent there, but I'm just going to leave all those settings for now.
+
+101
+00:06:00.000 --> 00:06:03.000
+Essentially, we just want to get the new view target.
+
+102
+00:06:03.000 --> 00:06:08.000
+So what we want to do is we want to get the list of cameras holding down control.
+
+103
+00:06:08.000 --> 00:06:14.000
+We want to drag off and get because we want to get a specific camera that's in the array.
+
+104
+00:06:14.000 --> 00:06:17.000
+And the camera that we want to get is this current camera.
+
+105
+00:06:17.000 --> 00:06:22.000
+So we can actually just drag that down there and then get that into there.
+
+106
+00:06:22.000 --> 00:06:25.000
+And that will essentially do all our heavy lifting for us.
+
+107
+00:06:25.000 --> 00:06:31.000
+So let's just save and compile and let's just see if that works right now.
+
+108
+00:06:34.000 --> 00:06:36.000
+So I'm going to add that.
+
+109
+00:06:36.000 --> 00:06:39.000
+We'll see that's a nice camera that we added first.
+
+110
+00:06:39.000 --> 00:06:42.000
+Let's see. Next camera.
+
+111
+00:06:42.000 --> 00:06:44.000
+Next camera.
+
+112
+00:06:44.000 --> 00:06:48.000
+And see now this is the downside of the system because now we're just blending.
+
+113
+00:06:48.000 --> 00:06:52.000
+So you want to make sure the cameras are far enough apart around there because we just went through the mesh.
+
+114
+00:06:52.000 --> 00:06:58.000
+But you'll see that it just keeps looping around, which is a really, really nice style camera system to have.
+
+115
+00:06:58.000 --> 00:07:01.000
+And it just gives us that nice little polish and functionality.
+
+116
+00:07:01.000 --> 00:07:04.000
+So we've got some cool angles and we can kind of just cycle through them.
+
+117
+00:07:04.000 --> 00:07:06.000
+That last one, a little bit clipping through the car.
+
+118
+00:07:06.000 --> 00:07:11.000
+So again, the order that we place them around the car will matter.
+
+119
+00:07:11.000 --> 00:07:18.000
+So maybe you want another one at the rear there on the left hand side of this frame just to make sure it circles around the car.
+
+120
+00:07:18.000 --> 00:07:21.000
+But that's essentially our UMG working.
+
+121
+00:07:21.000 --> 00:07:25.000
+And now we can dig into closing out the tutorial.

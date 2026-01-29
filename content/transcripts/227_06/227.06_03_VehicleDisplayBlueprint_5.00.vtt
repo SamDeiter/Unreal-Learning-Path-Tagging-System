@@ -1,0 +1,493 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.960
+Now let's talk about the vehicle display blueprint and how to create a controllable scene.
+
+2
+00:00:06.960 --> 00:00:12.160
+So first thing we want to do is assign the material to the car mesh.
+
+3
+00:00:12.160 --> 00:00:17.020
+So open up the display vehicle blueprint by double clicking it in your content browser
+
+4
+00:00:17.020 --> 00:00:22.360
+and then just select the vehicle mesh on the top left and then plug in the material by
+
+5
+00:00:22.360 --> 00:00:25.140
+pressing that little arrow there.
+
+6
+00:00:25.140 --> 00:00:31.940
+And that will essentially assign the material that you've just created to the blueprint.
+
+7
+00:00:31.940 --> 00:00:36.940
+Next up we'll create a display vehicle blueprint in the construction script here.
+
+8
+00:00:36.940 --> 00:00:43.120
+So whatever element we plugged our material into we can create a material instance based
+
+9
+00:00:43.120 --> 00:00:44.660
+on that index.
+
+10
+00:00:44.660 --> 00:00:51.380
+So if you ended up plugging in your material just into element 0 which was the same for
+
+11
+00:00:51.420 --> 00:00:56.620
+me on the previous slide so if I just go back to the previous slide I've got material element
+
+12
+00:00:56.620 --> 00:00:58.340
+0 on my car.
+
+13
+00:00:58.340 --> 00:01:03.780
+If you've got a different material element so say it's on number 1 or number 2 which
+
+14
+00:01:03.780 --> 00:01:09.340
+gives you the overall vehicle you need to just make sure this element is updated.
+
+15
+00:01:09.340 --> 00:01:12.900
+So I'll jump into my editor and show you how to do that.
+
+16
+00:01:12.900 --> 00:01:17.900
+So with my blueprint open I will go to construction script at the top here.
+
+17
+00:01:17.900 --> 00:01:23.380
+I will bring in my vehicle mesh so I'm just going to hold down left click and drag out
+
+18
+00:01:23.380 --> 00:01:29.820
+the vehicle mesh from the component list and then I'm going to create a dynamic material
+
+19
+00:01:29.820 --> 00:01:30.820
+instance.
+
+20
+00:01:30.820 --> 00:01:34.540
+So create dynamic material instance.
+
+21
+00:01:34.540 --> 00:01:40.380
+Again element 0 is going to be my element so just make sure whatever element you've
+
+22
+00:01:40.380 --> 00:01:45.420
+plugged your material into so if I plugged my material into a different element say the
+
+23
+00:01:45.460 --> 00:01:51.740
+chassis or the tyre something like this you would update this number inside the blueprint.
+
+24
+00:01:51.740 --> 00:01:58.480
+So just make sure that you have in the construction script the correct element for your vehicle
+
+25
+00:01:58.480 --> 00:02:05.680
+selected and then what you can do is you can just drag off here and promote this to a variable.
+
+26
+00:02:05.680 --> 00:02:13.500
+So drag off the blueprint promote to a variable and call this let's call this I generally
+
+27
+00:02:13.580 --> 00:02:19.980
+go with the naming convention mi underscore car material but you can name this whatever
+
+28
+00:02:19.980 --> 00:02:21.180
+you would like.
+
+29
+00:02:21.180 --> 00:02:31.700
+So that's just created an instance here which we can use later in the tutorial but essentially
+
+30
+00:02:31.700 --> 00:02:32.980
+this is the main setup.
+
+31
+00:02:32.980 --> 00:02:38.140
+Now you can override the source material here if you would like because the vehicle has
+
+32
+00:02:38.980 --> 00:02:44.620
+got the material already assigned you don't necessarily need to plug it in but I mean
+
+33
+00:02:44.620 --> 00:02:50.820
+even as a backup if you browsed to the material and then plugged it in there that would also
+
+34
+00:02:50.820 --> 00:02:51.860
+work completely fine.
+
+35
+00:02:51.860 --> 00:02:56.820
+So you can plug in them just as a backup just to make sure the correct material is assigned
+
+36
+00:02:56.820 --> 00:03:01.380
+but because the vehicle mesh already has it assigned you should be okay without plugging
+
+37
+00:03:01.380 --> 00:03:04.020
+that in there.
+
+38
+00:03:04.020 --> 00:03:10.500
+Next up we're going to add a scalar parameter to the variable that we just created so we
+
+39
+00:03:10.500 --> 00:03:15.620
+want to create two new variables which are two float variables one called display airspeed
+
+40
+00:03:15.620 --> 00:03:21.900
+and again you'll see that we are capitalizing each letter and there's no space in the name
+
+41
+00:03:21.900 --> 00:03:26.220
+but you'll see Unreal Engine creates a space which is really nice and readable and it also
+
+42
+00:03:26.220 --> 00:03:29.820
+means that we have a nice condensed variable name.
+
+43
+00:03:29.820 --> 00:03:35.340
+So we've got display airspeed and airspeed total time with this kind of setup I'll jump
+
+44
+00:03:35.340 --> 00:03:40.340
+into my editor now and show you exactly how to do this but this is the overview if you
+
+45
+00:03:40.340 --> 00:03:42.940
+want to move forward into the next section.
+
+46
+00:03:42.940 --> 00:03:47.780
+So inside of Unreal here I'm just going to go to my variables tab I'm going to create
+
+47
+00:03:47.780 --> 00:03:56.740
+the plus here and we'll call the first one display airspeed and then what we'll do we'll
+
+48
+00:03:56.740 --> 00:04:01.540
+change the variable type on the top right to a float so we'll call that a float so
+
+49
+00:04:01.540 --> 00:04:07.460
+it needs to be that green icon there and then we'll press plus again and this one needs
+
+50
+00:04:07.460 --> 00:04:15.060
+to be called airspeed total time like that and again you'll see that I'm not putting
+
+51
+00:04:15.060 --> 00:04:19.660
+spaces in my variable names and because I just create a float it creates another float
+
+52
+00:04:19.660 --> 00:04:24.500
+again which is handy so I'm just going to compile and save just to make sure everything's
+
+53
+00:04:24.500 --> 00:04:26.020
+okay.
+
+54
+00:04:26.020 --> 00:04:31.740
+So when I'm dragging out variables I'm going to hold down control on my keyboard and left
+
+55
+00:04:31.740 --> 00:04:34.020
+mouse drag so it does that.
+
+56
+00:04:34.020 --> 00:04:38.540
+If I just left mouse drag this out without holding down control I get the option do I
+
+57
+00:04:38.540 --> 00:04:43.020
+want to get the variable which is what this is or do I want to set the variable which
+
+58
+00:04:43.020 --> 00:04:45.020
+is what this is.
+
+59
+00:04:45.020 --> 00:04:52.780
+If I hold down alt and left mouse drag I get the set so it can be a few less button clicks
+
+60
+00:04:52.780 --> 00:04:58.180
+if you hold down control on your keyboard and drag to get if you hold down alt on your
+
+61
+00:04:58.180 --> 00:05:04.100
+keyboard to set alternative if I didn't hold down anything on my keyboard I would get the
+
+62
+00:05:04.100 --> 00:05:08.980
+option get and set so completely up to you what methods you use there but essentially
+
+63
+00:05:08.980 --> 00:05:16.300
+if I just delete these I want to get the display airspeed so I want that and so from the delta
+
+64
+00:05:16.300 --> 00:05:22.420
+seconds I just want to multiply this so I'm going to multiply this by pressing the star
+
+65
+00:05:23.060 --> 00:05:29.140
+key you can alternatively just type multiply and I need to add a additional pin here from
+
+66
+00:05:29.140 --> 00:05:35.540
+the previous slide the bottom value is going to be 0.1 and I'm going to plug the airspeed
+
+67
+00:05:35.540 --> 00:05:41.100
+into here so you should have something like this this is a multiply going into the display
+
+68
+00:05:41.100 --> 00:05:46.500
+airspeed and then what we'll do is we'll add so I'm just going to press plus or you can
+
+69
+00:05:46.500 --> 00:05:52.940
+type add onto here and we want to get the airspeed total time so I'm holding down control
+
+70
+00:05:52.940 --> 00:05:59.820
+on my keyboard left mouse dragging so we get this kind of setup here next we want to set
+
+71
+00:05:59.820 --> 00:06:05.900
+the total time so I'm going to hold alt on my keyboard left mouse drag and let's just
+
+72
+00:06:05.900 --> 00:06:11.140
+plug that into there so essentially now we've got the variable that we need and now we just
+
+73
+00:06:11.140 --> 00:06:17.020
+need to set the correct scale parameter on the material so you don't need to click here
+
+74
+00:06:17.020 --> 00:06:23.020
+but on the construction script we've got this material now where we can edit parameters based
+
+75
+00:06:23.020 --> 00:06:28.100
+on the material that we created so if I again you don't need to do this but I'm just going to go
+
+76
+00:06:28.100 --> 00:06:36.020
+and find this in my content browser if I pin this up here I'm going to open up the material and what
+
+77
+00:06:36.020 --> 00:06:42.060
+I'm looking for is I'm looking for airspeed so you'll see that I have this airspeed value here
+
+78
+00:06:42.060 --> 00:06:49.300
+and this is the parameter that I want to edit so you'll see airspeed there so I'm just going to
+
+79
+00:06:49.300 --> 00:06:55.260
+go back into my blueprint so you should be here by now if you didn't follow me down that little
+
+80
+00:06:55.260 --> 00:07:02.100
+rabbit hole I'm going to stay in my edit graph I'm going to get my material instance so I'm
+
+81
+00:07:02.100 --> 00:07:08.180
+going to ctrl drag out the material that I created again whatever you named this in your
+
+82
+00:07:08.180 --> 00:07:13.260
+construction script this is what you're dragging out from the left-hand side I'm going to drag
+
+83
+00:07:13.260 --> 00:07:19.820
+out the blue pin and say set scalar parameter value and then I'm just going to drag this out
+
+84
+00:07:19.820 --> 00:07:27.700
+into here and then the value is going to be from this airspeed total time so you can just drag it
+
+85
+00:07:27.700 --> 00:07:33.220
+into there sometimes I like to double click on the wire and add a little reroute node
+
+86
+00:07:33.220 --> 00:07:41.060
+alternatively you could just if you don't want wires there do this as well and that would keep
+
+87
+00:07:41.060 --> 00:07:47.740
+it equally as nice and clean and tidy so the parameter name here as I mentioned is airspeed
+
+88
+00:07:47.740 --> 00:07:54.580
+and again that airspeed value is just from what we put in our material so whatever you named that
+
+89
+00:07:54.580 --> 00:08:00.060
+in your material just type in airspeed there and then compile and save and we can move on to the
+
+90
+00:08:00.060 --> 00:08:05.420
+next section lastly in this section we just want to create a new function which again I'll jump
+
+91
+00:08:05.420 --> 00:08:09.780
+into the editor and do and so you can follow it step by step but if you know how to create functions
+
+92
+00:08:09.780 --> 00:08:14.740
+we just want to create a set scalar parameter value and make sure the parameter whatever we
+
+93
+00:08:14.740 --> 00:08:19.220
+named it whether we named it temperature or temp or whatever you called that parameter in your
+
+94
+00:08:19.220 --> 00:08:26.300
+material that's essentially what we want to do so we'll send the value to the temp parameter in
+
+95
+00:08:26.300 --> 00:08:33.700
+the material so let's jump into unreal and break that down for the function so back in our editor
+
+96
+00:08:33.700 --> 00:08:38.540
+we can see that we've got a function section on the left on the side so I'm just going to click
+
+97
+00:08:38.540 --> 00:08:46.620
+plus function and I'm going to say set temp again using lower and upper case letters to
+
+98
+00:08:46.620 --> 00:08:52.420
+differentiate between sets and temp so there's no space here but because I capitalized a T that's
+
+99
+00:08:52.420 --> 00:08:59.540
+now got a space I'll compile and save just to make sure I always just get into the habit of compiling
+
+100
+00:08:59.540 --> 00:09:06.380
+and saving as you go so what we want to do here is we want to set a scalar parameter value based
+
+101
+00:09:06.380 --> 00:09:12.900
+on the material so let's drag out our material again holding down ctrl I'm going to set scalar
+
+102
+00:09:13.060 --> 00:09:20.020
+parameter by value and if we look at our material again you'll see that we've got this temp here so
+
+103
+00:09:20.020 --> 00:09:24.980
+whatever you called this a value whether you call it temperature or temp this is what we're looking
+
+104
+00:09:24.980 --> 00:09:31.500
+for here so I'm going to type in temp also a good practice is sometimes if you've got complex
+
+105
+00:09:31.500 --> 00:09:36.540
+material parameter names I just click and then click again so it highlights you're going into
+
+106
+00:09:36.540 --> 00:09:43.740
+the rename you can also hit f2 to rename but I'm going to copy that text paste it in there now it's
+
+107
+00:09:43.740 --> 00:09:49.580
+quite hard to get temp wrong but if you have complex parameter names sometimes it's good practice
+
+108
+00:09:49.580 --> 00:09:55.060
+to copy and paste the values in so you know that that's definitely working I'm gonna drag this
+
+109
+00:09:55.060 --> 00:10:00.980
+variable in here now now what I'm going to do is I'm actually going to do a bit of a shortcut
+
+110
+00:10:01.140 --> 00:10:08.380
+here so I'm going to get this value I'm going to drag it into here and it creates a new node so
+
+111
+00:10:08.380 --> 00:10:13.860
+if you drag it into there it creates a new value I'm actually going to call this value temperature
+
+112
+00:10:15.860 --> 00:10:22.620
+let's see if I can just disconnect this compile save let's try and call it temperature now
+
+113
+00:10:25.620 --> 00:10:30.660
+so maybe that's not a shortcut maybe this works in yours this has always historically worked for
+
+114
+00:10:30.660 --> 00:10:36.900
+me maybe doesn't work for some reason but I'm just gonna compile and save I've deleted the
+
+115
+00:10:36.900 --> 00:10:42.020
+input let's go back to do it the old-fashioned way so I'm gonna select set temperature I'm going
+
+116
+00:10:42.020 --> 00:10:49.860
+to go to input I'm going to press new input I'm going to type temperature wow it's not working
+
+117
+00:10:49.860 --> 00:10:57.220
+okay this is super interesting let's call it temp okay so temp seemed to work so maybe it just
+
+118
+00:10:57.220 --> 00:11:03.740
+doesn't like a certain variable I'm not sure why that is you should be able to type temperature
+
+119
+00:11:03.740 --> 00:11:10.580
+but if you can let's go with temp which is a good temp name for this let's drop down to make sure
+
+120
+00:11:10.580 --> 00:11:18.020
+it's a float and now we got our temperature input let's compile save and what I need to do now is I
+
+121
+00:11:18.020 --> 00:11:24.980
+need to divide this so let's go to the the forward slash key for divide or we can type in divide here
+
+122
+00:11:25.020 --> 00:11:31.260
+and we just want to divide this variable let's go like that and we just want to divide this by
+
+123
+00:11:31.260 --> 00:11:38.780
+100 so plug in divide by 100 and then compile and save and that is your function created

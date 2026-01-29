@@ -1,0 +1,789 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.320
+Let's get started by talking about some materials and instances which are just child versions
+
+2
+00:00:07.320 --> 00:00:08.320
+of materials.
+
+3
+00:00:08.320 --> 00:00:12.520
+We'll talk about how to create some dynamic shadows in this section.
+
+4
+00:00:12.520 --> 00:00:17.600
+So to start off with, let's talk about some textures, materials and models.
+
+5
+00:00:17.600 --> 00:00:27.920
+So textures, we can pack multiple textures into one texture using the RGB and alpha channels.
+
+6
+00:00:27.920 --> 00:00:34.240
+So you can learn more about this by going to the Unreal documentation page under rendering
+
+7
+00:00:34.240 --> 00:00:37.600
+materials and material instances.
+
+8
+00:00:37.600 --> 00:00:43.840
+But essentially what we're talking about here is you'll see in a slide in a second that
+
+9
+00:00:43.840 --> 00:00:52.760
+we can put different maybe logos or noise effects or something that you only need black
+
+10
+00:00:52.760 --> 00:00:54.800
+and white information for.
+
+11
+00:00:54.800 --> 00:01:01.240
+If we pack a texture into a single channel, it doesn't come with any color information
+
+12
+00:01:01.240 --> 00:01:07.840
+because it's a single channel, but we can also then take that texture input and maybe
+
+13
+00:01:07.840 --> 00:01:12.200
+multiply it by a certain color or give it a certain effect, which you'll see in a moment
+
+14
+00:01:12.200 --> 00:01:13.200
+here.
+
+15
+00:01:13.200 --> 00:01:18.320
+So if you want multiple textures that only need grayscale information to start with,
+
+16
+00:01:18.320 --> 00:01:22.480
+you can think about packing multiple textures into the different channels if you want.
+
+17
+00:01:22.480 --> 00:01:25.360
+And you can use the RGB and alpha channels.
+
+18
+00:01:25.360 --> 00:01:31.520
+You can see in this image here, we've got a white pin at the top of a, it's a base color
+
+19
+00:01:31.520 --> 00:01:35.840
+in this instance, but you can see that it can be used for a texture sample.
+
+20
+00:01:35.840 --> 00:01:40.280
+So if you pull off the white channel here, it's all channels and you obviously see the
+
+21
+00:01:40.280 --> 00:01:44.160
+RGB and B outputs as well as the alpha output at the bottom.
+
+22
+00:01:44.160 --> 00:01:49.120
+So you can actually pull information from individual channels, which is super useful.
+
+23
+00:01:49.120 --> 00:01:53.680
+We can also use UI texture modes, which we'll touch upon in a second.
+
+24
+00:01:53.680 --> 00:01:59.640
+And then we can also minimize texture lookups by using material instances, which will really
+
+25
+00:01:59.640 --> 00:02:01.920
+help with performance.
+
+26
+00:02:01.920 --> 00:02:07.440
+So you only create one master material and then you create material instances based on
+
+27
+00:02:07.440 --> 00:02:09.400
+that parent material.
+
+28
+00:02:09.400 --> 00:02:16.480
+And again, you can find that material instancing documentation online on the unrealengine.com
+
+29
+00:02:16.480 --> 00:02:19.080
+documentation if needed.
+
+30
+00:02:20.040 --> 00:02:24.360
+And then also we'll look at the models and how to minimize certain elements, whether
+
+31
+00:02:24.360 --> 00:02:27.400
+it be in the mesh optimization.
+
+32
+00:02:27.400 --> 00:02:33.800
+So for this project, say we have a target of a hundred thousand triangles for mid to
+
+33
+00:02:33.800 --> 00:02:35.480
+high tier hardware.
+
+34
+00:02:35.480 --> 00:02:39.800
+Again, mileage may vary depending on the project.
+
+35
+00:02:39.800 --> 00:02:42.680
+You'll have different performance requirements.
+
+36
+00:02:42.680 --> 00:02:48.520
+And you can also look into some Nanite mesh optimization, which is an Unreal Engine feature
+
+37
+00:02:49.000 --> 00:02:52.120
+in a performance issue with the number of triangles on screen.
+
+38
+00:02:52.120 --> 00:02:56.360
+So we can look at the models, the optimization for the models.
+
+39
+00:02:56.360 --> 00:03:00.960
+We can also look at how many materials and material instances we're using.
+
+40
+00:03:00.960 --> 00:03:07.760
+And then also if we have a lot of textures being used unnecessarily, say we're only pulling
+
+41
+00:03:07.760 --> 00:03:13.640
+in a gray value or black and white value from a texture sample and we're using all four
+
+42
+00:03:13.640 --> 00:03:15.160
+channels to pull it in.
+
+43
+00:03:15.160 --> 00:03:18.680
+Maybe you could just pack it into the red channel and use the green and blue channel
+
+44
+00:03:18.680 --> 00:03:20.760
+and alpha channel for another texture.
+
+45
+00:03:20.760 --> 00:03:27.240
+So just things to consider there when looking at some optimization for your projects.
+
+46
+00:03:27.240 --> 00:03:31.880
+When we're looking at materials, we have some baked in functionality.
+
+47
+00:03:31.880 --> 00:03:35.440
+So materials cannot be edited at runtime.
+
+48
+00:03:35.440 --> 00:03:38.000
+So you'll see this material graph here.
+
+49
+00:03:38.000 --> 00:03:43.040
+We essentially whatever we hook up here, that is what happens at runtime.
+
+50
+00:03:43.120 --> 00:03:49.360
+However, we can expose certain parameters here into dynamic values.
+
+51
+00:03:49.360 --> 00:03:54.080
+So you can if you had a texture sample, you can right click on that texture sample
+
+52
+00:03:54.720 --> 00:03:58.240
+and you can see the convert to parameter at the top of the list there.
+
+53
+00:03:58.240 --> 00:04:03.440
+And that will mean that that parameter then can be edited at runtime, which we can use
+
+54
+00:04:03.440 --> 00:04:05.600
+material instances from.
+
+55
+00:04:05.600 --> 00:04:12.560
+So instances can derive from parent materials and they just inherit all the functionality
+
+56
+00:04:12.560 --> 00:04:17.280
+and then anything that is a parameter can then be edited at runtime.
+
+57
+00:04:17.920 --> 00:04:22.080
+So if you want to create a material with a core shared logic, then derive an instance
+
+58
+00:04:22.080 --> 00:04:24.480
+to control the specific parameters.
+
+59
+00:04:24.480 --> 00:04:27.200
+That's how you would change things at runtime.
+
+60
+00:04:27.200 --> 00:04:32.320
+And again, the Unreal Engine documentation on rendering and materials will give you a
+
+61
+00:04:32.320 --> 00:04:36.320
+lot of mileage here in terms of knowing what properties you can edit.
+
+62
+00:04:37.680 --> 00:04:42.160
+And then looking at the main difference between material and material instances.
+
+63
+00:04:42.400 --> 00:04:49.040
+Materials contain instructions and functions cannot be altered when the program is running,
+
+64
+00:04:49.040 --> 00:04:50.800
+as we said in the previous slide.
+
+65
+00:04:50.800 --> 00:04:56.000
+They can be applied directly to a mesh or a UI element or some kind of parent of an
+
+66
+00:04:56.000 --> 00:05:00.640
+instance, whereas material instances require this parent material.
+
+67
+00:05:00.640 --> 00:05:04.880
+So you can see the material instance window down at the bottom here and you'll see that
+
+68
+00:05:04.880 --> 00:05:05.920
+parent box here.
+
+69
+00:05:06.640 --> 00:05:11.920
+That essentially means we've got a parent material sending us certain instructions
+
+70
+00:05:11.920 --> 00:05:15.360
+and then the parameters that we can change are in this top section here.
+
+71
+00:05:15.360 --> 00:05:19.200
+So we can expose parameters that can be edited at runtime.
+
+72
+00:05:20.000 --> 00:05:25.280
+We can't change the instructions or functions inside the source material.
+
+73
+00:05:26.000 --> 00:05:29.280
+So that's just something to be mindful of there.
+
+74
+00:05:30.480 --> 00:05:38.000
+So for today's session, let's go ahead and import the hot and cold texture from your asset pack.
+
+75
+00:05:38.000 --> 00:05:43.440
+We just want to make sure the compression settings are the user interface 2D.
+
+76
+00:05:43.440 --> 00:05:49.200
+So when we talk about compression settings, which you'll see just here, compression settings,
+
+77
+00:05:49.200 --> 00:05:52.320
+you just want to make sure that texture is compressed correctly.
+
+78
+00:05:53.120 --> 00:05:56.720
+So then let's get started by creating a new material.
+
+79
+00:05:56.720 --> 00:06:02.080
+So we want to have imported the icon texture and then we want to create a new material.
+
+80
+00:06:02.080 --> 00:06:06.960
+So I'll just jump into the editor quickly to show you how to make a material if you're on show.
+
+81
+00:06:06.960 --> 00:06:12.160
+With your editor open, you just want to maybe create a new folder for material specific
+
+82
+00:06:13.440 --> 00:06:14.160
+content.
+
+83
+00:06:14.160 --> 00:06:17.680
+So you could right click and call this materials.
+
+84
+00:06:17.680 --> 00:06:24.480
+So I've just right clicked on content, new folder, and you can also just add here a new folder.
+
+85
+00:06:24.480 --> 00:06:29.600
+And then also when we're in our materials, you can either just right click in this gray space
+
+86
+00:06:29.600 --> 00:06:35.280
+in the content browser and go to material or again, you can go to add material.
+
+87
+00:06:36.080 --> 00:06:39.280
+So let's take a look at our material options here.
+
+88
+00:06:39.280 --> 00:06:42.240
+So we've set the material domain to user interface.
+
+89
+00:06:42.240 --> 00:06:46.880
+So you can see here, make sure you don't have any nodes selected.
+
+90
+00:06:46.880 --> 00:06:50.160
+And you'll see on the left hand side, you'll see user interface.
+
+91
+00:06:50.160 --> 00:06:52.240
+And then we've set the blend mode to translucent.
+
+92
+00:06:52.240 --> 00:06:54.240
+So make sure those two options are set.
+
+93
+00:06:55.040 --> 00:07:01.600
+We have a scalar parameter in here called temp or in this image temperature.
+
+94
+00:07:01.600 --> 00:07:05.120
+So we just hold down the number one key and left click.
+
+95
+00:07:05.200 --> 00:07:10.720
+Or you can add a const one node, but number one and left click will give you this.
+
+96
+00:07:11.520 --> 00:07:17.200
+And then just right click, convert to a parameter and call it either temperature or temp.
+
+97
+00:07:17.200 --> 00:07:20.240
+Just remember what you call this for later on.
+
+98
+00:07:20.240 --> 00:07:24.240
+And then everything else, we've got two linear interpolates here.
+
+99
+00:07:24.240 --> 00:07:27.120
+We've got a subtract and we've got an add node.
+
+100
+00:07:27.120 --> 00:07:30.480
+To get these two color nodes, this is a const three.
+
+101
+00:07:30.480 --> 00:07:33.360
+So you can hold down three and left click on your keyboard.
+
+102
+00:07:34.000 --> 00:07:36.240
+And then just pick two different colors there.
+
+103
+00:07:36.240 --> 00:07:38.080
+So we have our texture sample.
+
+104
+00:07:38.080 --> 00:07:44.480
+You can select it in the content browser and then press T in here and left click.
+
+105
+00:07:44.480 --> 00:07:46.720
+And that will create a texture sample.
+
+106
+00:07:46.720 --> 00:07:49.920
+And because you've got it selected in your content browser,
+
+107
+00:07:49.920 --> 00:07:54.240
+it will automatically assign the texture that you had imported on the previous slide.
+
+108
+00:07:54.240 --> 00:07:59.200
+If not, you can drag and drop this texture sample from the content browser into here.
+
+109
+00:07:59.200 --> 00:08:02.000
+Or you can create an empty texture sample, click on the node.
+
+110
+00:08:02.000 --> 00:08:05.360
+And then on the left hand details panel, you'll see what texture to use.
+
+111
+00:08:05.360 --> 00:08:07.680
+And you just want to plug that in from the content browser.
+
+112
+00:08:08.400 --> 00:08:12.880
+And so here's a larger image of that if you want to see it up close.
+
+113
+00:08:14.960 --> 00:08:20.080
+So what we have here is we have the multiplier of the red and blue channels by their respective colors.
+
+114
+00:08:20.080 --> 00:08:25.040
+We have the lerp based on the scalar parameter, which is this temperature that we had.
+
+115
+00:08:25.040 --> 00:08:26.560
+And we just name this temperature.
+
+116
+00:08:27.040 --> 00:08:34.400
+Then the opacity from the texture sample goes straight into the opacity of the material input.
+
+117
+00:08:35.920 --> 00:08:40.800
+And then what we want to do is we want to save the material and close it.
+
+118
+00:08:40.800 --> 00:08:44.160
+And then if we right click on this material that we've created,
+
+119
+00:08:44.160 --> 00:08:47.200
+so you'll see this material in the content browser, you'll see the map.
+
+120
+00:08:47.920 --> 00:08:53.680
+What you want to do is you want to right click on this map and create instance from material.
+
+121
+00:08:53.680 --> 00:08:55.680
+So I'll just jump into the editor and show you that.
+
+122
+00:08:56.560 --> 00:09:01.840
+So if I have my material here, I can just right click create material instance.
+
+123
+00:09:01.840 --> 00:09:09.120
+And then this type of material will now pop up, which you can see is the instance version of this.
+
+124
+00:09:09.920 --> 00:09:14.000
+And by default, you should see the details panel selected in the top left.
+
+125
+00:09:14.000 --> 00:09:19.280
+If you have any other windows open, just make sure that the parent material is in the hot and cold
+
+126
+00:09:19.280 --> 00:09:23.040
+material and our temperature parameter is here.
+
+127
+00:09:23.040 --> 00:09:28.000
+And we can actually just click that temperature and we can now change this temperature.
+
+128
+00:09:28.000 --> 00:09:35.280
+So you can see our material when working is dialing between this cold to hot.
+
+129
+00:09:35.280 --> 00:09:40.960
+And if we just snap from zero to one, we can see that our material is changing.
+
+130
+00:09:40.960 --> 00:09:46.800
+So that's the result of the parameter that you want to achieve with your material
+
+131
+00:09:46.800 --> 00:09:49.120
+and then subsequently material instance.
+
+132
+00:09:50.080 --> 00:09:53.440
+Next up, we want to create the display vehicle material.
+
+133
+00:09:53.440 --> 00:09:59.600
+So in this, we'll be using some parameters, LURPS, PANNERS, and the Saturate and Clamp node.
+
+134
+00:10:00.400 --> 00:10:04.720
+But we'll apply this to the car model in the viewport.
+
+135
+00:10:04.720 --> 00:10:09.440
+And again, we'll go through step by step how we go about creating this.
+
+136
+00:10:09.440 --> 00:10:12.560
+So we have metallic and roughness.
+
+137
+00:10:12.560 --> 00:10:17.040
+Again, hold down number one on your keyboard to create these boxes.
+
+138
+00:10:17.040 --> 00:10:22.080
+Your nodes, these constants values may look a little bit different depending on what version
+
+139
+00:10:22.080 --> 00:10:23.440
+of Unreal Engine you're using.
+
+140
+00:10:24.320 --> 00:10:29.840
+In the more recent versions, you'll see a little value number inside this const one,
+
+141
+00:10:29.840 --> 00:10:31.920
+but the functionality will be the same.
+
+142
+00:10:31.920 --> 00:10:36.480
+So metallic to one, roughness 2.5 there.
+
+143
+00:10:38.400 --> 00:10:42.000
+And then we want to display three vectors.
+
+144
+00:10:42.000 --> 00:10:48.400
+So hold down number three on the keyboard and go from the gray to the green to the red.
+
+145
+00:10:48.960 --> 00:10:51.680
+And essentially, as the temperature value goes up,
+
+146
+00:10:51.680 --> 00:10:55.440
+we want the wing color to change from blue to red.
+
+147
+00:10:55.440 --> 00:10:57.760
+So that's essentially what we're doing here.
+
+148
+00:10:57.760 --> 00:11:00.320
+And we again want that parameter.
+
+149
+00:11:00.320 --> 00:11:04.560
+If we hold down number one on the keyboard, left click and go to temp,
+
+150
+00:11:05.200 --> 00:11:08.160
+and then right click and convert it to a parameter
+
+151
+00:11:08.960 --> 00:11:14.000
+just to name it that temperature value there as you did on the last material.
+
+152
+00:11:15.520 --> 00:11:20.800
+The display material is going to be a little bit different than what you saw on our previous material.
+
+153
+00:11:20.800 --> 00:11:26.400
+So nothing to be too worried about here if we just set it up step by step.
+
+154
+00:11:26.400 --> 00:11:32.000
+So the local position provides the meshes local x and y directions.
+
+155
+00:11:32.000 --> 00:11:37.520
+And then the divide mask adjust to shape it and resize it for the model.
+
+156
+00:11:37.520 --> 00:11:41.680
+So you can change the divide amount as needed for the size of your vehicle.
+
+157
+00:11:42.640 --> 00:11:44.400
+The airspeed is a parameter.
+
+158
+00:11:44.400 --> 00:11:51.120
+So again, just left click holding down number one and convert it to a parameter and name that airspeed.
+
+159
+00:11:51.120 --> 00:11:56.800
+Now, it's important to note when calling parameters with two words like this,
+
+160
+00:11:56.800 --> 00:11:59.520
+airspeed and even band frequency here,
+
+161
+00:11:59.520 --> 00:12:06.800
+if you capitalize the letter without a space in when you go to edit the parameter,
+
+162
+00:12:06.800 --> 00:12:11.600
+it will have a space there because you've gone from a lowercase letter to an uppercase letter.
+
+163
+00:12:11.600 --> 00:12:19.120
+So Unreal Engine detects that and creates a space in the actual user facing parameter settings.
+
+164
+00:12:19.840 --> 00:12:21.440
+So that's just a really nice way.
+
+165
+00:12:21.440 --> 00:12:24.400
+You shouldn't really add spaces to parameter names.
+
+166
+00:12:25.440 --> 00:12:29.600
+It's not a terrible thing to do, but it's just a good practice to get into.
+
+167
+00:12:29.600 --> 00:12:32.800
+It comes from more of the coding language side.
+
+168
+00:12:32.800 --> 00:12:38.160
+So the airspeed is a parameter that we can drive up and down through the UI later.
+
+169
+00:12:38.160 --> 00:12:39.440
+So it's important to add that.
+
+170
+00:12:40.320 --> 00:12:47.120
+And make sure to give the panner an x or y value of one,
+
+171
+00:12:47.120 --> 00:12:50.480
+depending on the direction that the car is facing or it won't move at all.
+
+172
+00:12:51.280 --> 00:12:56.480
+A component mask here allows us to cut out the color channels and output what's left.
+
+173
+00:12:56.560 --> 00:12:59.280
+So if you mask a basic coordinate,
+
+174
+00:12:59.920 --> 00:13:05.360
+G creates a top bottom gradient and R creates a left right gradient.
+
+175
+00:13:05.360 --> 00:13:10.400
+So if you want a top bottom gradient, use your green channel, G channel.
+
+176
+00:13:10.400 --> 00:13:15.200
+And then if you want to use the R channel, that will create a left right gradient.
+
+177
+00:13:15.200 --> 00:13:16.560
+And then we've got a multiply.
+
+178
+00:13:16.560 --> 00:13:19.440
+You can hold down M on the keyboard for multiply.
+
+179
+00:13:19.440 --> 00:13:23.920
+And then sine provides a repeating wave pattern.
+
+180
+00:13:23.920 --> 00:13:26.560
+So then we just want to clamp that at the end there.
+
+181
+00:13:26.560 --> 00:13:31.360
+You can also go from sine to a saturate node if you want.
+
+182
+00:13:31.360 --> 00:13:32.880
+That makes things a little bit cleaner.
+
+183
+00:13:32.880 --> 00:13:35.760
+So you can drag off and do saturate.
+
+184
+00:13:35.760 --> 00:13:37.920
+So you can either clamp or saturate there.
+
+185
+00:13:38.640 --> 00:13:41.680
+And then we just want to make sure all the connections are hooked up there.
+
+186
+00:13:41.680 --> 00:13:44.960
+So this is a series of nodes that we hooked in there.
+
+187
+00:13:44.960 --> 00:13:48.000
+We've done our roughness and metallic values.
+
+188
+00:13:48.000 --> 00:13:50.720
+And then we've got our color controls here.
+
+189
+00:13:51.360 --> 00:13:54.880
+And then as before, we have our master material.
+
+190
+00:13:54.880 --> 00:13:58.800
+So you can right click on that material, select create material instance,
+
+191
+00:13:58.800 --> 00:14:03.840
+and then just name it some version of what you called the master material, underscore instance.
+
+192
+00:14:03.840 --> 00:14:06.960
+Unreal Engine will automatically add the underscore inst,
+
+193
+00:14:07.680 --> 00:14:13.360
+but just name it whatever naming convention is consistent to your project.
+
+194
+00:14:13.360 --> 00:14:17.280
+And then you can just tick these parameters and just alter them and see,
+
+195
+00:14:17.280 --> 00:14:18.560
+have a play around with the material,
+
+196
+00:14:19.360 --> 00:14:23.200
+get a feel for what it is actually doing inside the material editor,
+
+197
+00:14:23.200 --> 00:14:26.400
+and then we'll be able to apply it to our blueprint.

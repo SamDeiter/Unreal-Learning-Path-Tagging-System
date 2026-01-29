@@ -1,0 +1,2589 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.960
+So with that context in mind, let's now jump into creating a core UMG widget and talk about
+
+2
+00:00:06.960 --> 00:00:09.640
+creating a HUD and a reusable widget.
+
+3
+00:00:09.640 --> 00:00:11.940
+So we'll jump into an engine now.
+
+4
+00:00:11.940 --> 00:00:15.680
+And when we're in engine, we'll start by creating a new HUD widget.
+
+5
+00:00:15.680 --> 00:00:17.880
+So I've got a HMI folder here.
+
+6
+00:00:17.880 --> 00:00:23.680
+I'll just right click and go to new folder and I'll type blueprints here because we'll
+
+7
+00:00:23.680 --> 00:00:26.640
+be making a few different blueprints today.
+
+8
+00:00:26.640 --> 00:00:34.880
+I'm going to right click and I'll go to user interface and then we'll go to widget blueprint
+
+9
+00:00:34.880 --> 00:00:35.880
+at the bottom here.
+
+10
+00:00:35.880 --> 00:00:37.560
+I use a widget is fine.
+
+11
+00:00:37.560 --> 00:00:44.720
+So we'll just click that and we'll type HUD underscore UMG today.
+
+12
+00:00:44.720 --> 00:00:48.800
+And then we'll just hit enter to open it up.
+
+13
+00:00:48.800 --> 00:00:53.240
+And what I like to do is I like to just pin this next to the map here so it's a bit easier
+
+14
+00:00:53.240 --> 00:00:56.180
+to toggle between the two.
+
+15
+00:00:56.720 --> 00:01:02.420
+So now that we've created a new widget, we want to check the fill screen at the top right
+
+16
+00:01:02.420 --> 00:01:04.260
+of the viewport here.
+
+17
+00:01:04.260 --> 00:01:10.660
+So we've got fill screen here and we can set a desired screen size.
+
+18
+00:01:10.660 --> 00:01:14.980
+And so we'll do desired on screen.
+
+19
+00:01:14.980 --> 00:01:20.340
+If you'd like to set a specific screen size there, we have these options.
+
+20
+00:01:20.340 --> 00:01:24.380
+We can also just do a custom on screen as well.
+
+21
+00:01:24.380 --> 00:01:32.020
+So whichever kind of aspects you want to work with, I'm just going to use 1920, 1080,
+
+22
+00:01:32.020 --> 00:01:37.300
+which is going to be my aspect on the PC, but you can set the real estate to whatever
+
+23
+00:01:37.300 --> 00:01:39.320
+you would like it to be there.
+
+24
+00:01:39.320 --> 00:01:44.580
+And then on the top left hand side, we just need a canvas panel, which we will drag down
+
+25
+00:01:44.580 --> 00:01:51.680
+into here and so that we have our canvas panel now part of our hierarchy in the bottom left
+
+26
+00:01:51.680 --> 00:01:53.180
+hand side here.
+
+27
+00:01:53.180 --> 00:01:55.940
+So we've got our basic layout.
+
+28
+00:01:55.940 --> 00:02:02.140
+We will jump into creating a new blueprint now so that we can actually add this widget
+
+29
+00:02:02.140 --> 00:02:03.940
+to some kind of class.
+
+30
+00:02:03.940 --> 00:02:06.220
+So I'm just going to compile and save.
+
+31
+00:02:06.220 --> 00:02:11.380
+Again, we're just building the foundations right now of our functionality.
+
+32
+00:02:11.380 --> 00:02:14.180
+So I'm back in my content browser.
+
+33
+00:02:14.180 --> 00:02:19.880
+I'm going to go to new blueprint class by right clicking and this time we will select
+
+34
+00:02:19.880 --> 00:02:21.560
+player controller.
+
+35
+00:02:21.560 --> 00:02:25.920
+And this is just going to be a display controller.
+
+36
+00:02:25.920 --> 00:02:30.280
+And what we were talking about in the PowerPoint just a few minutes ago is that we need some
+
+37
+00:02:30.280 --> 00:02:33.680
+kind of controller that can interact with the scene.
+
+38
+00:02:33.680 --> 00:02:38.760
+As you recall, controllers can take input and consume input commands.
+
+39
+00:02:38.760 --> 00:02:41.980
+So that's why we've created a controller right now.
+
+40
+00:02:41.980 --> 00:02:44.760
+So I'm going to hit enter to open it up again.
+
+41
+00:02:44.760 --> 00:02:48.760
+Alternatively, you can just double click this, but when it's already selected, you can just
+
+42
+00:02:48.760 --> 00:02:50.360
+hit enter to open.
+
+43
+00:02:51.020 --> 00:02:55.200
+I'm just going to save it just to make sure we have the save preferences.
+
+44
+00:02:55.200 --> 00:02:58.460
+And I'll go to the event graph in the top middle here.
+
+45
+00:02:58.460 --> 00:03:04.480
+So when we go to the event graph, we can delete the tick if you'd like it like to delete that.
+
+46
+00:03:04.480 --> 00:03:08.260
+Again, it doesn't really have functionality, it just cleans it up a bit.
+
+47
+00:03:08.260 --> 00:03:13.220
+And so we'll go from the event begin play, and we'll create a widget.
+
+48
+00:03:13.220 --> 00:03:14.220
+So create widget.
+
+49
+00:03:14.420 --> 00:03:20.660
+So you just draw, drag off the the white execution pin and go to create widget.
+
+50
+00:03:20.660 --> 00:03:22.780
+And we'll have something like that.
+
+51
+00:03:22.780 --> 00:03:25.900
+And then we just want to find the hood that we just created.
+
+52
+00:03:25.900 --> 00:03:28.680
+So we called it hood underscore UMG.
+
+53
+00:03:28.680 --> 00:03:30.560
+So we'll add that there.
+
+54
+00:03:30.560 --> 00:03:33.260
+And then we want to promote this to a variable.
+
+55
+00:03:33.260 --> 00:03:38.040
+So we'll drag off the blue pin and say promotes a variable.
+
+56
+00:03:38.040 --> 00:03:46.940
+And we'll call this hood underscore UMG reference, something like this.
+
+57
+00:03:46.940 --> 00:03:51.440
+It doesn't matter what the specific name is, as long as it's consistent with your naming
+
+58
+00:03:51.440 --> 00:03:56.040
+convention and that you remember what that name is for use later on.
+
+59
+00:03:56.040 --> 00:04:01.220
+And then the last thing we want to do, we've got the controller, we've created our hood
+
+60
+00:04:01.220 --> 00:04:04.400
+widget, now we just need to add it to the screen.
+
+61
+00:04:04.400 --> 00:04:07.540
+So to do that, we say add to viewport.
+
+62
+00:04:07.540 --> 00:04:10.280
+So we'll just click add to viewport.
+
+63
+00:04:10.280 --> 00:04:17.880
+And as we now add functionality to this widget, it will get added to the viewport as long
+
+64
+00:04:17.880 --> 00:04:24.160
+as we have our game mode set correctly, which we will do in the coming time here.
+
+65
+00:04:24.160 --> 00:04:31.640
+So let's create our first bit of functionality to make sure we can see our UMG display and
+
+66
+00:04:31.640 --> 00:04:33.920
+just make sure everything's working correctly.
+
+67
+00:04:33.920 --> 00:04:38.180
+So I'm going to go back into the hood UMG now.
+
+68
+00:04:38.180 --> 00:04:43.380
+I'm going to find a vertical box.
+
+69
+00:04:43.380 --> 00:04:45.500
+So I'll go to vertical box.
+
+70
+00:04:45.500 --> 00:04:49.660
+I'm going to drag and drop that down into here.
+
+71
+00:04:49.660 --> 00:04:54.820
+And so you'll see a new box has been added and we can position this wherever we would
+
+72
+00:04:54.820 --> 00:04:55.820
+like.
+
+73
+00:04:55.820 --> 00:04:56.820
+We can change the positioning.
+
+74
+00:04:56.820 --> 00:05:01.180
+It doesn't really matter too much for these purposes, but I'll just drag it out so you
+
+75
+00:05:01.180 --> 00:05:03.620
+can see that happening.
+
+76
+00:05:03.620 --> 00:05:06.260
+And maybe I'll make it a little bit bigger.
+
+77
+00:05:06.260 --> 00:05:09.260
+And we want to add a text box.
+
+78
+00:05:09.260 --> 00:05:12.540
+So we'll just display some kind of text on the screen.
+
+79
+00:05:12.540 --> 00:05:17.420
+So I'll get the text box and drag and drop that down to the vertical box as well.
+
+80
+00:05:17.420 --> 00:05:27.260
+And then I will also add a name slot underneath that.
+
+81
+00:05:27.260 --> 00:05:28.680
+There we go.
+
+82
+00:05:28.680 --> 00:05:32.840
+So the text is just a text block there.
+
+83
+00:05:32.840 --> 00:05:37.160
+And the name slot comes in at 180 by default.
+
+84
+00:05:37.160 --> 00:05:41.040
+I'm just going to rename that at the top here.
+
+85
+00:05:41.040 --> 00:05:45.080
+Just name slot and then I'll compile and save.
+
+86
+00:05:45.080 --> 00:05:49.560
+And then we can jump into our graph, which is on the top right here to start adding some
+
+87
+00:05:49.560 --> 00:05:50.760
+kind of functionality.
+
+88
+00:05:50.760 --> 00:05:52.600
+So we'll go to the graph.
+
+89
+00:05:52.600 --> 00:05:56.860
+And we've got the event pre construct, which is what we want to use at the moment.
+
+90
+00:05:56.860 --> 00:06:03.420
+So we want a few variables on the left hand side to add before we get into any kind of
+
+91
+00:06:03.420 --> 00:06:04.540
+functionality.
+
+92
+00:06:04.540 --> 00:06:09.880
+So we want to actually find our text block and make sure that our text block is editable.
+
+93
+00:06:09.880 --> 00:06:11.980
+So let's go back into our designer.
+
+94
+00:06:11.980 --> 00:06:17.340
+Let's get this text block here, select the text block, and then just say is variable.
+
+95
+00:06:17.340 --> 00:06:20.260
+We can take that up there, compile and save.
+
+96
+00:06:20.260 --> 00:06:22.060
+And we'll go back into our graph.
+
+97
+00:06:22.060 --> 00:06:25.980
+And you can now see that that text block is there.
+
+98
+00:06:25.980 --> 00:06:27.420
+So we can also rename that.
+
+99
+00:06:27.420 --> 00:06:32.100
+You don't need to do this, but I just want to make sure that the text block just nice
+
+100
+00:06:32.100 --> 00:06:36.660
+clean naming conventions, compile and save, go back there.
+
+101
+00:06:36.660 --> 00:06:39.900
+And so everything looks a little bit more organized.
+
+102
+00:06:39.900 --> 00:06:43.300
+And then we just want to create a new variable as well.
+
+103
+00:06:43.300 --> 00:06:46.540
+Something along the lines of display text.
+
+104
+00:06:46.540 --> 00:06:48.660
+And we'll create a named variable from this.
+
+105
+00:06:48.660 --> 00:06:52.180
+So we'll change it from Boolean to will it be a text?
+
+106
+00:06:52.180 --> 00:06:54.440
+I believe it might be a text variable.
+
+107
+00:06:54.440 --> 00:06:56.960
+So we'll just compile and save that.
+
+108
+00:06:56.960 --> 00:06:58.840
+And then we'll drag out the display text.
+
+109
+00:06:58.840 --> 00:07:04.160
+I'm going to hold down control on my keyboard and drag out alternatively, you can just left
+
+110
+00:07:04.160 --> 00:07:05.160
+mouse drag out.
+
+111
+00:07:05.160 --> 00:07:09.520
+But then it'll say do you want to get or set the variable by holding down control, you
+
+112
+00:07:09.520 --> 00:07:11.040
+will get the variable.
+
+113
+00:07:11.040 --> 00:07:14.040
+And by holding down alt, you will set the variable.
+
+114
+00:07:14.040 --> 00:07:18.080
+So that's just a little shortcut in case you want to use that there.
+
+115
+00:07:18.080 --> 00:07:20.360
+I'll compile and save.
+
+116
+00:07:20.360 --> 00:07:22.840
+And then we want to set the text.
+
+117
+00:07:22.840 --> 00:07:27.240
+So I'm just going to move these two events, we don't really need them at the moment.
+
+118
+00:07:27.240 --> 00:07:29.800
+I'm going to grab the text block.
+
+119
+00:07:29.800 --> 00:07:32.600
+So I'm going to hold down control again and drag that out.
+
+120
+00:07:32.600 --> 00:07:40.480
+And I'll drag off the blue pin of the text block and just say set text.
+
+121
+00:07:40.480 --> 00:07:43.760
+So select set text there.
+
+122
+00:07:43.760 --> 00:07:47.380
+And then we'll have the text there.
+
+123
+00:07:47.380 --> 00:07:48.960
+And that'll be plugged in like that.
+
+124
+00:07:48.960 --> 00:07:54.280
+So we're under pre construct, we've got some display text, and you want the text block
+
+125
+00:07:54.280 --> 00:07:55.680
+to set the text.
+
+126
+00:07:55.680 --> 00:08:00.340
+Now it's not going to set any text because we don't have any default information.
+
+127
+00:08:00.340 --> 00:08:05.840
+So we'll just type test there, compile and save.
+
+128
+00:08:05.840 --> 00:08:12.560
+And so that's our basic setup for making sure we have editable content.
+
+129
+00:08:12.560 --> 00:08:16.600
+And the last thing we want to do is just make sure that variable is public, so that that
+
+130
+00:08:17.440 --> 00:08:19.040
+is instance editable.
+
+131
+00:08:19.040 --> 00:08:22.020
+And then we'll compile and save.
+
+132
+00:08:22.020 --> 00:08:27.920
+And then before we move on, let's just make sure we can display the content on our screen.
+
+133
+00:08:27.920 --> 00:08:31.880
+So we'll go to the display map and we need to create a new game mode.
+
+134
+00:08:31.880 --> 00:08:36.680
+So we'll right click and go to blueprint class.
+
+135
+00:08:36.680 --> 00:08:39.680
+And we'll select game mode base from here.
+
+136
+00:08:39.680 --> 00:08:46.520
+And we'll just call that display game mode.
+
+137
+00:08:46.520 --> 00:08:48.620
+And then open that up.
+
+138
+00:08:48.620 --> 00:08:53.380
+And we just want to make sure the player controller is assigned correctly.
+
+139
+00:08:53.380 --> 00:08:57.160
+So the player controller is our display controller.
+
+140
+00:08:57.160 --> 00:08:59.960
+And we'll compile and save that.
+
+141
+00:08:59.960 --> 00:09:04.680
+We'll go to our default map, we'll make sure on the world settings, if you don't have world
+
+142
+00:09:04.680 --> 00:09:09.040
+settings open, you can make sure that the windows open on world settings, and just make
+
+143
+00:09:09.040 --> 00:09:13.020
+sure that display game mode is set there.
+
+144
+00:09:13.020 --> 00:09:14.400
+And then we'll save all.
+
+145
+00:09:14.800 --> 00:09:21.200
+I'm going to full screen my window by pressing F11 and go and hit alt and P on the keyboard.
+
+146
+00:09:21.200 --> 00:09:25.560
+And you'll see that our test is now visible on the top left hand side there.
+
+147
+00:09:25.560 --> 00:09:33.440
+So you'll throughout this process, we've kind of created a new game mode that will display,
+
+148
+00:09:33.440 --> 00:09:40.100
+well, use some kind of controller that takes input in the controller.
+
+149
+00:09:40.100 --> 00:09:48.140
+We've added the UMG to the screen via this blueprint scripting here.
+
+150
+00:09:48.140 --> 00:09:52.020
+And then the controller says load this HUD and add it to the screen.
+
+151
+00:09:52.020 --> 00:09:58.340
+And the HUD that we've created, which we can find by searching here is this UMG HUD.
+
+152
+00:09:58.340 --> 00:10:03.300
+And the UMG HUD basically says, get some text and display text.
+
+153
+00:10:03.300 --> 00:10:10.500
+So whatever's in this variable right now, if I change this to hello, and compile and
+
+154
+00:10:10.500 --> 00:10:17.660
+save, then if I full screen and press alt P on the keyboard, you can see hello there.
+
+155
+00:10:17.660 --> 00:10:22.060
+So we've got some really nice basic functionality of a UMG setup.
+
+156
+00:10:22.060 --> 00:10:25.580
+We know that everything's working correctly before we move on.
+
+157
+00:10:25.580 --> 00:10:28.340
+So let's jump into the next section.
+
+158
+00:10:28.340 --> 00:10:34.900
+Next we'll create a right panel widget using a sub menu, which will house a lot of interactive
+
+159
+00:10:34.900 --> 00:10:37.020
+functionality that we can add to our scene.
+
+160
+00:10:37.020 --> 00:10:39.140
+So let's jump into the editor again.
+
+161
+00:10:39.140 --> 00:10:44.340
+And so we're back in editor now, we've got our HUD UMG class open.
+
+162
+00:10:44.340 --> 00:10:48.540
+Now that we know this is working, I'm going to change custom back to fill screen, because
+
+163
+00:10:48.540 --> 00:10:54.220
+that's going to be the desired behavior we want as we start adding more panels to our
+
+164
+00:10:54.220 --> 00:10:55.620
+user interface.
+
+165
+00:10:55.620 --> 00:10:58.980
+So we want to start by creating this right hand panel.
+
+166
+00:10:58.980 --> 00:11:00.960
+So we want a size box.
+
+167
+00:11:00.960 --> 00:11:07.220
+So we'll type in size on the top left hand side, grab a size box and get a size box at
+
+168
+00:11:07.220 --> 00:11:08.220
+the bottom here.
+
+169
+00:11:08.220 --> 00:11:14.900
+I will add it outside this vertical box actually, size box, and we'll call this size box, the
+
+170
+00:11:14.900 --> 00:11:16.340
+right panel, for example.
+
+171
+00:11:16.340 --> 00:11:24.380
+So we'll just call this right panel size box.
+
+172
+00:11:24.380 --> 00:11:26.500
+So we know exactly what that is.
+
+173
+00:11:26.500 --> 00:11:28.900
+We want a grid panel view.
+
+174
+00:11:28.900 --> 00:11:36.860
+So we want to get the grid and we want a grid panel view on this section here.
+
+175
+00:11:36.860 --> 00:11:42.740
+So we want to child the grid panel, make sure that's underneath the size box there, and
+
+176
+00:11:42.740 --> 00:11:45.460
+just compile and save.
+
+177
+00:11:45.460 --> 00:11:52.740
+And we'll get this grid size box and just bring it over into some better real estate
+
+178
+00:11:52.740 --> 00:11:53.940
+there.
+
+179
+00:11:53.940 --> 00:11:57.940
+For example, there, you can even anchor it to the right right hand side there instead
+
+180
+00:11:57.940 --> 00:12:01.900
+of the left, if you wanted to make sure it's right aligned.
+
+181
+00:12:01.900 --> 00:12:07.360
+And so in this panel, we want to add three buttons.
+
+182
+00:12:07.360 --> 00:12:13.020
+So we want an open and close button and a tab button.
+
+183
+00:12:13.020 --> 00:12:16.200
+So we will add the open button first.
+
+184
+00:12:16.200 --> 00:12:22.740
+So we'll go to button, add the button here, and that can go under the grid panel.
+
+185
+00:12:22.740 --> 00:12:27.520
+And then we'll call, we'll just keep, because we're adding so many components at the same
+
+186
+00:12:27.520 --> 00:12:30.120
+time, we'll just keep all our naming consistent.
+
+187
+00:12:31.120 --> 00:12:39.840
+So we want open, close, button, and then we will add another button as well.
+
+188
+00:12:39.840 --> 00:12:47.080
+And this one will be called tab 01 button.
+
+189
+00:12:47.080 --> 00:12:53.280
+And then we'll add some text to, oh, I changed the open, close button text in there.
+
+190
+00:12:53.280 --> 00:13:00.080
+So let's rename that open, close button and selecting this button here.
+
+191
+00:13:00.080 --> 00:13:05.080
+And we'll call this tab 01 button.
+
+192
+00:13:05.080 --> 00:13:08.380
+And then we want some text under this tab button.
+
+193
+00:13:08.380 --> 00:13:12.720
+So we'll add the text similar to how we did last time.
+
+194
+00:13:12.720 --> 00:13:14.760
+And we've got the text block there.
+
+195
+00:13:14.760 --> 00:13:17.880
+And this text will be the audio text box.
+
+196
+00:13:17.880 --> 00:13:20.880
+So we'll just say audio here.
+
+197
+00:13:20.880 --> 00:13:24.240
+And then we want another tab button.
+
+198
+00:13:24.240 --> 00:13:29.280
+So I'm just going to duplicate this by right clicking duplicate, and that'll bring the
+
+199
+00:13:29.280 --> 00:13:30.600
+button with it as well.
+
+200
+00:13:30.600 --> 00:13:33.680
+So this will be tab 02 button.
+
+201
+00:13:33.680 --> 00:13:37.440
+And then keep that renamed.
+
+202
+00:13:37.440 --> 00:13:45.200
+And then this one, instead of audio, will be radio.
+
+203
+00:13:45.200 --> 00:13:47.640
+If I can spell radio, there we go.
+
+204
+00:13:47.640 --> 00:13:53.760
+And then I'll just make sure in the audio text book, I've got audio.
+
+205
+00:13:53.760 --> 00:13:55.720
+So it says audio.
+
+206
+00:13:55.720 --> 00:14:01.160
+And then I will call this text radio.
+
+207
+00:14:01.160 --> 00:14:02.160
+There we go.
+
+208
+00:14:02.160 --> 00:14:06.360
+We'll compile and save and then start formatting everything now.
+
+209
+00:14:06.360 --> 00:14:12.440
+So to begin with, we want to sort out our grid panel here.
+
+210
+00:14:12.440 --> 00:14:16.040
+And we want to add the properties to the fill rule.
+
+211
+00:14:16.040 --> 00:14:19.200
+So let's add a column fill.
+
+212
+00:14:19.200 --> 00:14:22.400
+Let's add three indexes here.
+
+213
+00:14:22.400 --> 00:14:32.400
+And you want to input one, one, and leave index zero as zero.
+
+214
+00:14:32.400 --> 00:14:36.140
+And then on the row, we want zero.
+
+215
+00:14:36.140 --> 00:14:41.940
+And then we want a one on the one integer and zero there.
+
+216
+00:14:41.940 --> 00:14:45.380
+And then we will compile and save.
+
+217
+00:14:45.380 --> 00:14:50.640
+And then we just want to make sure our buttons are aligned correctly.
+
+218
+00:14:50.640 --> 00:14:56.940
+So the open close button will click the downward arrow there.
+
+219
+00:14:56.940 --> 00:15:01.720
+On audio, we will click that button there.
+
+220
+00:15:01.720 --> 00:15:07.140
+And then on our radio will go one, two.
+
+221
+00:15:07.140 --> 00:15:10.860
+And so we've got our button functionality as well.
+
+222
+00:15:10.860 --> 00:15:22.640
+So we can add spacing as well and padding where needed if you want to on the options.
+
+223
+00:15:22.640 --> 00:15:29.440
+We can do that by just typing padding and then answering some kind of numerical value.
+
+224
+00:15:29.440 --> 00:15:37.960
+If it's 10 or 20 or whatever that padding might be, maybe 20 looks good there.
+
+225
+00:15:37.960 --> 00:15:43.640
+We'll just give it its own spacing.
+
+226
+00:15:43.640 --> 00:15:44.640
+Something like that.
+
+227
+00:15:44.640 --> 00:15:49.420
+Again, as soon as we start getting down to the visual level, it's up to you how you want
+
+228
+00:15:49.420 --> 00:15:51.680
+to format things.
+
+229
+00:15:51.680 --> 00:15:54.100
+But that'll be our basic layout.
+
+230
+00:15:54.100 --> 00:16:01.660
+And then the last option that we want, the last palette option is a widget switcher.
+
+231
+00:16:01.660 --> 00:16:07.420
+So we just want to drag and drop the widget switcher down here and just remove that and
+
+232
+00:16:07.880 --> 00:16:13.240
+make sure the widget switcher is called widget switcher.
+
+233
+00:16:13.240 --> 00:16:15.720
+And we'll compile and save that.
+
+234
+00:16:15.720 --> 00:16:20.840
+And then we will drop down the slot and the grid slot.
+
+235
+00:16:20.840 --> 00:16:28.700
+And under the row variable, we want to change row to one and the column to one and the column
+
+236
+00:16:28.700 --> 00:16:32.160
+span to two.
+
+237
+00:16:32.160 --> 00:16:33.160
+There we go.
+
+238
+00:16:33.160 --> 00:16:35.640
+And then compile and save again.
+
+239
+00:16:35.640 --> 00:16:38.180
+And that's our basic right panel setup.
+
+240
+00:16:38.180 --> 00:16:42.500
+So we'll move into scripting the functionality next.
+
+241
+00:16:42.500 --> 00:16:49.900
+So into our graph, we will find some spare real estate and we want to select the tab
+
+242
+00:16:49.900 --> 00:16:51.860
+01 button here.
+
+243
+00:16:51.860 --> 00:16:55.420
+And as soon as you select that, you'll see an on clicked event.
+
+244
+00:16:55.420 --> 00:17:00.860
+So we'll just add the on clicked event and we will find the widget switcher, hold down
+
+245
+00:17:00.860 --> 00:17:10.400
+Ctrl and drag to get the variable and we'll type set active widget index.
+
+246
+00:17:10.400 --> 00:17:12.800
+And we'll hook that into there.
+
+247
+00:17:12.800 --> 00:17:17.720
+And then we'll also find tab 02 button on clicked.
+
+248
+00:17:17.720 --> 00:17:19.320
+And then the exact same thing.
+
+249
+00:17:19.320 --> 00:17:21.080
+So we'll copy and paste that.
+
+250
+00:17:21.080 --> 00:17:28.220
+So I've just Ctrl C, Ctrl V the function there, and we'll change this index to one.
+
+251
+00:17:28.220 --> 00:17:35.780
+And that'll set up some basic activity with the widget switcher on how to select each
+
+252
+00:17:35.780 --> 00:17:36.780
+one.
+
+253
+00:17:36.780 --> 00:17:41.060
+Next, we will go back into our designer.
+
+254
+00:17:41.060 --> 00:17:50.820
+And under our widget switcher, we will get a vertical, vertical, get a vertical box.
+
+255
+00:17:50.820 --> 00:17:53.460
+We've got that there.
+
+256
+00:17:53.460 --> 00:17:58.040
+And we will get a horizontal box as well.
+
+257
+00:17:58.040 --> 00:17:59.040
+Horizontal box.
+
+258
+00:17:59.040 --> 00:18:03.360
+And we're going to start building out a volume widget here.
+
+259
+00:18:03.360 --> 00:18:08.720
+So we will get the vertical box, this will be the audio tab.
+
+260
+00:18:08.720 --> 00:18:14.160
+So we want some kind of text input combo, which will be volume.
+
+261
+00:18:14.160 --> 00:18:28.060
+So text, vertical, we'll call this volume.
+
+262
+00:18:28.060 --> 00:18:33.620
+Let's just select the text box volume.
+
+263
+00:18:33.620 --> 00:18:35.580
+And we could even center this up.
+
+264
+00:18:35.580 --> 00:18:40.420
+I could even add some padding if you wanted.
+
+265
+00:18:40.420 --> 00:18:45.120
+I won't start getting deep into the visual style at the moment.
+
+266
+00:18:45.120 --> 00:18:52.540
+So we got our text box, text says volume, and then we want a spin, spin box as well
+
+267
+00:18:52.540 --> 00:18:55.680
+adding to the vertical box.
+
+268
+00:18:55.680 --> 00:19:00.460
+And that'll be this here.
+
+269
+00:19:00.460 --> 00:19:08.220
+So we want to make sure on this that there is some numerical value in there.
+
+270
+00:19:08.300 --> 00:19:11.200
+We also want to set some kind of properties as well.
+
+271
+00:19:11.200 --> 00:19:17.220
+So we want to make sure that the slider has the options set.
+
+272
+00:19:17.220 --> 00:19:20.180
+So we'll scroll down here to slider.
+
+273
+00:19:20.180 --> 00:19:27.080
+And the min property here is going to be zero.
+
+274
+00:19:27.080 --> 00:19:29.420
+So just make sure that that's at zero.
+
+275
+00:19:29.420 --> 00:19:36.980
+The max is going to be zero.
+
+276
+00:19:36.980 --> 00:19:39.260
+We could actually go to zero to 11 there actually.
+
+277
+00:19:39.260 --> 00:19:41.740
+And then always use Delta snap.
+
+278
+00:19:41.740 --> 00:19:48.860
+We can enable, we can make sure the Delta is at one there.
+
+279
+00:19:48.860 --> 00:19:53.140
+Slider exponent is also okay there.
+
+280
+00:19:53.140 --> 00:19:57.340
+And there should be, is the slider enabled?
+
+281
+00:19:57.340 --> 00:19:59.020
+Let's just check.
+
+282
+00:19:59.020 --> 00:20:01.780
+Yeah, so is enabled.
+
+283
+00:20:01.780 --> 00:20:02.780
+That's okay.
+
+284
+00:20:02.940 --> 00:20:06.620
+We've got the basic functionality in the slider set there.
+
+285
+00:20:06.620 --> 00:20:14.860
+And I might just add some padding to this just to give it a bit more space in there.
+
+286
+00:20:14.860 --> 00:20:18.300
+So again, just compile and save.
+
+287
+00:20:18.300 --> 00:20:22.460
+Next we will add another text box.
+
+288
+00:20:22.460 --> 00:20:27.020
+So add text below in this here.
+
+289
+00:20:27.020 --> 00:20:28.780
+Again we'll center it up.
+
+290
+00:20:29.180 --> 00:20:31.820
+We'll just make sure everything's aligned correctly.
+
+291
+00:20:31.820 --> 00:20:35.940
+And we'll call this text.
+
+292
+00:20:35.940 --> 00:20:37.700
+Let's find the text option.
+
+293
+00:20:37.700 --> 00:20:39.980
+And we'll call this balance.
+
+294
+00:20:41.980 --> 00:20:48.460
+And we could even just start naming these text blocks as well.
+
+295
+00:20:48.460 --> 00:20:54.260
+So we know exactly what each of the text blocks are, just in case we need to reference them
+
+296
+00:20:54.260 --> 00:20:55.260
+in blueprint.
+
+297
+00:20:56.060 --> 00:21:00.780
+That is purely just naming convention, so it's not going to affect any functionality.
+
+298
+00:21:00.780 --> 00:21:02.820
+So you can name them whatever you'd like.
+
+299
+00:21:02.820 --> 00:21:06.980
+And then we want a slider now for balance.
+
+300
+00:21:06.980 --> 00:21:12.420
+So we'll add a slider onto the vertical box.
+
+301
+00:21:12.420 --> 00:21:24.420
+And the slider is going to have these values of, so value is 0.5 here.
+
+302
+00:21:24.580 --> 00:21:28.580
+And the thumb image size is going to be 60.
+
+303
+00:21:32.580 --> 00:21:37.980
+Let's make sure we get the correct options here.
+
+304
+00:21:37.980 --> 00:21:41.780
+So we can type in thumb image.
+
+305
+00:21:41.780 --> 00:21:43.620
+And this will be the normal thumb image.
+
+306
+00:21:43.620 --> 00:21:51.180
+So from 8 and 14, we just want to change to 60 on both inputs there.
+
+307
+00:21:51.180 --> 00:21:53.980
+So 60 and 60.
+
+308
+00:21:54.540 --> 00:21:59.380
+And then if we cancel that out, the last thing we want is the thickness.
+
+309
+00:21:59.380 --> 00:22:03.980
+So again, I'll just type this property, the bar thickness.
+
+310
+00:22:03.980 --> 00:22:05.980
+I'll just change that to 1.
+
+311
+00:22:05.980 --> 00:22:06.980
+Oh, 10.
+
+312
+00:22:06.980 --> 00:22:08.980
+There we go.
+
+313
+00:22:08.980 --> 00:22:11.100
+That'll look better.
+
+314
+00:22:11.100 --> 00:22:14.580
+And then you can compile and save.
+
+315
+00:22:14.580 --> 00:22:19.460
+So we've got some basic UMG layouts for the volume and balance here.
+
+316
+00:22:19.460 --> 00:22:23.420
+Now let's switch to our horizontal box that we added before.
+
+317
+00:22:23.420 --> 00:22:28.100
+So we can either just select this and all of the other information will disappear just
+
+318
+00:22:28.100 --> 00:22:32.020
+because we've gone from the vertical box to the horizontal box.
+
+319
+00:22:32.020 --> 00:22:33.780
+So don't worry if anything disappears.
+
+320
+00:22:33.780 --> 00:22:36.860
+It's because we've got the horizontal box there.
+
+321
+00:22:36.860 --> 00:22:41.820
+Alternatively, just to show that the widget switcher is working as intended, you can actually
+
+322
+00:22:41.820 --> 00:22:45.740
+change the active widget index from 0.
+
+323
+00:22:45.740 --> 00:22:51.460
+If I can just select 0 to 1 and it'll go from 0 to 1, which is exactly what we did
+
+324
+00:22:51.460 --> 00:22:52.500
+in the graph here.
+
+325
+00:22:52.500 --> 00:22:57.860
+So it's just toggling between two different options, which is a really nice functionality.
+
+326
+00:22:57.860 --> 00:23:01.020
+So we've got our horizontal box.
+
+327
+00:23:01.020 --> 00:23:03.860
+And again, we want to create a couple of options here.
+
+328
+00:23:03.860 --> 00:23:06.140
+So we want two different text inputs.
+
+329
+00:23:06.140 --> 00:23:11.540
+We want saved and we want the station slider here.
+
+330
+00:23:11.540 --> 00:23:19.780
+So on the horizontal box, we will go to a text input and we'll drag the horizontal box
+
+331
+00:23:19.780 --> 00:23:26.600
+here and this one will be called saved in the text.
+
+332
+00:23:26.600 --> 00:23:31.800
+So we'll just select the text box there and we'll type saved.
+
+333
+00:23:31.800 --> 00:23:33.660
+So we've got that there.
+
+334
+00:23:33.660 --> 00:23:37.700
+And then we will make sure we have a named slot.
+
+335
+00:23:37.700 --> 00:23:44.940
+So named slots underneath here.
+
+336
+00:23:44.940 --> 00:23:52.340
+And that name slot can actually go underneath the text in this instance.
+
+337
+00:23:52.340 --> 00:23:59.840
+And we will, so to get the name slot underneath there, we'll need a vertical box.
+
+338
+00:23:59.840 --> 00:24:05.380
+So add the vertical box under the horizontal box, and then we'll add the text under the
+
+339
+00:24:05.380 --> 00:24:08.820
+vertical and the named under there.
+
+340
+00:24:08.820 --> 00:24:11.020
+And so that will get them to stack OK.
+
+341
+00:24:11.020 --> 00:24:14.580
+And then we want the combo box adding.
+
+342
+00:24:14.580 --> 00:24:21.660
+So combo box, which is the string version, and that will just go under the named slot
+
+343
+00:24:21.660 --> 00:24:23.100
+there.
+
+344
+00:24:23.100 --> 00:24:27.820
+So that'll be our basic vertical box functionality.
+
+345
+00:24:27.820 --> 00:24:33.860
+And so then we will add the exact same, but call this a station.
+
+346
+00:24:33.860 --> 00:24:43.180
+So we can maybe even right click, duplicate the vertical box here, and then we'll change
+
+347
+00:24:43.180 --> 00:24:47.260
+this text to station instead of saved.
+
+348
+00:24:47.260 --> 00:24:50.060
+So station will be there.
+
+349
+00:24:50.060 --> 00:24:54.520
+And we don't actually need the combo box this time.
+
+350
+00:24:54.520 --> 00:24:56.740
+So we can delete that one.
+
+351
+00:24:56.740 --> 00:25:03.300
+I'll rename this name slot to maybe let's call it station named slot.
+
+352
+00:25:03.380 --> 00:25:05.780
+And you don't need to rename your content.
+
+353
+00:25:05.780 --> 00:25:11.500
+It's more just to keep organized as this list ever expands.
+
+354
+00:25:11.500 --> 00:25:12.820
+It's good to keep things organized.
+
+355
+00:25:12.820 --> 00:25:16.500
+So I'll call this, this other one station named slot.
+
+356
+00:25:16.500 --> 00:25:18.300
+There we go.
+
+357
+00:25:18.300 --> 00:25:20.780
+So we can see exactly what we're doing.
+
+358
+00:25:20.780 --> 00:25:29.140
+And then on the second vertical, we'll call this vertical, we'll rename it, let's say
+
+359
+00:25:29.620 --> 00:25:34.060
+text input combo.
+
+360
+00:25:34.060 --> 00:25:39.060
+And this will be the station one.
+
+361
+00:25:39.060 --> 00:25:48.660
+And then this one will rename text input combo.
+
+362
+00:25:48.660 --> 00:25:51.580
+And this will be the saved one.
+
+363
+00:25:51.580 --> 00:25:55.300
+So this helps keep things a little bit more organized.
+
+364
+00:25:55.300 --> 00:26:00.580
+And then on the second text input combo, which is the station, we just now want to
+
+365
+00:26:00.580 --> 00:26:02.860
+add a slider.
+
+366
+00:26:02.860 --> 00:26:12.980
+So we will go to the top, we will add a slider, and we will add this to here.
+
+367
+00:26:12.980 --> 00:26:16.900
+And we can actually change this version of the slider.
+
+368
+00:26:16.900 --> 00:26:23.820
+If we type in orientation, we can actually change this to vertical, which will look much
+
+369
+00:26:23.820 --> 00:26:25.620
+better.
+
+370
+00:26:25.620 --> 00:26:35.060
+So the values for this one will be, let's see on the slider, we've got the value, let's
+
+371
+00:26:35.060 --> 00:26:37.380
+call this 80.
+
+372
+00:26:37.380 --> 00:26:42.700
+Let's say the min value is 80.
+
+373
+00:26:42.700 --> 00:26:48.140
+And the max value in this instance will be 110.
+
+374
+00:26:48.140 --> 00:26:50.460
+We've already changed the orientation.
+
+375
+00:26:50.460 --> 00:26:53.340
+Let's change the step size.
+
+376
+00:26:53.340 --> 00:26:57.740
+And we'll call this point one instead of point zero one.
+
+377
+00:26:57.740 --> 00:27:04.420
+We'll change the thumb size again.
+
+378
+00:27:04.420 --> 00:27:11.540
+And we will call this one, maybe 40 by 100.
+
+379
+00:27:11.540 --> 00:27:16.140
+And again, changing that bar thickness as we did last time as well.
+
+380
+00:27:16.140 --> 00:27:19.660
+We'll change this one to 10.
+
+381
+00:27:19.660 --> 00:27:23.180
+So that's our basic styling done.
+
+382
+00:27:23.180 --> 00:27:28.060
+And we now want to make sure this gets resized correctly.
+
+383
+00:27:28.060 --> 00:27:32.820
+So let's maybe move this down here.
+
+384
+00:27:32.820 --> 00:27:37.900
+And then maybe let's just try and fill this out here.
+
+385
+00:27:37.900 --> 00:27:40.340
+So that will look much better.
+
+386
+00:27:40.340 --> 00:27:44.840
+We could even change the horizontal.
+
+387
+00:27:44.840 --> 00:27:47.400
+So we can change all the padding, things like this.
+
+388
+00:27:47.400 --> 00:27:52.360
+So maybe let's try value of 20 again.
+
+389
+00:27:52.360 --> 00:27:57.320
+And then maybe on each individual padding as well, we just pad this out a little bit
+
+390
+00:27:57.320 --> 00:27:58.320
+more.
+
+391
+00:27:58.320 --> 00:28:01.060
+Again, we're working with a lot of different properties.
+
+392
+00:28:01.060 --> 00:28:07.160
+So you can kind of balance this to however you want it to look.
+
+393
+00:28:07.160 --> 00:28:13.160
+And then this slider, this slider, let's just check the value here.
+
+394
+00:28:13.160 --> 00:28:17.720
+That thumb, that thumb size doesn't feel right.
+
+395
+00:28:17.720 --> 00:28:23.740
+So let's just check the thumb.
+
+396
+00:28:23.740 --> 00:28:26.700
+So normal thumb image size.
+
+397
+00:28:26.700 --> 00:28:33.660
+Let's see, let's try 40 and 100.
+
+398
+00:28:33.660 --> 00:28:34.980
+There we go.
+
+399
+00:28:34.980 --> 00:28:37.960
+That's made it look much better.
+
+400
+00:28:37.960 --> 00:28:44.220
+So yeah, that value can then be set to 80 and we're okay to move on.
+
+401
+00:28:44.220 --> 00:28:47.760
+So compile and save and we'll move on to the next section.
+
+402
+00:28:47.760 --> 00:28:50.500
+So let's move into some visual scripting now.
+
+403
+00:28:50.500 --> 00:28:52.740
+So we'll go back to our graph.
+
+404
+00:28:52.740 --> 00:28:55.840
+And this time we want the station slider.
+
+405
+00:28:55.840 --> 00:29:00.700
+So the slider that we've got is our station slider, which again, we didn't rename.
+
+406
+00:29:00.700 --> 00:29:04.680
+So let's go in there and rename it so we can keep track of everything.
+
+407
+00:29:04.680 --> 00:29:10.620
+So this slider 260 is our station slider, but let's make sure that's named correctly
+
+408
+00:29:10.620 --> 00:29:13.040
+so we know exactly where it is.
+
+409
+00:29:13.040 --> 00:29:16.520
+We'll compile and save, jump back into the graph.
+
+410
+00:29:16.520 --> 00:29:19.360
+And now we've got the slider station here.
+
+411
+00:29:19.360 --> 00:29:23.940
+So we actually want the, you've got a few different options, but we actually want the
+
+412
+00:29:23.940 --> 00:29:26.820
+value changed option on the bottom here.
+
+413
+00:29:26.820 --> 00:29:29.140
+So we'll just click on value changed.
+
+414
+00:29:29.140 --> 00:29:33.500
+And then we just want to create a new custom event.
+
+415
+00:29:33.500 --> 00:29:43.160
+So just right click custom event and we'll call this update station text.
+
+416
+00:29:43.160 --> 00:29:48.800
+And we will actually then compile and save on the value changed.
+
+417
+00:29:48.800 --> 00:29:51.000
+And this will just keep things modular.
+
+418
+00:29:51.000 --> 00:29:53.720
+We will update the station text.
+
+419
+00:29:53.720 --> 00:29:58.820
+So we'll click up, enter there and whatever we named this custom event, that's what this
+
+420
+00:29:58.820 --> 00:29:59.820
+is calling.
+
+421
+00:29:59.820 --> 00:30:03.880
+So if we double click this, you'll see that we go to this section here, which is really
+
+422
+00:30:03.880 --> 00:30:04.880
+nice functionality.
+
+423
+00:30:04.880 --> 00:30:15.480
+And we can actually add a new pin into the value by, I used to be able to drag that.
+
+424
+00:30:15.480 --> 00:30:25.200
+I'm pretty sure, but anyway, we'll add a new input here and we'll call this just value.
+
+425
+00:30:25.200 --> 00:30:26.540
+There we go.
+
+426
+00:30:26.540 --> 00:30:28.960
+Change this to a float.
+
+427
+00:30:29.060 --> 00:30:30.940
+So now we've got a value value.
+
+428
+00:30:30.940 --> 00:30:35.160
+You'll see that this box is updated here and we can just drag and drop that in there.
+
+429
+00:30:35.160 --> 00:30:40.980
+So whatever value the slider feeds into this event, we'll get this output here.
+
+430
+00:30:40.980 --> 00:30:45.620
+This is what we were talking about when we were referring to working in a modular way.
+
+431
+00:30:45.620 --> 00:30:52.140
+So you can have this functionality over here, which feeds out to this functionality here.
+
+432
+00:30:52.140 --> 00:31:00.800
+So now we just want to update the text on the combo station based on whatever value
+
+433
+00:31:00.800 --> 00:31:02.460
+is being fed into here.
+
+434
+00:31:02.460 --> 00:31:05.960
+So we need to make sure we've got the correct text assigned.
+
+435
+00:31:05.960 --> 00:31:12.800
+And again, going back to good naming, we want to make sure that the text input combo there,
+
+436
+00:31:12.800 --> 00:31:17.760
+that station, we want to change that to get the text box here.
+
+437
+00:31:17.760 --> 00:31:19.780
+So the text is station.
+
+438
+00:31:19.780 --> 00:31:29.520
+Want to make sure that is a variable and we'll call this station text, compile and save.
+
+439
+00:31:29.520 --> 00:31:31.800
+So we're looking for a station text.
+
+440
+00:31:31.800 --> 00:31:33.880
+So we've got station text here.
+
+441
+00:31:33.880 --> 00:31:40.640
+We'll grab this and then we'll do a set text as we did before.
+
+442
+00:31:40.640 --> 00:31:42.840
+We've got a set text.
+
+443
+00:31:42.840 --> 00:31:47.680
+There we go.
+
+444
+00:31:48.080 --> 00:31:54.920
+We want to get this value and do a to text, which is in brackets, the flow.
+
+445
+00:31:54.920 --> 00:31:58.960
+So we have a few different properties down here that we can edit.
+
+446
+00:31:58.960 --> 00:32:02.360
+We'll just move this into position.
+
+447
+00:32:02.360 --> 00:32:04.880
+We'll drag this into here.
+
+448
+00:32:04.880 --> 00:32:09.320
+The use grouping, all these values are okay.
+
+449
+00:32:09.520 --> 00:32:17.800
+The min max digits can be two and three.
+
+450
+00:32:17.800 --> 00:32:23.400
+And the min max fractional digits are both one each.
+
+451
+00:32:23.400 --> 00:32:26.720
+There we go.
+
+452
+00:32:26.720 --> 00:32:30.120
+We'll just compile and save that.
+
+453
+00:32:30.120 --> 00:32:32.560
+Next we will edit the saved station.
+
+454
+00:32:32.560 --> 00:32:39.320
+So we'll go back into the designer and the combo box here, which is the saved.
+
+455
+00:32:39.320 --> 00:32:43.600
+We have this combo box that we can select.
+
+456
+00:32:43.600 --> 00:32:53.520
+And so we want to make sure that the default option, we'll just type in non here and set
+
+457
+00:32:53.520 --> 00:32:58.720
+non to the selected option.
+
+458
+00:32:58.720 --> 00:33:05.880
+And then content pattern, that should be okay as is.
+
+459
+00:33:05.880 --> 00:33:10.440
+We want to make sure that the down arrow is false.
+
+460
+00:33:10.440 --> 00:33:15.760
+So has down arrow is false.
+
+461
+00:33:15.760 --> 00:33:21.200
+And then item style, the text color is white.
+
+462
+00:33:21.200 --> 00:33:25.760
+So item style.
+
+463
+00:33:25.760 --> 00:33:29.200
+And we want to find the text color, make that white.
+
+464
+00:33:29.200 --> 00:33:31.600
+There we go.
+
+465
+00:33:31.600 --> 00:33:38.800
+And then the font, the size can be 20 in this instance.
+
+466
+00:33:38.800 --> 00:33:43.160
+And an outline can be two.
+
+467
+00:33:43.160 --> 00:33:47.640
+So let's see, outline size is two.
+
+468
+00:33:48.360 --> 00:33:54.960
+And you can also of course add a button padding if you want to.
+
+469
+00:33:54.960 --> 00:34:00.440
+And I've just compiled and saved this and noticed that the text isn't the correct color.
+
+470
+00:34:00.440 --> 00:34:03.920
+So let's just make sure we fix that before moving on.
+
+471
+00:34:03.920 --> 00:34:08.200
+So you can actually, I think maybe change the foreground color.
+
+472
+00:34:08.200 --> 00:34:15.340
+Yeah, let's just change that foreground color to a white and then non should be correct.
+
+473
+00:34:15.340 --> 00:34:17.200
+So you should end up with something like this.
+
+474
+00:34:17.360 --> 00:34:22.680
+If I go back down to the horizontal box, I'll actually maybe just try and collapse some of this here
+
+475
+00:34:22.680 --> 00:34:24.720
+so we can see a little bit better.
+
+476
+00:34:24.720 --> 00:34:28.760
+But that should be overall what we're looking at for that section.
+
+477
+00:34:29.960 --> 00:34:33.240
+Next, we want to create a list of saved stations.
+
+478
+00:34:33.240 --> 00:34:41.360
+So we'll go back into our graph here and we'll create a new variable, which is a saved station list.
+
+479
+00:34:41.760 --> 00:34:57.040
+So let's say saved station list and the variable type will be a string to float.
+
+480
+00:34:59.040 --> 00:35:00.680
+Let's just add a string.
+
+481
+00:35:03.560 --> 00:35:06.080
+Let's change that to an array, a map.
+
+482
+00:35:07.080 --> 00:35:11.160
+And then so yeah, string and then to map.
+
+483
+00:35:11.160 --> 00:35:13.880
+And then we want the actual flow here.
+
+484
+00:35:13.880 --> 00:35:15.680
+There we go.
+
+485
+00:35:15.680 --> 00:35:17.280
+And then we can compile and save that.
+
+486
+00:35:17.280 --> 00:35:26.640
+And as we're adding variables, sometimes it's easier to just separate these out into maybe call it the setting config,
+
+487
+00:35:26.640 --> 00:35:28.640
+the category config or something like this.
+
+488
+00:35:28.640 --> 00:35:33.040
+And then if you do the display text and change that to config,
+
+489
+00:35:34.000 --> 00:35:37.360
+it'll create its own group of variables that you edit.
+
+490
+00:35:37.360 --> 00:35:45.160
+So sometimes if you've got a whole list of variables here, it can just be a little bit easier to keep everything organized there.
+
+491
+00:35:45.160 --> 00:35:47.840
+So just worth keeping in mind.
+
+492
+00:35:47.840 --> 00:35:53.680
+The pre-construct, we'll just delete this now because this was just a test.
+
+493
+00:35:53.680 --> 00:35:55.520
+So I won't do that.
+
+494
+00:35:55.520 --> 00:35:57.440
+I'll compile and save.
+
+495
+00:35:57.440 --> 00:36:02.600
+And then now we want to get this saved station list.
+
+496
+00:36:03.160 --> 00:36:06.120
+And then we want to get the keys from this.
+
+497
+00:36:06.120 --> 00:36:08.600
+So we'll type keys.
+
+498
+00:36:08.600 --> 00:36:11.360
+We'll add this to the execution line.
+
+499
+00:36:11.360 --> 00:36:12.200
+There we go.
+
+500
+00:36:12.200 --> 00:36:15.200
+And then we'll for each from this array.
+
+501
+00:36:15.200 --> 00:36:21.440
+So let's for each loop through this series of keys here.
+
+502
+00:36:21.440 --> 00:36:29.440
+So we'll just loop through the whole station list and to try and find a certain variable.
+
+503
+00:36:29.440 --> 00:36:34.560
+So from the array, we'll do add option.
+
+504
+00:36:34.560 --> 00:36:40.680
+Well, from the actual station list, sorry, which is the combo box that we added before.
+
+505
+00:36:40.680 --> 00:36:47.360
+So let's just make sure we have combo.
+
+506
+00:36:47.360 --> 00:36:49.360
+So we've called that combo box string.
+
+507
+00:36:49.360 --> 00:36:54.040
+So let's rename that combo.
+
+508
+00:36:54.040 --> 00:36:58.080
+Again, this is why naming convention is good.
+
+509
+00:36:58.080 --> 00:37:00.800
+So combo box save station.
+
+510
+00:37:00.800 --> 00:37:03.280
+Let's go back to our graph now.
+
+511
+00:37:03.280 --> 00:37:05.120
+Let's go back into here.
+
+512
+00:37:05.120 --> 00:37:08.000
+Drag this out, holding down control.
+
+513
+00:37:08.000 --> 00:37:11.720
+And then we'll add the option from here.
+
+514
+00:37:11.720 --> 00:37:15.200
+Add option array element into there.
+
+515
+00:37:15.200 --> 00:37:16.640
+So that's our pre-construct.
+
+516
+00:37:16.640 --> 00:37:19.040
+So we can compile and save.
+
+517
+00:37:19.040 --> 00:37:24.360
+And then we want on the combo saved stations.
+
+518
+00:37:24.720 --> 00:37:28.320
+We actually want to change this property.
+
+519
+00:37:28.320 --> 00:37:33.920
+So let's start commenting out our code so we know exactly what we're doing.
+
+520
+00:37:33.920 --> 00:37:39.960
+So you can actually select a few boxes and you can just say like pre-construct and press
+
+521
+00:37:39.960 --> 00:37:41.960
+C on the keyboard.
+
+522
+00:37:41.960 --> 00:37:45.600
+Add that comment box and you can actually change the color if you want.
+
+523
+00:37:45.600 --> 00:37:52.040
+If you're looking at any kind of execution wiring or anything like this, you can go to
+
+524
+00:37:52.080 --> 00:37:54.680
+town on the font size, all this kind of stuff.
+
+525
+00:37:54.680 --> 00:37:58.680
+So I just I'm going to keep things organized.
+
+526
+00:37:58.680 --> 00:38:03.480
+Pressing C on my keyboard again.
+
+527
+00:38:03.480 --> 00:38:08.280
+Widget switcher is there.
+
+528
+00:38:08.280 --> 00:38:10.920
+Slider station.
+
+529
+00:38:10.920 --> 00:38:12.920
+This is purely for organization.
+
+530
+00:38:12.920 --> 00:38:16.520
+So it's completely up to you if you decide to do this.
+
+531
+00:38:16.520 --> 00:38:21.720
+But it just helps see things at a higher level, exactly what's going on,
+
+532
+00:38:21.720 --> 00:38:26.840
+especially when you've got a lot of blueprint being coded.
+
+533
+00:38:26.840 --> 00:38:29.640
+So I'm just going to compile and save that.
+
+534
+00:38:29.640 --> 00:38:36.600
+So from this combo box saved stations now, we will see the on selection changed here.
+
+535
+00:38:36.600 --> 00:38:44.760
+So let's add this as a property here and we'll go get the saved station list from here.
+
+536
+00:38:44.760 --> 00:38:49.640
+And we will drag off and type find.
+
+537
+00:38:49.640 --> 00:38:52.920
+The selected item we will add into here.
+
+538
+00:38:52.920 --> 00:39:00.760
+We will look for a specific value and then the slider station text, which is in the designer.
+
+539
+00:39:00.760 --> 00:39:05.480
+So the slider station text, which is this, we'll go back into our graph.
+
+540
+00:39:05.480 --> 00:39:07.800
+So that's the station text that we've got selected.
+
+541
+00:39:07.800 --> 00:39:10.760
+Now we want to set a value here.
+
+542
+00:39:12.680 --> 00:39:13.000
+Set.
+
+543
+00:39:14.920 --> 00:39:17.480
+That's not the text that we want, is it?
+
+544
+00:39:17.480 --> 00:39:18.920
+It's the actual slider.
+
+545
+00:39:18.920 --> 00:39:21.080
+So let's grab the slider.
+
+546
+00:39:21.080 --> 00:39:21.720
+There we go.
+
+547
+00:39:21.720 --> 00:39:22.200
+Slider.
+
+548
+00:39:23.560 --> 00:39:24.440
+Station.
+
+549
+00:39:24.440 --> 00:39:26.040
+Let's grab the slider.
+
+550
+00:39:26.040 --> 00:39:27.160
+That's what we want to do.
+
+551
+00:39:27.960 --> 00:39:32.280
+Set value and drag that into there.
+
+552
+00:39:33.400 --> 00:39:36.440
+And then the value can get passed out into there.
+
+553
+00:39:36.440 --> 00:39:40.680
+And now, now we want to update the station text.
+
+554
+00:39:40.680 --> 00:39:45.960
+So go back to our designer, we'll get our station text, go back into our graph.
+
+555
+00:39:46.600 --> 00:39:48.680
+And then we will check that out there.
+
+556
+00:39:49.400 --> 00:39:56.600
+And actually we have a update station text function already created.
+
+557
+00:39:56.600 --> 00:40:02.200
+So let's just call that update station text because now we're reusing functionality.
+
+558
+00:40:02.200 --> 00:40:05.800
+So we'll type update station text and you'll see that option there.
+
+559
+00:40:05.800 --> 00:40:10.200
+And you just want to make sure whatever you called this event that we created before,
+
+560
+00:40:10.200 --> 00:40:15.960
+you can just call that here and we can just drag out from the find and add that in there.
+
+561
+00:40:15.960 --> 00:40:19.000
+If you want to clean things up, you can double click and create
+
+562
+00:40:19.000 --> 00:40:21.160
+re-root nodes on the actual line.
+
+563
+00:40:22.200 --> 00:40:26.280
+And I can hold down alt on my keyboard and drag that in there.
+
+564
+00:40:27.000 --> 00:40:31.640
+If you just want to make things a little bit cleaner, I'm just going to compile and save
+
+565
+00:40:31.640 --> 00:40:33.720
+and we can move on to the next section.
+
+566
+00:40:34.440 --> 00:40:39.960
+And then lastly, it'd be useful to show you some animation functionality if you want to add this
+
+567
+00:40:39.960 --> 00:40:41.000
+for yourself.
+
+568
+00:40:41.080 --> 00:40:46.680
+So we can actually go back into the designer and you'll see I've got an animation window
+
+569
+00:40:46.680 --> 00:40:47.880
+open at the bottom here.
+
+570
+00:40:47.880 --> 00:40:52.280
+If you don't have that open, you can just go to window, animations,
+
+571
+00:40:52.280 --> 00:40:55.000
+and this animation box will appear for you.
+
+572
+00:40:55.640 --> 00:41:03.800
+And I'll just select the right panel size box and we will add an animation
+
+573
+00:41:05.080 --> 00:41:09.400
+and we will just call this a close open panel.
+
+574
+00:41:11.240 --> 00:41:15.720
+And if we select that now, we can add a track.
+
+575
+00:41:15.720 --> 00:41:20.600
+So we want to make sure we have the right panel size box here.
+
+576
+00:41:20.600 --> 00:41:25.720
+We will go to track, add rights panel size box.
+
+577
+00:41:27.160 --> 00:41:29.720
+And we can now add a transform.
+
+578
+00:41:29.720 --> 00:41:36.920
+So we'll go to track and we will add a transform and we can actually drop down this transform here.
+
+579
+00:41:36.920 --> 00:41:41.560
+And we don't actually care about any of the other properties here.
+
+580
+00:41:41.560 --> 00:41:44.520
+We mostly care about the translation.
+
+581
+00:41:44.520 --> 00:41:48.760
+So I'm going to right click and delete the rotation.
+
+582
+00:41:48.760 --> 00:41:50.520
+I'm going to delete the scale.
+
+583
+00:41:50.520 --> 00:41:51.800
+I'm going to delete the shear.
+
+584
+00:41:52.520 --> 00:41:54.440
+I just care about the translation.
+
+585
+00:41:54.440 --> 00:42:00.280
+I actually only really care about the translation in X because I want to move from left to right.
+
+586
+00:42:00.280 --> 00:42:06.600
+So I'm going to drag out maybe however many seconds you want the animation to go over.
+
+587
+00:42:06.600 --> 00:42:08.520
+I'm just going to drag to maybe three seconds.
+
+588
+00:42:09.080 --> 00:42:15.320
+I'm going to add an X key there and then I'm going to go back over to here
+
+589
+00:42:15.880 --> 00:42:24.840
+and I want to change this translation maybe to maybe to 843.
+
+590
+00:42:24.840 --> 00:42:27.000
+For example, I'm just scrolling across here.
+
+591
+00:42:27.000 --> 00:42:32.920
+And now when I press play, you'll see that this slides into view over three seconds.
+
+592
+00:42:32.920 --> 00:42:37.240
+So again, this is a very rudimentary kind of animation.
+
+593
+00:42:37.960 --> 00:42:41.400
+I'm sure you could create something much nicer with giving a bit more time.
+
+594
+00:42:42.360 --> 00:42:49.720
+And I just want to show you some basic animation inside of UMG if you wanted to add that.
+
+595
+00:42:49.720 --> 00:42:53.000
+So to actually add that functionality.
+
+596
+00:42:53.000 --> 00:42:56.760
+So we've got the animation here, but it's not actually part of the project.
+
+597
+00:42:56.760 --> 00:43:03.960
+So if we want to add that into the project, we can go back into our graph
+
+598
+00:43:03.960 --> 00:43:09.480
+and we can find some empty space and the open close button that we created at the very start.
+
+599
+00:43:10.040 --> 00:43:14.840
+We can just go to the on clicks of the open close button
+
+600
+00:43:15.800 --> 00:43:20.200
+and we can get the close open animation.
+
+601
+00:43:20.200 --> 00:43:23.240
+So we can make sure that we find the animation.
+
+602
+00:43:23.880 --> 00:43:25.960
+Let's just make sure it's a variable.
+
+603
+00:43:27.720 --> 00:43:34.200
+So let me just go to the graph, open, close panel.
+
+604
+00:43:36.120 --> 00:43:36.920
+There we go.
+
+605
+00:43:36.920 --> 00:43:38.440
+Just make sure it's called that.
+
+606
+00:43:38.440 --> 00:43:40.280
+So close open panel.
+
+607
+00:43:40.280 --> 00:43:45.080
+So I'll just right click close open panel and then I can play that animation.
+
+608
+00:43:46.840 --> 00:43:49.880
+So actually I want to play the animation forward in this instance.
+
+609
+00:43:49.880 --> 00:43:51.560
+So play animation forward.
+
+610
+00:43:52.680 --> 00:43:53.800
+I'll just delete that.
+
+611
+00:43:53.800 --> 00:43:55.000
+And there we go.
+
+612
+00:43:55.960 --> 00:44:00.120
+And then we can actually just play that animation in reverse as well.
+
+613
+00:44:01.400 --> 00:44:06.440
+Now, every time we click this button, we want it to do the opposite of what it just did.
+
+614
+00:44:06.440 --> 00:44:09.720
+So I can drag out from the execution pin.
+
+615
+00:44:09.720 --> 00:44:15.400
+I can flip flop here, add that flip flop in there, and actually just drag that into that.
+
+616
+00:44:15.400 --> 00:44:19.240
+So every time I click the button, it'll play the animation.
+
+617
+00:44:19.240 --> 00:44:25.800
+And every time I click it again, it'll reverse that animation.
+
+618
+00:44:25.800 --> 00:44:29.240
+So keep flip flop in between, play in reverse, play in reverse.
+
+619
+00:44:29.240 --> 00:44:33.800
+And therefore that will add the desired functionality that we want.
+
+620
+00:44:34.600 --> 00:44:38.040
+So now let's make sure this all works in situ.
+
+621
+00:44:38.040 --> 00:44:40.520
+So I'm going to go back to my designer.
+
+622
+00:44:41.160 --> 00:44:42.920
+I'm going to find this first key.
+
+623
+00:44:43.800 --> 00:44:47.640
+I'll make sure that the first key is this little button here
+
+624
+00:44:47.640 --> 00:44:50.520
+because that's going to open the actual animation.
+
+625
+00:44:50.520 --> 00:44:52.760
+So we'll see that that will open on the side.
+
+626
+00:44:53.560 --> 00:44:56.760
+I can delete this text for now.
+
+627
+00:44:56.760 --> 00:44:57.880
+That was just example.
+
+628
+00:44:59.000 --> 00:45:01.240
+So we'll compile and save.
+
+629
+00:45:01.240 --> 00:45:04.040
+So this is everything that we've seen so far.
+
+630
+00:45:04.040 --> 00:45:08.040
+Because we've got our controller, we're adding the UMG to the screen.
+
+631
+00:45:08.040 --> 00:45:10.440
+So that's already added.
+
+632
+00:45:10.440 --> 00:45:12.040
+So let's go back into our map.
+
+633
+00:45:12.040 --> 00:45:15.240
+Let's just make sure everything is saved before we try this out.
+
+634
+00:45:15.800 --> 00:45:20.280
+We'll go to full screen hitting F11.
+
+635
+00:45:20.280 --> 00:45:23.240
+I'm going to press Alt and P on my keyboard.
+
+636
+00:45:23.240 --> 00:45:26.840
+Now it's out by default, but let's just check that this is working.
+
+637
+00:45:26.840 --> 00:45:28.760
+So we can actually change that first key.
+
+638
+00:45:29.560 --> 00:45:35.000
+But you'll see that this opens and closes, reversing and opening.
+
+639
+00:45:35.000 --> 00:45:37.240
+So that's really nice functionality.
+
+640
+00:45:37.240 --> 00:45:41.000
+And we have the different audio and radio stations
+
+641
+00:45:41.000 --> 00:45:44.520
+and we can update these based on those properties.
+
+642
+00:45:44.520 --> 00:45:50.120
+So hopefully that gives you a good overview of the UMG
+
+643
+00:45:50.120 --> 00:45:55.400
+and different functionalities we can add inside of our interfaces.
+
+644
+00:45:56.280 --> 00:46:01.240
+If we had our test map open, then we'd be able to see our car
+
+645
+00:46:01.240 --> 00:46:05.320
+in the background and have all that, the functionality
+
+646
+00:46:05.960 --> 00:46:09.400
+required for that car configurator opening and closing.
+
+647
+00:46:09.400 --> 00:46:13.640
+So hopefully you found that useful and we'll jump into the closing comments.

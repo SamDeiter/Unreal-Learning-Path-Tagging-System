@@ -1,0 +1,273 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.000
+Now let's look at some optimization tools and techniques you'll be able to use in your projects.
+
+2
+00:00:06.000 --> 00:00:09.000
+So we've got some common performance factors here.
+
+3
+00:00:09.000 --> 00:00:14.000
+So scaling for the hardware, any kind of background operations that are going on,
+
+4
+00:00:14.000 --> 00:00:21.000
+you want to make sure that the engine content is not being unnecessarily packaged in your projects.
+
+5
+00:00:21.000 --> 00:00:28.000
+We want to make sure memory leaks are being addressed so we can use Unreal Engine insights for this.
+
+6
+00:00:28.000 --> 00:00:39.000
+We also have some timing and memory insights and you can use the console trace-memory to log any memory leaks that you might be experiencing.
+
+7
+00:00:39.000 --> 00:00:43.000
+So Unreal Insights is its own massive thing.
+
+8
+00:00:43.000 --> 00:00:50.000
+Again, some great documentation to dig into this further, which is Unreal Insights in Unreal Engine, the documentation there.
+
+9
+00:00:50.000 --> 00:00:57.000
+And then we've also got the memory insights in Unreal Engine, which will give you a good insight,
+
+10
+00:00:57.000 --> 00:01:02.000
+pun intended, into finding these memory leaks and tracking them down to fix them.
+
+11
+00:01:02.000 --> 00:01:08.000
+We can also do rendering optimization, which we can look at in a little while here.
+
+12
+00:01:08.000 --> 00:01:15.000
+So using the Unreal Insights tool, Unreal Insights identifies areas of your project that require optimization.
+
+13
+00:01:15.000 --> 00:01:26.000
+So it's a telemetry capture and analyzing suite that provides you the capability to capture events from the application at high data rates.
+
+14
+00:01:26.000 --> 00:01:30.000
+So it essentially just tracks everything that's going on in your project.
+
+15
+00:01:30.000 --> 00:01:38.000
+So you can really find out what's costing a lot of memory, other certain hitches at certain parts of the session.
+
+16
+00:01:38.000 --> 00:01:43.000
+A major component of Unreal Insights consists of the trace events.
+
+17
+00:01:43.000 --> 00:01:53.000
+So the Unreal Trace Server, which records and save traces from the application and Unreal Insights, it then uses that to analyze and visualize the data.
+
+18
+00:01:53.000 --> 00:01:58.000
+So again, using that Unreal Insights documentation is a really good place to start.
+
+19
+00:01:58.000 --> 00:02:08.000
+And the insights application can be found in your engine folder in binaries, Win64, and just locate Unreal Insights in there.
+
+20
+00:02:08.000 --> 00:02:18.000
+So the memory insights is a new component that provides you with the capability to investigate memory usage and call stack tracing in your project.
+
+21
+00:02:19.000 --> 00:02:26.000
+When we're looking at the package size and boot time, we want to make sure that we're not cooking anything unnecessary.
+
+22
+00:02:26.000 --> 00:02:32.000
+So we can create compressed cooked packages, which we'll do later in this course.
+
+23
+00:02:32.000 --> 00:02:37.000
+And you want to cook everything in the project and the content folder directly.
+
+24
+00:02:37.000 --> 00:02:45.000
+So you also want to ignore any maybe test maps you might have created, anything that has unnecessary data in there.
+
+25
+00:02:45.000 --> 00:02:52.000
+We don't want to package that. We want to make sure that that pack file size is as small as we can get it.
+
+26
+00:02:52.000 --> 00:02:58.000
+So we definitely want to check out the documentation guide on all the little tips and tricks here.
+
+27
+00:02:58.000 --> 00:03:08.000
+So performance and profiling section of the documentation section has a documentation page called Reducing Package Size.
+
+28
+00:03:08.000 --> 00:03:10.000
+And that's a really good place to start.
+
+29
+00:03:10.000 --> 00:03:15.000
+So we can use this size map that we spoke about earlier in the course.
+
+30
+00:03:15.000 --> 00:03:21.000
+And the size map is a really good tool to just show exactly what assets in your project are costing what budget.
+
+31
+00:03:21.000 --> 00:03:24.000
+So you can either right click on a single blueprint.
+
+32
+00:03:24.000 --> 00:03:31.000
+So we've got a blueprint here that's the Audi A5 and we can see that the seats are taking up 239 megs alone.
+
+33
+00:03:31.000 --> 00:03:36.000
+And you'll see all the different data, how much each data is costing.
+
+34
+00:03:36.000 --> 00:03:40.000
+And the size map is a really nice way to visualize all of that.
+
+35
+00:03:40.000 --> 00:03:47.000
+So we can go to the optimization tool. So we just click the drop down here and go to the size map.
+
+36
+00:03:47.000 --> 00:03:51.000
+Alternatively, we can use Alt Shift and M to open the size map.
+
+37
+00:03:51.000 --> 00:03:57.000
+We just get this by right clicking any asset that you're wanting to get the size map of.
+
+38
+00:03:57.000 --> 00:04:05.000
+And when we're looking at the rendering, we want to make sure that we've got the balance between are we using normal maps
+
+39
+00:04:05.000 --> 00:04:09.000
+to present the data or are we using high vertex meshes?
+
+40
+00:04:09.000 --> 00:04:16.000
+Maybe if you're using something like VR, you may not want to use normal maps because normal maps only work with a single view,
+
+41
+00:04:16.000 --> 00:04:21.000
+whereas the power of the normal map generally gets lost in VR.
+
+42
+00:04:21.000 --> 00:04:26.000
+So you may then want high vertex meshes. So it's going to be project specific.
+
+43
+00:04:26.000 --> 00:04:30.000
+There's always going to be a texture versus poly count trade off.
+
+44
+00:04:30.000 --> 00:04:41.000
+And that's down to the decision of the project and what your goals are for the project to determine whether you want to go more of a normal map direction or high vertices meshes.
+
+45
+00:04:41.000 --> 00:04:50.000
+Temporal AIA should be on by default for HMI. It's much faster than the MSAA 2X and looks better.
+
+46
+00:04:50.000 --> 00:04:55.000
+When we're looking at materials, we want to optimize the texture resolution.
+
+47
+00:04:55.000 --> 00:04:58.000
+We want to reduce draw calls and texture lookups.
+
+48
+00:04:58.000 --> 00:05:04.000
+If you want any more information on draw calls and texture lookups, of course, there is great documentation on that.
+
+49
+00:05:04.000 --> 00:05:08.000
+Draw call is essentially every unique asset that's in the scene.
+
+50
+00:05:08.000 --> 00:05:15.000
+So and that even if it's the same static mesh, but with a different material, that's still a new draw call.
+
+51
+00:05:15.000 --> 00:05:22.000
+So you want to make sure you keep in the draw calls down and then also the number of different textures that you're using.
+
+52
+00:05:22.000 --> 00:05:30.000
+There are tools to optimize this inside of Unreal Engine, such as merging actors and making sure textures all get baked into one texture.
+
+53
+00:05:30.000 --> 00:05:37.000
+But there's it's up to you and the performance of your project about kind of what optimizations you're looking for.
+
+54
+00:05:37.000 --> 00:05:48.000
+We also have the optimization view modes. If you go to show in your viewport in your engine and you go to optimization view modes, you can see that we might have.
+
+55
+00:05:48.000 --> 00:05:52.000
+I think this might be the quad overdraw viewport. I'm not sure.
+
+56
+00:05:52.000 --> 00:05:56.000
+But we've got the quad overdraw. We've got lighting complexity.
+
+57
+00:05:56.000 --> 00:06:01.000
+And you can see how your scene is looking based on the different optimization view modes.
+
+58
+00:06:01.000 --> 00:06:04.000
+So they're definitely worth checking out.
+
+59
+00:06:04.000 --> 00:06:13.000
+And you can also profile the GPU, which is its own tool that you can load up and see exactly what's taking time on the GPU.
+
+60
+00:06:13.000 --> 00:06:24.000
+So whereas blueprint blueprinting and C++ will predominantly be on the CPU, any kind of visual data that you have in your scene will all be on the GPU there.
+
+61
+00:06:24.000 --> 00:06:35.000
+And then some useful console commands. So you can use console commands by pressing the tilde key generally found next to the one key on your keyboard.
+
+62
+00:06:35.000 --> 00:06:42.000
+But you can open the console command at runtime in the editor when you have your projects loaded.
+
+63
+00:06:42.000 --> 00:06:48.000
+And you can type in stats space GPU, which displays the amount of time and milliseconds used for the GPU.
+
+64
+00:06:48.000 --> 00:06:52.000
+So you can get some good GPU information from there.
+
+65
+00:06:52.000 --> 00:06:57.000
+We've also got stat unit, stat unit graph and stat texture group to get you started.
+
+66
+00:06:57.000 --> 00:07:00.000
+There are many, many console commands.
+
+67
+00:07:00.000 --> 00:07:08.000
+And I believe it's you can press tilde and just type help and it'll print out all the different console commands that are available to you.
+
+68
+00:07:08.000 --> 00:07:13.000
+And of course, there's a full list of console commands on the Unreal Engine documentation page.

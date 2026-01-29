@@ -1,0 +1,401 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.800
+To begin with, let's look at the engineering aspects of this project.
+
+2
+00:00:04.800 --> 00:00:08.440
+So when we're talking about blueprint class and C++ classes,
+
+3
+00:00:08.940 --> 00:00:13.400
+you can think of blueprint as the easy way to prototype something.
+
+4
+00:00:14.040 --> 00:00:17.100
+You can get a lot of visual feedback very quickly.
+
+5
+00:00:17.400 --> 00:00:22.140
+You can create rapid prototypes and it can feel like there's a better connection
+
+6
+00:00:22.140 --> 00:00:25.840
+to other subsystems and tools because of the visual nature of it.
+
+7
+00:00:26.140 --> 00:00:31.180
+If you use in material editors, animation graphs,
+
+8
+00:00:31.440 --> 00:00:34.840
+any other kind of subsystem of Unreal Engine,
+
+9
+00:00:35.040 --> 00:00:39.180
+you can get a more visual representation and therefore a better connection
+
+10
+00:00:39.180 --> 00:00:42.340
+in some instances to the tools inside of Unreal Engine.
+
+11
+00:00:42.480 --> 00:00:47.200
+It also has its own component editor window, so you can very quickly see
+
+12
+00:00:47.400 --> 00:00:50.400
+and debug things that are going on in your blueprinting.
+
+13
+00:00:50.980 --> 00:00:54.800
+Blueprinting is essentially C++ in a visual wrapper, though.
+
+14
+00:00:54.860 --> 00:00:58.600
+So C++ can be faster because it's a lower level state.
+
+15
+00:00:58.860 --> 00:01:05.100
+And this can even be up up to 10 to 30 times faster than a blueprint script.
+
+16
+00:01:05.340 --> 00:01:08.600
+So again, it depends on the projects that you want to create.
+
+17
+00:01:09.000 --> 00:01:10.700
+It depends on the goals of the project.
+
+18
+00:01:10.700 --> 00:01:13.960
+But if you want a really performant optimized project,
+
+19
+00:01:14.240 --> 00:01:16.160
+maybe C++ is the route to go.
+
+20
+00:01:16.160 --> 00:01:18.160
+And of course, it doesn't have to be one or the other.
+
+21
+00:01:18.860 --> 00:01:23.200
+You can build some lower level language in your projects in C++
+
+22
+00:01:23.360 --> 00:01:26.200
+and then build out some blueprint scripting on top of that.
+
+23
+00:01:26.740 --> 00:01:30.200
+There's no kind of hard defined clear rule there.
+
+24
+00:01:30.240 --> 00:01:34.000
+So C++, you have more functions available to you.
+
+25
+00:01:34.660 --> 00:01:39.460
+It's better for online replication and processing any kind of math based loops.
+
+26
+00:01:40.400 --> 00:01:42.660
+And it's also just a low level language there.
+
+27
+00:01:44.160 --> 00:01:48.260
+When we think about a game mode in relation to HMI,
+
+28
+00:01:48.860 --> 00:01:51.900
+you can think about the game mode as a singleton in that
+
+29
+00:01:51.900 --> 00:01:54.160
+it can be accessed by any class.
+
+30
+00:01:54.760 --> 00:01:56.500
+It holds data.
+
+31
+00:01:56.500 --> 00:01:59.700
+It can be very easily accessed across the project.
+
+32
+00:02:00.140 --> 00:02:04.700
+You can also store information in the game mode, which is super helpful,
+
+33
+00:02:05.000 --> 00:02:07.860
+especially if you're wanting to set certain parameters
+
+34
+00:02:07.860 --> 00:02:10.360
+and have those values remembered.
+
+35
+00:02:11.160 --> 00:02:14.700
+It will only exist as long as the level is open.
+
+36
+00:02:14.700 --> 00:02:19.200
+So when you begin a session in your project, you can store data in there.
+
+37
+00:02:19.200 --> 00:02:21.400
+You can reuse it in other places.
+
+38
+00:02:21.400 --> 00:02:25.800
+However, when the level is closed, the game mode will go away.
+
+39
+00:02:25.800 --> 00:02:30.240
+So if you're wanting to store long term data,
+
+40
+00:02:30.360 --> 00:02:33.860
+there is a concept called game instance and also save states.
+
+41
+00:02:34.240 --> 00:02:38.440
+So you can definitely dig into those if you want to maybe save some settings
+
+42
+00:02:38.440 --> 00:02:43.440
+close down the session, open that session up with those remembered variables.
+
+43
+00:02:43.740 --> 00:02:46.260
+You'd want to use a game instance and save states there.
+
+44
+00:02:47.240 --> 00:02:49.940
+Today, we'll be looking at setting up a controller,
+
+45
+00:02:50.100 --> 00:02:52.980
+which you can see has been edited here, a menu controller.
+
+46
+00:02:52.980 --> 00:02:56.340
+And you'll see that it's been edited by these little yellow icons.
+
+47
+00:02:56.540 --> 00:02:59.340
+Whenever you see this, it means the default state has been changed
+
+48
+00:02:59.340 --> 00:03:00.800
+inside of Unreal Engine.
+
+49
+00:03:00.800 --> 00:03:02.840
+So we're mainly looking at a controller today.
+
+50
+00:03:02.840 --> 00:03:05.000
+You'll see that the pawn class has been removed.
+
+51
+00:03:05.240 --> 00:03:08.740
+And that's just because we don't actually need a physical representation
+
+52
+00:03:08.740 --> 00:03:10.840
+of a pawn in today's course.
+
+53
+00:03:11.740 --> 00:03:13.880
+So sometimes it's just easier to remove that.
+
+54
+00:03:13.880 --> 00:03:16.740
+So there's no crossed wires of communication.
+
+55
+00:03:16.980 --> 00:03:19.940
+When we are talking about this controller that we're setting up,
+
+56
+00:03:20.140 --> 00:03:24.200
+you can think of a controller in terms of the digital representation of the user.
+
+57
+00:03:24.400 --> 00:03:30.200
+The user will possess a pawn, but the controller has all of the input.
+
+58
+00:03:30.400 --> 00:03:36.200
+So every touch or click that you use to input some kind of action
+
+59
+00:03:36.400 --> 00:03:39.700
+into the project, that will all be done on the controller.
+
+60
+00:03:40.480 --> 00:03:42.780
+So the controller will decide the method of input,
+
+61
+00:03:43.040 --> 00:03:46.780
+whether it be on the mouse or the touch screen on the cursor,
+
+62
+00:03:46.980 --> 00:03:49.140
+any kind of peripheral that's being used,
+
+63
+00:03:49.340 --> 00:03:53.040
+the controller will decide how to interact with the project.
+
+64
+00:03:53.240 --> 00:03:58.640
+So in a HMI controller can be used to change the interaction modes,
+
+65
+00:03:58.840 --> 00:04:00.240
+manage information.
+
+66
+00:04:00.440 --> 00:04:04.740
+So in a control, you also have these mouse interface settings.
+
+67
+00:04:04.940 --> 00:04:08.740
+So we can show the mouse cursor if it's off by default,
+
+68
+00:04:08.940 --> 00:04:10.440
+we can enable click events.
+
+69
+00:04:10.440 --> 00:04:17.040
+We can enable click events and that helps you interact with the levels in your project.
+
+70
+00:04:18.240 --> 00:04:21.600
+When we are thinking about a pawn in relation to HMI,
+
+71
+00:04:22.340 --> 00:04:25.300
+the pawns usually represent some kind of visual avatar.
+
+72
+00:04:25.640 --> 00:04:30.600
+It's the user's kind of digital form here and it's a pseudo singleton.
+
+73
+00:04:32.800 --> 00:04:35.340
+HMI is generally like any kind of visible pawn.
+
+74
+00:04:35.800 --> 00:04:38.640
+We generally just use it to possess a camera,
+
+75
+00:04:39.200 --> 00:04:41.600
+to see some of the visual elements in the scene.
+
+76
+00:04:42.440 --> 00:04:48.500
+But if no visible element is needed, then you don't need to have it move or manipulate anything.
+
+77
+00:04:48.700 --> 00:04:53.800
+So in a standard HMI game mode, HMI pawn class will be set to none,
+
+78
+00:04:54.000 --> 00:04:56.500
+as we saw in the previous slide there.
+
+79
+00:04:57.200 --> 00:05:00.040
+We can enable a few plugins for our project today.
+
+80
+00:05:00.240 --> 00:05:05.640
+Batches in code slash data can be enabled or disabled through the plugins window.
+
+81
+00:05:06.040 --> 00:05:09.400
+And when we're looking at sensor data with Unreal,
+
+82
+00:05:09.600 --> 00:05:16.100
+Canbus is a redundant safety critical protocol that provides information from the sensors around the car.
+
+83
+00:05:16.800 --> 00:05:20.900
+So you're provided with a file of what messages contain,
+
+84
+00:05:21.100 --> 00:05:24.200
+and then you get them fed constantly at a specific rate.
+
+85
+00:05:24.700 --> 00:05:28.540
+When a message content changes, then you get a different message,
+
+86
+00:05:28.540 --> 00:05:31.540
+but they're repeatedly at the same rate.
+
+87
+00:05:31.540 --> 00:05:37.800
+So car sensors provide only partial HMI info and Canbus isn't used for everything,
+
+88
+00:05:37.800 --> 00:05:42.700
+which is why we have a service layer that provides all the information to the UI.
+
+89
+00:05:42.740 --> 00:05:48.900
+So we tend to avoid direct Canbus connection to Unreal Engine because it's not useful in production.
+
+90
+00:05:49.100 --> 00:05:56.740
+You can find a tutorial on how to do this on the case electronics dot com site,
+
+91
+00:05:56.740 --> 00:06:00.340
+which is Canbus simple intro tutorial.
+
+92
+00:06:00.600 --> 00:06:05.040
+And that's the CSS electronics dot com website.
+
+93
+00:06:05.300 --> 00:06:08.640
+So we can initiate the proxy objects from the game instance
+
+94
+00:06:09.300 --> 00:06:12.700
+and just make sure they're available before begin play of everything else.
+
+95
+00:06:12.800 --> 00:06:17.860
+Otherwise, you'll have objects trying to act on null objects that aren't created yet.
+
+96
+00:06:18.600 --> 00:06:23.200
+You may use MQTT, but you'd still need to write all the Unreal Engine
+
+97
+00:06:23.600 --> 00:06:27.960
+C++ code and the service side code to have a complete solution.
+
+98
+00:06:28.120 --> 00:06:31.380
+But the API gear can generate all that code
+
+99
+00:06:31.760 --> 00:06:37.460
+and it's the OEMs don't truly factor into the cost of decisions like that.
+
+100
+00:06:38.260 --> 00:06:42.060
+But hopefully that's a good overview of sensor data with Unreal.
