@@ -13,7 +13,7 @@ import { createContext, useContext, useState, useMemo } from "react";
 
 const TagDataContext = createContext(null);
 
-export function TagDataProvider({ children, tags = [], edges = [] }) {
+export function TagDataProvider({ children, tags = [], edges = [], courses = [] }) {
   // Selection state - synced across all tag views
   const [selectedTagId, setSelectedTagId] = useState(null);
 
@@ -101,6 +101,7 @@ export function TagDataProvider({ children, tags = [], edges = [] }) {
   const value = {
     tags,
     edges,
+    courses,
     enrichedTags,
     selectedTagId,
     setSelectedTagId,

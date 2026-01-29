@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
 import { PathProvider } from "./context/PathContext";
 import { TagDataProvider } from "./context/TagDataContext";
-import { extractTagsFromCourses, buildTagEdges } from "./utils/dataProcessing";
 import CourseLibrary from "./components/CourseLibrary/CourseLibrary";
 import AssemblyLine from "./components/AssemblyLine/AssemblyLine";
 import PathSummary from "./components/AssemblyLine/PathSummary";
+import TagGraph from "./components/TagGraph/TagGraph";
+import Dashboard from "./components/Dashboard/Dashboard";
 import "./App.css";
 
 // Import course data
@@ -13,7 +14,7 @@ import tagsData from "./data/tags.json";
 import edgesData from "./data/edges.json";
 
 function App() {
-  const [activeTab, setActiveTab] = useState("builder"); // 'builder' | 'tags'
+  const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'builder' | 'tags'
 
   // Process course data
   const courses = useMemo(() => {
@@ -44,13 +45,19 @@ function App() {
 
   return (
     <PathProvider>
-      <TagDataProvider tags={tags} edges={edges}>
+      <TagDataProvider tags={tags} edges={edges} courses={courses}>
         <div className="app">
           {/* Header */}
           <header className="app-header">
             <div className="header-left">
               <h1 className="app-title">UE5 Learning Path Builder</h1>
               <nav className="main-nav">
+                <button
+                  className={`nav-tab ${activeTab === "dashboard" ? "active" : ""}`}
+                  onClick={() => setActiveTab("dashboard")}
+                >
+                  📊 Dashboard
+                </button>
                 <button
                   className={`nav-tab ${activeTab === "builder" ? "active" : ""}`}
                   onClick={() => setActiveTab("builder")}
@@ -72,7 +79,12 @@ function App() {
 
           {/* Main Content */}
           <main className="app-main">
-            {activeTab === "builder" ? (
+            {activeTab === "dashboard" && (
+              <div className="dashboard-layout">
+                <Dashboard />
+              </div>
+            )}
+            {activeTab === "builder" && (
               <div className="builder-layout">
                 {/* Left: Course Library */}
                 <aside className="library-panel">
@@ -85,9 +97,10 @@ function App() {
                   <PathSummary />
                 </section>
               </div>
-            ) : (
+            )}
+            {activeTab === "tags" && (
               <div className="tags-layout">
-                <p className="coming-soon">Tag Analysis views coming in Phase 3</p>
+                <TagGraph tags={tags} edges={edges} />
               </div>
             )}
           </main>
