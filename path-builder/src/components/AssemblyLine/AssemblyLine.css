@@ -10,11 +10,16 @@
   overflow: hidden;
 }
 
-.assembly-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+/* Assembly Header */
+.assembly-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: var(--spacing-lg);
-  color: var(--text-primary);
+}
+
+.assembly-title {
+  margin-bottom: 0; /* Override default */
 }
 
 /* Empty State */
@@ -58,13 +63,75 @@
   overflow-x: auto;
   overflow-y: hidden;
   padding: var(--spacing-lg) 0;
+  min-width: 0; /* Important for flex child scrolling */
 }
 
-.path-line {
+/* Tiered Layout */
+.assembly-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md);
+}
+
+.tier-row {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+}
+
+.tier-header {
   display: flex;
   align-items: center;
-  padding: var(--spacing-md);
-  min-height: 180px;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tier-count {
+  background: var(--bg-secondary);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+}
+
+.tier-track {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; /* allow wrapping if many courses? or scroll? User said 'left to right' */
+  gap: var(--spacing-md);
+  min-height: 140px; /* Reduced since node height is mostly fixed */
+}
+
+/* Footer Add More */
+.path-footer-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.5;
+  margin-top: var(--spacing-md);
+}
+
+.connector-vertical {
+  height: 40px;
+  width: 2px;
+  background: repeating-linear-gradient(
+    0deg,
+    var(--border-color) 0,
+    var(--border-color) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  margin-bottom: var(--spacing-sm);
 }
 
 /* Path Item (Node + Connector) */
@@ -108,9 +175,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 140px;
-  max-width: 160px;
-  padding: var(--spacing-md);
+  min-width: 160px;
+  max-width: 180px;
+  padding: var(--spacing-sm);
   background: var(--bg-secondary);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -145,14 +212,50 @@
   border-color: var(--level-advanced);
 }
 
+/* Role-based distinctions */
+.path-node.prerequisite {
+  /* Dashed border + distinct bg */
+  border-style: dashed;
+  border-color: #f59e0b; /* Amber/Gold for prereq */
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.path-node.supplemental {
+  /* Dotted border + slightly smaller + Gray */
+  border-style: dotted;
+  border-width: 2px;
+  border-color: var(--text-muted, #888); /* Gray for supplemental */
+  opacity: 0.9;
+}
+
+.path-node.next-step {
+  /* Gradient border or specific style */
+  background: linear-gradient(to bottom, var(--bg-secondary), rgba(63, 185, 80, 0.05));
+  border-style: solid;
+  border-bottom-width: 4px; /* Stronger bottom anchor */
+  /* Keep level color for Next Step as it represents the target */
+}
+
+/* Ensure Core stays solid */
+.path-node.core {
+  border-style: solid;
+}
+
+/* Node Header */
+.node-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  height: 20px;
+  margin-bottom: 4px;
+}
+
 /* Node Number */
 .node-number {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,83 +266,80 @@
   color: white;
 }
 
+/* Remove Button Mini */
+.node-remove-mini {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.node-remove-mini:hover {
+  color: var(--accent-red);
+}
+
 /* Node Content */
 .node-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-top: var(--spacing-xs);
+  width: 100%;
 }
 
 .node-code {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-family: monospace;
   color: var(--text-muted);
+  margin-bottom: 2px;
 }
 
 .node-title {
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--text-primary);
-  margin: var(--spacing-xs) 0;
-  line-height: 1.3;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-xs);
 
   /* Clamp to 2 lines */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  height: 2.4em; /* Fixed height for consistency */
+  word-break: break-word; /* Ensure long words break */
+  overflow-wrap: anywhere;
 }
 
-.node-level {
-  font-size: 0.65rem;
-  font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 9999px;
-  background: var(--bg-tertiary);
-}
-
-.node-level.beginner {
-  background: rgba(63, 185, 80, 0.2);
-  color: var(--level-beginner);
-}
-.node-level.intermediate {
-  background: rgba(88, 166, 255, 0.2);
-  color: var(--level-intermediate);
-}
-.node-level.advanced {
-  background: rgba(163, 113, 247, 0.2);
-  color: var(--level-advanced);
-}
-
-/* Remove Button */
-.node-remove {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 20px;
-  height: 20px;
+/* Node Controls */
+.node-controls {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-tertiary);
-  border: none;
-  border-radius: 50%;
-  color: var(--text-muted);
-  font-size: 1rem;
+  gap: 4px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.node-select {
+  flex: 1;
+  font-size: 0.65rem;
+  padding: 2px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
   cursor: pointer;
-  opacity: 0;
-  transition: all 0.2s;
 }
 
-.path-node:hover .node-remove {
-  opacity: 1;
-}
-
-.node-remove:hover {
-  background: var(--accent-red);
-  color: white;
+.node-select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
 }
 
 /* Add More Node */

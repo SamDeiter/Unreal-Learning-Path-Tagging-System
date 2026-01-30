@@ -140,26 +140,50 @@ body {
    Builder Layout
    ========================================================================== */
 
+/* ==========================================================================
+   Builder Layout
+   ========================================================================== */
+
 .builder-layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 320px 1fr 320px;
+  grid-template-areas:
+    "intent intent intent"
+    "library canvas output";
   gap: 0;
   flex: 1;
   overflow: hidden;
+  height: calc(100vh - 60px);
+}
+
+.builder-header-area {
+  grid-area: intent;
+  z-index: 10;
 }
 
 /* Library Panel (Left) */
 .library-panel {
+  grid-area: library;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   overflow-y: auto;
-  height: calc(100vh - 60px);
+  height: 100%;
 }
 
-/* Assembly Panel (Right) */
+/* Assembly Panel (Center) */
 .assembly-panel {
+  grid-area: canvas;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+/* Output Panel (Right) */
+.output-panel-area {
+  grid-area: output;
+  height: 100%;
   overflow: hidden;
 }
 

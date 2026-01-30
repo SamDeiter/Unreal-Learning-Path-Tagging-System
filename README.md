@@ -22,37 +22,33 @@ A schema-driven system to **analyze user queries** about Unreal Engine, **tag th
 
 ## 🛠️ Tech Stack
 
-> **Important**: This is a **JavaScript/Node.js** project. Do not add Python scripts.
-
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | Vanilla JS, HTML, CSS |
-| **Backend** | Firebase Cloud Functions (Node.js) |
+| **Frontend** | Vanilla JS, HTML, CSS (in `ui/` directory) |
+| **Backend** | Firebase Cloud Functions (Node.js 20) |
 | **Database** | Firebase Firestore |
-| **AI** | Google Gemini API |
+| **AI** | Google Gemini 2.0 Flash (via Vertex AI / Studio) |
 | **Hosting** | Firebase Hosting |
-| **Scripts** | Node.js (not Python)
+| **Development** | Firebase Emulators (Legacy: Python local server) |
 
 ---
 
 ## 📁 Project Structure
 
 ```
+├── functions/        # Firebase Cloud Functions (Backend Logic)
+│   ├── ai/           # AI Generation Logic (Gemini 2.0)
+│   └── index.js      # Functions Entry Point
+├── ui/               # Frontend Application
+│   ├── js/           # Client-side Logic
+│   ├── css/          # Styles
+│   └── index.html    # Entry Point
 ├── tags/
-│   ├── tags.json         # 55 canonical tags with full schema
-│   ├── categories.json   # Lightweight category taxonomy
-│   ├── edges.json        # Tag relationship graph
-│   └── GOVERNANCE.md     # Rules to prevent schema rot
-├── user_queries/
-│   ├── schema.json       # Query schema definition
-│   └── examples/         # Sample queries for testing
-├── learning_paths/
-│   ├── schema.json       # Learning path schema
-│   └── templates/        # Step-by-step resolution paths
-├── ingestion/
-│   ├── match_rules.json  # Deterministic text→tag matching
-│   └── content_index.json # Atomic content references
-├── .env.example          # API key template
+│   ├── tags.json     # 55 canonical tags with full schema
+│   └── edges.json    # Tag relationship graph
+├── learning_paths/   # JSON Schema configs
+├── ingestion/        # Legacy Python ingestion scripts & matching rules
+├── firebase.json     # Firebase Project Configuration
 └── README.md
 ```
 
@@ -78,78 +74,51 @@ Each tag includes:
 ## 🔄 How Matching Works
 
 ```
-User Query → Deterministic Match → Tag Assignment → Learning Path Selection
+User Query → AI Analysis/Deterministic Match → Tag Assignment → Learning Path Selection
 ```
 
-1. User submits query: `"UE5 packaging fails with ExitCode=25"`
-2. `match_rules.json` applies regex/contains patterns
-3. Matches: `build.exitcode_25` + `build.packaging`
-4. System selects: `lp.build.exitcode_25.v1` learning path
-
-**No embeddings required** – all matching is deterministic via:
-
-- Regex patterns: `ExitCode[=:\s]*25`
-- Contains rules: `"D3D device lost"`
-- Error signatures: `0xC0000005`, `DXGI_ERROR_DEVICE_REMOVED`
-
----
-
-## 📚 Learning Path Structure
-
-Each path has:
-
-- **Entry conditions**: Required/optional tags
-- **Steps**: foundation → diagnostic → remediation → verification
-- **Decision gates**: Branch based on detected symptoms
-- **Skills gained**: What the user learns (not just actions)
-
-Example path: `lp.build.exitcode_25.v1.json`
-
-```
-Step 1: Understanding the Build Pipeline (foundation)
-Step 2: Reading the Build Log (diagnostic)
-  └─ Decision Gate: What error type?
-     ├─ Cook error → Step 3
-     ├─ Compile error → Step 4
-     └─ Shader error → Step 5
-Step 7: Verify the Fix (verification)
-```
+1. **AI Analysis**: `generateLearningPath` Cloud Function analyzes query intent.
+2. **Tag Matching**: Contextual tags are extracted from the problem description.
+3. **Path Generation**:
+   - **RAG**: Retrieves curated videos from catalog.
+   - **Grounding**: Falls back to Google Search for novel topics.
+4. **Structured Output**: AI generates a valid JSON learning path with:
+   - Understanding (Concept)
+   - Diagnostics (Root Cause)
+   - Resolution (Fix)
+   - Prevention (Best Practices)
 
 ---
 
 ## 🚀 Quick Start
 
-**Live Demo**: <https://ue5-learning-paths.web.app>
+### Prerequisites
 
-### Cloud Deployment (Production)
+- Node.js 20+
+- Firebase CLI (`npm install -g firebase-tools`)
+- Google Cloud Project with Gemini API enabled
 
-The app uses Firebase Cloud Functions for serverless AI generation:
+### Quick Start (Modern)
 
-```bash
-# Deploy functions (requires Blaze plan)
-firebase deploy --only functions
+1. **Navigate to App Directory**
 
-# Deploy hosting
-firebase deploy --only hosting
-```
+   ```bash
+   cd path-builder
+   ```
 
-### Local Development
+2. **Install & Run**
 
-```bash
-# Clone the repo
-git clone https://github.com/SamDeiter/Unreal-Learning-Path-Tagging-System.git
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-# Copy environment template
-cp .env.example .env
+3. **Open App**
+   <http://localhost:5173>
 
-# Add your API keys to .env
-# YOUTUBE_API_KEY=your_key_here
-# GEMINI_API_KEY=your_key_here
+### Legacy Python Server
 
-# Run local server
-python ui/server.py
-# Open http://localhost:8080
-```
+*Deprecated. Do not use `ui/server.py`.*
 
 ---
 

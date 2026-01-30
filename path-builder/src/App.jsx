@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
 import { PathProvider } from "./context/PathContext";
 import { TagDataProvider } from "./context/TagDataContext";
-import CourseLibrary from "./components/CourseLibrary/CourseLibrary";
+import LeftPanel from "./components/LeftPanel/LeftPanel";
 import AssemblyLine from "./components/AssemblyLine/AssemblyLine";
-import PathSummary from "./components/AssemblyLine/PathSummary";
+import OutputPanel from "./components/OutputPanel/OutputPanel";
+import LearningIntentHeader from "./components/LearningIntent/LearningIntentHeader";
 import TagGraph from "./components/TagGraph/TagGraph";
 import Dashboard from "./components/Dashboard/Dashboard";
 import "./App.css";
@@ -16,21 +17,37 @@ import edgesData from "./data/edges.json";
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'builder' | 'tags'
 
-  // Process course data
+  // Process course data - deduplicate by code
   const courses = useMemo(() => {
-    return videoLibrary.courses || [];
+    const raw = videoLibrary.courses || [];
+    // Deduplicate: keep first occurrence of each code
+    const seen = new Set();
+    return raw.filter((c) => {
+      if (seen.has(c.code)) return false;
+      seen.add(c.code);
+      return true;
+    });
   }, []);
 
   // Process tag data - either use pre-defined or extract from courses
   const { tags, edges } = useMemo(() => {
-    // Use the rich tag data from tags.json
-    const processedTags = (tagsData.tags || []).map((tag) => ({
-      id: tag.tag_id,
-      label: tag.display_name,
-      count: tag.relevance?.global_weight * 100 || 50, // Convert weight to count-like metric
-      description: tag.description,
-      categoryPath: tag.category_path,
-    }));
+    // Use the rich tag data from tags.json, deduplicated by tag_id
+    const rawTags = tagsData.tags || [];
+    const seenTagIds = new Set();
+    const processedTags = rawTags
+      .filter((tag) => {
+        if (seenTagIds.has(tag.tag_id)) return false;
+        seenTagIds.add(tag.tag_id);
+        return true;
+      })
+      .map((tag) => ({
+        id: tag.tag_id,
+        label: tag.display_name,
+        count: tag.relevance?.global_weight * 100 || 50, // Convert weight to count-like metric
+        description: tag.description,
+        categoryPath: tag.category_path,
+        synonyms: tag.synonyms, // Helpful for fuzzy matching (e.g. "World Building" -> "Level Design")
+      }));
 
     // Use edges from edges.json
     const processedEdges = (edgesData.edges || []).map((edge) => ({
@@ -86,21 +103,30 @@ function App() {
             )}
             {activeTab === "builder" && (
               <div className="builder-layout">
-                {/* Left: Course Library */}
+                {/* Top: Intent */}
+                <div className="builder-header-area">
+                  <LearningIntentHeader />
+                </div>
+
+                {/* Left: Input Panel */}
                 <aside className="library-panel">
-                  <CourseLibrary courses={courses} />
+                  <LeftPanel courses={courses} />
                 </aside>
 
-                {/* Right: Assembly Line + Summary */}
+                {/* Center: Path Canvas */}
                 <section className="assembly-panel">
                   <AssemblyLine />
-                  <PathSummary />
                 </section>
+
+                {/* Right: Outputs */}
+                <aside className="output-panel-area">
+                  <OutputPanel />
+                </aside>
               </div>
             )}
             {activeTab === "tags" && (
               <div className="tags-layout">
-                <TagGraph tags={tags} edges={edges} />
+                <TagGraph tags={tags} edges={edges} courses={courses} />
               </div>
             )}
           </main>

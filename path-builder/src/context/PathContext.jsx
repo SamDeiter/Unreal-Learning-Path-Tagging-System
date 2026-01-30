@@ -15,6 +15,8 @@ const ACTIONS = {
   ADD_COURSE: "ADD_COURSE",
   REMOVE_COURSE: "REMOVE_COURSE",
   REORDER_COURSES: "REORDER_COURSES",
+  UPDATE_COURSE_META: "UPDATE_COURSE_META",
+  SET_LEARNING_INTENT: "SET_LEARNING_INTENT",
   CLEAR_PATH: "CLEAR_PATH",
   LOAD_PATH: "LOAD_PATH",
 };
@@ -29,7 +31,16 @@ function pathReducer(state, action) {
       }
       return {
         ...state,
-        courses: [...state.courses, action.payload],
+        courses: [
+          ...state.courses,
+          {
+            ...action.payload,
+            // Default metadata
+            role: action.payload.role || "Core",
+            weight: action.payload.weight || "Medium",
+            why: action.payload.why || "Selected from library",
+          },
+        ],
       };
 
     case ACTIONS.REMOVE_COURSE:
@@ -42,6 +53,20 @@ function pathReducer(state, action) {
       return {
         ...state,
         courses: action.payload,
+      };
+
+    case ACTIONS.UPDATE_COURSE_META:
+      return {
+        ...state,
+        courses: state.courses.map((c) =>
+          c.code === action.payload.code ? { ...c, ...action.payload.meta } : c
+        ),
+      };
+
+    case ACTIONS.SET_LEARNING_INTENT:
+      return {
+        ...state,
+        learningIntent: { ...state.learningIntent, ...action.payload },
       };
 
     case ACTIONS.CLEAR_PATH:
@@ -64,6 +89,11 @@ function pathReducer(state, action) {
 // Initial state
 const initialState = {
   courses: [],
+  learningIntent: {
+    primaryGoal: "",
+    skillLevel: "",
+    timeBudget: "",
+  },
 };
 
 export function PathProvider({ children }) {
@@ -79,6 +109,7 @@ export function PathProvider({ children }) {
         estimatedHours: 0,
         levelRange: null,
         topics: [],
+        distribution: { Core: 0, Supplemental: 0, Prerequisite: 0 },
       };
     }
 
@@ -94,8 +125,22 @@ export function PathProvider({ children }) {
 
     const topics = [...new Set(courses.map((c) => c.tags?.topic).filter(Boolean))];
 
-    // Estimate ~2 hours per course (rough approximation)
-    const estimatedHours = courses.reduce((sum, c) => sum + (c.video_count || 1) * 0.5, 0);
+    // Estimate time based on weight
+    const weightMultipliers = { High: 1.2, Medium: 1.0, Low: 0.5 };
+    const estimatedHours = courses.reduce((sum, c) => {
+      const multiplier = weightMultipliers[c.weight || "Medium"] || 1.0;
+      const baseTime = (c.video_count || 1) * 0.5; // ~30 mins per video default
+      return sum + baseTime * multiplier;
+    }, 0);
+
+    // Distribution
+    const distribution = courses.reduce(
+      (acc, c) => {
+        acc[c.role || "Core"] = (acc[c.role || "Core"] || 0) + 1;
+        return acc;
+      },
+      { Core: 0, Supplemental: 0, Prerequisite: 0 }
+    );
 
     return {
       courseCount: courses.length,
@@ -105,6 +150,7 @@ export function PathProvider({ children }) {
           ? `${levels[minLevelIdx]} → ${levels[maxLevelIdx]}`
           : null,
       topics,
+      distribution,
     };
   }, [state.courses]);
 
@@ -121,6 +167,14 @@ export function PathProvider({ children }) {
     dispatch({ type: ACTIONS.REORDER_COURSES, payload: newOrder });
   };
 
+  const updateCourseMeta = (code, meta) => {
+    dispatch({ type: ACTIONS.UPDATE_COURSE_META, payload: { code, meta } });
+  };
+
+  const setLearningIntent = (intent) => {
+    dispatch({ type: ACTIONS.SET_LEARNING_INTENT, payload: intent });
+  };
+
   const clearPath = () => {
     dispatch({ type: ACTIONS.CLEAR_PATH });
   };
@@ -131,10 +185,13 @@ export function PathProvider({ children }) {
 
   const value = {
     courses: state.courses,
+    learningIntent: state.learningIntent,
     pathStats,
     addCourse,
     removeCourse,
     reorderCourses,
+    updateCourseMeta,
+    setLearningIntent,
     clearPath,
     loadPath,
   };
