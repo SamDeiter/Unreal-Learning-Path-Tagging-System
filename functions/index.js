@@ -9,3 +9,4 @@ admin.initializeApp();
 // AI Functions
 // ============================================================================
 Object.assign(exports, require("./ai/generateLearningPath"));
+Object.assign(exports, require("./ai/generateCourseMetadata"));
