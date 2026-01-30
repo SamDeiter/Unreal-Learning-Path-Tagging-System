@@ -230,11 +230,25 @@ export const generateGoals = (intent, courses) => {
     return tags.filter((t) => typeof t === "string");
   });
 
-  // Get unique skills and categorize them
-  const uniqueSkills = [...new Set(allSkills)];
+  // Get unique skills and categorize them - filter out short/meaningless values
+  const uniqueSkills = [...new Set(allSkills)].filter(
+    (s) => s.length > 3 && !["the", "and", "for", "with"].includes(s.toLowerCase())
+  );
 
-  // Try to find a primary domain (e.g., "Materials", "Lighting", "Niagara")
-  const primaryDomain = intent.primaryGoal || uniqueSkills[0] || "Unreal Engine";
+  // Try to find a primary domain from intent, skills, or course title
+  const getTopicFromCourse = (courses) => {
+    if (!courses.length) return null;
+    const title = courses[0].title || courses[0].folder_name || "";
+    // Extract meaningful topic from course title
+    const topicMatch = title.match(/(?:Introduction to |Learn |Master |)(\w+(?:\s+\w+)?)/i);
+    return topicMatch ? topicMatch[1] : title.split(/[-_]/)[0];
+  };
+
+  const primaryDomain =
+    intent.primaryGoal ||
+    uniqueSkills.find((s) => s.length > 4) ||
+    getTopicFromCourse(courses) ||
+    "Unreal Engine";
 
   // Calculate total time with proper grammar
   const totalMinutes = courses.reduce((sum, c) => {

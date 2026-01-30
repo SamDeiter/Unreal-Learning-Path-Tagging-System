@@ -49,12 +49,13 @@ function App() {
         synonyms: tag.synonyms, // Helpful for fuzzy matching (e.g. "World Building" -> "Level Design")
       }));
 
-    // Use edges from edges.json
-    const processedEdges = (edgesData.edges || []).map((edge) => ({
-      sourceTagId: edge.source,
-      targetTagId: edge.target,
-      weight: edge.weight * 100, // Scale up for visibility
-      relation: edge.relation,
+    // Use edges from edges.json - handle both array and wrapped formats
+    const rawEdges = Array.isArray(edgesData) ? edgesData : edgesData.edges || [];
+    const processedEdges = rawEdges.map((edge) => ({
+      sourceTagId: edge.sourceTagId || edge.source,
+      targetTagId: edge.targetTagId || edge.target,
+      weight: edge.weight || 5,
+      relation: edge.type || edge.relation || "related",
     }));
 
     return { tags: processedTags, edges: processedEdges };
