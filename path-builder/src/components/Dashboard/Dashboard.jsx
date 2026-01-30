@@ -53,10 +53,10 @@ function Dashboard() {
     return levels;
   }, [courses]);
 
-  // Get top 30 tags for Tag Cloud (reduced from 100 for better scannability)
+  // Get top 100 tags for Tag Cloud
   const tagCloud = useMemo(() => {
     if (!tags || tags.length === 0) return [];
-    return [...tags].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 30);
+    return [...tags].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 100);
   }, [tags]);
 
   // Calculate industry distribution for recommendations
@@ -314,7 +314,24 @@ function Dashboard() {
         <h3>
           <span className="section-icon">🏷️</span> Tag Cloud
         </h3>
-        <p className="section-desc">The top 30 tags that power this learning system</p>
+        <p className="section-desc">
+          The 100 most used tags that power this learning system
+          <button
+            className="export-btn"
+            onClick={() => {
+              const data = JSON.stringify(tagCloud, null, 2);
+              const blob = new Blob([data], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "tags.json";
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+          >
+            📥 Export Tags
+          </button>
+        </p>
         <div className="tag-cloud">
           {tagCloud.map((tag, index) => (
             <span
