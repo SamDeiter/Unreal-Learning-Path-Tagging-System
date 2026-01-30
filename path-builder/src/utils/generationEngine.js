@@ -157,8 +157,18 @@ export const generateObjectives = (intent, courses) => {
 
   // 2. Extract unique skills from all courses
   const allSkills = courses.flatMap((c) => {
-    const tags = c.tags || c.extracted_tags || [];
-    return tags.slice(0, 2);
+    // Handle both array and object tag formats
+    let tags = c.extracted_tags || [];
+    if (!Array.isArray(tags)) {
+      if (Array.isArray(c.tags)) {
+        tags = c.tags;
+      } else if (c.tags && typeof c.tags === "object") {
+        tags = [c.tags.topic].filter(Boolean);
+      } else {
+        tags = [];
+      }
+    }
+    return tags.filter((t) => typeof t === "string").slice(0, 2);
   });
   const uniqueSkills = [...new Set(allSkills)].slice(0, 4);
 
