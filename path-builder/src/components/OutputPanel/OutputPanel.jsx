@@ -74,25 +74,25 @@ function OutputPanel() {
             className={`output-tab ${activeTab === "outline" ? "active" : ""}`}
             onClick={() => setActiveTab("outline")}
           >
-            Outline
+            📄 Outline
           </button>
           <button
             className={`output-tab ${activeTab === "objectives" ? "active" : ""}`}
             onClick={() => setActiveTab("objectives")}
           >
-            Objectives
+            🎯 Objectives
           </button>
           <button
             className={`output-tab ${activeTab === "goals" ? "active" : ""}`}
             onClick={() => setActiveTab("goals")}
           >
-            Goals
+            🚀 Goals
           </button>
           <button
             className={`output-tab ${activeTab === "docs" ? "active" : ""}`}
             onClick={() => setActiveTab("docs")}
           >
-            Docs {docLinks.length > 0 && <span className="tab-count">{docLinks.length}</span>}
+            📚 Docs {docLinks.length > 0 && <span className="tab-count">({docLinks.length})</span>}
           </button>
         </div>
       </div>

@@ -108,8 +108,16 @@ function CourseLibrary({ courses }) {
                 {course.tags?.topic && <span className="tag tag-topic">{course.tags.topic}</span>}
               </div>
               <div className="card-meta">
-                <span>🎬 {course.video_count || 0}</span>
-                <span>📦 {course.versions?.length || 0} ver</span>
+                <span
+                  title={`${course.video_count || 0} video${(course.video_count || 0) === 1 ? "" : "s"}`}
+                >
+                  🎬 {course.video_count || 0}
+                </span>
+                <span
+                  title={`${course.versions?.length || 0} UE version${(course.versions?.length || 0) === 1 ? "" : "s"}`}
+                >
+                  📦 {course.versions?.length || 0} ver
+                </span>
               </div>
             </div>
 
