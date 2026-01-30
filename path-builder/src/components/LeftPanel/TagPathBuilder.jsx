@@ -5,7 +5,6 @@ import {
   suggestPrerequisites,
   suggestSupplementalByTags,
   suggestNextSteps,
-  getOfficialDocs,
 } from "../../utils/suggestionEngine";
 import "./TagPathBuilder.css";
 
@@ -14,9 +13,6 @@ function TagPathBuilder({ courses }) {
   const { addCourse, courses: pathCourses } = usePath();
 
   const [selectedTagIds, setSelectedTagIds] = useState(new Set());
-
-  // Update doc links whenever path changes
-  const docLinks = useMemo(() => getOfficialDocs(pathCourses), [pathCourses]);
 
   // Industry Filtering State
   const [selectedIndustry, setSelectedIndustry] = useState("All");
@@ -307,21 +303,6 @@ function TagPathBuilder({ courses }) {
           })
         )}
       </div>
-
-      {docLinks.length > 0 && (
-        <div className="official-docs-section">
-          <h4>Official Documentation</h4>
-          <ul className="docs-list">
-            {docLinks.map((doc, idx) => (
-              <li key={idx}>
-                <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                  {doc.title} <span className="doc-topic">({doc.topic})</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }

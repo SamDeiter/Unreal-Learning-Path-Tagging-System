@@ -5,7 +5,7 @@
  * API key stored securely in Firebase Secrets - never exposed to client.
  */
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 // Firebase config - uses same project as main app
@@ -18,27 +18,45 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase (or get existing app)
-import { getApps } from "firebase/app";
+// Lazy initialization - only initialize when needed and API key is present
+let app = null;
+let auth = null;
+let functions = null;
 
-let app;
-const existingApps = getApps();
-const pathBuilderApp = existingApps.find((a) => a.name === "path-builder");
+function initFirebase() {
+  if (app) return true;
 
-if (pathBuilderApp) {
-  app = pathBuilderApp;
-} else {
-  app = initializeApp(firebaseConfig, "path-builder");
+  // Check if API key is configured
+  if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "undefined") {
+    console.warn("Firebase API key not configured. Gemini AI features disabled.");
+    return false;
+  }
+
+  try {
+    const existingApps = getApps();
+    const pathBuilderApp = existingApps.find((a) => a.name === "path-builder");
+
+    if (pathBuilderApp) {
+      app = pathBuilderApp;
+    } else {
+      app = initializeApp(firebaseConfig, "path-builder");
+    }
+
+    auth = getAuth(app);
+    functions = getFunctions(app, "us-central1");
+    return true;
+  } catch (error) {
+    console.error("Firebase initialization failed:", error);
+    return false;
+  }
 }
-
-const auth = getAuth(app);
-const functions = getFunctions(app, "us-central1");
 
 /**
  * Check if user is authenticated
  */
 export function isUserAuthenticated() {
-  return !!auth.currentUser;
+  if (!initFirebase()) return false;
+  return !!auth?.currentUser;
 }
 
 /**
@@ -164,6 +182,122 @@ Respond with ONLY valid JSON array, no markdown.`;
 }
 
 /**
+ * Generate Learning Blueprint (outline, objectives, goals) via Gemini
+ * @param {Object} intent - User's learning intent (goal, skill level, time budget)
+ * @param {Array} courses - Selected courses with metadata and tags
+ * @returns {Object} Generated blueprint with outline, objectives, goals
+ */
+export async function generateLearningBlueprint(intent, courses) {
+  if (!courses || courses.length === 0) {
+    return generateFallbackBlueprint(intent, courses);
+  }
+
+  // Prepare course summaries for prompt
+  const courseSummaries = courses
+    .map((c, i) => {
+      const tags = (c.tags || c.extracted_tags || []).slice(0, 5).join(", ");
+      const role = c.role || "Core";
+      return `${i + 1}. "${c.title}" [${role}] - Tags: ${tags || "General UE5"}`;
+    })
+    .join("\n");
+
+  const systemPrompt = `You are an expert instructional designer specializing in Unreal Engine 5 training.
+Create specific, actionable learning blueprints that are relevant to the actual course content.
+Avoid generic phrases like "Master concepts in X" - be specific about WHAT skills will be learned.`;
+
+  const userPrompt = `Create a Learning Blueprint for this learning path:
+
+**Learning Intent:**
+- Primary Goal: ${intent.primaryGoal || "UE5 Development"}
+- Skill Level: ${intent.skillLevel || "Intermediate"}
+- Time Available: ${intent.timeBudget || "Flexible"}
+
+**Selected Courses (${courses.length} total):**
+${courseSummaries}
+
+Generate a JSON response with:
+
+1. "outline": Array of section objects, each with:
+   - "title": Section title (e.g., "Foundational Prerequisites", "Core Curriculum: Niagara VFX")
+   - "items": Array of specific learning activities (NOT just course titles!)
+     Each item has: "text" (specific skill/activity), "courseIndex" (1-based)
+
+2. "objectives": Array of 4-6 MEASURABLE learning objectives using Bloom's taxonomy verbs
+   Each has: "text" (specific, measurable objective)
+
+3. "goals": Array of 3 outcome goals with:
+   - "text": Concrete achievement statement
+   - "metric": How to measure completion
+
+Be SPECIFIC to the actual tags and content. Reference real UE5 concepts like Niagara, Blueprints, Materials, etc.
+
+Respond with ONLY valid JSON, no markdown.`;
+
+  if (!isUserAuthenticated()) {
+    console.warn("User not authenticated. Using fallback blueprint.");
+    return generateFallbackBlueprint(intent, courses);
+  }
+
+  try {
+    const generateBlueprint = httpsCallable(functions, "generateCourseMetadata");
+    const result = await generateBlueprint({
+      systemPrompt,
+      userPrompt,
+      temperature: 0.4,
+      model: "gemini-1.5-flash",
+    });
+
+    if (!result.data.success) {
+      throw new Error(result.data.error || "Blueprint generation failed");
+    }
+
+    const text = result.data.textResponse;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    throw new Error("No JSON found in response");
+  } catch (error) {
+    console.error("Learning Blueprint generation error:", error);
+    return generateFallbackBlueprint(intent, courses);
+  }
+}
+
+/**
+ * Fallback blueprint generation without API
+ */
+function generateFallbackBlueprint(intent, courses) {
+  const allTags = courses.flatMap((c) => c.tags || c.extracted_tags || []);
+  const topTags = [...new Set(allTags)].slice(0, 5);
+  const primaryTag = topTags[0] || "UE5";
+
+  return {
+    outline: [
+      {
+        title: "Core Curriculum: " + (intent.primaryGoal || primaryTag),
+        items: courses.slice(0, 5).map((c, i) => ({
+          text: `Learn ${(c.tags || c.extracted_tags || [])[0] || "core"} techniques from ${c.title?.split(" ")[0] || "lesson"}`,
+          courseIndex: i + 1,
+        })),
+      },
+    ],
+    objectives: [
+      { text: `Apply ${primaryTag} techniques in project workflows` },
+      { text: `Troubleshoot common ${primaryTag} issues independently` },
+      { text: `Implement ${primaryTag} best practices in production` },
+    ],
+    goals: [
+      {
+        text: `Build proficiency in ${topTags.slice(0, 3).join(", ")}`,
+        metric: `Complete ${courses.length} modules`,
+      },
+      { text: "Create a portfolio piece", metric: "Finished project using skills" },
+      { text: "Apply skills in real work", metric: "Use in production project" },
+    ],
+  };
+}
+
+/**
  * Fallback metadata generation without API
  */
 function generateFallbackMetadata(videos) {
@@ -214,6 +348,7 @@ export function isGeminiConfigured() {
 export default {
   generateCourseMetadata,
   generateQuizQuestions,
+  generateLearningBlueprint,
   isGeminiConfigured,
   isUserAuthenticated,
 };
