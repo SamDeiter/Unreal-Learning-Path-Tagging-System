@@ -215,7 +215,7 @@ export const generateObjectives = (intent, courses) => {
 };
 
 export const generateGoals = (intent, courses) => {
-  // Extract skill strings only (filter out objects)
+  // Extract and categorize skills for better goal generation
   const allSkills = courses.flatMap((c) => {
     let tags = c.extracted_tags || [];
     if (!Array.isArray(tags)) {
@@ -227,34 +227,60 @@ export const generateGoals = (intent, courses) => {
         tags = [];
       }
     }
-    // Only include string values
     return tags.filter((t) => typeof t === "string");
   });
-  const topSkills = [...new Set(allSkills)].slice(0, 3);
-  const skillsText = topSkills.length > 0 ? topSkills.join(", ") : "Unreal Engine";
 
+  // Get unique skills and categorize them
+  const uniqueSkills = [...new Set(allSkills)];
+
+  // Try to find a primary domain (e.g., "Materials", "Lighting", "Niagara")
+  const primaryDomain = intent.primaryGoal || uniqueSkills[0] || "Unreal Engine";
+
+  // Calculate total time with proper grammar
   const totalMinutes = courses.reduce((sum, c) => {
     return sum + (c.duration_seconds || c.durationSeconds || 600) / 60;
   }, 0);
-  const hours = Math.round((totalMinutes / 60) * 10) / 10; // Round to 1 decimal
+  const hours = Math.round((totalMinutes / 60) * 10) / 10;
+  const hoursText = hours === 1 ? "1 hour" : `${hours} hours`;
+  const moduleText = courses.length === 1 ? "1 module" : `${courses.length} modules`;
 
   // Get skill level from intent or courses
   const skillLevel = intent.skillLevel || courses[0]?.gemini_skill_level || "working";
 
-  return [
+  // Create domain-specific goals
+  const goals = [
     {
       id: "goal-1",
-      text: `Build ${skillLevel.toLowerCase()} proficiency in ${skillsText}`,
+      text: `Achieve ${skillLevel.toLowerCase()} proficiency in ${primaryDomain}`,
     },
     {
       id: "goal-2",
-      text: `Complete ${courses.length} modules (~${hours} hours of focused learning)`,
-    },
-    {
-      id: "goal-3",
-      text: "Create a portfolio piece demonstrating your new skills",
+      text: `Complete ${moduleText} (~${hoursText} of focused learning)`,
     },
   ];
+
+  // Add a third goal based on context
+  if (courses.length >= 3) {
+    // Multi-course path: focus on integration
+    goals.push({
+      id: "goal-3",
+      text: `Build a production-ready project integrating multiple ${primaryDomain} techniques`,
+    });
+  } else if (courses.length === 1) {
+    // Single course: focus on mastery
+    goals.push({
+      id: "goal-3",
+      text: `Apply ${primaryDomain} skills to a hands-on portfolio project`,
+    });
+  } else {
+    // 2 courses: focus on progression
+    goals.push({
+      id: "goal-3",
+      text: `Progress from fundamentals to practical ${primaryDomain} implementation`,
+    });
+  }
+
+  return goals;
 };
 
 /**
