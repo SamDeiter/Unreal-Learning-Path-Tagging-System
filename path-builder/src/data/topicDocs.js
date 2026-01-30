@@ -122,17 +122,17 @@ export const topicDocs = {
   Materials: [
     {
       title: "Materials and Shaders",
-      url: "https://dev.epicgames.com/documentation/en-us/unreal-engine/materials-and-shaders-in-unreal-engine",
+      url: "https://dev.epicgames.com/documentation/en-us/unreal-engine/materials-and-shaders-in-unreal-engine?application_version=5.5",
     },
     {
       title: "Material Inputs",
-      url: "https://dev.epicgames.com/documentation/en-us/unreal-engine/material-inputs-in-unreal-engine",
+      url: "https://dev.epicgames.com/documentation/en-us/unreal-engine/material-inputs-in-unreal-engine?application_version=5.5",
     },
   ],
   Niagara: [
     {
       title: "Niagara Visual Effects",
-      url: "https://dev.epicgames.com/documentation/en-us/unreal-engine/niagara-visual-effects-in-unreal-engine",
+      url: "https://dev.epicgames.com/documentation/en-us/unreal-engine/niagara-visual-effects-in-unreal-engine?application_version=5.5",
     },
   ],
   Optimization: [
