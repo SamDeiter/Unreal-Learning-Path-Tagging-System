@@ -187,13 +187,26 @@ export const generateObjectives = (intent, courses) => {
     });
   });
 
-  // 3. Course-specific mastery objectives (format titles nicely)
-  courses.slice(0, 2).forEach((c) => {
-    // Clean up title: remove underscores, extract main concept
-    const cleanTitle = (c.title || "").replace(/_/g, " ").replace(/\s+/g, " ").trim();
+  // 3. Course-specific mastery objectives using Gemini outcomes
+  courses.slice(0, 3).forEach((c) => {
+    // Use Gemini outcomes if available, otherwise create skill-based objective
+    let objectiveText;
+
+    if (c.gemini_outcomes && Array.isArray(c.gemini_outcomes) && c.gemini_outcomes.length > 0) {
+      // Use first Gemini outcome (most important)
+      objectiveText = c.gemini_outcomes[0];
+    } else {
+      // Fallback: create objective from primary skill
+      const skill = getPrimarySkill(c);
+      const cleanTitle = (c.title || "").replace(/_/g, " ").replace(/\s+/g, " ").trim();
+      const titleWords = cleanTitle.split(" ");
+      const mainConcept = titleWords.length > 3 ? titleWords.slice(0, 3).join(" ") : cleanTitle;
+      objectiveText = `Demonstrate ${skill} proficiency through ${mainConcept} techniques`;
+    }
+
     objectives.push({
       id: generateId(c.code + "obj"),
-      text: `Apply lessons from "${cleanTitle}" in a hands-on project`,
+      text: objectiveText,
       courses: [c.code],
     });
   });
