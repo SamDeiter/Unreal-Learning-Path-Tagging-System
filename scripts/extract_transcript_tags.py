@@ -126,8 +126,11 @@ def main():
         matched_vids = 0
         
         for vid in course.get("videos", []):
-            vid_name = vid.get("name", "")
-            drive_id = name_to_id.get(vid_name)
+            # Use drive_id field if available (new), else fallback to name lookup
+            drive_id = vid.get("drive_id")
+            if not drive_id:
+                vid_name = vid.get("name", "")
+                drive_id = name_to_id.get(vid_name)
             
             if drive_id and drive_id in transcript_ids:
                 transcript_file = TRANSCRIPTS_DIR / f"{drive_id}.json"
