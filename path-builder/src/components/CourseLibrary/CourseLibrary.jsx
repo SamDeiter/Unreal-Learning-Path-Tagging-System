@@ -10,7 +10,7 @@
  * - Click card to view details
  * - Click + button to add to path
  */
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { usePath } from "../../context/PathContext";
 import { filterCourses } from "../../utils/dataProcessing";
 import "./CourseLibrary.css";
@@ -37,6 +37,29 @@ function CourseLibrary({ courses }) {
   const { courses: pathCourses, addCourse } = usePath();
   const [search, setSearch] = useState("");
   const [levelFilter, setLevelFilter] = useState(null);
+  const searchInputRef = useRef(null);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl+K or Cmd+K - Focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      // Escape - Clear search and filters
+      if (e.key === "Escape") {
+        if (search || levelFilter) {
+          setSearch("");
+          setLevelFilter(null);
+          searchInputRef.current?.blur();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [search, levelFilter]);
 
   // Filter courses based on search and filters
   const filteredCourses = useMemo(() => {
@@ -65,9 +88,10 @@ function CourseLibrary({ courses }) {
       <div className="library-header">
         <div className="search-container">
           <input
+            ref={searchInputRef}
             type="text"
             className="search-input"
-            placeholder="Search courses..."
+            placeholder="Search courses... (Ctrl+K)"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
