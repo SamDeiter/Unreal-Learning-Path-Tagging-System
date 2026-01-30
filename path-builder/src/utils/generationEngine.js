@@ -20,9 +20,21 @@ const generateId = (str) => {
  * Get primary skill/topic from course based on tags
  */
 const getPrimarySkill = (course) => {
-  const tags = course.tags || course.extracted_tags || [];
+  // Handle both array and object tag formats
+  let tags = course.extracted_tags || [];
+  if (!Array.isArray(tags)) {
+    // If tags is not an array, try to extract from object or default to empty
+    if (Array.isArray(course.tags)) {
+      tags = course.tags;
+    } else if (course.tags && typeof course.tags === "object") {
+      // Extract topic if available
+      tags = [course.tags.topic, course.tags.level].filter(Boolean);
+    } else {
+      tags = [];
+    }
+  }
   // Find most specific tag (longer = more specific)
-  const sorted = [...tags].sort((a, b) => b.length - a.length);
+  const sorted = [...tags].filter((t) => typeof t === "string").sort((a, b) => b.length - a.length);
   return sorted[0] || course.title?.split(" ")[0] || "UE5";
 };
 
@@ -47,8 +59,10 @@ const generateOutlineText = (course, role, index) => {
   const skill = getPrimarySkill(course);
   const verb = getActionVerb(course, index);
 
-  // Extract key topics from tags
-  const topics = (course.tags || course.extracted_tags || []).slice(0, 2);
+  // Extract key topics from tags - handle array vs object
+  let rawTags = course.extracted_tags || (Array.isArray(course.tags) ? course.tags : []);
+  if (!Array.isArray(rawTags)) rawTags = [];
+  const topics = rawTags.filter((t) => typeof t === "string").slice(0, 2);
   const topicStr = topics.length > 0 ? topics.join(" and ") : skill;
 
   // Role-specific templates with variety
