@@ -7,7 +7,16 @@ after local processing.
 import json
 import os
 import urllib.request
+from pathlib import Path
 from typing import Optional
+
+# Load .env file if it exists
+try:
+    from dotenv import load_dotenv
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    load_dotenv(env_path)
+except ImportError:
+    pass  # dotenv not installed, will use system env vars
 
 
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
