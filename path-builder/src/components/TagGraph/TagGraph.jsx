@@ -702,11 +702,19 @@ function TagGraph({ tags = [], edges = [] }) {
           <button onClick={handleFitToScreen} title="Fit graph to screen">
             🔍 Fit
           </button>
-          <button onClick={handleRunLayout} disabled={isLayoutRunning}>
+          <button
+            onClick={handleRunLayout}
+            disabled={isLayoutRunning}
+            title="Recalculate node positions for better arrangement"
+          >
             {isLayoutRunning ? "⏳ Running..." : "🔄 Re-layout"}
           </button>
           {focusedNodeId && (
-            <button onClick={handleClearFocus} className="clear-focus">
+            <button
+              onClick={handleClearFocus}
+              className="clear-focus"
+              title="Deselect the focused node and show all connections"
+            >
               ✕ Clear Focus
             </button>
           )}
