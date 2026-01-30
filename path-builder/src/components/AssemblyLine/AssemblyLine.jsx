@@ -70,12 +70,35 @@ function AssemblyLine() {
   return (
     <div className="assembly-line">
       <div className="assembly-header">
-        <h2 className="assembly-title">Your Learning Path</h2>
-        {courses.length > 1 && (
-          <button className="btn btn-secondary btn-sm" onClick={handleOptimize}>
-            ⚡ Optimize Order
-          </button>
-        )}
+        <div className="assembly-title-group">
+          <h2 className="assembly-title">Your Learning Path</h2>
+          {courses.length > 0 && (
+            <span className="path-summary">
+              {courses.length} course{courses.length !== 1 ? "s" : ""} •{" ~"}
+              {courses.reduce((sum, c) => sum + (c.duration || 0), 0).toFixed(1)} hours •{" "}
+              {courses.reduce((sum, c) => sum + (c.video_count || 0), 0)} videos
+            </span>
+          )}
+        </div>
+        <div className="assembly-actions">
+          {courses.length > 1 && (
+            <button className="btn btn-secondary btn-sm" onClick={handleOptimize}>
+              ⚡ Optimize Order
+            </button>
+          )}
+          {courses.length > 0 && (
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => {
+                if (window.confirm(`Clear all ${courses.length} courses from your path?`)) {
+                  courses.forEach((c) => removeCourse(c.code));
+                }
+              }}
+            >
+              🗑️ Clear All
+            </button>
+          )}
+        </div>
       </div>
 
       {courses.length === 0 ? (

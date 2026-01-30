@@ -69,6 +69,40 @@ function OutputPanel() {
           {isGenerating && <span className="ai-badge generating">✨ AI</span>}
           {aiBlueprint && !isGenerating && <span className="ai-badge">✨</span>}
         </h3>
+        {hasContent && (
+          <button
+            className="btn btn-secondary btn-sm copy-blueprint-btn"
+            onClick={() => {
+              const blueprintText = `
+# Learning Blueprint
+
+## Outline
+${outputs.outline
+  .map(
+    (section) => `### ${section.title}\n${section.items.map((item) => `- ${item.text}`).join("\n")}`
+  )
+  .join("\n\n")}
+
+## Objectives
+${outputs.objectives.map((obj) => `- ${obj.text}`).join("\n")}
+
+## Goals
+${outputs.goals.map((goal) => `- ${goal.text}${goal.metric ? ` (Metric: ${goal.metric})` : ""}`).join("\n")}
+
+## Documentation Links
+${docLinks.length > 0 ? docLinks.map((doc) => `- ${doc.title}: ${doc.url}`).join("\n") : "No official documentation links available."}
+              `.trim();
+              navigator.clipboard.writeText(blueprintText);
+              // Show temporary feedback
+              const btn = document.querySelector(".copy-blueprint-btn");
+              const originalText = btn.textContent;
+              btn.textContent = "✓ Copied!";
+              setTimeout(() => (btn.textContent = originalText), 2000);
+            }}
+          >
+            📋 Copy Blueprint
+          </button>
+        )}
         <div className="output-tabs">
           <button
             className={`output-tab ${activeTab === "outline" ? "active" : ""}`}
