@@ -151,6 +151,7 @@ function CourseLibrary({ courses }) {
           <div
             key={`${course.code}-${index}`}
             className={`course-card ${isInPath(course.code) ? "in-path" : ""}`}
+            title={`${course.title}\n\nCode: ${course.code}\nLevel: ${course.tags?.level || "N/A"}\nDuration: ${course.duration ? `${course.duration.toFixed(1)} hours` : "Unknown"}\nVideos: ${course.video_count || 0}\nVersions: ${course.versions?.join(", ") || "N/A"}`}
           >
             <div className="card-content">
               <div className="card-header">
@@ -171,6 +172,11 @@ function CourseLibrary({ courses }) {
                 {course.tags?.topic && <span className="tag tag-topic">{course.tags.topic}</span>}
               </div>
               <div className="card-meta">
+                {course.duration && (
+                  <span title={`${course.duration.toFixed(1)} hours of content`}>
+                    ⏱️ {course.duration.toFixed(1)}h
+                  </span>
+                )}
                 <span
                   title={`${course.video_count || 0} video${(course.video_count || 0) === 1 ? "" : "s"}`}
                 >
