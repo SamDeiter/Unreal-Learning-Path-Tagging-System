@@ -316,21 +316,48 @@ function Dashboard() {
         </h3>
         <p className="section-desc">
           The 100 most used tags that power this learning system
-          <button
-            className="export-btn"
-            onClick={() => {
-              const data = JSON.stringify(tagCloud, null, 2);
-              const blob = new Blob([data], { type: "application/json" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = "tags.json";
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-          >
-            📥 Export Tags
-          </button>
+          <div className="export-dropdown">
+            <button
+              className="export-btn"
+              onClick={() => {
+                // Export as CSV for LMS import
+                const headers = ["Tag ID", "Tag Name", "Count", "Category", "Description"];
+                const rows = tagCloud.map((tag) => [
+                  tag.id || "",
+                  tag.name || tag.label || "",
+                  tag.count || 0,
+                  tag.categoryPath || "",
+                  (tag.description || "").replace(/,/g, ";"), // Escape commas
+                ]);
+                const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
+                const blob = new Blob([csv], { type: "text/csv" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "tags.csv";
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              📥 Export CSV
+            </button>
+            <button
+              className="export-btn"
+              onClick={() => {
+                // Export as JSON
+                const data = JSON.stringify(tagCloud, null, 2);
+                const blob = new Blob([data], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "tags.json";
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              � Export JSON
+            </button>
+          </div>
         </p>
         <div className="tag-cloud">
           {tagCloud.map((tag, index) => (
