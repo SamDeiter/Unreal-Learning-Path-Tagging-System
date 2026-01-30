@@ -292,17 +292,47 @@ function Dashboard() {
               </svg>
             </div>
             <div className="donut-legend">
-              <div className="legend-item">
+              <div
+                className="legend-item"
+                title={`${levelDistribution.Beginner} courses for learners new to the topic`}
+              >
                 <span className="legend-dot beginner"></span>
-                Beginner ({levelDistribution.Beginner})
+                <span className="legend-text">Beginner</span>
+                <span className="legend-value">
+                  {levelDistribution.Beginner} (
+                  {totalLevelCount > 0
+                    ? Math.round((levelDistribution.Beginner / totalLevelCount) * 100)
+                    : 0}
+                  %)
+                </span>
               </div>
-              <div className="legend-item">
+              <div
+                className="legend-item"
+                title={`${levelDistribution.Intermediate} courses for learners with some experience`}
+              >
                 <span className="legend-dot intermediate"></span>
-                Intermediate ({levelDistribution.Intermediate})
+                <span className="legend-text">Intermediate</span>
+                <span className="legend-value">
+                  {levelDistribution.Intermediate} (
+                  {totalLevelCount > 0
+                    ? Math.round((levelDistribution.Intermediate / totalLevelCount) * 100)
+                    : 0}
+                  %)
+                </span>
               </div>
-              <div className="legend-item">
+              <div
+                className="legend-item"
+                title={`${levelDistribution.Advanced} courses for expert-level learners`}
+              >
                 <span className="legend-dot advanced"></span>
-                Advanced ({levelDistribution.Advanced})
+                <span className="legend-text">Advanced</span>
+                <span className="legend-value">
+                  {levelDistribution.Advanced} (
+                  {totalLevelCount > 0
+                    ? Math.round((levelDistribution.Advanced / totalLevelCount) * 100)
+                    : 0}
+                  %)
+                </span>
               </div>
             </div>
           </div>
