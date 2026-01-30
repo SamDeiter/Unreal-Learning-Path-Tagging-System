@@ -21,14 +21,16 @@ function Dashboard() {
     return { totalCourses, totalVideos, coursesWithVideos, aiEnriched };
   }, [courses]);
 
-  // Calculate topic distribution (from courses)
+  // Calculate topic distribution (from courses) - excludes "Other" from chart
   const topicDistribution = useMemo(() => {
     if (!courses || courses.length === 0) return [];
 
-    // Group courses by topic
+    // Group courses by topic (check both course.topic and course.tags?.topic)
     const topics = {};
     courses.forEach((course) => {
-      const topic = course.tags?.topic || "Other";
+      const topic = course.topic || course.tags?.topic || "Other";
+      // Skip "Other" - fragments like Outro/WrapUp don't need to pollute analytics
+      if (topic === "Other") return;
       topics[topic] = (topics[topic] || 0) + 1;
     });
 
@@ -71,10 +73,11 @@ function Dashboard() {
   const recommendations = useMemo(() => {
     const recs = [];
 
-    // Find topics with low coverage (less than 3 courses)
+    // Find topics with low coverage (less than 3 courses) - skip "Other"
     const topicCounts = {};
     courses.forEach((course) => {
-      const topic = course.tags?.topic || "General";
+      const topic = course.topic || course.tags?.topic || "Other";
+      if (topic === "Other") return; // Skip fragments
       topicCounts[topic] = (topicCounts[topic] || 0) + 1;
     });
 
@@ -89,10 +92,11 @@ function Dashboard() {
         });
       });
 
-    // Find missing level progressions
+    // Find missing level progressions - skip "Other"
     const topicLevels = {};
     courses.forEach((course) => {
-      const topic = course.tags?.topic || "General";
+      const topic = course.topic || course.tags?.topic || "Other";
+      if (topic === "Other") return; // Skip fragments
       const level = course.tags?.level || "Intermediate";
       if (!topicLevels[topic]) topicLevels[topic] = new Set();
       topicLevels[topic].add(level);
