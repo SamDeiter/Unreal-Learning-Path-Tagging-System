@@ -72,6 +72,7 @@ function OutputPanel() {
         {hasContent && (
           <button
             className="btn btn-secondary btn-sm copy-blueprint-btn"
+            title="Copy the entire blueprint as markdown to your clipboard"
             onClick={() => {
               const blueprintText = `
 # Learning Blueprint
@@ -107,24 +108,28 @@ ${docLinks.length > 0 ? docLinks.map((doc) => `- ${doc.title}: ${doc.url}`).join
           <button
             className={`output-tab ${activeTab === "outline" ? "active" : ""}`}
             onClick={() => setActiveTab("outline")}
+            title="Structured course outline with sections"
           >
             📄 Outline
           </button>
           <button
             className={`output-tab ${activeTab === "objectives" ? "active" : ""}`}
             onClick={() => setActiveTab("objectives")}
+            title="Specific learning outcomes students will achieve"
           >
             🎯 Objectives
           </button>
           <button
             className={`output-tab ${activeTab === "goals" ? "active" : ""}`}
             onClick={() => setActiveTab("goals")}
+            title="High-level milestones and time estimates"
           >
             🚀 Goals
           </button>
           <button
             className={`output-tab ${activeTab === "docs" ? "active" : ""}`}
             onClick={() => setActiveTab("docs")}
+            title="Links to official Unreal Engine documentation"
           >
             📚 Docs {docLinks.length > 0 && <span className="tab-count">({docLinks.length})</span>}
           </button>

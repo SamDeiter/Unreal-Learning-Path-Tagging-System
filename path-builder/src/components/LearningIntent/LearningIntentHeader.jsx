@@ -20,6 +20,7 @@ function LearningIntentHeader() {
           placeholder="e.g. Master Lumen Lighting"
           value={learningIntent.primaryGoal || ""}
           onChange={(e) => handleChange("primaryGoal", e.target.value)}
+          title="What do you want to achieve? E.g., 'Learn Niagara VFX', 'Master landscape tools'"
         />
       </div>
 
@@ -29,6 +30,7 @@ function LearningIntentHeader() {
           className="intent-select"
           value={learningIntent.skillLevel || ""}
           onChange={(e) => handleChange("skillLevel", e.target.value)}
+          title="Your current experience level with this topic"
         >
           <option value="">Select Level...</option>
           <option value="Beginner">Beginner (New to topic)</option>
@@ -43,6 +45,7 @@ function LearningIntentHeader() {
           className="intent-select"
           value={learningIntent.timeBudget || ""}
           onChange={(e) => handleChange("timeBudget", e.target.value)}
+          title="How much time can you dedicate to learning?"
         >
           <option value="">No Limit</option>
           <option value="5">~5 Hours</option>

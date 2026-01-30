@@ -82,13 +82,18 @@ function AssemblyLine() {
         </div>
         <div className="assembly-actions">
           {courses.length > 1 && (
-            <button className="btn btn-secondary btn-sm" onClick={handleOptimize}>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={handleOptimize}
+              title="Reorder courses by prerequisite, core, then supplemental - with high-weight items first"
+            >
               ⚡ Optimize Order
             </button>
           )}
           {courses.length > 0 && (
             <button
               className="btn btn-danger btn-sm"
+              title="Remove all courses from your learning path"
               onClick={() => {
                 if (window.confirm(`Clear all ${courses.length} courses from your path?`)) {
                   courses.forEach((c) => removeCourse(c.code));
