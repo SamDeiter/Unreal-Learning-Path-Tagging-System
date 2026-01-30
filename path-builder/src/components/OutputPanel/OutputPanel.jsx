@@ -101,7 +101,51 @@ ${docLinks.length > 0 ? docLinks.map((doc) => `- ${doc.title}: ${doc.url}`).join
               setTimeout(() => (btn.textContent = originalText), 2000);
             }}
           >
-            📋 Copy Blueprint
+            📋 Copy
+          </button>
+        )}
+        {hasContent && (
+          <button
+            className="btn btn-secondary btn-sm download-blueprint-btn"
+            title="Download the blueprint as a markdown file"
+            onClick={() => {
+              const blueprintText = `# Learning Blueprint: ${learningIntent.primaryGoal || "My Learning Path"}
+
+Generated: ${new Date().toLocaleDateString()}
+
+## Learning Intent
+- **Primary Goal:** ${learningIntent.primaryGoal || "Not specified"}
+- **Skill Level:** ${learningIntent.skillLevel || "Not specified"}
+- **Time Budget:** ${learningIntent.timeBudget ? `~${learningIntent.timeBudget} hours` : "No limit"}
+
+## Outline
+${outputs.outline
+  .map(
+    (section) => `### ${section.title}\n${section.items.map((item) => `- ${item.text}`).join("\n")}`
+  )
+  .join("\n\n")}
+
+## Learning Objectives
+${outputs.objectives.map((obj) => `- ${obj.text}`).join("\n")}
+
+## Goals & Milestones
+${outputs.goals.map((goal) => `- ${goal.text}${goal.metric ? ` (Metric: ${goal.metric})` : ""}`).join("\n")}
+
+## Documentation Links
+${docLinks.length > 0 ? docLinks.map((doc) => `- [${doc.title}](${doc.url})`).join("\n") : "No official documentation links available."}
+`;
+              const blob = new Blob([blueprintText], { type: "text/markdown" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `learning-blueprint-${(learningIntent.primaryGoal || "path").toLowerCase().replace(/\s+/g, "-")}.md`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }}
+          >
+            ⬇️ Download
           </button>
         )}
         <div className="output-tabs">
