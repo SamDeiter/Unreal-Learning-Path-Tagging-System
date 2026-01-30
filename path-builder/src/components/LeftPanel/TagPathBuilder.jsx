@@ -19,9 +19,10 @@ function TagPathBuilder({ courses }) {
   const [showAllTags, setShowAllTags] = useState(false);
 
   // 1. Derive Industries and their associated tags from COURSES
+  // Now includes ALL tags from courses, not just topic mapping
   const { industries, industryToTagsMap } = useMemo(() => {
     const industrySet = new Set();
-    const map = {}; // Industry -> Set<TagID> (Using IDs is safer than labels)
+    const map = {}; // Industry -> Set<TagID>
 
     // Helper to normalize strings for matching
     const normalize = (str) =>
@@ -49,35 +50,45 @@ function TagPathBuilder({ courses }) {
     });
 
     courses.forEach((c) => {
-      // Check both 'industry' field and 'tags.industry'
-      const industry = c.industry || (c.tags && c.tags.industry);
-      const topic = c.topic || (c.tags && c.tags.topic);
-      const topics = c.topics || [];
+      // Get industry from course
+      const industry =
+        c.industry ||
+        (c.tags && typeof c.tags === "object" && !Array.isArray(c.tags) ? c.tags.industry : null);
+      if (!industry || industry === "General") return;
 
-      // Collect all potential "topics" for this course
-      const courseTopics = new Set();
-      if (topic) courseTopics.add(topic);
-      topics.forEach((t) => courseTopics.add(t));
+      industrySet.add(industry);
+      if (!map[industry]) map[industry] = new Set();
 
-      if (industry) {
-        // Handle comma-separated or array industries if feasible
-        const indList = Array.isArray(industry) ? industry : [industry];
+      // Collect ALL tags from this course - much more comprehensive
+      const courseTags = new Set();
 
-        indList.forEach((ind) => {
-          if (ind === "General" || !ind) return;
-          industrySet.add(ind);
+      // 1. Topic field
+      const topic =
+        c.topic ||
+        (c.tags && typeof c.tags === "object" && !Array.isArray(c.tags) ? c.tags.topic : null);
+      if (topic) courseTags.add(topic);
 
-          if (!map[ind]) map[ind] = new Set();
+      // 2. Topics array
+      if (c.topics) c.topics.forEach((t) => courseTags.add(t));
 
-          courseTopics.forEach((tRaw) => {
-            const key = normalize(tRaw);
-            const tagId = tagLookup.get(key);
-            if (tagId) {
-              map[ind].add(tagId);
-            }
-          });
-        });
+      // 3. extracted_tags array (the main source of course tags!)
+      if (c.extracted_tags && Array.isArray(c.extracted_tags)) {
+        c.extracted_tags.forEach((t) => courseTags.add(t));
       }
+
+      // 4. If tags is an array (older format)
+      if (Array.isArray(c.tags)) {
+        c.tags.forEach((t) => courseTags.add(t));
+      }
+
+      // Map all collected tags to their IDs
+      courseTags.forEach((tagRaw) => {
+        const key = normalize(tagRaw);
+        const tagId = tagLookup.get(key);
+        if (tagId) {
+          map[industry].add(tagId);
+        }
+      });
     });
 
     return {
