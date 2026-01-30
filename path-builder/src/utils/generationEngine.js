@@ -148,10 +148,10 @@ export const generateObjectives = (intent, courses) => {
   const objectives = [];
 
   // 1. Goal-based objective
-  const topic = intent.primaryGoal || "Custom Path";
+  const topic = intent.primaryGoal || "Unreal Engine";
   objectives.push({
     id: "obj-main",
-    text: `Demonstrate competency in ${topic} through ${courses.length} modules.`,
+    text: `Master ${topic} fundamentals through ${courses.length} targeted learning modules`,
     type: "goal",
   });
 
@@ -172,12 +172,12 @@ export const generateObjectives = (intent, courses) => {
   });
   const uniqueSkills = [...new Set(allSkills)].slice(0, 4);
 
-  // Generate skill-specific objectives
+  // Generate more varied skill-specific objectives
   const skillObjectives = [
-    (skill) => `Apply ${skill} techniques in project workflows`,
-    (skill) => `Troubleshoot common ${skill} issues independently`,
-    (skill) => `Implement ${skill} best practices in production`,
-    (skill) => `Evaluate ${skill} solutions for performance`,
+    (skill) => `Apply ${skill} techniques effectively in production pipelines`,
+    (skill) => `Debug and resolve common ${skill} issues independently`,
+    (skill) => `Follow ${skill} best practices and industry standards`,
+    (skill) => `Optimize ${skill} implementations for real-time performance`,
   ];
 
   uniqueSkills.forEach((skill, i) => {
@@ -187,12 +187,13 @@ export const generateObjectives = (intent, courses) => {
     });
   });
 
-  // 3. Course-specific mastery objectives
+  // 3. Course-specific mastery objectives (format titles nicely)
   courses.slice(0, 2).forEach((c) => {
-    const skill = getPrimarySkill(c);
+    // Clean up title: remove underscores, extract main concept
+    const cleanTitle = (c.title || "").replace(/_/g, " ").replace(/\s+/g, " ").trim();
     objectives.push({
       id: generateId(c.code + "obj"),
-      text: `Complete "${c.title}" and apply ${skill} concepts to a real project`,
+      text: `Apply lessons from "${cleanTitle}" in a hands-on project`,
       courses: [c.code],
     });
   });
@@ -201,20 +202,36 @@ export const generateObjectives = (intent, courses) => {
 };
 
 export const generateGoals = (intent, courses) => {
-  // Extract skills for more specific goals
-  const allSkills = courses.flatMap((c) => c.tags || c.extracted_tags || []);
+  // Extract skill strings only (filter out objects)
+  const allSkills = courses.flatMap((c) => {
+    let tags = c.extracted_tags || [];
+    if (!Array.isArray(tags)) {
+      if (Array.isArray(c.tags)) {
+        tags = c.tags;
+      } else if (c.tags && typeof c.tags === "object") {
+        tags = [c.tags.topic].filter(Boolean);
+      } else {
+        tags = [];
+      }
+    }
+    // Only include string values
+    return tags.filter((t) => typeof t === "string");
+  });
   const topSkills = [...new Set(allSkills)].slice(0, 3);
-  const skillsText = topSkills.length > 0 ? topSkills.join(", ") : "UE5";
+  const skillsText = topSkills.length > 0 ? topSkills.join(", ") : "Unreal Engine";
 
   const totalMinutes = courses.reduce((sum, c) => {
     return sum + (c.duration_seconds || c.durationSeconds || 600) / 60;
   }, 0);
-  const hours = Math.ceil(totalMinutes / 60);
+  const hours = Math.round((totalMinutes / 60) * 10) / 10; // Round to 1 decimal
+
+  // Get skill level from intent or courses
+  const skillLevel = intent.skillLevel || courses[0]?.gemini_skill_level || "working";
 
   return [
     {
       id: "goal-1",
-      text: `Build ${intent.skillLevel || "practical"} proficiency in ${skillsText}`,
+      text: `Build ${skillLevel.toLowerCase()} proficiency in ${skillsText}`,
     },
     {
       id: "goal-2",
