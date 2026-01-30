@@ -13,6 +13,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { usePath } from "../../context/PathContext";
 import { filterCourses } from "../../utils/dataProcessing";
+import { matchCoursesToGoal } from "../../utils/courseMatchingUtils";
 import "./CourseLibrary.css";
 
 // Helper to highlight search terms in text
@@ -34,10 +35,21 @@ function highlightText(text, query) {
 }
 
 function CourseLibrary({ courses }) {
-  const { courses: pathCourses, addCourse } = usePath();
+  const { courses: pathCourses, addCourse, learningIntent } = usePath();
   const [search, setSearch] = useState("");
   const [levelFilter, setLevelFilter] = useState(null);
   const searchInputRef = useRef(null);
+
+  // Get suggested courses based on learning goal
+  const suggestedCourses = useMemo(() => {
+    if (!learningIntent?.primaryGoal) return [];
+    return matchCoursesToGoal(learningIntent.primaryGoal, courses, 8);
+  }, [learningIntent?.primaryGoal, courses]);
+
+  // Filter out already-in-path courses from suggestions
+  const availableSuggestions = useMemo(() => {
+    return suggestedCourses.filter((c) => !pathCourses.some((p) => p.code === c.code));
+  }, [suggestedCourses, pathCourses]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -82,8 +94,52 @@ function CourseLibrary({ courses }) {
     }
   };
 
+  // Handle add all suggested courses
+  const handleAddAllSuggested = () => {
+    availableSuggestions.forEach((course) => {
+      addCourse(course);
+    });
+  };
+
   return (
     <div className="course-library">
+      {/* Suggested Courses Section - appears when goal is set */}
+      {learningIntent?.primaryGoal && availableSuggestions.length > 0 && (
+        <div className="suggested-section">
+          <div className="suggested-header">
+            <span className="suggested-title">✨ Suggested for "{learningIntent.primaryGoal}"</span>
+            <button
+              className="add-all-btn"
+              onClick={handleAddAllSuggested}
+              title="Add all suggested courses to your path"
+            >
+              + Add All ({availableSuggestions.length})
+            </button>
+          </div>
+          <div className="suggested-list">
+            {availableSuggestions.slice(0, 5).map((course, index) => (
+              <div
+                key={`suggested-${course.code}-${index}`}
+                className="suggested-card"
+                onClick={(e) => handleAddCourse(e, course)}
+                title={`Match score: ${course.matchScore}\n${course.title}`}
+              >
+                <span className="suggested-code">{course.code}</span>
+                <span className="suggested-name">{course.title}</span>
+                <span className="suggested-add">+</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* No Goal Hint */}
+      {!learningIntent?.primaryGoal && (
+        <div className="goal-hint">
+          💡 Enter a <strong>Primary Goal</strong> above to get personalized course suggestions
+        </div>
+      )}
+
       {/* Search & Filters */}
       <div className="library-header">
         <div className="search-container">
