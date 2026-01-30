@@ -103,9 +103,10 @@ def main():
         if v["id"] not in existing
         and v.get("duration_seconds", 0) > 60  # > 1 min
         and v.get("size_bytes", 0) < 500_000_000  # < 500MB
-    ][:50]  # Limit to first 50 for testing
+    ]  # Process ALL remaining videos
     
     print(f"\n📹 Videos to process: {len(to_process)}")
+    print(f"   Already transcribed: {len(existing)}")
     
     # Process videos
     completed = 0
