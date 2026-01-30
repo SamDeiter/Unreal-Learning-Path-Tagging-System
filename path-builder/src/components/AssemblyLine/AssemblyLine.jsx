@@ -203,7 +203,7 @@ function AssemblyLine() {
                                 onChange={(e) =>
                                   updateCourseMeta(course.code, { weight: e.target.value })
                                 }
-                                title="Weight"
+                                title="Priority/Importance: High = Must-learn critical content, Medium = Should-learn standard content, Low = Nice-to-know optional content"
                               >
                                 <option value="Low">Low</option>
                                 <option value="Medium">Med</option>
@@ -304,7 +304,7 @@ function AssemblyLine() {
                                 onChange={(e) =>
                                   updateCourseMeta(course.code, { weight: e.target.value })
                                 }
-                                title="Weight"
+                                title="Priority/Importance: High = Must-learn critical content, Medium = Should-learn standard content, Low = Nice-to-know optional content"
                               >
                                 <option value="Low">Low</option>
                                 <option value="Medium">Med</option>
