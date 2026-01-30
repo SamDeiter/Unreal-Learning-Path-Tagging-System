@@ -15,6 +15,24 @@ import { usePath } from "../../context/PathContext";
 import { filterCourses } from "../../utils/dataProcessing";
 import "./CourseLibrary.css";
 
+// Helper to highlight search terms in text
+function highlightText(text, query) {
+  if (!query || !text) return text;
+
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  const parts = text.split(regex);
+
+  return parts.map((part, i) =>
+    regex.test(part) ? (
+      <mark key={i} className="search-highlight">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+}
+
 function CourseLibrary({ courses }) {
   const { courses: pathCourses, addCourse } = usePath();
   const [search, setSearch] = useState("");
@@ -45,13 +63,20 @@ function CourseLibrary({ courses }) {
     <div className="course-library">
       {/* Search & Filters */}
       <div className="library-header">
-        <input
-          type="text"
-          className="search-input"
-          placeholder="Search courses..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="search-container">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search courses..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button className="search-clear" onClick={() => setSearch("")} title="Clear search">
+              ×
+            </button>
+          )}
+        </div>
 
         <div className="level-filters">
           {["Beginner", "Intermediate", "Advanced"].map((level) => (
@@ -66,9 +91,23 @@ function CourseLibrary({ courses }) {
         </div>
       </div>
 
-      {/* Course Count */}
+      {/* Course Count with Search Context */}
       <div className="library-info">
-        <span>{filteredCourses.length} courses</span>
+        {search || levelFilter ? (
+          <span>
+            <strong>{filteredCourses.length}</strong> result
+            {filteredCourses.length !== 1 ? "s" : ""}
+            {search && (
+              <>
+                {" "}
+                for "<em>{search}</em>"
+              </>
+            )}
+            {levelFilter && <> • {levelFilter}</>}
+          </span>
+        ) : (
+          <span>{filteredCourses.length} courses</span>
+        )}
         {(search || levelFilter) && (
           <button
             className="clear-filters"
@@ -77,7 +116,7 @@ function CourseLibrary({ courses }) {
               setLevelFilter(null);
             }}
           >
-            Clear
+            Clear All
           </button>
         )}
       </div>
@@ -98,7 +137,7 @@ function CourseLibrary({ courses }) {
                   </span>
                 )}
               </div>
-              <h3 className="course-title">{course.title}</h3>
+              <h3 className="course-title">{highlightText(course.title, search)}</h3>
               <div className="card-tags">
                 {course.tags?.level && (
                   <span className={`tag tag-level ${course.tags.level.toLowerCase()}`}>

@@ -247,15 +247,15 @@ export const generateGoals = (intent, courses) => {
   // Get skill level from intent or courses
   const skillLevel = intent.skillLevel || courses[0]?.gemini_skill_level || "working";
 
-  // Create domain-specific goals
+  // Create domain-specific goals (time estimate first)
   const goals = [
     {
       id: "goal-1",
-      text: `Achieve ${skillLevel.toLowerCase()} proficiency in ${primaryDomain}`,
+      text: `Complete ${moduleText} (~${hoursText} of focused learning)`,
     },
     {
       id: "goal-2",
-      text: `Complete ${moduleText} (~${hoursText} of focused learning)`,
+      text: `Achieve ${skillLevel.toLowerCase()} proficiency in ${primaryDomain}`,
     },
   ];
 
