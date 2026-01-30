@@ -64,20 +64,20 @@ function getNodeSize(count, minCount, maxCount) {
  * Calculates edge width based on weight.
  * Uses clamped scale for consistent visual density.
  *
- * Range: 1px (min) to 8px (max)
+ * Range: 3px (min) to 10px (max) - increased for visibility
  */
 function getEdgeWidth(weight, minWeight, maxWeight) {
-  return clampedScale(weight, minWeight, maxWeight, 1, 8);
+  return clampedScale(weight, minWeight, maxWeight, 3, 10);
 }
 
 /**
  * Calculates edge opacity based on weight.
  * Stronger connections are more visible.
  *
- * Range: 0.3 (min) to 1 (max)
+ * Range: 0.6 (min) to 1 (max) - increased for visibility
  */
 function getEdgeOpacity(weight, minWeight, maxWeight) {
-  return clampedScale(weight, minWeight, maxWeight, 0.3, 1);
+  return clampedScale(weight, minWeight, maxWeight, 0.6, 1);
 }
 
 // ============================================================================
@@ -291,7 +291,7 @@ function TagGraph({ tags = [], edges = [] }) {
         selector: "edge",
         style: {
           width: "data(width)",
-          "line-color": "#30363d",
+          "line-color": "#58a6ff", // Bright blue for visibility
           "curve-style": "bezier",
           opacity: "data(opacity)",
           "transition-property": "opacity, line-color, width",
