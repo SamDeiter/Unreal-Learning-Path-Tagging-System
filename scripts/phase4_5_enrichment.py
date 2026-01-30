@@ -8,6 +8,9 @@ from pathlib import Path
 from collections import Counter
 from itertools import combinations
 
+from dotenv import load_dotenv
+load_dotenv()
+
 CONTENT_DIR = Path("content")
 
 def generate_edges(courses, min_weight=2):
@@ -101,7 +104,7 @@ def enrich_with_gemini(courses, api_key=None, limit=10):
     try:
         import google.generativeai as genai
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.0-flash")
     except ImportError:
         print("⚠️ google-generativeai not installed - skipping")
         return 0
