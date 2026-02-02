@@ -7,6 +7,7 @@ import OutputPanel from "./components/OutputPanel/OutputPanel";
 import LearningIntentHeader from "./components/LearningIntent/LearningIntentHeader";
 import TagGraph from "./components/TagGraph/TagGraph";
 import Dashboard from "./components/Dashboard/Dashboard";
+import PathReadiness from "./components/PathReadiness/PathReadiness";
 import "./App.css";
 
 // Import course data
@@ -77,6 +78,12 @@ function App() {
                   📊 Dashboard
                 </button>
                 <button
+                  className={`nav-tab ${activeTab === "readiness" ? "active" : ""}`}
+                  onClick={() => setActiveTab("readiness")}
+                >
+                  📚 Path Readiness
+                </button>
+                <button
                   className={`nav-tab ${activeTab === "builder" ? "active" : ""}`}
                   onClick={() => setActiveTab("builder")}
                 >
@@ -100,6 +107,11 @@ function App() {
             {activeTab === "dashboard" && (
               <div className="dashboard-layout">
                 <Dashboard />
+              </div>
+            )}
+            {activeTab === "readiness" && (
+              <div className="dashboard-layout">
+                <PathReadiness />
               </div>
             )}
             {activeTab === "builder" && (
