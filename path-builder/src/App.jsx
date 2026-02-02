@@ -8,6 +8,7 @@ import LearningIntentHeader from "./components/LearningIntent/LearningIntentHead
 import TagGraph from "./components/TagGraph/TagGraph";
 import Dashboard from "./components/Dashboard/Dashboard";
 import PathReadiness from "./components/PathReadiness/PathReadiness";
+import TagSources from "./components/TagSources/TagSources";
 import "./App.css";
 
 // Import course data
@@ -84,6 +85,12 @@ function App() {
                   📚 Path Readiness
                 </button>
                 <button
+                  className={`nav-tab ${activeTab === "sources" ? "active" : ""}`}
+                  onClick={() => setActiveTab("sources")}
+                >
+                  🏷️ Tag Sources
+                </button>
+                <button
                   className={`nav-tab ${activeTab === "builder" ? "active" : ""}`}
                   onClick={() => setActiveTab("builder")}
                 >
@@ -112,6 +119,11 @@ function App() {
             {activeTab === "readiness" && (
               <div className="dashboard-layout">
                 <PathReadiness />
+              </div>
+            )}
+            {activeTab === "sources" && (
+              <div className="dashboard-layout">
+                <TagSources />
               </div>
             )}
             {activeTab === "builder" && (
