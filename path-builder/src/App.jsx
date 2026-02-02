@@ -9,6 +9,7 @@ import TagGraph from "./components/TagGraph/TagGraph";
 import Dashboard from "./components/Dashboard/Dashboard";
 import PathReadiness from "./components/PathReadiness/PathReadiness";
 import TagSources from "./components/TagSources/TagSources";
+import TagEditor from "./components/TagEditor/TagEditor";
 import "./App.css";
 
 // Import course data
@@ -91,6 +92,12 @@ function App() {
                   🏷️ Tag Sources
                 </button>
                 <button
+                  className={`nav-tab ${activeTab === "editor" ? "active" : ""}`}
+                  onClick={() => setActiveTab("editor")}
+                >
+                  ✏️ Tag Editor
+                </button>
+                <button
                   className={`nav-tab ${activeTab === "builder" ? "active" : ""}`}
                   onClick={() => setActiveTab("builder")}
                 >
@@ -124,6 +131,11 @@ function App() {
             {activeTab === "sources" && (
               <div className="dashboard-layout">
                 <TagSources />
+              </div>
+            )}
+            {activeTab === "editor" && (
+              <div className="dashboard-layout">
+                <TagEditor />
               </div>
             )}
             {activeTab === "builder" && (
