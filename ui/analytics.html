@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tag Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="css/base.css" />
+    <style>
+      :root {
+        --bg-primary: #1a1a2e;
+        --bg-secondary: #16213e;
+        --bg-card: #0f3460;
+        --accent: #e94560;
+        --accent-secondary: #00d9ff;
+        --text: #eaeaea;
+        --text-muted: #a0a0a0;
+        --success: #4ade80;
+        --warning: #fbbf24;
+        --danger: #f87171;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        color: var(--text);
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      .dashboard {
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      header h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+      }
+
+      header p {
+        color: var(--text-muted);
+      }
+
+      .nav-link {
+        display: inline-block;
+        margin-top: 1rem;
+        color: var(--accent-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .nav-link:hover {
+        text-decoration: underline;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      }
+
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--accent-secondary);
+      }
+
+      .stat-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+      }
+
+      .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .chart-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .chart-card h3 {
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        color: var(--text);
+      }
+
+      .chart-container {
+        position: relative;
+        height: 300px;
+      }
+
+      .table-section {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 2rem;
+      }
+
+      .table-section h3 {
+        margin-bottom: 1rem;
+      }
+
+      .search-input {
+        width: 100%;
+        max-width: 400px;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: var(--bg-secondary);
+        color: var(--text);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--accent-secondary);
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .data-table th {
+        background: var(--bg-secondary);
+        color: var(--text-muted);
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .data-table th:hover {
+        color: var(--text);
+      }
+
+      .data-table tr:hover td {
+        background: rgba(255,255,255,0.05);
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .badge-high { background: var(--success); color: #000; }
+      .badge-medium { background: var(--warning); color: #000; }
+      .badge-low { background: var(--danger); color: #000; }
+      .badge-category { background: var(--accent); color: #fff; }
+
+      .coverage-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .coverage-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 4rem;
+        color: var(--text-muted);
+      }
+
+      .loading::after {
+        content: '';
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--accent-secondary);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-left: 0.5rem;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      .tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .tab-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        background: var(--bg-secondary);
+        color: var(--text-muted);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .tab-btn:hover {
+        color: var(--text);
+      }
+
+      .tab-btn.active {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .gap-analysis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+
+      .gap-card {
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 3px solid var(--danger);
+      }
+
+      .gap-card.covered {
+        border-left-color: var(--success);
+      }
+
+      .gap-card h4 {
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .gap-card p {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      @media (max-width: 768px) {
+        .charts-grid {
+          grid-template-columns: 1fr;
+        }
+        
+        .data-table {
+          font-size: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard">
+      <header>
+        <h1>📊 Tag Analytics Dashboard</h1>
+        <p>Analyze tag usage patterns to make better learning path decisions</p>
+        <a href="index.html" class="nav-link">← Back to Learning Path Builder</a>
+      </header>
+
+      <div id="loading" class="loading">Loading analytics data...</div>
+
+      <div id="content" style="display: none;">
+        <!-- Stats Overview -->
+        <section class="stats-grid" id="statsGrid"></section>
+
+        <!-- Charts -->
+        <section class="charts-grid">
+          <div class="chart-card">
+            <h3>📈 Tag Usage by Category</h3>
+            <div class="chart-container">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>🔥 Top 15 Most Used Tags</h3>
+            <div class="chart-container">
+              <canvas id="topTagsChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>📚 Content Coverage by Difficulty</h3>
+            <div class="chart-container">
+              <canvas id="difficultyChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>🏭 Industry Distribution</h3>
+            <div class="chart-container">
+              <canvas id="industryChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Detailed Tables -->
+        <section class="table-section">
+          <h3>🏷️ Tag Details</h3>
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="all">All Tags</button>
+            <button class="tab-btn" data-tab="unused">Unused Tags</button>
+            <button class="tab-btn" data-tab="gaps">Coverage Gaps</button>
+          </div>
+          <input type="text" class="search-input" id="tagSearch" placeholder="Search tags...">
+          <div id="tabContent">
+            <table class="data-table" id="tagTable">
+              <thead>
+                <tr>
+                  <th data-sort="name">Tag Name ↕</th>
+                  <th data-sort="category">Category ↕</th>
+                  <th data-sort="usage">Usage Count ↕</th>
+                  <th data-sort="weight">Weight ↕</th>
+                  <th>Coverage</th>
+                </tr>
+              </thead>
+              <tbody id="tagTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Gap Analysis -->
+        <section class="table-section">
+          <h3>🎯 Recommended Actions</h3>
+          <div class="gap-analysis" id="gapAnalysis"></div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let tagsData = { tags: [] };
+      let coursesData = { courses: [] };
+      let tagUsageMap = new Map();
+      let currentSort = { field: 'usage', dir: -1 };
+      let currentTab = 'all';
+
+      // Load data
+      async function loadData() {
+        try {
+          const [tagsRes, coursesRes] = await Promise.all([
+            fetch('../tags/tags.json'),
+            fetch('../content/video_library_enriched.json')
+          ]);
+          
+          tagsData = await tagsRes.json();
+          coursesData = await coursesRes.json();
+          
+          processData();
+          renderDashboard();
+          
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('content').style.display = 'block';
+        } catch (e) {
+          document.getElementById('loading').innerHTML = 
+            `<span style="color: var(--danger)">Error loading data: ${e.message}</span>`;
+        }
+      }
+
+      // Process and analyze data
+      function processData() {
+        // Count tag usage across courses
+        tagUsageMap.clear();
+        
+        coursesData.courses.forEach(course => {
+          const allTags = [
+            ...(course.canonical_tags || []),
+            ...(course.ai_tags || []),
+            ...(course.extracted_tags || []),
+            ...(course.gemini_system_tags || [])
+          ];
+          
+          allTags.forEach(tag => {
+            const normalized = tag.toLowerCase().trim();
+            tagUsageMap.set(normalized, (tagUsageMap.get(normalized) || 0) + 1);
+          });
+        });
+      }
+
+      // Render dashboard
+      function renderDashboard() {
+        renderStats();
+        renderCategoryChart();
+        renderTopTagsChart();
+        renderDifficultyChart();
+        renderIndustryChart();
+        renderTagTable();
+        renderGapAnalysis();
+        setupEventListeners();
+      }
+
+      // Stats cards
+      function renderStats() {
+        const totalTags = tagsData.tags.length;
+        const totalCourses = coursesData.courses.length;
+        const usedTags = new Set([...tagUsageMap.keys()]).size;
+        const avgTagsPerCourse = (
+          coursesData.courses.reduce((sum, c) => 
+            sum + (c.canonical_tags?.length || 0), 0) / totalCourses
+        ).toFixed(1);
+        
+        const totalDuration = coursesData.courses.reduce((sum, c) => 
+          sum + (c.duration_minutes || 0), 0);
+        
+        document.getElementById('statsGrid').innerHTML = `
+          <div class="stat-card">
+            <div class="stat-value">${totalTags}</div>
+            <div class="stat-label">Total Tags Defined</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${usedTags}</div>
+            <div class="stat-label">Tags in Use</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${totalCourses}</div>
+            <div class="stat-label">Total Courses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${avgTagsPerCourse}</div>
+            <div class="stat-label">Avg Tags/Course</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${Math.round(totalDuration / 60)}h</div>
+            <div class="stat-label">Total Content</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${Math.round((usedTags / totalTags) * 100)}%</div>
+            <div class="stat-label">Tag Coverage</div>
+          </div>
+        `;
+      }
+
+      // Category distribution chart
+      function renderCategoryChart() {
+        const categories = {};
+        tagsData.tags.forEach(tag => {
+          const cat = tag.category_path?.[0] || 'Uncategorized';
+          categories[cat] = (categories[cat] || 0) + 1;
+        });
+        
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(categories),
+            datasets: [{
+              data: Object.values(categories),
+              backgroundColor: [
+                '#e94560', '#00d9ff', '#4ade80', '#fbbf24', 
+                '#a855f7', '#f472b6', '#22d3ee', '#fb923c'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: { color: '#eaeaea' }
+              }
+            }
+          }
+        });
+      }
+
+      // Top tags bar chart
+      function renderTopTagsChart() {
+        const sortedTags = [...tagUsageMap.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 15);
+        
+        const ctx = document.getElementById('topTagsChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: sortedTags.map(([name]) => name),
+            datasets: [{
+              label: 'Usage Count',
+              data: sortedTags.map(([, count]) => count),
+              backgroundColor: '#00d9ff',
+              borderRadius: 4
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: { 
+                grid: { color: 'rgba(255,255,255,0.1)' },
+                ticks: { color: '#a0a0a0' }
+              },
+              y: { 
+                grid: { display: false },
+                ticks: { color: '#eaeaea' }
+              }
+            }
+          }
+        });
+      }
+
+      // Difficulty distribution
+      function renderDifficultyChart() {
+        const difficulties = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        coursesData.courses.forEach(c => {
+          const d = c.difficulty || 3;
+          difficulties[d] = (difficulties[d] || 0) + 1;
+        });
+        
+        const labels = ['Beginner', 'Easy', 'Intermediate', 'Advanced', 'Expert'];
+        const ctx = document.getElementById('difficultyChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Courses',
+              data: Object.values(difficulties),
+              backgroundColor: ['#4ade80', '#22d3ee', '#fbbf24', '#f97316', '#ef4444'],
+              borderRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: { 
+                grid: { display: false },
+                ticks: { color: '#eaeaea' }
+              },
+              y: { 
+                grid: { color: 'rgba(255,255,255,0.1)' },
+                ticks: { color: '#a0a0a0' }
+              }
+            }
+          }
+        });
+      }
+
+      // Industry chart
+      function renderIndustryChart() {
+        const industries = {};
+        coursesData.courses.forEach(c => {
+          const ind = c.industry || c.tags?.industry || 'General';
+          industries[ind] = (industries[ind] || 0) + 1;
+        });
+        
+        const ctx = document.getElementById('industryChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: Object.keys(industries),
+            datasets: [{
+              data: Object.values(industries),
+              backgroundColor: [
+                '#e94560', '#00d9ff', '#4ade80', '#fbbf24', 
+                '#a855f7', '#f472b6', '#22d3ee', '#fb923c'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: { color: '#eaeaea' }
+              }
+            }
+          }
+        });
+      }
+
+      // Tag table
+      function renderTagTable() {
+        const tbody = document.getElementById('tagTableBody');
+        let tagsToShow = tagsData.tags.map(tag => {
+          const tagId = tag.tag_id.toLowerCase();
+          const displayName = tag.display_name.toLowerCase();
+          const usage = tagUsageMap.get(tagId) || tagUsageMap.get(displayName) || 0;
+          const weight = tag.relevance?.global_weight || 0.5;
+          
+          return {
+            id: tag.tag_id,
+            name: tag.display_name,
+            category: tag.category_path?.[0] || 'Uncategorized',
+            usage,
+            weight,
+            type: tag.tag_type
+          };
+        });
+        
+        // Filter by tab
+        if (currentTab === 'unused') {
+          tagsToShow = tagsToShow.filter(t => t.usage === 0);
+        } else if (currentTab === 'gaps') {
+          tagsToShow = tagsToShow.filter(t => t.usage < 3 && t.weight > 0.7);
+        }
+        
+        // Filter by search
+        const search = document.getElementById('tagSearch')?.value?.toLowerCase() || '';
+        if (search) {
+          tagsToShow = tagsToShow.filter(t => 
+            t.name.toLowerCase().includes(search) || 
+            t.category.toLowerCase().includes(search)
+          );
+        }
+        
+        // Sort
+        tagsToShow.sort((a, b) => {
+          const aVal = a[currentSort.field];
+          const bVal = b[currentSort.field];
+          if (typeof aVal === 'string') {
+            return currentSort.dir * aVal.localeCompare(bVal);
+          }
+          return currentSort.dir * (aVal - bVal);
+        });
+        
+        tbody.innerHTML = tagsToShow.slice(0, 100).map(tag => {
+          const coveragePercent = Math.min(100, (tag.usage / 10) * 100);
+          const badgeClass = tag.weight >= 0.85 ? 'badge-high' : 
+                            tag.weight >= 0.7 ? 'badge-medium' : 'badge-low';
+          const barColor = coveragePercent > 50 ? '#4ade80' : 
+                          coveragePercent > 20 ? '#fbbf24' : '#f87171';
+          
+          return `
+            <tr>
+              <td><strong>${tag.name}</strong><br><small style="color:var(--text-muted)">${tag.id}</small></td>
+              <td><span class="badge badge-category">${tag.category}</span></td>
+              <td>${tag.usage}</td>
+              <td><span class="badge ${badgeClass}">${(tag.weight * 100).toFixed(0)}%</span></td>
+              <td>
+                <div class="coverage-bar">
+                  <div class="coverage-fill" style="width:${coveragePercent}%;background:${barColor}"></div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Gap analysis
+      function renderGapAnalysis() {
+        const gaps = [];
+        
+        // High-weight tags with low usage
+        tagsData.tags.forEach(tag => {
+          const usage = tagUsageMap.get(tag.tag_id.toLowerCase()) || 
+                       tagUsageMap.get(tag.display_name.toLowerCase()) || 0;
+          const weight = tag.relevance?.global_weight || 0.5;
+          
+          if (weight >= 0.8 && usage < 3) {
+            gaps.push({
+              type: 'missing',
+              name: tag.display_name,
+              reason: `High-priority tag (${(weight*100).toFixed(0)}% weight) with only ${usage} courses`,
+              suggestion: `Add more content covering ${tag.display_name}`
+            });
+          }
+        });
+        
+        // Find categories with low representation
+        const categoryUsage = {};
+        tagsData.tags.forEach(tag => {
+          const cat = tag.category_path?.[0] || 'Other';
+          if (!categoryUsage[cat]) categoryUsage[cat] = { total: 0, used: 0 };
+          categoryUsage[cat].total++;
+          const usage = tagUsageMap.get(tag.tag_id.toLowerCase()) || 0;
+          if (usage > 0) categoryUsage[cat].used++;
+        });
+        
+        Object.entries(categoryUsage).forEach(([cat, data]) => {
+          const coverage = data.used / data.total;
+          if (coverage < 0.5 && data.total > 5) {
+            gaps.push({
+              type: 'category',
+              name: cat,
+              reason: `Only ${Math.round(coverage*100)}% of tags in "${cat}" have content`,
+              suggestion: `Expand content library for ${cat} topics`
+            });
+          }
+        });
+        
+        const container = document.getElementById('gapAnalysis');
+        container.innerHTML = gaps.slice(0, 8).map(gap => `
+          <div class="gap-card">
+            <h4>${gap.type === 'category' ? '📁' : '🏷️'} ${gap.name}</h4>
+            <p>${gap.reason}</p>
+            <p style="color:var(--accent-secondary);margin-top:0.5rem;">💡 ${gap.suggestion}</p>
+          </div>
+        `).join('') || '<p style="color:var(--text-muted)">No significant gaps found! 🎉</p>';
+      }
+
+      // Event listeners
+      function setupEventListeners() {
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTab = btn.dataset.tab;
+            renderTagTable();
+          });
+        });
+        
+        // Search
+        document.getElementById('tagSearch').addEventListener('input', () => {
+          renderTagTable();
+        });
+        
+        // Table sorting
+        document.querySelectorAll('.data-table th[data-sort]').forEach(th => {
+          th.addEventListener('click', () => {
+            const field = th.dataset.sort;
+            if (currentSort.field === field) {
+              currentSort.dir *= -1;
+            } else {
+              currentSort = { field, dir: -1 };
+            }
+            renderTagTable();
+          });
+        });
+      }
+
+      // Initialize
+      loadData();
+    </script>
+  </body>
+</html>
