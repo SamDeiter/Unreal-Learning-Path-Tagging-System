@@ -185,8 +185,13 @@ function PathReadiness() {
                   {["Beginner", "Intermediate", "Advanced"].map((level) => {
                     const count = topic.levels[level].length;
                     const cellClass = count >= 2 ? "cell-ready" : count === 1 ? "cell-partial" : "cell-gap";
+                    const tooltip = count >= 2 
+                      ? `✅ ${count} ${level} courses available — ready for learning path`
+                      : count === 1 
+                        ? `⚠️ Only 1 ${level} course — add more for variety`
+                        : `❌ No ${level} courses — must add content before creating path`;
                     return (
-                      <td key={level} className={`level-cell ${cellClass}`}>
+                      <td key={level} className={`level-cell ${cellClass}`} title={tooltip}>
                         {count > 0 ? (
                           <span className="level-count">{count}</span>
                         ) : (
@@ -196,7 +201,18 @@ function PathReadiness() {
                     );
                   })}
                   <td className="status-cell">
-                    <span className={`status-badge ${topic.status}`}>{topic.statusLabel}</span>
+                    <span 
+                      className={`status-badge ${topic.status}`}
+                      title={
+                        topic.status === "ready" 
+                          ? "This topic has courses at all 3 difficulty levels — ready to package as a complete learning path"
+                          : topic.status === "incomplete"
+                            ? `Missing ${topic.missing.join(" and ")} level courses — add these before creating a learning path`
+                            : "No courses available for this topic yet — cannot create a learning path"
+                      }
+                    >
+                      {topic.statusLabel}
+                    </span>
                   </td>
                   <td className="duration-cell">{formatDuration(topic.totalDuration)}</td>
                 </tr>
