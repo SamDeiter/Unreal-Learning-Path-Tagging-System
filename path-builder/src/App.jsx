@@ -10,6 +10,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import PathReadiness from "./components/PathReadiness/PathReadiness";
 import TagSources from "./components/TagSources/TagSources";
 import TagEditor from "./components/TagEditor/TagEditor";
+import { TagNetwork, SkillRadar, JourneyHeatmap, TagTimeline, PrereqFlow, InstructorMap } from "./components/Visualizations";
 import "./App.css";
 
 // Import course data
@@ -104,10 +105,10 @@ function App() {
                   Path Builder
                 </button>
                 <button
-                  className={`nav-tab ${activeTab === "tags" ? "active" : ""}`}
-                  onClick={() => setActiveTab("tags")}
+                  className={`nav-tab ${activeTab === "analytics" ? "active" : ""}`}
+                  onClick={() => setActiveTab("analytics")}
                 >
-                  Tag Analysis
+                  📊 Analytics
                 </button>
               </nav>
             </div>
@@ -161,9 +162,26 @@ function App() {
                 </aside>
               </div>
             )}
-            {activeTab === "tags" && (
-              <div className="tags-layout">
-                <TagGraph tags={tags} edges={edges} courses={courses} />
+            {activeTab === "analytics" && (
+              <div className="analytics-layout">
+                <div className="analytics-header">
+                  <h2>📊 Tag & Skill Analytics</h2>
+                  <p className="analytics-subtitle">Insights from {courses.length} courses</p>
+                </div>
+                <div className="analytics-grid">
+                  <TagNetwork />
+                  <SkillRadar />
+                  <JourneyHeatmap />
+                  <TagTimeline />
+                  <PrereqFlow />
+                  <InstructorMap />
+                </div>
+                <div className="analytics-section">
+                  <h3>🔗 Tag Relationship Graph</h3>
+                  <div className="tag-graph-container">
+                    <TagGraph tags={tags} edges={edges} courses={courses} />
+                  </div>
+                </div>
               </div>
             )}
           </main>

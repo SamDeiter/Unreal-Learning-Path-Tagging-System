@@ -3,6 +3,7 @@ import { usePath } from "../../context/PathContext";
 import { generateStructure, generateObjectives, generateGoals } from "../../utils/generationEngine";
 import { getOfficialDocs } from "../../utils/suggestionEngine";
 import { generateLearningBlueprint, isUserAuthenticated } from "../../services/geminiService";
+import { exportToJSON, exportToCSV, generateSCORMManifest, generateXAPITemplate, downloadFile } from "../../utils/pathExporter";
 import "./OutputPanel.css";
 
 function OutputPanel() {
@@ -10,6 +11,7 @@ function OutputPanel() {
   const [activeTab, setActiveTab] = useState("outline");
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiBlueprint, setAiBlueprint] = useState(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Get official docs for selected courses
   const docLinks = useMemo(() => getOfficialDocs(courses), [courses]);
@@ -147,6 +149,49 @@ ${docLinks.length > 0 ? docLinks.map((doc) => `- [${doc.title}](${doc.url})`).jo
           >
             ⬇️ Download
           </button>
+        )}
+        {hasContent && (
+          <div className="export-dropdown-container">
+            <button
+              className="btn btn-primary btn-sm export-lms-btn"
+              title="Export path for LMS integration"
+              onClick={() => setShowExportMenu(!showExportMenu)}
+            >
+              📤 Export for LMS ▾
+            </button>
+            {showExportMenu && (
+              <div className="export-dropdown-menu">
+                <button onClick={() => {
+                  const json = exportToJSON(learningIntent, courses);
+                  downloadFile(json, `${json.id}.json`, 'application/json');
+                  setShowExportMenu(false);
+                }}>
+                  📋 JSON (LMS Import)
+                </button>
+                <button onClick={() => {
+                  const csv = exportToCSV(learningIntent, courses);
+                  downloadFile(csv, `learning-path-${Date.now()}.csv`, 'text/csv');
+                  setShowExportMenu(false);
+                }}>
+                  📊 CSV (Spreadsheet)
+                </button>
+                <button onClick={() => {
+                  const manifest = generateSCORMManifest(learningIntent, courses);
+                  downloadFile(manifest, 'imsmanifest.xml', 'application/xml');
+                  setShowExportMenu(false);
+                }}>
+                  📦 SCORM Manifest
+                </button>
+                <button onClick={() => {
+                  const xapi = generateXAPITemplate(learningIntent, courses, 0);
+                  downloadFile(xapi, `xapi-template-${Date.now()}.json`, 'application/json');
+                  setShowExportMenu(false);
+                }}>
+                  🔗 xAPI Template
+                </button>
+              </div>
+            )}
+          </div>
         )}
         <div className="output-tabs">
           <button

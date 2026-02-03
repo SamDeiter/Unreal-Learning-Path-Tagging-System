@@ -344,7 +344,7 @@ function Dashboard() {
         <h3>
           <span className="section-icon">🏷️</span> Tag Cloud
         </h3>
-        <p className="section-desc">
+        <div className="section-desc">
           The 100 most used tags that power this learning system
           <div className="export-dropdown">
             <button
@@ -385,10 +385,10 @@ function Dashboard() {
                 URL.revokeObjectURL(url);
               }}
             >
-              � Export JSON
+              📄 Export JSON
             </button>
           </div>
-        </p>
+        </div>
         <div className="tag-cloud">
           {tagCloud.map((tag, index) => (
             <span

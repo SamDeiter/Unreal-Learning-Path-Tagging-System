@@ -9,9 +9,11 @@ import "./TagSources.css";
  * 3. AI Tags (Gemini-enriched)
  */
 function TagSources() {
-  const { courses, tags } = useTagData();
+  const { courses } = useTagData();
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [filter, setFilter] = useState("all"); // 'all' | 'enriched' | 'pending'
+  const [showAllVideoTags, setShowAllVideoTags] = useState(false);
+  const [videoTagLimit, setVideoTagLimit] = useState(15); // 15, 100, or 'all'
 
   // Analyze tag sources across all courses
   const analysis = useMemo(() => {
@@ -85,7 +87,76 @@ function TagSources() {
 
   const topBaseTags = getTopTags(analysis.baseTagCounts);
   const topAITags = getTopTags(analysis.aiTagCounts);
-  const topVideoTags = getTopTags(analysis.videoTagCounts);
+  
+  // Get all video tags sorted by frequency
+  const allVideoTags = useMemo(() => {
+    return Object.entries(analysis.videoTagCounts)
+      .sort((a, b) => b[1] - a[1]);
+  }, [analysis.videoTagCounts]);
+  
+  const displayedVideoTags = videoTagLimit === 'all' 
+    ? allVideoTags 
+    : allVideoTags.slice(0, videoTagLimit);
+
+  // Tag export data
+  const tagExportData = useMemo(() => {
+    const uniqueBaseTags = Object.keys(analysis.baseTagCounts).length;
+    const uniqueVideoTags = Object.keys(analysis.videoTagCounts).length;
+    const uniqueAITags = Object.keys(analysis.aiTagCounts).length;
+    
+    const totalBaseUsage = Object.values(analysis.baseTagCounts).reduce((a, b) => a + b, 0);
+    const totalVideoUsage = Object.values(analysis.videoTagCounts).reduce((a, b) => a + b, 0);
+    const totalAIUsage = Object.values(analysis.aiTagCounts).reduce((a, b) => a + b, 0);
+
+    return {
+      uniqueBaseTags,
+      uniqueVideoTags,
+      uniqueAITags,
+      totalBaseTags: totalBaseUsage,
+      totalVideoTags: totalVideoUsage,
+      totalAITags: totalAIUsage,
+      grandTotal: uniqueBaseTags + uniqueVideoTags + uniqueAITags,
+    };
+  }, [analysis]);
+
+  // Export tags to CSV
+  const exportTags = (source) => {
+    let tags;
+    let filename;
+    
+    switch (source) {
+      case 'base':
+        tags = analysis.baseTagCounts;
+        filename = 'base_tags_export.csv';
+        break;
+      case 'video':
+        tags = analysis.videoTagCounts;
+        filename = 'video_extracted_tags_export.csv';
+        break;
+      case 'ai':
+        tags = analysis.aiTagCounts;
+        filename = 'ai_tags_export.csv';
+        break;
+      default:
+        // Export all
+        tags = { ...analysis.baseTagCounts, ...analysis.videoTagCounts, ...analysis.aiTagCounts };
+        filename = 'all_tags_export.csv';
+    }
+
+    const csvContent = "Tag,Count,Source\n" + 
+      Object.entries(tags)
+        .sort((a, b) => b[1] - a[1])
+        .map(([tag, count]) => `"${tag}",${count},${source}`)
+        .join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="tag-sources">
@@ -141,6 +212,39 @@ function TagSources() {
         </div>
       </div>
 
+      {/* Tag Export Stats */}
+      <div className="ts-export-stats">
+        <div className="export-header">
+          <h3>📊 Tag Generation Summary</h3>
+          <button className="export-all-btn" onClick={() => exportTags('all')}>
+            ⬇️ Export All Tags (CSV)
+          </button>
+        </div>
+        <div className="export-grid">
+          <div className="export-stat base">
+            <div className="stat-label">BASE Tags</div>
+            <div className="stat-value">{tagExportData.uniqueBaseTags}</div>
+            <div className="stat-usage">{tagExportData.totalBaseTags} total uses</div>
+            <button className="export-btn" onClick={() => exportTags('base')}>Export</button>
+          </div>
+          <div className="export-stat video">
+            <div className="stat-label">VIDEO Tags</div>
+            <div className="stat-value">{tagExportData.uniqueVideoTags}</div>
+            <div className="stat-usage">{tagExportData.totalVideoTags} total uses</div>
+            <button className="export-btn" onClick={() => exportTags('video')}>Export</button>
+          </div>
+          <div className="export-stat ai">
+            <div className="stat-label">AI Tags</div>
+            <div className="stat-value">{tagExportData.uniqueAITags}</div>
+            <div className="stat-usage">{tagExportData.totalAITags} total uses</div>
+            <button className="export-btn" onClick={() => exportTags('ai')}>Export</button>
+          </div>
+        </div>
+        <div className="export-total">
+          Grand Total: <strong>{tagExportData.grandTotal}</strong> unique tags generated
+        </div>
+      </div>
+
       {/* Tag Source Breakdown */}
       <div className="ts-sources-grid">
         {/* Base Tags */}
@@ -148,6 +252,7 @@ function TagSources() {
           <h3>
             <span className="source-badge base">BASE</span>
             Manual Taxonomy
+            <span className="source-total">{Object.keys(analysis.baseTagCounts).length} unique tags</span>
           </h3>
           <p className="ts-source-desc">
             Official tags assigned during content creation
@@ -161,22 +266,53 @@ function TagSources() {
           </div>
         </div>
 
-        {/* Video Tags */}
-        <div className="ts-source-card">
+        {/* Video Tags - Expandable */}
+        <div className={`ts-source-card ${showAllVideoTags ? 'expanded' : ''}`}>
           <h3>
             <span className="source-badge video">VIDEO</span>
             Video Extracted
+            <span className="source-total">{allVideoTags.length} unique tags</span>
           </h3>
           <p className="ts-source-desc">
             Keywords from video titles and transcript analysis
           </p>
-          <div className="tag-list">
-            {topVideoTags.map(([tag, count]) => (
-              <span key={tag} className="tag-chip video">
-                {tag} <span className="count">{count}</span>
-              </span>
-            ))}
+          
+          {/* Tag limit controls */}
+          <div className="tag-limit-controls">
+            <span>Show:</span>
+            <button 
+              className={videoTagLimit === 15 ? 'active' : ''} 
+              onClick={() => { setVideoTagLimit(15); setShowAllVideoTags(false); }}
+            >
+              Top 15
+            </button>
+            <button 
+              className={videoTagLimit === 100 ? 'active' : ''} 
+              onClick={() => { setVideoTagLimit(100); setShowAllVideoTags(true); }}
+            >
+              Top 100
+            </button>
+            <button 
+              className={videoTagLimit === 'all' ? 'active' : ''} 
+              onClick={() => { setVideoTagLimit('all'); setShowAllVideoTags(true); }}
+            >
+              All ({allVideoTags.length})
+            </button>
           </div>
+          
+          {allVideoTags.length === 0 ? (
+            <div className="no-tags-warning">
+              ⚠️ No video-extracted tags found. Check if <code>ai_tags</code> or <code>transcript_tags</code> fields exist in your data.
+            </div>
+          ) : (
+            <div className={`tag-list ${showAllVideoTags ? 'expanded' : ''}`}>
+              {displayedVideoTags.map(([tag, count]) => (
+                <span key={tag} className="tag-chip video">
+                  {tag} <span className="count">{count}</span>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* AI Tags */}
@@ -184,6 +320,7 @@ function TagSources() {
           <h3>
             <span className="source-badge ai">AI</span>
             Gemini Enriched
+            <span className="source-total">{Object.keys(analysis.aiTagCounts).length} unique tags</span>
           </h3>
           <p className="ts-source-desc">
             System tags identified by AI content analysis

@@ -1,33 +1,33 @@
 import { useState } from "react";
 import CourseLibrary from "../CourseLibrary/CourseLibrary";
-import TagPathBuilder from "./TagPathBuilder";
+import SkillCurriculum from "./SkillCurriculum";
 import "./LeftPanel.css";
 
 function LeftPanel({ courses }) {
-  const [mode, setMode] = useState("browse"); // 'browse' | 'tags'
+  const [mode, setMode] = useState("skill"); // 'skill' | 'browse' - skill-first!
 
   return (
     <div className="left-panel">
       <div className="panel-tabs">
         <button
+          className={`panel-tab ${mode === "skill" ? "active" : ""}`}
+          onClick={() => setMode("skill")}
+        >
+          🎯 Build by Skill
+        </button>
+        <button
           className={`panel-tab ${mode === "browse" ? "active" : ""}`}
           onClick={() => setMode("browse")}
         >
-          Browse Courses
-        </button>
-        <button
-          className={`panel-tab ${mode === "tags" ? "active" : ""}`}
-          onClick={() => setMode("tags")}
-        >
-          Build by Tags
+          📚 Browse All
         </button>
       </div>
 
       <div className="panel-content">
-        {mode === "browse" ? (
-          <CourseLibrary courses={courses} />
+        {mode === "skill" ? (
+          <SkillCurriculum courses={courses} />
         ) : (
-          <TagPathBuilder courses={courses} />
+          <CourseLibrary courses={courses} />
         )}
       </div>
     </div>

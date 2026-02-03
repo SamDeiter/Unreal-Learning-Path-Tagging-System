@@ -13,7 +13,46 @@ import { createContext, useContext, useState, useMemo } from "react";
 
 const TagDataContext = createContext(null);
 
+/**
+ * Validate and normalize a course, applying defaults for missing fields
+ */
+function validateCourse(course) {
+  const validated = { ...course };
+  
+  // Apply defaults for missing required fields
+  if (!validated.duration_minutes) {
+    validated.duration_minutes = 15; // Default 15 min
+    validated._durationEstimated = true;
+  }
+  
+  if (!validated.topic) {
+    validated.topic = "General";
+    validated._topicInferred = true;
+  }
+  
+  if (!validated.video_url && !validated.url) {
+    // Try to construct from code if possible
+    validated._missingUrl = true;
+  }
+  
+  // Track completeness
+  const missingFields = [];
+  if (!course.duration_minutes) missingFields.push("duration");
+  if (!course.topic) missingFields.push("topic");
+  if (!course.video_url && !course.url) missingFields.push("url");
+  
+  validated._isComplete = missingFields.length === 0;
+  validated._missingFields = missingFields;
+  
+  return validated;
+}
+
 export function TagDataProvider({ children, tags = [], edges = [], courses = [] }) {
+  // Validate all courses on mount
+  const validatedCourses = useMemo(() => {
+    return courses.map(validateCourse);
+  }, [courses]);
+  
   // Selection state - synced across all tag views
   const [selectedTagId, setSelectedTagId] = useState(null);
 
@@ -101,7 +140,7 @@ export function TagDataProvider({ children, tags = [], edges = [], courses = [] 
   const value = {
     tags,
     edges,
-    courses,
+    courses: validatedCourses,
     enrichedTags,
     selectedTagId,
     setSelectedTagId,
