@@ -34,7 +34,7 @@ function TagTrends() {
             tagCourses[normalized].push({
               id: course.id,
               title: course.title,
-              level: course.level || course.difficulty || 'Beginner',
+              level: String(course.level || course.difficulty || course.tags?.level || 'Beginner'),
               duration: course.duration
             });
           }
@@ -117,7 +117,7 @@ function TagTrends() {
             {selectedTagData.courses.slice(0, 8).map(course => (
               <div key={course.id} className="course-item">
                 <span className="course-title">{course.title}</span>
-                <span className={`course-level ${(course.level || '').toLowerCase()}`}>
+                <span className={`course-level ${String(course.level || '').toLowerCase()}`}>
                   {course.level}
                 </span>
               </div>
