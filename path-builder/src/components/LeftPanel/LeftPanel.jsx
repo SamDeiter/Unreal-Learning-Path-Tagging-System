@@ -3,7 +3,7 @@ import CourseLibrary from "../CourseLibrary/CourseLibrary";
 import SkillCurriculum from "./SkillCurriculum";
 import "./LeftPanel.css";
 
-function LeftPanel({ courses }) {
+function LeftPanel({ courses, preSelectedSkill, onSkillUsed }) {
   const [mode, setMode] = useState("skill"); // 'skill' | 'browse' - skill-first!
 
   return (
@@ -25,7 +25,7 @@ function LeftPanel({ courses }) {
 
       <div className="panel-content">
         {mode === "skill" ? (
-          <SkillCurriculum courses={courses} />
+          <SkillCurriculum courses={courses} preSelectedSkill={preSelectedSkill} onSkillUsed={onSkillUsed} />
         ) : (
           <CourseLibrary courses={courses} />
         )}

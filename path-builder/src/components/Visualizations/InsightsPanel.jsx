@@ -8,7 +8,7 @@ import './InsightsPanel.css';
  * Insights & Recommendations Panel
  * Analyzes course data and generates actionable suggestions
  */
-function InsightsPanel() {
+function InsightsPanel({ onNavigate }) {
   const { courses } = useTagData();
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -61,7 +61,9 @@ function InsightsPanel() {
         title: `${item.name} has limited coverage`,
         description: `Only ${item.courseCount} courses cover ${item.name}. This may be an opportunity to expand.`,
         source: `Searched for "${item.keywords.join('", "')}" in course tags and titles`,
-        priority: 'medium'
+        priority: 'medium',
+        skillName: item.name,
+        actionable: true
       });
     });
 
@@ -78,7 +80,9 @@ function InsightsPanel() {
         title: `Strong ${strength.name} coverage`,
         description: `${strength.courseCount} courses covering ${strength.name}—well above average library depth.`,
         source: `Counted ${strength.courseCount} courses matching ${strength.name} keywords`,
-        priority: 'info'
+        priority: 'info',
+        skillName: strength.name,
+        actionable: true
       });
     });
 
@@ -175,6 +179,22 @@ function InsightsPanel() {
                 <p>{insight.description}</p>
                 {insight.source && (
                   <span className="insight-source">📊 {insight.source}</span>
+                )}
+                {insight.actionable && insight.skillName && onNavigate && (
+                  <div className="insight-actions">
+                    <button 
+                      className="insight-action-btn primary"
+                      onClick={() => onNavigate('builder', insight.skillName)}
+                    >
+                      🎯 Start Path
+                    </button>
+                    <button 
+                      className="insight-action-btn secondary"
+                      onClick={() => onNavigate('builder', insight.skillName)}
+                    >
+                      📚 View Courses
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

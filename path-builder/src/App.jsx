@@ -22,6 +22,15 @@ import edgesData from "./data/edges.json";
 
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'builder' | 'tags'
+  const [preSelectedSkill, setPreSelectedSkill] = useState(null);
+
+  // Handle navigation from insights panel
+  const handleInsightNavigate = (tab, skillName) => {
+    setActiveTab(tab);
+    if (skillName) {
+      setPreSelectedSkill(skillName);
+    }
+  };
 
   // Process course data - deduplicate by code
   const courses = useMemo(() => {
@@ -150,7 +159,7 @@ function App() {
 
                 {/* Left: Input Panel */}
                 <aside className="library-panel">
-                  <LeftPanel courses={courses} />
+                  <LeftPanel courses={courses} preSelectedSkill={preSelectedSkill} onSkillUsed={() => setPreSelectedSkill(null)} />
                 </aside>
 
                 {/* Center: Path Canvas */}
@@ -173,7 +182,7 @@ function App() {
 
                 <div className="analytics-grid">
                   {/* Insights & Recommendations */}
-                  <InsightsPanel />
+                  <InsightsPanel onNavigate={handleInsightNavigate} />
                   
                   {/* Overview Section */}
                   <CollapsibleSection title="Overview" icon="📈">

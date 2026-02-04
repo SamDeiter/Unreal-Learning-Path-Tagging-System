@@ -11,7 +11,7 @@ import "./SkillCurriculum.css";
  * - Learning outcomes preview
  * - Tiered curriculum organization
  */
-function SkillCurriculum({ courses }) {
+function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
   const { addCourse, courses: pathCourses } = usePath();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,6 +19,14 @@ function SkillCurriculum({ courses }) {
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [timeBudget, setTimeBudget] = useState(""); // "" = no limit, or minutes
   const searchRef = useRef(null);
+
+  // Auto-populate search when preSelectedSkill changes (from Analytics insights)
+  useEffect(() => {
+    if (preSelectedSkill) {
+      setSearchQuery(preSelectedSkill);
+      if (onSkillUsed) onSkillUsed(); // Clear after use
+    }
+  }, [preSelectedSkill, onSkillUsed]);
 
   // Get all unique skills for autocomplete
   const allSkills = useMemo(() => {
