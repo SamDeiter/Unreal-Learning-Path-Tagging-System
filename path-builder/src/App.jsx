@@ -191,12 +191,13 @@ function App() {
                   <CollapsibleSection title="Learning Paths" icon="🛤️">
                     <PrereqFlow />
                   </CollapsibleSection>
-                </div>
-                <div className="analytics-section">
-                  <h3>🔗 Tag Relationship Graph</h3>
-                  <div className="tag-graph-container">
-                    <TagGraph tags={tags} edges={edges} courses={courses} />
-                  </div>
+                  
+                  {/* Tag Relationship Graph Section */}
+                  <CollapsibleSection title="Tag Relationship Graph" icon="🔗" defaultExpanded={true}>
+                    <div className="tag-graph-wrapper">
+                      <TagGraph tags={tags} edges={edges} courses={courses} />
+                    </div>
+                  </CollapsibleSection>
                 </div>
               </div>
             )}

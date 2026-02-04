@@ -14,16 +14,16 @@ function InsightsPanel() {
   const insights = useMemo(() => {
     const results = [];
 
-    // Skill categories with demand estimates
+    // Skill categories - just keywords, no fake demand numbers
     const skillCategories = [
-      { name: 'Blueprints', keywords: ['blueprint', 'visual scripting', 'bp'], demand: 90 },
-      { name: 'Materials', keywords: ['material', 'shader', 'texture'], demand: 80 },
-      { name: 'Niagara', keywords: ['niagara', 'particle', 'vfx'], demand: 85 },
-      { name: 'Lighting', keywords: ['light', 'lumen', 'raytracing'], demand: 70 },
-      { name: 'Animation', keywords: ['animation', 'skeletal', 'rigging'], demand: 75 },
-      { name: 'UI/UMG', keywords: ['ui', 'umg', 'widget', 'hud'], demand: 65 },
-      { name: 'Audio', keywords: ['audio', 'sound', 'metasound'], demand: 40 },
-      { name: 'Landscape', keywords: ['landscape', 'terrain', 'foliage'], demand: 55 },
+      { name: 'Blueprints', keywords: ['blueprint', 'visual scripting', 'bp'] },
+      { name: 'Materials', keywords: ['material', 'shader', 'texture'] },
+      { name: 'Niagara', keywords: ['niagara', 'particle', 'vfx'] },
+      { name: 'Lighting', keywords: ['light', 'lumen', 'raytracing'] },
+      { name: 'Animation', keywords: ['animation', 'skeletal', 'rigging'] },
+      { name: 'UI/UMG', keywords: ['ui', 'umg', 'widget', 'hud'] },
+      { name: 'Audio', keywords: ['audio', 'sound', 'metasound'] },
+      { name: 'Landscape', keywords: ['landscape', 'terrain', 'foliage'] },
     ];
 
     // Calculate coverage for each skill
@@ -40,28 +40,26 @@ function InsightsPanel() {
         );
       });
 
-      const coverage = Math.min(100, (matchingCourses.length / courses.length) * 200);
       return {
         ...skill,
-        courseCount: matchingCourses.length,
-        coverage,
-        gap: skill.demand - coverage
+        courseCount: matchingCourses.length
       };
     });
 
-    // Skill Gap Insights (high demand, low coverage)
-    const gaps = skillCoverage
-      .filter(s => s.gap > 25 && s.courseCount < 10)
-      .sort((a, b) => b.gap - a.gap)
+    // Low Coverage Insights - topics with very few courses
+    const lowCoverage = skillCoverage
+      .filter(s => s.courseCount > 0 && s.courseCount < 10)
+      .sort((a, b) => a.courseCount - b.courseCount)
       .slice(0, 2);
 
-    gaps.forEach(gap => {
+    lowCoverage.forEach(item => {
       results.push({
         type: 'gap',
         icon: '📈',
-        title: `${gap.name} content opportunity`,
-        description: `High industry demand (${gap.demand}%) but only ${gap.courseCount} courses. Consider adding more ${gap.name} content.`,
-        priority: 'high'
+        title: `${item.name} has limited coverage`,
+        description: `Only ${item.courseCount} courses cover ${item.name}. This may be an opportunity to expand.`,
+        source: `Searched for "${item.keywords.join('", "')}" in course tags and titles`,
+        priority: 'medium'
       });
     });
 
@@ -77,6 +75,7 @@ function InsightsPanel() {
         icon: '✅',
         title: `Strong ${strength.name} coverage`,
         description: `${strength.courseCount} courses covering ${strength.name}—well above average library depth.`,
+        source: `Counted ${strength.courseCount} courses matching ${strength.name} keywords`,
         priority: 'info'
       });
     });
@@ -100,6 +99,7 @@ function InsightsPanel() {
         icon: '🎓',
         title: 'Advanced content gap',
         description: `Only ${levels.advanced} advanced courses vs ${levels.beginner} beginner. Consider creating expert-level content.`,
+        source: `Analyzed gemini_skill_level tags: ${levels.beginner} beginner, ${levels.intermediate} intermediate, ${levels.advanced} advanced`,
         priority: 'medium'
       });
     }
@@ -113,26 +113,8 @@ function InsightsPanel() {
         icon: '⏱️',
         title: 'Content format opportunity',
         description: `${Math.round(shortCourses/courses.length*100)}% of courses are under 30 min. Consider adding deeper workshop-style content.`,
+        source: `${shortCourses} of ${courses.length} courses have duration_minutes < 30`,
         priority: 'low'
-      });
-    }
-
-    // Trending Topics (placeholder for future API integration)
-    const trendingTopics = ['MetaHuman', 'PCG', 'Motion Design'];
-    const hasTrending = trendingTopics.some(topic => 
-      courses.some(c => 
-        (c.title || '').toLowerCase().includes(topic.toLowerCase()) ||
-        (c.gemini_system_tags || []).some(t => t.toLowerCase().includes(topic.toLowerCase()))
-      )
-    );
-
-    if (!hasTrending) {
-      results.push({
-        type: 'trend',
-        icon: '💡',
-        title: 'Trending topic opportunity',
-        description: 'MetaHuman, PCG, and Motion Design are trending in UE5. Consider adding related content.',
-        priority: 'medium'
       });
     }
 
@@ -161,6 +143,9 @@ function InsightsPanel() {
               <div className="insight-content">
                 <strong>{insight.title}</strong>
                 <p>{insight.description}</p>
+                {insight.source && (
+                  <span className="insight-source">📊 {insight.source}</span>
+                )}
               </div>
             </div>
           ))}
