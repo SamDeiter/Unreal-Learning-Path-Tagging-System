@@ -80,6 +80,32 @@ function getEdgeOpacity(weight, minWeight, maxWeight) {
   return clampedScale(weight, minWeight, maxWeight, 0.6, 1);
 }
 
+// Category color mapping for visual clustering
+const CATEGORY_COLORS = {
+  scripting: { bg: '#a371f7', border: '#8957e5' },      // Purple
+  rendering: { bg: '#58a6ff', border: '#1f6feb' },      // Blue
+  animation: { bg: '#3fb950', border: '#238636' },      // Green
+  environment: { bg: '#f0883e', border: '#d47616' },    // Orange
+  character: { bg: '#f778ba', border: '#db61a2' },      // Pink
+  multiplayer: { bg: '#56d4dd', border: '#39c5cf' },    // Cyan
+  ai: { bg: '#d29922', border: '#bb8009' },             // Gold
+  ui: { bg: '#bc8cff', border: '#a371f7' },             // Light Purple
+  optimization: { bg: '#ff7b72', border: '#f85149' },   // Red
+  cinematic: { bg: '#79c0ff', border: '#58a6ff' },      // Light Blue
+  audio: { bg: '#7ee787', border: '#56d364' },          // Light Green
+  procedural: { bg: '#ffa657', border: '#f0883e' },     // Light Orange
+  default: { bg: '#8b949e', border: '#6e7681' },        // Gray
+};
+
+/**
+ * Gets the color for a tag based on its category (derived from tag ID prefix)
+ */
+function getCategoryColor(tagId) {
+  if (!tagId) return CATEGORY_COLORS.default;
+  const category = tagId.split('.')[0]?.toLowerCase();
+  return CATEGORY_COLORS[category] || CATEGORY_COLORS.default;
+}
+
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -166,6 +192,8 @@ function TagGraph({ tags = [], edges = [] }) {
       const labelWidth = Math.max(tag.label.length * 7 + 40, nodeSize);
       // Height includes node + label below (node + spacing + text height)
       const totalHeight = nodeSize + 30;
+      // Get category color for this tag
+      const colors = getCategoryColor(tag.id);
 
       return {
         data: {
@@ -179,6 +207,10 @@ function TagGraph({ tags = [], edges = [] }) {
           height: totalHeight,
           // Track if node has visible connections
           hasConnections: connectedNodeIds.has(tag.id),
+          // Category color for visual clustering
+          bgColor: colors.bg,
+          borderColor: colors.border,
+          category: tag.id.split('.')[0] || 'other',
         },
       };
     });
@@ -264,15 +296,15 @@ function TagGraph({ tags = [], edges = [] }) {
 
   const stylesheet = useMemo(
     () => [
-      // Default node styling
+      // Default node styling - uses category colors
       {
         selector: "node",
         style: {
           width: "data(size)",
           height: "data(size)",
-          "background-color": "#58a6ff",
+          "background-color": "data(bgColor)",
           "border-width": 2,
-          "border-color": "#1f6feb",
+          "border-color": "data(borderColor)",
           label: "data(label)",
           "font-size": "10px",
           color: "#e6edf3",
@@ -667,34 +699,38 @@ function TagGraph({ tags = [], edges = [] }) {
         {/* Weight Filter Slider */}
         <div className="control-group">
           <label>Min Edge Weight: {minWeightFilter.toFixed(0)}</label>
-          <input
-            type="range"
-            min={0}
-            max={maxWeight}
-            step={1}
-            value={minWeightFilter}
-            onChange={(e) => setMinWeightFilter(Number(e.target.value))}
-          />
+          <div className="slider-row">
+            <input
+              type="range"
+              min={0}
+              max={maxWeight}
+              step={1}
+              value={minWeightFilter}
+              onChange={(e) => setMinWeightFilter(Number(e.target.value))}
+            />
+          </div>
         </div>
 
         {/* Max Nodes Display */}
         <div className="control-group">
           <label>Show Top {maxNodesDisplay === tags.length ? "All" : maxNodesDisplay} Tags</label>
-          <input
-            type="range"
-            min={10}
-            max={tags.length}
-            step={10}
-            value={maxNodesDisplay}
-            onChange={(e) => setMaxNodesDisplay(Number(e.target.value))}
-          />
-          <button
-            className="show-all-btn"
-            onClick={() => setMaxNodesDisplay(tags.length)}
-            title="Show all tags"
-          >
-            All
-          </button>
+          <div className="slider-row">
+            <input
+              type="range"
+              min={10}
+              max={tags.length}
+              step={10}
+              value={maxNodesDisplay}
+              onChange={(e) => setMaxNodesDisplay(Number(e.target.value))}
+            />
+            <button
+              className="show-all-btn"
+              onClick={() => setMaxNodesDisplay(tags.length)}
+              title="Show all tags"
+            >
+              All
+            </button>
+          </div>
         </div>
 
         {/* Action Buttons */}
@@ -725,6 +761,22 @@ function TagGraph({ tags = [], edges = [] }) {
           <span>Nodes: {filteredElements.filter((e) => !e.data.source).length}</span>
           <span>Edges: {filteredElements.filter((e) => e.data.source).length}</span>
         </div>
+
+        {/* Category Color Legend */}
+        <div className="category-legend">
+          {Object.entries(CATEGORY_COLORS)
+            .filter(([key]) => key !== 'default')
+            .slice(0, 8)
+            .map(([category, colors]) => (
+              <div key={category} className="legend-item">
+                <span 
+                  className="legend-dot" 
+                  style={{ backgroundColor: colors.bg }}
+                />
+                <span className="legend-label">{category}</span>
+              </div>
+            ))}
+        </div>
       </div>
 
       {/* Cytoscape Graph */}
@@ -735,9 +787,14 @@ function TagGraph({ tags = [], edges = [] }) {
           layout={layoutConfig}
           cy={handleCy}
           style={{ width: "100%", height: "calc(100vh - 200px)" }}
-          wheelSensitivity={1.0}
+          wheelSensitivity={0.3}
           boxSelectionEnabled={false}
           autounselectify={true}
+          userPanningEnabled={true}
+          userZoomingEnabled={true}
+          minZoom={0.3}
+          maxZoom={3}
+          pan={{ x: 0, y: 0 }}
         />
 
         {/* Tooltip */}

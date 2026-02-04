@@ -10,7 +10,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import PathReadiness from "./components/PathReadiness/PathReadiness";
 import TagSources from "./components/TagSources/TagSources";
 import TagEditor from "./components/TagEditor/TagEditor";
-import { TagNetwork, SkillRadar, JourneyHeatmap, TagTimeline, PrereqFlow, InstructorMap } from "./components/Visualizations";
+import { SkillRadar, JourneyHeatmap, TagTimeline, PrereqFlow, InstructorMap, TagHeatmap } from "./components/Visualizations";
 import "./App.css";
 
 // Import course data
@@ -47,7 +47,7 @@ function App() {
       .map((tag) => ({
         id: tag.tag_id,
         label: tag.display_name,
-        count: tag.relevance?.global_weight * 100 || 50, // Convert weight to count-like metric
+        count: tag.video_count || 1, // Use actual video count for node sizing
         description: tag.description,
         categoryPath: tag.category_path,
         synonyms: tag.synonyms, // Helpful for fuzzy matching (e.g. "World Building" -> "Level Design")
@@ -171,6 +171,7 @@ function App() {
                 <div className="analytics-grid">
                   <SkillRadar />
                   <JourneyHeatmap />
+                  <TagHeatmap />
                   <TagTimeline />
                   <PrereqFlow />
                   <InstructorMap />
@@ -180,9 +181,6 @@ function App() {
                   <div className="tag-graph-container">
                     <TagGraph tags={tags} edges={edges} courses={courses} />
                   </div>
-                </div>
-                <div className="analytics-section analytics-section-fullwidth">
-                  <TagNetwork />
                 </div>
               </div>
             )}

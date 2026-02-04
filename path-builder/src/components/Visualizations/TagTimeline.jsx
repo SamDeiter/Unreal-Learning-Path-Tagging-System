@@ -64,7 +64,9 @@ function TagTimeline() {
   return (
     <div className="tag-timeline">
       <div className="timeline-header">
-        <h3>⏱️ Tag Distribution by Duration</h3>
+        <h3>⏱️ Tag Distribution by Duration
+          <span className="info-tooltip" title="This chart shows how course duration correlates with topics covered. Taller bars indicate more courses in that duration range. The top tags listed under each bar show what topics are commonly taught in courses of that length—quick tutorials focus on different topics than deep-dive workshops.">ⓘ</span>
+        </h3>
         <p className="timeline-hint">Which topics are covered in short vs long courses</p>
       </div>
 

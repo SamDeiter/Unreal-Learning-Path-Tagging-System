@@ -68,7 +68,9 @@ function InstructorMap() {
   return (
     <div className="instructor-map">
       <div className="instructor-header">
-        <h3>👨‍🏫 Instructor Coverage</h3>
+        <h3>👨‍🏫 Instructor Coverage
+          <span className="info-tooltip" title="This map shows which instructors specialize in which topics. Each card displays an instructor's total courses, teaching hours, and topic expertise. Use this to identify subject matter experts, find instructors for specific topics, or discover potential collaboration opportunities.">ⓘ</span>
+        </h3>
         <p className="instructor-hint">Who teaches what topics</p>
       </div>
 

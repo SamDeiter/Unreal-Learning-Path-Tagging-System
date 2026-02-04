@@ -12,10 +12,18 @@ function PrereqFlow() {
 
   // Build prerequisite flow data
   const flowData = useMemo(() => {
-    // Helper to safely get level string
+    // Helper to safely get level string - same logic as JourneyHeatmap
     const getLevelString = (c) => {
-      const raw = c.level || c.difficulty || '';
-      return typeof raw === 'string' ? raw.toLowerCase() : '';
+      if (c.gemini_skill_level) {
+        return c.gemini_skill_level.toLowerCase();
+      } else if (c.tags?.level && typeof c.tags.level === 'string') {
+        return c.tags.level.toLowerCase();
+      } else if (typeof c.difficulty === 'number') {
+        if (c.difficulty <= 2) return 'beginner';
+        else if (c.difficulty === 3) return 'intermediate';
+        else return 'advanced';
+      }
+      return '';
     };
 
     // Group courses by level
@@ -75,7 +83,9 @@ function PrereqFlow() {
   return (
     <div className="prereq-flow">
       <div className="flow-header">
-        <h3>🔀 Learning Progression</h3>
+        <h3>🔀 Learning Progression
+          <span className="info-tooltip" title="This diagram shows recommended skill progression from Beginner to Advanced. Each column lists the most common topics taught at that level. Tags that appear across multiple levels indicate natural learning progressions—for example, 'Blueprint Basics' at Beginner leads to 'Blueprint Optimization' at Advanced.">ⓘ</span>
+        </h3>
         <p className="flow-hint">Recommended skill flow by difficulty level</p>
       </div>
 

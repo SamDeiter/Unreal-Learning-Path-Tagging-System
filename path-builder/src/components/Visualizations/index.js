@@ -9,3 +9,4 @@ export { default as JourneyHeatmap } from './JourneyHeatmap';
 export { default as TagTimeline } from './TagTimeline';
 export { default as PrereqFlow } from './PrereqFlow';
 export { default as InstructorMap } from './InstructorMap';
+export { default as TagHeatmap } from './TagHeatmap';

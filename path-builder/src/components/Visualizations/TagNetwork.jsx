@@ -514,10 +514,24 @@ function TagNetwork() {
         <div className="network-header-left">
           <h3>🔗 Tag Co-occurrence Network</h3>
           <div className="network-description">
-            <p className="network-what"><strong>What this shows:</strong> Tags that frequently appear together in courses are connected. Larger nodes = more courses with that skill. Thicker lines = stronger skill pairing. Colors indicate skill clusters.</p>
-            <p className="network-why"><strong>Why it matters:</strong> Use this to identify prerequisite chains (connected skills), discover hidden skill bundles (clusters), and find gaps in coverage (isolated nodes).</p>
+            <div className="description-section">
+              <span className="description-label">📊 Analytics View:</span>
+              <ul>
+                <li>Visual clusters = related skill groups</li>
+                <li>Larger nodes = more popular skills</li>
+                <li>Lines = skills taught together</li>
+              </ul>
+            </div>
+            <div className="description-section">
+              <span className="description-label">💡 Use for:</span>
+              <ul>
+                <li>Spotting curriculum patterns</li>
+                <li>Finding isolated topics</li>
+                <li>Quick visual overview</li>
+              </ul>
+            </div>
           </div>
-          <p className="network-hint">💡 Hover nodes to highlight connections • Click to focus • Scroll to zoom • Shift+drag to pan</p>
+          <p className="network-hint">For detailed exploration with search/filter, use the Tags tab → Tag Graph</p>
         </div>
         <div className="network-controls">
           <button onClick={() => setZoom(z => Math.min(z + 0.2, 2))} title="Zoom in">+</button>

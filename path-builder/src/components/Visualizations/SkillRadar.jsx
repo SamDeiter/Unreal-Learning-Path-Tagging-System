@@ -90,7 +90,23 @@ function SkillRadar() {
   return (
     <div className="skill-radar">
       <div className="radar-header">
-        <h3>📊 Skill Coverage Radar</h3>
+        <h3>📊 Skill Coverage Radar
+          <span className="info-tooltip">ⓘ
+            <span className="tooltip-content">
+              <strong>What this shows:</strong>
+              <ul>
+                <li>Green area = your library's topic coverage</li>
+                <li>Blue area = estimated industry demand</li>
+                <li>Gaps = where blue extends beyond green</li>
+              </ul>
+              <strong>How to use:</strong>
+              <ul>
+                <li>Identify under-covered high-demand topics</li>
+                <li>Prioritize content creation for gap areas</li>
+              </ul>
+            </span>
+          </span>
+        </h3>
         <p className="radar-hint">
           Green = Your coverage | Blue = Industry demand estimate*
         </p>
