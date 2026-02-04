@@ -169,7 +169,6 @@ function App() {
                   <p className="analytics-subtitle">Insights from {courses.length} courses</p>
                 </div>
                 <div className="analytics-grid">
-                  <TagNetwork />
                   <SkillRadar />
                   <JourneyHeatmap />
                   <TagTimeline />
@@ -181,6 +180,9 @@ function App() {
                   <div className="tag-graph-container">
                     <TagGraph tags={tags} edges={edges} courses={courses} />
                   </div>
+                </div>
+                <div className="analytics-section analytics-section-fullwidth">
+                  <TagNetwork />
                 </div>
               </div>
             )}
