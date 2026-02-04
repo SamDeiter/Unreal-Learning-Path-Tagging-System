@@ -42,6 +42,52 @@ function SkillCurriculum({ courses }) {
     return Array.from(skillSet.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [courses]);
 
+  // Calculate skill co-occurrence (which skills appear together)
+  const skillRelationships = useMemo(() => {
+    const coOccurrence = {};
+    
+    courses.forEach(course => {
+      // Get all tags for this course
+      const courseTags = new Set();
+      if (course.tags?.topic) courseTags.add(course.tags.topic.toLowerCase());
+      course.gemini_system_tags?.forEach(t => courseTags.add(t.toLowerCase()));
+      
+      // Count co-occurrences
+      const tagArray = Array.from(courseTags);
+      tagArray.forEach(tag1 => {
+        if (!coOccurrence[tag1]) coOccurrence[tag1] = {};
+        tagArray.forEach(tag2 => {
+          if (tag1 !== tag2) {
+            coOccurrence[tag1][tag2] = (coOccurrence[tag1][tag2] || 0) + 1;
+          }
+        });
+      });
+    });
+    
+    return coOccurrence;
+  }, [courses]);
+
+  // Get recommended skills based on current search
+  const recommendedSkills = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const queryLower = searchQuery.toLowerCase();
+    const related = skillRelationships[queryLower];
+    if (!related) return [];
+    
+    // Sort by co-occurrence count and get top 5
+    return Object.entries(related)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([skill, count]) => ({
+        name: skill,
+        count,
+        courseCount: courses.filter(c => {
+          const tags = [...(c.gemini_system_tags || []), c.tags?.topic].filter(Boolean);
+          return tags.some(t => t.toLowerCase() === skill);
+        }).length
+      }));
+  }, [searchQuery, skillRelationships, courses]);
+
   // Autocomplete suggestions
   const suggestions = useMemo(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) return [];
@@ -258,6 +304,36 @@ function SkillCurriculum({ courses }) {
           <option value="600">~10 hours</option>
         </select>
       </div>
+
+      {/* Skill Recommendations - "You might also need" */}
+      {recommendedSkills.length > 0 && (
+        <div className="sc-recommendations">
+          <div className="recommendations-header">
+            <span className="rec-icon">💡</span>
+            <span className="rec-title">You might also need:</span>
+          </div>
+          <div className="recommendations-list">
+            {recommendedSkills.map(skill => (
+              <button
+                key={skill.name}
+                className="rec-skill-chip"
+                onClick={() => setSearchQuery(prev => 
+                  prev.toLowerCase().includes(skill.name.toLowerCase()) 
+                    ? prev 
+                    : `${prev} ${skill.name}`.trim()
+                )}
+                title={`${skill.courseCount} courses cover this skill`}
+              >
+                <span className="skill-name">{skill.name}</span>
+                <span className="skill-count">{skill.courseCount}</span>
+              </button>
+            ))}
+          </div>
+          <p className="rec-hint">
+            Click to add skills • Combined curriculum expands coverage
+          </p>
+        </div>
+      )}
 
       {/* Quick-select skill chips */}
       {!searchQuery && (
