@@ -12,6 +12,7 @@ import TagSources from "./components/TagSources/TagSources";
 import TagEditor from "./components/TagEditor/TagEditor";
 import { SkillRadar, JourneyHeatmap, TagTimeline, PrereqFlow, InstructorMap, TagHeatmap } from "./components/Visualizations";
 import InsightsPanel from "./components/Visualizations/InsightsPanel";
+import CollapsibleSection from "./components/Visualizations/CollapsibleSection";
 import "./App.css";
 
 // Import course data
@@ -173,20 +174,23 @@ function App() {
                   {/* Insights & Recommendations */}
                   <InsightsPanel />
                   
-                  {/* Overview */}
-                  <h4 className="section-header">📈 Overview</h4>
-                  <SkillRadar />
-                  <JourneyHeatmap />
+                  {/* Overview Section */}
+                  <CollapsibleSection title="Overview" icon="📈">
+                    <SkillRadar />
+                    <JourneyHeatmap />
+                  </CollapsibleSection>
                   
-                  {/* Library Analysis */}
-                  <h4 className="section-header">📚 Library Analysis</h4>
-                  <TagHeatmap />
-                  <TagTimeline />
-                  <InstructorMap />
+                  {/* Library Analysis Section */}
+                  <CollapsibleSection title="Library Analysis" icon="📚">
+                    <TagHeatmap />
+                    <TagTimeline />
+                    <InstructorMap />
+                  </CollapsibleSection>
                   
-                  {/* Learning Paths */}
-                  <h4 className="section-header">🛤️ Learning Paths</h4>
-                  <PrereqFlow />
+                  {/* Learning Paths Section */}
+                  <CollapsibleSection title="Learning Paths" icon="🛤️">
+                    <PrereqFlow />
+                  </CollapsibleSection>
                 </div>
                 <div className="analytics-section">
                   <h3>🔗 Tag Relationship Graph</h3>
