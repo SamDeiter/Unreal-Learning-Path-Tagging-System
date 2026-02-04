@@ -70,8 +70,22 @@ function InstructorMap() {
   return (
     <div className="instructor-map">
       <div className="instructor-header">
-        <h3>� Course Categories
-          <span className="info-tooltip" title="Shows course distribution by folder category from your library structure.">ⓘ</span>
+        <h3>📁 Course Categories
+          <span className="info-tooltip">ⓘ
+            <span className="tooltip-content">
+              <strong>What this shows:</strong>
+              <ul>
+                <li>Courses grouped by folder category</li>
+                <li>Course count and total hours per category</li>
+                <li>Common tags within each category</li>
+              </ul>
+              <strong>How to use:</strong>
+              <ul>
+                <li>See your library's content distribution</li>
+                <li>Identify well-covered vs sparse categories</li>
+              </ul>
+            </span>
+          </span>
         </h3>
         <p className="instructor-hint">Distribution by folder structure</p>
       </div>

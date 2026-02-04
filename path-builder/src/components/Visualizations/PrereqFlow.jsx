@@ -84,7 +84,21 @@ function PrereqFlow() {
     <div className="prereq-flow">
       <div className="flow-header">
         <h3>🔀 Learning Progression
-          <span className="info-tooltip" title="This diagram shows recommended skill progression from Beginner to Advanced. Each column lists the most common topics taught at that level. Tags that appear across multiple levels indicate natural learning progressions—for example, 'Blueprint Basics' at Beginner leads to 'Blueprint Optimization' at Advanced.">ⓘ</span>
+          <span className="info-tooltip">ⓘ
+            <span className="tooltip-content">
+              <strong>What this shows:</strong>
+              <ul>
+                <li>Courses grouped by difficulty level</li>
+                <li>Top tags at each level</li>
+                <li>Natural skill progression paths</li>
+              </ul>
+              <strong>How to use:</strong>
+              <ul>
+                <li>Plan learning journeys from beginner to advanced</li>
+                <li>Identify skill building blocks at each level</li>
+              </ul>
+            </span>
+          </span>
         </h3>
         <p className="flow-hint">Recommended skill flow by difficulty level</p>
       </div>
