@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTagData } from '../../context/TagDataContext';
+import curatorData from '../../data/curator_insights.json';
 import './InsightsPanel.css';
 
 /**
@@ -118,7 +119,21 @@ function InsightsPanel() {
       });
     }
 
-    return results.slice(0, 5); // Max 5 insights
+    // Add curator-provided insights (from JSON file)
+    if (curatorData?.insights) {
+      curatorData.insights.forEach(insight => {
+        results.push({
+          type: insight.type || 'curator',
+          icon: insight.icon || '🎯',
+          title: insight.title,
+          description: insight.description,
+          source: insight.source,
+          priority: insight.priority || 'medium'
+        });
+      });
+    }
+
+    return results.slice(0, 6); // Max 6 insights
   }, [courses]);
 
   if (insights.length === 0) return null;
