@@ -86,14 +86,23 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     return Object.entries(related)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
-      .map(([skill, count]) => ({
-        name: skill,
-        count,
-        courseCount: courses.filter(c => {
+      .map(([skill, count]) => {
+        const matchingCourses = courses.filter(c => {
           const tags = [...(c.gemini_system_tags || []), c.tags?.topic].filter(Boolean);
           return tags.some(t => t.toLowerCase() === skill);
-        }).length
-      }));
+        });
+        // Calculate estimated time
+        const totalMinutes = matchingCourses.reduce((sum, course) => {
+          const courseTime = course.videos?.reduce((s, v) => s + (v.duration_minutes || 0), 0) || 30;
+          return sum + courseTime;
+        }, 0);
+        return {
+          name: skill,
+          count,
+          courseCount: matchingCourses.length,
+          estimatedTime: totalMinutes
+        };
+      });
   }, [searchQuery, skillRelationships, courses]);
 
   // Autocomplete suggestions
@@ -330,10 +339,11 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
                     ? prev 
                     : `${prev} ${skill.name}`.trim()
                 )}
-                title={`${skill.courseCount} courses cover this skill`}
+                title={`${skill.courseCount} courses • ~${formatTime(skill.estimatedTime)}`}
               >
                 <span className="skill-name">{skill.name}</span>
                 <span className="skill-count">{skill.courseCount}</span>
+                <span className="skill-time">~{formatTime(skill.estimatedTime)}</span>
               </button>
             ))}
           </div>
@@ -381,6 +391,14 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
               <span>~{formatTime(curriculum.totalTime)}</span>
               {timeBudget && <span className="time-badge">⏱️ Fits budget</span>}
             </div>
+            <button 
+              className="generate-path-btn"
+              onClick={handleAddToPath}
+              disabled={selectedCourses.size === 0}
+              title={`Add ${selectedCourses.size} selected courses to your learning path`}
+            >
+              🚀 Generate Path ({selectedCourses.size})
+            </button>
           </div>
 
           {/* Learning Outcomes */}
