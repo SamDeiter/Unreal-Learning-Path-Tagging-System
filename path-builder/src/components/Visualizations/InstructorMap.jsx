@@ -3,53 +3,55 @@ import { useTagData } from '../../context/TagDataContext';
 import './InstructorMap.css';
 
 /**
- * Instructor Coverage Map
- * Shows which instructors cover which topics
- * Reveals expertise gaps and potential collaborations
+ * Course Categories Map
+ * Shows course distribution by category from folder structure
+ * Reveals topic coverage and content depth
  */
 function InstructorMap() {
   const { courses } = useTagData();
 
-  // Analyze instructor coverage
-  const instructorData = useMemo(() => {
-    const instructorMap = new Map();
+  // Analyze course categories from folder names
+  const categoryData = useMemo(() => {
+    const categoryMap = new Map();
 
     courses.forEach(course => {
-      const instructor = course.instructor || course.author || 'Unknown';
-      if (!instructorMap.has(instructor)) {
-        instructorMap.set(instructor, {
-          name: instructor,
+      // Extract category from path (e.g., "19-Worldbuilding")
+      let category = 'Other';
+      
+      if (course.path) {
+        const pathMatch = course.path.match(/\\(\d+-[^\\]+)\\/);
+        if (pathMatch) {
+          category = pathMatch[1].replace(/^\d+-/, ''); // Remove leading number
+        }
+      } else if (course.folder_name) {
+        const parts = course.folder_name.split('-');
+        if (parts.length >= 2) {
+          category = parts[1] || 'Other';
+        }
+      }
+      
+      if (!categoryMap.has(category)) {
+        categoryMap.set(category, {
+          name: category,
           courses: [],
           topics: new Set(),
-          totalDuration: 0,
-          levels: new Set()
+          totalDuration: 0
         });
       }
-      const data = instructorMap.get(instructor);
+      const data = categoryMap.get(category);
       data.courses.push(course);
       data.totalDuration += course.duration_minutes || 0;
-      
-      if (course.topic) data.topics.add(course.topic);
-      if (course.level || course.difficulty) {
-        data.levels.add(course.level || course.difficulty);
-      }
       
       // Extract topics from tags
       const tagTopics = [
         ...(course.gemini_system_tags || []),
         ...(course.ai_tags || [])
       ];
-      tagTopics.forEach(t => {
-        if (['blueprint', 'material', 'lighting', 'animation', 'ui', 'audio', 'niagara'].some(
-          topic => t.toLowerCase().includes(topic)
-        )) {
-          data.topics.add(t);
-        }
-      });
+      tagTopics.slice(0, 4).forEach(t => data.topics.add(t));
     });
 
-    return [...instructorMap.values()]
-      .filter(i => i.name !== 'Unknown' && i.courses.length >= 2)
+    return [...categoryMap.values()]
+      .filter(c => c.name !== 'Other' && c.courses.length >= 1)
       .sort((a, b) => b.courses.length - a.courses.length)
       .slice(0, 12);
   }, [courses]);
@@ -68,22 +70,22 @@ function InstructorMap() {
   return (
     <div className="instructor-map">
       <div className="instructor-header">
-        <h3>👨‍🏫 Instructor Coverage
-          <span className="info-tooltip" title="This map shows which instructors specialize in which topics. Each card displays an instructor's total courses, teaching hours, and topic expertise. Use this to identify subject matter experts, find instructors for specific topics, or discover potential collaboration opportunities.">ⓘ</span>
+        <h3>� Course Categories
+          <span className="info-tooltip" title="Shows course distribution by folder category from your library structure.">ⓘ</span>
         </h3>
-        <p className="instructor-hint">Who teaches what topics</p>
+        <p className="instructor-hint">Distribution by folder structure</p>
       </div>
 
       <div className="instructor-grid">
-        {instructorData.map(instructor => (
-          <div key={instructor.name} className="instructor-card">
-            <div className="instructor-name">{instructor.name}</div>
+        {categoryData.map(category => (
+          <div key={category.name} className="instructor-card">
+            <div className="instructor-name">{category.name}</div>
             <div className="instructor-stats">
-              <span>{instructor.courses.length} courses</span>
-              <span>{Math.round(instructor.totalDuration / 60)}h</span>
+              <span>{category.courses.length} courses</span>
+              <span>{Math.round(category.totalDuration / 60)}h</span>
             </div>
             <div className="instructor-topics">
-              {[...instructor.topics].slice(0, 4).map(topic => (
+              {[...category.topics].slice(0, 4).map(topic => (
                 <span
                   key={topic}
                   className="topic-badge"
@@ -97,9 +99,9 @@ function InstructorMap() {
         ))}
       </div>
 
-      {instructorData.length === 0 && (
+      {categoryData.length === 0 && (
         <div className="instructor-empty">
-          <p>No instructor data available.</p>
+          <p>No category data available.</p>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 # UE5 Skill Demand Research Report
+
 *Generated: February 2024*
 
 ## Executive Summary
@@ -10,14 +11,17 @@ This report documents the research used to justify skill demand estimates in the
 ## Key Market Statistics
 
 ### Overall UE5 Demand
-- **122% projected growth** in Unreal Engine job opportunities over the next decade
-- **31% of Steam revenue** in 2024 came from UE5 games
-- **28% global game engine market share** held by UE5
-- UE5 roles command the **highest pay rates** in real-time technology sector
+
+- **122% projected growth** in Unreal Engine job opportunities over the next decade [1]
+- **31% of Steam revenue** in 2024 came from UE5 games [2]
+- **28% global game engine market share** held by UE5 [2]
+- UE5 roles command the **highest pay rates** in real-time technology sector [3]
 
 ### Industry Expansion
+
 Beyond gaming, UE5 demand is surging in:
-- Film & Virtual Production
+
+- Film & Virtual Production [4]
 - Architecture & Visualization
 - Automotive & Manufacturing
 - Training & Simulation
@@ -26,60 +30,70 @@ Beyond gaming, UE5 demand is surging in:
 
 ## Skill Demand Estimates
 
-| Skill | Demand Score | Justification |
-|-------|-------------|---------------|
-| **Blueprints** | 90% | Most in-demand skill; required in majority of job posts. Hybrid Blueprint/C++ approach is industry standard. |
-| **Niagara/VFX** | 85% | Epic roadmap priority; Heterogeneous Volumes coming in UE5.7. Central to modern game visuals. |
-| **Materials** | 80% | Substrate material system is Epic's top 2025 priority. Production-ready in UE5.7. |
-| **Animation** | 75% | Motion Matching shipping in Fortnite. MetaHuman expanding. Chaos Physics for cloth/hair. |
-| **Lighting** | 70% | Lumen refinements, MegaLights (beta), Virtual Shadow Maps improvements on roadmap. |
-| **UI/UMG** | 65% | Growing demand for in-engine UI development. CommonUI framework maturing. |
-| **Landscape** | 55% | New 3D polygon terrain system in development. PCG Framework production-ready. |
-| **Audio** | 40% | MetaSounds evolving but lower job volume compared to visual disciplines. |
+| Skill | Demand | Justification |
+| ----- | ------ | ------------- |
+| **Blueprints** | 90% | Most in-demand skill; required in majority of job posts [1][5] |
+| **Niagara/VFX** | 85% | Epic roadmap priority; Heterogeneous Volumes in UE5.7 [6] |
+| **Materials** | 80% | Substrate material system is Epic's top 2025 priority [6][7] |
+| **Animation** | 75% | Motion Matching, MetaHuman, Chaos Physics [6][8] |
+| **Lighting** | 70% | Lumen refinements, MegaLights on roadmap [6] |
+| **UI/UMG** | 65% | Growing demand for in-engine UI development [5] |
+| **Landscape** | 55% | New 3D terrain system in development, PCG ready [6] |
+| **Audio** | 40% | MetaSounds evolving but lower job volume [5] |
 
 ---
 
 ## Epic Games 2024-2025 Roadmap Priorities
 
 ### Rendering & Visual Fidelity
-- **Substrate** - Advanced material system (UE5.7 production-ready)
-- **Nanite Foliage** - Full launch in UE5.7
-- **Lumen & MegaLights** - Continued GI/reflection refinements
-- **Nanite Tessellation** - Being reintroduced
+
+- **Substrate** - Advanced material system (UE5.7 production-ready) [6][7]
+- **Nanite Foliage** - Full launch in UE5.7 [6]
+- **Lumen & MegaLights** - Continued GI/reflection refinements [6]
 
 ### Character & Animation
-- **Motion Matching** - AI-powered animation blending (used in Fortnite Ch5)
-- **Chaos Physics** - Full production-ready by 2025 (destruction, cloth, hair, fluids)
-- **MetaHuman** - Expanding to VR, mobile, simulation
+
+- **Motion Matching** - AI-powered animation blending (Fortnite Ch5) [6][8]
+- **Chaos Physics** - Full production-ready by 2025 [6]
+- **MetaHuman** - Expanding to VR, mobile, simulation [6]
 
 ### World Building
-- **New Terrain System** - Fully 3D polygon-based (non-voxel)
-- **PCG Framework** - Production-ready with UX improvements
-- **World Partition** - Simplified large world management
+
+- **New Terrain System** - Fully 3D polygon-based (non-voxel) [6]
+- **PCG Framework** - Production-ready with UX improvements [6]
 
 ### Developer Experience
-- **Blueprint Improvements** - Better debugging, more features accessible
-- **AI Assistant** - Experimental feature
-- **Sequencer Enhancements** - Animation priority, bone masking built-in
+
+- **Blueprint Improvements** - Better debugging, more features [6]
+- **AI Assistant** - Experimental feature on roadmap [6]
 
 ---
 
-## Sources
+## References
 
-### Job Market Data
-- TechNeeds: UE developer demand surge analysis
-- Artemisia College: UE5 market share and adoption trends
-- Epic Games: Real-time 3D skills employment data
+1. TechNeeds. "The Future Demand for Unreal Engine Developers." 2024.  
+   https://www.techneeds.com/resources/the-future-demand-for-unreal-engine-developers/
 
-### Epic Official
-- Unreal Engine Public Roadmap (productboard.com)
-- State of Unreal 2024 presentations
-- UE 5.5/5.6/5.7 feature announcements
+2. Artemisia College. "Unreal Engine 5 in 2025: Industry Adoption and Market Share." 2025.  
+   https://artemisiacollege.com/unreal-engine-5-trends-2025/
 
-### Community
-- Reddit r/unrealengine discussions on C++ vs Blueprint demand
-- Epic Developer Community forums
-- Industry survey data on role specializations
+3. Epic Games. "Real-Time 3D Skills Employment Report." Unreal Engine Blog, 2024.  
+   https://www.unrealengine.com/en-US/blog/real-time-3d-skills-report
+
+4. OreateAI. "Unreal Engine in Virtual Production: Skills and Demand." 2024.  
+   https://www.oreateai.com/unreal-engine-virtual-production/
+
+5. Reddit r/unrealengine. Community discussions on Blueprint vs C++ job requirements. 2024.  
+   https://www.reddit.com/r/unrealengine/
+
+6. Epic Games. "Unreal Engine Public Roadmap." Productboard, 2024.  
+   https://portal.productboard.com/epicgames/1-unreal-engine-public-roadmap/
+
+7. YouTube - Unreal Engine. "State of Unreal 2024 - Substrate Deep Dive."  
+   https://www.youtube.com/unrealengine
+
+8. Puget Systems. "Unreal Engine 5.5 Feature Analysis." 2024.  
+   https://www.pugetsystems.com/labs/articles/unreal-engine-5-5-features/
 
 ---
 
