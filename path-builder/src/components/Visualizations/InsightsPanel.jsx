@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTagData } from '../../context/TagDataContext';
 import curatorData from '../../data/curator_insights.json';
+import externalData from '../../data/external_sources.json';
 import './InsightsPanel.css';
 
 /**
@@ -133,7 +134,21 @@ function InsightsPanel() {
       });
     }
 
-    return results.slice(0, 6); // Max 6 insights
+    // Add external sources (Google Trends, YouTube, etc.)
+    if (externalData?.insights) {
+      externalData.insights.forEach(insight => {
+        results.push({
+          type: insight.type || 'external',
+          icon: insight.icon || '📊',
+          title: insight.title,
+          description: insight.description,
+          source: insight.source,
+          priority: insight.priority || 'low'
+        });
+      });
+    }
+
+    return results.slice(0, 8); // Max 8 insights
   }, [courses]);
 
   if (insights.length === 0) return null;
