@@ -11,6 +11,7 @@ import PathReadiness from "./components/PathReadiness/PathReadiness";
 import TagSources from "./components/TagSources/TagSources";
 import TagEditor from "./components/TagEditor/TagEditor";
 import { SkillRadar, JourneyHeatmap, TagTimeline, PrereqFlow, InstructorMap, TagHeatmap } from "./components/Visualizations";
+import InsightsPanel from "./components/Visualizations/InsightsPanel";
 import "./App.css";
 
 // Import course data
@@ -169,6 +170,9 @@ function App() {
                   <p className="analytics-subtitle">Insights from {courses.length} courses</p>
                 </div>
                 <div className="analytics-grid">
+                  {/* Insights & Recommendations */}
+                  <InsightsPanel />
+                  
                   {/* Overview */}
                   <h4 className="section-header">📈 Overview</h4>
                   <SkillRadar />
