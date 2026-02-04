@@ -169,12 +169,20 @@ function App() {
                   <p className="analytics-subtitle">Insights from {courses.length} courses</p>
                 </div>
                 <div className="analytics-grid">
+                  {/* Overview */}
+                  <h4 className="section-header">📈 Overview</h4>
                   <SkillRadar />
                   <JourneyHeatmap />
+                  
+                  {/* Library Analysis */}
+                  <h4 className="section-header">📚 Library Analysis</h4>
                   <TagHeatmap />
                   <TagTimeline />
-                  <PrereqFlow />
                   <InstructorMap />
+                  
+                  {/* Learning Paths */}
+                  <h4 className="section-header">🛤️ Learning Paths</h4>
+                  <PrereqFlow />
                 </div>
                 <div className="analytics-section">
                   <h3>🔗 Tag Relationship Graph</h3>

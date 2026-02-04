@@ -133,9 +133,10 @@ function JourneyHeatmap() {
                   key={`${rowIdx}-${colIdx}`}
                   className="heatmap-cell"
                   style={{ background: getHeatColor(cell.count, heatmapData.maxCount) }}
-                  title={`${cell.count} courses, ${hours}h total`}
+                  title={`${cell.count} courses, ${hours}h total duration`}
                 >
                   <span className="cell-count">{cell.count}</span>
+                  {cell.count > 0 && <span className="cell-hours">{hours}h</span>}
                 </div>
               );
             })}

@@ -65,7 +65,9 @@ function TagHeatmap() {
   return (
     <div className="tag-heatmap">
       <div className="heatmap-header">
-        <h3>🏷️ Tag Usage Heatmap</h3>
+        <h3>🏷️ Tag Usage Heatmap
+          <span className="info-tooltip" title="Shows how frequently each tag appears in your course library. Darker cells indicate more courses use that tag. Tags are grouped by category and sorted by popularity.">ⓘ</span>
+        </h3>
         <p className="heatmap-hint">Darker = more courses with this tag</p>
       </div>
 

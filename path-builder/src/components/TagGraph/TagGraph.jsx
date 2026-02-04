@@ -664,6 +664,45 @@ function TagGraph({ tags = [], edges = [] }) {
   }, [cyReady, isLayoutRunning]);
 
   // -------------------------------------------------------------------------
+  // KEYBOARD SHORTCUTS
+  // Escape = clear focus, F = fit to screen, +/- = zoom
+  // -------------------------------------------------------------------------
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      switch (e.key) {
+        case 'Escape':
+          handleClearFocus();
+          break;
+        case 'f':
+        case 'F':
+          handleFitToScreen();
+          break;
+        case '+':
+        case '=':
+          if (cyRef.current) {
+            cyRef.current.zoom(cyRef.current.zoom() * 1.2);
+          }
+          break;
+        case '-':
+        case '_':
+          if (cyRef.current) {
+            cyRef.current.zoom(cyRef.current.zoom() * 0.8);
+          }
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleClearFocus, handleFitToScreen]);
+
+  // -------------------------------------------------------------------------
   // RENDER
   // -------------------------------------------------------------------------
 
@@ -760,6 +799,11 @@ function TagGraph({ tags = [], edges = [] }) {
         <div className="graph-stats">
           <span>Nodes: {filteredElements.filter((e) => !e.data.source).length}</span>
           <span>Edges: {filteredElements.filter((e) => e.data.source).length}</span>
+        </div>
+
+        {/* Quick Tips */}
+        <div className="graph-tips">
+          💡 <strong>Click</strong> node to focus • <strong>Hover</strong> for connections • <strong>Esc</strong> to reset • <strong>F</strong> to fit
         </div>
 
         {/* Category Color Legend */}
