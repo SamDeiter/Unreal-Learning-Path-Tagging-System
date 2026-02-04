@@ -1,129 +1,139 @@
-import { useMemo } from 'react';
-import tagHistory from '../../data/tag_history.json';
+import { useState, useMemo } from 'react';
+import { useTagData } from '../../context/TagDataContext';
 import './TagTrends.css';
 
 /**
- * Tag Trends Over Time
- * Shows historical changes in tag usage across snapshots
+ * Tag Distribution with Course Drill-Down
+ * Click any tag to see the actual courses tagged with it
  */
 function TagTrends() {
-  const { snapshots } = tagHistory;
+  const { courses } = useTagData();
+  const [selectedTag, setSelectedTag] = useState(null);
   
-  // Get all unique tags and sort by latest count
-  const allTags = useMemo(() => {
-    const tags = new Set();
-    snapshots.forEach(s => Object.keys(s.tags || {}).forEach(t => tags.add(t)));
-    return Array.from(tags).sort((a, b) => {
-      const latest = snapshots[snapshots.length - 1]?.tags || {};
-      return (latest[b] || 0) - (latest[a] || 0);
-    }).slice(0, 8);
-  }, [snapshots]);
+  // Calculate tag counts from actual course data
+  const tagData = useMemo(() => {
+    const tagCounts = {};
+    const tagCourses = {};
+    
+    courses.forEach(course => {
+      // Collect all tags from different sources
+      const allTags = [
+        ...(course.gemini_system_tags || []),
+        ...(course.ai_tags || []),
+        ...(course.transcript_tags || []),
+        ...Object.keys(course.tags || {})
+      ];
+      
+      // Normalize and count
+      allTags.forEach(tag => {
+        const normalized = tag.toLowerCase().trim();
+        if (normalized && normalized.length > 2) {
+          tagCounts[normalized] = (tagCounts[normalized] || 0) + 1;
+          if (!tagCourses[normalized]) tagCourses[normalized] = [];
+          if (!tagCourses[normalized].find(c => c.id === course.id)) {
+            tagCourses[normalized].push({
+              id: course.id,
+              title: course.title,
+              level: course.level || course.difficulty || 'Beginner',
+              duration: course.duration
+            });
+          }
+        }
+      });
+    });
+    
+    // Sort by count and take top 12
+    return Object.entries(tagCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12)
+      .map(([name, count]) => ({
+        name,
+        count,
+        courses: tagCourses[name] || []
+      }));
+  }, [courses]);
 
   const colors = [
-    '#58a6ff', '#a371f7', '#3fb950', '#f0883e',
-    '#f778ba', '#db6d28', '#768390', '#54aeff'
+    '#58a6ff', '#a371f7', '#3fb950', '#f0883e', '#f778ba',
+    '#db6d28', '#768390', '#54aeff', '#7ee787', '#ff9bce',
+    '#d2a8ff', '#79c0ff'
   ];
 
   const maxValue = useMemo(() => {
-    let max = 0;
-    snapshots.forEach(s => {
-      allTags.forEach(tag => {
-        if ((s.tags?.[tag] || 0) > max) max = s.tags[tag];
-      });
-    });
-    return max || 1;
-  }, [snapshots, allTags]);
+    return Math.max(...tagData.map(t => t.count), 1);
+  }, [tagData]);
 
-  // Need at least 2 snapshots for trends
-  if (snapshots.length < 2) {
-    return (
-      <div className="tag-trends">
-        <div className="trends-header">
-          <h4>📊 Tag Trends Over Time</h4>
-          <span className="trends-subtitle">Tracking weekly changes</span>
-        </div>
-        <div className="trends-placeholder">
-          <div className="placeholder-icon">📅</div>
-          <p><strong>Collecting data...</strong></p>
-          <p className="trends-hint">
-            Weekly snapshots will show how tag usage changes over time.
-            First snapshot collected. Check back next week!
-          </p>
-          <div className="current-snapshot">
-            <strong>Current Snapshot ({snapshots[0]?.date || 'N/A'})</strong>
-            <div className="snapshot-tags">
-              {allTags.slice(0, 5).map((tag, i) => (
-                <span key={tag} className="snapshot-tag" style={{ borderColor: colors[i] }}>
-                  {tag}: {snapshots[0]?.tags?.[tag] || 0}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleBarClick = (tagName) => {
+    setSelectedTag(selectedTag === tagName ? null : tagName);
+  };
+
+  const selectedTagData = tagData.find(t => t.name === selectedTag);
 
   return (
     <div className="tag-trends">
       <div className="trends-header">
-        <h4>📊 Tag Trends Over Time</h4>
-        <span className="trends-subtitle">{snapshots.length} weeks tracked</span>
-      </div>
-      
-      <div className="trends-chart">
-        <div className="chart-grid">
-          {[100, 75, 50, 25, 0].map(pct => (
-            <div key={pct} className="grid-line" style={{ bottom: `${pct}%` }}>
-              <span className="grid-label">{Math.round(maxValue * pct / 100)}</span>
-            </div>
-          ))}
-        </div>
-        
-        <div className="chart-lines">
-          {allTags.map((tag, i) => (
-            <svg key={tag} className="trend-line" viewBox={`0 0 ${(snapshots.length - 1) * 100} 100`}>
-              <polyline
-                fill="none"
-                stroke={colors[i]}
-                strokeWidth="2"
-                points={snapshots.map((s, j) => {
-                  const x = j * 100;
-                  const y = 100 - ((s.tags?.[tag] || 0) / maxValue) * 100;
-                  return `${x},${y}`;
-                }).join(' ')}
-              />
-            </svg>
-          ))}
-        </div>
-        
-        <div className="chart-x-axis">
-          {snapshots.map((s, i) => (
-            <span key={i} className="x-label">
-              {new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+        <h4>📊 Tag Distribution
+          <span className="info-tooltip">ⓘ
+            <span className="tooltip-content">
+              Click any tag to see courses tagged with it
             </span>
-          ))}
-        </div>
+          </span>
+        </h4>
+        <span className="trends-subtitle">
+          From {courses.length} courses • Click to drill down
+        </span>
       </div>
       
-      <div className="trends-legend">
-        {allTags.map((tag, i) => {
-          const latest = snapshots[snapshots.length - 1]?.tags?.[tag] || 0;
-          const prev = snapshots[snapshots.length - 2]?.tags?.[tag] || 0;
-          const change = latest - prev;
-          return (
-            <div key={tag} className="legend-item">
-              <span className="legend-dot" style={{ backgroundColor: colors[i] }} />
-              <span className="legend-label">{tag}</span>
-              <span className={`legend-change ${change > 0 ? 'up' : change < 0 ? 'down' : ''}`}>
-                {change > 0 ? `+${change}` : change}
-              </span>
+      <div className="trends-bar-chart">
+        {tagData.map((tag, i) => (
+          <div 
+            key={tag.name} 
+            className={`bar-row ${selectedTag === tag.name ? 'selected' : ''}`}
+            onClick={() => handleBarClick(tag.name)}
+          >
+            <span className="bar-label" title={tag.name}>{tag.name}</span>
+            <div className="bar-container">
+              <div 
+                className="bar-fill"
+                style={{ 
+                  width: `${(tag.count / maxValue) * 100}%`,
+                  backgroundColor: colors[i % colors.length]
+                }}
+              />
             </div>
-          );
-        })}
+            <span className="bar-value">{tag.count}</span>
+          </div>
+        ))}
       </div>
+
+      {/* Course drill-down panel */}
+      {selectedTagData && (
+        <div className="tag-courses-panel">
+          <div className="panel-header">
+            <h5>📚 Courses tagged "{selectedTag}"</h5>
+            <button className="close-btn" onClick={() => setSelectedTag(null)}>×</button>
+          </div>
+          <div className="courses-list">
+            {selectedTagData.courses.slice(0, 8).map(course => (
+              <div key={course.id} className="course-item">
+                <span className="course-title">{course.title}</span>
+                <span className={`course-level ${(course.level || '').toLowerCase()}`}>
+                  {course.level}
+                </span>
+              </div>
+            ))}
+            {selectedTagData.courses.length > 8 && (
+              <div className="more-courses">
+                +{selectedTagData.courses.length - 8} more courses
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default TagTrends;
+
+

@@ -10,7 +10,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import PathReadiness from "./components/PathReadiness/PathReadiness";
 import TagSources from "./components/TagSources/TagSources";
 import TagEditor from "./components/TagEditor/TagEditor";
-import { SkillRadar, JourneyHeatmap, TagTimeline, PrereqFlow, InstructorMap, TagHeatmap } from "./components/Visualizations";
+import { JourneyHeatmap, TagTimeline, TagTrends, PrereqFlow, InstructorMap, TagHeatmap } from "./components/Visualizations";
 import InsightsPanel from "./components/Visualizations/InsightsPanel";
 import CollapsibleSection from "./components/Visualizations/CollapsibleSection";
 import "./App.css";
@@ -170,18 +170,19 @@ function App() {
                   <h2>📊 Tag & Skill Analytics</h2>
                   <p className="analytics-subtitle">Insights from {courses.length} courses</p>
                 </div>
+
                 <div className="analytics-grid">
                   {/* Insights & Recommendations */}
                   <InsightsPanel />
                   
                   {/* Overview Section */}
                   <CollapsibleSection title="Overview" icon="📈">
-                    <SkillRadar />
                     <JourneyHeatmap />
                   </CollapsibleSection>
                   
                   {/* Library Analysis Section */}
                   <CollapsibleSection title="Library Analysis" icon="📚">
+                    <TagTrends />
                     <TagHeatmap />
                     <TagTimeline />
                     <InstructorMap />

@@ -3,14 +3,14 @@ import { useTagData } from '../../context/TagDataContext';
 import './SkillRadar.css';
 
 /**
- * Skill Gap Radar
- * Spider chart showing skill coverage vs potential demand
- * Reveals where the course library has weaknesses
+ * Skill Coverage Radar
+ * Spider chart showing actual skill coverage from your course library
+ * All data derived from real course tags - no estimated/fake data
  */
 function SkillRadar() {
   const { courses } = useTagData();
 
-  // Analyze skill coverage
+  // Analyze skill coverage from actual course data
   const skillAnalysis = useMemo(() => {
     // Define skill categories to measure
     const skillCategories = [
@@ -43,16 +43,15 @@ function SkillRadar() {
         category: cat.name,
         courseCount: matchingCourses.length,
         coverage: Math.min(100, (matchingCourses.length / courses.length) * 200), // Scale for visibility
-        demand: getDemandEstimate(cat.name), // Simulated demand
       };
     });
 
-    // Find gaps (high demand, low coverage)
-    const gaps = coverage
-      .filter(c => c.demand > 50 && c.courseCount < 10)
-      .sort((a, b) => (b.demand - b.coverage) - (a.demand - a.coverage));
+    // Sort by coverage to highlight strengths/weaknesses
+    const sortedByCoverage = [...coverage].sort((a, b) => b.courseCount - a.courseCount);
+    const topSkills = sortedByCoverage.slice(0, 3);
+    const bottomSkills = sortedByCoverage.slice(-3).reverse();
 
-    return { coverage, gaps };
+    return { coverage, topSkills, bottomSkills };
   }, [courses]);
 
   // Calculate SVG points for radar
@@ -65,14 +64,11 @@ function SkillRadar() {
     return skillAnalysis.coverage.map((skill, i) => {
       const angle = i * angleStep - Math.PI / 2;
       const coverageRadius = (skill.coverage / 100) * maxRadius;
-      const demandRadius = (skill.demand / 100) * maxRadius;
 
       return {
         ...skill,
         coverageX: centerX + Math.cos(angle) * coverageRadius,
         coverageY: centerY + Math.sin(angle) * coverageRadius,
-        demandX: centerX + Math.cos(angle) * demandRadius,
-        demandY: centerY + Math.sin(angle) * demandRadius,
         labelX: centerX + Math.cos(angle) * (maxRadius + 25),
         labelY: centerY + Math.sin(angle) * (maxRadius + 25),
       };
@@ -83,10 +79,6 @@ function SkillRadar() {
     `${i === 0 ? 'M' : 'L'} ${p.coverageX} ${p.coverageY}`
   ).join(' ') + ' Z';
 
-  const demandPath = radarPoints.map((p, i) => 
-    `${i === 0 ? 'M' : 'L'} ${p.demandX} ${p.demandY}`
-  ).join(' ') + ' Z';
-
   return (
     <div className="skill-radar">
       <div className="radar-header">
@@ -95,20 +87,20 @@ function SkillRadar() {
             <span className="tooltip-content">
               <strong>What this shows:</strong>
               <ul>
-                <li>Green area = your library's topic coverage</li>
-                <li>Blue area = estimated industry demand</li>
-                <li>Gaps = where blue extends beyond green</li>
+                <li>Each axis = a skill category</li>
+                <li>Distance from center = relative coverage</li>
+                <li>Based on actual tags in your library</li>
               </ul>
               <strong>How to use:</strong>
               <ul>
-                <li>Identify under-covered high-demand topics</li>
-                <li>Prioritize content creation for gap areas</li>
+                <li>Identify well-covered vs sparse topics</li>
+                <li>Plan content to balance the shape</li>
               </ul>
             </span>
           </span>
         </h3>
         <p className="radar-hint">
-          Green = Your coverage | Blue = Industry demand estimate*
+          Coverage based on {courses.length} courses in your library
         </p>
       </div>
 
@@ -140,21 +132,26 @@ function SkillRadar() {
             />
           ))}
 
-          {/* Demand polygon (behind) */}
-          <path
-            d={demandPath}
-            fill="rgba(88, 166, 255, 0.2)"
-            stroke="#58a6ff"
-            strokeWidth="2"
-          />
-
-          {/* Coverage polygon (front) */}
+          {/* Coverage polygon */}
           <path
             d={coveragePath}
             fill="rgba(35, 134, 54, 0.3)"
             stroke="#238636"
             strokeWidth="2"
           />
+
+          {/* Data points */}
+          {radarPoints.map((point, i) => (
+            <circle
+              key={`point-${i}`}
+              cx={point.coverageX}
+              cy={point.coverageY}
+              r="4"
+              fill="#238636"
+              stroke="#0d1117"
+              strokeWidth="1"
+            />
+          ))}
 
           {/* Labels */}
           {radarPoints.map((point, i) => (
@@ -172,67 +169,30 @@ function SkillRadar() {
         </svg>
       </div>
 
-      {/* Gap alerts */}
-      {skillAnalysis.gaps.length > 0 && (
-        <div className="gap-alerts">
-          <h4>⚠️ Coverage Gaps</h4>
-          <div className="gap-list">
-            {skillAnalysis.gaps.slice(0, 3).map(gap => (
-              <div key={gap.category} className="gap-item">
-                <span className="gap-name">{gap.category}</span>
-                <span className="gap-stats">
-                  {gap.courseCount} courses (demand: {gap.demand}%)
-                </span>
-              </div>
-            ))}
-          </div>
+      {/* Coverage stats */}
+      <div className="coverage-stats">
+        <div className="stats-column">
+          <h4>💪 Strongest</h4>
+          {skillAnalysis.topSkills.map(skill => (
+            <div key={skill.category} className="stat-item strength">
+              <span className="stat-name">{skill.category}</span>
+              <span className="stat-count">{skill.courseCount} courses</span>
+            </div>
+          ))}
         </div>
-      )}
-
-      <div className="radar-legend">
-        <span className="legend-coverage">■ Coverage</span>
-        <span className="legend-demand">■ Demand</span>
-      </div>
-
-      <div className="demand-source">
-        <span className="source-asterisk">*</span>
-        Demand based on UE5 job market trends, community surveys, and Epic's feature roadmap priorities.
-        Replace with your LMS analytics when available.
+        <div className="stats-column">
+          <h4>📈 Opportunity</h4>
+          {skillAnalysis.bottomSkills.map(skill => (
+            <div key={skill.category} className="stat-item opportunity">
+              <span className="stat-name">{skill.category}</span>
+              <span className="stat-count">{skill.courseCount} courses</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-/**
- * Research-backed demand estimates (2024-2025)
- * 
- * Sources:
- * - Job market: UE developer demand projected to grow 122% over next decade
- * - Epic Roadmap: Nanite, Lumen, Substrate, Chaos Physics priority features
- * - Community: Blueprint/C++ hybrid approach most sought after
- * 
- * Methodology:
- * - Blueprints: 90% - Most in-demand skill, required in majority of job posts
- * - Niagara: 85% - Priority on Epic roadmap, VFX increasingly central
- * - Materials: 80% - Substrate material system is Epic's top 2025 priority  
- * - Animation: 75% - Motion Matching, MetaHuman driving high demand
- * - Lighting: 70% - Lumen refinements, MegaLights on roadmap
- * - UI/UMG: 65% - Growing demand for in-engine UI development
- * - Landscape: 55% - New terrain system in development, PCG production-ready
- * - Audio: 40% - MetaSounds maturing, but lower volume job demand
- */
-function getDemandEstimate(category) {
-  const estimates = {
-    'Blueprints': 90,  // Most in-demand skill, 122% job growth projection
-    'Niagara': 85,     // Epic roadmap priority, heterogeneous volumes coming
-    'Materials': 80,   // Substrate material system is UE5.7 focus
-    'Animation': 75,   // Motion Matching, MetaHuman, Chaos Physics
-    'Lighting': 70,    // Lumen, MegaLights, VSM improvements
-    'UI/UMG': 65,      // Growing demand for in-engine UI/HUD
-    'Landscape': 55,   // New 3D terrain system, PCG production-ready
-    'Audio': 40,       // MetaSounds evolving, but lower job volume
-  };
-  return estimates[category] || 50;
-}
-
 export default SkillRadar;
+
