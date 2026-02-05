@@ -1,48 +1,60 @@
-import { useMemo } from 'react';
-import { useTagData } from '../../context/TagDataContext';
-import './SkillRadar.css';
+import { useMemo, useState } from "react";
+import { useTagData } from "../../context/TagDataContext";
+import "./SkillRadar.css";
+
+// Industry demand benchmarks from UE5_SKILL_DEMAND_RESEARCH.md
+const INDUSTRY_DEMAND = {
+  Blueprints: 90,
+  Niagara: 85,
+  Materials: 80,
+  Animation: 75,
+  Lighting: 70,
+  "UI/UMG": 65,
+  Landscape: 55,
+  Audio: 40,
+};
 
 /**
  * Skill Coverage Radar
- * Spider chart showing actual skill coverage from your course library
- * All data derived from real course tags - no estimated/fake data
+ * Spider chart showing actual skill coverage vs industry demand
+ * Green = your coverage, Blue = industry demand benchmarks
  */
 function SkillRadar() {
   const { courses } = useTagData();
+  const [showDemand, setShowDemand] = useState(true);
 
   // Analyze skill coverage from actual course data
   const skillAnalysis = useMemo(() => {
-    // Define skill categories to measure
+    // Define skill categories to measure (aligned with industry demand keys)
     const skillCategories = [
-      { name: 'Blueprints', keywords: ['blueprint', 'visual scripting', 'bp', 'logic', 'node'] },
-      { name: 'Materials', keywords: ['material', 'shader', 'texture', 'pbr', 'substance'] },
-      { name: 'Lighting', keywords: ['light', 'lumen', 'raytracing', 'gi', 'shadow'] },
-      { name: 'Animation', keywords: ['animation', 'skeletal', 'rigging', 'anim', 'pose'] },
-      { name: 'Niagara', keywords: ['niagara', 'particle', 'vfx', 'effects', 'cascade'] },
-      { name: 'Landscape', keywords: ['landscape', 'terrain', 'foliage', 'world'] },
-      { name: 'Audio', keywords: ['audio', 'sound', 'music', 'acoustic'] },
-      { name: 'UI/UMG', keywords: ['ui', 'umg', 'widget', 'hud', 'interface'] },
+      { name: "Blueprints", keywords: ["blueprint", "visual scripting", "bp", "logic", "node"] },
+      { name: "Materials", keywords: ["material", "shader", "texture", "pbr", "substance"] },
+      { name: "Lighting", keywords: ["light", "lumen", "raytracing", "gi", "shadow"] },
+      { name: "Animation", keywords: ["animation", "skeletal", "rigging", "anim", "pose"] },
+      { name: "Niagara", keywords: ["niagara", "particle", "vfx", "effects", "cascade"] },
+      { name: "Landscape", keywords: ["landscape", "terrain", "foliage", "world"] },
+      { name: "Audio", keywords: ["audio", "sound", "music", "acoustic"] },
+      { name: "UI/UMG", keywords: ["ui", "umg", "widget", "hud", "interface"] },
     ];
 
     // Count courses per category
-    const coverage = skillCategories.map(cat => {
-      const matchingCourses = courses.filter(course => {
+    const coverage = skillCategories.map((cat) => {
+      const matchingCourses = courses.filter((course) => {
         const allTags = [
           ...(course.gemini_system_tags || []),
           ...(course.ai_tags || []),
           ...(course.transcript_tags || []),
-          ...Object.keys(course.tags || {})
-        ].map(t => t.toLowerCase());
-        
-        return cat.keywords.some(kw => 
-          allTags.some(tag => tag.includes(kw))
-        );
+          ...Object.keys(course.tags || {}),
+        ].map((t) => t.toLowerCase());
+
+        return cat.keywords.some((kw) => allTags.some((tag) => tag.includes(kw)));
       });
 
       return {
         category: cat.name,
         courseCount: matchingCourses.length,
         coverage: Math.min(100, (matchingCourses.length / courses.length) * 200), // Scale for visibility
+        demand: INDUSTRY_DEMAND[cat.name] || 50, // Industry demand benchmark
       };
     });
 
@@ -51,10 +63,18 @@ function SkillRadar() {
     const topSkills = sortedByCoverage.slice(0, 3);
     const bottomSkills = sortedByCoverage.slice(-3).reverse();
 
-    return { coverage, topSkills, bottomSkills };
+    // Calculate gap analysis
+    const gaps = coverage
+      .map((c) => ({
+        ...c,
+        gap: c.demand - c.coverage,
+      }))
+      .sort((a, b) => b.gap - a.gap);
+
+    return { coverage, topSkills, bottomSkills, gaps };
   }, [courses]);
 
-  // Calculate SVG points for radar
+  // Calculate SVG points for radar (including demand points)
   const radarPoints = useMemo(() => {
     const centerX = 150;
     const centerY = 150;
@@ -64,50 +84,64 @@ function SkillRadar() {
     return skillAnalysis.coverage.map((skill, i) => {
       const angle = i * angleStep - Math.PI / 2;
       const coverageRadius = (skill.coverage / 100) * maxRadius;
+      const demandRadius = (skill.demand / 100) * maxRadius;
 
       return {
         ...skill,
         coverageX: centerX + Math.cos(angle) * coverageRadius,
         coverageY: centerY + Math.sin(angle) * coverageRadius,
+        demandX: centerX + Math.cos(angle) * demandRadius,
+        demandY: centerY + Math.sin(angle) * demandRadius,
         labelX: centerX + Math.cos(angle) * (maxRadius + 25),
         labelY: centerY + Math.sin(angle) * (maxRadius + 25),
       };
     });
   }, [skillAnalysis]);
 
-  const coveragePath = radarPoints.map((p, i) => 
-    `${i === 0 ? 'M' : 'L'} ${p.coverageX} ${p.coverageY}`
-  ).join(' ') + ' Z';
+  const coveragePath =
+    radarPoints.map((p, i) => `${i === 0 ? "M" : "L"} ${p.coverageX} ${p.coverageY}`).join(" ") +
+    " Z";
+
+  const demandPath =
+    radarPoints.map((p, i) => `${i === 0 ? "M" : "L"} ${p.demandX} ${p.demandY}`).join(" ") + " Z";
 
   return (
     <div className="skill-radar">
       <div className="radar-header">
-        <h3>📊 Skill Coverage Radar
-          <span className="info-tooltip">ⓘ
+        <h3>
+          📊 Coverage vs Industry Demand
+          <span className="info-tooltip">
+            ⓘ
             <span className="tooltip-content">
               <strong>What this shows:</strong>
               <ul>
-                <li>Each axis = a skill category</li>
-                <li>Distance from center = relative coverage</li>
-                <li>Based on actual tags in your library</li>
+                <li>🟢 Green = Your library coverage</li>
+                <li>🔵 Blue = Industry demand benchmarks</li>
+                <li>Gap = Where demand exceeds coverage</li>
               </ul>
-              <strong>How to use:</strong>
+              <strong>Data source:</strong>
               <ul>
-                <li>Identify well-covered vs sparse topics</li>
-                <li>Plan content to balance the shape</li>
+                <li>Epic roadmap + job market research</li>
               </ul>
             </span>
           </span>
         </h3>
-        <p className="radar-hint">
-          Coverage based on {courses.length} courses in your library
-        </p>
+        <div className="radar-controls">
+          <label className="toggle-label">
+            <input
+              type="checkbox"
+              checked={showDemand}
+              onChange={(e) => setShowDemand(e.target.checked)}
+            />
+            Show Industry Demand
+          </label>
+        </div>
       </div>
 
       <div className="radar-chart">
         <svg viewBox="0 0 300 300" className="radar-svg">
           {/* Grid circles */}
-          {[25, 50, 75, 100].map(pct => (
+          {[25, 50, 75, 100].map((pct) => (
             <circle
               key={pct}
               cx="150"
@@ -132,13 +166,19 @@ function SkillRadar() {
             />
           ))}
 
-          {/* Coverage polygon */}
-          <path
-            d={coveragePath}
-            fill="rgba(35, 134, 54, 0.3)"
-            stroke="#238636"
-            strokeWidth="2"
-          />
+          {/* Industry Demand polygon (behind) */}
+          {showDemand && (
+            <path
+              d={demandPath}
+              fill="rgba(88, 166, 255, 0.2)"
+              stroke="#58a6ff"
+              strokeWidth="2"
+              strokeDasharray="5,3"
+            />
+          )}
+
+          {/* Your Coverage polygon (front) */}
+          <path d={coveragePath} fill="rgba(35, 134, 54, 0.3)" stroke="#238636" strokeWidth="2" />
 
           {/* Data points */}
           {radarPoints.map((point, i) => (
@@ -167,13 +207,25 @@ function SkillRadar() {
             </text>
           ))}
         </svg>
+
+        {/* Legend */}
+        <div className="radar-legend">
+          <span className="legend-item coverage">
+            <span className="legend-dot"></span> Your Coverage
+          </span>
+          {showDemand && (
+            <span className="legend-item demand">
+              <span className="legend-dot"></span> Industry Demand
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Coverage stats */}
       <div className="coverage-stats">
         <div className="stats-column">
           <h4>💪 Strongest</h4>
-          {skillAnalysis.topSkills.map(skill => (
+          {skillAnalysis.topSkills.map((skill) => (
             <div key={skill.category} className="stat-item strength">
               <span className="stat-name">{skill.category}</span>
               <span className="stat-count">{skill.courseCount} courses</span>
@@ -182,7 +234,7 @@ function SkillRadar() {
         </div>
         <div className="stats-column">
           <h4>📈 Opportunity</h4>
-          {skillAnalysis.bottomSkills.map(skill => (
+          {skillAnalysis.bottomSkills.map((skill) => (
             <div key={skill.category} className="stat-item opportunity">
               <span className="stat-name">{skill.category}</span>
               <span className="stat-count">{skill.courseCount} courses</span>
@@ -195,4 +247,3 @@ function SkillRadar() {
 }
 
 export default SkillRadar;
-

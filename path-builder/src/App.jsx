@@ -10,7 +10,16 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import PathReadiness from "./components/PathReadiness/PathReadiness";
 import TagSources from "./components/TagSources/TagSources";
 import TagEditor from "./components/TagEditor/TagEditor";
-import { JourneyHeatmap, TagTimeline, TagTrends, PrereqFlow, InstructorMap, TagHeatmap } from "./components/Visualizations";
+import {
+  JourneyHeatmap,
+  TagTimeline,
+  TagTrends,
+  PrereqFlow,
+  InstructorMap,
+  TagHeatmap,
+  SkillRadar,
+  SkillGapAnalysis,
+} from "./components/Visualizations";
 import InsightsPanel from "./components/Visualizations/InsightsPanel";
 import CollapsibleSection from "./components/Visualizations/CollapsibleSection";
 import "./App.css";
@@ -159,7 +168,11 @@ function App() {
 
                 {/* Left: Input Panel */}
                 <aside className="library-panel">
-                  <LeftPanel courses={courses} preSelectedSkill={preSelectedSkill} onSkillUsed={() => setPreSelectedSkill(null)} />
+                  <LeftPanel
+                    courses={courses}
+                    preSelectedSkill={preSelectedSkill}
+                    onSkillUsed={() => setPreSelectedSkill(null)}
+                  />
                 </aside>
 
                 {/* Center: Path Canvas */}
@@ -183,12 +196,24 @@ function App() {
                 <div className="analytics-grid">
                   {/* Insights & Recommendations */}
                   <InsightsPanel onNavigate={handleInsightNavigate} />
-                  
+
+                  {/* Skill Coverage vs Industry Demand */}
+                  <CollapsibleSection
+                    title="Coverage vs Industry Demand"
+                    icon="🎯"
+                    defaultExpanded={true}
+                  >
+                    <div className="coverage-grid">
+                      <SkillRadar />
+                      <SkillGapAnalysis />
+                    </div>
+                  </CollapsibleSection>
+
                   {/* Overview Section */}
                   <CollapsibleSection title="Overview" icon="📈">
                     <JourneyHeatmap />
                   </CollapsibleSection>
-                  
+
                   {/* Library Analysis Section */}
                   <CollapsibleSection title="Library Analysis" icon="📚">
                     <TagTrends />
@@ -196,14 +221,18 @@ function App() {
                     <TagTimeline />
                     <InstructorMap />
                   </CollapsibleSection>
-                  
+
                   {/* Learning Paths Section */}
                   <CollapsibleSection title="Learning Paths" icon="🛤️">
                     <PrereqFlow />
                   </CollapsibleSection>
-                  
+
                   {/* Tag Relationship Graph Section */}
-                  <CollapsibleSection title="Tag Relationship Graph" icon="🔗" defaultExpanded={true}>
+                  <CollapsibleSection
+                    title="Tag Relationship Graph"
+                    icon="🔗"
+                    defaultExpanded={true}
+                  >
                     <div className="tag-graph-wrapper">
                       <TagGraph tags={tags} edges={edges} courses={courses} />
                     </div>
