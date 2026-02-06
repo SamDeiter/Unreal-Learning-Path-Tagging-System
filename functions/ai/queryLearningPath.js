@@ -153,74 +153,41 @@ async function handleOnboarding(data, _context) {
 // ============ Gemini API Helpers ============
 
 async function callGeminiForIntent(query, personaHint, apiKey) {
-  const systemPrompt = `Extract structured intent from a plain-English Unreal Engine problem.
-Return ONLY valid JSON:
-{
-  "intent_id": "intent_<uuid>",
-  "user_role": "string",
-  "goal": "string",
-  "problem_description": "string",
-  "systems": ["string"],
-  "constraints": ["string"]
-}`;
+  // Token-optimized: ~80 tokens vs ~150 before
+  const systemPrompt = `UE5 expert. Extract intent from problem description. UE5-only, no other engines.
+JSON:{"intent_id":"intent_<uuid>","user_role":"str","goal":"str","problem_description":"str","systems":["str"],"constraints":["str"]}`;
 
-  const userPrompt = `Extract intent from: "${query}"
-${personaHint ? `Context: User appears to be a ${personaHint}` : ""}`;
+  const userPrompt = `"${query}"${personaHint ? ` [${personaHint}]` : ""}`;
 
   return await callGemini(systemPrompt, userPrompt, apiKey, "intent");
 }
 
 async function callGeminiForDiagnosis(intent, detectedTagIds, apiKey) {
-  const systemPrompt = `Diagnose WHY the problem occurs. Focus on root causes and signals.
-Return ONLY valid JSON:
-{
-  "diagnosis_id": "diag_<uuid>",
-  "problem_summary": "string",
-  "root_causes": ["string"],
-  "signals_to_watch_for": ["string"],
-  "variables_that_matter": ["string"],
-  "variables_that_do_not": ["string"],
-  "generalization_scope": ["string"]
-}`;
+  // Token-optimized: ~120 tokens vs ~200 before
+  const systemPrompt = `UE5 expert. Diagnose UE5 problems only (Lumen/Nanite/Blueprint/Material/Niagara/etc). Specific settings & Editor workflows.
+JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"],"signals_to_watch_for":["str"],"variables_that_matter":["str"],"variables_that_do_not":["str"],"generalization_scope":["str"]}`;
 
-  const userPrompt = `Diagnose: ${intent.problem_description}
-Systems: ${(intent.systems || []).join(", ")}
-${detectedTagIds?.length ? `Tags: ${detectedTagIds.join(", ")}` : ""}`;
+  const userPrompt = `${intent.problem_description}${intent.systems?.length ? ` [${intent.systems.join(",")}]` : ""}${detectedTagIds?.length ? ` Tags:${detectedTagIds.slice(0, 5).join(",")}` : ""}`;
 
   return await callGemini(systemPrompt, userPrompt, apiKey, "diagnosis");
 }
 
 async function callGeminiForObjectives(intent, diagnosis, apiKey) {
-  const systemPrompt = `Create learning objectives. At least ONE transferable is REQUIRED.
-Return ONLY valid JSON:
-{
-  "fix_specific": ["string"],
-  "transferable": ["string"]
-}`;
+  // Token-optimized: ~50 tokens vs ~80 before
+  const systemPrompt = `Create UE5 learning objectives. MUST have >=1 transferable skill.
+JSON:{"fix_specific":["str"],"transferable":["str"]}`;
 
-  const userPrompt = `Create objectives for:
-Problem: ${intent.problem_description}
-Root Causes: ${(diagnosis.root_causes || []).join("; ")}
-Generalization: ${(diagnosis.generalization_scope || []).join("; ")}`;
+  const userPrompt = `Problem:${intent.problem_description.slice(0, 200)}\nCauses:${(diagnosis.root_causes || []).slice(0, 3).join(";")}`;
 
   return await callGemini(systemPrompt, userPrompt, apiKey, "objectives");
 }
 
 async function callGeminiForValidation(intent, diagnosis, objectives, learningPath, apiKey) {
-  const systemPrompt = `Validate this curriculum against anti-tutorial-hell rules.
-Return ONLY valid JSON:
-{
-  "approved": boolean,
-  "reason": "string",
-  "issues": ["string"],
-  "suggestions": ["string"]
-}`;
+  // Token-optimized: ~60 tokens vs ~100 before
+  const systemPrompt = `Validate curriculum. Reject if: no transferable skills, purely procedural, can't generalize.
+JSON:{"approved":bool,"reason":"str","issues":["str"],"suggestions":["str"]}`;
 
-  const userPrompt = `Validate:
-Problem: ${intent?.problem_description}
-Objectives:
-- Fix: ${(objectives.fix_specific || []).join("; ")}
-- Transferable: ${(objectives.transferable || []).join("; ")}`;
+  const userPrompt = `Fix:[${(objectives.fix_specific || []).slice(0, 3).join(";")}] Transfer:[${(objectives.transferable || []).join(";")}]`;
 
   return await callGemini(systemPrompt, userPrompt, apiKey, "validation");
 }
@@ -229,12 +196,13 @@ async function callGemini(systemPrompt, userPrompt, apiKey, type) {
   const model = "gemini-2.0-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
+  // Token-optimized: reduced maxOutputTokens from 2048 to 1024
   const payload = {
     contents: [{ parts: [{ text: userPrompt }] }],
     systemInstruction: { parts: [{ text: systemPrompt }] },
     generationConfig: {
-      temperature: 0.3,
-      maxOutputTokens: 2048,
+      temperature: 0.2, // Lower temp = more focused, fewer tokens
+      maxOutputTokens: 1024, // Reduced from 2048
       responseMimeType: "application/json",
     },
   };
