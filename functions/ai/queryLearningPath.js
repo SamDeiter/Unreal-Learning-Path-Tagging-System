@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { checkRateLimit } = require("../utils/rateLimit");
+const { logApiUsage } = require("../utils/apiUsage");
 
 /**
  * UNIFIED /query ENDPOINT
@@ -64,22 +65,30 @@ function detectMode(data) {
  * Problem-First Flow:
  * Intent → Diagnosis → Learning Objectives → Validation → Adaptive Cart
  */
-async function handleProblemFirst(data, _context, apiKey) {
+async function handleProblemFirst(data, context, apiKey) {
   const { query, personaHint, detectedTagIds } = data;
+  const userId = context.auth?.uid || "anonymous";
 
   console.log(`[queryLearningPath] Problem-First mode for: "${query.substring(0, 50)}..."`);
 
   // Step 1: Extract Intent
   const intentResponse = await callGeminiForIntent(query, personaHint, apiKey);
   const intent = intentResponse.intent;
+  await logApiUsage(userId, { model: "gemini-2.0-flash", type: "intent", estimatedTokens: 150 });
 
   // Step 2: Generate Diagnosis
   const diagnosisResponse = await callGeminiForDiagnosis(intent, detectedTagIds, apiKey);
   const diagnosis = diagnosisResponse.diagnosis;
+  await logApiUsage(userId, { model: "gemini-2.0-flash", type: "diagnosis", estimatedTokens: 200 });
 
   // Step 3: Decompose Learning Objectives
   const objectivesResponse = await callGeminiForObjectives(intent, diagnosis, apiKey);
   const objectives = objectivesResponse.objectives;
+  await logApiUsage(userId, {
+    model: "gemini-2.0-flash",
+    type: "objectives",
+    estimatedTokens: 100,
+  });
 
   // Step 4: Validate Curriculum (Anti-Tutorial-Hell)
   const validationResponse = await callGeminiForValidation(
@@ -89,6 +98,7 @@ async function handleProblemFirst(data, _context, apiKey) {
     null,
     apiKey
   );
+  await logApiUsage(userId, { model: "gemini-2.0-flash", type: "validation", estimatedTokens: 80 });
 
   if (!validationResponse.validation.approved) {
     console.warn(
