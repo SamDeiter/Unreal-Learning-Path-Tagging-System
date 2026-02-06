@@ -103,9 +103,12 @@ export default function ProblemFirst() {
     });
   }, []);
 
-  // Check if course is in cart
+  // Check if course is in cart (accepts course object or code string)
   const isCourseInCart = useCallback(
-    (course) => selectedCourses.some((c) => c.code === course.code),
+    (courseOrCode) => {
+      const code = typeof courseOrCode === "string" ? courseOrCode : courseOrCode?.code;
+      return selectedCourses.some((c) => c.code === code);
+    },
     [selectedCourses]
   );
 
@@ -357,6 +360,8 @@ function matchCoursesToCart(cart, allCourses) {
     .map((result) => {
       const course = allCourses.find((c) => c.code === result.courseCode);
       if (!course) return null;
+      // Skip courses without playable videos (synthetic roll-up courses)
+      if (!course.videos?.length || !course.videos[0]?.drive_id) return null;
       return {
         ...course,
         _relevanceScore: result.score,
@@ -381,7 +386,7 @@ function matchCoursesToCart(cart, allCourses) {
   });
 
   return tagScored
-    .filter((c) => c._relevanceScore > 0)
+    .filter((c) => c._relevanceScore > 0 && c.videos?.length && c.videos[0]?.drive_id)
     .sort((a, b) => b._relevanceScore - a._relevanceScore)
     .slice(0, 5);
 }
