@@ -135,26 +135,33 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
             )}
           </div>
 
-          {/* Video Embed - placeholder for actual player */}
+          {/* Video Display - Thumbnail with Open in Drive */}
           <div className="video-container">
-            {currentCourse.videos?.[0]?.drive_id ? (
-              <iframe
-                src={`https://drive.google.com/file/d/${currentCourse.videos[0].drive_id}/preview`}
-                title={currentCourse.title}
-                allow="autoplay"
-                allowFullScreen
-              />
-            ) : (
-              <div className="video-placeholder">
-                <img src={getThumbnailUrl(currentCourse.videos?.[0])} alt={currentCourse.title} />
-                <div className="play-overlay">▶</div>
-              </div>
-            )}
+            <img
+              src={getThumbnailUrl(currentCourse.videos?.[0])}
+              alt={currentCourse.title}
+              className="video-thumbnail"
+            />
+            <div className="video-overlay">
+              <a
+                href={
+                  currentCourse.videos?.[0]?.drive_id
+                    ? `https://drive.google.com/file/d/${currentCourse.videos[0].drive_id}/view`
+                    : currentCourse.videoUrl || "#"
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="open-drive-btn"
+              >
+                ▶ Open in Google Drive
+              </a>
+              <p className="drive-hint">Opens in new tab (requires Google login)</p>
+            </div>
           </div>
 
           <div className="video-controls">
-            <button className="skip-btn" onClick={handleVideoComplete} disabled={!nextCourse}>
-              Skip to Next →
+            <button className="complete-btn" onClick={handleVideoComplete}>
+              ✓ Mark Complete & Continue
             </button>
             <button className="exit-btn" onClick={onExit}>
               Exit Path
