@@ -10,6 +10,7 @@ import DiagnosisCard from "./DiagnosisCard";
 import AdaptiveLearningCart from "./AdaptiveLearningCart";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import tagGraphService from "../../services/TagGraphService";
+import { searchSegments } from "../../services/segmentSearchService";
 import {
   trackQuerySubmitted,
   trackDiagnosisGenerated,
@@ -149,7 +150,10 @@ export default function ProblemFirst() {
 
         const cartData = result.data.cart;
 
-        // Match courses using TagGraphService
+        // Store original query for transcript search matching
+        cartData.userQuery = inputData.query;
+
+        // Match courses using transcript-based search
         const matchedCourses = matchCoursesToCart(cartData, courses);
         cartData.matchedCourses = matchedCourses;
 
@@ -176,13 +180,6 @@ export default function ProblemFirst() {
     setStage(STAGES.INPUT);
     setCart(null);
     setError(null);
-  }, []);
-
-  const handleCourseClick = useCallback((course) => {
-    // Open course detail or navigate
-    if (course.videoUrl || course.url) {
-      window.open(course.videoUrl || course.url, "_blank");
-    }
   }, []);
 
   return (
@@ -222,18 +219,61 @@ export default function ProblemFirst() {
             ← New Problem
           </button>
 
-          {/* Diagnosis Card */}
-          <DiagnosisCard diagnosis={cart.diagnosis} />
+          {/* HERO: Video Recommendations (TOP) */}
+          <div className="hero-videos">
+            <h2 className="hero-title">
+              🎯 Watch These ({(cart.matchedCourses || []).slice(0, 5).length} segments)
+            </h2>
+            <div className="hero-video-grid">
+              {(cart.matchedCourses || []).slice(0, 5).map((course, idx) => (
+                <div key={course.code} className={`hero-video-card ${idx === 0 ? "primary" : ""}`}>
+                  <div className="video-thumbnail">
+                    {course.videos?.[0]?.drive_id ? (
+                      <img
+                        src={`https://drive.google.com/thumbnail?id=${course.videos[0].drive_id}&sz=w320`}
+                        alt={course.title}
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div className="thumbnail-placeholder">📹</div>
+                    )}
+                  </div>
+                  <div className="video-info">
+                    <h3 className="video-title">{course.title || course.code}</h3>
+                    <p className="video-meta">
+                      {course.duration_formatted || "~10 min"} • {course.video_count || 1} video
+                      {(course.video_count || 1) > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <div className="video-actions">
+                    <button
+                      className={`cta-btn ${idx === 0 ? "primary" : "secondary"}`}
+                      onClick={() => {
+                        handleAddToCart(course);
+                        if (idx === 0) setStage(STAGES.GUIDED);
+                      }}
+                    >
+                      {idx === 0
+                        ? "▶ Watch Now"
+                        : isCourseInCart(course.code)
+                          ? "✓ Added"
+                          : "+ Add"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-          {/* Learning Cart */}
-          <AdaptiveLearningCart
-            objectives={cart.objectives}
-            courses={cart.matchedCourses || []}
-            validation={cart.validation}
-            onCourseClick={handleCourseClick}
-            onAddToCart={handleAddToCart}
-            isCourseInCart={isCourseInCart}
-          />
+          {/* Collapsed Diagnosis (BOTTOM) */}
+          <details className="diagnosis-collapsed">
+            <summary className="diagnosis-summary">
+              📋 Diagnosis ({cart.diagnosis?.root_causes?.length || 0} causes identified)
+            </summary>
+            <DiagnosisCard diagnosis={cart.diagnosis} />
+          </details>
 
           {/* Cart Summary Panel */}
           {selectedCourses.length > 0 && (
@@ -290,75 +330,58 @@ export default function ProblemFirst() {
 }
 
 /**
- * Match courses to the cart based on detected tags and systems
+ * Match courses to the cart based on TRANSCRIPT content (not just tags)
+ * Uses word frequency from actual video transcripts for better relevancy
  */
 function matchCoursesToCart(cart, allCourses) {
   if (!allCourses || allCourses.length === 0) return [];
-  if (!cart?.intent?.systems?.length && !cart?.diagnosis) return allCourses.slice(0, 5);
 
-  // Get relevant tag IDs from intent and diagnosis
-  const relevantTagIds = new Set();
-
-  // Add systems from intent
-  (cart.intent?.systems || []).forEach((sys) => {
-    relevantTagIds.add(sys.toLowerCase());
-  });
-
-  // Extract keywords from ALL diagnosis fields
-  const diagnosisParts = [
-    cart.diagnosis?.problem_summary,
-    ...(cart.diagnosis?.root_causes || []),
-    ...(cart.diagnosis?.signals_to_watch_for || []),
-    ...(cart.diagnosis?.variables_that_matter || []),
-    ...(cart.diagnosis?.generalization_scope || []),
+  // Build search query from user's problem and diagnosis
+  const queryParts = [
+    cart?.userQuery,
+    cart?.diagnosis?.problem_summary,
+    ...(cart?.intent?.systems || []),
   ].filter(Boolean);
 
-  const diagnosisText = diagnosisParts.join(" ");
+  const searchQuery = queryParts.join(" ");
 
-  // Extract tags from diagnosis text
-  const extractedTags = tagGraphService.extractTagsFromText(diagnosisText);
-  extractedTags.forEach((match) => {
-    relevantTagIds.add(match.tag.tag_id);
-    // Also add the display name for broader matching
-    relevantTagIds.add(match.tag.display_name.toLowerCase());
-  });
+  if (!searchQuery || searchQuery.length < 5) {
+    return allCourses.slice(0, 5);
+  }
 
-  // Also extract common UE5 keywords directly from diagnosis text
-  const ue5Keywords = [
-    "lumen",
-    "nanite",
-    "blueprint",
-    "material",
-    "lighting",
-    "animation",
-    "sequencer",
-    "niagara",
-    "landscape",
-    "foliage",
-    "pcg",
-    "taa",
-    "raytracing",
-    "reflection",
-    "gi",
-    "performance",
-    "rendering",
-  ];
-  const textLower = diagnosisText.toLowerCase();
-  ue5Keywords.forEach((kw) => {
-    if (textLower.includes(kw)) {
-      relevantTagIds.add(kw);
-    }
-  });
+  // Use transcript-based search for MUCH better relevancy
+  const transcriptResults = searchSegments(searchQuery, allCourses);
 
-  // Score and rank courses
-  const scoredCourses = allCourses.map((course) => {
-    const score = tagGraphService.scoreCourseRelevance(course, Array.from(relevantTagIds));
+  // Map back to full course objects with scores
+  const scoredCourses = transcriptResults
+    .map((result) => {
+      const course = allCourses.find((c) => c.code === result.courseCode);
+      if (!course) return null;
+      return {
+        ...course,
+        _relevanceScore: result.score,
+        _matchedKeywords: result.matchedKeywords,
+      };
+    })
+    .filter(Boolean);
+
+  // If transcript search found results, use those
+  if (scoredCourses.length >= 3) {
+    return scoredCourses.slice(0, 5);
+  }
+
+  // Fallback: Use tag-based scoring if transcript search is sparse
+  const keywords = searchQuery
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w.length > 2);
+  const tagScored = allCourses.map((course) => {
+    const score = tagGraphService.scoreCourseRelevance(course, keywords);
     return { ...course, _relevanceScore: score };
   });
 
-  // Sort by relevance and return top 8 (more options)
-  return scoredCourses
+  return tagScored
     .filter((c) => c._relevanceScore > 0)
     .sort((a, b) => b._relevanceScore - a._relevanceScore)
-    .slice(0, 8);
+    .slice(0, 5);
 }
