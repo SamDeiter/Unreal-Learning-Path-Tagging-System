@@ -226,7 +226,7 @@ Objectives:
 }
 
 async function callGemini(systemPrompt, userPrompt, apiKey, type) {
-  const model = "gemini-1.5-flash";
+  const model = "gemini-2.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const payload = {
@@ -258,12 +258,31 @@ async function callGemini(systemPrompt, userPrompt, apiKey, type) {
   }
 
   try {
+    // Try multiple patterns to extract JSON
+    let jsonStr = generatedText;
+
+    // Try markdown code block first (```json ... ```)
     const jsonMatch = generatedText.match(/```json\s*([\s\S]*?)\s*```/);
-    const jsonStr = jsonMatch ? jsonMatch[1] : generatedText;
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1];
+    } else {
+      // Try plain code block (``` ... ```)
+      const codeMatch = generatedText.match(/```\s*([\s\S]*?)\s*```/);
+      if (codeMatch) {
+        jsonStr = codeMatch[1];
+      } else {
+        // Try to find JSON object directly
+        const objectMatch = generatedText.match(/\{[\s\S]*\}/);
+        if (objectMatch) {
+          jsonStr = objectMatch[0];
+        }
+      }
+    }
+
     const parsed = JSON.parse(jsonStr.trim());
     return { [type]: parsed };
-  } catch (_parseError) {
-    console.error(`[Gemini ${type}] Parse failed:`, generatedText);
+  } catch (parseError) {
+    console.error(`[Gemini ${type}] Parse failed. Raw text:`, generatedText.substring(0, 500));
     throw new Error(`Failed to parse ${type} JSON`);
   }
 }
