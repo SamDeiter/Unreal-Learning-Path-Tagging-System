@@ -4,6 +4,7 @@
  */
 import { useState, useCallback, useMemo } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { initializeApp, getApps } from "firebase/app";
 import ProblemInput from "./ProblemInput";
 import DiagnosisCard from "./DiagnosisCard";
 import AdaptiveLearningCart from "./AdaptiveLearningCart";
@@ -15,6 +16,24 @@ import {
 } from "../../services/analyticsService";
 import { useTagData } from "../../context/TagDataContext";
 import "./ProblemFirst.css";
+
+// Firebase config - uses same project as main app
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+};
+
+// Helper to get or create Firebase app instance
+function getFirebaseApp() {
+  const existingApps = getApps();
+  const pathBuilderApp = existingApps.find((a) => a.name === "path-builder");
+  if (pathBuilderApp) return pathBuilderApp;
+  return initializeApp(firebaseConfig, "path-builder");
+}
 
 // Flow stages
 const STAGES = {
@@ -57,7 +76,8 @@ export default function ProblemFirst() {
         );
 
         // Call the unified query endpoint
-        const functions = getFunctions();
+        const app = getFirebaseApp();
+        const functions = getFunctions(app, "us-central1");
         const queryLearningPath = httpsCallable(functions, "queryLearningPath");
 
         const result = await queryLearningPath({
