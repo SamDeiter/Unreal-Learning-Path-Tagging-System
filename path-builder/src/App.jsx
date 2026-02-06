@@ -10,6 +10,8 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import PathReadiness from "./components/PathReadiness/PathReadiness";
 import TagSources from "./components/TagSources/TagSources";
 import TagEditor from "./components/TagEditor/TagEditor";
+import Personas from "./components/Personas/Personas";
+import { ProblemFirst } from "./components/ProblemFirst";
 import {
   JourneyHeatmap,
   TagTimeline,
@@ -125,6 +127,18 @@ function App() {
                   Path Builder
                 </button>
                 <button
+                  className={`nav-tab ${activeTab === "personas" ? "active" : ""}`}
+                  onClick={() => setActiveTab("personas")}
+                >
+                  🚀 Onboarding
+                </button>
+                <button
+                  className={`nav-tab ${activeTab === "problem" ? "active" : ""}`}
+                  onClick={() => setActiveTab("problem")}
+                >
+                  🔧 Fix a Problem
+                </button>
+                <button
                   className={`nav-tab ${activeTab === "analytics" ? "active" : ""}`}
                   onClick={() => setActiveTab("analytics")}
                 >
@@ -184,6 +198,16 @@ function App() {
                 <aside className="output-panel-area">
                   <OutputPanel />
                 </aside>
+              </div>
+            )}
+            {activeTab === "personas" && (
+              <div className="dashboard-layout">
+                <Personas />
+              </div>
+            )}
+            {activeTab === "problem" && (
+              <div className="dashboard-layout">
+                <ProblemFirst />
               </div>
             )}
             {activeTab === "analytics" && (

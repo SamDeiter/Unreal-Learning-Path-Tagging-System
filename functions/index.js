@@ -6,7 +6,20 @@ require("dotenv").config();
 admin.initializeApp();
 
 // ============================================================================
-// AI Functions
+// AI Functions - Existing
 // ============================================================================
 Object.assign(exports, require("./ai/generateLearningPath"));
 Object.assign(exports, require("./ai/generateCourseMetadata"));
+
+// ============================================================================
+// AI Functions - Problem-First Learning (Adaptive Cart)
+// ============================================================================
+Object.assign(exports, require("./ai/extractIntent"));
+Object.assign(exports, require("./ai/generateDiagnosis"));
+Object.assign(exports, require("./ai/decomposeLearningObjectives"));
+Object.assign(exports, require("./ai/validateCurriculum"));
+
+// ============================================================================
+// Unified Query Endpoint
+// ============================================================================
+Object.assign(exports, require("./ai/queryLearningPath"));
