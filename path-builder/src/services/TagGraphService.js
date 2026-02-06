@@ -215,8 +215,14 @@ class TagGraphService {
   scoreCourseRelevance(course, targetTagIds) {
     if (!course || !targetTagIds || targetTagIds.length === 0) return 0;
 
-    // Normalize course tags
-    const courseTags = (course.tags || []).map((t) => {
+    // Normalize course tags - ensure it's an array first
+    let rawTags = course.tags;
+    if (!Array.isArray(rawTags)) {
+      // Handle object-based tags or missing tags
+      rawTags = [];
+    }
+
+    const courseTags = rawTags.map((t) => {
       if (typeof t === "string") return t.toLowerCase();
       return (t?.name || t?.displayName || t?.tag_id || "").toLowerCase();
     });
