@@ -8,6 +8,7 @@ import { initializeApp, getApps } from "firebase/app";
 import ProblemInput from "./ProblemInput";
 import DiagnosisCard from "./DiagnosisCard";
 import AdaptiveLearningCart from "./AdaptiveLearningCart";
+import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import tagGraphService from "../../services/TagGraphService";
 import {
   trackQuerySubmitted,
@@ -41,6 +42,7 @@ const STAGES = {
   INPUT: "input",
   LOADING: "loading",
   DIAGNOSIS: "diagnosis",
+  GUIDED: "guided", // New: AI-narrated player
   ERROR: "error",
 };
 
@@ -261,19 +263,27 @@ export default function ProblemFirst() {
                   </div>
                 ))}
               </div>
-              <button
-                className="generate-path-btn"
-                onClick={() => {
-                  // Navigate to path builder with selected courses
-                  console.log("[ProblemFirst] Generate path with:", selectedCourses);
-                  // TODO: Navigate to GuidedPlayer or PathBuilder
-                }}
-              >
+              <button className="generate-path-btn" onClick={() => setStage(STAGES.GUIDED)}>
                 Generate Path →
               </button>
             </div>
           )}
         </div>
+      )}
+
+      {/* Stage: Guided Player */}
+      {stage === STAGES.GUIDED && (
+        <GuidedPlayer
+          courses={selectedCourses}
+          diagnosis={cart?.diagnosis}
+          problemSummary={cart?.diagnosis?.problem_summary}
+          onComplete={() => {
+            // Clear cart and return to input
+            setSelectedCourses([]);
+            setStage(STAGES.INPUT);
+          }}
+          onExit={() => setStage(STAGES.DIAGNOSIS)}
+        />
       )}
     </div>
   );
