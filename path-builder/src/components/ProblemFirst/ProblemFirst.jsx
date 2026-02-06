@@ -2,7 +2,7 @@
  * ProblemFirst - Main page component for Problem-First Learning
  * Orchestrates: Input → Diagnosis → Learning Cart
  */
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { initializeApp, getApps } from "firebase/app";
 import ProblemInput from "./ProblemInput";
@@ -15,6 +15,7 @@ import {
   trackLearningPathGenerated,
 } from "../../services/analyticsService";
 import { useTagData } from "../../context/TagDataContext";
+import { formatDuration } from "../../utils/videoUtils";
 import "./ProblemFirst.css";
 
 // Firebase config - uses same project as main app
@@ -43,14 +44,67 @@ const STAGES = {
   ERROR: "error",
 };
 
+const CART_STORAGE_KEY = "problem-first-cart";
+
 export default function ProblemFirst() {
   const [stage, setStage] = useState(STAGES.INPUT);
   const [cart, setCart] = useState(null);
   const [error, setError] = useState(null);
+  const [selectedCourses, setSelectedCourses] = useState([]);
 
   // Get courses from context using the hook
   const tagData = useTagData();
   const courses = useMemo(() => tagData?.courses || [], [tagData?.courses]);
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(CART_STORAGE_KEY);
+      if (stored) {
+        setSelectedCourses(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error("[ProblemFirst] Failed to load cart:", e);
+    }
+  }, []);
+
+  // Save cart to localStorage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(selectedCourses));
+    } catch (e) {
+      console.error("[ProblemFirst] Failed to save cart:", e);
+    }
+  }, [selectedCourses]);
+
+  // Calculate total duration of selected courses
+  const totalDuration = useMemo(() => {
+    const totalSec = selectedCourses.reduce((sum, course) => {
+      const courseDurationSec =
+        course.videos?.reduce((vs, v) => vs + (v.duration_seconds || 0), 0) ||
+        (course.duration_minutes || 0) * 60;
+      return sum + courseDurationSec;
+    }, 0);
+    return formatDuration(totalSec);
+  }, [selectedCourses]);
+
+  // Add/remove course from cart
+  const handleAddToCart = useCallback((course) => {
+    setSelectedCourses((prev) => {
+      const exists = prev.some((c) => c.code === course.code);
+      if (exists) {
+        return prev.filter((c) => c.code !== course.code);
+      } else {
+        return [...prev, course];
+      }
+    });
+  }, []);
+
+  // Check if course is in cart
+  const isCourseInCart = useCallback(
+    (course) => selectedCourses.some((c) => c.code === course.code),
+    [selectedCourses]
+  );
 
   // Get detected persona from localStorage if available
   const getDetectedPersona = useCallback(() => {
@@ -175,7 +229,50 @@ export default function ProblemFirst() {
             courses={cart.matchedCourses || []}
             validation={cart.validation}
             onCourseClick={handleCourseClick}
+            onAddToCart={handleAddToCart}
+            isCourseInCart={isCourseInCart}
           />
+
+          {/* Cart Summary Panel */}
+          {selectedCourses.length > 0 && (
+            <div className="cart-panel">
+              <h3>🛒 Your Learning Path</h3>
+              <div className="cart-stats">
+                <span className="stat">
+                  <strong>{selectedCourses.length}</strong> courses selected
+                </span>
+                {totalDuration && (
+                  <span className="stat">
+                    <strong>{totalDuration}</strong> total
+                  </span>
+                )}
+              </div>
+              <div className="cart-courses">
+                {selectedCourses.map((course) => (
+                  <div key={course.code} className="cart-course-item">
+                    <span className="name">{course.title || course.name}</span>
+                    <button
+                      className="remove-btn"
+                      onClick={() => handleAddToCart(course)}
+                      aria-label="Remove from path"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                className="generate-path-btn"
+                onClick={() => {
+                  // Navigate to path builder with selected courses
+                  console.log("[ProblemFirst] Generate path with:", selectedCourses);
+                  // TODO: Navigate to GuidedPlayer or PathBuilder
+                }}
+              >
+                Generate Path →
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

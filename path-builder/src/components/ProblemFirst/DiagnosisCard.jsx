@@ -8,6 +8,11 @@ import "./ProblemFirst.css";
 export default function DiagnosisCard({ diagnosis }) {
   if (!diagnosis) return null;
 
+  const rootCausesCount = diagnosis.root_causes?.length || 0;
+  const signalsCount = diagnosis.signals_to_watch_for?.length || 0;
+  const varMatterCount = diagnosis.variables_that_matter?.length || 0;
+  const varDontCount = diagnosis.variables_that_do_not?.length || 0;
+
   return (
     <div className="diagnosis-card">
       <div className="diagnosis-header">
@@ -19,65 +24,69 @@ export default function DiagnosisCard({ diagnosis }) {
 
       <div className="diagnosis-sections">
         {/* Root Causes - Most Important */}
-        <section className="root-causes">
-          <h4>
+        <details className="diagnosis-section root-causes">
+          <summary>
             <span className="icon">🎯</span>
             Root Causes
-          </h4>
+            <span className="count">({rootCausesCount})</span>
+          </summary>
           <ul>
             {(diagnosis.root_causes || []).map((cause, index) => (
               <li key={index}>{cause}</li>
             ))}
           </ul>
-        </section>
+        </details>
 
         {/* Signals to Watch For */}
-        <section className="signals">
-          <h4>
+        <details className="diagnosis-section signals">
+          <summary>
             <span className="icon">👁️</span>
             Signals to Watch For
-          </h4>
+            <span className="count">({signalsCount})</span>
+          </summary>
           <ul>
             {(diagnosis.signals_to_watch_for || []).map((signal, index) => (
               <li key={index}>{signal}</li>
             ))}
           </ul>
-        </section>
+        </details>
 
-        {/* Variables Comparison */}
-        <div className="variables-grid">
-          <section className="variables-matter">
-            <h4>
-              <span className="icon">✅</span>
-              Variables That Matter
-            </h4>
-            <ul>
-              {(diagnosis.variables_that_matter || []).map((variable, index) => (
-                <li key={index}>{variable}</li>
-              ))}
-            </ul>
-          </section>
+        {/* Variables That Matter */}
+        <details className="diagnosis-section variables-matter">
+          <summary>
+            <span className="icon">✅</span>
+            Variables That Matter
+            <span className="count">({varMatterCount})</span>
+          </summary>
+          <ul>
+            {(diagnosis.variables_that_matter || []).map((variable, index) => (
+              <li key={index}>{variable}</li>
+            ))}
+          </ul>
+        </details>
 
-          <section className="variables-dont-matter">
-            <h4>
-              <span className="icon">❌</span>
-              Variables That Don't
-            </h4>
-            <ul>
-              {(diagnosis.variables_that_do_not || []).map((variable, index) => (
-                <li key={index}>{variable}</li>
-              ))}
-            </ul>
-          </section>
-        </div>
+        {/* Variables That Don't Matter */}
+        <details className="diagnosis-section variables-dont-matter">
+          <summary>
+            <span className="icon">❌</span>
+            Variables That Don't
+            <span className="count">({varDontCount})</span>
+          </summary>
+          <ul>
+            {(diagnosis.variables_that_do_not || []).map((variable, index) => (
+              <li key={index}>{variable}</li>
+            ))}
+          </ul>
+        </details>
 
         {/* Generalization Scope */}
         {diagnosis.generalization_scope?.length > 0 && (
-          <section className="generalization">
-            <h4>
+          <details className="diagnosis-section generalization" open>
+            <summary>
               <span className="icon">🔄</span>
               Where Else This Applies
-            </h4>
+              <span className="count">({diagnosis.generalization_scope.length})</span>
+            </summary>
             <div className="scope-chips">
               {diagnosis.generalization_scope.map((scope, index) => (
                 <span key={index} className="scope-chip">
@@ -85,7 +94,7 @@ export default function DiagnosisCard({ diagnosis }) {
                 </span>
               ))}
             </div>
-          </section>
+          </details>
         )}
       </div>
     </div>

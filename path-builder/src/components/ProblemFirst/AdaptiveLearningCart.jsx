@@ -2,11 +2,19 @@
  * AdaptiveLearningCart - Cart with fix-specific and transferable objectives
  * The anti-tutorial-hell learning experience
  */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import PropTypes from "prop-types";
+import { formatDuration, getCourseThumbnail } from "../../utils/videoUtils";
 import "./ProblemFirst.css";
 
-export default function AdaptiveLearningCart({ objectives, courses, validation, onCourseClick }) {
+export default function AdaptiveLearningCart({
+  objectives,
+  courses,
+  validation,
+  onCourseClick,
+  onAddToCart,
+  isCourseInCart,
+}) {
   // Separate courses by relevance to objectives
   const { fixCourses, learnCourses } = useMemo(() => {
     if (!courses || courses.length === 0) {
@@ -76,6 +84,8 @@ export default function AdaptiveLearningCart({ objectives, courses, validation, 
                 course={course}
                 type="fix"
                 onClick={() => onCourseClick?.(course)}
+                onAddToCart={onAddToCart}
+                isInCart={isCourseInCart?.(course)}
               />
             ))}
           </div>
@@ -116,6 +126,8 @@ export default function AdaptiveLearningCart({ objectives, courses, validation, 
                 course={course}
                 type="learn"
                 onClick={() => onCourseClick?.(course)}
+                onAddToCart={onAddToCart}
+                isInCart={isCourseInCart?.(course)}
               />
             ))}
           </div>
@@ -142,13 +154,20 @@ export default function AdaptiveLearningCart({ objectives, courses, validation, 
 }
 
 /**
- * CourseCard - Individual course in the cart
+ * CourseCard - Individual course with thumbnail, objectives, and Add button
  */
-function CourseCard({ course, type, onClick }) {
+function CourseCard({ course, type, onClick, onAddToCart, isInCart }) {
+  const [imgError, setImgError] = useState(false);
+
   const duration = useMemo(() => {
     if (course.duration) return course.duration;
-    if (course.durationMinutes) return `${course.durationMinutes} min`;
     if (course.duration_minutes) return `${course.duration_minutes} min`;
+    if (course.durationMinutes) return `${course.durationMinutes} min`;
+    // Calculate from videos if available
+    if (course.videos?.length) {
+      const totalSec = course.videos.reduce((sum, v) => sum + (v.duration_seconds || 0), 0);
+      return totalSec > 0 ? formatDuration(totalSec) : null;
+    }
     return null;
   }, [course]);
 
@@ -163,22 +182,46 @@ function CourseCard({ course, type, onClick }) {
     return null;
   }, [course]);
 
+  // Get thumbnail URL
+  const thumbnailUrl = useMemo(() => getCourseThumbnail(course), [course]);
+
   // Get video count
   const videoCount = course.video_count || course.videos?.length || null;
 
+  // Handle Add to Cart click
+  const handleAddClick = (e) => {
+    e.stopPropagation();
+    onAddToCart?.(course);
+  };
+
   return (
     <div
-      className={`course-card ${type}`}
+      className={`course-card ${type} ${isInCart ? "in-cart" : ""}`}
       onClick={onClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick?.()}
     >
+      {/* Thumbnail */}
+      {thumbnailUrl && !imgError && (
+        <div className="course-thumbnail">
+          <img
+            src={thumbnailUrl}
+            alt={course.title}
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
+        </div>
+      )}
+
       <div className="course-info">
         <h4 className="title">{course.title || course.name}</h4>
+
+        {/* Learning Objective */}
         {course.gemini_outcomes?.[0] && (
           <p className="description">{course.gemini_outcomes[0].slice(0, 100)}...</p>
         )}
+
         <div className="meta">
           {duration && <span className="duration">⏱️ {duration}</span>}
           {videoCount && <span className="video-count">🎬 {videoCount} videos</span>}
@@ -187,8 +230,20 @@ function CourseCard({ course, type, onClick }) {
           )}
         </div>
       </div>
+
+      {/* Add/Added Button */}
       <div className="course-action">
-        <span className="arrow">→</span>
+        {onAddToCart ? (
+          <button
+            className={`add-btn ${isInCart ? "added" : ""}`}
+            onClick={handleAddClick}
+            aria-label={isInCart ? "Added to path" : "Add to path"}
+          >
+            {isInCart ? "✓ Added" : "+ Add"}
+          </button>
+        ) : (
+          <span className="arrow">→</span>
+        )}
       </div>
     </div>
   );
