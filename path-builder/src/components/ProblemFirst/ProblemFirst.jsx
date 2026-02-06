@@ -197,16 +197,50 @@ function matchCoursesToCart(cart, allCourses) {
     relevantTagIds.add(sys.toLowerCase());
   });
 
-  // Try to match diagnosis keywords to tags
-  const diagnosisText = [
+  // Extract keywords from ALL diagnosis fields
+  const diagnosisParts = [
     cart.diagnosis?.problem_summary,
     ...(cart.diagnosis?.root_causes || []),
+    ...(cart.diagnosis?.signals_to_watch_for || []),
+    ...(cart.diagnosis?.variables_that_matter || []),
     ...(cart.diagnosis?.generalization_scope || []),
-  ].join(" ");
+  ].filter(Boolean);
 
+  const diagnosisText = diagnosisParts.join(" ");
+
+  // Extract tags from diagnosis text
   const extractedTags = tagGraphService.extractTagsFromText(diagnosisText);
   extractedTags.forEach((match) => {
     relevantTagIds.add(match.tag.tag_id);
+    // Also add the display name for broader matching
+    relevantTagIds.add(match.tag.display_name.toLowerCase());
+  });
+
+  // Also extract common UE5 keywords directly from diagnosis text
+  const ue5Keywords = [
+    "lumen",
+    "nanite",
+    "blueprint",
+    "material",
+    "lighting",
+    "animation",
+    "sequencer",
+    "niagara",
+    "landscape",
+    "foliage",
+    "pcg",
+    "taa",
+    "raytracing",
+    "reflection",
+    "gi",
+    "performance",
+    "rendering",
+  ];
+  const textLower = diagnosisText.toLowerCase();
+  ue5Keywords.forEach((kw) => {
+    if (textLower.includes(kw)) {
+      relevantTagIds.add(kw);
+    }
   });
 
   // Score and rank courses
@@ -215,9 +249,9 @@ function matchCoursesToCart(cart, allCourses) {
     return { ...course, _relevanceScore: score };
   });
 
-  // Sort by relevance and return top 6
+  // Sort by relevance and return top 8 (more options)
   return scoredCourses
     .filter((c) => c._relevanceScore > 0)
     .sort((a, b) => b._relevanceScore - a._relevanceScore)
-    .slice(0, 6);
+    .slice(0, 8);
 }

@@ -215,32 +215,44 @@ class TagGraphService {
   scoreCourseRelevance(course, targetTagIds) {
     if (!course || !targetTagIds || targetTagIds.length === 0) return 0;
 
-    // Normalize course tags - ensure it's an array first
-    let rawTags = course.tags;
-    if (!Array.isArray(rawTags)) {
-      // Handle object-based tags or missing tags
-      rawTags = [];
-    }
+    // Combine ALL tag sources from the enriched video library
+    const allCourseTags = [
+      ...(Array.isArray(course.canonical_tags) ? course.canonical_tags : []),
+      ...(Array.isArray(course.ai_tags) ? course.ai_tags : []),
+      ...(Array.isArray(course.gemini_system_tags) ? course.gemini_system_tags : []),
+      ...(Array.isArray(course.transcript_tags) ? course.transcript_tags : []),
+      ...(Array.isArray(course.extracted_tags) ? course.extracted_tags : []),
+    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
 
-    const courseTags = rawTags.map((t) => {
-      if (typeof t === "string") return t.toLowerCase();
-      return (t?.name || t?.displayName || t?.tag_id || "").toLowerCase();
-    });
+    // Also include the legacy tags object fields
+    if (course.tags && typeof course.tags === "object" && !Array.isArray(course.tags)) {
+      Object.values(course.tags).forEach((v) => {
+        if (typeof v === "string") allCourseTags.push(v.toLowerCase());
+      });
+    }
 
     let score = 0;
     const targetSet = new Set(targetTagIds.map((t) => t.toLowerCase()));
 
-    // Direct tag matches
-    for (const courseTag of courseTags) {
+    // Direct tag matches (highest weight)
+    for (const courseTag of allCourseTags) {
       if (targetSet.has(courseTag)) {
-        score += 20; // Strong match
+        score += 25; // Strong exact match
       }
 
-      // Check for partial matches (e.g., 'blueprint' matches 'scripting.blueprint')
+      // Check for partial matches (e.g., 'lumen' matches 'rendering.lumen')
       for (const target of targetSet) {
         if (courseTag.includes(target) || target.includes(courseTag)) {
           score += 10;
         }
+      }
+    }
+
+    // Bonus for gemini_system_tags matches (AI-curated, high quality)
+    const geminiTags = (course.gemini_system_tags || []).map((t) => t.toLowerCase());
+    for (const target of targetSet) {
+      if (geminiTags.some((gt) => gt.includes(target) || target.includes(gt))) {
+        score += 15; // Gemini tags are curated - bonus
       }
     }
 
@@ -249,7 +261,7 @@ class TagGraphService {
       const related = this.getRelated(tagId, 0.6);
       for (const rel of related) {
         const relTagId = rel.tag?.tag_id?.toLowerCase() || "";
-        if (courseTags.some((ct) => ct.includes(relTagId.split(".").pop()))) {
+        if (allCourseTags.some((ct) => ct.includes(relTagId.split(".").pop()))) {
           score += 5 * rel.weight;
         }
       }

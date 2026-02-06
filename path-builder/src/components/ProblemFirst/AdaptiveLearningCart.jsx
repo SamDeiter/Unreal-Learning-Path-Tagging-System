@@ -148,8 +148,23 @@ function CourseCard({ course, type, onClick }) {
   const duration = useMemo(() => {
     if (course.duration) return course.duration;
     if (course.durationMinutes) return `${course.durationMinutes} min`;
+    if (course.duration_minutes) return `${course.duration_minutes} min`;
     return null;
   }, [course]);
+
+  // Convert numeric difficulty (1-5) to labels
+  const difficultyLabel = useMemo(() => {
+    if (typeof course.difficulty === "string") return course.difficulty;
+    if (typeof course.difficulty === "number") {
+      const labels = ["Beginner", "Beginner", "Intermediate", "Intermediate", "Advanced", "Expert"];
+      return labels[course.difficulty] || "Intermediate";
+    }
+    if (course.gemini_skill_level) return course.gemini_skill_level;
+    return null;
+  }, [course]);
+
+  // Get video count
+  const videoCount = course.video_count || course.videos?.length || null;
 
   return (
     <div
@@ -161,13 +176,14 @@ function CourseCard({ course, type, onClick }) {
     >
       <div className="course-info">
         <h4 className="title">{course.title || course.name}</h4>
-        {course.description && <p className="description">{course.description.slice(0, 100)}...</p>}
+        {course.gemini_outcomes?.[0] && (
+          <p className="description">{course.gemini_outcomes[0].slice(0, 100)}...</p>
+        )}
         <div className="meta">
           {duration && <span className="duration">⏱️ {duration}</span>}
-          {course.difficulty && (
-            <span className={`difficulty ${course.difficulty.toLowerCase()}`}>
-              {course.difficulty}
-            </span>
+          {videoCount && <span className="video-count">🎬 {videoCount} videos</span>}
+          {difficultyLabel && (
+            <span className={`difficulty ${difficultyLabel.toLowerCase()}`}>{difficultyLabel}</span>
           )}
         </div>
       </div>
