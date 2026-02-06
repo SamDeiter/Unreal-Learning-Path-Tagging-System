@@ -235,6 +235,7 @@ async function callGemini(systemPrompt, userPrompt, apiKey, type) {
     generationConfig: {
       temperature: 0.3,
       maxOutputTokens: 2048,
+      responseMimeType: "application/json",
     },
   };
 
