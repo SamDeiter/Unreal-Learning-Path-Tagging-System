@@ -2,13 +2,14 @@
  * GuidedPlayer - AI-narrated learning experience
  * Shows intro cards, plays videos in sequence, displays context bridges
  */
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
 import {
   generatePathIntro,
   generateBridgeText,
   generateProgressText,
 } from "../../services/narratorService";
+import { signInWithGoogle, onAuthChange } from "../../services/googleAuthService";
 import { getThumbnailUrl } from "../../utils/videoUtils";
 import "./GuidedPlayer.css";
 
@@ -23,6 +24,27 @@ const STAGES = {
 export default function GuidedPlayer({ courses, diagnosis, problemSummary, onComplete, onExit }) {
   const [stage, setStage] = useState(STAGES.INTRO);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Listen for auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthChange((currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  // Handle Google sign in
+  const handleSignIn = useCallback(async () => {
+    setAuthLoading(true);
+    const { error } = await signInWithGoogle();
+    if (error) {
+      console.error("[GuidedPlayer] Sign in failed:", error);
+    }
+    setAuthLoading(false);
+  }, []);
 
   // Generate intro card content
   const introContent = useMemo(() => {
@@ -119,9 +141,29 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
             </div>
           </div>
 
-          <button className="start-btn" onClick={handleStartLearning}>
-            ▶ Start Learning
-          </button>
+          {/* Auth Status & Start */}
+          <div className="auth-section">
+            {authLoading ? (
+              <p className="auth-loading">Checking sign-in status...</p>
+            ) : user ? (
+              <div className="auth-signed-in">
+                <span className="user-email">✓ Signed in as {user.email}</span>
+                <button className="start-btn" onClick={handleStartLearning}>
+                  ▶ Start Learning
+                </button>
+              </div>
+            ) : (
+              <div className="auth-prompt">
+                <p className="signin-note">Sign in with Google to watch videos from Google Drive</p>
+                <button className="signin-btn" onClick={handleSignIn}>
+                  🔐 Sign in with Google
+                </button>
+                <button className="start-btn secondary" onClick={handleStartLearning}>
+                  Skip sign-in (videos may not load)
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -135,28 +177,21 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
             )}
           </div>
 
-          {/* Video Display - Thumbnail with Open in Drive */}
+          {/* Video Embed */}
           <div className="video-container">
-            <img
-              src={getThumbnailUrl(currentCourse.videos?.[0])}
-              alt={currentCourse.title}
-              className="video-thumbnail"
-            />
-            <div className="video-overlay">
-              <a
-                href={
-                  currentCourse.videos?.[0]?.drive_id
-                    ? `https://drive.google.com/file/d/${currentCourse.videos[0].drive_id}/view`
-                    : currentCourse.videoUrl || "#"
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="open-drive-btn"
-              >
-                ▶ Open in Google Drive
-              </a>
-              <p className="drive-hint">Opens in new tab (requires Google login)</p>
-            </div>
+            {currentCourse.videos?.[0]?.drive_id ? (
+              <iframe
+                src={`https://drive.google.com/file/d/${currentCourse.videos[0].drive_id}/preview`}
+                title={currentCourse.title}
+                allow="autoplay"
+                allowFullScreen
+              />
+            ) : (
+              <div className="video-placeholder">
+                <img src={getThumbnailUrl(currentCourse.videos?.[0])} alt={currentCourse.title} />
+                <div className="play-overlay">▶</div>
+              </div>
+            )}
           </div>
 
           <div className="video-controls">
