@@ -265,7 +265,16 @@ export function generateChallenge(course, problemContext) {
   const tagNames = tags
     .map((t) => (typeof t === "string" ? t : t.name || t.display_name || ""))
     .filter(Boolean);
-  const primaryTag = tagNames[0] || "this concept";
+
+  // Find a tag that matches the user's problem context (case-insensitive partial match)
+  let primaryTag = tagNames[0] || "this concept";
+  if (problemContext && tagNames.length > 0) {
+    const contextLower = problemContext.toLowerCase();
+    const relevantTag = tagNames.find((tag) => contextLower.includes(tag.toLowerCase()));
+    if (relevantTag) {
+      primaryTag = relevantTag;
+    }
+  }
   const skillLevel = course?.gemini_skill_level || "Intermediate";
 
   // Three challenge patterns

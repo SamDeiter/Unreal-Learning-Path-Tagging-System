@@ -11,7 +11,7 @@ import VideoResultCard from "../VideoResultCard/VideoResultCard";
 import CartPanel from "../CartPanel/CartPanel";
 import { useVideoCart } from "../../hooks/useVideoCart";
 import tagGraphService from "../../services/TagGraphService";
-import { searchSegments, estimateTopSegment } from "../../services/segmentSearchService";
+import { searchSegments } from "../../services/segmentSearchService";
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import {
   trackQuerySubmitted,
@@ -21,6 +21,8 @@ import {
 import { useTagData } from "../../context/TagDataContext";
 import synonymMap from "../../data/synonym_map.json";
 import curatedSolutions from "../../data/curated_solutions.json";
+import segmentIndex from "../../data/segment_index.json";
+import docLinks from "../../data/doc_links.json";
 import "./ProblemFirst.css";
 
 // Firebase config - uses same project as main app
@@ -56,16 +58,28 @@ const CART_STORAGE_KEY = "problem-first-cart";
 
 /**
  * Flatten matched courses into individual video items for the shopping cart.
- * Each video becomes a separate browseable result.
+ * Videos are ranked by how well their transcript content answers the query,
+ * using real segment data from the pre-built segment index.
  */
 function flattenCoursesToVideos(matchedCourses, userQuery) {
   const videos = [];
+  const queryWords = (userQuery || "")
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w.length > 2);
+
+  // Find doc links matching the query
+  const matchedDocLinks = [];
+  const queryLower = (userQuery || "").toLowerCase();
+  for (const [topic, info] of Object.entries(docLinks)) {
+    if (queryLower.includes(topic)) {
+      matchedDocLinks.push({ label: info.label, url: info.url });
+    }
+  }
+
   for (const course of matchedCourses) {
     const courseVideos = course.videos || [];
     if (courseVideos.length === 0) continue;
-
-    // Score each video by title relevance to the query
-    const queryWords = (userQuery || "").toLowerCase().split(/\s+/).filter(Boolean);
 
     for (let i = 0; i < courseVideos.length; i++) {
       const v = courseVideos[i];
@@ -73,41 +87,143 @@ function flattenCoursesToVideos(matchedCourses, userQuery) {
 
       const videoTitle = v.title || v.name || `Video ${i + 1}`;
       const titleLower = videoTitle.toLowerCase();
+      const cleanTitle = cleanVideoTitle(videoTitle);
 
-      // Simple title relevance: boost videos whose title matches query words
+      // --- Score 1: Title relevance ---
       const titleMatches = queryWords.filter((w) => titleLower.includes(w)).length;
-      const isIntro = titleLower.includes("intro") || titleLower.includes("overview");
+      const titleScore = titleMatches * 50;
 
-      // Estimate relevant timestamp
-      const segment = estimateTopSegment(course.code, queryWords);
-      const timestampHint = segment?.estimatedStart
-        ? `~${Math.floor(segment.estimatedStart / 60)}:${String(Math.round(segment.estimatedStart % 60)).padStart(2, "0")}`
-        : null;
+      // --- Score 2: Transcript segment relevance (real timestamps) ---
+      // Build a video filename pattern to match against segment index
+      const videoKey = findVideoKeyForIndex(course.code, videoTitle, i);
+      const segmentData = getVideoSegmentScore(course.code, videoKey, queryWords);
+
+      // --- Score 3: Intro penalty (intros are less specific) ---
+      const isIntro =
+        titleLower.includes("intro") ||
+        titleLower.includes("wrap up") ||
+        titleLower.includes("outro");
+      const introPenalty = isIntro ? -20 : 0;
+
+      // Composite score
+      const totalScore =
+        titleScore + segmentData.score + introPenalty + (course._relevanceScore || 0);
+
+      // Build timestamp hint from best segment match
+      let watchHint = "▶ Watch full video";
+      if (segmentData.bestSegment) {
+        const ts = segmentData.bestSegment.timestamp;
+        const preview = segmentData.bestSegment.previewText;
+        const truncPreview = preview.length > 60 ? preview.substring(0, 57) + "..." : preview;
+        watchHint = `📍 Jump to ${ts} — "${truncPreview}"`;
+      }
 
       videos.push({
         driveId: v.drive_id,
-        title: cleanVideoTitle(videoTitle),
+        title: cleanTitle,
         duration: v.duration_seconds || 0,
         courseCode: course.code,
         courseName: course.title || course.code,
         matchedTags: (course._matchedKeywords || []).slice(0, 3),
         videoIndex: i,
+        relevanceScore: totalScore,
         titleRelevance: titleMatches,
         isIntro,
-        timestampHint,
-        watchHint: timestampHint ? `📍 Relevant section ${timestampHint}` : "▶ Watch full video",
+        timestampHint: segmentData.bestSegment?.timestamp || null,
+        startSeconds: segmentData.bestSegment?.startSeconds || 0,
+        topSegments: segmentData.topSegments,
+        watchHint,
+        docLinks: matchedDocLinks,
+        _curatedMatch: course._curatedMatch || false,
+        _curatedExplanation: course._curatedExplanation || null,
       });
     }
   }
 
-  // Sort: title-relevant first, intros last
-  videos.sort((a, b) => {
-    if (b.titleRelevance !== a.titleRelevance) return b.titleRelevance - a.titleRelevance;
-    if (a.isIntro !== b.isIntro) return a.isIntro ? 1 : -1;
-    return 0;
-  });
+  // Sort by relevance score — best answer to the question first
+  videos.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
   return videos.slice(0, 10); // Cap at 10 results
+}
+
+/**
+ * Find the matching video key in the segment index for a given video.
+ */
+function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
+  const courseData = segmentIndex[courseCode];
+  if (!courseData?.videos) return null;
+
+  const titleLower = (videoTitle || "").toLowerCase();
+  const keys = Object.keys(courseData.videos);
+
+  // Try to match by video title
+  for (const key of keys) {
+    const vidTitle = (courseData.videos[key].title || "").toLowerCase();
+    if (titleLower.includes(vidTitle) || vidTitle.includes(titleLower.replace(/[^a-z0-9 ]/g, ""))) {
+      return key;
+    }
+  }
+
+  // Fallback: match by index position
+  if (videoIndex < keys.length) {
+    return keys[videoIndex];
+  }
+  return keys[0] || null;
+}
+
+/**
+ * Score a specific video's segments against query keywords.
+ * Returns the total score, best matching segment, and top 3 segments.
+ */
+function getVideoSegmentScore(courseCode, videoKey, keywords) {
+  const fallback = { score: 0, bestSegment: null, topSegments: [] };
+  const courseData = segmentIndex[courseCode];
+  if (!courseData?.videos || !videoKey) return fallback;
+
+  const videoData = courseData.videos[videoKey];
+  if (!videoData?.segments) return fallback;
+
+  const scored = [];
+  for (const segment of videoData.segments) {
+    const textLower = segment.text.toLowerCase();
+    let segScore = 0;
+    const matched = [];
+
+    for (const kw of keywords) {
+      if (textLower.includes(kw)) {
+        // Count occurrences
+        const count = textLower.split(kw).length - 1;
+        segScore += count * 10;
+        matched.push(kw);
+      }
+    }
+
+    if (segScore > 0) {
+      let preview = segment.text;
+      if (preview.length > 100) {
+        const idx = preview.toLowerCase().indexOf(matched[0] || "");
+        if (idx > 30) preview = "..." + preview.substring(idx - 20);
+        if (preview.length > 100) preview = preview.substring(0, 97) + "...";
+      }
+      scored.push({
+        timestamp: segment.start,
+        startSeconds: segment.start_seconds,
+        previewText: preview,
+        matchedKeywords: matched,
+        score: segScore,
+      });
+    }
+  }
+
+  scored.sort((a, b) => b.score - a.score);
+  const topSegments = scored.slice(0, 3);
+  const totalScore = scored.reduce((sum, s) => sum + s.score, 0);
+
+  return {
+    score: totalScore,
+    bestSegment: topSegments[0] || null,
+    topSegments,
+  };
 }
 
 export default function ProblemFirst() {

@@ -1,6 +1,27 @@
 import React, { useState, useMemo } from "react";
 import { getAllPersonas, getPainPointMessaging } from "../../services/PersonaService";
 import { useTagData } from "../../context/TagDataContext";
+import {
+  Rocket,
+  Clapperboard,
+  Home,
+  Gamepad2,
+  Wand2,
+  Car,
+  Wrench,
+  Map,
+  Target,
+  BookOpen,
+  Clock,
+  BarChart,
+  Zap,
+  Trophy,
+  RefreshCw,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Sparkles,
+} from "lucide-react";
 import "./Personas.css";
 
 const QUESTIONS = [
@@ -10,28 +31,38 @@ const QUESTIONS = [
     options: [
       {
         value: "animation",
-        label: "🎭 Animation / Film",
+        label: "Animation / Film",
+        icon: Clapperboard,
         persona: "animator_alex",
       },
       {
         value: "architecture",
-        label: "🏛️ Architecture / ArchViz",
+        label: "Architecture / ArchViz",
+        icon: Home,
         persona: "architect_amy",
       },
       {
         value: "games",
-        label: "🎮 Game Development",
+        label: "Game Development",
+        icon: Gamepad2,
         persona: "gamedev_gary",
       },
-      { value: "vfx", label: "✨ VFX / Compositing", persona: "vfx_victor" },
+      {
+        value: "vfx",
+        label: "VFX / Compositing",
+        icon: Wand2,
+        persona: "vfx_victor",
+      },
       {
         value: "automotive",
-        label: "🚗 Automotive / Product Viz",
+        label: "Automotive / Product Viz",
+        icon: Car,
         persona: "automotive_andy",
       },
       {
         value: "other",
-        label: "🔧 Industrial / Simulation / Other",
+        label: "Industrial / Simulation / Other",
+        icon: Wrench,
         persona: "simulation_sam",
       },
     ],
@@ -40,20 +71,29 @@ const QUESTIONS = [
     id: "experience",
     question: "What's your experience with 3D software?",
     options: [
-      { value: "none", label: "Brand new to 3D" },
-      { value: "some", label: "Used Maya, Blender, or similar" },
-      { value: "experienced", label: "Professional 3D artist/developer" },
+      { value: "none", label: "Brand new to 3D", icon: Sparkles },
+      {
+        value: "some",
+        label: "Used Maya, Blender, or similar",
+        icon: () => <div className="icon-placeholder">●</div>,
+      },
+      {
+        value: "experienced",
+        label: "Professional 3D artist/developer",
+        icon: () => <div className="icon-placeholder">●●</div>,
+      },
     ],
   },
   {
     id: "goal",
     question: "What do you want to achieve in your first 10 hours?",
     options: [
-      { value: "explore", label: "🗺️ Just explore and understand UE5" },
-      { value: "project", label: "🎯 Start a specific project" },
+      { value: "explore", label: "Just explore and understand UE5", icon: Map },
+      { value: "project", label: "Start a specific project", icon: Target },
       {
         value: "skill",
-        label: "📚 Learn a specific skill (lighting, animation, etc.)",
+        label: "Learn a specific skill (lighting, animation, etc.)",
+        icon: BookOpen,
       },
     ],
   },
@@ -80,9 +120,7 @@ export default function Personas() {
     if (!industryPart) return null;
 
     // We assume questions[0] is always "Industry"
-    const industryOption = QUESTIONS[0].options.find(
-      (o) => o.value === industryPart
-    );
+    const industryOption = QUESTIONS[0].options.find((o) => o.value === industryPart);
 
     if (!industryOption) return null;
     return allPersonas.find((p) => p.id === industryOption.persona);
@@ -259,7 +297,9 @@ export default function Personas() {
   return (
     <div className="personas-page">
       <header className="personas-header">
-        <h1>🚀 New to UE5? Let's Get You Started</h1>
+        <h1>
+          <Rocket size={24} className="icon-inline" /> New to UE5? Let's Get You Started
+        </h1>
         <p className="personas-subtitle">
           Answer 3 quick questions and we'll create your personalized first 10-hour learning path
         </p>
@@ -274,7 +314,7 @@ export default function Personas() {
                 key={q.id}
                 className={`progress-step ${i <= step ? "active" : ""} ${answers[q.id] ? "completed" : ""}`}
               >
-                {i + 1}
+                {answers[q.id] ? <Check size={16} /> : i + 1}
               </div>
             ))}
           </div>
@@ -283,27 +323,39 @@ export default function Personas() {
           <section className="quiz-section">
             <h2>{QUESTIONS[step].question}</h2>
             <div className="quiz-options">
-              {QUESTIONS[step].options.map((option) => (
-                <button
-                  key={option.value}
-                  className={`quiz-option ${answers[QUESTIONS[step].id] === option.value ? "selected" : ""}`}
-                  onClick={() => handleAnswer(QUESTIONS[step].id, option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
+              {QUESTIONS[step].options.map((option) => {
+                const Icon = option.icon || Sparkles;
+                return (
+                  <button
+                    key={option.value}
+                    className={`quiz-option ${answers[QUESTIONS[step].id] === option.value ? "selected" : ""}`}
+                    onClick={() => handleAnswer(QUESTIONS[step].id, option.value)}
+                  >
+                    <span className="option-icon-wrapper">
+                      {typeof option.icon === "function" && !option.icon.render ? (
+                        // If it's a simple function component or reference
+                        <Icon size={18} />
+                      ) : (
+                        // If it's a custom render function (like the dots)
+                        option.icon()
+                      )}
+                    </span>
+                    <span className="option-label">{option.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Navigation */}
             <div className="quiz-nav">
               {step > 0 && (
                 <button className="quiz-back" onClick={() => setStep((s) => s - 1)}>
-                  ← Back
+                  <ArrowLeft size={16} /> Back
                 </button>
               )}
               {allAnswered && (
                 <button className="quiz-generate" onClick={generatePath}>
-                  Generate My Path →
+                  Generate My Path <ArrowRight size={16} />
                 </button>
               )}
             </div>
@@ -312,7 +364,9 @@ export default function Personas() {
           {/* Persona preview */}
           {detectedPersona && (
             <div className="persona-preview">
-              <span className="preview-emoji">{detectedPersona.emoji}</span>
+              <span className="preview-icon">
+                <Sparkles size={32} />
+              </span>
               <div className="preview-text">
                 <strong>{detectedPersona.name}</strong>
                 <p>{detectedPersona.description}</p>
@@ -325,13 +379,15 @@ export default function Personas() {
           {/* Generated Path Results */}
           <section className="generated-path">
             <div className="path-header">
-              <span className="path-emoji">{generatedPath.persona.emoji}</span>
+              <span className="path-icon">
+                <Rocket size={40} />
+              </span>
               <div>
                 <h2>Your Personalized 10-Hour Path</h2>
                 <p>Optimized for {generatedPath.persona.name}</p>
               </div>
               <button className="reset-btn" onClick={resetQuiz}>
-                Start Over
+                <RefreshCw size={16} /> Start Over
               </button>
             </div>
 
@@ -352,7 +408,10 @@ export default function Personas() {
                   className={`path-course ${course.quickWin ? "quick-win" : ""}`}
                 >
                   {course.milestone && (
-                    <div className="milestone-marker">🏆 {course.milestone} Milestone!</div>
+                    <div className="milestone-marker">
+                      <Trophy size={12} className="icon-inline-small" /> {course.milestone}{" "}
+                      Milestone!
+                    </div>
                   )}
                   <div className="course-order">{course.order}</div>
                   <div className="course-info">
@@ -372,9 +431,18 @@ export default function Personas() {
                       })()}
                     </h3>
                     <div className="course-meta">
-                      <span>⏱️ {course.duration || 45} min</span>
-                      <span>📊 {Math.round((course.cumulativeTime / 60) * 10) / 10}hr total</span>
-                      {course.quickWin && <span className="quick-win-badge">⚡ Quick Win</span>}
+                      <span>
+                        <Clock size={12} /> {course.duration || 45} min
+                      </span>
+                      <span>
+                        <BarChart size={12} /> {Math.round((course.cumulativeTime / 60) * 10) / 10}
+                        hr total
+                      </span>
+                      {course.quickWin && (
+                        <span className="quick-win-badge">
+                          <Zap size={10} /> Quick Win
+                        </span>
+                      )}
                     </div>
                     {/* Skills/tags learned */}
                     {Array.isArray(course.tags) && course.tags.length > 0 && (

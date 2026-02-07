@@ -1,3 +1,4 @@
+import { Check, AlertCircle } from "lucide-react";
 import { usePath } from "../../context/PathContext";
 import "./LearningIntentHeader.css";
 
@@ -59,7 +60,7 @@ function LearningIntentHeader() {
         className={`intent-status ${isComplete ? "valid" : ""}`}
         title={isComplete ? "Intent Set" : "Please fill required fields"}
       >
-        {isComplete ? "✓" : "!"}
+        {isComplete ? <Check size={18} /> : <AlertCircle size={18} />}
       </div>
     </div>
   );

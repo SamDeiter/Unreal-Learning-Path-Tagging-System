@@ -14,9 +14,11 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { usePath } from "../../context/PathContext";
 import { filterCourses } from "../../utils/dataProcessing";
 import { matchCoursesToGoal } from "../../utils/courseMatchingUtils";
+import { Search, Sparkles, Clock, Clapperboard, Layers, Plus, X, Check } from "lucide-react";
 import "./CourseLibrary.css";
 
-// Helper to highlight search terms in text
+// ... (highlightText helper remains same)
+
 function highlightText(text, query) {
   if (!query || !text) return text;
 
@@ -40,7 +42,6 @@ function CourseLibrary({ courses }) {
   const [levelFilter, setLevelFilter] = useState(null);
   const searchInputRef = useRef(null);
 
-  // Get suggested courses based on learning goal
   // Get suggested courses based on learning goal
   const suggestedCourses = useMemo(() => {
     const goal = learningIntent?.primaryGoal;
@@ -109,13 +110,16 @@ function CourseLibrary({ courses }) {
       {learningIntent?.primaryGoal && availableSuggestions.length > 0 && (
         <div className="suggested-section">
           <div className="suggested-header">
-            <span className="suggested-title">✨ Suggested for "{learningIntent.primaryGoal}"</span>
+            <span className="suggested-title">
+              <Sparkles size={16} className="icon-inline" /> Suggested for "
+              {learningIntent.primaryGoal}"
+            </span>
             <button
               className="add-all-btn"
               onClick={handleAddAllSuggested}
               title="Add all suggested courses to your path"
             >
-              + Add All ({availableSuggestions.length})
+              <Plus size={14} /> Add All ({availableSuggestions.length})
             </button>
           </div>
           <div className="suggested-list">
@@ -128,7 +132,9 @@ function CourseLibrary({ courses }) {
               >
                 <span className="suggested-code">{course.code}</span>
                 <span className="suggested-name">{course.title}</span>
-                <span className="suggested-add">+</span>
+                <span className="suggested-add">
+                  <Plus size={14} />
+                </span>
               </div>
             ))}
           </div>
@@ -138,13 +144,15 @@ function CourseLibrary({ courses }) {
       {/* No Goal Hint */}
       {!learningIntent?.primaryGoal && (
         <div className="goal-hint">
-          💡 Enter a <strong>Primary Goal</strong> above to get personalized course suggestions
+          <Sparkles size={16} className="icon-inline" /> Enter a <strong>Primary Goal</strong> above
+          to get personalized course suggestions
         </div>
       )}
 
       {/* Search & Filters */}
       <div className="library-header">
         <div className="search-container">
+          <Search size={16} className="search-icon" />
           <input
             ref={searchInputRef}
             type="text"
@@ -155,7 +163,7 @@ function CourseLibrary({ courses }) {
           />
           {search && (
             <button className="search-clear" onClick={() => setSearch("")} title="Clear search">
-              ×
+              <X size={14} />
             </button>
           )}
         </div>
@@ -216,7 +224,7 @@ function CourseLibrary({ courses }) {
                 <span className="course-code">{course.code}</span>
                 {course.has_ai_tags && (
                   <span className="ai-badge" title="AI-enriched">
-                    ✨
+                    <Sparkles size={12} />
                   </span>
                 )}
               </div>
@@ -231,19 +239,24 @@ function CourseLibrary({ courses }) {
               </div>
               <div className="card-meta">
                 {course.duration && (
-                  <span title={`${course.duration.toFixed(1)} hours of content`}>
-                    ⏱️ {course.duration.toFixed(1)}h
+                  <span
+                    title={`${course.duration.toFixed(1)} hours of content`}
+                    className="meta-item"
+                  >
+                    <Clock size={12} /> {course.duration.toFixed(1)}h
                   </span>
                 )}
                 <span
                   title={`${course.video_count || 0} video${(course.video_count || 0) === 1 ? "" : "s"}`}
+                  className="meta-item"
                 >
-                  🎬 {course.video_count || 0}
+                  <Clapperboard size={12} /> {course.video_count || 0}
                 </span>
                 <span
                   title={`${course.versions?.length || 0} UE version${(course.versions?.length || 0) === 1 ? "" : "s"}`}
+                  className="meta-item"
                 >
-                  📦 {course.versions?.length || 0} ver
+                  <Layers size={12} /> {course.versions?.length || 0}
                 </span>
               </div>
             </div>
@@ -254,7 +267,7 @@ function CourseLibrary({ courses }) {
               disabled={isInPath(course.code)}
               title={isInPath(course.code) ? "In path" : "Add to path"}
             >
-              {isInPath(course.code) ? "✓" : "+"}
+              {isInPath(course.code) ? <Check size={16} /> : <Plus size={16} />}
             </button>
           </div>
         ))}

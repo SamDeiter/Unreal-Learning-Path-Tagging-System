@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { PlayCircle, Check, Plus, Clock, ExternalLink } from "lucide-react";
 import "./VideoResultCard.css";
 
 /**
@@ -13,17 +14,28 @@ function formatDuration(seconds) {
 
 /**
  * Individual video result card — shows thumbnail, title, duration,
- * matched tags ("Covers: ..."), and an add/remove toggle.
+ * matched tags, timestamp hints, doc links, and an add/remove toggle.
  */
 export default function VideoResultCard({ video, isAdded, onToggle }) {
-  const { title, courseName, duration, matchedTags = [], driveId } = video;
+  const {
+    title,
+    courseName,
+    duration,
+    matchedTags = [],
+    driveId,
+    topSegments = [],
+    docLinks = [],
+    _curatedMatch,
+  } = video;
 
   // Fallback thumbnail — Drive thumbnails are currently broken,
   // so we use a gradient placeholder with a play icon
   const thumbnailUrl = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w320` : null;
 
   return (
-    <div className={`video-result-card ${isAdded ? "added" : ""}`}>
+    <div
+      className={`video-result-card ${isAdded ? "added" : ""} ${_curatedMatch ? "curated" : ""}`}
+    >
       <div className="vrc-thumbnail">
         {thumbnailUrl ? (
           <img
@@ -36,7 +48,9 @@ export default function VideoResultCard({ video, isAdded, onToggle }) {
           />
         ) : null}
         <div className="vrc-thumb-fallback" style={{ display: thumbnailUrl ? "none" : "flex" }}>
-          <span className="vrc-play-icon">▶</span>
+          <span className="vrc-play-icon">
+            <PlayCircle size={24} />
+          </span>
         </div>
         {duration > 0 && <span className="vrc-duration">{formatDuration(duration)}</span>}
       </div>
@@ -47,6 +61,41 @@ export default function VideoResultCard({ video, isAdded, onToggle }) {
         {matchedTags.length > 0 && (
           <p className="vrc-tags">Covers: {matchedTags.slice(0, 3).join(", ")}</p>
         )}
+
+        {/* Timestamp segments — show WHERE in the video */}
+        {topSegments.length > 0 && (
+          <div className="vrc-segments">
+            {topSegments.slice(0, 2).map((seg, idx) => (
+              <div key={idx} className="vrc-segment-hint">
+                <Clock size={12} className="vrc-clock-icon" />
+                <span className="vrc-seg-time">{seg.timestamp}</span>
+                <span className="vrc-seg-preview">
+                  {seg.previewText.length > 55
+                    ? seg.previewText.substring(0, 52) + "..."
+                    : seg.previewText}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Doc links */}
+        {docLinks.length > 0 && (
+          <div className="vrc-doc-links">
+            {docLinks.slice(0, 2).map((doc, idx) => (
+              <a
+                key={idx}
+                href={doc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="vrc-doc-link"
+              >
+                <ExternalLink size={11} />
+                <span>{doc.label}</span>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       <button
@@ -54,7 +103,15 @@ export default function VideoResultCard({ video, isAdded, onToggle }) {
         onClick={() => onToggle(video)}
         aria-label={isAdded ? "Remove from playlist" : "Add to playlist"}
       >
-        {isAdded ? "✓ Added" : "+ Add"}
+        {isAdded ? (
+          <>
+            <Check size={14} /> Added
+          </>
+        ) : (
+          <>
+            <Plus size={14} /> Add
+          </>
+        )}
       </button>
     </div>
   );
@@ -68,6 +125,9 @@ VideoResultCard.propTypes = {
     duration: PropTypes.number,
     matchedTags: PropTypes.arrayOf(PropTypes.string),
     courseCode: PropTypes.string,
+    topSegments: PropTypes.array,
+    docLinks: PropTypes.array,
+    _curatedMatch: PropTypes.bool,
   }).isRequired,
   isAdded: PropTypes.bool,
   onToggle: PropTypes.func.isRequired,
