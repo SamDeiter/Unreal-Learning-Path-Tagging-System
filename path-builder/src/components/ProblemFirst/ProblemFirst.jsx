@@ -240,24 +240,11 @@ export default function ProblemFirst() {
 
       {/* Stage: Input */}
       {(stage === STAGES.INPUT || stage === STAGES.LOADING) && (
-        <>
-          <ProblemInput
-            onSubmit={handleSubmit}
-            detectedPersona={getDetectedPersona()}
-            isLoading={stage === STAGES.LOADING}
-          />
-          {/* Show cart even during input if it has items */}
-          {cart.length > 0 && (
-            <div className="input-cart-preview">
-              <CartPanel
-                cart={cart}
-                onRemove={removeFromCart}
-                onClear={clearCart}
-                onWatchPath={handleWatchPath}
-              />
-            </div>
-          )}
-        </>
+        <ProblemInput
+          onSubmit={handleSubmit}
+          detectedPersona={getDetectedPersona()}
+          isLoading={stage === STAGES.LOADING}
+        />
       )}
 
       {/* Stage: Error */}
