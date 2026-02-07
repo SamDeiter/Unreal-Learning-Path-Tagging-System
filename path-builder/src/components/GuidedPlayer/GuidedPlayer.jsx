@@ -166,27 +166,89 @@ function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywor
   }, [courseCode, videoTitle, problemSummary, matchedKeywords]);
 
   /**
-   * Generate a topic label from a segment's matched keywords and text.
-   * Shows what the segment helps with, not the raw transcript.
+   * Generate a label that tells the learner what THIS segment covers
+   * and how it relates to what they searched for.
    */
-  const getTopicLabel = useCallback((seg) => {
-    // If we have keyword hits, describe what this moment covers
-    if (seg.hits && seg.hits.length > 0) {
-      const topics = seg.hits.map((h) => h.charAt(0).toUpperCase() + h.slice(1));
-      if (topics.length === 1) return `Covers ${topics[0]}`;
-      if (topics.length === 2) return `Covers ${topics[0]} and ${topics[1]}`;
-      return `Covers ${topics.slice(0, -1).join(", ")}, and ${topics[topics.length - 1]}`;
-    }
+  const getTopicLabel = useCallback(
+    (seg) => {
+      const text = seg.text || "";
+      const SKIP = new Set([
+        "gonna",
+        "going",
+        "really",
+        "actually",
+        "basically",
+        "right",
+        "thing",
+        "things",
+        "about",
+        "would",
+        "could",
+        "should",
+        "there",
+        "their",
+        "these",
+        "those",
+        "where",
+        "which",
+        "being",
+        "doing",
+        "using",
+        "other",
+        "first",
+        "second",
+        "third",
+        "after",
+        "before",
+        "every",
+        "still",
+        "again",
+        "already",
+        "engine",
+        "unreal",
+        "because",
+        "simply",
+        "called",
+        "allows",
+        "looking",
+        "provides",
+      ]);
 
-    // For chapter markers, extract key nouns from the text
-    const text = seg.text || "";
-    const words = text.split(/\s+/).filter((w) => w.length > 4);
-    const unique = [...new Set(words.slice(0, 4).map((w) => w.replace(/[.,;:!?]/g, "")))];
-    if (unique.length > 0) {
-      return `Discusses ${unique.slice(0, 3).join(", ")}`;
-    }
-    return "Key section";
-  }, []);
+      // Also skip the user's own search words — they already know what they searched
+      const searchWords = new Set(
+        (problemSummary || "")
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((w) => w.length > 3)
+      );
+
+      const words = text
+        .replace(/[.,;:!?'"()]/g, "")
+        .split(/\s+/)
+        .filter(
+          (w) => w.length >= 5 && !SKIP.has(w.toLowerCase()) && !searchWords.has(w.toLowerCase())
+        )
+        .map((w) => w.toLowerCase());
+
+      // Count frequency, pick top distinctive terms
+      const freq = {};
+      for (const w of words) freq[w] = (freq[w] || 0) + 1;
+
+      const topTerms = Object.entries(freq)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([w]) => w.charAt(0).toUpperCase() + w.slice(1));
+
+      const topic = topTerms.length > 0 ? topTerms.join(", ") : "Overview";
+
+      // Add user context for relevant (non-chapter) segments
+      if (seg.score > 0 && problemSummary) {
+        return `${topic} — helps with your ${problemSummary}`;
+      }
+      return topic;
+    },
+    [problemSummary]
+  );
 
   if (cards.length === 0) return null;
 
