@@ -16,12 +16,17 @@ import { getThumbnailUrl } from "../../utils/videoUtils";
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { recordPathCompletion, getStreakInfo } from "../../services/learningProgressService";
 import transcriptSegments from "../../data/transcript_segments.json";
+import learningObjectives from "../../data/learning_objectives.json";
+import coursePrerequisites from "../../data/course_prerequisites.json";
+import quizData from "../../data/quiz_questions.json";
+import QuizCard from "./QuizCard";
 import "./GuidedPlayer.css";
 
 // Player stages
 const STAGES = {
   INTRO: "intro",
   PLAYING: "playing",
+  QUIZ: "quiz",
   CHALLENGE: "challenge",
   BRIDGE: "bridge",
   COMPLETE: "complete",
@@ -319,14 +324,25 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
     setStage(STAGES.PLAYING);
   }, []);
 
-  // Handle video completion — advance within course or go to challenge
+  // Handle video completion — advance within course or go to quiz/challenge
   const handleVideoComplete = useCallback(() => {
     if (hasMoreVideos) {
       setVideoIndex((prev) => prev + 1);
     } else {
-      setStage(STAGES.CHALLENGE);
+      // Show quiz if questions exist for this course, otherwise skip to challenge
+      const courseQuiz = quizData[currentCourse?.code];
+      if (courseQuiz && Object.keys(courseQuiz).length > 0) {
+        setStage(STAGES.QUIZ);
+      } else {
+        setStage(STAGES.CHALLENGE);
+      }
     }
-  }, [hasMoreVideos]);
+  }, [hasMoreVideos, currentCourse]);
+
+  // After quiz, proceed to challenge
+  const handleQuizComplete = useCallback(() => {
+    setStage(STAGES.CHALLENGE);
+  }, []);
 
   // After challenge, proceed to BRIDGE or COMPLETE
   const handleChallengeComplete = useCallback(() => {
@@ -413,16 +429,28 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
             </div>
           )}
 
-          {/* Course Preview */}
+          {/* Course Preview with Learning Objectives */}
           <div className="course-preview">
             <h3>📚 What You'll Learn</h3>
             <div className="course-list">
-              {courses.slice(0, 5).map((course, i) => (
-                <div key={course.code || i} className="course-preview-item">
-                  <span className="number">{i + 1}</span>
-                  <span className="title">{course.title || course.name}</span>
-                </div>
-              ))}
+              {courses.slice(0, 5).map((course, i) => {
+                const objectives = learningObjectives[course.code] || [];
+                return (
+                  <div key={course.code || i} className="course-preview-item">
+                    <span className="number">{i + 1}</span>
+                    <div className="course-preview-details">
+                      <span className="title">{course.title || course.name}</span>
+                      {objectives.length > 0 && (
+                        <ul className="objective-list">
+                          {objectives.slice(0, 2).map((obj, j) => (
+                            <li key={j}>{obj}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
               {courses.length > 5 && <div className="more-courses">+{courses.length - 5} more</div>}
             </div>
           </div>
@@ -503,6 +531,16 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
             </button>
           </div>
         </div>
+      )}
+
+      {/* Stage: Quiz */}
+      {stage === STAGES.QUIZ && (
+        <QuizCard
+          courseCode={currentCourse?.code}
+          videoKey={currentVideo?.title || currentVideo?.name || ""}
+          onComplete={handleQuizComplete}
+          onSkip={handleQuizComplete}
+        />
       )}
 
       {/* Stage: Challenge Card */}
@@ -590,19 +628,38 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
         <div className="course-sidebar">
           <h4>Your Path</h4>
           <div className="sidebar-courses">
-            {courses.map((course, i) => (
-              <button
-                key={course.code || i}
-                className={`sidebar-course ${i === currentIndex ? "active" : ""} ${i < currentIndex ? "completed" : ""}`}
-                onClick={() => handleSkipTo(i)}
-                title={cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
-              >
-                <span className="index">{i < currentIndex ? "✓" : i + 1}</span>
-                <span className="title">
-                  {cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
-                </span>
-              </button>
-            ))}
+            {courses.map((course, i) => {
+              const prereqData = coursePrerequisites[course.code];
+              const pathCodes = courses.map((c) => c.code);
+              const missingPrereqs =
+                prereqData?.prerequisites?.filter((p) => !pathCodes.includes(p)) || [];
+              return (
+                <button
+                  key={course.code || i}
+                  className={`sidebar-course ${i === currentIndex ? "active" : ""} ${i < currentIndex ? "completed" : ""}`}
+                  onClick={() => handleSkipTo(i)}
+                  title={cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
+                >
+                  <span className="index">{i < currentIndex ? "✓" : i + 1}</span>
+                  <span className="title">
+                    {cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
+                  </span>
+                  {prereqData?.difficulty && (
+                    <span className={`difficulty-tag ${prereqData.difficulty}`}>
+                      {prereqData.difficulty}
+                    </span>
+                  )}
+                  {missingPrereqs.length > 0 && (
+                    <span
+                      className="prereq-warning"
+                      title={`Recommended: ${missingPrereqs.join(", ")} first`}
+                    >
+                      ⚠️
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
