@@ -166,85 +166,69 @@ function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywor
   }, [courseCode, videoTitle, problemSummary, matchedKeywords]);
 
   /**
-   * Generate a label that tells the learner what THIS segment covers
-   * and how it relates to what they searched for.
+   * Get the display label for a segment.
+   * Prefers Gemini-generated summary, falls back to keyword extraction.
    */
-  const getTopicLabel = useCallback(
-    (seg) => {
-      const text = seg.text || "";
-      const SKIP = new Set([
-        "gonna",
-        "going",
-        "really",
-        "actually",
-        "basically",
-        "right",
-        "thing",
-        "things",
-        "about",
-        "would",
-        "could",
-        "should",
-        "there",
-        "their",
-        "these",
-        "those",
-        "where",
-        "which",
-        "being",
-        "doing",
-        "using",
-        "other",
-        "first",
-        "second",
-        "third",
-        "after",
-        "before",
-        "every",
-        "still",
-        "again",
-        "already",
-        "engine",
-        "unreal",
-        "because",
-        "simply",
-        "called",
-        "allows",
-        "looking",
-        "provides",
-      ]);
+  const getTopicLabel = useCallback((seg) => {
+    // Use Gemini-generated summary if available
+    if (seg.summary) return seg.summary;
 
-      // Also skip the user's own search words — they already know what they searched
-      const searchWords = new Set(
-        (problemSummary || "")
-          .toLowerCase()
-          .split(/\s+/)
-          .filter((w) => w.length > 3)
-      );
-
-      const words = text
-        .replace(/[.,;:!?'"()]/g, "")
-        .split(/\s+/)
-        .filter(
-          (w) => w.length >= 5 && !SKIP.has(w.toLowerCase()) && !searchWords.has(w.toLowerCase())
-        )
-        .map((w) => w.toLowerCase());
-
-      // Count frequency, pick top distinctive terms
-      const freq = {};
-      for (const w of words) freq[w] = (freq[w] || 0) + 1;
-
-      const topTerms = Object.entries(freq)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([w]) => w.charAt(0).toUpperCase() + w.slice(1));
-
-      const topic = topTerms.length > 0 ? topTerms.join(", ") : "Overview";
-
-      return topic;
-    },
-    [problemSummary]
-  );
+    // Fallback: extract distinctive terms from transcript text
+    const text = seg.text || "";
+    const SKIP = new Set([
+      "gonna",
+      "going",
+      "really",
+      "actually",
+      "basically",
+      "right",
+      "thing",
+      "things",
+      "about",
+      "would",
+      "could",
+      "should",
+      "there",
+      "their",
+      "these",
+      "those",
+      "where",
+      "which",
+      "being",
+      "doing",
+      "using",
+      "other",
+      "first",
+      "second",
+      "third",
+      "after",
+      "before",
+      "every",
+      "still",
+      "again",
+      "already",
+      "engine",
+      "unreal",
+      "because",
+      "simply",
+      "called",
+      "allows",
+      "looking",
+      "provides",
+    ]);
+    const words = text
+      .replace(/[.,;:!?'"()]/g, "")
+      .split(/\s+/)
+      .filter((w) => w.length >= 5 && !SKIP.has(w.toLowerCase()))
+      .map((w) => w.toLowerCase());
+    const freq = {};
+    for (const w of words) freq[w] = (freq[w] || 0) + 1;
+    const topTerms = Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([w]) => w.charAt(0).toUpperCase() + w.slice(1));
+    return topTerms.length > 0 ? topTerms.join(", ") : "Overview";
+  }, []);
 
   if (cards.length === 0) return null;
 
