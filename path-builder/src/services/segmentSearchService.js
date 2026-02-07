@@ -71,7 +71,7 @@ export function searchSegments(query, courses = []) {
  * Estimate the top segment for a course based on keywords
  * In production, this would parse VTT files for exact timestamps
  */
-function estimateTopSegment(courseCode, keywords) {
+export function estimateTopSegment(courseCode, keywords) {
   // For MVP, return estimated segment info
   // Full implementation would parse VTT files from content/transcripts/
   return {
