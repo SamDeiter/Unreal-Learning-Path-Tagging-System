@@ -259,6 +259,47 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
             )}
           </div>
 
+          {/* Info Cards — Contextual learning alongside video */}
+          <div className="video-info-cards">
+            {/* Learning Outcomes */}
+            {currentCourse.gemini_outcomes && currentCourse.gemini_outcomes.length > 0 && (
+              <div className="info-card outcomes-card">
+                <h4>🎯 Learning Outcomes</h4>
+                <ul>
+                  {currentCourse.gemini_outcomes.slice(0, 3).map((outcome, i) => (
+                    <li key={i}>{outcome}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Covered Concepts */}
+            {(currentCourse._matchedKeywords?.length > 0 || currentCourse.tags?.length > 0) && (
+              <div className="info-card concepts-card">
+                <h4>🏷️ Concepts Covered</h4>
+                <div className="concept-tags">
+                  {(currentCourse._matchedKeywords || currentCourse.tags || [])
+                    .slice(0, 6)
+                    .map((tag, i) => (
+                      <span key={i} className="concept-tag">
+                        {typeof tag === "string" ? tag : tag.display_name || tag.id}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Focus Guide */}
+            {problemSummary && (
+              <div className="info-card focus-card">
+                <h4>🔍 What to Watch For</h4>
+                <p>
+                  Pay attention to how this video addresses: <strong>{problemSummary}</strong>
+                </p>
+              </div>
+            )}
+          </div>
+
           <div className="video-controls">
             <button className="complete-btn" onClick={handleVideoComplete}>
               {hasMoreVideos ? "Next Video →" : "✓ Mark Complete & Continue"}
