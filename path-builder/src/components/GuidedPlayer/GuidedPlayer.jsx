@@ -13,6 +13,7 @@ import {
 } from "../../services/narratorService";
 import { signInWithGoogle, onAuthChange } from "../../services/googleAuthService";
 import { getThumbnailUrl } from "../../utils/videoUtils";
+import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { recordPathCompletion, getStreakInfo } from "../../services/learningProgressService";
 import "./GuidedPlayer.css";
 
@@ -358,11 +359,11 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
               key={course.code || i}
               className={`sidebar-course ${i === currentIndex ? "active" : ""} ${i < currentIndex ? "completed" : ""}`}
               onClick={() => handleSkipTo(i)}
-              title={course.videos?.[0]?.title || course.title || course.name}
+              title={cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
             >
               <span className="index">{i < currentIndex ? "✓" : i + 1}</span>
               <span className="title">
-                {course.videos?.[0]?.title || course.title || course.name}
+                {cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
               </span>
             </button>
           ))}

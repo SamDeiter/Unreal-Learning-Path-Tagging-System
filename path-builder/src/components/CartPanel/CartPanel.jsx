@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import "./CartPanel.css";
 
 /**
@@ -55,7 +56,7 @@ export default function CartPanel({ cart, onRemove, onClear, onWatchPath }) {
               <div key={video.driveId || index} className="cart-item">
                 <span className="cart-item-num">{index + 1}</span>
                 <div className="cart-item-info">
-                  <span className="cart-item-title">{video.title}</span>
+                  <span className="cart-item-title">{cleanVideoTitle(video.title)}</span>
                   {video.duration > 0 && (
                     <span className="cart-item-dur">{formatMinutes(video.duration)}</span>
                   )}
