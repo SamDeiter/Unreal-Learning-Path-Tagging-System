@@ -7,6 +7,7 @@ Extracts timestamps, topics, and error signatures for tagging.
 import json
 import urllib.request
 import urllib.parse
+import urllib.error
 from dataclasses import dataclass
 from typing import Optional
 
@@ -54,13 +55,32 @@ class YouTubeFetcher:
             params: Query parameters.
 
         Returns:
-            JSON response as dictionary.
+            JSON response as dictionary, or empty dict on error.
         """
         params["key"] = self.api_key
         url = f"{self.BASE_URL}/{endpoint}?{urllib.parse.urlencode(params)}"
 
-        with urllib.request.urlopen(url) as response:
-            return json.loads(response.read().decode())
+        try:
+            with urllib.request.urlopen(url) as response:
+                return json.loads(response.read().decode())
+        except urllib.error.HTTPError as e:
+            error_body = ""
+            try:
+                error_body = e.read().decode()
+            except Exception:
+                pass
+            print(f"  ⚠️  YouTube API error {e.code}: {e.reason}")
+            if error_body:
+                print(f"       Details: {error_body[:300]}")
+            if e.code == 403:
+                print("       → YouTube Data API v3 may not be enabled in your GCP project.")
+                print("       → Enable it at: https://console.cloud.google.com/apis/library/youtube.googleapis.com")
+            elif e.code == 400:
+                print("       → The API key may not be valid for YouTube Data API v3.")
+            return {}
+        except urllib.error.URLError as e:
+            print(f"  ⚠️  Network error: {e.reason}")
+            return {}
 
     def search_videos(
         self,
