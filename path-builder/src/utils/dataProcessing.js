@@ -126,11 +126,12 @@ export function sortCourses(courses, sortBy = "title", direction = "asc") {
         valueA = a.title?.toLowerCase() || "";
         valueB = b.title?.toLowerCase() || "";
         break;
-      case "level":
+      case "level": {
         const levels = { Beginner: 0, Intermediate: 1, Advanced: 2 };
         valueA = levels[a.tags?.level] ?? 99;
         valueB = levels[b.tags?.level] ?? 99;
         break;
+      }
       case "videos":
         valueA = a.video_count || 0;
         valueB = b.video_count || 0;

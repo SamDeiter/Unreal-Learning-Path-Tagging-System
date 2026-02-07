@@ -1,92 +1,55 @@
 # Unreal Learning Path Tagging System
 
-A schema-driven system to **analyze user queries** about Unreal Engine, **tag them semantically**, and **generate personalized learning paths** for solving UE issues.
+A **problem-first learning platform** for Unreal Engine 5. Users describe their problem, and the system generates a personalized learning path with AI-narrated video sequences, comprehension quizzes, and transcript-powered context cards.
 
 > **Philosophy**: Problem-solving over tutorials. Debugging literacy over passive consumption.
 
 ---
 
-## 🎯 Project Goals
+## 🎯 What It Does
 
-1. **Query Analysis** – Capture and normalize user questions about Unreal Engine
-2. **Semantic Tagging** – Automatically categorize queries using deterministic matching
-3. **Learning Path Generation** – Match tagged queries to step-by-step resolution paths
-
-## 🚫 Non-Goals
-
-- No monolithic video courses or "tutorial hell"
-- No embeddings-based matching (v0.1 uses regex/contains only)
-- No user accounts or progress tracking (POC scope)
-
----
+1. **Problem Analysis** — User describes their UE5 issue in plain language
+2. **Intelligent Matching** — Hybrid transcript search + tag-based matching finds relevant content
+3. **Guided Learning Path** — AI-narrated sequence: intro → videos → quizzes → challenges → reflection
+4. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, and prerequisites
 
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | Vanilla JS, HTML, CSS (in `ui/` directory) |
+| **Frontend** | React 19 + Vite (in `path-builder/`) |
 | **Backend** | Firebase Cloud Functions (Node.js 20) |
 | **Database** | Firebase Firestore |
-| **AI** | Google Gemini 2.0 Flash (via Vertex AI / Studio) |
+| **AI** | Google Gemini 2.0 Flash (enrichment scripts) |
 | **Hosting** | Firebase Hosting |
-| **Development** | Firebase Emulators (Legacy: Python local server) |
+| **Testing** | Vitest + React Testing Library |
+| **Linting** | ESLint 9 (flat config) |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-├── functions/        # Firebase Cloud Functions (Backend Logic)
-│   ├── ai/           # AI Generation Logic (Gemini 2.0)
-│   └── index.js      # Functions Entry Point
-├── ui/               # Frontend Application
-│   ├── js/           # Client-side Logic
-│   ├── css/          # Styles
-│   └── index.html    # Entry Point
-├── tags/
-│   ├── tags.json     # 55 canonical tags with full schema
-│   └── edges.json    # Tag relationship graph
-├── learning_paths/   # JSON Schema configs
-├── ingestion/        # Legacy Python ingestion scripts & matching rules
-├── firebase.json     # Firebase Project Configuration
-└── README.md
+├── path-builder/          # React app (main UI)
+│   ├── src/
+│   │   ├── components/    # React components
+│   │   │   └── GuidedPlayer/  # AI-narrated learning experience
+│   │   ├── data/          # Static JSON data files
+│   │   ├── services/      # API & auth services
+│   │   └── utils/         # Helper functions
+│   └── vitest.config.js   # Test configuration
+├── scripts/               # Build-time enrichment scripts
+│   ├── summarize_segments.py          # Gemini transcript summaries
+│   ├── generate_learning_objectives.py # Course objectives
+│   ├── generate_quiz_questions.py      # Video MCQs
+│   ├── detect_prerequisites.py         # Prerequisite detection
+│   └── run_enrichment_pipeline.py      # Pipeline runner
+├── content/transcripts/   # 616 VTT transcript files
+├── tags/                  # Tag schema & relationship graph
+├── functions/             # Firebase Cloud Functions
+├── docs/                  # Architecture & strategy docs
+└── .env.example           # Environment variable template
 ```
-
----
-
-## 🏷️ Tag Schema (v0.1)
-
-Each tag includes:
-
-| Field | Description |
-|-------|-------------|
-| `tag_id` | Namespaced identifier (e.g., `build.exitcode_25`) |
-| `display_name` | Human-readable name |
-| `tag_type` | One of: `system`, `workflow`, `symptom`, `error_code`, `tool`, `platform`, `concept`, `ui_surface` |
-| `synonyms` | Search trigger variants |
-| `aliases` | Typed variants (abbrev, legacy, community) |
-| `signals.error_signatures` | Exact error strings for matching |
-| `constraints.engine_versions` | UE version compatibility |
-| `relevance.global_weight` | 0-1 importance score |
-
----
-
-## 🔄 How Matching Works
-
-```
-User Query → AI Analysis/Deterministic Match → Tag Assignment → Learning Path Selection
-```
-
-1. **AI Analysis**: `generateLearningPath` Cloud Function analyzes query intent.
-2. **Tag Matching**: Contextual tags are extracted from the problem description.
-3. **Path Generation**:
-   - **RAG**: Retrieves curated videos from catalog.
-   - **Grounding**: Falls back to Google Search for novel topics.
-4. **Structured Output**: AI generates a valid JSON learning path with:
-   - Understanding (Concept)
-   - Diagnostics (Root Cause)
-   - Resolution (Fix)
-   - Prevention (Best Practices)
 
 ---
 
@@ -95,45 +58,55 @@ User Query → AI Analysis/Deterministic Match → Tag Assignment → Learning P
 ### Prerequisites
 
 - Node.js 20+
-- Firebase CLI (`npm install -g firebase-tools`)
-- Google Cloud Project with Gemini API enabled
+- Python 3.10+ (for enrichment scripts)
+- `GOOGLE_API_KEY` set as system env var (for Gemini enrichment)
 
-### Quick Start (Modern)
+### Development
 
-1. **Navigate to App Directory**
+```bash
+cd path-builder
+npm install
+npm run dev          # http://localhost:5173
+```
 
-   ```bash
-   cd path-builder
-   ```
+### Run Tests
 
-2. **Install & Run**
+```bash
+cd path-builder
+npm test             # Run all tests
+npm run test:watch   # Watch mode
+```
 
-   ```bash
-   npm install
-   npm run dev
-   ```
+### Run Linter
 
-3. **Open App**
-   <http://localhost:5173>
+```bash
+cd path-builder
+npm run lint
+```
 
-### Legacy Python Server
+### Enrichment Pipeline
 
-*Deprecated. Do not use `ui/server.py`.*
+```bash
+# Set API key (one-time, persists across sessions)
+[System.Environment]::SetEnvironmentVariable("GOOGLE_API_KEY", "your_key", "User")
+
+# Run all enrichment scripts
+python scripts/run_enrichment_pipeline.py
+```
 
 ---
 
-## 📊 Current Tag Coverage (v0.1)
+## 🧪 Enrichment Pipeline
 
-| Category | Count |
-|----------|-------|
-| Core Systems (C++, Blueprint, AI, Multiplayer) | 8 |
-| Visuals (Lumen, Nanite, Niagara, Materials) | 10 |
-| Characters & Animation | 5 |
-| Platforms (VR, Quest, Android, iOS) | 8 |
-| Genres & Templates | 8 |
-| Build & Errors | 6 |
-| Crashes & Debugging | 6 |
-| **Total** | **55** |
+| Script | Output | Purpose |
+|--------|--------|---------|
+| `build_transcript_index.py` | `transcript_segments.json` | Parse 616 VTT files → 7,049 segments |
+| `summarize_segments.py` | Updates `transcript_segments.json` | Natural language summaries per segment |
+| `generate_learning_objectives.py` | `learning_objectives.json` | 3-5 objectives per course |
+| `generate_quiz_questions.py` | `quiz_questions.json` | 2-3 MCQs per video |
+| `detect_prerequisites.py` | `course_prerequisites.json` | Prerequisite relationships |
+
+All scripts use the Google Gemini API free tier (1,500 RPD).
 
 ---
 

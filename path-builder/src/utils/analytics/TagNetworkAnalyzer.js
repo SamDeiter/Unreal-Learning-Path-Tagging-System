@@ -5,7 +5,7 @@
  */
 
 // 1. Tag Co-occurrence Analysis
-export const analyzeCoOccurrence = (courses, tags) => {
+export const analyzeCoOccurrence = (courses, _tags) => {
   // Build adjacency matrix from course tags
   const adjacency = new Map();
 
