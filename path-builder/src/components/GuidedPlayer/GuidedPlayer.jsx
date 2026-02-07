@@ -74,14 +74,51 @@ function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywor
 
     if (!segments || segments.length === 0) return [];
 
-    // Build search keywords from problem summary + matched keywords
+    const STOPWORDS = new Set([
+      "with",
+      "that",
+      "this",
+      "from",
+      "have",
+      "will",
+      "been",
+      "when",
+      "what",
+      "which",
+      "their",
+      "there",
+      "about",
+      "would",
+      "could",
+      "should",
+      "these",
+      "those",
+      "into",
+      "also",
+      "just",
+      "than",
+      "then",
+      "them",
+      "they",
+      "your",
+      "some",
+      "very",
+      "more",
+      "does",
+      "here",
+      "want",
+      "make",
+      "like",
+      "know",
+      "need",
+    ]);
     const keywords = [];
     if (problemSummary) {
       keywords.push(
         ...problemSummary
           .toLowerCase()
           .split(/\s+/)
-          .filter((w) => w.length > 3)
+          .filter((w) => w.length > 3 && !STOPWORDS.has(w))
       );
     }
     if (matchedKeywords) {
@@ -112,7 +149,7 @@ function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywor
           if (!hits.includes(kw)) hits.push(kw);
         }
       }
-      return { ...seg, score, hits };
+      return { ...seg, score, hits: [...new Set(hits)] };
     });
 
     // Return top 3 scoring segments (minimum 1 hit)
