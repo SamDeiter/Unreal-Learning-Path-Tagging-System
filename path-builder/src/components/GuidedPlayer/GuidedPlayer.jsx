@@ -40,21 +40,36 @@ function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywor
     if (!courseTranscripts) return [];
 
     // Match video title to transcript key
-    // Video title: "08_MainLightingPartA.mp4" → key: "08_MainLightingPartA"
-    const videoKey = (videoTitle || "").replace(/\.mp4$/i, "").replace(/^[\d.]+_/, ""); // strip course prefix if present
+    // Video title may be cleaned ("Main Lighting Part A") or raw ("08_MainLightingPartA.mp4")
+    // Transcript keys are like "08_MainLightingPartA"
+    // Normalize both sides: lowercase, no spaces/underscores/numbers prefix
+    const normalize = (s) =>
+      (s || "")
+        .replace(/\.mp4$/i, "")
+        .replace(/^[\d._]+/, "") // strip leading numbers/dots/underscores
+        .replace(/[\s_]+/g, "") // strip all spaces and underscores
+        .toLowerCase();
 
-    // Try exact match first, then fuzzy
-    let segments = courseTranscripts[videoKey];
+    const normalizedTitle = normalize(videoTitle);
+
+    // Try to find matching transcript key
+    let segments = null;
+    for (const [key, segs] of Object.entries(courseTranscripts)) {
+      if (normalize(key) === normalizedTitle) {
+        segments = segs;
+        break;
+      }
+    }
+
+    // Fallback: partial match
     if (!segments) {
-      // Try matching without leading numbers (e.g., "MainLightingPartA")
-      const cleanKey = videoKey.replace(/^\d+_/, "");
-      const matchKey = Object.keys(courseTranscripts).find(
-        (k) =>
-          k.replace(/^\d+_/, "") === cleanKey ||
-          k.includes(cleanKey) ||
-          cleanKey.includes(k.replace(/^\d+_/, ""))
-      );
-      if (matchKey) segments = courseTranscripts[matchKey];
+      for (const [key, segs] of Object.entries(courseTranscripts)) {
+        const nk = normalize(key);
+        if (nk.includes(normalizedTitle) || normalizedTitle.includes(nk)) {
+          segments = segs;
+          break;
+        }
+      }
     }
 
     if (!segments || segments.length === 0) return [];
