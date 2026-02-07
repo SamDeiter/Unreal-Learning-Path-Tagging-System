@@ -339,13 +339,27 @@ export default function ProblemFirst() {
       {/* Stage: Guided Player */}
       {stage === STAGES.GUIDED && (
         <GuidedPlayer
-          courses={cart.map((item) => ({
-            code: item.courseCode,
-            title: item.courseName,
-            videos: [
-              { drive_id: item.driveId, title: item.title, duration_seconds: item.duration },
-            ],
-          }))}
+          courses={cart.map((item) => {
+            // Look up full course data for metadata (tags, description, etc.)
+            const fullCourse = courses.find((c) => c.code === item.courseCode);
+            if (fullCourse) {
+              return {
+                ...fullCourse,
+                // Override videos to only play the selected video
+                videos: [
+                  { drive_id: item.driveId, title: item.title, duration_seconds: item.duration },
+                ],
+              };
+            }
+            // Fallback if course not found in library
+            return {
+              code: item.courseCode,
+              title: item.courseName,
+              videos: [
+                { drive_id: item.driveId, title: item.title, duration_seconds: item.duration },
+              ],
+            };
+          })}
           diagnosis={diagnosisData?.diagnosis}
           problemSummary={diagnosisData?.diagnosis?.problem_summary}
           onComplete={() => {
