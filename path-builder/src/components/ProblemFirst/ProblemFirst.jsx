@@ -137,6 +137,17 @@ export default function ProblemFirst() {
       setStage(STAGES.LOADING);
       setError(null);
 
+      // Log attachments for later backend integration
+      if (inputData.pastedImage) {
+        console.log(
+          "[ProblemFirst] Screenshot attached (base64 length):",
+          inputData.pastedImage.length
+        );
+      }
+      if (inputData.errorLog) {
+        console.log("[ProblemFirst] Error log attached:", inputData.errorLog.slice(0, 200));
+      }
+
       try {
         // Track analytics
         await trackQuerySubmitted(
@@ -164,8 +175,13 @@ export default function ProblemFirst() {
         const cartData = result.data.cart;
         cartData.userQuery = inputData.query;
 
-        // Match courses using transcript-based search
-        const matchedCourses = matchCoursesToCart(cartData, courses);
+        // Match courses using transcript search + user-selected tags for accuracy
+        const matchedCourses = matchCoursesToCart(
+          cartData,
+          courses,
+          inputData.selectedTagIds || [],
+          inputData.errorLog || ""
+        );
         cartData.matchedCourses = matchedCourses;
 
         // Flatten to individual videos
@@ -369,10 +385,17 @@ export default function ProblemFirst() {
  *   Pass 1: Search with the user's raw query (highest relevancy)
  *   Pass 2: If sparse, broaden with AI diagnosis terms
  */
-function matchCoursesToCart(cart, allCourses) {
+function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = "") {
   if (!allCourses || allCourses.length === 0) return [];
 
   const userQuery = cart?.userQuery || "";
+
+  // Extract extra keywords from error log text
+  const errorKeywords = errorLog
+    .toLowerCase()
+    .split(/[\s\n:;,()[\]{}]+/)
+    .filter((w) => w.length > 3 && !/^[0-9]+$/.test(w))
+    .slice(0, 10);
 
   // Helper: run transcript search and filter to playable courses
   const searchAndFilter = (query) => {
@@ -393,15 +416,48 @@ function matchCoursesToCart(cart, allCourses) {
       .filter(Boolean);
   };
 
-  // Pass 1: Search with raw user query only (best relevancy)
-  const directResults = searchAndFilter(userQuery);
-  if (directResults.length >= 3) {
-    return directResults.slice(0, 5);
+  // Helper: boost score if course tags overlap with user-selected tags
+  const applyTagBoost = (courses) => {
+    if (selectedTagIds.length === 0) return courses;
+
+    return courses
+      .map((course) => {
+        const courseTags = (course.extracted_tags || course.tags || [])
+          .map((t) => (typeof t === "string" ? t : t.tag_id || t.name || ""))
+          .filter(Boolean);
+
+        const hasMatchingTag = courseTags.some((ct) =>
+          selectedTagIds.some(
+            (st) =>
+              ct.toLowerCase().includes(st.toLowerCase()) ||
+              st.toLowerCase().includes(ct.toLowerCase())
+          )
+        );
+
+        return {
+          ...course,
+          _relevanceScore: hasMatchingTag
+            ? course._relevanceScore * 2 // 2× boost for matching user-selected tags
+            : course._relevanceScore * 0.5, // Demote if no tag overlap and user explicitly selected tags
+        };
+      })
+      .sort((a, b) => b._relevanceScore - a._relevanceScore);
+  };
+
+  // Build search query, optionally enriched with error log keywords
+  const enrichedQuery =
+    errorKeywords.length > 0 ? `${userQuery} ${errorKeywords.join(" ")}` : userQuery;
+
+  // Pass 1: Search with raw user query (+ error log keywords)
+  const directResults = searchAndFilter(enrichedQuery);
+  const boostedDirect = applyTagBoost(directResults);
+  if (boostedDirect.length >= 3) {
+    return boostedDirect.slice(0, 5);
   }
 
   // Pass 2: Broaden with diagnosis terms if direct search is sparse
   const broadParts = [
-    userQuery,
+    enrichedQuery,
     cart?.diagnosis?.problem_summary,
     ...(cart?.intent?.systems || []),
   ].filter(Boolean);
@@ -410,8 +466,8 @@ function matchCoursesToCart(cart, allCourses) {
   const broadResults = searchAndFilter(broadQuery);
 
   // Merge: direct results first (higher trust), then broad results
-  const seen = new Set(directResults.map((c) => c.code));
-  const merged = [...directResults];
+  const seen = new Set(boostedDirect.map((c) => c.code));
+  const merged = [...boostedDirect];
   for (const result of broadResults) {
     if (!seen.has(result.code)) {
       merged.push(result);
@@ -419,8 +475,9 @@ function matchCoursesToCart(cart, allCourses) {
     }
   }
 
-  if (merged.length >= 3) {
-    return merged.slice(0, 5);
+  const boostedMerged = applyTagBoost(merged);
+  if (boostedMerged.length >= 3) {
+    return boostedMerged.slice(0, 5);
   }
 
   // Fallback: Use tag-based scoring if transcript search is sparse
@@ -433,8 +490,10 @@ function matchCoursesToCart(cart, allCourses) {
     return { ...course, _relevanceScore: score };
   });
 
-  return tagScored
+  const fallbackResults = tagScored
     .filter((c) => c._relevanceScore > 0 && c.videos?.length && c.videos[0]?.drive_id)
     .sort((a, b) => b._relevanceScore - a._relevanceScore)
     .slice(0, 5);
+
+  return applyTagBoost(fallbackResults);
 }

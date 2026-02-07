@@ -1,27 +1,54 @@
 /**
- * ProblemInput - Plain-English problem description input
- * With auto-detection of error signatures and UE5 tags
+ * ProblemInput - Enhanced problem description input
+ * Features:
+ *   - Plain-English text description
+ *   - Category-grouped tag picker for user context
+ *   - Paste (Ctrl+V) + Drag-and-Drop screenshot zone
+ *   - Error log paste area
+ *   - Auto-detection of error signatures and UE5 tags
  */
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
+import { Search, Tags, User, Image, Terminal, X, ChevronDown, ChevronUp } from "lucide-react";
 import tagGraphService from "../../services/TagGraphService";
+import { useTagData } from "../../context/TagDataContext";
 import "./ProblemFirst.css";
 
 export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   const [problem, setProblem] = useState("");
   const [detectedTags, setDetectedTags] = useState([]);
+  const [selectedTagIds, setSelectedTagIds] = useState([]);
+  const [pastedImage, setPastedImage] = useState(null); // base64 data URL
+  const [errorLog, setErrorLog] = useState("");
+  const [showTagPicker, setShowTagPicker] = useState(false);
+  const [showErrorLog, setShowErrorLog] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const dropZoneRef = useRef(null);
 
-  // Debounce tag detection to avoid excessive processing
+  // Get tags from context
+  const tagData = useTagData();
+  const allTags = useMemo(() => tagData?.tags || [], [tagData?.tags]);
+
+  // Group tags by top-level category
+  const tagsByCategory = useMemo(() => {
+    const groups = {};
+    allTags.forEach((tag) => {
+      const category = tag.category_path?.[0] || "Other";
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(tag);
+    });
+    // Sort categories alphabetically
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [allTags]);
+
+  // Debounce tag detection
   const handleChange = useCallback((e) => {
     const text = e.target.value;
     setProblem(text);
 
-    // Only run detection after 300ms of no typing
     if (text.length > 15) {
       const matches = tagGraphService.matchErrorSignature(text);
       const tagMatches = tagGraphService.extractTagsFromText(text);
-
-      // Combine and deduplicate
       const allMatches = [...matches, ...tagMatches];
       const seen = new Set();
       const unique = allMatches.filter((m) => {
@@ -29,10 +56,62 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
         seen.add(m.tag.tag_id);
         return true;
       });
-
-      setDetectedTags(unique.slice(0, 5)); // Limit to 5 tags
+      setDetectedTags(unique.slice(0, 5));
     } else {
       setDetectedTags([]);
+    }
+  }, []);
+
+  // Toggle user-selected tag
+  const toggleTag = useCallback((tagId) => {
+    setSelectedTagIds((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+    );
+  }, []);
+
+  // Handle clipboard paste for images
+  const handlePaste = useCallback((e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type.startsWith("image/")) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        const reader = new FileReader();
+        reader.onload = (ev) => setPastedImage(ev.target.result);
+        reader.readAsDataURL(file);
+        return;
+      }
+    }
+  }, []);
+
+  // Handle drag-and-drop for images
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setPastedImage(ev.target.result);
+      reader.readAsDataURL(file);
     }
   }, []);
 
@@ -42,9 +121,12 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
     onSubmit({
       query: problem,
       detectedTagIds: detectedTags.map((t) => t.tag.tag_id),
+      selectedTagIds,
       personaHint: detectedPersona?.name,
+      pastedImage,
+      errorLog: errorLog.trim() || null,
     });
-  }, [problem, detectedTags, detectedPersona, onSubmit]);
+  }, [problem, detectedTags, selectedTagIds, detectedPersona, onSubmit, pastedImage, errorLog]);
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -66,19 +148,21 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
     []
   );
 
-  // Use first placeholder (avoiding Math.random in render)
   const randomPlaceholder = placeholderExamples[0];
 
   return (
-    <div className="problem-input-container">
+    <div className="problem-input-container" onPaste={handlePaste}>
       <div className="problem-input-header">
-        <h2>🔍 What's the problem?</h2>
+        <h2>
+          <Search size={22} className="icon-inline" /> What's the problem?
+        </h2>
         <p className="subtitle">
           Describe your UE5 issue in plain English. We'll diagnose the root cause and teach you to
           fix it.
         </p>
       </div>
 
+      {/* Main text area */}
       <div className="problem-input-field">
         <textarea
           value={problem}
@@ -97,9 +181,12 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
         </div>
       </div>
 
+      {/* Auto-detected tags */}
       {detectedTags.length > 0 && (
         <div className="detected-tags">
-          <span className="label">🏷️ Detected:</span>
+          <span className="label">
+            <Tags size={14} className="icon-inline" /> Detected:
+          </span>
           <div className="tag-list">
             {detectedTags.map((match) => (
               <span
@@ -115,16 +202,110 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
         </div>
       )}
 
+      {/* Tag Picker Toggle */}
+      <div className="input-section-toggle">
+        <button
+          type="button"
+          className={`toggle-btn ${showTagPicker ? "active" : ""}`}
+          onClick={() => setShowTagPicker((v) => !v)}
+        >
+          <Tags size={14} />
+          Select Topics
+          {selectedTagIds.length > 0 && <span className="badge">{selectedTagIds.length}</span>}
+          {showTagPicker ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
+
+        <button
+          type="button"
+          className={`toggle-btn ${showErrorLog ? "active" : ""}`}
+          onClick={() => setShowErrorLog((v) => !v)}
+        >
+          <Terminal size={14} />
+          Paste Error Log
+          {errorLog.trim() && <span className="badge">1</span>}
+          {showErrorLog ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
+      </div>
+
+      {/* Tag Picker Panel */}
+      {showTagPicker && (
+        <div className="tag-picker">
+          {tagsByCategory.map(([category, tags]) => (
+            <div key={category} className="tag-group">
+              <span className="group-label">{category}</span>
+              <div className="group-chips">
+                {tags.map((tag) => (
+                  <button
+                    key={tag.tag_id}
+                    type="button"
+                    className={`picker-chip ${selectedTagIds.includes(tag.tag_id) ? "selected" : ""}`}
+                    onClick={() => toggleTag(tag.tag_id)}
+                    title={tag.description}
+                  >
+                    {tag.display_name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Error Log Paste Area */}
+      {showErrorLog && (
+        <div className="error-log-section">
+          <textarea
+            className="error-log-input"
+            value={errorLog}
+            onChange={(e) => setErrorLog(e.target.value)}
+            placeholder="Paste your error output, build log, or crash log here..."
+            rows={4}
+          />
+        </div>
+      )}
+
+      {/* Screenshot Paste / Drag-and-Drop Zone */}
+      <div
+        ref={dropZoneRef}
+        className={`screenshot-zone ${isDragOver ? "drag-over" : ""} ${pastedImage ? "has-image" : ""}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {pastedImage ? (
+          <div className="pasted-preview">
+            <img src={pastedImage} alt="Pasted screenshot" />
+            <button
+              type="button"
+              className="remove-image"
+              onClick={() => setPastedImage(null)}
+              aria-label="Remove screenshot"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ) : (
+          <div className="drop-prompt">
+            <Image size={20} />
+            <span>
+              Paste (<kbd>Ctrl+V</kbd>) or drag a screenshot here
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Persona Context */}
       {detectedPersona && (
         <div className="persona-context">
-          <span className="label">👤 Context:</span>
-          <span className="persona-chip">
-            {detectedPersona.emoji || "🎮"} {detectedPersona.name}
+          <span className="label">
+            <User size={14} className="icon-inline" /> Context:
           </span>
+          <span className="persona-chip">{detectedPersona.name}</span>
           <span className="hint">Recommendations will be tailored for you</span>
         </div>
       )}
 
+      {/* Submit */}
       <div className="problem-input-actions">
         <button
           className="submit-btn primary"
