@@ -334,49 +334,66 @@ export default function ProblemFirst() {
 
 /**
  * Match courses to the cart based on TRANSCRIPT content (not just tags)
- * Uses word frequency from actual video transcripts for better relevancy
+ * Uses a two-pass strategy:
+ *   Pass 1: Search with the user's raw query (highest relevancy)
+ *   Pass 2: If sparse, broaden with AI diagnosis terms
  */
 function matchCoursesToCart(cart, allCourses) {
   if (!allCourses || allCourses.length === 0) return [];
 
-  // Build search query from user's problem and diagnosis
-  const queryParts = [
-    cart?.userQuery,
+  const userQuery = cart?.userQuery || "";
+
+  // Helper: run transcript search and filter to playable courses
+  const searchAndFilter = (query) => {
+    if (!query || query.length < 5) return [];
+
+    const transcriptResults = searchSegments(query, allCourses);
+    return transcriptResults
+      .map((result) => {
+        const course = allCourses.find((c) => c.code === result.courseCode);
+        if (!course) return null;
+        if (!course.videos?.length || !course.videos[0]?.drive_id) return null;
+        return {
+          ...course,
+          _relevanceScore: result.score,
+          _matchedKeywords: result.matchedKeywords,
+        };
+      })
+      .filter(Boolean);
+  };
+
+  // Pass 1: Search with raw user query only (best relevancy)
+  const directResults = searchAndFilter(userQuery);
+  if (directResults.length >= 3) {
+    return directResults.slice(0, 5);
+  }
+
+  // Pass 2: Broaden with diagnosis terms if direct search is sparse
+  const broadParts = [
+    userQuery,
     cart?.diagnosis?.problem_summary,
     ...(cart?.intent?.systems || []),
   ].filter(Boolean);
+  const broadQuery = broadParts.join(" ");
 
-  const searchQuery = queryParts.join(" ");
+  const broadResults = searchAndFilter(broadQuery);
 
-  if (!searchQuery || searchQuery.length < 5) {
-    return allCourses.slice(0, 5);
+  // Merge: direct results first (higher trust), then broad results
+  const seen = new Set(directResults.map((c) => c.code));
+  const merged = [...directResults];
+  for (const result of broadResults) {
+    if (!seen.has(result.code)) {
+      merged.push(result);
+      seen.add(result.code);
+    }
   }
 
-  // Use transcript-based search for MUCH better relevancy
-  const transcriptResults = searchSegments(searchQuery, allCourses);
-
-  // Map back to full course objects with scores
-  const scoredCourses = transcriptResults
-    .map((result) => {
-      const course = allCourses.find((c) => c.code === result.courseCode);
-      if (!course) return null;
-      // Skip courses without playable videos (synthetic roll-up courses)
-      if (!course.videos?.length || !course.videos[0]?.drive_id) return null;
-      return {
-        ...course,
-        _relevanceScore: result.score,
-        _matchedKeywords: result.matchedKeywords,
-      };
-    })
-    .filter(Boolean);
-
-  // If transcript search found results, use those
-  if (scoredCourses.length >= 3) {
-    return scoredCourses.slice(0, 5);
+  if (merged.length >= 3) {
+    return merged.slice(0, 5);
   }
 
   // Fallback: Use tag-based scoring if transcript search is sparse
-  const keywords = searchQuery
+  const keywords = broadQuery
     .toLowerCase()
     .split(/\s+/)
     .filter((w) => w.length > 2);
