@@ -231,6 +231,15 @@ DEFAULT_RESEARCH_QUERIES = [
 def main():
     """CLI for tag discovery."""
     import sys
+    import os
+
+    # Pre-flight check: ensure API key is available before doing anything
+    api_key = os.environ.get("YOUTUBE_API_KEY", "")
+    if not api_key or api_key == "your_api_key_here":
+        print("❌ YOUTUBE_API_KEY not configured.")
+        print("   For local use: Copy .env.example to .env and add your key.")
+        print("   For CI: Add YOUTUBE_API_KEY to GitHub repo Secrets.")
+        sys.exit(1)
 
     discovery = TagDiscovery()
 
