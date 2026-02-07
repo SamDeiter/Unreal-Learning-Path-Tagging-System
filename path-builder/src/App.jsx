@@ -24,6 +24,7 @@ import {
 } from "./components/Visualizations";
 import InsightsPanel from "./components/Visualizations/InsightsPanel";
 import CollapsibleSection from "./components/Visualizations/CollapsibleSection";
+import FeedbackButton from "./components/Feedback/FeedbackButton";
 import "./App.css";
 
 // Import course data
@@ -66,14 +67,31 @@ function App() {
         seenTagIds.add(tag.tag_id);
         return true;
       })
-      .map((tag) => ({
-        id: tag.tag_id,
-        label: tag.display_name,
-        count: tag.video_count || 1, // Use actual video count for node sizing
-        description: tag.description,
-        categoryPath: tag.category_path,
-        synonyms: tag.synonyms, // Helpful for fuzzy matching (e.g. "World Building" -> "Level Design")
-      }));
+      .map((tag) => {
+        // Compute actual course count for this tag
+        const tagIdLower = tag.tag_id.toLowerCase();
+        const tagNameLower = tag.display_name.toLowerCase();
+        const courseCount = courses.filter((c) => {
+          const allTags = [
+            ...(c.canonical_tags || []),
+            ...(c.ai_tags || []),
+            ...(c.gemini_system_tags || []),
+            ...(c.transcript_tags || []),
+            ...(c.extracted_tags || []),
+          ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+          return allTags.some((ct) => ct.includes(tagIdLower) || ct.includes(tagNameLower));
+        }).length;
+
+        return {
+          id: tag.tag_id,
+          label: tag.display_name,
+          name: tag.display_name,
+          count: courseCount,
+          description: tag.description,
+          categoryPath: tag.category_path,
+          synonyms: tag.synonyms,
+        };
+      });
 
     // Use edges from edges.json - handle both array and wrapped formats
     const rawEdges = Array.isArray(edgesData) ? edgesData : edgesData.edges || [];
@@ -85,7 +103,7 @@ function App() {
     }));
 
     return { tags: processedTags, edges: processedEdges };
-  }, []);
+  }, [courses]);
 
   return (
     <PathProvider>
@@ -265,6 +283,8 @@ function App() {
               </div>
             )}
           </main>
+
+          <FeedbackButton />
         </div>
       </TagDataProvider>
     </PathProvider>

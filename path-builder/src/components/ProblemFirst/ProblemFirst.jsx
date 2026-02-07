@@ -19,6 +19,7 @@ import {
   trackLearningPathGenerated,
 } from "../../services/analyticsService";
 import { useTagData } from "../../context/TagDataContext";
+import synonymMap from "../../data/synonym_map.json";
 import "./ProblemFirst.css";
 
 // Firebase config - uses same project as main app
@@ -390,6 +391,22 @@ function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = ""
 
   const userQuery = cart?.userQuery || "";
 
+  // --- Phase 2: Error Signature Integration ---
+  // Auto-detect tags from error text (query + error log)
+  const combinedErrorText = `${userQuery} ${errorLog}`.trim();
+  const signatureMatches = tagGraphService.matchErrorSignature(combinedErrorText);
+  const autoDetectedTagIds = signatureMatches.map((m) => m.tag.tag_id);
+
+  // Merge auto-detected tags with user-selected tags (no duplicates)
+  const mergedTagIds = [...new Set([...selectedTagIds, ...autoDetectedTagIds])];
+
+  if (signatureMatches.length > 0) {
+    console.log(
+      "🔍 Error signatures detected:",
+      signatureMatches.map((m) => `${m.tag.display_name} (${m.matchedSignature}, ${m.confidence})`)
+    );
+  }
+
   // Extract extra keywords from error log text
   const errorKeywords = errorLog
     .toLowerCase()
@@ -424,10 +441,25 @@ function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = ""
   ]);
 
   // Extract meaningful query keywords
-  const queryKeywords = userQuery
+  const rawKeywords = userQuery
     .toLowerCase()
     .split(/\s+/)
     .filter((w) => w.length > 2 && !STOPWORDS.has(w));
+
+  // --- Phase 3: Synonym Expansion ---
+  // Expand keywords with synonyms from synonym_map.json
+  const expandedKeywords = new Set(rawKeywords);
+  const queryLower = userQuery.toLowerCase();
+  for (const [term, synonyms] of Object.entries(synonymMap)) {
+    if (queryLower.includes(term)) {
+      for (const syn of synonyms) {
+        syn.split(/\s+/).forEach((w) => {
+          if (w.length > 2 && !STOPWORDS.has(w)) expandedKeywords.add(w);
+        });
+      }
+    }
+  }
+  const queryKeywords = [...expandedKeywords];
 
   // Helper: run transcript search and filter to playable courses
   const searchAndFilter = (query) => {
@@ -497,9 +529,9 @@ function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = ""
       .sort((a, b) => b._relevanceScore - a._relevanceScore);
   };
 
-  // Helper: boost score if course tags overlap with user-selected tags
+  // Helper: boost score if course tags overlap with user-selected + auto-detected tags
   const applyTagBoost = (courses) => {
-    if (selectedTagIds.length === 0) return courses;
+    if (mergedTagIds.length === 0) return courses;
 
     return courses
       .map((course) => {
@@ -508,7 +540,7 @@ function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = ""
           .filter(Boolean);
 
         const hasMatchingTag = courseTags.some((ct) =>
-          selectedTagIds.some(
+          mergedTagIds.some(
             (st) =>
               ct.toLowerCase().includes(st.toLowerCase()) ||
               st.toLowerCase().includes(ct.toLowerCase())
