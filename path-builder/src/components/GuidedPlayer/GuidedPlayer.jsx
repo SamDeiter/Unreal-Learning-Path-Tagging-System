@@ -31,6 +31,7 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [reflectionText, setReflectionText] = useState("");
+  const [videoIndex, setVideoIndex] = useState(0);
 
   // Listen for auth state changes
   useEffect(() => {
@@ -60,27 +61,44 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
     });
   }, [problemSummary, courses, diagnosis]);
 
-  // Current course
+  // Current course and video
   const currentCourse = courses[currentIndex] || null;
   const nextCourse = courses[currentIndex + 1] || null;
+  const currentVideos = currentCourse?.videos || [];
+  const currentVideo = currentVideos[videoIndex] || currentVideos[0] || null;
+  const hasMoreVideos = videoIndex < currentVideos.length - 1;
 
   // Streak info
   const streak = useMemo(() => getStreakInfo(), []);
 
-  // Progress tracking
+  // Progress tracking — count total videos across all courses
+  const totalVideoCount = useMemo(() => {
+    return courses.reduce((sum, c) => sum + (c.videos?.length || 1), 0);
+  }, [courses]);
+  const videosWatchedSoFar = useMemo(() => {
+    let count = 0;
+    for (let i = 0; i < currentIndex; i++) {
+      count += courses[i]?.videos?.length || 1;
+    }
+    return count + videoIndex;
+  }, [courses, currentIndex, videoIndex]);
   const progress = useMemo(() => {
-    return generateProgressText(currentIndex, courses.length);
-  }, [currentIndex, courses.length]);
+    return generateProgressText(videosWatchedSoFar, totalVideoCount);
+  }, [videosWatchedSoFar, totalVideoCount]);
 
   // Handle starting video playback
   const handleStartLearning = useCallback(() => {
     setStage(STAGES.PLAYING);
   }, []);
 
-  // Handle video completion — go to CHALLENGE instead of BRIDGE
+  // Handle video completion — advance within course or go to challenge
   const handleVideoComplete = useCallback(() => {
-    setStage(STAGES.CHALLENGE);
-  }, []);
+    if (hasMoreVideos) {
+      setVideoIndex((prev) => prev + 1);
+    } else {
+      setStage(STAGES.CHALLENGE);
+    }
+  }, [hasMoreVideos]);
 
   // After challenge, proceed to BRIDGE or COMPLETE
   const handleChallengeComplete = useCallback(() => {
@@ -92,15 +110,17 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
     }
   }, [nextCourse, onComplete]);
 
-  // Handle moving to next video
+  // Handle moving to next course
   const handleContinue = useCallback(() => {
     setCurrentIndex((prev) => prev + 1);
+    setVideoIndex(0);
     setStage(STAGES.PLAYING);
   }, []);
 
   // Skip to specific course
   const handleSkipTo = useCallback((index) => {
     setCurrentIndex(index);
+    setVideoIndex(0);
     setStage(STAGES.PLAYING);
   }, []);
 
@@ -210,6 +230,11 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
         <div className="video-stage">
           <div className="video-header">
             <h3>{currentCourse.title || currentCourse.name}</h3>
+            {currentVideos.length > 1 && (
+              <span className="video-counter">
+                Video {videoIndex + 1} of {currentVideos.length}
+              </span>
+            )}
             {currentCourse.gemini_outcomes?.[0] && (
               <p className="objective">{currentCourse.gemini_outcomes[0]}</p>
             )}
@@ -217,16 +242,17 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
 
           {/* Video Embed */}
           <div className="video-container">
-            {currentCourse.videos?.[0]?.drive_id ? (
+            {currentVideo?.drive_id ? (
               <iframe
-                src={`https://drive.google.com/file/d/${currentCourse.videos[0].drive_id}/preview`}
-                title={currentCourse.title}
+                key={currentVideo.drive_id}
+                src={`https://drive.google.com/file/d/${currentVideo.drive_id}/preview`}
+                title={currentVideo.title || currentCourse.title}
                 allow="autoplay"
                 allowFullScreen
               />
             ) : (
               <div className="video-placeholder">
-                <img src={getThumbnailUrl(currentCourse.videos?.[0])} alt={currentCourse.title} />
+                <img src={getThumbnailUrl(currentVideo)} alt={currentCourse.title} />
                 <div className="play-overlay">▶</div>
               </div>
             )}
@@ -234,7 +260,7 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
 
           <div className="video-controls">
             <button className="complete-btn" onClick={handleVideoComplete}>
-              ✓ Mark Complete & Continue
+              {hasMoreVideos ? "Next Video →" : "✓ Mark Complete & Continue"}
             </button>
             <button className="exit-btn" onClick={onExit}>
               Exit Path
