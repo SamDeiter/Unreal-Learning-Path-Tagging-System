@@ -397,6 +397,38 @@ function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = ""
     .filter((w) => w.length > 3 && !/^[0-9]+$/.test(w))
     .slice(0, 10);
 
+  // Stopwords to ignore in title matching
+  const STOPWORDS = new Set([
+    "the",
+    "and",
+    "for",
+    "with",
+    "your",
+    "first",
+    "how",
+    "from",
+    "this",
+    "that",
+    "are",
+    "was",
+    "has",
+    "have",
+    "not",
+    "can",
+    "using",
+    "into",
+    "unreal",
+    "engine",
+    "introduction",
+    "quick",
+  ]);
+
+  // Extract meaningful query keywords
+  const queryKeywords = userQuery
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !STOPWORDS.has(w));
+
   // Helper: run transcript search and filter to playable courses
   const searchAndFilter = (query) => {
     if (!query || query.length < 5) return [];
@@ -414,6 +446,55 @@ function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = ""
         };
       })
       .filter(Boolean);
+  };
+
+  // Helper: match on course title, description, and tags (catches courses missing from search index)
+  const titleAndTagSearch = (keywords) => {
+    if (keywords.length === 0) return [];
+
+    const playableCourses = allCourses.filter((c) => c.videos?.length && c.videos[0]?.drive_id);
+
+    return playableCourses
+      .map((course) => {
+        const title = (course.title || "").toLowerCase();
+        const desc = (course.description || "").toLowerCase();
+        const allTags = [
+          ...(course.canonical_tags || []),
+          ...(course.gemini_system_tags || []),
+          ...(course.extracted_tags || []),
+        ]
+          .map((t) => (typeof t === "string" ? t.toLowerCase() : ""))
+          .join(" ");
+
+        let score = 0;
+        const matchedKeywords = [];
+
+        for (const kw of keywords) {
+          if (title.includes(kw)) {
+            score += 50; // Title match is strongest signal
+            matchedKeywords.push(kw);
+          } else if (allTags.includes(kw)) {
+            score += 30; // Exact tag match
+            matchedKeywords.push(kw);
+          } else if (desc.includes(kw)) {
+            score += 10; // Description mentions
+            matchedKeywords.push(kw);
+          }
+        }
+
+        // Keyword coverage bonus: reward matching more unique keywords
+        const uniqueMatched = new Set(matchedKeywords).size;
+        if (uniqueMatched >= 2) score *= 1 + uniqueMatched * 0.3;
+
+        if (score === 0) return null;
+        return {
+          ...course,
+          _relevanceScore: score,
+          _matchedKeywords: matchedKeywords,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b._relevanceScore - a._relevanceScore);
   };
 
   // Helper: boost score if course tags overlap with user-selected tags
@@ -437,8 +518,8 @@ function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = ""
         return {
           ...course,
           _relevanceScore: hasMatchingTag
-            ? course._relevanceScore * 2 // 2× boost for matching user-selected tags
-            : course._relevanceScore * 0.5, // Demote if no tag overlap and user explicitly selected tags
+            ? course._relevanceScore * 2
+            : course._relevanceScore * 0.5,
         };
       })
       .sort((a, b) => b._relevanceScore - a._relevanceScore);
@@ -448,45 +529,78 @@ function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = ""
   const enrichedQuery =
     errorKeywords.length > 0 ? `${userQuery} ${errorKeywords.join(" ")}` : userQuery;
 
-  // Pass 1: Search with raw user query (+ error log keywords)
-  const directResults = searchAndFilter(enrichedQuery);
-  const boostedDirect = applyTagBoost(directResults);
-  if (boostedDirect.length >= 3) {
-    return boostedDirect.slice(0, 5);
+  // Pass 1: Transcript search (from search index)
+  const transcriptResults = searchAndFilter(enrichedQuery);
+
+  // Pass 2: Title/tag/description search (catches courses missing from search index)
+  const allQueryKeywords =
+    errorKeywords.length > 0 ? [...queryKeywords, ...errorKeywords] : queryKeywords;
+  const titleResults = titleAndTagSearch(allQueryKeywords);
+
+  // Merge both passes, de-duplicating by course code
+  const seen = new Set();
+  const merged = [];
+
+  // Add transcript results first
+  for (const r of transcriptResults) {
+    if (!seen.has(r.code)) {
+      merged.push(r);
+      seen.add(r.code);
+    }
+  }
+  // Add title/tag results, boosting if also found in transcript search
+  for (const r of titleResults) {
+    if (!seen.has(r.code)) {
+      merged.push(r);
+      seen.add(r.code);
+    } else {
+      // Combine scores if found in both
+      const existing = merged.find((m) => m.code === r.code);
+      if (existing) {
+        existing._relevanceScore += r._relevanceScore;
+      }
+    }
   }
 
-  // Pass 2: Broaden with diagnosis terms if direct search is sparse
+  // Sort by combined score
+  merged.sort((a, b) => b._relevanceScore - a._relevanceScore);
+
+  const boosted = applyTagBoost(merged);
+  if (boosted.length >= 3) {
+    return boosted.slice(0, 5);
+  }
+
+  // Pass 3: Broaden with diagnosis terms if still sparse
   const broadParts = [
     enrichedQuery,
     cart?.diagnosis?.problem_summary,
     ...(cart?.intent?.systems || []),
   ].filter(Boolean);
   const broadQuery = broadParts.join(" ");
+  const broadKeywords = broadQuery
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !STOPWORDS.has(w));
 
-  const broadResults = searchAndFilter(broadQuery);
+  const broadTranscript = searchAndFilter(broadQuery);
+  const broadTitle = titleAndTagSearch(broadKeywords);
 
-  // Merge: direct results first (higher trust), then broad results
-  const seen = new Set(boostedDirect.map((c) => c.code));
-  const merged = [...boostedDirect];
-  for (const result of broadResults) {
-    if (!seen.has(result.code)) {
-      merged.push(result);
-      seen.add(result.code);
+  for (const r of [...broadTranscript, ...broadTitle]) {
+    if (!seen.has(r.code)) {
+      merged.push(r);
+      seen.add(r.code);
     }
   }
 
-  const boostedMerged = applyTagBoost(merged);
-  if (boostedMerged.length >= 3) {
-    return boostedMerged.slice(0, 5);
+  merged.sort((a, b) => b._relevanceScore - a._relevanceScore);
+  const boostedBroad = applyTagBoost(merged);
+  if (boostedBroad.length >= 3) {
+    return boostedBroad.slice(0, 5);
   }
 
-  // Fallback: Use tag-based scoring if transcript search is sparse
-  const keywords = broadQuery
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((w) => w.length > 2);
+  // Fallback: traditional tag graph scoring
   const tagScored = allCourses.map((course) => {
-    const score = tagGraphService.scoreCourseRelevance(course, keywords);
+    const score = tagGraphService.scoreCourseRelevance(course, allQueryKeywords);
     return { ...course, _relevanceScore: score };
   });
 
