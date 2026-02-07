@@ -20,6 +20,7 @@ import {
 } from "../../services/analyticsService";
 import { useTagData } from "../../context/TagDataContext";
 import synonymMap from "../../data/synonym_map.json";
+import curatedSolutions from "../../data/curated_solutions.json";
 import "./ProblemFirst.css";
 
 // Firebase config - uses same project as main app
@@ -390,6 +391,30 @@ function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = ""
   if (!allCourses || allCourses.length === 0) return [];
 
   const userQuery = cart?.userQuery || "";
+
+  // --- Phase 5: Curated Solutions (Priority 0 check) ---
+  const queryLowerFull = userQuery.toLowerCase();
+  for (const solution of curatedSolutions) {
+    const matched = solution.patterns.some((p) => queryLowerFull.includes(p));
+    if (matched) {
+      const curatedCourses = solution.courses
+        .map((code) => {
+          const course = allCourses.find((c) => c.code === code);
+          if (!course || !course.videos?.length || !course.videos[0]?.drive_id) return null;
+          return {
+            ...course,
+            _relevanceScore: 200,
+            _curatedMatch: true,
+            _curatedExplanation: solution.explanation,
+          };
+        })
+        .filter(Boolean);
+      if (curatedCourses.length > 0) {
+        console.log("✅ Curated solution match:", solution.explanation);
+        return curatedCourses;
+      }
+    }
+  }
 
   // --- Phase 2: Error Signature Integration ---
   // Auto-detect tags from error text (query + error log)
