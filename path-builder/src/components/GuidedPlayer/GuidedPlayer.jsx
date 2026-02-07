@@ -128,19 +128,40 @@ function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywor
       .map((seg) => ({ ...seg, score: 0, isChapter: true }));
   }, [courseCode, videoTitle, problemSummary, matchedKeywords]);
 
+  /**
+   * Generate a topic label from a segment's matched keywords and text.
+   * Shows what the segment helps with, not the raw transcript.
+   */
+  const getTopicLabel = useCallback((seg) => {
+    // If we have keyword hits, describe what this moment covers
+    if (seg.hits && seg.hits.length > 0) {
+      const topics = seg.hits.map((h) => h.charAt(0).toUpperCase() + h.slice(1));
+      if (topics.length === 1) return `Covers ${topics[0]}`;
+      if (topics.length === 2) return `Covers ${topics[0]} and ${topics[1]}`;
+      return `Covers ${topics.slice(0, -1).join(", ")}, and ${topics[topics.length - 1]}`;
+    }
+
+    // For chapter markers, extract key nouns from the text
+    const text = seg.text || "";
+    const words = text.split(/\s+/).filter((w) => w.length > 4);
+    const unique = [...new Set(words.slice(0, 4).map((w) => w.replace(/[.,;:!?]/g, "")))];
+    if (unique.length > 0) {
+      return `Discusses ${unique.slice(0, 3).join(", ")}`;
+    }
+    return "Key section";
+  }, []);
+
   if (cards.length === 0) return null;
 
   return (
     <div className="video-info-cards">
       <div className="info-card transcript-card">
-        <h4>{cards[0]?.isChapter ? "📋 Video Chapters" : "⏱️ Key Moments"}</h4>
+        <h4>{cards[0]?.isChapter ? "📋 Video Chapters" : "🎯 Relevant to Your Search"}</h4>
         <div className="timestamp-list">
           {cards.map((seg, i) => (
             <div key={i} className={`timestamp-item ${seg.score > 0 ? "relevant" : ""}`}>
               <span className="timestamp-badge">{seg.start}</span>
-              <span className="timestamp-text">
-                {seg.text.length > 120 ? seg.text.slice(0, 120) + "…" : seg.text}
-              </span>
+              <span className="timestamp-text">{getTopicLabel(seg)}</span>
             </div>
           ))}
         </div>
