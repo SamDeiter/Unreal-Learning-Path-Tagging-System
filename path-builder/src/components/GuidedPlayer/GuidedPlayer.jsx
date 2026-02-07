@@ -358,9 +358,12 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
               key={course.code || i}
               className={`sidebar-course ${i === currentIndex ? "active" : ""} ${i < currentIndex ? "completed" : ""}`}
               onClick={() => handleSkipTo(i)}
+              title={course.videos?.[0]?.title || course.title || course.name}
             >
               <span className="index">{i < currentIndex ? "✓" : i + 1}</span>
-              <span className="title">{course.title || course.name}</span>
+              <span className="title">
+                {course.videos?.[0]?.title || course.title || course.name}
+              </span>
             </button>
           ))}
         </div>
