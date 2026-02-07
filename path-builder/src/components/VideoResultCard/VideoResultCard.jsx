@@ -1,5 +1,7 @@
+import { useState } from "react";
 import PropTypes from "prop-types";
-import { PlayCircle, Check, Plus, Clock, ExternalLink } from "lucide-react";
+import { PlayCircle, Check, Plus, Clock, ExternalLink, ThumbsUp, ThumbsDown } from "lucide-react";
+import { recordUpvote, recordDownvote, getFeedbackStatus } from "../../services/feedbackService";
 import "./VideoResultCard.css";
 
 /**
@@ -14,9 +16,9 @@ function formatDuration(seconds) {
 
 /**
  * Individual video result card — shows thumbnail, title, duration,
- * matched tags, timestamp hints, doc links, and an add/remove toggle.
+ * matched tags, timestamp hints, doc links, feedback, and an add/remove toggle.
  */
-export default function VideoResultCard({ video, isAdded, onToggle }) {
+export default function VideoResultCard({ video, isAdded, onToggle, userQuery }) {
   const {
     title,
     courseName,
@@ -28,13 +30,26 @@ export default function VideoResultCard({ video, isAdded, onToggle }) {
     _curatedMatch,
   } = video;
 
-  // Fallback thumbnail — Drive thumbnails are currently broken,
-  // so we use a gradient placeholder with a play icon
+  const [feedbackState, setFeedbackState] = useState(() => getFeedbackStatus(driveId));
+
+  const handleUpvote = (e) => {
+    e.stopPropagation();
+    recordUpvote(driveId, userQuery || "");
+    setFeedbackState("up");
+  };
+
+  const handleDownvote = (e) => {
+    e.stopPropagation();
+    recordDownvote(driveId, userQuery || "");
+    setFeedbackState("down");
+  };
+
+  // Fallback thumbnail
   const thumbnailUrl = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w320` : null;
 
   return (
     <div
-      className={`video-result-card ${isAdded ? "added" : ""} ${_curatedMatch ? "curated" : ""}`}
+      className={`video-result-card ${isAdded ? "added" : ""} ${_curatedMatch ? "curated" : ""} ${feedbackState === "down" ? "demoted" : ""}`}
     >
       <div className="vrc-thumbnail">
         {thumbnailUrl ? (
@@ -98,21 +113,43 @@ export default function VideoResultCard({ video, isAdded, onToggle }) {
         )}
       </div>
 
-      <button
-        className={`vrc-add-btn ${isAdded ? "vrc-added" : ""}`}
-        onClick={() => onToggle(video)}
-        aria-label={isAdded ? "Remove from playlist" : "Add to playlist"}
-      >
-        {isAdded ? (
-          <>
-            <Check size={14} /> Added
-          </>
-        ) : (
-          <>
-            <Plus size={14} /> Add
-          </>
-        )}
-      </button>
+      {/* Actions row: feedback + add/remove */}
+      <div className="vrc-actions">
+        <div className="vrc-feedback">
+          <button
+            className={`vrc-fb-btn ${feedbackState === "up" ? "active-up" : ""}`}
+            onClick={handleUpvote}
+            aria-label="Helpful"
+            title="This was helpful"
+          >
+            <ThumbsUp size={13} />
+          </button>
+          <button
+            className={`vrc-fb-btn ${feedbackState === "down" ? "active-down" : ""}`}
+            onClick={handleDownvote}
+            aria-label="Not helpful"
+            title="Not relevant"
+          >
+            <ThumbsDown size={13} />
+          </button>
+        </div>
+
+        <button
+          className={`vrc-add-btn ${isAdded ? "vrc-added" : ""}`}
+          onClick={() => onToggle(video)}
+          aria-label={isAdded ? "Remove from playlist" : "Add to playlist"}
+        >
+          {isAdded ? (
+            <>
+              <Check size={14} /> Added
+            </>
+          ) : (
+            <>
+              <Plus size={14} /> Add
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
@@ -131,4 +168,5 @@ VideoResultCard.propTypes = {
   }).isRequired,
   isAdded: PropTypes.bool,
   onToggle: PropTypes.func.isRequired,
+  userQuery: PropTypes.string,
 };

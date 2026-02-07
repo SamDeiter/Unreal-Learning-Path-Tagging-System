@@ -12,6 +12,7 @@ import CartPanel from "../CartPanel/CartPanel";
 import { useVideoCart } from "../../hooks/useVideoCart";
 import tagGraphService from "../../services/TagGraphService";
 import { searchSegments } from "../../services/segmentSearchService";
+import { applyFeedbackMultiplier } from "../../services/feedbackService";
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import {
   trackQuerySubmitted,
@@ -105,9 +106,10 @@ function flattenCoursesToVideos(matchedCourses, userQuery) {
         titleLower.includes("outro");
       const introPenalty = isIntro ? -20 : 0;
 
-      // Composite score
-      const totalScore =
+      // Composite score with feedback adjustment
+      const rawScore =
         titleScore + segmentData.score + introPenalty + (course._relevanceScore || 0);
+      const totalScore = applyFeedbackMultiplier(v.drive_id, rawScore);
 
       // Build timestamp hint from best segment match
       let watchHint = "▶ Watch full video";
@@ -436,6 +438,7 @@ export default function ProblemFirst() {
                     video={video}
                     isAdded={isInCart(video.driveId)}
                     onToggle={handleVideoToggle}
+                    userQuery={searchHistory[searchHistory.length - 1]?.query || ""}
                   />
                   <span className="watch-hint">{video.watchHint}</span>
                 </div>
