@@ -3,6 +3,62 @@ import { getAllPersonas, getPainPointMessaging } from "../../services/PersonaSer
 import { useTagData } from "../../context/TagDataContext";
 import "./Personas.css";
 
+const QUESTIONS = [
+  {
+    id: "industry",
+    question: "What industry are you coming from?",
+    options: [
+      {
+        value: "animation",
+        label: "🎭 Animation / Film",
+        persona: "animator_alex",
+      },
+      {
+        value: "architecture",
+        label: "🏛️ Architecture / ArchViz",
+        persona: "architect_amy",
+      },
+      {
+        value: "games",
+        label: "🎮 Game Development",
+        persona: "gamedev_gary",
+      },
+      { value: "vfx", label: "✨ VFX / Compositing", persona: "vfx_victor" },
+      {
+        value: "automotive",
+        label: "🚗 Automotive / Product Viz",
+        persona: "automotive_andy",
+      },
+      {
+        value: "other",
+        label: "🔧 Industrial / Simulation / Other",
+        persona: "simulation_sam",
+      },
+    ],
+  },
+  {
+    id: "experience",
+    question: "What's your experience with 3D software?",
+    options: [
+      { value: "none", label: "Brand new to 3D" },
+      { value: "some", label: "Used Maya, Blender, or similar" },
+      { value: "experienced", label: "Professional 3D artist/developer" },
+    ],
+  },
+  {
+    id: "goal",
+    question: "What do you want to achieve in your first 10 hours?",
+    options: [
+      { value: "explore", label: "🗺️ Just explore and understand UE5" },
+      { value: "project", label: "🎯 Start a specific project" },
+      {
+        value: "skill",
+        label: "📚 Learn a specific skill (lighting, animation, etc.)",
+      },
+    ],
+  },
+];
+
 /**
  * Onboarding Path Builder - Help new learners get over the 5-10hr hump
  */
@@ -18,44 +74,16 @@ export default function Personas() {
 
   const allPersonas = useMemo(() => getAllPersonas(), []);
 
-  // Quiz questions
-  const questions = [
-    {
-      id: "industry",
-      question: "What industry are you coming from?",
-      options: [
-        { value: "animation", label: "🎭 Animation / Film", persona: "animator_alex" },
-        { value: "architecture", label: "🏛️ Architecture / ArchViz", persona: "architect_amy" },
-        { value: "games", label: "🎮 Game Development", persona: "gamedev_gary" },
-        { value: "vfx", label: "✨ VFX / Compositing", persona: "vfx_victor" },
-        { value: "automotive", label: "🚗 Automotive / Product Viz", persona: "automotive_andy" },
-        { value: "other", label: "🔧 Industrial / Simulation / Other", persona: "simulation_sam" },
-      ],
-    },
-    {
-      id: "experience",
-      question: "What's your experience with 3D software?",
-      options: [
-        { value: "none", label: "Brand new to 3D" },
-        { value: "some", label: "Used Maya, Blender, or similar" },
-        { value: "experienced", label: "Professional 3D artist/developer" },
-      ],
-    },
-    {
-      id: "goal",
-      question: "What do you want to achieve in your first 10 hours?",
-      options: [
-        { value: "explore", label: "🗺️ Just explore and understand UE5" },
-        { value: "project", label: "🎯 Start a specific project" },
-        { value: "skill", label: "📚 Learn a specific skill (lighting, animation, etc.)" },
-      ],
-    },
-  ];
-
   // Get detected persona based on answers
   const detectedPersona = useMemo(() => {
-    if (!answers.industry) return null;
-    const industryOption = questions[0].options.find((o) => o.value === answers.industry);
+    const industryPart = answers.industry;
+    if (!industryPart) return null;
+
+    // We assume questions[0] is always "Industry"
+    const industryOption = QUESTIONS[0].options.find(
+      (o) => o.value === industryPart
+    );
+
     if (!industryOption) return null;
     return allPersonas.find((p) => p.id === industryOption.persona);
   }, [answers.industry, allPersonas]);
@@ -214,7 +242,7 @@ export default function Personas() {
 
   const handleAnswer = (questionId, value) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
-    if (step < questions.length - 1) {
+    if (step < QUESTIONS.length - 1) {
       setStep((prev) => prev + 1);
     }
   };
@@ -241,7 +269,7 @@ export default function Personas() {
         <>
           {/* Progress indicator */}
           <div className="quiz-progress">
-            {questions.map((q, i) => (
+            {QUESTIONS.map((q, i) => (
               <div
                 key={q.id}
                 className={`progress-step ${i <= step ? "active" : ""} ${answers[q.id] ? "completed" : ""}`}
@@ -253,13 +281,13 @@ export default function Personas() {
 
           {/* Current question */}
           <section className="quiz-section">
-            <h2>{questions[step].question}</h2>
+            <h2>{QUESTIONS[step].question}</h2>
             <div className="quiz-options">
-              {questions[step].options.map((option) => (
+              {QUESTIONS[step].options.map((option) => (
                 <button
                   key={option.value}
-                  className={`quiz-option ${answers[questions[step].id] === option.value ? "selected" : ""}`}
-                  onClick={() => handleAnswer(questions[step].id, option.value)}
+                  className={`quiz-option ${answers[QUESTIONS[step].id] === option.value ? "selected" : ""}`}
+                  onClick={() => handleAnswer(QUESTIONS[step].id, option.value)}
                 >
                   {option.label}
                 </button>

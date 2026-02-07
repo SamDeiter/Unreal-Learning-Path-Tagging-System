@@ -41,10 +41,12 @@ function CourseLibrary({ courses }) {
   const searchInputRef = useRef(null);
 
   // Get suggested courses based on learning goal
+  // Get suggested courses based on learning goal
   const suggestedCourses = useMemo(() => {
-    if (!learningIntent?.primaryGoal) return [];
-    return matchCoursesToGoal(learningIntent.primaryGoal, courses, 8);
-  }, [learningIntent?.primaryGoal, courses]);
+    const goal = learningIntent?.primaryGoal;
+    if (!goal) return [];
+    return matchCoursesToGoal(goal, courses, 8);
+  }, [learningIntent, courses]);
 
   // Filter out already-in-path courses from suggestions
   const availableSuggestions = useMemo(() => {

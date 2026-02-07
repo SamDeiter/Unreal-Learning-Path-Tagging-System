@@ -400,7 +400,7 @@ function TagNetwork() {
     return () => {
       if (animationId) cancelAnimationFrame(animationId);
     };
-  }, [networkData, getConnectedNodes]);
+  }, [networkData, getConnectedNodes, hoveredNode, selectedNode, zoom, pan]);
 
   // Redraw on interaction changes (no simulation, just redraw)
   useEffect(() => {

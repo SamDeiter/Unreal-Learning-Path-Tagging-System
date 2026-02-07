@@ -251,6 +251,7 @@ export function PathProvider({ children }) {
   return <PathContext.Provider value={value}>{children}</PathContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePath() {
   const context = useContext(PathContext);
   if (!context) {

@@ -152,6 +152,7 @@ export function TagDataProvider({ children, tags = [], edges = [], courses = [] 
   return <TagDataContext.Provider value={value}>{children}</TagDataContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTagData() {
   const context = useContext(TagDataContext);
   if (!context) {
