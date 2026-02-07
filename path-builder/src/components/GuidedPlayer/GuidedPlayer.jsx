@@ -350,25 +350,27 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
         </div>
       )}
 
-      {/* Side Panel: Course List */}
-      <div className="course-sidebar">
-        <h4>Your Path</h4>
-        <div className="sidebar-courses">
-          {courses.map((course, i) => (
-            <button
-              key={course.code || i}
-              className={`sidebar-course ${i === currentIndex ? "active" : ""} ${i < currentIndex ? "completed" : ""}`}
-              onClick={() => handleSkipTo(i)}
-              title={cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
-            >
-              <span className="index">{i < currentIndex ? "✓" : i + 1}</span>
-              <span className="title">
-                {cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
-              </span>
-            </button>
-          ))}
+      {/* Side Panel: Course List (hidden during intro — shown inside intro card) */}
+      {stage !== STAGES.INTRO && (
+        <div className="course-sidebar">
+          <h4>Your Path</h4>
+          <div className="sidebar-courses">
+            {courses.map((course, i) => (
+              <button
+                key={course.code || i}
+                className={`sidebar-course ${i === currentIndex ? "active" : ""} ${i < currentIndex ? "completed" : ""}`}
+                onClick={() => handleSkipTo(i)}
+                title={cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
+              >
+                <span className="index">{i < currentIndex ? "✓" : i + 1}</span>
+                <span className="title">
+                  {cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
