@@ -250,3 +250,61 @@ export function generateProgressText(currentIndex, totalCount) {
     isComplete: currentIndex + 1 >= totalCount,
   };
 }
+
+/**
+ * Generate a hands-on challenge based on course metadata.
+ * Uses template patterns — no API calls needed.
+ *
+ * @param {Object} course - current course object
+ * @param {string} problemContext - the user's original problem summary
+ * @returns {{ task: string, hint: string, difficulty: string }}
+ */
+export function generateChallenge(course, problemContext) {
+  const outcome = course?.gemini_outcomes?.[0] || "";
+  const tags = course?.extracted_tags || course?.tags || [];
+  const tagNames = tags
+    .map((t) => (typeof t === "string" ? t : t.name || t.display_name || ""))
+    .filter(Boolean);
+  const primaryTag = tagNames[0] || "this concept";
+  const skillLevel = course?.gemini_skill_level || "Intermediate";
+
+  // Three challenge patterns
+  const patterns = [
+    {
+      // Pattern 1: Reproduce it
+      task: problemContext
+        ? `Open UE5 and try to reproduce the issue: "${problemContext}". Which ${primaryTag} settings affect the result?`
+        : `Open UE5 and experiment with ${primaryTag}. Try changing at least 2 settings and observe what happens.`,
+      hint: outcome
+        ? `Focus on: ${outcome}`
+        : `Look for ${primaryTag} settings in the Details panel or Project Settings.`,
+    },
+    {
+      // Pattern 2: Apply the concept
+      task: outcome
+        ? `Using what you learned, try to ${outcome.toLowerCase()} in your own project.`
+        : `Apply ${primaryTag} to a simple test scene. Start with default settings, then customize.`,
+      hint:
+        tagNames.length > 1
+          ? `Key concepts: ${tagNames.slice(0, 3).join(", ")}`
+          : `Search the UE5 docs for "${primaryTag}" if you get stuck.`,
+    },
+    {
+      // Pattern 3: Break it on purpose
+      task: `Deliberately make ${primaryTag} produce a bad result. What happens when you use extreme values? Understanding failure sharpens your instincts.`,
+      hint: outcome
+        ? `Then try the correct approach: ${outcome}`
+        : `Compare the broken vs. working result — what's the key difference?`,
+    },
+  ];
+
+  // Pick a pattern based on a simple hash of the course title (deterministic)
+  const titleHash = (course?.title || "").split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const pattern = patterns[titleHash % patterns.length];
+
+  return {
+    task: pattern.task,
+    hint: pattern.hint,
+    difficulty: skillLevel,
+  };
+}

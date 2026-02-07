@@ -1,6 +1,7 @@
 /**
  * GuidedPlayer - AI-narrated learning experience
  * Shows intro cards, plays videos in sequence, displays context bridges
+ * Features: Challenge cards, reflection prompts, learning progress tracking
  */
 import { useState, useMemo, useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
@@ -8,15 +9,18 @@ import {
   generatePathIntro,
   generateBridgeText,
   generateProgressText,
+  generateChallenge,
 } from "../../services/narratorService";
 import { signInWithGoogle, onAuthChange } from "../../services/googleAuthService";
 import { getThumbnailUrl } from "../../utils/videoUtils";
+import { recordPathCompletion, getStreakInfo } from "../../services/learningProgressService";
 import "./GuidedPlayer.css";
 
 // Player stages
 const STAGES = {
   INTRO: "intro",
   PLAYING: "playing",
+  CHALLENGE: "challenge",
   BRIDGE: "bridge",
   COMPLETE: "complete",
 };
@@ -26,6 +30,7 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
   const [currentIndex, setCurrentIndex] = useState(0);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [reflectionText, setReflectionText] = useState("");
 
   // Listen for auth state changes
   useEffect(() => {
@@ -59,6 +64,9 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
   const currentCourse = courses[currentIndex] || null;
   const nextCourse = courses[currentIndex + 1] || null;
 
+  // Streak info
+  const streak = useMemo(() => getStreakInfo(), []);
+
   // Progress tracking
   const progress = useMemo(() => {
     return generateProgressText(currentIndex, courses.length);
@@ -69,8 +77,13 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
     setStage(STAGES.PLAYING);
   }, []);
 
-  // Handle video completion
+  // Handle video completion — go to CHALLENGE instead of BRIDGE
   const handleVideoComplete = useCallback(() => {
+    setStage(STAGES.CHALLENGE);
+  }, []);
+
+  // After challenge, proceed to BRIDGE or COMPLETE
+  const handleChallengeComplete = useCallback(() => {
     if (nextCourse) {
       setStage(STAGES.BRIDGE);
     } else {
@@ -98,6 +111,26 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
     return generateBridgeText(currentCourse, nextCourse, objective);
   }, [stage, currentCourse, nextCourse]);
 
+  // Generate challenge content
+  const challengeContent = useMemo(() => {
+    if (stage !== STAGES.CHALLENGE) return null;
+    return generateChallenge(currentCourse, problemSummary);
+  }, [stage, currentCourse, problemSummary]);
+
+  // Handle path completion with progress tracking
+  const handleFinish = useCallback(() => {
+    // Generate a simple path ID from the problem summary
+    const pathId = problemSummary
+      ? `path-${problemSummary.replace(/\s+/g, "-").toLowerCase().slice(0, 40)}-${Date.now()}`
+      : `path-${Date.now()}`;
+
+    recordPathCompletion(pathId, courses, reflectionText);
+    onExit?.();
+  }, [problemSummary, courses, reflectionText, onExit]);
+
+  // Reflection word count
+  const wordCount = reflectionText.trim().split(/\s+/).filter(Boolean).length;
+
   return (
     <div className="guided-player">
       {/* Progress Bar */}
@@ -111,6 +144,11 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
         <div className="intro-card">
           <h2>{introContent.title}</h2>
           <p className="intro-text">{introContent.intro}</p>
+
+          {/* Streak Badge */}
+          {streak.isActive && streak.count > 1 && (
+            <div className="streak-badge">🔥 {streak.count}-day learning streak!</div>
+          )}
 
           {/* Instructor List */}
           {introContent.instructors.length > 0 && (
@@ -205,6 +243,29 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
         </div>
       )}
 
+      {/* Stage: Challenge Card */}
+      {stage === STAGES.CHALLENGE && challengeContent && (
+        <div className="challenge-card">
+          <div className="challenge-icon">🔨</div>
+          <h3>Try It Yourself</h3>
+          <div className="challenge-difficulty">
+            <span className={`difficulty-badge ${challengeContent.difficulty.toLowerCase()}`}>
+              {challengeContent.difficulty}
+            </span>
+          </div>
+          <p className="challenge-task">{challengeContent.task}</p>
+          <div className="challenge-hint">
+            <span className="hint-label">💡 Hint:</span> {challengeContent.hint}
+          </div>
+          <button className="challenge-done-btn" onClick={handleChallengeComplete}>
+            I tried it →
+          </button>
+          <button className="challenge-skip-btn" onClick={handleChallengeComplete}>
+            Skip challenge
+          </button>
+        </div>
+      )}
+
       {/* Stage: Bridge Card */}
       {stage === STAGES.BRIDGE && bridgeContent && (
         <div className={`bridge-card ${bridgeContent.type}`}>
@@ -233,8 +294,31 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
               <span className="label">Total Time</span>
             </div>
           </div>
-          <button className="finish-btn" onClick={onExit}>
-            Back to Problems
+
+          {/* Reflection Prompt */}
+          <div className="reflection-area">
+            <h3>📝 What was your main takeaway?</h3>
+            <p className="reflection-subtitle">
+              Writing your reflection helps cement what you learned.
+            </p>
+            <textarea
+              className="reflection-input"
+              placeholder="I learned that..."
+              value={reflectionText}
+              onChange={(e) => setReflectionText(e.target.value)}
+              rows={4}
+            />
+            <div className="reflection-meta">
+              {wordCount === 0 && <span className="word-hint">Try writing a few sentences</span>}
+              {wordCount > 0 && wordCount < 10 && (
+                <span className="word-hint">{wordCount} words — keep going!</span>
+              )}
+              {wordCount >= 10 && <span className="word-hint done">Great reflection! ✓</span>}
+            </div>
+          </div>
+
+          <button className="finish-btn" onClick={handleFinish}>
+            {reflectionText.trim() ? "Save & Finish" : "Back to Problems"}
           </button>
         </div>
       )}
