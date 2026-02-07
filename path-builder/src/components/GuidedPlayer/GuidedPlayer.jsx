@@ -241,10 +241,6 @@ function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywor
 
       const topic = topTerms.length > 0 ? topTerms.join(", ") : "Overview";
 
-      // Add user context for relevant (non-chapter) segments
-      if (seg.score > 0 && problemSummary) {
-        return `${topic} — helps with your ${problemSummary}`;
-      }
       return topic;
     },
     [problemSummary]
@@ -255,7 +251,11 @@ function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywor
   return (
     <div className="video-info-cards">
       <div className="info-card transcript-card">
-        <h4>{cards[0]?.isChapter ? "📋 Video Chapters" : "🎯 Relevant to Your Search"}</h4>
+        <h4>
+          {cards[0]?.isChapter
+            ? "📋 Video Chapters"
+            : `🎯 Helps with: ${problemSummary || "your search"}`}
+        </h4>
         <div className="timestamp-list">
           {cards.map((seg, i) => (
             <div key={i} className={`timestamp-item ${seg.score > 0 ? "relevant" : ""}`}>
