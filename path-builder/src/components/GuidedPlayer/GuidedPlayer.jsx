@@ -15,6 +15,7 @@ import { signInWithGoogle, onAuthChange } from "../../services/googleAuthService
 import { getThumbnailUrl } from "../../utils/videoUtils";
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { recordPathCompletion, getStreakInfo } from "../../services/learningProgressService";
+import transcriptSegments from "../../data/transcript_segments.json";
 import "./GuidedPlayer.css";
 
 // Player stages
@@ -25,6 +26,113 @@ const STAGES = {
   BRIDGE: "bridge",
   COMPLETE: "complete",
 };
+
+/**
+ * TranscriptCards — Shows relevant transcript timestamps during video playback.
+ * Matches segments by keyword relevance to the user's problem.
+ */
+function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywords }) {
+  const cards = useMemo(() => {
+    if (!courseCode) return [];
+
+    // Find transcript data for this course
+    const courseTranscripts = transcriptSegments[courseCode];
+    if (!courseTranscripts) return [];
+
+    // Match video title to transcript key
+    // Video title: "08_MainLightingPartA.mp4" → key: "08_MainLightingPartA"
+    const videoKey = (videoTitle || "").replace(/\.mp4$/i, "").replace(/^[\d.]+_/, ""); // strip course prefix if present
+
+    // Try exact match first, then fuzzy
+    let segments = courseTranscripts[videoKey];
+    if (!segments) {
+      // Try matching without leading numbers (e.g., "MainLightingPartA")
+      const cleanKey = videoKey.replace(/^\d+_/, "");
+      const matchKey = Object.keys(courseTranscripts).find(
+        (k) =>
+          k.replace(/^\d+_/, "") === cleanKey ||
+          k.includes(cleanKey) ||
+          cleanKey.includes(k.replace(/^\d+_/, ""))
+      );
+      if (matchKey) segments = courseTranscripts[matchKey];
+    }
+
+    if (!segments || segments.length === 0) return [];
+
+    // Build search keywords from problem summary + matched keywords
+    const keywords = [];
+    if (problemSummary) {
+      keywords.push(
+        ...problemSummary
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((w) => w.length > 3)
+      );
+    }
+    if (matchedKeywords) {
+      keywords.push(
+        ...matchedKeywords.map((k) =>
+          (typeof k === "string" ? k : k.display_name || k.id || "").toLowerCase()
+        )
+      );
+    }
+
+    if (keywords.length === 0) {
+      // No keywords — show evenly spaced segments as chapter markers
+      const step = Math.max(1, Math.floor(segments.length / 3));
+      return segments
+        .filter((_, i) => i % step === 0)
+        .slice(0, 3)
+        .map((seg) => ({ ...seg, score: 0, isChapter: true }));
+    }
+
+    // Score each segment by keyword matches
+    const scored = segments.map((seg) => {
+      const text = seg.text.toLowerCase();
+      let score = 0;
+      const hits = [];
+      for (const kw of keywords) {
+        if (text.includes(kw)) {
+          score += 10;
+          if (!hits.includes(kw)) hits.push(kw);
+        }
+      }
+      return { ...seg, score, hits };
+    });
+
+    // Return top 3 scoring segments (minimum 1 hit)
+    const relevant = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score);
+
+    if (relevant.length > 0) return relevant.slice(0, 3);
+
+    // Fallback: show evenly spaced segments
+    const step = Math.max(1, Math.floor(segments.length / 3));
+    return segments
+      .filter((_, i) => i % step === 0)
+      .slice(0, 3)
+      .map((seg) => ({ ...seg, score: 0, isChapter: true }));
+  }, [courseCode, videoTitle, problemSummary, matchedKeywords]);
+
+  if (cards.length === 0) return null;
+
+  return (
+    <div className="video-info-cards">
+      <div className="info-card transcript-card">
+        <h4>{cards[0]?.isChapter ? "📋 Video Chapters" : "⏱️ Key Moments"}</h4>
+        <div className="timestamp-list">
+          {cards.map((seg, i) => (
+            <div key={i} className={`timestamp-item ${seg.score > 0 ? "relevant" : ""}`}>
+              <span className="timestamp-badge">{seg.start}</span>
+              <span className="timestamp-text">
+                {seg.text.length > 120 ? seg.text.slice(0, 120) + "…" : seg.text}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function GuidedPlayer({ courses, diagnosis, problemSummary, onComplete, onExit }) {
   const [stage, setStage] = useState(STAGES.INTRO);
@@ -259,46 +367,13 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
             )}
           </div>
 
-          {/* Info Cards — Contextual learning alongside video */}
-          <div className="video-info-cards">
-            {/* Learning Outcomes */}
-            {currentCourse.gemini_outcomes && currentCourse.gemini_outcomes.length > 0 && (
-              <div className="info-card outcomes-card">
-                <h4>🎯 Learning Outcomes</h4>
-                <ul>
-                  {currentCourse.gemini_outcomes.slice(0, 3).map((outcome, i) => (
-                    <li key={i}>{outcome}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Covered Concepts */}
-            {(currentCourse._matchedKeywords?.length > 0 || currentCourse.tags?.length > 0) && (
-              <div className="info-card concepts-card">
-                <h4>🏷️ Concepts Covered</h4>
-                <div className="concept-tags">
-                  {(currentCourse._matchedKeywords || currentCourse.tags || [])
-                    .slice(0, 6)
-                    .map((tag, i) => (
-                      <span key={i} className="concept-tag">
-                        {typeof tag === "string" ? tag : tag.display_name || tag.id}
-                      </span>
-                    ))}
-                </div>
-              </div>
-            )}
-
-            {/* Focus Guide */}
-            {problemSummary && (
-              <div className="info-card focus-card">
-                <h4>🔍 What to Watch For</h4>
-                <p>
-                  Pay attention to how this video addresses: <strong>{problemSummary}</strong>
-                </p>
-              </div>
-            )}
-          </div>
+          {/* Transcript-powered info cards */}
+          <TranscriptCards
+            courseCode={currentCourse.code}
+            videoTitle={currentVideo?.title || currentVideo?.name || ""}
+            problemSummary={problemSummary}
+            matchedKeywords={currentCourse._matchedKeywords}
+          />
 
           <div className="video-controls">
             <button className="complete-btn" onClick={handleVideoComplete}>
