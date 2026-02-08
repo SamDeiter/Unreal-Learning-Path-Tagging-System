@@ -1,6 +1,6 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { PlayCircle, Check, Plus, Clock, ExternalLink, ThumbsUp, ThumbsDown } from "lucide-react";
+import { PlayCircle, Check, Plus, Clock, ExternalLink } from "lucide-react";
 import { recordUpvote, recordDownvote, getFeedbackStatus } from "../../services/feedbackService";
 import "./VideoResultCard.css";
 
@@ -122,7 +122,7 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
             aria-label="Helpful"
             title="This was helpful"
           >
-            <ThumbsUp size={13} />
+            <span className="vrc-fb-emoji">👍</span>
           </button>
           <button
             className={`vrc-fb-btn ${feedbackState === "down" ? "active-down" : ""}`}
@@ -130,7 +130,7 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
             aria-label="Not helpful"
             title="Not relevant"
           >
-            <ThumbsDown size={13} />
+            <span className="vrc-fb-emoji">👎</span>
           </button>
         </div>
 
