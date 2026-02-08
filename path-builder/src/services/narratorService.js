@@ -277,33 +277,33 @@ export function generateChallenge(course, problemContext) {
   }
   const skillLevel = course?.gemini_skill_level || "Intermediate";
 
-  // Three challenge patterns
+  // Three challenge patterns — all focused on APPLYING the fix, not reproducing the problem
   const patterns = [
     {
-      // Pattern 1: Reproduce it
+      // Pattern 1: Apply the fix
       task: problemContext
-        ? `Open UE5 and try to reproduce the issue: "${problemContext}". Which ${primaryTag} settings affect the result?`
-        : `Open UE5 and experiment with ${primaryTag}. Try changing at least 2 settings and observe what happens.`,
+        ? `Open UE5 and apply what you just learned to fix "${problemContext}". Which ${primaryTag} settings were key to the solution?`
+        : `Open UE5 and set up ${primaryTag} from scratch. Try to get a working result using the approach from this lesson.`,
       hint: outcome
         ? `Focus on: ${outcome}`
         : `Look for ${primaryTag} settings in the Details panel or Project Settings.`,
     },
     {
-      // Pattern 2: Apply the concept
+      // Pattern 2: Build something with the concept
       task: outcome
         ? `Using what you learned, try to ${outcome.toLowerCase()} in your own project.`
-        : `Apply ${primaryTag} to a simple test scene. Start with default settings, then customize.`,
+        : `Create a simple test scene that demonstrates ${primaryTag}. Start with default settings, then customize.`,
       hint:
         tagNames.length > 1
           ? `Key concepts: ${tagNames.slice(0, 3).join(", ")}`
           : `Search the UE5 docs for "${primaryTag}" if you get stuck.`,
     },
     {
-      // Pattern 3: Break it on purpose
-      task: `Deliberately make ${primaryTag} produce a bad result. What happens when you use extreme values? Understanding failure sharpens your instincts.`,
+      // Pattern 3: Explain it back
+      task: `In your own words, explain how ${primaryTag} works and when you would use it. Then set up a quick example in UE5 to confirm your understanding.`,
       hint: outcome
-        ? `Then try the correct approach: ${outcome}`
-        : `Compare the broken vs. working result — what's the key difference?`,
+        ? `Your explanation should cover: ${outcome}`
+        : `Try explaining it as if teaching a teammate — what are the key steps?`,
     },
   ];
 
