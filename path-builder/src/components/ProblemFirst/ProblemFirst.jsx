@@ -891,10 +891,15 @@ function matchCoursesToCart(
     return applyVersionFilter(boostedBroad.slice(0, 5), userQuery);
   }
 
-  // Fallback: traditional tag graph scoring
+  // Fallback: traditional tag graph scoring (V2: returns {score, breakdown, topContributors})
   const tagScored = allCourses.map((course) => {
-    const score = tagGraphService.scoreCourseRelevance(course, allQueryKeywords);
-    return { ...course, _relevanceScore: score };
+    const result = tagGraphService.scoreCourseRelevance(course, allQueryKeywords);
+    return {
+      ...course,
+      _relevanceScore: result.score,
+      _scoreBreakdown: result.breakdown,
+      _topContributors: result.topContributors,
+    };
   });
 
   const fallbackResults = tagScored

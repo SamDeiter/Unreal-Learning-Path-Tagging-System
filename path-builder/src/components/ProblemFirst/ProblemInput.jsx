@@ -47,9 +47,13 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
     setProblem(text);
 
     if (text.length > 15) {
-      const matches = tagGraphService.matchErrorSignature(text);
-      const tagMatches = tagGraphService.extractTagsFromText(text);
-      const allMatches = [...matches, ...tagMatches];
+      const errorMatches = tagGraphService.matchErrorSignature(text);
+      // V2: extractTagsFromText returns { matches: [{tag, confidence, ...}], ... }
+      const tagResult = tagGraphService.extractTagsFromText(text);
+      // Merge error signature matches with V2 tag matches (normalize shape)
+      const errorShaped = errorMatches.map((m) => ({ tag: m.tag, confidence: m.confidence }));
+      const tagShaped = tagResult.matches.map((m) => ({ tag: m.tag, confidence: m.confidence }));
+      const allMatches = [...errorShaped, ...tagShaped];
       const seen = new Set();
       const unique = allMatches.filter((m) => {
         if (seen.has(m.tag.tag_id)) return false;
