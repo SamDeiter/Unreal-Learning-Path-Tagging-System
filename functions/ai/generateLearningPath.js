@@ -1,17 +1,10 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const fs = require("fs");
-const path = require("path");
 
 // Import utility functions
 const { checkRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
-
-/**
- * Load curated video catalog for RAG context
- * Lazy-loaded on first request to ensure proper Cloud Functions environment
- */
-let videoCatalog = null;
+const { getVideoCatalog } = require("../utils/lazyData");
 
 // Hardcoded fallback videos (verified real @UnrealEngine IDs)
 const FALLBACK_VIDEOS = [
@@ -108,38 +101,12 @@ const FALLBACK_VIDEOS = [
   },
 ];
 
+/**
+ * Phase 8D: Use centralized lazyData for catalog, with fallback
+ */
 function loadVideoCatalog() {
-  if (videoCatalog !== null) return videoCatalog;
-
-  try {
-    // Try multiple possible paths for Cloud Functions deployment
-    const possiblePaths = [
-      path.join(__dirname, "../data/video_catalog.json"),
-      path.join(__dirname, "../../data/video_catalog.json"),
-      path.resolve(__dirname, "../data/video_catalog.json"),
-      "/workspace/functions/data/video_catalog.json",
-    ];
-
-    for (const catalogPath of possiblePaths) {
-      console.log(`[DEBUG] Trying catalog path: ${catalogPath}`);
-      if (fs.existsSync(catalogPath)) {
-        const data = JSON.parse(fs.readFileSync(catalogPath, "utf-8"));
-        videoCatalog = data.videos || [];
-        console.log(
-          `[INFO] Loaded ${videoCatalog.length} curated videos from: ${catalogPath}`,
-        );
-        return videoCatalog;
-      }
-    }
-
-    console.warn("[WARN] Video catalog not found, using fallback videos");
-    videoCatalog = FALLBACK_VIDEOS;
-    return videoCatalog;
-  } catch (e) {
-    console.error("[ERROR] Could not load video catalog:", e.message);
-    videoCatalog = FALLBACK_VIDEOS;
-    return videoCatalog;
-  }
+  const catalog = getVideoCatalog();
+  return catalog.length > 0 ? catalog : FALLBACK_VIDEOS;
 }
 
 /**
@@ -190,7 +157,7 @@ function buildVideoContext(query, maxVideos = 20) {
   return relevant
     .map(
       (v) =>
-        `[${v.id}] "${v.title}" (${Math.round(v.duration / 60)}min) - ${v.tags.join(", ")} - ${v.url}`,
+        `[${v.id}] "${v.title}" (${Math.round(v.duration / 60)}min) - ${v.tags.join(", ")} - ${v.url}`
     )
     .join("\n");
 }
@@ -225,7 +192,7 @@ exports.generateLearningPath = functions
     if (!query || query.trim().length < 3) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Query must be at least 3 characters.",
+        "Query must be at least 3 characters."
       );
     }
 
@@ -234,7 +201,7 @@ exports.generateLearningPath = functions
     if (!rateLimitCheck.allowed) {
       throw new functions.https.HttpsError(
         "resource-exhausted",
-        `Rate limit exceeded. ${rateLimitCheck.message}`,
+        `Rate limit exceeded. ${rateLimitCheck.message}`
       );
     }
 
@@ -250,7 +217,7 @@ exports.generateLearningPath = functions
         console.error("[ERROR] GEMINI_API_KEY secret is not set.");
         throw new functions.https.HttpsError(
           "failed-precondition",
-          "Server configuration error: API Key missing.",
+          "Server configuration error: API Key missing."
         );
       }
 
@@ -258,9 +225,7 @@ exports.generateLearningPath = functions
       const videoContext = buildVideoContext(query);
       const hasCuratedVideos = videoContext !== null;
 
-      console.log(
-        `[DEBUG] Query: "${query}", Curated videos found: ${hasCuratedVideos}`,
-      );
+      console.log(`[DEBUG] Query: "${query}", Curated videos found: ${hasCuratedVideos}`);
 
       // 6. Build the prompt for learning path generation
       // HYBRID APPROACH: Prioritize curated catalog, fall back to Google Search
@@ -403,23 +368,19 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
         const errorText = await response.text();
         console.error(
           `[ERROR] Gemini API failed: ${response.status} ${response.statusText}`,
-          errorText,
+          errorText
         );
-        throw new Error(
-          `Gemini API error: ${response.status} ${response.statusText}`,
-        );
+        throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
       }
 
       const responseData = await response.json();
-      const generatedText =
-        responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+      const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
 
       // Extract usage metadata for stats
       const usageMetadata = responseData.usageMetadata || {};
       const inputTokens = usageMetadata.promptTokenCount || 0;
       const outputTokens = usageMetadata.candidatesTokenCount || 0;
-      const totalTokens =
-        usageMetadata.totalTokenCount || inputTokens + outputTokens;
+      const totalTokens = usageMetadata.totalTokenCount || inputTokens + outputTokens;
 
       // Calculate costs (Gemini 2.0 Flash pricing)
       const inputCost = (inputTokens / 1000000) * 0.075;
@@ -446,10 +407,7 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
       console.log(`[DEBUG] Usage stats:`, usageStats);
 
       if (!generatedText) {
-        console.error(
-          "[ERROR] No content in Gemini response:",
-          JSON.stringify(responseData),
-        );
+        console.error("[ERROR] No content in Gemini response:", JSON.stringify(responseData));
         throw new Error("No content generated from Gemini");
       }
 
@@ -466,10 +424,7 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
       }
 
       // 8. Add metadata
-      pathData.path_id = query
-        .toLowerCase()
-        .replace(/\s+/g, "_")
-        .substring(0, 50);
+      pathData.path_id = query.toLowerCase().replace(/\s+/g, "_").substring(0, 50);
       pathData.query = query;
       pathData.tags = tags || [];
       pathData.generated_at = new Date().toISOString();
@@ -478,7 +433,7 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
       if (!Array.isArray(pathData.steps)) {
         console.error(
           "[ERROR] AI did not return a steps array. Full response:",
-          JSON.stringify(pathData),
+          JSON.stringify(pathData)
         );
         pathData.steps = [];
       }
@@ -523,7 +478,7 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
       console.error("[ERROR] Error details:", JSON.stringify(error, null, 2));
       throw new functions.https.HttpsError(
         "internal",
-        `Failed to generate learning path: ${error.message}`,
+        `Failed to generate learning path: ${error.message}`
       );
     }
   });
