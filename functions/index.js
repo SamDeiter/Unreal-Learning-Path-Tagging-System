@@ -23,3 +23,8 @@ Object.assign(exports, require("./ai/validateCurriculum"));
 // Unified Query Endpoint
 // ============================================================================
 Object.assign(exports, require("./ai/queryLearningPath"));
+
+// ============================================================================
+// Semantic Search - Query Embedding
+// ============================================================================
+Object.assign(exports, require("./ai/embedQuery"));

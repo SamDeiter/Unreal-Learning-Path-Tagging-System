@@ -12,6 +12,7 @@ import CartPanel from "../CartPanel/CartPanel";
 import { useVideoCart } from "../../hooks/useVideoCart";
 import tagGraphService from "../../services/TagGraphService";
 import { searchSegments } from "../../services/segmentSearchService";
+import { findSimilarCourses } from "../../services/semanticSearchService";
 import { applyFeedbackMultiplier } from "../../services/feedbackService";
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import {
@@ -295,12 +296,29 @@ export default function ProblemFirst() {
         const cartData = result.data.cart;
         cartData.userQuery = inputData.query;
 
-        // Match courses using transcript search + user-selected tags for accuracy
+        // Semantic search: get query embedding (non-blocking, enhances results)
+        let semanticResults = [];
+        try {
+          const embedQuery = httpsCallable(functions, "embedQuery");
+          const embedResult = await embedQuery({ query: inputData.query });
+          if (embedResult.data?.success && embedResult.data?.embedding) {
+            semanticResults = findSimilarCourses(embedResult.data.embedding, 8, 0.35);
+            console.log(
+              "🧠 Semantic matches:",
+              semanticResults.map((r) => `${r.code} (${r.similarity.toFixed(2)}`)
+            );
+          }
+        } catch (semanticErr) {
+          console.warn("⚠️ Semantic search skipped:", semanticErr.message);
+        }
+
+        // Match courses using transcript search + semantic + tags for accuracy
         const matchedCourses = matchCoursesToCart(
           cartData,
           courses,
           inputData.selectedTagIds || [],
-          inputData.errorLog || ""
+          inputData.errorLog || "",
+          semanticResults
         );
         cartData.matchedCourses = matchedCourses;
 
@@ -538,7 +556,13 @@ export default function ProblemFirst() {
  *   Pass 1: Search with the user's raw query (highest relevancy)
  *   Pass 2: If sparse, broaden with AI diagnosis terms
  */
-function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = "") {
+function matchCoursesToCart(
+  cart,
+  allCourses,
+  selectedTagIds = [],
+  errorLog = "",
+  semanticResults = []
+) {
   if (!allCourses || allCourses.length === 0) return [];
 
   const userQuery = cart?.userQuery || "";
@@ -766,6 +790,30 @@ function matchCoursesToCart(cart, allCourses, selectedTagIds = [], errorLog = ""
       const existing = merged.find((m) => m.code === r.code);
       if (existing) {
         existing._relevanceScore += r._relevanceScore;
+      }
+    }
+  }
+
+  // Pass 2.5: Semantic search results (from embeddings)
+  if (semanticResults.length > 0) {
+    for (const sr of semanticResults) {
+      if (!seen.has(sr.code)) {
+        const course = allCourses.find((c) => c.code === sr.code);
+        if (course && course.videos?.length && course.videos[0]?.drive_id) {
+          merged.push({
+            ...course,
+            _relevanceScore: sr.similarity * 100,
+            _matchedKeywords: ["semantic-match"],
+            _semanticMatch: true,
+          });
+          seen.add(sr.code);
+        }
+      } else {
+        // Boost existing result if also semantically similar
+        const existing = merged.find((m) => m.code === sr.code);
+        if (existing) {
+          existing._relevanceScore += sr.similarity * 40;
+        }
       }
     }
   }
