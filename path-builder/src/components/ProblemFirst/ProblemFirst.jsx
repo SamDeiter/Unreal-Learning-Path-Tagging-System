@@ -56,6 +56,30 @@ const STAGES = {
 
 const CART_STORAGE_KEY = "problem-first-cart";
 
+// Phase 8A: Tiered matching threshold — semantic search only fires when
+// deterministic passes score below this value
+const TIER1_CONFIDENCE_THRESHOLD = 60;
+
+// Phase 8A: UE5-only tag prefixes (engine_versions.min >= "5.0" in tags.json)
+const UE5_ONLY_TAGS = new Set([
+  "rendering.lumen",
+  "rendering.nanite",
+  "rendering.virtualShadowMaps",
+  "rendering.substrate",
+  "worldbuilding.worldPartition",
+]);
+
+/**
+ * Detect UE version intent from user query.
+ * @returns {number|null} 4, 5, or null (no version specified)
+ */
+function detectUEVersion(query) {
+  const q = (query || "").toLowerCase();
+  if (/\bue\s*5\b|\bunreal\s*engine\s*5\b|\b5\.\d\b/.test(q)) return 5;
+  if (/\bue\s*4\b|\bunreal\s*engine\s*4\b|\b4\.\d{1,2}\b/.test(q)) return 4;
+  return null;
+}
+
 // cleanVideoTitle imported from ../../utils/cleanVideoTitle
 
 /**
@@ -798,8 +822,12 @@ function matchCoursesToCart(
     }
   }
 
-  // Pass 2.5: Semantic search results (from embeddings)
-  if (semanticResults.length > 0) {
+  // Pass 2.5: Semantic search — Tier 2 fallback only when Tier 1 confidence is low
+  const tier1TopScore = merged.length > 0 ? merged[0]._relevanceScore : 0;
+  const tier1Confident = tier1TopScore >= TIER1_CONFIDENCE_THRESHOLD;
+
+  if (semanticResults.length > 0 && !tier1Confident) {
+    console.log(`🔀 Tier 2: Semantic fallback (Tier 1 top score: ${tier1TopScore})`);
     for (const sr of semanticResults) {
       if (!seen.has(sr.code)) {
         const course = allCourses.find((c) => c.code === sr.code);
@@ -809,6 +837,7 @@ function matchCoursesToCart(
             _relevanceScore: sr.similarity * 100,
             _matchedKeywords: ["semantic-match"],
             _semanticMatch: true,
+            _tier: 2,
           });
           seen.add(sr.code);
         }
@@ -820,6 +849,10 @@ function matchCoursesToCart(
         }
       }
     }
+  } else if (semanticResults.length > 0) {
+    console.log(
+      `✅ Tier 1: Deterministic match confident (top score: ${tier1TopScore}), skipping semantic`
+    );
   }
 
   // Sort by combined score
@@ -827,7 +860,7 @@ function matchCoursesToCart(
 
   const boosted = applyTagBoost(merged);
   if (boosted.length >= 3) {
-    return boosted.slice(0, 5);
+    return applyVersionFilter(boosted.slice(0, 5), userQuery);
   }
 
   // Pass 3: Broaden with diagnosis terms if still sparse
@@ -855,7 +888,7 @@ function matchCoursesToCart(
   merged.sort((a, b) => b._relevanceScore - a._relevanceScore);
   const boostedBroad = applyTagBoost(merged);
   if (boostedBroad.length >= 3) {
-    return boostedBroad.slice(0, 5);
+    return applyVersionFilter(boostedBroad.slice(0, 5), userQuery);
   }
 
   // Fallback: traditional tag graph scoring
@@ -869,5 +902,40 @@ function matchCoursesToCart(
     .sort((a, b) => b._relevanceScore - a._relevanceScore)
     .slice(0, 5);
 
-  return applyTagBoost(fallbackResults);
+  return applyVersionFilter(applyTagBoost(fallbackResults), userQuery);
+}
+
+/**
+ * Phase 8A: Version enforcement — adjust scores based on UE version intent.
+ * UE4 queries: demote courses with UE5-only tags (Lumen, Nanite, etc.)
+ * UE5 queries: boost courses with UE5-only tags
+ */
+function applyVersionFilter(courses, userQuery) {
+  const version = detectUEVersion(userQuery);
+  if (!version) return courses; // No version specified, no filtering
+
+  return courses
+    .map((course) => {
+      const allTags = [
+        ...(course.canonical_tags || []),
+        ...(course.gemini_system_tags || []),
+        ...(course.extracted_tags || []),
+      ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+
+      const hasUE5OnlyTag = allTags.some((t) =>
+        [...UE5_ONLY_TAGS].some((ue5) => t.includes(ue5.split(".").pop()))
+      );
+
+      if (version === 4 && hasUE5OnlyTag) {
+        // UE4 query but course has UE5-only tags → heavy demotion
+        console.log(`⬇️ UE4 demotion: ${course.code} (has UE5-only tags)`);
+        return { ...course, _relevanceScore: course._relevanceScore * 0.2 };
+      }
+      if (version === 5 && hasUE5OnlyTag) {
+        // UE5 query + UE5-only tags → boost
+        return { ...course, _relevanceScore: course._relevanceScore * 1.5 };
+      }
+      return course;
+    })
+    .sort((a, b) => b._relevanceScore - a._relevanceScore);
 }

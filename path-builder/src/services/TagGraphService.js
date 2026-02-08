@@ -22,6 +22,9 @@ class TagGraphService {
 
     // Build error signature index for fast matching
     this.errorSignatureIndex = this._buildErrorSignatureIndex();
+
+    // Phase 8A: Cache for getRelated() results to avoid redundant traversals
+    this._relatedCache = new Map();
   }
 
   /**
@@ -256,9 +259,13 @@ class TagGraphService {
       }
     }
 
-    // Check related tags (indirect relevance)
+    // Check related tags (indirect relevance) — Phase 8A: cached
     for (const tagId of targetTagIds) {
-      const related = this.getRelated(tagId, 0.6);
+      let related = this._relatedCache.get(tagId);
+      if (!related) {
+        related = this.getRelated(tagId, 0.6);
+        this._relatedCache.set(tagId, related);
+      }
       for (const rel of related) {
         const relTagId = rel.tag?.tag_id?.toLowerCase() || "";
         if (allCourseTags.some((ct) => ct.includes(relTagId.split(".").pop()))) {
@@ -269,6 +276,13 @@ class TagGraphService {
 
     // Normalize to 0-100
     return Math.min(100, score);
+  }
+
+  /**
+   * Clear the related-tag cache. Call between query batches.
+   */
+  clearRelatedCache() {
+    this._relatedCache.clear();
   }
 
   /**
