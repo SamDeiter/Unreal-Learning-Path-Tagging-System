@@ -1,6 +1,6 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { PlayCircle, Check, Plus, Clock, ExternalLink } from "lucide-react";
+import { PlayCircle, Check, Plus, Clock } from "lucide-react";
 import { recordUpvote, recordDownvote, getFeedbackStatus } from "../../services/feedbackService";
 import "./VideoResultCard.css";
 
@@ -26,7 +26,6 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
     matchedTags = [],
     driveId,
     topSegments = [],
-    docLinks = [],
     _curatedMatch,
   } = video;
 
@@ -90,24 +89,6 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
                     : seg.previewText}
                 </span>
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* Doc links */}
-        {docLinks.length > 0 && (
-          <div className="vrc-doc-links">
-            {docLinks.slice(0, 2).map((doc, idx) => (
-              <a
-                key={idx}
-                href={doc.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="vrc-doc-link"
-              >
-                <ExternalLink size={11} />
-                <span>{doc.label}</span>
-              </a>
             ))}
           </div>
         )}

@@ -435,11 +435,12 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
             <div className="course-list">
               {courses.slice(0, 5).map((course, i) => {
                 const objectives = learningObjectives[course.code] || [];
+                const videoTitle = course.videos?.[0]?.title || course.title || course.name;
                 return (
                   <div key={course.code || i} className="course-preview-item">
                     <span className="number">{i + 1}</span>
                     <div className="course-preview-details">
-                      <span className="title">{course.title || course.name}</span>
+                      <span className="title">{videoTitle}</span>
                       {objectives.length > 0 && (
                         <ul className="objective-list">
                           {objectives.slice(0, 2).map((obj, j) => (

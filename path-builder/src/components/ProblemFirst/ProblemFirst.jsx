@@ -111,9 +111,9 @@ function flattenCoursesToVideos(matchedCourses, userQuery) {
         titleScore + segmentData.score + introPenalty + (course._relevanceScore || 0);
       const totalScore = applyFeedbackMultiplier(v.drive_id, rawScore);
 
-      // Build timestamp hint from best segment match
+      // Build timestamp hint from best segment match (skip 0:00 — that's just the start)
       let watchHint = "▶ Watch full video";
-      if (segmentData.bestSegment) {
+      if (segmentData.bestSegment && segmentData.bestSegment.startSeconds > 5) {
         const ts = segmentData.bestSegment.timestamp;
         const preview = segmentData.bestSegment.previewText;
         const truncPreview = preview.length > 60 ? preview.substring(0, 57) + "..." : preview;
@@ -133,7 +133,7 @@ function flattenCoursesToVideos(matchedCourses, userQuery) {
         isIntro,
         timestampHint: segmentData.bestSegment?.timestamp || null,
         startSeconds: segmentData.bestSegment?.startSeconds || 0,
-        topSegments: segmentData.topSegments,
+        topSegments: (segmentData.topSegments || []).filter((s) => s.startSeconds > 5),
         watchHint,
         docLinks: matchedDocLinks,
         _curatedMatch: course._curatedMatch || false,
@@ -449,6 +449,37 @@ export default function ProblemFirst() {
                 </div>
               )}
             </div>
+
+            {/* Further Reading — deduplicated doc links from all results */}
+            {(() => {
+              const seen = new Set();
+              const allDocs = videoResults
+                .flatMap((v) => v.docLinks || [])
+                .filter((doc) => {
+                  if (seen.has(doc.url)) return false;
+                  seen.add(doc.url);
+                  return true;
+                });
+              if (allDocs.length === 0) return null;
+              return (
+                <div className="further-reading">
+                  <h3>📚 Further Reading</h3>
+                  <div className="further-reading-links">
+                    {allDocs.map((doc, idx) => (
+                      <a
+                        key={idx}
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="further-reading-link"
+                      >
+                        🔗 {doc.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Right: Sticky Cart */}
