@@ -136,16 +136,17 @@ function flattenCoursesToVideos(matchedCourses, userQuery) {
         titleScore + segmentData.score + introPenalty + (course._relevanceScore || 0);
       const totalScore = applyFeedbackMultiplier(v.drive_id, rawScore);
 
-      // Build timestamp hint from best segment match (skip 0:00 — that's just the start)
+      // Build timestamp hint from best segment match (BUG-3 fix: show all timestamps, not just >5s)
       let watchHint = "▶ Watch full video";
-      const jumpSegment =
-        (segmentData.topSegments || []).find((s) => s.startSeconds > 5) ||
-        (segmentData.bestSegment?.startSeconds > 5 ? segmentData.bestSegment : null);
+      const jumpSegment = (segmentData.topSegments || [])[0] || segmentData.bestSegment || null;
       if (jumpSegment) {
-        const ts = jumpSegment.timestamp;
+        const ts = jumpSegment.timestamp || "0:00";
         const preview = jumpSegment.previewText;
         const truncPreview = preview.length > 60 ? preview.substring(0, 57) + "..." : preview;
-        watchHint = `📍 Jump to ${ts} — "${truncPreview}"`;
+        watchHint =
+          jumpSegment.startSeconds < 5
+            ? `📍 Start of video — "${truncPreview}"`
+            : `📍 Jump to ${ts} — "${truncPreview}"`;
       }
 
       videos.push({
@@ -161,7 +162,7 @@ function flattenCoursesToVideos(matchedCourses, userQuery) {
         isIntro,
         timestampHint: segmentData.bestSegment?.timestamp || null,
         startSeconds: segmentData.bestSegment?.startSeconds || 0,
-        topSegments: (segmentData.topSegments || []).filter((s) => s.startSeconds > 5),
+        topSegments: segmentData.topSegments || [],
         watchHint,
         docLinks: matchedDocLinks,
         _curatedMatch: course._curatedMatch || false,

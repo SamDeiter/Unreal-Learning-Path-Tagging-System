@@ -385,8 +385,8 @@ export default function GuidedPlayer({
   // Generate challenge content
   const challengeContent = useMemo(() => {
     if (stage !== STAGES.CHALLENGE) return null;
-    return generateChallenge(currentCourse, problemSummary);
-  }, [stage, currentCourse, problemSummary]);
+    return generateChallenge(currentCourse, problemSummary, currentVideo?.title);
+  }, [stage, currentCourse, problemSummary, currentVideo]);
 
   // Handle path completion with progress tracking
   const handleFinish = useCallback(() => {

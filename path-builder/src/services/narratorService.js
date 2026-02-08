@@ -199,10 +199,11 @@ function formatDurationText(seconds) {
 function summarizeProblem(problemSummary) {
   if (!problemSummary) return "Learning Path";
 
-  // Take first 30 chars, end at word boundary
-  const truncated = problemSummary.slice(0, 40);
+  // Show full text if short, otherwise truncate at word boundary
+  if (problemSummary.length <= 80) return problemSummary;
+  const truncated = problemSummary.slice(0, 80);
   const lastSpace = truncated.lastIndexOf(" ");
-  return lastSpace > 20 ? truncated.slice(0, lastSpace) + "..." : truncated;
+  return (lastSpace > 30 ? truncated.slice(0, lastSpace) : truncated) + "…";
 }
 
 /**
@@ -259,15 +260,24 @@ export function generateProgressText(currentIndex, totalCount) {
  * @param {string} problemContext - the user's original problem summary
  * @returns {{ task: string, hint: string, difficulty: string }}
  */
-export function generateChallenge(course, problemContext) {
+export function generateChallenge(course, problemContext, videoTitle) {
   const outcome = course?.gemini_outcomes?.[0] || "";
-  const tags = course?.extracted_tags || course?.tags || [];
+  // Collect tags from ALL available sources (BUG-4 fix)
+  const tags = [
+    ...(course?.canonical_tags || []),
+    ...(course?.gemini_system_tags || []),
+    ...(course?.transcript_tags || []),
+    ...(course?.extracted_tags || []),
+    ...(Array.isArray(course?.tags) ? course.tags : []),
+  ];
   const tagNames = tags
-    .map((t) => (typeof t === "string" ? t : t.name || t.display_name || ""))
-    .filter(Boolean);
+    .map((t) => (typeof t === "string" ? t.split(".").pop() : t.name || t.display_name || ""))
+    .filter(Boolean)
+    .filter((v, i, a) => a.indexOf(v) === i); // unique
 
   // Find a tag that matches the user's problem context (case-insensitive partial match)
-  let primaryTag = tagNames[0] || "this concept";
+  let primaryTag =
+    tagNames[0] || (videoTitle ? videoTitle.split(/\s+/).slice(0, 3).join(" ") : "this concept");
   if (problemContext && tagNames.length > 0) {
     const contextLower = problemContext.toLowerCase();
     const relevantTag = tagNames.find((tag) => contextLower.includes(tag.toLowerCase()));
@@ -275,6 +285,7 @@ export function generateChallenge(course, problemContext) {
       primaryTag = relevantTag;
     }
   }
+  const lessonRef = videoTitle ? `"${videoTitle}"` : "this lesson";
   const skillLevel = course?.gemini_skill_level || "Intermediate";
 
   // Three challenge patterns — all focused on APPLYING the fix, not reproducing the problem
@@ -282,8 +293,8 @@ export function generateChallenge(course, problemContext) {
     {
       // Pattern 1: Apply the fix
       task: problemContext
-        ? `Open UE5 and apply what you just learned to fix "${problemContext}". Which ${primaryTag} settings were key to the solution?`
-        : `Open UE5 and set up ${primaryTag} from scratch. Try to get a working result using the approach from this lesson.`,
+        ? `Open UE5 and apply what you just learned from ${lessonRef} to fix "${problemContext}". Which ${primaryTag} settings were key to the solution?`
+        : `Open UE5 and set up ${primaryTag} from scratch using the approach from ${lessonRef}.`,
       hint: outcome
         ? `Focus on: ${outcome}`
         : `Look for ${primaryTag} settings in the Details panel or Project Settings.`,
