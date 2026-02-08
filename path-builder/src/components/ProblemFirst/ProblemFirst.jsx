@@ -114,9 +114,12 @@ function flattenCoursesToVideos(matchedCourses, userQuery) {
 
       // Build timestamp hint from best segment match (skip 0:00 — that's just the start)
       let watchHint = "▶ Watch full video";
-      if (segmentData.bestSegment && segmentData.bestSegment.startSeconds > 5) {
-        const ts = segmentData.bestSegment.timestamp;
-        const preview = segmentData.bestSegment.previewText;
+      const jumpSegment =
+        (segmentData.topSegments || []).find((s) => s.startSeconds > 5) ||
+        (segmentData.bestSegment?.startSeconds > 5 ? segmentData.bestSegment : null);
+      if (jumpSegment) {
+        const ts = jumpSegment.timestamp;
+        const preview = jumpSegment.previewText;
         const truncPreview = preview.length > 60 ? preview.substring(0, 57) + "..." : preview;
         watchHint = `📍 Jump to ${ts} — "${truncPreview}"`;
       }
