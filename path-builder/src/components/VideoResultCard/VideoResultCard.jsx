@@ -29,6 +29,8 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
     docLinks = [],
     watchHint,
     _curatedMatch,
+    role,
+    reason,
   } = video;
 
   const [feedbackState, setFeedbackState] = useState(() => getFeedbackStatus(driveId));
@@ -73,9 +75,20 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
 
       {_curatedMatch && <div className="vrc-curated-badge">✓ Known Solution</div>}
 
+      {/* Role badge from PathBuilder V2 */}
+      {role && (
+        <div className={`vrc-role-badge vrc-role-${role}`}>
+          {role === "prerequisite" && "🔗 Prerequisite"}
+          {role === "core" && "⭐ Core"}
+          {role === "troubleshooting" && "🔧 Troubleshooting"}
+          {role === "supplemental" && "📚 Supplemental"}
+        </div>
+      )}
+
       <div className="vrc-info">
         <h4 className="vrc-title">{title}</h4>
         {courseName && <p className="vrc-course">{courseName}</p>}
+        {reason && <p className="vrc-reason">{reason}</p>}
         {matchedTags.length > 0 && (
           <p className="vrc-tags">Covers: {matchedTags.slice(0, 3).join(", ")}</p>
         )}
@@ -170,6 +183,9 @@ VideoResultCard.propTypes = {
     topSegments: PropTypes.array,
     docLinks: PropTypes.array,
     _curatedMatch: PropTypes.bool,
+    role: PropTypes.oneOf(["prerequisite", "core", "troubleshooting", "supplemental"]),
+    reason: PropTypes.string,
+    estimatedMinutes: PropTypes.number,
   }).isRequired,
   isAdded: PropTypes.bool,
   onToggle: PropTypes.func.isRequired,

@@ -15,6 +15,7 @@ import { searchSegments } from "../../services/segmentSearchService";
 import { findSimilarCourses } from "../../services/semanticSearchService";
 import { applyFeedbackMultiplier } from "../../services/feedbackService";
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
+import { buildLearningPath } from "../../services/PathBuilder";
 import {
   trackQuerySubmitted,
   trackDiagnosisGenerated,
@@ -87,7 +88,7 @@ function detectUEVersion(query) {
  * Videos are ranked by how well their transcript content answers the query,
  * using real segment data from the pre-built segment index.
  */
-function flattenCoursesToVideos(matchedCourses, userQuery) {
+function flattenCoursesToVideos(matchedCourses, userQuery, roleMap = {}) {
   const videos = [];
   const queryWords = (userQuery || "")
     .toLowerCase()
@@ -149,6 +150,9 @@ function flattenCoursesToVideos(matchedCourses, userQuery) {
             : `📍 Jump to ${ts} — "${truncPreview}"`;
       }
 
+      // Attach PathBuilder role/reason if available
+      const pathInfo = roleMap[course.code] || {};
+
       videos.push({
         driveId: v.drive_id,
         title: cleanTitle,
@@ -167,6 +171,10 @@ function flattenCoursesToVideos(matchedCourses, userQuery) {
         docLinks: matchedDocLinks,
         _curatedMatch: course._curatedMatch || false,
         _curatedExplanation: course._curatedExplanation || null,
+        // PathBuilder V2 explainability
+        role: pathInfo.role || null,
+        reason: pathInfo.reason || null,
+        estimatedMinutes: pathInfo.estimatedMinutes || null,
       });
     }
   }
@@ -290,6 +298,7 @@ export default function ProblemFirst() {
   const [diagnosisData, setDiagnosisData] = useState(null);
   const [error, setError] = useState(null);
   const [videoResults, setVideoResults] = useState([]);
+  const [pathMetadata, setPathMetadata] = useState(null);
   const [searchHistory, setSearchHistory] = useState([]);
 
   // Video shopping cart (persisted in localStorage)
@@ -378,9 +387,31 @@ export default function ProblemFirst() {
         );
         cartData.matchedCourses = matchedCourses;
 
-        // Flatten to individual videos
-        const videos = flattenCoursesToVideos(matchedCourses, inputData.query);
+        // Build structured learning path (V2: roles, reasons, diversity)
+        const matchedTagIds = [
+          ...(cartData.diagnosis?.matched_tag_ids || []),
+          ...(inputData.detectedTagIds || []),
+          ...(inputData.selectedTagIds || []),
+        ];
+        const pathResult = buildLearningPath(matchedCourses, matchedTagIds, {
+          preferTroubleshooting: true,
+          diversity: true,
+        });
+
+        // Build a roleMap so flattenCoursesToVideos can attach role/reason
+        const roleMap = {};
+        for (const item of pathResult.path) {
+          roleMap[item.course.code] = {
+            role: item.role,
+            reason: item.reason,
+            estimatedMinutes: item.estimatedMinutes,
+          };
+        }
+
+        // Flatten to individual videos (now with PathBuilder metadata)
+        const videos = flattenCoursesToVideos(matchedCourses, inputData.query, roleMap);
         setVideoResults(videos);
+        setPathMetadata(pathResult.metadata);
         setDiagnosisData(cartData);
 
         // Track search history for multi-query support (dedup by query text)
@@ -509,6 +540,32 @@ export default function ProblemFirst() {
             )}
 
             {/* Video Results Grid */}
+            {/* Path Metadata Summary Bar */}
+            {pathMetadata && pathMetadata.itemCount > 0 && (
+              <div className="path-metadata-bar">
+                <div className="pm-stat">
+                  <span className="pm-icon">🕐</span>
+                  <span className="pm-value">~{pathMetadata.totalMinutes} min</span>
+                </div>
+                <div className="pm-stat">
+                  <span className="pm-icon">🏷️</span>
+                  <span className="pm-value">
+                    {Math.round(pathMetadata.tagCoverage * 100)}% tag coverage
+                  </span>
+                </div>
+                <div className="pm-stat">
+                  <span className="pm-icon">🎯</span>
+                  <span className="pm-value">
+                    {Math.round(pathMetadata.diversityScore * 100)}% diverse
+                  </span>
+                </div>
+                <div className="pm-stat">
+                  <span className="pm-icon">📚</span>
+                  <span className="pm-value">{pathMetadata.itemCount} courses</span>
+                </div>
+              </div>
+            )}
+
             <h2 className="results-title">🎬 Videos for You ({videoResults.length})</h2>
             <div className="video-results-grid">
               {videoResults.map((video) => (
