@@ -39,11 +39,11 @@ class TagGraphService {
 
     // V2: Edge-type weight configuration
     this.edgeWeights = {
-      subtopic: { forward: 0.7, reverse: 0.5 },
-      related: { forward: 0.3, reverse: 0.3 },
-      symptom_of: { forward: 0.6, reverse: 0.2 },
-      often_caused_by: { forward: 0.5, reverse: 0.3 },
-      replaces: { forward: 0.4, reverse: 0.1 },
+      subtopic: { forward: 0.8, reverse: 0.6 },
+      related: { forward: 0.5, reverse: 0.4 },
+      symptom_of: { forward: 0.7, reverse: 0.3 },
+      often_caused_by: { forward: 0.6, reverse: 0.4 },
+      replaces: { forward: 0.5, reverse: 0.15 },
     };
   }
 

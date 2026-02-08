@@ -43,6 +43,19 @@ const UE_ABBREVIATIONS = new Map([
   ["sequencer", "sequencer"],
   ["metahuman", "metahuman"],
   ["fab", "fab marketplace"],
+  ["eqs", "environment query system"],
+  ["abp", "animation blueprint"],
+  ["tsr", "temporal super resolution"],
+  ["pso", "pipeline state object"],
+  ["rpc", "remote procedure call"],
+  ["dlss", "deep learning super sampling"],
+  ["fsr", "fidelity super resolution"],
+  ["dmx", "lighting protocol"],
+  ["ecs", "entity component system"],
+  ["cas", "contrast adaptive sharpening"],
+  ["ssgi", "screen space global illumination"],
+  ["wpo", "world position offset"],
+  ["mrq", "movie render queue"],
 ]);
 
 // Words that should NOT be de-pluralized (safe-list exceptions)
