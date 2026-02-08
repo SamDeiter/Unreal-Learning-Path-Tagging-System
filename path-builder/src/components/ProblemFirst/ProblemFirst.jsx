@@ -342,11 +342,16 @@ export default function ProblemFirst() {
         setVideoResults(videos);
         setDiagnosisData(cartData);
 
-        // Track search history for multi-query support
-        setSearchHistory((prev) => [
-          { query: inputData.query, resultCount: videos.length },
-          ...prev,
-        ]);
+        // Track search history for multi-query support (dedup by query text)
+        setSearchHistory((prev) => {
+          const existing = prev.findIndex((e) => e.query === inputData.query);
+          if (existing >= 0) {
+            const updated = [...prev];
+            updated[existing] = { query: inputData.query, resultCount: videos.length };
+            return updated;
+          }
+          return [{ query: inputData.query, resultCount: videos.length }, ...prev];
+        });
 
         setStage(STAGES.DIAGNOSIS);
 
@@ -473,7 +478,6 @@ export default function ProblemFirst() {
                     onToggle={handleVideoToggle}
                     userQuery={searchHistory[searchHistory.length - 1]?.query || ""}
                   />
-                  <span className="watch-hint">{video.watchHint}</span>
                 </div>
               ))}
               {videoResults.length === 0 && (
@@ -482,37 +486,6 @@ export default function ProblemFirst() {
                 </div>
               )}
             </div>
-
-            {/* Further Reading — deduplicated doc links from all results */}
-            {(() => {
-              const seen = new Set();
-              const allDocs = videoResults
-                .flatMap((v) => v.docLinks || [])
-                .filter((doc) => {
-                  if (seen.has(doc.url)) return false;
-                  seen.add(doc.url);
-                  return true;
-                });
-              if (allDocs.length === 0) return null;
-              return (
-                <div className="further-reading">
-                  <h3>📚 Further Reading</h3>
-                  <div className="further-reading-links">
-                    {allDocs.map((doc, idx) => (
-                      <a
-                        key={idx}
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="further-reading-link"
-                      >
-                        🔗 {doc.label}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              );
-            })()}
           </div>
 
           {/* Right: Sticky Cart */}

@@ -26,6 +26,8 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
     matchedTags = [],
     driveId,
     topSegments = [],
+    docLinks = [],
+    watchHint,
     _curatedMatch,
   } = video;
 
@@ -91,6 +93,26 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
                     : seg.previewText}
                 </span>
               </div>
+            ))}
+          </div>
+        )}
+
+        {/* Watch hint — explains what to look for */}
+        {watchHint && <p className="vrc-watch-hint">{watchHint}</p>}
+
+        {/* Doc links — further reading */}
+        {docLinks.length > 0 && (
+          <div className="vrc-doc-links">
+            {docLinks.map((doc, idx) => (
+              <a
+                key={idx}
+                href={doc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="vrc-doc-link"
+              >
+                🔗 {doc.label}
+              </a>
             ))}
           </div>
         )}
