@@ -146,7 +146,22 @@ function flattenCoursesToVideos(matchedCourses, userQuery) {
   // Sort by relevance score — best answer to the question first
   videos.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-  return videos.slice(0, 10); // Cap at 10 results
+  // Systemic fix: filter out videos that don't meet a relevance threshold.
+  // This prevents mixed-content courses from surfacing irrelevant videos
+  // (e.g., "CPU Lightmass" showing up for a "Lumen reflections" query).
+  if (videos.length > 3) {
+    const scores = videos.map((v) => v.relevanceScore);
+    const median = scores[Math.floor(scores.length / 2)];
+    const threshold = Math.max(median * 0.5, 10); // At least 10 points or 50% of median
+
+    const filtered = videos.filter((v) => v.relevanceScore >= threshold);
+    // Keep at least 3 results even if filtering is aggressive
+    if (filtered.length >= 3) {
+      return filtered.slice(0, 6);
+    }
+  }
+
+  return videos.slice(0, 6); // Tighter cap: 6 max (was 10)
 }
 
 /**
