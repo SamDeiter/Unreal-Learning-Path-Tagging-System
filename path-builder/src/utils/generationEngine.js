@@ -3,39 +3,77 @@
  *
  * Generates specific, content-aware learning artifacts from
  * user intent and selected path courses.
+ *
+ * Phase 8C: Memoized generateId + taxonomy-weighted getPrimarySkill
  */
 
-// Stable ID generator (hashing string)
+import tagGraphService from "../services/TagGraphService";
+
+// Stable ID generator (hashing string) — Phase 8C: memoized
+const _idCache = new Map();
 const generateId = (str) => {
+  if (_idCache.has(str)) return _idCache.get(str);
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
-  return Math.abs(hash).toString(16);
+  const id = Math.abs(hash).toString(16);
+  _idCache.set(str, id);
+  return id;
 };
 
 /**
- * Get primary skill/topic from course based on tags
+ * Get primary skill/topic from course based on tags.
+ * Phase 8C: Uses TagGlobalWeight from tags.json to pick the most
+ * significant "root" skill instead of the longest string.
  */
+const _skillCache = new Map();
 const getPrimarySkill = (course) => {
-  // Handle both array and object tag formats
+  const cacheKey = course.code || course.title;
+  if (_skillCache.has(cacheKey)) return _skillCache.get(cacheKey);
+
+  // Collect all tag strings from the course
   let tags = course.extracted_tags || [];
   if (!Array.isArray(tags)) {
-    // If tags is not an array, try to extract from object or default to empty
     if (Array.isArray(course.tags)) {
       tags = course.tags;
     } else if (course.tags && typeof course.tags === "object") {
-      // Extract topic if available
       tags = [course.tags.topic, course.tags.level].filter(Boolean);
     } else {
       tags = [];
     }
   }
-  // Find most specific tag (longer = more specific)
-  const sorted = [...tags].filter((t) => typeof t === "string").sort((a, b) => b.length - a.length);
-  return sorted[0] || course.title?.split(" ")[0] || "UE5";
+  // Also include gemini_system_tags (high quality)
+  const geminiTags = Array.isArray(course.gemini_system_tags) ? course.gemini_system_tags : [];
+  const allTags = [...tags, ...geminiTags].filter((t) => typeof t === "string");
+
+  if (allTags.length === 0) {
+    const fallback = course.title?.split(" ")[0] || "UE5";
+    _skillCache.set(cacheKey, fallback);
+    return fallback;
+  }
+
+  // Rank by global_weight from tags.json (higher = more significant)
+  const ranked = allTags.map((tagStr) => {
+    const tagData = tagGraphService.getTag(tagStr);
+    const weight = tagData?.relevance?.global_weight || 0;
+    // Prefer root-level tags (fewer dots = higher in taxonomy)
+    const depth = (tagStr.match(/\./g) || []).length;
+    // Combined score: weight matters most, depth is tiebreaker
+    return { tag: tagStr, score: weight * 10 - depth };
+  });
+
+  ranked.sort((a, b) => b.score - a.score);
+
+  // Use display_name if available, otherwise the tag_id
+  const bestTag = ranked[0].tag;
+  const tagData = tagGraphService.getTag(bestTag);
+  const result = tagData?.display_name || bestTag.split(".").pop();
+
+  _skillCache.set(cacheKey, result);
+  return result;
 };
 
 /**
