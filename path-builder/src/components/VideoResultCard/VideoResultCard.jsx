@@ -69,6 +69,8 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
         {duration > 0 && <span className="vrc-duration">{formatDuration(duration)}</span>}
       </div>
 
+      {_curatedMatch && <div className="vrc-curated-badge">✓ Known Solution</div>}
+
       <div className="vrc-info">
         <h4 className="vrc-title">{title}</h4>
         {courseName && <p className="vrc-course">{courseName}</p>}
