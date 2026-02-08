@@ -258,7 +258,14 @@ function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywor
   );
 }
 
-export default function GuidedPlayer({ courses, diagnosis, problemSummary, onComplete, onExit }) {
+export default function GuidedPlayer({
+  courses,
+  diagnosis,
+  problemSummary,
+  pathSummary,
+  onComplete,
+  onExit,
+}) {
   const [stage, setStage] = useState(STAGES.INTRO);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [user, setUser] = useState(null);
@@ -432,6 +439,23 @@ export default function GuidedPlayer({ courses, diagnosis, problemSummary, onCom
           {/* Course Preview with Learning Objectives */}
           <div className="course-preview">
             <h3>📚 What You'll Learn</h3>
+
+            {/* AI-generated path summary */}
+            {pathSummary?.path_summary && (
+              <div className="path-summary-section">
+                <p className="path-summary-text">{pathSummary.path_summary}</p>
+                {pathSummary.topics_covered?.length > 0 && (
+                  <div className="topic-chips">
+                    {pathSummary.topics_covered.map((topic, i) => (
+                      <span key={i} className="topic-chip">
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="course-list">
               {courses.slice(0, 5).map((course, i) => {
                 const objectives = learningObjectives[course.code] || [];
@@ -672,6 +696,10 @@ GuidedPlayer.propTypes = {
   courses: PropTypes.array.isRequired,
   diagnosis: PropTypes.object,
   problemSummary: PropTypes.string,
+  pathSummary: PropTypes.shape({
+    path_summary: PropTypes.string,
+    topics_covered: PropTypes.arrayOf(PropTypes.string),
+  }),
   onComplete: PropTypes.func,
   onExit: PropTypes.func,
 };
@@ -679,6 +707,7 @@ GuidedPlayer.propTypes = {
 GuidedPlayer.defaultProps = {
   diagnosis: null,
   problemSummary: "",
+  pathSummary: null,
   onComplete: () => {},
   onExit: () => {},
 };
