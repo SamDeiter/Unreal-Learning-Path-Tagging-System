@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import { PlayCircle, Check, Plus, Clock } from "lucide-react";
+import { PlayCircle, Check, Plus, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { recordUpvote, recordDownvote, getFeedbackStatus } from "../../services/feedbackService";
 import "./VideoResultCard.css";
 
@@ -26,14 +26,25 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
     matchedTags = [],
     driveId,
     topSegments = [],
-    docLinks = [],
-    watchHint,
     _curatedMatch,
     role,
     reason,
   } = video;
 
   const [feedbackState, setFeedbackState] = useState(() => getFeedbackStatus(driveId));
+  const [segmentsOpen, setSegmentsOpen] = useState(false);
+  const [prereqTip, setPrereqTip] = useState(false);
+  const tipRef = useRef(null);
+
+  // Close tooltip on outside click
+  useEffect(() => {
+    if (!prereqTip) return;
+    const handler = (e) => {
+      if (tipRef.current && !tipRef.current.contains(e.target)) setPrereqTip(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [prereqTip]);
 
   const handleUpvote = (e) => {
     e.stopPropagation();
@@ -77,11 +88,30 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
 
       {/* Role badge from PathBuilder V2 */}
       {role && (
-        <div className={`vrc-role-badge vrc-role-${role}`}>
-          {role === "prerequisite" && "🔗 Prerequisite"}
-          {role === "core" && "⭐ Core"}
-          {role === "troubleshooting" && "🔧 Troubleshooting"}
-          {role === "supplemental" && "📚 Supplemental"}
+        <div className="vrc-role-wrapper" ref={role === "prerequisite" ? tipRef : null}>
+          <button
+            className={`vrc-role-badge vrc-role-${role} ${role === "prerequisite" ? "vrc-role-clickable" : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (role === "prerequisite") setPrereqTip((v) => !v);
+            }}
+            title={role === "prerequisite" ? "Click to see why this is a prerequisite" : undefined}
+          >
+            {role === "prerequisite" && "🔗 Prerequisite"}
+            {role === "core" && "⭐ Core"}
+            {role === "troubleshooting" && "🔧 Troubleshooting"}
+            {role === "supplemental" && "📚 Supplemental"}
+          </button>
+          {prereqTip && role === "prerequisite" && (
+            <div className="vrc-prereq-tooltip">
+              <strong>Prerequisite Course</strong>
+              <p>
+                Watch this first — it covers foundational concepts needed before advancing to more
+                complex topics in this area.
+              </p>
+              {reason && <p className="vrc-tip-reason">{reason}</p>}
+            </div>
+          )}
         </div>
       )}
 
@@ -93,42 +123,41 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
           <p className="vrc-tags">Covers: {matchedTags.slice(0, 3).join(", ")}</p>
         )}
 
-        {/* Timestamp segments — show WHERE in the video */}
+        {/* Timestamp segments — collapsed behind toggle */}
         {topSegments.length > 0 && (
-          <div className="vrc-segments">
-            {topSegments.slice(0, 2).map((seg, idx) => (
-              <div key={idx} className="vrc-segment-hint">
-                <Clock size={12} className="vrc-clock-icon" />
-                <span className="vrc-seg-time">{seg.timestamp}</span>
-                <span className="vrc-seg-preview">
-                  {seg.previewText.length > 55
-                    ? seg.previewText.substring(0, 52) + "..."
-                    : seg.previewText}
-                </span>
+          <div className="vrc-segments-wrapper">
+            <button
+              className="vrc-segments-toggle"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSegmentsOpen((v) => !v);
+              }}
+            >
+              <Clock size={11} />
+              <span>
+                {topSegments.length} timestamp{topSegments.length > 1 ? "s" : ""}
+              </span>
+              {segmentsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+            {segmentsOpen && (
+              <div className="vrc-segments">
+                {topSegments.slice(0, 2).map((seg, idx) => (
+                  <div key={idx} className="vrc-segment-hint">
+                    <Clock size={12} className="vrc-clock-icon" />
+                    <span className="vrc-seg-time">{seg.timestamp}</span>
+                    <span className="vrc-seg-preview">
+                      {seg.previewText.length > 55
+                        ? seg.previewText.substring(0, 52) + "..."
+                        : seg.previewText}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         )}
 
-        {/* Watch hint — explains what to look for */}
-        {watchHint && <p className="vrc-watch-hint">{watchHint}</p>}
-
-        {/* Doc links — further reading */}
-        {docLinks.length > 0 && (
-          <div className="vrc-doc-links">
-            {docLinks.map((doc, idx) => (
-              <a
-                key={idx}
-                href={doc.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="vrc-doc-link"
-              >
-                🔗 {doc.label}
-              </a>
-            ))}
-          </div>
-        )}
+        {/* watchHint and docLinks removed to reduce card noise */}
       </div>
 
       {/* Actions row: feedback + add/remove */}
