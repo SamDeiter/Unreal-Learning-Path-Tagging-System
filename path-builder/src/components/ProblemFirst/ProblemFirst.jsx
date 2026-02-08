@@ -174,13 +174,26 @@ function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
   const courseData = segmentIndex[courseCode];
   if (!courseData?.videos) return null;
 
-  const titleLower = (videoTitle || "").toLowerCase();
+  // Normalize: lowercase, strip .mp4, replace underscores with spaces
+  const normalize = (s) =>
+    (s || "")
+      .toLowerCase()
+      .replace(/\.mp4$/i, "")
+      .replace(/_/g, " ")
+      .trim();
+  const titleNorm = normalize(videoTitle);
   const keys = Object.keys(courseData.videos);
 
-  // Try to match by video title
+  // Try to match by video title (normalized)
   for (const key of keys) {
-    const vidTitle = (courseData.videos[key].title || "").toLowerCase();
-    if (titleLower.includes(vidTitle) || vidTitle.includes(titleLower.replace(/[^a-z0-9 ]/g, ""))) {
+    const vidTitle = normalize(courseData.videos[key].title || "");
+    const keyNorm = normalize(key);
+    if (
+      titleNorm.includes(vidTitle) ||
+      vidTitle.includes(titleNorm) ||
+      titleNorm.includes(keyNorm) ||
+      keyNorm.includes(titleNorm)
+    ) {
       return key;
     }
   }
