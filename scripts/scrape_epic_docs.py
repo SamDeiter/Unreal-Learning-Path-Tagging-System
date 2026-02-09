@@ -14,6 +14,7 @@ Usage:
     python scripts/scrape_epic_docs.py --resume          # Resume embedding
 """
 
+import hashlib
 import json
 import os
 import sys
@@ -459,6 +460,13 @@ def main():
                 break
             time.sleep(2)
 
+    # Compute source hash for freshness tracking
+    source_hash = "unknown"
+    if SCRAPED_DOCS.exists():
+        source_hash = hashlib.sha256(
+            open(SCRAPED_DOCS, "rb").read()
+        ).hexdigest()
+
     # Save output
     output = {
         "model": MODEL,
@@ -467,6 +475,7 @@ def main():
         "generated_at": datetime.now().isoformat(),
         "total_chunks": len(embeddings),
         "source": "dev.epicgames.com",
+        "source_hash": source_hash,
         "docs": embeddings,
     }
 

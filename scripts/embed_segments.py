@@ -11,6 +11,7 @@ Usage:
     python scripts/embed_segments.py --resume            # Resume from last checkpoint
 """
 
+import hashlib
 import json
 import os
 import sys
@@ -279,6 +280,11 @@ def main():
                 break
             time.sleep(2)  # backoff on error
 
+    # Compute source hash for freshness tracking
+    source_hash = hashlib.sha256(
+        open(SEGMENT_INDEX, "rb").read()
+    ).hexdigest()
+
     # Save output
     output = {
         "model": MODEL,
@@ -287,6 +293,7 @@ def main():
         "generated_at": datetime.now().isoformat(),
         "total_chunks": len(embeddings),
         "source": "segment_index.json",
+        "source_hash": source_hash,
         "segments": embeddings,
     }
 
