@@ -161,15 +161,22 @@ Fill this in as you test:
 | 3. MicroLesson UI | ✅ PASS | Purple badge, Quick Fix (4 steps), citations, all sections render |
 | 4. Accordion | ✅ PASS | Single-expand toggling, chevron updates, smooth transitions |
 | 5. Citations/Docs | ✅ PASS | Source chips (e.g. "Natural Lighting @ 13:37"), 3 doc links w/ scores |
-| 6. Varied Queries | 5/5 | Lumen ✅, Nanite ✅, Blueprint ✅, Level Streaming ✅, MetaHuman ✅ |
-| 7. Performance | ~20s | Includes embedding decode + 6 Gemini API calls + render |
+| 6. Varied Queries | 10/10 | All queries returned relevant MicroLessons (see below) |
+| 7. Performance | ~20s→~12s | Parallelized Steps 4-5.5 via Promise.allSettled |
 | 8. Mobile | ✅ PASS | Cards don't overflow, responsive layout verified |
 
-**Overall: 8 / 8 tests passed** (2026-02-09)
+**Overall: 8 / 8 tests passed** (2026-02-09, updated with 10/10 queries)
 
 Tested queries and Quick Fix titles:
-- "Lumen reflections flickering" → "Adjust Reflection Quality in Post Process Volume"
-- "Nanite mesh not rendering at distance" → "Adjust Nanite LOD Bias to Prevent Mesh Disappearance"
-- "Blueprint compilation error after reparenting" → "Compile the Blueprint after Changing Parent Class"
-- "Level streaming causing hitches" → "Use Blueprint-Driven Level Streaming"
-- "Metahuman face animation not working" → "Apply Existing Face Animation to Metahuman"
+
+1. "Lumen reflections flickering" → "Adjust Reflection Quality in Post Process Volume"
+2. "Nanite mesh not rendering at distance" → "Adjust Nanite LOD Bias to Prevent Mesh Disappearance"
+3. "Blueprint compilation error after reparenting" → "Compile the Blueprint after Changing Parent Class"
+4. "Level streaming causing hitches" → "Use Blueprint-Driven Level Streaming"
+5. "Metahuman face animation not working" → "Apply Existing Face Animation to Metahuman"
+6. "How to set up a cinematic camera" → "Add a Cine Camera Actor to Sequencer"
+7. "Material editor nodes not connecting" → "Create Valid Material Node Connections"
+8. "Multiplayer replication not syncing variables" → "Set a Variable to Replicate"
+9. "Landscape material layers blending wrong" → "Inspect Layer Blend Nodes and Weight Blending"
+10. "Sequencer animation not playing in game" → "Convert the Skeletal Mesh to Spawnable in Sequencer"
+
