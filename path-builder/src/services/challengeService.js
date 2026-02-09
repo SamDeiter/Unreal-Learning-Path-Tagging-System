@@ -28,31 +28,22 @@ export function generateChallenge(course, problemContext, videoTitle) {
     .filter((v, i, a) => a.indexOf(v) === i); // unique
 
   const skillLevel = course?.gemini_skill_level || "Intermediate";
+  const contextLower = (problemContext || "").toLowerCase();
 
-  // Try to match tags against the challenge registry (case-insensitive)
-  for (const tagName of tagNames) {
-    const key = tagName.toLowerCase();
-    const templates = challengeRegistry[key];
-    if (templates && templates.length > 0) {
-      const titleHash = (course?.title || "")
-        .split("")
-        .reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      const template = templates[titleHash % templates.length];
-      return {
-        task: template.task,
-        hint: template.hint,
-        expectedResult: template.expectedResult,
-        difficulty: skillLevel,
-      };
-    }
-  }
+  // Helper: pick a template deterministically from a list
+  const pickTemplate = (templates) => {
+    const titleHash = (course?.title || "").split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return templates[titleHash % templates.length];
+  };
 
-  // Also check problem context for registry matches
-  if (problemContext) {
-    const contextLower = problemContext.toLowerCase();
-    for (const [key, templates] of Object.entries(challengeRegistry)) {
+  // ── 1. Problem-context match (HIGHEST priority) ──
+  // The user's own words are the strongest signal for what challenge they need.
+  // Check longest keys first so "nanite" beats "nan", etc.
+  if (contextLower) {
+    const registryKeys = Object.keys(challengeRegistry).sort((a, b) => b.length - a.length);
+    for (const key of registryKeys) {
       if (contextLower.includes(key)) {
-        const template = templates[0];
+        const template = pickTemplate(challengeRegistry[key]);
         return {
           task: template.task,
           hint: template.hint,
@@ -60,6 +51,28 @@ export function generateChallenge(course, problemContext, videoTitle) {
           difficulty: skillLevel,
         };
       }
+    }
+  }
+
+  // ── 2. Course-tag match, prioritised by query overlap ──
+  // Sort tags so ones that appear in the user's query come first.
+  const sortedTagNames = [...tagNames].sort((a, b) => {
+    const aInQuery = contextLower.includes(a.toLowerCase()) ? 1 : 0;
+    const bInQuery = contextLower.includes(b.toLowerCase()) ? 1 : 0;
+    return bInQuery - aInQuery; // query-matching tags first
+  });
+
+  for (const tagName of sortedTagNames) {
+    const key = tagName.toLowerCase();
+    const templates = challengeRegistry[key];
+    if (templates && templates.length > 0) {
+      const template = pickTemplate(templates);
+      return {
+        task: template.task,
+        hint: template.hint,
+        expectedResult: template.expectedResult,
+        difficulty: skillLevel,
+      };
     }
   }
 

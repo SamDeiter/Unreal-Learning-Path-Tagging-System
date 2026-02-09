@@ -53,45 +53,15 @@ function Dashboard() {
     return levels;
   }, [courses]);
 
-  // Get top 100 tags for Tag Cloud — compute counts from course data
+  // Get top 100 tags for Tag Cloud — use pre-computed counts from App.jsx
   const tagCloud = useMemo(() => {
     if (!tags || tags.length === 0) return [];
 
-    // Build reverse lookup: tag_id, display_name, synonyms → tag index
-    const tagIndexMap = {};
-    tags.forEach((tag, idx) => {
-      if (tag.tag_id) tagIndexMap[tag.tag_id.toLowerCase()] = idx;
-      if (tag.display_name) tagIndexMap[tag.display_name.toLowerCase()] = idx;
-      (tag.synonyms || []).forEach((s) => {
-        tagIndexMap[s.toLowerCase()] = idx;
-      });
-    });
-
-    // Count courses per tag (dedup per course)
-    const counts = new Array(tags.length).fill(0);
-    courses.forEach((course) => {
-      const courseTags = [
-        ...(course.canonical_tags || []),
-        ...(course.extracted_tags || []),
-        ...(course.gemini_system_tags || []),
-      ];
-      const seen = new Set();
-      courseTags.forEach((t) => {
-        const name = (typeof t === "string" ? t : t.display_name || t.name || "").toLowerCase();
-        const idx = tagIndexMap[name];
-        if (idx !== undefined && !seen.has(idx)) {
-          counts[idx]++;
-          seen.add(idx);
-        }
-      });
-    });
-
-    return tags
-      .map((t, i) => ({ ...t, count: counts[i] }))
-      .filter((t) => t.count > 0)
-      .sort((a, b) => b.count - a.count)
+    return [...tags]
+      .filter((t) => (t.count || 0) > 0)
+      .sort((a, b) => (b.count || 0) - (a.count || 0))
       .slice(0, 100);
-  }, [tags, courses]);
+  }, [tags]);
 
   // Calculate industry distribution for recommendations
   const industryDistribution = useMemo(() => {
