@@ -17,6 +17,7 @@ import { useVideoCart } from "../../hooks/useVideoCart";
 import { matchCoursesToCart } from "../../domain/courseMatching";
 import { flattenCoursesToVideos } from "../../domain/videoRanking";
 import { findSimilarCourses } from "../../services/semanticSearchService";
+import { searchSegmentsSemantic } from "../../services/segmentSearchService";
 import { buildLearningPath } from "../../services/PathBuilder";
 import {
   trackQuerySubmitted,
@@ -67,7 +68,9 @@ export default function ProblemFirst() {
     try {
       const stored = localStorage.getItem("detected_persona");
       return stored ? JSON.parse(stored) : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }, []);
 
   const handleSubmit = useCallback(
@@ -76,46 +79,79 @@ export default function ProblemFirst() {
       setError(null);
 
       if (inputData.pastedImage) {
-        console.log("[ProblemFirst] Screenshot attached (base64 length):", inputData.pastedImage.length);
+        console.log(
+          "[ProblemFirst] Screenshot attached (base64 length):",
+          inputData.pastedImage.length
+        );
       }
       if (inputData.errorLog) {
         console.log("[ProblemFirst] Error log attached:", inputData.errorLog.slice(0, 200));
       }
 
       try {
-        await trackQuerySubmitted(inputData.query, inputData.detectedTagIds, getDetectedPersona()?.id);
+        await trackQuerySubmitted(
+          inputData.query,
+          inputData.detectedTagIds,
+          getDetectedPersona()?.id
+        );
 
         const app = getFirebaseApp();
         const functions = getFunctions(app, "us-central1");
-        const queryLearningPath = httpsCallable(functions, "queryLearningPath");
 
+        // Step 1: Get query embedding (used for both course + segment search)
+        let queryEmbedding = null;
+        let semanticResults = [];
+        let retrievedPassages = [];
+        try {
+          const embedQuery = httpsCallable(functions, "embedQuery");
+          const embedResult = await embedQuery({ query: inputData.query });
+          if (embedResult.data?.success && embedResult.data?.embedding) {
+            queryEmbedding = embedResult.data.embedding;
+            // Course-level semantic search (existing)
+            semanticResults = findSimilarCourses(queryEmbedding, 8, 0.35);
+            // Passage-level semantic search (RAG upgrade)
+            try {
+              const segResults = await searchSegmentsSemantic(queryEmbedding, 8, 0.35);
+              retrievedPassages = segResults.map((s) => ({
+                text: s.previewText,
+                courseCode: s.courseCode,
+                videoTitle: s.videoTitle,
+                timestamp: s.timestamp,
+                similarity: s.similarity,
+                source: "transcript",
+              }));
+              console.log(`[RAG] Retrieved ${retrievedPassages.length} transcript passages`);
+            } catch (segErr) {
+              console.warn("⚠️ Segment semantic search skipped:", segErr.message);
+            }
+          }
+        } catch (semanticErr) {
+          console.warn("⚠️ Semantic search skipped:", semanticErr.message);
+        }
+
+        // Step 2: Call Cloud Function with retrieved context
+        const queryLearningPath = httpsCallable(functions, "queryLearningPath");
         const result = await queryLearningPath({
           query: inputData.query,
           mode: "problem-first",
           detectedTagIds: inputData.detectedTagIds,
           personaHint: inputData.personaHint,
+          retrievedContext: retrievedPassages.slice(0, 5), // Top 5 passages
         });
 
         if (!result.data.success) throw new Error(result.data.message || "Failed to process query");
 
         const cartData = result.data.cart;
         cartData.userQuery = inputData.query;
-
-        // Semantic search (non-blocking enhancement)
-        let semanticResults = [];
-        try {
-          const embedQuery = httpsCallable(functions, "embedQuery");
-          const embedResult = await embedQuery({ query: inputData.query });
-          if (embedResult.data?.success && embedResult.data?.embedding) {
-            semanticResults = findSimilarCourses(embedResult.data.embedding, 8, 0.35);
-          }
-        } catch (semanticErr) {
-          console.warn("⚠️ Semantic search skipped:", semanticErr.message);
-        }
+        cartData.retrievedPassages = retrievedPassages; // Store for UI display
 
         // Match courses (extracted to domain/courseMatching.js)
         const matchedCourses = matchCoursesToCart(
-          cartData, courses, inputData.selectedTagIds || [], inputData.errorLog || "", semanticResults
+          cartData,
+          courses,
+          inputData.selectedTagIds || [],
+          inputData.errorLog || "",
+          semanticResults
         );
         cartData.matchedCourses = matchedCourses;
 
@@ -171,7 +207,11 @@ export default function ProblemFirst() {
 
         setStage(STAGES.DIAGNOSIS);
         await trackDiagnosisGenerated(cartData.diagnosis);
-        await trackLearningPathGenerated(cartData.objectives, matchedCourses, cartData.validation?.approved);
+        await trackLearningPathGenerated(
+          cartData.objectives,
+          matchedCourses,
+          cartData.validation?.approved
+        );
       } catch (err) {
         console.error("[ProblemFirst] Error:", err);
         setError(err.message || "An unexpected error occurred");
@@ -223,7 +263,9 @@ export default function ProblemFirst() {
           <div className="error-icon">⚠️</div>
           <h3>Something went wrong</h3>
           <p>{error}</p>
-          <button className="retry-btn" onClick={handleReset}>Try Again</button>
+          <button className="retry-btn" onClick={handleReset}>
+            Try Again
+          </button>
         </div>
       )}
 
@@ -231,8 +273,12 @@ export default function ProblemFirst() {
         <div className="shopping-layout">
           <div className="results-column">
             <div className="results-actions">
-              <button className="back-btn" onClick={handleReset}>← Start Over</button>
-              <button className="ask-again-btn" onClick={handleAskAgain}>+ Ask Another Question</button>
+              <button className="back-btn" onClick={handleReset}>
+                ← Start Over
+              </button>
+              <button className="ask-again-btn" onClick={handleAskAgain}>
+                + Ask Another Question
+              </button>
             </div>
 
             {diagnosisData.diagnosis?.problem_summary && (
@@ -260,11 +306,15 @@ export default function ProblemFirst() {
                 </div>
                 <div className="pm-stat">
                   <span className="pm-icon">🏷️</span>
-                  <span className="pm-value">{Math.round(pathMetadata.tagCoverage * 100)}% tag coverage</span>
+                  <span className="pm-value">
+                    {Math.round(pathMetadata.tagCoverage * 100)}% tag coverage
+                  </span>
                 </div>
                 <div className="pm-stat">
                   <span className="pm-icon">🎯</span>
-                  <span className="pm-value">{Math.round(pathMetadata.diversityScore * 100)}% diverse</span>
+                  <span className="pm-value">
+                    {Math.round(pathMetadata.diversityScore * 100)}% diverse
+                  </span>
                 </div>
                 <div className="pm-stat">
                   <span className="pm-icon">📚</span>
@@ -294,7 +344,12 @@ export default function ProblemFirst() {
           </div>
 
           <div className="cart-column">
-            <CartPanel cart={cart} onRemove={removeFromCart} onClear={clearCart} onWatchPath={handleWatchPath} />
+            <CartPanel
+              cart={cart}
+              onRemove={removeFromCart}
+              onClear={clearCart}
+              onWatchPath={handleWatchPath}
+            />
           </div>
         </div>
       )}
@@ -306,19 +361,26 @@ export default function ProblemFirst() {
             if (fullCourse) {
               return {
                 ...fullCourse,
-                videos: [{ drive_id: item.driveId, title: item.title, duration_seconds: item.duration }],
+                videos: [
+                  { drive_id: item.driveId, title: item.title, duration_seconds: item.duration },
+                ],
               };
             }
             return {
               code: item.courseCode,
               title: item.courseName,
-              videos: [{ drive_id: item.driveId, title: item.title, duration_seconds: item.duration }],
+              videos: [
+                { drive_id: item.driveId, title: item.title, duration_seconds: item.duration },
+              ],
             };
           })}
           diagnosis={diagnosisData?.diagnosis}
           problemSummary={diagnosisData?.diagnosis?.problem_summary}
           pathSummary={diagnosisData?.pathSummary}
-          onComplete={() => { clearCart(); setStage(STAGES.INPUT); }}
+          onComplete={() => {
+            clearCart();
+            setStage(STAGES.INPUT);
+          }}
           onExit={() => setStage(STAGES.DIAGNOSIS)}
         />
       )}
