@@ -10,6 +10,7 @@ import { useState, useCallback, useMemo } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { initializeApp, getApps } from "firebase/app";
 import ProblemInput from "./ProblemInput";
+import MicroLesson from "./MicroLesson";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import VideoResultCard from "../VideoResultCard/VideoResultCard";
 import CartPanel from "../CartPanel/CartPanel";
@@ -309,6 +310,12 @@ export default function ProblemFirst() {
                 <p className="tldr-text">{diagnosisData.diagnosis.problem_summary}</p>
               </div>
             )}
+
+            {/* RAG Micro-Lesson */}
+            <MicroLesson
+              microLesson={diagnosisData.microLesson}
+              retrievedPassages={diagnosisData.retrievedPassages}
+            />
 
             {searchHistory.length > 0 && (
               <div className="search-history">
