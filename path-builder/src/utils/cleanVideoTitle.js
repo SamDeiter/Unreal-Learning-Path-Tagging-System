@@ -7,14 +7,19 @@ export function cleanVideoTitle(raw) {
   let t = raw
     .replace(/\.mp4$/i, "") // strip .mp4
     .replace(/_/g, " ") // underscores → spaces
+    .replace(/^[A-Z]{2,5}\s+\d[\d.]*\s*/gi, "") // strip letter course codes (PGT 207.03, ANIM 101)
     .replace(/^\d+\.\d+\s*/g, "") // strip leading course code (100.10)
-    .replace(/^\d{1,3}\s+/g, "") // strip leading sequence number (08)
+    .replace(/^0*\d{1,3}\s+/g, "") // strip leading sequence number (08, 03)
+    .replace(/^(\w+)[ _]\1[ _]/i, "") // strip duplicated category prefix (Animation_Animation → "")
+    .replace(/^(?:and|or)\s+/i, "") // strip orphan conjunctions left after cleanup
     .replace(/\s+\d{1,3}\s*(NEW|FINAL|EDIT|EDITED|OLD|DRAFT|v\d+)?\s*$/gi, "") // strip trailing "53 NEW", "53", "NEW", etc.
     .replace(/\s+(NEW|FINAL|EDIT|EDITED|OLD|DRAFT|v\d+)\s*$/gi, "") // strip standalone trailing labels
     .replace(/([a-z])(\d{2})$/g, "$1") // strip version digits fused to word end (e.g., Assets55 → Assets)
     .replace(/([a-z])([A-Z])/g, "$1 $2") // camelCase → spaces
     .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2") // ABCDef → ABC Def
     .replace(/\s+(?:5[0-5]|4[0-9])$/g, "") // strip trailing UE version suffixes (49-55)
+    .replace(/[-]+\s*$/g, "") // strip trailing dashes/hyphens
+    .replace(/^\s*[-]+/g, "") // strip leading dashes/hyphens
     .replace(/\s{2,}/g, " ") // collapse double spaces
     .trim();
   return t || raw;
