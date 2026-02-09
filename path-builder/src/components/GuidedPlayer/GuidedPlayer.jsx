@@ -579,6 +579,11 @@ export default function GuidedPlayer({
             </span>
           </div>
           <p className="challenge-task">{challengeContent.task}</p>
+          {challengeContent.expectedResult && (
+            <div className="challenge-expected">
+              <span className="expected-label">👁️ What to look for:</span> {challengeContent.expectedResult}
+            </div>
+          )}
           <div className="challenge-hint">
             <span className="hint-label">💡 Hint:</span> {challengeContent.hint}
           </div>

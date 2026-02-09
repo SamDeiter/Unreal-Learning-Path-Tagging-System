@@ -57,29 +57,37 @@ function Dashboard() {
   const tagCloud = useMemo(() => {
     if (!tags || tags.length === 0) return [];
 
-    // Build counts by scanning every course's tags
-    const tagCounts = {};
+    // Build reverse lookup: tag_id, display_name, synonyms → tag index
+    const tagIndexMap = {};
+    tags.forEach((tag, idx) => {
+      if (tag.tag_id) tagIndexMap[tag.tag_id.toLowerCase()] = idx;
+      if (tag.display_name) tagIndexMap[tag.display_name.toLowerCase()] = idx;
+      (tag.synonyms || []).forEach((s) => {
+        tagIndexMap[s.toLowerCase()] = idx;
+      });
+    });
+
+    // Count courses per tag (dedup per course)
+    const counts = new Array(tags.length).fill(0);
     courses.forEach((course) => {
       const courseTags = [
         ...(course.canonical_tags || []),
         ...(course.extracted_tags || []),
         ...(course.gemini_system_tags || []),
       ];
+      const seen = new Set();
       courseTags.forEach((t) => {
-        const name =
-          typeof t === "string"
-            ? t.split(".").pop().toLowerCase()
-            : (t.display_name || t.name || "").toLowerCase();
-        if (name) tagCounts[name] = (tagCounts[name] || 0) + 1;
+        const name = (typeof t === "string" ? t : t.display_name || t.name || "").toLowerCase();
+        const idx = tagIndexMap[name];
+        if (idx !== undefined && !seen.has(idx)) {
+          counts[idx]++;
+          seen.add(idx);
+        }
       });
     });
 
-    // Enrich tags with computed counts, hide zero-count tags
     return tags
-      .map((t) => ({
-        ...t,
-        count: tagCounts[(t.display_name || "").toLowerCase()] || 0,
-      }))
+      .map((t, i) => ({ ...t, count: counts[i] }))
       .filter((t) => t.count > 0)
       .sort((a, b) => b.count - a.count)
       .slice(0, 100);
