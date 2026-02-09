@@ -159,7 +159,41 @@ function flattenCoursesToVideos(matchedCourses, userQuery, roleMap = {}) {
         duration: v.duration_seconds || 0,
         courseCode: course.code,
         courseName: course.title || course.code,
-        matchedTags: (course._matchedKeywords || []).slice(0, 3),
+        matchedTags: (() => {
+          // Filter out noise words that don't help the user understand why this matched
+          const DISPLAY_NOISE = new Set([
+            "help",
+            "helpful",
+            "helps",
+            "use",
+            "used",
+            "using",
+            "make",
+            "made",
+            "get",
+            "getting",
+            "look",
+            "going",
+            "come",
+            "know",
+            "thing",
+            "work",
+            "working",
+            "want",
+            "need",
+            "show",
+            "start",
+            "take",
+            "right",
+            "well",
+          ]);
+          const clean = (course._matchedKeywords || [])
+            .filter((kw) => kw.length > 3 && !DISPLAY_NOISE.has(kw.toLowerCase()))
+            .slice(0, 3);
+          return clean.length > 0
+            ? clean
+            : [course.topic || course.tags?.topic || "UE5"].flat().slice(0, 3);
+        })(),
         videoIndex: i,
         relevanceScore: totalScore,
         titleRelevance: titleMatches,
@@ -410,6 +444,21 @@ export default function ProblemFirst() {
 
         // Flatten to individual videos (now with PathBuilder metadata)
         const videos = flattenCoursesToVideos(matchedCourses, inputData.query, roleMap);
+
+        // No-results guard: show helpful message instead of empty results
+        if (videos.length === 0) {
+          setError(
+            "We couldn't find UE5 content matching your query. " +
+              "Try describing a specific Unreal Engine problem, for example:\n" +
+              '• "Blueprint compile error LNK2019"\n' +
+              '• "Lumen reflections flickering in indoor scene"\n' +
+              '• "Niagara particle system not spawning"\n' +
+              '• "UMG widget not rendering"'
+          );
+          setStage(STAGES.ERROR);
+          return;
+        }
+
         setVideoResults(videos);
         setPathMetadata(pathResult.metadata);
         setDiagnosisData(cartData);

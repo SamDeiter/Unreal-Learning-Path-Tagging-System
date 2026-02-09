@@ -53,11 +53,37 @@ function Dashboard() {
     return levels;
   }, [courses]);
 
-  // Get top 100 tags for Tag Cloud
+  // Get top 100 tags for Tag Cloud — compute counts from course data
   const tagCloud = useMemo(() => {
     if (!tags || tags.length === 0) return [];
-    return [...tags].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 100);
-  }, [tags]);
+
+    // Build counts by scanning every course's tags
+    const tagCounts = {};
+    courses.forEach((course) => {
+      const courseTags = [
+        ...(course.canonical_tags || []),
+        ...(course.extracted_tags || []),
+        ...(course.gemini_system_tags || []),
+      ];
+      courseTags.forEach((t) => {
+        const name =
+          typeof t === "string"
+            ? t.split(".").pop().toLowerCase()
+            : (t.display_name || t.name || "").toLowerCase();
+        if (name) tagCounts[name] = (tagCounts[name] || 0) + 1;
+      });
+    });
+
+    // Enrich tags with computed counts, hide zero-count tags
+    return tags
+      .map((t) => ({
+        ...t,
+        count: tagCounts[(t.display_name || "").toLowerCase()] || 0,
+      }))
+      .filter((t) => t.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 100);
+  }, [tags, courses]);
 
   // Calculate industry distribution for recommendations
   const industryDistribution = useMemo(() => {

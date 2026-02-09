@@ -8,6 +8,111 @@ import searchIndex from "../data/search_index.json";
 // Pre-built segment index (real timestamps from VTT transcripts)
 import segmentIndex from "../data/segment_index.json";
 
+// Common transcript words that appear in nearly every course and add no signal
+const SEARCH_STOPWORDS = new Set([
+  "the",
+  "and",
+  "for",
+  "with",
+  "this",
+  "that",
+  "are",
+  "was",
+  "has",
+  "have",
+  "not",
+  "can",
+  "into",
+  "from",
+  "how",
+  "you",
+  "your",
+  "will",
+  "would",
+  "also",
+  "just",
+  "like",
+  "more",
+  "very",
+  "some",
+  "want",
+  "need",
+  "make",
+  "use",
+  "used",
+  "using",
+  "help",
+  "helpful",
+  "helps",
+  "get",
+  "getting",
+  "let",
+  "look",
+  "going",
+  "come",
+  "here",
+  "there",
+  "know",
+  "thing",
+  "really",
+  "actually",
+  "basically",
+  "something",
+  "everything",
+  "slow",
+  "fast",
+  "leading",
+  "exhibiting",
+  "experiencing",
+  "causing",
+  "about",
+  "been",
+  "being",
+  "could",
+  "does",
+  "doing",
+  "done",
+  "each",
+  "even",
+  "every",
+  "first",
+  "give",
+  "good",
+  "great",
+  "kind",
+  "made",
+  "much",
+  "over",
+  "part",
+  "right",
+  "same",
+  "see",
+  "show",
+  "start",
+  "still",
+  "take",
+  "tell",
+  "than",
+  "them",
+  "then",
+  "these",
+  "they",
+  "those",
+  "through",
+  "time",
+  "took",
+  "turn",
+  "way",
+  "well",
+  "what",
+  "when",
+  "where",
+  "which",
+  "while",
+  "work",
+  "working",
+]);
+
 /**
  * Search for segments mentioning specific keywords
  * @param {string} query - Search query (e.g., "lumen flickering GI")
@@ -20,7 +125,7 @@ export function searchSegments(query, courses = []) {
   const keywords = query
     .toLowerCase()
     .split(/\s+/)
-    .filter((w) => w.length > 2);
+    .filter((w) => w.length > 2 && !SEARCH_STOPWORDS.has(w));
   if (keywords.length === 0) return [];
 
   const results = [];
@@ -37,18 +142,24 @@ export function searchSegments(query, courses = []) {
         score += wordFreq[keyword] * 10;
         matchedKeywords.push(keyword);
       }
-      // Check partial matches
-      for (const [word, count] of Object.entries(wordFreq)) {
-        if (word.includes(keyword) || keyword.includes(word)) {
-          score += count * 5;
-          if (!matchedKeywords.includes(word)) {
-            matchedKeywords.push(word);
+      // Check prefix/stem matches (must share 4+ char prefix)
+      if (keyword.length >= 4) {
+        for (const [word, count] of Object.entries(wordFreq)) {
+          if (
+            word !== keyword &&
+            word.length >= 4 &&
+            (word.startsWith(keyword) || keyword.startsWith(word))
+          ) {
+            score += count * 3;
+            if (!matchedKeywords.includes(word)) {
+              matchedKeywords.push(word);
+            }
           }
         }
       }
     }
 
-    if (score > 0 && matchedKeywords.length > 0) {
+    if (score >= 30 && matchedKeywords.length > 0) {
       // Find the course object if provided
       const course = courses.find((c) => c.code === courseCode);
 
