@@ -59,8 +59,7 @@ export default function ProblemFirst() {
   const [diagnosisData, setDiagnosisData] = useState(null);
   const [error, setError] = useState(null);
   const [videoResults, setVideoResults] = useState([]);
-  const [pathMetadata, setPathMetadata] = useState(null);
-  const [searchHistory, setSearchHistory] = useState([]);
+  const [expandedVideoId, setExpandedVideoId] = useState(null);
 
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
   const tagData = useTagData();
@@ -215,18 +214,9 @@ export default function ProblemFirst() {
         }
 
         setVideoResults(videos);
-        setPathMetadata(pathResult.metadata);
         setDiagnosisData(cartData);
-
-        setSearchHistory((prev) => {
-          const existing = prev.findIndex((e) => e.query === inputData.query);
-          if (existing >= 0) {
-            const updated = [...prev];
-            updated[existing] = { query: inputData.query, resultCount: videos.length };
-            return updated;
-          }
-          return [{ query: inputData.query, resultCount: videos.length }, ...prev];
-        });
+        // Auto-expand the first (most relevant) video card
+        if (videos.length > 0) setExpandedVideoId(videos[0].driveId);
 
         setStage(STAGES.DIAGNOSIS);
         await trackDiagnosisGenerated(cartData.diagnosis);
@@ -250,7 +240,7 @@ export default function ProblemFirst() {
     setStage(STAGES.INPUT);
     setDiagnosisData(null);
     setVideoResults([]);
-    setSearchHistory([]);
+    setExpandedVideoId(null);
     setError(null);
   }, []);
 
@@ -295,15 +285,6 @@ export default function ProblemFirst() {
       {stage === STAGES.DIAGNOSIS && diagnosisData && (
         <div className="shopping-layout">
           <div className="results-column">
-            <div className="results-actions">
-              <button className="back-btn" onClick={handleReset}>
-                ← Start Over
-              </button>
-              <button className="ask-again-btn" onClick={handleAskAgain}>
-                + Ask Another Question
-              </button>
-            </div>
-
             {diagnosisData.diagnosis?.problem_summary && (
               <div className="tldr-diagnosis">
                 <span className="tldr-icon">💡</span>
@@ -311,7 +292,7 @@ export default function ProblemFirst() {
               </div>
             )}
 
-            {/* 🎬 Videos for You — shown first per user preference */}
+            {/* 🎬 Videos for You */}
             <h2 className="results-title">🎬 Videos for You ({videoResults.length})</h2>
             <div className="video-results-grid">
               {videoResults.map((video) => (
@@ -320,7 +301,11 @@ export default function ProblemFirst() {
                     video={video}
                     isAdded={isInCart(video.driveId)}
                     onToggle={handleVideoToggle}
-                    userQuery={searchHistory[searchHistory.length - 1]?.query || ""}
+                    userQuery={diagnosisData?.userQuery || ""}
+                    isExpanded={expandedVideoId === video.driveId}
+                    onExpand={(id) => setExpandedVideoId(expandedVideoId === id ? null : id)}
+                    microLesson={diagnosisData.microLesson}
+                    retrievedPassages={diagnosisData.retrievedPassages}
                   />
                 </div>
               ))}
@@ -331,49 +316,15 @@ export default function ProblemFirst() {
               )}
             </div>
 
-            {/* RAG Micro-Lesson — interwoven with videos via citations */}
-            <MicroLesson
-              microLesson={diagnosisData.microLesson}
-              retrievedPassages={diagnosisData.retrievedPassages}
-              videoResults={videoResults}
-            />
-
-            {searchHistory.length > 0 && (
-              <div className="search-history">
-                {searchHistory.map((entry, idx) => (
-                  <span key={idx} className="search-tag">
-                    &quot;{entry.query}&quot; · {entry.resultCount} results
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {pathMetadata && pathMetadata.itemCount > 0 && (
-              <div className="path-metadata-bar">
-                <div className="pm-stat">
-                  <span className="pm-icon">🕐</span>
-                  <span className="pm-value">~{pathMetadata.totalMinutes} min</span>
-                </div>
-                <div className="pm-stat">
-                  <span className="pm-icon">🏷️</span>
-                  <span className="pm-value">
-                    {Math.round(pathMetadata.tagCoverage * 100)}% tag coverage
-                  </span>
-                </div>
-                <div className="pm-stat">
-                  <span className="pm-icon">🎯</span>
-                  <span className="pm-value">
-                    {Math.round(pathMetadata.diversityScore * 100)}% diverse
-                  </span>
-                </div>
-                <div className="pm-stat">
-                  <span className="pm-icon">📚</span>
-                  <span className="pm-value">{pathMetadata.itemCount} courses</span>
-                </div>
-              </div>
-            )}
-
-
+            {/* Bottom actions */}
+            <div className="results-actions-bottom">
+              <button className="back-btn" onClick={handleReset}>
+                ← Start Over
+              </button>
+              <button className="ask-again-btn" onClick={handleAskAgain}>
+                + Ask Another Question
+              </button>
+            </div>
           </div>
 
           <div className="cart-column">
