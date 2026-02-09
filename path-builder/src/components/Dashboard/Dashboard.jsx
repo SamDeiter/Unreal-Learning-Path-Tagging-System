@@ -10,6 +10,7 @@ function Dashboard() {
   const { courses, tags, edges } = useTagData();
   const [sortField, setSortField] = useState("code");
   const [sortDirection, setSortDirection] = useState("asc");
+  const [showMissingVideos, setShowMissingVideos] = useState(false);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -148,6 +149,10 @@ function Dashboard() {
       return aVal < bVal ? 1 : -1;
     });
   }, [courses, sortField, sortDirection]);
+
+  // Split courses by video availability
+  const coursesWithVideos = sortedCourses.filter((c) => (c.video_count || 0) > 0);
+  const coursesMissingVideos = sortedCourses.filter((c) => (c.video_count || 0) === 0);
 
   // Calculate max for chart scaling
   const maxTopicCount =
@@ -462,7 +467,7 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {sortedCourses.map((course, index) => (
+              {coursesWithVideos.map((course, index) => (
                 <tr key={course.id || course.code || index}>
                   <td className="code-cell">{course.code || "—"}</td>
                   <td className="title-cell">{course.title || course.name || "Untitled"}</td>
@@ -473,7 +478,7 @@ function Dashboard() {
                   </td>
                   <td>{course.tags?.topic || "General"}</td>
                   <td>{course.tags?.industry || "General"}</td>
-                  <td className="videos-cell">{course.video_count || 0}</td>
+                  <td className="videos-cell">{course.video_count}</td>
                   <td className="ai-cell">
                     {course.gemini_enriched ? <span className="ai-check">✓</span> : "—"}
                   </td>
@@ -481,6 +486,51 @@ function Dashboard() {
               ))}
             </tbody>
           </table>
+
+          {/* Missing Videos Section */}
+          {coursesMissingVideos.length > 0 && (
+            <div className="missing-videos-section">
+              <button
+                className="missing-videos-toggle"
+                onClick={() => setShowMissingVideos(!showMissingVideos)}
+              >
+                ⚠️ Missing Videos ({coursesMissingVideos.length} courses)
+                <span className="toggle-icon">{showMissingVideos ? "▲" : "▼"}</span>
+              </button>
+              {showMissingVideos && (
+                <table className="courses-table missing-videos-table">
+                  <thead>
+                    <tr>
+                      <th>CODE</th>
+                      <th>TITLE</th>
+                      <th>LEVEL</th>
+                      <th>TOPIC</th>
+                      <th>INDUSTRY</th>
+                      <th>AI</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {coursesMissingVideos.map((course, index) => (
+                      <tr key={course.id || course.code || index}>
+                        <td className="code-cell">{course.code || "—"}</td>
+                        <td className="title-cell">{course.title || course.name || "Untitled"}</td>
+                        <td>
+                          <span className={getLevelClass(course.tags?.level)}>
+                            {(course.tags?.level || "Intermediate").toUpperCase()}
+                          </span>
+                        </td>
+                        <td>{course.tags?.topic || "General"}</td>
+                        <td>{course.tags?.industry || "General"}</td>
+                        <td className="ai-cell">
+                          {course.gemini_enriched ? <span className="ai-check">✓</span> : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
