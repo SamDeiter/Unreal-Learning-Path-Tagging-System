@@ -1,697 +1,103 @@
 /**
- * GuidedPlayer - AI-narrated learning experience
- * Shows intro cards, plays videos in sequence, displays context bridges
- * Features: Challenge cards, reflection prompts, learning progress tracking
+ * GuidedPlayer - AI-narrated learning experience (thin view)
+ *
+ * State, effects, and handlers live in useGuidedPlayer hook.
+ * Stage-specific cards are extracted to sub-components.
  */
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
-import {
-  generatePathIntro,
-  generateBridgeText,
-  generateProgressText,
-  generateChallenge,
-} from "../../services/narratorService";
-import { signInWithGoogle, onAuthChange } from "../../services/googleAuthService";
+import useGuidedPlayer, { STAGES } from "../../hooks/useGuidedPlayer";
 import { getThumbnailUrl } from "../../utils/videoUtils";
-import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
-import { recordPathCompletion, getStreakInfo } from "../../services/learningProgressService";
-import transcriptSegments from "../../data/transcript_segments.json";
-import learningObjectives from "../../data/learning_objectives.json";
-import coursePrerequisites from "../../data/course_prerequisites.json";
-import quizData from "../../data/quiz_questions.json";
+import ChallengeCard from "./ChallengeCard";
+import BridgeCard from "./BridgeCard";
+import CompletionCard from "./CompletionCard";
+import CourseSidebar from "./CourseSidebar";
 import QuizCard from "./QuizCard";
+import TranscriptCards from "./TranscriptCards";
+import learningObjectives from "../../data/learning_objectives.json";
 import "./GuidedPlayer.css";
 
-// Player stages
-const STAGES = {
-  INTRO: "intro",
-  PLAYING: "playing",
-  QUIZ: "quiz",
-  CHALLENGE: "challenge",
-  BRIDGE: "bridge",
-  COMPLETE: "complete",
-};
-
-/**
- * TranscriptCards — Shows relevant transcript timestamps during video playback.
- * Matches segments by keyword relevance to the user's problem.
- */
-function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywords }) {
-  const cards = useMemo(() => {
-    if (!courseCode) return [];
-
-    // Find transcript data for this course
-    const courseTranscripts = transcriptSegments[courseCode];
-    if (!courseTranscripts) return [];
-
-    // Match video title to transcript key
-    // Video title may be cleaned ("Main Lighting Part A") or raw ("08_MainLightingPartA.mp4")
-    // Transcript keys are like "08_MainLightingPartA"
-    // Normalize both sides: lowercase, no spaces/underscores/numbers prefix
-    const normalize = (s) =>
-      (s || "")
-        .replace(/\.mp4$/i, "")
-        .replace(/^[\d._]+/, "") // strip leading numbers/dots/underscores
-        .replace(/[\s_]+/g, "") // strip all spaces and underscores
-        .toLowerCase();
-
-    const normalizedTitle = normalize(videoTitle);
-
-    // Try to find matching transcript key
-    let segments = null;
-    for (const [key, segs] of Object.entries(courseTranscripts)) {
-      if (normalize(key) === normalizedTitle) {
-        segments = segs;
-        break;
-      }
-    }
-
-    // Fallback: partial match
-    if (!segments) {
-      for (const [key, segs] of Object.entries(courseTranscripts)) {
-        const nk = normalize(key);
-        if (nk.includes(normalizedTitle) || normalizedTitle.includes(nk)) {
-          segments = segs;
-          break;
-        }
-      }
-    }
-
-    if (!segments || segments.length === 0) return [];
-
-    const STOPWORDS = new Set([
-      "with",
-      "that",
-      "this",
-      "from",
-      "have",
-      "will",
-      "been",
-      "when",
-      "what",
-      "which",
-      "their",
-      "there",
-      "about",
-      "would",
-      "could",
-      "should",
-      "these",
-      "those",
-      "into",
-      "also",
-      "just",
-      "than",
-      "then",
-      "them",
-      "they",
-      "your",
-      "some",
-      "very",
-      "more",
-      "does",
-      "here",
-      "want",
-      "make",
-      "like",
-      "know",
-      "need",
-    ]);
-    const keywords = [];
-    if (problemSummary) {
-      keywords.push(
-        ...problemSummary
-          .toLowerCase()
-          .split(/\s+/)
-          .filter((w) => w.length > 3 && !STOPWORDS.has(w))
-      );
-    }
-    if (matchedKeywords) {
-      keywords.push(
-        ...matchedKeywords.map((k) =>
-          (typeof k === "string" ? k : k.display_name || k.id || "").toLowerCase()
-        )
-      );
-    }
-
-    if (keywords.length === 0) {
-      // No keywords — show evenly spaced segments as chapter markers
-      const step = Math.max(1, Math.floor(segments.length / 3));
-      return segments
-        .filter((_, i) => i % step === 0)
-        .slice(0, 3)
-        .map((seg) => ({ ...seg, score: 0, isChapter: true }));
-    }
-
-    // Score each segment by keyword matches
-    const scored = segments.map((seg) => {
-      const text = seg.text.toLowerCase();
-      let score = 0;
-      const hits = [];
-      for (const kw of keywords) {
-        if (text.includes(kw)) {
-          score += 10;
-          if (!hits.includes(kw)) hits.push(kw);
-        }
-      }
-      return { ...seg, score, hits: [...new Set(hits)] };
-    });
-
-    // Return top 3 scoring segments (minimum 1 hit)
-    const relevant = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score);
-
-    if (relevant.length > 0) return relevant.slice(0, 3);
-
-    // Fallback: show evenly spaced segments
-    const step = Math.max(1, Math.floor(segments.length / 3));
-    return segments
-      .filter((_, i) => i % step === 0)
-      .slice(0, 3)
-      .map((seg) => ({ ...seg, score: 0, isChapter: true }));
-  }, [courseCode, videoTitle, problemSummary, matchedKeywords]);
-
-  /**
-   * Get the display label for a segment.
-   * Prefers Gemini-generated summary, falls back to keyword extraction.
-   */
-  const getTopicLabel = useCallback((seg) => {
-    // Use Gemini-generated summary if available
-    if (seg.summary) return seg.summary;
-
-    // Fallback: extract distinctive terms from transcript text
-    const text = seg.text || "";
-    const SKIP = new Set([
-      "gonna",
-      "going",
-      "really",
-      "actually",
-      "basically",
-      "right",
-      "thing",
-      "things",
-      "about",
-      "would",
-      "could",
-      "should",
-      "there",
-      "their",
-      "these",
-      "those",
-      "where",
-      "which",
-      "being",
-      "doing",
-      "using",
-      "other",
-      "first",
-      "second",
-      "third",
-      "after",
-      "before",
-      "every",
-      "still",
-      "again",
-      "already",
-      "engine",
-      "unreal",
-      "because",
-      "simply",
-      "called",
-      "allows",
-      "looking",
-      "provides",
-    ]);
-    const words = text
-      .replace(/[.,;:!?'"()]/g, "")
-      .split(/\s+/)
-      .filter((w) => w.length >= 5 && !SKIP.has(w.toLowerCase()))
-      .map((w) => w.toLowerCase());
-    const freq = {};
-    for (const w of words) freq[w] = (freq[w] || 0) + 1;
-    const topTerms = Object.entries(freq)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([w]) => w.charAt(0).toUpperCase() + w.slice(1));
-    return topTerms.length > 0 ? topTerms.join(", ") : "Overview";
-  }, []);
-
-  if (cards.length === 0) return null;
-
-  return (
-    <div className="video-info-cards">
-      <div className="info-card transcript-card">
-        <h4>
-          {cards[0]?.isChapter
-            ? "📋 Video Chapters"
-            : `🎯 Helps with: ${problemSummary || "your search"}`}
-        </h4>
-        <div className="timestamp-list">
-          {cards.map((seg, i) => (
-            <div key={i} className={`timestamp-item ${seg.score > 0 ? "relevant" : ""}`}>
-              <span className="timestamp-badge">{seg.start}</span>
-              <span className="timestamp-text">{getTopicLabel(seg)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function GuidedPlayer({
-  courses,
-  diagnosis,
-  problemSummary,
-  pathSummary,
-  onComplete,
-  onExit,
-}) {
-  const [stage, setStage] = useState(STAGES.INTRO);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [user, setUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [reflectionText, setReflectionText] = useState("");
-  const [videoIndex, setVideoIndex] = useState(0);
-
-  // Listen for auth state changes
-  useEffect(() => {
-    const unsubscribe = onAuthChange((currentUser) => {
-      setUser(currentUser);
-      setAuthLoading(false);
-    });
-    return unsubscribe;
-  }, []);
-
-  // Handle Google sign in
-  const handleSignIn = useCallback(async () => {
-    setAuthLoading(true);
-    const { error } = await signInWithGoogle();
-    if (error) {
-      console.error("[GuidedPlayer] Sign in failed:", error);
-    }
-    setAuthLoading(false);
-  }, []);
-
-  // Generate intro card content
-  const introContent = useMemo(() => {
-    return generatePathIntro({
-      problemSummary,
-      courses,
-      diagnosis,
-    });
-  }, [problemSummary, courses, diagnosis]);
-
-  // Current course and video
-  const currentCourse = courses[currentIndex] || null;
-  const nextCourse = courses[currentIndex + 1] || null;
-  const currentVideos = currentCourse?.videos || [];
-  const currentVideo = currentVideos[videoIndex] || currentVideos[0] || null;
-  const hasMoreVideos = videoIndex < currentVideos.length - 1;
-
-  // Streak info
-  const streak = useMemo(() => getStreakInfo(), []);
-
-  // Progress tracking — count total videos across all courses
-  const totalVideoCount = useMemo(() => {
-    return courses.reduce((sum, c) => sum + (c.videos?.length || 1), 0);
-  }, [courses]);
-  const videosWatchedSoFar = useMemo(() => {
-    let count = 0;
-    for (let i = 0; i < currentIndex; i++) {
-      count += courses[i]?.videos?.length || 1;
-    }
-    return count + videoIndex;
-  }, [courses, currentIndex, videoIndex]);
-  const progress = useMemo(() => {
-    return generateProgressText(videosWatchedSoFar, totalVideoCount);
-  }, [videosWatchedSoFar, totalVideoCount]);
-
-  // Handle starting video playback
-  const handleStartLearning = useCallback(() => {
-    setStage(STAGES.PLAYING);
-  }, []);
-
-  // Handle video completion — advance within course or go to quiz/challenge
-  const handleVideoComplete = useCallback(() => {
-    if (hasMoreVideos) {
-      setVideoIndex((prev) => prev + 1);
-    } else {
-      // Show quiz if questions exist for this course, otherwise skip to challenge
-      const courseQuiz = quizData[currentCourse?.code];
-      if (courseQuiz && Object.keys(courseQuiz).length > 0) {
-        setStage(STAGES.QUIZ);
-      } else {
-        setStage(STAGES.CHALLENGE);
-      }
-    }
-  }, [hasMoreVideos, currentCourse]);
-
-  // After quiz, proceed to challenge
-  const handleQuizComplete = useCallback(() => {
-    setStage(STAGES.CHALLENGE);
-  }, []);
-
-  // After challenge, proceed to BRIDGE or COMPLETE
-  const handleChallengeComplete = useCallback(() => {
-    if (nextCourse) {
-      setStage(STAGES.BRIDGE);
-    } else {
-      setStage(STAGES.COMPLETE);
-      onComplete?.();
-    }
-  }, [nextCourse, onComplete]);
-
-  // Handle moving to next course
-  const handleContinue = useCallback(() => {
-    setCurrentIndex((prev) => prev + 1);
-    setVideoIndex(0);
-    setStage(STAGES.PLAYING);
-  }, []);
-
-  // Skip to specific course
-  const handleSkipTo = useCallback((index) => {
-    setCurrentIndex(index);
-    setVideoIndex(0);
-    setStage(STAGES.PLAYING);
-  }, []);
-
-  // Generate bridge content
-  const bridgeContent = useMemo(() => {
-    if (stage !== STAGES.BRIDGE) return null;
-    const objective = currentCourse?.gemini_outcomes?.[0] || null;
-    return generateBridgeText(currentCourse, nextCourse, objective);
-  }, [stage, currentCourse, nextCourse]);
-
-  // Generate challenge content
-  const challengeContent = useMemo(() => {
-    if (stage !== STAGES.CHALLENGE) return null;
-    return generateChallenge(currentCourse, problemSummary, currentVideo?.title);
-  }, [stage, currentCourse, problemSummary, currentVideo]);
-
-  // Handle path completion with progress tracking
-  const handleFinish = useCallback(() => {
-    // Generate a simple path ID from the problem summary
-    const pathId = problemSummary
-      ? `path-${problemSummary.replace(/\s+/g, "-").toLowerCase().slice(0, 40)}-${Date.now()}`
-      : `path-${Date.now()}`;
-
-    recordPathCompletion(pathId, courses, reflectionText);
-    onExit?.();
-  }, [problemSummary, courses, reflectionText, onExit]);
-
-  // Reflection word count
-  const wordCount = reflectionText.trim().split(/\s+/).filter(Boolean).length;
+export default function GuidedPlayer(props) {
+  const gp = useGuidedPlayer(props);
 
   return (
     <div className="guided-player">
       {/* Progress Bar */}
       <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progress.percent}%` }} />
-        <span className="progress-text">{progress.text}</span>
+        <div className="progress-fill" style={{ width: `${gp.progress.percent}%` }} />
+        <span className="progress-text">{gp.progress.text}</span>
       </div>
 
       {/* Stage: Intro Card */}
-      {stage === STAGES.INTRO && (
-        <div className="intro-card">
-          <h2>{introContent.title}</h2>
-          <p className="intro-text">{introContent.intro}</p>
-
-          {/* Streak Badge */}
-          {streak.isActive && streak.count > 1 && (
-            <div className="streak-badge">🔥 {streak.count}-day learning streak!</div>
-          )}
-
-          {/* Instructor List */}
-          {introContent.instructors.length > 0 && (
-            <div className="instructor-list">
-              <h3>🎓 Your Instructors</h3>
-              {introContent.instructors.map((instructor, i) => (
-                <div key={i} className="instructor-item">
-                  <span className="name">{instructor.name}</span>
-                  <span className="courses">
-                    {instructor.courses.length} lesson{instructor.courses.length > 1 ? "s" : ""}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Course Preview with Learning Objectives */}
-          <div className="course-preview">
-            <h3>📚 What You'll Learn</h3>
-
-            {/* AI-generated path summary */}
-            {pathSummary?.path_summary && (
-              <div className="path-summary-section">
-                <p className="path-summary-text">{pathSummary.path_summary}</p>
-                {pathSummary.topics_covered?.length > 0 && (
-                  <div className="topic-chips">
-                    {pathSummary.topics_covered.map((topic, i) => (
-                      <span key={i} className="topic-chip">
-                        {topic}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="course-list">
-              {courses.slice(0, 5).map((course, i) => {
-                const objectives = learningObjectives[course.code] || [];
-                const videoTitle = course.videos?.[0]?.title || course.title || course.name;
-                return (
-                  <div key={course.code || i} className="course-preview-item">
-                    <span className="number">{i + 1}</span>
-                    <div className="course-preview-details">
-                      <span className="title">{videoTitle}</span>
-                      {objectives.length > 0 && (
-                        <ul className="objective-list">
-                          {objectives.slice(0, 2).map((obj, j) => (
-                            <li key={j}>{obj}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-              {courses.length > 5 && <div className="more-courses">+{courses.length - 5} more</div>}
-            </div>
-          </div>
-
-          {/* Auth Status & Start */}
-          <div className="auth-section">
-            {authLoading ? (
-              <p className="auth-loading">Checking sign-in status...</p>
-            ) : user ? (
-              <div className="auth-signed-in">
-                <span className="user-email">✓ Signed in as {user.email}</span>
-                <button className="start-btn" onClick={handleStartLearning}>
-                  ▶ Start Learning
-                </button>
-              </div>
-            ) : (
-              <div className="auth-prompt">
-                <p className="signin-note">Sign in with Google to watch videos from Google Drive</p>
-                <button className="signin-btn" onClick={handleSignIn}>
-                  🔐 Sign in with Google
-                </button>
-                <button className="start-btn secondary" onClick={handleStartLearning}>
-                  Skip sign-in (videos may not load)
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Stage: Video Playing */}
-      {stage === STAGES.PLAYING && currentCourse && (
-        <div className="video-stage">
-          <div className="video-header">
-            <h3>{currentCourse.title || currentCourse.name}</h3>
-            {currentVideos.length > 1 && (
-              <span className="video-counter">
-                Video {videoIndex + 1} of {currentVideos.length}
-              </span>
-            )}
-            {currentCourse.gemini_outcomes?.[0] && (
-              <p className="objective">{currentCourse.gemini_outcomes[0]}</p>
-            )}
-          </div>
-
-          {/* Video Embed */}
-          <div className="video-container">
-            {currentVideo?.drive_id ? (
-              <iframe
-                key={currentVideo.drive_id}
-                src={`https://drive.google.com/file/d/${currentVideo.drive_id}/preview`}
-                title={currentVideo.title || currentCourse.title}
-                allow="autoplay"
-                allowFullScreen
-              />
-            ) : (
-              <div className="video-placeholder">
-                <img src={getThumbnailUrl(currentVideo)} alt={currentCourse.title} />
-                <div className="play-overlay">▶</div>
-              </div>
-            )}
-          </div>
-
-          {/* Transcript-powered info cards */}
-          <TranscriptCards
-            courseCode={currentCourse.code}
-            videoTitle={currentVideo?.title || currentVideo?.name || ""}
-            problemSummary={problemSummary}
-            matchedKeywords={currentCourse._matchedKeywords}
-          />
-
-          <div className="video-controls">
-            <button className="complete-btn" onClick={handleVideoComplete}>
-              {hasMoreVideos ? "Next Video →" : "✓ Mark Complete & Continue"}
-            </button>
-            <button className="exit-btn" onClick={onExit}>
-              Exit Path
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Stage: Quiz */}
-      {stage === STAGES.QUIZ && (
-        <QuizCard
-          courseCode={currentCourse?.code}
-          videoKey={currentVideo?.title || currentVideo?.name || ""}
-          onComplete={handleQuizComplete}
-          onSkip={handleQuizComplete}
+      {gp.stage === STAGES.INTRO && (
+        <IntroCard
+          introContent={gp.introContent}
+          streak={gp.streak}
+          courses={gp.courses}
+          pathSummary={gp.pathSummary}
+          user={gp.user}
+          authLoading={gp.authLoading}
+          onSignIn={gp.handleSignIn}
+          onStart={gp.handleStartLearning}
         />
       )}
 
-      {/* Stage: Challenge Card */}
-      {stage === STAGES.CHALLENGE && challengeContent && (
-        <div className="challenge-card">
-          <div className="challenge-icon">🔨</div>
-          <h3>Try It Yourself</h3>
-          <div className="challenge-difficulty">
-            <span className={`difficulty-badge ${challengeContent.difficulty.toLowerCase()}`}>
-              {challengeContent.difficulty}
-            </span>
-          </div>
-          <p className="challenge-task">{challengeContent.task}</p>
-          {challengeContent.expectedResult && (
-            <div className="challenge-expected">
-              <span className="expected-label">👁️ What to look for:</span> {challengeContent.expectedResult}
-            </div>
-          )}
-          <div className="challenge-hint">
-            <span className="hint-label">💡 Hint:</span> {challengeContent.hint}
-          </div>
-          <button className="challenge-done-btn" onClick={handleChallengeComplete}>
-            I tried it →
-          </button>
-          <button className="challenge-skip-btn" onClick={handleChallengeComplete}>
-            Skip challenge
-          </button>
-        </div>
+      {/* Stage: Video Playing */}
+      {gp.stage === STAGES.PLAYING && gp.currentCourse && (
+        <VideoStage
+          course={gp.currentCourse}
+          currentVideos={gp.currentVideos}
+          currentVideo={gp.currentVideo}
+          videoIndex={gp.videoIndex}
+          hasMoreVideos={gp.hasMoreVideos}
+          problemSummary={props.problemSummary}
+          onVideoComplete={gp.handleVideoComplete}
+          onExit={gp.onExit}
+        />
       )}
 
-      {/* Stage: Bridge Card */}
-      {stage === STAGES.BRIDGE && bridgeContent && (
-        <div className={`bridge-card ${bridgeContent.type}`}>
-          <div className="bridge-icon">{bridgeContent.type === "transition" ? "🔄" : "➡️"}</div>
-          <h3>{bridgeContent.text}</h3>
-          {bridgeContent.subtext && <p className="subtext">{bridgeContent.subtext}</p>}
-          <button className="continue-btn" onClick={handleContinue}>
-            Continue →
-          </button>
-        </div>
+      {/* Stage: Quiz */}
+      {gp.stage === STAGES.QUIZ && (
+        <QuizCard
+          courseCode={gp.currentCourse?.code}
+          videoKey={gp.currentVideo?.title || gp.currentVideo?.name || ""}
+          onComplete={gp.handleQuizComplete}
+          onSkip={gp.handleQuizComplete}
+        />
+      )}
+
+      {/* Stage: Challenge */}
+      {gp.stage === STAGES.CHALLENGE && gp.challengeContent && (
+        <ChallengeCard
+          challengeContent={gp.challengeContent}
+          onComplete={gp.handleChallengeComplete}
+        />
+      )}
+
+      {/* Stage: Bridge */}
+      {gp.stage === STAGES.BRIDGE && gp.bridgeContent && (
+        <BridgeCard bridgeContent={gp.bridgeContent} onContinue={gp.handleContinue} />
       )}
 
       {/* Stage: Complete */}
-      {stage === STAGES.COMPLETE && (
-        <div className="complete-card">
-          <div className="complete-icon">🎉</div>
-          <h2>Path Complete!</h2>
-          <p>You've learned the skills to solve this problem and similar ones in the future.</p>
-          <div className="stats">
-            <div className="stat">
-              <span className="value">{courses.length}</span>
-              <span className="label">Lessons</span>
-            </div>
-            <div className="stat">
-              <span className="value">{introContent.totalDuration || "—"}</span>
-              <span className="label">Total Time</span>
-            </div>
-          </div>
-
-          {/* Reflection Prompt */}
-          <div className="reflection-area">
-            <h3>📝 What was your main takeaway?</h3>
-            <p className="reflection-subtitle">
-              Writing your reflection helps cement what you learned.
-            </p>
-            <textarea
-              className="reflection-input"
-              placeholder="I learned that..."
-              value={reflectionText}
-              onChange={(e) => setReflectionText(e.target.value)}
-              rows={4}
-            />
-            <div className="reflection-meta">
-              {wordCount === 0 && <span className="word-hint">Try writing a few sentences</span>}
-              {wordCount > 0 && wordCount < 10 && (
-                <span className="word-hint">{wordCount} words — keep going!</span>
-              )}
-              {wordCount >= 10 && <span className="word-hint done">Great reflection! ✓</span>}
-            </div>
-          </div>
-
-          <button className="finish-btn" onClick={handleFinish}>
-            {reflectionText.trim() ? "Save & Finish" : "Back to Problems"}
-          </button>
-        </div>
+      {gp.stage === STAGES.COMPLETE && (
+        <CompletionCard
+          courses={gp.courses}
+          totalDuration={gp.introContent.totalDuration}
+          reflectionText={gp.reflectionText}
+          onReflectionChange={gp.setReflectionText}
+          wordCount={gp.wordCount}
+          onFinish={gp.handleFinish}
+        />
       )}
 
-      {/* Side Panel: Course List (hidden during intro — shown inside intro card) */}
-      {stage !== STAGES.INTRO && (
-        <div className="course-sidebar">
-          <h4>Your Path</h4>
-          <div className="sidebar-courses">
-            {courses.map((course, i) => {
-              const prereqData = coursePrerequisites[course.code];
-              const pathCodes = courses.map((c) => c.code);
-              const missingPrereqs =
-                prereqData?.prerequisites?.filter((p) => !pathCodes.includes(p)) || [];
-              return (
-                <button
-                  key={course.code || i}
-                  className={`sidebar-course ${i === currentIndex ? "active" : ""} ${i < currentIndex ? "completed" : ""}`}
-                  onClick={() => handleSkipTo(i)}
-                  title={cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
-                >
-                  <span className="index">{i < currentIndex ? "✓" : i + 1}</span>
-                  <span className="title">
-                    {cleanVideoTitle(course.videos?.[0]?.title || course.title || course.name)}
-                  </span>
-                  {prereqData?.difficulty && (
-                    <span className={`difficulty-tag ${prereqData.difficulty}`}>
-                      {prereqData.difficulty}
-                    </span>
-                  )}
-                  {missingPrereqs.length > 0 && (
-                    <span
-                      className="prereq-warning"
-                      title={`Recommended: ${missingPrereqs.join(", ")} first`}
-                    >
-                      ⚠️
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+      {/* Side panel (hidden during intro) */}
+      {gp.stage !== STAGES.INTRO && (
+        <CourseSidebar
+          courses={gp.courses}
+          currentIndex={gp.currentIndex}
+          onSkipTo={gp.handleSkipTo}
+        />
       )}
     </div>
   );
@@ -716,3 +122,137 @@ GuidedPlayer.defaultProps = {
   onComplete: () => {},
   onExit: () => {},
 };
+
+// ─── Inline sub-components (tightly coupled to this view) ───
+
+/** IntroCard — welcome screen with instructor list and course preview */
+function IntroCard({ introContent, streak, courses, pathSummary, user, authLoading, onSignIn, onStart }) {
+  return (
+    <div className="intro-card">
+      <h2>{introContent.title}</h2>
+      <p className="intro-text">{introContent.intro}</p>
+
+      {streak.isActive && streak.count > 1 && (
+        <div className="streak-badge">🔥 {streak.count}-day learning streak!</div>
+      )}
+
+      {introContent.instructors.length > 0 && (
+        <div className="instructor-list">
+          <h3>🎓 Your Instructors</h3>
+          {introContent.instructors.map((instructor, i) => (
+            <div key={i} className="instructor-item">
+              <span className="name">{instructor.name}</span>
+              <span className="courses">
+                {instructor.courses.length} lesson{instructor.courses.length > 1 ? "s" : ""}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="course-preview">
+        <h3>📚 What You&#39;ll Learn</h3>
+        {pathSummary?.path_summary && (
+          <div className="path-summary-section">
+            <p className="path-summary-text">{pathSummary.path_summary}</p>
+            {pathSummary.topics_covered?.length > 0 && (
+              <div className="topic-chips">
+                {pathSummary.topics_covered.map((topic, i) => (
+                  <span key={i} className="topic-chip">{topic}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="course-list">
+          {courses.slice(0, 5).map((course, i) => {
+            const objectives = learningObjectives[course.code] || [];
+            const videoTitle = course.videos?.[0]?.title || course.title || course.name;
+            return (
+              <div key={course.code || i} className="course-preview-item">
+                <span className="number">{i + 1}</span>
+                <div className="course-preview-details">
+                  <span className="title">{videoTitle}</span>
+                  {objectives.length > 0 && (
+                    <ul className="objective-list">
+                      {objectives.slice(0, 2).map((obj, j) => (
+                        <li key={j}>{obj}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {courses.length > 5 && <div className="more-courses">+{courses.length - 5} more</div>}
+        </div>
+      </div>
+
+      <div className="auth-section">
+        {authLoading ? (
+          <p className="auth-loading">Checking sign-in status...</p>
+        ) : user ? (
+          <div className="auth-signed-in">
+            <span className="user-email">✓ Signed in as {user.email}</span>
+            <button className="start-btn" onClick={onStart}>▶ Start Learning</button>
+          </div>
+        ) : (
+          <div className="auth-prompt">
+            <p className="signin-note">Sign in with Google to watch videos from Google Drive</p>
+            <button className="signin-btn" onClick={onSignIn}>🔐 Sign in with Google</button>
+            <button className="start-btn secondary" onClick={onStart}>
+              Skip sign-in (videos may not load)
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** VideoStage — video player with transcript cards and controls */
+function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, problemSummary, onVideoComplete, onExit }) {
+  return (
+    <div className="video-stage">
+      <div className="video-header">
+        <h3>{course.title || course.name}</h3>
+        {currentVideos.length > 1 && (
+          <span className="video-counter">
+            Video {videoIndex + 1} of {currentVideos.length}
+          </span>
+        )}
+        {course.gemini_outcomes?.[0] && (
+          <p className="objective">{course.gemini_outcomes[0]}</p>
+        )}
+      </div>
+      <div className="video-container">
+        {currentVideo?.drive_id ? (
+          <iframe
+            key={currentVideo.drive_id}
+            src={`https://drive.google.com/file/d/${currentVideo.drive_id}/preview`}
+            title={currentVideo.title || course.title}
+            allow="autoplay"
+            allowFullScreen
+          />
+        ) : (
+          <div className="video-placeholder">
+            <img src={getThumbnailUrl(currentVideo)} alt={course.title} />
+            <div className="play-overlay">▶</div>
+          </div>
+        )}
+      </div>
+      <TranscriptCards
+        courseCode={course.code}
+        videoTitle={currentVideo?.title || currentVideo?.name || ""}
+        problemSummary={problemSummary}
+        matchedKeywords={course._matchedKeywords}
+      />
+      <div className="video-controls">
+        <button className="complete-btn" onClick={onVideoComplete}>
+          {hasMoreVideos ? "Next Video →" : "✓ Mark Complete & Continue"}
+        </button>
+        <button className="exit-btn" onClick={onExit}>Exit Path</button>
+      </div>
+    </div>
+  );
+}
