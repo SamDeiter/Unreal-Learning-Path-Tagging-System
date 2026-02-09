@@ -18,6 +18,7 @@ import { matchCoursesToCart } from "../../domain/courseMatching";
 import { flattenCoursesToVideos } from "../../domain/videoRanking";
 import { findSimilarCourses } from "../../services/semanticSearchService";
 import { searchSegmentsSemantic } from "../../services/segmentSearchService";
+import { searchDocsSemantic } from "../../services/docsSearchService";
 import { buildLearningPath } from "../../services/PathBuilder";
 import {
   trackQuerySubmitted,
@@ -111,8 +112,9 @@ export default function ProblemFirst() {
             semanticResults = findSimilarCourses(queryEmbedding, 8, 0.35);
             // Passage-level semantic search (RAG upgrade)
             try {
-              const segResults = await searchSegmentsSemantic(queryEmbedding, 8, 0.35);
-              retrievedPassages = segResults.map((s) => ({
+              // Search transcripts
+              const segResults = await searchSegmentsSemantic(queryEmbedding, 6, 0.35);
+              const segPassages = segResults.map((s) => ({
                 text: s.previewText,
                 courseCode: s.courseCode,
                 videoTitle: s.videoTitle,
@@ -120,7 +122,27 @@ export default function ProblemFirst() {
                 similarity: s.similarity,
                 source: "transcript",
               }));
-              console.log(`[RAG] Retrieved ${retrievedPassages.length} transcript passages`);
+
+              // Search Epic docs
+              let docPassages = [];
+              try {
+                const docResults = await searchDocsSemantic(queryEmbedding, 3, 0.35);
+                docPassages = docResults.map((d) => ({
+                  text: d.previewText,
+                  url: d.url,
+                  title: d.title,
+                  section: d.section,
+                  similarity: d.similarity,
+                  source: "epic_docs",
+                }));
+              } catch (docErr) {
+                console.warn("⚠️ Docs semantic search skipped:", docErr.message);
+              }
+
+              retrievedPassages = [...segPassages, ...docPassages];
+              console.log(
+                `[RAG] Retrieved ${segPassages.length} transcript + ${docPassages.length} doc passages`
+              );
             } catch (segErr) {
               console.warn("⚠️ Segment semantic search skipped:", segErr.message);
             }
