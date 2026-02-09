@@ -475,7 +475,7 @@ function Dashboard() {
                   <td>{course.tags?.industry || "General"}</td>
                   <td className="videos-cell">{course.video_count || 0}</td>
                   <td className="ai-cell">
-                    {course.has_ai_tags ? <span className="ai-check">✓</span> : "—"}
+                    {course.gemini_enriched ? <span className="ai-check">✓</span> : "—"}
                   </td>
                 </tr>
               ))}

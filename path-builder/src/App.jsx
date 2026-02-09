@@ -57,6 +57,9 @@ function App() {
     return raw.filter((c) => {
       if (seen.has(c.code)) return false;
       seen.add(c.code);
+      // Exclude intro/outro clips — no meaningful learning content
+      const title = (c.title || "").toLowerCase();
+      if (title === "introduction" || title === "intro" || title === "outro") return false;
       return true;
     });
   }, []);
