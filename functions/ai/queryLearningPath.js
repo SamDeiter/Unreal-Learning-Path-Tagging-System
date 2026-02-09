@@ -67,7 +67,7 @@ function detectMode(data) {
  * Intent → Diagnosis → Learning Objectives → Validation → Adaptive Cart
  */
 async function handleProblemFirst(data, context, apiKey) {
-  const { query: rawQuery, personaHint, detectedTagIds } = data;
+  const { query: rawQuery, personaHint, detectedTagIds, retrievedContext } = data;
   const userId = context.auth?.uid || "anonymous";
 
   // Security: sanitize and validate input before any Gemini call
@@ -84,15 +84,26 @@ async function handleProblemFirst(data, context, apiKey) {
 
   console.log(`[queryLearningPath] Problem-First mode for: "${query.substring(0, 50)}..."`);
 
+  // Sanitize retrieved context (max 5 passages, truncate text)
+  const passages = Array.isArray(retrievedContext)
+    ? retrievedContext.slice(0, 5).map((p) => ({
+        text: String(p.text || "").slice(0, 400),
+        courseCode: String(p.courseCode || ""),
+        videoTitle: String(p.videoTitle || ""),
+        timestamp: String(p.timestamp || ""),
+        source: String(p.source || "transcript"),
+      }))
+    : [];
+
   // Step 1: Extract Intent
   const intentResponse = await callGeminiForIntent(query, personaHint, apiKey);
   const intent = intentResponse.intent;
   await logApiUsage(userId, { model: "gemini-2.0-flash", type: "intent", estimatedTokens: 150 });
 
-  // Step 2: Generate Diagnosis
-  const diagnosisResponse = await callGeminiForDiagnosis(intent, detectedTagIds, apiKey);
+  // Step 2: Generate Diagnosis (now RAG-enhanced with retrieved passages)
+  const diagnosisResponse = await callGeminiForDiagnosis(intent, detectedTagIds, apiKey, passages);
   const diagnosis = diagnosisResponse.diagnosis;
-  await logApiUsage(userId, { model: "gemini-2.0-flash", type: "diagnosis", estimatedTokens: 200 });
+  await logApiUsage(userId, { model: "gemini-2.0-flash", type: "diagnosis", estimatedTokens: 300 });
 
   // Step 3: Decompose Learning Objectives
   const objectivesResponse = await callGeminiForObjectives(intent, diagnosis, apiKey);
@@ -122,6 +133,29 @@ async function handleProblemFirst(data, context, apiKey) {
     estimatedTokens: 80,
   });
 
+  // Step 5.5: Generate Micro-Lesson (RAG-grounded structured response)
+  let microLesson = null;
+  if (passages.length > 0) {
+    try {
+      const microLessonResponse = await callGeminiForMicroLesson(
+        intent,
+        diagnosis,
+        objectives,
+        passages,
+        apiKey
+      );
+      microLesson = microLessonResponse.micro_lesson;
+      await logApiUsage(userId, {
+        model: "gemini-2.0-flash",
+        type: "micro_lesson",
+        estimatedTokens: 400,
+      });
+    } catch (mlError) {
+      console.warn("[queryLearningPath] Micro-lesson generation failed:", mlError.message);
+      // Non-fatal — we still have the standard diagnosis
+    }
+  }
+
   if (!validationResponse.validation.approved) {
     console.warn(
       "[queryLearningPath] Curriculum validation failed:",
@@ -139,6 +173,7 @@ async function handleProblemFirst(data, context, apiKey) {
     objectives,
     validation: validationResponse.validation,
     pathSummary,
+    microLesson,
     created_at: new Date().toISOString(),
     // Courses will be matched on the frontend using TagGraphService
   };
@@ -199,13 +234,22 @@ JSON:{"intent_id":"intent_<uuid>","user_role":"str","goal":"str","problem_descri
   return await callGemini(systemPrompt, userPrompt, apiKey, "intent");
 }
 
-async function callGeminiForDiagnosis(intent, detectedTagIds, apiKey) {
+async function callGeminiForDiagnosis(intent, detectedTagIds, apiKey, passages = []) {
+  // Build context block from retrieved passages
+  let contextBlock = "";
+  if (passages.length > 0) {
+    const passageTexts = passages
+      .map((p, i) => `[${i + 1}] (${p.videoTitle || p.courseCode}, ${p.timestamp}): ${p.text}`)
+      .join("\n");
+    contextBlock = `\n\nRELEVANT TRANSCRIPT EXCERPTS (use these to ground your diagnosis):\n${passageTexts}\n\nCite specific excerpts by number [1], [2] etc. when they support your diagnosis.`;
+  }
+
   const systemPrompt =
     UE5_GUARDRAIL +
-    `UE5 expert. Diagnose UE5 problems only (Lumen/Nanite/Blueprint/Material/Niagara/etc). Specific settings & Editor workflows.
-JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"],"signals_to_watch_for":["str"],"variables_that_matter":["str"],"variables_that_do_not":["str"],"generalization_scope":["str"]}`;
+    `UE5 expert. Diagnose UE5 problems only (Lumen/Nanite/Blueprint/Material/Niagara/etc). Specific settings & Editor workflows. When transcript excerpts are provided, use them to ground your diagnosis with specific, actionable details.
+JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"],"signals_to_watch_for":["str"],"variables_that_matter":["str"],"variables_that_do_not":["str"],"generalization_scope":["str"],"cited_sources":[{"ref":"int","detail":"str"}]}`;
 
-  const userPrompt = `${intent.problem_description}${intent.systems?.length ? ` [${intent.systems.join(",")}]` : ""}${detectedTagIds?.length ? ` Tags:${detectedTagIds.slice(0, 5).join(",")}` : ""}`;
+  const userPrompt = `${intent.problem_description}${intent.systems?.length ? ` [${intent.systems.join(",")}]` : ""}${detectedTagIds?.length ? ` Tags:${detectedTagIds.slice(0, 5).join(",")}` : ""}${contextBlock}`;
 
   return await callGemini(systemPrompt, userPrompt, apiKey, "diagnosis");
 }
@@ -243,17 +287,65 @@ JSON:{"path_summary":"str","topics_covered":["str"]}`;
   return await callGemini(systemPrompt, userPrompt, apiKey, "path_summary_data");
 }
 
-async function callGemini(systemPrompt, userPrompt, apiKey, type) {
+async function callGeminiForMicroLesson(intent, diagnosis, objectives, passages, apiKey) {
+  const passageTexts = passages
+    .map(
+      (p, i) =>
+        `[${i + 1}] (Course: ${p.courseCode}, Video: "${p.videoTitle}", Time: ${p.timestamp}): ${p.text}`
+    )
+    .join("\n");
+
+  const systemPrompt =
+    UE5_GUARDRAIL +
+    `You are a UE5 instructor creating a focused micro-lesson for a student with a specific problem. You have access to real video transcript excerpts and must use them to create a grounded, actionable response.
+
+RULES:
+- Ground every claim in the provided transcript excerpts or official UE5 knowledge
+- Cite sources using [1], [2] etc. to reference specific transcript excerpts
+- Be specific: mention exact settings, node names, property values
+- The "quick_fix" should be immediately actionable (under 2 minutes to try)
+- The "why_it_works" should teach the underlying concept
+- "related_situations" should help the learner generalize the knowledge
+
+JSON:{
+  "quick_fix": {
+    "title": "str (imperative verb, e.g. 'Enable Screen Space Reflections as Fallback')",
+    "steps": ["str (numbered steps, be specific with menu paths and settings)"],
+    "citations": [{"ref": "int", "courseCode": "str", "videoTitle": "str", "timestamp": "str"}]
+  },
+  "why_it_works": {
+    "explanation": "str (2-3 sentences explaining the underlying UE5 system)",
+    "key_concept": "str (the transferable concept, e.g. 'Lumen ray budget allocation')",
+    "citations": [{"ref": "int", "courseCode": "str", "videoTitle": "str", "timestamp": "str"}]
+  },
+  "related_situations": [
+    {
+      "scenario": "str (when you'd encounter a similar issue)",
+      "connection": "str (how the same concept applies)"
+    }
+  ]
+}`;
+
+  const userPrompt = `PROBLEM: ${(intent.problem_description || "").slice(0, 300)}
+ROOT CAUSES: ${(diagnosis.root_causes || []).slice(0, 3).join("; ")}
+LEARNING GOALS: ${(objectives.fix_specific || []).slice(0, 3).join("; ")}
+
+TRANSCRIPT EXCERPTS:
+${passageTexts}`;
+
+  return await callGemini(systemPrompt, userPrompt, apiKey, "micro_lesson", 1536);
+}
+
+async function callGemini(systemPrompt, userPrompt, apiKey, type, maxTokens = 1024) {
   const model = "gemini-2.0-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  // Token-optimized: reduced maxOutputTokens from 2048 to 1024
   const payload = {
     contents: [{ parts: [{ text: userPrompt }] }],
     systemInstruction: { parts: [{ text: systemPrompt }] },
     generationConfig: {
-      temperature: 0.2, // Lower temp = more focused, fewer tokens
-      maxOutputTokens: 1024, // Reduced from 2048
+      temperature: 0.2,
+      maxOutputTokens: maxTokens,
       responseMimeType: "application/json",
     },
   };
