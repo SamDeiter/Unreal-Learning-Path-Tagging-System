@@ -1,0 +1,307 @@
+/**
+ * Course Matching Domain — Pure functions for matching courses to user queries.
+ * No React, no side effects, easily testable.
+ */
+import tagGraphService from "../services/TagGraphService";
+import { searchSegments } from "../services/segmentSearchService";
+import { findSimilarCourses } from "../services/semanticSearchService";
+import synonymMap from "../data/synonym_map.json";
+import curatedSolutions from "../data/curated_solutions.json";
+
+// Tiered matching threshold — semantic search only fires when
+// deterministic passes score below this value
+const TIER1_CONFIDENCE_THRESHOLD = 60;
+
+// UE5-only tag prefixes (engine_versions.min >= "5.0" in tags.json)
+const UE5_ONLY_TAGS = new Set([
+  "rendering.lumen",
+  "rendering.nanite",
+  "rendering.virtualShadowMaps",
+  "rendering.substrate",
+  "worldbuilding.worldPartition",
+]);
+
+// Stopwords to ignore in title matching
+const STOPWORDS = new Set([
+  "the", "and", "for", "with", "your", "first", "how", "from", "this",
+  "that", "are", "was", "has", "have", "not", "can", "using", "into",
+  "unreal", "engine", "introduction", "quick",
+]);
+
+/**
+ * Detect UE version intent from user query.
+ * @returns {number|null} 4, 5, or null (no version specified)
+ */
+export function detectUEVersion(query) {
+  const q = (query || "").toLowerCase();
+  if (/\bue\s*5\b|\bunreal\s*engine\s*5\b|\b5\.\d\b/.test(q)) return 5;
+  if (/\bue\s*4\b|\bunreal\s*engine\s*4\b|\b4\.\d{1,2}\b/.test(q)) return 4;
+  return null;
+}
+
+/**
+ * Match courses to the cart based on TRANSCRIPT content (not just tags)
+ * Uses a multi-pass strategy:
+ *   Pass 1: Search with the user's raw query (highest relevancy)
+ *   Pass 2: Title/tag/description + synonym expansion
+ *   Pass 2.5: Semantic search (tier 2 fallback)
+ *   Pass 3: Broaden with AI diagnosis terms
+ *   Fallback: Tag graph scoring
+ */
+export function matchCoursesToCart(
+  cart,
+  allCourses,
+  selectedTagIds = [],
+  errorLog = "",
+  semanticResults = []
+) {
+  if (!allCourses || allCourses.length === 0) return [];
+
+  const userQuery = cart?.userQuery || "";
+
+  // --- Curated Solutions (Priority 0 check) ---
+  const queryLowerFull = userQuery.toLowerCase();
+  for (const solution of curatedSolutions) {
+    const matched = solution.patterns.some((p) => queryLowerFull.includes(p));
+    if (matched) {
+      const curatedCourses = solution.courses
+        .map((code) => {
+          const course = allCourses.find((c) => c.code === code);
+          if (!course || !course.videos?.length || !course.videos[0]?.drive_id) return null;
+          return {
+            ...course,
+            _relevanceScore: 200,
+            _curatedMatch: true,
+            _curatedExplanation: solution.explanation,
+          };
+        })
+        .filter(Boolean);
+      if (curatedCourses.length > 0) {
+        console.log("✅ Curated solution match:", solution.explanation);
+        return curatedCourses;
+      }
+    }
+  }
+
+  // --- Error Signature Integration ---
+  const combinedErrorText = `${userQuery} ${errorLog}`.trim();
+  const signatureMatches = tagGraphService.matchErrorSignature(combinedErrorText);
+  const autoDetectedTagIds = signatureMatches.map((m) => m.tag.tag_id);
+  const mergedTagIds = [...new Set([...selectedTagIds, ...autoDetectedTagIds])];
+
+  if (signatureMatches.length > 0) {
+    console.log(
+      "🔍 Error signatures detected:",
+      signatureMatches.map((m) => `${m.tag.display_name} (${m.matchedSignature}, ${m.confidence})`)
+    );
+  }
+
+  // Extract extra keywords from error log
+  const errorKeywords = errorLog
+    .toLowerCase()
+    .split(/[\s\n:;,()[\]{}]+/)
+    .filter((w) => w.length > 3 && !/^[0-9]+$/.test(w))
+    .slice(0, 10);
+
+  // Extract + expand keywords
+  const rawKeywords = userQuery
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !STOPWORDS.has(w));
+
+  const expandedKeywords = new Set(rawKeywords);
+  const queryLower = userQuery.toLowerCase();
+  for (const [term, synonyms] of Object.entries(synonymMap)) {
+    if (queryLower.includes(term)) {
+      for (const syn of synonyms) {
+        syn.split(/\s+/).forEach((w) => {
+          if (w.length > 2 && !STOPWORDS.has(w)) expandedKeywords.add(w);
+        });
+      }
+    }
+  }
+  const queryKeywords = [...expandedKeywords];
+
+  // Helper: run transcript search and filter to playable courses
+  const searchAndFilter = (query) => {
+    if (!query || query.length < 5) return [];
+    const transcriptResults = searchSegments(query, allCourses);
+    return transcriptResults
+      .map((result) => {
+        const course = allCourses.find((c) => c.code === result.courseCode);
+        if (!course) return null;
+        if (!course.videos?.length || !course.videos[0]?.drive_id) return null;
+        return {
+          ...course,
+          _relevanceScore: result.score,
+          _matchedKeywords: result.matchedKeywords,
+        };
+      })
+      .filter(Boolean);
+  };
+
+  // Helper: title/tag/description search
+  const titleAndTagSearch = (keywords) => {
+    if (keywords.length === 0) return [];
+    const playableCourses = allCourses.filter((c) => c.videos?.length && c.videos[0]?.drive_id);
+    return playableCourses
+      .map((course) => {
+        const title = (course.title || "").toLowerCase();
+        const desc = (course.description || "").toLowerCase();
+        const allTags = [
+          ...(course.canonical_tags || []),
+          ...(course.gemini_system_tags || []),
+          ...(course.extracted_tags || []),
+        ]
+          .map((t) => (typeof t === "string" ? t.toLowerCase() : ""))
+          .join(" ");
+
+        let score = 0;
+        const matchedKeywords = [];
+        for (const kw of keywords) {
+          if (title.includes(kw)) { score += 50; matchedKeywords.push(kw); }
+          else if (allTags.includes(kw)) { score += 30; matchedKeywords.push(kw); }
+          else if (desc.includes(kw)) { score += 10; matchedKeywords.push(kw); }
+        }
+        const uniqueMatched = new Set(matchedKeywords).size;
+        if (uniqueMatched >= 2) score *= 1 + uniqueMatched * 0.3;
+        if (score === 0) return null;
+        return { ...course, _relevanceScore: score, _matchedKeywords: matchedKeywords };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b._relevanceScore - a._relevanceScore);
+  };
+
+  // Helper: boost by tag overlap
+  const applyTagBoost = (courses) => {
+    if (mergedTagIds.length === 0) return courses;
+    return courses
+      .map((course) => {
+        const courseTags = (course.extracted_tags || course.tags || [])
+          .map((t) => (typeof t === "string" ? t : t.tag_id || t.name || ""))
+          .filter(Boolean);
+        const hasMatchingTag = courseTags.some((ct) =>
+          mergedTagIds.some(
+            (st) => ct.toLowerCase().includes(st.toLowerCase()) || st.toLowerCase().includes(ct.toLowerCase())
+          )
+        );
+        return {
+          ...course,
+          _relevanceScore: hasMatchingTag ? course._relevanceScore * 2 : course._relevanceScore * 0.5,
+        };
+      })
+      .sort((a, b) => b._relevanceScore - a._relevanceScore);
+  };
+
+  // Build enriched query
+  const enrichedQuery = errorKeywords.length > 0 ? `${userQuery} ${errorKeywords.join(" ")}` : userQuery;
+
+  // Pass 1: Transcript search
+  const transcriptResults = searchAndFilter(enrichedQuery);
+
+  // Pass 2: Title/tag search
+  const allQueryKeywords = errorKeywords.length > 0 ? [...queryKeywords, ...errorKeywords] : queryKeywords;
+  const titleResults = titleAndTagSearch(allQueryKeywords);
+
+  // Merge both passes
+  const seen = new Set();
+  const merged = [];
+  for (const r of transcriptResults) {
+    if (!seen.has(r.code)) { merged.push(r); seen.add(r.code); }
+  }
+  for (const r of titleResults) {
+    if (!seen.has(r.code)) { merged.push(r); seen.add(r.code); }
+    else {
+      const existing = merged.find((m) => m.code === r.code);
+      if (existing) existing._relevanceScore += r._relevanceScore;
+    }
+  }
+
+  // Pass 2.5: Semantic search (Tier 2 fallback)
+  const tier1TopScore = merged.length > 0 ? merged[0]._relevanceScore : 0;
+  const tier1Confident = tier1TopScore >= TIER1_CONFIDENCE_THRESHOLD;
+
+  if (semanticResults.length > 0 && !tier1Confident) {
+    console.log(`🔀 Tier 2: Semantic fallback (Tier 1 top score: ${tier1TopScore})`);
+    for (const sr of semanticResults) {
+      if (!seen.has(sr.code)) {
+        const course = allCourses.find((c) => c.code === sr.code);
+        if (course && course.videos?.length && course.videos[0]?.drive_id) {
+          merged.push({
+            ...course,
+            _relevanceScore: sr.similarity * 100,
+            _matchedKeywords: ["semantic-match"],
+            _semanticMatch: true,
+            _tier: 2,
+          });
+          seen.add(sr.code);
+        }
+      } else {
+        const existing = merged.find((m) => m.code === sr.code);
+        if (existing) existing._relevanceScore += sr.similarity * 40;
+      }
+    }
+  } else if (semanticResults.length > 0) {
+    console.log(`✅ Tier 1: Deterministic match confident (top score: ${tier1TopScore}), skipping semantic`);
+  }
+
+  merged.sort((a, b) => b._relevanceScore - a._relevanceScore);
+  const boosted = applyTagBoost(merged);
+  if (boosted.length >= 3) {
+    return applyVersionFilter(boosted.slice(0, 5), userQuery);
+  }
+
+  // Pass 3: Broaden with diagnosis terms
+  const broadParts = [enrichedQuery, cart?.diagnosis?.problem_summary, ...(cart?.intent?.systems || [])].filter(Boolean);
+  const broadQuery = broadParts.join(" ");
+  const broadKeywords = broadQuery.toLowerCase().split(/\s+/).filter((w) => w.length > 2 && !STOPWORDS.has(w));
+  const broadTranscript = searchAndFilter(broadQuery);
+  const broadTitle = titleAndTagSearch(broadKeywords);
+  for (const r of [...broadTranscript, ...broadTitle]) {
+    if (!seen.has(r.code)) { merged.push(r); seen.add(r.code); }
+  }
+  merged.sort((a, b) => b._relevanceScore - a._relevanceScore);
+  const boostedBroad = applyTagBoost(merged);
+  if (boostedBroad.length >= 3) {
+    return applyVersionFilter(boostedBroad.slice(0, 5), userQuery);
+  }
+
+  // Fallback: tag graph scoring
+  const tagScored = allCourses.map((course) => {
+    const result = tagGraphService.scoreCourseRelevance(course, allQueryKeywords);
+    return { ...course, _relevanceScore: result.score, _scoreBreakdown: result.breakdown, _topContributors: result.topContributors };
+  });
+  const fallbackResults = tagScored
+    .filter((c) => c._relevanceScore > 0 && c.videos?.length && c.videos[0]?.drive_id)
+    .sort((a, b) => b._relevanceScore - a._relevanceScore)
+    .slice(0, 5);
+  return applyVersionFilter(applyTagBoost(fallbackResults), userQuery);
+}
+
+/**
+ * Version enforcement — adjust scores based on UE version intent.
+ */
+export function applyVersionFilter(courses, userQuery) {
+  const version = detectUEVersion(userQuery);
+  if (!version) return courses;
+  return courses
+    .map((course) => {
+      const allTags = [
+        ...(course.canonical_tags || []),
+        ...(course.gemini_system_tags || []),
+        ...(course.extracted_tags || []),
+      ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+      const hasUE5OnlyTag = allTags.some((t) =>
+        [...UE5_ONLY_TAGS].some((ue5) => t.includes(ue5.split(".").pop()))
+      );
+      if (version === 4 && hasUE5OnlyTag) {
+        console.log(`⬇️ UE4 demotion: ${course.code} (has UE5-only tags)`);
+        return { ...course, _relevanceScore: course._relevanceScore * 0.2 };
+      }
+      if (version === 5 && hasUE5OnlyTag) {
+        return { ...course, _relevanceScore: course._relevanceScore * 1.5 };
+      }
+      return course;
+    })
+    .sort((a, b) => b._relevanceScore - a._relevanceScore);
+}
