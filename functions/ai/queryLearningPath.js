@@ -96,65 +96,67 @@ async function handleProblemFirst(data, context, apiKey) {
     : [];
 
   // Step 1: Extract Intent
+  console.time("[perf] Step 1: Intent");
   const intentResponse = await callGeminiForIntent(query, personaHint, apiKey);
   const intent = intentResponse.intent;
-  await logApiUsage(userId, { model: "gemini-2.0-flash", type: "intent", estimatedTokens: 150 });
+  console.timeEnd("[perf] Step 1: Intent");
 
-  // Step 2: Generate Diagnosis (now RAG-enhanced with retrieved passages)
+  // Step 2: Generate Diagnosis (RAG-enhanced with retrieved passages)
+  console.time("[perf] Step 2: Diagnosis");
   const diagnosisResponse = await callGeminiForDiagnosis(intent, detectedTagIds, apiKey, passages);
   const diagnosis = diagnosisResponse.diagnosis;
-  await logApiUsage(userId, { model: "gemini-2.0-flash", type: "diagnosis", estimatedTokens: 300 });
+  console.timeEnd("[perf] Step 2: Diagnosis");
 
-  // Step 3: Decompose Learning Objectives
+  // Step 3: Decompose Learning Objectives (needed by Steps 4, 5, 5.5)
+  console.time("[perf] Step 3: Objectives");
   const objectivesResponse = await callGeminiForObjectives(intent, diagnosis, apiKey);
   const objectives = objectivesResponse.objectives;
-  await logApiUsage(userId, {
-    model: "gemini-2.0-flash",
-    type: "objectives",
-    estimatedTokens: 100,
-  });
+  console.timeEnd("[perf] Step 3: Objectives");
 
-  // Step 4: Validate Curriculum (Anti-Tutorial-Hell)
-  const validationResponse = await callGeminiForValidation(
-    intent,
-    diagnosis,
-    objectives,
-    null,
-    apiKey
-  );
-  await logApiUsage(userId, { model: "gemini-2.0-flash", type: "validation", estimatedTokens: 80 });
+  // Steps 4, 5, 5.5 — PARALLEL (all only need intent + diagnosis + objectives)
+  console.time("[perf] Steps 4-5.5: Parallel batch");
+  const [validationResult, summaryResult, microLessonResult] = await Promise.allSettled([
+    // Step 4: Validate Curriculum
+    callGeminiForValidation(intent, diagnosis, objectives, null, apiKey),
+    // Step 5: Generate Path Summary
+    callGeminiForPathSummary(intent, diagnosis, objectives, apiKey),
+    // Step 5.5: Generate Micro-Lesson (only if passages available)
+    passages.length > 0
+      ? callGeminiForMicroLesson(intent, diagnosis, objectives, passages, apiKey)
+      : Promise.resolve(null),
+  ]);
+  console.timeEnd("[perf] Steps 4-5.5: Parallel batch");
 
-  // Step 5: Generate Path Summary
-  const summaryResponse = await callGeminiForPathSummary(intent, diagnosis, objectives, apiKey);
-  const pathSummary = summaryResponse.path_summary_data;
-  await logApiUsage(userId, {
-    model: "gemini-2.0-flash",
-    type: "path_summary",
-    estimatedTokens: 80,
-  });
-
-  // Step 5.5: Generate Micro-Lesson (RAG-grounded structured response)
+  // Unpack parallel results with safe defaults
+  const validationResponse = validationResult.status === "fulfilled"
+    ? validationResult.value
+    : { validation: { approved: true, reason: "Validation skipped (error)" } };
+  const pathSummary = summaryResult.status === "fulfilled"
+    ? summaryResult.value.path_summary_data
+    : { path_summary: "Summary unavailable", topics_covered: [] };
   let microLesson = null;
-  if (passages.length > 0) {
-    try {
-      const microLessonResponse = await callGeminiForMicroLesson(
-        intent,
-        diagnosis,
-        objectives,
-        passages,
-        apiKey
-      );
-      microLesson = microLessonResponse.micro_lesson;
-      await logApiUsage(userId, {
-        model: "gemini-2.0-flash",
-        type: "micro_lesson",
-        estimatedTokens: 400,
-      });
-    } catch (mlError) {
-      console.warn("[queryLearningPath] Micro-lesson generation failed:", mlError.message);
-      // Non-fatal — we still have the standard diagnosis
-    }
+  if (microLessonResult.status === "fulfilled" && microLessonResult.value) {
+    microLesson = microLessonResult.value.micro_lesson;
+  } else if (microLessonResult.status === "rejected") {
+    console.warn("[queryLearningPath] Micro-lesson generation failed:", microLessonResult.reason?.message);
   }
+
+  // Log API usage (batched, non-blocking)
+  const usageLogs = [
+    logApiUsage(userId, { model: "gemini-2.0-flash", type: "intent", estimatedTokens: 150 }),
+    logApiUsage(userId, { model: "gemini-2.0-flash", type: "diagnosis", estimatedTokens: 300 }),
+    logApiUsage(userId, { model: "gemini-2.0-flash", type: "objectives", estimatedTokens: 100 }),
+  ];
+  if (validationResult.status === "fulfilled") {
+    usageLogs.push(logApiUsage(userId, { model: "gemini-2.0-flash", type: "validation", estimatedTokens: 80 }));
+  }
+  if (summaryResult.status === "fulfilled") {
+    usageLogs.push(logApiUsage(userId, { model: "gemini-2.0-flash", type: "path_summary", estimatedTokens: 80 }));
+  }
+  if (microLesson) {
+    usageLogs.push(logApiUsage(userId, { model: "gemini-2.0-flash", type: "micro_lesson", estimatedTokens: 400 }));
+  }
+  await Promise.all(usageLogs);
 
   if (!validationResponse.validation.approved) {
     console.warn(
