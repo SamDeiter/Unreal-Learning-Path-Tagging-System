@@ -8,6 +8,13 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
+/** Safely extract tags as an array. c.tags may be an object {topic, level} not an array. */
+function getTagsArray(item) {
+  if (Array.isArray(item?.tags)) return item.tags;
+  if (Array.isArray(item?.extracted_tags)) return item.extracted_tags;
+  return [];
+}
+
 // Firebase config - uses same project as main app
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -70,7 +77,7 @@ export async function generateCourseMetadata(videos) {
     .map((v, i) => {
       const transcript = v.transcript?.substring(0, 500) || "No transcript available";
       return `${i + 1}. "${v.title || v.name}" (${v.duration_formatted || "Unknown duration"})
-   Tags: ${(v.tags || v.extracted_tags || []).join(", ") || "None"}
+   Tags: ${getTagsArray(v).join(", ") || "None"}
    Preview: ${transcript}...`;
     })
     .join("\n\n");
@@ -195,7 +202,7 @@ export async function generateLearningBlueprint(intent, courses) {
   // Prepare course summaries for prompt
   const courseSummaries = courses
     .map((c, i) => {
-      const tags = (c.tags || c.extracted_tags || []).slice(0, 5).join(", ");
+      const tags = getTagsArray(c).slice(0, 5).join(", ");
       const role = c.role || "Core";
       return `${i + 1}. "${c.title}" [${role}] - Tags: ${tags || "General UE5"}`;
     })
@@ -267,7 +274,7 @@ Respond with ONLY valid JSON, no markdown.`;
  * Fallback blueprint generation without API
  */
 function generateFallbackBlueprint(intent, courses) {
-  const allTags = courses.flatMap((c) => c.tags || c.extracted_tags || []);
+  const allTags = courses.flatMap((c) => getTagsArray(c));
   const topTags = [...new Set(allTags)].slice(0, 5);
   const primaryTag = topTags[0] || "UE5";
 
@@ -276,7 +283,7 @@ function generateFallbackBlueprint(intent, courses) {
       {
         title: "Core Curriculum: " + (intent.primaryGoal || primaryTag),
         items: courses.slice(0, 5).map((c, i) => ({
-          text: `Learn ${(c.tags || c.extracted_tags || [])[0] || "core"} techniques from ${c.title?.split(" ")[0] || "lesson"}`,
+          text: `Learn ${getTagsArray(c)[0] || "core"} techniques from ${c.title?.split(" ")[0] || "lesson"}`,
           courseIndex: i + 1,
         })),
       },
@@ -301,7 +308,7 @@ function generateFallbackBlueprint(intent, courses) {
  * Fallback metadata generation without API
  */
 function generateFallbackMetadata(videos) {
-  const allTags = videos.flatMap((v) => v.tags || v.extracted_tags || []);
+  const allTags = videos.flatMap((v) => getTagsArray(v));
   const topTags = [...new Set(allTags)].slice(0, 5);
 
   const totalSeconds = videos.reduce((sum, v) => sum + (v.duration_seconds || 0), 0);
