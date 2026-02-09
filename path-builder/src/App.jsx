@@ -84,7 +84,7 @@ function App() {
             ...(c.transcript_tags || []),
             ...(c.extracted_tags || []),
           ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
-          return allTags.some((ct) => ct.includes(tagIdLower) || ct.includes(tagNameLower));
+          return allTags.some((ct) => ct === tagIdLower || ct === tagNameLower);
         }).length;
 
         return {

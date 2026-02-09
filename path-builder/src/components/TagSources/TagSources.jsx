@@ -47,10 +47,11 @@ function TagSources() {
         });
       }
 
-      // Count video-extracted tags (transcript + ai_tags)
+      // Count video-extracted tags (transcript + ai_tags + extracted_tags)
       const videoTags = [
         ...(course.transcript_tags || []),
         ...(course.ai_tags || []),
+        ...(course.extracted_tags || []),
       ];
       videoTags.forEach((tag) => {
         videoTagCounts[tag] = (videoTagCounts[tag] || 0) + 1;
@@ -87,23 +88,21 @@ function TagSources() {
 
   const topBaseTags = getTopTags(analysis.baseTagCounts);
   const topAITags = getTopTags(analysis.aiTagCounts);
-  
+
   // Get all video tags sorted by frequency
   const allVideoTags = useMemo(() => {
-    return Object.entries(analysis.videoTagCounts)
-      .sort((a, b) => b[1] - a[1]);
+    return Object.entries(analysis.videoTagCounts).sort((a, b) => b[1] - a[1]);
   }, [analysis.videoTagCounts]);
-  
-  const displayedVideoTags = videoTagLimit === 'all' 
-    ? allVideoTags 
-    : allVideoTags.slice(0, videoTagLimit);
+
+  const displayedVideoTags =
+    videoTagLimit === "all" ? allVideoTags : allVideoTags.slice(0, videoTagLimit);
 
   // Tag export data
   const tagExportData = useMemo(() => {
     const uniqueBaseTags = Object.keys(analysis.baseTagCounts).length;
     const uniqueVideoTags = Object.keys(analysis.videoTagCounts).length;
     const uniqueAITags = Object.keys(analysis.aiTagCounts).length;
-    
+
     const totalBaseUsage = Object.values(analysis.baseTagCounts).reduce((a, b) => a + b, 0);
     const totalVideoUsage = Object.values(analysis.videoTagCounts).reduce((a, b) => a + b, 0);
     const totalAIUsage = Object.values(analysis.aiTagCounts).reduce((a, b) => a + b, 0);
@@ -123,35 +122,36 @@ function TagSources() {
   const exportTags = (source) => {
     let tags;
     let filename;
-    
+
     switch (source) {
-      case 'base':
+      case "base":
         tags = analysis.baseTagCounts;
-        filename = 'base_tags_export.csv';
+        filename = "base_tags_export.csv";
         break;
-      case 'video':
+      case "video":
         tags = analysis.videoTagCounts;
-        filename = 'video_extracted_tags_export.csv';
+        filename = "video_extracted_tags_export.csv";
         break;
-      case 'ai':
+      case "ai":
         tags = analysis.aiTagCounts;
-        filename = 'ai_tags_export.csv';
+        filename = "ai_tags_export.csv";
         break;
       default:
         // Export all
         tags = { ...analysis.baseTagCounts, ...analysis.videoTagCounts, ...analysis.aiTagCounts };
-        filename = 'all_tags_export.csv';
+        filename = "all_tags_export.csv";
     }
 
-    const csvContent = "Tag,Count,Source\n" + 
+    const csvContent =
+      "Tag,Count,Source\n" +
       Object.entries(tags)
         .sort((a, b) => b[1] - a[1])
         .map(([tag, count]) => `"${tag}",${count},${source}`)
         .join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     a.click();
@@ -216,7 +216,7 @@ function TagSources() {
       <div className="ts-export-stats">
         <div className="export-header">
           <h3>📊 Tag Generation Summary</h3>
-          <button className="export-all-btn" onClick={() => exportTags('all')}>
+          <button className="export-all-btn" onClick={() => exportTags("all")}>
             ⬇️ Export All Tags (CSV)
           </button>
         </div>
@@ -225,19 +225,25 @@ function TagSources() {
             <div className="stat-label">BASE Tags</div>
             <div className="stat-value">{tagExportData.uniqueBaseTags}</div>
             <div className="stat-usage">{tagExportData.totalBaseTags} total uses</div>
-            <button className="export-btn" onClick={() => exportTags('base')}>Export</button>
+            <button className="export-btn" onClick={() => exportTags("base")}>
+              Export
+            </button>
           </div>
           <div className="export-stat video">
             <div className="stat-label">VIDEO Tags</div>
             <div className="stat-value">{tagExportData.uniqueVideoTags}</div>
             <div className="stat-usage">{tagExportData.totalVideoTags} total uses</div>
-            <button className="export-btn" onClick={() => exportTags('video')}>Export</button>
+            <button className="export-btn" onClick={() => exportTags("video")}>
+              Export
+            </button>
           </div>
           <div className="export-stat ai">
             <div className="stat-label">AI Tags</div>
             <div className="stat-value">{tagExportData.uniqueAITags}</div>
             <div className="stat-usage">{tagExportData.totalAITags} total uses</div>
-            <button className="export-btn" onClick={() => exportTags('ai')}>Export</button>
+            <button className="export-btn" onClick={() => exportTags("ai")}>
+              Export
+            </button>
           </div>
         </div>
         <div className="export-total">
@@ -252,11 +258,11 @@ function TagSources() {
           <h3>
             <span className="source-badge base">BASE</span>
             Manual Taxonomy
-            <span className="source-total">{Object.keys(analysis.baseTagCounts).length} unique tags</span>
+            <span className="source-total">
+              {Object.keys(analysis.baseTagCounts).length} unique tags
+            </span>
           </h3>
-          <p className="ts-source-desc">
-            Official tags assigned during content creation
-          </p>
+          <p className="ts-source-desc">Official tags assigned during content creation</p>
           <div className="tag-list">
             {topBaseTags.map(([tag, count]) => (
               <span key={tag} className="tag-chip base">
@@ -267,45 +273,53 @@ function TagSources() {
         </div>
 
         {/* Video Tags - Expandable */}
-        <div className={`ts-source-card ${showAllVideoTags ? 'expanded' : ''}`}>
+        <div className={`ts-source-card ${showAllVideoTags ? "expanded" : ""}`}>
           <h3>
             <span className="source-badge video">VIDEO</span>
             Video Extracted
             <span className="source-total">{allVideoTags.length} unique tags</span>
           </h3>
-          <p className="ts-source-desc">
-            Keywords from video titles and transcript analysis
-          </p>
-          
+          <p className="ts-source-desc">Keywords from video titles and transcript analysis</p>
+
           {/* Tag limit controls */}
           <div className="tag-limit-controls">
             <span>Show:</span>
-            <button 
-              className={videoTagLimit === 15 ? 'active' : ''} 
-              onClick={() => { setVideoTagLimit(15); setShowAllVideoTags(false); }}
+            <button
+              className={videoTagLimit === 15 ? "active" : ""}
+              onClick={() => {
+                setVideoTagLimit(15);
+                setShowAllVideoTags(false);
+              }}
             >
               Top 15
             </button>
-            <button 
-              className={videoTagLimit === 100 ? 'active' : ''} 
-              onClick={() => { setVideoTagLimit(100); setShowAllVideoTags(true); }}
+            <button
+              className={videoTagLimit === 100 ? "active" : ""}
+              onClick={() => {
+                setVideoTagLimit(100);
+                setShowAllVideoTags(true);
+              }}
             >
               Top 100
             </button>
-            <button 
-              className={videoTagLimit === 'all' ? 'active' : ''} 
-              onClick={() => { setVideoTagLimit('all'); setShowAllVideoTags(true); }}
+            <button
+              className={videoTagLimit === "all" ? "active" : ""}
+              onClick={() => {
+                setVideoTagLimit("all");
+                setShowAllVideoTags(true);
+              }}
             >
               All ({allVideoTags.length})
             </button>
           </div>
-          
+
           {allVideoTags.length === 0 ? (
             <div className="no-tags-warning">
-              ⚠️ No video-extracted tags found. Check if <code>ai_tags</code> or <code>transcript_tags</code> fields exist in your data.
+              ⚠️ No video-extracted tags found. Check if <code>ai_tags</code> or{" "}
+              <code>transcript_tags</code> fields exist in your data.
             </div>
           ) : (
-            <div className={`tag-list ${showAllVideoTags ? 'expanded' : ''}`}>
+            <div className={`tag-list ${showAllVideoTags ? "expanded" : ""}`}>
               {displayedVideoTags.map(([tag, count]) => (
                 <span key={tag} className="tag-chip video">
                   {tag} <span className="count">{count}</span>
@@ -320,11 +334,11 @@ function TagSources() {
           <h3>
             <span className="source-badge ai">AI</span>
             Gemini Enriched
-            <span className="source-total">{Object.keys(analysis.aiTagCounts).length} unique tags</span>
+            <span className="source-total">
+              {Object.keys(analysis.aiTagCounts).length} unique tags
+            </span>
           </h3>
-          <p className="ts-source-desc">
-            System tags identified by AI content analysis
-          </p>
+          <p className="ts-source-desc">System tags identified by AI content analysis</p>
           <div className="tag-list">
             {topAITags.map(([tag, count]) => (
               <span key={tag} className="tag-chip ai">
@@ -338,7 +352,7 @@ function TagSources() {
       {/* Course List */}
       <div className="ts-section">
         <h3>
-          📋 {filter === "pending" ? "Courses Needing AI Enrichment" : "All Courses"} 
+          📋 {filter === "pending" ? "Courses Needing AI Enrichment" : "All Courses"}
           <span className="course-count">({filteredCourses.length})</span>
         </h3>
         {filter === "pending" && (
@@ -356,13 +370,17 @@ function TagSources() {
               <div className="ts-course-header">
                 <span className="course-code">{course.code}</span>
                 {course.gemini_enriched ? (
-                  <span className="enrichment-badge enriched" title="AI enrichment complete">✅ AI</span>
+                  <span className="enrichment-badge enriched" title="AI enrichment complete">
+                    ✅ AI
+                  </span>
                 ) : (
-                  <span className="enrichment-badge pending" title="Needs AI enrichment">⏳ Pending</span>
+                  <span className="enrichment-badge pending" title="Needs AI enrichment">
+                    ⏳ Pending
+                  </span>
                 )}
               </div>
               <div className="ts-course-title">{course.title}</div>
-              
+
               {/* Show tag breakdown when selected */}
               {selectedCourse === course.code && (
                 <div className="ts-course-tags">
@@ -370,9 +388,15 @@ function TagSources() {
                   <div className="tag-group">
                     <span className="tag-group-label base">BASE</span>
                     <div className="tag-group-items">
-                      {course.tags?.topic && <span className="mini-tag base">{course.tags.topic}</span>}
-                      {course.tags?.level && <span className="mini-tag base">{course.tags.level}</span>}
-                      {course.tags?.industry && <span className="mini-tag base">{course.tags.industry}</span>}
+                      {course.tags?.topic && (
+                        <span className="mini-tag base">{course.tags.topic}</span>
+                      )}
+                      {course.tags?.level && (
+                        <span className="mini-tag base">{course.tags.level}</span>
+                      )}
+                      {course.tags?.industry && (
+                        <span className="mini-tag base">{course.tags.industry}</span>
+                      )}
                     </div>
                   </div>
 
@@ -382,10 +406,14 @@ function TagSources() {
                       <span className="tag-group-label video">VIDEO</span>
                       <div className="tag-group-items">
                         {course.ai_tags?.slice(0, 5).map((tag) => (
-                          <span key={tag} className="mini-tag video">{tag}</span>
+                          <span key={tag} className="mini-tag video">
+                            {tag}
+                          </span>
                         ))}
                         {course.transcript_tags?.slice(0, 3).map((tag) => (
-                          <span key={tag} className="mini-tag video">{tag}</span>
+                          <span key={tag} className="mini-tag video">
+                            {tag}
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -397,7 +425,9 @@ function TagSources() {
                       <span className="tag-group-label ai">AI</span>
                       <div className="tag-group-items">
                         {course.gemini_system_tags.map((tag) => (
-                          <span key={tag} className="mini-tag ai">{tag}</span>
+                          <span key={tag} className="mini-tag ai">
+                            {tag}
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -414,9 +444,7 @@ function TagSources() {
           ))}
         </div>
         {filteredCourses.length > 50 && (
-          <div className="ts-more-hint">
-            Showing first 50 of {filteredCourses.length} courses
-          </div>
+          <div className="ts-more-hint">Showing first 50 of {filteredCourses.length} courses</div>
         )}
       </div>
     </div>
