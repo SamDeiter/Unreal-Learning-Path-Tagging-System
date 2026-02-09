@@ -2,7 +2,15 @@ import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { PlayCircle, Check, Plus, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { recordUpvote, recordDownvote, getFeedbackStatus } from "../../services/feedbackService";
+import prereqData from "../../data/course_prerequisites.json";
+import libraryData from "../../data/video_library_enriched.json";
 import "./VideoResultCard.css";
+
+// Build code→title lookup once
+const courseTitles = {};
+(libraryData.courses || []).forEach((c) => {
+  courseTitles[c.code] = c.title;
+});
 
 /**
  * Formats seconds into a human-readable duration string.
@@ -26,10 +34,15 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
     matchedTags = [],
     driveId,
     topSegments = [],
+    courseCode,
     _curatedMatch,
     role,
     reason,
   } = video;
+
+  // Look up prereq data for this course
+  const prereqEntry = courseCode ? prereqData[courseCode] : null;
+  const prereqCourses = prereqEntry?.prereqs || [];
 
   const [feedbackState, setFeedbackState] = useState(() => getFeedbackStatus(driveId));
   const [segmentsOpen, setSegmentsOpen] = useState(false);
@@ -105,10 +118,23 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
           {prereqTip && role === "prerequisite" && (
             <div className="vrc-prereq-tooltip">
               <strong>Prerequisite Course</strong>
-              <p>
-                Watch this first — it covers foundational concepts needed before advancing to more
-                complex topics in this area.
-              </p>
+              {prereqCourses.length > 0 ? (
+                <>
+                  <p>Watch these first:</p>
+                  <ul className="vrc-prereq-list">
+                    {prereqCourses.map((pc) => (
+                      <li key={pc}>
+                        📘 {courseTitles[pc] || pc}
+                        {prereqEntry?.reasons?.[pc] && (
+                          <span className="vrc-prereq-why"> — {prereqEntry.reasons[pc]}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <p>Watch this first — it covers foundational concepts needed before advancing.</p>
+              )}
               {reason && <p className="vrc-tip-reason">{reason}</p>}
             </div>
           )}
