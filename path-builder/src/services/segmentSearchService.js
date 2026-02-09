@@ -1,12 +1,104 @@
 /**
  * Segment Search Service - Find exact moments in video transcripts
- * Uses pre-built segment index from VTT files to locate specific topics
+ * Supports both keyword search (TF scoring) and semantic search (cosine similarity).
+ *
+ * Keyword search: uses search_index.json + segment_index.json
+ * Semantic search: uses segment_embeddings.json (pre-computed 768-dim vectors)
  */
 
 // Pre-built search index (word frequencies by course)
 import searchIndex from "../data/search_index.json";
 // Pre-built segment index (real timestamps from VTT transcripts)
 import segmentIndex from "../data/segment_index.json";
+import { cosineSimilarity } from "./semanticSearchService";
+
+// Lazy-loaded embeddings (5.9MB, loaded on first semantic query)
+let _segmentEmbeddings = null;
+let _decodedVectors = null;
+
+/**
+ * Decode a base64-encoded float16 vector to a Float32Array.
+ * The embedding pipeline quantizes to float16 for storage efficiency.
+ * @param {string} b64 - Base64-encoded float16 vector
+ * @param {number} dim - Expected dimension (default 768)
+ * @returns {Float32Array}
+ */
+function decodeFloat16Vector(b64, dim = 768) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  const view = new DataView(bytes.buffer);
+  const result = new Float32Array(dim);
+  for (let i = 0; i < dim; i++) {
+    // Read float16 (2 bytes each, little-endian)
+    const half = view.getUint16(i * 2, true);
+    result[i] = float16ToFloat32(half);
+  }
+  return result;
+}
+
+/**
+ * Convert a float16 (half-precision) to float32.
+ * @param {number} half - 16-bit float as uint16
+ * @returns {number}
+ */
+function float16ToFloat32(half) {
+  const sign = (half >> 15) & 0x1;
+  const exponent = (half >> 10) & 0x1f;
+  const mantissa = half & 0x3ff;
+
+  if (exponent === 0) {
+    // Denormalized
+    return (sign ? -1 : 1) * Math.pow(2, -14) * (mantissa / 1024);
+  } else if (exponent === 31) {
+    // Inf / NaN
+    return mantissa ? NaN : sign ? -Infinity : Infinity;
+  }
+  return (sign ? -1 : 1) * Math.pow(2, exponent - 15) * (1 + mantissa / 1024);
+}
+
+/**
+ * Lazily load and decode segment embeddings.
+ * Only loaded on first semantic search call.
+ * @returns {Promise<Map<string, {vector: Float32Array, meta: Object}>>}
+ */
+async function getSegmentEmbeddings() {
+  if (_decodedVectors) return _decodedVectors;
+
+  if (!_segmentEmbeddings) {
+    try {
+      const mod = await import("../data/segment_embeddings.json");
+      _segmentEmbeddings = mod.default || mod;
+    } catch (err) {
+      console.warn("⚠️ segment_embeddings.json not available:", err.message);
+      return null;
+    }
+  }
+
+  const segments = _segmentEmbeddings?.segments;
+  if (!segments) return null;
+
+  // Decode all vectors once
+  _decodedVectors = new Map();
+  for (const [id, seg] of Object.entries(segments)) {
+    _decodedVectors.set(id, {
+      vector: decodeFloat16Vector(seg.embedding),
+      courseCode: seg.course_code,
+      videoKey: seg.video_key,
+      videoTitle: seg.video_title,
+      startTimestamp: seg.start_timestamp,
+      endTimestamp: seg.end_timestamp,
+      startSeconds: seg.start_seconds,
+      text: seg.text,
+      tokenEstimate: seg.token_estimate,
+    });
+  }
+
+  console.log(`[SegmentSearch] Decoded ${_decodedVectors.size} segment embeddings`);
+  return _decodedVectors;
+}
 
 // Common transcript words that appear in nearly every course and add no signal
 const SEARCH_STOPWORDS = new Set([
@@ -313,9 +405,115 @@ export function formatSegmentCard(segment) {
   };
 }
 
+/**
+ * Semantic segment search using pre-computed embeddings.
+ * Finds segments closest to the query embedding via cosine similarity.
+ *
+ * @param {number[]|Float32Array} queryEmbedding - 768-dim query vector (from embedQuery Cloud Function)
+ * @param {number} topK - Number of results (default 10)
+ * @param {number} threshold - Minimum similarity (default 0.35)
+ * @returns {Promise<Array<{id, courseCode, videoKey, videoTitle, timestamp, startSeconds, text, similarity}>>}
+ */
+export async function searchSegmentsSemantic(queryEmbedding, topK = 10, threshold = 0.35) {
+  if (!queryEmbedding) return [];
+
+  const embeddings = await getSegmentEmbeddings();
+  if (!embeddings) {
+    console.warn("[SegmentSearch] Semantic search unavailable — no embeddings loaded");
+    return [];
+  }
+
+  const results = [];
+  for (const [id, seg] of embeddings) {
+    const similarity = cosineSimilarity(queryEmbedding, seg.vector);
+    if (similarity >= threshold) {
+      results.push({
+        id,
+        courseCode: seg.courseCode,
+        videoKey: seg.videoKey,
+        videoTitle: seg.videoTitle,
+        timestamp: seg.startTimestamp,
+        endTimestamp: seg.endTimestamp,
+        startSeconds: seg.startSeconds,
+        previewText: seg.text,
+        similarity,
+        source: "transcript",
+      });
+    }
+  }
+
+  results.sort((a, b) => b.similarity - a.similarity);
+  return results.slice(0, topK);
+}
+
+/**
+ * Hybrid search: combines keyword results with semantic results.
+ * Deduplicates by courseCode + videoKey, preferring semantic scores.
+ *
+ * @param {string} query - User's text query
+ * @param {number[]|Float32Array|null} queryEmbedding - Optional 768-dim vector
+ * @param {Array} courses - Course objects for metadata
+ * @param {number} topK - Max results (default 8)
+ * @returns {Promise<Array>}
+ */
+export async function searchSegmentsHybrid(query, queryEmbedding, courses = [], topK = 8) {
+  // Run both searches
+  const keywordResults = searchSegments(query, courses);
+  let semanticResults = [];
+
+  if (queryEmbedding) {
+    semanticResults = await searchSegmentsSemantic(queryEmbedding, topK, 0.35);
+  }
+
+  // Semantic results are passage-level, keyword results are course-level
+  // Merge: semantic passages first, then keyword courses as fallback
+  const seen = new Set();
+  const merged = [];
+
+  // Add semantic results (higher priority — passage-level)
+  for (const seg of semanticResults) {
+    const key = `${seg.courseCode}:${seg.videoKey}:${seg.timestamp}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      merged.push({
+        ...seg,
+        searchType: "semantic",
+        score: Math.round(seg.similarity * 100),
+      });
+    }
+  }
+
+  // Add keyword results that weren't already covered
+  for (const kw of keywordResults) {
+    for (const topSeg of kw.topSegments || []) {
+      const key = `${kw.courseCode}:${topSeg.videoKey}:${topSeg.timestamp}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push({
+          id: `kw_${kw.courseCode}_${topSeg.videoKey}`,
+          courseCode: kw.courseCode,
+          videoKey: topSeg.videoKey,
+          videoTitle: topSeg.videoTitle,
+          timestamp: topSeg.timestamp,
+          startSeconds: topSeg.startSeconds,
+          previewText: topSeg.previewText,
+          similarity: 0,
+          score: topSeg.score,
+          searchType: "keyword",
+          source: "transcript",
+        });
+      }
+    }
+  }
+
+  return merged.slice(0, topK);
+}
+
 export default {
   searchSegments,
   findTopSegments,
   getTargetedSegments,
   formatSegmentCard,
+  searchSegmentsSemantic,
+  searchSegmentsHybrid,
 };
