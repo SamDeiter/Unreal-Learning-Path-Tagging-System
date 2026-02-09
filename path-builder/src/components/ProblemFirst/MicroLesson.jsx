@@ -16,7 +16,7 @@ function formatTimestamp(ts) {
   return ts.replace(/^00:/, "");
 }
 
-export default function MicroLesson({ microLesson, retrievedPassages }) {
+export default function MicroLesson({ microLesson, retrievedPassages, videoResults = [] }) {
   const [expandedSection, setExpandedSection] = useState("quick_fix");
 
   if (!microLesson) return null;
@@ -28,7 +28,34 @@ export default function MicroLesson({ microLesson, retrievedPassages }) {
   };
 
   /**
+   * Find a matching video card from videoResults based on citation videoTitle.
+   * Uses fuzzy matching (checks if videoTitle is contained in the video's title).
+   */
+  const findMatchingVideo = (citation) => {
+    if (!citation?.videoTitle || videoResults.length === 0) return null;
+    const citTitle = citation.videoTitle.toLowerCase().replace(/[^a-z0-9]/g, "");
+    return videoResults.find((v) => {
+      const vTitle = (v.title || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      return vTitle.includes(citTitle) || citTitle.includes(vTitle);
+    });
+  };
+
+  /**
+   * Scroll to and briefly highlight a video card in the grid above.
+   */
+  const scrollToVideo = (video) => {
+    if (!video) return;
+    const el = document.getElementById(`video-${video.driveId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("highlight-flash");
+      setTimeout(() => el.classList.remove("highlight-flash"), 1500);
+    }
+  };
+
+  /**
    * Render a citation chip that links to a specific video moment.
+   * Clicking scrolls to the matching video card above.
    */
   const renderCitation = (citation) => {
     if (!citation) return null;
@@ -36,10 +63,21 @@ export default function MicroLesson({ microLesson, retrievedPassages }) {
       ? `${citation.videoTitle} @ ${formatTimestamp(citation.timestamp) || "start"}`
       : `Source [${citation.ref}]`;
 
+    const matchedVideo = findMatchingVideo(citation);
+    const isClickable = !!matchedVideo;
+
     return (
-      <span key={`${citation.ref}-${citation.timestamp}`} className="ml-citation" title={label}>
+      <span
+        key={`${citation.ref}-${citation.timestamp}`}
+        className={`ml-citation ${isClickable ? "ml-citation-linked" : ""}`}
+        title={isClickable ? `Jump to ${label} ↑` : label}
+        onClick={isClickable ? () => scrollToVideo(matchedVideo) : undefined}
+        role={isClickable ? "button" : undefined}
+        tabIndex={isClickable ? 0 : undefined}
+      >
         <span className="ml-citation-icon">🎬</span>
         <span className="ml-citation-text">{label}</span>
+        {isClickable && <span className="ml-citation-link-icon">↑</span>}
       </span>
     );
   };

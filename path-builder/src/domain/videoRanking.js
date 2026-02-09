@@ -114,19 +114,39 @@ export function flattenCoursesToVideos(matchedCourses, userQuery, roleMap = {}) 
     }
   }
 
+  // Deduplicate by driveId — keep the highest-scored entry per unique video
+  const uniqueMap = new Map();
+  for (const v of videos) {
+    const existing = uniqueMap.get(v.driveId);
+    if (!existing || v.relevanceScore > existing.relevanceScore) {
+      uniqueMap.set(v.driveId, v);
+    }
+  }
+  const deduped = Array.from(uniqueMap.values());
+
   // Sort by relevance — best answer first
-  videos.sort((a, b) => b.relevanceScore - a.relevanceScore);
+  deduped.sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+  // Per-course diversity: keep at most 1 video per course to avoid flooding
+  const courseCount = new Map();
+  const MAX_PER_COURSE = 1;
+  const diverse = deduped.filter((v) => {
+    const count = courseCount.get(v.courseCode) || 0;
+    if (count >= MAX_PER_COURSE) return false;
+    courseCount.set(v.courseCode, count + 1);
+    return true;
+  });
 
   // Filter out low-relevance videos
-  if (videos.length > 3) {
-    const scores = videos.map((v) => v.relevanceScore);
+  if (diverse.length > 3) {
+    const scores = diverse.map((v) => v.relevanceScore);
     const median = scores[Math.floor(scores.length / 2)];
     const threshold = Math.max(median * 0.5, 10);
-    const filtered = videos.filter((v) => v.relevanceScore >= threshold);
+    const filtered = diverse.filter((v) => v.relevanceScore >= threshold);
     if (filtered.length >= 3) return filtered.slice(0, 6);
   }
 
-  return videos.slice(0, 6);
+  return diverse.slice(0, 6);
 }
 
 /**

@@ -311,10 +311,31 @@ export default function ProblemFirst() {
               </div>
             )}
 
-            {/* RAG Micro-Lesson */}
+            {/* 🎬 Videos for You — shown first per user preference */}
+            <h2 className="results-title">🎬 Videos for You ({videoResults.length})</h2>
+            <div className="video-results-grid">
+              {videoResults.map((video) => (
+                <div key={video.driveId} className="video-result-wrapper" id={`video-${video.driveId}`}>
+                  <VideoResultCard
+                    video={video}
+                    isAdded={isInCart(video.driveId)}
+                    onToggle={handleVideoToggle}
+                    userQuery={searchHistory[searchHistory.length - 1]?.query || ""}
+                  />
+                </div>
+              ))}
+              {videoResults.length === 0 && (
+                <div className="no-results">
+                  <p>No matching videos found. Try rephrasing your question.</p>
+                </div>
+              )}
+            </div>
+
+            {/* RAG Micro-Lesson — interwoven with videos via citations */}
             <MicroLesson
               microLesson={diagnosisData.microLesson}
               retrievedPassages={diagnosisData.retrievedPassages}
+              videoResults={videoResults}
             />
 
             {searchHistory.length > 0 && (
@@ -352,24 +373,7 @@ export default function ProblemFirst() {
               </div>
             )}
 
-            <h2 className="results-title">🎬 Videos for You ({videoResults.length})</h2>
-            <div className="video-results-grid">
-              {videoResults.map((video) => (
-                <div key={video.driveId} className="video-result-wrapper">
-                  <VideoResultCard
-                    video={video}
-                    isAdded={isInCart(video.driveId)}
-                    onToggle={handleVideoToggle}
-                    userQuery={searchHistory[searchHistory.length - 1]?.query || ""}
-                  />
-                </div>
-              ))}
-              {videoResults.length === 0 && (
-                <div className="no-results">
-                  <p>No matching videos found. Try rephrasing your question.</p>
-                </div>
-              )}
-            </div>
+
           </div>
 
           <div className="cart-column">
