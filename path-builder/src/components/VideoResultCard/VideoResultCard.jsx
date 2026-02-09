@@ -23,10 +23,27 @@ function formatDuration(seconds) {
 }
 
 /**
- * Individual video result card — shows thumbnail, title, duration,
- * matched tags, timestamp hints, doc links, feedback, and an add/remove toggle.
+ * Format a timestamp string (e.g. "00:12:34" or "12:34") for display.
  */
-export default function VideoResultCard({ video, isAdded, onToggle, userQuery }) {
+function formatTimestamp(ts) {
+  if (!ts) return null;
+  return ts.replace(/^00:/, "");
+}
+
+/**
+ * Individual video result card — compact by default, expandable on click.
+ * When expanded, shows MicroLesson content, timestamps, course details.
+ */
+export default function VideoResultCard({
+  video,
+  isAdded,
+  onToggle,
+  userQuery,
+  isExpanded = false,
+  onExpand,
+  microLesson,
+  retrievedPassages,
+}) {
   const {
     title,
     courseName,
@@ -45,8 +62,8 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
   const prereqCourses = prereqEntry?.prereqs || [];
 
   const [feedbackState, setFeedbackState] = useState(() => getFeedbackStatus(driveId));
-  const [segmentsOpen, setSegmentsOpen] = useState(false);
   const [prereqTip, setPrereqTip] = useState(false);
+  const [expandedLesson, setExpandedLesson] = useState("quick_fix");
   const tipRef = useRef(null);
 
   // Close tooltip on outside click
@@ -71,158 +88,273 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
     setFeedbackState("down");
   };
 
+  const handleCardClick = () => {
+    if (onExpand) onExpand(driveId);
+  };
+
+  const toggleLesson = (section) => {
+    setExpandedLesson((prev) => (prev === section ? null : section));
+  };
+
   // Fallback thumbnail
   const thumbnailUrl = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w320` : null;
 
+  // Extract MicroLesson sections
+  const quickFix = microLesson?.quick_fix;
+  const whyItWorks = microLesson?.why_it_works;
+  const relatedSituations = microLesson?.related_situations;
+
+  // Get doc passages
+  const docPassages = (retrievedPassages || []).filter((p) => p.source === "epic_docs");
+
   return (
     <div
-      className={`video-result-card ${isAdded ? "added" : ""} ${_curatedMatch ? "curated" : ""} ${feedbackState === "down" ? "demoted" : ""}`}
+      className={`video-result-card ${isAdded ? "added" : ""} ${_curatedMatch ? "curated" : ""} ${feedbackState === "down" ? "demoted" : ""} ${isExpanded ? "expanded" : ""}`}
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      aria-expanded={isExpanded}
     >
-      <div className="vrc-thumbnail">
-        {thumbnailUrl ? (
-          <img
-            src={thumbnailUrl}
-            alt={title}
-            onError={(e) => {
-              e.target.style.display = "none";
-              e.target.nextSibling.style.display = "flex";
-            }}
-          />
-        ) : null}
-        <div className="vrc-thumb-fallback" style={{ display: thumbnailUrl ? "none" : "flex" }}>
-          <span className="vrc-play-icon">
-            <PlayCircle size={24} />
-          </span>
+      {/* === Compact Card View (always visible) === */}
+      <div className="vrc-compact">
+        <div className="vrc-thumbnail">
+          {thumbnailUrl ? (
+            <img
+              src={thumbnailUrl}
+              alt={title}
+              onError={(e) => {
+                e.target.style.display = "none";
+                e.target.nextSibling.style.display = "flex";
+              }}
+            />
+          ) : null}
+          <div className="vrc-thumb-fallback" style={{ display: thumbnailUrl ? "none" : "flex" }}>
+            <span className="vrc-play-icon">
+              <PlayCircle size={24} />
+            </span>
+          </div>
+          {duration > 0 && <span className="vrc-duration">{formatDuration(duration)}</span>}
         </div>
-        {duration > 0 && <span className="vrc-duration">{formatDuration(duration)}</span>}
-      </div>
 
-      {_curatedMatch && <div className="vrc-curated-badge">✓ Known Solution</div>}
+        {_curatedMatch && <div className="vrc-curated-badge">✓ Known Solution</div>}
 
-      {/* Role badge from PathBuilder V2 */}
-      {role && (
-        <div className="vrc-role-wrapper" ref={role === "prerequisite" ? tipRef : null}>
-          <button
-            className={`vrc-role-badge vrc-role-${role} ${role === "prerequisite" ? "vrc-role-clickable" : ""}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (role === "prerequisite") setPrereqTip((v) => !v);
-            }}
-            title={role === "prerequisite" ? "Click to see why this is a prerequisite" : undefined}
-          >
-            {role === "prerequisite" && "🔗 Prerequisite"}
-            {role === "core" && "⭐ Core"}
-            {role === "troubleshooting" && "🔧 Troubleshooting"}
-            {role === "supplemental" && "📚 Supplemental"}
-          </button>
-          {prereqTip && role === "prerequisite" && (
-            <div className="vrc-prereq-tooltip">
-              <strong>Prerequisite Course</strong>
-              {prereqCourses.length > 0 ? (
-                <>
-                  <p>Watch these first:</p>
-                  <ul className="vrc-prereq-list">
-                    {prereqCourses.map((pc) => (
-                      <li key={pc}>
-                        📘 {courseTitles[pc] || pc}
-                        {prereqEntry?.reasons?.[pc] && (
-                          <span className="vrc-prereq-why"> — {prereqEntry.reasons[pc]}</span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <p>Watch this first — it covers foundational concepts needed before advancing.</p>
-              )}
-              {reason && <p className="vrc-tip-reason">{reason}</p>}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="vrc-info">
-        <h4 className="vrc-title">{title}</h4>
-        {courseName && <p className="vrc-course">{courseName}</p>}
-        {reason && <p className="vrc-reason">{reason}</p>}
-        {matchedTags.length > 0 && (
-          <p className="vrc-tags">Covers: {matchedTags.slice(0, 3).join(", ")}</p>
-        )}
-
-        {/* Timestamp segments — collapsed behind toggle */}
-        {topSegments.length > 0 && (
-          <div className="vrc-segments-wrapper">
+        {/* Role badge */}
+        {role && (
+          <div className="vrc-role-wrapper" ref={role === "prerequisite" ? tipRef : null}>
             <button
-              className="vrc-segments-toggle"
+              className={`vrc-role-badge vrc-role-${role} ${role === "prerequisite" ? "vrc-role-clickable" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
-                setSegmentsOpen((v) => !v);
+                if (role === "prerequisite") setPrereqTip((v) => !v);
               }}
+              title={role === "prerequisite" ? "Click to see why this is a prerequisite" : undefined}
             >
-              <Clock size={11} />
-              <span>
-                {topSegments.length} timestamp{topSegments.length > 1 ? "s" : ""}
-              </span>
-              {segmentsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+              {role === "prerequisite" && "🔗 Prerequisite"}
+              {role === "core" && "⭐ Core"}
+              {role === "troubleshooting" && "🔧 Troubleshooting"}
+              {role === "supplemental" && "📚 Supplemental"}
             </button>
-            {segmentsOpen && (
-              <div className="vrc-segments">
-                {topSegments.slice(0, 2).map((seg, idx) => (
-                  <div key={idx} className="vrc-segment-hint">
-                    <Clock size={12} className="vrc-clock-icon" />
-                    <span className="vrc-seg-time">{seg.timestamp}</span>
-                    <span className="vrc-seg-preview">
-                      {seg.previewText.length > 55
-                        ? seg.previewText.substring(0, 52) + "..."
-                        : seg.previewText}
-                    </span>
-                  </div>
-                ))}
+            {prereqTip && role === "prerequisite" && (
+              <div className="vrc-prereq-tooltip">
+                <strong>Prerequisite Course</strong>
+                {prereqCourses.length > 0 ? (
+                  <>
+                    <p>Watch these first:</p>
+                    <ul className="vrc-prereq-list">
+                      {prereqCourses.map((pc) => (
+                        <li key={pc}>
+                          📘 {courseTitles[pc] || pc}
+                          {prereqEntry?.reasons?.[pc] && (
+                            <span className="vrc-prereq-why"> — {prereqEntry.reasons[pc]}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <p>Watch this first — it covers foundational concepts needed before advancing.</p>
+                )}
+                {reason && <p className="vrc-tip-reason">{reason}</p>}
               </div>
             )}
           </div>
         )}
 
-        {/* watchHint and docLinks removed to reduce card noise */}
-      </div>
+        <div className="vrc-info">
+          <h4 className="vrc-title">{title}</h4>
+        </div>
 
-      {/* Actions row: feedback + add/remove */}
-      <div className="vrc-actions">
-        <div className="vrc-feedback">
+        {/* Actions row: feedback + add/remove */}
+        <div className="vrc-actions">
+          <div className="vrc-feedback">
+            <button
+              className={`vrc-fb-btn ${feedbackState === "up" ? "active-up" : ""}`}
+              onClick={handleUpvote}
+              aria-label="Helpful"
+              title="This was helpful"
+            >
+              <span className="vrc-fb-emoji">👍</span>
+            </button>
+            <button
+              className={`vrc-fb-btn ${feedbackState === "down" ? "active-down" : ""}`}
+              onClick={handleDownvote}
+              aria-label="Not helpful"
+              title="Not relevant"
+            >
+              <span className="vrc-fb-emoji">👎</span>
+            </button>
+          </div>
+
           <button
-            className={`vrc-fb-btn ${feedbackState === "up" ? "active-up" : ""}`}
-            onClick={handleUpvote}
-            aria-label="Helpful"
-            title="This was helpful"
+            className={`vrc-add-btn ${isAdded ? "vrc-added" : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle(video);
+            }}
+            aria-label={isAdded ? "Remove from playlist" : "Add to playlist"}
           >
-            <span className="vrc-fb-emoji">👍</span>
-          </button>
-          <button
-            className={`vrc-fb-btn ${feedbackState === "down" ? "active-down" : ""}`}
-            onClick={handleDownvote}
-            aria-label="Not helpful"
-            title="Not relevant"
-          >
-            <span className="vrc-fb-emoji">👎</span>
+            {isAdded ? (
+              <>
+                <Check size={14} /> Added
+              </>
+            ) : (
+              <>
+                <Plus size={14} /> Add
+              </>
+            )}
           </button>
         </div>
 
-        <button
-          className={`vrc-add-btn ${isAdded ? "vrc-added" : ""}`}
-          onClick={() => onToggle(video)}
-          aria-label={isAdded ? "Remove from playlist" : "Add to playlist"}
-        >
-          {isAdded ? (
-            <>
-              <Check size={14} /> Added
-            </>
-          ) : (
-            <>
-              <Plus size={14} /> Add
-            </>
-          )}
-        </button>
+        {/* Expand indicator */}
+        <div className="vrc-expand-hint">
+          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          <span>{isExpanded ? "Less" : "Details"}</span>
+        </div>
       </div>
+
+      {/* === Expanded Panel (progressive disclosure) === */}
+      {isExpanded && (
+        <div className="vrc-expanded-panel" onClick={(e) => e.stopPropagation()}>
+          {/* Course & Tags Details */}
+          <div className="vrc-details-row">
+            {courseName && (
+              <span className="vrc-detail-chip vrc-detail-course">📁 {courseName}</span>
+            )}
+            {matchedTags.length > 0 && (
+              <span className="vrc-detail-chip vrc-detail-tags">
+                🏷️ {matchedTags.slice(0, 4).join(", ")}
+              </span>
+            )}
+          </div>
+
+          {/* Reason */}
+          {reason && <p className="vrc-expanded-reason">{reason}</p>}
+
+          {/* Timestamp segments */}
+          {topSegments.length > 0 && (
+            <div className="vrc-expanded-segments">
+              <span className="vrc-expanded-segments-label">
+                <Clock size={12} /> Key Moments
+              </span>
+              {topSegments.slice(0, 3).map((seg, idx) => (
+                <div key={idx} className="vrc-segment-hint">
+                  <Clock size={12} className="vrc-clock-icon" />
+                  <span className="vrc-seg-time">{seg.timestamp}</span>
+                  <span className="vrc-seg-preview">
+                    {seg.previewText.length > 80
+                      ? seg.previewText.substring(0, 77) + "..."
+                      : seg.previewText}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* MicroLesson Sections */}
+          {microLesson && (
+            <div className="vrc-micro-lesson">
+              <div className="vrc-ml-header">
+                <span className="vrc-ml-badge">✨ AI Lesson</span>
+              </div>
+
+              {/* ⚡ Quick Fix */}
+              {quickFix && (
+                <div className={`vrc-ml-section ${expandedLesson === "quick_fix" ? "expanded" : ""}`}>
+                  <button className="vrc-ml-toggle" onClick={() => toggleLesson("quick_fix")}>
+                    <span>⚡ {quickFix.title || "Quick Fix"}</span>
+                    <span className="vrc-ml-chevron">{expandedLesson === "quick_fix" ? "▾" : "▸"}</span>
+                  </button>
+                  {expandedLesson === "quick_fix" && quickFix.steps && (
+                    <ol className="vrc-ml-steps">
+                      {quickFix.steps.map((step, i) => (
+                        <li key={i}>{step}</li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              )}
+
+              {/* 🧠 Why This Works */}
+              {whyItWorks && (
+                <div className={`vrc-ml-section ${expandedLesson === "why" ? "expanded" : ""}`}>
+                  <button className="vrc-ml-toggle" onClick={() => toggleLesson("why")}>
+                    <span>🧠 Why This Works</span>
+                    {whyItWorks.key_concept && (
+                      <span className="vrc-ml-concept">{whyItWorks.key_concept}</span>
+                    )}
+                    <span className="vrc-ml-chevron">{expandedLesson === "why" ? "▾" : "▸"}</span>
+                  </button>
+                  {expandedLesson === "why" && (
+                    <p className="vrc-ml-explanation">{whyItWorks.explanation}</p>
+                  )}
+                </div>
+              )}
+
+              {/* 🔗 Related Situations */}
+              {relatedSituations && relatedSituations.length > 0 && (
+                <div className={`vrc-ml-section ${expandedLesson === "related" ? "expanded" : ""}`}>
+                  <button className="vrc-ml-toggle" onClick={() => toggleLesson("related")}>
+                    <span>🔗 Related Situations</span>
+                    <span className="vrc-ml-tag">{relatedSituations.length} scenarios</span>
+                    <span className="vrc-ml-chevron">{expandedLesson === "related" ? "▾" : "▸"}</span>
+                  </button>
+                  {expandedLesson === "related" && (
+                    <div className="vrc-ml-scenarios">
+                      {relatedSituations.map((sit, i) => (
+                        <div key={i} className="vrc-ml-scenario">
+                          <strong>💡 {sit.scenario}</strong>
+                          <p>{sit.connection}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 📚 Epic Docs Links */}
+          {docPassages.length > 0 && (
+            <div className="vrc-expanded-docs">
+              <span className="vrc-expanded-docs-label">📚 Documentation</span>
+              <div className="vrc-doc-chips">
+                {docPassages.map((doc, i) => (
+                  <a
+                    key={i}
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="vrc-doc-chip"
+                    title={doc.text?.slice(0, 200)}
+                  >
+                    📄 {doc.title || doc.section || "UE5 Docs"}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -245,4 +377,8 @@ VideoResultCard.propTypes = {
   isAdded: PropTypes.bool,
   onToggle: PropTypes.func.isRequired,
   userQuery: PropTypes.string,
+  isExpanded: PropTypes.bool,
+  onExpand: PropTypes.func,
+  microLesson: PropTypes.object,
+  retrievedPassages: PropTypes.array,
 };
