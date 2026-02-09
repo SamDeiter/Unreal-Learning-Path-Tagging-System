@@ -1,4 +1,14 @@
 /* ===== Video Result Card ===== */
+
+/* Wrapper prevents collapsed cards from stretching when an expanded card spans full width */
+.video-result-wrapper {
+  align-self: start;
+}
+
+.video-result-wrapper.expanded {
+  grid-column: 1 / -1;
+}
+
 .video-result-card {
   display: flex;
   flex-direction: column;
@@ -7,6 +17,7 @@
   border: 1px solid rgba(139, 92, 246, 0.15);
   border-radius: 12px;
   overflow: hidden;
+  cursor: pointer;
   transition:
     transform 0.2s ease,
     border-color 0.3s ease,
@@ -470,4 +481,302 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* === Compact wrapper === */
+.vrc-compact {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* === Expand Hint (bottom of compact card) === */
+.vrc-expand-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0;
+  font-size: 0.65rem;
+  color: #6b7280;
+  border-top: 1px solid rgba(139, 92, 246, 0.08);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.vrc-expand-hint:hover {
+  color: #a78bfa;
+}
+
+/* === Expanded State === */
+.video-result-card.expanded {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+  height: auto;
+}
+
+.video-result-card.expanded:hover {
+  transform: none;
+}
+
+/* In expanded state, make compact section horizontal */
+.video-result-card.expanded .vrc-compact {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem;
+}
+
+.video-result-card.expanded .vrc-thumbnail {
+  width: 200px;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.video-result-card.expanded .vrc-info {
+  flex: 1;
+}
+
+.video-result-card.expanded .vrc-expand-hint {
+  display: none;
+}
+
+/* === Expanded Panel === */
+.vrc-expanded-panel {
+  padding: 1rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(24, 24, 37, 0.6);
+  animation: panelSlideIn 0.25s ease-out;
+}
+
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 800px;
+  }
+}
+
+/* Detail chips (course, tags) */
+.vrc-details-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.vrc-detail-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.vrc-detail-course {
+  background: rgba(59, 130, 246, 0.12);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.vrc-detail-tags {
+  background: rgba(139, 92, 246, 0.12);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Expanded reason */
+.vrc-expanded-reason {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  color: #9ca3af;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Expanded segments */
+.vrc-expanded-segments {
+  margin-bottom: 0.75rem;
+}
+
+.vrc-expanded-segments-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  color: #a78bfa;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+/* === In-Card MicroLesson === */
+.vrc-micro-lesson {
+  margin-top: 0.5rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.12);
+  padding-top: 0.75rem;
+}
+
+.vrc-ml-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.vrc-ml-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(59, 130, 246, 0.15));
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.vrc-ml-section {
+  border-radius: 8px;
+  margin-bottom: 0.35rem;
+  background: rgba(30, 30, 46, 0.5);
+  border: 1px solid rgba(139, 92, 246, 0.08);
+  overflow: hidden;
+}
+
+.vrc-ml-section.expanded {
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.vrc-ml-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.vrc-ml-toggle:hover {
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.vrc-ml-chevron {
+  margin-left: auto;
+  color: #6b7280;
+  font-size: 0.7rem;
+}
+
+.vrc-ml-concept {
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.6rem;
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.vrc-ml-tag {
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.6rem;
+  background: rgba(59, 130, 246, 0.12);
+  color: #93c5fd;
+}
+
+.vrc-ml-steps {
+  padding: 0.5rem 0.75rem 0.75rem 1.8rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: #d1d5db;
+  line-height: 1.6;
+}
+
+.vrc-ml-steps li {
+  margin-bottom: 0.35rem;
+}
+
+.vrc-ml-steps li::marker {
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+.vrc-ml-explanation {
+  padding: 0.5rem 0.75rem 0.75rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: #d1d5db;
+  line-height: 1.6;
+}
+
+.vrc-ml-scenarios {
+  padding: 0.5rem 0.75rem 0.75rem;
+}
+
+.vrc-ml-scenario {
+  margin-bottom: 0.5rem;
+  font-size: 0.73rem;
+  color: #d1d5db;
+  line-height: 1.5;
+}
+
+.vrc-ml-scenario strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.vrc-ml-scenario p {
+  margin: 0;
+  color: #9ca3af;
+}
+
+/* === Doc Links in expanded panel === */
+.vrc-expanded-docs {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.08);
+}
+
+.vrc-expanded-docs-label {
+  font-size: 0.7rem;
+  color: #a78bfa;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.vrc-doc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.vrc-doc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  background: rgba(34, 197, 94, 0.1);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.vrc-doc-chip:hover {
+  background: rgba(34, 197, 94, 0.2);
 }
