@@ -255,7 +255,7 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
       {microLesson && <AiGuidePanel microLesson={microLesson} courses={courses} />}
       <div className="video-controls">
         <button className="complete-btn" onClick={onVideoComplete}>
-          {hasMoreVideos ? "✓ Mark Complete & Continue" : "✓ Complete & Try Exercise"}
+          {hasMoreVideos ? "Mark Complete & Continue →" : "Complete & Try Exercise →"}
         </button>
         <button className="exit-btn" onClick={onExit}>Exit Path</button>
       </div>
