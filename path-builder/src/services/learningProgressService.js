@@ -3,6 +3,7 @@
  * Tracks learner progress via localStorage — foundation for spiral curriculum.
  * Stores completed paths, encountered tags, reflections, and streaks.
  */
+import { devWarn } from "../utils/logger";
 
 const STORAGE_KEY = "ue5_learning_progress";
 
@@ -41,7 +42,7 @@ function saveProgress(progress) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
   } catch (e) {
-    console.warn("[LearningProgress] Failed to save:", e.message);
+    devWarn("[LearningProgress] Failed to save:", e.message);
   }
 }
 

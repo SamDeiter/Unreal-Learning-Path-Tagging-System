@@ -9,6 +9,8 @@
 
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 
+import { devLog, devWarn } from "../utils/logger";
+
 /**
  * Analytics Event Types
  */
@@ -72,11 +74,11 @@ export async function trackEvent(eventName, payload = {}) {
 
     // Also log to console in development
     if (import.meta.env?.DEV) {
-      console.log("[Analytics]", eventName, payload);
+      devLog("[Analytics]", eventName, payload);
     }
   } catch (error) {
     // Don't let analytics failures break the app
-    console.warn("[Analytics] Failed to track event:", eventName, error.message);
+    devWarn("[Analytics] Failed to track event:", eventName, error.message);
   }
 }
 

@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { X, Upload, MessageSquare, AlertCircle, CheckCircle, Bug, Lightbulb } from "lucide-react";
 import "./FeedbackModal.css";
 
+import { devLog } from "../../utils/logger";
+
 /**
  * FeedbackModal - A global modal for reporting bugs and sharing feedback.
  * Supports:
@@ -38,11 +40,7 @@ export default function FeedbackModal({ isOpen, onClose }) {
     // Mock submission latency
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    console.group("📝 Feedback Submission");
-    console.log("Type:", type);
-    console.log("Description:", description);
-    console.log("Files:", files);
-    console.groupEnd();
+    devLog("📝 Feedback Submission", { type, description, files });
 
     setSuccess(true);
     setIsSubmitting(false);

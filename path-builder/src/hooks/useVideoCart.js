@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { devWarn } from "../utils/logger";
 
 const STORAGE_KEY = "ue5_video_cart";
 
@@ -15,7 +16,7 @@ function saveCart(items) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   } catch (e) {
-    console.warn("[VideoCart] Failed to save:", e);
+    devWarn("[VideoCart] Failed to save:", e);
   }
 }
 

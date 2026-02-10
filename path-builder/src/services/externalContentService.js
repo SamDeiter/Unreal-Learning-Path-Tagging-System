@@ -10,6 +10,8 @@
  * with first-party data files.
  */
 
+import { devWarn } from "../utils/logger";
+
 // Lazy-loaded
 let _ytData = null;
 
@@ -40,7 +42,7 @@ async function getYouTubeData() {
     _ytData = mod.default || mod;
     return _ytData;
   } catch {
-    console.warn("[ExternalContent] youtube_curated.json not found — third-party content disabled");
+    devWarn("[ExternalContent] youtube_curated.json not found — third-party content disabled");
     _ytData = { channels: {}, resources: [] };
     return _ytData;
   }

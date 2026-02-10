@@ -7,6 +7,8 @@ import { searchSegments } from "../services/segmentSearchService";
 import synonymMap from "../data/synonym_map.json";
 import curatedSolutions from "../data/curated_solutions.json";
 
+import { devLog } from "../utils/logger";
+
 // Tiered matching threshold — semantic search only fires when
 // deterministic passes score below this value
 const TIER1_CONFIDENCE_THRESHOLD = 60;
@@ -20,12 +22,7 @@ const UE5_ONLY_TAGS = new Set([
   "worldbuilding.worldPartition",
 ]);
 
-// Stopwords to ignore in title matching
-const STOPWORDS = new Set([
-  "the", "and", "for", "with", "your", "first", "how", "from", "this",
-  "that", "are", "was", "has", "have", "not", "can", "using", "into",
-  "unreal", "engine", "introduction", "quick",
-]);
+import { SEARCH_STOPWORDS as STOPWORDS } from "./constants";
 
 /**
  * Detect UE version intent from user query.
@@ -76,7 +73,7 @@ export function matchCoursesToCart(
         })
         .filter(Boolean);
       if (curatedCourses.length > 0) {
-        console.log("✅ Curated solution match:", solution.explanation);
+        devLog("✅ Curated solution match:", solution.explanation);
         return curatedCourses;
       }
     }
@@ -89,7 +86,7 @@ export function matchCoursesToCart(
   const mergedTagIds = [...new Set([...selectedTagIds, ...autoDetectedTagIds])];
 
   if (signatureMatches.length > 0) {
-    console.log(
+    devLog(
       "🔍 Error signatures detected:",
       signatureMatches.map((m) => `${m.tag.display_name} (${m.matchedSignature}, ${m.confidence})`)
     );
@@ -231,7 +228,7 @@ export function matchCoursesToCart(
   const tier1Confident = tier1TopScore >= TIER1_CONFIDENCE_THRESHOLD;
 
   if (semanticResults.length > 0 && !tier1Confident) {
-    console.log(`🔀 Tier 2: Semantic fallback (Tier 1 top score: ${tier1TopScore})`);
+    devLog(`🔀 Tier 2: Semantic fallback (Tier 1 top score: ${tier1TopScore})`);
     for (const sr of semanticResults) {
       if (!seen.has(sr.code)) {
         const course = allCourses.find((c) => c.code === sr.code);
@@ -251,7 +248,7 @@ export function matchCoursesToCart(
       }
     }
   } else if (semanticResults.length > 0) {
-    console.log(`✅ Tier 1: Deterministic match confident (top score: ${tier1TopScore}), skipping semantic`);
+    devLog(`✅ Tier 1: Deterministic match confident (top score: ${tier1TopScore}), skipping semantic`);
   }
 
   merged.sort((a, b) => b._relevanceScore - a._relevanceScore);
@@ -304,7 +301,7 @@ export function applyVersionFilter(courses, userQuery) {
         [...UE5_ONLY_TAGS].some((ue5) => t.includes(ue5.split(".").pop()))
       );
       if (version === 4 && hasUE5OnlyTag) {
-        console.log(`⬇️ UE4 demotion: ${course.code} (has UE5-only tags)`);
+        devLog(`⬇️ UE4 demotion: ${course.code} (has UE5-only tags)`);
         return { ...course, _relevanceScore: course._relevanceScore * 0.2 };
       }
       if (version === 5 && hasUE5OnlyTag) {

@@ -8,6 +8,8 @@ import {
 } from "../../utils/suggestionEngine";
 import "./TagPathBuilder.css";
 
+import { devLog, devWarn } from "../../utils/logger";
+
 function TagPathBuilder({ courses }) {
   const { tags } = useTagData();
   const { addCourse, courses: pathCourses } = usePath();
@@ -173,12 +175,12 @@ function TagPathBuilder({ courses }) {
 
   // Heuristic Recommendation
   const handleSuggest = () => {
-    console.log("handleSuggest triggered");
+    devLog("handleSuggest triggered");
 
     // If no tags selected but we have a path, use the path's topics as implicit tags
     let intentTags = selectedTags;
     if (selectedTagIds.size === 0 && pathCourses.length > 0) {
-      console.log("Using implicit path context...");
+      devLog("Using implicit path context...");
       const pathTopics = new Set();
       pathCourses.forEach((c) => {
         if (c.topics) c.topics.forEach((t) => pathTopics.add(t));
@@ -189,7 +191,7 @@ function TagPathBuilder({ courses }) {
     }
 
     if (intentTags.length === 0) {
-      console.warn("No intent tags found. Aborting suggestion.");
+      devWarn("No intent tags found. Aborting suggestion.");
       return;
     }
 

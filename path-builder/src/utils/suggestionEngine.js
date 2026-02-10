@@ -96,7 +96,7 @@ export const suggestSupplementalByTags = (selectedTags, pathCourses, library, pr
     }
   });
 
-  console.log("Selected Tag Keys for matching:", Array.from(selectedTagKeys));
+  devLog("Selected Tag Keys for matching:", Array.from(selectedTagKeys));
 
   const scored = library
     .map((course) => {
@@ -123,7 +123,7 @@ export const suggestSupplementalByTags = (selectedTags, pathCourses, library, pr
     .filter((item) => item && item.score > 0)
     .sort((a, b) => b.score - a.score);
 
-  console.log(
+  devLog(
     "Scored courses:",
     scored.slice(0, 10).map((s) => ({ title: s.course.title, score: s.score }))
   );
@@ -214,6 +214,8 @@ export const suggestNextSteps = (pathCourses, library) => {
 };
 
 import { topicDocs } from "../data/topicDocs";
+
+import { devLog } from "./logger";
 
 /**
  * Get Official Documentation Links

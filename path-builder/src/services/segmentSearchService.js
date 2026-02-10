@@ -12,6 +12,8 @@ import searchIndex from "../data/search_index.json";
 import segmentIndex from "../data/segment_index.json";
 import { cosineSimilarity } from "./semanticSearchService";
 
+import { devLog, devWarn } from "../utils/logger";
+
 // Lazy-loaded embeddings (5.9MB, loaded on first semantic query)
 let _segmentEmbeddings = null;
 let _decodedVectors = null;
@@ -72,7 +74,7 @@ async function getSegmentEmbeddings() {
       const mod = await import("../data/segment_embeddings.json");
       _segmentEmbeddings = mod.default || mod;
     } catch (err) {
-      console.warn("⚠️ segment_embeddings.json not available:", err.message);
+      devWarn("⚠️ segment_embeddings.json not available:", err.message);
       return null;
     }
   }
@@ -96,114 +98,11 @@ async function getSegmentEmbeddings() {
     });
   }
 
-  console.log(`[SegmentSearch] Decoded ${_decodedVectors.size} segment embeddings`);
+  devLog(`[SegmentSearch] Decoded ${_decodedVectors.size} segment embeddings`);
   return _decodedVectors;
 }
 
-// Common transcript words that appear in nearly every course and add no signal
-const SEARCH_STOPWORDS = new Set([
-  "the",
-  "and",
-  "for",
-  "with",
-  "this",
-  "that",
-  "are",
-  "was",
-  "has",
-  "have",
-  "not",
-  "can",
-  "into",
-  "from",
-  "how",
-  "you",
-  "your",
-  "will",
-  "would",
-  "also",
-  "just",
-  "like",
-  "more",
-  "very",
-  "some",
-  "want",
-  "need",
-  "make",
-  "use",
-  "used",
-  "using",
-  "help",
-  "helpful",
-  "helps",
-  "get",
-  "getting",
-  "let",
-  "look",
-  "going",
-  "come",
-  "here",
-  "there",
-  "know",
-  "thing",
-  "really",
-  "actually",
-  "basically",
-  "something",
-  "everything",
-  "slow",
-  "fast",
-  "leading",
-  "exhibiting",
-  "experiencing",
-  "causing",
-  "about",
-  "been",
-  "being",
-  "could",
-  "does",
-  "doing",
-  "done",
-  "each",
-  "even",
-  "every",
-  "first",
-  "give",
-  "good",
-  "great",
-  "kind",
-  "made",
-  "much",
-  "over",
-  "part",
-  "right",
-  "same",
-  "see",
-  "show",
-  "start",
-  "still",
-  "take",
-  "tell",
-  "than",
-  "them",
-  "then",
-  "these",
-  "they",
-  "those",
-  "through",
-  "time",
-  "took",
-  "turn",
-  "way",
-  "well",
-  "what",
-  "when",
-  "where",
-  "which",
-  "while",
-  "work",
-  "working",
-]);
+import { SEARCH_STOPWORDS } from "../domain/constants";
 
 /**
  * Search for segments mentioning specific keywords
@@ -347,29 +246,7 @@ export function findTopSegments(courseCode, keywords) {
   return scoredSegments.sort((a, b) => b.score - a.score).slice(0, 3);
 }
 
-/**
- * Legacy compatibility — now wraps findTopSegments
- */
-export function estimateTopSegment(courseCode, keywords) {
-  const segments = findTopSegments(courseCode, keywords);
-  if (segments.length > 0) {
-    return {
-      videoNumber: 1,
-      estimatedTimestamp: segments[0].timestamp,
-      previewText: segments[0].previewText,
-      segmentDuration: "~30s",
-      videoTitle: segments[0].videoTitle,
-      startSeconds: segments[0].startSeconds,
-    };
-  }
-  // Fallback if no segments found
-  return {
-    videoNumber: 1,
-    estimatedTimestamp: "0:00",
-    previewText: `Discusses ${keywords.slice(0, 3).join(", ")}...`,
-    segmentDuration: "Unknown",
-  };
-}
+
 
 /**
  * Get top courses matching a problem query
@@ -419,7 +296,7 @@ export async function searchSegmentsSemantic(queryEmbedding, topK = 10, threshol
 
   const embeddings = await getSegmentEmbeddings();
   if (!embeddings) {
-    console.warn("[SegmentSearch] Semantic search unavailable — no embeddings loaded");
+    devWarn("[SegmentSearch] Semantic search unavailable — no embeddings loaded");
     return [];
   }
 

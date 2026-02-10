@@ -5,8 +5,9 @@
  * API key stored securely in Firebase Secrets - never exposed to client.
  */
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getFirebaseApp, firebaseConfig } from "./firebaseConfig";
+import { devWarn } from "../utils/logger";
 
 /** Safely extract tags as an array. c.tags may be an object {topic, level} not an array. */
 function getTagsArray(item) {
@@ -14,16 +15,6 @@ function getTagsArray(item) {
   if (Array.isArray(item?.extracted_tags)) return item.extracted_tags;
   return [];
 }
-
-// Firebase config - uses same project as main app
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-};
 
 // Lazy initialization - only initialize when needed and API key is present
 let app = null;
@@ -35,19 +26,12 @@ function initFirebase() {
 
   // Check if API key is configured
   if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "undefined") {
-    console.warn("Firebase API key not configured. Gemini AI features disabled.");
+    devWarn("Firebase API key not configured. Gemini AI features disabled.");
     return false;
   }
 
   try {
-    const existingApps = getApps();
-    const pathBuilderApp = existingApps.find((a) => a.name === "path-builder");
-
-    if (pathBuilderApp) {
-      app = pathBuilderApp;
-    } else {
-      app = initializeApp(firebaseConfig, "path-builder");
-    }
+    app = getFirebaseApp();
 
     auth = getAuth(app);
     functions = getFunctions(app, "us-central1");
@@ -102,7 +86,7 @@ Respond with ONLY valid JSON, no markdown.`;
 
   // Check auth and call Cloud Function
   if (!isUserAuthenticated()) {
-    console.warn("User not authenticated. Using fallback generation.");
+    devWarn("User not authenticated. Using fallback generation.");
     return generateFallbackMetadata(videos);
   }
 
@@ -159,7 +143,7 @@ Generate a JSON array with questions, each having:
 Respond with ONLY valid JSON array, no markdown.`;
 
   if (!isUserAuthenticated()) {
-    console.warn("User not authenticated. Using fallback quiz.");
+    devWarn("User not authenticated. Using fallback quiz.");
     return generateFallbackQuiz(video, count);
   }
 
@@ -241,7 +225,7 @@ Be SPECIFIC to the actual tags and content. Reference real UE5 concepts like Nia
 Respond with ONLY valid JSON, no markdown.`;
 
   if (!isUserAuthenticated()) {
-    console.warn("User not authenticated. Using fallback blueprint.");
+    devWarn("User not authenticated. Using fallback blueprint.");
     return generateFallbackBlueprint(intent, courses);
   }
 

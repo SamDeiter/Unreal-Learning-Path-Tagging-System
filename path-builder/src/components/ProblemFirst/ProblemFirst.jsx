@@ -8,7 +8,7 @@
  */
 import { useState, useCallback, useMemo } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { initializeApp, getApps } from "firebase/app";
+import { getFirebaseApp } from "../../services/firebaseConfig";
 import ProblemInput from "./ProblemInput";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import VideoResultCard from "../VideoResultCard/VideoResultCard";
@@ -30,22 +30,9 @@ import {
 import { useTagData } from "../../context/TagDataContext";
 import "./ProblemFirst.css";
 
-// Firebase config - uses same project as main app
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-};
+import { devLog, devWarn } from "../../utils/logger";
 
-function getFirebaseApp() {
-  const existingApps = getApps();
-  const pathBuilderApp = existingApps.find((a) => a.name === "path-builder");
-  if (pathBuilderApp) return pathBuilderApp;
-  return initializeApp(firebaseConfig, "path-builder");
-}
+
 
 const STAGES = {
   INPUT: "input",
@@ -82,13 +69,13 @@ export default function ProblemFirst() {
       setError(null);
 
       if (inputData.pastedImage) {
-        console.log(
+        devLog(
           "[ProblemFirst] Screenshot attached (base64 length):",
           inputData.pastedImage.length
         );
       }
       if (inputData.errorLog) {
-        console.log("[ProblemFirst] Error log attached:", inputData.errorLog.slice(0, 200));
+        devLog("[ProblemFirst] Error log attached:", inputData.errorLog.slice(0, 200));
       }
 
       try {
@@ -138,19 +125,19 @@ export default function ProblemFirst() {
                   source: "epic_docs",
                 }));
               } catch (docErr) {
-                console.warn("⚠️ Docs semantic search skipped:", docErr.message);
+                devWarn("⚠️ Docs semantic search skipped:", docErr.message);
               }
 
               retrievedPassages = [...segPassages, ...docPassages];
-              console.log(
+              devLog(
                 `[RAG] Retrieved ${segPassages.length} transcript + ${docPassages.length} doc passages`
               );
             } catch (segErr) {
-              console.warn("⚠️ Segment semantic search skipped:", segErr.message);
+              devWarn("⚠️ Segment semantic search skipped:", segErr.message);
             }
           }
         } catch (semanticErr) {
-          console.warn("⚠️ Semantic search skipped:", semanticErr.message);
+          devWarn("⚠️ Semantic search skipped:", semanticErr.message);
         }
 
         // Step 2: Call Cloud Function with retrieved context
@@ -235,10 +222,10 @@ export default function ProblemFirst() {
           if (uniqueTopics.length > 0) {
             const blended = await buildBlendedPath(uniqueTopics, videos, { maxDocs: 5, maxYoutube: 3 });
             setBlendedPath(blended);
-            console.log(`[Blended] ${blended.docs.length} docs, ${blended.youtube.length} YT, coverage: ${(blended.coverageScore * 100).toFixed(0)}%`);
+            devLog(`[Blended] ${blended.docs.length} docs, ${blended.youtube.length} YT, coverage: ${(blended.coverageScore * 100).toFixed(0)}%`);
           }
         } catch (blendedErr) {
-          console.warn("⚠️ Blended path skipped:", blendedErr.message);
+          devWarn("⚠️ Blended path skipped:", blendedErr.message);
         }
 
         setStage(STAGES.DIAGNOSIS);

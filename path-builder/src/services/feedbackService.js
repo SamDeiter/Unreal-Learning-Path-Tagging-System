@@ -12,6 +12,8 @@
  * }
  */
 
+import { devWarn } from "../utils/logger";
+
 const STORAGE_KEY = "feedback_v1";
 const DEMOTION_MULTIPLIER = 0.3; // Downvoted videos get 30% of their score
 const BOOST_MULTIPLIER = 1.3; // Upvoted videos get 130% of their score
@@ -29,7 +31,7 @@ function saveFeedback(data) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
-    console.warn("[FeedbackService] Could not save:", e);
+    devWarn("[FeedbackService] Could not save:", e);
   }
 }
 

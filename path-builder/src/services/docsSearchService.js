@@ -7,6 +7,8 @@
 
 import { cosineSimilarity } from "./semanticSearchService";
 
+import { devLog, devWarn } from "../utils/logger";
+
 // Lazy-loaded (4.8MB quantized)
 let _docsEmbeddings = null;
 let _decodedVectors = null;
@@ -53,7 +55,7 @@ async function getDocsEmbeddings() {
       const mod = await import("../data/docs_embeddings.json");
       _docsEmbeddings = mod.default || mod;
     } catch (err) {
-      console.warn("⚠️ docs_embeddings.json not available:", err.message);
+      devWarn("⚠️ docs_embeddings.json not available:", err.message);
       return null;
     }
   }
@@ -74,7 +76,7 @@ async function getDocsEmbeddings() {
     });
   }
 
-  console.log(`[DocsSearch] Decoded ${_decodedVectors.size} doc embeddings`);
+  devLog(`[DocsSearch] Decoded ${_decodedVectors.size} doc embeddings`);
   return _decodedVectors;
 }
 
@@ -91,7 +93,7 @@ export async function searchDocsSemantic(queryEmbedding, topK = 5, threshold = 0
 
   const embeddings = await getDocsEmbeddings();
   if (!embeddings) {
-    console.warn("[DocsSearch] Semantic search unavailable — no embeddings loaded");
+    devWarn("[DocsSearch] Semantic search unavailable — no embeddings loaded");
     return [];
   }
 
@@ -130,7 +132,7 @@ async function getDocLinks() {
     _docLinks = mod.default || mod;
     return _docLinks;
   } catch (err) {
-    console.warn("⚠️ doc_links.json not available:", err.message);
+    devWarn("⚠️ doc_links.json not available:", err.message);
     return {};
   }
 }

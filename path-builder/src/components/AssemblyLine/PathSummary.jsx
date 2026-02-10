@@ -11,12 +11,14 @@
 import { usePath } from "../../context/PathContext";
 import "./PathSummary.css";
 
+import { devLog } from "../../utils/logger";
+
 function PathSummary() {
   const { courses, pathStats, clearPath } = usePath();
 
   const handleExport = (format) => {
     // TODO: Implement export in Phase 4
-    console.log(`Exporting as ${format}...`, courses);
+    devLog(`Exporting as ${format}...`, courses);
     alert(`Export to ${format} coming soon!`);
   };
 
