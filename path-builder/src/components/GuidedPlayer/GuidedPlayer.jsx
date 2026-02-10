@@ -50,9 +50,12 @@ export default function GuidedPlayer(props) {
           currentVideo={gp.currentVideo}
           videoIndex={gp.videoIndex}
           hasMoreVideos={gp.hasMoreVideos}
+          hasPreviousVideo={gp.hasPreviousVideo}
+          courseVideoCount={gp.courseVideoCount}
           microLesson={props.microLesson}
           courses={gp.courses}
           onVideoComplete={gp.handleVideoComplete}
+          onPreviousVideo={gp.handlePreviousVideo}
           onExit={gp.onExit}
         />
       )}
@@ -226,7 +229,7 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
 }
 
 /** VideoStage — video player with transcript cards and controls */
-function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, microLesson, courses, onVideoComplete, onExit }) {
+function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, hasPreviousVideo, courseVideoCount, microLesson, courses, onVideoComplete, onPreviousVideo, onExit }) {
   return (
     <div className="video-stage">
       <div className="video-header">
@@ -258,7 +261,17 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
       </div>
       {microLesson && <AiGuidePanel microLesson={microLesson} courses={courses} />}
       <div className="video-controls">
-        <button className="complete-btn" onClick={onVideoComplete}>
+        <button
+          className="prev-video-btn"
+          onClick={onPreviousVideo}
+          disabled={!hasPreviousVideo}
+        >
+          ← Previous
+        </button>
+        <span className="video-progress-indicator">
+          {videoIndex + 1} / {courseVideoCount}
+        </span>
+        <button className={hasMoreVideos ? "next-video-btn" : "complete-btn"} onClick={onVideoComplete}>
           {hasMoreVideos ? "Next Video →" : "✓ Mark Complete & Continue"}
         </button>
         <button className="exit-btn" onClick={onExit}>Exit Path</button>

@@ -7,7 +7,7 @@
  *   - Error log paste area
  *   - Auto-detection of error signatures and UE5 tags
  */
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import { Search, Tags, User, Image, Terminal, X, ChevronDown, ChevronUp } from "lucide-react";
 import tagGraphService from "../../services/TagGraphService";
@@ -351,20 +351,32 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
           <span className="history-label">🕘 Recent questions:</span>
           <div className="history-chips">
             {queryHistory.map((q, i) => (
-              <button
-                key={i}
-                type="button"
-                className="history-chip"
-                onClick={() => {
-                  setProblem(q);
-                  // Trigger tag detection
-                  const fakeEvent = { target: { value: q } };
-                  handleChange(fakeEvent);
-                }}
-                title={q}
-              >
-                {q.length > 50 ? q.slice(0, 50) + "…" : q}
-              </button>
+              <div key={i} className="history-chip-row">
+                <button
+                  type="button"
+                  className="history-chip"
+                  onClick={() => {
+                    setProblem(q);
+                    const fakeEvent = { target: { value: q } };
+                    handleChange(fakeEvent);
+                  }}
+                  title={q}
+                >
+                  {q.length > 50 ? q.slice(0, 50) + "…" : q}
+                </button>
+                <button
+                  type="button"
+                  className="history-delete"
+                  onClick={() => {
+                    setQueryHistory((prev) => {
+                      const updated = prev.filter((_, j) => j !== i);
+                      localStorage.setItem("fix-problem-history", JSON.stringify(updated));
+                      return updated;
+                    });
+                  }}
+                  title="Remove"
+                >×</button>
+              </div>
             ))}
           </div>
         </div>

@@ -72,6 +72,8 @@ export default function useGuidedPlayer({
   const currentVideos = currentCourse?.videos || [];
   const currentVideo = currentVideos[videoIndex] || currentVideos[0] || null;
   const hasMoreVideos = videoIndex < currentVideos.length - 1;
+  const hasPreviousVideo = videoIndex > 0;
+  const courseVideoCount = currentVideos.length;
 
   const introContent = useMemo(
     () => generatePathIntro({ problemSummary, courses, diagnosis }),
@@ -127,6 +129,12 @@ export default function useGuidedPlayer({
     }
   }, [hasMoreVideos, currentCourse]);
 
+  const handlePreviousVideo = useCallback(() => {
+    if (videoIndex > 0) {
+      setVideoIndex((prev) => prev - 1);
+    }
+  }, [videoIndex]);
+
   const handleQuizComplete = useCallback(() => {
     setStage(STAGES.CHALLENGE);
   }, []);
@@ -178,6 +186,8 @@ export default function useGuidedPlayer({
     currentVideos,
     currentVideo,
     hasMoreVideos,
+    hasPreviousVideo,
+    courseVideoCount,
     introContent,
     streak,
     progress,
@@ -191,6 +201,7 @@ export default function useGuidedPlayer({
     handleSignIn,
     handleStartLearning,
     handleVideoComplete,
+    handlePreviousVideo,
     handleQuizComplete,
     handleChallengeComplete,
     handleContinue,
