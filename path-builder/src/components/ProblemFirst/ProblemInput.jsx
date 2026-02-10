@@ -283,6 +283,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
       {/* Tag Picker Panel */}
       {showTagPicker && (
         <div className="tag-picker">
+          <p className="picker-hint">Select topics to focus your diagnosis on specific UE5 areas</p>
           {tagsByCategory.map(([category, tags]) => (
             <div key={category} className="tag-group">
               <span className="group-label">{category}</span>
