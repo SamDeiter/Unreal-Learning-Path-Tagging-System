@@ -116,6 +116,141 @@ export async function searchDocsSemantic(queryEmbedding, topK = 5, threshold = 0
   return results.slice(0, topK);
 }
 
+// ── Topic-Aware Doc Lookup (uses expanded doc_links.json) ──
+
+let _docLinks = null;
+
+/**
+ * Lazily load doc_links.json.
+ */
+async function getDocLinks() {
+  if (_docLinks) return _docLinks;
+  try {
+    const mod = await import("../data/doc_links.json");
+    _docLinks = mod.default || mod;
+    return _docLinks;
+  } catch (err) {
+    console.warn("⚠️ doc_links.json not available:", err.message);
+    return {};
+  }
+}
+
+/** Tier sort order: beginner → intermediate → advanced */
+const TIER_ORDER = { beginner: 0, intermediate: 1, advanced: 2 };
+
+/**
+ * Get doc links matching a set of topics/keywords.
+ * Matches against subsystem, key name, and label.
+ *
+ * @param {string[]} topics - Topic keywords (e.g., ["lumen", "lighting"])
+ * @param {Object} [options]
+ * @param {string} [options.maxTier] - Max difficulty tier to include ("beginner"|"intermediate"|"advanced")
+ * @param {number} [options.limit] - Max results (default 10)
+ * @returns {Promise<Array<{key, label, url, tier, subsystem, readTimeMinutes}>>}
+ */
+export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10 } = {}) {
+  const docLinks = await getDocLinks();
+  if (!docLinks || !topics?.length) return [];
+
+  const maxTierOrder = TIER_ORDER[maxTier] ?? 2;
+  const topicSet = topics.map((t) => t.toLowerCase());
+  const results = [];
+
+  for (const [key, doc] of Object.entries(docLinks)) {
+    const tierOrder = TIER_ORDER[doc.tier] ?? 1;
+    if (tierOrder > maxTierOrder) continue;
+
+    // Score: how well does this doc match the requested topics?
+    let score = 0;
+    const keyLower = key.toLowerCase();
+    const labelLower = (doc.label || "").toLowerCase();
+
+    for (const topic of topicSet) {
+      if (keyLower === topic) score += 10; // exact key match
+      else if (keyLower.includes(topic)) score += 5; // partial key match
+      else if (doc.subsystem === topic) score += 4; // subsystem match
+      else if (labelLower.includes(topic)) score += 3; // label match
+    }
+
+    if (score > 0) {
+      results.push({
+        key,
+        label: doc.label,
+        url: doc.url,
+        tier: doc.tier,
+        subsystem: doc.subsystem,
+        readTimeMinutes: doc.readTimeMinutes || 10,
+        prerequisites: doc.prerequisites || [],
+        _score: score,
+        source: "epic_docs",
+      });
+    }
+  }
+
+  // Sort: highest relevance first, then by tier (beginner first)
+  results.sort((a, b) => {
+    if (b._score !== a._score) return b._score - a._score;
+    return (TIER_ORDER[a.tier] ?? 1) - (TIER_ORDER[b.tier] ?? 1);
+  });
+
+  return results.slice(0, limit).map(({ _score, ...rest }) => rest);
+}
+
+/**
+ * Build a prerequisite-ordered reading path for given topics.
+ * Resolves prerequisites recursively so the learner reads foundational
+ * docs before advanced ones.
+ *
+ * @param {string[]} topics - Topic keywords
+ * @param {Object} [options]
+ * @param {number} [options.limit] - Max results (default 8)
+ * @returns {Promise<Array<{key, label, url, tier, subsystem, readTimeMinutes}>>}
+ */
+export async function getDocReadingPath(topics, { limit = 8 } = {}) {
+  const docLinks = await getDocLinks();
+  if (!docLinks) return [];
+
+  // Get matching docs
+  const matches = await getDocsForTopic(topics, { limit: limit * 2 });
+  if (!matches.length) return [];
+
+  // Collect all prerequisite keys
+  const needed = new Set();
+  const ordered = [];
+
+  function addWithPrereqs(key) {
+    if (needed.has(key)) return;
+    needed.add(key);
+
+    const doc = docLinks[key];
+    if (!doc) return;
+
+    // Add prerequisites first (recursive)
+    for (const prereq of doc.prerequisites || []) {
+      addWithPrereqs(prereq);
+    }
+
+    ordered.push({
+      key,
+      label: doc.label,
+      url: doc.url,
+      tier: doc.tier,
+      subsystem: doc.subsystem,
+      readTimeMinutes: doc.readTimeMinutes || 10,
+      source: "epic_docs",
+    });
+  }
+
+  // Process each match
+  for (const match of matches) {
+    addWithPrereqs(match.key);
+  }
+
+  return ordered.slice(0, limit);
+}
+
 export default {
   searchDocsSemantic,
+  getDocsForTopic,
+  getDocReadingPath,
 };
