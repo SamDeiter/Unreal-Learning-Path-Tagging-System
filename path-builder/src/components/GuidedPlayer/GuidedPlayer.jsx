@@ -406,6 +406,10 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
         </span>
       </div>
 
+      {course._description && (
+        <p className="reading-step-description">{course._description}</p>
+      )}
+
       <div className="reading-step-source">
         <span className="reading-step-source-label">Source: {sourceLabel}</span>
       </div>
