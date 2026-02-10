@@ -14,6 +14,24 @@ import tagGraphService from "../../services/TagGraphService";
 import { useTagData } from "../../context/TagDataContext";
 import "./ProblemFirst.css";
 
+// Normalize overlapping categories into clean groups
+const CATEGORY_MAP = {
+  "Audio": "Audio & Sound",
+  "Characters": "Characters & Animation",
+  "Animation": "Characters & Animation",
+  "Character & Avatar": "Characters & Animation",
+  "Core Systems": "Core Systems",
+  "AI & Navigation": "Core Systems",
+  "Ai": "Core Systems",
+  "Cinematics & Sequencer": "Cinematics",
+  "Cinematic": "Cinematics",
+  "Scripting & Programming": "Scripting & Blueprints",
+  "Blueprints": "Scripting & Blueprints",
+  "Tools & Pipeline": "Tools & Pipeline",
+  "Automation": "Tools & Pipeline",
+  "Build": "Build & Packaging",
+};
+
 export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   const [problem, setProblem] = useState("");
   const [detectedTags, setDetectedTags] = useState([]);
@@ -24,6 +42,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   const [showErrorLog, setShowErrorLog] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const dropZoneRef = useRef(null);
+
 
   // Past question history (last 6)
   const [queryHistory, setQueryHistory] = useState(() => {
@@ -36,25 +55,30 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   const tagData = useTagData();
   const allTags = useMemo(() => tagData?.tags || [], [tagData?.tags]);
 
-  // Group tags by top-level category
+  // Group tags by consolidated category (most popular first)
   const tagsByCategory = useMemo(() => {
     const groups = {};
-    allTags.forEach((tag) => {
-      const category =
-        tag.categoryPath?.[0] ||
-        tag.category ||
-        tag.tag_id?.split(".")[0]?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
-        tag.id?.split(".")[0]?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
-        "Other";
-      if (!groups[category]) groups[category] = [];
-      groups[category].push(tag);
-    });
-    // Sort categories alphabetically, put "Other" last
-    return Object.entries(groups).sort(([a], [b]) => {
-      if (a === "Other") return 1;
-      if (b === "Other") return -1;
-      return a.localeCompare(b);
-    });
+    allTags
+      .filter((tag) => (tag.count || 0) > 0)
+      .forEach((tag) => {
+        const rawCategory =
+          tag.categoryPath?.[0] ||
+          tag.category ||
+          tag.id?.split(".")[0]?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
+          "Other";
+        const category = CATEGORY_MAP[rawCategory] || rawCategory;
+        if (!groups[category]) groups[category] = [];
+        groups[category].push(tag);
+      });
+    return Object.entries(groups)
+      .map(([cat, tags]) => [cat, tags.sort((a, b) => (b.count || 0) - (a.count || 0))])
+      .sort(([a, aTags], [b, bTags]) => {
+        if (a === "Other") return 1;
+        if (b === "Other") return -1;
+        const aTotal = aTags.reduce((s, t) => s + (t.count || 0), 0);
+        const bTotal = bTags.reduce((s, t) => s + (t.count || 0), 0);
+        return bTotal - aTotal;
+      });
   }, [allTags]);
 
   // Debounce tag detection
@@ -265,13 +289,13 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
               <div className="group-chips">
                 {tags.map((tag) => (
                   <button
-                    key={tag.tag_id}
+                    key={tag.id}
                     type="button"
-                    className={`picker-chip ${selectedTagIds.includes(tag.tag_id) ? "selected" : ""}`}
-                    onClick={() => toggleTag(tag.tag_id)}
+                    className={`picker-chip ${selectedTagIds.includes(tag.id) ? "selected" : ""}`}
+                    onClick={() => toggleTag(tag.id)}
                     title={tag.description}
                   >
-                    {tag.display_name}
+                    {tag.name || tag.label}
                   </button>
                 ))}
               </div>
