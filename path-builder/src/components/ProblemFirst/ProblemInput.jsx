@@ -7,7 +7,7 @@
  *   - Error log paste area
  *   - Auto-detection of error signatures and UE5 tags
  */
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import { Search, Tags, User, Image, Terminal, X, ChevronDown, ChevronUp } from "lucide-react";
 import tagGraphService from "../../services/TagGraphService";
@@ -24,6 +24,13 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   const [showErrorLog, setShowErrorLog] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const dropZoneRef = useRef(null);
+
+  // Past question history (last 6)
+  const [queryHistory, setQueryHistory] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("fix-problem-history") || "[]");
+    } catch { return []; }
+  });
 
   // Get tags from context
   const tagData = useTagData();
@@ -121,6 +128,15 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
 
   const handleSubmit = useCallback(() => {
     if (problem.trim().length < 10) return;
+
+    // Save to history
+    const trimmed = problem.trim();
+    setQueryHistory((prev) => {
+      const filtered = prev.filter((q) => q !== trimmed);
+      const updated = [trimmed, ...filtered].slice(0, 6);
+      localStorage.setItem("fix-problem-history", JSON.stringify(updated));
+      return updated;
+    });
 
     onSubmit({
       query: problem,
@@ -328,6 +344,31 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
           Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to submit
         </span>
       </div>
+
+      {/* Past question history */}
+      {queryHistory.length > 0 && (
+        <div className="query-history">
+          <span className="history-label">🕘 Recent questions:</span>
+          <div className="history-chips">
+            {queryHistory.map((q, i) => (
+              <button
+                key={i}
+                type="button"
+                className="history-chip"
+                onClick={() => {
+                  setProblem(q);
+                  // Trigger tag detection
+                  const fakeEvent = { target: { value: q } };
+                  handleChange(fakeEvent);
+                }}
+                title={q}
+              >
+                {q.length > 50 ? q.slice(0, 50) + "…" : q}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

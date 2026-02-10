@@ -99,7 +99,15 @@ export default function TranscriptCards({ courseCode, videoTitle, problemSummary
     });
 
     const relevant = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score);
-    if (relevant.length > 0) return relevant.slice(0, 3);
+    if (relevant.length > 0) {
+      // Pick top 3 by relevance, then re-sort chronologically by timestamp
+      const top = relevant.slice(0, 3);
+      top.sort((a, b) => {
+        const toSec = (t) => { const p = (t || "0:00").split(":").map(Number); return p.length === 3 ? p[0]*3600+p[1]*60+p[2] : p[0]*60+(p[1]||0); };
+        return toSec(a.start) - toSec(b.start);
+      });
+      return top;
+    }
 
     // Fallback: evenly spaced
     const step = Math.max(1, Math.floor(segments.length / 3));
@@ -134,7 +142,7 @@ export default function TranscriptCards({ courseCode, videoTitle, problemSummary
         <h4>
           {cards[0]?.isChapter
             ? "📋 Video Chapters"
-            : `🎯 Helps with: ${problemSummary || "your search"}`}
+            : `🎯 🎬 Video Callouts: ${problemSummary || "your search"}`}
         </h4>
         <div className="timestamp-list">
           {cards.map((seg, i) => (

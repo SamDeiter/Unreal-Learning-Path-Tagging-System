@@ -42,6 +42,7 @@ export function generatePathIntro({ problemSummary, courses, diagnosis }) {
     instructors,
     totalDuration,
     courseCount: courses.length,
+    rootCauses: diagnosis?.root_causes || [],
   };
 }
 
@@ -213,9 +214,10 @@ function buildIntroText({ instructors, courseCount, totalDuration, rootCauses })
   const parts = [];
 
   // Opening based on problem
+  // Root causes are now displayed as a list in the UI, so we just mention the count here
   if (rootCauses.length > 0) {
     parts.push(
-      `We've identified ${rootCauses.length} root cause${rootCauses.length > 1 ? "s" : ""} for your issue.`
+      `We've identified ${rootCauses.length} root cause${rootCauses.length > 1 ? "s" : ""} for your issue:`
     );
   }
 

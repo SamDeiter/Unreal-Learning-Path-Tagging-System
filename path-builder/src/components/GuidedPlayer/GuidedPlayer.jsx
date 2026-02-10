@@ -50,7 +50,8 @@ export default function GuidedPlayer(props) {
           currentVideo={gp.currentVideo}
           videoIndex={gp.videoIndex}
           hasMoreVideos={gp.hasMoreVideos}
-          problemSummary={props.problemSummary}
+          microLesson={props.microLesson}
+          courses={gp.courses}
           onVideoComplete={gp.handleVideoComplete}
           onExit={gp.onExit}
         />
@@ -88,6 +89,7 @@ export default function GuidedPlayer(props) {
           onReflectionChange={gp.setReflectionText}
           wordCount={gp.wordCount}
           onFinish={gp.handleFinish}
+          onExit={gp.onExit}
         />
       )}
 
@@ -99,8 +101,13 @@ export default function GuidedPlayer(props) {
             currentIndex={gp.currentIndex}
             onSkipTo={gp.handleSkipTo}
           />
-          {gp.stage === STAGES.PLAYING && props.microLesson && (
-            <AiGuidePanel microLesson={props.microLesson} />
+          {gp.stage === STAGES.PLAYING && gp.currentCourse && (
+            <TranscriptCards
+              courseCode={gp.currentCourse.code}
+              videoTitle={gp.currentVideo?.title || gp.currentVideo?.name || ""}
+              problemSummary={props.problemSummary}
+              matchedKeywords={gp.currentCourse._matchedKeywords}
+            />
           )}
         </div>
       )}
@@ -138,6 +145,13 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
     <div className="intro-card">
       <h2>{introContent.title}</h2>
       <p className="intro-text">{introContent.intro}</p>
+      {introContent.rootCauses?.length > 0 && (
+        <ol className="root-cause-list">
+          {introContent.rootCauses.map((cause, i) => (
+            <li key={i}>{cause.replace(/\s*\[\d+\]/g, "")}</li>
+          ))}
+        </ol>
+      )}
 
       {streak.isActive && streak.count > 1 && (
         <div className="streak-badge">🔥 {streak.count}-day learning streak!</div>
@@ -162,13 +176,7 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
         {pathSummary?.path_summary && (
           <div className="path-summary-section">
             <p className="path-summary-text">{pathSummary.path_summary}</p>
-            {pathSummary.topics_covered?.length > 0 && (
-              <div className="topic-chips">
-                {pathSummary.topics_covered.map((topic, i) => (
-                  <span key={i} className="topic-chip">{topic}</span>
-                ))}
-              </div>
-            )}
+
           </div>
         )}
         <div className="course-list">
@@ -179,7 +187,7 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
               <div key={course.code || i} className="course-preview-item">
                 <span className="number">{i + 1}</span>
                 <div className="course-preview-details">
-                  <span className="title">{videoTitle}</span>
+                  <span className="title">{videoTitle?.replace(/\s+Part\s+[A-Z]$/i, "").trim()}</span>
                   {objectives.length > 0 && (
                     <ul className="objective-list">
                       {objectives.slice(0, 2).map((obj, j) => (
@@ -218,7 +226,7 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
 }
 
 /** VideoStage — video player with transcript cards and controls */
-function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, problemSummary, onVideoComplete, onExit }) {
+function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, microLesson, courses, onVideoComplete, onExit }) {
   return (
     <div className="video-stage">
       <div className="video-header">
@@ -248,12 +256,7 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
           </div>
         )}
       </div>
-      <TranscriptCards
-        courseCode={course.code}
-        videoTitle={currentVideo?.title || currentVideo?.name || ""}
-        problemSummary={problemSummary}
-        matchedKeywords={course._matchedKeywords}
-      />
+      {microLesson && <AiGuidePanel microLesson={microLesson} courses={courses} />}
       <div className="video-controls">
         <button className="complete-btn" onClick={onVideoComplete}>
           {hasMoreVideos ? "Next Video →" : "✓ Mark Complete & Continue"}
@@ -265,7 +268,7 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
 }
 
 /** AiGuidePanel — sidebar panel showing AI-generated lesson context */
-function AiGuidePanel({ microLesson }) {
+function AiGuidePanel({ microLesson, courses }) {
   const [lessonOpen, setLessonOpen] = useState(true);
   const [expandedSection, setExpandedSection] = useState("quick_fix");
 
@@ -275,6 +278,28 @@ function AiGuidePanel({ microLesson }) {
 
   const toggleSection = (section) => {
     setExpandedSection((prev) => (prev === section ? null : section));
+  };
+
+  // Parse [N] citation markers in text and render them as styled tooltips
+  const renderTextWithCitations = (text) => {
+    if (!text) return null;
+    const parts = text.split(/(\[\d+\])/g);
+    return parts.map((part, i) => {
+      const match = part.match(/^\[(\d+)\]$/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        const courseRef = courses?.[num - 1];
+        const videoName = (courseRef?.videos?.[0]?.title || courseRef?.title || "")
+          ?.replace(/\s+Part\s+[A-Z]$/i, "").trim();
+        if (!videoName) return null; // No matching course — hide citation
+        return (
+          <span key={i} className="gp-ai-cite" data-tooltip={`📹 ${videoName}`}>
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
   };
 
   return (
@@ -297,7 +322,7 @@ function AiGuidePanel({ microLesson }) {
               {expandedSection === "quick_fix" && quickFix.steps && (
                 <ol className="gp-ai-steps">
                   {quickFix.steps.map((step, i) => (
-                    <li key={i}>{step}</li>
+                    <li key={i}>{renderTextWithCitations(step)}</li>
                   ))}
                 </ol>
               )}
@@ -315,7 +340,7 @@ function AiGuidePanel({ microLesson }) {
                 <span className="gp-ai-section-chevron">{expandedSection === "why" ? "▾" : "▸"}</span>
               </button>
               {expandedSection === "why" && (
-                <p className="gp-ai-explanation">{whyItWorks.explanation}</p>
+                <p className="gp-ai-explanation">{renderTextWithCitations(whyItWorks.explanation)}</p>
               )}
             </div>
           )}
@@ -333,7 +358,7 @@ function AiGuidePanel({ microLesson }) {
                   {relatedSituations.map((sit, i) => (
                     <div key={i} className="gp-ai-scenario">
                       <strong>💡 {sit.scenario}</strong>
-                      <p>{sit.connection}</p>
+                      <p>{renderTextWithCitations(sit.connection)}</p>
                     </div>
                   ))}
                 </div>

@@ -45,7 +45,7 @@ export default function VideoResultCard({
   retrievedPassages,
 }) {
   const {
-    title,
+    title: rawTitle,
     courseName,
     duration,
     matchedTags = [],
@@ -57,6 +57,8 @@ export default function VideoResultCard({
     reason,
   } = video;
 
+  // Strip "Part A/B/C" suffixes from display title
+  const title = rawTitle?.replace(/\s+Part\s+[A-Z]$/i, "").trim() || rawTitle;
   // Look up prereq data for this course
   const prereqEntry = courseCode ? prereqData[courseCode] : null;
   const prereqCourses = prereqEntry?.prereqs || [];
@@ -65,6 +67,16 @@ export default function VideoResultCard({
   const [prereqTip, setPrereqTip] = useState(false);
   const [expandedLesson, setExpandedLesson] = useState("quick_fix");
   const tipRef = useRef(null);
+
+  // Scroll expanded card into view
+  const cardRef = useRef(null);
+  useEffect(() => {
+    if (isExpanded && cardRef.current) {
+      setTimeout(() => {
+        cardRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 50);
+    }
+  }, [isExpanded]);
 
   // Close tooltip on outside click
   useEffect(() => {
@@ -109,6 +121,7 @@ export default function VideoResultCard({
 
   return (
     <div
+      ref={cardRef}
       className={`video-result-card ${isAdded ? "added" : ""} ${_curatedMatch ? "curated" : ""} ${feedbackState === "down" ? "demoted" : ""} ${isExpanded ? "expanded" : ""}`}
       onClick={handleCardClick}
       role="button"
@@ -182,6 +195,7 @@ export default function VideoResultCard({
 
         <div className="vrc-info">
           <h4 className="vrc-title">{title}</h4>
+          {reason && <p className="vrc-reason-preview">{reason}</p>}
         </div>
 
         {/* Actions row: feedback + add/remove */}
@@ -353,6 +367,14 @@ export default function VideoResultCard({
               </div>
             </div>
           )}
+
+          {/* Collapse button */}
+          <button
+            className="vrc-collapse-btn"
+            onClick={() => onExpand && onExpand(driveId)}
+          >
+            <ChevronUp size={14} /> Collapse
+          </button>
         </div>
       )}
     </div>

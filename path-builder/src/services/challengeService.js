@@ -32,24 +32,31 @@ export function generateChallenge(course, problemContext, videoTitle) {
 
   // Helper: pick a template deterministically from a list
   const pickTemplate = (templates) => {
-    const titleHash = (course?.title || "").split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const titleHash = ((course?.title || "") + (videoTitle || "")).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
     return templates[titleHash % templates.length];
   };
 
   // ── 1. Problem-context match (HIGHEST priority) ──
   // The user's own words are the strongest signal for what challenge they need.
   // Check longest keys first so "nanite" beats "nan", etc.
+  // Only use this path if the matched key has multiple templates,
+  // otherwise fall through to course-specific tag/fallback logic.
   if (contextLower) {
     const registryKeys = Object.keys(challengeRegistry).sort((a, b) => b.length - a.length);
     for (const key of registryKeys) {
       if (contextLower.includes(key)) {
-        const template = pickTemplate(challengeRegistry[key]);
-        return {
-          task: template.task,
-          hint: template.hint,
-          expectedResult: template.expectedResult,
-          difficulty: skillLevel,
-        };
+        const templates = challengeRegistry[key];
+        if (templates.length > 1) {
+          const template = pickTemplate(templates);
+          return {
+            task: template.task,
+            hint: template.hint,
+            expectedResult: template.expectedResult,
+            difficulty: skillLevel,
+          };
+        }
+        // Single template — fall through so each course gets a unique challenge
+        break;
       }
     }
   }

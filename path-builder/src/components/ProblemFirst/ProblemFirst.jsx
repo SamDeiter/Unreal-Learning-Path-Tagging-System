@@ -214,8 +214,6 @@ export default function ProblemFirst() {
 
         setVideoResults(videos);
         setDiagnosisData(cartData);
-        // Auto-expand the first (most relevant) video card
-        if (videos.length > 0) setExpandedVideoId(videos[0].driveId);
 
         setStage(STAGES.DIAGNOSIS);
         await trackDiagnosisGenerated(cartData.diagnosis);
@@ -284,15 +282,24 @@ export default function ProblemFirst() {
       {stage === STAGES.DIAGNOSIS && diagnosisData && (
         <div className="shopping-layout">
           <div className="results-column">
-            {diagnosisData.diagnosis?.problem_summary && (
-              <div className="tldr-diagnosis">
-                <span className="tldr-icon">💡</span>
-                <p className="tldr-text">{diagnosisData.diagnosis.problem_summary}</p>
+            <div className="tldr-diagnosis">
+              <div className="tldr-user-query">
+                <span className="tldr-query-label">🔍 You asked:</span>
+                <p className="tldr-query-text">{diagnosisData.userQuery}</p>
               </div>
-            )}
+              {diagnosisData.diagnosis?.problem_summary && (
+                <p className="tldr-bridge">Based on your question, we think these videos will help you:</p>
+              )}
+            </div>
 
             {/* 🎬 Videos for You */}
             <h2 className="results-title">🎬 Videos for You ({videoResults.length})</h2>
+            <ul className="selection-tips">
+              <li>🔗 <strong>Prerequisite</strong> — foundational knowledge you may need first</li>
+              <li>⭐ <strong>Core</strong> — directly addresses your issue</li>
+              <li>🔧 <strong>Troubleshooting</strong> — helps debug related problems</li>
+              <li>📚 <strong>Supplemental</strong> — extra depth if you want to go further</li>
+            </ul>
             <div className="video-results-grid">
               {videoResults.map((video) => (
                 <div key={video.driveId} className={`video-result-wrapper ${expandedVideoId === video.driveId ? "expanded" : ""}`} id={`video-${video.driveId}`}>
@@ -362,8 +369,7 @@ export default function ProblemFirst() {
           pathSummary={diagnosisData?.pathSummary}
           microLesson={diagnosisData?.microLesson}
           onComplete={() => {
-            clearCart();
-            setStage(STAGES.INPUT);
+            // Path complete — stay on the guided player, don't auto-redirect
           }}
           onExit={() => setStage(STAGES.DIAGNOSIS)}
         />
