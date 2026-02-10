@@ -4,14 +4,8 @@
  */
 import { useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
+import { SEARCH_STOPWORDS } from "../../domain/constants";
 import transcriptSegments from "../../data/transcript_segments.json";
-
-const STOPWORDS = new Set([
-  "with", "that", "this", "from", "have", "will", "been", "when", "what",
-  "which", "their", "there", "about", "would", "could", "should", "these",
-  "those", "into", "also", "just", "than", "then", "them", "they", "your",
-  "some", "very", "more", "does", "here", "want", "make", "like", "know", "need",
-]);
 
 const TOPIC_SKIP = new Set([
   "gonna", "going", "really", "actually", "basically", "right", "thing",
@@ -65,7 +59,7 @@ export default function TranscriptCards({ courseCode, videoTitle, problemSummary
         ...problemSummary
           .toLowerCase()
           .split(/\s+/)
-          .filter((w) => w.length > 3 && !STOPWORDS.has(w))
+          .filter((w) => w.length > 3 && !SEARCH_STOPWORDS.has(w))
       );
     }
     if (matchedKeywords) {
