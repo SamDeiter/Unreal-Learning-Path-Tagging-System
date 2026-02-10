@@ -36,11 +36,16 @@ export default function FeedbackModal({ isOpen, onClose }) {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // TODO: Connect to backend/logging service
-    // Mock submission latency
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    devLog("📝 Feedback Submission", { type, description, files });
+    try {
+      const { recordFormFeedback } = await import(
+        "../../services/feedbackService"
+      );
+      const fileNames = files.map((f) => f.name);
+      const result = recordFormFeedback(type, description, fileNames);
+      devLog("📝 Feedback saved:", result);
+    } catch {
+      devLog("📝 Feedback submission (offline):", { type, description });
+    }
 
     setSuccess(true);
     setIsSubmitting(false);

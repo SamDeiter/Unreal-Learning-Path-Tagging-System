@@ -111,10 +111,43 @@ export function getFeedbackStats() {
   };
 }
 
+/**
+ * Record a form-based feedback submission (bug report, feature request, etc.)
+ * Stores in localStorage under a separate key from video feedback.
+ * @param {string} type - Feedback type (bug, feature, content, other)
+ * @param {string} description - User's description
+ * @param {string[]} [fileNames] - Optional attached file names
+ * @returns {{ id: string, timestamp: string }}
+ */
+export function recordFormFeedback(type, description, fileNames = []) {
+  const FORM_KEY = "feedback_submissions_v1";
+  const entry = {
+    id: `fb_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    type,
+    description,
+    fileNames,
+    timestamp: new Date().toISOString(),
+  };
+
+  try {
+    const raw = localStorage.getItem(FORM_KEY);
+    const submissions = raw ? JSON.parse(raw) : [];
+    submissions.push(entry);
+    // Keep last 50 submissions to avoid unbounded growth
+    if (submissions.length > 50) submissions.splice(0, submissions.length - 50);
+    localStorage.setItem(FORM_KEY, JSON.stringify(submissions));
+  } catch (e) {
+    devWarn("[FeedbackService] Could not save form feedback:", e);
+  }
+
+  return { id: entry.id, timestamp: entry.timestamp };
+}
+
 export default {
   recordUpvote,
   recordDownvote,
   getFeedbackStatus,
   applyFeedbackMultiplier,
   getFeedbackStats,
+  recordFormFeedback,
 };

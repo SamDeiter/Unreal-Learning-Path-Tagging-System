@@ -12,14 +12,43 @@ import { usePath } from "../../context/PathContext";
 import "./PathSummary.css";
 
 import { devLog } from "../../utils/logger";
+import { saveAs } from "file-saver";
 
 function PathSummary() {
   const { courses, pathStats, clearPath } = usePath();
 
-  const handleExport = (format) => {
-    // TODO: Implement export in Phase 4
+  const handleExport = async (format) => {
     devLog(`Exporting as ${format}...`, courses);
-    alert(`Export to ${format} coming soon!`);
+
+    if (format === "json") {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        stats: pathStats,
+        courses: courses.map((c) => ({
+          title: c.title,
+          slug: c.slug,
+          difficulty: c.difficulty,
+          tags: c.tags,
+          videoCount: c.videos?.length || 0,
+        })),
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {
+        type: "application/json",
+      });
+      saveAs(blob, `learning-path-${Date.now()}.json`);
+    } else if (format === "scorm") {
+      try {
+        const { default: scorm } = await import("../../utils/scormGenerator");
+        for (const course of courses) {
+          await scorm.generateScormPackage(course);
+        }
+      } catch (err) {
+        console.error("SCORM export failed:", err);
+        alert("SCORM export failed. Check console for details.");
+      }
+    } else if (format === "xapi") {
+      alert("xAPI (Tin Can) export is not yet available.");
+    }
   };
 
   if (courses.length === 0) {
