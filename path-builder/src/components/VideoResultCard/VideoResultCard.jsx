@@ -6,11 +6,23 @@ import prereqData from "../../data/course_prerequisites.json";
 import libraryData from "../../data/video_library_enriched.json";
 import "./VideoResultCard.css";
 
-// Build code→title lookup once
+// Build code→title and code→versions lookups once
 const courseTitles = {};
+const courseVersions = {};
 (libraryData.courses || []).forEach((c) => {
   courseTitles[c.code] = c.title;
+  courseVersions[c.code] = c.versions || [];
 });
+
+/** Returns true if ALL course versions are 4.x (UE4 era) */
+function isUE4Course(code) {
+  const versions = courseVersions[code];
+  if (!versions || versions.length === 0) return false;
+  return versions.every((v) => {
+    const normalized = String(v).replace(/^V/i, "");
+    return normalized.startsWith("4") && !normalized.startsWith("4.") ? /^4\d{1,2}$/.test(normalized) : normalized.startsWith("4.");
+  });
+}
 
 /**
  * Formats seconds into a human-readable duration string.
@@ -150,6 +162,11 @@ export default function VideoResultCard({
         </div>
 
         {_curatedMatch && <div className="vrc-curated-badge">✓ Known Solution</div>}
+        {courseCode && isUE4Course(courseCode) && (
+          <div className="vrc-ue4-badge" title="This content was created for Unreal Engine 4 — some details may differ in UE5">
+            ⚠️ UE4 Content
+          </div>
+        )}
 
         {/* Role badge */}
         {role && (

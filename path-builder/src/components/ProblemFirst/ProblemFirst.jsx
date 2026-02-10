@@ -416,29 +416,56 @@ export default function ProblemFirst() {
                   </p>
                 </div>
                 <div className="doc-cards-grid">
-                  {blendedPath.docs.map((doc, i) => (
-                    <a
-                      key={doc.key || i}
-                      href={doc.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="doc-card"
-                    >
-                      <div className="doc-card-header">
-                        <span className={`tier-badge tier-${doc.tier || "intermediate"}`}>
-                          {doc.tier || "intermediate"}
-                        </span>
-                        {doc.subsystem && (
-                          <span className="subsystem-tag">{doc.subsystem}</span>
-                        )}
+                  {blendedPath.docs.map((doc, i) => {
+                    const docId = `doc_${doc.key || i}`;
+                    const inCart = isInCart(docId);
+                    return (
+                      <div key={doc.key || i} className={`doc-card ${inCart ? "doc-card-added" : ""}`}>
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="doc-card-link"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="doc-card-header">
+                            <span className={`tier-badge tier-${doc.tier || "intermediate"}`}>
+                              {doc.tier || "intermediate"}
+                            </span>
+                            {doc.subsystem && (
+                              <span className="subsystem-tag">{doc.subsystem}</span>
+                            )}
+                          </div>
+                          <h4 className="doc-card-title">{doc.label}</h4>
+                          <div className="doc-card-footer">
+                            <span className="doc-source-badge">📄 Epic Docs</span>
+                            <span className="doc-read-time">{doc.readTimeMinutes || 10} min read</span>
+                          </div>
+                        </a>
+                        <button
+                          className={`doc-add-btn ${inCart ? "doc-added" : ""}`}
+                          onClick={() => {
+                            if (inCart) {
+                              removeFromCart(docId);
+                            } else {
+                              addToCart({
+                                type: "doc",
+                                itemId: docId,
+                                title: doc.label,
+                                url: doc.url,
+                                tier: doc.tier || "intermediate",
+                                subsystem: doc.subsystem,
+                                readTimeMinutes: doc.readTimeMinutes || 10,
+                              });
+                            }
+                          }}
+                          title={inCart ? "Remove from path" : "Add to learning path"}
+                        >
+                          {inCart ? "✓ Added" : "➕ Add"}
+                        </button>
                       </div>
-                      <h4 className="doc-card-title">{doc.label}</h4>
-                      <div className="doc-card-footer">
-                        <span className="doc-source-badge">📄 Epic Docs</span>
-                        <span className="doc-read-time">{doc.readTimeMinutes || 10} min read</span>
-                      </div>
-                    </a>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -453,27 +480,54 @@ export default function ProblemFirst() {
                   </p>
                 </div>
                 <div className="doc-cards-grid">
-                  {blendedPath.youtube.map((yt) => (
-                    <a
-                      key={yt.id}
-                      href={yt.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="doc-card external-card"
-                    >
-                      <div className="doc-card-header">
-                        <span className={`tier-badge tier-${yt.tier || "intermediate"}`}>
-                          {yt.tier || "intermediate"}
-                        </span>
-                        <span className="external-badge">External • YouTube</span>
+                  {blendedPath.youtube.map((yt) => {
+                    const ytId = yt.id || `yt_${yt.url}`;
+                    const inCart = isInCart(ytId);
+                    return (
+                      <div key={yt.id} className={`doc-card external-card ${inCart ? "doc-card-added" : ""}`}>
+                        <a
+                          href={yt.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="doc-card-link"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="doc-card-header">
+                            <span className={`tier-badge tier-${yt.tier || "intermediate"}`}>
+                              {yt.tier || "intermediate"}
+                            </span>
+                            <span className="external-badge">External • YouTube</span>
+                          </div>
+                          <h4 className="doc-card-title">{yt.title}</h4>
+                          <div className="doc-card-footer">
+                            <span className="doc-source-badge">📺 {yt.channelName}</span>
+                            <span className="doc-read-time">{yt.durationMinutes} min</span>
+                          </div>
+                        </a>
+                        <button
+                          className={`doc-add-btn ${inCart ? "doc-added" : ""}`}
+                          onClick={() => {
+                            if (inCart) {
+                              removeFromCart(ytId);
+                            } else {
+                              addToCart({
+                                type: "youtube",
+                                itemId: ytId,
+                                title: yt.title,
+                                url: yt.url,
+                                channel: yt.channelName,
+                                tier: yt.tier || "intermediate",
+                                durationMinutes: yt.durationMinutes || 15,
+                              });
+                            }
+                          }}
+                          title={inCart ? "Remove from path" : "Add to learning path"}
+                        >
+                          {inCart ? "✓ Added" : "➕ Add"}
+                        </button>
                       </div>
-                      <h4 className="doc-card-title">{yt.title}</h4>
-                      <div className="doc-card-footer">
-                        <span className="doc-source-badge">📺 {yt.channelName}</span>
-                        <span className="doc-read-time">{yt.durationMinutes} min</span>
-                      </div>
-                    </a>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

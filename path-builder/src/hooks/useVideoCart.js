@@ -19,25 +19,35 @@ function saveCart(items) {
   }
 }
 
+/** Get a universal unique key for any cart item */
+function getItemId(item) {
+  return item.itemId || item.driveId || item.id || `${item.type}_${item.url}`;
+}
+
 /**
- * Custom hook for managing a video shopping cart.
- * Each item: { driveId, title, duration, courseCode, courseName, matchedTags }
+ * Custom hook for managing a multi-source learning path cart.
+ * Supports three item types:
+ *   - video: { type: "video", driveId, title, duration, courseCode, courseName }
+ *   - doc:   { type: "doc",   itemId, title, url, tier, subsystem, readTimeMinutes }
+ *   - youtube: { type: "youtube", itemId, title, url, channel, tier, durationMinutes }
  */
 export function useVideoCart() {
   const [cart, setCart] = useState(loadCart);
 
-  const addToCart = useCallback((video) => {
+  const addToCart = useCallback((item) => {
     setCart((prev) => {
-      if (prev.some((v) => v.driveId === video.driveId)) return prev;
-      const next = [...prev, video];
+      const id = getItemId(item);
+      if (prev.some((v) => getItemId(v) === id)) return prev;
+      const enriched = { ...item, itemId: id, type: item.type || "video" };
+      const next = [...prev, enriched];
       saveCart(next);
       return next;
     });
   }, []);
 
-  const removeFromCart = useCallback((driveId) => {
+  const removeFromCart = useCallback((idOrDriveId) => {
     setCart((prev) => {
-      const next = prev.filter((v) => v.driveId !== driveId);
+      const next = prev.filter((v) => getItemId(v) !== idOrDriveId && v.driveId !== idOrDriveId);
       saveCart(next);
       return next;
     });
@@ -48,11 +58,27 @@ export function useVideoCart() {
     saveCart([]);
   }, []);
 
-  const isInCart = useCallback((driveId) => cart.some((v) => v.driveId === driveId), [cart]);
+  const isInCart = useCallback(
+    (idOrDriveId) => cart.some((v) => getItemId(v) === idOrDriveId || v.driveId === idOrDriveId),
+    [cart]
+  );
 
-  const videoCount = cart.length;
+  const videoCount = cart.filter((i) => (i.type || "video") === "video").length;
 
-  const totalDuration = useMemo(() => cart.reduce((sum, v) => sum + (v.duration || 0), 0), [cart]);
+  const totalDuration = useMemo(
+    () => cart.reduce((sum, v) => sum + (v.duration || (v.readTimeMinutes || v.durationMinutes || 0) * 60), 0),
+    [cart]
+  );
+
+  /** Group items by type for display */
+  const itemsByType = useMemo(() => {
+    const groups = { video: [], doc: [], youtube: [] };
+    for (const item of cart) {
+      const t = item.type || "video";
+      (groups[t] || groups.video).push(item);
+    }
+    return groups;
+  }, [cart]);
 
   return {
     cart,
@@ -62,5 +88,6 @@ export function useVideoCart() {
     isInCart,
     videoCount,
     totalDuration,
+    itemsByType,
   };
 }
