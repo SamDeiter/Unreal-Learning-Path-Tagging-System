@@ -136,7 +136,7 @@ function TagGraph({ tags = [], edges = [] }) {
           layout={LAYOUT_CONFIG}
           cy={handleCy}
           style={{ width: "100%", height: "calc(100vh - 200px)" }}
-          wheelSensitivity={0.3}
+          wheelSensitivity={0.8}
           boxSelectionEnabled={false}
           autounselectify={true}
           userPanningEnabled={true}

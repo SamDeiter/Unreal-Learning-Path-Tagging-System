@@ -81,7 +81,7 @@ export const GRAPH_STYLESHEET = [
       "text-outline-width": 2,
       "text-outline-color": "#0d1117",
       "transition-property": "opacity, background-color, border-color",
-      "transition-duration": "200ms",
+      "transition-duration": "0ms",
       "z-index": 10,
     },
   },
@@ -148,8 +148,8 @@ export const GRAPH_STYLESHEET = [
 
 export const LAYOUT_CONFIG = {
   name: "cose-bilkent",
-  idealEdgeLength: 250,
-  nodeRepulsion: 25000,
+  idealEdgeLength: 300,
+  nodeRepulsion: 40000,
   nestingFactor: 0.1,
   gravity: 0.15,
   gravityRange: 3.0,
@@ -161,7 +161,7 @@ export const LAYOUT_CONFIG = {
   randomize: true,
   edgeElasticity: 0.45,
   componentSpacing: 100,
-  nodeOverlap: 20,
+  nodeOverlap: 10,
   fit: true,
   padding: 40,
   quality: "default",

@@ -152,7 +152,7 @@ function App() {
     });
     // Add co-occurrence edges where no curated edge exists
     coOccurrenceWeights.forEach((weight, key) => {
-      if (!edgeMap.has(key) && weight >= 5) { // need 5+ co-occurrences for a meaningful edge
+      if (!edgeMap.has(key) && weight >= 25) { // need 25+ co-occurrences for visible edge
         const [sourceTagId, targetTagId] = key.split("|");
         edgeMap.set(key, { sourceTagId, targetTagId, weight, relation: "co-occurrence" });
       }

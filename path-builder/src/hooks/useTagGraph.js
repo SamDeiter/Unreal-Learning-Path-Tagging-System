@@ -66,7 +66,9 @@ export default function useTagGraph({ tags = [], edges = [] }) {
       connectedNodeIds.add(e.targetTagId);
     });
 
-    const nodes = topTags.map((tag) => {
+    // Only show nodes that have at least one connection (orphans are noise)
+    const connectedTopTags = topTags.filter((tag) => connectedNodeIds.has(tag.id));
+    const nodes = connectedTopTags.map((tag) => {
       const nodeSize = getNodeSize(tag.count, minCount, maxCount);
       const labelWidth = Math.max(tag.label.length * 7 + 40, nodeSize);
       const totalHeight = nodeSize + 30;
@@ -278,7 +280,7 @@ export default function useTagGraph({ tags = [], edges = [] }) {
         padding: 30,
         gridSize: 200,
         maxIterations: 50,
-        stiffness: 0.1,
+        stiffness: 0.05,
       });
       cy.batch(() => {
         nodes.forEach((node) => {
