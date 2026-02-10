@@ -118,6 +118,19 @@ export default function useGuidedPlayer({
   }, []);
 
   const handleVideoComplete = useCallback(() => {
+    // Reading steps skip quiz/challenge — go directly to next course or complete
+    if (currentCourse?._readingStep) {
+      if (nextCourse) {
+        setCurrentIndex((prev) => prev + 1);
+        setVideoIndex(0);
+        setStage(STAGES.PLAYING);
+      } else {
+        setStage(STAGES.COMPLETE);
+        onComplete?.();
+      }
+      return;
+    }
+
     if (hasMoreVideos) {
       setVideoIndex((prev) => prev + 1);
     } else {
@@ -128,7 +141,7 @@ export default function useGuidedPlayer({
         setStage(STAGES.CHALLENGE);
       }
     }
-  }, [hasMoreVideos, currentCourse]);
+  }, [hasMoreVideos, currentCourse, nextCourse, onComplete]);
 
   const handlePreviousVideo = useCallback(() => {
     if (videoIndex > 0) {

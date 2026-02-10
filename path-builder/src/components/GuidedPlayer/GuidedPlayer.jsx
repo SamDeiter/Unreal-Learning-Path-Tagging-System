@@ -43,7 +43,7 @@ export default function GuidedPlayer(props) {
       )}
 
       {/* Stage: Video Playing */}
-      {gp.stage === STAGES.PLAYING && gp.currentCourse && (
+      {gp.stage === STAGES.PLAYING && gp.currentCourse && !gp.currentCourse._readingStep && (
         <VideoStage
           course={gp.currentCourse}
           currentVideos={gp.currentVideos}
@@ -53,6 +53,17 @@ export default function GuidedPlayer(props) {
           microLesson={props.microLesson}
           courses={gp.courses}
           onVideoComplete={gp.handleVideoComplete}
+          onExit={gp.onExit}
+        />
+      )}
+
+      {/* Stage: Reading Step (doc/YouTube) */}
+      {gp.stage === STAGES.PLAYING && gp.currentCourse && gp.currentCourse._readingStep && (
+        <ReadingStep
+          course={gp.currentCourse}
+          stepNumber={gp.currentIndex + 1}
+          totalSteps={gp.courses.length}
+          onComplete={gp.handleVideoComplete}
           onExit={gp.onExit}
         />
       )}
@@ -366,3 +377,70 @@ function AiGuidePanel({ microLesson, courses }) {
     </div>
   );
 }
+
+/* ─── ReadingStep — card for doc/YouTube reading steps ─── */
+function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
+  const [isRead, setIsRead] = useState(false);
+  const typeIcon = course._resourceType === "doc" ? "📖" : "▶️";
+  const typeLabel = course._resourceType === "doc" ? "Documentation" : "YouTube Video";
+  const sourceLabel = course._resourceType === "doc" ? "Epic Docs" : (course._channel || "YouTube");
+
+  return (
+    <div className="reading-step">
+      <div className="reading-step-header">
+        <span className="reading-step-badge">{typeIcon} {typeLabel}</span>
+        <span className="reading-step-progress">Step {stepNumber} of {totalSteps}</span>
+      </div>
+
+      <h2 className="reading-step-title">{course.title}</h2>
+
+      <div className="reading-step-meta">
+        {course._tier && (
+          <span className={`tier-badge tier-${course._tier}`}>{course._tier}</span>
+        )}
+        {course._subsystem && (
+          <span className="subsystem-tag">{course._subsystem}</span>
+        )}
+        <span className="reading-step-time">
+          ⏱ {course._readTimeMinutes} min {course._resourceType === "doc" ? "read" : "watch"}
+        </span>
+      </div>
+
+      <div className="reading-step-source">
+        <span className="reading-step-source-label">Source: {sourceLabel}</span>
+      </div>
+
+      <a
+        href={course._url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="reading-step-link"
+        onClick={() => setIsRead(true)}
+      >
+        {course._resourceType === "doc" ? "📄 Open Documentation" : "▶️ Watch on YouTube"}
+        <span className="reading-step-link-arrow">↗</span>
+      </a>
+
+      <div className="reading-step-actions">
+        <button
+          className={`reading-step-complete ${isRead ? "ready" : ""}`}
+          onClick={onComplete}
+          title={isRead ? "Continue to next step" : "Mark as read and continue"}
+        >
+          {isRead ? "✓ Read — Continue →" : "Mark as Read → Continue"}
+        </button>
+        <button className="reading-step-exit" onClick={onExit}>
+          ✕ Exit Path
+        </button>
+      </div>
+    </div>
+  );
+}
+
+ReadingStep.propTypes = {
+  course: PropTypes.object.isRequired,
+  stepNumber: PropTypes.number.isRequired,
+  totalSteps: PropTypes.number.isRequired,
+  onComplete: PropTypes.func.isRequired,
+  onExit: PropTypes.func.isRequired,
+};

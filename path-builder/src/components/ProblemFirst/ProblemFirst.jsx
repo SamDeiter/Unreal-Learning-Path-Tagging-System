@@ -557,6 +557,25 @@ export default function ProblemFirst() {
       {stage === STAGES.GUIDED && (
         <GuidedPlayer
           courses={cart.map((item) => {
+            const itemType = item.type || "video";
+
+            // Doc or YouTube → reading step pseudo-course
+            if (itemType === "doc" || itemType === "youtube") {
+              return {
+                code: item.itemId || `${itemType}_${item.url}`,
+                title: item.title,
+                _readingStep: true,
+                _resourceType: itemType,
+                _url: item.url,
+                _tier: item.tier,
+                _channel: item.channel,
+                _subsystem: item.subsystem,
+                _readTimeMinutes: item.readTimeMinutes || item.durationMinutes || 10,
+                videos: [],
+              };
+            }
+
+            // Video → normal course mapping (existing logic)
             const fullCourse = courses.find((c) => c.code === item.courseCode);
             if (fullCourse) {
               return {
