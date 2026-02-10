@@ -7,10 +7,13 @@ import challengeRegistry from "../data/challengeRegistry.json";
 /**
  * Generate a hands-on challenge based on course metadata.
  * Uses tag-specific templates with concrete UE5 steps.
+ * Guarantees unique challenges per course by collecting all relevant
+ * templates and selecting based on courseIndex.
  *
  * @param {Object} course - current course object
  * @param {string} problemContext - the user's original problem summary
  * @param {string} videoTitle - title of the current video
+ * @param {number} courseIndex - index of the course in the path (ensures uniqueness)
  * @returns {{ task: string, hint: string, expectedResult: string, difficulty: string }}
  */
 export function generateChallenge(course, problemContext, videoTitle, courseIndex = 0) {
@@ -30,57 +33,53 @@ export function generateChallenge(course, problemContext, videoTitle, courseInde
   const skillLevel = course?.gemini_skill_level || "Intermediate";
   const contextLower = (problemContext || "").toLowerCase();
 
-  // Helper: pick a template deterministically from a list
-  const pickTemplate = (templates) => {
-    const titleHash = ((course?.title || "") + (videoTitle || "") + courseIndex).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return templates[titleHash % templates.length];
+  // ── Collect ALL matching template pools ──
+  // Instead of short-circuiting on the first match, gather every relevant
+  // template so we have enough variety to give each course a unique challenge.
+  const allTemplates = [];
+  const seenTasks = new Set();
+
+  const addTemplates = (templates) => {
+    for (const t of templates) {
+      if (!seenTasks.has(t.task)) {
+        seenTasks.add(t.task);
+        allTemplates.push(t);
+      }
+    }
   };
 
-  // ── 1. Problem-context match (HIGHEST priority) ──
-  // The user's own words are the strongest signal for what challenge they need.
-  // Check longest keys first so "nanite" beats "nan", etc.
-  // Only use this path if the matched key has multiple templates,
-  // otherwise fall through to course-specific tag/fallback logic.
+  // 1. Problem-context matches (highest priority — added first)
   if (contextLower) {
     const registryKeys = Object.keys(challengeRegistry).sort((a, b) => b.length - a.length);
     for (const key of registryKeys) {
       if (contextLower.includes(key)) {
-        const templates = challengeRegistry[key];
-        if (templates.length > 1) {
-          const template = pickTemplate(templates);
-          return {
-            task: template.task,
-            hint: template.hint,
-            expectedResult: template.expectedResult,
-            difficulty: skillLevel,
-          };
-        }
-        // Single template — fall through so each course gets a unique challenge
-        break;
+        addTemplates(challengeRegistry[key]);
       }
     }
   }
 
-  // ── 2. Course-tag match, prioritised by query overlap ──
-  // Sort tags so ones that appear in the user's query come first.
+  // 2. Course-tag matches (added second, deduped)
   const sortedTagNames = [...tagNames].sort((a, b) => {
     const aInQuery = contextLower.includes(a.toLowerCase()) ? 1 : 0;
     const bInQuery = contextLower.includes(b.toLowerCase()) ? 1 : 0;
-    return bInQuery - aInQuery; // query-matching tags first
+    return bInQuery - aInQuery;
   });
-
   for (const tagName of sortedTagNames) {
     const key = tagName.toLowerCase();
-    const templates = challengeRegistry[key];
-    if (templates && templates.length > 0) {
-      const template = pickTemplate(templates);
-      return {
-        task: template.task,
-        hint: template.hint,
-        expectedResult: template.expectedResult,
-        difficulty: skillLevel,
-      };
+    if (challengeRegistry[key]) {
+      addTemplates(challengeRegistry[key]);
     }
+  }
+
+  // 3. Pick from the combined pool using courseIndex (simple & guaranteed unique)
+  if (allTemplates.length > 0) {
+    const template = allTemplates[courseIndex % allTemplates.length];
+    return {
+      task: template.task,
+      hint: template.hint,
+      expectedResult: template.expectedResult,
+      difficulty: skillLevel,
+    };
   }
 
   // Fallback: still specific to UE5 even without a tag match
