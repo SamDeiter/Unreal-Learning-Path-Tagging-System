@@ -292,35 +292,90 @@ export default function ProblemFirst() {
               )}
             </div>
 
-            {/* 🎬 Videos for You */}
+            {/* 🎬 Videos for You — Grouped by Role */}
             <h2 className="results-title">🎬 Videos for You ({videoResults.length})</h2>
-            <ul className="selection-tips">
-              <li>🔗 <strong>Prerequisite</strong> — foundational knowledge you may need first</li>
-              <li>⭐ <strong>Core</strong> — directly addresses your issue</li>
-              <li>🔧 <strong>Troubleshooting</strong> — helps debug related problems</li>
-              <li>📚 <strong>Supplemental</strong> — extra depth if you want to go further</li>
-            </ul>
-            <div className="video-results-grid">
-              {videoResults.map((video) => (
-                <div key={video.driveId} className={`video-result-wrapper ${expandedVideoId === video.driveId ? "expanded" : ""}`} id={`video-${video.driveId}`}>
-                  <VideoResultCard
-                    video={video}
-                    isAdded={isInCart(video.driveId)}
-                    onToggle={handleVideoToggle}
-                    userQuery={diagnosisData?.userQuery || ""}
-                    isExpanded={expandedVideoId === video.driveId}
-                    onExpand={(id) => setExpandedVideoId(expandedVideoId === id ? null : id)}
-                    microLesson={diagnosisData.microLesson}
-                    retrievedPassages={diagnosisData.retrievedPassages}
-                  />
-                </div>
-              ))}
-              {videoResults.length === 0 && (
-                <div className="no-results">
-                  <p>No matching videos found. Try rephrasing your question.</p>
-                </div>
-              )}
-            </div>
+
+            {videoResults.length === 0 && (
+              <div className="no-results">
+                <p>No matching videos found. Try rephrasing your question.</p>
+              </div>
+            )}
+
+            {(() => {
+              const ROLE_SECTIONS = [
+                { key: "prerequisite", icon: "🔗", label: "Prerequisite", desc: "Build the foundation first — these cover concepts you'll need before tackling the main topic." },
+                { key: "core",         icon: "⭐", label: "Core",         desc: "These directly address your question and are the most important videos to watch." },
+                { key: "troubleshooting", icon: "🔧", label: "Troubleshooting", desc: "Debugging helpers — watch these if you're hitting errors or unexpected behavior." },
+                { key: "supplemental", icon: "📚", label: "Supplemental", desc: "Go deeper — extra context and advanced techniques for when you're ready." },
+              ];
+
+              const grouped = {};
+              for (const section of ROLE_SECTIONS) grouped[section.key] = [];
+              grouped._other = [];
+
+              for (const video of videoResults) {
+                const role = video.role || "_other";
+                (grouped[role] || grouped._other).push(video);
+              }
+
+              return ROLE_SECTIONS
+                .filter((s) => grouped[s.key].length > 0)
+                .map((section) => (
+                  <div key={section.key} className="role-section">
+                    <div className="role-section-header">
+                      <h3 className="role-section-title">
+                        {section.icon} {section.label}
+                        <span className="role-section-count">{grouped[section.key].length}</span>
+                      </h3>
+                      <p className="role-section-desc">{section.desc}</p>
+                    </div>
+                    <div className="video-results-grid">
+                      {grouped[section.key].map((video) => (
+                        <div key={video.driveId} className={`video-result-wrapper ${expandedVideoId === video.driveId ? "expanded" : ""}`} id={`video-${video.driveId}`}>
+                          <VideoResultCard
+                            video={video}
+                            isAdded={isInCart(video.driveId)}
+                            onToggle={handleVideoToggle}
+                            userQuery={diagnosisData?.userQuery || ""}
+                            isExpanded={expandedVideoId === video.driveId}
+                            onExpand={(id) => setExpandedVideoId(expandedVideoId === id ? null : id)}
+                            microLesson={diagnosisData.microLesson}
+                            retrievedPassages={diagnosisData.retrievedPassages}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+                .concat(
+                  grouped._other.length > 0
+                    ? [
+                        <div key="_other" className="role-section">
+                          <div className="role-section-header">
+                            <h3 className="role-section-title">📎 Related <span className="role-section-count">{grouped._other.length}</span></h3>
+                            <p className="role-section-desc">Additional videos that may be relevant to your query.</p>
+                          </div>
+                          <div className="video-results-grid">
+                            {grouped._other.map((video) => (
+                              <div key={video.driveId} className={`video-result-wrapper ${expandedVideoId === video.driveId ? "expanded" : ""}`} id={`video-${video.driveId}`}>
+                                <VideoResultCard
+                                  video={video}
+                                  isAdded={isInCart(video.driveId)}
+                                  onToggle={handleVideoToggle}
+                                  userQuery={diagnosisData?.userQuery || ""}
+                                  isExpanded={expandedVideoId === video.driveId}
+                                  onExpand={(id) => setExpandedVideoId(expandedVideoId === id ? null : id)}
+                                  microLesson={diagnosisData.microLesson}
+                                  retrievedPassages={diagnosisData.retrievedPassages}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>,
+                      ]
+                    : []
+                );
+            })()}
 
             {/* Bottom actions */}
             <div className="results-actions-bottom">
