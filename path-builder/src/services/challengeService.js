@@ -78,6 +78,7 @@ export function generateChallenge(course, problemContext, videoTitle, courseInde
       task: template.task,
       hint: template.hint,
       expectedResult: template.expectedResult,
+      docsUrl: template.docsUrl || null,
       difficulty: skillLevel,
     };
   }

@@ -1,170 +1,382 @@
 {
   "blueprint": [
     {
-      "task": "Create a new Actor Blueprint (right-click Content Browser \u2192 Blueprint Class \u2192 Actor). Add a Point Light component and a Box Collision. In the Event Graph, wire 'On Component Begin Overlap' \u2192 'Set Visibility' to toggle the light when the player walks through.",
+      "task": "Create a new Actor Blueprint (right-click Content Browser → Blueprint Class → Actor). Add a Point Light component and a Box Collision. In the Event Graph, wire 'On Component Begin Overlap' → 'Set Visibility' to toggle the light when the player walks through.",
       "hint": "Compile the Blueprint after wiring. Drop it in your level and hit Play to test the overlap.",
-      "expectedResult": "When you walk into the collision box in Play mode, the Point Light should turn on/off. The Event Graph should show a connected chain from Overlap \u2192 Set Visibility with no compile errors."
+      "expectedResult": "When you walk into the collision box in Play mode, the Point Light should turn on/off. The Event Graph should show a connected chain from Overlap → Set Visibility with no compile errors.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprints-visual-scripting-in-unreal-engine"
     },
     {
       "task": "Open any existing Blueprint. Add a Custom Event called 'ResetState'. Wire it to set at least 2 variables back to their defaults, then call it from Begin Play with a 3-second Delay node.",
-      "hint": "Right-click the Event Graph \u2192 Add Custom Event. Use a 'Delay' node (set Duration to 3.0) before the call.",
-      "expectedResult": "After pressing Play, wait 3 seconds \u2014 the variables should snap back to their defaults. Print String nodes on each Set will confirm the reset fires. The Blueprint should compile without errors."
+      "hint": "Right-click the Event Graph → Add Custom Event. Use a 'Delay' node (set Duration to 3.0) before the call.",
+      "expectedResult": "After pressing Play, wait 3 seconds — the variables should snap back to their defaults. Print String nodes on each Set will confirm the reset fires. The Blueprint should compile without errors.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/custom-events-in-unreal-engine"
+    },
+    {
+      "task": "Create a Blueprint Interface (right-click Content Browser → Blueprint Interface). Add a function signature called 'Interact' with no inputs. Implement this interface on two different Actor Blueprints — one that prints 'Hello' and one that toggles a light. Call Interact via the interface on both.",
+      "hint": "After adding the Interface to each Blueprint's Class Settings, open the interface function in each BP to add the implementation logic.",
+      "expectedResult": "Calling 'Interact' via the interface message on Actor A should print 'Hello' and on Actor B should toggle a light — same call, different behavior. Both BPs should show the Interface listed under Class Settings → Interfaces.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-interface-in-unreal-engine"
     }
   ],
   "materials": [
     {
-      "task": "Create a new Material (right-click Content Browser \u2192 Material). Add a Texture Sample node for a Base Color map, plug a Constant3Vector into Emissive Color with a value like (1, 0.5, 0), and set Blend Mode to 'Masked'. Apply it to a cube in your scene.",
+      "task": "Create a new Material (right-click Content Browser → Material). Add a Texture Sample node for a Base Color map, plug a Constant3Vector into Emissive Color with a value like (1, 0.5, 0), and set Blend Mode to 'Masked'. Apply it to a cube in your scene.",
       "hint": "Double-click the Material to open the editor. Drag from output pins to input pins to connect nodes.",
-      "expectedResult": "The cube should display your texture on its surface with an orange glow from the emissive channel. In 'Lit' mode, the emissive color should be visible even in shadow. The Material should show no errors in the Stats panel."
+      "expectedResult": "The cube should display your texture on its surface with an orange glow from the emissive channel. In 'Lit' mode, the emissive color should be visible even in shadow. The Material should show no errors in the Stats panel.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-materials"
     },
     {
-      "task": "Create a Material Instance from an existing Material (right-click \u2192 Create Material Instance). Expose at least 2 parameters (a color and a scalar), then adjust them on the instance to see the changes live in the viewport.",
-      "hint": "In the parent Material, right-click a Constant \u2192 'Convert to Parameter' and give it a name.",
-      "expectedResult": "Changing the color slider on the Material Instance should immediately update the mesh's appearance in the viewport \u2014 no recompile needed. Both parameters should appear as editable fields in the Instance's Details panel."
+      "task": "Create a Material Instance from an existing Material (right-click → Create Material Instance). Expose at least 2 parameters (a color and a scalar), then adjust them on the instance to see the changes live in the viewport.",
+      "hint": "In the parent Material, right-click a Constant → 'Convert to Parameter' and give it a name.",
+      "expectedResult": "Changing the color slider on the Material Instance should immediately update the mesh's appearance in the viewport — no recompile needed. Both parameters should appear as editable fields in the Instance's Details panel.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/instanced-materials-in-unreal-engine"
+    },
+    {
+      "task": "Build a layered Material with a Lerp node blending between two textures. Use a vertex-painted mask to control the blend. Apply it to a mesh, then use Mesh Paint mode (Shift+5) to paint the blend in the viewport.",
+      "hint": "The Lerp Alpha input should come from a Vertex Color node's R channel. In Mesh Paint mode, paint with red to reveal the second texture.",
+      "expectedResult": "Where you paint red, the second texture should appear. Unpainted areas show the first texture. The transition should be smooth at the painted edges. The Material Graph should show Lerp with both textures connected.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/mesh-paint-mode-in-unreal-engine"
     }
   ],
   "lighting": [
     {
-      "task": "Build a small interior room with 4 walls and a ceiling (use BSP or cubes). Place a Rect Light (Add \u2192 Lights \u2192 Rect Light) inside, set its Source Width/Height to 200, Intensity to 15 cd, and color to warm white (4200K). Compare the result with a basic Point Light.",
-      "hint": "Select the Rect Light \u2192 Details panel \u2192 Light section. Use 'Lit' viewport mode to see the final result.",
-      "expectedResult": "The Rect Light should cast soft, directional shadows with a warm rectangular pool of light on the floor. Compared to the Point Light, the Rect Light shadows should be noticeably softer with more realistic falloff at the edges."
+      "task": "Build a small interior room with 4 walls and a ceiling (use BSP or cubes). Place a Rect Light (Add → Lights → Rect Light) inside, set its Source Width/Height to 200, Intensity to 15 cd, and color to warm white (4200K). Compare the result with a basic Point Light.",
+      "hint": "Select the Rect Light → Details panel → Light section. Use 'Lit' viewport mode to see the final result.",
+      "expectedResult": "The Rect Light should cast soft, directional shadows with a warm rectangular pool of light on the floor. Compared to the Point Light, the Rect Light shadows should be noticeably softer with more realistic falloff at the edges.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/rect-lights-in-unreal-engine"
     },
     {
       "task": "Set up a three-point lighting rig: one Directional Light as key, one Rect Light as fill (half the intensity, opposite side), and one Spot Light as rim/backlight behind the subject. Screenshot the result.",
       "hint": "Key light: ~10 lux, Fill: ~5 lux, Rim: ~8 lux. Adjust the Directional Light's rotation in the Details panel.",
-      "expectedResult": "Your subject should have a bright side (key), a dimly lit opposite side (fill) with soft shadows, and a bright edge outline on the back (rim). The overall look should feel cinematic with clear depth separation from the background."
+      "expectedResult": "Your subject should have a bright side (key), a dimly lit opposite side (fill) with soft shadows, and a bright edge outline on the back (rim). The overall look should feel cinematic with clear depth separation from the background.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/light-types-and-their-mobility-in-unreal-engine"
+    },
+    {
+      "task": "Create a flickering light effect using a Light Function Material. Create a new Material with Material Domain set to 'Light Function'. Use a Time node driving a Sine wave into Emissive Color. Apply the Material as a Light Function on a Point Light.",
+      "hint": "In the Material, set Material Domain to 'Light Function' in the Details panel. Apply it on the Point Light's Details → Light → Light Function Material.",
+      "expectedResult": "The Point Light should pulse rhythmically on and off following the sine wave pattern. Adjusting the Time node's multiplier should change the flicker speed. Shadows cast by the light should also pulse in sync.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/light-functions-in-unreal-engine"
     }
   ],
   "lumen": [
     {
-      "task": "Go to Project Settings \u2192 Engine \u2192 Rendering \u2192 Global Illumination. Switch the method to Lumen. Place a colored Rect Light in a corner of a room and observe the indirect bounce light on nearby walls. Then try switching to 'Hardware Ray Tracing' under Lumen settings and compare.",
-      "hint": "Use viewport Show \u2192 Visualize \u2192 Lumen Scene to debug. Software tracing works on any GPU; hardware RT needs RTX/RX 6000+.",
-      "expectedResult": "Nearby white walls should pick up a tinted color from the Rect Light's bounce. Moving the light should update the indirect illumination within 1-2 seconds. Hardware RT mode should show sharper, more accurate bounces with less noise."
+      "task": "Go to Project Settings → Engine → Rendering → Global Illumination. Switch the method to Lumen. Place a colored Rect Light in a corner of a room and observe the indirect bounce light on nearby walls. Then try switching to 'Hardware Ray Tracing' under Lumen settings and compare.",
+      "hint": "Use viewport Show → Visualize → Lumen Scene to debug. Software tracing works on any GPU; hardware RT needs RTX/RX 6000+.",
+      "expectedResult": "Nearby white walls should pick up a tinted color from the Rect Light's bounce. Moving the light should update the indirect illumination within 1-2 seconds. Hardware RT mode should show sharper, more accurate bounces with less noise.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine"
     },
     {
       "task": "Create a dark hallway with one open doorway letting in a Directional Light. With Lumen enabled, observe how light bleeds around the doorframe. Add an Emissive Material (Emissive value > 5) to a mesh inside and verify Lumen picks up the emission as a light source.",
       "hint": "Emissive lighting in Lumen needs Emissive values well above 1.0. Try 10-50 for visible bounce.",
-      "expectedResult": "Light should visibly bleed around the doorframe edges into the dark hallway. The emissive mesh should cast soft colored light onto nearby surfaces \u2014 you'll see the floor and walls near it glow with the emissive color."
+      "expectedResult": "Light should visibly bleed around the doorframe edges into the dark hallway. The emissive mesh should cast soft colored light onto nearby surfaces — you'll see the floor and walls near it glow with the emissive color.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine"
+    },
+    {
+      "task": "With Lumen enabled, place a large reflective sphere (Metallic=1, Roughness=0) in a room with colored walls. Walk the camera around it and observe real-time reflections. Then open console and type 'r.Lumen.Reflections.Quality 4' to max out reflection quality and compare.",
+      "hint": "Lumen reflections need the Reflection Method set to 'Lumen' in Project Settings → Rendering. The sphere needs a Material with full metallic and zero roughness.",
+      "expectedResult": "The sphere should show real-time reflections of the colored room. Moving the camera should update reflections dynamically. At Quality 4, reflections should be noticeably sharper with less noise, especially on curved surfaces.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine"
     }
   ],
   "animation": [
     {
-      "task": "Open an Animation Blueprint for any Skeletal Mesh. In the Anim Graph, add a Blend Space 1D node. Create a new Blend Space asset (right-click Content Browser \u2192 Animation \u2192 Blend Space 1D), set the axis from 0-600 for 'Speed', and add Idle at 0 and Walk at 300.",
+      "task": "Open an Animation Blueprint for any Skeletal Mesh. In the Anim Graph, add a Blend Space 1D node. Create a new Blend Space asset (right-click Content Browser → Animation → Blend Space 1D), set the axis from 0-600 for 'Speed', and add Idle at 0 and Walk at 300.",
       "hint": "The X-axis parameter typically maps to a 'Speed' variable. Add sample points by right-clicking the graph area.",
-      "expectedResult": "In the Blend Space preview, dragging the slider from 0 to 300 should smoothly transition from Idle to Walk. In Play mode, the character should blend between animations based on movement speed \u2014 standing still plays Idle, walking plays Walk."
+      "expectedResult": "In the Blend Space preview, dragging the slider from 0 to 300 should smoothly transition from Idle to Walk. In Play mode, the character should blend between animations based on movement speed — standing still plays Idle, walking plays Walk.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/blend-spaces-in-unreal-engine"
     },
     {
-      "task": "Create an Animation Montage from any animation (right-click anim \u2192 Create Montage). Add a Notify at the halfway point called 'FootstepSound'. In the Anim Blueprint's Event Graph, handle 'Anim Notify FootstepSound' to print a string.",
-      "hint": "In the Montage timeline, right-click \u2192 Add Notify \u2192 New Notify. Name it exactly to match your handler.",
-      "expectedResult": "When the montage plays and reaches the halfway mark, 'FootstepSound' should appear in the Output Log via Print String. The Notify marker should be visible as a triangle on the Montage timeline at the exact position you placed it."
+      "task": "Create an Animation Montage from any animation (right-click anim → Create Montage). Add a Notify at the halfway point called 'FootstepSound'. In the Anim Blueprint's Event Graph, handle 'Anim Notify FootstepSound' to print a string.",
+      "hint": "In the Montage timeline, right-click → Add Notify → New Notify. Name it exactly to match your handler.",
+      "expectedResult": "When the montage plays and reaches the halfway mark, 'FootstepSound' should appear in the Output Log via Print String. The Notify marker should be visible as a triangle on the Montage timeline at the exact position you placed it.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-montage-in-unreal-engine"
+    },
+    {
+      "task": "Set up an additive animation layer. Take a base locomotion animation and create an additive layer for a 'lean left' pose. In the Anim Blueprint, use a 'Layered Blend Per Bone' node to apply the lean only to the spine bones while legs continue walking.",
+      "hint": "The additive anim needs its Additive Anim Type set to 'Local Space' in the asset details. Layered Blend Per Bone → set the Branch Filter to 'spine_01' bone.",
+      "expectedResult": "The character should walk normally with its legs while the upper body leans to the left. Blending the additive weight from 0 to 1 should smoothly introduce the lean. The lower body animation should be completely unaffected.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-blueprints-in-unreal-engine"
     }
   ],
   "niagara": [
     {
-      "task": "Create a new Niagara System (right-click Content Browser \u2192 FX \u2192 Niagara System \u2192 New System from Template \u2192 Fountain). Open it, find the 'Initialize Particle' module, and change the Lifetime from the default to a Min/Max of 1.0-3.0. Change the Sprite Size to 5-15. Drop it in your level.",
+      "task": "Create a new Niagara System (right-click Content Browser → FX → Niagara System → New System from Template → Fountain). Open it, find the 'Initialize Particle' module, and change the Lifetime from the default to a Min/Max of 1.0-3.0. Change the Sprite Size to 5-15. Drop it in your level.",
       "hint": "Expand modules by clicking the arrow. Each module has parameters you can override. Use the preview panel to see changes live.",
-      "expectedResult": "Particles should now live longer (1-3 seconds instead of default), creating taller fountain arcs. The sprites should be visibly smaller (5-15 vs default). In the level viewport, you should see a continuous stream of small particles rising and falling."
+      "expectedResult": "Particles should now live longer (1-3 seconds instead of default), creating taller fountain arcs. The sprites should be visibly smaller (5-15 vs default). In the level viewport, you should see a continuous stream of small particles rising and falling.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/niagara-visual-effects-in-unreal-engine"
     },
     {
-      "task": "In an existing Niagara emitter, add a 'Curl Noise Force' module (click + in the Particle Update group \u2192 search 'Curl Noise'). Set Noise Strength to 200 and Frequency to 0.5. Observe how particles now swirl instead of falling straight.",
-      "hint": "Curl Noise is under Particle Update \u2192 Forces. Increase Strength for more dramatic swirling.",
-      "expectedResult": "Particles should visibly swirl and curl in organic patterns instead of falling straight down. At Strength 200 the effect should be dramatic \u2014 particles will loop and spiral. Reducing Frequency makes larger, lazier swirls."
+      "task": "In an existing Niagara emitter, add a 'Curl Noise Force' module (click + in the Particle Update group → search 'Curl Noise'). Set Noise Strength to 200 and Frequency to 0.5. Observe how particles now swirl instead of falling straight.",
+      "hint": "Curl Noise is under Particle Update → Forces. Increase Strength for more dramatic swirling.",
+      "expectedResult": "Particles should visibly swirl and curl in organic patterns instead of falling straight down. At Strength 200 the effect should be dramatic — particles will loop and spiral. Reducing Frequency makes larger, lazier swirls.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/niagara-visual-effects-in-unreal-engine"
+    },
+    {
+      "task": "Create a GPU-driven Niagara particle system with 100,000 particles. Set Sim Target to 'GPU Compute'. Add a 'Point Attraction Force' module pointing at the world origin with Attraction Strength 500. Spawn all particles in a sphere around the attractor.",
+      "hint": "In the Emitter Properties, set Sim Target to 'GPUCompute Sim'. The Point Attraction module is under Particle Update → Forces. Set Spawn Rate to 100000.",
+      "expectedResult": "Particles should orbit and spiral into the center point like a vortex. Performance should remain smooth even at 100K particles thanks to GPU compute. The preview should show a dense swirling mass converging on the attractor point.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/niagara-visual-effects-in-unreal-engine"
     }
   ],
   "landscape": [
     {
-      "task": "Enter Landscape Mode (Shift+3 or Modes panel \u2192 Landscape). Create a new landscape (Manage \u2192 New, 63\u00d763 quads). Use the Sculpt tool to carve a river bed: flatten a path, then lower it with the Erosion tool. Paint a water material on the channel.",
+      "task": "Enter Landscape Mode (Shift+3 or Modes panel → Landscape). Create a new landscape (Manage → New, 63×63 quads). Use the Sculpt tool to carve a river bed: flatten a path, then lower it with the Erosion tool. Paint a water material on the channel.",
       "hint": "Ctrl+scroll to resize brush. Flatten tool: hold Ctrl to sample target height first, then paint to level.",
-      "expectedResult": "You should see a flat green landscape with a visibly sunken channel carved through it. The channel should have smooth, eroded edges (not sharp cuts). The water material should appear only on the painted channel area, distinct from the surrounding terrain."
+      "expectedResult": "You should see a flat green landscape with a visibly sunken channel carved through it. The channel should have smooth, eroded edges (not sharp cuts). The water material should appear only on the painted channel area, distinct from the surrounding terrain.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/landscape-outdoor-terrain-in-unreal-engine"
     },
     {
       "task": "Add a Landscape Layer Blend material with 3 layers: Grass, Rock, and Sand. In Landscape Paint mode, paint each layer onto appropriate terrain areas. Add at least one auto-threshold rule based on slope angle.",
       "hint": "In the Material Editor, use a 'Landscape Layer Blend' node with 'LB Weight Blend' type. Each layer needs a Layer Info asset.",
-      "expectedResult": "Steep slopes should auto-paint as Rock, flat areas as Grass, and your manually painted Sand should appear where you chose. Each layer should blend smoothly at boundaries \u2014 no hard seams between Grass and Rock transitions."
+      "expectedResult": "Steep slopes should auto-paint as Rock, flat areas as Grass, and your manually painted Sand should appear where you chose. Each layer should blend smoothly at boundaries — no hard seams between Grass and Rock transitions.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/landscape-materials-in-unreal-engine"
+    },
+    {
+      "task": "Import a heightmap (16-bit PNG or RAW) to create a landscape from real-world terrain data. Go to Landscape Mode → Import from File, set the scale, and import. Add a simple grass/rock material and sculpt refinements by hand.",
+      "hint": "Heightmaps must be specific resolutions (1009×1009, 2017×2017, etc.). Use 100 Z-scale for realistic height. Free heightmaps are available from terrain.party.",
+      "expectedResult": "The landscape should show recognizable terrain features from your heightmap (mountains, valleys). Hand-sculpted refinements should blend naturally with the imported terrain. The material should render across the entire landscape surface.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/landscape-outdoor-terrain-in-unreal-engine"
     }
   ],
   "mesh": [
     {
-      "task": "Import a Static Mesh (drag an .fbx into the Content Browser). Open the Static Mesh Editor (double-click). Add a second LOD: Mesh \u2192 LOD Settings \u2192 set Number of LODs to 2 \u2192 click 'Apply Changes'. Set LOD1's screen size to 0.5.",
+      "task": "Import a Static Mesh (drag an .fbx into the Content Browser). Open the Static Mesh Editor (double-click). Add a second LOD: Mesh → LOD Settings → set Number of LODs to 2 → click 'Apply Changes'. Set LOD1's screen size to 0.5.",
       "hint": "LOD0 is the highest detail. LOD1 kicks in when the mesh is smaller than 50% of the screen.",
-      "expectedResult": "In the mesh editor, the LOD picker should show LOD0 and LOD1 with different triangle counts. In the viewport, zooming out past the 50% screen threshold should visibly switch to a simpler mesh version. Use 'r.StaticMeshLODDistanceScale 1' to verify."
+      "expectedResult": "In the mesh editor, the LOD picker should show LOD0 and LOD1 with different triangle counts. In the viewport, zooming out past the 50% screen threshold should visibly switch to a simpler mesh version. Use 'r.StaticMeshLODDistanceScale 1' to verify.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/static-meshes-in-unreal-engine"
+    },
+    {
+      "task": "Create a simple collision mesh for a Static Mesh. Open the mesh → Collision menu → Add Box Simplified Collision. Then try 'Auto Convex Collision' with Max Hulls = 4 and Max Verts = 16. Compare both collision shapes using 'Show → Collision' in the viewport.",
+      "hint": "Simple box collision is fastest but least accurate. Auto Convex with more hulls wraps the mesh tighter. Use Player Collision view to debug.",
+      "expectedResult": "The box collision should appear as a green wireframe box around the mesh. Auto Convex collision should show 4 convex hull shapes that follow the mesh contours more closely. Both should block player movement when tested in Play mode.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-collisions-with-static-meshes-in-unreal-engine"
+    },
+    {
+      "task": "Use the Merge Actors tool (Window → Merge Actors) to combine multiple Static Meshes in your scene into a single mesh. Select 5-10 similar objects (like rocks or props), merge them, and compare the draw call count before and after using 'stat SceneRendering'.",
+      "hint": "Select all meshes to merge → Window → Merge Actors → Merge button. Check 'Bake Material' if they share the same material.",
+      "expectedResult": "The draw call count (Mesh Draw Calls in stat SceneRendering) should decrease after merging. The merged mesh should appear as a single entry in the World Outliner. Visual quality should remain identical to the separate meshes.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/merging-actors-in-unreal-engine"
     }
   ],
   "texture": [
     {
       "task": "Import a texture (drag a .png into Content Browser). Open it and change Compression Settings to 'BC7' for quality. Set the LOD Bias to 1 to test lower mip levels. Create a Material using this texture as Base Color and verify it renders in-scene.",
-      "hint": "Texture Editor \u2192 Details \u2192 Compression \u2192 Compression Settings. Apply changes with 'Save'.",
-      "expectedResult": "The texture should render clearly on the mesh with BC7 compression (minimal artifacts). With LOD Bias 1, the texture should appear slightly blurrier at distance (using a lower mip). The Material's Stats should show the texture memory size."
+      "hint": "Texture Editor → Details → Compression → Compression Settings. Apply changes with 'Save'.",
+      "expectedResult": "The texture should render clearly on the mesh with BC7 compression (minimal artifacts). With LOD Bias 1, the texture should appear slightly blurrier at distance (using a lower mip). The Material's Stats should show the texture memory size.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/textures-in-unreal-engine"
+    },
+    {
+      "task": "Create a detail normal map setup. Import a tiling normal map and a macro normal map. In a Material, blend them using a 'BlendAngleCorrectNormal' node at different UV scales (base at 1x, detail at 8x). Apply to a flat surface.",
+      "hint": "The detail normal should tile at a higher UV scale for close-up surface detail. Use a TexCoord node with U/V tiling set to 8 for the detail texture.",
+      "expectedResult": "Up close, you should see fine surface detail from the tiled normal map. From a distance, the macro normal should provide broad surface variation. The blend should look seamless with no visible tiling patterns at normal viewing distance.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/textures-in-unreal-engine"
+    },
+    {
+      "task": "Create a Virtual Texture (right-click Content Browser → Create Runtime Virtual Texture). Place a Runtime Virtual Texture Volume in the scene. Assign the RVT to a landscape material to enable streaming textures that load on demand as the camera moves.",
+      "hint": "The RVT Volume must encompass the landscape. In the Material, use 'Runtime Virtual Texture Sample' instead of regular Texture Sample.",
+      "expectedResult": "The landscape should render with its full material detail but VRAM usage should be lower than traditional textures. Using 'stat VirtualTexturing' should show pages being streamed in/out as the camera moves.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/virtual-texturing-in-unreal-engine"
     }
   ],
   "character": [
     {
-      "task": "Open your Character Blueprint. In the Details panel, find the Character Movement component. Set Max Walk Speed to 400, Jump Z Velocity to 600, and Air Control to 0.3. Test in Play mode \u2014 your character should now run faster and have more air steering.",
+      "task": "Open your Character Blueprint. In the Details panel, find the Character Movement component. Set Max Walk Speed to 400, Jump Z Velocity to 600, and Air Control to 0.3. Test in Play mode — your character should now run faster and have more air steering.",
       "hint": "Character Movement is a component on your Character BP. All movement tuning is under 'Character Movement: Walking' and 'Jumping/Falling'.",
-      "expectedResult": "In Play mode, your character should move noticeably faster than default (600 \u2192 400). Jumping should feel floatier with higher arc (Z Velocity 600). While airborne, WASD should steer the character mid-jump thanks to Air Control 0.3."
+      "expectedResult": "In Play mode, your character should move noticeably faster than default (600 → 400). Jumping should feel floatier with higher arc (Z Velocity 600). While airborne, WASD should steer the character mid-jump thanks to Air Control 0.3.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-character-movement-in-unreal-engine"
+    },
+    {
+      "task": "Add a sprint mechanic to your character. In the Character Blueprint, create a 'Sprint' Input Action. On Pressed, set Max Walk Speed to 800. On Released, set it back to 400. Add a stamina float variable that decreases while sprinting and regenerates when walking.",
+      "hint": "Use Enhanced Input Actions for the sprint binding. Tick-based stamina drain: subtract DeltaTime × DrainRate each frame while sprinting.",
+      "expectedResult": "Holding sprint should visibly increase movement speed. The stamina variable should decrease in real-time (verify with Print String). Releasing sprint should return to normal speed and stamina should slowly refill. Depleted stamina should auto-stop sprinting.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-character-movement-in-unreal-engine"
+    },
+    {
+      "task": "Set up a third-person camera system. Add a Spring Arm component to your Character BP with Target Arm Length 300. Attach a Camera component to it. Enable 'Use Pawn Control Rotation' on the Spring Arm and disable it on the Character Movement.",
+      "hint": "Spring Arm → Details → Camera Settings → enable 'Use Pawn Control Rotation'. Character Movement → Orient Rotation to Movement = true, Use Controller Desired Rotation = false.",
+      "expectedResult": "The camera should orbit around the character when you move the mouse. The character should face the direction of movement, not the camera direction. The Spring Arm should handle collision — the camera should push in when a wall is behind the character.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-character-movement-in-unreal-engine"
     }
   ],
   "sequencer": [
     {
-      "task": "Create a Level Sequence (Cinematics \u2192 Add Level Sequence). Add an actor track for a light in your scene. At frame 0, set intensity to 0. At frame 120, set intensity to 20. Play back the sequence and watch the light fade in over 4 seconds (at 30fps).",
-      "hint": "Click + Track \u2192 Actor to Sequence \u2192 select the light. Right-click a property \u2192 'Add Key' at the playhead position.",
-      "expectedResult": "When you press Play in the Sequencer timeline, the light should gradually brighten from completely off to full intensity over exactly 4 seconds. The keyframe curve in the Sequencer should show a smooth ramp from 0 to 20. The scene should start dark and end lit."
+      "task": "Create a Level Sequence (Cinematics → Add Level Sequence). Add an actor track for a light in your scene. At frame 0, set intensity to 0. At frame 120, set intensity to 20. Play back the sequence and watch the light fade in over 4 seconds (at 30fps).",
+      "hint": "Click + Track → Actor to Sequence → select the light. Right-click a property → 'Add Key' at the playhead position.",
+      "expectedResult": "When you press Play in the Sequencer timeline, the light should gradually brighten from completely off to full intensity over exactly 4 seconds. The keyframe curve in the Sequencer should show a smooth ramp from 0 to 20. The scene should start dark and end lit.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/sequencer-editor-in-unreal-engine"
+    },
+    {
+      "task": "Create a camera fly-through cinematic. Add a Cine Camera Actor to your level. In a Level Sequence, add the camera as a track. Set keyframes at 3 different positions/rotations over 300 frames. Use the 'Pilot' feature to position the camera from the viewport.",
+      "hint": "Right-click the CineCamera in viewport → 'Pilot Selected Camera'. Move the viewport to frame your shot, then add a keyframe with 'S' in Sequencer.",
+      "expectedResult": "Playing the sequence in 'Cinematic Viewport' should show a smooth camera fly-through between your 3 keyframed positions. The motion should interpolate smoothly with no jarring jumps. The Sequencer should show transform keyframes on the camera track.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/sequencer-editor-in-unreal-engine"
+    },
+    {
+      "task": "Add a fade-to-black transition in Sequencer. Create a Fade Track on the Level Sequence. Set a keyframe at frame 90 with value 0 (fully visible) and at frame 120 with value 1 (fully black). Then reverse the fade from frame 150 to 180.",
+      "hint": "Click + Track → Fade Track at the sequence level. Right-click on the timeline to add keyframes. The fade value ranges from 0.0 (clear) to 1.0 (black).",
+      "expectedResult": "The viewport should smoothly fade to black between frames 90-120, hold black for 30 frames, then smoothly fade back in from frames 150-180. The transition should be cinematic and smooth with no popping.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/sequencer-editor-in-unreal-engine"
     }
   ],
   "umg": [
     {
-      "task": "Create a Widget Blueprint (right-click Content Browser \u2192 User Interface \u2192 Widget Blueprint). Add a Vertical Box with a Text block ('Health: 100') and a Progress Bar below it. In the Graph, bind the Progress Bar's Percent to a float variable called 'HealthPercent'.",
-      "hint": "Select the Progress Bar \u2192 Details \u2192 Percent \u2192 click 'Bind' \u2192 Create Binding function that returns your HealthPercent variable.",
-      "expectedResult": "In the Widget Designer preview, you should see 'Health: 100' text above a green progress bar. Changing the HealthPercent default value (0.0-1.0) should immediately update the bar fill. The binding icon next to Percent should show as linked (chain icon)."
+      "task": "Create a Widget Blueprint (right-click Content Browser → User Interface → Widget Blueprint). Add a Vertical Box with a Text block ('Health: 100') and a Progress Bar below it. In the Graph, bind the Progress Bar's Percent to a float variable called 'HealthPercent'.",
+      "hint": "Select the Progress Bar → Details → Percent → click 'Bind' → Create Binding function that returns your HealthPercent variable.",
+      "expectedResult": "In the Widget Designer preview, you should see 'Health: 100' text above a green progress bar. Changing the HealthPercent default value (0.0-1.0) should immediately update the bar fill. The binding icon next to Percent should show as linked (chain icon).",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/umg-ui-designer-in-unreal-engine"
+    },
+    {
+      "task": "Build a pause menu widget with Resume, Settings, and Quit buttons. Create the Widget Blueprint, add a Canvas Panel with 3 buttons in a Vertical Box centered on screen. Wire each button's OnClicked event — Resume closes the widget, Quit calls 'Quit Game'.",
+      "hint": "To pause: Set Game Paused = true and Add Widget to Viewport. For mouse cursor: Set Show Mouse Cursor = true on the Player Controller. Set Input Mode UI Only while paused.",
+      "expectedResult": "Pressing Escape should show the pause menu and freeze gameplay. Clicking Resume should close the menu and unpause. Clicking Quit should exit to desktop. The buttons should highlight on hover and the game should be frozen behind the menu.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/umg-ui-designer-in-unreal-engine"
+    },
+    {
+      "task": "Create a minimap widget using a Render Target. Place a Scene Capture 2D component above your level pointing down. Create a Render Target texture and assign it to the Scene Capture. Display the Render Target in a circular Image widget on the HUD.",
+      "hint": "Scene Capture 2D → Details → set Capture Source to 'Scene Color'. Use an Image widget with a circular material mask to crop the minimap into a circle.",
+      "expectedResult": "The HUD should show a top-down view of the level in a circular frame. As the player moves, the minimap should update in real-time showing a bird's eye view. The Scene Capture should render at a lower resolution for performance (256×256).",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/umg-ui-designer-in-unreal-engine"
     }
   ],
   "performance": [
     {
-      "task": "Open your project and press ` (backtick) to open the console. Type 'stat fps' \u2192 Enter, then 'stat unit' \u2192 Enter. Walk around your scene and note where GPU ms spikes above 16ms. Use 'stat scenerendering' to find the most expensive render pass.",
+      "task": "Open your project and press ` (backtick) to open the console. Type 'stat fps' → Enter, then 'stat unit' → Enter. Walk around your scene and note where GPU ms spikes above 16ms. Use 'stat scenerendering' to find the most expensive render pass.",
       "hint": "stat unit shows Game, Draw, GPU, and RHIT thread times. The bottleneck is whichever thread has the highest ms value.",
-      "expectedResult": "You should see an FPS counter in the top-left and a 4-bar breakdown (Game/Draw/GPU/RHIT). If any bar exceeds 16.6ms, that thread is your bottleneck. The scenerendering stats should highlight which pass (Base Pass, Shadows, Translucency) costs the most ms."
+      "expectedResult": "You should see an FPS counter in the top-left and a 4-bar breakdown (Game/Draw/GPU/RHIT). If any bar exceeds 16.6ms, that thread is your bottleneck. The scenerendering stats should highlight which pass (Base Pass, Shadows, Translucency) costs the most ms.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/performance-and-profiling-in-unreal-engine"
+    },
+    {
+      "task": "Profile your project with Unreal Insights. Go to Tools → Trace → Run via Unreal Insights. Record a 10-second trace while moving through your level. Open the trace file and identify the 3 most expensive game thread functions.",
+      "hint": "Launch Unreal Insights from the toolbar or via '-trace=default' command line. The Timing tab shows per-frame function costs. Sort by Inclusive Time to find the biggest offenders.",
+      "expectedResult": "The Unreal Insights viewer should show a frame timeline with colored bars per function. The top 3 most expensive functions should be clearly identifiable. Common culprits include Tick functions, physics, and heavy Blueprint logic.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-insights-in-unreal-engine"
+    },
+    {
+      "task": "Optimize draw calls by enabling Instanced Static Meshes. Select multiple identical meshes in your level (e.g., 20 copies of a rock). Replace them with an Instanced Static Mesh Component in a single Blueprint. Compare draw calls before and after using 'stat SceneRendering'.",
+      "hint": "Create a Blueprint with an Instanced Static Mesh Component. Use 'Add Instance' to place each rock at the same transforms as the originals. ISMs batch identical meshes into one draw call.",
+      "expectedResult": "Draw calls should drop significantly — 20 separate rocks (20 draw calls) should merge into 1 draw call with ISM. FPS should improve in dense scenes. The visual result should be identical to the separate meshes.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/performance-and-profiling-in-unreal-engine"
     }
   ],
   "nanite": [
     {
-      "task": "Import a high-poly mesh (1M+ triangles). Enable Nanite on it: Static Mesh Editor \u2192 Nanite Settings \u2192 check 'Enable Nanite Support' \u2192 Apply. Place 50 instances in your scene using the Foliage tool and compare the frame rate with Nanite on vs. off using 'stat fps'.",
+      "task": "Import a high-poly mesh (1M+ triangles). Enable Nanite on it: Static Mesh Editor → Nanite Settings → check 'Enable Nanite Support' → Apply. Place 50 instances in your scene using the Foliage tool and compare the frame rate with Nanite on vs. off using 'stat fps'.",
       "hint": "Nanite works best on Static Meshes without transparency. Use 'r.Nanite.Visualize.Overview 1' in console to see Nanite clusters.",
-      "expectedResult": "With Nanite ON, 50 instances of a 1M-tri mesh should maintain near the same FPS as a single instance. With Nanite OFF, FPS should drop significantly. The Nanite visualization should show colored triangle clusters that change density based on distance."
+      "expectedResult": "With Nanite ON, 50 instances of a 1M-tri mesh should maintain near the same FPS as a single instance. With Nanite OFF, FPS should drop significantly. The Nanite visualization should show colored triangle clusters that change density based on distance.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/nanite-virtualized-geometry-in-unreal-engine"
+    },
+    {
+      "task": "Test Nanite's displacement feature (UE 5.4+). Enable Nanite on a subdivided plane mesh. In the Material, enable Tessellation and add a heightmap to the World Displacement input. Verify the mesh deforms based on the heightmap with Nanite handling the LODs.",
+      "hint": "Nanite Displacement needs 'Allow Tessellation' enabled in the Nanite settings and a Material with Tessellation enabled. Start with a low displacement multiplier (5-10).",
+      "expectedResult": "The flat plane should deform according to the heightmap texture with no visible LOD popping. Zooming in should reveal increasing geometric detail from Nanite's adaptive tessellation. The displacement should be smooth across the entire surface.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/nanite-virtualized-geometry-in-unreal-engine"
+    },
+    {
+      "task": "Set up a Nanite fallback mesh for transparent objects. Since Nanite doesn't support transparency, create a high-poly tree trunk with Nanite enabled and a separate translucent leaf card mesh without Nanite. Combine them in a Blueprint and verify both render correctly.",
+      "hint": "Nanite will automatically use a proxy/fallback for non-supported features. The leaf mesh should use a Masked or Translucent material without Nanite enabled.",
+      "expectedResult": "The tree trunk should render with full Nanite detail (verify with r.Nanite.Visualize.Overview 1 showing clusters). The leaf cards should render normally without Nanite. Together they should look like a complete tree with high geometric detail on the trunk.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/nanite-virtualized-geometry-in-unreal-engine"
     }
   ],
   "rendering": [
     {
-      "task": "Open Project Settings \u2192 Engine \u2192 Rendering. Enable 'Virtual Shadow Maps'. Place a Directional Light, set it to Movable, and verify shadows render correctly. Compare the shadow quality at distance by zooming the camera far from objects.",
+      "task": "Open Project Settings → Engine → Rendering. Enable 'Virtual Shadow Maps'. Place a Directional Light, set it to Movable, and verify shadows render correctly. Compare the shadow quality at distance by zooming the camera far from objects.",
       "hint": "Virtual Shadow Maps replace Cascaded Shadow Maps. Check 'stat ShadowRendering' for performance impact.",
-      "expectedResult": "Shadows should remain sharp and detailed even at far distances (unlike Cascaded Shadow Maps which get blurry). Close-up shadows should have clean edges without visible cascade boundaries. The stat overlay should show VSM memory and page usage."
+      "expectedResult": "Shadows should remain sharp and detailed even at far distances (unlike Cascaded Shadow Maps which get blurry). Close-up shadows should have clean edges without visible cascade boundaries. The stat overlay should show VSM memory and page usage.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/virtual-shadow-maps-in-unreal-engine"
+    },
+    {
+      "task": "Enable and configure Temporal Super Resolution (TSR). Go to Project Settings → Rendering → set Anti-Aliasing Method to 'TSR'. Set the Screen Percentage to 50% using 'r.ScreenPercentage 50' in console. Compare visual quality and FPS vs 100% native resolution.",
+      "hint": "TSR upscales from a lower internal resolution to native display resolution. Lower screen percentage = more FPS but potentially softer image. Try 50%, 67%, and 80% to find the sweet spot.",
+      "expectedResult": "At 50% screen percentage with TSR, the image should look close to native quality while FPS increases significantly. Fine details like text and thin wires may appear slightly softer. The FPS gain should be roughly 2x compared to native.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/temporal-super-resolution-in-unreal-engine"
+    },
+    {
+      "task": "Set up a Post Process Volume for cinematic color grading. Place a Post Process Volume, enable Infinite Extent. Under Color Grading, adjust: Global Saturation to 0.8, Shadows Color to slight blue tint, Highlights Color to warm orange. Add Bloom Intensity 0.3 and Vignette 0.4.",
+      "hint": "Post Process Volume → Details → Color Grading section. Each zone (Shadows, Midtones, Highlights) has independent color controls. Use the color wheel to tint.",
+      "expectedResult": "The viewport should show a cinematic look with desaturated colors, blue-tinted shadows, warm highlights, subtle bloom glow, and darkened corners from vignette. The overall mood should feel like a movie color grade rather than raw engine output.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/post-process-effects-in-unreal-engine"
     }
   ],
   "component": [
     {
       "task": "Open any Actor Blueprint. Add 3 components: a Static Mesh (as root), an Audio Component (attach a sound cue), and a Particle System. Arrange them in the component hierarchy so the particle and audio are children of the mesh. Test that moving the root moves everything.",
       "hint": "Drag components onto others in the hierarchy to parent them. Children inherit transform from their parent.",
-      "expectedResult": "In the Blueprint viewport, all 3 components should be visible on the actor. Moving the root Static Mesh should move the particle and audio with it (they follow the parent). The hierarchy panel should show Audio and Particles indented under the mesh."
+      "expectedResult": "In the Blueprint viewport, all 3 components should be visible on the actor. Moving the root Static Mesh should move the particle and audio with it (they follow the parent). The hierarchy panel should show Audio and Particles indented under the mesh.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/components-in-unreal-engine"
+    },
+    {
+      "task": "Create a reusable ActorComponent (right-click Content Browser → Blueprint Class → Actor Component). Add a Health float variable with getter/setter functions and an OnDeath event dispatcher. Add this component to 3 different Actor Blueprints and wire the OnDeath event.",
+      "hint": "ActorComponent lives as a Blueprint class. Add it to Actors via the Components panel → Add → search your component name. Bind OnDeath in each Actor's Begin Play.",
+      "expectedResult": "Each of the 3 actors should have a Health component visible in their Details panel. Calling TakeDamage (reducing health to 0) should fire the OnDeath dispatcher. Each actor should handle death differently (one destroys itself, one plays anim, etc.).",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/components-in-unreal-engine"
+    },
+    {
+      "task": "Build a SceneComponent-based modular weapon system. Create a SceneComponent Blueprint called 'WeaponMount'. Add a Skeletal Mesh socket, a muzzle flash particle system, and an audio component for gunfire. Attach it to a character's hand socket at runtime.",
+      "hint": "Use 'Attach to Component' with a Socket Name matching the skeleton's hand bone. The SceneComponent groups all weapon sub-components for easy attach/detach.",
+      "expectedResult": "The weapon should attach to the character's hand and follow hand movement during animations. Firing should trigger both the muzzle flash particle and audio simultaneously. Detaching should cleanly remove all sub-components as a unit.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/components-in-unreal-engine"
     }
   ],
   "actor": [
     {
-      "task": "Right-click in the level viewport \u2192 Place Actor \u2192 Empty Actor. Add a Scene Component as root, then add a Static Mesh and a Spot Light as children. Position the Spot Light to illuminate the mesh. Save the actor as a Blueprint (select it \u2192 Blueprints \u2192 Convert Selection to Blueprint Class).",
+      "task": "Right-click in the level viewport → Place Actor → Empty Actor. Add a Scene Component as root, then add a Static Mesh and a Spot Light as children. Position the Spot Light to illuminate the mesh. Save the actor as a Blueprint (select it → Blueprints → Convert Selection to Blueprint Class).",
       "hint": "Converting to a Blueprint lets you reuse this actor setup across levels. Choose 'Harvest Components' when prompted.",
-      "expectedResult": "A new Blueprint asset should appear in your Content Browser. Dropping multiple instances into the level should each show the same mesh+light setup. The Spot Light cone should visibly illuminate the mesh in Lit viewport mode."
+      "expectedResult": "A new Blueprint asset should appear in your Content Browser. Dropping multiple instances into the level should each show the same mesh+light setup. The Spot Light cone should visibly illuminate the mesh in Lit viewport mode.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/actors-in-unreal-engine"
+    },
+    {
+      "task": "Create a pickup Actor Blueprint that the player can collect. Add a Static Mesh (floating coin/gem), a rotating movement (use Timeline or Rotating Movement Component), and a Sphere Collision. On overlap with the player, play a sound, add score, and destroy the pickup.",
+      "hint": "Add a 'Rotating Movement Component' for auto-rotation (set Rotation Rate Y to 90). Use 'On Component Begin Overlap' for the collect trigger.",
+      "expectedResult": "The pickup should float and rotate continuously in the level. Walking into it should play a collect sound, the pickup should disappear (Destroy Actor), and a Print String should confirm the score increased. No collision should remain after pickup.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/actors-in-unreal-engine"
+    },
+    {
+      "task": "Implement actor spawning at runtime. In your Game Mode or Player Blueprint, use 'Spawn Actor from Class' to spawn a projectile actor when the player presses Fire. Set the spawn location to the camera's forward vector. Give the projectile a movement component with Initial Speed 3000.",
+      "hint": "Spawn Actor from Class needs a Transform input — use 'Get Camera Location' + 'Get Camera Rotation' to position it. Add a Projectile Movement Component to the projectile BP with Initial Speed set.",
+      "expectedResult": "Pressing Fire should spawn a visible projectile that flies forward from the camera at high speed. Multiple presses should spawn multiple independent projectiles. Each projectile should continue flying until it hits something or leaves the level.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/actors-in-unreal-engine"
     }
   ],
   "foliage": [
     {
       "task": "Enter Foliage Mode (Shift+4). Add a tree or bush mesh to the foliage palette (drag from Content Browser). Set Density to 200, Min/Max Scale to 0.8-1.2, and enable 'Align to Normal'. Paint foliage on a Landscape surface and check the instance count in the Foliage panel.",
       "hint": "Use Erase (Shift+click) to remove foliage. Larger brush radius + lower density gives more natural distribution.",
-      "expectedResult": "Trees/bushes should scatter naturally across the painted area with slight size variation (0.8x-1.2x). On slopes, they should tilt to match the terrain angle. The Foliage panel should show the total instance count increasing as you paint."
+      "expectedResult": "Trees/bushes should scatter naturally across the painted area with slight size variation (0.8x-1.2x). On slopes, they should tilt to match the terrain angle. The Foliage panel should show the total instance count increasing as you paint.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/foliage-mode-in-unreal-engine"
+    },
+    {
+      "task": "Set up procedural foliage with a Procedural Foliage Spawner. Create a Procedural Foliage Spawner volume in your level. Add a Foliage Type with your tree mesh, set Num Steps to 5 and Initial Seed Density to 0.5. Click 'Resimulate' to generate a forest.",
+      "hint": "Procedural Foliage Spawner simulates growth over time. More Num Steps = more mature/dense forest. Adjusting Shade Tolerance controls which trees survive under canopy.",
+      "expectedResult": "Clicking Resimulate should fill the volume with a realistic-looking random forest. Trees should vary in size based on the growth simulation. Changing the random seed should produce a different but equally natural-looking distribution.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/foliage-mode-in-unreal-engine"
+    },
+    {
+      "task": "Add wind animation to foliage. In the foliage mesh's Material, add a SimpleGrassWind or Wind node. Set Wind Intensity to 0.5 and Wind Speed to 1.0. Place a Wind Directional Source actor in the level to control wind direction globally.",
+      "hint": "The Material needs 'Used with Instanced Static Meshes' enabled in Material Details. SimpleGrassWind is under Material Functions → search 'grass'.",
+      "expectedResult": "Foliage should sway gently in the wind direction. The Wind Directional Source arrow should indicate wind direction. Adjusting wind speed/intensity should visibly change the sway amount. All foliage instances should respond to wind simultaneously.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/foliage-mode-in-unreal-engine"
     }
   ],
   "plugin": [
     {
-      "task": "Go to Edit \u2192 Plugins. Search for 'Water' (the built-in Water plugin). Enable it and restart the editor. After restart, place a Water Body Lake in your level (Place Actors \u2192 Water Body Lake) and observe how it auto-generates a water surface.",
+      "task": "Go to Edit → Plugins. Search for 'Water' (the built-in Water plugin). Enable it and restart the editor. After restart, place a Water Body Lake in your level (Place Actors → Water Body Lake) and observe how it auto-generates a water surface.",
       "hint": "Many built-in plugins are disabled by default. The Water plugin requires a Landscape in the level to function properly.",
-      "expectedResult": "After restart, the Place Actors panel should list 'Water Body Lake'. Placing it should auto-generate a translucent water surface that conforms to your landscape. You should see reflections and shoreline foam where the water meets terrain."
+      "expectedResult": "After restart, the Place Actors panel should list 'Water Body Lake'. Placing it should auto-generate a translucent water surface that conforms to your landscape. You should see reflections and shoreline foam where the water meets terrain.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/water-system-in-unreal-engine"
+    },
+    {
+      "task": "Enable the Geometry Script plugin (Edit → Plugins → search 'Geometry Script'). Create a new Actor Blueprint and add a Generated Dynamic Mesh Component. Use a Geometry Script function to create a procedural staircase by appending box meshes in a loop.",
+      "hint": "After enabling the plugin, the 'Dynamic Mesh Component' appears in BP component list. Use the 'Append Box' Geometry Script function in a loop with increasing Z offset.",
+      "expectedResult": "The Blueprint should show a procedurally generated staircase made of stacked boxes. Changing the step count or size variables should regenerate the stairs in real-time. The dynamic mesh should have proper collision and render correctly in Lit mode.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/geometry-script-in-unreal-engine"
+    },
+    {
+      "task": "Create your own simple editor plugin. Go to Edit → Plugins → New Plugin → choose 'Blank'. Name it 'MyToolPlugin'. Find the generated source in your project's Plugins folder. Add a simple toolbar button that prints 'Hello from Plugin!' when clicked.",
+      "hint": "The blank plugin template creates a .uplugin file and Source folder. Register a toolbar extension in your module's StartupModule() function. Use FToolBarBuilder to add the button.",
+      "expectedResult": "A new button should appear in the editor toolbar after recompiling. Clicking it should print 'Hello from Plugin!' in the Output Log. The plugin should appear in Edit → Plugins under the 'Project' category with your name and description.",
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/plugins-in-unreal-engine"
     }
   ]
 }

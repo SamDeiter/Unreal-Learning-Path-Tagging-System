@@ -23,6 +23,16 @@ export default function ChallengeCard({ challengeContent, onComplete }) {
       <div className="challenge-hint">
         <span className="hint-label">💡 Hint:</span> {challengeContent.hint}
       </div>
+      {challengeContent.docsUrl && (
+        <a
+          className="docs-link"
+          href={challengeContent.docsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          📖 Read the official UE5 docs →
+        </a>
+      )}
       <button className="challenge-done-btn" onClick={onComplete}>
         I tried it →
       </button>
@@ -38,6 +48,7 @@ ChallengeCard.propTypes = {
     task: PropTypes.string.isRequired,
     hint: PropTypes.string.isRequired,
     expectedResult: PropTypes.string,
+    docsUrl: PropTypes.string,
     difficulty: PropTypes.string.isRequired,
   }).isRequired,
   onComplete: PropTypes.func.isRequired,
