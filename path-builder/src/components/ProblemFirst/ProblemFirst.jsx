@@ -20,6 +20,8 @@ import { findSimilarCourses } from "../../services/semanticSearchService";
 import { searchSegmentsSemantic } from "../../services/segmentSearchService";
 import { searchDocsSemantic } from "../../services/docsSearchService";
 import { buildLearningPath } from "../../services/PathBuilder";
+import { buildBlendedPath } from "../../services/coverageAnalyzer";
+import { isEnabled as isExternalEnabled } from "../../services/externalContentService";
 import {
   trackQuerySubmitted,
   trackDiagnosisGenerated,
@@ -57,6 +59,7 @@ export default function ProblemFirst() {
   const [stage, setStage] = useState(STAGES.INPUT);
   const [diagnosisData, setDiagnosisData] = useState(null);
   const [error, setError] = useState(null);
+  const [blendedPath, setBlendedPath] = useState(null);
   const [videoResults, setVideoResults] = useState([]);
   const [expandedVideoId, setExpandedVideoId] = useState(null);
 
@@ -125,7 +128,7 @@ export default function ProblemFirst() {
               // Search Epic docs
               let docPassages = [];
               try {
-                const docResults = await searchDocsSemantic(queryEmbedding, 3, 0.35);
+                const docResults = await searchDocsSemantic(queryEmbedding, 6, 0.35);
                 docPassages = docResults.map((d) => ({
                   text: d.previewText,
                   url: d.url,
@@ -215,6 +218,29 @@ export default function ProblemFirst() {
         setVideoResults(videos);
         setDiagnosisData(cartData);
 
+        // Build blended path (docs + YouTube gap-fillers)
+        try {
+          const rawTags = [
+            ...(cartData.diagnosis?.matched_tag_ids || []),
+            ...(inputData.detectedTagIds || []),
+          ];
+          // Split dotted tag IDs into individual segments: "unreal_engine.blueprint.casting" → ["blueprint", "casting"]
+          const tagSegments = rawTags.flatMap((t) =>
+            t.split(/[._]/).filter((s) => s.length > 2 && s !== "unreal" && s !== "engine")
+          );
+          // Also extract keywords from the user's query
+          const queryWords = (inputData.query || "").toLowerCase().split(/\s+/)
+            .filter((w) => w.length > 3);
+          const uniqueTopics = [...new Set([...tagSegments, ...queryWords])].slice(0, 12);
+          if (uniqueTopics.length > 0) {
+            const blended = await buildBlendedPath(uniqueTopics, videos, { maxDocs: 5, maxYoutube: 3 });
+            setBlendedPath(blended);
+            console.log(`[Blended] ${blended.docs.length} docs, ${blended.youtube.length} YT, coverage: ${(blended.coverageScore * 100).toFixed(0)}%`);
+          }
+        } catch (blendedErr) {
+          console.warn("⚠️ Blended path skipped:", blendedErr.message);
+        }
+
         setStage(STAGES.DIAGNOSIS);
         await trackDiagnosisGenerated(cartData.diagnosis);
         await trackLearningPathGenerated(
@@ -239,6 +265,7 @@ export default function ProblemFirst() {
     setVideoResults([]);
     setExpandedVideoId(null);
     setError(null);
+    setBlendedPath(null);
   }, []);
 
   const handleVideoToggle = useCallback(
@@ -376,6 +403,80 @@ export default function ProblemFirst() {
                     : []
                 );
             })()}
+
+            {/* 📚 Recommended Reading — Official Epic Docs */}
+            {blendedPath?.docs?.length > 0 && (
+              <div className="blended-section">
+                <div className="blended-section-header">
+                  <h2 className="blended-section-title">📚 Recommended Reading</h2>
+                  <p className="blended-section-desc">
+                    Official Unreal Engine documentation to deepen your understanding.
+                    {blendedPath.docs.reduce((sum, d) => sum + (d.readTimeMinutes || 10), 0) > 0 &&
+                      ` (~${blendedPath.docs.reduce((sum, d) => sum + (d.readTimeMinutes || 10), 0)} min total read time)`}
+                  </p>
+                </div>
+                <div className="doc-cards-grid">
+                  {blendedPath.docs.map((doc, i) => (
+                    <a
+                      key={doc.key || i}
+                      href={doc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="doc-card"
+                    >
+                      <div className="doc-card-header">
+                        <span className={`tier-badge tier-${doc.tier || "intermediate"}`}>
+                          {doc.tier || "intermediate"}
+                        </span>
+                        {doc.subsystem && (
+                          <span className="subsystem-tag">{doc.subsystem}</span>
+                        )}
+                      </div>
+                      <h4 className="doc-card-title">{doc.label}</h4>
+                      <div className="doc-card-footer">
+                        <span className="doc-source-badge">📄 Epic Docs</span>
+                        <span className="doc-read-time">{doc.readTimeMinutes || 10} min read</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 📺 Community Resources — YouTube (third-party, if enabled) */}
+            {isExternalEnabled() && blendedPath?.youtube?.length > 0 && (
+              <div className="blended-section external-section">
+                <div className="blended-section-header">
+                  <h2 className="blended-section-title">📺 Community Resources</h2>
+                  <p className="blended-section-desc">
+                    Curated videos from trusted UE5 creators to fill any remaining gaps.
+                  </p>
+                </div>
+                <div className="doc-cards-grid">
+                  {blendedPath.youtube.map((yt) => (
+                    <a
+                      key={yt.id}
+                      href={yt.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="doc-card external-card"
+                    >
+                      <div className="doc-card-header">
+                        <span className={`tier-badge tier-${yt.tier || "intermediate"}`}>
+                          {yt.tier || "intermediate"}
+                        </span>
+                        <span className="external-badge">External • YouTube</span>
+                      </div>
+                      <h4 className="doc-card-title">{yt.title}</h4>
+                      <div className="doc-card-footer">
+                        <span className="doc-source-badge">📺 {yt.channelName}</span>
+                        <span className="doc-read-time">{yt.durationMinutes} min</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Bottom actions */}
             <div className="results-actions-bottom">
