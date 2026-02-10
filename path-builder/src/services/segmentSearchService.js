@@ -6,10 +6,27 @@
  * Semantic search: uses segment_embeddings.json (pre-computed 768-dim vectors)
  */
 
-// Pre-built search index (word frequencies by course)
-import searchIndex from "../data/search_index.json";
-// Pre-built segment index (real timestamps from VTT transcripts)
-import segmentIndex from "../data/segment_index.json";
+// Lazy-loaded data (deferred from initial bundle)
+let _searchIndex = null;
+let _segmentIndex = null;
+
+/** Lazily load search_index.json (4.7MB). */
+async function getSearchIndex() {
+  if (!_searchIndex) {
+    const mod = await import("../data/search_index.json");
+    _searchIndex = mod.default || mod;
+  }
+  return _searchIndex;
+}
+
+/** Lazily load segment_index.json (3.7MB). */
+export async function getSegmentIndex() {
+  if (!_segmentIndex) {
+    const mod = await import("../data/segment_index.json");
+    _segmentIndex = mod.default || mod;
+  }
+  return _segmentIndex;
+}
 import { cosineSimilarity } from "./semanticSearchService";
 
 import { devLog, devWarn } from "../utils/logger";
@@ -110,7 +127,7 @@ import { SEARCH_STOPWORDS } from "../domain/constants";
  * @param {Array} courses - Optional array of course objects to search within
  * @returns {Array} Matched segments with timestamps
  */
-export function searchSegments(query, courses = []) {
+export async function searchSegments(query, courses = []) {
   if (!query || query.length < 3) return [];
 
   const keywords = query
@@ -119,6 +136,7 @@ export function searchSegments(query, courses = []) {
     .filter((w) => w.length > 2 && !SEARCH_STOPWORDS.has(w));
   if (keywords.length === 0) return [];
 
+  const searchIndex = await getSearchIndex();
   const results = [];
   const courseWords = searchIndex?.course_words || {};
 
@@ -155,7 +173,7 @@ export function searchSegments(query, courses = []) {
       const course = courses.find((c) => c.code === courseCode);
 
       // Find real segments with timestamps
-      const topSegments = findTopSegments(courseCode, matchedKeywords);
+      const topSegments = await findTopSegments(courseCode, matchedKeywords);
 
       results.push({
         courseCode,
@@ -183,7 +201,8 @@ export function searchSegments(query, courses = []) {
  * @param {Array<string>} keywords - Keywords to search for
  * @returns {Array} Top 3 segments with timestamps and preview text
  */
-export function findTopSegments(courseCode, keywords) {
+export async function findTopSegments(courseCode, keywords) {
+  const segmentIndex = await getSegmentIndex();
   const courseData = segmentIndex[courseCode];
   if (!courseData || !courseData.videos) return [];
 
@@ -255,8 +274,8 @@ export function findTopSegments(courseCode, keywords) {
  * @param {Array} allCourses - All available courses
  * @returns {Array} Top 3-5 targeted course segments
  */
-export function getTargetedSegments(problemQuery, allCourses) {
-  const segments = searchSegments(problemQuery, allCourses);
+export async function getTargetedSegments(problemQuery, allCourses) {
+  const segments = await searchSegments(problemQuery, allCourses);
 
   return segments.map((seg, index) => ({
     ...seg,
@@ -335,7 +354,7 @@ export async function searchSegmentsSemantic(queryEmbedding, topK = 10, threshol
  */
 export async function searchSegmentsHybrid(query, queryEmbedding, courses = [], topK = 8) {
   // Run both searches
-  const keywordResults = searchSegments(query, courses);
+  const keywordResults = await searchSegments(query, courses);
   let semanticResults = [];
 
   if (queryEmbedding) {

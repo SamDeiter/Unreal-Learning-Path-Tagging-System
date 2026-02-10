@@ -4,7 +4,16 @@
  * Loads course_embeddings.json and provides cosine similarity search
  * against a query embedding from the embedQuery Cloud Function.
  */
-import courseEmbeddings from "../data/course_embeddings.json";
+
+// Lazy-loaded course embeddings (0.4MB)
+let _courseEmbeddings = null;
+async function getCourseEmbeddings() {
+  if (!_courseEmbeddings) {
+    const mod = await import("../data/course_embeddings.json");
+    _courseEmbeddings = mod.default || mod;
+  }
+  return _courseEmbeddings;
+}
 
 /**
  * Compute cosine similarity between two vectors.
@@ -38,7 +47,8 @@ export function cosineSimilarity(a, b) {
  * @param {number} threshold - Minimum similarity to include (default 0.3)
  * @returns {Array<{code: string, title: string, similarity: number}>}
  */
-export function findSimilarCourses(queryEmbedding, topK = 5, threshold = 0.3) {
+export async function findSimilarCourses(queryEmbedding, topK = 5, threshold = 0.3) {
+  const courseEmbeddings = await getCourseEmbeddings();
   if (!queryEmbedding || !courseEmbeddings?.courses) return [];
 
   const results = [];
@@ -63,7 +73,8 @@ export function findSimilarCourses(queryEmbedding, topK = 5, threshold = 0.3) {
  * Get the embedding dimension expected by this service.
  * @returns {number}
  */
-export function getEmbeddingDimension() {
+export async function getEmbeddingDimension() {
+  const courseEmbeddings = await getCourseEmbeddings();
   return courseEmbeddings?.dimension || 768;
 }
 
@@ -71,6 +82,7 @@ export function getEmbeddingDimension() {
  * Get the total number of embedded courses.
  * @returns {number}
  */
-export function getEmbeddedCourseCount() {
+export async function getEmbeddedCourseCount() {
+  const courseEmbeddings = await getCourseEmbeddings();
   return courseEmbeddings?.total_courses || 0;
 }

@@ -4,8 +4,17 @@
  */
 import { applyFeedbackMultiplier } from "../services/feedbackService";
 import { cleanVideoTitle } from "../utils/cleanVideoTitle";
-import segmentIndex from "../data/segment_index.json";
-import docLinks from "../data/doc_links.json";
+import { getSegmentIndex } from "../services/segmentSearchService";
+
+// Lazy-loaded doc_links (0.1MB)
+let _docLinks = null;
+async function getDocLinks() {
+  if (!_docLinks) {
+    const mod = await import("../data/doc_links.json");
+    _docLinks = mod.default || mod;
+  }
+  return _docLinks;
+}
 
 /**
  * Display noise words — filtered from matchedKeywords before UI display.
@@ -20,7 +29,7 @@ const DISPLAY_NOISE = new Set([
  * Flatten matched courses into individual video items for the shopping cart.
  * Videos are ranked by how well their transcript content answers the query.
  */
-export function flattenCoursesToVideos(matchedCourses, userQuery, roleMap = {}) {
+export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap = {}) {
   const videos = [];
   const queryWords = (userQuery || "")
     .toLowerCase()
@@ -28,6 +37,7 @@ export function flattenCoursesToVideos(matchedCourses, userQuery, roleMap = {}) 
     .filter((w) => w.length > 2);
 
   // Find doc links matching the query
+  const docLinks = await getDocLinks();
   const matchedDocLinks = [];
   const queryLower = (userQuery || "").toLowerCase();
   for (const [topic, info] of Object.entries(docLinks)) {
@@ -53,8 +63,8 @@ export function flattenCoursesToVideos(matchedCourses, userQuery, roleMap = {}) 
       const titleScore = titleMatches * 50;
 
       // Score 2: Transcript segment relevance
-      const videoKey = findVideoKeyForIndex(course.code, videoTitle, i);
-      const segmentData = getVideoSegmentScore(course.code, videoKey, queryWords);
+      const videoKey = await findVideoKeyForIndex(course.code, videoTitle, i);
+      const segmentData = await getVideoSegmentScore(course.code, videoKey, queryWords);
 
       // Score 3: Intro penalty
       const isIntro = titleLower.includes("intro") || titleLower.includes("wrap up") || titleLower.includes("outro");
@@ -152,7 +162,8 @@ export function flattenCoursesToVideos(matchedCourses, userQuery, roleMap = {}) 
 /**
  * Find the matching video key in the segment index.
  */
-export function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
+export async function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
+  const segmentIndex = await getSegmentIndex();
   const courseData = segmentIndex[courseCode];
   if (!courseData?.videos) return null;
 
@@ -178,8 +189,9 @@ export function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
 /**
  * Score a specific video's segments against query keywords.
  */
-export function getVideoSegmentScore(courseCode, videoKey, keywords) {
+export async function getVideoSegmentScore(courseCode, videoKey, keywords) {
   const fallback = { score: 0, bestSegment: null, topSegments: [] };
+  const segmentIndex = await getSegmentIndex();
   const courseData = segmentIndex[courseCode];
   if (!courseData?.videos || !videoKey) return fallback;
 

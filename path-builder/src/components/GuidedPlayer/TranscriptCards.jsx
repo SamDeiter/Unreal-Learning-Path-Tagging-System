@@ -2,10 +2,9 @@
  * TranscriptCards — Shows relevant transcript timestamps during video playback.
  * Matches segments by keyword relevance to the user's problem.
  */
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { SEARCH_STOPWORDS } from "../../domain/constants";
-import transcriptSegments from "../../data/transcript_segments.json";
 
 const TOPIC_SKIP = new Set([
   "gonna", "going", "really", "actually", "basically", "right", "thing",
@@ -25,8 +24,18 @@ function normalize(s) {
 }
 
 export default function TranscriptCards({ courseCode, videoTitle, problemSummary, matchedKeywords }) {
+  // Lazy-load transcript_segments.json (4MB) on first mount
+  const [transcriptSegments, setTranscriptSegments] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    import("../../data/transcript_segments.json").then((mod) => {
+      if (!cancelled) setTranscriptSegments(mod.default || mod);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
   const cards = useMemo(() => {
-    if (!courseCode) return [];
+    if (!courseCode || !transcriptSegments) return [];
 
     const courseTranscripts = transcriptSegments[courseCode];
     if (!courseTranscripts) return [];
@@ -109,7 +118,7 @@ export default function TranscriptCards({ courseCode, videoTitle, problemSummary
       .filter((_, i) => i % step === 0)
       .slice(0, 3)
       .map((seg) => ({ ...seg, score: 0, isChapter: true }));
-  }, [courseCode, videoTitle, problemSummary, matchedKeywords]);
+  }, [courseCode, videoTitle, problemSummary, matchedKeywords, transcriptSegments]);
 
   const getTopicLabel = useCallback((seg) => {
     if (seg.summary) return seg.summary;

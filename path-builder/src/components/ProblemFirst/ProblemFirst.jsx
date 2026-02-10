@@ -98,7 +98,7 @@ export default function ProblemFirst() {
           if (embedResult.data?.success && embedResult.data?.embedding) {
             queryEmbedding = embedResult.data.embedding;
             // Course-level semantic search (existing)
-            semanticResults = findSimilarCourses(queryEmbedding, 8, 0.35);
+            semanticResults = await findSimilarCourses(queryEmbedding, 8, 0.35);
             // Passage-level semantic search (RAG upgrade)
             try {
               // Search transcripts
@@ -157,7 +157,7 @@ export default function ProblemFirst() {
         cartData.retrievedPassages = retrievedPassages; // Store for UI display
 
         // Match courses (extracted to domain/courseMatching.js)
-        const matchedCourses = matchCoursesToCart(
+        const matchedCourses = await matchCoursesToCart(
           cartData,
           courses,
           inputData.selectedTagIds || [],
@@ -187,7 +187,7 @@ export default function ProblemFirst() {
         }
 
         // Flatten to videos (extracted to domain/videoRanking.js)
-        const videos = flattenCoursesToVideos(matchedCourses, inputData.query, roleMap);
+        const videos = await flattenCoursesToVideos(matchedCourses, inputData.query, roleMap);
 
         if (videos.length === 0) {
           setError(

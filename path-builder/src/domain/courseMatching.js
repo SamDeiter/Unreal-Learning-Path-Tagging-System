@@ -44,7 +44,7 @@ export function detectUEVersion(query) {
  *   Pass 3: Broaden with AI diagnosis terms
  *   Fallback: Tag graph scoring
  */
-export function matchCoursesToCart(
+export async function matchCoursesToCart(
   cart,
   allCourses,
   selectedTagIds = [],
@@ -119,9 +119,9 @@ export function matchCoursesToCart(
   const queryKeywords = [...expandedKeywords];
 
   // Helper: run transcript search and filter to playable courses
-  const searchAndFilter = (query) => {
+  const searchAndFilter = async (query) => {
     if (!query || query.length < 5) return [];
-    const transcriptResults = searchSegments(query, allCourses);
+    const transcriptResults = await searchSegments(query, allCourses);
     return transcriptResults
       .map((result) => {
         const course = allCourses.find((c) => c.code === result.courseCode);
@@ -203,7 +203,7 @@ export function matchCoursesToCart(
   const enrichedQuery = errorKeywords.length > 0 ? `${userQuery} ${errorKeywords.join(" ")}` : userQuery;
 
   // Pass 1: Transcript search
-  const transcriptResults = searchAndFilter(enrichedQuery);
+  const transcriptResults = await searchAndFilter(enrichedQuery);
 
   // Pass 2: Title/tag search
   const allQueryKeywords = errorKeywords.length > 0 ? [...queryKeywords, ...errorKeywords] : queryKeywords;
@@ -261,7 +261,7 @@ export function matchCoursesToCart(
   const broadParts = [enrichedQuery, cart?.diagnosis?.problem_summary, ...(cart?.intent?.systems || [])].filter(Boolean);
   const broadQuery = broadParts.join(" ");
   const broadKeywords = broadQuery.toLowerCase().split(/\s+/).filter((w) => w.length > 2 && !STOPWORDS.has(w));
-  const broadTranscript = searchAndFilter(broadQuery);
+  const broadTranscript = await searchAndFilter(broadQuery);
   const broadTitle = titleAndTagSearch(broadKeywords);
   for (const r of [...broadTranscript, ...broadTitle]) {
     if (!seen.has(r.code)) { merged.push(r); seen.add(r.code); }
