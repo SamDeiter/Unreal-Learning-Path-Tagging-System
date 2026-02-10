@@ -103,12 +103,62 @@ function App() {
 
     // Use edges from edges.json - handle both array and wrapped formats
     const rawEdges = Array.isArray(edgesData) ? edgesData : edgesData.edges || [];
-    const processedEdges = rawEdges.map((edge) => ({
+    const curatedEdges = rawEdges.map((edge) => ({
       sourceTagId: edge.sourceTagId || edge.source,
       targetTagId: edge.targetTagId || edge.target,
       weight: edge.weight || 5,
       relation: edge.type || edge.relation || "related",
     }));
+
+    // Compute co-occurrence edges from courses — tags that appear together
+    // This supplements the sparse curated edges with real course data
+    // Build display name → tag ID lookup (course tags often use display names)
+    const nameToId = new Map();
+    processedTags.forEach((t) => {
+      nameToId.set(t.id.toLowerCase(), t.id);
+      if (t.label) nameToId.set(t.label.toLowerCase(), t.id);
+    });
+    const coOccurrenceWeights = new Map();
+    courses.forEach((course) => {
+      const rawTags = [
+        ...(course.canonical_tags || []),
+        ...(course.ai_tags || []),
+        ...(course.gemini_system_tags || []),
+        ...(course.transcript_tags || []),
+        ...(course.extracted_tags || []),
+      ]
+        .map((t) => (typeof t === "string" ? t.toLowerCase().trim() : ""))
+        .filter(Boolean);
+      // Normalize to tag IDs using the lookup (matches both IDs and display names)
+      const resolvedIds = rawTags.map((t) => nameToId.get(t)).filter(Boolean);
+      // Dedupe within this course
+      const uniqueTags = [...new Set(resolvedIds)];
+      for (let i = 0; i < uniqueTags.length; i++) {
+        for (let j = i + 1; j < uniqueTags.length; j++) {
+          const [a, b] = [uniqueTags[i], uniqueTags[j]].sort();
+          const key = `${a}|${b}`;
+          coOccurrenceWeights.set(key, (coOccurrenceWeights.get(key) || 0) + 1);
+        }
+      }
+    });
+
+    // Merge: curated edges indexed by key, co-occurrence fills gaps
+    const edgeMap = new Map();
+    // Add curated edges first (they take priority)
+    curatedEdges.forEach((e) => {
+      const [a, b] = [e.sourceTagId, e.targetTagId].sort();
+      const key = `${a}|${b}`;
+      edgeMap.set(key, e);
+    });
+    // Add co-occurrence edges where no curated edge exists
+    coOccurrenceWeights.forEach((weight, key) => {
+      if (!edgeMap.has(key) && weight >= 1) { // any co-occurrence creates an edge
+        const [sourceTagId, targetTagId] = key.split("|");
+        edgeMap.set(key, { sourceTagId, targetTagId, weight, relation: "co-occurrence" });
+      }
+    });
+
+    const processedEdges = [...edgeMap.values()];
 
     return { tags: processedTags, edges: processedEdges };
   }, [courses]);

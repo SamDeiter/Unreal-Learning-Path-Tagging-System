@@ -165,6 +165,16 @@ export function matchCoursesToCart(
         }
         const uniqueMatched = new Set(matchedKeywords).size;
         if (uniqueMatched >= 2) score *= 1 + uniqueMatched * 0.3;
+
+        // Keyword coverage gate: penalize courses matching too few query keywords
+        // Prevents single-keyword partial matches (e.g. "Camera Rigs" for "sequencer camera")
+        const coverage = keywords.length > 0 ? uniqueMatched / keywords.length : 1;
+        if (keywords.length >= 2 && coverage < 0.5) {
+          score *= 0.3; // Heavy penalty for <50% keyword coverage
+        } else if (coverage >= 1) {
+          score *= 2; // Full-coverage bonus
+        }
+
         if (score === 0) return null;
         return { ...course, _relevanceScore: score, _matchedKeywords: matchedKeywords };
       })
