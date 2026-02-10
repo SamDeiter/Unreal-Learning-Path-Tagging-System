@@ -141,7 +141,10 @@ export default function useGuidedPlayer({
 
   const handleChallengeComplete = useCallback(() => {
     if (nextCourse) {
-      setStage(STAGES.BRIDGE);
+      // Auto-advance to next course (bridge card removed)
+      setCurrentIndex((prev) => prev + 1);
+      setVideoIndex(0);
+      setStage(STAGES.PLAYING);
     } else {
       setStage(STAGES.COMPLETE);
       onComplete?.();

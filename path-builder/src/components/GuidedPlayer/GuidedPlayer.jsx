@@ -51,7 +51,6 @@ export default function GuidedPlayer(props) {
           videoIndex={gp.videoIndex}
           hasMoreVideos={gp.hasMoreVideos}
           hasPreviousVideo={gp.hasPreviousVideo}
-          courseVideoCount={gp.courseVideoCount}
           microLesson={props.microLesson}
           courses={gp.courses}
           onVideoComplete={gp.handleVideoComplete}
@@ -78,10 +77,6 @@ export default function GuidedPlayer(props) {
         />
       )}
 
-      {/* Stage: Bridge */}
-      {gp.stage === STAGES.BRIDGE && gp.bridgeContent && (
-        <BridgeCard bridgeContent={gp.bridgeContent} onContinue={gp.handleContinue} />
-      )}
 
       {/* Stage: Complete */}
       {gp.stage === STAGES.COMPLETE && (
@@ -229,7 +224,7 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
 }
 
 /** VideoStage — video player with transcript cards and controls */
-function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, hasPreviousVideo, courseVideoCount, microLesson, courses, onVideoComplete, onPreviousVideo, onExit }) {
+function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, hasPreviousVideo, microLesson, courses, onVideoComplete, onPreviousVideo, onExit }) {
   return (
     <div className="video-stage">
       <div className="video-header">
@@ -268,11 +263,15 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
         >
           ← Previous
         </button>
-        <span className="video-progress-indicator">
-          {videoIndex + 1} / {courseVideoCount}
-        </span>
-        <button className={hasMoreVideos ? "next-video-btn" : "complete-btn"} onClick={onVideoComplete}>
-          {hasMoreVideos ? "Next Video →" : "✓ Mark Complete & Continue"}
+        <button className="complete-btn" onClick={onVideoComplete}>
+          ✓ Mark Complete
+        </button>
+        <button
+          className="next-video-btn"
+          onClick={onVideoComplete}
+          disabled={!hasMoreVideos}
+        >
+          Next →
         </button>
         <button className="exit-btn" onClick={onExit}>Exit Path</button>
       </div>
