@@ -241,6 +241,8 @@ export async function getDocReadingPath(topics, { limit = 8 } = {}) {
       key,
       label: doc.label,
       description: doc.description || "",
+      keySteps: doc.keySteps || [],
+      seeAlso: doc.seeAlso || [],
       url: doc.url,
       tier: doc.tier,
       subsystem: doc.subsystem,

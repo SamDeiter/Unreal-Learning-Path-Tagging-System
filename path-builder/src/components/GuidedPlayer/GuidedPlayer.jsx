@@ -7,6 +7,7 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 import useGuidedPlayer, { STAGES } from "../../hooks/useGuidedPlayer";
+import docLinks from "../../data/doc_links.json";
 import { getThumbnailUrl } from "../../utils/videoUtils";
 import ChallengeCard from "./ChallengeCard";
 import BridgeCard from "./BridgeCard";
@@ -408,6 +409,41 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
 
       {course._description && (
         <p className="reading-step-description">{course._description}</p>
+      )}
+
+      {course._keySteps && course._keySteps.length > 0 && (
+        <div className="key-steps-section">
+          <h3 className="key-steps-heading">📋 Key Steps</h3>
+          <ol className="key-steps-list">
+            {course._keySteps.map((step, i) => (
+              <li key={i} className="key-step-item">{step}</li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {course._seeAlso && course._seeAlso.length > 0 && (
+        <div className="see-also-section">
+          <h3 className="see-also-heading">🔗 See Also</h3>
+          <div className="see-also-links">
+            {course._seeAlso.map((ref, i) => {
+              const refDoc = docLinks[ref.docKey];
+              const refUrl = refDoc ? refDoc.url : "#";
+              return (
+                <a
+                  key={i}
+                  href={refUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="see-also-link"
+                  title={refDoc ? refDoc.description : ref.label}
+                >
+                  → {ref.label}
+                </a>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       <div className="reading-step-source">
