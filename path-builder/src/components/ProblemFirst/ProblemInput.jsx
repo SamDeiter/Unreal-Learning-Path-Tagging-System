@@ -40,12 +40,20 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   const tagsByCategory = useMemo(() => {
     const groups = {};
     allTags.forEach((tag) => {
-      const category = tag.category_path?.[0] || "Other";
+      const category =
+        tag.category_path?.[0] ||
+        tag.category ||
+        tag.tag_id?.split(".")[0]?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
+        "Other";
       if (!groups[category]) groups[category] = [];
       groups[category].push(tag);
     });
-    // Sort categories alphabetically
-    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+    // Sort categories alphabetically, put "Other" last
+    return Object.entries(groups).sort(([a], [b]) => {
+      if (a === "Other") return 1;
+      if (b === "Other") return -1;
+      return a.localeCompare(b);
+    });
   }, [allTags]);
 
   // Debounce tag detection
