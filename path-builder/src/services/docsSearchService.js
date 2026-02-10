@@ -182,6 +182,7 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
       results.push({
         key,
         label: doc.label,
+        description: doc.description || "",
         url: doc.url,
         tier: doc.tier,
         subsystem: doc.subsystem,
@@ -239,6 +240,7 @@ export async function getDocReadingPath(topics, { limit = 8 } = {}) {
     ordered.push({
       key,
       label: doc.label,
+      description: doc.description || "",
       url: doc.url,
       tier: doc.tier,
       subsystem: doc.subsystem,

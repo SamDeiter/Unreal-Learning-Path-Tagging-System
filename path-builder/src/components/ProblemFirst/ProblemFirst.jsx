@@ -424,6 +424,9 @@ export default function ProblemFirst() {
                             )}
                           </div>
                           <h4 className="doc-card-title">{doc.label}</h4>
+                          {doc.description && (
+                            <p className="doc-card-desc">{doc.description}</p>
+                          )}
                           <div className="doc-card-footer">
                             <span className="doc-source-badge">📄 Epic Docs</span>
                             <span className="doc-read-time">{doc.readTimeMinutes || 10} min read</span>
