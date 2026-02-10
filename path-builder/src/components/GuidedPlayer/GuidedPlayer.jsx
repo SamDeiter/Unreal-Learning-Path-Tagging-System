@@ -4,7 +4,7 @@
  * State, effects, and handlers live in useGuidedPlayer hook.
  * Stage-specific cards are extracted to sub-components.
  */
-import { useMemo, useCallback } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import useGuidedPlayer, { STAGES } from "../../hooks/useGuidedPlayer";
 import { getThumbnailUrl } from "../../utils/videoUtils";
@@ -51,6 +51,7 @@ export default function GuidedPlayer(props) {
           videoIndex={gp.videoIndex}
           hasMoreVideos={gp.hasMoreVideos}
           problemSummary={props.problemSummary}
+          microLesson={props.microLesson}
           onVideoComplete={gp.handleVideoComplete}
           onExit={gp.onExit}
         />
@@ -107,6 +108,7 @@ GuidedPlayer.propTypes = {
   courses: PropTypes.array.isRequired,
   diagnosis: PropTypes.object,
   problemSummary: PropTypes.string,
+  microLesson: PropTypes.object,
   pathSummary: PropTypes.shape({
     path_summary: PropTypes.string,
     topics_covered: PropTypes.arrayOf(PropTypes.string),
@@ -118,6 +120,7 @@ GuidedPlayer.propTypes = {
 GuidedPlayer.defaultProps = {
   diagnosis: null,
   problemSummary: "",
+  microLesson: null,
   pathSummary: null,
   onComplete: () => {},
   onExit: () => {},
@@ -210,8 +213,20 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
   );
 }
 
-/** VideoStage — video player with transcript cards and controls */
-function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, problemSummary, onVideoComplete, onExit }) {
+/** VideoStage — video player with transcript cards, AI lesson, and controls */
+function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, problemSummary, microLesson, onVideoComplete, onExit }) {
+  const [lessonOpen, setLessonOpen] = useState(true);
+  const [expandedSection, setExpandedSection] = useState("quick_fix");
+
+  const quickFix = microLesson?.quick_fix;
+  const whyItWorks = microLesson?.why_it_works;
+  const relatedSituations = microLesson?.related_situations;
+  const hasMicroLesson = quickFix || whyItWorks || (relatedSituations && relatedSituations.length > 0);
+
+  const toggleSection = (section) => {
+    setExpandedSection((prev) => (prev === section ? null : section));
+  };
+
   return (
     <div className="video-stage">
       <div className="video-header">
@@ -241,6 +256,76 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
           </div>
         )}
       </div>
+
+      {/* AI Lesson Panel — what to look for while watching */}
+      {hasMicroLesson && (
+        <div className={`gp-ai-lesson ${lessonOpen ? "open" : "collapsed"}`}>
+          <button className="gp-ai-lesson-toggle" onClick={() => setLessonOpen((v) => !v)}>
+            <span className="gp-ai-badge">✨ AI Guide</span>
+            <span className="gp-ai-subtitle">What to look for</span>
+            <span className="gp-ai-chevron">{lessonOpen ? "▾" : "▸"}</span>
+          </button>
+
+          {lessonOpen && (
+            <div className="gp-ai-body">
+              {/* Quick Fix Steps */}
+              {quickFix && (
+                <div className={`gp-ai-section ${expandedSection === "quick_fix" ? "expanded" : ""}`}>
+                  <button className="gp-ai-section-toggle" onClick={() => toggleSection("quick_fix")}>
+                    <span>⚡ {quickFix.title || "Quick Fix"}</span>
+                    <span className="gp-ai-section-chevron">{expandedSection === "quick_fix" ? "▾" : "▸"}</span>
+                  </button>
+                  {expandedSection === "quick_fix" && quickFix.steps && (
+                    <ol className="gp-ai-steps">
+                      {quickFix.steps.map((step, i) => (
+                        <li key={i}>{step}</li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              )}
+
+              {/* Why This Works */}
+              {whyItWorks && (
+                <div className={`gp-ai-section ${expandedSection === "why" ? "expanded" : ""}`}>
+                  <button className="gp-ai-section-toggle" onClick={() => toggleSection("why")}>
+                    <span>🧠 Why This Works</span>
+                    {whyItWorks.key_concept && (
+                      <span className="gp-ai-concept-tag">{whyItWorks.key_concept}</span>
+                    )}
+                    <span className="gp-ai-section-chevron">{expandedSection === "why" ? "▾" : "▸"}</span>
+                  </button>
+                  {expandedSection === "why" && (
+                    <p className="gp-ai-explanation">{whyItWorks.explanation}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Related Situations */}
+              {relatedSituations && relatedSituations.length > 0 && (
+                <div className={`gp-ai-section ${expandedSection === "related" ? "expanded" : ""}`}>
+                  <button className="gp-ai-section-toggle" onClick={() => toggleSection("related")}>
+                    <span>🔗 Related Situations</span>
+                    <span className="gp-ai-count-tag">{relatedSituations.length}</span>
+                    <span className="gp-ai-section-chevron">{expandedSection === "related" ? "▾" : "▸"}</span>
+                  </button>
+                  {expandedSection === "related" && (
+                    <div className="gp-ai-scenarios">
+                      {relatedSituations.map((sit, i) => (
+                        <div key={i} className="gp-ai-scenario">
+                          <strong>💡 {sit.scenario}</strong>
+                          <p>{sit.connection}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       <TranscriptCards
         courseCode={course.code}
         videoTitle={currentVideo?.title || currentVideo?.name || ""}

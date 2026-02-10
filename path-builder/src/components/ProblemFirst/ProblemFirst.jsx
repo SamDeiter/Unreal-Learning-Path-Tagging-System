@@ -360,6 +360,7 @@ export default function ProblemFirst() {
           diagnosis={diagnosisData?.diagnosis}
           problemSummary={diagnosisData?.diagnosis?.problem_summary}
           pathSummary={diagnosisData?.pathSummary}
+          microLesson={diagnosisData?.microLesson}
           onComplete={() => {
             clearCart();
             setStage(STAGES.INPUT);
