@@ -10,13 +10,13 @@
       "task": "Open any existing Blueprint. Add a Custom Event called 'ResetState'. Wire it to set at least 2 variables back to their defaults, then call it from Begin Play with a 3-second Delay node.",
       "hint": "Right-click the Event Graph → Add Custom Event. Use a 'Delay' node (set Duration to 3.0) before the call.",
       "expectedResult": "After pressing Play, wait 3 seconds — the variables should snap back to their defaults. Print String nodes on each Set will confirm the reset fires. The Blueprint should compile without errors.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/custom-events-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprints-visual-scripting-in-unreal-engine"
     },
     {
       "task": "Create a Blueprint Interface (right-click Content Browser → Blueprint Interface). Add a function signature called 'Interact' with no inputs. Implement this interface on two different Actor Blueprints — one that prints 'Hello' and one that toggles a light. Call Interact via the interface on both.",
       "hint": "After adding the Interface to each Blueprint's Class Settings, open the interface function in each BP to add the implementation logic.",
       "expectedResult": "Calling 'Interact' via the interface message on Actor A should print 'Hello' and on Actor B should toggle a light — same call, different behavior. Both BPs should show the Interface listed under Class Settings → Interfaces.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-interface-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprints-visual-scripting-in-unreal-engine"
     }
   ],
   "materials": [
@@ -30,7 +30,7 @@
       "task": "Create a Material Instance from an existing Material (right-click → Create Material Instance). Expose at least 2 parameters (a color and a scalar), then adjust them on the instance to see the changes live in the viewport.",
       "hint": "In the parent Material, right-click a Constant → 'Convert to Parameter' and give it a name.",
       "expectedResult": "Changing the color slider on the Material Instance should immediately update the mesh's appearance in the viewport — no recompile needed. Both parameters should appear as editable fields in the Instance's Details panel.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/instanced-materials-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-materials"
     },
     {
       "task": "Build a layered Material with a Lerp node blending between two textures. Use a vertex-painted mask to control the blend. Apply it to a mesh, then use Mesh Paint mode (Shift+5) to paint the blend in the viewport.",
@@ -44,19 +44,19 @@
       "task": "Build a small interior room with 4 walls and a ceiling (use BSP or cubes). Place a Rect Light (Add → Lights → Rect Light) inside, set its Source Width/Height to 200, Intensity to 15 cd, and color to warm white (4200K). Compare the result with a basic Point Light.",
       "hint": "Select the Rect Light → Details panel → Light section. Use 'Lit' viewport mode to see the final result.",
       "expectedResult": "The Rect Light should cast soft, directional shadows with a warm rectangular pool of light on the floor. Compared to the Point Light, the Rect Light shadows should be noticeably softer with more realistic falloff at the edges.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/rect-lights-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/lighting-for-unreal-engine"
     },
     {
       "task": "Set up a three-point lighting rig: one Directional Light as key, one Rect Light as fill (half the intensity, opposite side), and one Spot Light as rim/backlight behind the subject. Screenshot the result.",
       "hint": "Key light: ~10 lux, Fill: ~5 lux, Rim: ~8 lux. Adjust the Directional Light's rotation in the Details panel.",
       "expectedResult": "Your subject should have a bright side (key), a dimly lit opposite side (fill) with soft shadows, and a bright edge outline on the back (rim). The overall look should feel cinematic with clear depth separation from the background.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/light-types-and-their-mobility-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/lighting-for-unreal-engine"
     },
     {
       "task": "Create a flickering light effect using a Light Function Material. Create a new Material with Material Domain set to 'Light Function'. Use a Time node driving a Sine wave into Emissive Color. Apply the Material as a Light Function on a Point Light.",
       "hint": "In the Material, set Material Domain to 'Light Function' in the Details panel. Apply it on the Point Light's Details → Light → Light Function Material.",
       "expectedResult": "The Point Light should pulse rhythmically on and off following the sine wave pattern. Adjusting the Time node's multiplier should change the flicker speed. Shadows cast by the light should also pulse in sync.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/light-functions-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/lighting-for-unreal-engine"
     }
   ],
   "lumen": [
@@ -96,7 +96,7 @@
       "task": "Set up an additive animation layer. Take a base locomotion animation and create an additive layer for a 'lean left' pose. In the Anim Blueprint, use a 'Layered Blend Per Bone' node to apply the lean only to the spine bones while legs continue walking.",
       "hint": "The additive anim needs its Additive Anim Type set to 'Local Space' in the asset details. Layered Blend Per Bone → set the Branch Filter to 'spine_01' bone.",
       "expectedResult": "The character should walk normally with its legs while the upper body leans to the left. Blending the additive weight from 0 to 1 should smoothly introduce the lean. The lower body animation should be completely unaffected.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-blueprints-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-animation-system-in-unreal-engine"
     }
   ],
   "niagara": [
@@ -104,19 +104,19 @@
       "task": "Create a new Niagara System (right-click Content Browser → FX → Niagara System → New System from Template → Fountain). Open it, find the 'Initialize Particle' module, and change the Lifetime from the default to a Min/Max of 1.0-3.0. Change the Sprite Size to 5-15. Drop it in your level.",
       "hint": "Expand modules by clicking the arrow. Each module has parameters you can override. Use the preview panel to see changes live.",
       "expectedResult": "Particles should now live longer (1-3 seconds instead of default), creating taller fountain arcs. The sprites should be visibly smaller (5-15 vs default). In the level viewport, you should see a continuous stream of small particles rising and falling.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/niagara-visual-effects-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/creating-visual-effects-in-niagara-for-unreal-engine"
     },
     {
       "task": "In an existing Niagara emitter, add a 'Curl Noise Force' module (click + in the Particle Update group → search 'Curl Noise'). Set Noise Strength to 200 and Frequency to 0.5. Observe how particles now swirl instead of falling straight.",
       "hint": "Curl Noise is under Particle Update → Forces. Increase Strength for more dramatic swirling.",
       "expectedResult": "Particles should visibly swirl and curl in organic patterns instead of falling straight down. At Strength 200 the effect should be dramatic — particles will loop and spiral. Reducing Frequency makes larger, lazier swirls.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/niagara-visual-effects-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/creating-visual-effects-in-niagara-for-unreal-engine"
     },
     {
       "task": "Create a GPU-driven Niagara particle system with 100,000 particles. Set Sim Target to 'GPU Compute'. Add a 'Point Attraction Force' module pointing at the world origin with Attraction Strength 500. Spawn all particles in a sphere around the attractor.",
       "hint": "In the Emitter Properties, set Sim Target to 'GPUCompute Sim'. The Point Attraction module is under Particle Update → Forces. Set Spawn Rate to 100000.",
       "expectedResult": "Particles should orbit and spiral into the center point like a vortex. Performance should remain smooth even at 100K particles thanks to GPU compute. The preview should show a dense swirling mass converging on the attractor point.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/niagara-visual-effects-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/creating-visual-effects-in-niagara-for-unreal-engine"
     }
   ],
   "landscape": [
@@ -130,7 +130,7 @@
       "task": "Add a Landscape Layer Blend material with 3 layers: Grass, Rock, and Sand. In Landscape Paint mode, paint each layer onto appropriate terrain areas. Add at least one auto-threshold rule based on slope angle.",
       "hint": "In the Material Editor, use a 'Landscape Layer Blend' node with 'LB Weight Blend' type. Each layer needs a Layer Info asset.",
       "expectedResult": "Steep slopes should auto-paint as Rock, flat areas as Grass, and your manually painted Sand should appear where you chose. Each layer should blend smoothly at boundaries — no hard seams between Grass and Rock transitions.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/landscape-materials-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/landscape-outdoor-terrain-in-unreal-engine"
     },
     {
       "task": "Import a heightmap (16-bit PNG or RAW) to create a landscape from real-world terrain data. Go to Landscape Mode → Import from File, set the scale, and import. Add a simple grass/rock material and sculpt refinements by hand.",
@@ -150,7 +150,7 @@
       "task": "Create a simple collision mesh for a Static Mesh. Open the mesh → Collision menu → Add Box Simplified Collision. Then try 'Auto Convex Collision' with Max Hulls = 4 and Max Verts = 16. Compare both collision shapes using 'Show → Collision' in the viewport.",
       "hint": "Simple box collision is fastest but least accurate. Auto Convex with more hulls wraps the mesh tighter. Use Player Collision view to debug.",
       "expectedResult": "The box collision should appear as a green wireframe box around the mesh. Auto Convex collision should show 4 convex hull shapes that follow the mesh contours more closely. Both should block player movement when tested in Play mode.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-collisions-with-static-meshes-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/collision-in-unreal-engine"
     },
     {
       "task": "Use the Merge Actors tool (Window → Merge Actors) to combine multiple Static Meshes in your scene into a single mesh. Select 5-10 similar objects (like rocks or props), merge them, and compare the draw call count before and after using 'stat SceneRendering'.",
@@ -204,19 +204,19 @@
       "task": "Create a Level Sequence (Cinematics → Add Level Sequence). Add an actor track for a light in your scene. At frame 0, set intensity to 0. At frame 120, set intensity to 20. Play back the sequence and watch the light fade in over 4 seconds (at 30fps).",
       "hint": "Click + Track → Actor to Sequence → select the light. Right-click a property → 'Add Key' at the playhead position.",
       "expectedResult": "When you press Play in the Sequencer timeline, the light should gradually brighten from completely off to full intensity over exactly 4 seconds. The keyframe curve in the Sequencer should show a smooth ramp from 0 to 20. The scene should start dark and end lit.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/sequencer-editor-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-sequencer-movie-tool-overview"
     },
     {
       "task": "Create a camera fly-through cinematic. Add a Cine Camera Actor to your level. In a Level Sequence, add the camera as a track. Set keyframes at 3 different positions/rotations over 300 frames. Use the 'Pilot' feature to position the camera from the viewport.",
       "hint": "Right-click the CineCamera in viewport → 'Pilot Selected Camera'. Move the viewport to frame your shot, then add a keyframe with 'S' in Sequencer.",
       "expectedResult": "Playing the sequence in 'Cinematic Viewport' should show a smooth camera fly-through between your 3 keyframed positions. The motion should interpolate smoothly with no jarring jumps. The Sequencer should show transform keyframes on the camera track.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/sequencer-editor-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-sequencer-movie-tool-overview"
     },
     {
       "task": "Add a fade-to-black transition in Sequencer. Create a Fade Track on the Level Sequence. Set a keyframe at frame 90 with value 0 (fully visible) and at frame 120 with value 1 (fully black). Then reverse the fade from frame 150 to 180.",
       "hint": "Click + Track → Fade Track at the sequence level. Right-click on the timeline to add keyframes. The fade value ranges from 0.0 (clear) to 1.0 (black).",
       "expectedResult": "The viewport should smoothly fade to black between frames 90-120, hold black for 30 frames, then smoothly fade back in from frames 150-180. The transition should be cinematic and smooth with no popping.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/sequencer-editor-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-sequencer-movie-tool-overview"
     }
   ],
   "umg": [
@@ -224,19 +224,19 @@
       "task": "Create a Widget Blueprint (right-click Content Browser → User Interface → Widget Blueprint). Add a Vertical Box with a Text block ('Health: 100') and a Progress Bar below it. In the Graph, bind the Progress Bar's Percent to a float variable called 'HealthPercent'.",
       "hint": "Select the Progress Bar → Details → Percent → click 'Bind' → Create Binding function that returns your HealthPercent variable.",
       "expectedResult": "In the Widget Designer preview, you should see 'Health: 100' text above a green progress bar. Changing the HealthPercent default value (0.0-1.0) should immediately update the bar fill. The binding icon next to Percent should show as linked (chain icon).",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/umg-ui-designer-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/umg-ui-designer-for-unreal-engine"
     },
     {
       "task": "Build a pause menu widget with Resume, Settings, and Quit buttons. Create the Widget Blueprint, add a Canvas Panel with 3 buttons in a Vertical Box centered on screen. Wire each button's OnClicked event — Resume closes the widget, Quit calls 'Quit Game'.",
       "hint": "To pause: Set Game Paused = true and Add Widget to Viewport. For mouse cursor: Set Show Mouse Cursor = true on the Player Controller. Set Input Mode UI Only while paused.",
       "expectedResult": "Pressing Escape should show the pause menu and freeze gameplay. Clicking Resume should close the menu and unpause. Clicking Quit should exit to desktop. The buttons should highlight on hover and the game should be frozen behind the menu.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/umg-ui-designer-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/umg-ui-designer-for-unreal-engine"
     },
     {
       "task": "Create a minimap widget using a Render Target. Place a Scene Capture 2D component above your level pointing down. Create a Render Target texture and assign it to the Scene Capture. Display the Render Target in a circular Image widget on the HUD.",
       "hint": "Scene Capture 2D → Details → set Capture Source to 'Scene Color'. Use an Image widget with a circular material mask to crop the minimap into a circle.",
       "expectedResult": "The HUD should show a top-down view of the level in a circular frame. As the player moves, the minimap should update in real-time showing a bird's eye view. The Scene Capture should render at a lower resolution for performance (256×256).",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/umg-ui-designer-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/umg-ui-designer-for-unreal-engine"
     }
   ],
   "performance": [
@@ -344,19 +344,19 @@
       "task": "Enter Foliage Mode (Shift+4). Add a tree or bush mesh to the foliage palette (drag from Content Browser). Set Density to 200, Min/Max Scale to 0.8-1.2, and enable 'Align to Normal'. Paint foliage on a Landscape surface and check the instance count in the Foliage panel.",
       "hint": "Use Erase (Shift+click) to remove foliage. Larger brush radius + lower density gives more natural distribution.",
       "expectedResult": "Trees/bushes should scatter naturally across the painted area with slight size variation (0.8x-1.2x). On slopes, they should tilt to match the terrain angle. The Foliage panel should show the total instance count increasing as you paint.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/foliage-mode-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/foliage-tool-in-unreal-engine"
     },
     {
       "task": "Set up procedural foliage with a Procedural Foliage Spawner. Create a Procedural Foliage Spawner volume in your level. Add a Foliage Type with your tree mesh, set Num Steps to 5 and Initial Seed Density to 0.5. Click 'Resimulate' to generate a forest.",
       "hint": "Procedural Foliage Spawner simulates growth over time. More Num Steps = more mature/dense forest. Adjusting Shade Tolerance controls which trees survive under canopy.",
       "expectedResult": "Clicking Resimulate should fill the volume with a realistic-looking random forest. Trees should vary in size based on the growth simulation. Changing the random seed should produce a different but equally natural-looking distribution.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/foliage-mode-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/foliage-tool-in-unreal-engine"
     },
     {
       "task": "Add wind animation to foliage. In the foliage mesh's Material, add a SimpleGrassWind or Wind node. Set Wind Intensity to 0.5 and Wind Speed to 1.0. Place a Wind Directional Source actor in the level to control wind direction globally.",
       "hint": "The Material needs 'Used with Instanced Static Meshes' enabled in Material Details. SimpleGrassWind is under Material Functions → search 'grass'.",
       "expectedResult": "Foliage should sway gently in the wind direction. The Wind Directional Source arrow should indicate wind direction. Adjusting wind speed/intensity should visibly change the sway amount. All foliage instances should respond to wind simultaneously.",
-      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/foliage-mode-in-unreal-engine"
+      "docsUrl": "https://dev.epicgames.com/documentation/en-us/unreal-engine/foliage-tool-in-unreal-engine"
     }
   ],
   "plugin": [
