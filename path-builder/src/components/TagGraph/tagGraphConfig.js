@@ -93,8 +93,6 @@ export const GRAPH_STYLESHEET = [
       "line-color": "#58a6ff",
       "curve-style": "bezier",
       opacity: "data(opacity)",
-      "transition-property": "opacity, line-color, width",
-      "transition-duration": "200ms",
       "z-index": 1,
     },
   },
