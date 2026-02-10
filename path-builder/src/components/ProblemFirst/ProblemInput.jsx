@@ -41,9 +41,10 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
     const groups = {};
     allTags.forEach((tag) => {
       const category =
-        tag.category_path?.[0] ||
+        tag.categoryPath?.[0] ||
         tag.category ||
         tag.tag_id?.split(".")[0]?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
+        tag.id?.split(".")[0]?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
         "Other";
       if (!groups[category]) groups[category] = [];
       groups[category].push(tag);

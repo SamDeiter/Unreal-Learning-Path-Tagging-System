@@ -96,7 +96,9 @@ function App() {
           name: tag.display_name,
           count: courseCount,
           description: tag.description,
+          tag_id: tag.tag_id,
           categoryPath: tag.category_path,
+          category: tag.category,
           synonyms: tag.synonyms,
         };
       });
