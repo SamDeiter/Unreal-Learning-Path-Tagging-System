@@ -83,3 +83,19 @@ tag_ids = [t.tag_id for t in results]      # Extract IDs if needed
 - Match rules (`ingestion/match_rules.json`)
 - Learning path templates (`learning_paths/templates/`)
 - Sample queries (`user_queries/examples/`)
+
+---
+
+## Roadmap
+
+### Phase 5 — Diagnosis Caching & Similar Query Reuse
+
+Cache AI diagnosis results in Firestore so similar future questions get instant answers.
+
+**Approach:**
+1. After each diagnosis, store `{ queryEmbedding, rootCauses, matchedCourses, microLesson, timestamp }` in a `cached_diagnoses` Firestore collection
+2. On new queries, compute cosine similarity against cached embeddings before calling Gemini
+3. If similarity > 0.9, reuse the cached result (instant response, no API cost)
+4. Surface a "📖 Further Reading" section linking to matched Epic UE5 docs (already retrieved via `docsSearchService.js` but not yet shown in UI)
+5. Optionally ingest local UE 5.6 editor docs (`D:\Fortnite\UE_5.6\Engine\Documentation\Source\Shared\`) for property-level tooltip references
+
