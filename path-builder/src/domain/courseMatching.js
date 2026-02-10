@@ -4,7 +4,6 @@
  */
 import tagGraphService from "../services/TagGraphService";
 import { searchSegments } from "../services/segmentSearchService";
-import { findSimilarCourses } from "../services/semanticSearchService";
 import synonymMap from "../data/synonym_map.json";
 import curatedSolutions from "../data/curated_solutions.json";
 

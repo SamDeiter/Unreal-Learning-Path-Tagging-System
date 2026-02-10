@@ -35,14 +35,6 @@ function formatDuration(seconds) {
 }
 
 /**
- * Format a timestamp string (e.g. "00:12:34" or "12:34") for display.
- */
-function formatTimestamp(ts) {
-  if (!ts) return null;
-  return ts.replace(/^00:/, "");
-}
-
-/**
  * Individual video result card — compact by default, expandable on click.
  * When expanded, shows MicroLesson content, timestamps, course details.
  */

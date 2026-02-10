@@ -83,14 +83,16 @@ describe("QuizCard", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows incorrect styling when wrong answer is selected", () => {
-    render(<QuizCard {...defaultProps} />);
+  it("shows correct/incorrect styling when wrong answer is selected", () => {
+    const { container } = render(<QuizCard {...defaultProps} />);
     fireEvent.click(screen.getByText("Texture streaming"));
     fireEvent.click(screen.getByText("Check Answer"));
-    // The correct answer should have a checkmark
-    expect(screen.getByText("✓")).toBeInTheDocument();
-    // The wrong answer should have an X
-    expect(screen.getByText("✗")).toBeInTheDocument();
+    // The correct answer option should gain the .correct class
+    const correctOption = container.querySelector(".quiz-option.correct");
+    expect(correctOption).not.toBeNull();
+    // The wrong answer should gain the .incorrect class
+    const incorrectOption = container.querySelector(".quiz-option.incorrect");
+    expect(incorrectOption).not.toBeNull();
   });
 
   it("advances to next question after answering", () => {
@@ -98,7 +100,9 @@ describe("QuizCard", () => {
     // Answer Q1
     fireEvent.click(screen.getByText("Real-time global illumination"));
     fireEvent.click(screen.getByText("Check Answer"));
-    fireEvent.click(screen.getByText("Next Question →"));
+    // "Next Question" button — text content omits the ArrowRight SVG icon
+    const nextBtn = screen.getByRole("button", { name: /next question/i });
+    fireEvent.click(nextBtn);
     // Q2 should be visible
     expect(
       screen.getByText("Which setting controls Lumen reflection quality?")
@@ -111,11 +115,11 @@ describe("QuizCard", () => {
     // Answer Q1 correctly
     fireEvent.click(screen.getByText("Real-time global illumination"));
     fireEvent.click(screen.getByText("Check Answer"));
-    fireEvent.click(screen.getByText("Next Question →"));
+    fireEvent.click(screen.getByRole("button", { name: /next question/i }));
     // Answer Q2 correctly
     fireEvent.click(screen.getByText("Reflection Method"));
     fireEvent.click(screen.getByText("Check Answer"));
-    fireEvent.click(screen.getByText("See Results →"));
+    fireEvent.click(screen.getByRole("button", { name: /see results/i }));
     // Score summary
     expect(screen.getByText("2/2 Correct")).toBeInTheDocument();
   });
@@ -133,11 +137,11 @@ describe("QuizCard", () => {
     // Answer both questions
     fireEvent.click(screen.getByText("Real-time global illumination"));
     fireEvent.click(screen.getByText("Check Answer"));
-    fireEvent.click(screen.getByText("Next Question →"));
+    fireEvent.click(screen.getByRole("button", { name: /next question/i }));
     fireEvent.click(screen.getByText("Reflection Method"));
     fireEvent.click(screen.getByText("Check Answer"));
-    fireEvent.click(screen.getByText("See Results →"));
-    fireEvent.click(screen.getByText("Continue →"));
+    fireEvent.click(screen.getByRole("button", { name: /see results/i }));
+    fireEvent.click(screen.getByRole("button", { name: /continue/i }));
     expect(onComplete).toHaveBeenCalledWith({ score: 2, total: 2 });
   });
 });
