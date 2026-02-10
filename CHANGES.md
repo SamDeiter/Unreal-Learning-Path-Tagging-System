@@ -99,3 +99,13 @@ Cache AI diagnosis results in Firestore so similar future questions get instant 
 4. Surface a "📖 Further Reading" section linking to matched Epic UE5 docs (already retrieved via `docsSearchService.js` but not yet shown in UI)
 5. Optionally ingest local UE 5.6 editor docs (`D:\Fortnite\UE_5.6\Engine\Documentation\Source\Shared\`) for property-level tooltip references
 
+### Phase 6 — Feedback Submission Backend
+
+Connect the feedback modal to a real backend so bug reports, feature requests, and attachments are persisted.
+
+**Approach:**
+
+1. Store feedback in a `feedback` Firestore collection: `{ type, description, attachments[], userId, timestamp, status }`
+2. Upload file attachments to Firebase Storage under `feedback/{docId}/`
+3. Send email notification on new submissions (Firebase Cloud Function trigger)
+4. Add an admin view to review/triage submitted feedback
