@@ -50,11 +50,9 @@ export default function GuidedPlayer(props) {
           currentVideo={gp.currentVideo}
           videoIndex={gp.videoIndex}
           hasMoreVideos={gp.hasMoreVideos}
-          hasPreviousVideo={gp.hasPreviousVideo}
           microLesson={props.microLesson}
           courses={gp.courses}
           onVideoComplete={gp.handleVideoComplete}
-          onPreviousVideo={gp.handlePreviousVideo}
           onExit={gp.onExit}
         />
       )}
@@ -87,7 +85,7 @@ export default function GuidedPlayer(props) {
           onReflectionChange={gp.setReflectionText}
           wordCount={gp.wordCount}
           onFinish={gp.handleFinish}
-          onExit={gp.onExit}
+          onBackToPath={gp.handleBackToPath}
         />
       )}
 
@@ -224,7 +222,7 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
 }
 
 /** VideoStage — video player with transcript cards and controls */
-function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, hasPreviousVideo, microLesson, courses, onVideoComplete, onPreviousVideo, onExit }) {
+function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, microLesson, courses, onVideoComplete, onExit }) {
   return (
     <div className="video-stage">
       <div className="video-header">
@@ -256,22 +254,8 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
       </div>
       {microLesson && <AiGuidePanel microLesson={microLesson} courses={courses} />}
       <div className="video-controls">
-        <button
-          className="prev-video-btn"
-          onClick={onPreviousVideo}
-          disabled={!hasPreviousVideo}
-        >
-          ← Previous
-        </button>
         <button className="complete-btn" onClick={onVideoComplete}>
-          ✓ Mark Complete
-        </button>
-        <button
-          className="next-video-btn"
-          onClick={onVideoComplete}
-          disabled={!hasMoreVideos}
-        >
-          Next →
+          {hasMoreVideos ? "✓ Mark Complete & Continue" : "✓ Complete & Try Exercise"}
         </button>
         <button className="exit-btn" onClick={onExit}>Exit Path</button>
       </div>
@@ -281,7 +265,7 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
 
 /** AiGuidePanel — sidebar panel showing AI-generated lesson context */
 function AiGuidePanel({ microLesson, courses }) {
-  const [lessonOpen, setLessonOpen] = useState(true);
+  const [lessonOpen, setLessonOpen] = useState(false);
   const [expandedSection, setExpandedSection] = useState("quick_fix");
 
   const quickFix = microLesson?.quick_fix;

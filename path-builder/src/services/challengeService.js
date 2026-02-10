@@ -13,7 +13,7 @@ import challengeRegistry from "../data/challengeRegistry.json";
  * @param {string} videoTitle - title of the current video
  * @returns {{ task: string, hint: string, expectedResult: string, difficulty: string }}
  */
-export function generateChallenge(course, problemContext, videoTitle) {
+export function generateChallenge(course, problemContext, videoTitle, courseIndex = 0) {
   // Collect tags from ALL available sources
   const tags = [
     ...(course?.canonical_tags || []),
@@ -32,7 +32,7 @@ export function generateChallenge(course, problemContext, videoTitle) {
 
   // Helper: pick a template deterministically from a list
   const pickTemplate = (templates) => {
-    const titleHash = ((course?.title || "") + (videoTitle || "")).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const titleHash = ((course?.title || "") + (videoTitle || "") + courseIndex).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
     return templates[titleHash % templates.length];
   };
 

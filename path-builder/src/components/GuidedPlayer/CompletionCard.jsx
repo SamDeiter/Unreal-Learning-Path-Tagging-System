@@ -10,7 +10,7 @@ export default function CompletionCard({
   onReflectionChange,
   wordCount,
   onFinish,
-  onExit,
+  onBackToPath,
 }) {
   return (
     <div className="complete-card">
@@ -54,8 +54,8 @@ export default function CompletionCard({
         <button className="finish-btn" onClick={onFinish}>
           {reflectionText.trim() ? "Save & Finish" : "Back to Problems"}
         </button>
-        {onExit && (
-          <button className="back-to-path-btn" onClick={onExit}>
+        {onBackToPath && (
+          <button className="back-to-path-btn" onClick={onBackToPath}>
             ← Back to Learning Path
           </button>
         )}

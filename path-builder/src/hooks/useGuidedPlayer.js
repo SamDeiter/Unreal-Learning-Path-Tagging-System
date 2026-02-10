@@ -72,7 +72,8 @@ export default function useGuidedPlayer({
   const currentVideos = currentCourse?.videos || [];
   const currentVideo = currentVideos[videoIndex] || currentVideos[0] || null;
   const hasMoreVideos = videoIndex < currentVideos.length - 1;
-  const hasPreviousVideo = videoIndex > 0;
+  const hasPreviousVideo = videoIndex > 0 || currentIndex > 0;
+  const hasNextVideo = hasMoreVideos || !!nextCourse;
   const courseVideoCount = currentVideos.length;
 
   const introContent = useMemo(
@@ -108,8 +109,8 @@ export default function useGuidedPlayer({
 
   const challengeContent = useMemo(() => {
     if (stage !== STAGES.CHALLENGE) return null;
-    return generateChallenge(currentCourse, problemSummary, currentVideo?.title);
-  }, [stage, currentCourse, problemSummary, currentVideo]);
+    return generateChallenge(currentCourse, problemSummary, currentVideo?.title, currentIndex);
+  }, [stage, currentCourse, problemSummary, currentVideo, currentIndex]);
 
   // ── Handlers (stage transitions) ──
   const handleStartLearning = useCallback(() => {
@@ -132,8 +133,30 @@ export default function useGuidedPlayer({
   const handlePreviousVideo = useCallback(() => {
     if (videoIndex > 0) {
       setVideoIndex((prev) => prev - 1);
+    } else if (currentIndex > 0) {
+      // Go to last video of previous course
+      const prevVideos = courses[currentIndex - 1]?.videos || [];
+      setCurrentIndex((prev) => prev - 1);
+      setVideoIndex(Math.max(0, prevVideos.length - 1));
     }
-  }, [videoIndex]);
+  }, [videoIndex, currentIndex, courses]);
+
+  const handleNextVideo = useCallback(() => {
+    if (hasMoreVideos) {
+      setVideoIndex((prev) => prev + 1);
+    } else if (nextCourse) {
+      // Go to first video of next course
+      setCurrentIndex((prev) => prev + 1);
+      setVideoIndex(0);
+    }
+  }, [hasMoreVideos, nextCourse]);
+
+  const handleBackToPath = useCallback(() => {
+    // Reset to first course, first video, PLAYING stage
+    setCurrentIndex(0);
+    setVideoIndex(0);
+    setStage(STAGES.PLAYING);
+  }, []);
 
   const handleQuizComplete = useCallback(() => {
     setStage(STAGES.CHALLENGE);
@@ -190,6 +213,7 @@ export default function useGuidedPlayer({
     currentVideo,
     hasMoreVideos,
     hasPreviousVideo,
+    hasNextVideo,
     courseVideoCount,
     introContent,
     streak,
@@ -205,6 +229,8 @@ export default function useGuidedPlayer({
     handleStartLearning,
     handleVideoComplete,
     handlePreviousVideo,
+    handleNextVideo,
+    handleBackToPath,
     handleQuizComplete,
     handleChallengeComplete,
     handleContinue,
