@@ -8,6 +8,7 @@
  */
 import { useState, useCallback, useMemo } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getFirebaseApp } from "../../services/firebaseConfig";
 import ProblemInput from "./ProblemInput";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
@@ -80,6 +81,72 @@ export default function ProblemFirst() {
       }
 
       try {
+        // ─── Cache-first: check Firestore for cached cart ───
+        if (inputData.cachedCartId) {
+          devLog(`[Cache] Checking Firestore for cart: ${inputData.cachedCartId}`);
+          try {
+            const app = getFirebaseApp();
+            const db = getFirestore(app);
+            const cartRef = doc(db, "adaptive_carts", inputData.cachedCartId);
+            const cartSnap = await getDoc(cartRef);
+
+            if (cartSnap.exists()) {
+              const cachedCart = cartSnap.data();
+
+              // Check 24h TTL
+              const cachedAt = cachedCart.cached_at?.toDate?.() || new Date(cachedCart.created_at || 0);
+              const ageMs = Date.now() - cachedAt.getTime();
+              const TTL_MS = 24 * 60 * 60 * 1000;
+
+              if (ageMs < TTL_MS) {
+                devLog(`[Cache Hit] Cart is ${Math.round(ageMs / 60000)}min old — using cached result`);
+
+                const cartData = { ...cachedCart, userQuery: inputData.query, retrievedPassages: [] };
+
+                // Re-run local matching (no Gemini calls)
+                const matchedCourses = await matchCoursesToCart(
+                  cartData, courses, inputData.selectedTagIds || [], inputData.errorLog || "", []
+                );
+                cartData.matchedCourses = matchedCourses;
+
+                const matchedTagIds = [
+                  ...(cartData.diagnosis?.matched_tag_ids || []),
+                  ...(inputData.detectedTagIds || []),
+                  ...(inputData.selectedTagIds || []),
+                ];
+                const pathResult = buildLearningPath(matchedCourses, matchedTagIds, {
+                  preferTroubleshooting: true, diversity: true,
+                });
+
+                const roleMap = {};
+                for (const item of pathResult.path) {
+                  roleMap[item.course.code] = {
+                    role: item.role, reason: item.reason, estimatedMinutes: item.estimatedMinutes,
+                  };
+                }
+
+                const videos = await flattenCoursesToVideos(matchedCourses, inputData.query, roleMap);
+
+                if (videos.length > 0) {
+                  setVideoResults(videos);
+                  setDiagnosisData(cartData);
+                  setStage(STAGES.DIAGNOSIS);
+                  devLog(`[Cache] Loaded ${videos.length} videos from cached cart — 0 Gemini calls`);
+                  return;
+                }
+                devWarn("[Cache] Cached cart produced 0 videos — falling through to fresh diagnosis");
+              } else {
+                devLog(`[Cache Expired] Cart is ${Math.round(ageMs / 3600000)}h old — refreshing`);
+              }
+            } else {
+              devLog(`[Cache Miss] Cart ${inputData.cachedCartId} not found in Firestore`);
+            }
+          } catch (cacheErr) {
+            devWarn("[Cache Error] Falling through to fresh diagnosis:", cacheErr.message);
+          }
+        }
+
+        // ─── Fresh diagnosis: full Gemini pipeline ───
         await trackQuerySubmitted(
           inputData.query,
           inputData.detectedTagIds,
@@ -230,6 +297,13 @@ export default function ProblemFirst() {
         }
 
         setStage(STAGES.DIAGNOSIS);
+
+        // Update history with cart_id so future clicks use cache
+        if (inputData.updateCartIdForQuery && cartData.cart_id) {
+          inputData.updateCartIdForQuery(inputData.query, cartData.cart_id);
+          devLog(`[Cache] Saved cart_id ${cartData.cart_id} to history for: "${inputData.query.substring(0, 40)}..."`);
+        }
+
         await trackDiagnosisGenerated(cartData.diagnosis);
         await trackLearningPathGenerated(
           cartData.objectives,

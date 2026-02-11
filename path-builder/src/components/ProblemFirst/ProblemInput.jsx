@@ -43,11 +43,19 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const dropZoneRef = useRef(null);
 
-
-  // Past question history (last 6)
+  // Past question history (last 6) — stored as {query, cartId} objects
+  // Migrate from old string[] format on first load
   const [queryHistory, setQueryHistory] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("fix-problem-history") || "[]");
+      const raw = JSON.parse(localStorage.getItem("fix-problem-history") || "[]");
+      // Migrate old string[] → {query, cartId}[] format
+      const migrated = raw.map((item) =>
+        typeof item === "string" ? { query: item, cartId: null } : item
+      );
+      if (raw.length > 0 && typeof raw[0] === "string") {
+        localStorage.setItem("fix-problem-history", JSON.stringify(migrated));
+      }
+      return migrated;
     } catch { return []; }
   });
 
@@ -159,14 +167,27 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
     }
   }, []);
 
-  const handleSubmit = useCallback(() => {
+  // Save a cart_id to history after a fresh diagnosis completes
+  const updateCartIdForQuery = useCallback((queryText, cartId) => {
+    setQueryHistory((prev) => {
+      const updated = prev.map((item) =>
+        item.query === queryText ? { ...item, cartId } : item
+      );
+      localStorage.setItem("fix-problem-history", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  // Expose updateCartIdForQuery to parent via a ref-like pattern
+  // The parent can call onSubmit and receive this function back
+  const handleSubmit = useCallback((cachedCartId = null) => {
     if (problem.trim().length < 10) return;
 
-    // Save to history
+    // Save to history (without cartId yet — it comes after diagnosis)
     const trimmed = problem.trim();
     setQueryHistory((prev) => {
-      const filtered = prev.filter((q) => q !== trimmed);
-      const updated = [trimmed, ...filtered].slice(0, 6);
+      const filtered = prev.filter((item) => item.query !== trimmed);
+      const updated = [{ query: trimmed, cartId: cachedCartId }, ...filtered].slice(0, 6);
       localStorage.setItem("fix-problem-history", JSON.stringify(updated));
       return updated;
     });
@@ -178,8 +199,10 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
       personaHint: detectedPersona?.name,
       pastedImage,
       errorLog: errorLog.trim() || null,
+      cachedCartId: cachedCartId || null,
+      updateCartIdForQuery,
     });
-  }, [problem, detectedTags, selectedTagIds, detectedPersona, onSubmit, pastedImage, errorLog]);
+  }, [problem, detectedTags, selectedTagIds, detectedPersona, onSubmit, pastedImage, errorLog, updateCartIdForQuery]);
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -363,7 +386,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
       <div className="problem-input-actions">
         <button
           className="submit-btn primary"
-          onClick={handleSubmit}
+          onClick={() => handleSubmit()}
           disabled={problem.trim().length < 10 || isLoading}
         >
           {isLoading ? (
@@ -384,34 +407,47 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
         <div className="query-history">
           <span className="history-label">🕘 Recent questions:</span>
           <div className="history-chips">
-            {queryHistory.map((q, i) => (
-              <div key={i} className="history-chip-row">
-                <button
-                  type="button"
-                  className="history-chip"
-                  onClick={() => {
-                    setProblem(q);
-                    const fakeEvent = { target: { value: q } };
-                    handleChange(fakeEvent);
-                  }}
-                  title={q}
-                >
-                  {q.length > 50 ? q.slice(0, 50) + "…" : q}
-                </button>
-                <button
-                  type="button"
-                  className="history-delete"
-                  onClick={() => {
-                    setQueryHistory((prev) => {
-                      const updated = prev.filter((_, j) => j !== i);
-                      localStorage.setItem("fix-problem-history", JSON.stringify(updated));
-                      return updated;
-                    });
-                  }}
-                  title="Remove"
-                >×</button>
-              </div>
-            ))}
+            {queryHistory.map((item, i) => {
+              const q = item.query || item; // backward compat
+              const cartId = item.cartId || null;
+              const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+              const isCached = Boolean(cartId);
+              return (
+                <div key={i} className="history-chip-row">
+                  <button
+                    type="button"
+                    className={`history-chip ${isCached ? "cached" : ""}`}
+                    onClick={() => {
+                      setProblem(q);
+                      const fakeEvent = { target: { value: q } };
+                      handleChange(fakeEvent);
+                      // Auto-submit with cached cart ID if available
+                      if (isCached && !isLoading) {
+                        // Small delay so state updates propagate
+                        setTimeout(() => handleSubmit(cartId), 50);
+                      }
+                    }}
+                    title={isCached ? `${q} (cached — instant load)` : q}
+                    disabled={isLoading}
+                  >
+                    {isCached && <span className="cache-indicator">⚡</span>}
+                    {q.length > 50 ? q.slice(0, 50) + "…" : q}
+                  </button>
+                  <button
+                    type="button"
+                    className="history-delete"
+                    onClick={() => {
+                      setQueryHistory((prev) => {
+                        const updated = prev.filter((_, j) => j !== i);
+                        localStorage.setItem("fix-problem-history", JSON.stringify(updated));
+                        return updated;
+                      });
+                    }}
+                    title="Remove"
+                  >×</button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
