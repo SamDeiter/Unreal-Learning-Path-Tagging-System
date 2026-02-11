@@ -18,6 +18,55 @@ import TranscriptCards from "./TranscriptCards";
 import learningObjectives from "../../data/learning_objectives.json";
 import "./GuidedPlayer.css";
 
+/**
+ * Convert inline markdown (**bold**, *italic*, `code`, [text](url)) to React elements.
+ */
+function renderInlineMarkdown(text) {
+  if (!text || typeof text !== "string") return text;
+  const parts = [];
+  let remaining = text;
+  let key = 0;
+
+  while (remaining.length > 0) {
+    // Find the earliest markdown pattern
+    const patterns = [
+      { re: /\*\*(.+?)\*\*/, wrap: (m) => <strong key={key++}>{m}</strong> },
+      { re: /\*(.+?)\*/, wrap: (m) => <em key={key++}>{m}</em> },
+      { re: /`([^`]+)`/, wrap: (m) => <code key={key++} className="inline-code">{m}</code> },
+      { re: /\[([^\]]+)\]\(([^)]+)\)/, wrap: (m, url) => <a key={key++} href={url} target="_blank" rel="noopener noreferrer">{m}</a> },
+    ];
+
+    let earliest = null;
+    let earliestIdx = remaining.length;
+    let matchedPattern = null;
+
+    for (const p of patterns) {
+      const match = remaining.match(p.re);
+      if (match && match.index < earliestIdx) {
+        earliest = match;
+        earliestIdx = match.index;
+        matchedPattern = p;
+      }
+    }
+
+    if (!earliest) {
+      parts.push(remaining);
+      break;
+    }
+
+    // Add text before the match
+    if (earliestIdx > 0) {
+      parts.push(remaining.slice(0, earliestIdx));
+    }
+
+    // Add the rendered element
+    parts.push(matchedPattern.wrap(earliest[1], earliest[2]));
+    remaining = remaining.slice(earliestIdx + earliest[0].length);
+  }
+
+  return parts;
+}
+
 export default function GuidedPlayer(props) {
   const gp = useGuidedPlayer(props);
 
@@ -101,8 +150,8 @@ export default function GuidedPlayer(props) {
         />
       )}
 
-      {/* Side panel (hidden during intro) */}
-      {gp.stage !== STAGES.INTRO && (
+      {/* Side panel (hidden during intro and complete) */}
+      {gp.stage !== STAGES.INTRO && gp.stage !== STAGES.COMPLETE && (
         <div className="sidebar-column">
           <CourseSidebar
             courses={gp.courses}
@@ -416,7 +465,7 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
           <h3 className="key-steps-heading">📋 Key Steps</h3>
           <ol className="key-steps-list">
             {course._keySteps.map((step, i) => (
-              <li key={i} className="key-step-item">{step}</li>
+              <li key={i} className="key-step-item">{renderInlineMarkdown(step)}</li>
             ))}
           </ol>
         </div>
