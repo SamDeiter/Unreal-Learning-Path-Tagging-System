@@ -92,6 +92,20 @@ export async function matchCoursesToCart(
     );
   }
 
+  // --- Tag Taxonomy Boost (Pass 0.5) ---
+  // Resolve query to canonical tags via synonym rings (e.g. "nanite" → rendering.nanite)
+  const taxonomyResult = tagGraphService.extractTagsFromText(userQuery);
+  const taxonomyTagIds = taxonomyResult.matchedTagIds || [];
+  if (taxonomyTagIds.length > 0) {
+    devLog("🏷️ Tag taxonomy matches:", taxonomyResult.matches.map(
+      (m) => `${m.tagId} (via "${m.matchedTerm}", ${m.matchType})`
+    ));
+    // Merge into tag boost pool so applyTagBoost also benefits
+    for (const tid of taxonomyTagIds) {
+      if (!mergedTagIds.includes(tid)) mergedTagIds.push(tid);
+    }
+  }
+
   // Extract extra keywords from error log
   const errorKeywords = errorLog
     .toLowerCase()
@@ -158,6 +172,15 @@ export async function matchCoursesToCart(
           if (title.includes(kw)) { score += 50; matchedKeywords.push(kw); }
           else if (allTags.includes(kw)) { score += 30; matchedKeywords.push(kw); }
           else if (desc.includes(kw)) { score += 10; matchedKeywords.push(kw); }
+        }
+
+        // Taxonomy tag boost: courses with matching canonical tags get 3x
+        if (taxonomyTagIds.length > 0) {
+          const courseTags = (course.canonical_tags || []).map((t) => t.toLowerCase());
+          const hasCanonicalMatch = taxonomyTagIds.some((tid) =>
+            courseTags.some((ct) => ct.includes(tid.split(".").pop()))
+          );
+          if (hasCanonicalMatch) score *= 3;
         }
         const uniqueMatched = new Set(matchedKeywords).size;
         if (uniqueMatched >= 2) score *= 1 + uniqueMatched * 0.3;
