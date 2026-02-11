@@ -168,14 +168,20 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
     const labelLower = (doc.label || "").toLowerCase();
     // Extract slug from URL for matching: "https://...unreal-engine/blueprints-visual-scripting" → "blueprints visual scripting"
     const urlSlug = (doc.url || "").split("/").pop().replace(/-/g, " ").toLowerCase();
+    // UDN tags array (e.g., ["optimization", "performance", "rendering"])
+    const docTags = (doc.tags || []).map((t) => t.toLowerCase());
+    const descLower = (doc.description || "").toLowerCase();
 
     for (const topic of topicSet) {
       if (keyLower === topic) score += 10;             // exact key match
       else if (keyLower.includes(topic)) score += 5;   // partial key match
       else if (topic.includes(keyLower)) score += 4;   // reverse: topic word contains the key
       else if (doc.subsystem === topic) score += 4;    // subsystem match
+      else if (docTags.includes(topic)) score += 4;    // UDN tag exact match
       else if (labelLower.includes(topic)) score += 3; // label match
+      else if (docTags.some((t) => t.includes(topic) || topic.includes(t))) score += 2; // partial tag match
       else if (urlSlug.includes(topic)) score += 2;    // URL slug match
+      else if (descLower.includes(topic)) score += 1;  // description match
     }
 
     if (score > 0) {

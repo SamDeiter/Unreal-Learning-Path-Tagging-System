@@ -272,7 +272,10 @@ def parse_single_udn(filepath, source_root):
             tags = [tags]
         tags = [t.lower().strip() for t in tags if t.strip()]
         
-        doc_type = header.get("type", "Overview")
+        doc_type = header.get("type", "Overview").strip().title()
+        # Normalize common type variations
+        type_map = {"Quick Start": "Quick Start", "Release Notes": "Release Notes"}
+        doc_type = type_map.get(doc_type, doc_type)
         parent = header.get("parent", "")
         version = header.get("version", "5.5")
         

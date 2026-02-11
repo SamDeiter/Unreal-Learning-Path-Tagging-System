@@ -120,8 +120,17 @@ export default function VideoResultCard({
   const whyItWorks = microLesson?.why_it_works;
   const relatedSituations = microLesson?.related_situations;
 
-  // Get doc passages
-  const docPassages = (retrievedPassages || []).filter((p) => p.source === "epic_docs");
+  // Get doc passages — deduplicate by URL (multiple chunks from same page)
+  const rawDocPassages = (retrievedPassages || []).filter((p) => p.source === "epic_docs");
+  const docByUrl = new Map();
+  for (const doc of rawDocPassages) {
+    const url = doc.url || "";
+    const existing = docByUrl.get(url);
+    if (!existing || (doc.similarity || 0) > (existing.similarity || 0)) {
+      docByUrl.set(url, doc);
+    }
+  }
+  const docPassages = [...docByUrl.values()];
 
   return (
     <div

@@ -90,11 +90,22 @@ export default function MicroLesson({ microLesson, retrievedPassages, videoResul
     const docPassages = retrievedPassages.filter((p) => p.source === "epic_docs");
     if (docPassages.length === 0) return null;
 
+    // Deduplicate by URL — keep the highest-similarity passage per unique URL
+    const byUrl = new Map();
+    for (const doc of docPassages) {
+      const url = doc.url || "";
+      const existing = byUrl.get(url);
+      if (!existing || (doc.similarity || 0) > (existing.similarity || 0)) {
+        byUrl.set(url, doc);
+      }
+    }
+    const uniqueDocs = [...byUrl.values()];
+
     return (
       <div className="ml-doc-links">
-        <span className="ml-doc-links-label">📚 Related Documentation</span>
+        <span className="ml-doc-links-label">📚 Documentation</span>
         <div className="ml-doc-chips">
-          {docPassages.map((doc, i) => (
+          {uniqueDocs.map((doc, i) => (
             <a
               key={i}
               href={doc.url}
@@ -104,7 +115,12 @@ export default function MicroLesson({ microLesson, retrievedPassages, videoResul
               title={doc.text?.slice(0, 200)}
             >
               <span className="ml-doc-chip-icon">📄</span>
-              <span className="ml-doc-chip-title">{doc.title || doc.section || "UE5 Docs"}</span>
+              <span className="ml-doc-chip-title">
+                {doc.title || doc.section || "UE5 Docs"}
+                {doc.section && doc.title && doc.section !== doc.title
+                  ? ` — ${doc.section}`
+                  : ""}
+              </span>
               {doc.similarity && (
                 <span className="ml-doc-chip-score">{Math.round(doc.similarity * 100)}%</span>
               )}
