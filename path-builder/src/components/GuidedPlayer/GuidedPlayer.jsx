@@ -422,6 +422,25 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
   const typeIcon = course._resourceType === "doc" ? "📖" : "▶️";
   const typeLabel = course._resourceType === "doc" ? "Documentation" : "YouTube Video";
   const sourceLabel = course._resourceType === "doc" ? "Epic Docs" : (course._channel || "YouTube");
+  const isYouTube = course._resourceType !== "doc";
+
+  // Extract YouTube video ID from URL for embedding
+  const youtubeId = (() => {
+    if (!isYouTube || !course._url) return null;
+    try {
+      const url = new URL(course._url);
+      if (url.hostname.includes("youtube.com")) return url.searchParams.get("v");
+      if (url.hostname.includes("youtu.be")) return url.pathname.slice(1);
+    } catch { /* invalid URL */ }
+    return null;
+  })();
+
+  // Format seconds to MM:SS
+  const fmtTime = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="reading-step">
@@ -436,21 +455,47 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
         {course._tier && (
           <span className={`tier-badge tier-${course._tier}`}>{course._tier}</span>
         )}
-        {course._subsystem && (
-          <span className="subsystem-tag">{course._subsystem}</span>
+        {course._channelTrust && (
+          <span className={`channel-trust-badge trust-${course._channelTrust}`}>
+            {course._channelTrust === "official" ? "✓ Official" : "⭐ Expert"}
+          </span>
         )}
         <span className="reading-step-time">
-          ⏱ {course._readTimeMinutes} min {course._resourceType === "doc" ? "read" : "watch"}
+          ⏱ {course._readTimeMinutes} min {isYouTube ? "watch" : "read"}
         </span>
       </div>
 
+      {/* Topic chips */}
+      {course._topics && course._topics.length > 0 && (
+        <div className="reading-step-topics">
+          {course._topics.map((topic, i) => (
+            <span key={i} className="topic-chip">{topic.replace(/_/g, " ")}</span>
+          ))}
+        </div>
+      )}
+
+      {/* Description */}
       {course._description && (
         <p className="reading-step-description">{course._description}</p>
       )}
 
+      {/* Embedded YouTube Player */}
+      {youtubeId && (
+        <div className="reading-step-player">
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&modestbranding=1`}
+            title={course.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="reading-step-iframe"
+          />
+        </div>
+      )}
+
+      {/* Key Takeaways / Steps */}
       {course._keySteps && course._keySteps.length > 0 ? (
         <div className="key-steps-section">
-          <h3 className="key-steps-heading">📋 Key Steps</h3>
+          <h3 className="key-steps-heading">🎯 Key Takeaways</h3>
           <ol className="key-steps-list">
             {course._keySteps.map((step, i) => (
               <li key={i} className="key-step-item">{renderInlineMarkdown(step)}</li>
@@ -471,6 +516,28 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
         </div>
       )}
 
+      {/* Chapter Navigation */}
+      {course._chapters && course._chapters.length > 0 && (
+        <div className="chapters-section">
+          <h3 className="chapters-heading">📑 Chapters</h3>
+          <div className="chapters-list">
+            {course._chapters.map((ch, i) => (
+              <a
+                key={i}
+                href={youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}&t=${ch.seconds}` : "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="chapter-item"
+              >
+                <span className="chapter-time">{fmtTime(ch.seconds)}</span>
+                <span className="chapter-label">{ch.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* See Also */}
       {course._seeAlso && course._seeAlso.length > 0 && (
         <div className="see-also-section">
           <h3 className="see-also-heading">🔗 See Also</h3>
@@ -499,6 +566,7 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
         <span className="reading-step-source-label">Source: {sourceLabel}</span>
       </div>
 
+      {/* Open externally link (still useful even with embed) */}
       <a
         href={course._url}
         target="_blank"

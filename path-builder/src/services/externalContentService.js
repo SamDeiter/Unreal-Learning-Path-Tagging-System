@@ -96,6 +96,9 @@ export async function getResourcesForTopics(topics, { maxTier = "advanced", limi
         tier: resource.tier,
         durationMinutes: resource.durationMinutes,
         topics: resource.topics,
+        description: resource.description || "",
+        keyTakeaways: resource.keyTakeaways || [],
+        chapters: resource.chapters || [],
         source: "third_party",
         _score: score,
       });
