@@ -59,8 +59,8 @@ export default function VideoResultCard({
   const matchTier = matchPercent >= 100 ? "best" : matchPercent >= 70 ? "strong" : matchPercent >= 40 ? "good" : "related";
   const matchLabel = matchPercent >= 100 ? "Best Match" : matchPercent >= 70 ? "Strong Match" : matchPercent >= 40 ? "Good Match" : "Related";
 
-  // Strip "Part A/B/C" suffixes from display title
-  const title = rawTitle?.replace(/\s+Part\s+[A-Z]$/i, "").trim() || rawTitle;
+  // Strip "Part A/B/C" and "PT1/PT2" suffixes from display title
+  const title = rawTitle?.replace(/\s+(?:Part\s+[A-Z]|PT\s*\d+)$/i, "").trim() || rawTitle;
   // Look up prereq data for this course
   const prereqEntry = courseCode ? prereqData[courseCode] : null;
   const prereqCourses = prereqEntry?.prereqs || [];

@@ -168,7 +168,7 @@ export default function MicroLesson({ microLesson, retrievedPassages, videoResul
                   {quick_fix.steps.map((step, i) => (
                     <li key={i} className="ml-step">
                       <span className="ml-step-number">{i + 1}</span>
-                      <span className="ml-step-text">{step}</span>
+                      <span className="ml-step-text">{typeof step === "string" ? step.replace(/\s*\[\d+(?:[,\s]*\d+)*\]/g, "").trim() : step}</span>
                     </li>
                   ))}
                 </ol>

@@ -23,6 +23,10 @@ import "./GuidedPlayer.css";
  */
 function renderInlineMarkdown(text) {
   if (!text || typeof text !== "string") return text;
+
+  // Strip bare citation markers from Gemini output (e.g. [4], [1,2], [1][2])
+  text = text.replace(/\s*\[\d+(?:[,\s]*\d+)*\]/g, "").trim();
+
   const parts = [];
   let remaining = text;
   let key = 0;
