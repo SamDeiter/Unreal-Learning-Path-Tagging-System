@@ -22,7 +22,6 @@ import { searchSegmentsSemantic } from "../../services/segmentSearchService";
 import { searchDocsSemantic } from "../../services/docsSearchService";
 import { buildLearningPath } from "../../services/PathBuilder";
 import { buildBlendedPath } from "../../services/coverageAnalyzer";
-import { isEnabled as isExternalEnabled } from "../../services/externalContentService";
 import {
   trackQuerySubmitted,
   trackDiagnosisGenerated,
@@ -570,13 +569,13 @@ export default function ProblemFirst() {
               </div>
             )}
 
-            {/* 📺 Community Resources — YouTube (third-party, if enabled) */}
-            {isExternalEnabled() && blendedPath?.youtube?.length > 0 && (
-              <div className="blended-section external-section">
+            {/* 📺 Official Epic YouTube */}
+            {blendedPath?.youtube?.length > 0 && (
+              <div className="blended-section">
                 <div className="blended-section-header">
-                  <h2 className="blended-section-title">📺 Community Resources</h2>
+                  <h2 className="blended-section-title">📺 Official Epic YouTube</h2>
                   <p className="blended-section-desc">
-                    Curated videos from trusted UE5 creators to fill any remaining gaps.
+                    Official Unreal Engine tutorials from Epic Games.
                   </p>
                 </div>
                 <div className="doc-cards-grid">
@@ -584,7 +583,7 @@ export default function ProblemFirst() {
                     const ytId = yt.id || `yt_${yt.url}`;
                     const inCart = isInCart(ytId);
                     return (
-                      <div key={yt.id} className={`doc-card external-card ${inCart ? "doc-card-added" : ""}`}>
+                      <div key={yt.id} className={`doc-card ${inCart ? "doc-card-added" : ""}`}>
                         <a
                           href={yt.url}
                           target="_blank"
@@ -596,7 +595,7 @@ export default function ProblemFirst() {
                             <span className={`tier-badge tier-${yt.tier || "intermediate"}`}>
                               {yt.tier || "intermediate"}
                             </span>
-                            <span className="external-badge">External • YouTube</span>
+                            <span className="external-badge">Official • YouTube</span>
                           </div>
                           <h4 className="doc-card-title">{yt.title}</h4>
                           <div className="doc-card-footer">

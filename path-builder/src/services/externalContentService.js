@@ -1,13 +1,8 @@
 /**
- * External Content Service — Legal isolation layer for third-party resources.
+ * External Content Service — Official Epic YouTube integration.
  *
- * Kill switches:
- *   1. VITE_ENABLE_THIRD_PARTY=false in .env → isEnabled() returns false
- *   2. Delete youtube_curated.json → graceful fallback to []
- *   3. removeChannel(channelKey) → programmatic per-channel removal
- *
- * All external resources are tagged source:"third_party" and never mixed
- * with first-party data files.
+ * Loads curated Epic Games YouTube content from youtube_curated.json.
+ * All resources are official Unreal Engine tutorials.
  */
 
 import { devWarn } from "../utils/logger";
@@ -16,33 +11,18 @@ import { devWarn } from "../utils/logger";
 let _ytData = null;
 
 /**
- * Check if third-party content is enabled.
- * Disabled by setting VITE_ENABLE_THIRD_PARTY=false in .env
- */
-export function isEnabled() {
-  const flag = import.meta.env?.VITE_ENABLE_THIRD_PARTY;
-  // Enabled by default unless explicitly set to "false"
-  return flag !== "false" && flag !== false;
-}
-
-/**
  * Lazily load youtube_curated.json.
- * Returns null gracefully if file is missing (kill switch #2).
+ * Returns null gracefully if file is missing.
  */
 async function getYouTubeData() {
   if (_ytData !== undefined && _ytData !== null) return _ytData;
-
-  if (!isEnabled()) {
-    _ytData = { channels: {}, resources: [] };
-    return _ytData;
-  }
 
   try {
     const mod = await import("../data/youtube_curated.json");
     _ytData = mod.default || mod;
     return _ytData;
   } catch {
-    devWarn("[ExternalContent] youtube_curated.json not found — third-party content disabled");
+    devWarn("[ExternalContent] youtube_curated.json not found — Epic YouTube content unavailable");
     _ytData = { channels: {}, resources: [] };
     return _ytData;
   }
@@ -52,7 +32,7 @@ async function getYouTubeData() {
 const TIER_ORDER = { beginner: 0, intermediate: 1, advanced: 2 };
 
 /**
- * Get YouTube resources matching a set of topics.
+ * Get official Epic YouTube resources matching a set of topics.
  *
  * @param {string[]} topics - Topic keywords to match (e.g., ["lumen", "lighting"])
  * @param {Object} [options]
@@ -61,7 +41,7 @@ const TIER_ORDER = { beginner: 0, intermediate: 1, advanced: 2 };
  * @returns {Promise<Array<{id, title, url, channelName, tier, durationMinutes, topics, source}>>}
  */
 export async function getResourcesForTopics(topics, { maxTier = "advanced", limit = 5 } = {}) {
-  if (!isEnabled() || !topics?.length) return [];
+  if (!topics?.length) return [];
 
   const data = await getYouTubeData();
   if (!data?.resources?.length) return [];
@@ -91,15 +71,15 @@ export async function getResourcesForTopics(topics, { maxTier = "advanced", limi
         id: resource.id,
         title: resource.title,
         url: resource.url,
-        channelName: channel?.name || resource.channelKey,
-        channelTrust: channel?.trustTier || "community",
+        channelName: channel?.name || "Unreal Engine",
+        channelTrust: "official",
         tier: resource.tier,
         durationMinutes: resource.durationMinutes,
         topics: resource.topics,
         description: resource.description || "",
         keyTakeaways: resource.keyTakeaways || [],
         chapters: resource.chapters || [],
-        source: "third_party",
+        source: "epic_youtube",
         _score: score,
       });
     }
@@ -112,13 +92,10 @@ export async function getResourcesForTopics(topics, { maxTier = "advanced", limi
                (r.topics || []).some((t) => UE5_PATTERN.test(t));
   }
 
-  // Sort: UE5 first, then best match, then official > community, then beginner first
+  // Sort: UE5 first, then best match, then beginner first
   results.sort((a, b) => {
     if (a._isUE5 !== b._isUE5) return a._isUE5 ? -1 : 1;
     if (b._score !== a._score) return b._score - a._score;
-    if (a.channelTrust !== b.channelTrust) {
-      return a.channelTrust === "official" ? -1 : 1;
-    }
     return (TIER_ORDER[a.tier] ?? 1) - (TIER_ORDER[b.tier] ?? 1);
   });
 
@@ -145,14 +122,11 @@ export async function getAllByChannel() {
 }
 
 /**
- * Get summary stats for the external content index.
+ * Get summary stats for the Epic YouTube content index.
  *
- * @returns {Promise<{enabled: boolean, totalResources: number, channels: number, byTier: Object}>}
+ * @returns {Promise<{totalResources: number, channels: number, byTier: Object}>}
  */
 export async function getStats() {
-  const enabled = isEnabled();
-  if (!enabled) return { enabled, totalResources: 0, channels: 0, byTier: {} };
-
   const data = await getYouTubeData();
   const byTier = {};
   for (const r of data?.resources || []) {
@@ -160,7 +134,6 @@ export async function getStats() {
   }
 
   return {
-    enabled,
     totalResources: data?.resources?.length || 0,
     channels: Object.keys(data?.channels || {}).length,
     byTier,
@@ -168,7 +141,6 @@ export async function getStats() {
 }
 
 export default {
-  isEnabled,
   getResourcesForTopics,
   getAllByChannel,
   getStats,

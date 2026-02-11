@@ -5,11 +5,11 @@
  * Three content tiers (highest priority first):
  *   1. First-party videos (video library)
  *   2. Official Epic docs (doc_links.json)
- *   3. Curated YouTube (youtube_curated.json, third-party)
+ *   3. Official Epic YouTube (youtube_curated.json)
  */
 
 import { getDocsForTopic, getDocReadingPath } from "./docsSearchService";
-import { getResourcesForTopics, isEnabled as isExternalEnabled } from "./externalContentService";
+import { getResourcesForTopics } from "./externalContentService";
 
 /**
  * Analyze coverage for a set of topics across all content sources.
@@ -122,7 +122,7 @@ export async function buildBlendedPath(topics, videoResults = [], { maxDocs = 5,
     totalTimeMinutes: videoTime + docTime + ytTime,
     coverageScore: coverage.coverageScore,
     gaps: coverage.gaps,
-    externalEnabled: isExternalEnabled(),
+    externalEnabled: true,
   };
 }
 
@@ -131,7 +131,7 @@ export async function buildBlendedPath(topics, videoResults = [], { maxDocs = 5,
  *   1. Prerequisite doc reading (beginner tier, ordered by prerequisites)
  *   2. Core video segments
  *   3. Supplemental doc reading (intermediate/advanced)
- *   4. YouTube gap-fillers (if enabled)
+ *   4. Official Epic YouTube gap-fillers
  *
  * Returns a flat list of steps, each with a `type` and `step` number.
  *
@@ -207,7 +207,7 @@ export async function composeSequencedPath(topics, videoResults = [], { maxDocs 
       tier: yt.tier || "intermediate",
       channel: yt.channel,
       durationMinutes: yt.durationMinutes || 15,
-      source: "youtube",
+      source: "epic_youtube",
     });
   }
 
