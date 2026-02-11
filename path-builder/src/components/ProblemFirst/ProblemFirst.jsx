@@ -65,6 +65,7 @@ export default function ProblemFirst() {
 
   const handleSubmit = useCallback(
     async (inputData) => {
+      clearCart();
       setStage(STAGES.LOADING);
       setError(null);
 
@@ -241,7 +242,7 @@ export default function ProblemFirst() {
         setStage(STAGES.ERROR);
       }
     },
-    [courses, getDetectedPersona]
+    [courses, getDetectedPersona, clearCart]
   );
 
   const handleAskAgain = useCallback(() => setStage(STAGES.INPUT), []);
