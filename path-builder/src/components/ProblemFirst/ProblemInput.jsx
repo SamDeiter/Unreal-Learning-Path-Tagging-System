@@ -180,20 +180,20 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
 
   // Expose updateCartIdForQuery to parent via a ref-like pattern
   // The parent can call onSubmit and receive this function back
-  const handleSubmit = useCallback((cachedCartId = null) => {
-    if (problem.trim().length < 10) return;
+  const handleSubmit = useCallback((cachedCartId = null, overrideQuery = null) => {
+    const queryText = (overrideQuery || problem).trim();
+    if (queryText.length < 10) return;
 
     // Save to history (without cartId yet — it comes after diagnosis)
-    const trimmed = problem.trim();
     setQueryHistory((prev) => {
-      const filtered = prev.filter((item) => item.query !== trimmed);
-      const updated = [{ query: trimmed, cartId: cachedCartId }, ...filtered].slice(0, 6);
+      const filtered = prev.filter((item) => item.query !== queryText);
+      const updated = [{ query: queryText, cartId: cachedCartId }, ...filtered].slice(0, 6);
       localStorage.setItem("fix-problem-history", JSON.stringify(updated));
       return updated;
     });
 
     onSubmit({
-      query: problem,
+      query: queryText,
       detectedTagIds: detectedTags.map((t) => t.tag.tag_id),
       selectedTagIds,
       personaHint: detectedPersona?.name,
@@ -423,8 +423,8 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
                       handleChange(fakeEvent);
                       // Auto-submit with cached cart ID if available
                       if (isCached && !isLoading) {
-                        // Small delay so state updates propagate
-                        setTimeout(() => handleSubmit(cartId), 50);
+                        // Pass q as overrideQuery to avoid stale closure
+                        setTimeout(() => handleSubmit(cartId, q), 50);
                       }
                     }}
                     title={isCached ? `${q} (cached — instant load)` : q}
