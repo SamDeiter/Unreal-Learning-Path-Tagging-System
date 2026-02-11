@@ -137,7 +137,7 @@ export default function VideoResultCard({
             </span>
           )}
           {_curatedMatch && <span className="vrc-curated-badge">✓ Solution</span>}
-          {role && (
+          {role && role !== "core" && (
             <div className="vrc-role-wrapper" ref={role === "prerequisite" ? tipRef : null}>
               <button
                 className={`vrc-role-badge vrc-role-${role} ${role === "prerequisite" ? "vrc-role-clickable" : ""}`}
@@ -148,7 +148,6 @@ export default function VideoResultCard({
                 title={role === "prerequisite" ? "Click to see why this is a prerequisite" : undefined}
               >
                 {role === "prerequisite" && "🔗 Prerequisite"}
-                {role === "core" && "⭐ Core"}
                 {role === "troubleshooting" && "🔧 Troubleshooting"}
                 {role === "supplemental" && "📚 Supplemental"}
               </button>
