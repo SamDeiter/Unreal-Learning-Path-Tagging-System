@@ -88,8 +88,11 @@ async function getSegmentEmbeddings() {
 
   if (!_segmentEmbeddings) {
     try {
-      const mod = await import("../data/segment_embeddings.json");
-      _segmentEmbeddings = mod.default || mod;
+      // Use fetch() instead of import() — Vite resolves import() at build time,
+      // which fails in CI where this optional file doesn't exist.
+      const resp = await fetch(new URL("../data/segment_embeddings.json", import.meta.url));
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      _segmentEmbeddings = await resp.json();
     } catch (err) {
       devWarn("⚠️ segment_embeddings.json not available:", err.message);
       return null;
