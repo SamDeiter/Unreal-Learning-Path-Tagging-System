@@ -39,3 +39,16 @@ dev = [
     "pre-commit>=3.5.0",
     "pytest>=8.0.0",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+# Prevent flat-layout auto-discovery error — this repo is not a
+# distributable Python package, so don't scan for packages at all.
+[tool.setuptools.packages.find]
+where = ["ingestion"]
+exclude = ["ui*", "eval*", "tags*", "data*", "steps*", "exports*",
+           "content*", "functions*", "sample_data*", "xapi_output*",
+           "scorm_output*", "user_queries*", "learning_paths*",
+           "path-builder*", "scripts*", "computed_matches*"]
