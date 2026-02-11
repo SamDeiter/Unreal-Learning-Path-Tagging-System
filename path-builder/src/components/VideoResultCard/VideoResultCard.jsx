@@ -156,7 +156,7 @@ export default function VideoResultCard({
               {matchLabel}
             </span>
           )}
-          {_curatedMatch && <span className="vrc-curated-badge">✓ Known Solution</span>}
+          {_curatedMatch && <span className="vrc-curated-badge">✓ Solution</span>}
           {role && (
             <div className="vrc-role-wrapper" ref={role === "prerequisite" ? tipRef : null}>
               <button
