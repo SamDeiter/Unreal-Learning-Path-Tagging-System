@@ -465,21 +465,17 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
         <p className="reading-step-description">{course._description}</p>
       )}
 
-      {/* YouTube Thumbnail — links to YouTube (avoids embedding restrictions) */}
+      {/* Embedded YouTube Player */}
       {youtubeId && (
-        <a
-          href={`https://www.youtube.com/watch?v=${youtubeId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="reading-step-player"
-        >
-          <img
-            src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
-            alt={course.title}
-            className="reading-step-thumb"
+        <div className="reading-step-player">
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&modestbranding=1`}
+            title={course.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="reading-step-iframe"
           />
-          <div className="reading-step-play-overlay">▶</div>
-        </a>
+        </div>
       )}
 
       {/* Key Takeaways / Steps */}
@@ -492,19 +488,22 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
             ))}
           </ol>
         </div>
-      ) : (
+      ) : course._description ? (
+        /* If we have a description but no key steps, show description-based guidance */
         <div className="key-steps-section key-steps-fallback">
           <h3 className="key-steps-heading">🎯 What to Focus On</h3>
           <ul className="key-steps-list">
-            <li className="key-step-item">Read through the overview to understand the core concepts</li>
+            <li className="key-step-item">Understand how <strong>{course.title}</strong> works in UE5</li>
+            {course._topics && course._topics.length > 0 && course._topics.slice(0, 2).map((topic, i) => (
+              <li key={i} className="key-step-item">Pay attention to <strong>{topic.replace(/_/g, " ")}</strong> concepts and workflows</li>
+            ))}
             {course._subsystem && (
-              <li className="key-step-item">Pay attention to how <strong>{course._subsystem}</strong> integrates with the editor workflow</li>
+              <li className="key-step-item">Note how <strong>{course._subsystem}</strong> integrates with the editor</li>
             )}
-            <li className="key-step-item">Note any prerequisites or required project settings</li>
-            <li className="key-step-item">Try recreating the examples in your own UE5 project</li>
+            <li className="key-step-item">Try applying these techniques in your own UE5 project</li>
           </ul>
         </div>
-      )}
+      ) : null}
 
       {/* Chapter Navigation */}
       {course._chapters && course._chapters.length > 0 && (

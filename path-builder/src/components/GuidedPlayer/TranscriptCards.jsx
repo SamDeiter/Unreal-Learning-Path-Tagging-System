@@ -80,8 +80,11 @@ export default function TranscriptCards({ courseCode, videoTitle, problemSummary
     }
 
     if (keywords.length === 0) {
-      const step = Math.max(1, Math.floor(segments.length / 3));
-      return segments
+      // Skip intro segment (0:00) — evenly space from remainder
+      const usable = segments.filter((s) => s.start && s.start !== "0:00");
+      if (usable.length === 0) return [];
+      const step = Math.max(1, Math.floor(usable.length / 3));
+      return usable
         .filter((_, i) => i % step === 0)
         .slice(0, 3)
         .map((seg) => ({ ...seg, score: 0, isChapter: true }));
