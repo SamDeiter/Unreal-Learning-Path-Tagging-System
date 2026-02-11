@@ -329,7 +329,7 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
 }
 
 /** AiGuidePanel — sidebar panel showing AI-generated lesson context */
-function AiGuidePanel({ microLesson, courses }) {
+function AiGuidePanel({ microLesson, courses: _courses }) {
   const [lessonOpen, setLessonOpen] = useState(false);
   const [expandedSection, setExpandedSection] = useState("quick_fix");
 
@@ -341,26 +341,10 @@ function AiGuidePanel({ microLesson, courses }) {
     setExpandedSection((prev) => (prev === section ? null : section));
   };
 
-  // Parse [N] citation markers in text and render them as styled tooltips
+  // Strip [N] citation markers from text (Gemini outputs these but we don't want them)
   const renderTextWithCitations = (text) => {
     if (!text) return null;
-    const parts = text.split(/(\[\d+\])/g);
-    return parts.map((part, i) => {
-      const match = part.match(/^\[(\d+)\]$/);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        const courseRef = courses?.[num - 1];
-        const videoName = (courseRef?.videos?.[0]?.title || courseRef?.title || "")
-          ?.replace(/\s+Part\s+[A-Z]$/i, "").trim();
-        if (!videoName) return null; // No matching course — hide citation
-        return (
-          <span key={i} className="gp-ai-cite" data-tooltip={`📹 ${videoName}`}>
-            {part}
-          </span>
-        );
-      }
-      return part;
-    });
+    return text.replace(/\s*\[\d+(?:[,\s]*\d+)*\]/g, "").trim();
   };
 
   return (

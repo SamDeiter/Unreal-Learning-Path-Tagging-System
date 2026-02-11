@@ -394,6 +394,19 @@ export default function ProblemFirst() {
                 <span className="tldr-query-label">🔍 You asked:</span>
                 <p className="tldr-query-text">{diagnosisData.userQuery}</p>
               </div>
+              {diagnosisData._localFallback && (
+                <div className="tldr-fallback-notice" style={{
+                  background: 'rgba(255, 193, 7, 0.1)',
+                  border: '1px solid rgba(255, 193, 7, 0.3)',
+                  borderRadius: '8px',
+                  padding: '8px 14px',
+                  margin: '8px 0',
+                  fontSize: '0.85rem',
+                  color: 'var(--text-muted, #aaa)',
+                }}>
+                  ⚡ <strong>Fast results</strong> — AI diagnosis unavailable (rate limit). Videos matched by tag taxonomy.
+                </div>
+              )}
               {diagnosisData.diagnosis?.problem_summary && (
                 <p className="tldr-bridge">Based on your question, we think these videos will help you:</p>
               )}
