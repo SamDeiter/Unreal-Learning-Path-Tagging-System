@@ -2,6 +2,7 @@ import { useState, useMemo, lazy, Suspense } from "react";
 import { PathProvider } from "./context/PathContext";
 import { TagDataProvider } from "./context/TagDataContext";
 import Dashboard from "./components/Dashboard/Dashboard";
+import AuthGate from "./components/AuthGate/AuthGate";
 import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
 import "./App.css";
 
@@ -166,6 +167,7 @@ function App() {
   }, [courses]);
 
   return (
+    <AuthGate>
     <PathProvider>
       <TagDataProvider tags={tags} edges={edges} courses={courses}>
         <div className="app">
@@ -350,6 +352,7 @@ function App() {
         </div>
       </TagDataProvider>
     </PathProvider>
+    </AuthGate>
   );
 }
 
