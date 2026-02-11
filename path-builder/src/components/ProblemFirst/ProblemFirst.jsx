@@ -615,8 +615,12 @@ export default function ProblemFirst() {
                                 itemId: ytId,
                                 title: yt.title,
                                 description: yt.description || "",
+                                keyTakeaways: yt.keyTakeaways || [],
+                                chapters: yt.chapters || [],
+                                topics: yt.topics || [],
                                 url: yt.url,
-                                channel: yt.channelName,
+                                channelName: yt.channelName,
+                                channelTrust: yt.channelTrust,
                                 tier: yt.tier || "intermediate",
                                 durationMinutes: yt.durationMinutes || 15,
                               });

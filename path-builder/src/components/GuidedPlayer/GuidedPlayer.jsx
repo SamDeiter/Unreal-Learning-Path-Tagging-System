@@ -200,7 +200,7 @@ GuidedPlayer.defaultProps = {
 
 // ─── Inline sub-components (tightly coupled to this view) ───
 
-/** IntroCard — welcome screen with instructor list and course preview */
+/** IntroCard — welcome screen with course preview */
 function IntroCard({ introContent, streak, courses, pathSummary, user, authLoading, onSignIn, onStart }) {
   return (
     <div className="intro-card">
@@ -218,26 +218,12 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
         <div className="streak-badge">🔥 {streak.count}-day learning streak!</div>
       )}
 
-      {introContent.instructors.length > 0 && (
-        <div className="instructor-list">
-          <h3>🎓 Your Instructors</h3>
-          {introContent.instructors.map((instructor, i) => (
-            <div key={i} className="instructor-item">
-              <span className="name">{instructor.name}</span>
-              <span className="courses">
-                {instructor.courses.length} lesson{instructor.courses.length > 1 ? "s" : ""}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="course-preview">
         <h3>📚 What You&#39;ll Learn</h3>
-        {pathSummary?.path_summary && (
+        {pathSummary?.path_summary && !/unavailable/i.test(pathSummary.path_summary) && (
           <div className="path-summary-section">
             <p className="path-summary-text">{pathSummary.path_summary}</p>
-
           </div>
         )}
         <div className="course-list">
@@ -479,17 +465,21 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
         <p className="reading-step-description">{course._description}</p>
       )}
 
-      {/* Embedded YouTube Player */}
+      {/* YouTube Thumbnail — links to YouTube (avoids embedding restrictions) */}
       {youtubeId && (
-        <div className="reading-step-player">
-          <iframe
-            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&modestbranding=1`}
-            title={course.title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="reading-step-iframe"
+        <a
+          href={`https://www.youtube.com/watch?v=${youtubeId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="reading-step-player"
+        >
+          <img
+            src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
+            alt={course.title}
+            className="reading-step-thumb"
           />
-        </div>
+          <div className="reading-step-play-overlay">▶</div>
+        </a>
       )}
 
       {/* Key Takeaways / Steps */}
