@@ -148,67 +148,65 @@ export default function VideoResultCard({
           {duration > 0 && <span className="vrc-duration">{formatDuration(duration)}</span>}
         </div>
 
-        {_curatedMatch && <div className="vrc-curated-badge">✓ Known Solution</div>}
-        {courseCode && isUE4Course(courseCode) && (
-          <div className="vrc-ue4-badge" title="This content was created for Unreal Engine 4 — some details may differ in UE5">
-            ⚠️ UE4 Content
-          </div>
-        )}
-
-        {/* Match quality badge */}
-        {matchPercent != null && (
-          <div className={`vrc-match-badge vrc-match-${matchTier}`} title={`${matchPercent}% match`}>
-            <span className="vrc-match-dot" />
-            {matchLabel}
-          </div>
-        )}
-
-        {/* Role badge */}
-        {role && (
-          <div className="vrc-role-wrapper" ref={role === "prerequisite" ? tipRef : null}>
-            <button
-              className={`vrc-role-badge vrc-role-${role} ${role === "prerequisite" ? "vrc-role-clickable" : ""}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (role === "prerequisite") setPrereqTip((v) => !v);
-              }}
-              title={role === "prerequisite" ? "Click to see why this is a prerequisite" : undefined}
-            >
-              {role === "prerequisite" && "🔗 Prerequisite"}
-              {role === "core" && "⭐ Core"}
-              {role === "troubleshooting" && "🔧 Troubleshooting"}
-              {role === "supplemental" && "📚 Supplemental"}
-            </button>
-            {prereqTip && role === "prerequisite" && (
-              <div className="vrc-prereq-tooltip">
-                <strong>Prerequisite Course</strong>
-                {prereqCourses.length > 0 ? (
-                  <>
-                    <p>Watch these first:</p>
-                    <ul className="vrc-prereq-list">
-                      {prereqCourses.map((pc) => (
-                        <li key={pc}>
-                          📘 {courseTitles[pc] || pc}
-                          {prereqEntry?.reasons?.[pc] && (
-                            <span className="vrc-prereq-why"> — {prereqEntry.reasons[pc]}</span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : (
-                  <p>Watch this first — it covers foundational concepts needed before advancing.</p>
-                )}
-                {reason && <p className="vrc-tip-reason">{reason}</p>}
-              </div>
-            )}
-          </div>
-        )}
+        {/* Badge row — all badges on one line */}
+        <div className="vrc-badge-row">
+          {matchPercent != null && (
+            <span className={`vrc-match-badge vrc-match-${matchTier}`} title={`${matchPercent}% match`}>
+              <span className="vrc-match-dot" />
+              {matchLabel}
+            </span>
+          )}
+          {_curatedMatch && <span className="vrc-curated-badge">✓ Known Solution</span>}
+          {role && (
+            <div className="vrc-role-wrapper" ref={role === "prerequisite" ? tipRef : null}>
+              <button
+                className={`vrc-role-badge vrc-role-${role} ${role === "prerequisite" ? "vrc-role-clickable" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (role === "prerequisite") setPrereqTip((v) => !v);
+                }}
+                title={role === "prerequisite" ? "Click to see why this is a prerequisite" : undefined}
+              >
+                {role === "prerequisite" && "🔗 Prerequisite"}
+                {role === "core" && "⭐ Core"}
+                {role === "troubleshooting" && "🔧 Troubleshooting"}
+                {role === "supplemental" && "📚 Supplemental"}
+              </button>
+              {prereqTip && role === "prerequisite" && (
+                <div className="vrc-prereq-tooltip">
+                  <strong>Prerequisite Course</strong>
+                  {prereqCourses.length > 0 ? (
+                    <>
+                      <p>Watch these first:</p>
+                      <ul className="vrc-prereq-list">
+                        {prereqCourses.map((pc) => (
+                          <li key={pc}>
+                            📘 {courseTitles[pc] || pc}
+                            {prereqEntry?.reasons?.[pc] && (
+                              <span className="vrc-prereq-why"> — {prereqEntry.reasons[pc]}</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : (
+                    <p>Watch this first — it covers foundational concepts needed before advancing.</p>
+                  )}
+                  {reason && <p className="vrc-tip-reason">{reason}</p>}
+                </div>
+              )}
+            </div>
+          )}
+          {courseCode && isUE4Course(courseCode) && (
+            <span className="vrc-ue4-badge" title="This content was created for Unreal Engine 4 — some details may differ in UE5">
+              ⚠️ UE4
+            </span>
+          )}
+        </div>
 
         <div className="vrc-info">
           <h4 className="vrc-title">{title}</h4>
           {matchReason && <p className="vrc-match-reason">{matchReason}</p>}
-          {reason && <p className="vrc-reason-preview">{reason}</p>}
         </div>
 
         {/* Actions row: feedback + add/remove */}
