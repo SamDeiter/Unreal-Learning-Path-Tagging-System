@@ -1,6 +1,7 @@
 /**
  * CompletionCard — End-of-path summary with reflection prompt and stats.
  */
+import { useEffect } from "react";
 import PropTypes from "prop-types";
 
 export default function CompletionCard({
@@ -12,23 +13,37 @@ export default function CompletionCard({
   onFinish,
   onBackToPath,
 }) {
+  // Auto-save reflection to localStorage as user types
+  useEffect(() => {
+    if (reflectionText.trim()) {
+      try {
+        localStorage.setItem("lp_reflection_draft", JSON.stringify({
+          text: reflectionText,
+          timestamp: Date.now(),
+          courseCount: courses.length,
+        }));
+      } catch { /* storage full — silently ignore */ }
+    }
+  }, [reflectionText, courses.length]);
+
+  // Load saved draft on mount
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("lp_reflection_draft") || "null");
+      if (saved?.text && !reflectionText) {
+        onReflectionChange(saved.text);
+      }
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="complete-card">
       <div className="complete-icon">🎉</div>
       <h2>Path Complete!</h2>
       <p>You&apos;ve learned the skills to solve this problem and similar ones in the future.</p>
-      <div className="stats">
-        <div className="stat">
-          <span className="value">{courses.length}</span>
-          <span className="label">Lessons</span>
-        </div>
-        <div className="stat">
-          <span className="value">{totalDuration || "—"}</span>
-          <span className="label">Total Time</span>
-        </div>
-      </div>
 
-      {/* Reflection Prompt */}
+      {/* Reflection Prompt — moved above stats for visibility */}
       <div className="reflection-area">
         <h3>📝 What was your main takeaway?</h3>
         <p className="reflection-subtitle">
@@ -50,8 +65,23 @@ export default function CompletionCard({
         </div>
       </div>
 
+      <div className="stats">
+        <div className="stat">
+          <span className="value">{courses.length}</span>
+          <span className="label">Lessons</span>
+        </div>
+        <div className="stat">
+          <span className="value">{totalDuration || "—"}</span>
+          <span className="label">Total Time</span>
+        </div>
+      </div>
+
       <div className="completion-actions">
-        <button className="finish-btn" onClick={onFinish}>
+        <button className="finish-btn" onClick={() => {
+          onFinish();
+          // Clear draft after save
+          try { localStorage.removeItem("lp_reflection_draft"); } catch { /* ignore */ }
+        }}>
           {reflectionText.trim() ? "Save & Finish" : "Back to Problems"}
         </button>
         {onBackToPath && (

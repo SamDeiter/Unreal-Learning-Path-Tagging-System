@@ -332,13 +332,7 @@ export default function Personas() {
                     onClick={() => handleAnswer(QUESTIONS[step].id, option.value)}
                   >
                     <span className="option-icon-wrapper">
-                      {typeof option.icon === "function" && !option.icon.render ? (
-                        // If it's a simple function component or reference
-                        <Icon size={18} />
-                      ) : (
-                        // If it's a custom render function (like the dots)
-                        option.icon()
-                      )}
+                      <Icon size={18} />
                     </span>
                     <span className="option-label">{option.label}</span>
                   </button>

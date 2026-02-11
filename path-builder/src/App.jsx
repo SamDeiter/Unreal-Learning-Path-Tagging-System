@@ -202,7 +202,7 @@ function App() {
                   className={`nav-tab ${activeTab === "builder" ? "active" : ""}`}
                   onClick={() => setActiveTab("builder")}
                 >
-                  Path Builder
+                  🏗️ Path Builder
                 </button>
                 <button
                   className={`nav-tab ${activeTab === "personas" ? "active" : ""}`}

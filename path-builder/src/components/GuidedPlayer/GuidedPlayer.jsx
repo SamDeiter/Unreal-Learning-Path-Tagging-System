@@ -411,7 +411,7 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
         <p className="reading-step-description">{course._description}</p>
       )}
 
-      {course._keySteps && course._keySteps.length > 0 && (
+      {course._keySteps && course._keySteps.length > 0 ? (
         <div className="key-steps-section">
           <h3 className="key-steps-heading">📋 Key Steps</h3>
           <ol className="key-steps-list">
@@ -419,6 +419,18 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
               <li key={i} className="key-step-item">{step}</li>
             ))}
           </ol>
+        </div>
+      ) : (
+        <div className="key-steps-section key-steps-fallback">
+          <h3 className="key-steps-heading">🎯 What to Focus On</h3>
+          <ul className="key-steps-list">
+            <li className="key-step-item">Read through the overview to understand the core concepts</li>
+            {course._subsystem && (
+              <li className="key-step-item">Pay attention to how <strong>{course._subsystem}</strong> integrates with the editor workflow</li>
+            )}
+            <li className="key-step-item">Note any prerequisites or required project settings</li>
+            <li className="key-step-item">Try recreating the examples in your own UE5 project</li>
+          </ul>
         </div>
       )}
 
