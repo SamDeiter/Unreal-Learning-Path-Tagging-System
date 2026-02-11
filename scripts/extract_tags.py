@@ -1,11 +1,10 @@
-"""
-Extract tags from transcripts using keyword matching and frequency analysis.
+"""Extract tags from transcripts using keyword matching and frequency analysis.
 Uses existing tag vocabulary + detects new UE5-related terms.
 """
 import json
 import re
-from pathlib import Path
 from collections import Counter, defaultdict
+from pathlib import Path
 
 CONTENT_DIR = Path("content")
 TRANSCRIPTS_DIR = CONTENT_DIR / "transcripts"
@@ -93,14 +92,14 @@ def extract_tags_from_text(text):
     """Extract UE5-related tags from transcript text."""
     text_lower = text.lower()
     found_tags = Counter()
-    
+
     for pattern in UE5_PATTERNS:
         matches = re.findall(pattern, text_lower, re.IGNORECASE)
         for match in matches:
             # Normalize tag
             tag = match.strip().title()
             found_tags[tag] += 1
-    
+
     return found_tags
 
 
@@ -108,9 +107,9 @@ def main():
     # Load video metadata for mapping
     videos = json.loads((CONTENT_DIR / "drive_video_metadata_final.json").read_text())
     code_pattern = re.compile(r'^(\d{3}\.\d{2})')
-    video_map = {v['id']: code_pattern.match(v['name']).group(1) 
+    video_map = {v['id']: code_pattern.match(v['name']).group(1)
                  for v in videos if code_pattern.match(v['name'])}
-    
+
     # Load existing tags
     tags_path = CONTENT_DIR / "tags.json"
     existing_tags = {}
@@ -118,12 +117,12 @@ def main():
         tags_data = json.loads(tags_path.read_text())
         existing_tags = {t['name'].lower(): t for t in tags_data.get('tags', [])}
         print(f"Loaded {len(existing_tags)} existing tags")
-    
+
     # Process transcripts by course
     course_transcripts = defaultdict(str)
     transcript_files = list(TRANSCRIPTS_DIR.glob("*.json"))
     print(f"Processing {len(transcript_files)} transcripts...")
-    
+
     for f in transcript_files:
         video_id = f.stem
         if video_id not in video_map:
@@ -134,40 +133,40 @@ def main():
             course_transcripts[code] += " " + data.get('text', '')
         except:
             continue
-    
+
     print(f"Indexed {len(course_transcripts)} courses")
-    
+
     # Extract tags for each course
     course_tags = {}
     all_tags = Counter()
-    
+
     for code, text in course_transcripts.items():
         tags = extract_tags_from_text(text)
         # Keep only tags mentioned 3+ times
         significant_tags = {k: v for k, v in tags.items() if v >= 3}
         course_tags[code] = significant_tags
         all_tags.update(tags)
-    
+
     # Report top tags
-    print(f"\nTop 20 tags across all transcripts:")
+    print("\nTop 20 tags across all transcripts:")
     for tag, count in all_tags.most_common(20):
         print(f"  {tag}: {count}")
-    
+
     # Update course data with extracted tags
     library = json.loads((CONTENT_DIR / "video_library_enriched.json").read_text())
-    
+
     updated = 0
     for course in library['courses']:
         code = course['code']
         if code in course_tags and course_tags[code]:
             # Add extracted tags (top 10 by frequency)
-            extracted = [t for t, _ in sorted(course_tags[code].items(), 
+            extracted = [t for t, _ in sorted(course_tags[code].items(),
                                               key=lambda x: -x[1])[:10]]
             course['extracted_tags'] = extracted
             updated += 1
-    
+
     print(f"\nUpdated {updated} courses with extracted tags")
-    
+
     # Save updated library
     (CONTENT_DIR / "video_library_enriched.json").write_text(
         json.dumps(library, indent=2)
@@ -178,7 +177,7 @@ def main():
     Path("path-builder/src/data/video_library_enriched.json").write_text(
         json.dumps(library, indent=2)
     )
-    
+
     # Save tag extraction results
     results = {
         'course_tags': course_tags,
@@ -186,8 +185,8 @@ def main():
         'courses_tagged': updated
     }
     (CONTENT_DIR / "extracted_tags.json").write_text(json.dumps(results, indent=2))
-    
-    print(f"\nSaved extracted tags to content/extracted_tags.json")
+
+    print("\nSaved extracted tags to content/extracted_tags.json")
 
 
 if __name__ == "__main__":

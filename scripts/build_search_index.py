@@ -5,8 +5,8 @@ Also adds a cross-check report for playable courses missing transcript coverage.
 """
 import json
 import re
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CONTENT_DIR = REPO_ROOT / "content"
@@ -48,41 +48,41 @@ def build_index():
                 'code': match.group(1),
                 'name': v['name']
             }
-    
+
     # Build inverted index: word -> [(course_code, count)]
     inverted_index = defaultdict(list)
     course_transcripts = defaultdict(str)
-    
+
     # Load all transcripts
     transcript_files = list(TRANSCRIPTS_DIR.glob("*.json"))
     print(f"Processing {len(transcript_files)} transcript files...")
-    
+
     skipped_unplayable = set()
 
     for f in transcript_files:
         video_id = f.stem
         if video_id not in video_map:
             continue
-            
+
         code = video_map[video_id]['code']
 
         # PLAYABILITY FILTER: skip courses without playable videos
         if code not in playable_codes:
             skipped_unplayable.add(code)
             continue
-        
+
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
             text = data.get('text', '')
             course_transcripts[code] += " " + text
         except Exception:
             continue
-    
+
     if skipped_unplayable:
         print(f"Skipped {len(skipped_unplayable)} unplayable course codes: {sorted(skipped_unplayable)[:10]}...")
 
     print(f"Indexed {len(course_transcripts)} playable courses")
-    
+
     # Build word frequency per course
     course_words = {}
     for code, text in course_transcripts.items():
@@ -92,18 +92,18 @@ def build_index():
             if len(w) > 2:  # Skip very short words
                 word_freq[w] += 1
         course_words[code] = dict(word_freq)
-        
+
         # Add to inverted index
         for word, count in word_freq.items():
             inverted_index[word].append({
                 'code': code,
                 'count': count
             })
-    
+
     # Sort inverted index by count
     for word in inverted_index:
         inverted_index[word].sort(key=lambda x: -x['count'])
-    
+
     # Save search index
     search_index = {
         'course_words': course_words,
@@ -111,14 +111,14 @@ def build_index():
         'total_courses': len(course_transcripts),
         'total_words': len(inverted_index)
     }
-    
+
     output_content = CONTENT_DIR / "search_index.json"
     output_content.write_text(json.dumps(search_index, indent=2), encoding="utf-8")
-    
+
     output_app = REPO_ROOT / "path-builder" / "src" / "data" / "search_index.json"
     output_app.write_text(json.dumps(search_index, indent=2), encoding="utf-8")
-    
-    print(f"\nSearch index built!")
+
+    print("\nSearch index built!")
     print(f"  Unique words: {len(inverted_index):,}")
     print(f"  Courses indexed: {len(course_transcripts)}")
     print(f"  Saved to: {output_content}")

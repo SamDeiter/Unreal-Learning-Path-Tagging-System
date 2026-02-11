@@ -1,7 +1,7 @@
-"""Quick validation of udn_docs.json"""
+"""Quick validation of udn_docs.json."""
 import json
 
-data = json.load(open("content/udn_docs.json", "r", encoding="utf-8"))
+data = json.load(open("content/udn_docs.json", encoding="utf-8"))
 
 # Spot check key entries
 for key in ["nanite", "blueprints", "connectingnodes", "lumen"]:
@@ -23,7 +23,7 @@ for key in ["nanite", "blueprints", "connectingnodes", "lumen"]:
 
 # Check for entries missing required fields
 missing = {"label": 0, "url": 0, "description": 0}
-for k, v in data.items():
+for _k, v in data.items():
     for field in missing:
         if not v.get(field):
             missing[field] += 1

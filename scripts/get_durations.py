@@ -1,10 +1,9 @@
-"""
-Get video metadata from training folder - sequential, reliable version.
-"""
+"""Get video metadata from training folder - sequential, reliable version."""
 import json
 import pickle
 import time
 from pathlib import Path
+
 from googleapiclient.discovery import build
 
 # Config
@@ -38,12 +37,12 @@ def list_folder(service, folder_id):
 def search_folder(service, folder_id, folder_name="", depth=0, max_depth=3):
     """Search folder for videos up to max_depth levels."""
     videos = []
-    
+
     if depth > max_depth:
         return videos
-    
+
     items = list_folder(service, folder_id)
-    
+
     for item in items:
         if 'folder' in item['mimeType']:
             # Recurse into subfolder
@@ -55,7 +54,7 @@ def search_folder(service, folder_id, folder_name="", depth=0, max_depth=3):
             # Found a video
             video_meta = item.get('videoMediaMetadata', {})
             duration_ms = video_meta.get('durationMillis', 0)
-            
+
             videos.append({
                 'id': item['id'],
                 'name': item['name'],
@@ -63,7 +62,7 @@ def search_folder(service, folder_id, folder_name="", depth=0, max_depth=3):
                 'size_bytes': int(item.get('size', 0)),
                 'duration_seconds': int(duration_ms) // 1000 if duration_ms else 0
             })
-    
+
     return videos
 
 
@@ -72,39 +71,39 @@ def main():
     print("VIDEO DURATION EXTRACTOR (Sequential)")
     print(f"Root folder: {ROOT_FOLDER}")
     print("=" * 60)
-    
+
     start = time.time()
     service = get_service()
-    
+
     # Get category folders
     print("\n📂 Getting category folders...")
     categories = [f for f in list_folder(service, ROOT_FOLDER) if 'folder' in f['mimeType']]
     print(f"   Found {len(categories)} category folders")
-    
+
     # Search each category sequentially
     print("\n🔍 Searching for videos...")
     all_videos = []
-    
+
     for i, cat in enumerate(categories):
         print(f"   [{i+1}/{len(categories)}] {cat['name']}...", end=" ", flush=True)
         videos = search_folder(service, cat['id'], cat['name'])
         all_videos.extend(videos)
         print(f"{len(videos)} videos")
         time.sleep(0.2)  # Small delay to avoid rate limiting
-    
+
     print(f"\n✅ Found {len(all_videos)} total videos")
-    
+
     # Calculate total duration
     total_seconds = sum(v['duration_seconds'] for v in all_videos)
     hours = total_seconds // 3600
     mins = (total_seconds % 3600) // 60
     print(f"📹 Total content: {hours} hours {mins} minutes")
-    
+
     # Save raw data
     raw_path = CONTENT_DIR / "drive_video_metadata.json"
     raw_path.write_text(json.dumps(all_videos, indent=2))
     print(f"\n💾 Saved to {raw_path}")
-    
+
     # Summary by category
     print("\n📊 Top categories by video count:")
     by_cat = {}
@@ -113,7 +112,7 @@ def main():
         by_cat[cat] = by_cat.get(cat, 0) + 1
     for cat, count in sorted(by_cat.items(), key=lambda x: -x[1])[:10]:
         print(f"   {cat}: {count}")
-    
+
     elapsed = time.time() - start
     print(f"\n⏱️  Completed in {elapsed:.1f}s")
 

@@ -1,12 +1,11 @@
-"""
-Data Quality Validation Script
+"""Data Quality Validation Script.
 
 Checks for holes and missing data in the enriched courses.
 """
 
 import json
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
 
 path = Path("path-builder/src/data/video_library_enriched.json")
 data = json.loads(path.read_text())
@@ -17,27 +16,25 @@ print("DATA QUALITY VALIDATION")
 print("=" * 60)
 
 # Basic counts
-print(f"\n📊 OVERVIEW")
+print("\n📊 OVERVIEW")
 print(f"   Total courses: {len(courses)}")
 
 # Check for missing fields
 issues = []
 
-print(f"\n🔍 CHECKING FOR MISSING DATA...")
+print("\n🔍 CHECKING FOR MISSING DATA...")
 
 # Required fields
-required_fields = ['code', 'title', 'ai_tags', 'canonical_tags', 'has_ai_tags', 
+required_fields = ['code', 'title', 'ai_tags', 'canonical_tags', 'has_ai_tags',
                    'difficulty', 'duration_minutes', 'video_count']
 
 missing_by_field = {f: [] for f in required_fields}
 
 for course in courses:
     code = course.get('code', 'UNKNOWN')
-    
+
     for field in required_fields:
-        if field not in course or course[field] is None:
-            missing_by_field[field].append(code)
-        elif field in ['ai_tags', 'canonical_tags'] and len(course[field]) == 0:
+        if field not in course or course[field] is None or field in ['ai_tags', 'canonical_tags'] and len(course[field]) == 0:
             missing_by_field[field].append(code)
 
 # Report missing
@@ -55,7 +52,7 @@ for field, missing in missing_by_field.items():
         print(f"   ✅ '{field}': All courses have data")
 
 # Tag distribution
-print(f"\n📈 TAG DISTRIBUTION")
+print("\n📈 TAG DISTRIBUTION")
 ai_tag_counts = [len(c.get('ai_tags', [])) for c in courses]
 canonical_counts = [len(c.get('canonical_tags', [])) for c in courses]
 
@@ -70,7 +67,7 @@ if sparse:
         print(f"      - {c['code']}: {c['title'][:40]}... ({len(c.get('canonical_tags', []))} tags)")
 
 # Check difficulty distribution
-print(f"\n📊 DIFFICULTY BREAKDOWN")
+print("\n📊 DIFFICULTY BREAKDOWN")
 diff_counts = Counter(c.get('difficulty') for c in courses)
 for d in sorted(diff_counts.keys()):
     if d is not None:
@@ -79,13 +76,13 @@ for d in sorted(diff_counts.keys()):
         print(f"   No difficulty: {diff_counts[d]} courses")
 
 # Check for duplicates
-print(f"\n🔍 CHECKING FOR DUPLICATES")
+print("\n🔍 CHECKING FOR DUPLICATES")
 codes = [c.get('code') for c in courses]
 dupe_codes = [code for code, count in Counter(codes).items() if count > 1]
 if dupe_codes:
     print(f"   ❌ Duplicate course codes: {dupe_codes}")
 else:
-    print(f"   ✅ No duplicate course codes")
+    print("   ✅ No duplicate course codes")
 
 titles = [c.get('title') for c in courses]
 dupe_titles = [t for t, count in Counter(titles).items() if count > 1]
@@ -94,7 +91,7 @@ if dupe_titles:
     for t in dupe_titles[:3]:
         print(f"      - {t[:50]}")
 else:
-    print(f"   ✅ No duplicate titles")
+    print("   ✅ No duplicate titles")
 
 print("\n" + "=" * 60)
 print("VALIDATION COMPLETE")

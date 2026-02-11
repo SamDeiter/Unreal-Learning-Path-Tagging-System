@@ -1,5 +1,4 @@
-"""
-Tag Schema Cleanup Script
+"""Tag Schema Cleanup Script.
 
 Cleans up the tag system for better learning path decision-making:
 1. Removes unused schema tags (error codes, debugging)
@@ -9,8 +8,8 @@ Cleans up the tag system for better learning path decision-making:
 """
 
 import json
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
 
 # Paths
 CONTENT_DIR = Path("content")
@@ -38,32 +37,32 @@ EXPANDED_SYNONYMS = {
     'exposure': 'rendering.postprocess',
     'shadow': 'rendering.lighting',
     'virtual shadow': 'rendering.vsm',
-    
+
     # Materials
     'material': 'rendering.material',
     'texture': 'rendering.material',
     'shader': 'rendering.material',
-    
-    # Animation  
+
+    # Animation
     'animation': 'animation.general',
     'skeletal': 'animation.general',
     'bone': 'animation.general',
     'control rig': 'animation.control_rig',
     'ik': 'animation.control_rig',
     'retarget': 'animation.retargeting',
-    
+
     # Scripting
     'blueprint': 'scripting.blueprint',
     'bp': 'scripting.blueprint',
     'c++': 'scripting.cpp',
     'cpp': 'scripting.cpp',
     'python': 'scripting.python',
-    
+
     # Cinematics
     'sequencer': 'cinematic.sequencer',
     'sequence': 'cinematic.sequencer',
     'movie render': 'cinematic.movie_render',
-    
+
     # Environment
     'landscape': 'environment.landscape',
     'terrain': 'environment.landscape',
@@ -72,48 +71,48 @@ EXPANDED_SYNONYMS = {
     'water': 'environment.water',
     'ocean': 'environment.water',
     'river': 'environment.water',
-    
+
     # VFX
     'niagara': 'vfx.niagara',
     'particle': 'vfx.niagara',
     'emitter': 'vfx.niagara',
-    
+
     # Procedural
     'pcg': 'procedural.pcg',
     'procedural': 'procedural.pcg',
-    
+
     # Audio
     'audio': 'audio.metasounds',
     'sound': 'audio.metasounds',
     'metasound': 'audio.metasounds',
-    
+
     # UI
     'widget': 'ui.umg',
     'umg': 'ui.umg',
     'hud': 'ui.hud',
     'menu': 'ui.umg',
-    
+
     # Physics
     'physics': 'physics.general',
     'collision': 'physics.general',
     'chaos': 'physics.chaos',
-    
+
     # Gameplay
     'gameplay ability': 'gameplay.gas',
     'gas': 'gameplay.gas',
     'gameplay tag': 'gameplay.tags',
-    
+
     # World
     'world partition': 'world.partition',
     'level streaming': 'world.streaming',
     'hlod': 'world.hlod',
     'lod': 'optimization.lod',
-    
+
     # Platforms
     'android': 'platform.android',
     'ios': 'platform.ios',
     'console': 'platform.console',
-    
+
     # Misc
     'lumen': 'rendering.lumen',
     'spline': 'scripting.blueprint',
@@ -134,13 +133,13 @@ def save_json(path: Path, data: dict):
 def clean_schema_tags(schema: dict) -> tuple[dict, int]:
     """Remove unused tag types from schema."""
     original_count = len(schema.get('tags', []))
-    
+
     # Filter out error codes and symptoms
     cleaned_tags = [
         t for t in schema.get('tags', [])
         if t.get('tag_type') not in REMOVE_TAG_TYPES
     ]
-    
+
     schema['tags'] = cleaned_tags
     removed = original_count - len(cleaned_tags)
     return schema, removed
@@ -154,12 +153,12 @@ def filter_noise_tags(ai_tags: list) -> list:
 def expand_canonical_tags(ai_tags: list, existing_canonical: list) -> list:
     """Expand canonical tags using improved synonym matching."""
     canonical_set = set(existing_canonical)
-    
+
     for ai_tag in ai_tags:
         ai_lower = ai_tag.lower()
         if ai_lower in EXPANDED_SYNONYMS:
             canonical_set.add(EXPANDED_SYNONYMS[ai_lower])
-    
+
     return sorted(canonical_set)
 
 
@@ -184,69 +183,69 @@ def main():
     print("=" * 60)
     print("TAG SCHEMA CLEANUP")
     print("=" * 60)
-    
+
     # Load data
     print("\n📂 Loading data...")
     enriched_path = CONTENT_DIR / "video_library_enriched.json"
     schema_path = DATA_DIR / "tags.json"
-    
+
     enriched_data = load_json(enriched_path)
     schema = load_json(schema_path)
-    
+
     courses = enriched_data.get('courses', [])
     print(f"   Loaded {len(courses)} courses")
     print(f"   Schema has {len(schema.get('tags', []))} tags")
-    
+
     # Step 1: Clean schema tags
     print("\n🧹 Step 1: Removing unused tag types...")
     schema, removed = clean_schema_tags(schema)
     print(f"   Removed {removed} error/symptom tags")
     print(f"   Schema now has {len(schema.get('tags', []))} tags")
-    
+
     # Step 2: Filter noise and expand canonical tags
     print("\n🔗 Step 2: Filtering noise and expanding matches...")
     total_filtered = 0
     total_expanded = 0
-    
+
     for course in courses:
         original_ai = course.get('ai_tags', [])
         original_canonical = course.get('canonical_tags', [])
-        
+
         # Filter noise
         filtered_ai = filter_noise_tags(original_ai)
         total_filtered += len(original_ai) - len(filtered_ai)
         course['ai_tags'] = filtered_ai
-        
+
         # Expand canonical
         expanded_canonical = expand_canonical_tags(filtered_ai, original_canonical)
         total_expanded += len(expanded_canonical) - len(original_canonical)
         course['canonical_tags'] = expanded_canonical
-    
+
     print(f"   Filtered {total_filtered} noise AI tags")
     print(f"   Expanded {total_expanded} new canonical tag matches")
-    
+
     # Step 3: Count and add to schema
     print("\n📊 Step 3: Adding video counts to schema...")
     tag_counts = count_tags_per_course(courses)
     schema = add_counts_to_schema(schema, tag_counts)
-    
+
     used_tags = sum(1 for t in schema.get('tags', []) if t.get('video_count', 0) > 0)
     print(f"   {used_tags} tags have video content")
-    print(f"   Top 5 tags by count:")
+    print("   Top 5 tags by count:")
     for tag_id, count in tag_counts.most_common(5):
         print(f"      {tag_id}: {count} courses")
-    
+
     # Save results
     print("\n💾 Saving results...")
     save_json(enriched_path, enriched_data)
     save_json(schema_path, schema)
-    
+
     # Copy to path-builder
     save_json(DATA_DIR / "video_library.json", enriched_data)
-    
+
     print(f"   ✅ Saved: {enriched_path}")
     print(f"   ✅ Saved: {schema_path}")
-    
+
     print("\n" + "=" * 60)
     print("✅ CLEANUP COMPLETE")
     print("=" * 60)

@@ -1,5 +1,4 @@
-"""
-scrape_epic_docs.py — Phase 1B of RAG upgrade
+"""scrape_epic_docs.py — Phase 1B of RAG upgrade
 Scrapes Epic Games UE5 documentation using curated URL slugs from
 UE5QuestionGenerator/src/utils/urlValidatorData.js.
 
@@ -14,16 +13,16 @@ Usage:
     python scripts/scrape_epic_docs.py --resume          # Resume embedding
 """
 
+import argparse
 import hashlib
 import json
 import os
-import sys
 import re
+import sys
 import time
-import argparse
-from pathlib import Path
 from datetime import datetime
 from html.parser import HTMLParser
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Config
@@ -184,13 +183,12 @@ def chunk_doc(text, slug, max_tokens=MAX_TOKENS, target_tokens=TARGET_TOKENS):
 
 
 def crawl_discover_slugs(max_pages=2000):
-    """
-    Discover doc page slugs by crawling from the docs index.
+    """Discover doc page slugs by crawling from the docs index.
     Uses BFS to follow links within /documentation/en-us/unreal-engine/.
     Returns list of discovered slugs.
     """
-    import urllib.request
     import urllib.error
+    import urllib.request
     from collections import deque
 
     docs_prefix = "/documentation/en-us/unreal-engine/"
@@ -252,8 +250,8 @@ def crawl_discover_slugs(max_pages=2000):
 
 def scrape_docs(slugs):
     """Fetch and parse doc pages. Returns list of {slug, title, chunks}."""
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     docs = []
     success = 0
@@ -315,8 +313,8 @@ def scrape_docs(slugs):
 
 def embed_text(text, api_key):
     """Call Gemini embedding API."""
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     url = f"{API_URL}?key={api_key}"
     payload = {
@@ -392,7 +390,7 @@ def main():
     # Step 3: Flatten chunks for embedding
     all_chunks = []
     for doc in docs:
-        for j, chunk in enumerate(doc["chunks"]):
+        for _j, chunk in enumerate(doc["chunks"]):
             all_chunks.append({
                 "id": f"doc_{len(all_chunks):04d}",
                 "slug": doc["slug"],

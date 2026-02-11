@@ -1,5 +1,4 @@
-"""
-enrich_doc_links.py — Add 'description' field to doc_links.json entries.
+"""enrich_doc_links.py — Add 'description' field to doc_links.json entries.
 Derives descriptions from URL slugs + labels without network calls.
 """
 import json
@@ -84,7 +83,7 @@ def slug_to_description(key, entry):
 
 
 def main():
-    with open(DOC_LINKS_PATH, "r", encoding="utf-8") as f:
+    with open(DOC_LINKS_PATH, encoding="utf-8") as f:
         doc_links = json.load(f)
 
     print(f"Processing {len(doc_links)} doc entries...")

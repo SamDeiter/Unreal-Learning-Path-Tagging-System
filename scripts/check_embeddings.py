@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-check_embeddings.py — Freshness checker for RAG embedding files.
+"""check_embeddings.py — Freshness checker for RAG embedding files.
 
 Computes SHA-256 hashes of source data files and compares them against
 hashes stored in the embedding JSON files. Reports which embeddings are
@@ -14,8 +13,8 @@ Usage:
 import hashlib
 import json
 import os
-import sys
 import subprocess
+import sys
 from datetime import datetime
 
 # ---------- Configuration ----------
@@ -84,7 +83,7 @@ def read_embedding_meta(filepath):
     if not os.path.exists(filepath):
         return None
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             data = json.load(f)
         return {
             "source_hash": data.get("source_hash"),
@@ -92,7 +91,7 @@ def read_embedding_meta(filepath):
             "total_chunks": data.get("total_chunks"),
             "model": data.get("model"),
         }
-    except (json.JSONDecodeError, IOError):
+    except (OSError, json.JSONDecodeError):
         return None
 
 
@@ -101,13 +100,13 @@ def inject_hash(embedding_file, source_hash):
     if not os.path.exists(embedding_file):
         return False
     try:
-        with open(embedding_file, "r", encoding="utf-8") as f:
+        with open(embedding_file, encoding="utf-8") as f:
             data = json.load(f)
         data["source_hash"] = source_hash
         with open(embedding_file, "w", encoding="utf-8") as f:
             json.dump(data, f, separators=(",", ":"))
         return True
-    except (json.JSONDecodeError, IOError) as e:
+    except (OSError, json.JSONDecodeError) as e:
         print(f"  ✗ Failed to inject hash: {e}")
         return False
 
@@ -165,7 +164,7 @@ def check_all(auto_fix=False):
 
         # Check embedding file exists
         if not os.path.exists(emb_file):
-            print(f"   ✗ MISSING — embedding file does not exist")
+            print("   ✗ MISSING — embedding file does not exist")
             missing_count += 1
             print()
             continue
@@ -173,7 +172,7 @@ def check_all(auto_fix=False):
         # Read metadata
         meta = read_embedding_meta(emb_file)
         if not meta:
-            print(f"   ✗ UNREADABLE — cannot parse embedding file")
+            print("   ✗ UNREADABLE — cannot parse embedding file")
             missing_count += 1
             print()
             continue
@@ -187,21 +186,21 @@ def check_all(auto_fix=False):
         stored_hash = meta.get("source_hash")
 
         if stored_hash is None:
-            print(f"   ⚠️  No source_hash stored — injecting current hash")
+            print("   ⚠️  No source_hash stored — injecting current hash")
             inject_hash(emb_file, current_hash)
-            print(f"   ✓ ASSUMED FRESH (hash now stored for future checks)")
+            print("   ✓ ASSUMED FRESH (hash now stored for future checks)")
             fresh_count += 1
         elif stored_hash == current_hash:
-            print(f"   ✓ FRESH — source data unchanged")
+            print("   ✓ FRESH — source data unchanged")
             fresh_count += 1
         else:
-            print(f"   ✗ STALE — source data has changed since last embedding!")
+            print("   ✗ STALE — source data has changed since last embedding!")
             print(f"     Stored:  {stored_hash[:16]}...")
             print(f"     Current: {current_hash[:16]}...")
             stale_count += 1
 
             if auto_fix and config["regen_command"]:
-                print(f"   🔄 Re-generating...")
+                print("   🔄 Re-generating...")
                 try:
                     result = subprocess.run(
                         config["regen_command"],
@@ -213,11 +212,11 @@ def check_all(auto_fix=False):
                     if result.returncode == 0:
                         # Inject new hash
                         inject_hash(emb_file, current_hash)
-                        print(f"   ✓ Regenerated successfully!")
+                        print("   ✓ Regenerated successfully!")
                     else:
                         print(f"   ✗ Regeneration failed: {result.stderr[:200]}")
                 except subprocess.TimeoutExpired:
-                    print(f"   ✗ Regeneration timed out (10 min)")
+                    print("   ✗ Regeneration timed out (10 min)")
                 except Exception as e:
                     print(f"   ✗ Regeneration error: {e}")
 
@@ -236,7 +235,7 @@ def check_all(auto_fix=False):
         if missing_count > 0:
             print(f"  ❌ {missing_count}/{total} embedding files are MISSING")
         if not auto_fix:
-            print(f"\n  Run with --fix to auto-regenerate stale embeddings")
+            print("\n  Run with --fix to auto-regenerate stale embeddings")
     print("=" * 60)
 
     return 1 if (stale_count > 0 or missing_count > 0) else 0

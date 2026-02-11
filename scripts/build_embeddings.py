@@ -1,5 +1,4 @@
-"""
-build_embeddings.py — Generate course embeddings using Gemini text-embedding-004.
+"""build_embeddings.py — Generate course embeddings using Gemini text-embedding-004.
 
 Reads video_library_enriched.json + search_index.json, builds a text chunk
 per course (title + description + tags + top transcript words), and calls
@@ -19,6 +18,7 @@ import json
 import os
 import sys
 import time
+
 import requests
 
 # ──────────── Config ────────────
@@ -37,11 +37,11 @@ RATE_LIMIT_DELAY = 0.5  # Seconds between batches
 
 def load_data():
     """Load enriched library and search index."""
-    with open(ENRICHED_PATH, "r", encoding="utf-8") as f:
+    with open(ENRICHED_PATH, encoding="utf-8") as f:
         lib = json.load(f)
     courses = lib.get("courses", lib) if isinstance(lib, dict) else lib
 
-    with open(SEARCH_INDEX_PATH, "r", encoding="utf-8") as f:
+    with open(SEARCH_INDEX_PATH, encoding="utf-8") as f:
         search_idx = json.load(f)
     course_words = search_idx.get("course_words", {})
 
@@ -199,7 +199,7 @@ def main():
     }
 
     success_count = 0
-    for code, title, embedding in zip(codes, titles, all_embeddings):
+    for code, title, embedding in zip(codes, titles, all_embeddings, strict=False):
         if embedding and len(embedding) == DIMENSION:
             output["courses"][code] = {
                 "title": title,

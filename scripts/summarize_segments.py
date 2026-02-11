@@ -1,5 +1,4 @@
-"""
-Summarize Transcript Segments using Gemini API.
+"""Summarize Transcript Segments using Gemini API.
 
 Uses the google-genai Python SDK (same pattern as UE5QuestionGenerator).
 Reads transcript_segments.json, sends video segments in BATCHES to Gemini,
@@ -14,11 +13,11 @@ Usage:
   python scripts/summarize_segments.py --dry-run
 """
 
+import argparse
+import json
 import os
 import re
-import json
 import time
-import argparse
 from pathlib import Path
 
 try:
@@ -43,8 +42,7 @@ BATCH_SIZE = 4
 
 
 def summarize_video_batch(client, batch):
-    """
-    Send multiple videos' segments in one Gemini call.
+    """Send multiple videos' segments in one Gemini call.
 
     Args:
         client: Gemini client
@@ -126,8 +124,7 @@ Expected keys: {json.dumps(video_keys)}"""
 
 # Legacy single-video function kept for fallback
 def summarize_video_segments(client, video_key, segments):
-    """
-    Send all segments for one video to Gemini and get back
+    """Send all segments for one video to Gemini and get back
     a one-line learning-focused summary for each.
     """
     result = summarize_video_batch(client, {video_key: segments})
@@ -154,7 +151,7 @@ def main():
 
     client = None if args.dry_run else genai.Client(api_key=API_KEY)
 
-    with open(SEGMENTS_FILE, "r", encoding="utf-8") as f:
+    with open(SEGMENTS_FILE, encoding="utf-8") as f:
         index = json.load(f)
 
     # Collect all videos needing summaries
@@ -173,7 +170,7 @@ def main():
     print(f"📝 Summarizing {len(pending)} videos ({skipped} already done, {total} total)")
     print(f"   Batch size: {BATCH_SIZE} videos/call → ~{batches_needed} Gemini calls")
     if args.dry_run:
-        print(f"   🏜️ DRY RUN — no API calls will be made")
+        print("   🏜️ DRY RUN — no API calls will be made")
     print(f"   Estimated time: ~{batches_needed * DELAY_BETWEEN_REQUESTS / 60:.1f} minutes\n")
 
     processed = 0
@@ -185,7 +182,7 @@ def main():
         batch_dict = {video_key: segments for _, video_key, segments in batch_items}
         batch_num = batch_idx // BATCH_SIZE + 1
 
-        course_codes = set(cc for cc, _, _ in batch_items)
+        course_codes = {cc for cc, _, _ in batch_items}
         print(f"  📦 Batch {batch_num}/{batches_needed} ({len(batch_items)} videos from {course_codes})")
 
         if args.dry_run:
@@ -198,7 +195,7 @@ def main():
         if result:
             for course_code, video_key, segments in batch_items:
                 if video_key in result:
-                    for seg, summary in zip(segments, result[video_key]):
+                    for seg, summary in zip(segments, result[video_key], strict=False):
                         seg["summary"] = summary
                     processed += 1
                     print(f"     ✅ {video_key}")
@@ -207,7 +204,7 @@ def main():
                     print(f"     ❌ {video_key} (missing from response)")
         else:
             failed += len(batch_items)
-            print(f"     ❌ Entire batch failed")
+            print("     ❌ Entire batch failed")
 
         # Rate limit
         time.sleep(DELAY_BETWEEN_REQUESTS)
@@ -224,7 +221,7 @@ def main():
             json.dump(index, f, ensure_ascii=False, separators=(",", ":"))
 
     file_size_kb = os.path.getsize(SEGMENTS_FILE) / 1024 if SEGMENTS_FILE.exists() else 0
-    print(f"\n✅ Done!")
+    print("\n✅ Done!")
     print(f"   Processed: {processed} videos")
     print(f"   Skipped (already done): {skipped}")
     print(f"   Failed: {failed}")

@@ -1,5 +1,4 @@
-"""
-generate_cooccurrence_edges.py — Auto-generate tag graph edges from co-occurrence
+"""generate_cooccurrence_edges.py — Auto-generate tag graph edges from co-occurrence
 patterns in the enriched video library.
 
 Scans all courses, maps raw tags to known tag_ids, counts pairwise co-occurrences,
@@ -29,7 +28,7 @@ WEIGHT_CEILING = 0.85       # Maximum edge weight (reserve 0.85+ for curated edg
 
 
 def load_json(path):
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -189,16 +188,16 @@ def main():
     print(f"\n  💾 Saved tags/edges.json ({len(edges_data['edges'])} total edges)")
 
     shutil.copy2(EDGES_PATH, SAMPLE_EDGES)
-    print(f"  📋 Synced → sample_data/edges.json")
+    print("  📋 Synced → sample_data/edges.json")
 
     # Summary stats
-    print(f"\n✅ Done!")
-    print(f"   Before: 51 edges")
+    print("\n✅ Done!")
+    print("   Before: 51 edges")
     print(f"   Added:  {len(to_add)} co-occurrence edges")
     print(f"   After:  {len(edges_data['edges'])} total edges")
 
     # Show top tag frequencies for context
-    print(f"\n📊 Top 10 most-connected tags:")
+    print("\n📊 Top 10 most-connected tags:")
     tag_edge_count = Counter()
     for edge in edges_data["edges"]:
         tag_edge_count[edge["source"]] += 1

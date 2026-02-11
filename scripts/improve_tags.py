@@ -1,6 +1,4 @@
-"""
-Quick Phase 2 tag improvement.
-"""
+"""Quick Phase 2 tag improvement."""
 import json
 from pathlib import Path
 

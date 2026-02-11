@@ -1,14 +1,13 @@
-"""
-Run all Gemini enrichment scripts in sequence.
+"""Run all Gemini enrichment scripts in sequence.
 Loads API key from .env file if present.
 
 Usage (from repo root):
   python scripts/run_enrichment_pipeline.py
 """
 
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -16,7 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # Load .env file if it exists (no dependency needed)
 env_file = REPO_ROOT / ".env"
 if env_file.exists():
-    with open(env_file, "r") as f:
+    with open(env_file) as f:
         for line in f:
             line = line.strip()
             if line and not line.startswith("#") and "=" in line:

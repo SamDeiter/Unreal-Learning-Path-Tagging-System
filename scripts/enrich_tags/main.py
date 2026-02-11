@@ -23,7 +23,6 @@ from .phase3_normalize import run_phase3
 from .phase4_edges import run_phase4
 from .phase5_gemini import run_phase5
 
-
 # Phase 8B: State management for pipeline checkpointing
 STATE_FILENAME = "pipeline_state.json"
 

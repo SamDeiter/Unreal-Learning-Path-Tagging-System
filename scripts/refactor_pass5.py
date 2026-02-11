@@ -1,9 +1,9 @@
-"""
-Pass 5 — CSS Consolidation
+"""Pass 5 — CSS Consolidation
 Replace hardcoded hex color literals with CSS custom properties from App.css :root.
 Only replaces in property *values* (not inside var() fallbacks or selectors).
 """
-import pathlib, re, json
+import pathlib
+import re
 
 SRC = pathlib.Path(r"c:\Users\Sam Deiter\Documents\GitHub\Unreal-Learning-Path-Tagging-System\path-builder\src")
 
@@ -101,5 +101,5 @@ for css_file in sorted(SRC.rglob("*.css")):
         total_replacements += replacements
         modified_files += 1
 
-print(f"\n─── Pass 5 Complete ───")
+print("\n─── Pass 5 Complete ───")
 print(f"  {modified_files} files modified, {total_replacements} hex literals → CSS variables")

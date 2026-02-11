@@ -1,5 +1,4 @@
-"""
-Build Segment Index — Parse VTT transcript files to create a keyword→timestamp index.
+"""Build Segment Index — Parse VTT transcript files to create a keyword→timestamp index.
 
 Reads all .vtt files in content/transcripts/ and groups consecutive cues
 into ~30-second segments. Outputs a JSON index that maps course codes to
@@ -8,9 +7,8 @@ searchable segments with real timestamps.
 Output: path-builder/src/data/segment_index.json
 """
 
-import os
-import re
 import json
+import re
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -55,7 +53,7 @@ def parse_vtt_file(filepath):
     """Parse a VTT file and return a list of cues with timestamps and text."""
     cues = []
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             content = f.read()
     except (UnicodeDecodeError, OSError):
         return cues
@@ -155,7 +153,7 @@ def get_playable_codes():
     if not LIBRARY_PATH.exists():
         return set()
 
-    with open(LIBRARY_PATH, "r", encoding="utf-8") as f:
+    with open(LIBRARY_PATH, encoding="utf-8") as f:
         lib = json.load(f)
 
     courses = lib if isinstance(lib, list) else lib.get("courses", [])

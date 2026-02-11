@@ -1,10 +1,9 @@
-"""
-quantize_embeddings.py — Compress embedding vectors from float64 JSON to base64 float16.
+"""quantize_embeddings.py — Compress embedding vectors from float64 JSON to base64 float16.
 Reduces file size by ~4x with negligible impact on cosine similarity.
 """
+import base64
 import json
 import struct
-import base64
 from pathlib import Path
 
 INPUT = Path("path-builder/src/data/segment_embeddings.json")
@@ -18,7 +17,7 @@ original_size = INPUT.stat().st_size / (1024 * 1024)
 print(f"  Original size: {original_size:.1f} MB")
 
 # Quantize: float64 JSON → base64 float16
-for sid, seg in segs.items():
+for _sid, seg in segs.items():
     emb = seg["embedding"]
     packed = struct.pack(f"{len(emb)}e", *emb)
     seg["embedding"] = base64.b64encode(packed).decode("ascii")

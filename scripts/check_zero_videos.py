@@ -1,7 +1,6 @@
 """Analyze remaining 44 courses with 0 videos vs drive file codes."""
 import json
 import re
-from collections import defaultdict
 
 with open("path-builder/src/data/video_library_enriched.json") as f:
     data = json.load(f)
@@ -33,12 +32,12 @@ for code in sorted(missing_from_drive):
     print(f"    {code} {empty[code]}")
 
 # Check if any drive files have codes like "104.01" with different naming
-print(f"\nSample drive filenames for debugging:")
+print("\nSample drive filenames for debugging:")
 for d in drive[:5]:
     print(f"  {d['name']}")
 
 # Check names that contain empty course codes as substring
-print(f"\nDrive files containing empty course codes (substring):")
+print("\nDrive files containing empty course codes (substring):")
 for code in sorted(list(missing_from_drive)[:5]):
     matches = [d["name"] for d in drive if code.replace(".", "") in d["name"].replace(".", "") or code in d["name"]]
     if matches:

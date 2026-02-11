@@ -1,9 +1,7 @@
-"""
-Find videos for unmatched courses by searching folder categories.
-"""
+"""Find videos for unmatched courses by searching folder categories."""
 import json
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 data = json.loads(Path('content/video_library_enriched.json').read_text())
 videos = json.loads(Path('content/drive_video_metadata.json').read_text())  # Use full data, not just FINAL
@@ -41,11 +39,11 @@ for code, keywords in searches.items():
             if kw in folder:
                 matches.extend(vids)
                 break
-    
+
     if matches:
         # Only count FINAL videos
         final_matches = [v for v in matches if 'FINAL' in v.get('folder', '').upper()]
         duration = sum(v.get('duration_seconds', 0) for v in final_matches)
         print(f"  Found {len(final_matches)} FINAL videos ({duration//60} min)")
     else:
-        print(f"  No folder matches found")
+        print("  No folder matches found")

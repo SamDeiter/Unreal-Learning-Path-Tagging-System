@@ -8,8 +8,8 @@ def main():
     """Update match_rules.json with rule_weight and negative_patterns."""
     # Load existing rules
     rules_path = Path(__file__).parent.parent / "ingestion" / "match_rules.json"
-    
-    with open(rules_path, "r", encoding="utf-8") as f:
+
+    with open(rules_path, encoding="utf-8") as f:
         data = json.load(f)
 
     # Update version

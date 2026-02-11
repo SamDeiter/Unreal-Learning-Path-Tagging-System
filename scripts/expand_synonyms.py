@@ -1,5 +1,4 @@
-"""
-expand_synonyms.py — Expands synonym coverage across tags.json for better matching recall.
+"""expand_synonyms.py — Expands synonym coverage across tags.json for better matching recall.
 
 Adds common UE5 community terms, natural language phrases, and related search terms
 to each tag's synonyms array. Only adds new entries (no duplicates).
@@ -11,7 +10,7 @@ Usage:
 import json
 import os
 import shutil
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TAGS_PATH = os.path.join(ROOT, "tags", "tags.json")
@@ -301,7 +300,7 @@ SYNONYM_EXPANSIONS = {
 
 
 def load_json(path):
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -328,7 +327,7 @@ def main():
             print(f"  ⚠️  Tag '{tag_id}' not found — skipping")
             continue
 
-        existing = set(s.lower() for s in tag.get("synonyms", []))
+        existing = {s.lower() for s in tag.get("synonyms", [])}
         added = []
 
         for syn in new_synonyms:
@@ -343,14 +342,14 @@ def main():
             print(f"  ✅ {tag_id}: +{len(added)} synonyms")
 
     # Update timestamp
-    tags_data["generated_utc"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    tags_data["generated_utc"] = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     # Save
     save_json(TAGS_PATH, tags_data)
-    print(f"\n  💾 Saved tags/tags.json")
+    print("\n  💾 Saved tags/tags.json")
 
     shutil.copy2(TAGS_PATH, SAMPLE_TAGS)
-    print(f"  📋 Synced → sample_data/tags.json")
+    print("  📋 Synced → sample_data/tags.json")
 
     print(f"\n✅ Done! {total_added} synonyms added across {tags_updated} tags")
 

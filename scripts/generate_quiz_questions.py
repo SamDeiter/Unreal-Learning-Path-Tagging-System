@@ -1,5 +1,4 @@
-"""
-Generate Quiz Questions per Video using Gemini API.
+"""Generate Quiz Questions per Video using Gemini API.
 
 For each video, generates 2-3 multiple-choice questions from transcript content.
 
@@ -8,9 +7,9 @@ Usage:
   python scripts/generate_quiz_questions.py
 """
 
+import json
 import os
 import re
-import json
 import time
 from pathlib import Path
 
@@ -99,13 +98,13 @@ def main():
 
     client = genai.Client(api_key=API_KEY)
 
-    with open(SEGMENTS_FILE, "r", encoding="utf-8") as f:
+    with open(SEGMENTS_FILE, encoding="utf-8") as f:
         index = json.load(f)
 
     # Load existing for resume
     quiz_data = {}
     if OUTPUT_FILE.exists():
-        with open(OUTPUT_FILE, "r", encoding="utf-8") as f:
+        with open(OUTPUT_FILE, encoding="utf-8") as f:
             quiz_data = json.load(f)
 
     total_videos = sum(len(v) for v in index.values())
@@ -152,7 +151,7 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(quiz_data, f, ensure_ascii=False, indent=2)
 
-    print(f"\n✅ Done!")
+    print("\n✅ Done!")
     print(f"   Videos processed: {processed}")
     print(f"   Total questions: {total_questions}")
     print(f"   Skipped: {skipped}, Failed: {failed}")

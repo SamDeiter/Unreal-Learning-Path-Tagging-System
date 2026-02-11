@@ -1,5 +1,4 @@
-"""
-Generate Learning Objectives per Course using Gemini API.
+"""Generate Learning Objectives per Course using Gemini API.
 
 For each course, sends representative transcript segments to Gemini
 and generates 3-5 learning objectives.
@@ -12,11 +11,11 @@ Usage:
   python scripts/generate_learning_objectives.py --dry-run
 """
 
+import argparse
+import json
 import os
 import re
-import json
 import time
-import argparse
 from pathlib import Path
 
 try:
@@ -40,8 +39,7 @@ BATCH_SIZE = 5
 
 
 def generate_objectives_batch(client, courses_batch):
-    """
-    Send multiple courses in one Gemini call.
+    """Send multiple courses in one Gemini call.
 
     Args:
         client: Gemini client
@@ -134,13 +132,13 @@ def main():
 
     client = None if args.dry_run else genai.Client(api_key=API_KEY)
 
-    with open(SEGMENTS_FILE, "r", encoding="utf-8") as f:
+    with open(SEGMENTS_FILE, encoding="utf-8") as f:
         index = json.load(f)
 
     # Load existing output for resume support
     objectives = {}
     if OUTPUT_FILE.exists():
-        with open(OUTPUT_FILE, "r", encoding="utf-8") as f:
+        with open(OUTPUT_FILE, encoding="utf-8") as f:
             objectives = json.load(f)
 
     # Collect pending courses
@@ -157,7 +155,7 @@ def main():
     print(f"📝 Generating learning objectives for {len(pending)} courses ({skipped} already done)")
     print(f"   Batch size: {BATCH_SIZE} courses/call → ~{batches_needed} Gemini calls")
     if args.dry_run:
-        print(f"   🏜️ DRY RUN — no API calls will be made")
+        print("   🏜️ DRY RUN — no API calls will be made")
     print()
 
     processed = 0
@@ -165,7 +163,7 @@ def main():
 
     for batch_idx in range(0, len(pending), BATCH_SIZE):
         batch_items = pending[batch_idx : batch_idx + BATCH_SIZE]
-        batch_dict = {cc: vids for cc, vids in batch_items}
+        batch_dict = dict(batch_items)
         batch_num = batch_idx // BATCH_SIZE + 1
 
         print(f"  📦 Batch {batch_num}/{batches_needed} ({len(batch_items)} courses: {[cc for cc, _ in batch_items]})")
@@ -188,7 +186,7 @@ def main():
                     print(f"     ❌ {cc} (missing from response)")
         else:
             failed += len(batch_items)
-            print(f"     ❌ Entire batch failed")
+            print("     ❌ Entire batch failed")
 
         time.sleep(DELAY_BETWEEN_REQUESTS)
 

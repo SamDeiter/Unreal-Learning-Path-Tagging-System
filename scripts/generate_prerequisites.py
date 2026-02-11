@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-generate_prerequisites.py
+"""generate_prerequisites.py.
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 Reads video_library_enriched.json and matches each course's
 gemini_prerequisites text against other courses' titles and extracted_tags
@@ -10,10 +9,8 @@ Output: path-builder/src/data/course_prerequisites.json
 """
 
 import json
-import re
 import os
-import sys
-from collections import defaultdict
+import re
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(SCRIPT_DIR)
@@ -166,7 +163,7 @@ def generate_prerequisites(courses):
 
 def main():
     print(f"Loading library from {LIBRARY_PATH}")
-    with open(LIBRARY_PATH, "r", encoding="utf-8") as f:
+    with open(LIBRARY_PATH, encoding="utf-8") as f:
         data = json.load(f)
 
     courses = data.get("courses", [])
@@ -174,13 +171,13 @@ def main():
 
     prereqs, stats = generate_prerequisites(courses)
 
-    print(f"\nResults:")
+    print("\nResults:")
     print(f"  Courses with matched prereqs: {stats['matched']}")
     print(f"  Courses with no prereq text:  {stats['no_prereqs']}")
     print(f"  Courses with text but no match: {stats['no_match']}")
 
     # Show sample output
-    print(f"\nSample entries:")
+    print("\nSample entries:")
     for code, entry in list(prereqs.items())[:5]:
         print(f"  {code}: prereqs={entry['prereqs']}")
         for pc, reason in entry["reasons"].items():

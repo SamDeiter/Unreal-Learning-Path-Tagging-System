@@ -1,5 +1,4 @@
-"""
-embed_segments.py — Phase 1A of RAG upgrade
+"""embed_segments.py — Phase 1A of RAG upgrade
 Reads segment_index.json, merges adjacent segments into ~300-500 token chunks,
 then embeds each chunk via Gemini gemini-embedding-001.
 
@@ -11,14 +10,14 @@ Usage:
     python scripts/embed_segments.py --resume            # Resume from last checkpoint
 """
 
+import argparse
 import hashlib
 import json
 import os
 import sys
 import time
-import argparse
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Config
@@ -58,8 +57,7 @@ def estimate_tokens(text):
 
 
 def merge_segments_into_chunks(segment_index):
-    """
-    Merge adjacent segments into ~400-token chunks with 1-segment overlap.
+    """Merge adjacent segments into ~400-token chunks with 1-segment overlap.
     Returns list of chunk dicts with metadata.
     """
     chunks = []
@@ -116,8 +114,8 @@ def merge_segments_into_chunks(segment_index):
 
 def embed_text(text, api_key):
     """Call Gemini embedding API for a single text. Returns 768-dim vector."""
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     url = f"{API_URL}?key={api_key}"
     payload = {
@@ -196,7 +194,7 @@ def main():
     print(f"  Avg tokens/chunk: {sum(token_counts) // len(token_counts)}")
 
     # Show sample
-    print(f"\n  Sample chunk:")
+    print("\n  Sample chunk:")
     sample = chunks[len(chunks) // 2]
     print(f"    ID: {sample['id']}")
     print(f"    Course: {sample['course_code']}, Video: {sample['video_title']}")
@@ -209,7 +207,7 @@ def main():
         # Distribution by course
         from collections import Counter
         course_counts = Counter(c["course_code"] for c in chunks)
-        print(f"\n  Chunks per course (top 10):")
+        print("\n  Chunks per course (top 10):")
         for code, count in course_counts.most_common(10):
             print(f"    {code}: {count} chunks")
         return

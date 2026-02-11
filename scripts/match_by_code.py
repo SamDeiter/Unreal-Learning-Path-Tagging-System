@@ -1,10 +1,8 @@
-"""
-Match unmatched courses by course code prefix in video filenames.
-"""
+"""Match unmatched courses by course code prefix in video filenames."""
 import json
 import re
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 CONTENT_DIR = Path('content')
 DATA_DIR = Path('path-builder/src/data')

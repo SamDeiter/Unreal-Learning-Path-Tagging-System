@@ -1,5 +1,4 @@
-"""
-Detect Course Prerequisites using Gemini API.
+"""Detect Course Prerequisites using Gemini API.
 
 Analyzes transcript content across courses to suggest prerequisite relationships.
 
@@ -8,9 +7,9 @@ Usage:
   python scripts/detect_prerequisites.py
 """
 
+import json
 import os
 import re
-import json
 import time
 from pathlib import Path
 
@@ -35,7 +34,7 @@ def detect_prereqs(client, course_code, videos, all_course_codes):
     """Analyze a course's content and suggest prerequisites from available courses."""
     # Build a sample of this course's content
     sample_texts = []
-    for video_key, segments in list(videos.items())[:6]:
+    for _video_key, segments in list(videos.items())[:6]:
         for seg in segments[:2]:
             sample_texts.append(seg["text"][:150])
     course_sample = " ".join(sample_texts)[:1500]
@@ -105,7 +104,7 @@ def main():
 
     client = genai.Client(api_key=API_KEY)
 
-    with open(SEGMENTS_FILE, "r", encoding="utf-8") as f:
+    with open(SEGMENTS_FILE, encoding="utf-8") as f:
         index = json.load(f)
 
     all_course_codes = sorted(index.keys())
@@ -113,7 +112,7 @@ def main():
     # Load existing for resume
     prereqs = {}
     if OUTPUT_FILE.exists():
-        with open(OUTPUT_FILE, "r", encoding="utf-8") as f:
+        with open(OUTPUT_FILE, encoding="utf-8") as f:
             prereqs = json.load(f)
 
     processed = 0

@@ -1,8 +1,8 @@
 """Add missing courses from Google Drive to the library."""
 import json
 import re
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 CONTENT_DIR = Path("content")
 
@@ -32,14 +32,14 @@ new_courses = []
 for code in sorted(missing_codes):
     vids = video_by_code[code]
     first_name = vids[0]["name"]
-    
+
     # Extract title part
     title_match = re.match(r"\d{3}\.\d{2}_\d{2}_(.+?)_\d+", first_name)
     title = title_match.group(1).replace("_", " ") if title_match else code
-    
+
     # Calculate total duration
     total_duration = sum(v.get("duration_seconds", 0) for v in vids)
-    
+
     new_courses.append({
         "code": code,
         "title": title,

@@ -1,11 +1,11 @@
-"""
-Pass 2: Split narratorService.js
+"""Pass 2: Split narratorService.js
 1. CHALLENGE_REGISTRY → data/challengeRegistry.json (static data)
 2. generateChallenge() → services/challengeService.js (logic only)
 3. narratorService.js keeps intro/bridge/progress only (~253 lines)
-4. Update useGuidedPlayer.js import path
+4. Update useGuidedPlayer.js import path.
 """
-import os, json
+import json
+import os
 
 BASE = r"c:\Users\Sam Deiter\Documents\GitHub\Unreal-Learning-Path-Tagging-System\path-builder\src"
 
@@ -279,7 +279,7 @@ print("✅ services/challengeService.js created")
 
 # ─── 3. Slim narratorService.js — remove CHALLENGE_REGISTRY + generateChallenge ───
 narrator_path = os.path.join(BASE, "services", "narratorService.js")
-with open(narrator_path, "r", encoding="utf-8") as f:
+with open(narrator_path, encoding="utf-8") as f:
     content = f.read()
 
 # Remove from the CHALLENGE_REGISTRY comment block through the end of generateChallenge
@@ -318,7 +318,7 @@ else:
 
 # ─── 4. Update useGuidedPlayer.js to import from challengeService ───
 hook_path = os.path.join(BASE, "hooks", "useGuidedPlayer.js")
-with open(hook_path, "r", encoding="utf-8") as f:
+with open(hook_path, encoding="utf-8") as f:
     hook_content = f.read()
 
 # Replace the import

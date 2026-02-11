@@ -1,5 +1,4 @@
-"""
-Unified Content Fetcher Infrastructure.
+"""Unified Content Fetcher Infrastructure.
 
 Phase 8D: Standardized Python fetcher layer that provides a unified
 `RawContent` interface for all external content sources.
@@ -21,7 +20,6 @@ Usage:
 """
 
 import json
-import os
 import time
 from datetime import datetime
 from pathlib import Path
@@ -48,8 +46,7 @@ def _make_raw_content(source, content_type, title, description, url=None, metada
 # ============================================================================
 
 def fetch_google_trends(keywords=None, max_retries=3, retry_delay=60):
-    """
-    Fetch Google Trends data using pytrends.
+    """Fetch Google Trends data using pytrends.
     Returns list of RawContent dicts.
     """
     if keywords is None:
@@ -148,8 +145,7 @@ _FETCHER_REGISTRY = {
 
 
 def run_all_fetchers(sources=None):
-    """
-    Run all (or selected) fetchers and merge results into external_sources.json.
+    """Run all (or selected) fetchers and merge results into external_sources.json.
 
     Args:
         sources: list of source names to run, or None for all
@@ -175,7 +171,7 @@ def run_all_fetchers(sources=None):
         data = {"insights": [], "_meta": {}}
 
     # Remove previous entries from the fetched sources
-    fetched_sources = set(r["source"] for r in all_results)
+    fetched_sources = {r["source"] for r in all_results}
     data["insights"] = [
         i for i in data.get("insights", [])
         if i.get("source") not in fetched_sources

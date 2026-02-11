@@ -1,14 +1,15 @@
-"""Quick test to verify YouTube API key is working"""
-import os
-import urllib.request
-import urllib.parse
+"""Quick test to verify YouTube API key is working."""
 import json
+import os
+import urllib.parse
+import urllib.request
+
 
 # Load API key from .env file
 def load_env():
     env_path = os.path.join(os.path.dirname(__file__), '.env')
     if os.path.exists(env_path):
-        with open(env_path, 'r') as f:
+        with open(env_path) as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith('#') and '=' in line:
@@ -37,18 +38,18 @@ try:
         'key': api_key
     })
     url = f"https://www.googleapis.com/youtube/v3/search?{params}"
-    
+
     with urllib.request.urlopen(url) as response:
         data = json.loads(response.read().decode())
-        
+
     if 'items' in data and len(data['items']) > 0:
         video = data['items'][0]
         title = video['snippet']['title']
-        print(f"✅ SUCCESS! API key is working.")
+        print("✅ SUCCESS! API key is working.")
         print(f"   Test result: Found video '{title[:50]}...'")
     else:
         print("⚠️ API responded but no results found")
-        
+
 except urllib.error.HTTPError as e:
     error_body = e.read().decode()
     print(f"❌ API Error {e.code}: {e.reason}")

@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-"""
-enrich_tags.py — Clean up and expand tags.json
-  1. Remove junk entries (crash codes, error messages)
-  2. Mine all tags from course canonical_tags / extracted_tags / gemini_system_tags
-  3. Merge, deduplicate, auto-generate metadata
-  4. Write updated tags.json
+"""enrich_tags.py — Clean up and expand tags.json
+1. Remove junk entries (crash codes, error messages)
+2. Mine all tags from course canonical_tags / extracted_tags / gemini_system_tags
+3. Merge, deduplicate, auto-generate metadata
+4. Write updated tags.json.
 """
 
 import json
 import os
-import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(SCRIPT_DIR)
@@ -158,9 +156,9 @@ def generate_description(display_name: str, category: str) -> str:
 
 def main():
     # Load existing data
-    with open(TAGS_PATH, "r", encoding="utf-8") as f:
+    with open(TAGS_PATH, encoding="utf-8") as f:
         tags_data = json.load(f)
-    with open(COURSES_PATH, "r", encoding="utf-8") as f:
+    with open(COURSES_PATH, encoding="utf-8") as f:
         courses_data = json.load(f)
 
     existing_tags = tags_data.get("tags", [])
@@ -199,7 +197,7 @@ def main():
     print(f"Plain-name tags in courses: {len(plain_set)}")
 
     # ── Step 3: Generate missing tags ─────────────────────────────────
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    now = datetime.now(UTC).strftime("%Y-%m-%d")
     added = 0
 
     # 3a. From canonical tags

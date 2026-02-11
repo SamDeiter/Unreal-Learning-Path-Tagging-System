@@ -1,5 +1,4 @@
-"""
-refresh_docs.py — Pipeline Refresh for doc_links.json
+"""refresh_docs.py — Pipeline Refresh for doc_links.json
 ────────────────────────────────────────────────────────
 Updates readTimeMinutes in doc_links.json using:
   1. Cached scraped doc content (content/scraped_docs.json), or
@@ -14,10 +13,10 @@ Usage:
   python scripts/refresh_docs.py --check-stale     # report stale embedding chunks
 """
 
+import argparse
+import hashlib
 import json
 import sys
-import hashlib
-import argparse
 from pathlib import Path
 
 # Paths relative to repo root
@@ -45,7 +44,7 @@ def load_scraped_docs():
         print("Run: python scripts/scrape_epic_docs.py --scrape-only")
         sys.exit(1)
 
-    with open(SCRAPED_DOCS, "r", encoding="utf-8") as f:
+    with open(SCRAPED_DOCS, encoding="utf-8") as f:
         docs = json.load(f)
     print(f"Loaded {len(docs)} scraped docs from {SCRAPED_DOCS}")
     return docs
@@ -73,7 +72,7 @@ def slug_from_url(url):
 
 def update_doc_links(word_counts, dry_run=False):
     """Update readTimeMinutes in doc_links.json based on word counts."""
-    with open(DOC_LINKS, "r", encoding="utf-8") as f:
+    with open(DOC_LINKS, encoding="utf-8") as f:
         links = json.load(f)
 
     updates = 0
@@ -118,7 +117,7 @@ def check_stale_embeddings():
         print("No scraped docs found. Cannot compare hashes.")
         return
 
-    with open(EMBEDDINGS, "r", encoding="utf-8") as f:
+    with open(EMBEDDINGS, encoding="utf-8") as f:
         emb = json.load(f)
 
     stored_hash = emb.get("source_hash", "unknown")

@@ -1,6 +1,6 @@
 import re
 
-with open('index.html', 'r', encoding='utf-8') as f:
+with open('index.html', encoding='utf-8') as f:
     content = f.read()
 
 # Extract CSS (between <style> and </style>)

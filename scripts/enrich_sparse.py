@@ -4,6 +4,7 @@ import json
 import os
 import urllib.request
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -23,39 +24,39 @@ VALID_TAGS = ['rendering.material', 'rendering.lighting', 'rendering.lumen', 're
 
 for batch_start in range(0, len(sparse), 10):
     batch = sparse[batch_start:batch_start + 10]
-    
+
     prompt = f'''Analyze these UE5 training course titles and return canonical tags for each.
 Use ONLY these tag categories: {', '.join(VALID_TAGS)}
 
 '''
     for i, c in enumerate(batch):
         prompt += f"{i+1}. {c['title']}\n"
-    
+
     prompt += '\nReturn ONLY a JSON array of arrays, one per course. Example: [["tag1","tag2"], ["tag1"]]'
-    
+
     print(f'\nBatch {batch_start//10 + 1}: Processing {len(batch)} courses...')
-    
+
     try:
-        req_data = {'contents': [{'parts': [{'text': prompt}]}], 
+        req_data = {'contents': [{'parts': [{'text': prompt}]}],
                     'generationConfig': {'temperature': 0.2, 'maxOutputTokens': 500}}
         req = urllib.request.Request(
             f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}',
-            data=json.dumps(req_data).encode(), 
-            headers={'Content-Type': 'application/json'}, 
+            data=json.dumps(req_data).encode(),
+            headers={'Content-Type': 'application/json'},
             method='POST')
-        
+
         with urllib.request.urlopen(req, timeout=30) as resp:
             result = json.loads(resp.read())
             text = result['candidates'][0]['content']['parts'][0]['text']
-            
+
             # Extract JSON
             if '```json' in text:
                 text = text.split('```json')[1].split('```')[0]
             elif '```' in text:
                 text = text.split('```')[1].split('```')[0]
-            
+
             tags_list = json.loads(text.strip())
-            
+
             # Apply tags
             for i, tags in enumerate(tags_list):
                 if i < len(batch):
@@ -65,7 +66,7 @@ Use ONLY these tag categories: {', '.join(VALID_TAGS)}
                     valid = [t for t in tags if t in VALID_TAGS]
                     batch[i]['canonical_tags'] = sorted(existing | set(valid))
                     print(f"  {code}: {batch[i]['canonical_tags']}")
-    
+
     except Exception as e:
         print(f"  Error: {e}")
 

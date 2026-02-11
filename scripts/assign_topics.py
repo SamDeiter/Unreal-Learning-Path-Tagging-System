@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-"""
-Auto-assign topics to courses based on title and tag analysis.
+"""Auto-assign topics to courses based on title and tag analysis.
 Reduces "Other" category by intelligently categorizing unlabeled courses.
 """
 import json
-import re
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
 
 CONTENT_DIR = Path("content")
 VIDEO_LIBRARY = CONTENT_DIR / "video_library_enriched.json"
@@ -88,7 +86,7 @@ def normalize(text):
 def find_topic(course):
     """Find the best topic match for a course based on title and tags."""
     title = normalize(course.get("title", ""))
-    
+
     # Also check extracted_tags if available
     tags = course.get("tags", [])
     if isinstance(tags, list):
@@ -97,14 +95,14 @@ def find_topic(course):
         tag_text = " ".join(normalize(str(v)) for v in tags.values())
     else:
         tag_text = ""
-    
+
     # Check topics array
     topics = course.get("topics", [])
     topics_text = " ".join(normalize(t) for t in topics)
-    
+
     # Combine all searchable text
     search_text = f"{title} {tag_text} {topics_text}"
-    
+
     # Score each topic
     scores = {}
     for topic, keywords in TOPIC_KEYWORDS.items():
@@ -118,30 +116,30 @@ def find_topic(course):
                     score += 1
         if score > 0:
             scores[topic] = score
-    
+
     if scores:
         # Return highest scoring topic
         return max(scores, key=scores.get)
-    
+
     return None
 
 def main():
     # Load library
-    with open(VIDEO_LIBRARY, "r", encoding="utf-8") as f:
+    with open(VIDEO_LIBRARY, encoding="utf-8") as f:
         library = json.load(f)
-    
+
     courses = library.get("courses", [])
-    
+
     # Find courses without topics
     updated = 0
     topic_counts = Counter()
-    
+
     for course in courses:
         existing_topic = course.get("topic")
         if existing_topic:
             topic_counts[existing_topic] += 1
             continue
-        
+
         # Try to assign a topic
         new_topic = find_topic(course)
         if new_topic:
@@ -152,14 +150,14 @@ def main():
         else:
             topic_counts["Other"] += 1
             print(f"✗ No match: '{course.get('title', '?')[:50]}'")
-    
+
     # Save updated library
     with open(VIDEO_LIBRARY, "w", encoding="utf-8") as f:
         json.dump(library, f, indent=2, ensure_ascii=False)
-    
+
     print(f"\n{'='*60}")
     print(f"SUMMARY: Updated {updated} courses with topics")
-    print(f"\nTopic Distribution:")
+    print("\nTopic Distribution:")
     for topic, count in topic_counts.most_common():
         print(f"  {topic}: {count}")
 

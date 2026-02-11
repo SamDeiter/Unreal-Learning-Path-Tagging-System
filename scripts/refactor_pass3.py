@@ -1,9 +1,8 @@
-"""
-Pass 3: Extract ProblemFirst search pipeline.
+"""Pass 3: Extract ProblemFirst search pipeline.
 1. Pure matching functions → domain/courseMatching.js
-2. Video flattening + scoring → domain/videoRanking.js  
+2. Video flattening + scoring → domain/videoRanking.js
 3. React state/handlers → hooks/useProblemSearch.js
-4. ProblemFirst.jsx → thin view (render only)
+4. ProblemFirst.jsx → thin view (render only).
 """
 import os
 
@@ -536,7 +535,7 @@ print("✅ domain/videoRanking.js created")
 
 # ─── 3. Rewrite ProblemFirst.jsx as thin view importing from domain ───
 problem_first_path = os.path.join(BASE, "components", "ProblemFirst", "ProblemFirst.jsx")
-with open(problem_first_path, "r", encoding="utf-8") as f:
+with open(problem_first_path, encoding="utf-8") as f:
     original = f.read()
 
 # The new slim ProblemFirst.jsx

@@ -1,5 +1,6 @@
 """Quick test to see what's in the target folder."""
 import pickle
+
 from googleapiclient.discovery import build
 
 # Load creds
@@ -39,5 +40,5 @@ for v in videos[:10]:
     print(f"   {v['name']}")
 if len(videos) > 10:
     print(f"   ... and {len(videos) - 10} more")
-    
+
 print(f"\n✅ Total: {len(folders)} folders, {len(videos)} videos")

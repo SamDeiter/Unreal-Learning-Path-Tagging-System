@@ -1,5 +1,4 @@
-"""
-extract_key_steps.py — Extract keySteps + seeAlso from scraped Epic docs via Gemini
+"""extract_key_steps.py — Extract keySteps + seeAlso from scraped Epic docs via Gemini
 ═══════════════════════════════════════════════════════════════════════════════════════
 Reads content/scraped_docs.json (pre-scraped Epic doc pages), matches them to
 doc_links.json entries by URL slug, then calls Gemini to extract structured
@@ -13,13 +12,13 @@ Usage:
     python scripts/extract_key_steps.py --key nanite     # Process single entry
 """
 
+import argparse
 import json
 import os
 import sys
 import time
-import argparse
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # ─── Paths ─────────────────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -107,8 +106,8 @@ def build_slug_index(scraped_docs):
 
 def call_gemini(prompt, api_key):
     """Call Gemini API with retry + exponential backoff."""
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     url = f"{API_URL}?key={api_key}"
     payload = {
@@ -173,7 +172,7 @@ def parse_extraction(raw_text, allowed_keys):
     try:
         data = json.loads(text)
     except json.JSONDecodeError:
-        print(f"    WARN: Failed to parse JSON, trying to extract...")
+        print("    WARN: Failed to parse JSON, trying to extract...")
         # Try to find JSON in response
         import re
         match = re.search(r'\{.*\}', text, re.DOTALL)
@@ -241,12 +240,12 @@ def main():
 
     # Load data
     print(f"Loading doc_links from {DOC_LINKS}...")
-    with open(DOC_LINKS, "r", encoding="utf-8") as f:
+    with open(DOC_LINKS, encoding="utf-8") as f:
         doc_links = json.load(f)
     print(f"  {len(doc_links)} entries")
 
     print(f"Loading scraped docs from {SCRAPED_DOCS}...")
-    with open(SCRAPED_DOCS, "r", encoding="utf-8") as f:
+    with open(SCRAPED_DOCS, encoding="utf-8") as f:
         scraped_docs = json.load(f)
     slug_index = build_slug_index(scraped_docs)
     print(f"  {len(slug_index)} scraped pages indexed")
@@ -370,7 +369,7 @@ def main():
     if not args.dry_run:
         print(f"  Written to {DOC_LINKS}")
     else:
-        print(f"  [DRY RUN] No files modified")
+        print("  [DRY RUN] No files modified")
 
     # Cleanup checkpoint on full completion
     if errors == 0 and CHECKPOINT.exists() and not args.key:

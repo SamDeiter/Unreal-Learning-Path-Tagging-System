@@ -1,10 +1,10 @@
+"""Pass 4 — Split TagGraph.jsx (933 lines) into:
+1. tagGraphConfig.js   — scaling functions, CATEGORY_COLORS, stylesheet, layoutConfig
+2. useTagGraph.js       — custom hook with all state, effects, event handlers
+3. TagGraph.jsx (slim)  — thin view (~250 lines).
 """
-Pass 4 — Split TagGraph.jsx (933 lines) into:
-  1. tagGraphConfig.js   — scaling functions, CATEGORY_COLORS, stylesheet, layoutConfig
-  2. useTagGraph.js       — custom hook with all state, effects, event handlers
-  3. TagGraph.jsx (slim)  — thin view (~250 lines)
-"""
-import pathlib, textwrap
+import pathlib
+import textwrap
 
 SRC = pathlib.Path(r"c:\Users\Sam Deiter\Documents\GitHub\Unreal-Learning-Path-Tagging-System\path-builder\src")
 COMP = SRC / "components" / "TagGraph"
@@ -760,4 +760,4 @@ orig = 933
 new = slim_jsx.count('\n') + 1
 print(f"✅ TagGraph.jsx rewritten: {orig} → {new} lines")
 
-print(f"\n─── Pass 4 Complete ───")
+print("\n─── Pass 4 Complete ───")

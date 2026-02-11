@@ -1,5 +1,4 @@
-"""
-Pass 1 Refactor: Extract GuidedPlayer controller hook + sub-components.
+"""Pass 1 Refactor: Extract GuidedPlayer controller hook + sub-components.
 Zero behavior change — just moves state/handlers to hook, rendering to sub-components.
 """
 import os

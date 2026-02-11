@@ -1,14 +1,13 @@
-"""
-Build Transcript Segments Index
+"""Build Transcript Segments Index
 Parses VTT files from content/transcripts/ and produces a compact JSON
 mapping each video to timestamped text segments.
 
 Output: path-builder/src/data/transcript_segments.json
 """
 
+import json
 import os
 import re
-import json
 from pathlib import Path
 
 # Paths
@@ -44,7 +43,7 @@ def format_timestamp(seconds):
 def parse_vtt_file(filepath):
     """Parse a VTT file into a list of cues with start, end, text."""
     cues = []
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         content = f.read()
 
     # Remove WEBVTT header
@@ -124,7 +123,7 @@ def group_cues_into_segments(cues, chunk_seconds=SEGMENT_DURATION_SECONDS):
 
 def extract_video_key(filename):
     """Extract a clean video key from VTT filename.
-    
+
     Example: '100.01_12_Lumen_55.vtt' -> '12_Lumen'
     """
     name = Path(filename).stem
@@ -181,7 +180,7 @@ def build_index():
         json.dump(index, f, ensure_ascii=False, separators=(",", ":"))
 
     file_size_kb = os.path.getsize(OUTPUT_FILE) / 1024
-    print(f"Built transcript index:")
+    print("Built transcript index:")
     print(f"  Courses: {len(index)}")
     print(f"  VTT files: {total_files}")
     print(f"  Segments: {total_segments}")

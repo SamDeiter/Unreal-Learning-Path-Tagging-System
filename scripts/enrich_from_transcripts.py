@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Phase 1: Transcript-Based Tag Enrichment via Gemini AI
+"""Phase 1: Transcript-Based Tag Enrichment via Gemini AI
 Uses existing transcripts + Gemini to extract rich tags from video content.
 Processes in batches with rate limiting to manage API costs.
 
@@ -8,12 +7,10 @@ Usage:
   python scripts/enrich_from_transcripts.py --limit 10  # Process 10 courses
   python scripts/enrich_from_transcripts.py --all       # Process all (careful!)
 """
-import json
-import re
-import time
 import argparse
+import json
+import time
 from pathlib import Path
-from collections import Counter
 
 # Configuration
 CONTENT_DIR = Path("content")
@@ -53,7 +50,7 @@ Respond as JSON only:
 
 
 def load_library():
-    with open(VIDEO_LIBRARY, "r", encoding="utf-8") as f:
+    with open(VIDEO_LIBRARY, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -67,10 +64,10 @@ def load_transcript(video_id):
     transcript_file = TRANSCRIPTS_DIR / f"{video_id}.json"
     if not transcript_file.exists():
         return None
-    
-    with open(transcript_file, "r", encoding="utf-8") as f:
+
+    with open(transcript_file, encoding="utf-8") as f:
         data = json.load(f)
-    
+
     # Handle different transcript formats
     if isinstance(data, dict):
         return data.get("text") or data.get("transcript") or ""
@@ -80,41 +77,40 @@ def load_transcript(video_id):
 def get_videos_needing_enrichment(courses, limit=None):
     """Find videos with transcripts that haven't been AI-enriched yet."""
     videos_to_process = []
-    
+
     for course in courses:
         if not course.get("videos"):
             continue
-            
+
         for video in course["videos"]:
             video_id = video.get("id") or video.get("video_id")
             if not video_id:
                 continue
-            
+
             # Check if already enriched
             if video.get("ai_enriched"):
                 continue
-            
+
             # Check if transcript exists
             transcript = load_transcript(video_id)
             if not transcript or len(transcript) < 100:
                 continue
-            
+
             videos_to_process.append({
                 "course": course,
                 "video": video,
                 "video_id": video_id,
                 "transcript": transcript[:2000],  # First 2000 chars
             })
-            
+
             if limit and len(videos_to_process) >= limit:
                 return videos_to_process
-    
+
     return videos_to_process
 
 
 def call_gemini_api(prompt):
-    """
-    Call Gemini API for enrichment.
+    """Call Gemini API for enrichment.
     NOTE: This is a placeholder - you need to implement actual API call
     or use the Cloud Function if running from client.
     """
@@ -134,12 +130,12 @@ def enrich_video(video_data):
     """Enrich a single video using Gemini."""
     video = video_data["video"]
     transcript = video_data["transcript"]
-    
+
     prompt = ENRICHMENT_PROMPT.format(transcript=transcript)
-    
+
     try:
         result = call_gemini_api(prompt)
-        
+
         # Merge extracted data into video
         video["ai_enriched"] = True
         video["ai_tags"] = result.get("technical_tags", [])
@@ -147,7 +143,7 @@ def enrich_video(video_data):
         video["ai_level"] = result.get("skill_level")
         video["ai_topics"] = result.get("learning_topics", [])
         video["ai_prerequisites"] = result.get("prerequisites", [])
-        
+
         return True
     except Exception as e:
         print(f"  [ERROR] {e}")
@@ -160,34 +156,34 @@ def main():
     parser.add_argument("--all", action="store_true", help="Process all videos (careful!)")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be processed")
     args = parser.parse_args()
-    
+
     limit = None if args.all else args.limit
-    
+
     library = load_library()
     courses = library.get("courses", [])
-    
+
     videos = get_videos_needing_enrichment(courses, limit=limit)
-    
+
     print(f"Found {len(videos)} videos needing enrichment")
-    
+
     if args.dry_run:
         for v in videos[:20]:
             print(f"  - {v['video'].get('title', 'Unknown')[:50]}")
         return
-    
+
     enriched = 0
     for i, video_data in enumerate(videos):
         title = video_data["video"].get("title", "Unknown")[:40]
         print(f"[{i+1}/{len(videos)}] {title}...")
-        
+
         if enrich_video(video_data):
             enriched += 1
-        
+
         time.sleep(RATE_LIMIT_DELAY)
-    
+
     # Save updated library
     save_library(library)
-    
+
     print(f"\nSUMMARY: Enriched {enriched}/{len(videos)} videos")
 
 
