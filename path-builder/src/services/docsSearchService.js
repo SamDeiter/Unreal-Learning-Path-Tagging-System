@@ -231,9 +231,12 @@ export async function getDocReadingPath(topics, { limit = 8 } = {}) {
   const docLinks = await getDocLinks();
   if (!docLinks) return [];
 
-  // Get matching docs
+  // Get matching docs (now includes matchScore)
   const matches = await getDocsForTopic(topics, { limit: limit * 2 });
   if (!matches.length) return [];
+
+  // Build a map of matchScore by key for later lookup
+  const scoreMap = new Map(matches.map((m) => [m.key, m.matchScore ?? 0]));
 
   // Collect all prerequisite keys
   const needed = new Set();
@@ -261,6 +264,7 @@ export async function getDocReadingPath(topics, { limit = 8 } = {}) {
       tier: doc.tier,
       subsystem: doc.subsystem,
       readTimeMinutes: doc.readTimeMinutes || 10,
+      matchScore: scoreMap.get(key) ?? 0,
       source: "epic_docs",
     });
   }
