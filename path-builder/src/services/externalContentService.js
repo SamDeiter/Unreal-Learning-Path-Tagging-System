@@ -102,8 +102,16 @@ export async function getResourcesForTopics(topics, { maxTier = "advanced", limi
     }
   }
 
-  // Sort: best match first, then official > community, then beginner first
+  // Detect UE5 content for priority sorting
+  const UE5_PATTERN = /\b(ue\s*5|unreal\s*engine\s*5|5\.\d)/i;
+  for (const r of results) {
+    r._isUE5 = UE5_PATTERN.test(r.title) ||
+               (r.topics || []).some((t) => UE5_PATTERN.test(t));
+  }
+
+  // Sort: UE5 first, then best match, then official > community, then beginner first
   results.sort((a, b) => {
+    if (a._isUE5 !== b._isUE5) return a._isUE5 ? -1 : 1;
     if (b._score !== a._score) return b._score - a._score;
     if (a.channelTrust !== b.channelTrust) {
       return a.channelTrust === "official" ? -1 : 1;
@@ -111,7 +119,7 @@ export async function getResourcesForTopics(topics, { maxTier = "advanced", limi
     return (TIER_ORDER[a.tier] ?? 1) - (TIER_ORDER[b.tier] ?? 1);
   });
 
-  return results.slice(0, limit).map(({ _score, ...rest }) => rest);
+  return results.slice(0, limit).map(({ _score, _isUE5, ...rest }) => rest);
 }
 
 /**

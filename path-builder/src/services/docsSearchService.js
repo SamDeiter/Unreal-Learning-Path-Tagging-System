@@ -209,7 +209,12 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
     return (TIER_ORDER[a.tier] ?? 1) - (TIER_ORDER[b.tier] ?? 1);
   });
 
-  return results.slice(0, limit).map(({ _score, ...rest }) => rest);
+  // Normalize scores to 0–100 range for UI match badges
+  const maxScore = results.length > 0 ? results[0]._score : 1;
+  return results.slice(0, limit).map(({ _score, ...rest }) => ({
+    ...rest,
+    matchScore: Math.round((_score / Math.max(maxScore, 1)) * 100),
+  }));
 }
 
 /**

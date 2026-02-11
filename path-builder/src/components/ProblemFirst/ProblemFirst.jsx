@@ -49,7 +49,7 @@ export default function ProblemFirst() {
   const [error, setError] = useState(null);
   const [blendedPath, setBlendedPath] = useState(null);
   const [videoResults, setVideoResults] = useState([]);
-  const [expandedVideoId, setExpandedVideoId] = useState(null);
+
 
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
   const tagData = useTagData();
@@ -325,7 +325,7 @@ export default function ProblemFirst() {
     setStage(STAGES.INPUT);
     setDiagnosisData(null);
     setVideoResults([]);
-    setExpandedVideoId(null);
+
     setError(null);
     setBlendedPath(null);
   }, []);
@@ -420,14 +420,12 @@ export default function ProblemFirst() {
                     </div>
                     <div className="video-results-grid">
                       {grouped[section.key].map((video) => (
-                        <div key={video.driveId} className={`video-result-wrapper ${expandedVideoId === video.driveId ? "expanded" : ""}`} id={`video-${video.driveId}`}>
+                        <div key={video.driveId} className="video-result-wrapper" id={`video-${video.driveId}`}>
                           <VideoResultCard
                             video={video}
                             isAdded={isInCart(video.driveId)}
                             onToggle={handleVideoToggle}
                             userQuery={diagnosisData?.userQuery || ""}
-                            isExpanded={expandedVideoId === video.driveId}
-                            onExpand={(id) => setExpandedVideoId(expandedVideoId === id ? null : id)}
                           />
                         </div>
                       ))}
@@ -444,14 +442,12 @@ export default function ProblemFirst() {
                           </div>
                           <div className="video-results-grid">
                             {grouped._other.map((video) => (
-                              <div key={video.driveId} className={`video-result-wrapper ${expandedVideoId === video.driveId ? "expanded" : ""}`} id={`video-${video.driveId}`}>
+                              <div key={video.driveId} className="video-result-wrapper" id={`video-${video.driveId}`}>
                                 <VideoResultCard
                                   video={video}
                                   isAdded={isInCart(video.driveId)}
                                   onToggle={handleVideoToggle}
                                   userQuery={diagnosisData?.userQuery || ""}
-                                  isExpanded={expandedVideoId === video.driveId}
-                                  onExpand={(id) => setExpandedVideoId(expandedVideoId === id ? null : id)}
                                 />
                               </div>
                             ))}
@@ -487,6 +483,15 @@ export default function ProblemFirst() {
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="doc-card-header">
+                            {doc.matchScore != null && (() => {
+                              const tier = doc.matchScore >= 90 ? "best" : doc.matchScore >= 60 ? "strong" : doc.matchScore >= 30 ? "good" : "related";
+                              const label = doc.matchScore >= 90 ? "Best Match" : doc.matchScore >= 60 ? "Strong" : doc.matchScore >= 30 ? "Good" : "Related";
+                              return (
+                                <span className={`doc-match-badge doc-match-${tier}`} title={`${doc.matchScore}% relevancy`}>
+                                  <span className="doc-match-dot" />{label}
+                                </span>
+                              );
+                            })()}
                             <span className={`tier-badge tier-${doc.tier || "intermediate"}`}>
                               {doc.tier || "intermediate"}
                             </span>

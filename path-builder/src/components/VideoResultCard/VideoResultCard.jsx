@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import { PlayCircle, Check, Plus, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { PlayCircle, Check, Plus } from "lucide-react";
 import { recordUpvote, recordDownvote, getFeedbackStatus } from "../../services/feedbackService";
 import prereqData from "../../data/course_prerequisites.json";
 import libraryData from "../../data/video_library_enriched.json";
@@ -35,29 +35,22 @@ function formatDuration(seconds) {
 }
 
 /**
- * Individual video result card — compact by default, expandable on click.
- * When expanded, shows MicroLesson content, timestamps, course details.
+ * Individual video result card — compact display.
  */
 export default function VideoResultCard({
   video,
   isAdded,
   onToggle,
   userQuery,
-  isExpanded = false,
-  onExpand,
 }) {
   const {
     title: rawTitle,
-    courseName,
     duration,
-    matchedTags = [],
     driveId,
-    topSegments = [],
     courseCode,
     _curatedMatch,
     role,
     reason,
-    docLinks = [],
     matchPercent,
     matchReason,
   } = video;
@@ -76,15 +69,7 @@ export default function VideoResultCard({
   const [prereqTip, setPrereqTip] = useState(false);
   const tipRef = useRef(null);
 
-  // Scroll expanded card into view
   const cardRef = useRef(null);
-  useEffect(() => {
-    if (isExpanded && cardRef.current) {
-      setTimeout(() => {
-        cardRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 50);
-    }
-  }, [isExpanded]);
 
   // Close tooltip on outside click
   useEffect(() => {
@@ -108,9 +93,6 @@ export default function VideoResultCard({
     setFeedbackState("down");
   };
 
-  const handleCardClick = () => {
-    if (onExpand) onExpand(driveId);
-  };
 
 
   // Fallback thumbnail
@@ -121,11 +103,9 @@ export default function VideoResultCard({
   return (
     <div
       ref={cardRef}
-      className={`video-result-card ${isAdded ? "added" : ""} ${_curatedMatch ? "curated" : ""} ${feedbackState === "down" ? "demoted" : ""} ${isExpanded ? "expanded" : ""}`}
-      onClick={handleCardClick}
+      className={`video-result-card ${isAdded ? "added" : ""} ${_curatedMatch ? "curated" : ""} ${feedbackState === "down" ? "demoted" : ""}`}
       role="button"
       tabIndex={0}
-      aria-expanded={isExpanded}
     >
       {/* === Compact Card View (always visible) === */}
       <div className="vrc-compact">
@@ -250,82 +230,7 @@ export default function VideoResultCard({
           </button>
         </div>
 
-        {/* Expand indicator */}
-        <div className="vrc-expand-hint">
-          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          <span>{isExpanded ? "Less" : "Details"}</span>
-        </div>
       </div>
-
-      {/* === Expanded Panel (progressive disclosure) === */}
-      {isExpanded && (
-        <div className="vrc-expanded-panel" onClick={(e) => e.stopPropagation()}>
-          {/* Course & Tags Details */}
-          <div className="vrc-details-row">
-            {courseName && (
-              <span className="vrc-detail-chip vrc-detail-course">📁 {courseName}</span>
-            )}
-            {matchedTags.length > 0 && (
-              <span className="vrc-detail-chip vrc-detail-tags">
-                🏷️ {matchedTags.slice(0, 4).join(", ")}
-              </span>
-            )}
-          </div>
-
-          {/* Reason */}
-          {reason && <p className="vrc-expanded-reason">{reason}</p>}
-
-          {/* Timestamp segments */}
-          {topSegments.length > 0 && (
-            <div className="vrc-expanded-segments">
-              <span className="vrc-expanded-segments-label">
-                <Clock size={12} /> Key Moments
-              </span>
-              {topSegments.slice(0, 3).map((seg, idx) => (
-                <div key={idx} className="vrc-segment-hint">
-                  <Clock size={12} className="vrc-clock-icon" />
-                  <span className="vrc-seg-time">{seg.timestamp}</span>
-                  <span className="vrc-seg-preview">
-                    {seg.previewText.length > 80
-                      ? seg.previewText.substring(0, 77) + "..."
-                      : seg.previewText}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-
-
-
-          {/* 📚 Per-Video Doc Links */}
-          {docLinks.length > 0 && (
-            <div className="vrc-expanded-docs">
-              <span className="vrc-expanded-docs-label">📚 Documentation</span>
-              <div className="vrc-doc-chips">
-                {docLinks.map((doc, i) => (
-                  <a
-                    key={i}
-                    href={doc.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="vrc-doc-chip"
-                  >
-                    📄 {doc.label || "UE5 Docs"}
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Collapse button */}
-          <button
-            className="vrc-collapse-btn"
-            onClick={() => onExpand && onExpand(driveId)}
-          >
-            <ChevronUp size={14} /> Collapse
-          </button>
-        </div>
-      )}
     </div>
   );
 }
@@ -348,6 +253,4 @@ VideoResultCard.propTypes = {
   isAdded: PropTypes.bool,
   onToggle: PropTypes.func.isRequired,
   userQuery: PropTypes.string,
-  isExpanded: PropTypes.bool,
-  onExpand: PropTypes.func,
 };
