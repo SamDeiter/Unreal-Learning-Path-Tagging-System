@@ -24,9 +24,10 @@ import {
 const app = getFirebaseApp();
 const db = getFirestore(app);
 
-// ── Domain Check ─────────────────────────────────────────────────────
+// ── Domain & Admin Check ─────────────────────────────────────────────
 
 const ALLOWED_DOMAINS = ["epicgames.com"];
+const ADMIN_EMAILS = ["samdeiter@gmail.com"];
 
 /**
  * Check if an email belongs to an auto-admitted domain.
@@ -35,7 +36,9 @@ const ALLOWED_DOMAINS = ["epicgames.com"];
  */
 export function isEpicEmployee(email) {
   if (!email) return false;
-  const domain = email.split("@")[1]?.toLowerCase();
+  const lower = email.toLowerCase();
+  if (ADMIN_EMAILS.includes(lower)) return true;
+  const domain = lower.split("@")[1];
   return ALLOWED_DOMAINS.includes(domain);
 }
 
