@@ -58,7 +58,13 @@ export default function VideoResultCard({
     role,
     reason,
     docLinks = [],
+    matchPercent,
+    matchReason,
   } = video;
+
+  // Compute match tier for badge
+  const matchTier = matchPercent >= 100 ? "best" : matchPercent >= 70 ? "strong" : matchPercent >= 40 ? "good" : "related";
+  const matchLabel = matchPercent >= 100 ? "Best Match" : matchPercent >= 70 ? "Strong Match" : matchPercent >= 40 ? "Good Match" : "Related";
 
   // Strip "Part A/B/C" suffixes from display title
   const title = rawTitle?.replace(/\s+Part\s+[A-Z]$/i, "").trim() || rawTitle;
@@ -149,6 +155,14 @@ export default function VideoResultCard({
           </div>
         )}
 
+        {/* Match quality badge */}
+        {matchPercent != null && (
+          <div className={`vrc-match-badge vrc-match-${matchTier}`} title={`${matchPercent}% match`}>
+            <span className="vrc-match-dot" />
+            {matchLabel}
+          </div>
+        )}
+
         {/* Role badge */}
         {role && (
           <div className="vrc-role-wrapper" ref={role === "prerequisite" ? tipRef : null}>
@@ -193,6 +207,7 @@ export default function VideoResultCard({
 
         <div className="vrc-info">
           <h4 className="vrc-title">{title}</h4>
+          {matchReason && <p className="vrc-match-reason">{matchReason}</p>}
           {reason && <p className="vrc-reason-preview">{reason}</p>}
         </div>
 

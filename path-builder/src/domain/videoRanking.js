@@ -153,10 +153,57 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
     const median = scores[Math.floor(scores.length / 2)];
     const threshold = Math.max(median * 0.5, 10);
     const filtered = diverse.filter((v) => v.relevanceScore >= threshold);
-    if (filtered.length >= 3) return filtered.slice(0, 6);
+    if (filtered.length >= 3) {
+      const results = filtered.slice(0, 6);
+      addMatchMetadata(results, queryWords);
+      return results;
+    }
   }
 
-  return diverse.slice(0, 6);
+  const results = diverse.slice(0, 6);
+  addMatchMetadata(results, queryWords);
+  return results;
+}
+
+/**
+ * Compute matchPercent (relative to top scorer) and matchReason for each video.
+ */
+function addMatchMetadata(videos, queryWords) {
+  if (videos.length === 0) return;
+  const topScore = Math.max(videos[0].relevanceScore, 1);
+
+  for (const v of videos) {
+    // Percent relative to top result
+    v.matchPercent = Math.min(100, Math.round((v.relevanceScore / topScore) * 100));
+
+    // Build human-readable match reason
+    const reasons = [];
+    if (v._curatedMatch) {
+      reasons.push("Known solution for this problem");
+    }
+    if (v.titleRelevance > 0) {
+      const hitWords = queryWords
+        .filter((w) => (v.title || "").toLowerCase().includes(w))
+        .slice(0, 3);
+      if (hitWords.length > 0) {
+        reasons.push(`Title matches: ${hitWords.join(", ")}`);
+      }
+    }
+    if (v.topSegments.length > 0) {
+      const segKws = new Set();
+      for (const seg of v.topSegments) {
+        for (const kw of seg.matchedKeywords || []) segKws.add(kw);
+      }
+      const kwList = [...segKws].slice(0, 4);
+      if (kwList.length > 0) {
+        reasons.push(`Transcript mentions: ${kwList.join(", ")}`);
+      }
+    }
+    if (v.matchedTags.length > 0 && reasons.length < 2) {
+      reasons.push(`Tagged: ${v.matchedTags.slice(0, 3).join(", ")}`);
+    }
+    v.matchReason = reasons.length > 0 ? reasons.join(" · ") : "Related to your query";
+  }
 }
 
 /**
