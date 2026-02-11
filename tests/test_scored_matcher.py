@@ -3,12 +3,10 @@
 import sys
 from pathlib import Path
 
-import pytest
-
 # Add ingestion to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from ingestion.scored_matcher import ScoredMatcher, SIGNAL_MULTIPLIERS
+from ingestion.scored_matcher import SIGNAL_MULTIPLIERS, ScoredMatcher
 
 
 class TestScoringPrecedence:
@@ -90,7 +88,7 @@ class TestTieBreakers:
         results = matcher.match_query(query)
 
         # packaging has higher priority (60) than blueprint (40) in rules
-        tag_order = [t.tag_id for t in results if "packag" in t.tag_id or "blueprint" in t.tag_id]
+        [t.tag_id for t in results if "packag" in t.tag_id or "blueprint" in t.tag_id]
 
         # Verify we got results
         assert len(results) > 0, "Expected some matches"
