@@ -6,7 +6,6 @@ and links to specific moments relevant to the user's query.
 
 import re
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -163,7 +162,7 @@ def main():
     # Sample description with timestamps
     description = """
     Learn how to fix packaging errors in UE5!
-    
+
     0:00 Introduction
     1:23 Common Packaging Errors
     3:45 ExitCode 25 Explained
@@ -187,7 +186,7 @@ def main():
         query_terms=["ExitCode 25", "packaging", "error"],
     )
 
-    print(f"\n🎯 Relevant snippets for 'ExitCode 25':")
+    print("\n🎯 Relevant snippets for 'ExitCode 25':")
     for s in snippets:
         print(f"  {s.timestamp_display} - {s.snippet_title}")
         print(f"    URL: {s.url}")

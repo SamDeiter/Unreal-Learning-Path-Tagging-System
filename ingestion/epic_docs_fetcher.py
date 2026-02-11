@@ -5,7 +5,6 @@ Maps tags to relevant Epic docs URLs.
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -15,8 +14,8 @@ class DocResource:
     title: str
     url: str
     category: str
-    description: Optional[str] = None
-    thumbnail_url: Optional[str] = None
+    description: str | None = None
+    thumbnail_url: str | None = None
 
 
 class EpicDocsFetcher:

@@ -4,14 +4,14 @@ Fetches video metadata and captions from UE5 tutorial channels.
 Extracts timestamps, topics, and error signatures for tagging.
 """
 
+import contextlib
 import json
-import urllib.request
-import urllib.parse
 import urllib.error
+import urllib.parse
+import urllib.request
 from dataclasses import dataclass
-from typing import Optional
 
-from .config import get_youtube_api_key, INGESTION_DIR
+from .config import INGESTION_DIR, get_youtube_api_key
 
 
 @dataclass
@@ -23,10 +23,10 @@ class VideoMetadata:
     description: str
     channel_title: str
     published_at: str
-    duration: Optional[str] = None
-    view_count: Optional[int] = None
-    tags: Optional[list[str]] = None
-    thumbnail_url: Optional[str] = None
+    duration: str | None = None
+    view_count: int | None = None
+    tags: list[str] | None = None
+    thumbnail_url: str | None = None
 
 
 class YouTubeFetcher:
@@ -65,10 +65,8 @@ class YouTubeFetcher:
                 return json.loads(response.read().decode())
         except urllib.error.HTTPError as e:
             error_body = ""
-            try:
+            with contextlib.suppress(Exception):
                 error_body = e.read().decode()
-            except Exception:
-                pass
             print(f"  ⚠️  YouTube API error {e.code}: {e.reason}")
             if error_body:
                 print(f"       Details: {error_body[:300]}")
@@ -101,7 +99,10 @@ class YouTubeFetcher:
         params = {
             "part": "snippet",
             "q": f"Unreal Engine 5 {query}",
-            "maxResults": max_results * 5 if epic_only else max_results * 2,  # Fetch more to filter intros
+            "maxResults": (
+                max_results * 5 if epic_only
+                else max_results * 2
+            ),  # Fetch more to filter intros
             "type": "video",
             "relevanceLanguage": "en",
         }
@@ -112,22 +113,25 @@ class YouTubeFetcher:
 
         data = self._api_request("search", params)
         videos = []
-        
+
         # Terms that indicate intro/preview content (skip these for detailed tutorials)
-        skip_terms = ['preview', 'intro', 'introduction', 'trailer', 'teaser', 'essentials', 'overview']
+        skip_terms = [
+            'preview', 'intro', 'introduction',
+            'trailer', 'teaser', 'essentials', 'overview',
+        ]
 
         for item in data.get("items", []):
             snippet = item["snippet"]
-            
+
             # Filter by Epic Games if requested (fallback for search without channelId)
             if epic_only and snippet.get("channelId") != self.CHANNEL_IDS["epic_games"]:
                 continue
-            
+
             # Skip intro/preview videos for better content matching
             title_lower = snippet["title"].lower()
             if any(term in title_lower for term in skip_terms):
                 continue
-                
+
             # Get best available thumbnail
             thumbnails = snippet.get("thumbnails", {})
             thumbnail_url = (
@@ -135,7 +139,7 @@ class YouTubeFetcher:
                 thumbnails.get("medium", {}).get("url") or
                 thumbnails.get("default", {}).get("url")
             )
-            
+
             videos.append(
                 VideoMetadata(
                     video_id=item["id"]["videoId"],
@@ -146,7 +150,7 @@ class YouTubeFetcher:
                     thumbnail_url=thumbnail_url,
                 )
             )
-            
+
             if len(videos) >= max_results:
                 break
 

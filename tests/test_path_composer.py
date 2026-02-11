@@ -8,8 +8,8 @@ import pytest
 # Add ingestion to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from ingestion.scored_matcher import ScoredMatcher, ScoredTag, MatchTrace
-from ingestion.path_composer import PathComposer, Atom, ComposedPath
+from ingestion.path_composer import PathComposer
+from ingestion.scored_matcher import ScoredMatcher
 
 
 class TestEdgeExpansion:
@@ -30,7 +30,7 @@ class TestEdgeExpansion:
         path = composer.compose_path(query, tags)
 
         # Check edge expansions
-        symptom_expansions = [
+        [
             e for e in path.edge_expansions
             if e.relation == "symptom_of"
         ]
@@ -48,7 +48,7 @@ class TestEdgeExpansion:
         if len(tags) == 0:
             pytest.skip("No tags matched")
 
-        path = composer.compose_path(query, tags)
+        composer.compose_path(query, tags)
         # Path should include prerequisite topics in edge expansions
 
 

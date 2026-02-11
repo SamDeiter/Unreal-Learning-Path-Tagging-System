@@ -9,8 +9,6 @@ import re
 from collections import Counter
 from dataclasses import dataclass
 from math import log
-from pathlib import Path
-from typing import Optional
 
 from .config import TAGS_DIR
 
@@ -20,7 +18,7 @@ class ExtractedConcept:
     """A concept extracted from text with confidence score."""
 
     term: str
-    tag_id: Optional[str]  # Matched canonical tag
+    tag_id: str | None  # Matched canonical tag
     confidence: float
     source: str  # Where it was found (title, description, etc.)
     context: str  # Surrounding text
@@ -83,7 +81,7 @@ class ConceptExtractor:
         """Load canonical tags from tags.json."""
         tags_file = TAGS_DIR / "tags.json"
         if tags_file.exists():
-            with open(tags_file, "r") as f:
+            with open(tags_file) as f:
                 data = json.load(f)
                 return {t["tag_id"]: t for t in data.get("tags", [])}
         return {}
@@ -119,7 +117,7 @@ class ConceptExtractor:
             List of extracted error concepts.
         """
         concepts = []
-        text_lower = text.lower()
+        text.lower()
 
         for pattern, tag_template in ERROR_PATTERNS.items():
             matches = re.finditer(pattern, text, re.IGNORECASE)
@@ -189,7 +187,7 @@ class ConceptExtractor:
         self,
         title: str,
         description: str,
-        video_tags: Optional[list[str]] = None,
+        video_tags: list[str] | None = None,
     ) -> list[ExtractedConcept]:
         """Extract all concepts from video metadata.
 

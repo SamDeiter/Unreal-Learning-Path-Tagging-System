@@ -11,8 +11,6 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
-
 
 # =============================================================================
 # SIGNAL TYPE MULTIPLIERS
@@ -107,9 +105,9 @@ class ScoredMatcher:
 
     def __init__(
         self,
-        rules_path: Optional[Path] = None,
-        tags_path: Optional[Path] = None,
-        edges_path: Optional[Path] = None,
+        rules_path: Path | None = None,
+        tags_path: Path | None = None,
+        edges_path: Path | None = None,
     ):
         """Initialize with paths to JSON config files.
 
@@ -145,8 +143,8 @@ class ScoredMatcher:
     def match_query(
         self,
         query: str,
-        engine_version: Optional[str] = None,
-        platform: Optional[str] = None,
+        engine_version: str | None = None,
+        platform: str | None = None,
     ) -> list[ScoredTag]:
         """Match a query to tags with scores.
 
@@ -327,7 +325,7 @@ class ScoredMatcher:
 
         return "contains"
 
-    def _extract_engine_version(self, query: str) -> Optional[str]:
+    def _extract_engine_version(self, query: str) -> str | None:
         """Extract UE version from query text.
 
         Args:
@@ -426,7 +424,7 @@ class ScoredMatcher:
         self,
         query: str,
         scored_tags: list[ScoredTag],
-        output_dir: Optional[Path] = None,
+        output_dir: Path | None = None,
     ) -> Path:
         """Save match trace to JSON file for debugging.
 

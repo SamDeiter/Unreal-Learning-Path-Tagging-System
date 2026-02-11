@@ -7,10 +7,8 @@ Falls back to golden templates when atoms don't cover all requirements.
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 from .scored_matcher import ScoredTag
-
 
 # =============================================================================
 # DATA CLASSES
@@ -67,7 +65,7 @@ class ComposedPath:
     tags: list[ScoredTag]
     steps: list[ComposedStep]
     edge_expansions: list[EdgeExpansion] = field(default_factory=list)
-    fallback_template: Optional[str] = None  # If we fell back to a template
+    fallback_template: str | None = None  # If we fell back to a template
     total_duration_minutes: int = 0
 
     def to_dict(self) -> dict:
@@ -128,9 +126,9 @@ class PathComposer:
 
     def __init__(
         self,
-        atoms_dir: Optional[Path] = None,
-        edges_path: Optional[Path] = None,
-        templates_dir: Optional[Path] = None,
+        atoms_dir: Path | None = None,
+        edges_path: Path | None = None,
+        templates_dir: Path | None = None,
     ):
         """Initialize with paths to atoms, edges, and templates.
 
@@ -327,7 +325,7 @@ class PathComposer:
 
         return matching
 
-    def _find_template(self, tags: list[ScoredTag]) -> Optional[Path]:
+    def _find_template(self, tags: list[ScoredTag]) -> Path | None:
         """Find a golden template that matches the tags.
 
         Args:
@@ -487,6 +485,7 @@ class PathComposer:
 def main():
     """CLI for testing path composer."""
     import sys
+
     from .scored_matcher import ScoredMatcher
 
     if len(sys.argv) < 2:
@@ -507,7 +506,7 @@ def main():
     composer = PathComposer()
     path = composer.compose_path(query, tags)
 
-    print(f"\n=== Composed Path ===\n")
+    print("\n=== Composed Path ===\n")
     print(f"ID: {path.path_id}")
     print(f"Title: {path.title}")
     print(f"Duration: {path.total_duration_minutes} minutes")

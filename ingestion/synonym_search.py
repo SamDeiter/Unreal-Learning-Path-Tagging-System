@@ -5,10 +5,7 @@ Allows users to search "BP" and find "scripting.blueprint" content.
 """
 
 import json
-import re
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional
 
 from .config import TAGS_DIR
 
@@ -37,7 +34,7 @@ class SynonymSearch:
         """Load canonical tags from tags.json."""
         tags_file = TAGS_DIR / "tags.json"
         if tags_file.exists():
-            with open(tags_file, "r") as f:
+            with open(tags_file) as f:
                 data = json.load(f)
                 return {t["tag_id"]: t for t in data.get("tags", [])}
         return {}
@@ -141,23 +138,25 @@ class SynonymSearch:
         # 5. Fuzzy match on display names
         for tag_id, tag in self.tags.items():
             display = tag.get("display_name", "").lower()
-            if query_lower in display or display in query_lower:
-                if not any(r.matched_tag_id == tag_id for r in results):
-                    results.append(
-                        SearchResult(
-                            query_term=query,
-                            matched_tag_id=tag_id,
-                            match_type="fuzzy",
-                            confidence=0.6,
-                            display_name=tag.get("display_name", tag_id),
-                        )
+            if (
+                (query_lower in display or display in query_lower)
+                and not any(r.matched_tag_id == tag_id for r in results)
+            ):
+                results.append(
+                    SearchResult(
+                        query_term=query,
+                        matched_tag_id=tag_id,
+                        match_type="fuzzy",
+                        confidence=0.6,
+                        display_name=tag.get("display_name", tag_id),
                     )
+                )
 
         # Sort by confidence
         results.sort(key=lambda x: x.confidence, reverse=True)
         return results
 
-    def resolve(self, query: str) -> Optional[str]:
+    def resolve(self, query: str) -> str | None:
         """Resolve a query to a single canonical tag_id.
 
         Args:

@@ -8,14 +8,13 @@ import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
-from .config import TAGS_DIR, LEARNING_PATHS_DIR
-from .youtube_fetcher import YouTubeFetcher, VideoMetadata
 from .concept_extractor import ConceptExtractor
-from .timestamp_extractor import TimestampExtractor
-from .gemini_helper import GeminiHelper
+from .config import LEARNING_PATHS_DIR, TAGS_DIR
 from .epic_docs_fetcher import EpicDocsFetcher
+from .gemini_helper import GeminiHelper
+from .timestamp_extractor import TimestampExtractor
+from .youtube_fetcher import YouTubeFetcher
 
 
 @dataclass
@@ -28,10 +27,10 @@ class ContentItem:
     url: str
     matched_tags: list[str]
     relevance_score: float
-    step_type: Optional[str] = None  # foundations, diagnostics, resolution, prevention
-    snippets: Optional[list[dict]] = None  # Timestamped sections
-    thumbnail_url: Optional[str] = None  # Preview image
-    description: Optional[str] = None  # Brief description
+    step_type: str | None = None  # foundations, diagnostics, resolution, prevention
+    snippets: list[dict] | None = None  # Timestamped sections
+    thumbnail_url: str | None = None  # Preview image
+    description: str | None = None  # Brief description
 
 
 @dataclass
@@ -57,13 +56,13 @@ class LearningPath:
     steps: list[LearningStep] = field(default_factory=list)
     total_duration_minutes: int = 0
     # AI-generated guidance
-    ai_summary: Optional[str] = None
-    ai_what_you_learn: Optional[list[str]] = None
-    ai_estimated_time: Optional[str] = None
-    ai_difficulty: Optional[str] = None
-    ai_hint: Optional[str] = None
-    ai_key_takeaways: Optional[list[str]] = None
-    epic_docs: Optional[list[dict]] = None  # Official Epic documentation links
+    ai_summary: str | None = None
+    ai_what_you_learn: list[str] | None = None
+    ai_estimated_time: str | None = None
+    ai_difficulty: str | None = None
+    ai_hint: str | None = None
+    ai_key_takeaways: list[str] | None = None
+    epic_docs: list[dict] | None = None  # Official Epic documentation links
 
 
 class PathGenerator:
@@ -84,7 +83,7 @@ class PathGenerator:
         """Load canonical tags from tags.json."""
         tags_file = TAGS_DIR / "tags.json"
         if tags_file.exists():
-            with open(tags_file, "r") as f:
+            with open(tags_file) as f:
                 data = json.load(f)
                 return {t["tag_id"]: t for t in data.get("tags", [])}
         return {}
@@ -142,7 +141,11 @@ class PathGenerator:
                     relevance_score=0.8,
                     step_type=step_type,
                     thumbnail_url=video.thumbnail_url,
-                    description=video.description[:150] + "..." if len(video.description) > 150 else video.description,
+                    description=(
+                        video.description[:150] + "..."
+                        if len(video.description) > 150
+                        else video.description
+                    ),
                 )
 
                 if len(content_by_step[step_type]) < max_per_step:
@@ -191,7 +194,7 @@ class PathGenerator:
             display_name = tag.get("display_name", tag_id.split(".")[-1])
             search_query = f"UE5 {display_name}"
             videos = self.fetcher.search_videos(search_query, max_results=5, epic_only=True)
-            
+
             for video in videos:
                 all_videos.append({
                     "video_id": video.video_id,
@@ -211,11 +214,11 @@ class PathGenerator:
 
         if self.gemini.is_available() and all_videos:
             curated = self.gemini.curate_learning_path(query, all_videos)
-            
+
             if curated:
                 ai_summary = curated.get("problem_overview")
                 ai_what_you_learn = curated.get("key_takeaways", [])
-                
+
                 for step_data in curated.get("steps", []):
                     # Build content items from curated videos
                     content = []
@@ -225,16 +228,21 @@ class PathGenerator:
                             video = all_videos[idx]
                             # Build enhanced description with AI context
                             desc = f"**Why this helps:** {vid_ref.get('why_relevant', '')}"
-                            
+
                             # Parse timestamp and add to URL
                             video_url = video["url"]
                             timestamp_hint = vid_ref.get('timestamp_hint', '')
                             if timestamp_hint:
                                 desc += f"\n\n⏱️ **When to watch:** {timestamp_hint}"
-                                # Try to extract timestamp from hint (e.g., "10:00", "start at 5:30", "around 15 minutes")
-                                time_match = re.search(r'(\d{1,2}):(\d{2})', timestamp_hint)
-                                minute_match = re.search(r'(\d+)\s*(?:minute|min)', timestamp_hint, re.IGNORECASE)
-                                
+                                # Try to extract timestamp from hint
+                                time_match = re.search(
+                                    r'(\d{1,2}):(\d{2})', timestamp_hint,
+                                )
+                                minute_match = re.search(
+                                    r'(\d+)\s*(?:minute|min)',
+                                    timestamp_hint, re.IGNORECASE,
+                                )
+
                                 start_seconds = 0
                                 if time_match:
                                     minutes = int(time_match.group(1))
@@ -242,13 +250,13 @@ class PathGenerator:
                                     start_seconds = minutes * 60 + seconds
                                 elif minute_match:
                                     start_seconds = int(minute_match.group(1)) * 60
-                                
+
                                 if start_seconds > 0:
                                     video_url += f"&t={start_seconds}"
-                            
+
                             if vid_ref.get('watch_duration'):
                                 desc += f" ({vid_ref['watch_duration']})"
-                            
+
                             content.append(ContentItem(
                                 content_id=video["video_id"],
                                 title=video["title"],
@@ -260,12 +268,12 @@ class PathGenerator:
                                 thumbnail_url=video["thumbnail_url"],
                                 description=desc,
                             ))
-                    
+
                     if content:
                         step_desc = step_data.get("description", "")
                         if step_data.get("action"):
                             step_desc += f"\n\n👉 **Action:** {step_data['action']}"
-                        
+
                         steps.append(LearningStep(
                             step_number=step_data.get("step_number", len(steps) + 1),
                             step_type=step_data.get("step_type", "foundations"),
@@ -279,10 +287,22 @@ class PathGenerator:
         if not steps:
             content_by_step = self.find_content(tags)
             step_config = {
-                "foundations": {"title": "📚 Step 1: Understand the Basics", "description": "Build foundational knowledge"},
-                "diagnostics": {"title": "🔍 Step 2: Diagnose Your Issue", "description": "Identify the root cause"},
-                "resolution": {"title": "🔧 Step 3: Apply the Fix", "description": "Implement the solution"},
-                "prevention": {"title": "🛡️ Step 4: Prevent Future Issues", "description": "Learn best practices"},
+                "foundations": {
+                    "title": "📚 Step 1: Understand the Basics",
+                    "description": "Build foundational knowledge",
+                },
+                "diagnostics": {
+                    "title": "🔍 Step 2: Diagnose Your Issue",
+                    "description": "Identify the root cause",
+                },
+                "resolution": {
+                    "title": "🔧 Step 3: Apply the Fix",
+                    "description": "Implement the solution",
+                },
+                "prevention": {
+                    "title": "🛡️ Step 4: Prevent Future Issues",
+                    "description": "Learn best practices",
+                },
             }
             for i, step_type in enumerate(self.STEP_TYPES):
                 content = content_by_step[step_type]

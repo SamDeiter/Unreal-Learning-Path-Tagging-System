@@ -6,10 +6,9 @@ based on the user's problem and the content found.
 
 import json
 import os
-import urllib.request
 import urllib.parse
+import urllib.request
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -41,7 +40,7 @@ class GeminiHelper:
         user_query: str,
         tags: list[str],
         video_titles: list[str],
-    ) -> Optional[PathGuidance]:
+    ) -> PathGuidance | None:
         """Generate personalized guidance for a learning path.
 
         Args:
@@ -123,7 +122,7 @@ Be concise and encouraging. Focus on practical help."""
         step_type: str,
         video_titles: list[str],
         user_query: str,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Generate a brief summary for a specific step.
 
         Args:
@@ -182,7 +181,7 @@ Don't use quotes. Be specific and actionable."""
         self,
         user_query: str,
         videos: list[dict],
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """Use AI to curate videos into a structured learning path.
 
         Args:
@@ -206,10 +205,13 @@ Don't use quotes. Be specific and actionable."""
 Here are videos from Epic Games that might help:
 {chr(10).join(video_info)}
 
-Create a structured 4-step learning path. For EACH step, pick the most relevant video(s) and explain:
+Create a structured 4-step learning path.
+For EACH step, pick the most relevant video(s) and explain:
 1. WHY this video helps with their specific problem
-2. WHAT timestamp/section to watch (estimate based on title/description, e.g., "Skip to ~5:00 for...")
-3. A SPECIFIC ACTION telling them exactly what to look for (e.g., "Look for the section where they adjust r.Lumen.* cvars and note the values")
+2. WHAT timestamp/section to watch
+(estimate based on title/description, e.g., "Skip to ~5:00")
+3. A SPECIFIC ACTION telling them exactly what to look for
+(e.g., "Look for the section where they adjust r.Lumen.* cvars")
 
 Return JSON with this EXACT structure:
 {{
@@ -226,7 +228,8 @@ Return JSON with this EXACT structure:
       "step_type": "foundations",
       "title": "Step 1: Understand [Topic]",
       "description": "Why this matters for their problem",
-      "action": "SPECIFIC things to look for in the video - mention exact settings, panels, or concepts (e.g., 'Look for where they open Project Settings > Rendering and explain the Lumen options')",
+      "action": "SPECIFIC things to look for in the video",
+      "action_detail": "mention exact settings, panels, or concepts",
       "videos": [
         {{
           "video_index": 1,
@@ -257,7 +260,7 @@ Return JSON with this EXACT structure:
   ]
 }}
 
-IMPORTANT: 
+IMPORTANT:
 - Each step MUST have at least one video
 - Different steps should use DIFFERENT videos when possible
 - Be specific about timestamps and what to look for
@@ -325,7 +328,7 @@ def main():
         print(f"⏱️ Time: {guidance.estimated_time}")
         print(f"📊 Difficulty: {guidance.difficulty_level}")
         print(f"💡 Hint: {guidance.first_step_hint}")
-        print(f"\n📚 You'll learn:")
+        print("\n📚 You'll learn:")
         for item in guidance.what_you_will_learn:
             print(f"  • {item}")
 

@@ -5,14 +5,12 @@ Provides CLI for researching and managing the tag database.
 """
 
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from pathlib import Path
-from typing import Optional
 
+from .concept_extractor import ConceptExtractor
 from .config import TAGS_DIR
 from .youtube_fetcher import YouTubeFetcher
-from .concept_extractor import ConceptExtractor
 
 
 @dataclass
@@ -24,7 +22,7 @@ class TagCandidate:
     frequency: int  # How many times found
     sources: list[str]  # Video IDs or URLs where found
     sample_context: str
-    existing_tag: Optional[str]  # If maps to existing tag
+    existing_tag: str | None  # If maps to existing tag
     status: str = "candidate"  # candidate, approved, rejected
 
 
@@ -41,7 +39,7 @@ class TagDiscovery:
     def _load_candidates(self) -> list[TagCandidate]:
         """Load existing candidate tags."""
         if self.candidates_file.exists():
-            with open(self.candidates_file, "r") as f:
+            with open(self.candidates_file) as f:
                 data = json.load(f)
                 return [TagCandidate(**c) for c in data.get("candidates", [])]
         return []
@@ -165,7 +163,7 @@ class TagDiscovery:
         self._save_candidates()
         return unique
 
-    def list_candidates(self, status: Optional[str] = None) -> list[TagCandidate]:
+    def list_candidates(self, status: str | None = None) -> list[TagCandidate]:
         """List all candidate tags.
 
         Args:
@@ -178,7 +176,7 @@ class TagDiscovery:
             return [c for c in self.candidates if c.status == status]
         return self.candidates
 
-    def approve_candidate(self, term: str) -> Optional[TagCandidate]:
+    def approve_candidate(self, term: str) -> TagCandidate | None:
         """Approve a candidate tag for addition to tags.json.
 
         Args:
@@ -194,7 +192,7 @@ class TagDiscovery:
                 return candidate
         return None
 
-    def reject_candidate(self, term: str) -> Optional[TagCandidate]:
+    def reject_candidate(self, term: str) -> TagCandidate | None:
         """Reject a candidate tag.
 
         Args:
@@ -230,8 +228,8 @@ DEFAULT_RESEARCH_QUERIES = [
 
 def main():
     """CLI for tag discovery."""
-    import sys
     import os
+    import sys
 
     # Pre-flight check: ensure API key is available before doing anything
     api_key = os.environ.get("YOUTUBE_API_KEY", "")
@@ -258,9 +256,12 @@ def main():
         query = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else "UE5 common errors"
         candidates = discovery.research_topic(query)
 
-        print(f"\n📋 Top discoveries:")
+        print("\n📋 Top discoveries:")
         for c in candidates[:10]:
-            tag_info = f" -> {c.existing_tag}" if c.existing_tag else f" (new: {c.suggested_tag_id})"
+            tag_info = (
+                f" -> {c.existing_tag}" if c.existing_tag
+                else f" (new: {c.suggested_tag_id})"
+            )
             print(f"  [{c.frequency}x] {c.term}{tag_info}")
 
     elif command == "research-all":
