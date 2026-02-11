@@ -52,8 +52,11 @@ async function getDocsEmbeddings() {
 
   if (!_docsEmbeddings) {
     try {
-      const mod = await import("../data/docs_embeddings.json");
-      _docsEmbeddings = mod.default || mod;
+      // Use fetch() instead of import() — Vite resolves import() at build time,
+      // which fails in CI where this optional file doesn't exist.
+      const resp = await fetch(new URL("../data/docs_embeddings.json", import.meta.url));
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      _docsEmbeddings = await resp.json();
     } catch (err) {
       devWarn("⚠️ docs_embeddings.json not available:", err.message);
       return null;
