@@ -209,20 +209,38 @@ export default function ProblemFirst() {
         }
 
         // Step 2: Call Cloud Function with retrieved context
-        const queryLearningPath = httpsCallable(functions, "queryLearningPath");
-        const result = await queryLearningPath({
-          query: inputData.query,
-          mode: "problem-first",
-          detectedTagIds: inputData.detectedTagIds,
-          personaHint: inputData.personaHint,
-          retrievedContext: retrievedPassages.slice(0, 5), // Top 5 passages
-        });
+        let cartData;
+        let geminiSucceeded = true;
+        try {
+          const queryLearningPath = httpsCallable(functions, "queryLearningPath");
+          const result = await queryLearningPath({
+            query: inputData.query,
+            mode: "problem-first",
+            detectedTagIds: inputData.detectedTagIds,
+            personaHint: inputData.personaHint,
+            retrievedContext: retrievedPassages.slice(0, 5), // Top 5 passages
+          });
 
-        if (!result.data.success) throw new Error(result.data.message || "Failed to process query");
+          if (!result.data.success) throw new Error(result.data.message || "Failed to process query");
 
-        const cartData = result.data.cart;
+          cartData = result.data.cart;
+        } catch (geminiErr) {
+          // Graceful fallback on 429 or other Gemini errors — use local-only matching
+          const is429 = geminiErr.message?.includes("429") || geminiErr.code === "resource-exhausted";
+          devWarn(`⚠️ Gemini ${is429 ? "rate limited (429)" : "error"}: ${geminiErr.message}. Falling back to local matching.`);
+          geminiSucceeded = false;
+          cartData = {
+            diagnosis: {
+              problem_summary: inputData.query,
+              matched_tag_ids: inputData.detectedTagIds || [],
+            },
+            objectives: [],
+            intent: { systems: [] },
+          };
+        }
         cartData.userQuery = inputData.query;
         cartData.retrievedPassages = retrievedPassages; // Store for UI display
+        cartData._localFallback = !geminiSucceeded; // Flag for UI to show fallback notice
 
         // Match courses (extracted to domain/courseMatching.js)
         const matchedCourses = await matchCoursesToCart(
