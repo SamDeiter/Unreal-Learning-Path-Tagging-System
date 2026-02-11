@@ -274,21 +274,6 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
 
 /** VideoStage — video player with transcript cards and controls */
 function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, microLesson, courses, onVideoComplete, onExit }) {
-  const [hasDriveAccess, setHasDriveAccess] = useState(false);
-  const [driveLoading, setDriveLoading] = useState(false);
-
-  const handleGrantDriveAccess = async () => {
-    setDriveLoading(true);
-    try {
-      const { signInWithGoogleDrive } = await import("../../services/googleAuthService");
-      const { error } = await signInWithGoogleDrive();
-      if (!error) setHasDriveAccess(true);
-    } catch (err) {
-      console.error("[VideoStage] Drive access failed:", err);
-    }
-    setDriveLoading(false);
-  };
-
   return (
     <div className="video-stage">
       <div className="video-header">
@@ -304,28 +289,13 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
       </div>
       <div className="video-container">
         {currentVideo?.drive_id ? (
-          hasDriveAccess ? (
-            <iframe
-              key={currentVideo.drive_id}
-              src={`https://drive.google.com/file/d/${currentVideo.drive_id}/preview`}
-              title={currentVideo.title || course.title}
-              allow="autoplay"
-              allowFullScreen
-            />
-          ) : (
-            <div className="drive-access-prompt">
-              <div className="drive-access-icon">🎬</div>
-              <h4>Video requires Google Drive access</h4>
-              <p>Grant read-only access to watch training videos hosted on Google Drive.</p>
-              <button
-                className="drive-access-btn"
-                onClick={handleGrantDriveAccess}
-                disabled={driveLoading}
-              >
-                {driveLoading ? "Requesting access..." : "🔓 Grant Video Access"}
-              </button>
-            </div>
-          )
+          <iframe
+            key={currentVideo.drive_id}
+            src={`https://drive.google.com/file/d/${currentVideo.drive_id}/preview`}
+            title={currentVideo.title || course.title}
+            allow="autoplay"
+            allowFullScreen
+          />
         ) : (
           <div className="video-placeholder">
             <img src={getThumbnailUrl(currentVideo)} alt={course.title} />
@@ -333,6 +303,16 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
           </div>
         )}
       </div>
+      {currentVideo?.drive_id && (
+        <a
+          href={`https://drive.google.com/file/d/${currentVideo.drive_id}/view`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="drive-fallback-link"
+        >
+          🔗 Video not loading? Open in Google Drive
+        </a>
+      )}
       {microLesson && <AiGuidePanel microLesson={microLesson} courses={courses} />}
       <div className="video-controls">
         <button className="complete-btn" onClick={onVideoComplete}>
