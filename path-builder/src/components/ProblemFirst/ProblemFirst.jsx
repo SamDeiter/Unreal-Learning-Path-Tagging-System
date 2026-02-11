@@ -354,8 +354,6 @@ export default function ProblemFirst() {
                             userQuery={diagnosisData?.userQuery || ""}
                             isExpanded={expandedVideoId === video.driveId}
                             onExpand={(id) => setExpandedVideoId(expandedVideoId === id ? null : id)}
-                            microLesson={diagnosisData.microLesson}
-                            retrievedPassages={diagnosisData.retrievedPassages}
                           />
                         </div>
                       ))}
@@ -380,8 +378,6 @@ export default function ProblemFirst() {
                                   userQuery={diagnosisData?.userQuery || ""}
                                   isExpanded={expandedVideoId === video.driveId}
                                   onExpand={(id) => setExpandedVideoId(expandedVideoId === id ? null : id)}
-                                  microLesson={diagnosisData.microLesson}
-                                  retrievedPassages={diagnosisData.retrievedPassages}
                                 />
                               </div>
                             ))}

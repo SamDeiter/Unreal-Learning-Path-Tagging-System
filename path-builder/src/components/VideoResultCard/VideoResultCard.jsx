@@ -45,8 +45,6 @@ export default function VideoResultCard({
   userQuery,
   isExpanded = false,
   onExpand,
-  microLesson,
-  retrievedPassages,
 }) {
   const {
     title: rawTitle,
@@ -59,6 +57,7 @@ export default function VideoResultCard({
     _curatedMatch,
     role,
     reason,
+    docLinks = [],
   } = video;
 
   // Strip "Part A/B/C" suffixes from display title
@@ -69,7 +68,6 @@ export default function VideoResultCard({
 
   const [feedbackState, setFeedbackState] = useState(() => getFeedbackStatus(driveId));
   const [prereqTip, setPrereqTip] = useState(false);
-  const [expandedLesson, setExpandedLesson] = useState("quick_fix");
   const tipRef = useRef(null);
 
   // Scroll expanded card into view
@@ -108,29 +106,11 @@ export default function VideoResultCard({
     if (onExpand) onExpand(driveId);
   };
 
-  const toggleLesson = (section) => {
-    setExpandedLesson((prev) => (prev === section ? null : section));
-  };
 
   // Fallback thumbnail
   const thumbnailUrl = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w320` : null;
 
-  // Extract MicroLesson sections
-  const quickFix = microLesson?.quick_fix;
-  const whyItWorks = microLesson?.why_it_works;
-  const relatedSituations = microLesson?.related_situations;
 
-  // Get doc passages — deduplicate by URL (multiple chunks from same page)
-  const rawDocPassages = (retrievedPassages || []).filter((p) => p.source === "epic_docs");
-  const docByUrl = new Map();
-  for (const doc of rawDocPassages) {
-    const url = doc.url || "";
-    const existing = docByUrl.get(url);
-    if (!existing || (doc.similarity || 0) > (existing.similarity || 0)) {
-      docByUrl.set(url, doc);
-    }
-  }
-  const docPassages = [...docByUrl.values()];
 
   return (
     <div
@@ -302,84 +282,22 @@ export default function VideoResultCard({
             </div>
           )}
 
-          {/* MicroLesson Sections */}
-          {microLesson && (
-            <div className="vrc-micro-lesson">
-              <div className="vrc-ml-header">
-                <span className="vrc-ml-badge">✨ AI Lesson</span>
-              </div>
 
-              {/* ⚡ Quick Fix */}
-              {quickFix && (
-                <div className={`vrc-ml-section ${expandedLesson === "quick_fix" ? "expanded" : ""}`}>
-                  <button className="vrc-ml-toggle" onClick={() => toggleLesson("quick_fix")}>
-                    <span>⚡ {quickFix.title || "Quick Fix"}</span>
-                    <span className="vrc-ml-chevron">{expandedLesson === "quick_fix" ? "▾" : "▸"}</span>
-                  </button>
-                  {expandedLesson === "quick_fix" && quickFix.steps && (
-                    <ol className="vrc-ml-steps">
-                      {quickFix.steps.map((step, i) => (
-                        <li key={i}>{step}</li>
-                      ))}
-                    </ol>
-                  )}
-                </div>
-              )}
 
-              {/* 🧠 Why This Works */}
-              {whyItWorks && (
-                <div className={`vrc-ml-section ${expandedLesson === "why" ? "expanded" : ""}`}>
-                  <button className="vrc-ml-toggle" onClick={() => toggleLesson("why")}>
-                    <span>🧠 Why This Works</span>
-                    {whyItWorks.key_concept && (
-                      <span className="vrc-ml-concept">{whyItWorks.key_concept}</span>
-                    )}
-                    <span className="vrc-ml-chevron">{expandedLesson === "why" ? "▾" : "▸"}</span>
-                  </button>
-                  {expandedLesson === "why" && (
-                    <p className="vrc-ml-explanation">{whyItWorks.explanation}</p>
-                  )}
-                </div>
-              )}
-
-              {/* 🔗 Related Situations */}
-              {relatedSituations && relatedSituations.length > 0 && (
-                <div className={`vrc-ml-section ${expandedLesson === "related" ? "expanded" : ""}`}>
-                  <button className="vrc-ml-toggle" onClick={() => toggleLesson("related")}>
-                    <span>🔗 Related Situations</span>
-                    <span className="vrc-ml-tag">{relatedSituations.length} scenarios</span>
-                    <span className="vrc-ml-chevron">{expandedLesson === "related" ? "▾" : "▸"}</span>
-                  </button>
-                  {expandedLesson === "related" && (
-                    <div className="vrc-ml-scenarios">
-                      {relatedSituations.map((sit, i) => (
-                        <div key={i} className="vrc-ml-scenario">
-                          <strong>💡 {sit.scenario}</strong>
-                          <p>{sit.connection}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 📚 Epic Docs Links */}
-          {docPassages.length > 0 && (
+          {/* 📚 Per-Video Doc Links */}
+          {docLinks.length > 0 && (
             <div className="vrc-expanded-docs">
               <span className="vrc-expanded-docs-label">📚 Documentation</span>
               <div className="vrc-doc-chips">
-                {docPassages.map((doc, i) => (
+                {docLinks.map((doc, i) => (
                   <a
                     key={i}
                     href={doc.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="vrc-doc-chip"
-                    title={doc.text?.slice(0, 200)}
                   >
-                    📄 {doc.title || doc.section || "UE5 Docs"}
+                    📄 {doc.label || "UE5 Docs"}
                   </a>
                 ))}
               </div>
@@ -419,6 +337,4 @@ VideoResultCard.propTypes = {
   userQuery: PropTypes.string,
   isExpanded: PropTypes.bool,
   onExpand: PropTypes.func,
-  microLesson: PropTypes.object,
-  retrievedPassages: PropTypes.array,
 };
