@@ -56,12 +56,22 @@ export async function getResourcesForTopics(topics, { maxTier = "advanced", limi
 
     // Score: count topic overlaps
     const resourceTopics = (resource.topics || []).map((t) => t.toLowerCase());
+    const resourceTagIds = (resource.tag_ids || []).map((t) => t.toLowerCase());
     let score = 0;
     for (const rt of resourceTopics) {
       if (topicSet.has(rt)) score += 5;
       // Partial match
       for (const qt of topicSet) {
         if (rt.includes(qt) || qt.includes(rt)) score += 2;
+      }
+    }
+    // Also match against formal tag_ids (e.g. query "scripting.blueprint" matches tag_id)
+    for (const tid of resourceTagIds) {
+      if (topicSet.has(tid)) score += 5;
+      // Match on tag segment (e.g. query "blueprint" matches tag_id "scripting.blueprint")
+      const segments = tid.split(".");
+      for (const seg of segments) {
+        if (topicSet.has(seg)) score += 3;
       }
     }
 
@@ -76,6 +86,7 @@ export async function getResourcesForTopics(topics, { maxTier = "advanced", limi
         tier: resource.tier,
         durationMinutes: resource.durationMinutes,
         topics: resource.topics,
+        tag_ids: resource.tag_ids || [],
         description: resource.description || "",
         keyTakeaways: resource.keyTakeaways || [],
         chapters: resource.chapters || [],
@@ -140,8 +151,57 @@ export async function getStats() {
   };
 }
 
+/**
+ * Get official Epic YouTube resources matching formal tag_ids.
+ *
+ * @param {string[]} tagIds - Formal tag IDs (e.g., ["scripting.blueprint", "rendering.lumen"])
+ * @param {Object} [options]
+ * @param {number} [options.limit] - Max results (default 5)
+ * @returns {Promise<Array>}
+ */
+export async function getResourcesForTagIds(tagIds, { limit = 5 } = {}) {
+  if (!tagIds?.length) return [];
+
+  const data = await getYouTubeData();
+  if (!data?.resources?.length) return [];
+
+  const tagSet = new Set(tagIds.map((t) => t.toLowerCase()));
+  const results = [];
+
+  for (const resource of data.resources) {
+    const resourceTagIds = (resource.tag_ids || []).map((t) => t.toLowerCase());
+    let score = 0;
+    for (const tid of resourceTagIds) {
+      if (tagSet.has(tid)) score += 5;
+    }
+    if (score > 0) {
+      const channel = data.channels?.[resource.channelKey];
+      results.push({
+        id: resource.id,
+        title: resource.title,
+        url: resource.url,
+        channelName: channel?.name || "Unreal Engine",
+        channelTrust: "official",
+        tier: resource.tier,
+        durationMinutes: resource.durationMinutes,
+        topics: resource.topics,
+        tag_ids: resource.tag_ids || [],
+        description: resource.description || "",
+        keyTakeaways: resource.keyTakeaways || [],
+        chapters: resource.chapters || [],
+        source: "epic_youtube",
+        _score: score,
+      });
+    }
+  }
+
+  results.sort((a, b) => b._score - a._score);
+  return results.slice(0, limit).map(({ _score, ...rest }) => rest);
+}
+
 export default {
   getResourcesForTopics,
+  getResourcesForTagIds,
   getAllByChannel,
   getStats,
 };

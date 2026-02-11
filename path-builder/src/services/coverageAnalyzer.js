@@ -9,7 +9,7 @@
  */
 
 import { getDocsForTopic, getDocReadingPath } from "./docsSearchService";
-import { getResourcesForTopics } from "./externalContentService";
+import { getResourcesForTopics, getResourcesForTagIds } from "./externalContentService";
 
 /**
  * Analyze coverage for a set of topics across all content sources.
@@ -33,8 +33,8 @@ export async function analyzeCoverage(topics, videoResults = []) {
   // Gather docs
   const docs = await getDocsForTopic(topics, { limit: 10 });
 
-  // Gather YouTube (respects kill switch)
-  const youtube = await getResourcesForTopics(topics, { limit: 5 });
+  // Gather YouTube (matches on topics + tag_ids)
+  const youtube = await getResourcesForTopics(topics, { limit: 10 });
 
   // Calculate per-topic coverage
   const topicCoverage = {};
@@ -53,7 +53,9 @@ export async function analyzeCoverage(topics, videoResults = []) {
     }).length;
 
     const ytHits = youtube.filter((r) => {
-      return (r.topics || []).some((t) => t.toLowerCase().includes(tLower));
+      const topicMatch = (r.topics || []).some((t) => t.toLowerCase().includes(tLower));
+      const tagMatch = (r.tag_ids || []).some((t) => t.toLowerCase().includes(tLower));
+      return topicMatch || tagMatch;
     }).length;
 
     const total = videoHits + docHits + ytHits;
@@ -105,8 +107,18 @@ export async function buildBlendedPath(topics, videoResults = [], { maxDocs = 5,
   // Get prerequisite-ordered reading path
   const docs = await getDocReadingPath(topics, { limit: maxDocs });
 
-  // Get YouTube gap-fillers (only if external content enabled)
-  const youtube = await getResourcesForTopics(topics, { limit: maxYoutube });
+  // Get YouTube gap-fillers via both topic strings and formal tag_ids
+  const ytByTopic = await getResourcesForTopics(topics, { limit: maxYoutube });
+  const ytByTag = await getResourcesForTagIds(topics, { limit: maxYoutube });
+  // Merge and deduplicate by id
+  const seenIds = new Set(ytByTopic.map((r) => r.id));
+  const youtube = [...ytByTopic];
+  for (const r of ytByTag) {
+    if (!seenIds.has(r.id)) {
+      youtube.push(r);
+      seenIds.add(r.id);
+    }
+  }
 
   // Calculate total estimated time
   const videoTime = videoResults.reduce((sum, v) => sum + (v.durationMinutes || 10), 0);
