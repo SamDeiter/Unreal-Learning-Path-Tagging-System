@@ -12,13 +12,19 @@ import {
 } from "firebase/auth";
 
 
-
 const app = getFirebaseApp();
 const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 
-// Request Drive access scope for video playback
-provider.addScope("https://www.googleapis.com/auth/drive.readonly");
+// Basic provider — email + profile only (no restricted scopes)
+// Used by AuthGate for initial sign-in
+const basicProvider = new GoogleAuthProvider();
+basicProvider.setCustomParameters({ prompt: "select_account" });
+
+// Drive provider — adds drive.readonly for video playback
+// Only used when video access is actually needed
+const driveProvider = new GoogleAuthProvider();
+driveProvider.addScope("https://www.googleapis.com/auth/drive.readonly");
+driveProvider.setCustomParameters({ prompt: "select_account" });
 
 /**
  * Sign in with Google popup
@@ -26,10 +32,25 @@ provider.addScope("https://www.googleapis.com/auth/drive.readonly");
  */
 export async function signInWithGoogle() {
   try {
-    const result = await signInWithPopup(auth, provider);
+    const result = await signInWithPopup(auth, basicProvider);
     return { user: result.user, error: null };
   } catch (error) {
     console.error("[GoogleAuth] Sign in failed:", error);
+    return { user: null, error: error.message };
+  }
+}
+
+/**
+ * Sign in with Google popup + Drive access scope
+ * Only call this when video playback is needed
+ * @returns {Promise<{user: object, error: string | null}>}
+ */
+export async function signInWithGoogleDrive() {
+  try {
+    const result = await signInWithPopup(auth, driveProvider);
+    return { user: result.user, error: null };
+  } catch (error) {
+    console.error("[GoogleAuth] Drive sign in failed:", error);
     return { user: null, error: error.message };
   }
 }
