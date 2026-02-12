@@ -41,6 +41,32 @@ service cloud.firestore {
       allow write: if false;
     }
     
+    // Helper: check if user is admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email in ['samdeiter@gmail.com'];
+    }
+    
+    // Invite codes — admin creates/lists/revokes, users read + consume
+    match /path_builder_invites/{code} {
+      // Admin can do anything
+      allow read, write: if isAdmin();
+      // Authenticated users can read individual invites (to validate)
+      allow get: if request.auth != null;
+      // Authenticated users can update usedCount when consuming
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount', 'lastUsedAt']);
+    }
+    
+    // Access allowlist — admin manages, users can read own + create via invite
+    match /path_builder_access/{email} {
+      // Admin can do anything
+      allow read, write: if isAdmin();
+      // Users can read their own access doc
+      allow get: if request.auth != null && request.auth.token.email == email;
+      // Users can create their own access entry (when consuming invite)
+      allow create: if request.auth != null && request.auth.token.email == email;
+    }
+    
     // Default deny everything else
     match /{document=**} {
       allow read, write: if false;
