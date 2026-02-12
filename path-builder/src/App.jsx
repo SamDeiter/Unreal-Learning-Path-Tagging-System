@@ -1,9 +1,11 @@
-import { useState, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { PathProvider } from "./context/PathContext";
 import { TagDataProvider } from "./context/TagDataContext";
 import Dashboard from "./components/Dashboard/Dashboard";
 import AuthGate from "./components/AuthGate/AuthGate";
 import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
+import { onAuthChange } from "./services/googleAuthService";
+import { isAdmin } from "./services/accessControl";
 import "./App.css";
 
 // Import course data
@@ -37,10 +39,18 @@ const InstructorMap = lazy(() => import("./components/Visualizations/InstructorM
 const TagHeatmap = lazy(() => import("./components/Visualizations/TagHeatmap"));
 const SkillRadar = lazy(() => import("./components/Visualizations/SkillRadar"));
 const SkillGapAnalysis = lazy(() => import("./components/Visualizations/SkillGapAnalysis"));
+const InviteManager = lazy(() => import("./components/InviteManager/InviteManager"));
 
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'builder' | 'tags'
   const [preSelectedSkill, setPreSelectedSkill] = useState(null);
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
+
+  // Check if current user is admin for showing invite tab
+  useEffect(() => {
+    const unsub = onAuthChange((u) => setUserIsAdmin(u ? isAdmin(u.email) : false));
+    return unsub;
+  }, []);
 
   // Handle navigation from insights panel
   const handleInsightNavigate = (tab, skillName) => {
@@ -224,6 +234,14 @@ function App() {
                 >
                   📊 Analytics
                 </button>
+                {userIsAdmin && (
+                  <button
+                    className={`nav-tab ${activeTab === "invites" ? "active" : ""}`}
+                    onClick={() => setActiveTab("invites")}
+                  >
+                    🎟️ Invites
+                  </button>
+                )}
               </nav>
             </div>
             <div className="header-right">
@@ -343,6 +361,11 @@ function App() {
                       </div>
                     </CollapsibleSection>
                   </div>
+                </div>
+              )}
+              {activeTab === "invites" && userIsAdmin && (
+                <div className="dashboard-layout">
+                  <InviteManager />
                 </div>
               )}
             </Suspense>
