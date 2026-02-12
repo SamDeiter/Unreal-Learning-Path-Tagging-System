@@ -31,7 +31,7 @@ const db = getFirestore(app);
 // ── Domain & Admin Check ─────────────────────────────────────────────
 
 const ALLOWED_DOMAINS = ["epicgames.com"];
-const ADMIN_EMAILS = ["samdeiter@gmail.com"];
+const ADMIN_EMAILS = ["sam.deiter@epicgames.com", "samdeiter@gmail.com"];
 
 /**
  * Check if an email is an admin.
