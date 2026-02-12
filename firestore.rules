@@ -8,6 +8,8 @@ service cloud.firestore {
       // Anyone can write a query log (for analytics)
       // But with strict validation to prevent abuse
       allow create: if 
+        // Must be authenticated
+        request.auth != null &&
         // Must have required fields
         request.resource.data.keys().hasAll(['query', 'timestamp']) &&
         // Query must be a string, max 200 chars (prevent large payloads)
@@ -28,6 +30,7 @@ service cloud.firestore {
     // Path ratings - allow creating feedback
     match /path_ratings/{ratingId} {
       allow create: if 
+        request.auth != null &&
         request.resource.data.keys().hasAll(['path_id', 'rating', 'timestamp']) &&
         request.resource.data.rating in ['up', 'down'] &&
         request.resource.data.timestamp == request.time &&

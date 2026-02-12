@@ -37,7 +37,10 @@ function renderInlineMarkdown(text) {
       { re: /\*\*(.+?)\*\*/, wrap: (m) => <strong key={key++}>{m}</strong> },
       { re: /\*(.+?)\*/, wrap: (m) => <em key={key++}>{m}</em> },
       { re: /`([^`]+)`/, wrap: (m) => <code key={key++} className="inline-code">{m}</code> },
-      { re: /\[([^\]]+)\]\(([^)]+)\)/, wrap: (m, url) => <a key={key++} href={url} target="_blank" rel="noopener noreferrer">{m}</a> },
+      { re: /\[([^\]]+)\]\(([^)]+)\)/, wrap: (m, url) => {
+        const safeUrl = /^https?:\/\//i.test(url) ? url : '#';
+        return <a key={key++} href={safeUrl} target="_blank" rel="noopener noreferrer">{m}</a>;
+      }},
     ];
 
     let earliest = null;
