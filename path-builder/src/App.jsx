@@ -4,7 +4,7 @@ import { TagDataProvider } from "./context/TagDataContext";
 import Dashboard from "./components/Dashboard/Dashboard";
 import AuthGate from "./components/AuthGate/AuthGate";
 import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
-import { onAuthChange } from "./services/googleAuthService";
+import { onAuthChange, signOutUser } from "./services/googleAuthService";
 import { isAdmin } from "./services/accessControl";
 import "./App.css";
 
@@ -44,11 +44,15 @@ const InviteManager = lazy(() => import("./components/InviteManager/InviteManage
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'builder' | 'tags'
   const [preSelectedSkill, setPreSelectedSkill] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [userIsAdmin, setUserIsAdmin] = useState(false);
 
   // Check if current user is admin for showing invite tab
   useEffect(() => {
-    const unsub = onAuthChange((u) => setUserIsAdmin(u ? isAdmin(u.email) : false));
+    const unsub = onAuthChange((u) => {
+      setCurrentUser(u);
+      setUserIsAdmin(u ? isAdmin(u.email) : false);
+    });
     return unsub;
   }, []);
 
@@ -246,6 +250,27 @@ function App() {
             </div>
             <div className="header-right">
               <span className="course-count">{courses.length} Courses Available</span>
+              {currentUser && (
+                <div className="header-user-info">
+                  {currentUser.photoURL && (
+                    <img
+                      src={currentUser.photoURL}
+                      alt=""
+                      className="header-avatar"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
+                  <span className="header-user-name">
+                    {currentUser.displayName || currentUser.email}
+                  </span>
+                  <button
+                    className="header-signout-btn"
+                    onClick={() => signOutUser()}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
             </div>
           </header>
 

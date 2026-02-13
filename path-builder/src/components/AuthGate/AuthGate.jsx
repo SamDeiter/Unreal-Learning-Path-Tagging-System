@@ -234,27 +234,9 @@ export default function AuthGate({ children }) {
     );
   }
 
-  // ── Authorized — render app with sign-out control ──
+  // ── Authorized — render app (user bar is in App header) ──
   return (
     <div className="auth-gate-authorized">
-      <div className="auth-gate-user-bar">
-        <div className="auth-gate-user-info">
-          {user.photoURL && (
-            <img
-              src={user.photoURL}
-              alt=""
-              className="auth-gate-avatar"
-              referrerPolicy="no-referrer"
-            />
-          )}
-          <span className="auth-gate-user-name">
-            {user.displayName || user.email}
-          </span>
-        </div>
-        <button className="auth-gate-signout-small" onClick={handleSignOut}>
-          Sign Out
-        </button>
-      </div>
       {children}
     </div>
   );
