@@ -9,37 +9,18 @@
  */
 import { useState, useMemo, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
-import { Search, Tags, User, Image, Terminal, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, User, Image, Terminal, XCircle } from "lucide-react";
 import tagGraphService from "../../services/TagGraphService";
-import { useTagData } from "../../context/TagDataContext";
+
 import "./ProblemFirst.css";
 
-// Normalize overlapping categories into clean groups
-const CATEGORY_MAP = {
-  "Audio": "Audio & Sound",
-  "Characters": "Characters & Animation",
-  "Animation": "Characters & Animation",
-  "Character & Avatar": "Characters & Animation",
-  "Core Systems": "Core Systems",
-  "AI & Navigation": "Core Systems",
-  "Ai": "Core Systems",
-  "Cinematics & Sequencer": "Cinematics",
-  "Cinematic": "Cinematics",
-  "Scripting & Programming": "Scripting & Blueprints",
-  "Blueprints": "Scripting & Blueprints",
-  "Tools & Pipeline": "Tools & Pipeline",
-  "Automation": "Tools & Pipeline",
-  "Build": "Build & Packaging",
-};
+
 
 export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   const [problem, setProblem] = useState("");
   const [detectedTags, setDetectedTags] = useState([]);
-  const [selectedTagIds, setSelectedTagIds] = useState([]);
   const [pastedImage, setPastedImage] = useState(null); // base64 data URL
   const [errorLog, setErrorLog] = useState("");
-  const [showTagPicker, setShowTagPicker] = useState(false);
-  const [showErrorLog, setShowErrorLog] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const dropZoneRef = useRef(null);
 
@@ -59,35 +40,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
     } catch { return []; }
   });
 
-  // Get tags from context
-  const tagData = useTagData();
-  const allTags = useMemo(() => tagData?.tags || [], [tagData?.tags]);
 
-  // Group tags by consolidated category (most popular first)
-  const tagsByCategory = useMemo(() => {
-    const groups = {};
-    allTags
-      .filter((tag) => (tag.count || 0) > 0)
-      .forEach((tag) => {
-        const rawCategory =
-          tag.categoryPath?.[0] ||
-          tag.category ||
-          tag.id?.split(".")[0]?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
-          "Other";
-        const category = CATEGORY_MAP[rawCategory] || rawCategory;
-        if (!groups[category]) groups[category] = [];
-        groups[category].push(tag);
-      });
-    return Object.entries(groups)
-      .map(([cat, tags]) => [cat, tags.sort((a, b) => (b.count || 0) - (a.count || 0))])
-      .sort(([a, aTags], [b, bTags]) => {
-        if (a === "Other") return 1;
-        if (b === "Other") return -1;
-        const aTotal = aTags.reduce((s, t) => s + (t.count || 0), 0);
-        const bTotal = bTags.reduce((s, t) => s + (t.count || 0), 0);
-        return bTotal - aTotal;
-      });
-  }, [allTags]);
 
   // Debounce tag detection
   const handleChange = useCallback((e) => {
@@ -114,12 +67,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
     }
   }, []);
 
-  // Toggle user-selected tag
-  const toggleTag = useCallback((tagId) => {
-    setSelectedTagIds((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
-    );
-  }, []);
+
 
   // Handle clipboard paste for images
   const handlePaste = useCallback((e) => {
@@ -195,14 +143,14 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
     onSubmit({
       query: queryText,
       detectedTagIds: detectedTags.map((t) => t.tag.tag_id),
-      selectedTagIds,
+      selectedTagIds: [],
       personaHint: detectedPersona?.name,
       pastedImage,
       errorLog: errorLog.trim() || null,
       cachedCartId: cachedCartId || null,
       updateCartIdForQuery,
     });
-  }, [problem, detectedTags, selectedTagIds, detectedPersona, onSubmit, pastedImage, errorLog, updateCartIdForQuery]);
+  }, [problem, detectedTags, detectedPersona, onSubmit, pastedImage, errorLog, updateCartIdForQuery]);
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -278,68 +226,51 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
         </div>
       )}
 
-      {/* Tag Picker Toggle */}
-      <div className="input-section-toggle">
-        <button
-          type="button"
-          className={`toggle-btn ${showTagPicker ? "active" : ""}`}
-          onClick={() => setShowTagPicker((v) => !v)}
-        >
-          <Tags size={14} />
-          Select Topics
-          {selectedTagIds.length > 0 && <span className="badge">{selectedTagIds.length}</span>}
-          {showTagPicker ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </button>
-
-        <button
-          type="button"
-          className={`toggle-btn ${showErrorLog ? "active" : ""}`}
-          onClick={() => setShowErrorLog((v) => !v)}
-        >
-          <Terminal size={14} />
-          Paste Error Log
-          {errorLog.trim() && <span className="badge">1</span>}
-          {showErrorLog ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </button>
+      {/* Error Log Paste Zone — matches screenshot drop zone style */}
+      <div
+        className={`screenshot-zone ${errorLog.trim() ? "has-image" : ""}`}
+        onClick={() => {
+          if (!errorLog.trim()) {
+            document.getElementById("error-log-input")?.focus();
+          }
+        }}
+      >
+        {errorLog.trim() ? (
+          <div className="pasted-preview error-log-preview">
+            <pre className="error-log-display">{errorLog}</pre>
+            <button
+              type="button"
+              className="clear-error-log"
+              onClick={(e) => { e.stopPropagation(); setErrorLog(""); }}
+              aria-label="Remove error log"
+              title="Clear error log"
+            >
+              <XCircle size={20} />
+            </button>
+          </div>
+        ) : (
+          <div className="drop-prompt">
+            <Terminal size={20} />
+            <span>
+              Paste (<kbd>Ctrl+V</kbd>) an error log or build output
+            </span>
+          </div>
+        )}
+        <textarea
+          id="error-log-input"
+          className="error-log-hidden-input"
+          value={errorLog}
+          onChange={(e) => setErrorLog(e.target.value)}
+          onPaste={(e) => {
+            const text = e.clipboardData?.getData("text");
+            if (text) {
+              e.preventDefault();
+              setErrorLog(text);
+            }
+          }}
+          rows={1}
+        />
       </div>
-
-      {/* Tag Picker Panel */}
-      {showTagPicker && (
-        <div className="tag-picker">
-          <p className="picker-hint">Select topics to focus your diagnosis on specific UE5 areas</p>
-          {tagsByCategory.map(([category, tags]) => (
-            <div key={category} className="tag-group">
-              <span className="group-label">{category}</span>
-              <div className="group-chips">
-                {tags.map((tag) => (
-                  <button
-                    key={tag.id}
-                    type="button"
-                    className={`picker-chip ${selectedTagIds.includes(tag.id) ? "selected" : ""}`}
-                    onClick={() => toggleTag(tag.id)}
-                    title={tag.description}
-                  >
-                    {tag.name || tag.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Error Log Paste Area */}
-      {showErrorLog && (
-        <div className="error-log-section">
-          <textarea
-            className="error-log-input"
-            value={errorLog}
-            onChange={(e) => setErrorLog(e.target.value)}
-            placeholder="Paste your error output, build log, or crash log here..."
-            rows={4}
-          />
-        </div>
-      )}
 
       {/* Screenshot Paste / Drag-and-Drop Zone */}
       <div
@@ -354,11 +285,12 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
             <img src={pastedImage} alt="Pasted screenshot" />
             <button
               type="button"
-              className="remove-image"
+              className="clear-error-log"
               onClick={() => setPastedImage(null)}
               aria-label="Remove screenshot"
+              title="Remove screenshot"
             >
-              <X size={14} />
+              <XCircle size={20} />
             </button>
           </div>
         ) : (
