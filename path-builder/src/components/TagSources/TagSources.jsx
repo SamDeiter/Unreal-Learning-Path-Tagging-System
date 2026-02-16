@@ -52,11 +52,13 @@ function TagSources() {
       }
 
       // Count video-extracted tags (canonical + extracted + topic)
-      // Normalize dotted canonical_tags (e.g. "rendering.material" → "Material")
+      // Normalize dotted canonical_tags (e.g. "rendering.material" → "Rendering Material")
       const normalizeTag = (tag) => {
         if (tag.includes(".")) {
-          const lastPart = tag.split(".").pop();
-          return lastPart.charAt(0).toUpperCase() + lastPart.slice(1);
+          return tag
+            .split(".")
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(" ");
         }
         return tag;
       };
