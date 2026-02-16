@@ -47,6 +47,84 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
   }
 
   for (const course of matchedCourses) {
+    // --- YouTube courses: single video item from youtube_url ---
+    if (course.source === 'youtube' && course.youtube_url) {
+      const pathInfo = roleMap[course.code] || {};
+      const matchedTags = (() => {
+        const clean = (course._matchedKeywords || [])
+          .filter((kw) => kw.length > 3 && !DISPLAY_NOISE.has(kw.toLowerCase()))
+          .slice(0, 3);
+        return clean.length > 0
+          ? clean
+          : [course.topic || course.tags?.topic || "UE5"].flat().slice(0, 3);
+      })();
+      videos.push({
+        driveId: course.youtube_url,
+        title: cleanVideoTitle(course.title || course.code),
+        duration: course.duration_seconds || 0,
+        courseCode: course.code,
+        courseName: course.title || course.code,
+        matchedTags,
+        videoIndex: 0,
+        relevanceScore: course._relevanceScore || 0,
+        titleRelevance: 0,
+        isIntro: false,
+        timestampHint: null,
+        startSeconds: 0,
+        topSegments: [],
+        watchHint: `▶ Watch on YouTube`,
+        docLinks: matchedDocLinks,
+        _curatedMatch: course._curatedMatch || false,
+        _curatedExplanation: course._curatedExplanation || null,
+        role: pathInfo.role || null,
+        reason: pathInfo.reason || null,
+        estimatedMinutes: pathInfo.estimatedMinutes || null,
+        _source: 'youtube',
+        _externalUrl: course.youtube_url,
+      });
+      continue;
+    }
+
+    // --- Epic Docs courses: produce a doc card ---
+    if (course.source === 'epic_docs') {
+      const docUrl = course.url || course.youtube_url || '#';
+      const pathInfo = roleMap[course.code] || {};
+      const matchedTags = (() => {
+        const clean = (course._matchedKeywords || [])
+          .filter((kw) => kw.length > 3 && !DISPLAY_NOISE.has(kw.toLowerCase()))
+          .slice(0, 3);
+        return clean.length > 0
+          ? clean
+          : [course.topic || course.tags?.topic || "UE5"].flat().slice(0, 3);
+      })();
+      videos.push({
+        driveId: `doc_${course.code}`,
+        title: cleanVideoTitle(course.title || course.code),
+        duration: 0,
+        courseCode: course.code,
+        courseName: course.title || course.code,
+        matchedTags,
+        videoIndex: 0,
+        relevanceScore: course._relevanceScore || 0,
+        titleRelevance: 0,
+        isIntro: false,
+        timestampHint: null,
+        startSeconds: 0,
+        topSegments: [],
+        watchHint: `📖 Read Epic Docs`,
+        docLinks: [{ label: course.title || 'Epic Docs', url: docUrl }, ...matchedDocLinks],
+        _curatedMatch: course._curatedMatch || false,
+        _curatedExplanation: course._curatedExplanation || null,
+        role: pathInfo.role || null,
+        reason: pathInfo.reason || null,
+        estimatedMinutes: pathInfo.estimatedMinutes || null,
+        _source: 'epic_docs',
+        _externalUrl: docUrl,
+      });
+      continue;
+    }
+
+    // --- Standard LMS courses with Drive videos ---
     const courseVideos = course.videos || [];
     if (courseVideos.length === 0) continue;
 

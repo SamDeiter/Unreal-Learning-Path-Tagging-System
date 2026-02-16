@@ -24,6 +24,14 @@ const UE5_ONLY_TAGS = new Set([
 
 import { SEARCH_STOPWORDS as STOPWORDS } from "./constants";
 
+/** Check if a course has any playable/viewable content (Drive video, YouTube, or Doc URL) */
+function isPlayable(course) {
+  if (course.videos?.length && course.videos[0]?.drive_id) return true;
+  if (course.source === 'youtube' && course.youtube_url) return true;
+  if (course.source === 'epic_docs') return true;
+  return false;
+}
+
 /**
  * Detect UE version intent from user query.
  * @returns {number|null} 4, 5, or null (no version specified)
@@ -63,7 +71,7 @@ export async function matchCoursesToCart(
       const curatedCourses = solution.courses
         .map((code) => {
           const course = allCourses.find((c) => c.code === code);
-          if (!course || !course.videos?.length || !course.videos[0]?.drive_id) return null;
+          if (!course || !isPlayable(course)) return null;
           return {
             ...course,
             _relevanceScore: 200,
@@ -139,8 +147,7 @@ export async function matchCoursesToCart(
     return transcriptResults
       .map((result) => {
         const course = allCourses.find((c) => c.code === result.courseCode);
-        if (!course) return null;
-        if (!course.videos?.length || !course.videos[0]?.drive_id) return null;
+        if (!course || !isPlayable(course)) return null;
         return {
           ...course,
           _relevanceScore: result.score,
@@ -153,7 +160,7 @@ export async function matchCoursesToCart(
   // Helper: title/tag/description search
   const titleAndTagSearch = (keywords) => {
     if (keywords.length === 0) return [];
-    const playableCourses = allCourses.filter((c) => c.videos?.length && c.videos[0]?.drive_id);
+    const playableCourses = allCourses.filter(isPlayable);
     return playableCourses
       .map((course) => {
         const title = (course.title || "").toLowerCase();
@@ -206,7 +213,9 @@ export async function matchCoursesToCart(
     if (mergedTagIds.length === 0) return courses;
     return courses
       .map((course) => {
-        const courseTags = (course.extracted_tags || course.tags || [])
+        const rawTags = course.extracted_tags || course.tags || [];
+        const tagsArray = Array.isArray(rawTags) ? rawTags : Object.values(rawTags);
+        const courseTags = tagsArray
           .map((t) => (typeof t === "string" ? t : t.tag_id || t.name || ""))
           .filter(Boolean);
         const hasMatchingTag = courseTags.some((ct) =>
@@ -255,7 +264,7 @@ export async function matchCoursesToCart(
     for (const sr of semanticResults) {
       if (!seen.has(sr.code)) {
         const course = allCourses.find((c) => c.code === sr.code);
-        if (course && course.videos?.length && course.videos[0]?.drive_id) {
+        if (course && isPlayable(course)) {
           merged.push({
             ...course,
             _relevanceScore: sr.similarity * 100,
@@ -301,7 +310,7 @@ export async function matchCoursesToCart(
     return { ...course, _relevanceScore: result.score, _scoreBreakdown: result.breakdown, _topContributors: result.topContributors };
   });
   const fallbackResults = tagScored
-    .filter((c) => c._relevanceScore > 0 && c.videos?.length && c.videos[0]?.drive_id)
+    .filter((c) => c._relevanceScore > 0 && isPlayable(c))
     .sort((a, b) => b._relevanceScore - a._relevanceScore)
     .slice(0, 5);
   return applyVersionFilter(applyTagBoost(fallbackResults), userQuery);
