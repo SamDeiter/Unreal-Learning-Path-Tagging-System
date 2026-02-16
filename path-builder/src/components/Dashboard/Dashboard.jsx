@@ -7,7 +7,7 @@ import "./Dashboard.css";
  * recommendations, and courses table for the course library
  */
 function Dashboard() {
-  const { courses, tags, edges } = useTagData();
+  const { courses, tags, edges, lastUpdated } = useTagData();
   const [sortField, setSortField] = useState("code");
   const [sortDirection, setSortDirection] = useState("asc");
   const [showMissingVideos, setShowMissingVideos] = useState(false);
@@ -17,7 +17,7 @@ function Dashboard() {
     const totalCourses = courses.length;
     const totalVideos = courses.reduce((sum, c) => sum + (c.video_count || 0), 0);
     const coursesWithVideos = courses.filter((c) => c.video_count > 0).length;
-    const aiEnriched = courses.filter((c) => c.has_ai_tags).length;
+    const aiEnriched = courses.filter((c) => c.gemini_enriched).length;
 
     return { totalCourses, totalVideos, coursesWithVideos, aiEnriched };
   }, [courses]);
@@ -539,6 +539,19 @@ function Dashboard() {
         <p>
           📊 {tags?.length || 0} tags • {edges?.length || 0} tag connections •{" "}
           {Object.keys(industryDistribution).length} industries
+          {lastUpdated && (
+            <span className="last-updated">
+              {" "}
+              • 🕐 Last updated:{" "}
+              {new Date(lastUpdated).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          )}
         </p>
       </div>
     </div>

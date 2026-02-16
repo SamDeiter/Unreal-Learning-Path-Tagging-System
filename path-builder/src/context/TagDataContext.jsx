@@ -18,41 +18,50 @@ const TagDataContext = createContext(null);
  */
 function validateCourse(course) {
   const validated = { ...course };
-  
+
   // Apply defaults for missing required fields
   if (!validated.duration_minutes) {
     validated.duration_minutes = 15; // Default 15 min
     validated._durationEstimated = true;
   }
-  
-  if (!validated.topic) {
+
+  if (!validated.topic && !validated.tags?.topic) {
     validated.topic = "General";
     validated._topicInferred = true;
+  } else if (!validated.topic && validated.tags?.topic) {
+    // Promote tags.topic to top-level for consistency
+    validated.topic = validated.tags.topic;
   }
-  
+
   if (!validated.video_url && !validated.url) {
     // Try to construct from code if possible
     validated._missingUrl = true;
   }
-  
+
   // Track completeness
   const missingFields = [];
   if (!course.duration_minutes) missingFields.push("duration");
   if (!course.topic) missingFields.push("topic");
   if (!course.video_url && !course.url) missingFields.push("url");
-  
+
   validated._isComplete = missingFields.length === 0;
   validated._missingFields = missingFields;
-  
+
   return validated;
 }
 
-export function TagDataProvider({ children, tags = [], edges = [], courses = [] }) {
+export function TagDataProvider({
+  children,
+  tags = [],
+  edges = [],
+  courses = [],
+  lastUpdated = null,
+}) {
   // Validate all courses on mount
   const validatedCourses = useMemo(() => {
     return courses.map(validateCourse);
   }, [courses]);
-  
+
   // Selection state - synced across all tag views
   const [selectedTagId, setSelectedTagId] = useState(null);
 
@@ -141,6 +150,7 @@ export function TagDataProvider({ children, tags = [], edges = [], courses = [] 
     tags,
     edges,
     courses: validatedCourses,
+    lastUpdated,
     enrichedTags,
     selectedTagId,
     setSelectedTagId,

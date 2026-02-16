@@ -169,7 +169,8 @@ function App() {
     });
     // Add co-occurrence edges where no curated edge exists
     coOccurrenceWeights.forEach((weight, key) => {
-      if (!edgeMap.has(key) && weight >= 25) { // need 25+ co-occurrences for visible edge
+      if (!edgeMap.has(key) && weight >= 25) {
+        // need 25+ co-occurrences for visible edge
         const [sourceTagId, targetTagId] = key.split("|");
         edgeMap.set(key, { sourceTagId, targetTagId, weight, relation: "co-occurrence" });
       }
@@ -182,224 +183,225 @@ function App() {
 
   return (
     <AuthGate>
-    <PathProvider>
-      <TagDataProvider tags={tags} edges={edges} courses={courses}>
-        <div className="app">
-          {/* Header */}
-          <header className="app-header">
-            <div className="header-left">
-              <h1 className="app-title">UE5 Learning Path Builder</h1>
-              <nav className="main-nav">
-                <button
-                  className={`nav-tab ${activeTab === "dashboard" ? "active" : ""}`}
-                  onClick={() => setActiveTab("dashboard")}
-                >
-                  📊 Dashboard
-                </button>
-                <button
-                  className={`nav-tab ${activeTab === "readiness" ? "active" : ""}`}
-                  onClick={() => setActiveTab("readiness")}
-                >
-                  📚 Path Readiness
-                </button>
-                <button
-                  className={`nav-tab ${activeTab === "sources" ? "active" : ""}`}
-                  onClick={() => setActiveTab("sources")}
-                >
-                  🏷️ Tag Sources
-                </button>
-                <button
-                  className={`nav-tab ${activeTab === "editor" ? "active" : ""}`}
-                  onClick={() => setActiveTab("editor")}
-                >
-                  ✏️ Tag Editor
-                </button>
-                <button
-                  className={`nav-tab ${activeTab === "builder" ? "active" : ""}`}
-                  onClick={() => setActiveTab("builder")}
-                >
-                  🏗️ Path Builder
-                </button>
-                <button
-                  className={`nav-tab ${activeTab === "personas" ? "active" : ""}`}
-                  onClick={() => setActiveTab("personas")}
-                >
-                  🚀 Onboarding
-                </button>
-                <button
-                  className={`nav-tab ${activeTab === "problem" ? "active" : ""}`}
-                  onClick={() => setActiveTab("problem")}
-                >
-                  🔧 Fix a Problem
-                </button>
-                <button
-                  className={`nav-tab ${activeTab === "analytics" ? "active" : ""}`}
-                  onClick={() => setActiveTab("analytics")}
-                >
-                  📊 Analytics
-                </button>
-                {userIsAdmin && (
+      <PathProvider>
+        <TagDataProvider
+          tags={tags}
+          edges={edges}
+          courses={courses}
+          lastUpdated={videoLibrary.generated_at}
+        >
+          <div className="app">
+            {/* Header */}
+            <header className="app-header">
+              <div className="header-left">
+                <h1 className="app-title">UE5 Learning Path Builder</h1>
+                <nav className="main-nav">
                   <button
-                    className={`nav-tab ${activeTab === "invites" ? "active" : ""}`}
-                    onClick={() => setActiveTab("invites")}
+                    className={`nav-tab ${activeTab === "dashboard" ? "active" : ""}`}
+                    onClick={() => setActiveTab("dashboard")}
                   >
-                    🎟️ Invites
+                    📊 Dashboard
                   </button>
-                )}
-              </nav>
-            </div>
-            <div className="header-right">
-              <span className="course-count">{courses.length} Courses Available</span>
-              {currentUser && (
-                <div className="header-user-info">
-                  {currentUser.photoURL && (
-                    <img
-                      src={currentUser.photoURL}
-                      alt=""
-                      className="header-avatar"
-                      referrerPolicy="no-referrer"
-                    />
+                  <button
+                    className={`nav-tab ${activeTab === "readiness" ? "active" : ""}`}
+                    onClick={() => setActiveTab("readiness")}
+                  >
+                    📚 Path Readiness
+                  </button>
+                  <button
+                    className={`nav-tab ${activeTab === "sources" ? "active" : ""}`}
+                    onClick={() => setActiveTab("sources")}
+                  >
+                    🏷️ Tag Sources
+                  </button>
+                  <button
+                    className={`nav-tab ${activeTab === "editor" ? "active" : ""}`}
+                    onClick={() => setActiveTab("editor")}
+                  >
+                    ✏️ Tag Editor
+                  </button>
+                  <button
+                    className={`nav-tab ${activeTab === "builder" ? "active" : ""}`}
+                    onClick={() => setActiveTab("builder")}
+                  >
+                    🏗️ Path Builder
+                  </button>
+                  <button
+                    className={`nav-tab ${activeTab === "personas" ? "active" : ""}`}
+                    onClick={() => setActiveTab("personas")}
+                  >
+                    🚀 Onboarding
+                  </button>
+                  <button
+                    className={`nav-tab ${activeTab === "problem" ? "active" : ""}`}
+                    onClick={() => setActiveTab("problem")}
+                  >
+                    🔧 Fix a Problem
+                  </button>
+                  <button
+                    className={`nav-tab ${activeTab === "analytics" ? "active" : ""}`}
+                    onClick={() => setActiveTab("analytics")}
+                  >
+                    📊 Analytics
+                  </button>
+                  {userIsAdmin && (
+                    <button
+                      className={`nav-tab ${activeTab === "invites" ? "active" : ""}`}
+                      onClick={() => setActiveTab("invites")}
+                    >
+                      🎟️ Invites
+                    </button>
                   )}
-                  <span className="header-user-name">
-                    {currentUser.displayName || currentUser.email}
-                  </span>
-                  <button
-                    className="header-signout-btn"
-                    onClick={() => signOutUser()}
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
-          </header>
-
-          {/* Main Content */}
-          <main className="app-main">
-            <Suspense fallback={<LoadingSpinner />}>
-              {activeTab === "dashboard" && (
-                <div className="dashboard-layout">
-                  <Dashboard />
-                </div>
-              )}
-              {activeTab === "readiness" && (
-                <div className="dashboard-layout">
-                  <PathReadiness />
-                </div>
-              )}
-              {activeTab === "sources" && (
-                <div className="dashboard-layout">
-                  <TagSources />
-                </div>
-              )}
-              {activeTab === "editor" && (
-                <div className="dashboard-layout">
-                  <TagEditor />
-                </div>
-              )}
-              {activeTab === "builder" && (
-                <div className="builder-layout">
-                  {/* Top: Intent */}
-                  <div className="builder-header-area">
-                    <LearningIntentHeader />
+                </nav>
+              </div>
+              <div className="header-right">
+                {currentUser && (
+                  <div className="header-user-info">
+                    {currentUser.photoURL && (
+                      <img
+                        src={currentUser.photoURL}
+                        alt=""
+                        className="header-avatar"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
+                    <span className="header-user-name">
+                      {currentUser.displayName || currentUser.email}
+                    </span>
+                    <button className="header-signout-btn" onClick={() => signOutUser()}>
+                      Sign Out
+                    </button>
                   </div>
+                )}
+              </div>
+            </header>
 
-                  {/* Left: Input Panel */}
-                  <aside className="library-panel">
-                    <LeftPanel
-                      courses={courses}
-                      preSelectedSkill={preSelectedSkill}
-                      onSkillUsed={() => setPreSelectedSkill(null)}
-                    />
-                  </aside>
-
-                  {/* Center: Path Canvas */}
-                  <section className="assembly-panel">
-                    <AssemblyLine />
-                  </section>
-
-                  {/* Right: Outputs */}
-                  <aside className="output-panel-area">
-                    <OutputPanel />
-                  </aside>
-                </div>
-              )}
-              {activeTab === "personas" && (
-                <div className="dashboard-layout">
-                  <Personas />
-                </div>
-              )}
-              {activeTab === "problem" && (
-                <div className="dashboard-layout">
-                  <ProblemFirst />
-                </div>
-              )}
-              {activeTab === "analytics" && (
-                <div className="analytics-layout">
-                  <div className="analytics-header">
-                    <h2>📊 Tag & Skill Analytics</h2>
-                    <p className="analytics-subtitle">Insights from {courses.length} courses</p>
+            {/* Main Content */}
+            <main className="app-main">
+              <Suspense fallback={<LoadingSpinner />}>
+                {activeTab === "dashboard" && (
+                  <div className="dashboard-layout">
+                    <Dashboard />
                   </div>
-
-                  <div className="analytics-grid">
-                    {/* Insights & Recommendations */}
-                    <InsightsPanel onNavigate={handleInsightNavigate} />
-
-                    {/* Skill Coverage vs Industry Demand */}
-                    <CollapsibleSection
-                      title="Coverage vs Industry Demand"
-                      icon="🎯"
-                      defaultExpanded={true}
-                    >
-                      <div className="coverage-grid">
-                        <SkillRadar />
-                        <SkillGapAnalysis />
-                      </div>
-                    </CollapsibleSection>
-
-                    {/* Overview Section */}
-                    <CollapsibleSection title="Overview" icon="📈">
-                      <JourneyHeatmap />
-                    </CollapsibleSection>
-
-                    {/* Library Analysis Section */}
-                    <CollapsibleSection title="Library Analysis" icon="📚">
-                      <TagTrends />
-                      <TagHeatmap />
-                      <TagTimeline />
-                      <InstructorMap />
-                    </CollapsibleSection>
-
-                    {/* Learning Paths Section */}
-                    <CollapsibleSection title="Learning Paths" icon="🛤️">
-                      <PrereqFlow />
-                    </CollapsibleSection>
-
-                    {/* Tag Relationship Graph Section */}
-                    <CollapsibleSection
-                      title="Tag Relationship Graph"
-                      icon="🔗"
-                      defaultExpanded={true}
-                    >
-                      <div className="tag-graph-wrapper">
-                        <TagGraph tags={tags} edges={edges} courses={courses} />
-                      </div>
-                    </CollapsibleSection>
+                )}
+                {activeTab === "readiness" && (
+                  <div className="dashboard-layout">
+                    <PathReadiness />
                   </div>
-                </div>
-              )}
-              {activeTab === "invites" && userIsAdmin && (
-                <div className="dashboard-layout">
-                  <InviteManager />
-                </div>
-              )}
-            </Suspense>
-          </main>
+                )}
+                {activeTab === "sources" && (
+                  <div className="dashboard-layout">
+                    <TagSources />
+                  </div>
+                )}
+                {activeTab === "editor" && (
+                  <div className="dashboard-layout">
+                    <TagEditor />
+                  </div>
+                )}
+                {activeTab === "builder" && (
+                  <div className="builder-layout">
+                    {/* Top: Intent */}
+                    <div className="builder-header-area">
+                      <LearningIntentHeader />
+                    </div>
 
-          <FeedbackButton />
-        </div>
-      </TagDataProvider>
-    </PathProvider>
+                    {/* Left: Input Panel */}
+                    <aside className="library-panel">
+                      <LeftPanel
+                        courses={courses}
+                        preSelectedSkill={preSelectedSkill}
+                        onSkillUsed={() => setPreSelectedSkill(null)}
+                      />
+                    </aside>
+
+                    {/* Center: Path Canvas */}
+                    <section className="assembly-panel">
+                      <AssemblyLine />
+                    </section>
+
+                    {/* Right: Outputs */}
+                    <aside className="output-panel-area">
+                      <OutputPanel />
+                    </aside>
+                  </div>
+                )}
+                {activeTab === "personas" && (
+                  <div className="dashboard-layout">
+                    <Personas />
+                  </div>
+                )}
+                {activeTab === "problem" && (
+                  <div className="dashboard-layout">
+                    <ProblemFirst />
+                  </div>
+                )}
+                {activeTab === "analytics" && (
+                  <div className="analytics-layout">
+                    <div className="analytics-header">
+                      <h2>📊 Tag & Skill Analytics</h2>
+                      <p className="analytics-subtitle">Insights from {courses.length} courses</p>
+                    </div>
+
+                    <div className="analytics-grid">
+                      {/* Insights & Recommendations */}
+                      <InsightsPanel onNavigate={handleInsightNavigate} />
+
+                      {/* Skill Coverage vs Industry Demand */}
+                      <CollapsibleSection
+                        title="Coverage vs Industry Demand"
+                        icon="🎯"
+                        defaultExpanded={true}
+                      >
+                        <div className="coverage-grid">
+                          <SkillRadar />
+                          <SkillGapAnalysis />
+                        </div>
+                      </CollapsibleSection>
+
+                      {/* Overview Section */}
+                      <CollapsibleSection title="Overview" icon="📈">
+                        <JourneyHeatmap />
+                      </CollapsibleSection>
+
+                      {/* Library Analysis Section */}
+                      <CollapsibleSection title="Library Analysis" icon="📚">
+                        <TagTrends />
+                        <TagHeatmap />
+                        <TagTimeline />
+                        <InstructorMap />
+                      </CollapsibleSection>
+
+                      {/* Learning Paths Section */}
+                      <CollapsibleSection title="Learning Paths" icon="🛤️">
+                        <PrereqFlow />
+                      </CollapsibleSection>
+
+                      {/* Tag Relationship Graph Section */}
+                      <CollapsibleSection
+                        title="Tag Relationship Graph"
+                        icon="🔗"
+                        defaultExpanded={true}
+                      >
+                        <div className="tag-graph-wrapper">
+                          <TagGraph tags={tags} edges={edges} courses={courses} />
+                        </div>
+                      </CollapsibleSection>
+                    </div>
+                  </div>
+                )}
+                {activeTab === "invites" && userIsAdmin && (
+                  <div className="dashboard-layout">
+                    <InviteManager />
+                  </div>
+                )}
+              </Suspense>
+            </main>
+
+            <FeedbackButton />
+          </div>
+        </TagDataProvider>
+      </PathProvider>
     </AuthGate>
   );
 }

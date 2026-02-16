@@ -222,7 +222,7 @@ function CourseLibrary({ courses }) {
             <div className="card-content">
               <div className="card-header">
                 <span className="course-code">{course.code}</span>
-                {course.has_ai_tags && (
+                {course.gemini_enriched && (
                   <span className="ai-badge" title="AI-enriched">
                     <Sparkles size={12} />
                   </span>

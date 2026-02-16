@@ -37,7 +37,7 @@ function PathReadiness() {
           code: course.code,
           title: course.title || course.name,
           duration,
-          hasAI: course.has_ai_tags,
+          hasAI: course.gemini_enriched,
         });
       }
       analysis[topic].totalCourses++;
@@ -45,45 +45,47 @@ function PathReadiness() {
     });
 
     // Classify each topic
-    return Object.values(analysis).map((t) => {
-      const hasB = t.levels.Beginner.length > 0;
-      const hasI = t.levels.Intermediate.length > 0;
-      const hasA = t.levels.Advanced.length > 0;
-      const levelCount = [hasB, hasI, hasA].filter(Boolean).length;
+    return Object.values(analysis)
+      .map((t) => {
+        const hasB = t.levels.Beginner.length > 0;
+        const hasI = t.levels.Intermediate.length > 0;
+        const hasA = t.levels.Advanced.length > 0;
+        const levelCount = [hasB, hasI, hasA].filter(Boolean).length;
 
-      let status, statusLabel, missing;
-      if (levelCount === 3) {
-        status = "ready";
-        statusLabel = "✅ Path Ready";
-        missing = [];
-      } else if (levelCount === 2) {
-        status = "incomplete";
-        statusLabel = "🟡 Almost Ready";
-        missing = [];
-        if (!hasB) missing.push("Beginner");
-        if (!hasI) missing.push("Intermediate");
-        if (!hasA) missing.push("Advanced");
-      } else if (levelCount === 1) {
-        status = "incomplete";
-        statusLabel = "🟠 Needs Content";
-        missing = [];
-        if (!hasB) missing.push("Beginner");
-        if (!hasI) missing.push("Intermediate");
-        if (!hasA) missing.push("Advanced");
-      } else {
-        status = "gap";
-        statusLabel = "❌ Major Gap";
-        missing = levels;
-      }
+        let status, statusLabel, missing;
+        if (levelCount === 3) {
+          status = "ready";
+          statusLabel = "✅ Path Ready";
+          missing = [];
+        } else if (levelCount === 2) {
+          status = "incomplete";
+          statusLabel = "🟡 Almost Ready";
+          missing = [];
+          if (!hasB) missing.push("Beginner");
+          if (!hasI) missing.push("Intermediate");
+          if (!hasA) missing.push("Advanced");
+        } else if (levelCount === 1) {
+          status = "incomplete";
+          statusLabel = "🟠 Needs Content";
+          missing = [];
+          if (!hasB) missing.push("Beginner");
+          if (!hasI) missing.push("Intermediate");
+          if (!hasA) missing.push("Advanced");
+        } else {
+          status = "gap";
+          statusLabel = "❌ Major Gap";
+          missing = levels;
+        }
 
-      return {
-        ...t,
-        status,
-        statusLabel,
-        missing,
-        levelCount,
-      };
-    }).sort((a, b) => b.levelCount - a.levelCount || b.totalCourses - a.totalCourses);
+        return {
+          ...t,
+          status,
+          statusLabel,
+          missing,
+          levelCount,
+        };
+      })
+      .sort((a, b) => b.levelCount - a.levelCount || b.totalCourses - a.totalCourses);
   }, [courses]);
 
   // Filter topics based on status
@@ -176,7 +178,9 @@ function PathReadiness() {
                 <tr
                   key={topic.topic}
                   className={`matrix-row ${selectedTopic === topic.topic ? "selected" : ""}`}
-                  onClick={() => setSelectedTopic(selectedTopic === topic.topic ? null : topic.topic)}
+                  onClick={() =>
+                    setSelectedTopic(selectedTopic === topic.topic ? null : topic.topic)
+                  }
                 >
                   <td className="topic-cell">
                     <strong>{topic.topic}</strong>
@@ -184,12 +188,14 @@ function PathReadiness() {
                   </td>
                   {["Beginner", "Intermediate", "Advanced"].map((level) => {
                     const count = topic.levels[level].length;
-                    const cellClass = count >= 2 ? "cell-ready" : count === 1 ? "cell-partial" : "cell-gap";
-                    const tooltip = count >= 2 
-                      ? `✅ ${count} ${level} courses available — ready for learning path`
-                      : count === 1 
-                        ? `⚠️ Only 1 ${level} course — add more for variety`
-                        : `❌ No ${level} courses — must add content before creating path`;
+                    const cellClass =
+                      count >= 2 ? "cell-ready" : count === 1 ? "cell-partial" : "cell-gap";
+                    const tooltip =
+                      count >= 2
+                        ? `✅ ${count} ${level} courses available — ready for learning path`
+                        : count === 1
+                          ? `⚠️ Only 1 ${level} course — add more for variety`
+                          : `❌ No ${level} courses — must add content before creating path`;
                     return (
                       <td key={level} className={`level-cell ${cellClass}`} title={tooltip}>
                         {count > 0 ? (
@@ -201,10 +207,10 @@ function PathReadiness() {
                     );
                   })}
                   <td className="status-cell">
-                    <span 
+                    <span
                       className={`status-badge ${topic.status}`}
                       title={
-                        topic.status === "ready" 
+                        topic.status === "ready"
                           ? "This topic has courses at all 3 difficulty levels — ready to package as a complete learning path"
                           : topic.status === "incomplete"
                             ? `Missing ${topic.missing.join(" and ")} level courses — add these before creating a learning path`
@@ -227,7 +233,9 @@ function PathReadiness() {
         <div className="pr-section detail-panel">
           <h3>
             📋 {selectedTopic} — Course Breakdown
-            <button className="close-btn" onClick={() => setSelectedTopic(null)}>×</button>
+            <button className="close-btn" onClick={() => setSelectedTopic(null)}>
+              ×
+            </button>
           </h3>
           {(() => {
             const topic = topicAnalysis.find((t) => t.topic === selectedTopic);
@@ -247,7 +255,9 @@ function PathReadiness() {
                             <span className="course-code">{course.code}</span>
                             <span className="course-title">{course.title}</span>
                             {course.duration > 0 && (
-                              <span className="course-duration">{formatDuration(course.duration)}</span>
+                              <span className="course-duration">
+                                {formatDuration(course.duration)}
+                              </span>
                             )}
                             {course.hasAI && <span className="ai-badge">AI</span>}
                           </li>
@@ -262,8 +272,8 @@ function PathReadiness() {
                 ))}
                 {topic.missing.length > 0 && (
                   <div className="recommendation-box">
-                    <strong>💡 Recommendation:</strong> Add {topic.missing.join(" and ")} level content
-                    to complete this learning path.
+                    <strong>💡 Recommendation:</strong> Add {topic.missing.join(" and ")} level
+                    content to complete this learning path.
                   </div>
                 )}
               </div>
