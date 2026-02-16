@@ -5,6 +5,28 @@ const fs = require("fs");
 const path = require("path");
 
 // ---------------------------------------------------------------------------
+// Indirect Injection Guard — strip prompt-injection keywords from user input
+// ---------------------------------------------------------------------------
+const INJECTION_PATTERNS = [
+  /ignore\s+(all\s+)?previous\s+(instructions|prompts?)/gi,
+  /disregard\s+(all\s+)?above/gi,
+  /you\s+are\s+now\s+(a|an)\s+/gi,
+  /system\s*:\s*/gi,
+  /\bact\s+as\b/gi,
+  /\bnew\s+instructions?\b/gi,
+  /\boverride\s+(previous|system)\b/gi,
+  /\breset\s+(your\s+)?(context|instructions?|prompt)\b/gi,
+  /\bforget\s+(everything|all|your)\b/gi,
+];
+
+function sanitizeContent(text) {
+  if (!text || typeof text !== "string") return text || "";
+  let cleaned = text;
+  for (const pattern of INJECTION_PATTERNS) {
+    cleaned = cleaned.replace(pattern, "[FILTERED]");
+  }
+  return cleaned;
+}
 // Solution Atoms — loaded once at cold start (zero Firestore cost)
 // ---------------------------------------------------------------------------
 const SOLUTION_ATOMS = [];
@@ -137,8 +159,8 @@ exports.generateDiagnosis = functions
 
 Intent:
 - Role: ${intent.user_role || "Unknown"}
-- Goal: ${intent.goal || "Solve the problem"}
-- Problem: ${intent.problem_description}
+- Goal: ${sanitizeContent(intent.goal || "Solve the problem")}
+- Problem: ${sanitizeContent(intent.problem_description)}
 - Systems involved: ${(intent.systems || []).join(", ") || "Unknown"}
 
 ${detectedTags?.length > 0 ? `Detected tags: ${detectedTags.map((t) => t.display_name || t).join(", ")}` : ""}

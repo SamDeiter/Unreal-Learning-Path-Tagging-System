@@ -14,7 +14,15 @@ import tagGraphService from "../../services/TagGraphService";
 
 import "./ProblemFirst.css";
 
+// ---------------------------------------------------------------------------
+// PII Guard — redact local file paths from pasted logs / error messages
+// Matches Windows (C:\Users\...), macOS (/Users/...) and Linux (/home/...)
+// ---------------------------------------------------------------------------
+const LOCAL_PATH_REGEX = /(?:[A-Za-z]:\\[\w\\. -]+|\/(?:Users|home|tmp|var|opt|etc)\/[\w/. -]+)/g;
 
+function redactLocalPaths(text) {
+  return text.replace(LOCAL_PATH_REGEX, "[LOCAL_PATH]");
+}
 
 export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   const [problem, setProblem] = useState("");
@@ -37,14 +45,14 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
         localStorage.setItem("fix-problem-history", JSON.stringify(migrated));
       }
       return migrated;
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   });
-
-
 
   // Debounce tag detection
   const handleChange = useCallback((e) => {
-    const text = e.target.value;
+    const text = redactLocalPaths(e.target.value);
     setProblem(text);
 
     if (text.length > 15) {
@@ -66,8 +74,6 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
       setDetectedTags([]);
     }
   }, []);
-
-
 
   // Handle clipboard paste for images
   const handlePaste = useCallback((e) => {
@@ -118,9 +124,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   // Save a cart_id to history after a fresh diagnosis completes
   const updateCartIdForQuery = useCallback((queryText, cartId) => {
     setQueryHistory((prev) => {
-      const updated = prev.map((item) =>
-        item.query === queryText ? { ...item, cartId } : item
-      );
+      const updated = prev.map((item) => (item.query === queryText ? { ...item, cartId } : item));
       localStorage.setItem("fix-problem-history", JSON.stringify(updated));
       return updated;
     });
@@ -128,29 +132,32 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
 
   // Expose updateCartIdForQuery to parent via a ref-like pattern
   // The parent can call onSubmit and receive this function back
-  const handleSubmit = useCallback((cachedCartId = null, overrideQuery = null) => {
-    const queryText = (overrideQuery || problem).trim();
-    if (queryText.length < 10) return;
+  const handleSubmit = useCallback(
+    (cachedCartId = null, overrideQuery = null) => {
+      const queryText = (overrideQuery || problem).trim();
+      if (queryText.length < 10) return;
 
-    // Save to history (without cartId yet — it comes after diagnosis)
-    setQueryHistory((prev) => {
-      const filtered = prev.filter((item) => item.query !== queryText);
-      const updated = [{ query: queryText, cartId: cachedCartId }, ...filtered].slice(0, 6);
-      localStorage.setItem("fix-problem-history", JSON.stringify(updated));
-      return updated;
-    });
+      // Save to history (without cartId yet — it comes after diagnosis)
+      setQueryHistory((prev) => {
+        const filtered = prev.filter((item) => item.query !== queryText);
+        const updated = [{ query: queryText, cartId: cachedCartId }, ...filtered].slice(0, 6);
+        localStorage.setItem("fix-problem-history", JSON.stringify(updated));
+        return updated;
+      });
 
-    onSubmit({
-      query: queryText,
-      detectedTagIds: detectedTags.map((t) => t.tag.tag_id),
-      selectedTagIds: [],
-      personaHint: detectedPersona?.name,
-      pastedImage,
-      errorLog: errorLog.trim() || null,
-      cachedCartId: cachedCartId || null,
-      updateCartIdForQuery,
-    });
-  }, [problem, detectedTags, detectedPersona, onSubmit, pastedImage, errorLog, updateCartIdForQuery]);
+      onSubmit({
+        query: queryText,
+        detectedTagIds: detectedTags.map((t) => t.tag.tag_id),
+        selectedTagIds: [],
+        personaHint: detectedPersona?.name,
+        pastedImage,
+        errorLog: errorLog.trim() || null,
+        cachedCartId: cachedCartId || null,
+        updateCartIdForQuery,
+      });
+    },
+    [problem, detectedTags, detectedPersona, onSubmit, pastedImage, errorLog, updateCartIdForQuery]
+  );
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -241,7 +248,10 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
             <button
               type="button"
               className="clear-error-log"
-              onClick={(e) => { e.stopPropagation(); setErrorLog(""); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setErrorLog("");
+              }}
               aria-label="Remove error log"
               title="Clear error log"
             >
@@ -265,7 +275,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
             const text = e.clipboardData?.getData("text");
             if (text) {
               e.preventDefault();
-              setErrorLog(text);
+              setErrorLog(redactLocalPaths(text));
             }
           }}
           rows={1}
@@ -376,7 +386,9 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
                       });
                     }}
                     title="Remove"
-                  >×</button>
+                  >
+                    ×
+                  </button>
                 </div>
               );
             })}

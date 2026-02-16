@@ -70,6 +70,19 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.token.email == email;
     }
     
+    // Adaptive carts — per-user isolation (Google Auth required)
+    match /adaptive_carts/{cartId} {
+      // Users can only read their own carts
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+      // Users can only create carts owned by themselves
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+      // Users can only update/delete their own carts
+      allow update, delete: if request.auth != null
+                            && resource.data.userId == request.auth.uid;
+    }
+
     // Default deny everything else
     match /{document=**} {
       allow read, write: if false;
