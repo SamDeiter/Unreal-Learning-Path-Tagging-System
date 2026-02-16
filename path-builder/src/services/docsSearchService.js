@@ -321,6 +321,10 @@ export async function getDocReadingPath(topics, { limit = 8 } = {}) {
     addWithPrereqs(match.key);
   }
 
+  // Sort by relevance score (highest first) — prerequisite order is less important
+  // than showing the most relevant docs to the user
+  ordered.sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
+
   return ordered.slice(0, limit);
 }
 

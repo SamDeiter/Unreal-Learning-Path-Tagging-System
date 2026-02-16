@@ -404,10 +404,41 @@ export default function ProblemFirst() {
 
           // Doc topics: use ONLY user query words + augmentation (not tag segments,
           // which inject noise like "rendering"/"meshDistanceField" and boost wrong docs)
+          const STOP_WORDS = new Set([
+            "the",
+            "and",
+            "for",
+            "are",
+            "but",
+            "not",
+            "you",
+            "all",
+            "can",
+            "has",
+            "her",
+            "was",
+            "one",
+            "our",
+            "out",
+            "its",
+            "how",
+            "why",
+            "with",
+            "from",
+            "they",
+            "been",
+            "have",
+            "this",
+            "that",
+            "what",
+            "when",
+            "your",
+            "into",
+          ]);
           const queryWords = (inputData.query || "")
             .toLowerCase()
             .split(/\s+/)
-            .filter((w) => w.length > 2);
+            .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
           const docTopics = [...new Set(queryWords)];
 
           // Topic augmentation: add common related terms that users imply but don't type
