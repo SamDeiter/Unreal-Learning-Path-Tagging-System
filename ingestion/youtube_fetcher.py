@@ -177,6 +177,14 @@ class YouTubeFetcher:
             snippet = item["snippet"]
             stats = item.get("statistics", {})
 
+            # Get best available thumbnail
+            thumbnails = snippet.get("thumbnails", {})
+            thumbnail_url = (
+                thumbnails.get("high", {}).get("url")
+                or thumbnails.get("medium", {}).get("url")
+                or thumbnails.get("default", {}).get("url")
+            )
+
             videos.append(
                 VideoMetadata(
                     video_id=item["id"],
@@ -187,6 +195,7 @@ class YouTubeFetcher:
                     duration=item["contentDetails"]["duration"],
                     view_count=int(stats.get("viewCount", 0)),
                     tags=snippet.get("tags", []),
+                    thumbnail_url=thumbnail_url,
                 )
             )
 
