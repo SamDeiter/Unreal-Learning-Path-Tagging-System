@@ -180,13 +180,24 @@ export default function ProblemFirst() {
           const embedResult = await embedQuery({ query: inputData.query });
           if (embedResult.data?.success && embedResult.data?.embedding) {
             queryEmbedding = embedResult.data.embedding;
-            // Course-level semantic search (existing)
-            semanticResults = await findSimilarCourses(queryEmbedding, 8, 0.35);
-            // Passage-level semantic search (RAG upgrade)
-            try {
-              // Search transcripts
-              const segResults = await searchSegmentsSemantic(queryEmbedding, 6, 0.35);
-              const segPassages = segResults.map((s) => ({
+
+            // Run all three searches in parallel (no dependencies between them)
+            const [courseResult, segResult, docResult] = await Promise.allSettled([
+              findSimilarCourses(queryEmbedding, 8, 0.35),
+              searchSegmentsSemantic(queryEmbedding, 6, 0.35),
+              searchDocsSemantic(queryEmbedding, 6, 0.35),
+            ]);
+
+            // Course-level semantic search
+            if (courseResult.status === "fulfilled") {
+              semanticResults = courseResult.value;
+            } else {
+              devWarn("⚠️ Course semantic search failed:", courseResult.reason?.message);
+            }
+
+            // Passage-level: transcript segments
+            if (segResult.status === "fulfilled") {
+              const segPassages = segResult.value.map((s) => ({
                 text: s.previewText,
                 courseCode: s.courseCode,
                 videoTitle: s.videoTitle,
@@ -194,30 +205,29 @@ export default function ProblemFirst() {
                 similarity: s.similarity,
                 source: "transcript",
               }));
-
-              // Search Epic docs
-              let docPassages = [];
-              try {
-                const docResults = await searchDocsSemantic(queryEmbedding, 6, 0.35);
-                docPassages = docResults.map((d) => ({
-                  text: d.previewText,
-                  url: d.url,
-                  title: d.title,
-                  section: d.section,
-                  similarity: d.similarity,
-                  source: "epic_docs",
-                }));
-              } catch (docErr) {
-                devWarn("⚠️ Docs semantic search skipped:", docErr.message);
-              }
-
-              retrievedPassages = [...segPassages, ...docPassages];
-              devLog(
-                `[RAG] Retrieved ${segPassages.length} transcript + ${docPassages.length} doc passages`
-              );
-            } catch (segErr) {
-              devWarn("⚠️ Segment semantic search skipped:", segErr.message);
+              retrievedPassages.push(...segPassages);
+              devLog(`[RAG] ${segPassages.length} transcript passages`);
+            } else {
+              devWarn("⚠️ Segment search failed:", segResult.reason?.message);
             }
+
+            // Passage-level: Epic docs
+            if (docResult.status === "fulfilled") {
+              const docPassages = docResult.value.map((d) => ({
+                text: d.previewText,
+                url: d.url,
+                title: d.title,
+                section: d.section,
+                similarity: d.similarity,
+                source: "epic_docs",
+              }));
+              retrievedPassages.push(...docPassages);
+              devLog(`[RAG] ${docPassages.length} doc passages`);
+            } else {
+              devWarn("⚠️ Docs search failed:", docResult.reason?.message);
+            }
+
+            devLog(`[RAG] Total: ${retrievedPassages.length} passages retrieved (parallel)`);
           }
         } catch (semanticErr) {
           devWarn("⚠️ Semantic search skipped:", semanticErr.message);

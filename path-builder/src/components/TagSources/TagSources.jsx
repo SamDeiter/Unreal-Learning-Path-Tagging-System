@@ -51,8 +51,19 @@ function TagSources() {
         });
       }
 
-      // Count video-extracted tags (transcript + extracted_tags)
-      const videoTags = [...(course.transcript_tags || []), ...(course.extracted_tags || [])];
+      // Count video-extracted tags (canonical + extracted + topic)
+      const videoTags = [
+        ...(course.canonical_tags || []),
+        ...(course.transcript_tags || []),
+        ...(course.extracted_tags || []),
+      ];
+      // Also include tags.topic (can be string or array)
+      const topicVal = course.tags?.topic;
+      if (Array.isArray(topicVal)) {
+        videoTags.push(...topicVal);
+      } else if (typeof topicVal === "string" && topicVal) {
+        videoTags.push(topicVal);
+      }
       videoTags.forEach((tag) => {
         videoTagCounts[tag] = (videoTagCounts[tag] || 0) + 1;
       });

@@ -7,7 +7,7 @@ const path = require("path");
 // ---------------------------------------------------------------------------
 // Solution Atoms — loaded once at cold start (zero Firestore cost)
 // ---------------------------------------------------------------------------
-let SOLUTION_ATOMS = [];
+const SOLUTION_ATOMS = [];
 
 try {
   const atomsDir = path.join(__dirname, "..", "data", "atoms");
@@ -182,7 +182,7 @@ This diagnosis should teach the developer to recognize and solve similar problem
         const jsonMatch = generatedText.match(/```json\s*([\s\S]*?)\s*```/);
         const jsonStr = jsonMatch ? jsonMatch[1] : generatedText;
         diagnosisData = JSON.parse(jsonStr.trim());
-      } catch (_parseError) {
+      } catch {
         console.error("[ERROR] Failed to parse Diagnosis JSON:", generatedText);
         throw new Error("Failed to parse AI response as JSON");
       }

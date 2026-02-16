@@ -16,6 +16,20 @@ function formatTimestamp(ts) {
   return ts.replace(/^00:/, "");
 }
 
+/**
+ * Parse a timestamp string into total seconds for YouTube &t= parameter.
+ * Handles "HH:MM:SS", "MM:SS", or raw seconds.
+ */
+function parseTimestampToSeconds(ts) {
+  if (!ts) return 0;
+  // If it's already a number
+  if (!isNaN(ts)) return Math.floor(Number(ts));
+  const parts = String(ts).split(":").map(Number);
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return 0;
+}
+
 export default function MicroLesson({ microLesson, retrievedPassages, videoResults = [] }) {
   const [expandedSection, setExpandedSection] = useState("quick_fix");
 
@@ -65,19 +79,44 @@ export default function MicroLesson({ microLesson, retrievedPassages, videoResul
 
     const matchedVideo = findMatchingVideo(citation);
     const isClickable = !!matchedVideo;
+    const isYouTube =
+      matchedVideo &&
+      (matchedVideo.type === "youtube" ||
+        matchedVideo.source === "youtube" ||
+        (matchedVideo.url && matchedVideo.url.includes("youtube.com")));
+
+    const handleClick = () => {
+      if (!matchedVideo) return;
+      if (isYouTube && matchedVideo.url) {
+        // Deep-link to YouTube with timestamp
+        const secs = parseTimestampToSeconds(citation.timestamp);
+        const baseUrl = matchedVideo.url.split("&t=")[0]; // strip existing &t=
+        const deepLink = secs > 0 ? `${baseUrl}&t=${secs}` : baseUrl;
+        window.open(deepLink, "_blank", "noopener,noreferrer");
+      } else {
+        scrollToVideo(matchedVideo);
+      }
+    };
 
     return (
       <span
         key={`${citation.ref}-${citation.timestamp}`}
         className={`ml-citation ${isClickable ? "ml-citation-linked" : ""}`}
-        title={isClickable ? `Jump to ${label} ↑` : label}
-        onClick={isClickable ? () => scrollToVideo(matchedVideo) : undefined}
+        title={
+          isYouTube
+            ? `Open on YouTube @ ${formatTimestamp(citation.timestamp) || "start"}`
+            : isClickable
+              ? `Jump to ${label} ↑`
+              : label
+        }
+        onClick={isClickable ? handleClick : undefined}
         role={isClickable ? "button" : undefined}
         tabIndex={isClickable ? 0 : undefined}
       >
-        <span className="ml-citation-icon">🎬</span>
+        <span className="ml-citation-icon">{isYouTube ? "▶" : "🎬"}</span>
         <span className="ml-citation-text">{label}</span>
-        {isClickable && <span className="ml-citation-link-icon">↑</span>}
+        {isYouTube && <span className="ml-citation-link-icon">↗</span>}
+        {isClickable && !isYouTube && <span className="ml-citation-link-icon">↑</span>}
       </span>
     );
   };
@@ -117,9 +156,7 @@ export default function MicroLesson({ microLesson, retrievedPassages, videoResul
               <span className="ml-doc-chip-icon">📄</span>
               <span className="ml-doc-chip-title">
                 {doc.title || doc.section || "UE5 Docs"}
-                {doc.section && doc.title && doc.section !== doc.title
-                  ? ` — ${doc.section}`
-                  : ""}
+                {doc.section && doc.title && doc.section !== doc.title ? ` — ${doc.section}` : ""}
               </span>
               {doc.similarity && (
                 <span className="ml-doc-chip-score">{Math.round(doc.similarity * 100)}%</span>
@@ -168,7 +205,11 @@ export default function MicroLesson({ microLesson, retrievedPassages, videoResul
                   {quick_fix.steps.map((step, i) => (
                     <li key={i} className="ml-step">
                       <span className="ml-step-number">{i + 1}</span>
-                      <span className="ml-step-text">{typeof step === "string" ? step.replace(/\s*\[\d+(?:[,\s]*\d+)*\]/g, "").trim() : step}</span>
+                      <span className="ml-step-text">
+                        {typeof step === "string"
+                          ? step.replace(/\s*\[\d+(?:[,\s]*\d+)*\]/g, "").trim()
+                          : step}
+                      </span>
                     </li>
                   ))}
                 </ol>
