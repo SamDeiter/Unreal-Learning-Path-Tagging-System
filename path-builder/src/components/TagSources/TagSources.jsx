@@ -64,13 +64,16 @@ function TagSources() {
         ...(course.transcript_tags || []).flatMap(splitTag),
         ...(course.extracted_tags || []),
       ];
-      // Also include tags.topic (can be string or array)
-      const topicVal = course.tags?.topic;
-      if (Array.isArray(topicVal)) {
-        videoTags.push(...topicVal);
-      } else if (typeof topicVal === "string" && topicVal) {
-        videoTags.push(topicVal);
-      }
+      // Also include all tags dict values (topic, industry, level, etc.)
+      const tagsObj = course.tags || {};
+      Object.entries(tagsObj).forEach(([key, val]) => {
+        if (key.startsWith("_")) return; // skip internal fields
+        if (Array.isArray(val)) {
+          videoTags.push(...val);
+        } else if (typeof val === "string" && val) {
+          videoTags.push(val);
+        }
+      });
       videoTags.forEach((tag) => {
         videoTagCounts[tag] = (videoTagCounts[tag] || 0) + 1;
       });
