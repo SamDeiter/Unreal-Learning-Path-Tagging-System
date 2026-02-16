@@ -1,0 +1,6897 @@
+[
+  {
+    "text": "Thank you for joining. Uh my name is",
+    "start": 1.52,
+    "duration": 3.2
+  },
+  {
+    "text": "Luke Thatcher. I'm a principal rendering",
+    "start": 3.12,
+    "duration": 4.239
+  },
+  {
+    "text": "programmer on the RHI team at Epic. Um",
+    "start": 4.72,
+    "duration": 4.32
+  },
+  {
+    "text": "and this is our session on the new GP",
+    "start": 7.359,
+    "duration": 6.2
+  },
+  {
+    "text": "profiler and RHI submission pipeline.",
+    "start": 9.04,
+    "duration": 4.519
+  },
+  {
+    "text": "Uh so this session will be one that's in",
+    "start": 14.16,
+    "duration": 4.4
+  },
+  {
+    "text": "kind of two halves really. Uh first",
+    "start": 16.0,
+    "duration": 3.92
+  },
+  {
+    "text": "section I'm going to talk about what",
+    "start": 18.56,
+    "duration": 3.12
+  },
+  {
+    "text": "we've done to the new GP profiler in",
+    "start": 19.92,
+    "duration": 3.599
+  },
+  {
+    "text": "Unreal 5.6 and the improvements that",
+    "start": 21.68,
+    "duration": 4.4
+  },
+  {
+    "text": "we've made there. Um, and then in the",
+    "start": 23.519,
+    "duration": 4.0
+  },
+  {
+    "text": "second half I'll be going over like a",
+    "start": 26.08,
+    "duration": 4.16
+  },
+  {
+    "text": "deep technical dive into uh the RHI",
+    "start": 27.519,
+    "duration": 4.16
+  },
+  {
+    "text": "submission pipeline. This was something",
+    "start": 30.24,
+    "duration": 3.52
+  },
+  {
+    "text": "that we shipped in 5.5 uh but we haven't",
+    "start": 31.679,
+    "duration": 4.72
+  },
+  {
+    "text": "kind of publicly spoken about yet. Um,",
+    "start": 33.76,
+    "duration": 4.24
+  },
+  {
+    "text": "and just for anyone who who's curious,",
+    "start": 36.399,
+    "duration": 3.201
+  },
+  {
+    "text": "RHI stands for render hardware",
+    "start": 38.0,
+    "duration": 3.2
+  },
+  {
+    "text": "interface. Um, it's one of those",
+    "start": 39.6,
+    "duration": 2.799
+  },
+  {
+    "text": "acronyms that we throw around quite a",
+    "start": 41.2,
+    "duration": 2.8
+  },
+  {
+    "text": "lot but we don't tend to define very",
+    "start": 42.399,
+    "duration": 4.561
+  },
+  {
+    "text": "much. Um so yeah the RHI is the is the",
+    "start": 44.0,
+    "duration": 4.48
+  },
+  {
+    "text": "module of the engine that sits between",
+    "start": 46.96,
+    "duration": 3.759
+  },
+  {
+    "text": "the render uh the renderer and the GPU",
+    "start": 48.48,
+    "duration": 5.599
+  },
+  {
+    "text": "kind of um platform API and we implement",
+    "start": 50.719,
+    "duration": 5.201
+  },
+  {
+    "text": "one of these per platform and uh it's",
+    "start": 54.079,
+    "duration": 3.201
+  },
+  {
+    "text": "what provides the platform support for",
+    "start": 55.92,
+    "duration": 4.36
+  },
+  {
+    "text": "graphics.",
+    "start": 57.28,
+    "duration": 3.0
+  },
+  {
+    "text": "Uh but before we dive into that um let's",
+    "start": 60.8,
+    "duration": 4.319
+  },
+  {
+    "text": "just have a quick recap on GPQs as this",
+    "start": 63.359,
+    "duration": 3.521
+  },
+  {
+    "text": "will set like some of the scene for some",
+    "start": 65.119,
+    "duration": 2.881
+  },
+  {
+    "text": "of the changes that we've made in the",
+    "start": 66.88,
+    "duration": 3.2
+  },
+  {
+    "text": "profiler. Um, some of this you may",
+    "start": 68.0,
+    "duration": 3.36
+  },
+  {
+    "text": "already be familiar with, but it's it's",
+    "start": 70.08,
+    "duration": 2.24
+  },
+  {
+    "text": "probably worth just having a quick",
+    "start": 71.36,
+    "duration": 3.96
+  },
+  {
+    "text": "refresh.",
+    "start": 72.32,
+    "duration": 3.0
+  },
+  {
+    "text": "So, for the best part of a decade now,",
+    "start": 75.439,
+    "duration": 5.921
+  },
+  {
+    "text": "um, GPUs have had multiple cues. Um,",
+    "start": 77.759,
+    "duration": 5.201
+  },
+  {
+    "text": "these cues you can kind of think of as",
+    "start": 81.36,
+    "duration": 3.36
+  },
+  {
+    "text": "almost like hyperthreading on a CPU and",
+    "start": 82.96,
+    "duration": 3.28
+  },
+  {
+    "text": "multiple threads on a CPU in that we",
+    "start": 84.72,
+    "duration": 3.2
+  },
+  {
+    "text": "have kind of two or two or more",
+    "start": 86.24,
+    "duration": 3.36
+  },
+  {
+    "text": "independent cues of work that the the",
+    "start": 87.92,
+    "duration": 4.08
+  },
+  {
+    "text": "application can submit to. Um, and they",
+    "start": 89.6,
+    "duration": 4.559
+  },
+  {
+    "text": "run concurrently. Um, and they sort of",
+    "start": 92.0,
+    "duration": 3.6
+  },
+  {
+    "text": "intelligently share the execution",
+    "start": 94.159,
+    "duration": 4.081
+  },
+  {
+    "text": "resources on the GPU. Uh typically",
+    "start": 95.6,
+    "duration": 4.24
+  },
+  {
+    "text": "there's always uh a single graphics",
+    "start": 98.24,
+    "duration": 3.76
+  },
+  {
+    "text": "queue and the graphics Q can access the",
+    "start": 99.84,
+    "duration": 3.919
+  },
+  {
+    "text": "full traditional uh rasterization",
+    "start": 102.0,
+    "duration": 4.24
+  },
+  {
+    "text": "pipeline. So depth essential testing,",
+    "start": 103.759,
+    "duration": 4.561
+  },
+  {
+    "text": "vertex, pixel shaders, all that stuff.",
+    "start": 106.24,
+    "duration": 4.879
+  },
+  {
+    "text": "Um but it can also run compute jobs. And",
+    "start": 108.32,
+    "duration": 4.479
+  },
+  {
+    "text": "then you typically have either one or",
+    "start": 111.119,
+    "duration": 3.201
+  },
+  {
+    "text": "more compute cues that can only run",
+    "start": 112.799,
+    "duration": 3.921
+  },
+  {
+    "text": "compute shaders.",
+    "start": 114.32,
+    "duration": 4.32
+  },
+  {
+    "text": "And of course these jobs um the jobs",
+    "start": 116.72,
+    "duration": 3.2
+  },
+  {
+    "text": "submitted to these cues can run",
+    "start": 118.64,
+    "duration": 2.72
+  },
+  {
+    "text": "concurrently with each other. But that's",
+    "start": 119.92,
+    "duration": 4.08
+  },
+  {
+    "text": "not always desirable. we tend to have uh",
+    "start": 121.36,
+    "duration": 4.56
+  },
+  {
+    "text": "jobs that create data on one pipe and",
+    "start": 124.0,
+    "duration": 3.759
+  },
+  {
+    "text": "need to be consumed by another pipe. So",
+    "start": 125.92,
+    "duration": 3.6
+  },
+  {
+    "text": "we need some way of synchronizing these",
+    "start": 127.759,
+    "duration": 4.401
+  },
+  {
+    "text": "two pipes together",
+    "start": 129.52,
+    "duration": 4.48
+  },
+  {
+    "text": "and that's where we get fences. So",
+    "start": 132.16,
+    "duration": 3.52
+  },
+  {
+    "text": "fences are kind of synchronization",
+    "start": 134.0,
+    "duration": 3.599
+  },
+  {
+    "text": "primitives that are used to prevent one",
+    "start": 135.68,
+    "duration": 3.919
+  },
+  {
+    "text": "queue from advancing any further until",
+    "start": 137.599,
+    "duration": 3.441
+  },
+  {
+    "text": "uh the signal has come from the other",
+    "start": 139.599,
+    "duration": 3.521
+  },
+  {
+    "text": "queue that was producing that data. Uh",
+    "start": 141.04,
+    "duration": 4.96
+  },
+  {
+    "text": "so in this case um those three compute",
+    "start": 143.12,
+    "duration": 4.0
+  },
+  {
+    "text": "jobs on the right hand side on the",
+    "start": 146.0,
+    "duration": 3.12
+  },
+  {
+    "text": "compute Q can't start work until the",
+    "start": 147.12,
+    "duration": 3.6
+  },
+  {
+    "text": "graphics queue has completed that first",
+    "start": 149.12,
+    "duration": 3.44
+  },
+  {
+    "text": "piece of work in the upper left and then",
+    "start": 150.72,
+    "duration": 3.76
+  },
+  {
+    "text": "we get that signal of fence A and then",
+    "start": 152.56,
+    "duration": 3.759
+  },
+  {
+    "text": "the wait for fence A um to allow",
+    "start": 154.48,
+    "duration": 3.52
+  },
+  {
+    "text": "everything to advance and then coming",
+    "start": 156.319,
+    "duration": 4.481
+  },
+  {
+    "text": "back the other way those last three uh",
+    "start": 158.0,
+    "duration": 4.48
+  },
+  {
+    "text": "jobs on the graphics queue can't start",
+    "start": 160.8,
+    "duration": 5.12
+  },
+  {
+    "text": "until that signal has passed um on the",
+    "start": 162.48,
+    "duration": 5.44
+  },
+  {
+    "text": "compute queue.",
+    "start": 165.92,
+    "duration": 3.36
+  },
+  {
+    "text": "And one thing that's interesting to note",
+    "start": 167.92,
+    "duration": 2.959
+  },
+  {
+    "text": "about this is that because these weights",
+    "start": 169.28,
+    "duration": 3.2
+  },
+  {
+    "text": "stall the cues, you can end up with",
+    "start": 170.879,
+    "duration": 3.281
+  },
+  {
+    "text": "execution kind of pauses. And you can",
+    "start": 172.48,
+    "duration": 3.92
+  },
+  {
+    "text": "see that kind of like in the uh on the",
+    "start": 174.16,
+    "duration": 4.24
+  },
+  {
+    "text": "left hand side where there's that gap",
+    "start": 176.4,
+    "duration": 4.64
+  },
+  {
+    "text": "just before uh the weight for fence B.",
+    "start": 178.4,
+    "duration": 5.52
+  },
+  {
+    "text": "Um so because the cues are synchronizing",
+    "start": 181.04,
+    "duration": 3.839
+  },
+  {
+    "text": "with each other, you can end up with",
+    "start": 183.92,
+    "duration": 2.56
+  },
+  {
+    "text": "these kind of bubbles on the cues. Um",
+    "start": 184.879,
+    "duration": 3.041
+  },
+  {
+    "text": "and that's something important to to to",
+    "start": 186.48,
+    "duration": 2.64
+  },
+  {
+    "text": "be aware of when we're looking at the",
+    "start": 187.92,
+    "duration": 4.2
+  },
+  {
+    "text": "profiler.",
+    "start": 189.12,
+    "duration": 3.0
+  },
+  {
+    "text": "So, moving on to the actual profile",
+    "start": 193.68,
+    "duration": 2.4
+  },
+  {
+    "text": "itself and then the improvements that",
+    "start": 194.959,
+    "duration": 3.92
+  },
+  {
+    "text": "we've made in 56.",
+    "start": 196.08,
+    "duration": 4.4
+  },
+  {
+    "text": "Uh, hopefully you're all familiar with",
+    "start": 198.879,
+    "duration": 3.041
+  },
+  {
+    "text": "these tools. Um, they've been around for",
+    "start": 200.48,
+    "duration": 3.119
+  },
+  {
+    "text": "a while now. Uh, the three main",
+    "start": 201.92,
+    "duration": 3.599
+  },
+  {
+    "text": "components of the GPU profiler are stat",
+    "start": 203.599,
+    "duration": 4.401
+  },
+  {
+    "text": "GPU, the profile GPU command, and Unreal",
+    "start": 205.519,
+    "duration": 5.121
+  },
+  {
+    "text": "Insights. Um,",
+    "start": 208.0,
+    "duration": 4.239
+  },
+  {
+    "text": "in 56, we've rebuilt these from the",
+    "start": 210.64,
+    "duration": 4.8
+  },
+  {
+    "text": "ground up to to uh uh be based heavily",
+    "start": 212.239,
+    "duration": 5.441
+  },
+  {
+    "text": "on our RI breadcrumb system. I'll touch",
+    "start": 215.44,
+    "duration": 4.0
+  },
+  {
+    "text": "on what our RI breadcrumb system is um",
+    "start": 217.68,
+    "duration": 4.72
+  },
+  {
+    "text": "further on in this talk. Um, and one of",
+    "start": 219.44,
+    "duration": 4.56
+  },
+  {
+    "text": "the key things here is that it now all",
+    "start": 222.4,
+    "duration": 4.16
+  },
+  {
+    "text": "draws from a unified data source. So,",
+    "start": 224.0,
+    "duration": 4.319
+  },
+  {
+    "text": "uh, all of these, uh, tools now agree",
+    "start": 226.56,
+    "duration": 4.16
+  },
+  {
+    "text": "with each other. Um, perhaps previously",
+    "start": 228.319,
+    "duration": 3.521
+  },
+  {
+    "text": "you might have noticed that some of the",
+    "start": 230.72,
+    "duration": 2.799
+  },
+  {
+    "text": "stats were like off by fractions of",
+    "start": 231.84,
+    "duration": 3.52
+  },
+  {
+    "text": "milliseconds because they're all drawing",
+    "start": 233.519,
+    "duration": 3.601
+  },
+  {
+    "text": "from the same, uh, information. Now,",
+    "start": 235.36,
+    "duration": 4.0
+  },
+  {
+    "text": "they all they all agree with each other.",
+    "start": 237.12,
+    "duration": 6.56
+  },
+  {
+    "text": "Okay. So, uh, stat GPU, um, this is a,",
+    "start": 239.36,
+    "duration": 6.0
+  },
+  {
+    "text": "uh, a tool that you can use as to to",
+    "start": 243.68,
+    "duration": 3.119
+  },
+  {
+    "text": "give you kind of like a live overview of",
+    "start": 245.36,
+    "duration": 2.64
+  },
+  {
+    "text": "the GPU work that's running in the",
+    "start": 246.799,
+    "duration": 3.041
+  },
+  {
+    "text": "frame. You can bring this up on console.",
+    "start": 248.0,
+    "duration": 4.48
+  },
+  {
+    "text": "You can bring this up in the editor. Um,",
+    "start": 249.84,
+    "duration": 4.56
+  },
+  {
+    "text": "each one of each one of the lines here",
+    "start": 252.48,
+    "duration": 3.52
+  },
+  {
+    "text": "is a single stat and the stats are",
+    "start": 254.4,
+    "duration": 3.2
+  },
+  {
+    "text": "defining code. There's an example macro",
+    "start": 256.0,
+    "duration": 4.959
+  },
+  {
+    "text": "for the base pass there. Um,",
+    "start": 257.6,
+    "duration": 5.12
+  },
+  {
+    "text": "and the individual uh the individual",
+    "start": 260.959,
+    "duration": 3.841
+  },
+  {
+    "text": "stats get attached to specific render",
+    "start": 262.72,
+    "duration": 3.919
+  },
+  {
+    "text": "graph event scopes or RHI breadcrumb",
+    "start": 264.8,
+    "duration": 3.679
+  },
+  {
+    "text": "scopes and then all of the rendering",
+    "start": 266.639,
+    "duration": 3.761
+  },
+  {
+    "text": "that happens within those scopes gets",
+    "start": 268.479,
+    "duration": 4.321
+  },
+  {
+    "text": "attributed to these stats. And something",
+    "start": 270.4,
+    "duration": 4.72
+  },
+  {
+    "text": "important to note is that uh these stats",
+    "start": 272.8,
+    "duration": 3.44
+  },
+  {
+    "text": "can appear multiple times in the",
+    "start": 275.12,
+    "duration": 3.2
+  },
+  {
+    "text": "renderer and they uh so like uh for",
+    "start": 276.24,
+    "duration": 3.44
+  },
+  {
+    "text": "example I think the post-processing one",
+    "start": 278.32,
+    "duration": 2.879
+  },
+  {
+    "text": "is an example where there's actually",
+    "start": 279.68,
+    "duration": 3.2
+  },
+  {
+    "text": "multiple places in the renderer we tag",
+    "start": 281.199,
+    "duration": 4.321
+  },
+  {
+    "text": "with post-processing and then the stat",
+    "start": 282.88,
+    "duration": 5.039
+  },
+  {
+    "text": "the data that you see in stat GPU is uh",
+    "start": 285.52,
+    "duration": 4.08
+  },
+  {
+    "text": "an amalgamation of that kind of we",
+    "start": 287.919,
+    "duration": 5.801
+  },
+  {
+    "text": "accumulate in some the results.",
+    "start": 289.6,
+    "duration": 4.12
+  },
+  {
+    "text": "Uh so for the first time we are now",
+    "start": 295.759,
+    "duration": 4.561
+  },
+  {
+    "text": "multiGPU aware and multiqaware. Um, this",
+    "start": 297.6,
+    "duration": 5.12
+  },
+  {
+    "text": "was the big change in 56. Uh, previously",
+    "start": 300.32,
+    "duration": 4.48
+  },
+  {
+    "text": "with stat GPU, um, you'd only get the",
+    "start": 302.72,
+    "duration": 4.56
+  },
+  {
+    "text": "single graphics pipe of your first GPU.",
+    "start": 304.8,
+    "duration": 4.08
+  },
+  {
+    "text": "Um, so if you're running in a, uh, if",
+    "start": 307.28,
+    "duration": 2.88
+  },
+  {
+    "text": "you're running as compute, you'd never",
+    "start": 308.88,
+    "duration": 2.96
+  },
+  {
+    "text": "see the information from async compute",
+    "start": 310.16,
+    "duration": 3.44
+  },
+  {
+    "text": "or, uh, if you're running a virtual",
+    "start": 311.84,
+    "duration": 3.6
+  },
+  {
+    "text": "production uh, scenario with multi",
+    "start": 313.6,
+    "duration": 3.92
+  },
+  {
+    "text": "multiple GPUs and so on, um, you never",
+    "start": 315.44,
+    "duration": 3.36
+  },
+  {
+    "text": "got the information about those GPUs.",
+    "start": 317.52,
+    "duration": 4.56
+  },
+  {
+    "text": "Now, we get all of it. Um, and so each",
+    "start": 318.8,
+    "duration": 4.56
+  },
+  {
+    "text": "of these stat pages that are highlighted",
+    "start": 322.08,
+    "duration": 2.8
+  },
+  {
+    "text": "with the brackets, um, they're all",
+    "start": 323.36,
+    "duration": 3.52
+  },
+  {
+    "text": "actually independent stat pages. It just",
+    "start": 324.88,
+    "duration": 4.0
+  },
+  {
+    "text": "uses the standard Unreal stat system.",
+    "start": 326.88,
+    "duration": 3.28
+  },
+  {
+    "text": "Um, and you can bring them up",
+    "start": 328.88,
+    "duration": 3.2
+  },
+  {
+    "text": "individually uh with the longer format",
+    "start": 330.16,
+    "duration": 4.24
+  },
+  {
+    "text": "command stat GPU and then the index, the",
+    "start": 332.08,
+    "duration": 4.64
+  },
+  {
+    "text": "Q type and another index. Um, it's all",
+    "start": 334.4,
+    "duration": 4.079
+  },
+  {
+    "text": "built so that we can in future support",
+    "start": 336.72,
+    "duration": 3.44
+  },
+  {
+    "text": "potentially more than one compute Q. Um,",
+    "start": 338.479,
+    "duration": 3.761
+  },
+  {
+    "text": "but at the moment there's just the one.",
+    "start": 340.16,
+    "duration": 5.039
+  },
+  {
+    "text": "Um, but we've also repurposed this the",
+    "start": 342.24,
+    "duration": 5.84
+  },
+  {
+    "text": "standard uh stat GPU command um, which",
+    "start": 345.199,
+    "duration": 4.081
+  },
+  {
+    "text": "is just like a macro command now. It",
+    "start": 348.08,
+    "duration": 2.399
+  },
+  {
+    "text": "toggles all of them on and all of them",
+    "start": 349.28,
+    "duration": 3.12
+  },
+  {
+    "text": "off. So if you've got like muscle memory",
+    "start": 350.479,
+    "duration": 4.081
+  },
+  {
+    "text": "of of typing stat GPU then it will still",
+    "start": 352.4,
+    "duration": 5.72
+  },
+  {
+    "text": "work as it did before.",
+    "start": 354.56,
+    "duration": 3.56
+  },
+  {
+    "text": "Uh but the actual data that we present",
+    "start": 358.88,
+    "duration": 4.08
+  },
+  {
+    "text": "now has been greatly expanded. Um we now",
+    "start": 360.56,
+    "duration": 4.079
+  },
+  {
+    "text": "have these three separate columns. The",
+    "start": 362.96,
+    "duration": 3.12
+  },
+  {
+    "text": "one on the far left is what you used to",
+    "start": 364.639,
+    "duration": 3.28
+  },
+  {
+    "text": "see before. Uh it's the busy time. It's",
+    "start": 366.08,
+    "duration": 3.6
+  },
+  {
+    "text": "the time actually spent doing useful",
+    "start": 367.919,
+    "duration": 3.28
+  },
+  {
+    "text": "work, running command lists, running",
+    "start": 369.68,
+    "duration": 4.16
+  },
+  {
+    "text": "shaders. Um the middle column on the and",
+    "start": 371.199,
+    "duration": 3.761
+  },
+  {
+    "text": "the column on the right are the two new",
+    "start": 373.84,
+    "duration": 2.799
+  },
+  {
+    "text": "ones that we've added. Uh the middle",
+    "start": 374.96,
+    "duration": 4.0
+  },
+  {
+    "text": "column is the wait time. And going back",
+    "start": 376.639,
+    "duration": 4.081
+  },
+  {
+    "text": "to that example I gave during the recap,",
+    "start": 378.96,
+    "duration": 3.44
+  },
+  {
+    "text": "that's the time when one Q is waiting",
+    "start": 380.72,
+    "duration": 3.68
+  },
+  {
+    "text": "for another Q to signal a fence and",
+    "start": 382.4,
+    "duration": 4.239
+  },
+  {
+    "text": "therefore isn't running anything useful.",
+    "start": 384.4,
+    "duration": 6.4
+  },
+  {
+    "text": "Um you may find that uh generally um",
+    "start": 386.639,
+    "duration": 6.801
+  },
+  {
+    "text": "compute Q you'll see larger nonzero",
+    "start": 390.8,
+    "duration": 5.679
+  },
+  {
+    "text": "values um because it's not always a win",
+    "start": 393.44,
+    "duration": 4.319
+  },
+  {
+    "text": "to run something on the compute because",
+    "start": 396.479,
+    "duration": 2.56
+  },
+  {
+    "text": "it depends on what it's overlapping with",
+    "start": 397.759,
+    "duration": 3.521
+  },
+  {
+    "text": "on the graphics queue. Portions of the",
+    "start": 399.039,
+    "duration": 4.16
+  },
+  {
+    "text": "frame on the on the compute Q is just",
+    "start": 401.28,
+    "duration": 3.44
+  },
+  {
+    "text": "idle waiting for fences to signal",
+    "start": 403.199,
+    "duration": 3.44
+  },
+  {
+    "text": "waiting for the the data dependencies to",
+    "start": 404.72,
+    "duration": 4.16
+  },
+  {
+    "text": "be resolved. Um so it's not necessarily",
+    "start": 406.639,
+    "duration": 3.84
+  },
+  {
+    "text": "a bad thing if you see lots of wait time",
+    "start": 408.88,
+    "duration": 3.36
+  },
+  {
+    "text": "on the compute Q. However, the graphics",
+    "start": 410.479,
+    "duration": 3.201
+  },
+  {
+    "text": "queue we tend to try and keep busy all",
+    "start": 412.24,
+    "duration": 3.04
+  },
+  {
+    "text": "the time. So generally the numbers there",
+    "start": 413.68,
+    "duration": 5.12
+  },
+  {
+    "text": "should be closer to zero.",
+    "start": 415.28,
+    "duration": 5.52
+  },
+  {
+    "text": "And then the the the column on the right",
+    "start": 418.8,
+    "duration": 4.959
+  },
+  {
+    "text": "hand side uh is idle time. We've never",
+    "start": 420.8,
+    "duration": 4.239
+  },
+  {
+    "text": "had a stat like this in Unreal Engine",
+    "start": 423.759,
+    "duration": 4.241
+  },
+  {
+    "text": "before. This is really cool uh because",
+    "start": 425.039,
+    "duration": 4.72
+  },
+  {
+    "text": "we know exactly when the work gets",
+    "start": 428.0,
+    "duration": 3.84
+  },
+  {
+    "text": "submitted. So in modern APIs like D3G12,",
+    "start": 429.759,
+    "duration": 3.041
+  },
+  {
+    "text": "we know exactly when the work gets",
+    "start": 431.84,
+    "duration": 3.04
+  },
+  {
+    "text": "submitted to the driver. We know exactly",
+    "start": 432.8,
+    "duration": 4.16
+  },
+  {
+    "text": "when the GPU is completing the work. We",
+    "start": 434.88,
+    "duration": 3.92
+  },
+  {
+    "text": "can now see that the GPU has gone idle",
+    "start": 436.96,
+    "duration": 3.12
+  },
+  {
+    "text": "because it's run out of work from the",
+    "start": 438.8,
+    "duration": 3.76
+  },
+  {
+    "text": "CPU. Um, so a non-zero value here means",
+    "start": 440.08,
+    "duration": 3.92
+  },
+  {
+    "text": "that the GPU has actually completed all",
+    "start": 442.56,
+    "duration": 2.88
+  },
+  {
+    "text": "of its work and has gone idle because",
+    "start": 444.0,
+    "duration": 2.72
+  },
+  {
+    "text": "the CPU hasn't given it anything",
+    "start": 445.44,
+    "duration": 3.759
+  },
+  {
+    "text": "further, which is a good indication um",
+    "start": 446.72,
+    "duration": 4.16
+  },
+  {
+    "text": "that your title is at least partially",
+    "start": 449.199,
+    "duration": 3.921
+  },
+  {
+    "text": "CPUbound um for that duration of the",
+    "start": 450.88,
+    "duration": 4.8
+  },
+  {
+    "text": "frame. Um, so if you see non-zero values",
+    "start": 453.12,
+    "duration": 4.4
+  },
+  {
+    "text": "here, be sure you're running a test",
+    "start": 455.68,
+    "duration": 3.04
+  },
+  {
+    "text": "build or something, something with good",
+    "start": 457.52,
+    "duration": 2.48
+  },
+  {
+    "text": "CPF, otherwise it's not very",
+    "start": 458.72,
+    "duration": 2.56
+  },
+  {
+    "text": "representative. But if you do see",
+    "start": 460.0,
+    "duration": 3.199
+  },
+  {
+    "text": "non-zero values, that kind of warrants",
+    "start": 461.28,
+    "duration": 3.68
+  },
+  {
+    "text": "some further investigation with Unreal",
+    "start": 463.199,
+    "duration": 5.801
+  },
+  {
+    "text": "Insights or or other tools.",
+    "start": 464.96,
+    "duration": 4.04
+  },
+  {
+    "text": "And one very important thing to to note",
+    "start": 470.56,
+    "duration": 3.68
+  },
+  {
+    "text": "is that the cues are because the cues",
+    "start": 472.479,
+    "duration": 3.761
+  },
+  {
+    "text": "are concurrent. Um you can't just add up",
+    "start": 474.24,
+    "duration": 3.76
+  },
+  {
+    "text": "these numbers across the Q pages. Um",
+    "start": 476.24,
+    "duration": 3.6
+  },
+  {
+    "text": "that wouldn't make any sense. Um each of",
+    "start": 478.0,
+    "duration": 4.16
+  },
+  {
+    "text": "the stat pages have a uh Q total stat",
+    "start": 479.84,
+    "duration": 3.84
+  },
+  {
+    "text": "which is the one at the top. Um which",
+    "start": 482.16,
+    "duration": 3.439
+  },
+  {
+    "text": "gives you the total amount of work in",
+    "start": 483.68,
+    "duration": 4.4
+  },
+  {
+    "text": "each of the columns for that frame. Um,",
+    "start": 485.599,
+    "duration": 4.16
+  },
+  {
+    "text": "but if you're looking for an overall GPU",
+    "start": 488.08,
+    "duration": 3.2
+  },
+  {
+    "text": "stat time that tells you kind of like",
+    "start": 489.759,
+    "duration": 3.361
+  },
+  {
+    "text": "the ballpark figure of how long the GPU",
+    "start": 491.28,
+    "duration": 3.359
+  },
+  {
+    "text": "took for the whole frame across all",
+    "start": 493.12,
+    "duration": 3.759
+  },
+  {
+    "text": "cues, uh, you need to be using the stat",
+    "start": 494.639,
+    "duration": 3.84
+  },
+  {
+    "text": "GPU time for that, which is, uh, the one",
+    "start": 496.879,
+    "duration": 3.76
+  },
+  {
+    "text": "highlighted with the arrow.",
+    "start": 498.479,
+    "duration": 5.28
+  },
+  {
+    "text": "Um, we compute this stat by taking, uh,",
+    "start": 500.639,
+    "duration": 5.12
+  },
+  {
+    "text": "a union of all the busy times across all",
+    "start": 503.759,
+    "duration": 4.081
+  },
+  {
+    "text": "of the all of the cues. Um, and then",
+    "start": 505.759,
+    "duration": 4.321
+  },
+  {
+    "text": "that goes into uh that final stat time,",
+    "start": 507.84,
+    "duration": 5.36
+  },
+  {
+    "text": "which is for the frame. Um,",
+    "start": 510.08,
+    "duration": 4.959
+  },
+  {
+    "text": "and that's the that particular stat is",
+    "start": 513.2,
+    "duration": 3.12
+  },
+  {
+    "text": "the one that drives systems like dynamic",
+    "start": 515.039,
+    "duration": 3.12
+  },
+  {
+    "text": "resolution. um because we need like a a",
+    "start": 516.32,
+    "duration": 3.839
+  },
+  {
+    "text": "single stat to say how expensive the GPU",
+    "start": 518.159,
+    "duration": 3.521
+  },
+  {
+    "text": "is this frame. Um and then we can scale",
+    "start": 520.159,
+    "duration": 5.721
+  },
+  {
+    "text": "things up and down uh with that.",
+    "start": 521.68,
+    "duration": 4.2
+  },
+  {
+    "text": "So moving on to profile GPU. Um you may",
+    "start": 527.92,
+    "duration": 4.24
+  },
+  {
+    "text": "have already seen this uh this command",
+    "start": 530.8,
+    "duration": 3.12
+  },
+  {
+    "text": "before. It's a command you can run in in",
+    "start": 532.16,
+    "duration": 5.28
+  },
+  {
+    "text": "the in-game consoles. Uh it produces a",
+    "start": 533.92,
+    "duration": 5.52
+  },
+  {
+    "text": "text log that goes out to either the it",
+    "start": 537.44,
+    "duration": 3.44
+  },
+  {
+    "text": "goes out of the UEI log. So, it's either",
+    "start": 539.44,
+    "duration": 3.68
+  },
+  {
+    "text": "into the um debugger output window if",
+    "start": 540.88,
+    "duration": 4.079
+  },
+  {
+    "text": "you've got Visual Studio attached uh or",
+    "start": 543.12,
+    "duration": 3.92
+  },
+  {
+    "text": "the editor log window um or the log file",
+    "start": 544.959,
+    "duration": 5.601
+  },
+  {
+    "text": "itself. Um it gives you a table nice",
+    "start": 547.04,
+    "duration": 5.12
+  },
+  {
+    "text": "view breakdown of absolutely everything",
+    "start": 550.56,
+    "duration": 3.04
+  },
+  {
+    "text": "that happened in the frame. Um and",
+    "start": 552.16,
+    "duration": 3.28
+  },
+  {
+    "text": "again, it's driven by RHI breadcrumb",
+    "start": 553.6,
+    "duration": 3.76
+  },
+  {
+    "text": "system that I'll come to later. Um and",
+    "start": 555.44,
+    "duration": 3.28
+  },
+  {
+    "text": "this will include all of the individual",
+    "start": 557.36,
+    "duration": 4.24
+  },
+  {
+    "text": "RDG uh pass names. Um so there's a",
+    "start": 558.72,
+    "duration": 4.799
+  },
+  {
+    "text": "couple ways you can use this. I use this",
+    "start": 561.6,
+    "duration": 3.44
+  },
+  {
+    "text": "uh sometimes just to check if a certain",
+    "start": 563.519,
+    "duration": 3.361
+  },
+  {
+    "text": "pass is even running. is quite a handy",
+    "start": 565.04,
+    "duration": 3.52
+  },
+  {
+    "text": "command to just throw into the console,",
+    "start": 566.88,
+    "duration": 3.2
+  },
+  {
+    "text": "see the output log and go, \"Oh yeah,",
+    "start": 568.56,
+    "duration": 3.12
+  },
+  {
+    "text": "this particular postprocess pass is",
+    "start": 570.08,
+    "duration": 3.439
+  },
+  {
+    "text": "running in this frame.\" Um, but of",
+    "start": 571.68,
+    "duration": 2.88
+  },
+  {
+    "text": "course it gives you all of the stat",
+    "start": 573.519,
+    "duration": 3.041
+  },
+  {
+    "text": "breakdowns. So we have for the first",
+    "start": 574.56,
+    "duration": 4.24
+  },
+  {
+    "text": "time we now show both uh exclusive and",
+    "start": 576.56,
+    "duration": 4.16
+  },
+  {
+    "text": "inclusive timings. Um, I think",
+    "start": 578.8,
+    "duration": 3.2
+  },
+  {
+    "text": "previously we only showed the inclusive",
+    "start": 580.72,
+    "duration": 2.799
+  },
+  {
+    "text": "timings.",
+    "start": 582.0,
+    "duration": 4.32
+  },
+  {
+    "text": "Um, and also again as the kind of theme",
+    "start": 583.519,
+    "duration": 3.841
+  },
+  {
+    "text": "with the changes that we've made here,",
+    "start": 586.32,
+    "duration": 3.36
+  },
+  {
+    "text": "we're now also multiGPU and multiqaware.",
+    "start": 587.36,
+    "duration": 4.72
+  },
+  {
+    "text": "So you get one of these tables per GPU",
+    "start": 589.68,
+    "duration": 4.56
+  },
+  {
+    "text": "per Q. Um, so if you have async compute",
+    "start": 592.08,
+    "duration": 3.36
+  },
+  {
+    "text": "enabled, you'll get two tables. You get",
+    "start": 594.24,
+    "duration": 4.88
+  },
+  {
+    "text": "one for graphics, one for compute. Um,",
+    "start": 595.44,
+    "duration": 5.28
+  },
+  {
+    "text": "but if you're trying to use this tool to",
+    "start": 599.12,
+    "duration": 4.32
+  },
+  {
+    "text": "focus on a particular uh render pass, a",
+    "start": 600.72,
+    "duration": 4.559
+  },
+  {
+    "text": "particular shader, um, to kind of",
+    "start": 603.44,
+    "duration": 3.839
+  },
+  {
+    "text": "optimize and and tune things, um, it",
+    "start": 605.279,
+    "duration": 3.441
+  },
+  {
+    "text": "might be best for you to turn off async",
+    "start": 607.279,
+    "duration": 4.0
+  },
+  {
+    "text": "compute with that uh, the CR R. RDG.",
+    "start": 608.72,
+    "duration": 4.96
+  },
+  {
+    "text": "Async compute zero. Um, the reason for",
+    "start": 611.279,
+    "duration": 4.401
+  },
+  {
+    "text": "this is because as uh, compute work",
+    "start": 613.68,
+    "duration": 3.44
+  },
+  {
+    "text": "overlaps with work on the G on the",
+    "start": 615.68,
+    "duration": 3.839
+  },
+  {
+    "text": "graphics Q, um, they can affect the",
+    "start": 617.12,
+    "duration": 3.44
+  },
+  {
+    "text": "timings of each other because they're",
+    "start": 619.519,
+    "duration": 2.481
+  },
+  {
+    "text": "sharing execution resources. So if",
+    "start": 620.56,
+    "duration": 2.64
+  },
+  {
+    "text": "you're trying to focus on a specific",
+    "start": 622.0,
+    "duration": 3.12
+  },
+  {
+    "text": "pass, it's it's worth turning that off.",
+    "start": 623.2,
+    "duration": 3.12
+  },
+  {
+    "text": "When you turn it off, everything will",
+    "start": 625.12,
+    "duration": 2.399
+  },
+  {
+    "text": "fall back to the graphics queue and then",
+    "start": 626.32,
+    "duration": 4.92
+  },
+  {
+    "text": "everything kind of lines up.",
+    "start": 627.519,
+    "duration": 3.721
+  },
+  {
+    "text": "Uh there's a whole the whole chunk of uh",
+    "start": 632.8,
+    "duration": 4.24
+  },
+  {
+    "text": "uh console variables that you can use to",
+    "start": 635.519,
+    "duration": 3.921
+  },
+  {
+    "text": "to filter this this table um and and",
+    "start": 637.04,
+    "duration": 4.08
+  },
+  {
+    "text": "show and hide columns that you don't you",
+    "start": 639.44,
+    "duration": 4.48
+  },
+  {
+    "text": "don't want to see. Um in this particular",
+    "start": 641.12,
+    "duration": 4.08
+  },
+  {
+    "text": "the screenshot example I have at the",
+    "start": 643.92,
+    "duration": 2.56
+  },
+  {
+    "text": "top, I've actually filtered the tree",
+    "start": 645.2,
+    "duration": 3.36
+  },
+  {
+    "text": "down to just the scene node. Um and you",
+    "start": 646.48,
+    "duration": 4.0
+  },
+  {
+    "text": "can do that with the r.profilegu.root",
+    "start": 648.56,
+    "duration": 4.08
+  },
+  {
+    "text": "root uh console variable. It just takes",
+    "start": 650.48,
+    "duration": 4.08
+  },
+  {
+    "text": "a string and you can put wild cards in",
+    "start": 652.64,
+    "duration": 3.759
+  },
+  {
+    "text": "and it will show you only the the event",
+    "start": 654.56,
+    "duration": 3.92
+  },
+  {
+    "text": "names that match that. Um so if you're",
+    "start": 656.399,
+    "duration": 3.68
+  },
+  {
+    "text": "focusing on like say post-processing",
+    "start": 658.48,
+    "duration": 2.799
+  },
+  {
+    "text": "that you can just set the route to",
+    "start": 660.079,
+    "duration": 2.561
+  },
+  {
+    "text": "postprocessing you only get that section",
+    "start": 661.279,
+    "duration": 3.761
+  },
+  {
+    "text": "of the table visible.",
+    "start": 662.64,
+    "duration": 5.52
+  },
+  {
+    "text": "Uh one other important thing to note um",
+    "start": 665.04,
+    "duration": 4.96
+  },
+  {
+    "text": "some text editors don't handle uh",
+    "start": 668.16,
+    "duration": 3.359
+  },
+  {
+    "text": "unicode fixed width characters very",
+    "start": 670.0,
+    "duration": 3.519
+  },
+  {
+    "text": "well. So those kind of pretty bars that",
+    "start": 671.519,
+    "duration": 3.361
+  },
+  {
+    "text": "we draw now uh to show the kind of",
+    "start": 673.519,
+    "duration": 3.44
+  },
+  {
+    "text": "relative timings, some text editors just",
+    "start": 674.88,
+    "duration": 3.76
+  },
+  {
+    "text": "just can't handle that and it's all it's",
+    "start": 676.959,
+    "duration": 4.161
+  },
+  {
+    "text": "all um out of alignment. Um so if you",
+    "start": 678.64,
+    "duration": 4.319
+  },
+  {
+    "text": "find that I'd either recommend changing",
+    "start": 681.12,
+    "duration": 3.36
+  },
+  {
+    "text": "your font to one that can handle those",
+    "start": 682.959,
+    "duration": 2.481
+  },
+  {
+    "text": "characters because then you get the nice",
+    "start": 684.48,
+    "duration": 3.12
+  },
+  {
+    "text": "the nice table view. Um but otherwise",
+    "start": 685.44,
+    "duration": 4.56
+  },
+  {
+    "text": "you can set that uh unicode output cart",
+    "start": 687.6,
+    "duration": 3.919
+  },
+  {
+    "text": "to zero and we'll fall back to just asky",
+    "start": 690.0,
+    "duration": 2.959
+  },
+  {
+    "text": "characters and then the table should",
+    "start": 691.519,
+    "duration": 4.841
+  },
+  {
+    "text": "line up properly.",
+    "start": 692.959,
+    "duration": 3.401
+  },
+  {
+    "text": "Okay, so moving on to Unreal Insights.",
+    "start": 698.16,
+    "duration": 3.6
+  },
+  {
+    "text": "Um, hopefully you've all been using this",
+    "start": 700.0,
+    "duration": 4.0
+  },
+  {
+    "text": "tool to profile uh the CPU, but now",
+    "start": 701.76,
+    "duration": 4.48
+  },
+  {
+    "text": "we've greatly enhanced our uh GPU",
+    "start": 704.0,
+    "duration": 4.56
+  },
+  {
+    "text": "capabilities in a real uh insights.",
+    "start": 706.24,
+    "duration": 4.48
+  },
+  {
+    "text": "Again, as as with the theme, we're now",
+    "start": 708.56,
+    "duration": 4.48
+  },
+  {
+    "text": "multiGPU uh multiGPUware and multiQ",
+    "start": 710.72,
+    "duration": 5.6
+  },
+  {
+    "text": "aware. So, we have one uh timeline per Q",
+    "start": 713.04,
+    "duration": 6.0
+  },
+  {
+    "text": "per GPU. Um, and these cues are aligned",
+    "start": 716.32,
+    "duration": 4.959
+  },
+  {
+    "text": "correctly with the CPU as well. Um, so",
+    "start": 719.04,
+    "duration": 4.479
+  },
+  {
+    "text": "you can see the the the the motion of",
+    "start": 721.279,
+    "duration": 4.24
+  },
+  {
+    "text": "work from CPU into GPU and back again",
+    "start": 723.519,
+    "duration": 3.281
+  },
+  {
+    "text": "and see where the weights are happening",
+    "start": 725.519,
+    "duration": 2.721
+  },
+  {
+    "text": "if you have bubbles in your pipeline and",
+    "start": 726.8,
+    "duration": 4.32
+  },
+  {
+    "text": "that kind of thing.",
+    "start": 728.24,
+    "duration": 2.88
+  },
+  {
+    "text": "And maybe some of you are familiar with",
+    "start": 733.68,
+    "duration": 3.52
+  },
+  {
+    "text": "the context switch data that you can get",
+    "start": 735.76,
+    "duration": 3.28
+  },
+  {
+    "text": "in Unreal Insights um which you see on",
+    "start": 737.2,
+    "duration": 3.6
+  },
+  {
+    "text": "CPU threads that tell you exactly when",
+    "start": 739.04,
+    "duration": 3.039
+  },
+  {
+    "text": "the thread is actually scheduled and",
+    "start": 740.8,
+    "duration": 2.96
+  },
+  {
+    "text": "running. We have something similar now",
+    "start": 742.079,
+    "duration": 4.481
+  },
+  {
+    "text": "on uh on the GPU. Uh so we're able to",
+    "start": 743.76,
+    "duration": 4.4
+  },
+  {
+    "text": "with the extra information we get from",
+    "start": 746.56,
+    "duration": 4.16
+  },
+  {
+    "text": "the new profiler draw these regions that",
+    "start": 748.16,
+    "duration": 4.08
+  },
+  {
+    "text": "highlight exactly when the cues are",
+    "start": 750.72,
+    "duration": 2.72
+  },
+  {
+    "text": "running and when they're waiting and",
+    "start": 752.24,
+    "duration": 3.68
+  },
+  {
+    "text": "when they're idle. So the highlighted um",
+    "start": 753.44,
+    "duration": 3.839
+  },
+  {
+    "text": "regions on the timeline at the top",
+    "start": 755.92,
+    "duration": 2.96
+  },
+  {
+    "text": "currently are the regions where we're",
+    "start": 757.279,
+    "duration": 3.601
+  },
+  {
+    "text": "doing the GPU busy work. And this again",
+    "start": 758.88,
+    "duration": 3.92
+  },
+  {
+    "text": "is the same stats that you get from stat",
+    "start": 760.88,
+    "duration": 4.079
+  },
+  {
+    "text": "GPU. Um it's literally these regions",
+    "start": 762.8,
+    "duration": 3.599
+  },
+  {
+    "text": "that we're summing up to produce that",
+    "start": 764.959,
+    "duration": 3.761
+  },
+  {
+    "text": "data.",
+    "start": 766.399,
+    "duration": 3.68
+  },
+  {
+    "text": "And then the highlighted regions here",
+    "start": 768.72,
+    "duration": 3.04
+  },
+  {
+    "text": "are the GPU weight regions where the",
+    "start": 770.079,
+    "duration": 3.2
+  },
+  {
+    "text": "where the queue is blocked. And you can",
+    "start": 771.76,
+    "duration": 3.84
+  },
+  {
+    "text": "see here the the lower line is the uh",
+    "start": 773.279,
+    "duration": 4.161
+  },
+  {
+    "text": "async compute Q. And you can see that",
+    "start": 775.6,
+    "duration": 3.12
+  },
+  {
+    "text": "there's just more weight work happening",
+    "start": 777.44,
+    "duration": 2.639
+  },
+  {
+    "text": "there because that's just generally what",
+    "start": 778.72,
+    "duration": 3.919
+  },
+  {
+    "text": "async compute does.",
+    "start": 780.079,
+    "duration": 3.76
+  },
+  {
+    "text": "And then finally, we have the kind of",
+    "start": 782.639,
+    "duration": 2.401
+  },
+  {
+    "text": "grayed out regions that don't have any",
+    "start": 783.839,
+    "duration": 2.641
+  },
+  {
+    "text": "marker above them. And that's the idle",
+    "start": 785.04,
+    "duration": 2.88
+  },
+  {
+    "text": "regions, the places where the GPU has",
+    "start": 786.48,
+    "duration": 2.72
+  },
+  {
+    "text": "stopped because there's nothing further",
+    "start": 787.92,
+    "duration": 2.8
+  },
+  {
+    "text": "for it to do. The CPU hasn't given it",
+    "start": 789.2,
+    "duration": 5.16
+  },
+  {
+    "text": "any more work to do.",
+    "start": 790.72,
+    "duration": 3.64
+  },
+  {
+    "text": "Uh so we've also added uh similarly to",
+    "start": 797.2,
+    "duration": 4.72
+  },
+  {
+    "text": "the to the tasks channel um on the CPU",
+    "start": 799.519,
+    "duration": 3.841
+  },
+  {
+    "text": "in Unreal Insights, we now have these",
+    "start": 801.92,
+    "duration": 4.0
+  },
+  {
+    "text": "fence dependency arrows. Um you can",
+    "start": 803.36,
+    "duration": 3.919
+  },
+  {
+    "text": "bring these up by just single clicking",
+    "start": 805.92,
+    "duration": 2.64
+  },
+  {
+    "text": "on one of the markers like the frame",
+    "start": 807.279,
+    "duration": 2.881
+  },
+  {
+    "text": "marker. So yeah, the screenshot I have",
+    "start": 808.56,
+    "duration": 3.44
+  },
+  {
+    "text": "here is just single clicking on the",
+    "start": 810.16,
+    "duration": 3.679
+  },
+  {
+    "text": "frame marker and it shows all of the uh",
+    "start": 812.0,
+    "duration": 3.6
+  },
+  {
+    "text": "the weight dependencies between the two",
+    "start": 813.839,
+    "duration": 5.281
+  },
+  {
+    "text": "cues. Um and each one of these is a",
+    "start": 815.6,
+    "duration": 4.799
+  },
+  {
+    "text": "fence that is getting signaled and",
+    "start": 819.12,
+    "duration": 2.88
+  },
+  {
+    "text": "weighted upon and it's the thing that is",
+    "start": 820.399,
+    "duration": 3.841
+  },
+  {
+    "text": "driven by our RHI transition API, not an",
+    "start": 822.0,
+    "duration": 3.76
+  },
+  {
+    "text": "API that you generally need to deal with",
+    "start": 824.24,
+    "duration": 3.12
+  },
+  {
+    "text": "because RG deals with all that stuff for",
+    "start": 825.76,
+    "duration": 3.92
+  },
+  {
+    "text": "you. Um but as RG knows that there's a",
+    "start": 827.36,
+    "duration": 3.919
+  },
+  {
+    "text": "data dependency between certain uh",
+    "start": 829.68,
+    "duration": 3.599
+  },
+  {
+    "text": "certain passes, then this is when we get",
+    "start": 831.279,
+    "duration": 4.24
+  },
+  {
+    "text": "these fences.",
+    "start": 833.279,
+    "duration": 3.92
+  },
+  {
+    "text": "Uh but of course this is quite a busy",
+    "start": 835.519,
+    "duration": 3.921
+  },
+  {
+    "text": "busy view to look at. So if we zoom in",
+    "start": 837.199,
+    "duration": 3.921
+  },
+  {
+    "text": "and just look at a single example of one",
+    "start": 839.44,
+    "duration": 3.199
+  },
+  {
+    "text": "of these arrows um to get a feel for",
+    "start": 841.12,
+    "duration": 2.8
+  },
+  {
+    "text": "exactly how they appear on the on the",
+    "start": 842.639,
+    "duration": 3.601
+  },
+  {
+    "text": "timeline. Um the top line again is the",
+    "start": 843.92,
+    "duration": 3.599
+  },
+  {
+    "text": "graphics Q. The lower line is the",
+    "start": 846.24,
+    "duration": 3.2
+  },
+  {
+    "text": "compute Q. And here we have uh some",
+    "start": 847.519,
+    "duration": 3.76
+  },
+  {
+    "text": "nanite base pass work that's running for",
+    "start": 849.44,
+    "duration": 3.92
+  },
+  {
+    "text": "several milliseconds and a region where",
+    "start": 851.279,
+    "duration": 3.761
+  },
+  {
+    "text": "the uh the as compute Q is just waiting",
+    "start": 853.36,
+    "duration": 4.24
+  },
+  {
+    "text": "for graphics to catch up.",
+    "start": 855.04,
+    "duration": 4.799
+  },
+  {
+    "text": "So if we zoom in a little further that's",
+    "start": 857.6,
+    "duration": 4.799
+  },
+  {
+    "text": "this is that same arrow. So we have that",
+    "start": 859.839,
+    "duration": 4.401
+  },
+  {
+    "text": "region in the top left uh corner where",
+    "start": 862.399,
+    "duration": 3.68
+  },
+  {
+    "text": "the graphics Q is doing the busy work.",
+    "start": 864.24,
+    "duration": 3.599
+  },
+  {
+    "text": "And as soon as that busy work completes",
+    "start": 866.079,
+    "duration": 3.601
+  },
+  {
+    "text": "uh we signal the fence and that's",
+    "start": 867.839,
+    "duration": 4.081
+  },
+  {
+    "text": "denoted by these uh two matching fence",
+    "start": 869.68,
+    "duration": 4.24
+  },
+  {
+    "text": "numbers. They appear uh just below the",
+    "start": 871.92,
+    "duration": 3.84
+  },
+  {
+    "text": "markers on the timeline and these are",
+    "start": 873.92,
+    "duration": 3.84
+  },
+  {
+    "text": "the indices of the specific fence. Um",
+    "start": 875.76,
+    "duration": 3.519
+  },
+  {
+    "text": "they just increment along the pipe. So",
+    "start": 877.76,
+    "duration": 3.12
+  },
+  {
+    "text": "the very first fence ever submitted is",
+    "start": 879.279,
+    "duration": 4.24
+  },
+  {
+    "text": "index one. Um and it shows you exactly",
+    "start": 880.88,
+    "duration": 3.92
+  },
+  {
+    "text": "where the fence is signaled and where",
+    "start": 883.519,
+    "duration": 2.641
+  },
+  {
+    "text": "the fence is resolved because that might",
+    "start": 884.8,
+    "duration": 2.8
+  },
+  {
+    "text": "not always line up exactly. It could you",
+    "start": 886.16,
+    "duration": 3.039
+  },
+  {
+    "text": "could signal a fence much earlier and",
+    "start": 887.6,
+    "duration": 3.2
+  },
+  {
+    "text": "then it gets weighted on much later if",
+    "start": 889.199,
+    "duration": 5.041
+  },
+  {
+    "text": "just the way things line up. Um so you",
+    "start": 890.8,
+    "duration": 5.44
+  },
+  {
+    "text": "can see here the fence gets signaled.",
+    "start": 894.24,
+    "duration": 3.599
+  },
+  {
+    "text": "The compute Q goes from a waiting state",
+    "start": 896.24,
+    "duration": 3.44
+  },
+  {
+    "text": "it back into an idle state because",
+    "start": 897.839,
+    "duration": 3.201
+  },
+  {
+    "text": "there's always some amount of latency",
+    "start": 899.68,
+    "duration": 3.04
+  },
+  {
+    "text": "that's associated with signaling a",
+    "start": 901.04,
+    "duration": 3.44
+  },
+  {
+    "text": "fence. Um but after a very short period",
+    "start": 902.72,
+    "duration": 3.76
+  },
+  {
+    "text": "of time you can see the compute uh",
+    "start": 904.48,
+    "duration": 3.2
+  },
+  {
+    "text": "springs back into life and we get back",
+    "start": 906.48,
+    "duration": 6.599
+  },
+  {
+    "text": "into a a GPU um busy state.",
+    "start": 907.68,
+    "duration": 5.399
+  },
+  {
+    "text": "So uh as I mentioned before um since we",
+    "start": 915.76,
+    "duration": 6.16
+  },
+  {
+    "text": "have the GPU cues aligning correctly now",
+    "start": 919.68,
+    "duration": 4.32
+  },
+  {
+    "text": "uh with the CPU timeline and insights we",
+    "start": 921.92,
+    "duration": 4.159
+  },
+  {
+    "text": "can get a lot of information from uh the",
+    "start": 924.0,
+    "duration": 4.079
+  },
+  {
+    "text": "flow the kind of pipeline of data into",
+    "start": 926.079,
+    "duration": 4.721
+  },
+  {
+    "text": "the GPU. Um so one thing that's worth",
+    "start": 928.079,
+    "duration": 4.32
+  },
+  {
+    "text": "mentioning a lot of our platform RHIs",
+    "start": 930.8,
+    "duration": 4.64
+  },
+  {
+    "text": "now have an RHI submission thread. Um",
+    "start": 932.399,
+    "duration": 4.641
+  },
+  {
+    "text": "and this is a thread that sits between",
+    "start": 935.44,
+    "duration": 4.0
+  },
+  {
+    "text": "the RHI thread and uh the GPU itself and",
+    "start": 937.04,
+    "duration": 4.799
+  },
+  {
+    "text": "the driver. uh primarily it's used for",
+    "start": 939.44,
+    "duration": 5.28
+  },
+  {
+    "text": "batching work together um to reduce uh",
+    "start": 941.839,
+    "duration": 4.481
+  },
+  {
+    "text": "GPU overhead and driver overhead. So",
+    "start": 944.72,
+    "duration": 2.88
+  },
+  {
+    "text": "we're just making fewer calls into the",
+    "start": 946.32,
+    "duration": 3.439
+  },
+  {
+    "text": "OS. Um and it's also the thread that",
+    "start": 947.6,
+    "duration": 4.96
+  },
+  {
+    "text": "resolves uh fences.",
+    "start": 949.759,
+    "duration": 4.241
+  },
+  {
+    "text": "Um so in the example again on the",
+    "start": 952.56,
+    "duration": 3.12
+  },
+  {
+    "text": "timeline uh the very upper left corner",
+    "start": 954.0,
+    "duration": 3.839
+  },
+  {
+    "text": "we have the RI thread with uh this RHI",
+    "start": 955.68,
+    "duration": 4.88
+  },
+  {
+    "text": "submit to GPU marker. That marker is the",
+    "start": 957.839,
+    "duration": 4.401
+  },
+  {
+    "text": "place where we take the work that we've",
+    "start": 960.56,
+    "duration": 3.6
+  },
+  {
+    "text": "produced in the in the kind of the CPU",
+    "start": 962.24,
+    "duration": 3.44
+  },
+  {
+    "text": "threaded side of the renderer and hand",
+    "start": 964.16,
+    "duration": 3.44
+  },
+  {
+    "text": "it down to the submission thread. The",
+    "start": 965.68,
+    "duration": 3.279
+  },
+  {
+    "text": "submission thread runs for some amount",
+    "start": 967.6,
+    "duration": 3.039
+  },
+  {
+    "text": "of time doing this batching work and",
+    "start": 968.959,
+    "duration": 3.601
+  },
+  {
+    "text": "resolving the fences and then eventually",
+    "start": 970.639,
+    "duration": 3.841
+  },
+  {
+    "text": "we hit this that blue uh region on the",
+    "start": 972.56,
+    "duration": 3.199
+  },
+  {
+    "text": "right um which is where we actually",
+    "start": 974.48,
+    "duration": 2.56
+  },
+  {
+    "text": "crawl into the OS and then you can see",
+    "start": 975.759,
+    "duration": 3.2
+  },
+  {
+    "text": "the GPU Q springs into life uh",
+    "start": 977.04,
+    "duration": 5.4
+  },
+  {
+    "text": "immediately afterwards.",
+    "start": 978.959,
+    "duration": 3.481
+  },
+  {
+    "text": "And similarly to the to the submission",
+    "start": 984.32,
+    "duration": 3.6
+  },
+  {
+    "text": "thread where work is flowing into the",
+    "start": 986.079,
+    "duration": 3.281
+  },
+  {
+    "text": "GPU, we have another thread that's",
+    "start": 987.92,
+    "duration": 3.52
+  },
+  {
+    "text": "monitoring work uh completion on the GPU",
+    "start": 989.36,
+    "duration": 4.159
+  },
+  {
+    "text": "to then signal the rest of the engine.",
+    "start": 991.44,
+    "duration": 4.56
+  },
+  {
+    "text": "Um we call this the RI interrupt thread.",
+    "start": 993.519,
+    "duration": 4.24
+  },
+  {
+    "text": "Uh it's basically just one thread that",
+    "start": 996.0,
+    "duration": 4.399
+  },
+  {
+    "text": "sits and waits on fences um to see the",
+    "start": 997.759,
+    "duration": 4.0
+  },
+  {
+    "text": "work that we've submitted to the queue",
+    "start": 1000.399,
+    "duration": 3.68
+  },
+  {
+    "text": "know when it's completed um and then",
+    "start": 1001.759,
+    "duration": 4.801
+  },
+  {
+    "text": "goes and signals the rest of the engine.",
+    "start": 1004.079,
+    "duration": 5.12
+  },
+  {
+    "text": "And uh one thing to note is that we have",
+    "start": 1006.56,
+    "duration": 3.839
+  },
+  {
+    "text": "generally we have one of these threads",
+    "start": 1009.199,
+    "duration": 2.64
+  },
+  {
+    "text": "but it actually handles all of the GPU",
+    "start": 1010.399,
+    "duration": 3.201
+  },
+  {
+    "text": "cues. So you'll see this thread wake up",
+    "start": 1011.839,
+    "duration": 3.521
+  },
+  {
+    "text": "whenever any one of the cues complete",
+    "start": 1013.6,
+    "duration": 3.359
+  },
+  {
+    "text": "some work. Um so you'll see them it kind",
+    "start": 1015.36,
+    "duration": 4.88
+  },
+  {
+    "text": "of springing to life. Um so in the",
+    "start": 1016.959,
+    "duration": 4.961
+  },
+  {
+    "text": "timeline example uh this particular",
+    "start": 1020.24,
+    "duration": 4.079
+  },
+  {
+    "text": "example is occlusion queries. So the",
+    "start": 1021.92,
+    "duration": 4.08
+  },
+  {
+    "text": "very bottom left corner we have the GPU",
+    "start": 1024.319,
+    "duration": 3.201
+  },
+  {
+    "text": "doing occlusion queries for the previous",
+    "start": 1026.0,
+    "duration": 3.6
+  },
+  {
+    "text": "frame. And then in the top right on the",
+    "start": 1027.52,
+    "duration": 3.919
+  },
+  {
+    "text": "foreground worker thread we have uh the",
+    "start": 1029.6,
+    "duration": 3.599
+  },
+  {
+    "text": "the code in the renderer that's doing uh",
+    "start": 1031.439,
+    "duration": 3.441
+  },
+  {
+    "text": "the init views pass the scene visibility",
+    "start": 1033.199,
+    "duration": 3.6
+  },
+  {
+    "text": "pass that wants that data back and it's",
+    "start": 1034.88,
+    "duration": 3.36
+  },
+  {
+    "text": "waiting on the the occlusion query",
+    "start": 1036.799,
+    "duration": 3.841
+  },
+  {
+    "text": "results from that frame. Uh so the GPU",
+    "start": 1038.24,
+    "duration": 4.0
+  },
+  {
+    "text": "completes the work signals fence there's",
+    "start": 1040.64,
+    "duration": 2.799
+  },
+  {
+    "text": "a little fence number you might not be",
+    "start": 1042.24,
+    "duration": 2.559
+  },
+  {
+    "text": "able to see on the slide um but where",
+    "start": 1043.439,
+    "duration": 5.12
+  },
+  {
+    "text": "that arrow is pointing um the fence gets",
+    "start": 1044.799,
+    "duration": 5.12
+  },
+  {
+    "text": "resolved. It wakes up the interrupt",
+    "start": 1048.559,
+    "duration": 2.961
+  },
+  {
+    "text": "thread. The interrupt thread pulls the",
+    "start": 1049.919,
+    "duration": 3.921
+  },
+  {
+    "text": "cues across all of the GPU to know what",
+    "start": 1051.52,
+    "duration": 4.399
+  },
+  {
+    "text": "work has just completed. Sees that it's",
+    "start": 1053.84,
+    "duration": 3.36
+  },
+  {
+    "text": "this particular piece of work that's",
+    "start": 1055.919,
+    "duration": 2.801
+  },
+  {
+    "text": "completed, grabs the event and fires it",
+    "start": 1057.2,
+    "duration": 3.359
+  },
+  {
+    "text": "into into task graph which then wakes up",
+    "start": 1058.72,
+    "duration": 4.8
+  },
+  {
+    "text": "the task graph.",
+    "start": 1060.559,
+    "duration": 5.601
+  },
+  {
+    "text": "Um so with this kind of that this flow",
+    "start": 1063.52,
+    "duration": 4.0
+  },
+  {
+    "text": "of data the arch submission thread the",
+    "start": 1066.16,
+    "duration": 2.72
+  },
+  {
+    "text": "arch interrupt thread and then the",
+    "start": 1067.52,
+    "duration": 5.76
+  },
+  {
+    "text": "alignment um uh of the timelines um you",
+    "start": 1068.88,
+    "duration": 5.84
+  },
+  {
+    "text": "can now use insights to really know",
+    "start": 1073.28,
+    "duration": 2.8
+  },
+  {
+    "text": "where your bottlenecks are where your",
+    "start": 1074.72,
+    "duration": 2.88
+  },
+  {
+    "text": "bubbles are and you can do analysis of",
+    "start": 1076.08,
+    "duration": 2.959
+  },
+  {
+    "text": "the pipeline all the way back from the",
+    "start": 1077.6,
+    "duration": 2.959
+  },
+  {
+    "text": "GPU all the way through to the to the",
+    "start": 1079.039,
+    "duration": 3.281
+  },
+  {
+    "text": "render thread um which is super powerful",
+    "start": 1080.559,
+    "duration": 5.0
+  },
+  {
+    "text": "super useful.",
+    "start": 1082.32,
+    "duration": 3.239
+  },
+  {
+    "text": "So that covers uh the improvements we've",
+    "start": 1087.44,
+    "duration": 3.119
+  },
+  {
+    "text": "made to the new profiler. I'll move on",
+    "start": 1089.039,
+    "duration": 3.601
+  },
+  {
+    "text": "now to talk about our new RHI submission",
+    "start": 1090.559,
+    "duration": 6.441
+  },
+  {
+    "text": "pipeline which uh shipped in 5.5.",
+    "start": 1092.64,
+    "duration": 4.36
+  },
+  {
+    "text": "And uh in this section I'm going to be",
+    "start": 1097.84,
+    "duration": 3.92
+  },
+  {
+    "text": "focusing primarily on the RHI API",
+    "start": 1099.76,
+    "duration": 4.48
+  },
+  {
+    "text": "itself. Uh day-to-day this isn't an API",
+    "start": 1101.76,
+    "duration": 4.08
+  },
+  {
+    "text": "that you'll be uh kind of directly",
+    "start": 1104.24,
+    "duration": 3.6
+  },
+  {
+    "text": "using. Um generally if you're writing",
+    "start": 1105.84,
+    "duration": 3.36
+  },
+  {
+    "text": "renderer features these days you'll be",
+    "start": 1107.84,
+    "duration": 4.079
+  },
+  {
+    "text": "using render graph. Um so sort of like",
+    "start": 1109.2,
+    "duration": 4.479
+  },
+  {
+    "text": "some of the some of the details here are",
+    "start": 1111.919,
+    "duration": 3.521
+  },
+  {
+    "text": "real low-level stuff inside the arch.",
+    "start": 1113.679,
+    "duration": 3.12
+  },
+  {
+    "text": "But it's still very useful to know about",
+    "start": 1115.44,
+    "duration": 3.76
+  },
+  {
+    "text": "this um if you're doing performance",
+    "start": 1116.799,
+    "duration": 3.681
+  },
+  {
+    "text": "analysis and you're looking at insights",
+    "start": 1119.2,
+    "duration": 2.8
+  },
+  {
+    "text": "and trying to work out where your per uh",
+    "start": 1120.48,
+    "duration": 2.8
+  },
+  {
+    "text": "whether where your bottlenecks are,",
+    "start": 1122.0,
+    "duration": 2.48
+  },
+  {
+    "text": "where your threading is going, that kind",
+    "start": 1123.28,
+    "duration": 3.6
+  },
+  {
+    "text": "of thing. So I'll start by just uh",
+    "start": 1124.48,
+    "duration": 3.84
+  },
+  {
+    "text": "defining a few highle types that you'll",
+    "start": 1126.88,
+    "duration": 4.56
+  },
+  {
+    "text": "see in the code. Um we have the FRI",
+    "start": 1128.32,
+    "duration": 4.719
+  },
+  {
+    "text": "command list base type which has most of",
+    "start": 1131.44,
+    "duration": 3.44
+  },
+  {
+    "text": "the implementation for recording RHI",
+    "start": 1133.039,
+    "duration": 4.0
+  },
+  {
+    "text": "command lists and then the three derived",
+    "start": 1134.88,
+    "duration": 3.76
+  },
+  {
+    "text": "types from that which are just sort of",
+    "start": 1137.039,
+    "duration": 3.121
+  },
+  {
+    "text": "mostly adapter classes that give you",
+    "start": 1138.64,
+    "duration": 3.36
+  },
+  {
+    "text": "access to things like the draw call API",
+    "start": 1140.16,
+    "duration": 5.28
+  },
+  {
+    "text": "and the dispatch API and so on. Um, and",
+    "start": 1142.0,
+    "duration": 5.28
+  },
+  {
+    "text": "the special case in there is the R uh",
+    "start": 1145.44,
+    "duration": 3.599
+  },
+  {
+    "text": "RHI command list immediate, that last",
+    "start": 1147.28,
+    "duration": 3.92
+  },
+  {
+    "text": "option there. Um, the immediate command",
+    "start": 1149.039,
+    "duration": 3.601
+  },
+  {
+    "text": "list is a singleton in the engine that's",
+    "start": 1151.2,
+    "duration": 2.88
+  },
+  {
+    "text": "owned by the render thread and is kind",
+    "start": 1152.64,
+    "duration": 2.96
+  },
+  {
+    "text": "of the primary entry point into the",
+    "start": 1154.08,
+    "duration": 5.52
+  },
+  {
+    "text": "pipeline for submitting work to the GPU.",
+    "start": 1155.6,
+    "duration": 6.64
+  },
+  {
+    "text": "Uh, we also then have uh the uh the",
+    "start": 1159.6,
+    "duration": 4.56
+  },
+  {
+    "text": "types that are implemented uh per",
+    "start": 1162.24,
+    "duration": 3.76
+  },
+  {
+    "text": "platform RHI. So there's these base",
+    "start": 1164.16,
+    "duration": 3.44
+  },
+  {
+    "text": "interfaces that are then implemented by",
+    "start": 1166.0,
+    "duration": 5.84
+  },
+  {
+    "text": "each each each RHI module. Um",
+    "start": 1167.6,
+    "duration": 5.68
+  },
+  {
+    "text": "uh the the the main one there being the",
+    "start": 1171.84,
+    "duration": 3.92
+  },
+  {
+    "text": "RHI compute context and RHI command",
+    "start": 1173.28,
+    "duration": 5.36
+  },
+  {
+    "text": "context types. The contexts in the RHI",
+    "start": 1175.76,
+    "duration": 5.12
+  },
+  {
+    "text": "are kind of uh the the objects that are",
+    "start": 1178.64,
+    "duration": 4.399
+  },
+  {
+    "text": "involved in converting the recorded RHI",
+    "start": 1180.88,
+    "duration": 3.36
+  },
+  {
+    "text": "commands from the renderer into the",
+    "start": 1183.039,
+    "duration": 2.961
+  },
+  {
+    "text": "actual GPU commands that run on on the",
+    "start": 1184.24,
+    "duration": 3.36
+  },
+  {
+    "text": "hardware. So it's within the context",
+    "start": 1186.0,
+    "duration": 3.44
+  },
+  {
+    "text": "that we're calling into say D3D12 and",
+    "start": 1187.6,
+    "duration": 5.439
+  },
+  {
+    "text": "actually producing D3D command lists. Um",
+    "start": 1189.44,
+    "duration": 5.359
+  },
+  {
+    "text": "and those produced D3D command lists end",
+    "start": 1193.039,
+    "duration": 3.601
+  },
+  {
+    "text": "up getting wrapped in this IHI platform",
+    "start": 1194.799,
+    "duration": 3.841
+  },
+  {
+    "text": "command list type um which is used just",
+    "start": 1196.64,
+    "duration": 3.2
+  },
+  {
+    "text": "for the management of the submission",
+    "start": 1198.64,
+    "duration": 3.68
+  },
+  {
+    "text": "pipeline. Uh and one thing to be aware",
+    "start": 1199.84,
+    "duration": 4.079
+  },
+  {
+    "text": "of uh we have lots of legacy names",
+    "start": 1202.32,
+    "duration": 3.12
+  },
+  {
+    "text": "around this stuff because this this this",
+    "start": 1203.919,
+    "duration": 2.961
+  },
+  {
+    "text": "system has been around since like the",
+    "start": 1205.44,
+    "duration": 4.96
+  },
+  {
+    "text": "early UE4 days maybe even UEI3. Um so",
+    "start": 1206.88,
+    "duration": 6.08
+  },
+  {
+    "text": "the II command context is specifically",
+    "start": 1210.4,
+    "duration": 3.92
+  },
+  {
+    "text": "for the graphics pipe but it doesn't",
+    "start": 1212.96,
+    "duration": 2.64
+  },
+  {
+    "text": "mention the word graphics in it even",
+    "start": 1214.32,
+    "duration": 2.88
+  },
+  {
+    "text": "though we have a compute context called",
+    "start": 1215.6,
+    "duration": 4.48
+  },
+  {
+    "text": "II compute context. Um, so yeah, I'm",
+    "start": 1217.2,
+    "duration": 4.24
+  },
+  {
+    "text": "sure one day we'll be renaming these,",
+    "start": 1220.08,
+    "duration": 5.64
+  },
+  {
+    "text": "but uh that hasn't happened just yet.",
+    "start": 1221.44,
+    "duration": 4.28
+  },
+  {
+    "text": "So as a general kind of high level",
+    "start": 1226.4,
+    "duration": 3.04
+  },
+  {
+    "text": "overview of how this process works, the",
+    "start": 1227.84,
+    "duration": 3.199
+  },
+  {
+    "text": "renderer and render graph creates",
+    "start": 1229.44,
+    "duration": 4.64
+  },
+  {
+    "text": "instances of FRHI command list. Um,",
+    "start": 1231.039,
+    "duration": 4.321
+  },
+  {
+    "text": "there's one of these per recording",
+    "start": 1234.08,
+    "duration": 2.719
+  },
+  {
+    "text": "thread and the commands that get",
+    "start": 1235.36,
+    "duration": 2.88
+  },
+  {
+    "text": "inserted into this command list happens",
+    "start": 1236.799,
+    "duration": 4.88
+  },
+  {
+    "text": "in CPU order. Um, but a single RHI",
+    "start": 1238.24,
+    "duration": 4.88
+  },
+  {
+    "text": "command list can record work into",
+    "start": 1241.679,
+    "duration": 3.761
+  },
+  {
+    "text": "multiple RHI contexts. You have one of",
+    "start": 1243.12,
+    "duration": 4.0
+  },
+  {
+    "text": "these contexts per pipeline that you're",
+    "start": 1245.44,
+    "duration": 3.44
+  },
+  {
+    "text": "targeting. So either graphics or compute",
+    "start": 1247.12,
+    "duration": 3.679
+  },
+  {
+    "text": "generally you have either one or two",
+    "start": 1248.88,
+    "duration": 5.52
+  },
+  {
+    "text": "contexts per per command list. Um and as",
+    "start": 1250.799,
+    "duration": 4.88
+  },
+  {
+    "text": "the commands are inserted we have these",
+    "start": 1254.4,
+    "duration": 3.04
+  },
+  {
+    "text": "two functions switch pipeline and in Q",
+    "start": 1255.679,
+    "duration": 4.24
+  },
+  {
+    "text": "lambda multipe that is what toggles",
+    "start": 1257.44,
+    "duration": 4.8
+  },
+  {
+    "text": "between uh it directs the the commands",
+    "start": 1259.919,
+    "duration": 5.041
+  },
+  {
+    "text": "towards whichever appropriate context um",
+    "start": 1262.24,
+    "duration": 4.72
+  },
+  {
+    "text": "the commands are for. So say for example",
+    "start": 1264.96,
+    "duration": 4.959
+  },
+  {
+    "text": "when render graph is uh replaying passes",
+    "start": 1266.96,
+    "duration": 4.959
+  },
+  {
+    "text": "and there's a a pass for the graphics",
+    "start": 1269.919,
+    "duration": 3.201
+  },
+  {
+    "text": "queue and then a pass for the compute",
+    "start": 1271.919,
+    "duration": 3.281
+  },
+  {
+    "text": "queue inside render graph there will be",
+    "start": 1273.12,
+    "duration": 3.439
+  },
+  {
+    "text": "a call to switch pipeline from one to",
+    "start": 1275.2,
+    "duration": 3.04
+  },
+  {
+    "text": "the other to direct it over to to async",
+    "start": 1276.559,
+    "duration": 3.6
+  },
+  {
+    "text": "compute.",
+    "start": 1278.24,
+    "duration": 3.679
+  },
+  {
+    "text": "Um all of our RI command lists are",
+    "start": 1280.159,
+    "duration": 3.601
+  },
+  {
+    "text": "submitted via the immediate command list",
+    "start": 1281.919,
+    "duration": 3.361
+  },
+  {
+    "text": "uh with those two functions there the Q",
+    "start": 1283.76,
+    "duration": 2.96
+  },
+  {
+    "text": "async command list submit and immediate",
+    "start": 1285.28,
+    "duration": 3.92
+  },
+  {
+    "text": "flush. Um and all of our command lists",
+    "start": 1286.72,
+    "duration": 4.4
+  },
+  {
+    "text": "are they operate in two phases. they're",
+    "start": 1289.2,
+    "duration": 3.839
+  },
+  {
+    "text": "either um they're initially recorded and",
+    "start": 1291.12,
+    "duration": 4.08
+  },
+  {
+    "text": "then later what we call translated. And",
+    "start": 1293.039,
+    "duration": 4.88
+  },
+  {
+    "text": "translation is that process of replaying",
+    "start": 1295.2,
+    "duration": 4.959
+  },
+  {
+    "text": "uh the recorded commands calling into",
+    "start": 1297.919,
+    "duration": 3.76
+  },
+  {
+    "text": "the RHI context and generating the",
+    "start": 1300.159,
+    "duration": 5.481
+  },
+  {
+    "text": "actual GP platform commands.",
+    "start": 1301.679,
+    "duration": 3.961
+  },
+  {
+    "text": "And so this is exactly what the the",
+    "start": 1306.24,
+    "duration": 3.04
+  },
+  {
+    "text": "switch pipelines looks like. Uh in the",
+    "start": 1307.76,
+    "duration": 2.96
+  },
+  {
+    "text": "center is an example command list with",
+    "start": 1309.28,
+    "duration": 3.12
+  },
+  {
+    "text": "loads of commands in. Um and then you",
+    "start": 1310.72,
+    "duration": 3.439
+  },
+  {
+    "text": "get the kind of interled uh switch",
+    "start": 1312.4,
+    "duration": 3.519
+  },
+  {
+    "text": "pipeline calls that just direct when we",
+    "start": 1314.159,
+    "duration": 3.361
+  },
+  {
+    "text": "do the translate it directs those",
+    "start": 1315.919,
+    "duration": 3.041
+  },
+  {
+    "text": "following commands into the appropriate",
+    "start": 1317.52,
+    "duration": 4.399
+  },
+  {
+    "text": "context.",
+    "start": 1318.96,
+    "duration": 2.959
+  },
+  {
+    "text": "Uh one other thing to note is the uh the",
+    "start": 1322.159,
+    "duration": 4.64
+  },
+  {
+    "text": "context themselves are required lazily.",
+    "start": 1324.96,
+    "duration": 3.199
+  },
+  {
+    "text": "So if you have a command list that only",
+    "start": 1326.799,
+    "duration": 3.041
+  },
+  {
+    "text": "uses graphics, it will only acquire a",
+    "start": 1328.159,
+    "duration": 3.121
+  },
+  {
+    "text": "graphics context and only do the work",
+    "start": 1329.84,
+    "duration": 2.88
+  },
+  {
+    "text": "for the graphics uh for the graphics",
+    "start": 1331.28,
+    "duration": 4.399
+  },
+  {
+    "text": "pipe. Um so it saves you the work of",
+    "start": 1332.72,
+    "duration": 5.6
+  },
+  {
+    "text": "like if you were to grab uh both at the",
+    "start": 1335.679,
+    "duration": 3.841
+  },
+  {
+    "text": "same time, you'd end up with a context",
+    "start": 1338.32,
+    "duration": 2.64
+  },
+  {
+    "text": "that had no work in it and it's just an",
+    "start": 1339.52,
+    "duration": 4.639
+  },
+  {
+    "text": "overhead. So",
+    "start": 1340.96,
+    "duration": 5.12
+  },
+  {
+    "text": "uh so at this point I'll apologize. is",
+    "start": 1344.159,
+    "duration": 2.88
+  },
+  {
+    "text": "I'm going to switch to just reading",
+    "start": 1346.08,
+    "duration": 2.079
+  },
+  {
+    "text": "directly from my speaker notes because",
+    "start": 1347.039,
+    "duration": 3.921
+  },
+  {
+    "text": "this slide is really complicated.",
+    "start": 1348.159,
+    "duration": 4.961
+  },
+  {
+    "text": "Um, and yeah, there's there's there's a",
+    "start": 1350.96,
+    "duration": 3.199
+  },
+  {
+    "text": "lot of information here that I need to",
+    "start": 1353.12,
+    "duration": 2.559
+  },
+  {
+    "text": "make sure that I get right. So, uh,",
+    "start": 1354.159,
+    "duration": 3.121
+  },
+  {
+    "text": "we'll have to bear with me and read just",
+    "start": 1355.679,
+    "duration": 4.48
+  },
+  {
+    "text": "from the from my notes.",
+    "start": 1357.28,
+    "duration": 4.399
+  },
+  {
+    "text": "Uh, so over the next few slides, I'll",
+    "start": 1360.159,
+    "duration": 3.041
+  },
+  {
+    "text": "walk through an example of how RHI",
+    "start": 1361.679,
+    "duration": 4.0
+  },
+  {
+    "text": "command lists are created, recorded,",
+    "start": 1363.2,
+    "duration": 4.8
+  },
+  {
+    "text": "dispatched, translated, and submitted to",
+    "start": 1365.679,
+    "duration": 5.041
+  },
+  {
+    "text": "the GPU. This is a multi-step process",
+    "start": 1368.0,
+    "duration": 5.28
+  },
+  {
+    "text": "with lots of tasks and parallelism. You",
+    "start": 1370.72,
+    "duration": 3.52
+  },
+  {
+    "text": "don't need to take all of the",
+    "start": 1373.28,
+    "duration": 2.56
+  },
+  {
+    "text": "information in on this slide immediately",
+    "start": 1374.24,
+    "duration": 3.04
+  },
+  {
+    "text": "as I'll be stepping through the stages",
+    "start": 1375.84,
+    "duration": 3.04
+  },
+  {
+    "text": "and adding arrows to the slide to show",
+    "start": 1377.28,
+    "duration": 3.68
+  },
+  {
+    "text": "task flow.",
+    "start": 1378.88,
+    "duration": 3.84
+  },
+  {
+    "text": "Solid arrows indicate where one task",
+    "start": 1380.96,
+    "duration": 3.44
+  },
+  {
+    "text": "starts another and dashed arrows",
+    "start": 1382.72,
+    "duration": 4.079
+  },
+  {
+    "text": "indicate where a weight is resolved. The",
+    "start": 1384.4,
+    "duration": 4.159
+  },
+  {
+    "text": "colored boxes represent threads or",
+    "start": 1386.799,
+    "duration": 4.081
+  },
+  {
+    "text": "chains of tasks. They execute left to",
+    "start": 1388.559,
+    "duration": 4.48
+  },
+  {
+    "text": "right on the slide. None of the steps",
+    "start": 1390.88,
+    "duration": 4.159
+  },
+  {
+    "text": "block unless a step is explicitly marked",
+    "start": 1393.039,
+    "duration": 5.401
+  },
+  {
+    "text": "as a weight.",
+    "start": 1395.039,
+    "duration": 3.401
+  },
+  {
+    "text": "To begin, the render thread creates",
+    "start": 1399.76,
+    "duration": 3.6
+  },
+  {
+    "text": "three new RHI command lists which we'll",
+    "start": 1401.52,
+    "duration": 4.8
+  },
+  {
+    "text": "label A, B, and C. It then kicks a set",
+    "start": 1403.36,
+    "duration": 4.799
+  },
+  {
+    "text": "of tasks to the to record work into",
+    "start": 1406.32,
+    "duration": 4.32
+  },
+  {
+    "text": "these command lists. Each recording task",
+    "start": 1408.159,
+    "duration": 4.961
+  },
+  {
+    "text": "runs concurrently. The main source of",
+    "start": 1410.64,
+    "duration": 4.159
+  },
+  {
+    "text": "the tasks in this the main source of",
+    "start": 1413.12,
+    "duration": 3.2
+  },
+  {
+    "text": "these tasks in the renderer today are",
+    "start": 1414.799,
+    "duration": 2.88
+  },
+  {
+    "text": "from render graph parallel pass",
+    "start": 1416.32,
+    "duration": 4.08
+  },
+  {
+    "text": "execution.",
+    "start": 1417.679,
+    "duration": 4.161
+  },
+  {
+    "text": "When the command lists have been fully",
+    "start": 1420.4,
+    "duration": 3.04
+  },
+  {
+    "text": "recorded, the recording tasks will call",
+    "start": 1421.84,
+    "duration": 3.6
+  },
+  {
+    "text": "finish recording. This function signals",
+    "start": 1423.44,
+    "duration": 3.44
+  },
+  {
+    "text": "that the command list is completed and",
+    "start": 1425.44,
+    "duration": 4.76
+  },
+  {
+    "text": "ready for dispatch.",
+    "start": 1426.88,
+    "duration": 3.32
+  },
+  {
+    "text": "Meanwhile, the render thread has",
+    "start": 1430.96,
+    "duration": 3.52
+  },
+  {
+    "text": "continued on and has called QA async",
+    "start": 1432.48,
+    "duration": 4.0
+  },
+  {
+    "text": "command list submit passing the three",
+    "start": 1434.48,
+    "duration": 5.36
+  },
+  {
+    "text": "command lists. The order of ABC is",
+    "start": 1436.48,
+    "duration": 5.04
+  },
+  {
+    "text": "significant as this is the submission",
+    "start": 1439.84,
+    "duration": 3.12
+  },
+  {
+    "text": "order and therefore the order that the",
+    "start": 1441.52,
+    "duration": 4.32
+  },
+  {
+    "text": "work will be sent to the GPU. QAnc",
+    "start": 1442.96,
+    "duration": 4.4
+  },
+  {
+    "text": "command list submit will launch a new",
+    "start": 1445.84,
+    "duration": 4.4
+  },
+  {
+    "text": "task called the dispatch task. This task",
+    "start": 1447.36,
+    "duration": 4.24
+  },
+  {
+    "text": "is responsible for grouping command",
+    "start": 1450.24,
+    "duration": 3.039
+  },
+  {
+    "text": "lists together into translate chains to",
+    "start": 1451.6,
+    "duration": 3.679
+  },
+  {
+    "text": "achieve parallelism.",
+    "start": 1453.279,
+    "duration": 3.601
+  },
+  {
+    "text": "It starts by creating a state structure",
+    "start": 1455.279,
+    "duration": 5.801
+  },
+  {
+    "text": "to track the progress of the submission.",
+    "start": 1456.88,
+    "duration": 4.2
+  },
+  {
+    "text": "After creating the state structure, the",
+    "start": 1462.08,
+    "duration": 3.28
+  },
+  {
+    "text": "dispatch task awaits completion of the",
+    "start": 1463.6,
+    "duration": 4.0
+  },
+  {
+    "text": "first command list in submission order.",
+    "start": 1465.36,
+    "duration": 3.6
+  },
+  {
+    "text": "This weight is resolved once the",
+    "start": 1467.6,
+    "duration": 2.64
+  },
+  {
+    "text": "recording task is called finished",
+    "start": 1468.96,
+    "duration": 4.079
+  },
+  {
+    "text": "recording. At this point, command list A",
+    "start": 1470.24,
+    "duration": 5.039
+  },
+  {
+    "text": "is ready for dispatch. Since this is the",
+    "start": 1473.039,
+    "duration": 3.601
+  },
+  {
+    "text": "first command list in the submission,",
+    "start": 1475.279,
+    "duration": 2.88
+  },
+  {
+    "text": "the dispatch thread starts a new",
+    "start": 1476.64,
+    "duration": 3.76
+  },
+  {
+    "text": "translate chain. This is another task",
+    "start": 1478.159,
+    "duration": 3.681
+  },
+  {
+    "text": "graph task which is responsible for",
+    "start": 1480.4,
+    "duration": 2.96
+  },
+  {
+    "text": "replaying the commands recorded in the",
+    "start": 1481.84,
+    "duration": 5.28
+  },
+  {
+    "text": "RII command lists into RHI contexts.",
+    "start": 1483.36,
+    "duration": 5.28
+  },
+  {
+    "text": "Translation is the process that calls",
+    "start": 1487.12,
+    "duration": 3.2
+  },
+  {
+    "text": "into the platform RHI implementation to",
+    "start": 1488.64,
+    "duration": 3.44
+  },
+  {
+    "text": "generate actual GPU specific command",
+    "start": 1490.32,
+    "duration": 3.839
+  },
+  {
+    "text": "lists.",
+    "start": 1492.08,
+    "duration": 3.52
+  },
+  {
+    "text": "The translate chain acquires the",
+    "start": 1494.159,
+    "duration": 3.681
+  },
+  {
+    "text": "relevant RHI context by calling RHI get",
+    "start": 1495.6,
+    "duration": 4.64
+  },
+  {
+    "text": "command context and then executes the",
+    "start": 1497.84,
+    "duration": 5.28
+  },
+  {
+    "text": "command lists. The contexts acquired are",
+    "start": 1500.24,
+    "duration": 4.799
+  },
+  {
+    "text": "stored on the chain for later use.",
+    "start": 1503.12,
+    "duration": 3.919
+  },
+  {
+    "text": "Command list A is deleted once execution",
+    "start": 1505.039,
+    "duration": 5.361
+  },
+  {
+    "text": "has has completed.",
+    "start": 1507.039,
+    "duration": 3.361
+  },
+  {
+    "text": "While translation of command list A is",
+    "start": 1511.039,
+    "duration": 3.441
+  },
+  {
+    "text": "in flight, the record task for B has",
+    "start": 1512.559,
+    "duration": 4.081
+  },
+  {
+    "text": "finished. The dispatch task has been",
+    "start": 1514.48,
+    "duration": 3.92
+  },
+  {
+    "text": "waiting for B to be completed and once",
+    "start": 1516.64,
+    "duration": 4.88
+  },
+  {
+    "text": "it has dispatches B. Since A and B were",
+    "start": 1518.4,
+    "duration": 4.72
+  },
+  {
+    "text": "relatively short command lists, the",
+    "start": 1521.52,
+    "duration": 3.759
+  },
+  {
+    "text": "dispatch task decided to append B to the",
+    "start": 1523.12,
+    "duration": 4.799
+  },
+  {
+    "text": "first translation chain. The context for",
+    "start": 1525.279,
+    "duration": 4.64
+  },
+  {
+    "text": "the translation chain, excuse me, the",
+    "start": 1527.919,
+    "duration": 3.12
+  },
+  {
+    "text": "context of the translation chain",
+    "start": 1529.919,
+    "duration": 3.281
+  },
+  {
+    "text": "acquired while translating A are reused",
+    "start": 1531.039,
+    "duration": 4.961
+  },
+  {
+    "text": "for B. Again, B is executed and then",
+    "start": 1533.2,
+    "duration": 5.8
+  },
+  {
+    "text": "deleted.",
+    "start": 1536.0,
+    "duration": 3.0
+  },
+  {
+    "text": "As before, the dispatch task has moved",
+    "start": 1540.4,
+    "duration": 3.6
+  },
+  {
+    "text": "forward and is now waiting for C to be",
+    "start": 1542.24,
+    "duration": 4.64
+  },
+  {
+    "text": "completed. However, this time the the",
+    "start": 1544.0,
+    "duration": 4.32
+  },
+  {
+    "text": "dispatch task decides that it should",
+    "start": 1546.88,
+    "duration": 3.44
+  },
+  {
+    "text": "avoid appending C to the first chain to",
+    "start": 1548.32,
+    "duration": 4.56
+  },
+  {
+    "text": "achieve better parallelism. Instead, it",
+    "start": 1550.32,
+    "duration": 4.719
+  },
+  {
+    "text": "issues a close command to chain one.",
+    "start": 1552.88,
+    "duration": 3.76
+  },
+  {
+    "text": "This causes chain one to finalize the",
+    "start": 1555.039,
+    "duration": 3.041
+  },
+  {
+    "text": "context that it acquired once all",
+    "start": 1556.64,
+    "duration": 2.639
+  },
+  {
+    "text": "translations in that chain have",
+    "start": 1558.08,
+    "duration": 2.88
+  },
+  {
+    "text": "completed.",
+    "start": 1559.279,
+    "duration": 4.241
+  },
+  {
+    "text": "Finalizing an an RHI context converts it",
+    "start": 1560.96,
+    "duration": 4.48
+  },
+  {
+    "text": "into an IHI platform command list",
+    "start": 1563.52,
+    "duration": 3.68
+  },
+  {
+    "text": "pointer which contains all the platform",
+    "start": 1565.44,
+    "duration": 3.44
+  },
+  {
+    "text": "specific GPU work generated by that",
+    "start": 1567.2,
+    "duration": 4.0
+  },
+  {
+    "text": "context ready for submission.",
+    "start": 1568.88,
+    "duration": 3.679
+  },
+  {
+    "text": "These pointers are stored on the chain",
+    "start": 1571.2,
+    "duration": 3.28
+  },
+  {
+    "text": "for later.",
+    "start": 1572.559,
+    "duration": 3.36
+  },
+  {
+    "text": "Meanwhile, the second chain is started",
+    "start": 1574.48,
+    "duration": 4.319
+  },
+  {
+    "text": "by a dispatch task. As before, contexts",
+    "start": 1575.919,
+    "duration": 4.961
+  },
+  {
+    "text": "are required, C is executed, and then",
+    "start": 1578.799,
+    "duration": 5.081
+  },
+  {
+    "text": "deleted.",
+    "start": 1580.88,
+    "duration": 3.0
+  },
+  {
+    "text": "While all of this has been happening,",
+    "start": 1584.4,
+    "duration": 2.639
+  },
+  {
+    "text": "the render thread has continued on and",
+    "start": 1585.6,
+    "duration": 3.04
+  },
+  {
+    "text": "called immediate flush on the immediate",
+    "start": 1587.039,
+    "duration": 4.081
+  },
+  {
+    "text": "command list. This function flushes all",
+    "start": 1588.64,
+    "duration": 4.159
+  },
+  {
+    "text": "prior work and will eventually result in",
+    "start": 1591.12,
+    "duration": 4.0
+  },
+  {
+    "text": "submission of work to the GPU. It",
+    "start": 1592.799,
+    "duration": 3.841
+  },
+  {
+    "text": "achieves this by appending a submit",
+    "start": 1595.12,
+    "duration": 3.439
+  },
+  {
+    "text": "command to the end of the dispatch task",
+    "start": 1596.64,
+    "duration": 3.519
+  },
+  {
+    "text": "to run after all prior command list",
+    "start": 1598.559,
+    "duration": 5.321
+  },
+  {
+    "text": "dispatches have completed.",
+    "start": 1600.159,
+    "duration": 3.721
+  },
+  {
+    "text": "The submit command closes the last open",
+    "start": 1604.159,
+    "duration": 3.601
+  },
+  {
+    "text": "translate chain. This is the same as",
+    "start": 1606.159,
+    "duration": 3.281
+  },
+  {
+    "text": "before. The acquired contexts are",
+    "start": 1607.76,
+    "duration": 3.2
+  },
+  {
+    "text": "finalized into platform command list",
+    "start": 1609.44,
+    "duration": 3.04
+  },
+  {
+    "text": "pointers.",
+    "start": 1610.96,
+    "duration": 3.28
+  },
+  {
+    "text": "The submit command also incues a task",
+    "start": 1612.48,
+    "duration": 5.28
+  },
+  {
+    "text": "for the RHI thread.",
+    "start": 1614.24,
+    "duration": 5.36
+  },
+  {
+    "text": "The RHI thread waits for the translate",
+    "start": 1617.76,
+    "duration": 3.6
+  },
+  {
+    "text": "chains to be closed, then retrieves the",
+    "start": 1619.6,
+    "duration": 4.0
+  },
+  {
+    "text": "finalized platform command lists. It",
+    "start": 1621.36,
+    "duration": 3.76
+  },
+  {
+    "text": "then forwards these command lists to the",
+    "start": 1623.6,
+    "duration": 4.16
+  },
+  {
+    "text": "platform RHI implementation via RHI",
+    "start": 1625.12,
+    "duration": 5.36
+  },
+  {
+    "text": "submit command lists. Again, the order",
+    "start": 1627.76,
+    "duration": 4.64
+  },
+  {
+    "text": "is important. Work from chain one is",
+    "start": 1630.48,
+    "duration": 4.16
+  },
+  {
+    "text": "submitted before work from chain 2.",
+    "start": 1632.4,
+    "duration": 3.92
+  },
+  {
+    "text": "Finally, the tracking state structure is",
+    "start": 1634.64,
+    "duration": 4.68
+  },
+  {
+    "text": "deleted.",
+    "start": 1636.32,
+    "duration": 3.0
+  },
+  {
+    "text": "So there we are. That's that's the full",
+    "start": 1639.6,
+    "duration": 4.319
+  },
+  {
+    "text": "graph. That's quite a lot. Um, as I",
+    "start": 1640.96,
+    "duration": 5.28
+  },
+  {
+    "text": "mentioned that this is like the the full",
+    "start": 1643.919,
+    "duration": 3.681
+  },
+  {
+    "text": "uh run through of everything that",
+    "start": 1646.24,
+    "duration": 2.4
+  },
+  {
+    "text": "happens from the render thread all the",
+    "start": 1647.6,
+    "duration": 3.28
+  },
+  {
+    "text": "way down to the RHI thread. Uh, an",
+    "start": 1648.64,
+    "duration": 3.76
+  },
+  {
+    "text": "interesting thing to note is that this",
+    "start": 1650.88,
+    "duration": 3.84
+  },
+  {
+    "text": "final uh box in the lower right that was",
+    "start": 1652.4,
+    "duration": 3.68
+  },
+  {
+    "text": "the marker that I was referring to when",
+    "start": 1654.72,
+    "duration": 2.8
+  },
+  {
+    "text": "we were talking about Unreal insights",
+    "start": 1656.08,
+    "duration": 3.68
+  },
+  {
+    "text": "earlier. Um, the Ri submit GP marker",
+    "start": 1657.52,
+    "duration": 4.48
+  },
+  {
+    "text": "that occurs on the RHI thread. So that",
+    "start": 1659.76,
+    "duration": 3.68
+  },
+  {
+    "text": "whole flow graph goes up to that point",
+    "start": 1662.0,
+    "duration": 3.52
+  },
+  {
+    "text": "and then after that point the par the",
+    "start": 1663.44,
+    "duration": 4.479
+  },
+  {
+    "text": "platform command lists get um pushed",
+    "start": 1665.52,
+    "duration": 4.08
+  },
+  {
+    "text": "into into the platform RGI and then from",
+    "start": 1667.919,
+    "duration": 3.201
+  },
+  {
+    "text": "that point the submission thread and the",
+    "start": 1669.6,
+    "duration": 2.88
+  },
+  {
+    "text": "GPU is kind of an implementation detail",
+    "start": 1671.12,
+    "duration": 2.48
+  },
+  {
+    "text": "of the particular platform that you're",
+    "start": 1672.48,
+    "duration": 3.439
+  },
+  {
+    "text": "running on. Uh so this is what the",
+    "start": 1673.6,
+    "duration": 3.439
+  },
+  {
+    "text": "translate chains look like if you were",
+    "start": 1675.919,
+    "duration": 3.441
+  },
+  {
+    "text": "to take an insights capture. Um each one",
+    "start": 1677.039,
+    "duration": 3.76
+  },
+  {
+    "text": "of these lines here is a single",
+    "start": 1679.36,
+    "duration": 3.679
+  },
+  {
+    "text": "translate chain. Um and each of the blue",
+    "start": 1680.799,
+    "duration": 4.401
+  },
+  {
+    "text": "markers uh within those lines is a",
+    "start": 1683.039,
+    "duration": 3.52
+  },
+  {
+    "text": "single RI command list that's being",
+    "start": 1685.2,
+    "duration": 3.599
+  },
+  {
+    "text": "translated. We have this RI translate",
+    "start": 1686.559,
+    "duration": 5.281
+  },
+  {
+    "text": "marker above each of them. Um and each",
+    "start": 1688.799,
+    "duration": 4.88
+  },
+  {
+    "text": "of the chains end with an RHI finalize",
+    "start": 1691.84,
+    "duration": 3.439
+  },
+  {
+    "text": "command uh which is the pink marker at",
+    "start": 1693.679,
+    "duration": 4.961
+  },
+  {
+    "text": "the end of each line. Um",
+    "start": 1695.279,
+    "duration": 5.441
+  },
+  {
+    "text": "and one thing uh that we do here is that",
+    "start": 1698.64,
+    "duration": 4.32
+  },
+  {
+    "text": "uh to avoid some task graph overhead as",
+    "start": 1700.72,
+    "duration": 4.319
+  },
+  {
+    "text": "we build these chains we append command",
+    "start": 1702.96,
+    "duration": 3.599
+  },
+  {
+    "text": "lists to the end of the existing chain",
+    "start": 1705.039,
+    "duration": 4.321
+  },
+  {
+    "text": "atomically in a way that the task if the",
+    "start": 1706.559,
+    "duration": 4.561
+  },
+  {
+    "text": "if the command list is has arrived",
+    "start": 1709.36,
+    "duration": 3.6
+  },
+  {
+    "text": "before the task is finished. It sees",
+    "start": 1711.12,
+    "duration": 2.88
+  },
+  {
+    "text": "that there's another command list to",
+    "start": 1712.96,
+    "duration": 2.24
+  },
+  {
+    "text": "continue and it just pops it and just",
+    "start": 1714.0,
+    "duration": 3.039
+  },
+  {
+    "text": "loops back again and runs it again. Um",
+    "start": 1715.2,
+    "duration": 3.199
+  },
+  {
+    "text": "which minimizes the overhead. We used to",
+    "start": 1717.039,
+    "duration": 2.481
+  },
+  {
+    "text": "have a version of this where there was",
+    "start": 1718.399,
+    "duration": 2.561
+  },
+  {
+    "text": "gaps between each because every single",
+    "start": 1719.52,
+    "duration": 2.72
+  },
+  {
+    "text": "command this was a taskcraft task and",
+    "start": 1720.96,
+    "duration": 5.24
+  },
+  {
+    "text": "the overhead was was too much.",
+    "start": 1722.24,
+    "duration": 3.96
+  },
+  {
+    "text": "Um but crucially the question then",
+    "start": 1727.279,
+    "duration": 3.601
+  },
+  {
+    "text": "becomes when exactly do we break the",
+    "start": 1728.96,
+    "duration": 3.92
+  },
+  {
+    "text": "chain? When do we how do we decide how",
+    "start": 1730.88,
+    "duration": 3.279
+  },
+  {
+    "text": "wide we're going? How many how many of",
+    "start": 1732.88,
+    "duration": 5.76
+  },
+  {
+    "text": "these chains we're producing? Um the uh",
+    "start": 1734.159,
+    "duration": 6.4
+  },
+  {
+    "text": "the kind of the short answer is we count",
+    "start": 1738.64,
+    "duration": 3.12
+  },
+  {
+    "text": "the number of commands on the RII",
+    "start": 1740.559,
+    "duration": 2.881
+  },
+  {
+    "text": "command list. We have a a num commands",
+    "start": 1741.76,
+    "duration": 4.159
+  },
+  {
+    "text": "field per RHI command list. every time",
+    "start": 1743.44,
+    "duration": 4.0
+  },
+  {
+    "text": "you call a function on an RII command",
+    "start": 1745.919,
+    "duration": 2.88
+  },
+  {
+    "text": "list that results in an allocated",
+    "start": 1747.44,
+    "duration": 2.56
+  },
+  {
+    "text": "command that just increments that",
+    "start": 1748.799,
+    "duration": 4.081
+  },
+  {
+    "text": "counter. Um, and then by the time the",
+    "start": 1750.0,
+    "duration": 4.399
+  },
+  {
+    "text": "RHI command list arrives at the dispatch",
+    "start": 1752.88,
+    "duration": 3.76
+  },
+  {
+    "text": "thread or the dispatch tasks, um, we",
+    "start": 1754.399,
+    "duration": 3.52
+  },
+  {
+    "text": "know how many commands are coming up. We",
+    "start": 1756.64,
+    "duration": 2.639
+  },
+  {
+    "text": "know so we know kind of roughly how big",
+    "start": 1757.919,
+    "duration": 2.961
+  },
+  {
+    "text": "the command list is. And then we have",
+    "start": 1759.279,
+    "duration": 5.12
+  },
+  {
+    "text": "this car um, r. RHI command.paral",
+    "start": 1760.88,
+    "duration": 6.48
+  },
+  {
+    "text": "translate max commands per translate.",
+    "start": 1764.399,
+    "duration": 4.561
+  },
+  {
+    "text": "Um, and it's just a high watermark. You",
+    "start": 1767.36,
+    "duration": 3.12
+  },
+  {
+    "text": "set that value to like a thousand or",
+    "start": 1768.96,
+    "duration": 3.439
+  },
+  {
+    "text": "something. then uh we'll be build chains",
+    "start": 1770.48,
+    "duration": 3.52
+  },
+  {
+    "text": "up until the next command list will",
+    "start": 1772.399,
+    "duration": 2.961
+  },
+  {
+    "text": "breach that limit and then we'll start a",
+    "start": 1774.0,
+    "duration": 4.64
+  },
+  {
+    "text": "new chain. Um but besides that",
+    "start": 1775.36,
+    "duration": 4.88
+  },
+  {
+    "text": "mechanism, there's also a a handful of",
+    "start": 1778.64,
+    "duration": 3.6
+  },
+  {
+    "text": "reasons why we can't do parallel",
+    "start": 1780.24,
+    "duration": 3.919
+  },
+  {
+    "text": "translate on on some command lists. The",
+    "start": 1782.24,
+    "duration": 3.36
+  },
+  {
+    "text": "full reasoning is the code snippet on",
+    "start": 1784.159,
+    "duration": 2.88
+  },
+  {
+    "text": "there. Um I don't expect you to be able",
+    "start": 1785.6,
+    "duration": 2.559
+  },
+  {
+    "text": "to read that, but that's kind of the",
+    "start": 1787.039,
+    "duration": 2.321
+  },
+  {
+    "text": "function you want to look at if you want",
+    "start": 1788.159,
+    "duration": 4.721
+  },
+  {
+    "text": "the reasons. Um the main one being or",
+    "start": 1789.36,
+    "duration": 5.12
+  },
+  {
+    "text": "the one of the big ones is any use of",
+    "start": 1792.88,
+    "duration": 3.36
+  },
+  {
+    "text": "the immediate command list. That's the",
+    "start": 1794.48,
+    "duration": 3.12
+  },
+  {
+    "text": "one that's the global singleton, the one",
+    "start": 1796.24,
+    "duration": 3.52
+  },
+  {
+    "text": "that's owned by the render thread. um",
+    "start": 1797.6,
+    "duration": 3.679
+  },
+  {
+    "text": "because that thing has been around since",
+    "start": 1799.76,
+    "duration": 3.519
+  },
+  {
+    "text": "very early UE4, there's a lot of systems",
+    "start": 1801.279,
+    "duration": 4.321
+  },
+  {
+    "text": "that were still using it that relied on",
+    "start": 1803.279,
+    "duration": 4.0
+  },
+  {
+    "text": "uh that weren't thread safe. Um so it",
+    "start": 1805.6,
+    "duration": 3.76
+  },
+  {
+    "text": "wasn't possible to uh to run that stuff",
+    "start": 1807.279,
+    "duration": 4.961
+  },
+  {
+    "text": "in parallel. Um so even today any use of",
+    "start": 1809.36,
+    "duration": 4.48
+  },
+  {
+    "text": "the immediate command list to do drawing",
+    "start": 1812.24,
+    "duration": 3.12
+  },
+  {
+    "text": "work will result in a single thread",
+    "start": 1813.84,
+    "duration": 3.36
+  },
+  {
+    "text": "translate and is is a bit of a per hit.",
+    "start": 1815.36,
+    "duration": 3.439
+  },
+  {
+    "text": "Um so generally you should avoid uh",
+    "start": 1817.2,
+    "duration": 3.839
+  },
+  {
+    "text": "unnecessary use. Uh that means like in",
+    "start": 1818.799,
+    "duration": 4.081
+  },
+  {
+    "text": "your render graph passes the type of the",
+    "start": 1821.039,
+    "duration": 3.281
+  },
+  {
+    "text": "command list that you take you can take",
+    "start": 1822.88,
+    "duration": 4.32
+  },
+  {
+    "text": "a base one just like FRI command list um",
+    "start": 1824.32,
+    "duration": 4.8
+  },
+  {
+    "text": "which will allow parallel translate but",
+    "start": 1827.2,
+    "duration": 3.28
+  },
+  {
+    "text": "if you take one that is the immediate",
+    "start": 1829.12,
+    "duration": 2.559
+  },
+  {
+    "text": "command list then you'll be causing this",
+    "start": 1830.48,
+    "duration": 4.0
+  },
+  {
+    "text": "to happen.",
+    "start": 1831.679,
+    "duration": 4.48
+  },
+  {
+    "text": "Uh there's also a mechanism that we call",
+    "start": 1834.48,
+    "duration": 3.919
+  },
+  {
+    "text": "uh the lock fence. Um the name came",
+    "start": 1836.159,
+    "duration": 3.76
+  },
+  {
+    "text": "about because this was originally used",
+    "start": 1838.399,
+    "duration": 3.601
+  },
+  {
+    "text": "in RHI buffers for lock and unlock to",
+    "start": 1839.919,
+    "duration": 4.721
+  },
+  {
+    "text": "update uh buffers on the GPU. Um, but",
+    "start": 1842.0,
+    "duration": 4.08
+  },
+  {
+    "text": "it's used today for anytime there's an",
+    "start": 1844.64,
+    "duration": 3.68
+  },
+  {
+    "text": "RHI command that will mutate the CPU",
+    "start": 1846.08,
+    "duration": 4.8
+  },
+  {
+    "text": "side of an RHI resource. Uh, the reason",
+    "start": 1848.32,
+    "duration": 4.4
+  },
+  {
+    "text": "that buffers use it is because on most",
+    "start": 1850.88,
+    "duration": 3.44
+  },
+  {
+    "text": "of our platforms when we lock and unlock",
+    "start": 1852.72,
+    "duration": 3.439
+  },
+  {
+    "text": "a buffer, um, we're not actually",
+    "start": 1854.32,
+    "duration": 3.359
+  },
+  {
+    "text": "updating the original buffer. We're",
+    "start": 1856.159,
+    "duration": 2.961
+  },
+  {
+    "text": "allocating a brand new buffer in GPU",
+    "start": 1857.679,
+    "duration": 2.72
+  },
+  {
+    "text": "memory to avoid having to stall",
+    "start": 1859.12,
+    "duration": 3.84
+  },
+  {
+    "text": "anything. Um, and then we do a kind of a",
+    "start": 1860.399,
+    "duration": 5.841
+  },
+  {
+    "text": "swap uh uh we call it a rename which is",
+    "start": 1862.96,
+    "duration": 4.8
+  },
+  {
+    "text": "where we uh there's like a pointer to",
+    "start": 1866.24,
+    "duration": 3.76
+  },
+  {
+    "text": "the current buffer in the RHI and at",
+    "start": 1867.76,
+    "duration": 3.44
+  },
+  {
+    "text": "some point we swap out that value for",
+    "start": 1870.0,
+    "duration": 3.039
+  },
+  {
+    "text": "the old one, discard and and and and",
+    "start": 1871.2,
+    "duration": 4.64
+  },
+  {
+    "text": "free the old buffer. Um, but of course",
+    "start": 1873.039,
+    "duration": 4.801
+  },
+  {
+    "text": "if if uh multiple translates are",
+    "start": 1875.84,
+    "duration": 3.839
+  },
+  {
+    "text": "happening in parallel, we want to ensure",
+    "start": 1877.84,
+    "duration": 3.36
+  },
+  {
+    "text": "that all the all the commands that",
+    "start": 1879.679,
+    "duration": 3.12
+  },
+  {
+    "text": "happened before the lock see the old",
+    "start": 1881.2,
+    "duration": 2.959
+  },
+  {
+    "text": "value and all the ones happening after",
+    "start": 1882.799,
+    "duration": 3.12
+  },
+  {
+    "text": "see the new value. So we have to fall",
+    "start": 1884.159,
+    "duration": 3.041
+  },
+  {
+    "text": "back to a single thread translate. And",
+    "start": 1885.919,
+    "duration": 2.88
+  },
+  {
+    "text": "this is what that RHI thread fence with",
+    "start": 1887.2,
+    "duration": 3.52
+  },
+  {
+    "text": "true as the argument um causes to",
+    "start": 1888.799,
+    "duration": 3.921
+  },
+  {
+    "text": "happen. Um but again you won't",
+    "start": 1890.72,
+    "duration": 3.76
+  },
+  {
+    "text": "necessarily run into that yourself. It's",
+    "start": 1892.72,
+    "duration": 3.6
+  },
+  {
+    "text": "just a an implementation detail of the",
+    "start": 1894.48,
+    "duration": 3.84
+  },
+  {
+    "text": "API. There are certain APIs that do",
+    "start": 1896.32,
+    "duration": 3.44
+  },
+  {
+    "text": "these mutates that will have this just",
+    "start": 1898.32,
+    "duration": 4.16
+  },
+  {
+    "text": "kind of built in.",
+    "start": 1899.76,
+    "duration": 4.56
+  },
+  {
+    "text": "Um and then finally we also have this uh",
+    "start": 1902.48,
+    "duration": 3.919
+  },
+  {
+    "text": "additional command um uh console",
+    "start": 1904.32,
+    "duration": 5.12
+  },
+  {
+    "text": "variable r.rmand.p parallel translate",
+    "start": 1906.399,
+    "duration": 6.241
+  },
+  {
+    "text": "combine single and parallel. Um, and so",
+    "start": 1909.44,
+    "duration": 5.52
+  },
+  {
+    "text": "when this is enabled, it means that any",
+    "start": 1912.64,
+    "duration": 4.24
+  },
+  {
+    "text": "uh an RI command list that could have",
+    "start": 1914.96,
+    "duration": 3.28
+  },
+  {
+    "text": "been parallel translated will be a",
+    "start": 1916.88,
+    "duration": 3.679
+  },
+  {
+    "text": "candidate to join a translate chain that",
+    "start": 1918.24,
+    "duration": 4.48
+  },
+  {
+    "text": "is forced down to single thread. Um, so",
+    "start": 1920.559,
+    "duration": 3.681
+  },
+  {
+    "text": "if you turn this off, then it means that",
+    "start": 1922.72,
+    "duration": 3.679
+  },
+  {
+    "text": "any uh any RI command list that could be",
+    "start": 1924.24,
+    "duration": 3.6
+  },
+  {
+    "text": "parallel translated will be parallel",
+    "start": 1926.399,
+    "duration": 2.64
+  },
+  {
+    "text": "translated and it won't be kind of",
+    "start": 1927.84,
+    "duration": 4.719
+  },
+  {
+    "text": "siloed into um running on just the RHI",
+    "start": 1929.039,
+    "duration": 6.0
+  },
+  {
+    "text": "thread uh because of some other uh some",
+    "start": 1932.559,
+    "duration": 3.84
+  },
+  {
+    "text": "other um command list that has to be",
+    "start": 1935.039,
+    "duration": 4.88
+  },
+  {
+    "text": "single thread translated. Um, so that s",
+    "start": 1936.399,
+    "duration": 5.28
+  },
+  {
+    "text": "uh comm uh console variable together",
+    "start": 1939.919,
+    "duration": 3.201
+  },
+  {
+    "text": "with the max commands per translate one",
+    "start": 1941.679,
+    "duration": 4.081
+  },
+  {
+    "text": "are your two primary tunables for uh",
+    "start": 1943.12,
+    "duration": 4.24
+  },
+  {
+    "text": "determining how wide the renderer will",
+    "start": 1945.76,
+    "duration": 6.24
+  },
+  {
+    "text": "go. Excuse me. Um so uh these are the",
+    "start": 1947.36,
+    "duration": 5.52
+  },
+  {
+    "text": "two kind of things you want to",
+    "start": 1952.0,
+    "duration": 2.24
+  },
+  {
+    "text": "experiment with and run a load of Perf",
+    "start": 1952.88,
+    "duration": 2.96
+  },
+  {
+    "text": "captures on if you're targeting hardware",
+    "start": 1954.24,
+    "duration": 4.559
+  },
+  {
+    "text": "that has fewer cores or more cores. Um",
+    "start": 1955.84,
+    "duration": 4.8
+  },
+  {
+    "text": "generally you'll want to go wider if",
+    "start": 1958.799,
+    "duration": 3.041
+  },
+  {
+    "text": "you're on a on a system with multiple",
+    "start": 1960.64,
+    "duration": 3.2
+  },
+  {
+    "text": "calls or go narrower if you're on a on a",
+    "start": 1961.84,
+    "duration": 4.959
+  },
+  {
+    "text": "on a more limited system.",
+    "start": 1963.84,
+    "duration": 4.319
+  },
+  {
+    "text": "Um, and I think I already mentioned, but",
+    "start": 1966.799,
+    "duration": 2.72
+  },
+  {
+    "text": "the single thread translate always runs",
+    "start": 1968.159,
+    "duration": 3.041
+  },
+  {
+    "text": "on the RHI thread. Um, and this was",
+    "start": 1969.519,
+    "duration": 3.441
+  },
+  {
+    "text": "again because of a legacy reasoning.",
+    "start": 1971.2,
+    "duration": 3.199
+  },
+  {
+    "text": "There's certain code that expects to be",
+    "start": 1972.96,
+    "duration": 3.76
+  },
+  {
+    "text": "on the actual physical RI thread. Um,",
+    "start": 1974.399,
+    "duration": 3.52
+  },
+  {
+    "text": "and we achieved this with some task",
+    "start": 1976.72,
+    "duration": 4.0
+  },
+  {
+    "text": "dependencies um between the the the the",
+    "start": 1977.919,
+    "duration": 6.36
+  },
+  {
+    "text": "um the tasks.",
+    "start": 1980.72,
+    "duration": 3.559
+  },
+  {
+    "text": "Uh, and again, so this is what this",
+    "start": 1984.88,
+    "duration": 3.919
+  },
+  {
+    "text": "looks like in insights. Um,",
+    "start": 1986.32,
+    "duration": 4.32
+  },
+  {
+    "text": "so this uh you'll get single thread",
+    "start": 1988.799,
+    "duration": 3.6
+  },
+  {
+    "text": "translate anytime that allow paradigm",
+    "start": 1990.64,
+    "duration": 3.039
+  },
+  {
+    "text": "translate function on the command list",
+    "start": 1992.399,
+    "duration": 3.041
+  },
+  {
+    "text": "returns false. And you can see we have",
+    "start": 1993.679,
+    "duration": 3.12
+  },
+  {
+    "text": "two blocks of parallel work and then we",
+    "start": 1995.44,
+    "duration": 2.8
+  },
+  {
+    "text": "just fall back to single thread for for",
+    "start": 1996.799,
+    "duration": 3.36
+  },
+  {
+    "text": "a duration. Um I think this",
+    "start": 1998.24,
+    "duration": 3.52
+  },
+  {
+    "text": "screenshots's probably about over a year",
+    "start": 2000.159,
+    "duration": 3.041
+  },
+  {
+    "text": "old now. And the reason for this",
+    "start": 2001.76,
+    "duration": 3.519
+  },
+  {
+    "text": "particular single thread um translate",
+    "start": 2003.2,
+    "duration": 4.719
+  },
+  {
+    "text": "was uh some uh rate tracing APIs that",
+    "start": 2005.279,
+    "duration": 4.561
+  },
+  {
+    "text": "was using the media command list. I",
+    "start": 2007.919,
+    "duration": 3.281
+  },
+  {
+    "text": "believe we fix this now although don't",
+    "start": 2009.84,
+    "duration": 4.48
+  },
+  {
+    "text": "hold me to that. Um and yeah, so we're",
+    "start": 2011.2,
+    "duration": 5.28
+  },
+  {
+    "text": "we're we're we're slowly moving towards",
+    "start": 2014.32,
+    "duration": 3.44
+  },
+  {
+    "text": "a world where we're trying to reduce the",
+    "start": 2016.48,
+    "duration": 2.559
+  },
+  {
+    "text": "amount of uh single thread translate",
+    "start": 2017.76,
+    "duration": 2.56
+  },
+  {
+    "text": "that happens because it's just a perfect",
+    "start": 2019.039,
+    "duration": 3.281
+  },
+  {
+    "text": "it's just a bubble in the pipeline. Um",
+    "start": 2020.32,
+    "duration": 5.359
+  },
+  {
+    "text": "doesn't scale very well.",
+    "start": 2022.32,
+    "duration": 3.359
+  },
+  {
+    "text": "Uh, so a few kind of caveats and",
+    "start": 2026.96,
+    "duration": 3.68
+  },
+  {
+    "text": "clarifications about all the stuff I've",
+    "start": 2029.12,
+    "duration": 4.48
+  },
+  {
+    "text": "just said. Um, any thread can create an",
+    "start": 2030.64,
+    "duration": 4.56
+  },
+  {
+    "text": "RHI command list instance, but only the",
+    "start": 2033.6,
+    "duration": 4.16
+  },
+  {
+    "text": "render thread can submit them. Um, a",
+    "start": 2035.2,
+    "duration": 3.76
+  },
+  {
+    "text": "good example of this would be our mesh",
+    "start": 2037.76,
+    "duration": 3.2
+  },
+  {
+    "text": "streaming system.",
+    "start": 2038.96,
+    "duration": 3.68
+  },
+  {
+    "text": "In order to stream a mesh, we're pulling",
+    "start": 2040.96,
+    "duration": 3.439
+  },
+  {
+    "text": "like vertex and index data off the hard",
+    "start": 2042.64,
+    "duration": 4.0
+  },
+  {
+    "text": "disk. And on PC, getting that into the",
+    "start": 2044.399,
+    "duration": 4.081
+  },
+  {
+    "text": "actual GPU memory involves work on the",
+    "start": 2046.64,
+    "duration": 5.199
+  },
+  {
+    "text": "GPU. um the OS like Windows will get you",
+    "start": 2048.48,
+    "duration": 5.119
+  },
+  {
+    "text": "as far as bringing the data into system",
+    "start": 2051.839,
+    "duration": 3.361
+  },
+  {
+    "text": "memory into an upload heap but then the",
+    "start": 2053.599,
+    "duration": 3.201
+  },
+  {
+    "text": "GPU actually has to copy that data into",
+    "start": 2055.2,
+    "duration": 4.32
+  },
+  {
+    "text": "its local uh local memory. Um so as a",
+    "start": 2056.8,
+    "duration": 4.4
+  },
+  {
+    "text": "result if you want to create a buffer in",
+    "start": 2059.52,
+    "duration": 3.2
+  },
+  {
+    "text": "the RHI you need a command list. The",
+    "start": 2061.2,
+    "duration": 2.959
+  },
+  {
+    "text": "function to create a buffer is on the",
+    "start": 2062.72,
+    "duration": 4.399
+  },
+  {
+    "text": "command list type. Um and so what",
+    "start": 2064.159,
+    "duration": 5.121
+  },
+  {
+    "text": "happens in the mesh streamer is the mesh",
+    "start": 2067.119,
+    "duration": 3.441
+  },
+  {
+    "text": "streamer thread that's running in the",
+    "start": 2069.28,
+    "duration": 2.96
+  },
+  {
+    "text": "background creates its own RHI command",
+    "start": 2070.56,
+    "duration": 3.359
+  },
+  {
+    "text": "list. It uses it to create the buffers",
+    "start": 2072.24,
+    "duration": 3.52
+  },
+  {
+    "text": "and fill them in with the initial data.",
+    "start": 2073.919,
+    "duration": 3.2
+  },
+  {
+    "text": "And then the very last step of the mesh",
+    "start": 2075.76,
+    "duration": 2.72
+  },
+  {
+    "text": "streaming system when the buffer gets",
+    "start": 2077.119,
+    "duration": 3.361
+  },
+  {
+    "text": "handed over to the renderer is a task on",
+    "start": 2078.48,
+    "duration": 4.159
+  },
+  {
+    "text": "the render thread gets incued. Um and",
+    "start": 2080.48,
+    "duration": 3.439
+  },
+  {
+    "text": "then the command list that it created",
+    "start": 2082.639,
+    "duration": 2.48
+  },
+  {
+    "text": "gets handed along with that and then",
+    "start": 2083.919,
+    "duration": 2.401
+  },
+  {
+    "text": "submitted through the immediate command",
+    "start": 2085.119,
+    "duration": 2.96
+  },
+  {
+    "text": "list and from that point onwards the",
+    "start": 2086.32,
+    "duration": 3.359
+  },
+  {
+    "text": "buffers are now safe to use. So there's",
+    "start": 2088.079,
+    "duration": 2.961
+  },
+  {
+    "text": "kind of like a handover mechanism that",
+    "start": 2089.679,
+    "duration": 3.601
+  },
+  {
+    "text": "happens.",
+    "start": 2091.04,
+    "duration": 5.52
+  },
+  {
+    "text": "Uh the dispatch task in quotes uh is not",
+    "start": 2093.28,
+    "duration": 5.36
+  },
+  {
+    "text": "isolated to a single submit. Um you",
+    "start": 2096.56,
+    "duration": 3.6
+  },
+  {
+    "text": "could think of this as a thread really.",
+    "start": 2098.64,
+    "duration": 2.64
+  },
+  {
+    "text": "We don't call it a thread because it",
+    "start": 2100.16,
+    "duration": 2.64
+  },
+  {
+    "text": "isn't a physical thread, but it is a",
+    "start": 2101.28,
+    "duration": 4.24
+  },
+  {
+    "text": "continual chain of of dependent tasks. I",
+    "start": 2102.8,
+    "duration": 4.4
+  },
+  {
+    "text": "know in the in the kind of flow graph",
+    "start": 2105.52,
+    "duration": 3.12
+  },
+  {
+    "text": "example I gave earlier, it looks like",
+    "start": 2107.2,
+    "duration": 3.04
+  },
+  {
+    "text": "the dispatch task is only relevant for",
+    "start": 2108.64,
+    "duration": 2.959
+  },
+  {
+    "text": "that particular submit, but actually",
+    "start": 2110.24,
+    "duration": 2.64
+  },
+  {
+    "text": "there's dependencies off either end of",
+    "start": 2111.599,
+    "duration": 2.641
+  },
+  {
+    "text": "that and it's it's just a chain of",
+    "start": 2112.88,
+    "duration": 4.16
+  },
+  {
+    "text": "tasks. Um, so yeah, so like a dispatch",
+    "start": 2114.24,
+    "duration": 4.96
+  },
+  {
+    "text": "for a subsequent job won't run until the",
+    "start": 2117.04,
+    "duration": 4.079
+  },
+  {
+    "text": "private private one uh previous ones",
+    "start": 2119.2,
+    "duration": 4.159
+  },
+  {
+    "text": "have completed in submission order, but",
+    "start": 2121.119,
+    "duration": 4.161
+  },
+  {
+    "text": "generally the dispatch tasks are so so",
+    "start": 2123.359,
+    "duration": 3.601
+  },
+  {
+    "text": "short you don't see them being a",
+    "start": 2125.28,
+    "duration": 4.24
+  },
+  {
+    "text": "bottleneck.",
+    "start": 2126.96,
+    "duration": 4.32
+  },
+  {
+    "text": "uh the recording and the translate chain",
+    "start": 2129.52,
+    "duration": 3.44
+  },
+  {
+    "text": "tasks complete out of order but the",
+    "start": 2131.28,
+    "duration": 3.2
+  },
+  {
+    "text": "dispatch and submission is always in",
+    "start": 2132.96,
+    "duration": 4.48
+  },
+  {
+    "text": "order. Um again this goes back to that",
+    "start": 2134.48,
+    "duration": 4.16
+  },
+  {
+    "text": "the reason why we have the lock fence",
+    "start": 2137.44,
+    "duration": 2.72
+  },
+  {
+    "text": "and so on is because those translate",
+    "start": 2138.64,
+    "duration": 3.76
+  },
+  {
+    "text": "jobs they're just kind of free to run on",
+    "start": 2140.16,
+    "duration": 3.52
+  },
+  {
+    "text": "the task graph and they complete out of",
+    "start": 2142.4,
+    "duration": 3.199
+  },
+  {
+    "text": "order. Um but all of this management",
+    "start": 2143.68,
+    "duration": 3.919
+  },
+  {
+    "text": "logic then has to kind of reorder",
+    "start": 2145.599,
+    "duration": 3.041
+  },
+  {
+    "text": "everything back into the correct order",
+    "start": 2147.599,
+    "duration": 4.24
+  },
+  {
+    "text": "to hit the actual GPQs.",
+    "start": 2148.64,
+    "duration": 4.56
+  },
+  {
+    "text": "Uh and then finally the immediate",
+    "start": 2151.839,
+    "duration": 2.561
+  },
+  {
+    "text": "command list works exactly the same as",
+    "start": 2153.2,
+    "duration": 2.639
+  },
+  {
+    "text": "the parallel ones. You can do drawing on",
+    "start": 2154.4,
+    "duration": 3.04
+  },
+  {
+    "text": "it. You can do all the same stuff that",
+    "start": 2155.839,
+    "duration": 3.201
+  },
+  {
+    "text": "you can with a parallel command list.",
+    "start": 2157.44,
+    "duration": 3.28
+  },
+  {
+    "text": "Um, I'd advise you don't because we",
+    "start": 2159.04,
+    "duration": 2.88
+  },
+  {
+    "text": "should be avoiding the immediate command",
+    "start": 2160.72,
+    "duration": 3.119
+  },
+  {
+    "text": "list. Um, but the only difference is",
+    "start": 2161.92,
+    "duration": 3.76
+  },
+  {
+    "text": "that you don't call finish recording.",
+    "start": 2163.839,
+    "duration": 4.24
+  },
+  {
+    "text": "Um, finish recording was uh a mechanism",
+    "start": 2165.68,
+    "duration": 3.84
+  },
+  {
+    "text": "to get this kind of parallel stuff to",
+    "start": 2168.079,
+    "duration": 2.641
+  },
+  {
+    "text": "work and it doesn't need to happen on",
+    "start": 2169.52,
+    "duration": 2.64
+  },
+  {
+    "text": "the immediate command list. I think",
+    "start": 2170.72,
+    "duration": 2.879
+  },
+  {
+    "text": "it'll actually crash if you do there's",
+    "start": 2172.16,
+    "duration": 5.16
+  },
+  {
+    "text": "an assert in there, I think.",
+    "start": 2173.599,
+    "duration": 3.721
+  },
+  {
+    "text": "Okay, so uh that covers all of our",
+    "start": 2178.56,
+    "duration": 4.64
+  },
+  {
+    "text": "submission pipeline stuff. Um but we'll",
+    "start": 2180.88,
+    "duration": 4.719
+  },
+  {
+    "text": "now just kind of go into RII breadcrumb",
+    "start": 2183.2,
+    "duration": 4.639
+  },
+  {
+    "text": "system and the RI breadcrumb system uh",
+    "start": 2185.599,
+    "duration": 4.0
+  },
+  {
+    "text": "forms the kind of underpinnings of",
+    "start": 2187.839,
+    "duration": 3.121
+  },
+  {
+    "text": "everything that we've done in the new GP",
+    "start": 2189.599,
+    "duration": 4.081
+  },
+  {
+    "text": "profiler. Um and it was kind of it came",
+    "start": 2190.96,
+    "duration": 5.28
+  },
+  {
+    "text": "about as uh there were multiple systems",
+    "start": 2193.68,
+    "duration": 4.08
+  },
+  {
+    "text": "in the engine and in the renderer that",
+    "start": 2196.24,
+    "duration": 3.76
+  },
+  {
+    "text": "were trying to label renderer work for",
+    "start": 2197.76,
+    "duration": 3.359
+  },
+  {
+    "text": "so that you can see what you're working",
+    "start": 2200.0,
+    "duration": 2.96
+  },
+  {
+    "text": "on in like in a pix capture or anything",
+    "start": 2201.119,
+    "duration": 4.161
+  },
+  {
+    "text": "like that. Um and all the systems were",
+    "start": 2202.96,
+    "duration": 4.879
+  },
+  {
+    "text": "kind of competing with each other. uh",
+    "start": 2205.28,
+    "duration": 3.76
+  },
+  {
+    "text": "they weren't correct in all the",
+    "start": 2207.839,
+    "duration": 2.721
+  },
+  {
+    "text": "threading scenarios and there's multiple",
+    "start": 2209.04,
+    "duration": 2.799
+  },
+  {
+    "text": "ways that the engine runs threads across",
+    "start": 2210.56,
+    "duration": 2.48
+  },
+  {
+    "text": "all the different platforms. So we",
+    "start": 2211.839,
+    "duration": 2.961
+  },
+  {
+    "text": "needed a system that um kind of brought",
+    "start": 2213.04,
+    "duration": 3.6
+  },
+  {
+    "text": "everything together and the archite",
+    "start": 2214.8,
+    "duration": 5.96
+  },
+  {
+    "text": "system is is what came out of that.",
+    "start": 2216.64,
+    "duration": 4.12
+  },
+  {
+    "text": "Uh so this is what they look like um in",
+    "start": 2221.44,
+    "duration": 3.679
+  },
+  {
+    "text": "insights. Uh you probably can't read",
+    "start": 2223.2,
+    "duration": 3.36
+  },
+  {
+    "text": "that on the slide, but the the area",
+    "start": 2225.119,
+    "duration": 3.201
+  },
+  {
+    "text": "that's highlighted with the brackets um",
+    "start": 2226.56,
+    "duration": 3.44
+  },
+  {
+    "text": "everything from the frame marker down is",
+    "start": 2228.32,
+    "duration": 7.039
+  },
+  {
+    "text": "a breadcrumb. And the breadcrumbs um",
+    "start": 2230.0,
+    "duration": 6.8
+  },
+  {
+    "text": "we tag certain areas of the renderer",
+    "start": 2235.359,
+    "duration": 2.961
+  },
+  {
+    "text": "with with certain names and then that",
+    "start": 2236.8,
+    "duration": 3.36
+  },
+  {
+    "text": "breadcrumb that same breadcrumb appears",
+    "start": 2238.32,
+    "duration": 3.92
+  },
+  {
+    "text": "everywhere that it can. Um so you'll see",
+    "start": 2240.16,
+    "duration": 3.12
+  },
+  {
+    "text": "them on the render thread, you'll see",
+    "start": 2242.24,
+    "duration": 3.04
+  },
+  {
+    "text": "them on parallel pass RDG execution,",
+    "start": 2243.28,
+    "duration": 3.28
+  },
+  {
+    "text": "you'll see them on the parallel",
+    "start": 2245.28,
+    "duration": 2.559
+  },
+  {
+    "text": "translate, you'll see them on the RHI",
+    "start": 2246.56,
+    "duration": 2.96
+  },
+  {
+    "text": "thread, you'll also see them on the GPU.",
+    "start": 2247.839,
+    "duration": 2.961
+  },
+  {
+    "text": "It's all the same marker all the way",
+    "start": 2249.52,
+    "duration": 3.44
+  },
+  {
+    "text": "through. Um, and this gives us some real",
+    "start": 2250.8,
+    "duration": 3.84
+  },
+  {
+    "text": "good context as to like what what a",
+    "start": 2252.96,
+    "duration": 2.96
+  },
+  {
+    "text": "thread is working on. Previously, you",
+    "start": 2254.64,
+    "duration": 2.959
+  },
+  {
+    "text": "just saw, oh, it's doing render graph",
+    "start": 2255.92,
+    "duration": 2.96
+  },
+  {
+    "text": "stuff, but you actually had no idea what",
+    "start": 2257.599,
+    "duration": 2.801
+  },
+  {
+    "text": "pass it was working on. If something's",
+    "start": 2258.88,
+    "duration": 2.959
+  },
+  {
+    "text": "really expensive, you have to kind of",
+    "start": 2260.4,
+    "duration": 4.959
+  },
+  {
+    "text": "profile with sampling or something. Um,",
+    "start": 2261.839,
+    "duration": 5.441
+  },
+  {
+    "text": "so these are in every build uh that has",
+    "start": 2265.359,
+    "duration": 4.0
+  },
+  {
+    "text": "that macro enabled with RHI breadcrumbs,",
+    "start": 2267.28,
+    "duration": 5.12
+  },
+  {
+    "text": "which in vanilla UE is uh every debug",
+    "start": 2269.359,
+    "duration": 5.201
+  },
+  {
+    "text": "and dev config build, but also builds",
+    "start": 2272.4,
+    "duration": 3.76
+  },
+  {
+    "text": "with the profile GPU command enabled.",
+    "start": 2274.56,
+    "duration": 3.12
+  },
+  {
+    "text": "There's some additional macros that can",
+    "start": 2276.16,
+    "duration": 3.12
+  },
+  {
+    "text": "turn that on in test or shipping. And",
+    "start": 2277.68,
+    "duration": 2.72
+  },
+  {
+    "text": "when you do that, you'll also get the",
+    "start": 2279.28,
+    "duration": 2.559
+  },
+  {
+    "text": "breadcrumb system as part of that",
+    "start": 2280.4,
+    "duration": 3.36
+  },
+  {
+    "text": "because uh profile GPU relies on the",
+    "start": 2281.839,
+    "duration": 5.121
+  },
+  {
+    "text": "breadcrumb system to work. Um and then",
+    "start": 2283.76,
+    "duration": 4.319
+  },
+  {
+    "text": "we also have this console variable",
+    "start": 2286.96,
+    "duration": 3.36
+  },
+  {
+    "text": "rdg.events.",
+    "start": 2288.079,
+    "duration": 4.961
+  },
+  {
+    "text": "Um this uh determines how much detail",
+    "start": 2290.32,
+    "duration": 4.24
+  },
+  {
+    "text": "render graph will emit to the breadcrumb",
+    "start": 2293.04,
+    "duration": 3.28
+  },
+  {
+    "text": "system. Obviously emitting all of the",
+    "start": 2294.56,
+    "duration": 3.76
+  },
+  {
+    "text": "detail all the time is is is more",
+    "start": 2296.32,
+    "duration": 4.0
+  },
+  {
+    "text": "expensive than not. Um so the default",
+    "start": 2298.32,
+    "duration": 3.6
+  },
+  {
+    "text": "value here will only emit the highle",
+    "start": 2300.32,
+    "duration": 3.92
+  },
+  {
+    "text": "scopes things like scene base pass",
+    "start": 2301.92,
+    "duration": 4.24
+  },
+  {
+    "text": "processing that kind of thing. Um but",
+    "start": 2304.24,
+    "duration": 2.96
+  },
+  {
+    "text": "you can turn this all the way up to",
+    "start": 2306.16,
+    "duration": 2.56
+  },
+  {
+    "text": "number three. And when you get to level",
+    "start": 2307.2,
+    "duration": 3.2
+  },
+  {
+    "text": "three, you get all of the scopes, all of",
+    "start": 2308.72,
+    "duration": 3.28
+  },
+  {
+    "text": "the info, all the pass names, including",
+    "start": 2310.4,
+    "duration": 3.52
+  },
+  {
+    "text": "all their parameters and everything. Um,",
+    "start": 2312.0,
+    "duration": 3.599
+  },
+  {
+    "text": "and that's that's actually implicitly",
+    "start": 2313.92,
+    "duration": 3.12
+  },
+  {
+    "text": "what happens when you do a profile GPU",
+    "start": 2315.599,
+    "duration": 3.121
+  },
+  {
+    "text": "is it internally turns that C bar kind",
+    "start": 2317.04,
+    "duration": 3.36
+  },
+  {
+    "text": "of to three. Um, and you get everything",
+    "start": 2318.72,
+    "duration": 5.72
+  },
+  {
+    "text": "in a profile GPU capture.",
+    "start": 2320.4,
+    "duration": 4.04
+  },
+  {
+    "text": "Uh, and so this is what they actually",
+    "start": 2325.2,
+    "duration": 3.84
+  },
+  {
+    "text": "look like in code. Um, and like I said,",
+    "start": 2326.48,
+    "duration": 4.24
+  },
+  {
+    "text": "because this was kind of a drawing",
+    "start": 2329.04,
+    "duration": 3.12
+  },
+  {
+    "text": "together of multiple systems that that",
+    "start": 2330.72,
+    "duration": 3.2
+  },
+  {
+    "text": "work differently, there's multiple",
+    "start": 2332.16,
+    "duration": 3.84
+  },
+  {
+    "text": "scopes, uh, scope macros here that all",
+    "start": 2333.92,
+    "duration": 3.52
+  },
+  {
+    "text": "feed into the same system now. So the",
+    "start": 2336.0,
+    "duration": 2.8
+  },
+  {
+    "text": "implementation of these macros all feed",
+    "start": 2337.44,
+    "duration": 3.919
+  },
+  {
+    "text": "to the to the same place now. Um so",
+    "start": 2338.8,
+    "duration": 4.0
+  },
+  {
+    "text": "around the renderer you'll see the scope",
+    "start": 2341.359,
+    "duration": 2.72
+  },
+  {
+    "text": "drawer events that have been there for",
+    "start": 2342.8,
+    "duration": 3.6
+  },
+  {
+    "text": "for a long time. Um and then in the",
+    "start": 2344.079,
+    "duration": 3.841
+  },
+  {
+    "text": "lower left is the actual is the new",
+    "start": 2346.4,
+    "duration": 3.199
+  },
+  {
+    "text": "breadcrumb macro that this all kind of",
+    "start": 2347.92,
+    "duration": 4.64
+  },
+  {
+    "text": "feeds into. Um and that macro is capable",
+    "start": 2349.599,
+    "duration": 4.561
+  },
+  {
+    "text": "of taking either an RHI command list or",
+    "start": 2352.56,
+    "duration": 3.6
+  },
+  {
+    "text": "an RHI context. So you'll actually see",
+    "start": 2354.16,
+    "duration": 4.56
+  },
+  {
+    "text": "some of these inside platform RHIs. Now",
+    "start": 2356.16,
+    "duration": 4.72
+  },
+  {
+    "text": "um the example on the slide there is uh",
+    "start": 2358.72,
+    "duration": 4.72
+  },
+  {
+    "text": "D3D12's defrag pass that happens at the",
+    "start": 2360.88,
+    "duration": 4.479
+  },
+  {
+    "text": "beginning of the frame. um we can now",
+    "start": 2363.44,
+    "duration": 3.84
+  },
+  {
+    "text": "label stuff that is specific to the",
+    "start": 2365.359,
+    "duration": 3.681
+  },
+  {
+    "text": "platform RHI in the same breadcrumb",
+    "start": 2367.28,
+    "duration": 2.96
+  },
+  {
+    "text": "system and then you'll get the markers",
+    "start": 2369.04,
+    "duration": 2.24
+  },
+  {
+    "text": "everywhere you'll get them in insights",
+    "start": 2370.24,
+    "duration": 4.08
+  },
+  {
+    "text": "you'll get them in pix and so on um and",
+    "start": 2371.28,
+    "duration": 5.12
+  },
+  {
+    "text": "then the ones on the right render graph",
+    "start": 2374.32,
+    "duration": 3.44
+  },
+  {
+    "text": "uh the one at the top the event scopes",
+    "start": 2376.4,
+    "duration": 2.56
+  },
+  {
+    "text": "are the ones that you get by default",
+    "start": 2377.76,
+    "duration": 3.12
+  },
+  {
+    "text": "with the events greater than or equal to",
+    "start": 2378.96,
+    "duration": 4.0
+  },
+  {
+    "text": "one um and then the lower one the pass",
+    "start": 2380.88,
+    "duration": 3.12
+  },
+  {
+    "text": "names are the ones that you'll see when",
+    "start": 2382.96,
+    "duration": 2.48
+  },
+  {
+    "text": "you when you turn the full the full",
+    "start": 2384.0,
+    "duration": 4.68
+  },
+  {
+    "text": "system on",
+    "start": 2385.44,
+    "duration": 3.24
+  },
+  {
+    "text": "so this is a kind of quick overview of",
+    "start": 2389.92,
+    "duration": 3.12
+  },
+  {
+    "text": "how the breadcrumb system is it works",
+    "start": 2391.44,
+    "duration": 4.0
+  },
+  {
+    "text": "like the operation of it. Um, as we're",
+    "start": 2393.04,
+    "duration": 4.24
+  },
+  {
+    "text": "recording RHI command lists, we build a",
+    "start": 2395.44,
+    "duration": 4.32
+  },
+  {
+    "text": "tree of uh RHI breadcrumb nodes that",
+    "start": 2397.28,
+    "duration": 4.24
+  },
+  {
+    "text": "refer to the to the actual breadcrumb",
+    "start": 2399.76,
+    "duration": 3.52
+  },
+  {
+    "text": "names themselves. Um, and all of that",
+    "start": 2401.52,
+    "duration": 3.44
+  },
+  {
+    "text": "code is crossplatform. Um, so it works",
+    "start": 2403.28,
+    "duration": 4.72
+  },
+  {
+    "text": "works on all of our platforms. Um, and",
+    "start": 2404.96,
+    "duration": 5.44
+  },
+  {
+    "text": "since RHI command lists are uh they can",
+    "start": 2408.0,
+    "duration": 3.92
+  },
+  {
+    "text": "be recorded like with the mestreamer,",
+    "start": 2410.4,
+    "duration": 2.8
+  },
+  {
+    "text": "they can be recorded on entirely",
+    "start": 2411.92,
+    "duration": 2.32
+  },
+  {
+    "text": "separate threads that are separate from",
+    "start": 2413.2,
+    "duration": 3.68
+  },
+  {
+    "text": "the render thread. Um each RHI command",
+    "start": 2414.24,
+    "duration": 5.359
+  },
+  {
+    "text": "list itself uh builds a subree of nodes",
+    "start": 2416.88,
+    "duration": 4.8
+  },
+  {
+    "text": "um as it walks in and out of the scopes",
+    "start": 2419.599,
+    "duration": 4.081
+  },
+  {
+    "text": "and then at the dispatch time when uh",
+    "start": 2421.68,
+    "duration": 3.52
+  },
+  {
+    "text": "when the dispatch thread acquires that",
+    "start": 2423.68,
+    "duration": 3.679
+  },
+  {
+    "text": "command list for submission um it gets",
+    "start": 2425.2,
+    "duration": 3.68
+  },
+  {
+    "text": "attached to the root tree which then",
+    "start": 2427.359,
+    "duration": 3.76
+  },
+  {
+    "text": "means that those sub trees appear in the",
+    "start": 2428.88,
+    "duration": 4.32
+  },
+  {
+    "text": "overall kind of overarching tree for the",
+    "start": 2431.119,
+    "duration": 3.361
+  },
+  {
+    "text": "whole frame and we get the full context",
+    "start": 2433.2,
+    "duration": 4.0
+  },
+  {
+    "text": "all the way up to the frame marker. Um",
+    "start": 2434.48,
+    "duration": 4.639
+  },
+  {
+    "text": "and we also do by capture of the format",
+    "start": 2437.2,
+    "duration": 4.32
+  },
+  {
+    "text": "args. Um, so the primary reason for this",
+    "start": 2439.119,
+    "duration": 4.401
+  },
+  {
+    "text": "is that we want to be able to to capture",
+    "start": 2441.52,
+    "duration": 3.599
+  },
+  {
+    "text": "all of the context like the there's a",
+    "start": 2443.52,
+    "duration": 2.96
+  },
+  {
+    "text": "marker at the beginning of the frame",
+    "start": 2445.119,
+    "duration": 3.441
+  },
+  {
+    "text": "which which is frame n where n is an",
+    "start": 2446.48,
+    "duration": 4.16
+  },
+  {
+    "text": "integer. Um, and rather than just",
+    "start": 2448.56,
+    "duration": 3.44
+  },
+  {
+    "text": "calling it frame and not having that",
+    "start": 2450.64,
+    "duration": 3.12
+  },
+  {
+    "text": "that extra context, we capture the like",
+    "start": 2452.0,
+    "duration": 3.28
+  },
+  {
+    "text": "the four bytes for the integer and the",
+    "start": 2453.76,
+    "duration": 3.52
+  },
+  {
+    "text": "pointer to the to the format string. And",
+    "start": 2455.28,
+    "duration": 3.12
+  },
+  {
+    "text": "then it means that we only have to do",
+    "start": 2457.28,
+    "duration": 2.72
+  },
+  {
+    "text": "the formatting when we need the actual",
+    "start": 2458.4,
+    "duration": 3.52
+  },
+  {
+    "text": "name, which uh for the most part if",
+    "start": 2460.0,
+    "duration": 3.119
+  },
+  {
+    "text": "you're not actually running insights, if",
+    "start": 2461.92,
+    "duration": 2.88
+  },
+  {
+    "text": "you're not running uh like a snapshot",
+    "start": 2463.119,
+    "duration": 3.2
+  },
+  {
+    "text": "that frame of profile GPU, we don't do",
+    "start": 2464.8,
+    "duration": 2.799
+  },
+  {
+    "text": "the string formatting. So it's a lot",
+    "start": 2466.319,
+    "duration": 4.321
+  },
+  {
+    "text": "cheaper. Um",
+    "start": 2467.599,
+    "duration": 4.321
+  },
+  {
+    "text": "so there's a handful of functions on the",
+    "start": 2470.64,
+    "duration": 2.88
+  },
+  {
+    "text": "archite command list uh which you don't",
+    "start": 2471.92,
+    "duration": 2.72
+  },
+  {
+    "text": "need to call directly but I'll just",
+    "start": 2473.52,
+    "duration": 3.28
+  },
+  {
+    "text": "mention them here for um uh for",
+    "start": 2474.64,
+    "duration": 4.959
+  },
+  {
+    "text": "completion sake. Um",
+    "start": 2476.8,
+    "duration": 5.519
+  },
+  {
+    "text": "so uh begin and end uh breadcrumb g CPU",
+    "start": 2479.599,
+    "duration": 5.281
+  },
+  {
+    "text": "and begin and end uh breadcrumb GPU. Uh",
+    "start": 2482.319,
+    "duration": 4.561
+  },
+  {
+    "text": "the CPU functions are used for inserting",
+    "start": 2484.88,
+    "duration": 3.36
+  },
+  {
+    "text": "the insights markers. This is how we get",
+    "start": 2486.88,
+    "duration": 3.6
+  },
+  {
+    "text": "them into insights. Um it's also used",
+    "start": 2488.24,
+    "duration": 3.839
+  },
+  {
+    "text": "for CPU crash reporting. This is",
+    "start": 2490.48,
+    "duration": 4.08
+  },
+  {
+    "text": "something really cool now is that uh if",
+    "start": 2492.079,
+    "duration": 4.081
+  },
+  {
+    "text": "you crash like in previous versions of",
+    "start": 2494.56,
+    "duration": 3.84
+  },
+  {
+    "text": "the engine if you crash uh on a thread",
+    "start": 2496.16,
+    "duration": 4.08
+  },
+  {
+    "text": "that is inside a render graph pass just",
+    "start": 2498.4,
+    "duration": 4.4
+  },
+  {
+    "text": "a parallel uh pass generally the call",
+    "start": 2500.24,
+    "duration": 4.48
+  },
+  {
+    "text": "stack doesn't give you much information",
+    "start": 2502.8,
+    "duration": 3.36
+  },
+  {
+    "text": "um because the call stack just takes you",
+    "start": 2504.72,
+    "duration": 3.84
+  },
+  {
+    "text": "back to some execute task that came from",
+    "start": 2506.16,
+    "duration": 4.32
+  },
+  {
+    "text": "the the uh the task graph you have no",
+    "start": 2508.56,
+    "duration": 3.36
+  },
+  {
+    "text": "idea what pass it was or anything like",
+    "start": 2510.48,
+    "duration": 3.44
+  },
+  {
+    "text": "that unless uh it's particularly a",
+    "start": 2511.92,
+    "duration": 3.6
+  },
+  {
+    "text": "problem for compute shader passes",
+    "start": 2513.92,
+    "duration": 4.08
+  },
+  {
+    "text": "because comput shader passes uh there's",
+    "start": 2515.52,
+    "duration": 4.799
+  },
+  {
+    "text": "like a general add shader pass function",
+    "start": 2518.0,
+    "duration": 3.92
+  },
+  {
+    "text": "and you get no context from the from the",
+    "start": 2520.319,
+    "duration": 5.04
+  },
+  {
+    "text": "call stack. Um so now when we crash we",
+    "start": 2521.92,
+    "duration": 5.84
+  },
+  {
+    "text": "can dump into the crash report um the",
+    "start": 2525.359,
+    "duration": 3.841
+  },
+  {
+    "text": "stack of breadcrumbs from the thread",
+    "start": 2527.76,
+    "duration": 2.8
+  },
+  {
+    "text": "that crashed which gives you all that",
+    "start": 2529.2,
+    "duration": 3.919
+  },
+  {
+    "text": "extra extra information. Likewise for",
+    "start": 2530.56,
+    "duration": 3.759
+  },
+  {
+    "text": "the parallel translate if you crash",
+    "start": 2533.119,
+    "duration": 2.561
+  },
+  {
+    "text": "inside the RHR you know where in the",
+    "start": 2534.319,
+    "duration": 4.161
+  },
+  {
+    "text": "frame you came from",
+    "start": 2535.68,
+    "duration": 4.96
+  },
+  {
+    "text": "and the CPU functions uh are the ones",
+    "start": 2538.48,
+    "duration": 3.52
+  },
+  {
+    "text": "that build the tree. They're the ones",
+    "start": 2540.64,
+    "duration": 2.24
+  },
+  {
+    "text": "that kind of do all all of the",
+    "start": 2542.0,
+    "duration": 2.24
+  },
+  {
+    "text": "bookkeeping and everything. It's quite",
+    "start": 2542.88,
+    "duration": 2.719
+  },
+  {
+    "text": "complicated because we have lots of",
+    "start": 2544.24,
+    "duration": 2.48
+  },
+  {
+    "text": "different uh threading modes in the",
+    "start": 2545.599,
+    "duration": 2.561
+  },
+  {
+    "text": "engine. So it might be quite hard to",
+    "start": 2546.72,
+    "duration": 2.48
+  },
+  {
+    "text": "wrap your head around. It certainly took",
+    "start": 2548.16,
+    "duration": 2.8
+  },
+  {
+    "text": "a while to write. Um but that's where",
+    "start": 2549.2,
+    "duration": 4.8
+  },
+  {
+    "text": "all the bookkeeping is. Um and then the",
+    "start": 2550.96,
+    "duration": 4.32
+  },
+  {
+    "text": "GPU functions are the ones that actually",
+    "start": 2554.0,
+    "duration": 3.52
+  },
+  {
+    "text": "go and insert pix markers uh render dot",
+    "start": 2555.28,
+    "duration": 4.16
+  },
+  {
+    "text": "markers and the the insights GPU markers",
+    "start": 2557.52,
+    "duration": 4.319
+  },
+  {
+    "text": "that we see now. Um and we could also uh",
+    "start": 2559.44,
+    "duration": 4.32
+  },
+  {
+    "text": "we also have a new system um as a result",
+    "start": 2561.839,
+    "duration": 5.961
+  },
+  {
+    "text": "of this for GPU crash debugging.",
+    "start": 2563.76,
+    "duration": 4.04
+  },
+  {
+    "text": "And so this is what our new GPU crash",
+    "start": 2568.319,
+    "duration": 4.561
+  },
+  {
+    "text": "debugging system uh looks like. Uh you",
+    "start": 2570.0,
+    "duration": 4.48
+  },
+  {
+    "text": "can turn this on with any of those",
+    "start": 2572.88,
+    "duration": 4.08
+  },
+  {
+    "text": "options at the top there. um - GPU crash",
+    "start": 2574.48,
+    "duration": 4.48
+  },
+  {
+    "text": "debugging- GPU breadcrumbs on the",
+    "start": 2576.96,
+    "duration": 4.48
+  },
+  {
+    "text": "command line or the equivalent CRS which",
+    "start": 2578.96,
+    "duration": 4.48
+  },
+  {
+    "text": "do the same thing R.GPUp crash debugging",
+    "start": 2581.44,
+    "duration": 4.639
+  },
+  {
+    "text": "one R.GP crash debugging breadcrumbs",
+    "start": 2583.44,
+    "duration": 5.6
+  },
+  {
+    "text": "one. Um the first one there is like a a",
+    "start": 2586.079,
+    "duration": 4.561
+  },
+  {
+    "text": "larger features thing that turns on a",
+    "start": 2589.04,
+    "duration": 3.12
+  },
+  {
+    "text": "lot of systems whereas the the lower one",
+    "start": 2590.64,
+    "duration": 2.8
+  },
+  {
+    "text": "is just specifically turning on the",
+    "start": 2592.16,
+    "duration": 4.159
+  },
+  {
+    "text": "system that you see on the slide. Um,",
+    "start": 2593.44,
+    "duration": 5.84
+  },
+  {
+    "text": "and the way this works, uh, as we, uh,",
+    "start": 2596.319,
+    "duration": 4.481
+  },
+  {
+    "text": "encounter breadcrumbs, as we're, as",
+    "start": 2599.28,
+    "duration": 3.12
+  },
+  {
+    "text": "we're replaying them into the into R",
+    "start": 2600.8,
+    "duration": 3.12
+  },
+  {
+    "text": "context to produce the GPU command",
+    "start": 2602.4,
+    "duration": 3.52
+  },
+  {
+    "text": "lists, um, every time we enter a",
+    "start": 2603.92,
+    "duration": 3.84
+  },
+  {
+    "text": "breadcrumb scope and exit a breadcrumb",
+    "start": 2605.92,
+    "duration": 3.84
+  },
+  {
+    "text": "scope, we insert, uh, on D312, for",
+    "start": 2607.76,
+    "duration": 3.839
+  },
+  {
+    "text": "example, we use write buffer immediate",
+    "start": 2609.76,
+    "duration": 3.92
+  },
+  {
+    "text": "to insert, uh, an integer, right, into",
+    "start": 2611.599,
+    "duration": 4.321
+  },
+  {
+    "text": "the command list, uh, stream and those",
+    "start": 2613.68,
+    "duration": 3.679
+  },
+  {
+    "text": "integers get written to a buffer that",
+    "start": 2615.92,
+    "duration": 3.199
+  },
+  {
+    "text": "persists even if the GPU crashes.",
+    "start": 2617.359,
+    "duration": 3.121
+  },
+  {
+    "text": "There's some mechanism in Windows that",
+    "start": 2619.119,
+    "duration": 3.841
+  },
+  {
+    "text": "allows you to get that data back. Um so",
+    "start": 2620.48,
+    "duration": 4.639
+  },
+  {
+    "text": "what we can do is basically the GPU is",
+    "start": 2622.96,
+    "duration": 4.0
+  },
+  {
+    "text": "is marking how far through the frame it",
+    "start": 2625.119,
+    "duration": 3.761
+  },
+  {
+    "text": "got the whole time it's running and then",
+    "start": 2626.96,
+    "duration": 3.52
+  },
+  {
+    "text": "on the RI interrupt thread when we see",
+    "start": 2628.88,
+    "duration": 4.719
+  },
+  {
+    "text": "that the GPU has crashed um we can we",
+    "start": 2630.48,
+    "duration": 4.639
+  },
+  {
+    "text": "get we get the device removed error we",
+    "start": 2633.599,
+    "duration": 3.841
+  },
+  {
+    "text": "jump into the crash handler um and we",
+    "start": 2635.119,
+    "duration": 4.24
+  },
+  {
+    "text": "can pull back those integer values and",
+    "start": 2637.44,
+    "duration": 3.679
+  },
+  {
+    "text": "then look through the list of work that",
+    "start": 2639.359,
+    "duration": 3.281
+  },
+  {
+    "text": "we know was in flight on the GPU that we",
+    "start": 2641.119,
+    "duration": 3.521
+  },
+  {
+    "text": "haven't completed yet find the",
+    "start": 2642.64,
+    "duration": 3.679
+  },
+  {
+    "text": "corresponding range of of markers and",
+    "start": 2644.64,
+    "duration": 3.84
+  },
+  {
+    "text": "then dump that to the log. Um, and",
+    "start": 2646.319,
+    "duration": 3.76
+  },
+  {
+    "text": "again, because we're multiGPU,",
+    "start": 2648.48,
+    "duration": 3.119
+  },
+  {
+    "text": "multiqaware, you'll get one of these,",
+    "start": 2650.079,
+    "duration": 5.121
+  },
+  {
+    "text": "one of these dumps per Q. Um, and so the",
+    "start": 2651.599,
+    "duration": 5.681
+  },
+  {
+    "text": "example here was some particular, it's",
+    "start": 2655.2,
+    "duration": 3.04
+  },
+  {
+    "text": "really handy. When I was putting these",
+    "start": 2657.28,
+    "duration": 2.319
+  },
+  {
+    "text": "slides together, someone had a GPU crash",
+    "start": 2658.24,
+    "duration": 3.76
+  },
+  {
+    "text": "in in in Lumen. Uh, so I just, I just",
+    "start": 2659.599,
+    "duration": 4.0
+  },
+  {
+    "text": "stole the log and then could dump it",
+    "start": 2662.0,
+    "duration": 3.839
+  },
+  {
+    "text": "into into here. Um, we do have a a",
+    "start": 2663.599,
+    "duration": 3.841
+  },
+  {
+    "text": "debugg",
+    "start": 2665.839,
+    "duration": 3.52
+  },
+  {
+    "text": "like test command, but it's a bit of a",
+    "start": 2667.44,
+    "duration": 3.679
+  },
+  {
+    "text": "it's like a kind of a contrived example.",
+    "start": 2669.359,
+    "duration": 3.841
+  },
+  {
+    "text": "You just see it's like GPU crash debug",
+    "start": 2671.119,
+    "duration": 3.681
+  },
+  {
+    "text": "hang. That's the pass that crashed.",
+    "start": 2673.2,
+    "duration": 4.399
+  },
+  {
+    "text": "Surprise, surprise. Um, so in this case,",
+    "start": 2674.8,
+    "duration": 4.16
+  },
+  {
+    "text": "uh, it was something in Lumen that was",
+    "start": 2677.599,
+    "duration": 3.601
+  },
+  {
+    "text": "crashing. Um, and the likely culprits",
+    "start": 2678.96,
+    "duration": 3.28
+  },
+  {
+    "text": "are going to be the ones that are the",
+    "start": 2681.2,
+    "duration": 2.48
+  },
+  {
+    "text": "most indented nodes that are still",
+    "start": 2682.24,
+    "duration": 2.879
+  },
+  {
+    "text": "marked as active, which we we've",
+    "start": 2683.68,
+    "duration": 4.72
+  },
+  {
+    "text": "highlighted in orange here. Um, but the",
+    "start": 2685.119,
+    "duration": 5.2
+  },
+  {
+    "text": "one thing to to be aware of, oh yeah, so",
+    "start": 2688.4,
+    "duration": 3.76
+  },
+  {
+    "text": "the and the the stuff that's highlighted",
+    "start": 2690.319,
+    "duration": 3.921
+  },
+  {
+    "text": "in gray there, um, we know that we've",
+    "start": 2692.16,
+    "duration": 3.439
+  },
+  {
+    "text": "not started that because the GPU hasn't",
+    "start": 2694.24,
+    "duration": 2.72
+  },
+  {
+    "text": "the command processor hasn't emitted",
+    "start": 2695.599,
+    "duration": 2.961
+  },
+  {
+    "text": "that break marker in submission order",
+    "start": 2696.96,
+    "duration": 3.68
+  },
+  {
+    "text": "yet. So we know that's not the culprit.",
+    "start": 2698.56,
+    "duration": 4.72
+  },
+  {
+    "text": "It's something before then. Um, one",
+    "start": 2700.64,
+    "duration": 4.959
+  },
+  {
+    "text": "thing to be aware of is that some uh",
+    "start": 2703.28,
+    "duration": 4.4
+  },
+  {
+    "text": "some hardware can report completion of",
+    "start": 2705.599,
+    "duration": 3.52
+  },
+  {
+    "text": "work even though it's not actually",
+    "start": 2707.68,
+    "duration": 3.28
+  },
+  {
+    "text": "completed. There can be like memory",
+    "start": 2709.119,
+    "duration": 3.121
+  },
+  {
+    "text": "operations that are still in flight that",
+    "start": 2710.96,
+    "duration": 2.56
+  },
+  {
+    "text": "might still cause a page fault on the",
+    "start": 2712.24,
+    "duration": 4.24
+  },
+  {
+    "text": "GPU. Um, so some of those nodes there",
+    "start": 2713.52,
+    "duration": 5.2
+  },
+  {
+    "text": "that are marked as finished, take that",
+    "start": 2716.48,
+    "duration": 3.92
+  },
+  {
+    "text": "with a bit of a pinch of salt. Um, and",
+    "start": 2718.72,
+    "duration": 3.84
+  },
+  {
+    "text": "maybe gather multiple repros and see if",
+    "start": 2720.4,
+    "duration": 4.8
+  },
+  {
+    "text": "there's a pattern of um, whether or not",
+    "start": 2722.56,
+    "duration": 4.88
+  },
+  {
+    "text": "like that that upper bound changes",
+    "start": 2725.2,
+    "duration": 5.72
+  },
+  {
+    "text": "changes as well.",
+    "start": 2727.44,
+    "duration": 3.48
+  },
+  {
+    "text": "Okay, so that's pretty much everything.",
+    "start": 2731.28,
+    "duration": 3.36
+  },
+  {
+    "text": "I hope uh all the information here helps",
+    "start": 2733.119,
+    "duration": 3.601
+  },
+  {
+    "text": "you guys with uh profiling your games",
+    "start": 2734.64,
+    "duration": 3.52
+  },
+  {
+    "text": "and and and resolving all of your",
+    "start": 2736.72,
+    "duration": 4.32
+  },
+  {
+    "text": "horrible uh CPU and GPU per bottlenecks.",
+    "start": 2738.16,
+    "duration": 4.08
+  },
+  {
+    "text": "Uh, thank you very much and I'd like to",
+    "start": 2741.04,
+    "duration": 5.079
+  },
+  {
+    "text": "open the floor to Q&A.",
+    "start": 2742.24,
+    "duration": 3.879
+  }
+]

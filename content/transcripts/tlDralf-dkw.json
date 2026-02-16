@@ -1,0 +1,5787 @@
+[
+  {
+    "text": "Hello. Uh, I've come from the UK to",
+    "start": 1.6,
+    "duration": 4.8
+  },
+  {
+    "text": "speak to you today. Uh, the last time I",
+    "start": 4.24,
+    "duration": 3.28
+  },
+  {
+    "text": "was in San Francisco, actually, it",
+    "start": 6.4,
+    "duration": 2.4
+  },
+  {
+    "text": "rained all week, so it's been really",
+    "start": 7.52,
+    "duration": 3.92
+  },
+  {
+    "text": "nice to have some sunshine. Um, which",
+    "start": 8.8,
+    "duration": 4.24
+  },
+  {
+    "text": "California is obviously famous for. Um,",
+    "start": 11.44,
+    "duration": 3.92
+  },
+  {
+    "text": "I'm a software engineer by trade. Uh, I",
+    "start": 13.04,
+    "duration": 3.68
+  },
+  {
+    "text": "work for Epic Games, or more",
+    "start": 15.36,
+    "duration": 3.04
+  },
+  {
+    "text": "specifically, the kids web services team",
+    "start": 16.72,
+    "duration": 4.16
+  },
+  {
+    "text": "at Epic Games. And today I'm going to be",
+    "start": 18.4,
+    "duration": 4.24
+  },
+  {
+    "text": "talking to you about how we ensure our",
+    "start": 20.88,
+    "duration": 4.08
+  },
+  {
+    "text": "services can scale to meet the demands",
+    "start": 22.64,
+    "duration": 3.68
+  },
+  {
+    "text": "of some of the biggest digital",
+    "start": 24.96,
+    "duration": 3.68
+  },
+  {
+    "text": "experiences in the world, including our",
+    "start": 26.32,
+    "duration": 3.92
+  },
+  {
+    "text": "very own Fortnite, which you may have",
+    "start": 28.64,
+    "duration": 3.32
+  },
+  {
+    "text": "heard",
+    "start": 30.24,
+    "duration": 5.2
+  },
+  {
+    "text": "of. So Kids Web Services, or KWS for",
+    "start": 31.96,
+    "duration": 5.72
+  },
+  {
+    "text": "short, as we call it, is a team inside",
+    "start": 35.44,
+    "duration": 4.32
+  },
+  {
+    "text": "the Epic Games ecosystem, and our",
+    "start": 37.68,
+    "duration": 3.6
+  },
+  {
+    "text": "mission is to make the internet safer",
+    "start": 39.76,
+    "duration": 4.16
+  },
+  {
+    "text": "for kids. We build and maintain a suite",
+    "start": 41.28,
+    "duration": 5.52
+  },
+  {
+    "text": "of services to help developers keep kids",
+    "start": 43.92,
+    "duration": 5.799
+  },
+  {
+    "text": "safe in online experiences.",
+    "start": 46.8,
+    "duration": 5.279
+  },
+  {
+    "text": "Our products are mostly used in gaming,",
+    "start": 49.719,
+    "duration": 4.041
+  },
+  {
+    "text": "but they're practical applications",
+    "start": 52.079,
+    "duration": 3.921
+  },
+  {
+    "text": "across many digital environments. And",
+    "start": 53.76,
+    "duration": 3.84
+  },
+  {
+    "text": "the KWS products I'm going to be talking",
+    "start": 56.0,
+    "duration": 4.079
+  },
+  {
+    "text": "about today are our parent verification",
+    "start": 57.6,
+    "duration": 4.4
+  },
+  {
+    "text": "service and our content management",
+    "start": 60.079,
+    "duration": 4.001
+  },
+  {
+    "text": "service. And together, these form the",
+    "start": 62.0,
+    "duration": 4.56
+  },
+  {
+    "text": "backbone of the KWS offering and are",
+    "start": 64.08,
+    "duration": 4.56
+  },
+  {
+    "text": "great examples on which to base a talk",
+    "start": 66.56,
+    "duration": 4.48
+  },
+  {
+    "text": "around the challenges and opportunities",
+    "start": 68.64,
+    "duration": 4.28
+  },
+  {
+    "text": "of",
+    "start": 71.04,
+    "duration": 4.96
+  },
+  {
+    "text": "scaling. So firstly, a caveat. We run a",
+    "start": 72.92,
+    "duration": 4.6
+  },
+  {
+    "text": "microservices environment or",
+    "start": 76.0,
+    "duration": 4.24
+  },
+  {
+    "text": "architecture out of AWS. A lot of the",
+    "start": 77.52,
+    "duration": 3.919
+  },
+  {
+    "text": "things I'm going to talk about in this",
+    "start": 80.24,
+    "duration": 2.96
+  },
+  {
+    "text": "session uh will make a lot more sense",
+    "start": 81.439,
+    "duration": 3.68
+  },
+  {
+    "text": "based on that understanding. Um there",
+    "start": 83.2,
+    "duration": 3.2
+  },
+  {
+    "text": "are of course other ways to do it, but",
+    "start": 85.119,
+    "duration": 3.241
+  },
+  {
+    "text": "this is how we",
+    "start": 86.4,
+    "duration": 4.48
+  },
+  {
+    "text": "roll. And just some context on our text",
+    "start": 88.36,
+    "duration": 4.68
+  },
+  {
+    "text": "choices. We use TypeScript front to",
+    "start": 90.88,
+    "duration": 5.44
+  },
+  {
+    "text": "back. Um our APIs are built on a very",
+    "start": 93.04,
+    "duration": 5.36
+  },
+  {
+    "text": "awesome NestJS web framework. If you",
+    "start": 96.32,
+    "duration": 5.04
+  },
+  {
+    "text": "haven't tried it, give it a go. Um we're",
+    "start": 98.4,
+    "duration": 4.719
+  },
+  {
+    "text": "Angular on the front end. And for",
+    "start": 101.36,
+    "duration": 4.719
+  },
+  {
+    "text": "persistence we've got Dynamo DB or if we",
+    "start": 103.119,
+    "duration": 4.32
+  },
+  {
+    "text": "need something more relational it'll be",
+    "start": 106.079,
+    "duration": 3.921
+  },
+  {
+    "text": "a Postgress database and then Reddis for",
+    "start": 107.439,
+    "duration": 5.521
+  },
+  {
+    "text": "caching CFKA for our event streaming and",
+    "start": 110.0,
+    "duration": 4.479
+  },
+  {
+    "text": "as I said we operate a microservices",
+    "start": 112.96,
+    "duration": 3.04
+  },
+  {
+    "text": "architecture so with Docker and",
+    "start": 114.479,
+    "duration": 4.721
+  },
+  {
+    "text": "Kubernetes under the",
+    "start": 116.0,
+    "duration": 3.2
+  },
+  {
+    "text": "hood. So in terms of partners using our",
+    "start": 119.64,
+    "duration": 4.92
+  },
+  {
+    "text": "platforms all of EP Epic's first party",
+    "start": 122.079,
+    "duration": 6.081
+  },
+  {
+    "text": "titles use KWS services. So, Fortnite,",
+    "start": 124.56,
+    "duration": 5.679
+  },
+  {
+    "text": "Lego Fortnite, Odyssey, I got Rocket",
+    "start": 128.16,
+    "duration": 4.799
+  },
+  {
+    "text": "League, Four Guys. And our platform is",
+    "start": 130.239,
+    "duration": 4.481
+  },
+  {
+    "text": "also open to third party developers as",
+    "start": 132.959,
+    "duration": 4.321
+  },
+  {
+    "text": "well. And we do this for some of the",
+    "start": 134.72,
+    "duration": 5.36
+  },
+  {
+    "text": "largest account systems in the world.",
+    "start": 137.28,
+    "duration": 4.08
+  },
+  {
+    "text": "And I can't tell you which ones though",
+    "start": 140.08,
+    "duration": 3.28
+  },
+  {
+    "text": "cuz legal have forbidden me from sharing",
+    "start": 141.36,
+    "duration": 3.0
+  },
+  {
+    "text": "that",
+    "start": 143.36,
+    "duration": 2.959
+  },
+  {
+    "text": "information. Our platform is also",
+    "start": 144.36,
+    "duration": 4.68
+  },
+  {
+    "text": "entirely free. So, when we're done here,",
+    "start": 146.319,
+    "duration": 4.801
+  },
+  {
+    "text": "should you want to, um, you go away,",
+    "start": 149.04,
+    "duration": 3.6
+  },
+  {
+    "text": "create an account, log into our",
+    "start": 151.12,
+    "duration": 3.92
+  },
+  {
+    "text": "developer portal, fire up some of these",
+    "start": 152.64,
+    "duration": 4.16
+  },
+  {
+    "text": "services, configure them, get them",
+    "start": 155.04,
+    "duration": 3.279
+  },
+  {
+    "text": "running, test them, and get them in",
+    "start": 156.8,
+    "duration": 4.719
+  },
+  {
+    "text": "production absolutely free. As I said,",
+    "start": 158.319,
+    "duration": 4.401
+  },
+  {
+    "text": "our mission is to make the internet",
+    "start": 161.519,
+    "duration": 3.681
+  },
+  {
+    "text": "safer for kids. And by giving them away",
+    "start": 162.72,
+    "duration": 4.56
+  },
+  {
+    "text": "for free is one way that we can help",
+    "start": 165.2,
+    "duration": 4.96
+  },
+  {
+    "text": "achieve that mission.",
+    "start": 167.28,
+    "duration": 6.0
+  },
+  {
+    "text": "So scale within KWS is it's about",
+    "start": 170.16,
+    "duration": 6.079
+  },
+  {
+    "text": "meeting the needs of game as popular as",
+    "start": 173.28,
+    "duration": 5.599
+  },
+  {
+    "text": "Fortnite, but also ensuring that we",
+    "start": 176.239,
+    "duration": 4.801
+  },
+  {
+    "text": "support all of our partners equally as",
+    "start": 178.879,
+    "duration": 4.481
+  },
+  {
+    "text": "well from the smallest de dev house to",
+    "start": 181.04,
+    "duration": 4.8
+  },
+  {
+    "text": "the largest. But if we can scale for",
+    "start": 183.36,
+    "duration": 4.239
+  },
+  {
+    "text": "Fortnite, we're pretty confident we can",
+    "start": 185.84,
+    "duration": 4.16
+  },
+  {
+    "text": "scale for",
+    "start": 187.599,
+    "duration": 2.401
+  },
+  {
+    "text": "anyone. So what is scalability?",
+    "start": 195.56,
+    "duration": 5.399
+  },
+  {
+    "text": "Scalability is the property of a system",
+    "start": 199.28,
+    "duration": 4.239
+  },
+  {
+    "text": "to handle a growing amount of work. And",
+    "start": 200.959,
+    "duration": 4.321
+  },
+  {
+    "text": "for me, it's to do with the design and",
+    "start": 203.519,
+    "duration": 4.36
+  },
+  {
+    "text": "the architecture of a",
+    "start": 205.28,
+    "duration": 5.319
+  },
+  {
+    "text": "platform and its ability to avoid",
+    "start": 207.879,
+    "duration": 5.0
+  },
+  {
+    "text": "bottlenecks. And the idea of scalability",
+    "start": 210.599,
+    "duration": 5.161
+  },
+  {
+    "text": "is that as your services come under",
+    "start": 212.879,
+    "duration": 4.64
+  },
+  {
+    "text": "increased load, you want to be able to",
+    "start": 215.76,
+    "duration": 3.36
+  },
+  {
+    "text": "offer the same experience to your",
+    "start": 217.519,
+    "duration": 3.201
+  },
+  {
+    "text": "customers as when you're not under that",
+    "start": 219.12,
+    "duration": 3.759
+  },
+  {
+    "text": "load. And in a lot of cases, you won't",
+    "start": 220.72,
+    "duration": 4.159
+  },
+  {
+    "text": "know when you need to scale. It may come",
+    "start": 222.879,
+    "duration": 4.321
+  },
+  {
+    "text": "suddenly and without warning. But you",
+    "start": 224.879,
+    "duration": 4.0
+  },
+  {
+    "text": "want to be able to react to increases in",
+    "start": 227.2,
+    "duration": 3.48
+  },
+  {
+    "text": "traffic ideally",
+    "start": 228.879,
+    "duration": 4.0
+  },
+  {
+    "text": "automatically. Now at KWS we're quite",
+    "start": 230.68,
+    "duration": 4.76
+  },
+  {
+    "text": "lucky in that we know when a lot of our",
+    "start": 232.879,
+    "duration": 3.92
+  },
+  {
+    "text": "launches are going to happen. We have a",
+    "start": 235.44,
+    "duration": 4.079
+  },
+  {
+    "text": "big plan epic of when chapters go live,",
+    "start": 236.799,
+    "duration": 4.241
+  },
+  {
+    "text": "when seasons going live, when new IP is",
+    "start": 239.519,
+    "duration": 4.72
+  },
+  {
+    "text": "going live. So we know to a fine degree",
+    "start": 241.04,
+    "duration": 6.0
+  },
+  {
+    "text": "when a lot of our traffic will come. And",
+    "start": 244.239,
+    "duration": 4.321
+  },
+  {
+    "text": "for me scaling is about making every",
+    "start": 247.04,
+    "duration": 3.6
+  },
+  {
+    "text": "optimization you can in your platform.",
+    "start": 248.56,
+    "duration": 3.679
+  },
+  {
+    "text": "It's about marginal gains. And I'm going",
+    "start": 250.64,
+    "duration": 3.04
+  },
+  {
+    "text": "to say marginal gains a lot throughout",
+    "start": 252.239,
+    "duration": 4.161
+  },
+  {
+    "text": "this talk. And engineers can spend a lot",
+    "start": 253.68,
+    "duration": 4.839
+  },
+  {
+    "text": "of time doing many, many",
+    "start": 256.4,
+    "duration": 4.88
+  },
+  {
+    "text": "things. One of those things is scaling.",
+    "start": 258.519,
+    "duration": 4.641
+  },
+  {
+    "text": "But a spoiler",
+    "start": 261.28,
+    "duration": 4.199
+  },
+  {
+    "text": "alert, scaling is",
+    "start": 263.16,
+    "duration": 4.92
+  },
+  {
+    "text": "hard. Now, I've been a developer for 20",
+    "start": 265.479,
+    "duration": 6.401
+  },
+  {
+    "text": "years, and this stuff, it's still",
+    "start": 268.08,
+    "duration": 6.0
+  },
+  {
+    "text": "challenging. Like most services on the",
+    "start": 271.88,
+    "duration": 4.64
+  },
+  {
+    "text": "internet, KWS have downstream",
+    "start": 274.08,
+    "duration": 4.64
+  },
+  {
+    "text": "dependencies. We have services that talk",
+    "start": 276.52,
+    "duration": 4.04
+  },
+  {
+    "text": "to other people's services. They have",
+    "start": 278.72,
+    "duration": 3.919
+  },
+  {
+    "text": "services that have databases and talk to",
+    "start": 280.56,
+    "duration": 4.4
+  },
+  {
+    "text": "other services and so on and so forth in",
+    "start": 282.639,
+    "duration": 5.601
+  },
+  {
+    "text": "a big network, the internet. And now if",
+    "start": 284.96,
+    "duration": 5.16
+  },
+  {
+    "text": "we're serving a few thousand requests an",
+    "start": 288.24,
+    "duration": 4.28
+  },
+  {
+    "text": "hour, things are ticking over quite",
+    "start": 290.12,
+    "duration": 5.16
+  },
+  {
+    "text": "nicely. But then let's imagine a partner",
+    "start": 292.52,
+    "duration": 5.32
+  },
+  {
+    "text": "event goes live and suddenly they got a",
+    "start": 295.28,
+    "duration": 6.199
+  },
+  {
+    "text": "huge surge in traffic, new game",
+    "start": 297.84,
+    "duration": 6.4
+  },
+  {
+    "text": "launch. What does that look like?",
+    "start": 301.479,
+    "duration": 4.361
+  },
+  {
+    "text": "Suddenly we need a lot more capacity to",
+    "start": 304.24,
+    "duration": 4.16
+  },
+  {
+    "text": "support that. Now things like Kubernetes",
+    "start": 305.84,
+    "duration": 4.16
+  },
+  {
+    "text": "make scaling a lot easier than it used",
+    "start": 308.4,
+    "duration": 4.0
+  },
+  {
+    "text": "to be. There's still plenty of thinking",
+    "start": 310.0,
+    "duration": 3.8
+  },
+  {
+    "text": "to be",
+    "start": 312.4,
+    "duration": 3.68
+  },
+  {
+    "text": "done and yet we can still make things",
+    "start": 313.8,
+    "duration": 4.119
+  },
+  {
+    "text": "more complex. We've got databases in",
+    "start": 316.08,
+    "duration": 3.44
+  },
+  {
+    "text": "multiple regions that need to stay in",
+    "start": 317.919,
+    "duration": 3.441
+  },
+  {
+    "text": "sync. We've got events firing off",
+    "start": 319.52,
+    "duration": 3.44
+  },
+  {
+    "text": "telling other services that state has",
+    "start": 321.36,
+    "duration": 3.04
+  },
+  {
+    "text": "changed. We got caches that need",
+    "start": 322.96,
+    "duration": 4.079
+  },
+  {
+    "text": "clearing down and tidying up. And modern",
+    "start": 324.4,
+    "duration": 4.4
+  },
+  {
+    "text": "computers are incredibly clever and",
+    "start": 327.039,
+    "duration": 4.241
+  },
+  {
+    "text": "powerful machines. But no amount of",
+    "start": 328.8,
+    "duration": 4.239
+  },
+  {
+    "text": "compute is going to make this problem go",
+    "start": 331.28,
+    "duration": 4.759
+  },
+  {
+    "text": "away.",
+    "start": 333.039,
+    "duration": 3.0
+  },
+  {
+    "text": "So let's talk a bit more about",
+    "start": 336.639,
+    "duration": 5.201
+  },
+  {
+    "text": "KWS. So parent verification simply means",
+    "start": 338.6,
+    "duration": 5.319
+  },
+  {
+    "text": "that a parent or guardian has verified",
+    "start": 341.84,
+    "duration": 4.56
+  },
+  {
+    "text": "they are an adult and confirmed that",
+    "start": 343.919,
+    "duration": 4.641
+  },
+  {
+    "text": "they have parental responsibility for",
+    "start": 346.4,
+    "duration": 4.48
+  },
+  {
+    "text": "the child. Although the ultimate",
+    "start": 348.56,
+    "duration": 4.16
+  },
+  {
+    "text": "beneficiary of this process is the child",
+    "start": 350.88,
+    "duration": 3.2
+  },
+  {
+    "text": "because they get to play the game or use",
+    "start": 352.72,
+    "duration": 3.759
+  },
+  {
+    "text": "the experience, it's the parent who",
+    "start": 354.08,
+    "duration": 4.839
+  },
+  {
+    "text": "comes through the verification web",
+    "start": 356.479,
+    "duration": 4.72
+  },
+  {
+    "text": "flow. And so what does this flow look",
+    "start": 358.919,
+    "duration": 4.28
+  },
+  {
+    "text": "like? Well, let's take Fortnite as the",
+    "start": 361.199,
+    "duration": 4.641
+  },
+  {
+    "text": "example. You come in to to sign up for",
+    "start": 363.199,
+    "duration": 4.72
+  },
+  {
+    "text": "Fortnite and the first thing you see is",
+    "start": 365.84,
+    "duration": 4.079
+  },
+  {
+    "text": "you have to enter your date of birth and",
+    "start": 367.919,
+    "duration": 3.761
+  },
+  {
+    "text": "should you declare yourself as under the",
+    "start": 369.919,
+    "duration": 4.0
+  },
+  {
+    "text": "age of digital consent. The next thing",
+    "start": 371.68,
+    "duration": 3.519
+  },
+  {
+    "text": "you're asked to do is provide an email",
+    "start": 373.919,
+    "duration": 3.0
+  },
+  {
+    "text": "address of a parent or",
+    "start": 375.199,
+    "duration": 3.921
+  },
+  {
+    "text": "guardian. And an email will then get",
+    "start": 376.919,
+    "duration": 4.681
+  },
+  {
+    "text": "sent to the parent or guardian in which",
+    "start": 379.12,
+    "duration": 4.96
+  },
+  {
+    "text": "said parent will then click on an a link",
+    "start": 381.6,
+    "duration": 4.159
+  },
+  {
+    "text": "in the email which will take them",
+    "start": 384.08,
+    "duration": 3.839
+  },
+  {
+    "text": "straight through to the KWS parent",
+    "start": 385.759,
+    "duration": 4.321
+  },
+  {
+    "text": "verification flow where based on their",
+    "start": 387.919,
+    "duration": 3.441
+  },
+  {
+    "text": "geography and a few other factors,",
+    "start": 390.08,
+    "duration": 2.8
+  },
+  {
+    "text": "they'll be offered a number of",
+    "start": 391.36,
+    "duration": 3.679
+  },
+  {
+    "text": "verification methods with which to",
+    "start": 392.88,
+    "duration": 4.319
+  },
+  {
+    "text": "verify as an adult. In the US, for",
+    "start": 395.039,
+    "duration": 5.121
+  },
+  {
+    "text": "example, you can verify you're an adult",
+    "start": 397.199,
+    "duration": 6.401
+  },
+  {
+    "text": "with an SSN or a payment card. And once",
+    "start": 400.16,
+    "duration": 4.56
+  },
+  {
+    "text": "you've done that successfully, you're",
+    "start": 403.6,
+    "duration": 2.319
+  },
+  {
+    "text": "return back to the experience you come",
+    "start": 404.72,
+    "duration": 3.199
+  },
+  {
+    "text": "from. You can set up the permissions for",
+    "start": 405.919,
+    "duration": 3.441
+  },
+  {
+    "text": "your kid and they can go in and play the",
+    "start": 407.919,
+    "duration": 4.081
+  },
+  {
+    "text": "game. Job",
+    "start": 409.36,
+    "duration": 2.64
+  },
+  {
+    "text": "done. Now, given we have customers, our",
+    "start": 412.52,
+    "duration": 5.64
+  },
+  {
+    "text": "parents, my first piece of advice is to",
+    "start": 415.28,
+    "duration": 5.52
+  },
+  {
+    "text": "know your traffic patterns. Now, traffic",
+    "start": 418.16,
+    "duration": 4.8
+  },
+  {
+    "text": "wise, the verification API, we generally",
+    "start": 420.8,
+    "duration": 5.04
+  },
+  {
+    "text": "see around 500,000 requests a day. And",
+    "start": 422.96,
+    "duration": 5.84
+  },
+  {
+    "text": "this has peaks in the sort of early",
+    "start": 425.84,
+    "duration": 5.12
+  },
+  {
+    "text": "evening GMT time. And the rest of the",
+    "start": 428.8,
+    "duration": 3.6
+  },
+  {
+    "text": "day it kind of rolls along throughout",
+    "start": 430.96,
+    "duration": 3.12
+  },
+  {
+    "text": "the week like this in a sort of a soft",
+    "start": 432.4,
+    "duration": 4.32
+  },
+  {
+    "text": "wavy wavy pattern. And at the weekends",
+    "start": 434.08,
+    "duration": 4.399
+  },
+  {
+    "text": "you get more kids online playing games",
+    "start": 436.72,
+    "duration": 3.36
+  },
+  {
+    "text": "and we see higher peaks Friday,",
+    "start": 438.479,
+    "duration": 4.16
+  },
+  {
+    "text": "Saturday, Sunday. And then we may have a",
+    "start": 440.08,
+    "duration": 5.28
+  },
+  {
+    "text": "launch going on or whatever is happening",
+    "start": 442.639,
+    "duration": 4.96
+  },
+  {
+    "text": "and we'll see a lot higher peaks as",
+    "start": 445.36,
+    "duration": 4.16
+  },
+  {
+    "text": "well. And as we integrate more partners",
+    "start": 447.599,
+    "duration": 3.6
+  },
+  {
+    "text": "over time, we get more developers coming",
+    "start": 449.52,
+    "duration": 3.2
+  },
+  {
+    "text": "on board with us. Our base level of",
+    "start": 451.199,
+    "duration": 3.041
+  },
+  {
+    "text": "traffic is generally increasing over",
+    "start": 452.72,
+    "duration": 3.199
+  },
+  {
+    "text": "time as well. So we know our traffic",
+    "start": 454.24,
+    "duration": 4.079
+  },
+  {
+    "text": "pretty well.",
+    "start": 455.919,
+    "duration": 3.68
+  },
+  {
+    "text": "But one question you need to ask",
+    "start": 458.319,
+    "duration": 3.921
+  },
+  {
+    "text": "yourself about your traffic is how",
+    "start": 459.599,
+    "duration": 5.44
+  },
+  {
+    "text": "quickly do you need to scale when your",
+    "start": 462.24,
+    "duration": 5.44
+  },
+  {
+    "text": "traffic comes? Does your data and your",
+    "start": 465.039,
+    "duration": 4.241
+  },
+  {
+    "text": "experience suggest you're going to have",
+    "start": 467.68,
+    "duration": 3.04
+  },
+  {
+    "text": "a sharp spike in traffic? Is it going to",
+    "start": 469.28,
+    "duration": 3.68
+  },
+  {
+    "text": "be a big cliff or is it going to be more",
+    "start": 470.72,
+    "duration": 4.96
+  },
+  {
+    "text": "of a rolling gradual thing? Does it",
+    "start": 472.96,
+    "duration": 4.639
+  },
+  {
+    "text": "matter if your response times drop off a",
+    "start": 475.68,
+    "duration": 3.919
+  },
+  {
+    "text": "bit or does it matter if your experience",
+    "start": 477.599,
+    "duration": 4.801
+  },
+  {
+    "text": "is degraded?",
+    "start": 479.599,
+    "duration": 4.801
+  },
+  {
+    "text": "The answer here is not always yes, but",
+    "start": 482.4,
+    "duration": 4.88
+  },
+  {
+    "text": "if it is, you need to ensure that speed",
+    "start": 484.4,
+    "duration": 5.359
+  },
+  {
+    "text": "of scale is in your mind when you're",
+    "start": 487.28,
+    "duration": 4.12
+  },
+  {
+    "text": "choosing your scaling",
+    "start": 489.759,
+    "duration": 4.16
+  },
+  {
+    "text": "strategy. Now, at KWS, we test our",
+    "start": 491.4,
+    "duration": 5.239
+  },
+  {
+    "text": "platform regularly and we know we can go",
+    "start": 493.919,
+    "duration": 4.96
+  },
+  {
+    "text": "from 0 to 10,000 verifications per",
+    "start": 496.639,
+    "duration": 5.4
+  },
+  {
+    "text": "minute in a 5minute window from a cold",
+    "start": 498.879,
+    "duration": 5.561
+  },
+  {
+    "text": "start and be stable",
+    "start": 502.039,
+    "duration": 4.44
+  },
+  {
+    "text": "throughout. And that gives us confidence",
+    "start": 504.44,
+    "duration": 4.199
+  },
+  {
+    "text": "when we're talking to partners about",
+    "start": 506.479,
+    "duration": 4.16
+  },
+  {
+    "text": "meeting their requirements. They know",
+    "start": 508.639,
+    "duration": 5.201
+  },
+  {
+    "text": "we're not going to drop the ball on",
+    "start": 510.639,
+    "duration": 3.201
+  },
+  {
+    "text": "them. Now, one thing we can do as",
+    "start": 514.12,
+    "duration": 3.479
+  },
+  {
+    "text": "engineers to improve the performance of",
+    "start": 516.08,
+    "duration": 4.16
+  },
+  {
+    "text": "a system is to make it do less,",
+    "start": 517.599,
+    "duration": 4.481
+  },
+  {
+    "text": "especially when traffic increases.",
+    "start": 520.24,
+    "duration": 3.919
+  },
+  {
+    "text": "That's the holy grail. One of the most",
+    "start": 522.08,
+    "duration": 3.92
+  },
+  {
+    "text": "common ways to do that is with caching.",
+    "start": 524.159,
+    "duration": 4.961
+  },
+  {
+    "text": "Caching is a technique that temporarily",
+    "start": 526.0,
+    "duration": 4.959
+  },
+  {
+    "text": "stores data to improve the performance",
+    "start": 529.12,
+    "duration": 4.56
+  },
+  {
+    "text": "of a system. Now, caching solutions are",
+    "start": 530.959,
+    "duration": 4.32
+  },
+  {
+    "text": "generally really fast, unlike normal",
+    "start": 533.68,
+    "duration": 3.12
+  },
+  {
+    "text": "databases. They don't have complex",
+    "start": 535.279,
+    "duration": 3.761
+  },
+  {
+    "text": "querying and aggregation logic and",
+    "start": 536.8,
+    "duration": 3.52
+  },
+  {
+    "text": "they're particularly effective when the",
+    "start": 539.04,
+    "duration": 4.04
+  },
+  {
+    "text": "underlying data doesn't change that",
+    "start": 540.32,
+    "duration": 4.88
+  },
+  {
+    "text": "much. There's two main ways to cache",
+    "start": 543.08,
+    "duration": 4.439
+  },
+  {
+    "text": "data. Uh the first one is your classic",
+    "start": 545.2,
+    "duration": 5.04
+  },
+  {
+    "text": "cache service. So over here we've got",
+    "start": 547.519,
+    "duration": 4.561
+  },
+  {
+    "text": "our Redisk cache running on a dedicated",
+    "start": 550.24,
+    "duration": 3.68
+  },
+  {
+    "text": "piece of hardware. And over here we've",
+    "start": 552.08,
+    "duration": 3.52
+  },
+  {
+    "text": "got our cluster with all the pods",
+    "start": 553.92,
+    "duration": 2.919
+  },
+  {
+    "text": "running our",
+    "start": 555.6,
+    "duration": 3.919
+  },
+  {
+    "text": "service. And the second method is an",
+    "start": 556.839,
+    "duration": 5.161
+  },
+  {
+    "text": "inmemory cache. So on each of the pods",
+    "start": 559.519,
+    "duration": 4.32
+  },
+  {
+    "text": "you got a dedicated piece of memory for",
+    "start": 562.0,
+    "duration": 3.44
+  },
+  {
+    "text": "storing your cache data. And there's",
+    "start": 563.839,
+    "duration": 4.0
+  },
+  {
+    "text": "pros and cons of each of course. So your",
+    "start": 565.44,
+    "duration": 5.839
+  },
+  {
+    "text": "cache server will retain your cache data",
+    "start": 567.839,
+    "duration": 5.44
+  },
+  {
+    "text": "when you deploy your service. So you",
+    "start": 571.279,
+    "duration": 3.441
+  },
+  {
+    "text": "throw away your pods, you bring up some",
+    "start": 573.279,
+    "duration": 3.281
+  },
+  {
+    "text": "new ones in the cluster, and your cache",
+    "start": 574.72,
+    "duration": 3.6
+  },
+  {
+    "text": "service is still sitting there getting",
+    "start": 576.56,
+    "duration": 4.0
+  },
+  {
+    "text": "your caches. So that's that's a good win",
+    "start": 578.32,
+    "duration": 4.4
+  },
+  {
+    "text": "there. And secondly, your cache service",
+    "start": 580.56,
+    "duration": 5.719
+  },
+  {
+    "text": "will store your keys once for the entire",
+    "start": 582.72,
+    "duration": 5.92
+  },
+  {
+    "text": "cluster, whereas your in-memory cache",
+    "start": 586.279,
+    "duration": 4.921
+  },
+  {
+    "text": "will have each key on each pod. So",
+    "start": 588.64,
+    "duration": 4.52
+  },
+  {
+    "text": "you're much more likely to get a cachier",
+    "start": 591.2,
+    "duration": 4.24
+  },
+  {
+    "text": "that. But in memory cache is a lot",
+    "start": 593.16,
+    "duration": 4.04
+  },
+  {
+    "text": "quicker. Requests don't have to go off",
+    "start": 595.44,
+    "duration": 3.76
+  },
+  {
+    "text": "pod to the cache service to retrieve the",
+    "start": 597.2,
+    "duration": 3.6
+  },
+  {
+    "text": "data. So there's trade-offs there for",
+    "start": 599.2,
+    "duration": 5.12
+  },
+  {
+    "text": "sure. And at KWS we employ both",
+    "start": 600.8,
+    "duration": 5.28
+  },
+  {
+    "text": "mechanisms in different places depending",
+    "start": 604.32,
+    "duration": 3.72
+  },
+  {
+    "text": "on the use",
+    "start": 606.08,
+    "duration": 4.0
+  },
+  {
+    "text": "case. And now earlier we talked about",
+    "start": 608.04,
+    "duration": 4.28
+  },
+  {
+    "text": "knowing your traffic patterns. If you",
+    "start": 610.08,
+    "duration": 4.48
+  },
+  {
+    "text": "have read heavy requests or requests",
+    "start": 612.32,
+    "duration": 4.24
+  },
+  {
+    "text": "that do a lot of processing, those are",
+    "start": 614.56,
+    "duration": 4.56
+  },
+  {
+    "text": "great candidates for trying to cache.",
+    "start": 616.56,
+    "duration": 4.24
+  },
+  {
+    "text": "And this could be at the API layer in",
+    "start": 619.12,
+    "duration": 4.08
+  },
+  {
+    "text": "front of your API or it could be behind",
+    "start": 620.8,
+    "duration": 4.12
+  },
+  {
+    "text": "into service calls or in front of a",
+    "start": 623.2,
+    "duration": 4.16
+  },
+  {
+    "text": "database. And specifically, if data's",
+    "start": 624.92,
+    "duration": 4.599
+  },
+  {
+    "text": "been processed a lot, if you can put",
+    "start": 627.36,
+    "duration": 3.52
+  },
+  {
+    "text": "that in a cache after it's been",
+    "start": 629.519,
+    "duration": 3.44
+  },
+  {
+    "text": "processed, that is saving your services",
+    "start": 630.88,
+    "duration": 4.16
+  },
+  {
+    "text": "doing a lot of work the next time that",
+    "start": 632.959,
+    "duration": 4.081
+  },
+  {
+    "text": "piece of information is requested by the",
+    "start": 635.04,
+    "duration": 2.76
+  },
+  {
+    "text": "front",
+    "start": 637.04,
+    "duration": 3.52
+  },
+  {
+    "text": "end. And if you have some data, and it",
+    "start": 637.8,
+    "duration": 5.159
+  },
+  {
+    "text": "doesn't matter if it's 100% accurate,",
+    "start": 640.56,
+    "duration": 4.0
+  },
+  {
+    "text": "you take this piece of data before you",
+    "start": 642.959,
+    "duration": 2.88
+  },
+  {
+    "text": "send it back to the client, stick it in",
+    "start": 644.56,
+    "duration": 3.519
+  },
+  {
+    "text": "your cache, put a a 5 minute, 10-minute",
+    "start": 645.839,
+    "duration": 4.481
+  },
+  {
+    "text": "TTL on it, whatever. And then next time",
+    "start": 648.079,
+    "duration": 3.601
+  },
+  {
+    "text": "the request comes in for that piece of",
+    "start": 650.32,
+    "duration": 3.12
+  },
+  {
+    "text": "information, we'll simply check if it's",
+    "start": 651.68,
+    "duration": 3.12
+  },
+  {
+    "text": "in the cache, and if it is, we'll serve",
+    "start": 653.44,
+    "duration": 4.0
+  },
+  {
+    "text": "it. And you've reduced the load on the",
+    "start": 654.8,
+    "duration": 4.88
+  },
+  {
+    "text": "back end, which is the goal here of of",
+    "start": 657.44,
+    "duration": 4.32
+  },
+  {
+    "text": "scaling. You want to reduce the load on",
+    "start": 659.68,
+    "duration": 3.08
+  },
+  {
+    "text": "your",
+    "start": 661.76,
+    "duration": 3.4
+  },
+  {
+    "text": "services. And we can make this more",
+    "start": 662.76,
+    "duration": 5.16
+  },
+  {
+    "text": "complex because if you do it that way,",
+    "start": 665.16,
+    "duration": 4.04
+  },
+  {
+    "text": "you end up with stale data at some",
+    "start": 667.92,
+    "duration": 2.72
+  },
+  {
+    "text": "stage. If the underlying data in your",
+    "start": 669.2,
+    "duration": 3.44
+  },
+  {
+    "text": "database changes and you've got is",
+    "start": 670.64,
+    "duration": 4.16
+  },
+  {
+    "text": "sitting here in a cache, then for the",
+    "start": 672.64,
+    "duration": 3.56
+  },
+  {
+    "text": "next 5 minutes, you're serving that",
+    "start": 674.8,
+    "duration": 3.76
+  },
+  {
+    "text": "information. If the data underlying the",
+    "start": 676.2,
+    "duration": 4.199
+  },
+  {
+    "text": "data store changes, you're serving what",
+    "start": 678.56,
+    "duration": 4.56
+  },
+  {
+    "text": "call stale data. So we can improve that",
+    "start": 680.399,
+    "duration": 4.081
+  },
+  {
+    "text": "by making it more complex. You can",
+    "start": 683.12,
+    "duration": 3.12
+  },
+  {
+    "text": "always make things things more complex.",
+    "start": 684.48,
+    "duration": 3.28
+  },
+  {
+    "text": "We can have an event when the data",
+    "start": 686.24,
+    "duration": 3.44
+  },
+  {
+    "text": "changes, tell the cache to clear down,",
+    "start": 687.76,
+    "duration": 3.68
+  },
+  {
+    "text": "and we solve the problem. the request",
+    "start": 689.68,
+    "duration": 4.08
+  },
+  {
+    "text": "drops straight through, skips the cache,",
+    "start": 691.44,
+    "duration": 4.0
+  },
+  {
+    "text": "and then pulls the fresh data out of the",
+    "start": 693.76,
+    "duration": 3.199
+  },
+  {
+    "text": "database. So, there's a couple of ways",
+    "start": 695.44,
+    "duration": 3.04
+  },
+  {
+    "text": "you can do that here. And we can look at",
+    "start": 696.959,
+    "duration": 3.521
+  },
+  {
+    "text": "the cache metrics to make sure we're",
+    "start": 698.48,
+    "duration": 3.44
+  },
+  {
+    "text": "getting good cache hits and that we're",
+    "start": 700.48,
+    "duration": 3.2
+  },
+  {
+    "text": "not serving style data. And you can",
+    "start": 701.92,
+    "duration": 3.84
+  },
+  {
+    "text": "fine-tune these stuff and spend a lot of",
+    "start": 703.68,
+    "duration": 6.399
+  },
+  {
+    "text": "time making sure that it's working",
+    "start": 705.76,
+    "duration": 4.319
+  },
+  {
+    "text": "effectively. But just one piece of",
+    "start": 710.519,
+    "duration": 5.361
+  },
+  {
+    "text": "advice here, caches can make things more",
+    "start": 712.32,
+    "duration": 5.6
+  },
+  {
+    "text": "complicated. Don't c any piece of",
+    "start": 715.88,
+    "duration": 4.68
+  },
+  {
+    "text": "information more than once. Now it may",
+    "start": 717.92,
+    "duration": 4.72
+  },
+  {
+    "text": "look good on the numbers and your happy",
+    "start": 720.56,
+    "duration": 4.48
+  },
+  {
+    "text": "path probably going to look a bit better",
+    "start": 722.64,
+    "duration": 4.319
+  },
+  {
+    "text": "but it does make your services very",
+    "start": 725.04,
+    "duration": 4.479
+  },
+  {
+    "text": "difficult to reason about. It makes them",
+    "start": 726.959,
+    "duration": 4.401
+  },
+  {
+    "text": "very difficult to debug. So there's a",
+    "start": 729.519,
+    "duration": 3.44
+  },
+  {
+    "text": "trade-off there. You need to decide on",
+    "start": 731.36,
+    "duration": 3.44
+  },
+  {
+    "text": "as a team about having multiple caches",
+    "start": 732.959,
+    "duration": 6.201
+  },
+  {
+    "text": "but my advice would be don't do it.",
+    "start": 734.8,
+    "duration": 4.36
+  },
+  {
+    "text": "So we have a piece of technology in the",
+    "start": 746.8,
+    "duration": 3.52
+  },
+  {
+    "text": "verification platform called the parent",
+    "start": 748.959,
+    "duration": 3.44
+  },
+  {
+    "text": "graph and it's one of the key pieces of",
+    "start": 750.32,
+    "duration": 4.72
+  },
+  {
+    "text": "value we have at KWS. So when a parent",
+    "start": 752.399,
+    "duration": 4.481
+  },
+  {
+    "text": "verifies with us they click through from",
+    "start": 755.04,
+    "duration": 2.919
+  },
+  {
+    "text": "the",
+    "start": 756.88,
+    "duration": 4.36
+  },
+  {
+    "text": "email. What we do is once they finish",
+    "start": 757.959,
+    "duration": 5.721
+  },
+  {
+    "text": "verifying we hash up their email address",
+    "start": 761.24,
+    "duration": 5.08
+  },
+  {
+    "text": "and we put it in a Postgress database",
+    "start": 763.68,
+    "duration": 4.48
+  },
+  {
+    "text": "which is a bar graph. It's pretty pretty",
+    "start": 766.32,
+    "duration": 5.04
+  },
+  {
+    "text": "simple. There's no no magic there.",
+    "start": 768.16,
+    "duration": 5.32
+  },
+  {
+    "text": "So should the parent come back again,",
+    "start": 771.36,
+    "duration": 5.12
+  },
+  {
+    "text": "maybe they have another child who wants",
+    "start": 773.48,
+    "duration": 5.96
+  },
+  {
+    "text": "to play the same game or the child wants",
+    "start": 776.48,
+    "duration": 4.0
+  },
+  {
+    "text": "to play a different game from a",
+    "start": 779.44,
+    "duration": 2.399
+  },
+  {
+    "text": "different account system. The parent",
+    "start": 780.48,
+    "duration": 2.919
+  },
+  {
+    "text": "will then come back through to us for",
+    "start": 781.839,
+    "duration": 3.521
+  },
+  {
+    "text": "verification before we ask them to",
+    "start": 783.399,
+    "duration": 3.88
+  },
+  {
+    "text": "verify again. We'll take their email",
+    "start": 785.36,
+    "duration": 3.84
+  },
+  {
+    "text": "address, we'll hash it up, we'll check",
+    "start": 787.279,
+    "duration": 4.521
+  },
+  {
+    "text": "if it's already in the parent",
+    "start": 789.2,
+    "duration": 5.04
+  },
+  {
+    "text": "graph. That way if we find them and we",
+    "start": 791.8,
+    "duration": 4.44
+  },
+  {
+    "text": "know they're already verified, we don't",
+    "start": 794.24,
+    "duration": 4.64
+  },
+  {
+    "text": "need to ask them to verify again.",
+    "start": 796.24,
+    "duration": 4.08
+  },
+  {
+    "text": "it it would just suck if you had to",
+    "start": 798.88,
+    "duration": 3.519
+  },
+  {
+    "text": "verify every time your kid wants to play",
+    "start": 800.32,
+    "duration": 3.16
+  },
+  {
+    "text": "a new",
+    "start": 802.399,
+    "duration": 3.521
+  },
+  {
+    "text": "game. So, we've shortcuted the process",
+    "start": 803.48,
+    "duration": 3.64
+  },
+  {
+    "text": "for the parent. They don't have to",
+    "start": 805.92,
+    "duration": 2.96
+  },
+  {
+    "text": "verify again. And we've reduced the load",
+    "start": 807.12,
+    "duration": 3.519
+  },
+  {
+    "text": "on our system by not having to do all",
+    "start": 808.88,
+    "duration": 4.44
+  },
+  {
+    "text": "the processing of the",
+    "start": 810.639,
+    "duration": 4.64
+  },
+  {
+    "text": "verification. And today, the parent",
+    "start": 813.32,
+    "duration": 5.4
+  },
+  {
+    "text": "graph holds over 27 million verified",
+    "start": 815.279,
+    "duration": 6.24
+  },
+  {
+    "text": "parents. That's 27 million parents who",
+    "start": 818.72,
+    "duration": 5.359
+  },
+  {
+    "text": "don't need to verify when their kid",
+    "start": 821.519,
+    "duration": 5.281
+  },
+  {
+    "text": "wants to use a digital experience simply",
+    "start": 824.079,
+    "duration": 4.481
+  },
+  {
+    "text": "by storing that they've verified with us",
+    "start": 826.8,
+    "duration": 6.08
+  },
+  {
+    "text": "successfully in the past. And that is",
+    "start": 828.56,
+    "duration": 4.32
+  },
+  {
+    "text": "significant. So moving on, I want to",
+    "start": 834.76,
+    "duration": 3.319
+  },
+  {
+    "text": "talk a bit about the web app that sits",
+    "start": 836.72,
+    "duration": 3.72
+  },
+  {
+    "text": "at the front end, our verification web",
+    "start": 838.079,
+    "duration": 4.481
+  },
+  {
+    "text": "app. What happens in the front end is a",
+    "start": 840.44,
+    "duration": 4.12
+  },
+  {
+    "text": "part that's often overlooked when the",
+    "start": 842.56,
+    "duration": 3.76
+  },
+  {
+    "text": "discussion around scaling is happening.",
+    "start": 844.56,
+    "duration": 3.36
+  },
+  {
+    "text": "Uh but I want to raise a few things to",
+    "start": 846.32,
+    "duration": 3.44
+  },
+  {
+    "text": "consider. There's optimizations we can",
+    "start": 847.92,
+    "duration": 4.0
+  },
+  {
+    "text": "we can make here. Your UX and your UI",
+    "start": 849.76,
+    "duration": 4.8
+  },
+  {
+    "text": "need to work effectively as well.",
+    "start": 851.92,
+    "duration": 4.56
+  },
+  {
+    "text": "Understand your user journeys. Know",
+    "start": 854.56,
+    "duration": 3.76
+  },
+  {
+    "text": "where your parents or your customers are",
+    "start": 856.48,
+    "duration": 4.919
+  },
+  {
+    "text": "going in your web app and optimize",
+    "start": 858.32,
+    "duration": 6.079
+  },
+  {
+    "text": "those. Optimize your bundles. Tree",
+    "start": 861.399,
+    "duration": 5.961
+  },
+  {
+    "text": "shaking, gzipping, image compression,",
+    "start": 864.399,
+    "duration": 4.56
+  },
+  {
+    "text": "all sorts of tools that can make your",
+    "start": 867.36,
+    "duration": 5.039
+  },
+  {
+    "text": "web app faster to load, faster to run.",
+    "start": 868.959,
+    "duration": 5.521
+  },
+  {
+    "text": "The goal is to get your customers",
+    "start": 872.399,
+    "duration": 3.921
+  },
+  {
+    "text": "through the web flow. Get them what they",
+    "start": 874.48,
+    "duration": 3.719
+  },
+  {
+    "text": "want and get them out as soon as",
+    "start": 876.32,
+    "duration": 4.0
+  },
+  {
+    "text": "possible. When you're running hot and",
+    "start": 878.199,
+    "duration": 4.521
+  },
+  {
+    "text": "you're scaled, you got customers",
+    "start": 880.32,
+    "duration": 4.879
+  },
+  {
+    "text": "dwelling on your site, causing lots of",
+    "start": 882.72,
+    "duration": 4.96
+  },
+  {
+    "text": "requests to your API. That's no good.",
+    "start": 885.199,
+    "duration": 4.32
+  },
+  {
+    "text": "They need to find what they want and we",
+    "start": 887.68,
+    "duration": 3.839
+  },
+  {
+    "text": "need to get them served and them happy",
+    "start": 889.519,
+    "duration": 3.88
+  },
+  {
+    "text": "and then move them",
+    "start": 891.519,
+    "duration": 4.401
+  },
+  {
+    "text": "on. You need to keep your payloads",
+    "start": 893.399,
+    "duration": 3.721
+  },
+  {
+    "text": "between your API and your front end",
+    "start": 895.92,
+    "duration": 3.64
+  },
+  {
+    "text": "small as well. Less data, quicker in",
+    "start": 897.12,
+    "duration": 5.44
+  },
+  {
+    "text": "transit. Close your socket connection as",
+    "start": 899.56,
+    "duration": 4.839
+  },
+  {
+    "text": "quickly as you can. There's a finite",
+    "start": 902.56,
+    "duration": 4.24
+  },
+  {
+    "text": "number of sockets open in the API. Once",
+    "start": 904.399,
+    "duration": 4.321
+  },
+  {
+    "text": "we've used them all, there's no more.",
+    "start": 906.8,
+    "duration": 4.24
+  },
+  {
+    "text": "So, we close the socket as soon as we",
+    "start": 908.72,
+    "duration": 5.28
+  },
+  {
+    "text": "can. And again, we move them on. Look at",
+    "start": 911.04,
+    "duration": 5.359
+  },
+  {
+    "text": "your response headers. Cache control",
+    "start": 914.0,
+    "duration": 4.56
+  },
+  {
+    "text": "content encoding. Every single HTTP",
+    "start": 916.399,
+    "duration": 5.041
+  },
+  {
+    "text": "request that your web app makes has",
+    "start": 918.56,
+    "duration": 5.04
+  },
+  {
+    "text": "headers has these headers on it. You can",
+    "start": 921.44,
+    "duration": 4.959
+  },
+  {
+    "text": "fine-tune every single one of them. You",
+    "start": 923.6,
+    "duration": 4.96
+  },
+  {
+    "text": "can tell your logo or your banner image",
+    "start": 926.399,
+    "duration": 3.841
+  },
+  {
+    "text": "to cache on the client's browser, on the",
+    "start": 928.56,
+    "duration": 3.839
+  },
+  {
+    "text": "user's browser. So the next time they",
+    "start": 930.24,
+    "duration": 3.36
+  },
+  {
+    "text": "come to you, they don't even have to",
+    "start": 932.399,
+    "duration": 2.401
+  },
+  {
+    "text": "request that. It's already sitting there",
+    "start": 933.6,
+    "duration": 2.88
+  },
+  {
+    "text": "on their browser ready to go. We're",
+    "start": 934.8,
+    "duration": 3.52
+  },
+  {
+    "text": "reducing the work that the back end has",
+    "start": 936.48,
+    "duration": 5.28
+  },
+  {
+    "text": "to do. Lazy load your assets. Use a CDN.",
+    "start": 938.32,
+    "duration": 6.0
+  },
+  {
+    "text": "Get your assets geographically as close",
+    "start": 941.76,
+    "duration": 5.12
+  },
+  {
+    "text": "to the user as possible. Like latency is",
+    "start": 944.32,
+    "duration": 5.199
+  },
+  {
+    "text": "a thing, right? And when I was prepping",
+    "start": 946.88,
+    "duration": 4.16
+  },
+  {
+    "text": "this deck, I was having a look at the",
+    "start": 949.519,
+    "duration": 5.361
+  },
+  {
+    "text": "Amazon um latency between their regions.",
+    "start": 951.04,
+    "duration": 5.2
+  },
+  {
+    "text": "If you've got a service running out of",
+    "start": 954.88,
+    "duration": 3.6
+  },
+  {
+    "text": "US East1 and you got a customer who's in",
+    "start": 956.24,
+    "duration": 5.92
+  },
+  {
+    "text": "EU West, 70 milliseconds of latency and",
+    "start": 958.48,
+    "duration": 5.279
+  },
+  {
+    "text": "that's before we even think about the",
+    "start": 962.16,
+    "duration": 3.359
+  },
+  {
+    "text": "internet connection that your users on",
+    "start": 963.759,
+    "duration": 3.52
+  },
+  {
+    "text": "and the processing that the servers need",
+    "start": 965.519,
+    "duration": 2.68
+  },
+  {
+    "text": "to",
+    "start": 967.279,
+    "duration": 3.36
+  },
+  {
+    "text": "do. If you've got servers down in",
+    "start": 968.199,
+    "duration": 5.361
+  },
+  {
+    "text": "Singapore in Apac, 200 milliseconds of",
+    "start": 970.639,
+    "duration": 5.521
+  },
+  {
+    "text": "latency, if your service needs to",
+    "start": 973.56,
+    "duration": 4.44
+  },
+  {
+    "text": "perform really well, that's going to",
+    "start": 976.16,
+    "duration": 3.0
+  },
+  {
+    "text": "kill",
+    "start": 978.0,
+    "duration": 4.48
+  },
+  {
+    "text": "you. Things have to be smart. And if we",
+    "start": 979.16,
+    "duration": 6.2
+  },
+  {
+    "text": "can push our assets and our services out",
+    "start": 982.48,
+    "duration": 4.479
+  },
+  {
+    "text": "geographically close to our customers as",
+    "start": 985.36,
+    "duration": 3.039
+  },
+  {
+    "text": "possible, that's only going to improve",
+    "start": 986.959,
+    "duration": 3.721
+  },
+  {
+    "text": "the performance of your",
+    "start": 988.399,
+    "duration": 5.68
+  },
+  {
+    "text": "services. Marginal",
+    "start": 990.68,
+    "duration": 3.399
+  },
+  {
+    "text": "gains. So I've just talked about a",
+    "start": 994.36,
+    "duration": 3.32
+  },
+  {
+    "text": "number of things as engineers we can do",
+    "start": 996.24,
+    "duration": 3.2
+  },
+  {
+    "text": "to improve uh the ability of our",
+    "start": 997.68,
+    "duration": 4.079
+  },
+  {
+    "text": "services to scale. But product and",
+    "start": 999.44,
+    "duration": 4.399
+  },
+  {
+    "text": "design folks don't get away with doing",
+    "start": 1001.759,
+    "duration": 4.161
+  },
+  {
+    "text": "nothing. They got a role to play here",
+    "start": 1003.839,
+    "duration": 4.8
+  },
+  {
+    "text": "too. Again, knowing user is everything",
+    "start": 1005.92,
+    "duration": 4.64
+  },
+  {
+    "text": "and knowing your critical path and how",
+    "start": 1008.639,
+    "duration": 4.481
+  },
+  {
+    "text": "your users are using your web flow.",
+    "start": 1010.56,
+    "duration": 4.719
+  },
+  {
+    "text": "Removing unnecessary buttons or making",
+    "start": 1013.12,
+    "duration": 4.399
+  },
+  {
+    "text": "the key actions more apparent, improving",
+    "start": 1015.279,
+    "duration": 4.401
+  },
+  {
+    "text": "the call to actions, reducing the noise",
+    "start": 1017.519,
+    "duration": 4.24
+  },
+  {
+    "text": "on the page. At KWS, we spend a lot of",
+    "start": 1019.68,
+    "duration": 5.519
+  },
+  {
+    "text": "time AB testing how web flows. And we'll",
+    "start": 1021.759,
+    "duration": 5.521
+  },
+  {
+    "text": "be trying things like tweaking content,",
+    "start": 1025.199,
+    "duration": 3.441
+  },
+  {
+    "text": "reducing content, adding some more",
+    "start": 1027.28,
+    "duration": 3.44
+  },
+  {
+    "text": "content in if it makes it easier for the",
+    "start": 1028.64,
+    "duration": 3.679
+  },
+  {
+    "text": "parents, our parents to navigate the",
+    "start": 1030.72,
+    "duration": 5.28
+  },
+  {
+    "text": "flow. We'll tweak the UI, the shape of",
+    "start": 1032.319,
+    "duration": 5.281
+  },
+  {
+    "text": "the boxes, and the size of the buttons",
+    "start": 1036.0,
+    "duration": 3.799
+  },
+  {
+    "text": "and the",
+    "start": 1037.6,
+    "duration": 4.959
+  },
+  {
+    "text": "colors. Anything that can help our users",
+    "start": 1039.799,
+    "duration": 4.52
+  },
+  {
+    "text": "get through our critical path quicker,",
+    "start": 1042.559,
+    "duration": 4.161
+  },
+  {
+    "text": "the better. And we get it wrong a lot of",
+    "start": 1044.319,
+    "duration": 3.52
+  },
+  {
+    "text": "the time as well. I think there's a",
+    "start": 1046.72,
+    "duration": 2.72
+  },
+  {
+    "text": "misnomer with AB tested. They all have",
+    "start": 1047.839,
+    "duration": 4.72
+  },
+  {
+    "text": "to be successful. That's not the case. A",
+    "start": 1049.44,
+    "duration": 4.96
+  },
+  {
+    "text": "lot of them fail and for good reason.",
+    "start": 1052.559,
+    "duration": 3.521
+  },
+  {
+    "text": "You learn from your mistakes. You don't",
+    "start": 1054.4,
+    "duration": 4.92
+  },
+  {
+    "text": "do it again.",
+    "start": 1056.08,
+    "duration": 3.24
+  },
+  {
+    "text": "So if you've got an API, chances are",
+    "start": 1061.44,
+    "duration": 3.84
+  },
+  {
+    "text": "you're going to be at some stage",
+    "start": 1064.0,
+    "duration": 3.76
+  },
+  {
+    "text": "managing external dependencies. And",
+    "start": 1065.28,
+    "duration": 4.56
+  },
+  {
+    "text": "within KWS, we use a number of",
+    "start": 1067.76,
+    "duration": 3.919
+  },
+  {
+    "text": "verification vendors, age verification",
+    "start": 1069.84,
+    "duration": 3.68
+  },
+  {
+    "text": "vendors to pro provide us with the",
+    "start": 1071.679,
+    "duration": 4.0
+  },
+  {
+    "text": "actual verification checks and we",
+    "start": 1073.52,
+    "duration": 4.96
+  },
+  {
+    "text": "communicate with them through API calls.",
+    "start": 1075.679,
+    "duration": 4.88
+  },
+  {
+    "text": "And now we know we can handle a good",
+    "start": 1078.48,
+    "duration": 5.76
+  },
+  {
+    "text": "level of traffic, but can our vendors? I",
+    "start": 1080.559,
+    "duration": 5.36
+  },
+  {
+    "text": "mean, it's it's great that we can scale",
+    "start": 1084.24,
+    "duration": 4.48
+  },
+  {
+    "text": "our own systems, but if our vendors fall",
+    "start": 1085.919,
+    "duration": 4.481
+  },
+  {
+    "text": "over under the load that we receive,",
+    "start": 1088.72,
+    "duration": 3.839
+  },
+  {
+    "text": "that's no good. That is not good to us",
+    "start": 1090.4,
+    "duration": 3.76
+  },
+  {
+    "text": "and it's not good to our customers and",
+    "start": 1092.559,
+    "duration": 4.24
+  },
+  {
+    "text": "our partners. Now, the chances are if",
+    "start": 1094.16,
+    "duration": 4.0
+  },
+  {
+    "text": "you've got third party integrations",
+    "start": 1096.799,
+    "duration": 3.321
+  },
+  {
+    "text": "you're relying on that they will be a",
+    "start": 1098.16,
+    "duration": 3.759
+  },
+  {
+    "text": "bottleneck because you don't have any",
+    "start": 1100.12,
+    "duration": 4.36
+  },
+  {
+    "text": "control over them.",
+    "start": 1101.919,
+    "duration": 4.401
+  },
+  {
+    "text": "Now the KWS verification API has an",
+    "start": 1104.48,
+    "duration": 3.28
+  },
+  {
+    "text": "average response time around 100",
+    "start": 1106.32,
+    "duration": 3.84
+  },
+  {
+    "text": "millconds which is pretty good. But",
+    "start": 1107.76,
+    "duration": 3.68
+  },
+  {
+    "text": "we've got an endpoint which is part of",
+    "start": 1110.16,
+    "duration": 3.04
+  },
+  {
+    "text": "our critical path and it's right at the",
+    "start": 1111.44,
+    "duration": 3.599
+  },
+  {
+    "text": "back of back end of our flow which",
+    "start": 1113.2,
+    "duration": 3.719
+  },
+  {
+    "text": "averages about 500",
+    "start": 1115.039,
+    "duration": 4.961
+  },
+  {
+    "text": "millconds. And the reason it's so slow",
+    "start": 1116.919,
+    "duration": 4.76
+  },
+  {
+    "text": "is because this is the request which",
+    "start": 1120.0,
+    "duration": 3.2
+  },
+  {
+    "text": "does pretty much all of our heavy",
+    "start": 1121.679,
+    "duration": 3.841
+  },
+  {
+    "text": "lifting whether we're processing data",
+    "start": 1123.2,
+    "duration": 3.599
+  },
+  {
+    "text": "and sticking some information in our",
+    "start": 1125.52,
+    "duration": 3.36
+  },
+  {
+    "text": "database or whether our vendors are",
+    "start": 1126.799,
+    "duration": 4.0
+  },
+  {
+    "text": "processing images or they've got",
+    "start": 1128.88,
+    "duration": 4.52
+  },
+  {
+    "text": "services they talk to as well. And and",
+    "start": 1130.799,
+    "duration": 4.401
+  },
+  {
+    "text": "sometimes there's nothing you can do",
+    "start": 1133.4,
+    "duration": 5.6
+  },
+  {
+    "text": "about that. These things take time.",
+    "start": 1135.2,
+    "duration": 6.479
+  },
+  {
+    "text": "But one thing we do at KDS is we try and",
+    "start": 1139.0,
+    "duration": 4.76
+  },
+  {
+    "text": "protect ourselves a bit from those",
+    "start": 1141.679,
+    "duration": 4.401
+  },
+  {
+    "text": "variable response times. And we call",
+    "start": 1143.76,
+    "duration": 3.919
+  },
+  {
+    "text": "them circuit breakers. It's a very small",
+    "start": 1146.08,
+    "duration": 2.8
+  },
+  {
+    "text": "piece of software that we've written.",
+    "start": 1147.679,
+    "duration": 3.601
+  },
+  {
+    "text": "And what happen is where we're measuring",
+    "start": 1148.88,
+    "duration": 4.48
+  },
+  {
+    "text": "what's going on with our integrations.",
+    "start": 1151.28,
+    "duration": 3.92
+  },
+  {
+    "text": "We got response times and status codes",
+    "start": 1153.36,
+    "duration": 3.6
+  },
+  {
+    "text": "and all this this visibility that we",
+    "start": 1155.2,
+    "duration": 3.2
+  },
+  {
+    "text": "have. And if we start seeing it",
+    "start": 1156.96,
+    "duration": 2.88
+  },
+  {
+    "text": "struggle, if response times are going up",
+    "start": 1158.4,
+    "duration": 3.84
+  },
+  {
+    "text": "a bit, instead of letting it go, we'll",
+    "start": 1159.84,
+    "duration": 4.16
+  },
+  {
+    "text": "pull the plug on it. Literally cut off",
+    "start": 1162.24,
+    "duration": 3.92
+  },
+  {
+    "text": "half requests and we won't offer it to",
+    "start": 1164.0,
+    "duration": 4.559
+  },
+  {
+    "text": "our parents. What we don't want to be",
+    "start": 1166.16,
+    "duration": 4.56
+  },
+  {
+    "text": "doing is offering our parents flaky",
+    "start": 1168.559,
+    "duration": 3.681
+  },
+  {
+    "text": "experiences on the front end and",
+    "start": 1170.72,
+    "duration": 3.92
+  },
+  {
+    "text": "services and and verification methods",
+    "start": 1172.24,
+    "duration": 4.16
+  },
+  {
+    "text": "which are going to fail or error. So",
+    "start": 1174.64,
+    "duration": 3.279
+  },
+  {
+    "text": "we'll pull the plug on it. We won't",
+    "start": 1176.4,
+    "duration": 3.68
+  },
+  {
+    "text": "offer it. And parent can then choose one",
+    "start": 1177.919,
+    "duration": 3.161
+  },
+  {
+    "text": "of the other methods that we have",
+    "start": 1180.08,
+    "duration": 3.2
+  },
+  {
+    "text": "available. And then once we see the",
+    "start": 1181.08,
+    "duration": 4.44
+  },
+  {
+    "text": "metrics recover, we'll plug it back in",
+    "start": 1183.28,
+    "duration": 4.56
+  },
+  {
+    "text": "and we'll start offering again. So, it's",
+    "start": 1185.52,
+    "duration": 4.0
+  },
+  {
+    "text": "not a complex piece of of code that",
+    "start": 1187.84,
+    "duration": 3.76
+  },
+  {
+    "text": "we've written, but it just protects us",
+    "start": 1189.52,
+    "duration": 5.279
+  },
+  {
+    "text": "from the variances of software that we",
+    "start": 1191.6,
+    "duration": 5.36
+  },
+  {
+    "text": "can't",
+    "start": 1194.799,
+    "duration": 2.161
+  },
+  {
+    "text": "control. Pro tip, if you have vendors,",
+    "start": 1197.0,
+    "duration": 6.2
+  },
+  {
+    "text": "speak to them. And it probably seems",
+    "start": 1200.72,
+    "duration": 3.64
+  },
+  {
+    "text": "quite",
+    "start": 1203.2,
+    "duration": 4.32
+  },
+  {
+    "text": "obvious. Ensure you have visibility over",
+    "start": 1204.36,
+    "duration": 5.4
+  },
+  {
+    "text": "what's going on between you yourself and",
+    "start": 1207.52,
+    "duration": 4.32
+  },
+  {
+    "text": "your vendors. So, measure everything",
+    "start": 1209.76,
+    "duration": 4.56
+  },
+  {
+    "text": "that you can and understand how the",
+    "start": 1211.84,
+    "duration": 4.88
+  },
+  {
+    "text": "dependency reacts to your traffic. Quite",
+    "start": 1214.32,
+    "duration": 4.96
+  },
+  {
+    "text": "often when you're signing a deal, a",
+    "start": 1216.72,
+    "duration": 4.24
+  },
+  {
+    "text": "contract with a vendor to provide you",
+    "start": 1219.28,
+    "duration": 3.36
+  },
+  {
+    "text": "with their services, they'll give you an",
+    "start": 1220.96,
+    "duration": 4.0
+  },
+  {
+    "text": "SLA, uh, service level agreement, and",
+    "start": 1222.64,
+    "duration": 5.6
+  },
+  {
+    "text": "you can see kind of what they say their",
+    "start": 1224.96,
+    "duration": 4.56
+  },
+  {
+    "text": "response times are going to be, what",
+    "start": 1228.24,
+    "duration": 2.76
+  },
+  {
+    "text": "load they can handle, these kind of",
+    "start": 1229.52,
+    "duration": 3.639
+  },
+  {
+    "text": "things. When you start using their",
+    "start": 1231.0,
+    "duration": 4.2
+  },
+  {
+    "text": "service, does it correlate with what",
+    "start": 1233.159,
+    "duration": 3.801
+  },
+  {
+    "text": "you're seeing? Are you seeing the",
+    "start": 1235.2,
+    "duration": 3.04
+  },
+  {
+    "text": "response times that they've they said",
+    "start": 1236.96,
+    "duration": 3.599
+  },
+  {
+    "text": "you're going to get? Ask them about",
+    "start": 1238.24,
+    "duration": 4.88
+  },
+  {
+    "text": "their reliability, the disaster recovery",
+    "start": 1240.559,
+    "duration": 4.48
+  },
+  {
+    "text": "processes.",
+    "start": 1243.12,
+    "duration": 3.439
+  },
+  {
+    "text": "Are they doing the sort of things that",
+    "start": 1245.039,
+    "duration": 4.081
+  },
+  {
+    "text": "you do yourself and that you rely on to",
+    "start": 1246.559,
+    "duration": 3.881
+  },
+  {
+    "text": "be",
+    "start": 1249.12,
+    "duration": 3.28
+  },
+  {
+    "text": "stable? You could even ask them to do",
+    "start": 1250.44,
+    "duration": 3.44
+  },
+  {
+    "text": "some load",
+    "start": 1252.4,
+    "duration": 4.88
+  },
+  {
+    "text": "testing. They'll probably say no, but",
+    "start": 1253.88,
+    "duration": 5.88
+  },
+  {
+    "text": "you can ask. And lastly, but most",
+    "start": 1257.28,
+    "duration": 3.72
+  },
+  {
+    "text": "importantly,",
+    "start": 1259.76,
+    "duration": 3.12
+  },
+  {
+    "text": "communication. Be sure to create a good",
+    "start": 1261.0,
+    "duration": 3.96
+  },
+  {
+    "text": "relationship with your vendors. Be clear",
+    "start": 1262.88,
+    "duration": 4.0
+  },
+  {
+    "text": "with your requirements and make sure you",
+    "start": 1264.96,
+    "duration": 3.719
+  },
+  {
+    "text": "listen to their requirements as",
+    "start": 1266.88,
+    "duration": 4.08
+  },
+  {
+    "text": "well. And once you've integrated, speak",
+    "start": 1268.679,
+    "duration": 4.12
+  },
+  {
+    "text": "to their engineers. These are the guys",
+    "start": 1270.96,
+    "duration": 3.44
+  },
+  {
+    "text": "who wrote the services that you're",
+    "start": 1272.799,
+    "duration": 4.161
+  },
+  {
+    "text": "consuming. They will know the best route",
+    "start": 1274.4,
+    "duration": 4.96
+  },
+  {
+    "text": "through their software. Show them what",
+    "start": 1276.96,
+    "duration": 4.64
+  },
+  {
+    "text": "you've done. Let them critique it. Make",
+    "start": 1279.36,
+    "duration": 4.319
+  },
+  {
+    "text": "sure you've got the optimal flow to",
+    "start": 1281.6,
+    "duration": 4.48
+  },
+  {
+    "text": "integrate with their APIs.",
+    "start": 1283.679,
+    "duration": 4.161
+  },
+  {
+    "text": "Now, when we know we've got a bunch of",
+    "start": 1286.08,
+    "duration": 5.28
+  },
+  {
+    "text": "traffic coming to our API with a season",
+    "start": 1287.84,
+    "duration": 5.199
+  },
+  {
+    "text": "launcher or whatever whatever's going on",
+    "start": 1291.36,
+    "duration": 3.6
+  },
+  {
+    "text": "in the Fortnite ecosystem, what we'll do",
+    "start": 1293.039,
+    "duration": 3.281
+  },
+  {
+    "text": "is we'll take the numbers that we",
+    "start": 1294.96,
+    "duration": 3.36
+  },
+  {
+    "text": "anticipate and we'll divvy those up",
+    "start": 1296.32,
+    "duration": 4.0
+  },
+  {
+    "text": "between all of the vendors that we use",
+    "start": 1298.32,
+    "duration": 3.92
+  },
+  {
+    "text": "for our verification and we'll let them",
+    "start": 1300.32,
+    "duration": 3.68
+  },
+  {
+    "text": "know in advance and we'll say on this",
+    "start": 1302.24,
+    "duration": 3.919
+  },
+  {
+    "text": "date at this time you can expect this",
+    "start": 1304.0,
+    "duration": 4.88
+  },
+  {
+    "text": "amount of traffic so they can prepare",
+    "start": 1306.159,
+    "duration": 4.801
+  },
+  {
+    "text": "themselves so they're ready to go if",
+    "start": 1308.88,
+    "duration": 3.44
+  },
+  {
+    "text": "they need to make any adjustments their",
+    "start": 1310.96,
+    "duration": 4.36
+  },
+  {
+    "text": "end.",
+    "start": 1312.32,
+    "duration": 3.0
+  },
+  {
+    "text": "Cool. So, we've talked about parent",
+    "start": 1323.28,
+    "duration": 2.32
+  },
+  {
+    "text": "going through the parent verification",
+    "start": 1324.48,
+    "duration": 3.28
+  },
+  {
+    "text": "flow um to verify that they're an adult.",
+    "start": 1325.6,
+    "duration": 3.92
+  },
+  {
+    "text": "And now I'd like to turn attention to",
+    "start": 1327.76,
+    "duration": 3.919
+  },
+  {
+    "text": "the second of our core KOS products,",
+    "start": 1329.52,
+    "duration": 3.92
+  },
+  {
+    "text": "which is consent management. Now,",
+    "start": 1331.679,
+    "duration": 3.281
+  },
+  {
+    "text": "content management builds on parent",
+    "start": 1333.44,
+    "duration": 3.599
+  },
+  {
+    "text": "verification by then allowing the parent",
+    "start": 1334.96,
+    "duration": 3.92
+  },
+  {
+    "text": "to provide permission for their kid to",
+    "start": 1337.039,
+    "duration": 3.601
+  },
+  {
+    "text": "access an experience that collects",
+    "start": 1338.88,
+    "duration": 4.08
+  },
+  {
+    "text": "personal information and set permissions",
+    "start": 1340.64,
+    "duration": 4.96
+  },
+  {
+    "text": "over what their kid can and cannot do in",
+    "start": 1342.96,
+    "duration": 3.56
+  },
+  {
+    "text": "a",
+    "start": 1345.6,
+    "duration": 3.12
+  },
+  {
+    "text": "game. Now, these settings are all stored",
+    "start": 1346.52,
+    "duration": 4.44
+  },
+  {
+    "text": "in a database and they're read every",
+    "start": 1348.72,
+    "duration": 4.68
+  },
+  {
+    "text": "time that a kid enters a Fortnite",
+    "start": 1350.96,
+    "duration": 4.64
+  },
+  {
+    "text": "lobby. Now, the biggest challenge we",
+    "start": 1353.4,
+    "duration": 4.88
+  },
+  {
+    "text": "have for scaling this service is",
+    "start": 1355.6,
+    "duration": 5.36
+  },
+  {
+    "text": "actually during launch events, at the",
+    "start": 1358.28,
+    "duration": 4.279
+  },
+  {
+    "text": "end of a launch event. So, has anyone",
+    "start": 1360.96,
+    "duration": 3.36
+  },
+  {
+    "text": "ever been in a a Fortnite season launch",
+    "start": 1362.559,
+    "duration": 2.921
+  },
+  {
+    "text": "or a chapter",
+    "start": 1364.32,
+    "duration": 4.8
+  },
+  {
+    "text": "launch? So, so what generally happens is",
+    "start": 1365.48,
+    "duration": 5.8
+  },
+  {
+    "text": "um all of the millions of people who",
+    "start": 1369.12,
+    "duration": 4.48
+  },
+  {
+    "text": "want to see the launch reveal get backed",
+    "start": 1371.28,
+    "duration": 4.96
+  },
+  {
+    "text": "up into a lobby and then the curtains",
+    "start": 1373.6,
+    "duration": 5.04
+  },
+  {
+    "text": "drop and all the millions of people rush",
+    "start": 1376.24,
+    "duration": 5.76
+  },
+  {
+    "text": "into Fortnite to see the trailer for the",
+    "start": 1378.64,
+    "duration": 6.399
+  },
+  {
+    "text": "new season and you're in there for a",
+    "start": 1382.0,
+    "duration": 4.559
+  },
+  {
+    "text": "number of minutes, 5 10 minutes,",
+    "start": 1385.039,
+    "duration": 3.281
+  },
+  {
+    "text": "whatever it is. Um, and at the end of",
+    "start": 1386.559,
+    "duration": 4.24
+  },
+  {
+    "text": "the launch event, Fortnite drops the",
+    "start": 1388.32,
+    "duration": 4.08
+  },
+  {
+    "text": "curtain and kicks everyone out back to",
+    "start": 1390.799,
+    "duration": 5.601
+  },
+  {
+    "text": "the lobby same time. And as I said, when",
+    "start": 1392.4,
+    "duration": 5.72
+  },
+  {
+    "text": "somebody enters the Fortnite",
+    "start": 1396.4,
+    "duration": 6.32
+  },
+  {
+    "text": "lobby, calls this API. So when we've got",
+    "start": 1398.12,
+    "duration": 6.12
+  },
+  {
+    "text": "millions of people getting kicked out of",
+    "start": 1402.72,
+    "duration": 4.56
+  },
+  {
+    "text": "Fortnite at exactly the same time, we've",
+    "start": 1404.24,
+    "duration": 5.84
+  },
+  {
+    "text": "then got millions of people requesting",
+    "start": 1407.28,
+    "duration": 4.56
+  },
+  {
+    "text": "settings information from a content back",
+    "start": 1410.08,
+    "duration": 4.719
+  },
+  {
+    "text": "end within a period of 30 seconds to a",
+    "start": 1411.84,
+    "duration": 5.199
+  },
+  {
+    "text": "minute. Suddenly, we're serving hundreds",
+    "start": 1414.799,
+    "duration": 3.561
+  },
+  {
+    "text": "of thousands of",
+    "start": 1417.039,
+    "duration": 4.081
+  },
+  {
+    "text": "requests per minute that we weren't",
+    "start": 1418.36,
+    "duration": 5.0
+  },
+  {
+    "text": "doing",
+    "start": 1421.12,
+    "duration": 2.24
+  },
+  {
+    "text": "before. There's many things you can do",
+    "start": 1424.84,
+    "duration": 3.64
+  },
+  {
+    "text": "to handle this kind of scale. And one of",
+    "start": 1426.72,
+    "duration": 4.52
+  },
+  {
+    "text": "them is by making sure you're",
+    "start": 1428.48,
+    "duration": 4.72
+  },
+  {
+    "text": "prepared. There's a bunch of stuff that",
+    "start": 1431.24,
+    "duration": 3.559
+  },
+  {
+    "text": "isn't engineering that will give you a",
+    "start": 1433.2,
+    "duration": 3.28
+  },
+  {
+    "text": "better chance of handling scale",
+    "start": 1434.799,
+    "duration": 3.841
+  },
+  {
+    "text": "effectively. Monitoring playbooks on",
+    "start": 1436.48,
+    "duration": 3.679
+  },
+  {
+    "text": "call processes. So these are all useful",
+    "start": 1438.64,
+    "duration": 4.039
+  },
+  {
+    "text": "tools in getting your team in the best",
+    "start": 1440.159,
+    "duration": 4.721
+  },
+  {
+    "text": "place to be able to handle these kind of",
+    "start": 1442.679,
+    "duration": 3.281
+  },
+  {
+    "text": "surges in",
+    "start": 1444.88,
+    "duration": 3.159
+  },
+  {
+    "text": "traffic. Pro",
+    "start": 1445.96,
+    "duration": 5.0
+  },
+  {
+    "text": "tip, have great visibility. Now speaking",
+    "start": 1448.039,
+    "duration": 4.841
+  },
+  {
+    "text": "from experience, having great visibility",
+    "start": 1450.96,
+    "duration": 3.079
+  },
+  {
+    "text": "is",
+    "start": 1452.88,
+    "duration": 3.44
+  },
+  {
+    "text": "compulsory. Measure your inputs, measure",
+    "start": 1454.039,
+    "duration": 3.961
+  },
+  {
+    "text": "your outputs, measure your response",
+    "start": 1456.32,
+    "duration": 3.28
+  },
+  {
+    "text": "codes, your response times, your cath",
+    "start": 1458.0,
+    "duration": 4.32
+  },
+  {
+    "text": "collag, your CPU usage, and then when",
+    "start": 1459.6,
+    "duration": 4.64
+  },
+  {
+    "text": "you've measured all of the things, put",
+    "start": 1462.32,
+    "duration": 4.56
+  },
+  {
+    "text": "them somewhere you can see them.",
+    "start": 1464.24,
+    "duration": 5.439
+  },
+  {
+    "text": "KWS we have uh we use data dog there are",
+    "start": 1466.88,
+    "duration": 5.12
+  },
+  {
+    "text": "plenty of tools available graphana etc",
+    "start": 1469.679,
+    "duration": 4.161
+  },
+  {
+    "text": "um but every service we have has like a",
+    "start": 1472.0,
+    "duration": 3.279
+  },
+  {
+    "text": "roll-up dashboard where you can see",
+    "start": 1473.84,
+    "duration": 2.88
+  },
+  {
+    "text": "what's going on at a high level you can",
+    "start": 1475.279,
+    "duration": 3.561
+  },
+  {
+    "text": "see if the service is",
+    "start": 1476.72,
+    "duration": 4.0
+  },
+  {
+    "text": "performing and then once you've got your",
+    "start": 1478.84,
+    "duration": 3.4
+  },
+  {
+    "text": "monitoring down and you can see what's",
+    "start": 1480.72,
+    "duration": 3.439
+  },
+  {
+    "text": "going on you take it a step further and",
+    "start": 1482.24,
+    "duration": 3.559
+  },
+  {
+    "text": "you can put in",
+    "start": 1484.159,
+    "duration": 4.4
+  },
+  {
+    "text": "alerting we'll set thresholds on metrics",
+    "start": 1485.799,
+    "duration": 5.961
+  },
+  {
+    "text": "for example um response times if we see",
+    "start": 1488.559,
+    "duration": 5.12
+  },
+  {
+    "text": "response times are going over what we",
+    "start": 1491.76,
+    "duration": 3.32
+  },
+  {
+    "text": "consider to be",
+    "start": 1493.679,
+    "duration": 4.0
+  },
+  {
+    "text": "reasonable data will send alert to Slack",
+    "start": 1495.08,
+    "duration": 4.199
+  },
+  {
+    "text": "and then we can triage that within the",
+    "start": 1497.679,
+    "duration": 3.521
+  },
+  {
+    "text": "team. We can investigate if that's a",
+    "start": 1499.279,
+    "duration": 4.561
+  },
+  {
+    "text": "problem, whether that's expected. And",
+    "start": 1501.2,
+    "duration": 5.24
+  },
+  {
+    "text": "then if you get really good at",
+    "start": 1503.84,
+    "duration": 4.88
+  },
+  {
+    "text": "this, you can alert yourself before",
+    "start": 1506.44,
+    "duration": 3.44
+  },
+  {
+    "text": "incidents",
+    "start": 1508.72,
+    "duration": 3.76
+  },
+  {
+    "text": "happen. If you get good experience, you",
+    "start": 1509.88,
+    "duration": 5.24
+  },
+  {
+    "text": "set extra thresholds in say Kevin, this",
+    "start": 1512.48,
+    "duration": 4.72
+  },
+  {
+    "text": "this isn't looking good. This is going",
+    "start": 1515.12,
+    "duration": 3.28
+  },
+  {
+    "text": "in the wrong direction. You might want",
+    "start": 1517.2,
+    "duration": 3.44
+  },
+  {
+    "text": "to look at this before it blows up. And",
+    "start": 1518.4,
+    "duration": 4.96
+  },
+  {
+    "text": "so good visibility monitors drive this",
+    "start": 1520.64,
+    "duration": 5.039
+  },
+  {
+    "text": "entire process of being able to detect",
+    "start": 1523.36,
+    "duration": 3.84
+  },
+  {
+    "text": "these problems and they help us know",
+    "start": 1525.679,
+    "duration": 3.24
+  },
+  {
+    "text": "what's happening on the",
+    "start": 1527.2,
+    "duration": 3.68
+  },
+  {
+    "text": "platform. And it does take time to get",
+    "start": 1528.919,
+    "duration": 4.201
+  },
+  {
+    "text": "these right. It takes constant tweaking.",
+    "start": 1530.88,
+    "duration": 4.32
+  },
+  {
+    "text": "Software changes over time. Requirements",
+    "start": 1533.12,
+    "duration": 4.48
+  },
+  {
+    "text": "change and you need to be constantly",
+    "start": 1535.2,
+    "duration": 4.0
+  },
+  {
+    "text": "tweaking these things to make sure",
+    "start": 1537.6,
+    "duration": 3.24
+  },
+  {
+    "text": "they're relevant and",
+    "start": 1539.2,
+    "duration": 4.079
+  },
+  {
+    "text": "accurate. There's no point having noisy",
+    "start": 1540.84,
+    "duration": 4.04
+  },
+  {
+    "text": "alerting going on because that's just as",
+    "start": 1543.279,
+    "duration": 4.801
+  },
+  {
+    "text": "bad as no alerting at all. People ignore",
+    "start": 1544.88,
+    "duration": 6.44
+  },
+  {
+    "text": "noisy alerts. That's no",
+    "start": 1548.08,
+    "duration": 5.44
+  },
+  {
+    "text": "good. And lastly, I just wanted to",
+    "start": 1551.32,
+    "duration": 3.04
+  },
+  {
+    "text": "mention",
+    "start": 1553.52,
+    "duration": 3.2
+  },
+  {
+    "text": "culture. I've seen teams do this stuff",
+    "start": 1554.36,
+    "duration": 4.84
+  },
+  {
+    "text": "really well, and I've seen teams not do",
+    "start": 1556.72,
+    "duration": 4.72
+  },
+  {
+    "text": "this stuff at all. And it's not",
+    "start": 1559.2,
+    "duration": 3.92
+  },
+  {
+    "text": "particularly hard doing this. Sending",
+    "start": 1561.44,
+    "duration": 3.4
+  },
+  {
+    "text": "some metrics is",
+    "start": 1563.12,
+    "duration": 4.4
+  },
+  {
+    "text": "trivial. Tools will wash all this stuff",
+    "start": 1564.84,
+    "duration": 4.68
+  },
+  {
+    "text": "up for you into dashboards and",
+    "start": 1567.52,
+    "duration": 3.84
+  },
+  {
+    "text": "integrations with communication",
+    "start": 1569.52,
+    "duration": 4.759
+  },
+  {
+    "text": "platforms is trivial. clicking some",
+    "start": 1571.36,
+    "duration": 6.24
+  },
+  {
+    "text": "buttons. But it takes time and it takes",
+    "start": 1574.279,
+    "duration": 5.721
+  },
+  {
+    "text": "effort to want to get it right. But the",
+    "start": 1577.6,
+    "duration": 4.28
+  },
+  {
+    "text": "value is",
+    "start": 1580.0,
+    "duration": 3.919
+  },
+  {
+    "text": "there. If you want to get the value out",
+    "start": 1581.88,
+    "duration": 3.64
+  },
+  {
+    "text": "of it, you need to put the time in to",
+    "start": 1583.919,
+    "duration": 3.441
+  },
+  {
+    "text": "make sure it's constantly working well",
+    "start": 1585.52,
+    "duration": 3.8
+  },
+  {
+    "text": "for you and",
+    "start": 1587.36,
+    "duration": 4.0
+  },
+  {
+    "text": "optimized. And this is just a quick",
+    "start": 1589.32,
+    "duration": 5.08
+  },
+  {
+    "text": "slide to show um essentially the",
+    "start": 1591.36,
+    "duration": 4.96
+  },
+  {
+    "text": "verification API, our rollup dashboard.",
+    "start": 1594.4,
+    "duration": 3.36
+  },
+  {
+    "text": "On the top left, we've got response",
+    "start": 1596.32,
+    "duration": 4.4
+  },
+  {
+    "text": "times. Below that, you've got um some uh",
+    "start": 1597.76,
+    "duration": 5.279
+  },
+  {
+    "text": "request levels. We've got some errors",
+    "start": 1600.72,
+    "duration": 4.16
+  },
+  {
+    "text": "which we've got no 500 errors in the",
+    "start": 1603.039,
+    "duration": 4.081
+  },
+  {
+    "text": "last 15 minutes which is nice and some",
+    "start": 1604.88,
+    "duration": 4.159
+  },
+  {
+    "text": "average response times there as well.",
+    "start": 1607.12,
+    "duration": 3.84
+  },
+  {
+    "text": "And at a glance I can see exactly what's",
+    "start": 1609.039,
+    "duration": 5.601
+  },
+  {
+    "text": "going on at service I can see there's no",
+    "start": 1610.96,
+    "duration": 3.68
+  },
+  {
+    "text": "problems. So when you're building a",
+    "start": 1616.12,
+    "duration": 3.96
+  },
+  {
+    "text": "platform that needs to scale and some of",
+    "start": 1618.0,
+    "duration": 4.36
+  },
+  {
+    "text": "the most important discussions you will",
+    "start": 1620.08,
+    "duration": 5.839
+  },
+  {
+    "text": "have are about choosing the right tools.",
+    "start": 1622.36,
+    "duration": 5.88
+  },
+  {
+    "text": "As software engineers every day we make",
+    "start": 1625.919,
+    "duration": 4.401
+  },
+  {
+    "text": "decisions over how our software is going",
+    "start": 1628.24,
+    "duration": 3.36
+  },
+  {
+    "text": "to work.",
+    "start": 1630.32,
+    "duration": 3.16
+  },
+  {
+    "text": "Sometimes we make big",
+    "start": 1631.6,
+    "duration": 3.92
+  },
+  {
+    "text": "decisions. Sometimes we're choosing the",
+    "start": 1633.48,
+    "duration": 4.52
+  },
+  {
+    "text": "tech for a new feature or we're choosing",
+    "start": 1635.52,
+    "duration": 4.159
+  },
+  {
+    "text": "the tech that we're going to migrate an",
+    "start": 1638.0,
+    "duration": 4.48
+  },
+  {
+    "text": "existing feature from. Do we choose the",
+    "start": 1639.679,
+    "duration": 5.281
+  },
+  {
+    "text": "new shiny stuff that's going on or do we",
+    "start": 1642.48,
+    "duration": 4.16
+  },
+  {
+    "text": "use the battle harden stuff that we know",
+    "start": 1644.96,
+    "duration": 4.079
+  },
+  {
+    "text": "works for us? Do you need performance",
+    "start": 1646.64,
+    "duration": 4.0
+  },
+  {
+    "text": "and reliability or do you need",
+    "start": 1649.039,
+    "duration": 4.0
+  },
+  {
+    "text": "flexibility and security? Or do you need",
+    "start": 1650.64,
+    "duration": 4.56
+  },
+  {
+    "text": "all of those things? Understand your",
+    "start": 1653.039,
+    "duration": 3.601
+  },
+  {
+    "text": "trade-offs when making these decisions",
+    "start": 1655.2,
+    "duration": 3.839
+  },
+  {
+    "text": "around your tooling. And if scaling is a",
+    "start": 1656.64,
+    "duration": 4.24
+  },
+  {
+    "text": "strong requirement for you, make sure",
+    "start": 1659.039,
+    "duration": 3.841
+  },
+  {
+    "text": "you factor that in. It's got to be part",
+    "start": 1660.88,
+    "duration": 4.88
+  },
+  {
+    "text": "of the conversation from the",
+    "start": 1662.88,
+    "duration": 2.88
+  },
+  {
+    "text": "get-go. Now, we did just this with the",
+    "start": 1665.88,
+    "duration": 4.96
+  },
+  {
+    "text": "database tech for this",
+    "start": 1669.12,
+    "duration": 3.919
+  },
+  {
+    "text": "service. If you're running a database,",
+    "start": 1670.84,
+    "duration": 3.48
+  },
+  {
+    "text": "chances are that's going to be high up",
+    "start": 1673.039,
+    "duration": 2.841
+  },
+  {
+    "text": "on your list of potential",
+    "start": 1674.32,
+    "duration": 3.52
+  },
+  {
+    "text": "bottlenecks. And at the center of our",
+    "start": 1675.88,
+    "duration": 4.279
+  },
+  {
+    "text": "content management service is a single",
+    "start": 1677.84,
+    "duration": 5.439
+  },
+  {
+    "text": "Dynamo DB table. Now this database",
+    "start": 1680.159,
+    "duration": 6.24
+  },
+  {
+    "text": "stores not only all the settings for any",
+    "start": 1683.279,
+    "duration": 5.841
+  },
+  {
+    "text": "given game for every kid but also the",
+    "start": 1686.399,
+    "duration": 4.561
+  },
+  {
+    "text": "limits the parent has set for the kid",
+    "start": 1689.12,
+    "duration": 3.52
+  },
+  {
+    "text": "and the value the kid has chosen for",
+    "start": 1690.96,
+    "duration": 4.079
+  },
+  {
+    "text": "that setting. And we also allow the",
+    "start": 1692.64,
+    "duration": 4.96
+  },
+  {
+    "text": "developer to set defaults and limits",
+    "start": 1695.039,
+    "duration": 4.0
+  },
+  {
+    "text": "which can vary by the geography of the",
+    "start": 1697.6,
+    "duration": 3.6
+  },
+  {
+    "text": "kid. And so the values which we return",
+    "start": 1699.039,
+    "duration": 5.841
+  },
+  {
+    "text": "for any given request for the account is",
+    "start": 1701.2,
+    "duration": 5.199
+  },
+  {
+    "text": "actually a combination of all these",
+    "start": 1704.88,
+    "duration": 2.76
+  },
+  {
+    "text": "different",
+    "start": 1706.399,
+    "duration": 3.361
+  },
+  {
+    "text": "settings. And as mentioned before, we",
+    "start": 1707.64,
+    "duration": 3.56
+  },
+  {
+    "text": "can get suddenly get an awful lot of",
+    "start": 1709.76,
+    "duration": 3.36
+  },
+  {
+    "text": "traffic. And so there's a lot of",
+    "start": 1711.2,
+    "duration": 3.599
+  },
+  {
+    "text": "critical stuff going on here. And these",
+    "start": 1713.12,
+    "duration": 4.24
+  },
+  {
+    "text": "settings cannot be wrong. These are",
+    "start": 1714.799,
+    "duration": 5.041
+  },
+  {
+    "text": "fundamental to making sure Fortnite",
+    "start": 1717.36,
+    "duration": 5.36
+  },
+  {
+    "text": "works correctly. And if it stops",
+    "start": 1719.84,
+    "duration": 6.64
+  },
+  {
+    "text": "working, you can't log into",
+    "start": 1722.72,
+    "duration": 3.76
+  },
+  {
+    "text": "Fortnite. So as I mentioned this in this",
+    "start": 1727.08,
+    "duration": 5.319
+  },
+  {
+    "text": "Dynamob table, uh we store user settings",
+    "start": 1729.679,
+    "duration": 5.841
+  },
+  {
+    "text": "for partners entire account systems for",
+    "start": 1732.399,
+    "duration": 5.041
+  },
+  {
+    "text": "hundreds of partners. We're we're",
+    "start": 1735.52,
+    "duration": 4.32
+  },
+  {
+    "text": "talking terabytes of data here and the",
+    "start": 1737.44,
+    "duration": 4.239
+  },
+  {
+    "text": "logic behind how we get to the responses",
+    "start": 1739.84,
+    "duration": 4.959
+  },
+  {
+    "text": "we serve. It's fairly complex, but it's",
+    "start": 1741.679,
+    "duration": 5.681
+  },
+  {
+    "text": "the sheer magnitude of data and the",
+    "start": 1744.799,
+    "duration": 4.081
+  },
+  {
+    "text": "performance requirement which led us",
+    "start": 1747.36,
+    "duration": 4.08
+  },
+  {
+    "text": "down the path of using a NoSQL solution",
+    "start": 1748.88,
+    "duration": 5.2
+  },
+  {
+    "text": "for content management. Dynamo's ability",
+    "start": 1751.44,
+    "duration": 4.959
+  },
+  {
+    "text": "to scale horizontally and and",
+    "start": 1754.08,
+    "duration": 6.0
+  },
+  {
+    "text": "limitlessly asterisk is is a huge draw.",
+    "start": 1756.399,
+    "duration": 5.361
+  },
+  {
+    "text": "And when we're designing a content",
+    "start": 1760.08,
+    "duration": 3.199
+  },
+  {
+    "text": "management system, we knew this thing",
+    "start": 1761.76,
+    "duration": 3.039
+  },
+  {
+    "text": "was going to have to scale. We spent a",
+    "start": 1763.279,
+    "duration": 3.601
+  },
+  {
+    "text": "lot of time working with our AWS account",
+    "start": 1764.799,
+    "duration": 4.161
+  },
+  {
+    "text": "managers to get understanding of things",
+    "start": 1766.88,
+    "duration": 4.519
+  },
+  {
+    "text": "like throttling, hot partitions,",
+    "start": 1768.96,
+    "duration": 5.319
+  },
+  {
+    "text": "sharding, and how their solution would",
+    "start": 1771.399,
+    "duration": 5.0
+  },
+  {
+    "text": "scale so we could be sure that it would",
+    "start": 1774.279,
+    "duration": 5.161
+  },
+  {
+    "text": "meet our requirements. And so far, it's",
+    "start": 1776.399,
+    "duration": 5.961
+  },
+  {
+    "text": "doing a great job and the",
+    "start": 1779.44,
+    "duration": 5.44
+  },
+  {
+    "text": "outcome. So, this is the Fortnite login",
+    "start": 1782.36,
+    "duration": 4.96
+  },
+  {
+    "text": "screen. Has anyone ever logged into",
+    "start": 1784.88,
+    "duration": 6.08
+  },
+  {
+    "text": "Fortnite? Few. So in the middle um in",
+    "start": 1787.32,
+    "duration": 6.44
+  },
+  {
+    "text": "the blue text login in and it's just at",
+    "start": 1790.96,
+    "duration": 4.56
+  },
+  {
+    "text": "the bottom sorry it's just at the bottom",
+    "start": 1793.76,
+    "duration": 3.68
+  },
+  {
+    "text": "uh in gray downloading supervised",
+    "start": 1795.52,
+    "duration": 3.92
+  },
+  {
+    "text": "settings and as you're logging in",
+    "start": 1797.44,
+    "duration": 4.08
+  },
+  {
+    "text": "different things flash up there when it",
+    "start": 1799.44,
+    "duration": 3.52
+  },
+  {
+    "text": "says downloading supervised settings",
+    "start": 1801.52,
+    "duration": 3.519
+  },
+  {
+    "text": "that's this that's our 20 milliseconds",
+    "start": 1802.96,
+    "duration": 4.76
+  },
+  {
+    "text": "of glory and if we're doing our job",
+    "start": 1805.039,
+    "duration": 6.64
+  },
+  {
+    "text": "properly you don't even notice",
+    "start": 1807.72,
+    "duration": 3.959
+  },
+  {
+    "text": "us. And just lastly on choosing the",
+    "start": 1812.44,
+    "duration": 3.959
+  },
+  {
+    "text": "right tools, this one you'll probably",
+    "start": 1814.72,
+    "duration": 4.839
+  },
+  {
+    "text": "only get one opportunity to make this",
+    "start": 1816.399,
+    "duration": 5.52
+  },
+  {
+    "text": "decision. If you're hosting on premises",
+    "start": 1819.559,
+    "duration": 5.0
+  },
+  {
+    "text": "or if you're hosting on metal, clearly",
+    "start": 1821.919,
+    "duration": 4.321
+  },
+  {
+    "text": "your scaling strategy is going to look a",
+    "start": 1824.559,
+    "duration": 3.201
+  },
+  {
+    "text": "lot different to mine. You're going to",
+    "start": 1826.24,
+    "duration": 2.4
+  },
+  {
+    "text": "need to have all your hardware",
+    "start": 1827.76,
+    "duration": 2.56
+  },
+  {
+    "text": "provisioned up front, but generally",
+    "start": 1828.64,
+    "duration": 4.08
+  },
+  {
+    "text": "you're probably using a cloud provider.",
+    "start": 1830.32,
+    "duration": 4.959
+  },
+  {
+    "text": "How much control do you need over the",
+    "start": 1832.72,
+    "duration": 4.0
+  },
+  {
+    "text": "hardware? Do your DevOps guys like",
+    "start": 1835.279,
+    "duration": 3.52
+  },
+  {
+    "text": "tinkering or does your software run out",
+    "start": 1836.72,
+    "duration": 3.839
+  },
+  {
+    "text": "of the box? Now, as I mentioned earlier,",
+    "start": 1838.799,
+    "duration": 4.48
+  },
+  {
+    "text": "we're hosted out of AWS. And yes, being",
+    "start": 1840.559,
+    "duration": 5.84
+  },
+  {
+    "text": "such a big user of AWS, we get a lot of",
+    "start": 1843.279,
+    "duration": 4.561
+  },
+  {
+    "text": "support from our account managers. But",
+    "start": 1846.399,
+    "duration": 3.121
+  },
+  {
+    "text": "the biggest thing I can say about",
+    "start": 1847.84,
+    "duration": 3.28
+  },
+  {
+    "text": "hosting with one of the biggest cloud",
+    "start": 1849.52,
+    "duration": 3.84
+  },
+  {
+    "text": "providers is their ability to give us as",
+    "start": 1851.12,
+    "duration": 5.12
+  },
+  {
+    "text": "much scale as we need. We literally take",
+    "start": 1853.36,
+    "duration": 7.12
+  },
+  {
+    "text": "it and then when we're done, we give it",
+    "start": 1856.24,
+    "duration": 4.24
+  },
+  {
+    "text": "back testing at scale. So, one thing we",
+    "start": 1862.44,
+    "duration": 5.56
+  },
+  {
+    "text": "do a lot on our core products is load",
+    "start": 1865.76,
+    "duration": 5.279
+  },
+  {
+    "text": "testing. And we're lucky at KS in that",
+    "start": 1868.0,
+    "duration": 5.12
+  },
+  {
+    "text": "we can create our staging environment",
+    "start": 1871.039,
+    "duration": 4.0
+  },
+  {
+    "text": "and we can make staging look like",
+    "start": 1873.12,
+    "duration": 4.08
+  },
+  {
+    "text": "production. So we can load test against",
+    "start": 1875.039,
+    "duration": 4.801
+  },
+  {
+    "text": "staging without impacting customers.",
+    "start": 1877.2,
+    "duration": 4.32
+  },
+  {
+    "text": "What we'll do is we'll pull down the",
+    "start": 1879.84,
+    "duration": 3.28
+  },
+  {
+    "text": "configuration from production and we'll",
+    "start": 1881.52,
+    "duration": 4.399
+  },
+  {
+    "text": "scale up staging so it looks as much",
+    "start": 1883.12,
+    "duration": 4.88
+  },
+  {
+    "text": "like production as possible. If we got a",
+    "start": 1885.919,
+    "duration": 3.841
+  },
+  {
+    "text": "database in production that has hundreds",
+    "start": 1888.0,
+    "duration": 3.279
+  },
+  {
+    "text": "of millions of records in it, we'll",
+    "start": 1889.76,
+    "duration": 3.44
+  },
+  {
+    "text": "recreate that in staging as well to try",
+    "start": 1891.279,
+    "duration": 4.0
+  },
+  {
+    "text": "and recreate what production looks like",
+    "start": 1893.2,
+    "duration": 6.44
+  },
+  {
+    "text": "and simulate actual behavior.",
+    "start": 1895.279,
+    "duration": 4.361
+  },
+  {
+    "text": "We'll mock out downstream",
+    "start": 1899.84,
+    "duration": 3.6
+  },
+  {
+    "text": "dependencies. If we're send if we're",
+    "start": 1901.559,
+    "duration": 3.24
+  },
+  {
+    "text": "firing a load test that fires billions",
+    "start": 1903.44,
+    "duration": 3.2
+  },
+  {
+    "text": "of requests at our API, we don't want to",
+    "start": 1904.799,
+    "duration": 3.36
+  },
+  {
+    "text": "send billions of emails. That's no use",
+    "start": 1906.64,
+    "duration": 3.36
+  },
+  {
+    "text": "to anyone, but we still want to simulate",
+    "start": 1908.159,
+    "duration": 3.681
+  },
+  {
+    "text": "that happening. So, we'll mock that out",
+    "start": 1910.0,
+    "duration": 4.72
+  },
+  {
+    "text": "and we can we can set variable latencies",
+    "start": 1911.84,
+    "duration": 5.12
+  },
+  {
+    "text": "or response times on responses from that",
+    "start": 1914.72,
+    "duration": 5.76
+  },
+  {
+    "text": "service. We can even simulate complete",
+    "start": 1916.96,
+    "duration": 5.76
+  },
+  {
+    "text": "failure and simulate how the rest of the",
+    "start": 1920.48,
+    "duration": 4.4
+  },
+  {
+    "text": "service and the platform will work under",
+    "start": 1922.72,
+    "duration": 3.6
+  },
+  {
+    "text": "those conditions as well. So being able",
+    "start": 1924.88,
+    "duration": 3.2
+  },
+  {
+    "text": "to mock out downstream dependencies is",
+    "start": 1926.32,
+    "duration": 3.32
+  },
+  {
+    "text": "really useful in these",
+    "start": 1928.08,
+    "duration": 3.52
+  },
+  {
+    "text": "circumstances. And we built some tooling",
+    "start": 1929.64,
+    "duration": 3.24
+  },
+  {
+    "text": "that can generate a frightening amount",
+    "start": 1931.6,
+    "duration": 3.76
+  },
+  {
+    "text": "of traffic. So when we're ready to run",
+    "start": 1932.88,
+    "duration": 4.88
+  },
+  {
+    "text": "the load test, we scaled up staging.",
+    "start": 1935.36,
+    "duration": 4.48
+  },
+  {
+    "text": "We'll kick off the load test. We'll pull",
+    "start": 1937.76,
+    "duration": 4.08
+  },
+  {
+    "text": "up the telemetry. We get a cup of tea,",
+    "start": 1939.84,
+    "duration": 4.64
+  },
+  {
+    "text": "put our feet up, and then we'll watch",
+    "start": 1941.84,
+    "duration": 5.199
+  },
+  {
+    "text": "what happens or we'll probably do some",
+    "start": 1944.48,
+    "duration": 4.039
+  },
+  {
+    "text": "other work while it's",
+    "start": 1947.039,
+    "duration": 3.441
+  },
+  {
+    "text": "happening. And then you can see the",
+    "start": 1948.519,
+    "duration": 3.801
+  },
+  {
+    "text": "metrics. You can see how it scales, how",
+    "start": 1950.48,
+    "duration": 3.6
+  },
+  {
+    "text": "the platform grows, how the response",
+    "start": 1952.32,
+    "duration": 3.839
+  },
+  {
+    "text": "times change. And we can bring traffic",
+    "start": 1954.08,
+    "duration": 3.52
+  },
+  {
+    "text": "up to a certain level. We can hold it",
+    "start": 1956.159,
+    "duration": 4.561
+  },
+  {
+    "text": "there for minutes, hours. We can look",
+    "start": 1957.6,
+    "duration": 4.64
+  },
+  {
+    "text": "for problems that manifest over time,",
+    "start": 1960.72,
+    "duration": 4.079
+  },
+  {
+    "text": "memory leaks, database bottlenecks, all",
+    "start": 1962.24,
+    "duration": 5.039
+  },
+  {
+    "text": "these sort of things. We check error",
+    "start": 1964.799,
+    "duration": 5.76
+  },
+  {
+    "text": "rates. We check our CPU usage. And then",
+    "start": 1967.279,
+    "duration": 4.64
+  },
+  {
+    "text": "when the test is done, we scale back",
+    "start": 1970.559,
+    "duration": 2.96
+  },
+  {
+    "text": "down again and we can go away and we can",
+    "start": 1971.919,
+    "duration": 3.041
+  },
+  {
+    "text": "debug everything. We get up our",
+    "start": 1973.519,
+    "duration": 3.441
+  },
+  {
+    "text": "telemetry and we can then dig further",
+    "start": 1974.96,
+    "duration": 4.24
+  },
+  {
+    "text": "into any issues we saw in the load test.",
+    "start": 1976.96,
+    "duration": 4.48
+  },
+  {
+    "text": "And then should we find issues, we fix",
+    "start": 1979.2,
+    "duration": 3.92
+  },
+  {
+    "text": "them. And then we run the load test",
+    "start": 1981.44,
+    "duration": 3.599
+  },
+  {
+    "text": "again and we can confirm that we've",
+    "start": 1983.12,
+    "duration": 4.48
+  },
+  {
+    "text": "solved the problem. So we know when",
+    "start": 1985.039,
+    "duration": 5.201
+  },
+  {
+    "text": "traffic comes our way, we can hit",
+    "start": 1987.6,
+    "duration": 4.079
+  },
+  {
+    "text": "certain levels and we're going to be",
+    "start": 1990.24,
+    "duration": 4.88
+  },
+  {
+    "text": "stable. We don't get any nasty",
+    "start": 1991.679,
+    "duration": 3.441
+  },
+  {
+    "text": "surprises. So for our content management",
+    "start": 1996.679,
+    "duration": 4.441
+  },
+  {
+    "text": "product, typically we see around 20,000",
+    "start": 1998.96,
+    "duration": 4.319
+  },
+  {
+    "text": "requests per second and we've load",
+    "start": 2001.12,
+    "duration": 4.72
+  },
+  {
+    "text": "tested up to 350,000 requests a second,",
+    "start": 2003.279,
+    "duration": 5.441
+  },
+  {
+    "text": "which is a 17.5x increase in traffic we",
+    "start": 2005.84,
+    "duration": 5.439
+  },
+  {
+    "text": "know we can handle in this service. And",
+    "start": 2008.72,
+    "duration": 3.959
+  },
+  {
+    "text": "that just gives us",
+    "start": 2011.279,
+    "duration": 3.52
+  },
+  {
+    "text": "confidence that we don't drop the ball",
+    "start": 2012.679,
+    "duration": 4.681
+  },
+  {
+    "text": "when the time",
+    "start": 2014.799,
+    "duration": 2.561
+  },
+  {
+    "text": "comes. Now, this is my favorite slide.",
+    "start": 2018.2,
+    "duration": 3.24
+  },
+  {
+    "text": "When I started writing this deck, this",
+    "start": 2020.159,
+    "duration": 2.4
+  },
+  {
+    "text": "was probably one of the first slides I",
+    "start": 2021.44,
+    "duration": 2.719
+  },
+  {
+    "text": "put in. And I want to share a couple of",
+    "start": 2022.559,
+    "duration": 3.161
+  },
+  {
+    "text": "stories just",
+    "start": 2024.159,
+    "duration": 3.921
+  },
+  {
+    "text": "around things breaking when you're not",
+    "start": 2025.72,
+    "duration": 5.079
+  },
+  {
+    "text": "expecting them to. In a couple of the",
+    "start": 2028.08,
+    "duration": 4.719
+  },
+  {
+    "text": "early runs of running load tests against",
+    "start": 2030.799,
+    "duration": 4.161
+  },
+  {
+    "text": "the service,",
+    "start": 2032.799,
+    "duration": 4.88
+  },
+  {
+    "text": "uh I remember one we we ran out of CFKA",
+    "start": 2034.96,
+    "duration": 4.64
+  },
+  {
+    "text": "disc space. Um, in another one we blew",
+    "start": 2037.679,
+    "duration": 3.281
+  },
+  {
+    "text": "up the all server. Literally just",
+    "start": 2039.6,
+    "duration": 2.88
+  },
+  {
+    "text": "couldn't handle the volume of requests",
+    "start": 2040.96,
+    "duration": 4.76
+  },
+  {
+    "text": "we're sending at it. In another test, we",
+    "start": 2042.48,
+    "duration": 5.84
+  },
+  {
+    "text": "were we couldn't provision enough pods",
+    "start": 2045.72,
+    "duration": 5.159
+  },
+  {
+    "text": "to serve the traffic. We clearly had",
+    "start": 2048.32,
+    "duration": 4.079
+  },
+  {
+    "text": "headroom, but it just wasn't getting up",
+    "start": 2050.879,
+    "duration": 3.04
+  },
+  {
+    "text": "there. So, we took that away. We",
+    "start": 2052.399,
+    "duration": 2.72
+  },
+  {
+    "text": "debugged it. We found out we were",
+    "start": 2053.919,
+    "duration": 3.881
+  },
+  {
+    "text": "hitting max IP limits on the cluster.",
+    "start": 2055.119,
+    "duration": 5.28
+  },
+  {
+    "text": "Now, just by doing these tests, we",
+    "start": 2057.8,
+    "duration": 4.599
+  },
+  {
+    "text": "managed to find and fix a bunch of",
+    "start": 2060.399,
+    "duration": 3.68
+  },
+  {
+    "text": "problems that would have happened in",
+    "start": 2062.399,
+    "duration": 4.081
+  },
+  {
+    "text": "production at some stage. You do not",
+    "start": 2064.079,
+    "duration": 3.681
+  },
+  {
+    "text": "want to be finding these things in",
+    "start": 2066.48,
+    "duration": 3.119
+  },
+  {
+    "text": "production when you're running hot. That",
+    "start": 2067.76,
+    "duration": 4.079
+  },
+  {
+    "text": "is",
+    "start": 2069.599,
+    "duration": 2.24
+  },
+  {
+    "text": "terrifying. Pro",
+    "start": 2073.24,
+    "duration": 5.96
+  },
+  {
+    "text": "tip, optimize your most important calls.",
+    "start": 2075.079,
+    "duration": 5.56
+  },
+  {
+    "text": "So, we've already discussed knowing your",
+    "start": 2079.2,
+    "duration": 3.76
+  },
+  {
+    "text": "traffic patterns, and this takes it one",
+    "start": 2080.639,
+    "duration": 4.561
+  },
+  {
+    "text": "step further. When you know your",
+    "start": 2082.96,
+    "duration": 4.48
+  },
+  {
+    "text": "critical path or paths, focus on making",
+    "start": 2085.2,
+    "duration": 4.479
+  },
+  {
+    "text": "those good first. These are the ones",
+    "start": 2087.44,
+    "duration": 3.479
+  },
+  {
+    "text": "that are most likely to cause you",
+    "start": 2089.679,
+    "duration": 3.521
+  },
+  {
+    "text": "problems. Understand what's happening on",
+    "start": 2090.919,
+    "duration": 4.121
+  },
+  {
+    "text": "those calls.",
+    "start": 2093.2,
+    "duration": 3.919
+  },
+  {
+    "text": "When is the IO happening? Are the",
+    "start": 2095.04,
+    "duration": 4.559
+  },
+  {
+    "text": "dependencies working efficiently? Is",
+    "start": 2097.119,
+    "duration": 4.0
+  },
+  {
+    "text": "there any waste happening? Is the",
+    "start": 2099.599,
+    "duration": 3.681
+  },
+  {
+    "text": "database are the database calls",
+    "start": 2101.119,
+    "duration": 4.401
+  },
+  {
+    "text": "optimized? Get out your slow query log.",
+    "start": 2103.28,
+    "duration": 4.64
+  },
+  {
+    "text": "Run your query profiling. Get those",
+    "start": 2105.52,
+    "duration": 3.839
+  },
+  {
+    "text": "metrics dashboards up. Is the cache",
+    "start": 2107.92,
+    "duration": 3.84
+  },
+  {
+    "text": "working",
+    "start": 2109.359,
+    "duration": 2.401
+  },
+  {
+    "text": "efficiently? Can we do that",
+    "start": 2111.8,
+    "duration": 5.24
+  },
+  {
+    "text": "later? This one's brilliant. Can we do",
+    "start": 2114.44,
+    "duration": 3.96
+  },
+  {
+    "text": "that later? If you have some processing",
+    "start": 2117.04,
+    "duration": 3.6
+  },
+  {
+    "text": "that happens on a critical path call, do",
+    "start": 2118.4,
+    "duration": 5.28
+  },
+  {
+    "text": "you need to do it now? If the goal is to",
+    "start": 2120.64,
+    "duration": 4.56
+  },
+  {
+    "text": "make things scale and you want to",
+    "start": 2123.68,
+    "duration": 3.52
+  },
+  {
+    "text": "respond to the client as quickly as",
+    "start": 2125.2,
+    "duration": 3.44
+  },
+  {
+    "text": "possible, is there anything you can",
+    "start": 2127.2,
+    "duration": 2.52
+  },
+  {
+    "text": "strip out of",
+    "start": 2128.64,
+    "duration": 4.16
+  },
+  {
+    "text": "there? One example, we send emails a lot",
+    "start": 2129.72,
+    "duration": 5.32
+  },
+  {
+    "text": "of the time, but we don't need to send",
+    "start": 2132.8,
+    "duration": 5.6
+  },
+  {
+    "text": "emails when the request happens. We rip",
+    "start": 2135.04,
+    "duration": 4.96
+  },
+  {
+    "text": "it out of the code and we'll do it",
+    "start": 2138.4,
+    "duration": 3.36
+  },
+  {
+    "text": "later. Doesn't have to be much later. It",
+    "start": 2140.0,
+    "duration": 3.839
+  },
+  {
+    "text": "can be seconds later or minutes later,",
+    "start": 2141.76,
+    "duration": 3.359
+  },
+  {
+    "text": "but simply by removing it from the",
+    "start": 2143.839,
+    "duration": 3.801
+  },
+  {
+    "text": "critical path and doing that job",
+    "start": 2145.119,
+    "duration": 4.401
+  },
+  {
+    "text": "elsewhere means it's less of a",
+    "start": 2147.64,
+    "duration": 3.56
+  },
+  {
+    "text": "bottleneck. Means we perform a lot",
+    "start": 2149.52,
+    "duration": 4.319
+  },
+  {
+    "text": "better.",
+    "start": 2151.2,
+    "duration": 2.639
+  },
+  {
+    "text": "And this is one of my favorite things as",
+    "start": 2154.8,
+    "duration": 2.72
+  },
+  {
+    "text": "an engineer. I'm sure there's plenty of",
+    "start": 2156.16,
+    "duration": 3.439
+  },
+  {
+    "text": "you out there who will agree. Can I go",
+    "start": 2157.52,
+    "duration": 3.599
+  },
+  {
+    "text": "through the flow with the goal of",
+    "start": 2159.599,
+    "duration": 3.76
+  },
+  {
+    "text": "improving the efficiency of it? This",
+    "start": 2161.119,
+    "duration": 3.96
+  },
+  {
+    "text": "could be profiling the codebase to find",
+    "start": 2163.359,
+    "duration": 5.921
+  },
+  {
+    "text": "out memory intensive uh functions. This",
+    "start": 2165.079,
+    "duration": 6.361
+  },
+  {
+    "text": "could be making call order optimizations",
+    "start": 2169.28,
+    "duration": 4.559
+  },
+  {
+    "text": "or choosing to do a certain event later.",
+    "start": 2171.44,
+    "duration": 4.08
+  },
+  {
+    "text": "Uh rewriting that for loop that's been",
+    "start": 2173.839,
+    "duration": 3.0
+  },
+  {
+    "text": "looking at you for",
+    "start": 2175.52,
+    "duration": 5.72
+  },
+  {
+    "text": "months. All good engineering.",
+    "start": 2176.839,
+    "duration": 4.401
+  },
+  {
+    "text": "This is my favorite saying. Probably",
+    "start": 2182.8,
+    "duration": 4.76
+  },
+  {
+    "text": "sounds really sad, but I do actually say",
+    "start": 2184.56,
+    "duration": 5.12
+  },
+  {
+    "text": "this. I want to talk a bit about keeping",
+    "start": 2187.56,
+    "duration": 5.08
+  },
+  {
+    "text": "it simple. As engineers, we love to",
+    "start": 2189.68,
+    "duration": 5.76
+  },
+  {
+    "text": "write code. I got into coding because I",
+    "start": 2192.64,
+    "duration": 4.68
+  },
+  {
+    "text": "like solving problems with",
+    "start": 2195.44,
+    "duration": 4.6
+  },
+  {
+    "text": "code. And we love making smart",
+    "start": 2197.32,
+    "duration": 4.759
+  },
+  {
+    "text": "abstractions. Look at this really cool",
+    "start": 2200.04,
+    "duration": 4.12
+  },
+  {
+    "text": "inheritance trio created. It is a work",
+    "start": 2202.079,
+    "duration": 4.681
+  },
+  {
+    "text": "of art. Yes, that is",
+    "start": 2204.16,
+    "duration": 4.72
+  },
+  {
+    "text": "fantastic. But over time, solutions get",
+    "start": 2206.76,
+    "duration": 3.64
+  },
+  {
+    "text": "muddy. The guy who wrote that",
+    "start": 2208.88,
+    "duration": 3.44
+  },
+  {
+    "text": "inheritance inheritance tree, he left",
+    "start": 2210.4,
+    "duration": 4.04
+  },
+  {
+    "text": "three weeks ago and nobody knows how it",
+    "start": 2212.32,
+    "duration": 4.64
+  },
+  {
+    "text": "works. New features are added,",
+    "start": 2214.44,
+    "duration": 5.639
+  },
+  {
+    "text": "requirements change, shortcuts happen,",
+    "start": 2216.96,
+    "duration": 5.08
+  },
+  {
+    "text": "refactoring doesn't",
+    "start": 2220.079,
+    "duration": 4.561
+  },
+  {
+    "text": "happen. Inevitably, our services get",
+    "start": 2222.04,
+    "duration": 3.96
+  },
+  {
+    "text": "more complex over time. I don't think",
+    "start": 2224.64,
+    "duration": 2.719
+  },
+  {
+    "text": "I've ever worked on a service that",
+    "start": 2226.0,
+    "duration": 4.16
+  },
+  {
+    "text": "doesn't get more complex over time. And",
+    "start": 2227.359,
+    "duration": 4.521
+  },
+  {
+    "text": "that complexity comes at a",
+    "start": 2230.16,
+    "duration": 4.56
+  },
+  {
+    "text": "cost. Scaling complex architectures is",
+    "start": 2231.88,
+    "duration": 6.84
+  },
+  {
+    "text": "in itself complex, but also expensive.",
+    "start": 2234.72,
+    "duration": 6.16
+  },
+  {
+    "text": "And as I mentioned earlier, try to avoid",
+    "start": 2238.72,
+    "duration": 3.6
+  },
+  {
+    "text": "things like having multiple layers of",
+    "start": 2240.88,
+    "duration": 3.52
+  },
+  {
+    "text": "caching. It just makes it more complex.",
+    "start": 2242.32,
+    "duration": 5.36
+  },
+  {
+    "text": "And complex makes other things complex.",
+    "start": 2244.4,
+    "duration": 5.679
+  },
+  {
+    "text": "Keep it",
+    "start": 2247.68,
+    "duration": 2.399
+  },
+  {
+    "text": "simple. Another technique we sometimes",
+    "start": 2250.92,
+    "duration": 4.199
+  },
+  {
+    "text": "employ at KWS is pre-warming our",
+    "start": 2253.04,
+    "duration": 4.0
+  },
+  {
+    "text": "services. And one advantage of knowing",
+    "start": 2255.119,
+    "duration": 3.761
+  },
+  {
+    "text": "when we've got big events coming up is",
+    "start": 2257.04,
+    "duration": 3.6
+  },
+  {
+    "text": "that we can better prepare ourselves for",
+    "start": 2258.88,
+    "duration": 3.76
+  },
+  {
+    "text": "when that traffic does come. And to give",
+    "start": 2260.64,
+    "duration": 3.28
+  },
+  {
+    "text": "ourselves the best chance of handling",
+    "start": 2262.64,
+    "duration": 3.6
+  },
+  {
+    "text": "that scale, we can provision hardware",
+    "start": 2263.92,
+    "duration": 4.919
+  },
+  {
+    "text": "ahead of time. And that's called",
+    "start": 2266.24,
+    "duration": 4.48
+  },
+  {
+    "text": "pre-warming. We'll take the numbers of",
+    "start": 2268.839,
+    "duration": 4.601
+  },
+  {
+    "text": "anticipated users which we get ahead of",
+    "start": 2270.72,
+    "duration": 5.04
+  },
+  {
+    "text": "the launch. We'll translate that into a",
+    "start": 2273.44,
+    "duration": 5.08
+  },
+  {
+    "text": "projected load on each of our",
+    "start": 2275.76,
+    "duration": 4.8
+  },
+  {
+    "text": "services. We'll model the data. We'll",
+    "start": 2278.52,
+    "duration": 4.76
+  },
+  {
+    "text": "then run a load test and should we see",
+    "start": 2280.56,
+    "duration": 5.559
+  },
+  {
+    "text": "any holes or anything that needs to",
+    "start": 2283.28,
+    "duration": 5.52
+  },
+  {
+    "text": "be well have more pods provisioned for",
+    "start": 2286.119,
+    "duration": 5.321
+  },
+  {
+    "text": "the launch. But a couple of days before",
+    "start": 2288.8,
+    "duration": 4.88
+  },
+  {
+    "text": "the launch, we'll go into the config and",
+    "start": 2291.44,
+    "duration": 4.399
+  },
+  {
+    "text": "we'll provision more manually ahead of",
+    "start": 2293.68,
+    "duration": 4.919
+  },
+  {
+    "text": "time. So those services are ready to",
+    "start": 2295.839,
+    "duration": 5.28
+  },
+  {
+    "text": "go. If our marketing team or whoever it",
+    "start": 2298.599,
+    "duration": 5.801
+  },
+  {
+    "text": "is has spent a lot of time pulling in a",
+    "start": 2301.119,
+    "duration": 5.361
+  },
+  {
+    "text": "bunch more traffic, you do not want to",
+    "start": 2304.4,
+    "duration": 4.32
+  },
+  {
+    "text": "be dropping the ball on that. Be as",
+    "start": 2306.48,
+    "duration": 4.879
+  },
+  {
+    "text": "ready as you can. And you can use",
+    "start": 2308.72,
+    "duration": 3.92
+  },
+  {
+    "text": "pre-warming. You could even apply the",
+    "start": 2311.359,
+    "duration": 2.801
+  },
+  {
+    "text": "same concept to your cache as well. You",
+    "start": 2312.64,
+    "duration": 3.12
+  },
+  {
+    "text": "can pre-populate your cache with a bunch",
+    "start": 2314.16,
+    "duration": 4.32
+  },
+  {
+    "text": "of data. Same kind of idea um if that's",
+    "start": 2315.76,
+    "duration": 6.359
+  },
+  {
+    "text": "feasible for you.",
+    "start": 2318.48,
+    "duration": 3.639
+  },
+  {
+    "text": "scaling your infrastructure and this can",
+    "start": 2322.88,
+    "duration": 3.76
+  },
+  {
+    "text": "be known as vertical or horizontal",
+    "start": 2325.28,
+    "duration": 3.839
+  },
+  {
+    "text": "scaling. Uh vertical scaling it's",
+    "start": 2326.64,
+    "duration": 4.4
+  },
+  {
+    "text": "increasing the size of individual",
+    "start": 2329.119,
+    "duration": 4.121
+  },
+  {
+    "text": "instances. So a relational database for",
+    "start": 2331.04,
+    "duration": 4.48
+  },
+  {
+    "text": "example and then horizontal scaling is",
+    "start": 2333.24,
+    "duration": 4.44
+  },
+  {
+    "text": "adding more of the same uh instances",
+    "start": 2335.52,
+    "duration": 4.2
+  },
+  {
+    "text": "into your pool running the same",
+    "start": 2337.68,
+    "duration": 4.24
+  },
+  {
+    "text": "service. And this is the bit which most",
+    "start": 2339.72,
+    "duration": 4.44
+  },
+  {
+    "text": "people think about when talking about",
+    "start": 2341.92,
+    "duration": 4.32
+  },
+  {
+    "text": "scaling, adding more servers, increasing",
+    "start": 2344.16,
+    "duration": 4.919
+  },
+  {
+    "text": "the throughput in having a more powerful",
+    "start": 2346.24,
+    "duration": 4.8
+  },
+  {
+    "text": "database. But there's a lot more to it",
+    "start": 2349.079,
+    "duration": 4.04
+  },
+  {
+    "text": "than that. Of course there is. If you",
+    "start": 2351.04,
+    "duration": 4.0
+  },
+  {
+    "text": "were running, let's say, 10 pods in your",
+    "start": 2353.119,
+    "duration": 3.681
+  },
+  {
+    "text": "cluster and you get a sudden sustained",
+    "start": 2355.04,
+    "duration": 5.52
+  },
+  {
+    "text": "rush in traffic. What happens",
+    "start": 2356.8,
+    "duration": 3.76
+  },
+  {
+    "text": "next? Ideally, you want to automatically",
+    "start": 2360.92,
+    "duration": 4.52
+  },
+  {
+    "text": "provision more pods and probably quite",
+    "start": 2363.2,
+    "duration": 4.24
+  },
+  {
+    "text": "fast. And you should know ahead of time",
+    "start": 2365.44,
+    "duration": 3.2
+  },
+  {
+    "text": "which services are going to need to",
+    "start": 2367.44,
+    "duration": 2.88
+  },
+  {
+    "text": "scale and how they scale. You should",
+    "start": 2368.64,
+    "duration": 4.88
+  },
+  {
+    "text": "have plans tailored for every service so",
+    "start": 2370.32,
+    "duration": 5.6
+  },
+  {
+    "text": "that they all scale individually.",
+    "start": 2373.52,
+    "duration": 4.16
+  },
+  {
+    "text": "Especially in a microser environment,",
+    "start": 2375.92,
+    "duration": 2.96
+  },
+  {
+    "text": "some of your services are going to be",
+    "start": 2377.68,
+    "duration": 2.8
+  },
+  {
+    "text": "read heavy. Some are going to do a lot",
+    "start": 2378.88,
+    "duration": 4.16
+  },
+  {
+    "text": "of processing and some are going to do",
+    "start": 2380.48,
+    "duration": 6.48
+  },
+  {
+    "text": "different things. No scale, no service",
+    "start": 2383.04,
+    "duration": 7.2
+  },
+  {
+    "text": "scales equally. So making sure each one",
+    "start": 2386.96,
+    "duration": 6.24
+  },
+  {
+    "text": "scales effectively is the goal here. You",
+    "start": 2390.24,
+    "duration": 4.04
+  },
+  {
+    "text": "don't want to be",
+    "start": 2393.2,
+    "duration": 2.96
+  },
+  {
+    "text": "overprovisioning services where you",
+    "start": 2394.28,
+    "duration": 3.64
+  },
+  {
+    "text": "don't need to. That's just basically",
+    "start": 2396.16,
+    "duration": 3.48
+  },
+  {
+    "text": "burning",
+    "start": 2397.92,
+    "duration": 3.919
+  },
+  {
+    "text": "money. Now if you're hosted out of a",
+    "start": 2399.64,
+    "duration": 4.439
+  },
+  {
+    "text": "cloud provider, obviously these things",
+    "start": 2401.839,
+    "duration": 4.641
+  },
+  {
+    "text": "are a lot easier to achieve than if you",
+    "start": 2404.079,
+    "duration": 6.241
+  },
+  {
+    "text": "need your hardware provision up front.",
+    "start": 2406.48,
+    "duration": 5.52
+  },
+  {
+    "text": "And to give you an idea of how content",
+    "start": 2410.32,
+    "duration": 3.6
+  },
+  {
+    "text": "management scales, our current load test",
+    "start": 2412.0,
+    "duration": 4.0
+  },
+  {
+    "text": "ceiling will sit us at around 6,000 pods",
+    "start": 2413.92,
+    "duration": 3.84
+  },
+  {
+    "text": "in our Kubernetes cluster. Obviously, we",
+    "start": 2416.0,
+    "duration": 3.04
+  },
+  {
+    "text": "try not to leave that sort of provision",
+    "start": 2417.76,
+    "duration": 3.359
+  },
+  {
+    "text": "lying around uh for too long as cost me",
+    "start": 2419.04,
+    "duration": 4.16
+  },
+  {
+    "text": "up quickly. But when you're super busy,",
+    "start": 2421.119,
+    "duration": 4.121
+  },
+  {
+    "text": "having reliability in the platform",
+    "start": 2423.2,
+    "duration": 5.28
+  },
+  {
+    "text": "justifies the scale. You do not want to",
+    "start": 2425.24,
+    "duration": 5.599
+  },
+  {
+    "text": "be dropping your",
+    "start": 2428.48,
+    "duration": 4.359
+  },
+  {
+    "text": "traffic. A pro",
+    "start": 2430.839,
+    "duration": 4.681
+  },
+  {
+    "text": "tip, scaling your infrastructure is the",
+    "start": 2432.839,
+    "duration": 5.401
+  },
+  {
+    "text": "absolute last thing you should be doing.",
+    "start": 2435.52,
+    "duration": 4.24
+  },
+  {
+    "text": "As I said, it's often the first thing",
+    "start": 2438.24,
+    "duration": 3.04
+  },
+  {
+    "text": "people think about when we're talking",
+    "start": 2439.76,
+    "duration": 2.28
+  },
+  {
+    "text": "about",
+    "start": 2441.28,
+    "duration": 3.04
+  },
+  {
+    "text": "scaling. And if you've done everything",
+    "start": 2442.04,
+    "duration": 4.2
+  },
+  {
+    "text": "else that we've already discussed here",
+    "start": 2444.32,
+    "duration": 3.68
+  },
+  {
+    "text": "today, only then is it a good time to",
+    "start": 2446.24,
+    "duration": 2.879
+  },
+  {
+    "text": "think about how you scale your",
+    "start": 2448.0,
+    "duration": 2.48
+  },
+  {
+    "text": "infrastructure. Scaling your",
+    "start": 2449.119,
+    "duration": 3.361
+  },
+  {
+    "text": "infrastructure is the lever you pull",
+    "start": 2450.48,
+    "duration": 4.76
+  },
+  {
+    "text": "when the traffic is turning up, not",
+    "start": 2452.48,
+    "duration": 4.599
+  },
+  {
+    "text": "beforehand. And",
+    "start": 2455.24,
+    "duration": 4.44
+  },
+  {
+    "text": "why? It gets expensive quickly. If",
+    "start": 2457.079,
+    "duration": 4.28
+  },
+  {
+    "text": "you're running optimized unoptimized",
+    "start": 2459.68,
+    "duration": 3.12
+  },
+  {
+    "text": "services, as I said, you're basically",
+    "start": 2461.359,
+    "duration": 4.281
+  },
+  {
+    "text": "burning money. And secondly, little",
+    "start": 2462.8,
+    "duration": 5.2
+  },
+  {
+    "text": "problems become very big problems at",
+    "start": 2465.64,
+    "duration": 4.76
+  },
+  {
+    "text": "scale. That memory leak that you didn't",
+    "start": 2468.0,
+    "duration": 4.24
+  },
+  {
+    "text": "even know was there. When you're running",
+    "start": 2470.4,
+    "duration": 3.679
+  },
+  {
+    "text": "hot, that shows up and that will bring",
+    "start": 2472.24,
+    "duration": 2.92
+  },
+  {
+    "text": "your servers",
+    "start": 2474.079,
+    "duration": 3.681
+  },
+  {
+    "text": "down. So, it magnifies those problems.",
+    "start": 2475.16,
+    "duration": 4.04
+  },
+  {
+    "text": "You need to have those problems solved",
+    "start": 2477.76,
+    "duration": 3.359
+  },
+  {
+    "text": "ahead of time so that when you scale,",
+    "start": 2479.2,
+    "duration": 4.72
+  },
+  {
+    "text": "things are working",
+    "start": 2481.119,
+    "duration": 2.801
+  },
+  {
+    "text": "efficiently. So, three takeaways.",
+    "start": 2485.96,
+    "duration": 6.24
+  },
+  {
+    "text": "Uh firstly, marginal",
+    "start": 2490.0,
+    "duration": 4.88
+  },
+  {
+    "text": "gains. Optimizing your platform. It's",
+    "start": 2492.2,
+    "duration": 4.44
+  },
+  {
+    "text": "all about those marginal gains. Invest",
+    "start": 2494.88,
+    "duration": 3.8
+  },
+  {
+    "text": "in time up front in getting your",
+    "start": 2496.64,
+    "duration": 4.52
+  },
+  {
+    "text": "services and platform in the right",
+    "start": 2498.68,
+    "duration": 4.6
+  },
+  {
+    "text": "place. Running a tight ship will give",
+    "start": 2501.16,
+    "duration": 4.679
+  },
+  {
+    "text": "you the confidence you need to handle",
+    "start": 2503.28,
+    "duration": 4.039
+  },
+  {
+    "text": "the traffic when it",
+    "start": 2505.839,
+    "duration": 4.441
+  },
+  {
+    "text": "comes. Secondly, have a plan and be",
+    "start": 2507.319,
+    "duration": 5.081
+  },
+  {
+    "text": "prepared. Use the resources and the",
+    "start": 2510.28,
+    "duration": 4.6
+  },
+  {
+    "text": "tools at your disposal. I cannot stress",
+    "start": 2512.4,
+    "duration": 5.679
+  },
+  {
+    "text": "enough how good load testing is for us.",
+    "start": 2514.88,
+    "duration": 5.439
+  },
+  {
+    "text": "We do this regularly.",
+    "start": 2518.079,
+    "duration": 4.881
+  },
+  {
+    "text": "We do it before launches. We do it when",
+    "start": 2520.319,
+    "duration": 4.241
+  },
+  {
+    "text": "we deploy a new feature. We'll take the",
+    "start": 2522.96,
+    "duration": 2.879
+  },
+  {
+    "text": "metrics and we'll compare them to our",
+    "start": 2524.56,
+    "duration": 4.08
+  },
+  {
+    "text": "last load test. Has it changed at all?",
+    "start": 2525.839,
+    "duration": 5.28
+  },
+  {
+    "text": "And if it has, we can then address the",
+    "start": 2528.64,
+    "duration": 4.679
+  },
+  {
+    "text": "situation. Be",
+    "start": 2531.119,
+    "duration": 4.881
+  },
+  {
+    "text": "prepared. And then lastly, observability",
+    "start": 2533.319,
+    "duration": 5.321
+  },
+  {
+    "text": "is critical. You'll regularly need to",
+    "start": 2536.0,
+    "duration": 4.68
+  },
+  {
+    "text": "reassess what good looks like from your",
+    "start": 2538.64,
+    "duration": 4.16
+  },
+  {
+    "text": "observability. As your platform evolves",
+    "start": 2540.68,
+    "duration": 3.96
+  },
+  {
+    "text": "and your requirements change, you need",
+    "start": 2542.8,
+    "duration": 4.4
+  },
+  {
+    "text": "to make sure it's still accurate. And",
+    "start": 2544.64,
+    "duration": 4.479
+  },
+  {
+    "text": "you cannot scale effectively if you",
+    "start": 2547.2,
+    "duration": 4.36
+  },
+  {
+    "text": "don't know what's going",
+    "start": 2549.119,
+    "duration": 7.48
+  },
+  {
+    "text": "on. And that's me. Thank you.",
+    "start": 2551.56,
+    "duration": 5.039
+  },
+  {
+    "text": "[Music]",
+    "start": 2557.33,
+    "duration": 7.959
+  }
+]

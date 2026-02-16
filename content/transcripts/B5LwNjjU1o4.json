@@ -1,0 +1,4602 @@
+[
+  {
+    "text": "Welcome everybody. My name is Matt",
+    "start": 5.04,
+    "duration": 3.68
+  },
+  {
+    "text": "Ostel. I'm a senior technical artist on",
+    "start": 6.72,
+    "duration": 3.839
+  },
+  {
+    "text": "the developer relations team here at",
+    "start": 8.72,
+    "duration": 5.919
+  },
+  {
+    "text": "Epic Games. And uh I I didn't get the",
+    "start": 10.559,
+    "duration": 6.961
+  },
+  {
+    "text": "title for this talk into the Cvent app",
+    "start": 14.639,
+    "duration": 5.361
+  },
+  {
+    "text": "in time. I realized way too late I",
+    "start": 17.52,
+    "duration": 5.2
+  },
+  {
+    "text": "needed to call this beyond print string",
+    "start": 20.0,
+    "duration": 4.4
+  },
+  {
+    "text": "because I feel like when we are",
+    "start": 22.72,
+    "duration": 4.399
+  },
+  {
+    "text": "debugging things in Unreal and we don't",
+    "start": 24.4,
+    "duration": 6.0
+  },
+  {
+    "text": "know what tools are available to us we",
+    "start": 27.119,
+    "duration": 5.841
+  },
+  {
+    "text": "just print a string right I don't know",
+    "start": 30.4,
+    "duration": 4.64
+  },
+  {
+    "text": "print a string uh this is what I would",
+    "start": 32.96,
+    "duration": 3.84
+  },
+  {
+    "text": "do in Python what I before I knew about",
+    "start": 35.04,
+    "duration": 4.24
+  },
+  {
+    "text": "breakpoints perfectly reasonable stuff",
+    "start": 36.8,
+    "duration": 3.919
+  },
+  {
+    "text": "but I feel like we can do better than",
+    "start": 39.28,
+    "duration": 3.76
+  },
+  {
+    "text": "that because there are a lot of more",
+    "start": 40.719,
+    "duration": 4.561
+  },
+  {
+    "text": "appropriate tools for our debugging",
+    "start": 43.04,
+    "duration": 5.199
+  },
+  {
+    "text": "built into the Unreal Engine if we only",
+    "start": 45.28,
+    "duration": 5.84
+  },
+  {
+    "text": "knew about them um or if we only knew",
+    "start": 48.239,
+    "duration": 4.64
+  },
+  {
+    "text": "where to look. So, this is going to be",
+    "start": 51.12,
+    "duration": 5.36
+  },
+  {
+    "text": "kind of a a blend of tips and tricks as",
+    "start": 52.879,
+    "duration": 5.36
+  },
+  {
+    "text": "well as some examples of how to use some",
+    "start": 56.48,
+    "duration": 3.84
+  },
+  {
+    "text": "of the more specialized tools uh for",
+    "start": 58.239,
+    "duration": 5.361
+  },
+  {
+    "text": "debugging stuff in the engine. And uh",
+    "start": 60.32,
+    "duration": 6.4
+  },
+  {
+    "text": "we've got a lot to cover today. So,",
+    "start": 63.6,
+    "duration": 5.199
+  },
+  {
+    "text": "we're going to maybe kind of blast",
+    "start": 66.72,
+    "duration": 3.84
+  },
+  {
+    "text": "through this a little bit because this",
+    "start": 68.799,
+    "duration": 5.121
+  },
+  {
+    "text": "is after all a lightning round.",
+    "start": 70.56,
+    "duration": 6.48
+  },
+  {
+    "text": "So, I know that I said we're going to go",
+    "start": 73.92,
+    "duration": 5.36
+  },
+  {
+    "text": "beyond print string, but first I wanted",
+    "start": 77.04,
+    "duration": 4.8
+  },
+  {
+    "text": "to talk about print string because",
+    "start": 79.28,
+    "duration": 4.72
+  },
+  {
+    "text": "there's actually some more advanced uses",
+    "start": 81.84,
+    "duration": 5.68
+  },
+  {
+    "text": "that we might not know about. So, uh",
+    "start": 84.0,
+    "duration": 6.0
+  },
+  {
+    "text": "we're all familiar with this situation,",
+    "start": 87.52,
+    "duration": 5.279
+  },
+  {
+    "text": "right?",
+    "start": 90.0,
+    "duration": 5.439
+  },
+  {
+    "text": "We've all done this. Uh it turns out you",
+    "start": 92.799,
+    "duration": 4.481
+  },
+  {
+    "text": "you can you don't actually have to do",
+    "start": 95.439,
+    "duration": 4.801
+  },
+  {
+    "text": "that. Uh because what you can do so one,",
+    "start": 97.28,
+    "duration": 4.24
+  },
+  {
+    "text": "of course, there are two options for",
+    "start": 100.24,
+    "duration": 2.64
+  },
+  {
+    "text": "print string, right? We've got print",
+    "start": 101.52,
+    "duration": 3.36
+  },
+  {
+    "text": "string and log string. So maybe we don't",
+    "start": 102.88,
+    "duration": 4.559
+  },
+  {
+    "text": "need it to go up onto the player screen",
+    "start": 104.88,
+    "duration": 4.32
+  },
+  {
+    "text": "all the time. So then in that case we",
+    "start": 107.439,
+    "duration": 4.481
+  },
+  {
+    "text": "would be using log string. But there's",
+    "start": 109.2,
+    "duration": 4.72
+  },
+  {
+    "text": "actually even even more that we can do",
+    "start": 111.92,
+    "duration": 4.159
+  },
+  {
+    "text": "with this because you can see down in",
+    "start": 113.92,
+    "duration": 3.76
+  },
+  {
+    "text": "the",
+    "start": 116.079,
+    "duration": 3.841
+  },
+  {
+    "text": "there we go. Uh see down here at the",
+    "start": 117.68,
+    "duration": 3.84
+  },
+  {
+    "text": "bottom of the print string node, we",
+    "start": 119.92,
+    "duration": 5.44
+  },
+  {
+    "text": "added this in UE5 key. So I set the key",
+    "start": 121.52,
+    "duration": 5.68
+  },
+  {
+    "text": "of my print string and now it's only",
+    "start": 125.36,
+    "duration": 3.84
+  },
+  {
+    "text": "going to put that value in one spot on",
+    "start": 127.2,
+    "duration": 4.56
+  },
+  {
+    "text": "the string on the screen. which is very",
+    "start": 129.2,
+    "duration": 4.72
+  },
+  {
+    "text": "handy. So, it reduces that spam before",
+    "start": 131.76,
+    "duration": 4.0
+  },
+  {
+    "text": "you get your UI set up and all that fun",
+    "start": 133.92,
+    "duration": 5.2
+  },
+  {
+    "text": "stuff. Um, and maybe we want to format",
+    "start": 135.76,
+    "duration": 5.119
+  },
+  {
+    "text": "stuff that's going to go into our print",
+    "start": 139.12,
+    "duration": 3.68
+  },
+  {
+    "text": "string. And so, we might use like a pen",
+    "start": 140.879,
+    "duration": 3.36
+  },
+  {
+    "text": "string for something like this, right?",
+    "start": 142.8,
+    "duration": 3.84
+  },
+  {
+    "text": "Who's somebody's done this? Yeah, I got",
+    "start": 144.239,
+    "duration": 3.921
+  },
+  {
+    "text": "at least one person who's done this.",
+    "start": 146.64,
+    "duration": 3.76
+  },
+  {
+    "text": "I've done this a lot. Don't do that. You",
+    "start": 148.16,
+    "duration": 5.04
+  },
+  {
+    "text": "don't need to do that because we added",
+    "start": 150.4,
+    "duration": 5.52
+  },
+  {
+    "text": "something in UE5 called format text. And",
+    "start": 153.2,
+    "duration": 4.319
+  },
+  {
+    "text": "what you can do is type out the text",
+    "start": 155.92,
+    "duration": 3.599
+  },
+  {
+    "text": "that you want and then brackets, curly",
+    "start": 157.519,
+    "duration": 4.641
+  },
+  {
+    "text": "braces, some parameter and then input",
+    "start": 159.519,
+    "duration": 4.401
+  },
+  {
+    "text": "that to compose your string. So you",
+    "start": 162.16,
+    "duration": 4.4
+  },
+  {
+    "text": "don't have to use append string to do",
+    "start": 163.92,
+    "duration": 4.64
+  },
+  {
+    "text": "this kind of stuff. It's really handy.",
+    "start": 166.56,
+    "duration": 3.84
+  },
+  {
+    "text": "Um, and then actually, you know, you see",
+    "start": 168.56,
+    "duration": 4.64
+  },
+  {
+    "text": "that that convert to, you know, text to",
+    "start": 170.4,
+    "duration": 4.72
+  },
+  {
+    "text": "string. You don't need to use that",
+    "start": 173.2,
+    "duration": 4.72
+  },
+  {
+    "text": "anymore either because we also added a",
+    "start": 175.12,
+    "duration": 5.68
+  },
+  {
+    "text": "print text node to blueprint. How handy",
+    "start": 177.92,
+    "duration": 6.72
+  },
+  {
+    "text": "is that? So that's pretty great. Again,",
+    "start": 180.8,
+    "duration": 7.6
+  },
+  {
+    "text": "also new in UE5. Um, and wouldn't it be",
+    "start": 184.64,
+    "duration": 5.599
+  },
+  {
+    "text": "nice if the thing that we were because",
+    "start": 188.4,
+    "duration": 4.16
+  },
+  {
+    "text": "sometimes, you know, I I I need to print",
+    "start": 190.239,
+    "duration": 3.92
+  },
+  {
+    "text": "a string. I was actually chatting with",
+    "start": 192.56,
+    "duration": 3.759
+  },
+  {
+    "text": "somebody about this at the dev lounge.",
+    "start": 194.159,
+    "duration": 4.561
+  },
+  {
+    "text": "Hey, I want to make sure that that when",
+    "start": 196.319,
+    "duration": 4.321
+  },
+  {
+    "text": "my camera system is set up, I've got",
+    "start": 198.72,
+    "duration": 4.32
+  },
+  {
+    "text": "this weird like third person camera and",
+    "start": 200.64,
+    "duration": 4.319
+  },
+  {
+    "text": "when I spawn in, it doesn't work until I",
+    "start": 203.04,
+    "duration": 3.52
+  },
+  {
+    "text": "get into the trigger volume. I was like,",
+    "start": 204.959,
+    "duration": 4.161
+  },
+  {
+    "text": "\"Oh, what you could do is create uh, you",
+    "start": 206.56,
+    "duration": 4.88
+  },
+  {
+    "text": "know, have in your blueprint look for uh",
+    "start": 209.12,
+    "duration": 5.6
+  },
+  {
+    "text": "the actor tag first camera and then you",
+    "start": 211.44,
+    "duration": 4.799
+  },
+  {
+    "text": "can go grab the first camera and set",
+    "start": 214.72,
+    "duration": 2.799
+  },
+  {
+    "text": "everything up on begin play.\" They're",
+    "start": 216.239,
+    "duration": 3.041
+  },
+  {
+    "text": "like, \"Oh, this is a great idea.\" And",
+    "start": 217.519,
+    "duration": 4.561
+  },
+  {
+    "text": "then I said, \"Oh, and then if you don't",
+    "start": 219.28,
+    "duration": 5.12
+  },
+  {
+    "text": "find the first camera actor tag in the",
+    "start": 222.08,
+    "duration": 5.12
+  },
+  {
+    "text": "level, you can use this brand new node",
+    "start": 224.4,
+    "duration": 5.36
+  },
+  {
+    "text": "called raise script error, which will",
+    "start": 227.2,
+    "duration": 5.28
+  },
+  {
+    "text": "actually create an error in the message",
+    "start": 229.76,
+    "duration": 6.64
+  },
+  {
+    "text": "log from blueprint.",
+    "start": 232.48,
+    "duration": 5.52
+  },
+  {
+    "text": "this this is worth the price of",
+    "start": 236.4,
+    "duration": 3.68
+  },
+  {
+    "text": "admission alone",
+    "start": 238.0,
+    "duration": 3.84
+  },
+  {
+    "text": "and like I said this is brand new in",
+    "start": 240.08,
+    "duration": 5.92
+  },
+  {
+    "text": "5.6. Um so that's really handy",
+    "start": 241.84,
+    "duration": 5.759
+  },
+  {
+    "text": "and that's that's going to make that's",
+    "start": 246.0,
+    "duration": 3.519
+  },
+  {
+    "text": "going to make things a lot easier. Uh",
+    "start": 247.599,
+    "duration": 3.521
+  },
+  {
+    "text": "and then we of course get to talk about",
+    "start": 249.519,
+    "duration": 7.161
+  },
+  {
+    "text": "print strings uh C++ cousin log",
+    "start": 251.12,
+    "duration": 5.56
+  },
+  {
+    "text": "ue uee log. There's a few things I",
+    "start": 256.72,
+    "duration": 4.639
+  },
+  {
+    "text": "wanted to cover with uee log. So one,",
+    "start": 258.239,
+    "duration": 5.361
+  },
+  {
+    "text": "we've got a sort of basic format there,",
+    "start": 261.359,
+    "duration": 5.12
+  },
+  {
+    "text": "right? Category, log level, and format.",
+    "start": 263.6,
+    "duration": 5.36
+  },
+  {
+    "text": "Uh, and if you are really quickly trying",
+    "start": 266.479,
+    "duration": 4.881
+  },
+  {
+    "text": "to do something, you can use log temp",
+    "start": 268.96,
+    "duration": 4.08
+  },
+  {
+    "text": "instead of having to declare your own",
+    "start": 271.36,
+    "duration": 4.0
+  },
+  {
+    "text": "log category because as a tech artist, I",
+    "start": 273.04,
+    "duration": 5.12
+  },
+  {
+    "text": "always forget how to do that. Um, and",
+    "start": 275.36,
+    "duration": 4.48
+  },
+  {
+    "text": "then if you want to log something",
+    "start": 278.16,
+    "duration": 4.24
+  },
+  {
+    "text": "conditionally, you can use a clog, a",
+    "start": 279.84,
+    "duration": 4.639
+  },
+  {
+    "text": "conditional log, and pass in the",
+    "start": 282.4,
+    "duration": 4.48
+  },
+  {
+    "text": "condition under which you want to log to",
+    "start": 284.479,
+    "duration": 4.561
+  },
+  {
+    "text": "that uh to that level. Super super",
+    "start": 286.88,
+    "duration": 4.56
+  },
+  {
+    "text": "handy. And then um this is something",
+    "start": 289.04,
+    "duration": 3.92
+  },
+  {
+    "text": "that I always struggled with as a tech",
+    "start": 291.44,
+    "duration": 3.68
+  },
+  {
+    "text": "artist is remembering the specifiers for",
+    "start": 292.96,
+    "duration": 5.679
+  },
+  {
+    "text": "formatting stuff into the text macro. So",
+    "start": 295.12,
+    "duration": 5.44
+  },
+  {
+    "text": "handy little guy there. It is actually",
+    "start": 298.639,
+    "duration": 4.401
+  },
+  {
+    "text": "in our documentation now, but when I was",
+    "start": 300.56,
+    "duration": 4.8
+  },
+  {
+    "text": "starting out it wasn't. Uh and then the",
+    "start": 303.04,
+    "duration": 5.28
+  },
+  {
+    "text": "other thing, so who has ever run into an",
+    "start": 305.36,
+    "duration": 4.399
+  },
+  {
+    "text": "error doing something like this where",
+    "start": 308.32,
+    "duration": 3.84
+  },
+  {
+    "text": "you want to put a string into a text",
+    "start": 309.759,
+    "duration": 4.88
+  },
+  {
+    "text": "macro and the the thing that you're",
+    "start": 312.16,
+    "duration": 4.0
+  },
+  {
+    "text": "trying to put in is like the return of",
+    "start": 314.639,
+    "duration": 2.961
+  },
+  {
+    "text": "some other function. Who's ever done",
+    "start": 316.16,
+    "duration": 3.52
+  },
+  {
+    "text": "this and gotten an error?",
+    "start": 317.6,
+    "duration": 3.68
+  },
+  {
+    "text": "because I have I've got at least three",
+    "start": 319.68,
+    "duration": 2.959
+  },
+  {
+    "text": "people that four people that have",
+    "start": 321.28,
+    "duration": 3.44
+  },
+  {
+    "text": "errored out on this. Right? So, you know",
+    "start": 322.639,
+    "duration": 4.241
+  },
+  {
+    "text": "what you're missing? You see that little",
+    "start": 324.72,
+    "duration": 3.919
+  },
+  {
+    "text": "guy right there? That little asterisk?",
+    "start": 326.88,
+    "duration": 3.44
+  },
+  {
+    "text": "That's what you were missing. And the",
+    "start": 328.639,
+    "duration": 3.521
+  },
+  {
+    "text": "error message does not tell you that you",
+    "start": 330.32,
+    "duration": 3.36
+  },
+  {
+    "text": "needed to put an asterisk in front of",
+    "start": 332.16,
+    "duration": 4.56
+  },
+  {
+    "text": "the return of your function. It broke me",
+    "start": 333.68,
+    "duration": 5.2
+  },
+  {
+    "text": "when I found this out. Uh because I've",
+    "start": 336.72,
+    "duration": 5.199
+  },
+  {
+    "text": "been using Unreal for 10 years, maybe 12",
+    "start": 338.88,
+    "duration": 6.56
+  },
+  {
+    "text": "at that point. That's not great.",
+    "start": 341.919,
+    "duration": 4.881
+  },
+  {
+    "text": "So, let's talk about some console",
+    "start": 345.44,
+    "duration": 3.28
+  },
+  {
+    "text": "commands because I there's a bunch in",
+    "start": 346.8,
+    "duration": 5.92
+  },
+  {
+    "text": "here and some of this was I should have",
+    "start": 348.72,
+    "duration": 5.919
+  },
+  {
+    "text": "said this earlier. Most of this talk is",
+    "start": 352.72,
+    "duration": 4.88
+  },
+  {
+    "text": "just hey, did you know about this? The",
+    "start": 354.639,
+    "duration": 4.4
+  },
+  {
+    "text": "console command section is a lot of",
+    "start": 357.6,
+    "duration": 4.159
+  },
+  {
+    "text": "that. So, did you know that stat",
+    "start": 359.039,
+    "duration": 4.961
+  },
+  {
+    "text": "commands now autocomplete in in the",
+    "start": 361.759,
+    "duration": 5.28
+  },
+  {
+    "text": "editor? Because that was new. Um, that's",
+    "start": 364.0,
+    "duration": 4.639
+  },
+  {
+    "text": "really handy so that you don't have to",
+    "start": 367.039,
+    "duration": 3.201
+  },
+  {
+    "text": "press play in editor to get the stat",
+    "start": 368.639,
+    "duration": 3.441
+  },
+  {
+    "text": "commands to autocomplete. That's really",
+    "start": 370.24,
+    "duration": 3.84
+  },
+  {
+    "text": "nice. And then if you've got too many",
+    "start": 372.08,
+    "duration": 4.32
+  },
+  {
+    "text": "stat commands on screen, you can just",
+    "start": 374.08,
+    "duration": 4.0
+  },
+  {
+    "text": "stat none to get rid of all of them",
+    "start": 376.4,
+    "duration": 3.44
+  },
+  {
+    "text": "instead of having to remember which ones",
+    "start": 378.08,
+    "duration": 4.48
+  },
+  {
+    "text": "you wanted up on screen. Uh and then of",
+    "start": 379.84,
+    "duration": 4.16
+  },
+  {
+    "text": "course I I don't know if anybody noticed",
+    "start": 382.56,
+    "duration": 3.919
+  },
+  {
+    "text": "this, but in 5.6",
+    "start": 384.0,
+    "duration": 5.36
+  },
+  {
+    "text": "or 5.5 we added the render resolution to",
+    "start": 386.479,
+    "duration": 5.84
+  },
+  {
+    "text": "stat unit. I just think it's neat. Uh",
+    "start": 389.36,
+    "duration": 4.559
+  },
+  {
+    "text": "it's good to know that that's there. And",
+    "start": 392.319,
+    "duration": 3.361
+  },
+  {
+    "text": "then this one's really handy. Uh if you",
+    "start": 393.919,
+    "duration": 4.081
+  },
+  {
+    "text": "just type help and enter into the",
+    "start": 395.68,
+    "duration": 4.639
+  },
+  {
+    "text": "console command, it will generate a web",
+    "start": 398.0,
+    "duration": 4.4
+  },
+  {
+    "text": "page of all of the console commands in",
+    "start": 400.319,
+    "duration": 4.081
+  },
+  {
+    "text": "your project, including the ones that",
+    "start": 402.4,
+    "duration": 4.4
+  },
+  {
+    "text": "you have created yourself, and put it",
+    "start": 404.4,
+    "duration": 5.359
+  },
+  {
+    "text": "into a searchable web page, like locally",
+    "start": 406.8,
+    "duration": 5.04
+  },
+  {
+    "text": "created web page live. This is really",
+    "start": 409.759,
+    "duration": 3.921
+  },
+  {
+    "text": "handy. If I want to get through all of",
+    "start": 411.84,
+    "duration": 4.4
+  },
+  {
+    "text": "my console commands or if I wanted to",
+    "start": 413.68,
+    "duration": 4.56
+  },
+  {
+    "text": "learn more about one of my console",
+    "start": 416.24,
+    "duration": 5.6
+  },
+  {
+    "text": "commands, uh all I need to do is ask it.",
+    "start": 418.24,
+    "duration": 6.32
+  },
+  {
+    "text": "just my console variable space question",
+    "start": 421.84,
+    "duration": 5.44
+  },
+  {
+    "text": "mark and that will print out the help",
+    "start": 424.56,
+    "duration": 5.28
+  },
+  {
+    "text": "text of the console command as well as",
+    "start": 427.28,
+    "duration": 4.96
+  },
+  {
+    "text": "the history of the values that were set",
+    "start": 429.84,
+    "duration": 4.639
+  },
+  {
+    "text": "to it. So was it set by constructor? Was",
+    "start": 432.24,
+    "duration": 4.56
+  },
+  {
+    "text": "it set by project setting? Was it set by",
+    "start": 434.479,
+    "duration": 4.401
+  },
+  {
+    "text": "console or scalability? You can see all",
+    "start": 436.8,
+    "duration": 4.56
+  },
+  {
+    "text": "of that there. That's really handy. Uh",
+    "start": 438.88,
+    "duration": 4.4
+  },
+  {
+    "text": "and if I wanted to get all of the",
+    "start": 441.36,
+    "duration": 3.839
+  },
+  {
+    "text": "console commands, all of the values of",
+    "start": 443.28,
+    "duration": 3.68
+  },
+  {
+    "text": "all of the console variables in my",
+    "start": 445.199,
+    "duration": 3.601
+  },
+  {
+    "text": "project, I can just dump them out with",
+    "start": 446.96,
+    "duration": 3.76
+  },
+  {
+    "text": "dump car. You can even dump this out to",
+    "start": 448.8,
+    "duration": 5.44
+  },
+  {
+    "text": "a CSV file if you wanted to.",
+    "start": 450.72,
+    "duration": 5.36
+  },
+  {
+    "text": "Um, but maybe you don't want to manually",
+    "start": 454.24,
+    "duration": 4.079
+  },
+  {
+    "text": "type two different console variables to",
+    "start": 456.08,
+    "duration": 4.8
+  },
+  {
+    "text": "compare two of them together. So, we can",
+    "start": 458.319,
+    "duration": 6.16
+  },
+  {
+    "text": "use AB test to AB test console",
+    "start": 460.88,
+    "duration": 5.36
+  },
+  {
+    "text": "variables. So, maybe I want to see what",
+    "start": 464.479,
+    "duration": 3.601
+  },
+  {
+    "text": "happens when I toggle back and forth the",
+    "start": 466.24,
+    "duration": 3.92
+  },
+  {
+    "text": "dynamic global illumination method. And",
+    "start": 468.08,
+    "duration": 3.679
+  },
+  {
+    "text": "instead of having to like write a",
+    "start": 470.16,
+    "duration": 3.68
+  },
+  {
+    "text": "blueprint, sort of like doing a print",
+    "start": 471.759,
+    "duration": 4.481
+  },
+  {
+    "text": "string, I can just use the AB test",
+    "start": 473.84,
+    "duration": 3.919
+  },
+  {
+    "text": "command that's built into the engine,",
+    "start": 476.24,
+    "duration": 3.04
+  },
+  {
+    "text": "and it will toggle things back and",
+    "start": 477.759,
+    "duration": 3.44
+  },
+  {
+    "text": "forth.",
+    "start": 479.28,
+    "duration": 3.759
+  },
+  {
+    "text": "Uh, and then this one's really helpful",
+    "start": 481.199,
+    "duration": 3.44
+  },
+  {
+    "text": "if you're trying to debug something in",
+    "start": 483.039,
+    "duration": 3.361
+  },
+  {
+    "text": "animation or gameplay and it's moving",
+    "start": 484.639,
+    "duration": 3.521
+  },
+  {
+    "text": "really quickly, or you want something to",
+    "start": 486.4,
+    "duration": 3.519
+  },
+  {
+    "text": "move really quickly, you can use",
+    "start": 488.16,
+    "duration": 4.56
+  },
+  {
+    "text": "slow-mo. So, in this example here, I do",
+    "start": 489.919,
+    "duration": 4.56
+  },
+  {
+    "text": "slow-mo two. That actually is going to",
+    "start": 492.72,
+    "duration": 4.0
+  },
+  {
+    "text": "speed up the game in a second here.",
+    "start": 494.479,
+    "duration": 4.801
+  },
+  {
+    "text": "Yeah, we do slow-mo",
+    "start": 496.72,
+    "duration": 4.24
+  },
+  {
+    "text": "two.",
+    "start": 499.28,
+    "duration": 3.28
+  },
+  {
+    "text": "And then now things go really quickly.",
+    "start": 500.96,
+    "duration": 2.639
+  },
+  {
+    "text": "Oh my gosh. Oh my gosh. Oh my gosh.",
+    "start": 502.56,
+    "duration": 2.639
+  },
+  {
+    "text": "We're going really, really quick. And",
+    "start": 503.599,
+    "duration": 3.841
+  },
+  {
+    "text": "then I can slow things down with",
+    "start": 505.199,
+    "duration": 5.28
+  },
+  {
+    "text": "slow-mo. For example,",
+    "start": 507.44,
+    "duration": 5.2
+  },
+  {
+    "text": "one",
+    "start": 510.479,
+    "duration": 7.721
+  },
+  {
+    "text": "and things swirl swirl.",
+    "start": 512.64,
+    "duration": 5.56
+  },
+  {
+    "text": "And that joke got old. So if you are",
+    "start": 518.24,
+    "duration": 5.76
+  },
+  {
+    "text": "ever trying to get to the same position",
+    "start": 521.68,
+    "duration": 4.96
+  },
+  {
+    "text": "in the world, you can bug it, which will",
+    "start": 524.0,
+    "duration": 4.399
+  },
+  {
+    "text": "print out",
+    "start": 526.64,
+    "duration": 4.56
+  },
+  {
+    "text": "a bugget go command of the position and",
+    "start": 528.399,
+    "duration": 4.88
+  },
+  {
+    "text": "rotation of the camera the second you",
+    "start": 531.2,
+    "duration": 4.0
+  },
+  {
+    "text": "typed in bugget. So then if you ever",
+    "start": 533.279,
+    "duration": 3.921
+  },
+  {
+    "text": "want to get to that exact point ever",
+    "start": 535.2,
+    "duration": 5.52
+  },
+  {
+    "text": "again, you just bugget go and it will",
+    "start": 537.2,
+    "duration": 5.44
+  },
+  {
+    "text": "take you back to where you were. Really",
+    "start": 540.72,
+    "duration": 3.76
+  },
+  {
+    "text": "handy if you've got like QA and they're",
+    "start": 542.64,
+    "duration": 3.6
+  },
+  {
+    "text": "like, \"Hey, I found a bug at this spot",
+    "start": 544.48,
+    "duration": 3.12
+  },
+  {
+    "text": "in the world.\" and they like take a",
+    "start": 546.24,
+    "duration": 3.2
+  },
+  {
+    "text": "screenshot of it and you're like I don't",
+    "start": 547.6,
+    "duration": 4.4
+  },
+  {
+    "text": "know where that is in the Jira ticket",
+    "start": 549.44,
+    "duration": 4.8
+  },
+  {
+    "text": "they should have the bugget go so you as",
+    "start": 552.0,
+    "duration": 4.16
+  },
+  {
+    "text": "the developer can go straight to that",
+    "start": 554.24,
+    "duration": 4.92
+  },
+  {
+    "text": "position",
+    "start": 556.16,
+    "duration": 3.0
+  },
+  {
+    "text": "Unreal Insights so I'm going to talk a",
+    "start": 559.2,
+    "duration": 3.199
+  },
+  {
+    "text": "little bit about some of the stuff in",
+    "start": 561.2,
+    "duration": 4.96
+  },
+  {
+    "text": "Unreal Insights and then later at 2:30",
+    "start": 562.399,
+    "duration": 5.44
+  },
+  {
+    "text": "my colleague Ken Kuano is going to be",
+    "start": 566.16,
+    "duration": 4.16
+  },
+  {
+    "text": "back in this room to go really deep on",
+    "start": 567.839,
+    "duration": 4.321
+  },
+  {
+    "text": "Unreal Insights definitely don't miss",
+    "start": 570.32,
+    "duration": 4.72
+  },
+  {
+    "text": "that talk uh the first one I want to",
+    "start": 572.16,
+    "duration": 4.4
+  },
+  {
+    "text": "talk about with Unreal Insights is the",
+    "start": 575.04,
+    "duration": 3.76
+  },
+  {
+    "text": "trace toolbar. This was relatively new,",
+    "start": 576.56,
+    "duration": 4.64
+  },
+  {
+    "text": "I think 5.2, and it's just a little",
+    "start": 578.8,
+    "duration": 4.24
+  },
+  {
+    "text": "toolbar down in the bottom corner of the",
+    "start": 581.2,
+    "duration": 3.759
+  },
+  {
+    "text": "editor that is going to give you a bunch",
+    "start": 583.04,
+    "duration": 4.56
+  },
+  {
+    "text": "of really useful things for uh using",
+    "start": 584.959,
+    "duration": 4.961
+  },
+  {
+    "text": "Unreal Insights in the editor. Uh, one",
+    "start": 587.6,
+    "duration": 4.16
+  },
+  {
+    "text": "of them is taking a trace screenshot.",
+    "start": 589.92,
+    "duration": 3.359
+  },
+  {
+    "text": "This is great because it embeds a",
+    "start": 591.76,
+    "duration": 4.72
+  },
+  {
+    "text": "screenshot into the trace file so that",
+    "start": 593.279,
+    "duration": 5.521
+  },
+  {
+    "text": "you know what's happening when you are",
+    "start": 596.48,
+    "duration": 3.84
+  },
+  {
+    "text": "looking at your Unreal Insights trace",
+    "start": 598.8,
+    "duration": 3.92
+  },
+  {
+    "text": "later. There's also, this one I just",
+    "start": 600.32,
+    "duration": 4.48
+  },
+  {
+    "text": "turn on by default, this open insights",
+    "start": 602.72,
+    "duration": 4.08
+  },
+  {
+    "text": "after trace. So if you ever are like,",
+    "start": 604.8,
+    "duration": 3.52
+  },
+  {
+    "text": "\"Oh, I want to test something in the",
+    "start": 606.8,
+    "duration": 3.28
+  },
+  {
+    "text": "editor and and look at the insights",
+    "start": 608.32,
+    "duration": 4.24
+  },
+  {
+    "text": "results and then you stop tracing,\" this",
+    "start": 610.08,
+    "duration": 5.28
+  },
+  {
+    "text": "will immediately open the trace file as",
+    "start": 612.56,
+    "duration": 4.48
+  },
+  {
+    "text": "soon as you hit stop. I think it's",
+    "start": 615.36,
+    "duration": 4.159
+  },
+  {
+    "text": "really handy just for like speeding up",
+    "start": 617.04,
+    "duration": 4.799
+  },
+  {
+    "text": "my workflows. And then finally, this one",
+    "start": 619.519,
+    "duration": 5.601
+  },
+  {
+    "text": "I added myself to the trace toolbar. You",
+    "start": 621.839,
+    "duration": 6.321
+  },
+  {
+    "text": "can specify trace regions from the",
+    "start": 625.12,
+    "duration": 5.92
+  },
+  {
+    "text": "editor. Uh mostly I had this in here so",
+    "start": 628.16,
+    "duration": 4.72
+  },
+  {
+    "text": "that I could demo trace regions to",
+    "start": 631.04,
+    "duration": 5.039
+  },
+  {
+    "text": "developers as I was talking to them. Um,",
+    "start": 632.88,
+    "duration": 4.56
+  },
+  {
+    "text": "and if you're not familiar with trace",
+    "start": 636.079,
+    "duration": 3.76
+  },
+  {
+    "text": "regions, these are new as of about 5.3.",
+    "start": 637.44,
+    "duration": 6.639
+  },
+  {
+    "text": "It just adds this bar at the top of the",
+    "start": 639.839,
+    "duration": 6.401
+  },
+  {
+    "text": "uh of the insights panel. And they're",
+    "start": 644.079,
+    "duration": 5.281
+  },
+  {
+    "text": "basically like uh events that span",
+    "start": 646.24,
+    "duration": 5.52
+  },
+  {
+    "text": "multiple frames. And I can specify a",
+    "start": 649.36,
+    "duration": 5.2
+  },
+  {
+    "text": "start and an end with uh blueprint nodes",
+    "start": 651.76,
+    "duration": 6.319
+  },
+  {
+    "text": "with C uh C++ macros or uh console",
+    "start": 654.56,
+    "duration": 5.68
+  },
+  {
+    "text": "commands. um really useful for things",
+    "start": 658.079,
+    "duration": 4.401
+  },
+  {
+    "text": "like oh there was a cinematic playing at",
+    "start": 660.24,
+    "duration": 5.52
+  },
+  {
+    "text": "this point or we were we were um in a",
+    "start": 662.48,
+    "duration": 5.359
+  },
+  {
+    "text": "boss fight and you can say oh you know",
+    "start": 665.76,
+    "duration": 5.519
+  },
+  {
+    "text": "uh trace region begin boss fight um",
+    "start": 667.839,
+    "duration": 5.521
+  },
+  {
+    "text": "really really handy again because if",
+    "start": 671.279,
+    "duration": 3.921
+  },
+  {
+    "text": "you're not if you just get an Unreal",
+    "start": 673.36,
+    "duration": 4.159
+  },
+  {
+    "text": "Insights trace all you see is like the",
+    "start": 675.2,
+    "duration": 4.319
+  },
+  {
+    "text": "frame number maybe you get a bookmark",
+    "start": 677.519,
+    "duration": 4.481
+  },
+  {
+    "text": "trace regions really help you are ways",
+    "start": 679.519,
+    "duration": 4.0
+  },
+  {
+    "text": "that you can communicate to other people",
+    "start": 682.0,
+    "duration": 3.279
+  },
+  {
+    "text": "looking at your insights trace what was",
+    "start": 683.519,
+    "duration": 3.281
+  },
+  {
+    "text": "happening while you were doing the",
+    "start": 685.279,
+    "duration": 3.921
+  },
+  {
+    "text": "trace. Uh and then if you click on that",
+    "start": 686.8,
+    "duration": 4.64
+  },
+  {
+    "text": "region and hit enter, it will select the",
+    "start": 689.2,
+    "duration": 4.48
+  },
+  {
+    "text": "whole time range of that region. So if",
+    "start": 691.44,
+    "duration": 3.68
+  },
+  {
+    "text": "you want to do anything in like, oh, I",
+    "start": 693.68,
+    "duration": 3.599
+  },
+  {
+    "text": "want to get the aggregate statistics of",
+    "start": 695.12,
+    "duration": 5.2
+  },
+  {
+    "text": "like the GPU frame time, I can do that",
+    "start": 697.279,
+    "duration": 5.12
+  },
+  {
+    "text": "in that specific region just by clicking",
+    "start": 700.32,
+    "duration": 3.759
+  },
+  {
+    "text": "enter. Super handy. And then I'm going",
+    "start": 702.399,
+    "duration": 3.68
+  },
+  {
+    "text": "to let Ken talk about way more about",
+    "start": 704.079,
+    "duration": 4.801
+  },
+  {
+    "text": "Unreal Insights. Um and then we're all",
+    "start": 706.079,
+    "duration": 4.561
+  },
+  {
+    "text": "familiar with a GPU visualizer, right?",
+    "start": 708.88,
+    "duration": 4.32
+  },
+  {
+    "text": "Who here has done like profile GPU or",
+    "start": 710.64,
+    "duration": 5.28
+  },
+  {
+    "text": "control shift, raise your hands. Okay,",
+    "start": 713.2,
+    "duration": 4.319
+  },
+  {
+    "text": "about a quarter of the room. Well, I",
+    "start": 715.92,
+    "duration": 5.4
+  },
+  {
+    "text": "have some very bad news.",
+    "start": 717.519,
+    "duration": 3.801
+  },
+  {
+    "text": "[Music]",
+    "start": 723.86,
+    "duration": 4.779
+  },
+  {
+    "text": "The GPU visualizer is no more. Uh it has",
+    "start": 725.2,
+    "duration": 6.879
+  },
+  {
+    "text": "been deprecated in uh 5.6 as we have",
+    "start": 728.639,
+    "duration": 8.0
+  },
+  {
+    "text": "moved on to the GPU profiler 2.0 O which",
+    "start": 732.079,
+    "duration": 7.2
+  },
+  {
+    "text": "means which in the whole point of this",
+    "start": 736.639,
+    "duration": 5.121
+  },
+  {
+    "text": "partly was to unify the things you see",
+    "start": 739.279,
+    "duration": 4.961
+  },
+  {
+    "text": "in stat GPU with the things you see in",
+    "start": 741.76,
+    "duration": 4.48
+  },
+  {
+    "text": "Unreal insights with the things that you",
+    "start": 744.24,
+    "duration": 5.12
+  },
+  {
+    "text": "see in Pix or Razer or any or render do",
+    "start": 746.24,
+    "duration": 5.36
+  },
+  {
+    "text": "or anything like that as well as",
+    "start": 749.36,
+    "duration": 4.96
+  },
+  {
+    "text": "visualizing all of the compute work that",
+    "start": 751.6,
+    "duration": 4.16
+  },
+  {
+    "text": "is happening on the GPU because",
+    "start": 754.32,
+    "duration": 4.319
+  },
+  {
+    "text": "previously that wasn't available. So we",
+    "start": 755.76,
+    "duration": 5.68
+  },
+  {
+    "text": "have moved to this new paradigm of GPU",
+    "start": 758.639,
+    "duration": 4.721
+  },
+  {
+    "text": "profiling and statistics. it means that",
+    "start": 761.44,
+    "duration": 6.079
+  },
+  {
+    "text": "the GPU visualizer has been deprecated.",
+    "start": 763.36,
+    "duration": 5.52
+  },
+  {
+    "text": "But if you want to get any of that",
+    "start": 767.519,
+    "duration": 3.281
+  },
+  {
+    "text": "functionality back of like that really",
+    "start": 768.88,
+    "duration": 4.079
+  },
+  {
+    "text": "immediate feedback of control shift,",
+    "start": 770.8,
+    "duration": 5.2
+  },
+  {
+    "text": "comma, you can do a trace.snapshot file",
+    "start": 772.959,
+    "duration": 4.88
+  },
+  {
+    "text": "and if you have open insights after",
+    "start": 776.0,
+    "duration": 4.32
+  },
+  {
+    "text": "trace turned on in your trace toolbar,",
+    "start": 777.839,
+    "duration": 3.921
+  },
+  {
+    "text": "same basic thing. It's going to pop up",
+    "start": 780.32,
+    "duration": 3.84
+  },
+  {
+    "text": "an insights trace and you get way more",
+    "start": 781.76,
+    "duration": 5.04
+  },
+  {
+    "text": "depth out of your GPU tracing than you",
+    "start": 784.16,
+    "duration": 5.6
+  },
+  {
+    "text": "ever got before. So like half of that",
+    "start": 786.8,
+    "duration": 4.8
+  },
+  {
+    "text": "stuff wasn't available in Unreal",
+    "start": 789.76,
+    "duration": 4.56
+  },
+  {
+    "text": "Insights in 5.5. Really, really handy.",
+    "start": 791.6,
+    "duration": 4.4
+  },
+  {
+    "text": "But you know, pour one out for GPU",
+    "start": 794.32,
+    "duration": 4.4
+  },
+  {
+    "text": "visualizer.",
+    "start": 796.0,
+    "duration": 4.48
+  },
+  {
+    "text": "Great. Good idea. That is a really good",
+    "start": 798.72,
+    "duration": 5.16
+  },
+  {
+    "text": "idea. Slides.",
+    "start": 800.48,
+    "duration": 3.4
+  },
+  {
+    "text": "Whoever put that there must have been",
+    "start": 805.279,
+    "duration": 3.68
+  },
+  {
+    "text": "really smart.",
+    "start": 806.72,
+    "duration": 3.919
+  },
+  {
+    "text": "Okay, let's talk really quickly about",
+    "start": 808.959,
+    "duration": 4.081
+  },
+  {
+    "text": "audio. Um, there are some audio console",
+    "start": 810.639,
+    "duration": 4.161
+  },
+  {
+    "text": "commands that are very specific to audio",
+    "start": 813.04,
+    "duration": 3.84
+  },
+  {
+    "text": "that I think are really handy. The first",
+    "start": 814.8,
+    "duration": 5.2
+  },
+  {
+    "text": "one uh is solo metaasound. So you can do",
+    "start": 816.88,
+    "duration": 5.28
+  },
+  {
+    "text": "au metaasound.sol metasound and then",
+    "start": 820.0,
+    "duration": 3.44
+  },
+  {
+    "text": "type in the name of the metaound that",
+    "start": 822.16,
+    "duration": 3.2
+  },
+  {
+    "text": "you want to isolate specifically.",
+    "start": 823.44,
+    "duration": 4.48
+  },
+  {
+    "text": "There's also uh like solo sound class,",
+    "start": 825.36,
+    "duration": 5.68
+  },
+  {
+    "text": "solo sound q, and a couple of others.",
+    "start": 827.92,
+    "duration": 5.12
+  },
+  {
+    "text": "The keyword you're looking for is solo,",
+    "start": 831.04,
+    "duration": 3.84
+  },
+  {
+    "text": "not isolate.",
+    "start": 833.04,
+    "duration": 4.64
+  },
+  {
+    "text": "Don't ask me how I know. Uh there's also",
+    "start": 834.88,
+    "duration": 5.04
+  },
+  {
+    "text": "uh you can debug sound mixes, you can",
+    "start": 837.68,
+    "duration": 4.88
+  },
+  {
+    "text": "dump all of the active sounds, and you",
+    "start": 839.92,
+    "duration": 4.64
+  },
+  {
+    "text": "can get a memory report of the audio",
+    "start": 842.56,
+    "duration": 3.519
+  },
+  {
+    "text": "specifically. But if you want to get",
+    "start": 844.56,
+    "duration": 4.8
+  },
+  {
+    "text": "even more advanced, uh, audio insights,",
+    "start": 846.079,
+    "duration": 5.76
+  },
+  {
+    "text": "really, really powerful tool, it's got a",
+    "start": 849.36,
+    "duration": 4.4
+  },
+  {
+    "text": "timeline scrubber so that you don't have",
+    "start": 851.839,
+    "duration": 4.881
+  },
+  {
+    "text": "to, um, if you're if you're trying to",
+    "start": 853.76,
+    "duration": 4.48
+  },
+  {
+    "text": "like play back everything, you can see,",
+    "start": 856.72,
+    "duration": 2.88
+  },
+  {
+    "text": "all right, this audio was playing at",
+    "start": 858.24,
+    "duration": 3.279
+  },
+  {
+    "text": "this time with these values. There's a",
+    "start": 859.6,
+    "duration": 3.919
+  },
+  {
+    "text": "bunch of new stuff in 5.6. I'm not going",
+    "start": 861.519,
+    "duration": 3.521
+  },
+  {
+    "text": "to get super deep into it because my",
+    "start": 863.519,
+    "duration": 3.44
+  },
+  {
+    "text": "colleague Dan Reynolds did a whole video",
+    "start": 865.04,
+    "duration": 3.359
+  },
+  {
+    "text": "breakdown of it. I'm going to let him do",
+    "start": 866.959,
+    "duration": 3.12
+  },
+  {
+    "text": "most of that talking. But what's really",
+    "start": 868.399,
+    "duration": 3.44
+  },
+  {
+    "text": "nice about some of the new stuff in 5.6",
+    "start": 870.079,
+    "duration": 4.801
+  },
+  {
+    "text": "six is this this sounds panel is going",
+    "start": 871.839,
+    "duration": 4.881
+  },
+  {
+    "text": "to give you a list of all of the sounds",
+    "start": 874.88,
+    "duration": 4.959
+  },
+  {
+    "text": "that are currently playing as well as",
+    "start": 876.72,
+    "duration": 5.919
+  },
+  {
+    "text": "some of the sounds that were previously",
+    "start": 879.839,
+    "duration": 4.56
+  },
+  {
+    "text": "playing. So, if you've got one that goes",
+    "start": 882.639,
+    "duration": 4.481
+  },
+  {
+    "text": "like blip and that's it and you're",
+    "start": 884.399,
+    "duration": 4.0
+  },
+  {
+    "text": "trying to like look for, okay, what was",
+    "start": 887.12,
+    "duration": 3.44
+  },
+  {
+    "text": "that blip sound? That blip sound will",
+    "start": 888.399,
+    "duration": 4.401
+  },
+  {
+    "text": "show up as the sort of grayed out thing",
+    "start": 890.56,
+    "duration": 4.56
+  },
+  {
+    "text": "for a few frames after it's over so that",
+    "start": 892.8,
+    "duration": 4.159
+  },
+  {
+    "text": "you can go back and like see what was",
+    "start": 895.12,
+    "duration": 4.0
+  },
+  {
+    "text": "actually happening. And there are so",
+    "start": 896.959,
+    "duration": 4.56
+  },
+  {
+    "text": "many other uh tabs in here that I don't",
+    "start": 899.12,
+    "duration": 5.2
+  },
+  {
+    "text": "necessarily have time to get into, but",
+    "start": 901.519,
+    "duration": 4.721
+  },
+  {
+    "text": "audio insights is going to save you so",
+    "start": 904.32,
+    "duration": 5.199
+  },
+  {
+    "text": "much time uh in debugging your audio.",
+    "start": 906.24,
+    "duration": 6.24
+  },
+  {
+    "text": "And then similarly with animation, the",
+    "start": 909.519,
+    "duration": 5.361
+  },
+  {
+    "text": "rewind debugger.",
+    "start": 912.48,
+    "duration": 4.799
+  },
+  {
+    "text": "So slow-mo was really cool, right? But",
+    "start": 914.88,
+    "duration": 5.04
+  },
+  {
+    "text": "what if you could slow-mo and scrub and",
+    "start": 917.279,
+    "duration": 5.12
+  },
+  {
+    "text": "play back and see the state of all of",
+    "start": 919.92,
+    "duration": 4.4
+  },
+  {
+    "text": "the different animations as part of your",
+    "start": 922.399,
+    "duration": 5.12
+  },
+  {
+    "text": "blueprint all in the editor. And then I",
+    "start": 924.32,
+    "duration": 4.8
+  },
+  {
+    "text": "think at some point here, yep, I stop",
+    "start": 927.519,
+    "duration": 3.841
+  },
+  {
+    "text": "play and editor and then I can scrub",
+    "start": 929.12,
+    "duration": 5.36
+  },
+  {
+    "text": "back through all of those values. Right?",
+    "start": 931.36,
+    "duration": 5.52
+  },
+  {
+    "text": "How nice is this? And this is all this",
+    "start": 934.48,
+    "duration": 3.84
+  },
+  {
+    "text": "is just built into the editor and all",
+    "start": 936.88,
+    "duration": 2.8
+  },
+  {
+    "text": "you got to do is make sure that you hit",
+    "start": 938.32,
+    "duration": 3.28
+  },
+  {
+    "text": "the record button right there and",
+    "start": 939.68,
+    "duration": 3.76
+  },
+  {
+    "text": "everything's going to be good to go.",
+    "start": 941.6,
+    "duration": 4.72
+  },
+  {
+    "text": "Cool. So memory, there's a little bit of",
+    "start": 943.44,
+    "duration": 4.32
+  },
+  {
+    "text": "stuff that I wanted to talk about with",
+    "start": 946.32,
+    "duration": 4.56
+  },
+  {
+    "text": "memory debugging. Um the statistics",
+    "start": 947.76,
+    "duration": 4.8
+  },
+  {
+    "text": "panel, who knows about statistics panel,",
+    "start": 950.88,
+    "duration": 4.56
+  },
+  {
+    "text": "who's used it? Not as many people as I",
+    "start": 952.56,
+    "duration": 5.839
+  },
+  {
+    "text": "thought. Um but yeah, really useful. You",
+    "start": 955.44,
+    "duration": 4.16
+  },
+  {
+    "text": "can get texture stats, you can get",
+    "start": 958.399,
+    "duration": 2.88
+  },
+  {
+    "text": "primitive stats. It's a good like kind",
+    "start": 959.6,
+    "duration": 3.2
+  },
+  {
+    "text": "of gut check as you're wandering around",
+    "start": 961.279,
+    "duration": 4.641
+  },
+  {
+    "text": "the editor. Uh similarly size map. So",
+    "start": 962.8,
+    "duration": 5.12
+  },
+  {
+    "text": "you can click on an asset and it will",
+    "start": 965.92,
+    "duration": 3.839
+  },
+  {
+    "text": "show you all of the things that are",
+    "start": 967.92,
+    "duration": 3.68
+  },
+  {
+    "text": "being hard referenced by whatever you've",
+    "start": 969.759,
+    "duration": 4.161
+  },
+  {
+    "text": "selected. So like I can click my level",
+    "start": 971.6,
+    "duration": 4.56
+  },
+  {
+    "text": "and it will show me all of the things",
+    "start": 973.92,
+    "duration": 4.24
+  },
+  {
+    "text": "that have been hard referenced by the",
+    "start": 976.16,
+    "duration": 3.84
+  },
+  {
+    "text": "level. So all the static meshes, their",
+    "start": 978.16,
+    "duration": 3.44
+  },
+  {
+    "text": "materials, their textures, their height",
+    "start": 980.0,
+    "duration": 4.16
+  },
+  {
+    "text": "maps. The really important thing about",
+    "start": 981.6,
+    "duration": 5.679
+  },
+  {
+    "text": "size map is you need to switch it over",
+    "start": 984.16,
+    "duration": 5.359
+  },
+  {
+    "text": "switch the size to display over to",
+    "start": 987.279,
+    "duration": 5.521
+  },
+  {
+    "text": "memory size as opposed to disk size.",
+    "start": 989.519,
+    "duration": 6.081
+  },
+  {
+    "text": "Because if you go to disk size, that's",
+    "start": 992.8,
+    "duration": 5.599
+  },
+  {
+    "text": "going to include the 200 megabyte FBX",
+    "start": 995.6,
+    "duration": 4.239
+  },
+  {
+    "text": "file that you've got in all your static",
+    "start": 998.399,
+    "duration": 3.36
+  },
+  {
+    "text": "meshes because we we're now doing like 2",
+    "start": 999.839,
+    "duration": 3.761
+  },
+  {
+    "text": "million triangle static meshes for",
+    "start": 1001.759,
+    "duration": 3.681
+  },
+  {
+    "text": "everything. That's not necessarily",
+    "start": 1003.6,
+    "duration": 3.28
+  },
+  {
+    "text": "representative of what's going to happen",
+    "start": 1005.44,
+    "duration": 4.0
+  },
+  {
+    "text": "in your actual project. Memory size,",
+    "start": 1006.88,
+    "duration": 5.6
+  },
+  {
+    "text": "remember that. And then uh the other fun",
+    "start": 1009.44,
+    "duration": 4.48
+  },
+  {
+    "text": "thing is we've got the render resource",
+    "start": 1012.48,
+    "duration": 2.719
+  },
+  {
+    "text": "viewer, which is going to give you a",
+    "start": 1013.92,
+    "duration": 2.96
+  },
+  {
+    "text": "really good idea of what's happening in",
+    "start": 1015.199,
+    "duration": 5.681
+  },
+  {
+    "text": "the memory of your GPU, your VRAM. And I",
+    "start": 1016.88,
+    "duration": 6.079
+  },
+  {
+    "text": "didn't know about this until about two",
+    "start": 1020.88,
+    "duration": 5.199
+  },
+  {
+    "text": "weeks ago, but we added a size map like",
+    "start": 1022.959,
+    "duration": 5.761
+  },
+  {
+    "text": "display to the render resource viewer so",
+    "start": 1026.079,
+    "duration": 4.321
+  },
+  {
+    "text": "you can get a visual display of",
+    "start": 1028.72,
+    "duration": 3.68
+  },
+  {
+    "text": "everything as well. Really helps when",
+    "start": 1030.4,
+    "duration": 5.039
+  },
+  {
+    "text": "you need to find the big number.",
+    "start": 1032.4,
+    "duration": 4.72
+  },
+  {
+    "text": "And then of course, believe it or not,",
+    "start": 1035.439,
+    "duration": 3.441
+  },
+  {
+    "text": "there's more stuff to talk about with",
+    "start": 1037.12,
+    "duration": 5.24
+  },
+  {
+    "text": "Unreal Insights",
+    "start": 1038.88,
+    "duration": 3.48
+  },
+  {
+    "text": "because there's memory insights. So",
+    "start": 1042.48,
+    "duration": 4.64
+  },
+  {
+    "text": "instead of doing like a mem report or a",
+    "start": 1045.199,
+    "duration": 4.161
+  },
+  {
+    "text": "mem report full and having to to look",
+    "start": 1047.12,
+    "duration": 4.08
+  },
+  {
+    "text": "through the log and figure out",
+    "start": 1049.36,
+    "duration": 3.92
+  },
+  {
+    "text": "everything, memory insights. Now the one",
+    "start": 1051.2,
+    "duration": 3.359
+  },
+  {
+    "text": "thing to watch out for with memory",
+    "start": 1053.28,
+    "duration": 3.84
+  },
+  {
+    "text": "insights is that you need to start the",
+    "start": 1054.559,
+    "duration": 5.36
+  },
+  {
+    "text": "session with the memory channel enabled.",
+    "start": 1057.12,
+    "duration": 6.0
+  },
+  {
+    "text": "You can't do this on the fly. And if you",
+    "start": 1059.919,
+    "duration": 5.521
+  },
+  {
+    "text": "want to get even more uh data, you can",
+    "start": 1063.12,
+    "duration": 4.559
+  },
+  {
+    "text": "use the metadata and asset metadata",
+    "start": 1065.44,
+    "duration": 4.4
+  },
+  {
+    "text": "channels. Really, really useful. And",
+    "start": 1067.679,
+    "duration": 3.441
+  },
+  {
+    "text": "then when you go into the trace",
+    "start": 1069.84,
+    "duration": 2.8
+  },
+  {
+    "text": "analyzer, when you had the memory",
+    "start": 1071.12,
+    "duration": 4.08
+  },
+  {
+    "text": "channel enabled, remember to go find the",
+    "start": 1072.64,
+    "duration": 5.12
+  },
+  {
+    "text": "memory insights analyzer because it's",
+    "start": 1075.2,
+    "duration": 4.8
+  },
+  {
+    "text": "not going to be open by default. I had",
+    "start": 1077.76,
+    "duration": 4.0
+  },
+  {
+    "text": "to look for the menu and I didn't even",
+    "start": 1080.0,
+    "duration": 3.679
+  },
+  {
+    "text": "know it was there. So, sorry about that.",
+    "start": 1081.76,
+    "duration": 3.68
+  },
+  {
+    "text": "Um, but then it's going to give you the",
+    "start": 1083.679,
+    "duration": 3.12
+  },
+  {
+    "text": "memory load of a bunch of different",
+    "start": 1085.44,
+    "duration": 3.52
+  },
+  {
+    "text": "allocations over time. So, you can see",
+    "start": 1086.799,
+    "duration": 4.161
+  },
+  {
+    "text": "what was my physics, what was my static",
+    "start": 1088.96,
+    "duration": 3.76
+  },
+  {
+    "text": "mesh, what was my texture, all what was",
+    "start": 1090.96,
+    "duration": 3.76
+  },
+  {
+    "text": "my audio. All of that is going to be in",
+    "start": 1092.72,
+    "duration": 3.76
+  },
+  {
+    "text": "a timeline just like everything else in",
+    "start": 1094.72,
+    "duration": 4.079
+  },
+  {
+    "text": "in Unreal Insights.",
+    "start": 1096.48,
+    "duration": 4.4
+  },
+  {
+    "text": "And then there's",
+    "start": 1098.799,
+    "duration": 3.681
+  },
+  {
+    "text": "a couple of fun things to talk about",
+    "start": 1100.88,
+    "duration": 3.76
+  },
+  {
+    "text": "with physics debugging. The one that I",
+    "start": 1102.48,
+    "duration": 5.04
+  },
+  {
+    "text": "really like is just hitting alt C",
+    "start": 1104.64,
+    "duration": 4.56
+  },
+  {
+    "text": "because that will show you the collision",
+    "start": 1107.52,
+    "duration": 3.68
+  },
+  {
+    "text": "wireframe of everything in the world.",
+    "start": 1109.2,
+    "duration": 4.16
+  },
+  {
+    "text": "Can anybody spot the crime in this",
+    "start": 1111.2,
+    "duration": 4.479
+  },
+  {
+    "text": "picture?",
+    "start": 1113.36,
+    "duration": 5.199
+  },
+  {
+    "text": "It's right there. This helped me figure",
+    "start": 1115.679,
+    "duration": 5.041
+  },
+  {
+    "text": "out that that static mesh has use",
+    "start": 1118.559,
+    "duration": 4.961
+  },
+  {
+    "text": "complex as simple, which we all know is",
+    "start": 1120.72,
+    "duration": 4.4
+  },
+  {
+    "text": "a crime.",
+    "start": 1123.52,
+    "duration": 4.48
+  },
+  {
+    "text": "Uh, so the the actual static mesh is its",
+    "start": 1125.12,
+    "duration": 5.439
+  },
+  {
+    "text": "collision mesh and that's not great. And",
+    "start": 1128.0,
+    "duration": 4.64
+  },
+  {
+    "text": "you can see that really easily in this",
+    "start": 1130.559,
+    "duration": 5.841
+  },
+  {
+    "text": "view mode. Um, and then as I was talking",
+    "start": 1132.64,
+    "duration": 5.36
+  },
+  {
+    "text": "to somebody about, oh, I'm doing a",
+    "start": 1136.4,
+    "duration": 3.84
+  },
+  {
+    "text": "debugging talk at Unreal Fest in Bali.",
+    "start": 1138.0,
+    "duration": 3.679
+  },
+  {
+    "text": "They're like, yeah, man, are you going",
+    "start": 1140.24,
+    "duration": 3.04
+  },
+  {
+    "text": "to, you know, because I really struggle.",
+    "start": 1141.679,
+    "duration": 3.601
+  },
+  {
+    "text": "I don't know how to debug uh, water",
+    "start": 1143.28,
+    "duration": 3.68
+  },
+  {
+    "text": "buoyancy. And I was like, well, you know",
+    "start": 1145.28,
+    "duration": 3.92
+  },
+  {
+    "text": "about r.debug",
+    "start": 1146.96,
+    "duration": 4.719
+  },
+  {
+    "text": "buoyancy, right? And he said, no. And I",
+    "start": 1149.2,
+    "duration": 5.359
+  },
+  {
+    "text": "wrote down like, add that slide in. Um,",
+    "start": 1151.679,
+    "duration": 4.321
+  },
+  {
+    "text": "yeah, really handy. So, you don't even",
+    "start": 1154.559,
+    "duration": 3.281
+  },
+  {
+    "text": "have to build your own like uh, you",
+    "start": 1156.0,
+    "duration": 4.48
+  },
+  {
+    "text": "know, draw debug sphere, draw debug uh,",
+    "start": 1157.84,
+    "duration": 4.079
+  },
+  {
+    "text": "cross or anything like that. That's all",
+    "start": 1160.48,
+    "duration": 3.04
+  },
+  {
+    "text": "just built in. And that's going to show",
+    "start": 1161.919,
+    "duration": 3.441
+  },
+  {
+    "text": "you all the pontoons, their positions,",
+    "start": 1163.52,
+    "duration": 3.44
+  },
+  {
+    "text": "and all the vertices of the water that",
+    "start": 1165.36,
+    "duration": 3.679
+  },
+  {
+    "text": "it's tracing against.",
+    "start": 1166.96,
+    "duration": 3.68
+  },
+  {
+    "text": "And then I'm not going to go into this",
+    "start": 1169.039,
+    "duration": 3.601
+  },
+  {
+    "text": "one super super deeply, but I will point",
+    "start": 1170.64,
+    "duration": 4.399
+  },
+  {
+    "text": "you to uh in the resources that are",
+    "start": 1172.64,
+    "duration": 3.6
+  },
+  {
+    "text": "going to be in the links at the end of",
+    "start": 1175.039,
+    "duration": 4.241
+  },
+  {
+    "text": "the show, there is a user guide written",
+    "start": 1176.24,
+    "duration": 5.2
+  },
+  {
+    "text": "by the guy who wrote the chaos visual",
+    "start": 1179.28,
+    "duration": 4.32
+  },
+  {
+    "text": "debugger with information on how to use",
+    "start": 1181.44,
+    "duration": 4.239
+  },
+  {
+    "text": "all of this. Uh believe it or not, Chaos",
+    "start": 1183.6,
+    "duration": 4.4
+  },
+  {
+    "text": "Visual Debugger also built on Unreal",
+    "start": 1185.679,
+    "duration": 4.561
+  },
+  {
+    "text": "Insights. Uh and then he also had a",
+    "start": 1188.0,
+    "duration": 3.919
+  },
+  {
+    "text": "really really great talk at Unreal Fest",
+    "start": 1190.24,
+    "duration": 3.36
+  },
+  {
+    "text": "in Seattle. So I'm going to let him do",
+    "start": 1191.919,
+    "duration": 3.76
+  },
+  {
+    "text": "most of the talking on this one. But if",
+    "start": 1193.6,
+    "duration": 4.24
+  },
+  {
+    "text": "you are trying to debug chaos, don't",
+    "start": 1195.679,
+    "duration": 5.041
+  },
+  {
+    "text": "print string chaos visual debugger.",
+    "start": 1197.84,
+    "duration": 4.959
+  },
+  {
+    "text": "Cool. Let's talk about game AI real",
+    "start": 1200.72,
+    "duration": 4.319
+  },
+  {
+    "text": "quick. Now, the thing about game AI, uh,",
+    "start": 1202.799,
+    "duration": 4.0
+  },
+  {
+    "text": "one, if you want to debug your nav mesh,",
+    "start": 1205.039,
+    "duration": 3.201
+  },
+  {
+    "text": "just hit P. It's going to show you all",
+    "start": 1206.799,
+    "duration": 3.441
+  },
+  {
+    "text": "the nav mesh. That's super handy. And",
+    "start": 1208.24,
+    "duration": 4.88
+  },
+  {
+    "text": "then there is u AI debugging or or the",
+    "start": 1210.24,
+    "duration": 5.28
+  },
+  {
+    "text": "gameplay debugger you bring up with",
+    "start": 1213.12,
+    "duration": 4.24
+  },
+  {
+    "text": "apostrophe. Now, the thing about the",
+    "start": 1215.52,
+    "duration": 4.399
+  },
+  {
+    "text": "gameplay debugger is that you need",
+    "start": 1217.36,
+    "duration": 4.72
+  },
+  {
+    "text": "numpads to enable all of the different",
+    "start": 1219.919,
+    "duration": 4.561
+  },
+  {
+    "text": "channels.",
+    "start": 1222.08,
+    "duration": 4.479
+  },
+  {
+    "text": "you need a numpad",
+    "start": 1224.48,
+    "duration": 5.199
+  },
+  {
+    "text": "to enable all of the different channels",
+    "start": 1226.559,
+    "duration": 4.961
+  },
+  {
+    "text": "and that's why I'm not debugging this",
+    "start": 1229.679,
+    "duration": 4.801
+  },
+  {
+    "text": "live. Um,",
+    "start": 1231.52,
+    "duration": 5.12
+  },
+  {
+    "text": "but it is it you can apparently you can",
+    "start": 1234.48,
+    "duration": 3.76
+  },
+  {
+    "text": "remap those channels, but you can do",
+    "start": 1236.64,
+    "duration": 4.399
+  },
+  {
+    "text": "stuff like you can look at um your your",
+    "start": 1238.24,
+    "duration": 6.08
+  },
+  {
+    "text": "behavior trees, your EQS queries. Um,",
+    "start": 1241.039,
+    "duration": 4.801
+  },
+  {
+    "text": "there's a lot of really great stuff in",
+    "start": 1244.32,
+    "duration": 4.719
+  },
+  {
+    "text": "this for debugging AI. Uh, you just need",
+    "start": 1245.84,
+    "duration": 6.64
+  },
+  {
+    "text": "a numpad. Just don't forget that. Uh,",
+    "start": 1249.039,
+    "duration": 5.441
+  },
+  {
+    "text": "and then there's also, uh, I wanted to",
+    "start": 1252.48,
+    "duration": 4.16
+  },
+  {
+    "text": "call out the state tree debugger, which",
+    "start": 1254.48,
+    "duration": 4.8
+  },
+  {
+    "text": "it's a little small for us, but we'll",
+    "start": 1256.64,
+    "duration": 4.96
+  },
+  {
+    "text": "live. Um, so when you open your state",
+    "start": 1259.28,
+    "duration": 4.16
+  },
+  {
+    "text": "tree, the debugger isn't open by",
+    "start": 1261.6,
+    "duration": 3.04
+  },
+  {
+    "text": "default. So, you got to go up to the",
+    "start": 1263.44,
+    "duration": 4.32
+  },
+  {
+    "text": "window panel, hit the debugger, and then",
+    "start": 1264.64,
+    "duration": 4.64
+  },
+  {
+    "text": "when you're playing a session, you can",
+    "start": 1267.76,
+    "duration": 3.279
+  },
+  {
+    "text": "hit the record button. Don't forget to",
+    "start": 1269.28,
+    "duration": 3.92
+  },
+  {
+    "text": "hit the record button and it's going to",
+    "start": 1271.039,
+    "duration": 3.281
+  },
+  {
+    "text": "show you all of the different",
+    "start": 1273.2,
+    "duration": 3.68
+  },
+  {
+    "text": "executions, all of the different um the",
+    "start": 1274.32,
+    "duration": 4.8
+  },
+  {
+    "text": "state tree components that are there as",
+    "start": 1276.88,
+    "duration": 4.08
+  },
+  {
+    "text": "well as their transitions, their current",
+    "start": 1279.12,
+    "duration": 3.76
+  },
+  {
+    "text": "states. Why did they end up in that",
+    "start": 1280.96,
+    "duration": 4.16
+  },
+  {
+    "text": "state? Really, really useful for",
+    "start": 1282.88,
+    "duration": 4.24
+  },
+  {
+    "text": "debugging all of that. I definitely had",
+    "start": 1285.12,
+    "duration": 4.08
+  },
+  {
+    "text": "some some uses for it when I was working",
+    "start": 1287.12,
+    "duration": 4.48
+  },
+  {
+    "text": "on my GDC talk.",
+    "start": 1289.2,
+    "duration": 4.88
+  },
+  {
+    "text": "Really love that. Um user interfaces.",
+    "start": 1291.6,
+    "duration": 4.72
+  },
+  {
+    "text": "Just want to briefly touch on this. The",
+    "start": 1294.08,
+    "duration": 4.719
+  },
+  {
+    "text": "widget reflector will save your life at",
+    "start": 1296.32,
+    "duration": 5.12
+  },
+  {
+    "text": "some point. I guarantee it. So, it's",
+    "start": 1298.799,
+    "duration": 4.161
+  },
+  {
+    "text": "going to bring this up and it's it's hit",
+    "start": 1301.44,
+    "duration": 3.68
+  },
+  {
+    "text": "testing everything that's under your",
+    "start": 1302.96,
+    "duration": 4.32
+  },
+  {
+    "text": "mouse and showing you all of the widgets",
+    "start": 1305.12,
+    "duration": 4.4
+  },
+  {
+    "text": "and sort of the the every bit of layout",
+    "start": 1307.28,
+    "duration": 4.48
+  },
+  {
+    "text": "that it takes to get down to the widget",
+    "start": 1309.52,
+    "duration": 4.0
+  },
+  {
+    "text": "that you're actually hovering over. So,",
+    "start": 1311.76,
+    "duration": 4.56
+  },
+  {
+    "text": "like I can turn it on. I can uh pick",
+    "start": 1313.52,
+    "duration": 5.44
+  },
+  {
+    "text": "that. You can also filter. So, if you",
+    "start": 1316.32,
+    "duration": 4.56
+  },
+  {
+    "text": "want to look at just the user widgets,",
+    "start": 1318.96,
+    "duration": 3.839
+  },
+  {
+    "text": "you can filter by stuff that is that",
+    "start": 1320.88,
+    "duration": 4.96
+  },
+  {
+    "text": "inherits from user widget and uh you can",
+    "start": 1322.799,
+    "duration": 4.401
+  },
+  {
+    "text": "take a snapshot with it so you can save",
+    "start": 1325.84,
+    "duration": 3.199
+  },
+  {
+    "text": "it for later. There's also a bunch in",
+    "start": 1327.2,
+    "duration": 3.839
+  },
+  {
+    "text": "here for like um I use this",
+    "start": 1329.039,
+    "duration": 4.64
+  },
+  {
+    "text": "occasionally. There is a um mouse",
+    "start": 1331.039,
+    "duration": 4.161
+  },
+  {
+    "text": "highlighter. So if you're trying to",
+    "start": 1333.679,
+    "duration": 3.201
+  },
+  {
+    "text": "record a video and pe you want people to",
+    "start": 1335.2,
+    "duration": 2.959
+  },
+  {
+    "text": "know where the mouse is, you can turn",
+    "start": 1336.88,
+    "duration": 3.6
+  },
+  {
+    "text": "that on. There's also a keystroke",
+    "start": 1338.159,
+    "duration": 4.0
+  },
+  {
+    "text": "visualization. So as you're typing",
+    "start": 1340.48,
+    "duration": 3.28
+  },
+  {
+    "text": "something out. So like if you need",
+    "start": 1342.159,
+    "duration": 4.321
+  },
+  {
+    "text": "somebody to um what's the word I'm",
+    "start": 1343.76,
+    "duration": 4.399
+  },
+  {
+    "text": "looking for? If you're like, \"Hey, can",
+    "start": 1346.48,
+    "duration": 3.28
+  },
+  {
+    "text": "you record a video of you doing the",
+    "start": 1348.159,
+    "duration": 3.52
+  },
+  {
+    "text": "thing that causes the bug?\" Tell them to",
+    "start": 1349.76,
+    "duration": 3.84
+  },
+  {
+    "text": "turn that on and you know exactly all",
+    "start": 1351.679,
+    "duration": 3.521
+  },
+  {
+    "text": "the stuff that they're doing. You don't",
+    "start": 1353.6,
+    "duration": 4.319
+  },
+  {
+    "text": "have to like intuit it. Widget reflector",
+    "start": 1355.2,
+    "duration": 4.64
+  },
+  {
+    "text": "is great. Slate debugger also really",
+    "start": 1357.919,
+    "duration": 3.921
+  },
+  {
+    "text": "useful because it will show you all of",
+    "start": 1359.84,
+    "duration": 4.319
+  },
+  {
+    "text": "the invalidations, all of the paint",
+    "start": 1361.84,
+    "duration": 4.319
+  },
+  {
+    "text": "commands, all of the update commands. So",
+    "start": 1364.159,
+    "duration": 3.52
+  },
+  {
+    "text": "if you're trying to figure out why does",
+    "start": 1366.159,
+    "duration": 3.441
+  },
+  {
+    "text": "this widget keep, you know, there's a",
+    "start": 1367.679,
+    "duration": 3.681
+  },
+  {
+    "text": "widget that keeps invalidating what's",
+    "start": 1369.6,
+    "duration": 3.6
+  },
+  {
+    "text": "going on. Slate debugger is going to",
+    "start": 1371.36,
+    "duration": 3.76
+  },
+  {
+    "text": "help you with that. And then Slate",
+    "start": 1373.2,
+    "duration": 4.56
+  },
+  {
+    "text": "Insights, it keeps coming up. Slate",
+    "start": 1375.12,
+    "duration": 4.32
+  },
+  {
+    "text": "insights is going to be how you figure",
+    "start": 1377.76,
+    "duration": 4.24
+  },
+  {
+    "text": "out why was that thing invalidating or",
+    "start": 1379.44,
+    "duration": 4.479
+  },
+  {
+    "text": "updating and so on and so forth. Slate",
+    "start": 1382.0,
+    "duration": 4.4
+  },
+  {
+    "text": "insights, again, very, very handy. Um,",
+    "start": 1383.919,
+    "duration": 4.321
+  },
+  {
+    "text": "but it does have to work in standalone.",
+    "start": 1386.4,
+    "duration": 3.44
+  },
+  {
+    "text": "So that's just one thing to watch out",
+    "start": 1388.24,
+    "duration": 3.679
+  },
+  {
+    "text": "for. Uh, it doesn't work in plain",
+    "start": 1389.84,
+    "duration": 4.48
+  },
+  {
+    "text": "editor. And the plugin is not enabled by",
+    "start": 1391.919,
+    "duration": 4.961
+  },
+  {
+    "text": "default. So watch out for that. And",
+    "start": 1394.32,
+    "duration": 5.44
+  },
+  {
+    "text": "then, uh, MVVM. Is anybody using Vue",
+    "start": 1396.88,
+    "duration": 6.32
+  },
+  {
+    "text": "models? Couple of people. Yeah. Oh man,",
+    "start": 1399.76,
+    "duration": 5.279
+  },
+  {
+    "text": "these things are great. Uh if you had if",
+    "start": 1403.2,
+    "duration": 3.599
+  },
+  {
+    "text": "you haven't seen any of Adrianne's talks",
+    "start": 1405.039,
+    "duration": 4.88
+  },
+  {
+    "text": "yet, uh she might yell at you about MVVM",
+    "start": 1406.799,
+    "duration": 6.0
+  },
+  {
+    "text": "for longer than I have time for, but",
+    "start": 1409.919,
+    "duration": 5.441
+  },
+  {
+    "text": "using MVVM and widget preview is a",
+    "start": 1412.799,
+    "duration": 4.481
+  },
+  {
+    "text": "really powerful combination. Just make",
+    "start": 1415.36,
+    "duration": 4.48
+  },
+  {
+    "text": "sure that in your widget preview uh you",
+    "start": 1417.28,
+    "duration": 6.08
+  },
+  {
+    "text": "enable the view models um uh window,",
+    "start": 1419.84,
+    "duration": 5.36
+  },
+  {
+    "text": "click on the view model, and what that's",
+    "start": 1423.36,
+    "duration": 3.76
+  },
+  {
+    "text": "going to let you do is so I've got my",
+    "start": 1425.2,
+    "duration": 4.16
+  },
+  {
+    "text": "widget here, and in the view model for",
+    "start": 1427.12,
+    "duration": 4.16
+  },
+  {
+    "text": "the widget, I'm updating the text on the",
+    "start": 1429.36,
+    "duration": 4.96
+  },
+  {
+    "text": "widget itself. I don't have to like",
+    "start": 1431.28,
+    "duration": 5.92
+  },
+  {
+    "text": "somebody has done this. Open a level",
+    "start": 1434.32,
+    "duration": 5.28
+  },
+  {
+    "text": "blueprint on begin play. Create a",
+    "start": 1437.2,
+    "duration": 4.56
+  },
+  {
+    "text": "widget. Add the viewport to screen.",
+    "start": 1439.6,
+    "duration": 4.079
+  },
+  {
+    "text": "Yeah, I see. I see this. We've all done",
+    "start": 1441.76,
+    "duration": 4.399
+  },
+  {
+    "text": "this, right? You don't have to do that",
+    "start": 1443.679,
+    "duration": 5.12
+  },
+  {
+    "text": "anymore. You can preview the widget. I'm",
+    "start": 1446.159,
+    "duration": 4.241
+  },
+  {
+    "text": "not even showing you half of what like",
+    "start": 1448.799,
+    "duration": 3.041
+  },
+  {
+    "text": "Adrian is definitely going to show you",
+    "start": 1450.4,
+    "duration": 2.72
+  },
+  {
+    "text": "all of the cool things that you can do",
+    "start": 1451.84,
+    "duration": 3.28
+  },
+  {
+    "text": "with widget preview. Um, there's also",
+    "start": 1453.12,
+    "duration": 4.4
+  },
+  {
+    "text": "apparently a way a console command that",
+    "start": 1455.12,
+    "duration": 4.32
+  },
+  {
+    "text": "you have to enable and it will put a",
+    "start": 1457.52,
+    "duration": 4.72
+  },
+  {
+    "text": "widget preview option in the widget",
+    "start": 1459.44,
+    "duration": 4.96
+  },
+  {
+    "text": "blueprint designer itself. So you'll",
+    "start": 1462.24,
+    "duration": 5.6
+  },
+  {
+    "text": "have like designer and uh uh blueprint",
+    "start": 1464.4,
+    "duration": 7.12
+  },
+  {
+    "text": "and preview all in the same window. It's",
+    "start": 1467.84,
+    "duration": 8.079
+  },
+  {
+    "text": "so nice. It's so nice.",
+    "start": 1471.52,
+    "duration": 6.159
+  },
+  {
+    "text": "Uh has anybody ever done like",
+    "start": 1475.919,
+    "duration": 4.0
+  },
+  {
+    "text": "localization? I imagine I imagine a lot",
+    "start": 1477.679,
+    "duration": 3.12
+  },
+  {
+    "text": "of people have had to do some",
+    "start": 1479.919,
+    "duration": 5.601
+  },
+  {
+    "text": "localization, right? Um, I am an English",
+    "start": 1480.799,
+    "duration": 6.641
+  },
+  {
+    "text": "speaker. I don't speak a lot of other",
+    "start": 1485.52,
+    "duration": 4.92
+  },
+  {
+    "text": "languages.",
+    "start": 1487.44,
+    "duration": 3.0
+  },
+  {
+    "text": "It's fine. Um, and so if I if I want to",
+    "start": 1491.84,
+    "duration": 5.839
+  },
+  {
+    "text": "debug, do I have all of the strings",
+    "start": 1495.279,
+    "duration": 6.4
+  },
+  {
+    "text": "localized, I can pass in dash to the",
+    "start": 1497.679,
+    "duration": 6.801
+  },
+  {
+    "text": "session, and it will open with all of",
+    "start": 1501.679,
+    "duration": 5.521
+  },
+  {
+    "text": "the elite strings as a language. And",
+    "start": 1504.48,
+    "duration": 5.439
+  },
+  {
+    "text": "it's really easy to spot if the string",
+    "start": 1507.2,
+    "duration": 4.8
+  },
+  {
+    "text": "hasn't been localized.",
+    "start": 1509.919,
+    "duration": 4.081
+  },
+  {
+    "text": "But you can still like actually play the",
+    "start": 1512.0,
+    "duration": 3.52
+  },
+  {
+    "text": "game because you can read the leap",
+    "start": 1514.0,
+    "duration": 3.919
+  },
+  {
+    "text": "speak, right? We all we can all read",
+    "start": 1515.52,
+    "duration": 6.68
+  },
+  {
+    "text": "speak, right?",
+    "start": 1517.919,
+    "duration": 4.281
+  },
+  {
+    "text": "Such a good idea.",
+    "start": 1524.08,
+    "duration": 3.64
+  },
+  {
+    "text": "True story. I was on a I was on a tour",
+    "start": 1527.76,
+    "duration": 5.76
+  },
+  {
+    "text": "in a a uh Charleston, South Carolina,",
+    "start": 1530.159,
+    "duration": 6.081
+  },
+  {
+    "text": "and our tour guide",
+    "start": 1533.52,
+    "duration": 6.0
+  },
+  {
+    "text": "was a very fast speaker, and she'd go",
+    "start": 1536.24,
+    "duration": 5.679
+  },
+  {
+    "text": "through she'd go through all this",
+    "start": 1539.52,
+    "duration": 3.6
+  },
+  {
+    "text": "All right, coming up for air. Does",
+    "start": 1541.919,
+    "duration": 4.841
+  },
+  {
+    "text": "anybody have any questions?",
+    "start": 1543.12,
+    "duration": 3.64
+  },
+  {
+    "text": "And I have used that ever since. Coming",
+    "start": 1546.799,
+    "duration": 4.48
+  },
+  {
+    "text": "up for air.",
+    "start": 1548.88,
+    "duration": 3.84
+  },
+  {
+    "text": "All right, we're in the home stretch",
+    "start": 1551.279,
+    "duration": 3.121
+  },
+  {
+    "text": "now. Now we get to talk about graphics",
+    "start": 1552.72,
+    "duration": 3.52
+  },
+  {
+    "text": "debugging. This is kind of graphics",
+    "start": 1554.4,
+    "duration": 3.6
+  },
+  {
+    "text": "debugging might be a little generous",
+    "start": 1556.24,
+    "duration": 3.919
+  },
+  {
+    "text": "here, but I do want to talk about uh",
+    "start": 1558.0,
+    "duration": 5.52
+  },
+  {
+    "text": "debug scaler values and debug ve 3, vec",
+    "start": 1560.159,
+    "duration": 5.52
+  },
+  {
+    "text": "4 in your material. So if you want to",
+    "start": 1563.52,
+    "duration": 5.84
+  },
+  {
+    "text": "know like what is the the number at this",
+    "start": 1565.679,
+    "duration": 5.921
+  },
+  {
+    "text": "specific point as opposed to just like",
+    "start": 1569.36,
+    "duration": 4.4
+  },
+  {
+    "text": "looking at the color, you can just print",
+    "start": 1571.6,
+    "duration": 5.6
+  },
+  {
+    "text": "out the number into the material itself.",
+    "start": 1573.76,
+    "duration": 6.08
+  },
+  {
+    "text": "Really handy, right? Um and we can also",
+    "start": 1577.2,
+    "duration": 4.24
+  },
+  {
+    "text": "combine them together by pushing and",
+    "start": 1579.84,
+    "duration": 3.12
+  },
+  {
+    "text": "pulling the UVs or changing the",
+    "start": 1581.44,
+    "duration": 3.599
+  },
+  {
+    "text": "position. So I can have like a bunch of",
+    "start": 1582.96,
+    "duration": 5.36
+  },
+  {
+    "text": "different values al together. The the",
+    "start": 1585.039,
+    "duration": 5.76
+  },
+  {
+    "text": "limits on this are probably endless. And",
+    "start": 1588.32,
+    "duration": 4.479
+  },
+  {
+    "text": "then if you want to debug a texture, if",
+    "start": 1590.799,
+    "duration": 3.601
+  },
+  {
+    "text": "you want to get a specific value of a",
+    "start": 1592.799,
+    "duration": 4.321
+  },
+  {
+    "text": "texture, you can just set the UV the",
+    "start": 1594.4,
+    "duration": 5.6
+  },
+  {
+    "text": "exact UV position because otherwise",
+    "start": 1597.12,
+    "duration": 5.12
+  },
+  {
+    "text": "because it's sampling the number at all",
+    "start": 1600.0,
+    "duration": 4.24
+  },
+  {
+    "text": "of the positions in UV space, it can get",
+    "start": 1602.24,
+    "duration": 3.52
+  },
+  {
+    "text": "a little squiggly if you've got like a",
+    "start": 1604.24,
+    "duration": 4.319
+  },
+  {
+    "text": "noise texture. Just pass in the center",
+    "start": 1605.76,
+    "duration": 5.2
+  },
+  {
+    "text": "of the UV coordinates, right? And that",
+    "start": 1608.559,
+    "duration": 5.761
+  },
+  {
+    "text": "gives me the exact number that I want.",
+    "start": 1610.96,
+    "duration": 4.88
+  },
+  {
+    "text": "And then if you're ever trying to like",
+    "start": 1614.32,
+    "duration": 4.56
+  },
+  {
+    "text": "graph a function, um because like if",
+    "start": 1615.84,
+    "duration": 4.16
+  },
+  {
+    "text": "you're trying to do anything with a",
+    "start": 1618.88,
+    "duration": 2.64
+  },
+  {
+    "text": "gradient, it can be really hard to",
+    "start": 1620.0,
+    "duration": 2.88
+  },
+  {
+    "text": "figure out what's actually happening",
+    "start": 1621.52,
+    "duration": 3.519
+  },
+  {
+    "text": "with that gradient. So I really like",
+    "start": 1622.88,
+    "duration": 4.56
+  },
+  {
+    "text": "using plot function on graph. And",
+    "start": 1625.039,
+    "duration": 4.401
+  },
+  {
+    "text": "usually the stuff that I'm doing is in 0",
+    "start": 1627.44,
+    "duration": 4.32
+  },
+  {
+    "text": "to one space. It's by default negative 1",
+    "start": 1629.44,
+    "duration": 5.599
+  },
+  {
+    "text": "to one one. Um so I can just graph that",
+    "start": 1631.76,
+    "duration": 5.44
+  },
+  {
+    "text": "function out. Also, this is a stealth",
+    "start": 1635.039,
+    "duration": 4.24
+  },
+  {
+    "text": "launch. Uh I don't know if anybody has",
+    "start": 1637.2,
+    "duration": 4.079
+  },
+  {
+    "text": "seen this node before. The convert node",
+    "start": 1639.279,
+    "duration": 4.801
+  },
+  {
+    "text": "is now in the material editor. So you",
+    "start": 1641.279,
+    "duration": 5.52
+  },
+  {
+    "text": "can freely like combine and convert and",
+    "start": 1644.08,
+    "duration": 5.839
+  },
+  {
+    "text": "break float uh float 2, float three,",
+    "start": 1646.799,
+    "duration": 5.12
+  },
+  {
+    "text": "float four. We basically ported it over",
+    "start": 1649.919,
+    "duration": 4.24
+  },
+  {
+    "text": "from Niagara. Uh this thing is a game",
+    "start": 1651.919,
+    "duration": 4.561
+  },
+  {
+    "text": "changer.",
+    "start": 1654.159,
+    "duration": 4.481
+  },
+  {
+    "text": "Uh and then oh we all know that we can",
+    "start": 1656.48,
+    "duration": 3.84
+  },
+  {
+    "text": "preview widgets with this little button",
+    "start": 1658.64,
+    "duration": 3.519
+  },
+  {
+    "text": "on the nodes, right? We all knew about",
+    "start": 1660.32,
+    "duration": 4.479
+  },
+  {
+    "text": "that. No, because we just added that in",
+    "start": 1662.159,
+    "duration": 4.481
+  },
+  {
+    "text": "5.6. So now you don't have to like",
+    "start": 1664.799,
+    "duration": 4.081
+  },
+  {
+    "text": "rightclick start previewing node. You",
+    "start": 1666.64,
+    "duration": 4.08
+  },
+  {
+    "text": "can there's a button on the node for",
+    "start": 1668.88,
+    "duration": 4.56
+  },
+  {
+    "text": "previewing. Really handy. And then this",
+    "start": 1670.72,
+    "duration": 4.4
+  },
+  {
+    "text": "one comes up every so often. Did you",
+    "start": 1673.44,
+    "duration": 3.119
+  },
+  {
+    "text": "know that you can get view modes in",
+    "start": 1675.12,
+    "duration": 3.279
+  },
+  {
+    "text": "package builds?",
+    "start": 1676.559,
+    "duration": 4.48
+  },
+  {
+    "text": "You just have to force it. Um, this is",
+    "start": 1678.399,
+    "duration": 4.0
+  },
+  {
+    "text": "going to be in the in the links at the",
+    "start": 1681.039,
+    "duration": 2.401
+  },
+  {
+    "text": "end of the show, so don't worry about",
+    "start": 1682.399,
+    "duration": 3.28
+  },
+  {
+    "text": "that. And this one's really really cool.",
+    "start": 1683.44,
+    "duration": 3.76
+  },
+  {
+    "text": "Did you know you can make your own uh",
+    "start": 1685.679,
+    "duration": 4.0
+  },
+  {
+    "text": "buffer visualizations at the project",
+    "start": 1687.2,
+    "duration": 4.32
+  },
+  {
+    "text": "level? You just need to add it to your",
+    "start": 1689.679,
+    "duration": 4.0
+  },
+  {
+    "text": "default engine ini. There's the format.",
+    "start": 1691.52,
+    "duration": 4.0
+  },
+  {
+    "text": "Again, links at the end of the show, so",
+    "start": 1693.679,
+    "duration": 3.041
+  },
+  {
+    "text": "you don't have to write any of that",
+    "start": 1695.52,
+    "duration": 2.56
+  },
+  {
+    "text": "down, but yeah, you can make your own",
+    "start": 1696.72,
+    "duration": 4.72
+  },
+  {
+    "text": "buffer visualizations. It's super cool.",
+    "start": 1698.08,
+    "duration": 5.68
+  },
+  {
+    "text": "Um, and then so remember how we were",
+    "start": 1701.44,
+    "duration": 4.32
+  },
+  {
+    "text": "like debugging pixel values, but maybe",
+    "start": 1703.76,
+    "duration": 5.2
+  },
+  {
+    "text": "you don't have um you don't want to have",
+    "start": 1705.76,
+    "duration": 5.36
+  },
+  {
+    "text": "to like update the material to print out",
+    "start": 1708.96,
+    "duration": 4.24
+  },
+  {
+    "text": "the value or you don't have a situation",
+    "start": 1711.12,
+    "duration": 4.159
+  },
+  {
+    "text": "where a whole bunch of numbers on screen",
+    "start": 1713.2,
+    "duration": 3.76
+  },
+  {
+    "text": "are going to be really useful. Use the",
+    "start": 1715.279,
+    "duration": 3.361
+  },
+  {
+    "text": "pixel inspector. That's exactly what",
+    "start": 1716.96,
+    "duration": 4.48
+  },
+  {
+    "text": "this is for. You turn it on, you hover",
+    "start": 1718.64,
+    "duration": 4.159
+  },
+  {
+    "text": "the mouse over a point, and it's going",
+    "start": 1721.44,
+    "duration": 4.32
+  },
+  {
+    "text": "to show you all of the buffer values at",
+    "start": 1722.799,
+    "duration": 5.041
+  },
+  {
+    "text": "that specific point on screen. Really",
+    "start": 1725.76,
+    "duration": 4.72
+  },
+  {
+    "text": "handy. Um, and there's a little bit",
+    "start": 1727.84,
+    "duration": 4.48
+  },
+  {
+    "text": "really quickly on Niagara, the Niagara",
+    "start": 1730.48,
+    "duration": 3.679
+  },
+  {
+    "text": "debugger. Super powerful. It's going to",
+    "start": 1732.32,
+    "duration": 4.959
+  },
+  {
+    "text": "give you the option to um to customize",
+    "start": 1734.159,
+    "duration": 5.921
+  },
+  {
+    "text": "the HUD display as well as see a whole",
+    "start": 1737.279,
+    "duration": 4.721
+  },
+  {
+    "text": "bunch of different statistics about the",
+    "start": 1740.08,
+    "duration": 3.36
+  },
+  {
+    "text": "particles that are going on. And I think",
+    "start": 1742.0,
+    "duration": 3.279
+  },
+  {
+    "text": "there's even an option to like play back",
+    "start": 1743.44,
+    "duration": 4.479
+  },
+  {
+    "text": "a sim cache and look at the values of",
+    "start": 1745.279,
+    "duration": 4.801
+  },
+  {
+    "text": "all of the attributes of a particle.",
+    "start": 1747.919,
+    "duration": 4.24
+  },
+  {
+    "text": "Very, very handy. Uh, again, so you",
+    "start": 1750.08,
+    "duration": 4.24
+  },
+  {
+    "text": "don't have to print out a string. World",
+    "start": 1752.159,
+    "duration": 3.681
+  },
+  {
+    "text": "partition debugging. Really quickly, I",
+    "start": 1754.32,
+    "duration": 4.959
+  },
+  {
+    "text": "wanted to touch on this one. Um, so one",
+    "start": 1755.84,
+    "duration": 4.88
+  },
+  {
+    "text": "of the things that's really cool about",
+    "start": 1759.279,
+    "duration": 4.561
+  },
+  {
+    "text": "this is in the world settings, we can",
+    "start": 1760.72,
+    "duration": 5.839
+  },
+  {
+    "text": "enable show grid preview. And this has",
+    "start": 1763.84,
+    "duration": 5.36
+  },
+  {
+    "text": "actually been updated for 5.6, I",
+    "start": 1766.559,
+    "duration": 4.72
+  },
+  {
+    "text": "believe. It's going to show you sort of",
+    "start": 1769.2,
+    "duration": 5.839
+  },
+  {
+    "text": "the status of each world partition cell",
+    "start": 1771.279,
+    "duration": 5.601
+  },
+  {
+    "text": "that you're looking at. So the the fully",
+    "start": 1775.039,
+    "duration": 3.921
+  },
+  {
+    "text": "colored ones are fully loaded. The",
+    "start": 1776.88,
+    "duration": 3.76
+  },
+  {
+    "text": "partially colored ones are the ones that",
+    "start": 1778.96,
+    "duration": 3.52
+  },
+  {
+    "text": "are about to be loaded, and then you can",
+    "start": 1780.64,
+    "duration": 3.519
+  },
+  {
+    "text": "see the stuff that's unloaded beyond a",
+    "start": 1782.48,
+    "duration": 4.0
+  },
+  {
+    "text": "certain distance. uh really really handy",
+    "start": 1784.159,
+    "duration": 4.24
+  },
+  {
+    "text": "for debugging that. There's also of",
+    "start": 1786.48,
+    "duration": 5.12
+  },
+  {
+    "text": "course a toggle draw runtime hash 2D",
+    "start": 1788.399,
+    "duration": 4.561
+  },
+  {
+    "text": "which is going to give you a top-down",
+    "start": 1791.6,
+    "duration": 3.199
+  },
+  {
+    "text": "view. It's going to show you the shape",
+    "start": 1792.96,
+    "duration": 4.48
+  },
+  {
+    "text": "of your uh streaming source, the camera",
+    "start": 1794.799,
+    "duration": 3.921
+  },
+  {
+    "text": "direction that you're looking in, the",
+    "start": 1797.44,
+    "duration": 2.88
+  },
+  {
+    "text": "status of all the cells that are around",
+    "start": 1798.72,
+    "duration": 4.72
+  },
+  {
+    "text": "you. There's also the uh draw runtime",
+    "start": 1800.32,
+    "duration": 5.839
+  },
+  {
+    "text": "hash 3D because we've sort of changed",
+    "start": 1803.44,
+    "duration": 4.0
+  },
+  {
+    "text": "how all that works. It's going to show",
+    "start": 1806.159,
+    "duration": 3.681
+  },
+  {
+    "text": "you all of the um all of the different",
+    "start": 1807.44,
+    "duration": 4.56
+  },
+  {
+    "text": "3D grid cells. Not a super great",
+    "start": 1809.84,
+    "duration": 3.839
+  },
+  {
+    "text": "visualization here in the default world",
+    "start": 1812.0,
+    "duration": 3.44
+  },
+  {
+    "text": "partition level, but there's only so",
+    "start": 1813.679,
+    "duration": 3.921
+  },
+  {
+    "text": "much time in the day. And then if you",
+    "start": 1815.44,
+    "duration": 5.44
+  },
+  {
+    "text": "turn off H lods, it will show you uh",
+    "start": 1817.6,
+    "duration": 5.52
+  },
+  {
+    "text": "what stuff",
+    "start": 1820.88,
+    "duration": 4.159
+  },
+  {
+    "text": "doesn't have H lods. It turns out most",
+    "start": 1823.12,
+    "duration": 4.32
+  },
+  {
+    "text": "of my level uh was unloaded here, which",
+    "start": 1825.039,
+    "duration": 4.24
+  },
+  {
+    "text": "is not great, but really really handy",
+    "start": 1827.44,
+    "duration": 4.719
+  },
+  {
+    "text": "debugging tool. And then I just Chris",
+    "start": 1829.279,
+    "duration": 4.721
+  },
+  {
+    "text": "Murphy let me borrow this slide. The",
+    "start": 1832.159,
+    "duration": 4.64
+  },
+  {
+    "text": "property coloration view mode is back.",
+    "start": 1834.0,
+    "duration": 4.64
+  },
+  {
+    "text": "This is a really handy way. You turn it",
+    "start": 1836.799,
+    "duration": 4.081
+  },
+  {
+    "text": "on. you go into the details panel and",
+    "start": 1838.64,
+    "duration": 4.56
+  },
+  {
+    "text": "then controlclick on a property in the",
+    "start": 1840.88,
+    "duration": 4.88
+  },
+  {
+    "text": "details panel and it will show you all",
+    "start": 1843.2,
+    "duration": 4.88
+  },
+  {
+    "text": "of the actors in the world that have",
+    "start": 1845.76,
+    "duration": 5.039
+  },
+  {
+    "text": "that same value on that property. This",
+    "start": 1848.08,
+    "duration": 4.56
+  },
+  {
+    "text": "thing is really really handy. We used to",
+    "start": 1850.799,
+    "duration": 4.081
+  },
+  {
+    "text": "have a version in UE3. It's now back in",
+    "start": 1852.64,
+    "duration": 5.12
+  },
+  {
+    "text": "5.6.",
+    "start": 1854.88,
+    "duration": 5.6
+  },
+  {
+    "text": "Uh some blueprint debugging sort of pro",
+    "start": 1857.76,
+    "duration": 4.639
+  },
+  {
+    "text": "tips. Of course, you know, we were",
+    "start": 1860.48,
+    "duration": 3.679
+  },
+  {
+    "text": "talking about print string earlier. Did",
+    "start": 1862.399,
+    "duration": 4.64
+  },
+  {
+    "text": "I hit this part of my graph? Don't do",
+    "start": 1864.159,
+    "duration": 6.321
+  },
+  {
+    "text": "that. use break points. They're so much",
+    "start": 1867.039,
+    "duration": 6.161
+  },
+  {
+    "text": "nicer. You just control F9 or just F9,",
+    "start": 1870.48,
+    "duration": 5.199
+  },
+  {
+    "text": "click a node, hit F9, and then you don't",
+    "start": 1873.2,
+    "duration": 4.719
+  },
+  {
+    "text": "have to uh muddle up your graph with a",
+    "start": 1875.679,
+    "duration": 4.321
+  },
+  {
+    "text": "bunch of debug statements, log strings",
+    "start": 1877.919,
+    "duration": 5.201
+  },
+  {
+    "text": "that you then have to rip out later. Um,",
+    "start": 1880.0,
+    "duration": 5.6
+  },
+  {
+    "text": "if I'm trying to like get a value from a",
+    "start": 1883.12,
+    "duration": 4.08
+  },
+  {
+    "text": "blueprint during gameplay, one of the",
+    "start": 1885.6,
+    "duration": 3.439
+  },
+  {
+    "text": "things I might use is like a text render",
+    "start": 1887.2,
+    "duration": 3.92
+  },
+  {
+    "text": "component. Uh, I can just set, you know,",
+    "start": 1889.039,
+    "duration": 4.401
+  },
+  {
+    "text": "I can set a bunch of debug text on that.",
+    "start": 1891.12,
+    "duration": 4.24
+  },
+  {
+    "text": "Um, if I ever am trying to debug some",
+    "start": 1893.44,
+    "duration": 3.68
+  },
+  {
+    "text": "like vector math, I'll usually set up a",
+    "start": 1895.36,
+    "duration": 3.919
+  },
+  {
+    "text": "bunch of arrow components, which can be",
+    "start": 1897.12,
+    "duration": 4.0
+  },
+  {
+    "text": "really handy as well. Just like a this",
+    "start": 1899.279,
+    "duration": 3.601
+  },
+  {
+    "text": "is a thing that I use. Maybe it's useful",
+    "start": 1901.12,
+    "duration": 5.039
+  },
+  {
+    "text": "for you. Uh, but you can also draw debug",
+    "start": 1902.88,
+    "duration": 5.44
+  },
+  {
+    "text": "sphere and draw debug arrow. And there's",
+    "start": 1906.159,
+    "duration": 3.841
+  },
+  {
+    "text": "a whole bunch of draw debug commands",
+    "start": 1908.32,
+    "duration": 3.199
+  },
+  {
+    "text": "that are really really useful here as",
+    "start": 1910.0,
+    "duration": 4.159
+  },
+  {
+    "text": "well. Um, and then if you want to get",
+    "start": 1911.519,
+    "duration": 5.52
+  },
+  {
+    "text": "really deep into drawing drawing debug",
+    "start": 1914.159,
+    "duration": 5.201
+  },
+  {
+    "text": "shapes, there is the visual logger. uh",
+    "start": 1917.039,
+    "duration": 6.321
+  },
+  {
+    "text": "in C++ you've got ueI vlog everything uh",
+    "start": 1919.36,
+    "duration": 5.6
+  },
+  {
+    "text": "and then I'm not even going to try and",
+    "start": 1923.36,
+    "duration": 3.28
+  },
+  {
+    "text": "and make a word out of that but you",
+    "start": 1924.96,
+    "duration": 4.16
+  },
+  {
+    "text": "there is conditional vlogging as well",
+    "start": 1926.64,
+    "duration": 4.639
+  },
+  {
+    "text": "for all of these different shapes and",
+    "start": 1929.12,
+    "duration": 4.32
+  },
+  {
+    "text": "there's a way to record and play back a",
+    "start": 1931.279,
+    "duration": 4.721
+  },
+  {
+    "text": "session so you can see all of the visual",
+    "start": 1933.44,
+    "duration": 5.28
+  },
+  {
+    "text": "log events that occurred and you can see",
+    "start": 1936.0,
+    "duration": 4.88
+  },
+  {
+    "text": "again a whole bunch of shapes that are",
+    "start": 1938.72,
+    "duration": 4.799
+  },
+  {
+    "text": "uh you know you can draw like oh this is",
+    "start": 1940.88,
+    "duration": 5.2
+  },
+  {
+    "text": "the path that the my AI agent was",
+    "start": 1943.519,
+    "duration": 4.481
+  },
+  {
+    "text": "supposed to take through the world or",
+    "start": 1946.08,
+    "duration": 3.839
+  },
+  {
+    "text": "this was the shape shape of the damage",
+    "start": 1948.0,
+    "duration": 6.159
+  },
+  {
+    "text": "overlap or really handy stuff. Um, and",
+    "start": 1949.919,
+    "duration": 5.521
+  },
+  {
+    "text": "also just like this one I'm going to",
+    "start": 1954.159,
+    "duration": 2.721
+  },
+  {
+    "text": "kind of throw in for free. You can make",
+    "start": 1955.44,
+    "duration": 4.079
+  },
+  {
+    "text": "your own node uh you can make your own",
+    "start": 1956.88,
+    "duration": 5.76
+  },
+  {
+    "text": "hotkeys to create nodes in blueprints.",
+    "start": 1959.519,
+    "duration": 5.04
+  },
+  {
+    "text": "You just have to go into your editor per",
+    "start": 1962.64,
+    "duration": 5.6
+  },
+  {
+    "text": "project user settings ini and add this.",
+    "start": 1964.559,
+    "duration": 4.881
+  },
+  {
+    "text": "Again, it's going to be at the end of",
+    "start": 1968.24,
+    "duration": 3.36
+  },
+  {
+    "text": "the show, but it's going to also let you",
+    "start": 1969.44,
+    "duration": 3.839
+  },
+  {
+    "text": "do corded action. So, if you want to do",
+    "start": 1971.6,
+    "duration": 4.799
+  },
+  {
+    "text": "like shiftr to spawn a reroute node, you",
+    "start": 1973.279,
+    "duration": 5.201
+  },
+  {
+    "text": "can do that. You just have to know the",
+    "start": 1976.399,
+    "duration": 4.0
+  },
+  {
+    "text": "name of the node that like the",
+    "start": 1978.48,
+    "duration": 3.439
+  },
+  {
+    "text": "underlying name of the node that you're",
+    "start": 1980.399,
+    "duration": 5.201
+  },
+  {
+    "text": "trying to spawn. Um, and we're getting",
+    "start": 1981.919,
+    "duration": 5.281
+  },
+  {
+    "text": "down to it. Just a little bit of build",
+    "start": 1985.6,
+    "duration": 3.679
+  },
+  {
+    "text": "graph debugging pro tips. So, if you",
+    "start": 1987.2,
+    "duration": 4.16
+  },
+  {
+    "text": "were in my last talk about automated",
+    "start": 1989.279,
+    "duration": 3.681
+  },
+  {
+    "text": "performance testing, you know, you're",
+    "start": 1991.36,
+    "duration": 2.559
+  },
+  {
+    "text": "going to have to do a little bit of",
+    "start": 1992.96,
+    "duration": 3.12
+  },
+  {
+    "text": "build graph. You can pass list only to",
+    "start": 1993.919,
+    "duration": 4.48
+  },
+  {
+    "text": "build graph and it's going to print out",
+    "start": 1996.08,
+    "duration": 4.719
+  },
+  {
+    "text": "uh the graph. So, all of the agents and",
+    "start": 1998.399,
+    "duration": 4.241
+  },
+  {
+    "text": "all of the nodes as well as the",
+    "start": 2000.799,
+    "duration": 3.6
+  },
+  {
+    "text": "aggregates that would be generated by",
+    "start": 2002.64,
+    "duration": 4.0
+  },
+  {
+    "text": "that build graph. And it's going to",
+    "start": 2004.399,
+    "duration": 4.561
+  },
+  {
+    "text": "print out all of the options that you",
+    "start": 2006.64,
+    "duration": 4.24
+  },
+  {
+    "text": "would pass to the command line with",
+    "start": 2008.96,
+    "duration": 4.24
+  },
+  {
+    "text": "their default values and the help text",
+    "start": 2010.88,
+    "duration": 4.24
+  },
+  {
+    "text": "for those values. Again, very, very",
+    "start": 2013.2,
+    "duration": 3.839
+  },
+  {
+    "text": "handy. And then if you want to figure",
+    "start": 2015.12,
+    "duration": 3.919
+  },
+  {
+    "text": "out, all right, the build graph script",
+    "start": 2017.039,
+    "duration": 3.681
+  },
+  {
+    "text": "is going to create this whole graph",
+    "start": 2019.039,
+    "duration": 4.561
+  },
+  {
+    "text": "based on the build graph that I graphed.",
+    "start": 2020.72,
+    "duration": 4.799
+  },
+  {
+    "text": "And then you want to see every single",
+    "start": 2023.6,
+    "duration": 3.12
+  },
+  {
+    "text": "command that's going to come out of",
+    "start": 2025.519,
+    "duration": 4.241
+  },
+  {
+    "text": "that, you use -ashprocess.",
+    "start": 2026.72,
+    "duration": 5.439
+  },
+  {
+    "text": "Uh, and what that is going to do is",
+    "start": 2029.76,
+    "duration": 4.0
+  },
+  {
+    "text": "print out, hopefully you can see it",
+    "start": 2032.159,
+    "duration": 3.921
+  },
+  {
+    "text": "there, the node, the name, the the",
+    "start": 2033.76,
+    "duration": 4.0
+  },
+  {
+    "text": "command line arguments that are actually",
+    "start": 2036.08,
+    "duration": 3.68
+  },
+  {
+    "text": "going to be passed to the run Unreal",
+    "start": 2037.76,
+    "duration": 3.919
+  },
+  {
+    "text": "command. So if you ever need to like",
+    "start": 2039.76,
+    "duration": 5.2
+  },
+  {
+    "text": "debug this specific node right now,",
+    "start": 2041.679,
+    "duration": 4.48
+  },
+  {
+    "text": "you're going to be able to get all that",
+    "start": 2044.96,
+    "duration": 3.199
+  },
+  {
+    "text": "out with pre-process.",
+    "start": 2046.159,
+    "duration": 4.881
+  },
+  {
+    "text": "And that's it. I did it. I came in under",
+    "start": 2048.159,
+    "duration": 5.44
+  },
+  {
+    "text": "time. Um, so we have learned a lot today",
+    "start": 2051.04,
+    "duration": 4.799
+  },
+  {
+    "text": "about print string, about logging,",
+    "start": 2053.599,
+    "duration": 5.121
+  },
+  {
+    "text": "console commands, um, audio animation",
+    "start": 2055.839,
+    "duration": 5.52
+  },
+  {
+    "text": "memory, Niagara UI,",
+    "start": 2058.72,
+    "duration": 5.04
+  },
+  {
+    "text": "lead command. Um, there's a whole bunch",
+    "start": 2061.359,
+    "duration": 4.24
+  },
+  {
+    "text": "here. I I've left myself a lot of time",
+    "start": 2063.76,
+    "duration": 3.28
+  },
+  {
+    "text": "for questions because I'm sure there are",
+    "start": 2065.599,
+    "duration": 4.961
+  },
+  {
+    "text": "going to be some. Um, thanks. Thanks for",
+    "start": 2067.04,
+    "duration": 6.76
+  },
+  {
+    "text": "coming out.",
+    "start": 2070.56,
+    "duration": 3.24
+  },
+  {
+    "text": "And as always with all of my talks, this",
+    "start": 2077.2,
+    "duration": 4.08
+  },
+  {
+    "text": "is a QR code. it will take you to my",
+    "start": 2079.599,
+    "duration": 4.641
+  },
+  {
+    "text": "link tree. Uh, and if you give me like",
+    "start": 2081.28,
+    "duration": 5.119
+  },
+  {
+    "text": "15 minutes, I will publish the article",
+    "start": 2084.24,
+    "duration": 4.32
+  },
+  {
+    "text": "with all of the helpful tips, tricks,",
+    "start": 2086.399,
+    "duration": 3.68
+  },
+  {
+    "text": "and documentation that I talked about",
+    "start": 2088.56,
+    "duration": 5.63
+  },
+  {
+    "text": "today. Thanks everybody.",
+    "start": 2090.079,
+    "duration": 7.241
+  },
+  {
+    "text": "[Applause]",
+    "start": 2094.19,
+    "duration": 3.13
+  }
+]

@@ -1,0 +1,5567 @@
+[
+  {
+    "text": "All right, I think we're going to get",
+    "start": 1.6,
+    "duration": 3.679
+  },
+  {
+    "text": "started here. So, welcome to our talk on",
+    "start": 2.72,
+    "duration": 5.119
+  },
+  {
+    "text": "studio tested strategies perforce",
+    "start": 5.279,
+    "duration": 4.801
+  },
+  {
+    "text": "workflows at scale from small to large",
+    "start": 7.839,
+    "duration": 5.041
+  },
+  {
+    "text": "teams. We tried to win the award for the",
+    "start": 10.08,
+    "duration": 5.439
+  },
+  {
+    "text": "most words in the title of a talk, but",
+    "start": 12.88,
+    "duration": 4.479
+  },
+  {
+    "text": "um I looked at the agenda and I found a",
+    "start": 15.519,
+    "duration": 3.84
+  },
+  {
+    "text": "couple that beat us. So, we have",
+    "start": 17.359,
+    "duration": 4.881
+  },
+  {
+    "text": "something to aspire to for next year.",
+    "start": 19.359,
+    "duration": 5.281
+  },
+  {
+    "text": ">> All right. Uh our agenda today uh first",
+    "start": 22.24,
+    "duration": 5.279
+  },
+  {
+    "text": "off, my name is Brent Shisl. Um I run",
+    "start": 24.64,
+    "duration": 6.08
+  },
+  {
+    "text": "our product management group and lead P4",
+    "start": 27.519,
+    "duration": 5.441
+  },
+  {
+    "text": "um P4 cloud and some other parts of the",
+    "start": 30.72,
+    "duration": 6.48
+  },
+  {
+    "text": "P P4 portfolio. And my name is Yuan",
+    "start": 32.96,
+    "duration": 5.919
+  },
+  {
+    "text": "Coulson. I also work as a product",
+    "start": 37.2,
+    "duration": 4.16
+  },
+  {
+    "text": "manager for our code review solution as",
+    "start": 38.879,
+    "duration": 4.401
+  },
+  {
+    "text": "well as our DAM and and and our new",
+    "start": 41.36,
+    "duration": 4.48
+  },
+  {
+    "text": "product P41. So I will be following up",
+    "start": 43.28,
+    "duration": 4.16
+  },
+  {
+    "text": "after Brent here in the end and talk",
+    "start": 45.84,
+    "duration": 3.6
+  },
+  {
+    "text": "about some of the things that are kind",
+    "start": 47.44,
+    "duration": 3.76
+  },
+  {
+    "text": "of in the periphery around the core",
+    "start": 49.44,
+    "duration": 3.119
+  },
+  {
+    "text": "product that we have around version",
+    "start": 51.2,
+    "duration": 2.56
+  },
+  {
+    "text": "control and I will also talk",
+    "start": 52.559,
+    "duration": 3.201
+  },
+  {
+    "text": "specifically about some tips and tricks",
+    "start": 53.76,
+    "duration": 5.76
+  },
+  {
+    "text": "when it comes to uh the code reviewing.",
+    "start": 55.76,
+    "duration": 5.36
+  },
+  {
+    "text": "All right. So I'm going to start off",
+    "start": 59.52,
+    "duration": 4.16
+  },
+  {
+    "text": "here talking about server topologies. Uh",
+    "start": 61.12,
+    "duration": 6.88
+  },
+  {
+    "text": "the very most basic server topology is a",
+    "start": 63.68,
+    "duration": 6.479
+  },
+  {
+    "text": "single server topology. This is what you",
+    "start": 68.0,
+    "duration": 4.0
+  },
+  {
+    "text": "get when you come out of the box",
+    "start": 70.159,
+    "duration": 4.401
+  },
+  {
+    "text": "installation with Perforce. Uh your",
+    "start": 72.0,
+    "duration": 4.72
+  },
+  {
+    "text": "single server is called a standard",
+    "start": 74.56,
+    "duration": 4.879
+  },
+  {
+    "text": "server technically speaking and then you",
+    "start": 76.72,
+    "duration": 5.92
+  },
+  {
+    "text": "have options uh to scale and the scale",
+    "start": 79.439,
+    "duration": 5.761
+  },
+  {
+    "text": "comes with better performance but also",
+    "start": 82.64,
+    "duration": 4.96
+  },
+  {
+    "text": "more management overhead. So you can see",
+    "start": 85.2,
+    "duration": 5.279
+  },
+  {
+    "text": "here starting with a single server a lot",
+    "start": 87.6,
+    "duration": 4.64
+  },
+  {
+    "text": "of times customers will then move to",
+    "start": 90.479,
+    "duration": 4.721
+  },
+  {
+    "text": "proxies then eventually to forwarding",
+    "start": 92.24,
+    "duration": 5.36
+  },
+  {
+    "text": "replicas and the most adventurous",
+    "start": 95.2,
+    "duration": 4.16
+  },
+  {
+    "text": "customers uh make their way to edge",
+    "start": 97.6,
+    "duration": 3.28
+  },
+  {
+    "text": "servers as well. So I'm going to talk",
+    "start": 99.36,
+    "duration": 2.96
+  },
+  {
+    "text": "about the differences between all these",
+    "start": 100.88,
+    "duration": 2.8
+  },
+  {
+    "text": "different types of servers and try to",
+    "start": 102.32,
+    "duration": 3.839
+  },
+  {
+    "text": "make sense of it for you. So again where",
+    "start": 103.68,
+    "duration": 4.719
+  },
+  {
+    "text": "you start out of the box is a standard",
+    "start": 106.159,
+    "duration": 4.881
+  },
+  {
+    "text": "server. So this is a screenshot from our",
+    "start": 108.399,
+    "duration": 6.241
+  },
+  {
+    "text": "P4 admin tool. There is a new uh tab in",
+    "start": 111.04,
+    "duration": 5.439
+  },
+  {
+    "text": "there called topology. I can't remember",
+    "start": 114.64,
+    "duration": 3.119
+  },
+  {
+    "text": "what version you have to be on. It's",
+    "start": 116.479,
+    "duration": 4.161
+  },
+  {
+    "text": "probably 23.2 or something like that uh",
+    "start": 117.759,
+    "duration": 4.96
+  },
+  {
+    "text": "in order to have it enabled. But we draw",
+    "start": 120.64,
+    "duration": 4.32
+  },
+  {
+    "text": "this graph for you. Again, this is not a",
+    "start": 122.719,
+    "duration": 3.68
+  },
+  {
+    "text": "fun looking graph because there's only",
+    "start": 124.96,
+    "duration": 3.919
+  },
+  {
+    "text": "one server. But this is where you start",
+    "start": 126.399,
+    "duration": 4.48
+  },
+  {
+    "text": "and it's a type of server called",
+    "start": 128.879,
+    "duration": 5.041
+  },
+  {
+    "text": "standard. Now, where most customers go",
+    "start": 130.879,
+    "duration": 5.521
+  },
+  {
+    "text": "next are proxy servers. So, you can see",
+    "start": 133.92,
+    "duration": 5.84
+  },
+  {
+    "text": "here again using our topology graph.",
+    "start": 136.4,
+    "duration": 5.6
+  },
+  {
+    "text": "This is a example of three different",
+    "start": 139.76,
+    "duration": 5.119
+  },
+  {
+    "text": "proxy servers all connected to the same",
+    "start": 142.0,
+    "duration": 4.319
+  },
+  {
+    "text": "hub. In this case, you see the word",
+    "start": 144.879,
+    "duration": 3.44
+  },
+  {
+    "text": "commit. This could also still be called",
+    "start": 146.319,
+    "duration": 3.441
+  },
+  {
+    "text": "standard. It doesn't have to be called",
+    "start": 148.319,
+    "duration": 4.161
+  },
+  {
+    "text": "commit at this point. Um, why do people",
+    "start": 149.76,
+    "duration": 4.96
+  },
+  {
+    "text": "use proxy servers? Number one, it's the",
+    "start": 152.48,
+    "duration": 5.039
+  },
+  {
+    "text": "easiest to set up and administer. Uh,",
+    "start": 154.72,
+    "duration": 6.08
+  },
+  {
+    "text": "number two, they cache files. So, they",
+    "start": 157.519,
+    "duration": 4.881
+  },
+  {
+    "text": "do not cache metadata. They're not",
+    "start": 160.8,
+    "duration": 3.519
+  },
+  {
+    "text": "they're not going to help you get",
+    "start": 162.4,
+    "duration": 4.559
+  },
+  {
+    "text": "information about branches or streams or",
+    "start": 164.319,
+    "duration": 4.081
+  },
+  {
+    "text": "about change lists or anything like",
+    "start": 166.959,
+    "duration": 3.601
+  },
+  {
+    "text": "that, but they are going to get the",
+    "start": 168.4,
+    "duration": 4.16
+  },
+  {
+    "text": "files physically closer to the end user.",
+    "start": 170.56,
+    "duration": 4.24
+  },
+  {
+    "text": "So your sync times are going to be uh",
+    "start": 172.56,
+    "duration": 3.759
+  },
+  {
+    "text": "benefited. Your end users are going to",
+    "start": 174.8,
+    "duration": 4.719
+  },
+  {
+    "text": "notice a speed up in the syncing.",
+    "start": 176.319,
+    "duration": 5.521
+  },
+  {
+    "text": "Uh proxy ser servers are ephemeral",
+    "start": 179.519,
+    "duration": 3.521
+  },
+  {
+    "text": "meaning you don't have to have a",
+    "start": 181.84,
+    "duration": 3.759
+  },
+  {
+    "text": "separate uh DR strategy. If one goes",
+    "start": 183.04,
+    "duration": 4.32
+  },
+  {
+    "text": "away, there's really no harm whatsoever.",
+    "start": 185.599,
+    "duration": 3.201
+  },
+  {
+    "text": "There's no data loss or anything like",
+    "start": 187.36,
+    "duration": 3.84
+  },
+  {
+    "text": "that to be concerned about. And then",
+    "start": 188.8,
+    "duration": 4.32
+  },
+  {
+    "text": "they do have some built-in cache",
+    "start": 191.2,
+    "duration": 4.56
+  },
+  {
+    "text": "management functionality. We put in some",
+    "start": 193.12,
+    "duration": 5.28
+  },
+  {
+    "text": "abilities to define a last access",
+    "start": 195.76,
+    "duration": 4.96
+  },
+  {
+    "text": "threshold. So if you can say the number",
+    "start": 198.4,
+    "duration": 5.199
+  },
+  {
+    "text": "of days is 28 and if a file in the cache",
+    "start": 200.72,
+    "duration": 4.4
+  },
+  {
+    "text": "hasn't been accessed in the last 28",
+    "start": 203.599,
+    "duration": 3.761
+  },
+  {
+    "text": "days, we will can automatically purge it",
+    "start": 205.12,
+    "duration": 4.399
+  },
+  {
+    "text": "for you. Uh I will say we could do",
+    "start": 207.36,
+    "duration": 4.08
+  },
+  {
+    "text": "better here. I think most of you say",
+    "start": 209.519,
+    "duration": 3.521
+  },
+  {
+    "text": "that's great, but I really want",
+    "start": 211.44,
+    "duration": 4.32
+  },
+  {
+    "text": "something that says if my proxy is 90%",
+    "start": 213.04,
+    "duration": 5.68
+  },
+  {
+    "text": "full, get rid of the oldest things in",
+    "start": 215.76,
+    "duration": 4.88
+  },
+  {
+    "text": "there and get it back down to a lower",
+    "start": 218.72,
+    "duration": 4.56
+  },
+  {
+    "text": "threshold. So um we could do better",
+    "start": 220.64,
+    "duration": 5.679
+  },
+  {
+    "text": "here. We do have some options for you.",
+    "start": 223.28,
+    "duration": 6.0
+  },
+  {
+    "text": "um room for improvement.",
+    "start": 226.319,
+    "duration": 4.56
+  },
+  {
+    "text": "All right, I also want to highlight that",
+    "start": 229.28,
+    "duration": 3.12
+  },
+  {
+    "text": "some of our customers actually like to",
+    "start": 230.879,
+    "duration": 5.28
+  },
+  {
+    "text": "set up a proxy for every single user. Uh",
+    "start": 232.4,
+    "duration": 5.68
+  },
+  {
+    "text": "in this case, the graph is the same only",
+    "start": 236.159,
+    "duration": 4.321
+  },
+  {
+    "text": "it's just one user per proxy. So this is",
+    "start": 238.08,
+    "duration": 4.32
+  },
+  {
+    "text": "another option that you have if you",
+    "start": 240.48,
+    "duration": 4.56
+  },
+  {
+    "text": "really want to get uh data as close as",
+    "start": 242.4,
+    "duration": 5.199
+  },
+  {
+    "text": "possible to the end user. Uh literally",
+    "start": 245.04,
+    "duration": 4.64
+  },
+  {
+    "text": "install a proxy on their same local",
+    "start": 247.599,
+    "duration": 4.081
+  },
+  {
+    "text": "machine that their client is installed",
+    "start": 249.68,
+    "duration": 4.72
+  },
+  {
+    "text": "on. Uh so this works a lot where you",
+    "start": 251.68,
+    "duration": 5.279
+  },
+  {
+    "text": "have extremely geographically dispersed",
+    "start": 254.4,
+    "duration": 4.799
+  },
+  {
+    "text": "users. So you don't have pockets where",
+    "start": 256.959,
+    "duration": 4.481
+  },
+  {
+    "text": "you've got u you know 20 users over here",
+    "start": 259.199,
+    "duration": 3.601
+  },
+  {
+    "text": "and 20 over there. They're just",
+    "start": 261.44,
+    "duration": 2.96
+  },
+  {
+    "text": "literally all spread out across the",
+    "start": 262.8,
+    "duration": 5.119
+  },
+  {
+    "text": "world world. Uh kind of truly remote uh",
+    "start": 264.4,
+    "duration": 5.6
+  },
+  {
+    "text": "no offices.",
+    "start": 267.919,
+    "duration": 3.921
+  },
+  {
+    "text": "And then what you can do is you can do",
+    "start": 270.0,
+    "duration": 3.52
+  },
+  {
+    "text": "scheduled data updates. So when that",
+    "start": 271.84,
+    "duration": 3.12
+  },
+  {
+    "text": "person is done working for the day, you",
+    "start": 273.52,
+    "duration": 3.119
+  },
+  {
+    "text": "usually know their work schedule. Then",
+    "start": 274.96,
+    "duration": 4.16
+  },
+  {
+    "text": "you go ahead and you go refresh the",
+    "start": 276.639,
+    "duration": 4.081
+  },
+  {
+    "text": "cache with the latest versions of the",
+    "start": 279.12,
+    "duration": 3.44
+  },
+  {
+    "text": "files that are mapped to their client.",
+    "start": 280.72,
+    "duration": 3.44
+  },
+  {
+    "text": "And now you're getting that data as",
+    "start": 282.56,
+    "duration": 3.28
+  },
+  {
+    "text": "close as possible to them. So that next",
+    "start": 284.16,
+    "duration": 5.039
+  },
+  {
+    "text": "sync in the morning is super fast.",
+    "start": 285.84,
+    "duration": 5.76
+  },
+  {
+    "text": "Uh also you can ensure that your local",
+    "start": 289.199,
+    "duration": 4.801
+  },
+  {
+    "text": "data matches the server data. So if you",
+    "start": 291.6,
+    "duration": 4.48
+  },
+  {
+    "text": "want to avoid P4 clean, which we",
+    "start": 294.0,
+    "duration": 4.24
+  },
+  {
+    "text": "actually did some uh enhancements",
+    "start": 296.08,
+    "duration": 4.16
+  },
+  {
+    "text": "recently to P4 clean, so it's not as bad",
+    "start": 298.24,
+    "duration": 4.16
+  },
+  {
+    "text": "as it has been in the past. Um, but",
+    "start": 300.24,
+    "duration": 3.84
+  },
+  {
+    "text": "there are other ways that you can just",
+    "start": 302.4,
+    "duration": 4.079
+  },
+  {
+    "text": "wipe out the proxy and start over to",
+    "start": 304.08,
+    "duration": 4.8
+  },
+  {
+    "text": "make sure you're good and you're synced",
+    "start": 306.479,
+    "duration": 4.241
+  },
+  {
+    "text": "with the with the head server, if you",
+    "start": 308.88,
+    "duration": 4.72
+  },
+  {
+    "text": "will. And then also you can keep these",
+    "start": 310.72,
+    "duration": 6.08
+  },
+  {
+    "text": "servers tidy. So sometimes you can run a",
+    "start": 313.6,
+    "duration": 5.68
+  },
+  {
+    "text": "custom tool and clean out the proxy and",
+    "start": 316.8,
+    "duration": 4.88
+  },
+  {
+    "text": "just leave the latest versions. Um, so",
+    "start": 319.28,
+    "duration": 4.479
+  },
+  {
+    "text": "the these reasons actually came from a",
+    "start": 321.68,
+    "duration": 4.16
+  },
+  {
+    "text": "customer of ours where I was talking",
+    "start": 323.759,
+    "duration": 3.681
+  },
+  {
+    "text": "with them and they said, \"I actually set",
+    "start": 325.84,
+    "duration": 3.12
+  },
+  {
+    "text": "up a proxy for every single user.\" And",
+    "start": 327.44,
+    "duration": 3.039
+  },
+  {
+    "text": "that kind of blew my mind. I was like I",
+    "start": 328.96,
+    "duration": 3.12
+  },
+  {
+    "text": "didn't I didn't know customers did that.",
+    "start": 330.479,
+    "duration": 3.521
+  },
+  {
+    "text": "So I asked why are you doing that? So",
+    "start": 332.08,
+    "duration": 4.24
+  },
+  {
+    "text": "these were the the reasons why this uh",
+    "start": 334.0,
+    "duration": 5.039
+  },
+  {
+    "text": "individual customer is doing that. Okay.",
+    "start": 336.32,
+    "duration": 5.52
+  },
+  {
+    "text": "So then moving on from proxy to the next",
+    "start": 339.039,
+    "duration": 6.481
+  },
+  {
+    "text": "one in the in the complication or the",
+    "start": 341.84,
+    "duration": 5.68
+  },
+  {
+    "text": "level of complexity chain is forwarding",
+    "start": 345.52,
+    "duration": 4.239
+  },
+  {
+    "text": "replicas. So again here what you're",
+    "start": 347.52,
+    "duration": 5.36
+  },
+  {
+    "text": "going to see is that middle blue server",
+    "start": 349.759,
+    "duration": 4.961
+  },
+  {
+    "text": "can either be commit or standard still",
+    "start": 352.88,
+    "duration": 4.48
+  },
+  {
+    "text": "at this point. But forwarding replicas",
+    "start": 354.72,
+    "duration": 5.759
+  },
+  {
+    "text": "bring metadata into the mix. So unlike",
+    "start": 357.36,
+    "duration": 4.88
+  },
+  {
+    "text": "proxies where we're just talking about",
+    "start": 360.479,
+    "duration": 3.601
+  },
+  {
+    "text": "file content, now we're starting to talk",
+    "start": 362.24,
+    "duration": 5.519
+  },
+  {
+    "text": "about file content and metadata",
+    "start": 364.08,
+    "duration": 5.28
+  },
+  {
+    "text": "um but we are only talking about",
+    "start": 367.759,
+    "duration": 3.921
+  },
+  {
+    "text": "readonly operations. So things like sync",
+    "start": 369.36,
+    "duration": 5.36
+  },
+  {
+    "text": "and submit and others and revert um are",
+    "start": 371.68,
+    "duration": 4.72
+  },
+  {
+    "text": "not going to be handled through that",
+    "start": 374.72,
+    "duration": 3.36
+  },
+  {
+    "text": "forwarding replica itself. It's still",
+    "start": 376.4,
+    "duration": 3.519
+  },
+  {
+    "text": "going to have to go to the upstream and",
+    "start": 378.08,
+    "duration": 4.64
+  },
+  {
+    "text": "do some uh coordination. So you won't",
+    "start": 379.919,
+    "duration": 4.881
+  },
+  {
+    "text": "benefit from all things but readonly",
+    "start": 382.72,
+    "duration": 5.199
+  },
+  {
+    "text": "operations will benefit.",
+    "start": 384.8,
+    "duration": 5.519
+  },
+  {
+    "text": "You can chain them together uh as shown",
+    "start": 387.919,
+    "duration": 4.241
+  },
+  {
+    "text": "in this picture. The foring replica",
+    "start": 390.319,
+    "duration": 3.6
+  },
+  {
+    "text": "three and two are chained together. The",
+    "start": 392.16,
+    "duration": 3.52
+  },
+  {
+    "text": "three is chained to two which is chained",
+    "start": 393.919,
+    "duration": 4.4
+  },
+  {
+    "text": "to the commit or the standard server. It",
+    "start": 395.68,
+    "duration": 4.32
+  },
+  {
+    "text": "is possible to do that if that is",
+    "start": 398.319,
+    "duration": 3.921
+  },
+  {
+    "text": "something that you find value in. And",
+    "start": 400.0,
+    "duration": 4.08
+  },
+  {
+    "text": "then again ease of management. You don't",
+    "start": 402.24,
+    "duration": 4.399
+  },
+  {
+    "text": "need to have a separate DR strategy for",
+    "start": 404.08,
+    "duration": 4.32
+  },
+  {
+    "text": "each of these forwarding replicas",
+    "start": 406.639,
+    "duration": 3.601
+  },
+  {
+    "text": "because they are also ephemeral just",
+    "start": 408.4,
+    "duration": 4.88
+  },
+  {
+    "text": "like a proxy server.",
+    "start": 410.24,
+    "duration": 4.64
+  },
+  {
+    "text": "All right. So then moving to the most",
+    "start": 413.28,
+    "duration": 3.52
+  },
+  {
+    "text": "complicated part of this one. You're",
+    "start": 414.88,
+    "duration": 4.48
+  },
+  {
+    "text": "going to see a bunch of edge servers in",
+    "start": 416.8,
+    "duration": 4.56
+  },
+  {
+    "text": "blue and then each of those edge servers",
+    "start": 419.36,
+    "duration": 4.32
+  },
+  {
+    "text": "actually has a standby server because",
+    "start": 421.36,
+    "duration": 3.839
+  },
+  {
+    "text": "this is where you actually need to get",
+    "start": 423.68,
+    "duration": 3.519
+  },
+  {
+    "text": "into a little bit more complicated DR",
+    "start": 425.199,
+    "duration": 4.321
+  },
+  {
+    "text": "strategy. Uh why do you want to move to",
+    "start": 427.199,
+    "duration": 5.041
+  },
+  {
+    "text": "an edge server? Well, number one, uh",
+    "start": 429.52,
+    "duration": 5.44
+  },
+  {
+    "text": "some write operations like sync, opening",
+    "start": 432.24,
+    "duration": 6.0
+  },
+  {
+    "text": "for edit, resolve, merge, revert can all",
+    "start": 434.96,
+    "duration": 4.959
+  },
+  {
+    "text": "be done through the edge. It doesn't",
+    "start": 438.24,
+    "duration": 4.56
+  },
+  {
+    "text": "need to go back to the commit server. Um",
+    "start": 439.919,
+    "duration": 4.72
+  },
+  {
+    "text": "in this case, that middle server",
+    "start": 442.8,
+    "duration": 3.679
+  },
+  {
+    "text": "actually is a commit server. It's not a",
+    "start": 444.639,
+    "duration": 3.441
+  },
+  {
+    "text": "type standard anymore. So when you move",
+    "start": 446.479,
+    "duration": 4.401
+  },
+  {
+    "text": "to edges, you do have to uh take your",
+    "start": 448.08,
+    "duration": 4.8
+  },
+  {
+    "text": "existing standard server and and update",
+    "start": 450.88,
+    "duration": 4.879
+  },
+  {
+    "text": "it to be a commit server. Uh that is",
+    "start": 452.88,
+    "duration": 5.68
+  },
+  {
+    "text": "something to be aware of. You can chain",
+    "start": 455.759,
+    "duration": 4.641
+  },
+  {
+    "text": "edges together just like shown at the",
+    "start": 458.56,
+    "duration": 3.199
+  },
+  {
+    "text": "bottom of the screen just like you can",
+    "start": 460.4,
+    "duration": 3.76
+  },
+  {
+    "text": "do with forwarding replicas. But again,",
+    "start": 461.759,
+    "duration": 3.761
+  },
+  {
+    "text": "each of those should have its own",
+    "start": 464.16,
+    "duration": 4.72
+  },
+  {
+    "text": "standby server, which is the next point.",
+    "start": 465.52,
+    "duration": 4.88
+  },
+  {
+    "text": "Each of these should have a mandatory",
+    "start": 468.88,
+    "duration": 3.759
+  },
+  {
+    "text": "standby. Uh mandatory standbys are good",
+    "start": 470.4,
+    "duration": 4.88
+  },
+  {
+    "text": "for d disaster recovery and they have",
+    "start": 472.639,
+    "duration": 4.641
+  },
+  {
+    "text": "built over failover. So we have P4",
+    "start": 475.28,
+    "duration": 4.56
+  },
+  {
+    "text": "failover and actually if you're doing a",
+    "start": 477.28,
+    "duration": 4.72
+  },
+  {
+    "text": "planned failover, not an emergency",
+    "start": 479.84,
+    "duration": 4.96
+  },
+  {
+    "text": "failover, we also have a P4 failback",
+    "start": 482.0,
+    "duration": 4.319
+  },
+  {
+    "text": "command that not a lot of people know",
+    "start": 484.8,
+    "duration": 4.799
+  },
+  {
+    "text": "about. Some of our customers use the P4",
+    "start": 486.319,
+    "duration": 6.0
+  },
+  {
+    "text": "failover with intention to fail back for",
+    "start": 489.599,
+    "duration": 6.401
+  },
+  {
+    "text": "how they upgrade their servers as well.",
+    "start": 492.319,
+    "duration": 5.921
+  },
+  {
+    "text": "Um, and then last but not least, one of",
+    "start": 496.0,
+    "duration": 4.8
+  },
+  {
+    "text": "the what I'll call not so great things",
+    "start": 498.24,
+    "duration": 5.28
+  },
+  {
+    "text": "about edge servers is that the client is",
+    "start": 500.8,
+    "duration": 5.04
+  },
+  {
+    "text": "attached to each edge. So every user",
+    "start": 503.52,
+    "duration": 4.959
+  },
+  {
+    "text": "client uh is attached to an edge, the",
+    "start": 505.84,
+    "duration": 4.24
+  },
+  {
+    "text": "edge knows about it. And if you want to",
+    "start": 508.479,
+    "duration": 3.361
+  },
+  {
+    "text": "move a client from one edge server to",
+    "start": 510.08,
+    "duration": 2.959
+  },
+  {
+    "text": "another, you have to do this thing",
+    "start": 511.84,
+    "duration": 3.36
+  },
+  {
+    "text": "called unloading and reloading, which is",
+    "start": 513.039,
+    "duration": 3.841
+  },
+  {
+    "text": "not the most efficient operation in the",
+    "start": 515.2,
+    "duration": 4.079
+  },
+  {
+    "text": "world. I can tell you that the architect",
+    "start": 516.88,
+    "duration": 5.039
+  },
+  {
+    "text": "team, if I ask them to try to squeeze",
+    "start": 519.279,
+    "duration": 4.081
+  },
+  {
+    "text": "any more juice out of unloading and",
+    "start": 521.919,
+    "duration": 2.48
+  },
+  {
+    "text": "reloading, they're going to throw",
+    "start": 523.36,
+    "duration": 2.479
+  },
+  {
+    "text": "something at me because they're sick of",
+    "start": 524.399,
+    "duration": 4.161
+  },
+  {
+    "text": "me asking. Um, but one thing that we are",
+    "start": 525.839,
+    "duration": 4.881
+  },
+  {
+    "text": "looking at doing is saying in the",
+    "start": 528.56,
+    "duration": 4.8
+  },
+  {
+    "text": "future, a lot of this client information",
+    "start": 530.72,
+    "duration": 4.32
+  },
+  {
+    "text": "that's stored on the edge that's unique",
+    "start": 533.36,
+    "duration": 3.2
+  },
+  {
+    "text": "to the edge, we're actually going to try",
+    "start": 535.04,
+    "duration": 4.08
+  },
+  {
+    "text": "to push it to the client itself. And so",
+    "start": 536.56,
+    "duration": 5.68
+  },
+  {
+    "text": "we're working on a very big P right now",
+    "start": 539.12,
+    "duration": 5.44
+  },
+  {
+    "text": "where the end goal is to say we're going",
+    "start": 542.24,
+    "duration": 4.48
+  },
+  {
+    "text": "to take the requirement of unloading and",
+    "start": 544.56,
+    "duration": 4.399
+  },
+  {
+    "text": "reloading clients across edges",
+    "start": 546.72,
+    "duration": 4.64
+  },
+  {
+    "text": "completely away. Now, I can tell you",
+    "start": 548.959,
+    "duration": 6.161
+  },
+  {
+    "text": "that it's P. You know, if if we make it,",
+    "start": 551.36,
+    "duration": 6.0
+  },
+  {
+    "text": "uh, that's going to be fantastic because",
+    "start": 555.12,
+    "duration": 4.64
+  },
+  {
+    "text": "at that point, you could say, uh,",
+    "start": 557.36,
+    "duration": 5.52
+  },
+  {
+    "text": "yesterday John Doe logged into edge one",
+    "start": 559.76,
+    "duration": 5.28
+  },
+  {
+    "text": "and his client was attached to that or",
+    "start": 562.88,
+    "duration": 4.399
+  },
+  {
+    "text": "was attached to that one, per se, was",
+    "start": 565.04,
+    "duration": 4.16
+  },
+  {
+    "text": "working off that server, and tomorrow",
+    "start": 567.279,
+    "duration": 3.361
+  },
+  {
+    "text": "I'm just going to automatically route",
+    "start": 569.2,
+    "duration": 3.199
+  },
+  {
+    "text": "him to Edge 2 instead, and there would",
+    "start": 570.64,
+    "duration": 4.319
+  },
+  {
+    "text": "be no unload and reload required. So",
+    "start": 572.399,
+    "duration": 4.321
+  },
+  {
+    "text": "that's the uh that's the place we're",
+    "start": 574.959,
+    "duration": 3.681
+  },
+  {
+    "text": "trying to get to with edge servers to",
+    "start": 576.72,
+    "duration": 4.48
+  },
+  {
+    "text": "make them better than they are today.",
+    "start": 578.64,
+    "duration": 4.96
+  },
+  {
+    "text": "Okay, so that's server topologies. I'm",
+    "start": 581.2,
+    "duration": 4.639
+  },
+  {
+    "text": "going to move on to branching and",
+    "start": 583.6,
+    "duration": 5.2
+  },
+  {
+    "text": "streams. So",
+    "start": 585.839,
+    "duration": 5.041
+  },
+  {
+    "text": "let me just go with where do you want to",
+    "start": 588.8,
+    "duration": 4.32
+  },
+  {
+    "text": "usually start and why are streams",
+    "start": 590.88,
+    "duration": 4.959
+  },
+  {
+    "text": "useful? Number one, a stream is like a",
+    "start": 593.12,
+    "duration": 5.04
+  },
+  {
+    "text": "branch except when it's not. And the",
+    "start": 595.839,
+    "duration": 4.081
+  },
+  {
+    "text": "accept when it's not part is things like",
+    "start": 598.16,
+    "duration": 4.799
+  },
+  {
+    "text": "import import plus being able to",
+    "start": 599.92,
+    "duration": 5.68
+  },
+  {
+    "text": "basically bring in content from another",
+    "start": 602.959,
+    "duration": 5.281
+  },
+  {
+    "text": "part of the depot into your stream. Also",
+    "start": 605.6,
+    "duration": 4.32
+  },
+  {
+    "text": "we have functionality called stream",
+    "start": 608.24,
+    "duration": 3.44
+  },
+  {
+    "text": "components where basically one stream",
+    "start": 609.92,
+    "duration": 5.52
+  },
+  {
+    "text": "can import another stream. Um so it's",
+    "start": 611.68,
+    "duration": 5.839
+  },
+  {
+    "text": "like a branch just with a little",
+    "start": 615.44,
+    "duration": 4.399
+  },
+  {
+    "text": "different flavor.",
+    "start": 617.519,
+    "duration": 4.401
+  },
+  {
+    "text": "Streams define workspace views. So the",
+    "start": 619.839,
+    "duration": 3.761
+  },
+  {
+    "text": "nice thing about streams is when you set",
+    "start": 621.92,
+    "duration": 3.2
+  },
+  {
+    "text": "up a client you just point it to the",
+    "start": 623.6,
+    "duration": 4.16
+  },
+  {
+    "text": "stream. uh this is helpful in terms of",
+    "start": 625.12,
+    "duration": 4.399
+  },
+  {
+    "text": "easing the burden of setting up new",
+    "start": 627.76,
+    "duration": 3.68
+  },
+  {
+    "text": "clients",
+    "start": 629.519,
+    "duration": 3.841
+  },
+  {
+    "text": "and then they enforce merging rules. So",
+    "start": 631.44,
+    "duration": 3.839
+  },
+  {
+    "text": "we always talk about merge down copy up",
+    "start": 633.36,
+    "duration": 3.919
+  },
+  {
+    "text": "as being the most useful pattern in",
+    "start": 635.279,
+    "duration": 5.441
+  },
+  {
+    "text": "branching and using streams but um when",
+    "start": 637.279,
+    "duration": 5.601
+  },
+  {
+    "text": "exceptions arise we don't enforce it",
+    "start": 640.72,
+    "duration": 4.239
+  },
+  {
+    "text": "where you can't get around it. So if you",
+    "start": 642.88,
+    "duration": 3.6
+  },
+  {
+    "text": "need to do cherrypicking that's totally",
+    "start": 644.959,
+    "duration": 4.961
+  },
+  {
+    "text": "possible with streams and then streams",
+    "start": 646.48,
+    "duration": 5.359
+  },
+  {
+    "text": "we call them have superpowers. The most",
+    "start": 649.92,
+    "duration": 3.52
+  },
+  {
+    "text": "recent one is something called sparse",
+    "start": 651.839,
+    "duration": 2.881
+  },
+  {
+    "text": "streams. I'll talk a little bit more",
+    "start": 653.44,
+    "duration": 3.519
+  },
+  {
+    "text": "about sparse streams uh in another slide",
+    "start": 654.72,
+    "duration": 4.88
+  },
+  {
+    "text": "here. The key thing is when you start,",
+    "start": 656.959,
+    "duration": 4.401
+  },
+  {
+    "text": "you should really just start with a",
+    "start": 659.6,
+    "duration": 4.16
+  },
+  {
+    "text": "single stream. So, it's the it's the",
+    "start": 661.36,
+    "duration": 4.56
+  },
+  {
+    "text": "easiest way to work. Everybody's working",
+    "start": 663.76,
+    "duration": 4.24
+  },
+  {
+    "text": "in the same stream.",
+    "start": 665.92,
+    "duration": 3.599
+  },
+  {
+    "text": "Then at some point, you're going to say,",
+    "start": 668.0,
+    "duration": 2.88
+  },
+  {
+    "text": "well, I'm going to start doing some more",
+    "start": 669.519,
+    "duration": 3.201
+  },
+  {
+    "text": "experimental work. This experimental",
+    "start": 670.88,
+    "duration": 4.48
+  },
+  {
+    "text": "work could have the, you know, build",
+    "start": 672.72,
+    "duration": 6.239
+  },
+  {
+    "text": "breaking component to it. uh you know",
+    "start": 675.36,
+    "duration": 6.4
+  },
+  {
+    "text": "I'm less confident that it's going to",
+    "start": 678.959,
+    "duration": 4.56
+  },
+  {
+    "text": "build correctly the first time and I",
+    "start": 681.76,
+    "duration": 2.96
+  },
+  {
+    "text": "don't want to be the one to break the",
+    "start": 683.519,
+    "duration": 2.88
+  },
+  {
+    "text": "build because nobody likes to be that",
+    "start": 684.72,
+    "duration": 3.84
+  },
+  {
+    "text": "person. So in that case you'll probably",
+    "start": 686.399,
+    "duration": 3.921
+  },
+  {
+    "text": "move to a development stream and you can",
+    "start": 688.56,
+    "duration": 3.76
+  },
+  {
+    "text": "see a dual arrow here for that merge",
+    "start": 690.32,
+    "duration": 4.4
+  },
+  {
+    "text": "down copy up workflow. The merge down",
+    "start": 692.32,
+    "duration": 5.199
+  },
+  {
+    "text": "copy up helps us to keep the main line",
+    "start": 694.72,
+    "duration": 5.28
+  },
+  {
+    "text": "stable. So you merge all the latest",
+    "start": 697.519,
+    "duration": 4.161
+  },
+  {
+    "text": "changes from main into development. You",
+    "start": 700.0,
+    "duration": 3.12
+  },
+  {
+    "text": "do all your testing there. You make sure",
+    "start": 701.68,
+    "duration": 2.56
+  },
+  {
+    "text": "everything's good. When everything's",
+    "start": 703.12,
+    "duration": 2.88
+  },
+  {
+    "text": "good, you copy those changes back up to",
+    "start": 704.24,
+    "duration": 4.0
+  },
+  {
+    "text": "main. When you do it that way, you're",
+    "start": 706.0,
+    "duration": 3.6
+  },
+  {
+    "text": "making sure that when you copy those",
+    "start": 708.24,
+    "duration": 3.12
+  },
+  {
+    "text": "changes back up to main that you're not",
+    "start": 709.6,
+    "duration": 5.04
+  },
+  {
+    "text": "going to break the build. Okay, so in",
+    "start": 711.36,
+    "duration": 5.12
+  },
+  {
+    "text": "this case, work can be done in a",
+    "start": 714.64,
+    "duration": 3.68
+  },
+  {
+    "text": "devstream. And there could be multiple",
+    "start": 716.48,
+    "duration": 4.32
+  },
+  {
+    "text": "people working on the devstream. And",
+    "start": 718.32,
+    "duration": 5.44
+  },
+  {
+    "text": "then again, you copy up to main. At some",
+    "start": 720.8,
+    "duration": 4.56
+  },
+  {
+    "text": "point, you're going to hopefully hit the",
+    "start": 723.76,
+    "duration": 3.519
+  },
+  {
+    "text": "point of releasing code. And now this",
+    "start": 725.36,
+    "duration": 3.12
+  },
+  {
+    "text": "point, you're going to add a release",
+    "start": 727.279,
+    "duration": 3.68
+  },
+  {
+    "text": "stream. The release stream is shown as",
+    "start": 728.48,
+    "duration": 5.359
+  },
+  {
+    "text": "being above the main stream just because",
+    "start": 730.959,
+    "duration": 4.641
+  },
+  {
+    "text": "it's a more stable code line. And in",
+    "start": 733.839,
+    "duration": 3.841
+  },
+  {
+    "text": "this case, there's only a single",
+    "start": 735.6,
+    "duration": 4.239
+  },
+  {
+    "text": "direction arrow. And that's because in",
+    "start": 737.68,
+    "duration": 4.08
+  },
+  {
+    "text": "this case, you don't want to be taking a",
+    "start": 739.839,
+    "duration": 5.44
+  },
+  {
+    "text": "lot of changes and bringing them back up",
+    "start": 741.76,
+    "duration": 5.36
+  },
+  {
+    "text": "to the release stream after you cut it.",
+    "start": 745.279,
+    "duration": 3.041
+  },
+  {
+    "text": "Because your release stream is really",
+    "start": 747.12,
+    "duration": 3.2
+  },
+  {
+    "text": "just a point in time artifact. This is",
+    "start": 748.32,
+    "duration": 3.519
+  },
+  {
+    "text": "what the code looked like when I pushed",
+    "start": 750.32,
+    "duration": 4.16
+  },
+  {
+    "text": "out this particular release.",
+    "start": 751.839,
+    "duration": 4.641
+  },
+  {
+    "text": "And then as you make new releases, you",
+    "start": 754.48,
+    "duration": 4.24
+  },
+  {
+    "text": "make new release streams. And again,",
+    "start": 756.48,
+    "duration": 4.159
+  },
+  {
+    "text": "this is a good reflection of a point in",
+    "start": 758.72,
+    "duration": 4.799
+  },
+  {
+    "text": "time. What was the code looking like at",
+    "start": 760.639,
+    "duration": 4.401
+  },
+  {
+    "text": "the time I pushed out a particular",
+    "start": 763.519,
+    "duration": 3.921
+  },
+  {
+    "text": "release?",
+    "start": 765.04,
+    "duration": 4.72
+  },
+  {
+    "text": "Okay, virtual streams are a thing. I",
+    "start": 767.44,
+    "duration": 3.76
+  },
+  {
+    "text": "don't really want to talk too much about",
+    "start": 769.76,
+    "duration": 3.28
+  },
+  {
+    "text": "virtual streams because we have",
+    "start": 771.2,
+    "duration": 4.319
+  },
+  {
+    "text": "something coming out in 2025.2, which is",
+    "start": 773.04,
+    "duration": 5.52
+  },
+  {
+    "text": "in November, that hopefully take a very",
+    "start": 775.519,
+    "duration": 4.721
+  },
+  {
+    "text": "big reason why you're using virtual",
+    "start": 778.56,
+    "duration": 5.2
+  },
+  {
+    "text": "streams today. Um, I'll just say virtual",
+    "start": 780.24,
+    "duration": 6.08
+  },
+  {
+    "text": "streams are just a filtered view of its",
+    "start": 783.76,
+    "duration": 5.12
+  },
+  {
+    "text": "parent. So if you have today in today's",
+    "start": 786.32,
+    "duration": 4.319
+  },
+  {
+    "text": "world a lot of people use them because",
+    "start": 788.88,
+    "duration": 3.759
+  },
+  {
+    "text": "I've got six people all working off the",
+    "start": 790.639,
+    "duration": 3.681
+  },
+  {
+    "text": "same stream but they all have six unique",
+    "start": 792.639,
+    "duration": 3.2
+  },
+  {
+    "text": "needs in terms of what content they want",
+    "start": 794.32,
+    "duration": 3.04
+  },
+  {
+    "text": "from the stream. So we tell them to",
+    "start": 795.839,
+    "duration": 3.601
+  },
+  {
+    "text": "create virtual streams and then this",
+    "start": 797.36,
+    "duration": 4.479
+  },
+  {
+    "text": "virtual or this stream graph gets very",
+    "start": 799.44,
+    "duration": 6.079
+  },
+  {
+    "text": "cluttered and nobody likes it. So what",
+    "start": 801.839,
+    "duration": 6.481
+  },
+  {
+    "text": "we're doing is in 25.2 we're introducing",
+    "start": 805.519,
+    "duration": 4.721
+  },
+  {
+    "text": "a new field on the client spec called",
+    "start": 808.32,
+    "duration": 4.24
+  },
+  {
+    "text": "limit view. And so limit view is",
+    "start": 810.24,
+    "duration": 4.96
+  },
+  {
+    "text": "basically going to say create the stream",
+    "start": 812.56,
+    "duration": 4.48
+  },
+  {
+    "text": "or sorry create the client point it to",
+    "start": 815.2,
+    "duration": 5.199
+  },
+  {
+    "text": "this stream but then exclude these paths",
+    "start": 817.04,
+    "duration": 5.2
+  },
+  {
+    "text": "from that stream. So now you can say",
+    "start": 820.399,
+    "duration": 3.761
+  },
+  {
+    "text": "every individual user gets their own",
+    "start": 822.24,
+    "duration": 3.839
+  },
+  {
+    "text": "unique view of this stream without",
+    "start": 824.16,
+    "duration": 4.0
+  },
+  {
+    "text": "having to mess with virtual streams.",
+    "start": 826.079,
+    "duration": 4.0
+  },
+  {
+    "text": "Again this should be coming out in mid",
+    "start": 828.16,
+    "duration": 3.679
+  },
+  {
+    "text": "November.",
+    "start": 830.079,
+    "duration": 4.081
+  },
+  {
+    "text": "Okay. And then last on branching is",
+    "start": 831.839,
+    "duration": 4.881
+  },
+  {
+    "text": "sparse streams. So, one of the pieces of",
+    "start": 834.16,
+    "duration": 5.359
+  },
+  {
+    "text": "feedback which was very legitimate is uh",
+    "start": 836.72,
+    "duration": 4.64
+  },
+  {
+    "text": "for those of you and probably everybody",
+    "start": 839.519,
+    "duration": 3.76
+  },
+  {
+    "text": "in the room is experienced with git",
+    "start": 841.36,
+    "duration": 4.08
+  },
+  {
+    "text": "growing up and you know at some point in",
+    "start": 843.279,
+    "duration": 4.481
+  },
+  {
+    "text": "your careers and then you come over to",
+    "start": 845.44,
+    "duration": 4.32
+  },
+  {
+    "text": "Perforce and you're like oh man",
+    "start": 847.76,
+    "duration": 4.48
+  },
+  {
+    "text": "branching was so cheap in git and then I",
+    "start": 849.76,
+    "duration": 3.92
+  },
+  {
+    "text": "had to use this thing called perforce",
+    "start": 852.24,
+    "duration": 3.839
+  },
+  {
+    "text": "and branching is not cheap in perforce.",
+    "start": 853.68,
+    "duration": 4.48
+  },
+  {
+    "text": "Um and we heard you and so what we did",
+    "start": 856.079,
+    "duration": 4.641
+  },
+  {
+    "text": "is we created two new types of streams.",
+    "start": 858.16,
+    "duration": 4.32
+  },
+  {
+    "text": "One is called a sparse dev for",
+    "start": 860.72,
+    "duration": 3.04
+  },
+  {
+    "text": "development. The other one's called",
+    "start": 862.48,
+    "duration": 3.84
+  },
+  {
+    "text": "sparse re for release. And basically",
+    "start": 863.76,
+    "duration": 5.199
+  },
+  {
+    "text": "what we do here is say on the left hand",
+    "start": 866.32,
+    "duration": 5.36
+  },
+  {
+    "text": "side the traditional stream is you had",
+    "start": 868.959,
+    "duration": 4.961
+  },
+  {
+    "text": "to run this really heavy populate step.",
+    "start": 871.68,
+    "duration": 4.48
+  },
+  {
+    "text": "And so basically I believe it's",
+    "start": 873.92,
+    "duration": 4.159
+  },
+  {
+    "text": "somewhere between five and six metadata",
+    "start": 876.16,
+    "duration": 4.72
+  },
+  {
+    "text": "records that we write into the newly",
+    "start": 878.079,
+    "duration": 5.521
+  },
+  {
+    "text": "created branch or streams namespace for",
+    "start": 880.88,
+    "duration": 5.44
+  },
+  {
+    "text": "every file in the parent stream. Some of",
+    "start": 883.6,
+    "duration": 5.12
+  },
+  {
+    "text": "our customers have upwards of 20 million",
+    "start": 886.32,
+    "duration": 4.4
+  },
+  {
+    "text": "files in their mainline stream. And if",
+    "start": 888.72,
+    "duration": 3.76
+  },
+  {
+    "text": "we're writing five to six metadata",
+    "start": 890.72,
+    "duration": 3.359
+  },
+  {
+    "text": "records for every single file, that's a",
+    "start": 892.48,
+    "duration": 4.0
+  },
+  {
+    "text": "lot of metadata. And then if you add",
+    "start": 894.079,
+    "duration": 4.081
+  },
+  {
+    "text": "edge servers into the mix, now we're",
+    "start": 896.48,
+    "duration": 4.0
+  },
+  {
+    "text": "replicating a bunch of data downstream.",
+    "start": 898.16,
+    "duration": 5.119
+  },
+  {
+    "text": "Uh which is why that um operation feels",
+    "start": 900.48,
+    "duration": 5.44
+  },
+  {
+    "text": "so heavy. So with sparse streams, what",
+    "start": 903.279,
+    "duration": 5.12
+  },
+  {
+    "text": "we do is we say create this sparse dev",
+    "start": 905.92,
+    "duration": 4.719
+  },
+  {
+    "text": "stream for example. And instead of",
+    "start": 908.399,
+    "duration": 4.961
+  },
+  {
+    "text": "branching any metadata, we actually",
+    "start": 910.639,
+    "duration": 4.56
+  },
+  {
+    "text": "don't branch anything at all. And we use",
+    "start": 913.36,
+    "duration": 4.08
+  },
+  {
+    "text": "something called overlay views. So we",
+    "start": 915.199,
+    "duration": 4.161
+  },
+  {
+    "text": "overlay a view to the parent stream. So",
+    "start": 917.44,
+    "duration": 3.6
+  },
+  {
+    "text": "your workspace makes it look like all",
+    "start": 919.36,
+    "duration": 3.76
+  },
+  {
+    "text": "these files are there, but actually if",
+    "start": 921.04,
+    "duration": 3.68
+  },
+  {
+    "text": "you look inspected the depot, none of",
+    "start": 923.12,
+    "duration": 3.44
+  },
+  {
+    "text": "the files are there because no metadata",
+    "start": 924.72,
+    "duration": 4.4
+  },
+  {
+    "text": "was branched. And then only when you",
+    "start": 926.56,
+    "duration": 5.12
+  },
+  {
+    "text": "actually open forit files in that sparse",
+    "start": 929.12,
+    "duration": 4.959
+  },
+  {
+    "text": "dev uh stream do we actually branch",
+    "start": 931.68,
+    "duration": 4.56
+  },
+  {
+    "text": "metadata. So it might look like more",
+    "start": 934.079,
+    "duration": 5.2
+  },
+  {
+    "text": "over time. If all I did was branch three",
+    "start": 936.24,
+    "duration": 5.279
+  },
+  {
+    "text": "files or or open forit three files,",
+    "start": 939.279,
+    "duration": 3.841
+  },
+  {
+    "text": "those are the only files that are going",
+    "start": 941.519,
+    "duration": 3.68
+  },
+  {
+    "text": "to have metadata populated in the sparse",
+    "start": 943.12,
+    "duration": 4.079
+  },
+  {
+    "text": "stream. So again, what we're trying to",
+    "start": 945.199,
+    "duration": 5.121
+  },
+  {
+    "text": "do here is say, um, we heard you on the",
+    "start": 947.199,
+    "duration": 5.361
+  },
+  {
+    "text": "fact that branching was very expensive",
+    "start": 950.32,
+    "duration": 4.879
+  },
+  {
+    "text": "and we tried to make it much more cheap",
+    "start": 952.56,
+    "duration": 5.12
+  },
+  {
+    "text": "with sparse streams. All right, I'm",
+    "start": 955.199,
+    "duration": 3.921
+  },
+  {
+    "text": "going to hand it over to Johan who's",
+    "start": 957.68,
+    "duration": 3.68
+  },
+  {
+    "text": "going to talk about code review.",
+    "start": 959.12,
+    "duration": 5.56
+  },
+  {
+    "text": ">> Thank you, Brent.",
+    "start": 961.36,
+    "duration": 3.32
+  },
+  {
+    "text": "All right, so we brought bees for",
+    "start": 967.92,
+    "duration": 4.56
+  },
+  {
+    "text": "everyone that we would come here and we",
+    "start": 970.16,
+    "duration": 4.479
+  },
+  {
+    "text": "clearly didn't bring enough bees. So,",
+    "start": 972.48,
+    "duration": 3.599
+  },
+  {
+    "text": "um, I've been trying to get my colleague",
+    "start": 974.639,
+    "duration": 4.481
+  },
+  {
+    "text": "to bring another box of them. Um, if",
+    "start": 976.079,
+    "duration": 4.161
+  },
+  {
+    "text": "you've been at other events, you",
+    "start": 979.12,
+    "duration": 2.32
+  },
+  {
+    "text": "probably are familiar with those piece.",
+    "start": 980.24,
+    "duration": 2.959
+  },
+  {
+    "text": "But how many in here are using Perforce",
+    "start": 981.44,
+    "duration": 3.839
+  },
+  {
+    "text": "today for version control? Can you raise",
+    "start": 983.199,
+    "duration": 4.401
+  },
+  {
+    "text": "hands? Almost all of you. Great, great,",
+    "start": 985.279,
+    "duration": 5.441
+  },
+  {
+    "text": "great. I will be talking about code",
+    "start": 987.6,
+    "duration": 4.88
+  },
+  {
+    "text": "review primarily. But before I go into",
+    "start": 990.72,
+    "duration": 3.359
+  },
+  {
+    "text": "the some of the wheats there, I want to",
+    "start": 992.48,
+    "duration": 3.599
+  },
+  {
+    "text": "talk about",
+    "start": 994.079,
+    "duration": 4.401
+  },
+  {
+    "text": "basically some of the rebranding we've",
+    "start": 996.079,
+    "duration": 4.401
+  },
+  {
+    "text": "done and the suite of products that you",
+    "start": 998.48,
+    "duration": 3.84
+  },
+  {
+    "text": "have access to. And since many of you",
+    "start": 1000.48,
+    "duration": 4.24
+  },
+  {
+    "text": "are using this already, I think this can",
+    "start": 1002.32,
+    "duration": 4.72
+  },
+  {
+    "text": "be good as as a quick explainer as well",
+    "start": 1004.72,
+    "duration": 4.239
+  },
+  {
+    "text": "because many think of perforce as just",
+    "start": 1007.04,
+    "duration": 3.44
+  },
+  {
+    "text": "version control but we actually do many",
+    "start": 1008.959,
+    "duration": 3.361
+  },
+  {
+    "text": "many more things and this is what we",
+    "start": 1010.48,
+    "duration": 3.599
+  },
+  {
+    "text": "call the P4 platform. So if you want to",
+    "start": 1012.32,
+    "duration": 4.879
+  },
+  {
+    "text": "be like a true P4 studio uh you could",
+    "start": 1014.079,
+    "duration": 5.12
+  },
+  {
+    "text": "use code review. So this is a tool that",
+    "start": 1017.199,
+    "duration": 4.0
+  },
+  {
+    "text": "used to be called Swarm before. So how",
+    "start": 1019.199,
+    "duration": 3.921
+  },
+  {
+    "text": "many are using swarm or code review?",
+    "start": 1021.199,
+    "duration": 3.6
+  },
+  {
+    "text": "Most of you okay good. So that's where I",
+    "start": 1023.12,
+    "duration": 5.839
+  },
+  {
+    "text": "will spend most of my my part here. P4",
+    "start": 1024.799,
+    "duration": 6.321
+  },
+  {
+    "text": "DAM we launched a couple of years ago",
+    "start": 1028.959,
+    "duration": 4.08
+  },
+  {
+    "text": "now but it's been maturing very quickly.",
+    "start": 1031.12,
+    "duration": 3.839
+  },
+  {
+    "text": "is our digital asset management tool",
+    "start": 1033.039,
+    "duration": 4.4
+  },
+  {
+    "text": "that's also used for reviews of of",
+    "start": 1034.959,
+    "duration": 4.72
+  },
+  {
+    "text": "assets. So, how many of you would say",
+    "start": 1037.439,
+    "duration": 4.081
+  },
+  {
+    "text": "that you work on more of the art side of",
+    "start": 1039.679,
+    "duration": 5.52
+  },
+  {
+    "text": "of game development or whatever you do?",
+    "start": 1041.52,
+    "duration": 5.76
+  },
+  {
+    "text": "Not that many. Okay. So, I'm going to",
+    "start": 1045.199,
+    "duration": 3.441
+  },
+  {
+    "text": "have one or two slides for you as well.",
+    "start": 1047.28,
+    "duration": 4.08
+  },
+  {
+    "text": "So, don't worry. Uh P4 plan used to be",
+    "start": 1048.64,
+    "duration": 4.64
+  },
+  {
+    "text": "called Handsoft back in the day. A lot",
+    "start": 1051.36,
+    "duration": 3.199
+  },
+  {
+    "text": "of things has happened with that product",
+    "start": 1053.28,
+    "duration": 3.04
+  },
+  {
+    "text": "as well, but that's our our planning",
+    "start": 1054.559,
+    "duration": 4.881
+  },
+  {
+    "text": "tool. So for anyone who wants a",
+    "start": 1056.32,
+    "duration": 4.8
+  },
+  {
+    "text": "scheduling tool or capacity tool, any",
+    "start": 1059.44,
+    "duration": 3.359
+  },
+  {
+    "text": "producers in the room, that would be one",
+    "start": 1061.12,
+    "duration": 3.2
+  },
+  {
+    "text": "to look out. I'm not going to cover that",
+    "start": 1062.799,
+    "duration": 4.401
+  },
+  {
+    "text": "today. And then we have just launched",
+    "start": 1064.32,
+    "duration": 6.8
+  },
+  {
+    "text": "P41. So P41 is our brand new client. So",
+    "start": 1067.2,
+    "duration": 5.599
+  },
+  {
+    "text": "this is included for free with all of",
+    "start": 1071.12,
+    "duration": 4.16
+  },
+  {
+    "text": "you who use perfor",
+    "start": 1072.799,
+    "duration": 6.321
+  },
+  {
+    "text": "built to be sort of a alternative to P4V",
+    "start": 1075.28,
+    "duration": 6.399
+  },
+  {
+    "text": "for those users who may struggle using",
+    "start": 1079.12,
+    "duration": 4.96
+  },
+  {
+    "text": "P4V for various reasons. And we have",
+    "start": 1081.679,
+    "duration": 4.321
+  },
+  {
+    "text": "focused very much on the kind of artist",
+    "start": 1084.08,
+    "duration": 4.24
+  },
+  {
+    "text": "persona. So it's a very visual",
+    "start": 1086.0,
+    "duration": 4.88
+  },
+  {
+    "text": "interface. Uh you have local versioning",
+    "start": 1088.32,
+    "duration": 4.4
+  },
+  {
+    "text": "there. So you could kind of go out on",
+    "start": 1090.88,
+    "duration": 3.679
+  },
+  {
+    "text": "different experiments and and track",
+    "start": 1092.72,
+    "duration": 4.319
+  },
+  {
+    "text": "versions locally in what we call tracks.",
+    "start": 1094.559,
+    "duration": 3.761
+  },
+  {
+    "text": "That's what you're seeing on the on the",
+    "start": 1097.039,
+    "duration": 3.361
+  },
+  {
+    "text": "left hand side there kind of branches",
+    "start": 1098.32,
+    "duration": 4.64
+  },
+  {
+    "text": "you could say. And then when you",
+    "start": 1100.4,
+    "duration": 4.24
+  },
+  {
+    "text": "navigate through your files as you will",
+    "start": 1102.96,
+    "duration": 3.76
+  },
+  {
+    "text": "notice if it's an FBX file or an image",
+    "start": 1104.64,
+    "duration": 4.32
+  },
+  {
+    "text": "etc. we will we will show the actual",
+    "start": 1106.72,
+    "duration": 4.56
+  },
+  {
+    "text": "visualization there.",
+    "start": 1108.96,
+    "duration": 4.48
+  },
+  {
+    "text": "So yeah, that's the that's what the kind",
+    "start": 1111.28,
+    "duration": 5.36
+  },
+  {
+    "text": "of state of the the platform is. And now",
+    "start": 1113.44,
+    "duration": 4.96
+  },
+  {
+    "text": "let's get back talking about code",
+    "start": 1116.64,
+    "duration": 4.08
+  },
+  {
+    "text": "reviewing. So three things we want to",
+    "start": 1118.4,
+    "duration": 4.399
+  },
+  {
+    "text": "achieve with code review. Good",
+    "start": 1120.72,
+    "duration": 3.68
+  },
+  {
+    "text": "collaboration. A lot of good learning",
+    "start": 1122.799,
+    "duration": 4.721
+  },
+  {
+    "text": "experiences and ways of getting getting",
+    "start": 1124.4,
+    "duration": 4.639
+  },
+  {
+    "text": "cross team learnings of of doing code",
+    "start": 1127.52,
+    "duration": 4.0
+  },
+  {
+    "text": "reviews. Speed of course. Many people",
+    "start": 1129.039,
+    "duration": 4.321
+  },
+  {
+    "text": "associate code reviews with being",
+    "start": 1131.52,
+    "duration": 3.36
+  },
+  {
+    "text": "something that kind of slows things down",
+    "start": 1133.36,
+    "duration": 3.199
+  },
+  {
+    "text": "and things. I think you can look at it",
+    "start": 1134.88,
+    "duration": 4.08
+  },
+  {
+    "text": "as really a a powerful tool that in",
+    "start": 1136.559,
+    "duration": 4.161
+  },
+  {
+    "text": "total is going to speed up your your",
+    "start": 1138.96,
+    "duration": 4.4
+  },
+  {
+    "text": "total development time. And then lastly",
+    "start": 1140.72,
+    "duration": 4.319
+  },
+  {
+    "text": "and I think the primary reason most",
+    "start": 1143.36,
+    "duration": 3.439
+  },
+  {
+    "text": "people are doing code review of course",
+    "start": 1145.039,
+    "duration": 4.401
+  },
+  {
+    "text": "is is quality",
+    "start": 1146.799,
+    "duration": 4.481
+  },
+  {
+    "text": "and and towards the end of this talk I",
+    "start": 1149.44,
+    "duration": 4.16
+  },
+  {
+    "text": "will try to give some recommendations.",
+    "start": 1151.28,
+    "duration": 4.8
+  },
+  {
+    "text": "So just as a little bit primer of how I",
+    "start": 1153.6,
+    "duration": 4.959
+  },
+  {
+    "text": "think of context because very often how",
+    "start": 1156.08,
+    "duration": 4.24
+  },
+  {
+    "text": "we give recommendations the first thing",
+    "start": 1158.559,
+    "duration": 4.48
+  },
+  {
+    "text": "will be it depends and and I love this",
+    "start": 1160.32,
+    "duration": 4.16
+  },
+  {
+    "text": "graph. It's called a stacy graph for",
+    "start": 1163.039,
+    "duration": 2.801
+  },
+  {
+    "text": "complexity. It's not something that I",
+    "start": 1164.48,
+    "duration": 3.36
+  },
+  {
+    "text": "came up with but basically on the on the",
+    "start": 1165.84,
+    "duration": 4.719
+  },
+  {
+    "text": "left hand side you have how certain are",
+    "start": 1167.84,
+    "duration": 4.4
+  },
+  {
+    "text": "you in your project or how how much",
+    "start": 1170.559,
+    "duration": 3.761
+  },
+  {
+    "text": "agreement do you have around what you're",
+    "start": 1172.24,
+    "duration": 4.799
+  },
+  {
+    "text": "doing around your requirements you know",
+    "start": 1174.32,
+    "duration": 4.64
+  },
+  {
+    "text": "simplest possible form or do we all know",
+    "start": 1177.039,
+    "duration": 3.361
+  },
+  {
+    "text": "what we're going to do you know what's",
+    "start": 1178.96,
+    "duration": 3.36
+  },
+  {
+    "text": "in in P for plan or in Jira or something",
+    "start": 1180.4,
+    "duration": 3.84
+  },
+  {
+    "text": "like that or also do we know what's",
+    "start": 1182.32,
+    "duration": 4.239
+  },
+  {
+    "text": "going to make this game fun for example",
+    "start": 1184.24,
+    "duration": 4.88
+  },
+  {
+    "text": "and on the right hand on the x-axis we",
+    "start": 1186.559,
+    "duration": 4.24
+  },
+  {
+    "text": "have how certain are you with the",
+    "start": 1189.12,
+    "duration": 3.36
+  },
+  {
+    "text": "technology that you're using to deliver",
+    "start": 1190.799,
+    "duration": 3.76
+  },
+  {
+    "text": "this project so if you're extreme",
+    "start": 1192.48,
+    "duration": 3.76
+  },
+  {
+    "text": "extremely far from certain how you're",
+    "start": 1194.559,
+    "duration": 2.961
+  },
+  {
+    "text": "going to do something. You're very far",
+    "start": 1196.24,
+    "duration": 2.96
+  },
+  {
+    "text": "from certain what you're doing. That's",
+    "start": 1197.52,
+    "duration": 5.519
+  },
+  {
+    "text": "when it gets very chaotic. So,",
+    "start": 1199.2,
+    "duration": 5.52
+  },
+  {
+    "text": "this could happen in normal projects as",
+    "start": 1203.039,
+    "duration": 3.121
+  },
+  {
+    "text": "well. So, one example can be, you know,",
+    "start": 1204.72,
+    "duration": 3.839
+  },
+  {
+    "text": "it's a day before the release, QA comes",
+    "start": 1206.16,
+    "duration": 4.16
+  },
+  {
+    "text": "up with like 10 series bugs or something",
+    "start": 1208.559,
+    "duration": 3.681
+  },
+  {
+    "text": "happened overnight with the build and",
+    "start": 1210.32,
+    "duration": 3.92
+  },
+  {
+    "text": "it's like, are we agreeing on what we're",
+    "start": 1212.24,
+    "duration": 3.2
+  },
+  {
+    "text": "going to do with these bugs? Someone",
+    "start": 1214.24,
+    "duration": 2.88
+  },
+  {
+    "text": "exec might says no, we have to push the",
+    "start": 1215.44,
+    "duration": 3.52
+  },
+  {
+    "text": "game. Someone else may say we have to",
+    "start": 1217.12,
+    "duration": 3.439
+  },
+  {
+    "text": "fix all of these, etc. So you're having",
+    "start": 1218.96,
+    "duration": 4.4
+  },
+  {
+    "text": "to pretty quickly come out of that that",
+    "start": 1220.559,
+    "duration": 6.961
+  },
+  {
+    "text": "chaotic situation. Um next up you come",
+    "start": 1223.36,
+    "duration": 6.48
+  },
+  {
+    "text": "into a more complex scenario and that's",
+    "start": 1227.52,
+    "duration": 4.48
+  },
+  {
+    "text": "where I think most of game projects",
+    "start": 1229.84,
+    "duration": 3.839
+  },
+  {
+    "text": "happen most of the time where there are",
+    "start": 1232.0,
+    "duration": 2.96
+  },
+  {
+    "text": "some uncertainty in one of these",
+    "start": 1233.679,
+    "duration": 2.561
+  },
+  {
+    "text": "domains. There's something you're trying",
+    "start": 1234.96,
+    "duration": 3.04
+  },
+  {
+    "text": "to discover.",
+    "start": 1236.24,
+    "duration": 3.919
+  },
+  {
+    "text": "Normally this is why you know scrum and",
+    "start": 1238.0,
+    "duration": 4.4
+  },
+  {
+    "text": "kban and methods like that has become so",
+    "start": 1240.159,
+    "duration": 4.321
+  },
+  {
+    "text": "so popular and there's a lot of good",
+    "start": 1242.4,
+    "duration": 3.84
+  },
+  {
+    "text": "things you can do with code review. here",
+    "start": 1244.48,
+    "duration": 4.48
+  },
+  {
+    "text": "as well. We have a complicated scenario",
+    "start": 1246.24,
+    "duration": 4.4
+  },
+  {
+    "text": "which is typically more when things are",
+    "start": 1248.96,
+    "duration": 3.28
+  },
+  {
+    "text": "more we have agreed on standards. We",
+    "start": 1250.64,
+    "duration": 3.84
+  },
+  {
+    "text": "kind of have agreed on on something we",
+    "start": 1252.24,
+    "duration": 3.76
+  },
+  {
+    "text": "need to comply with something we need to",
+    "start": 1254.48,
+    "duration": 4.319
+  },
+  {
+    "text": "do. Um it becomes a little bit more plan",
+    "start": 1256.0,
+    "duration": 6.08
+  },
+  {
+    "text": "driven at that approach. I see a lot of",
+    "start": 1258.799,
+    "duration": 5.201
+  },
+  {
+    "text": "uh our teams tends to be in this kind of",
+    "start": 1262.08,
+    "duration": 3.92
+  },
+  {
+    "text": "a domain. And then lastly when it's",
+    "start": 1264.0,
+    "duration": 3.6
+  },
+  {
+    "text": "super super simple you know you know",
+    "start": 1266.0,
+    "duration": 5.039
+  },
+  {
+    "text": "exactly what to do you know you know um",
+    "start": 1267.6,
+    "duration": 5.12
+  },
+  {
+    "text": "um um how you're going to do it. You've",
+    "start": 1271.039,
+    "duration": 3.841
+  },
+  {
+    "text": "done it 100 time before. It's really",
+    "start": 1272.72,
+    "duration": 3.68
+  },
+  {
+    "text": "just a checklist thing like things can",
+    "start": 1274.88,
+    "duration": 2.96
+  },
+  {
+    "text": "be really really efficient when it comes",
+    "start": 1276.4,
+    "duration": 4.88
+  },
+  {
+    "text": "to code review. So a project of course",
+    "start": 1277.84,
+    "duration": 5.12
+  },
+  {
+    "text": "moves between these phases all the time",
+    "start": 1281.28,
+    "duration": 3.04
+  },
+  {
+    "text": "and different teams are in these",
+    "start": 1282.96,
+    "duration": 2.959
+  },
+  {
+    "text": "different phases. So I think that's",
+    "start": 1284.32,
+    "duration": 3.28
+  },
+  {
+    "text": "where I want to come back to in the end",
+    "start": 1285.919,
+    "duration": 3.12
+  },
+  {
+    "text": "and just talk about this more from a",
+    "start": 1287.6,
+    "duration": 3.12
+  },
+  {
+    "text": "code review experience and how it can be",
+    "start": 1289.039,
+    "duration": 4.241
+  },
+  {
+    "text": "good to use some of the flexibility that",
+    "start": 1290.72,
+    "duration": 5.04
+  },
+  {
+    "text": "we offer.",
+    "start": 1293.28,
+    "duration": 4.16
+  },
+  {
+    "text": "But all right you already made it quite",
+    "start": 1295.76,
+    "duration": 3.36
+  },
+  {
+    "text": "far now with very technical slides. I",
+    "start": 1297.44,
+    "duration": 2.88
+  },
+  {
+    "text": "just want to talk a little bit about",
+    "start": 1299.12,
+    "duration": 3.12
+  },
+  {
+    "text": "collaboration because a benefit with my",
+    "start": 1300.32,
+    "duration": 3.2
+  },
+  {
+    "text": "job is that I meet a lot of different",
+    "start": 1302.24,
+    "duration": 3.52
+  },
+  {
+    "text": "companies and I can kind of see when we",
+    "start": 1303.52,
+    "duration": 4.399
+  },
+  {
+    "text": "interview users and things how they do",
+    "start": 1305.76,
+    "duration": 4.32
+  },
+  {
+    "text": "code review and and collaboration",
+    "start": 1307.919,
+    "duration": 3.681
+  },
+  {
+    "text": "doesn't really matter about what tool",
+    "start": 1310.08,
+    "duration": 3.44
+  },
+  {
+    "text": "you have. But I thought, you know, I",
+    "start": 1311.6,
+    "duration": 2.959
+  },
+  {
+    "text": "assume there will be a lot of game",
+    "start": 1313.52,
+    "duration": 2.48
+  },
+  {
+    "text": "developers here. So I'm I'm kind of",
+    "start": 1314.559,
+    "duration": 2.641
+  },
+  {
+    "text": "thinking that when you're doing code",
+    "start": 1316.0,
+    "duration": 3.679
+  },
+  {
+    "text": "review, what is your review character?",
+    "start": 1317.2,
+    "duration": 3.599
+  },
+  {
+    "text": "You know, this is like an adventure",
+    "start": 1319.679,
+    "duration": 2.401
+  },
+  {
+    "text": "we're going out to when we doing code",
+    "start": 1320.799,
+    "duration": 3.12
+  },
+  {
+    "text": "review. And I kind of find some kind of",
+    "start": 1322.08,
+    "duration": 3.92
+  },
+  {
+    "text": "people that on the left hand side here,",
+    "start": 1323.919,
+    "duration": 3.441
+  },
+  {
+    "text": "they're are kind of the good characters.",
+    "start": 1326.0,
+    "duration": 3.6
+  },
+  {
+    "text": "If you have these people in your team,",
+    "start": 1327.36,
+    "duration": 4.48
+  },
+  {
+    "text": "your code review experience in swarm or",
+    "start": 1329.6,
+    "duration": 4.079
+  },
+  {
+    "text": "whatever tool you're using is going to",
+    "start": 1331.84,
+    "duration": 3.12
+  },
+  {
+    "text": "be really nice. And if you have the",
+    "start": 1333.679,
+    "duration": 2.961
+  },
+  {
+    "text": "people on the right hand side, it's",
+    "start": 1334.96,
+    "duration": 2.959
+  },
+  {
+    "text": "going to make it really hard. So let me",
+    "start": 1336.64,
+    "duration": 4.0
+  },
+  {
+    "text": "just quickly go through this. So a",
+    "start": 1337.919,
+    "duration": 4.64
+  },
+  {
+    "text": "mentor that is someone who teaches and",
+    "start": 1340.64,
+    "duration": 4.56
+  },
+  {
+    "text": "and kind of helps especially junior devs",
+    "start": 1342.559,
+    "duration": 5.521
+  },
+  {
+    "text": "to do a better job. So if you are a a",
+    "start": 1345.2,
+    "duration": 4.8
+  },
+  {
+    "text": "mentor, you ask you know why are we",
+    "start": 1348.08,
+    "duration": 3.28
+  },
+  {
+    "text": "doing this more than you know what are",
+    "start": 1350.0,
+    "duration": 4.0
+  },
+  {
+    "text": "we doing. Um if you're an architect you",
+    "start": 1351.36,
+    "duration": 4.319
+  },
+  {
+    "text": "look more at the big picture. you",
+    "start": 1354.0,
+    "duration": 3.919
+  },
+  {
+    "text": "typically miss, you know, maybe some",
+    "start": 1355.679,
+    "duration": 4.24
+  },
+  {
+    "text": "some small details in the code, etc.,",
+    "start": 1357.919,
+    "duration": 3.601
+  },
+  {
+    "text": "but you think about how is this code",
+    "start": 1359.919,
+    "duration": 4.0
+  },
+  {
+    "text": "going to scale, let's say, six months",
+    "start": 1361.52,
+    "duration": 4.24
+  },
+  {
+    "text": "from now or 10 years from now or forever",
+    "start": 1363.919,
+    "duration": 4.561
+  },
+  {
+    "text": "how long you think about your product. A",
+    "start": 1365.76,
+    "duration": 4.72
+  },
+  {
+    "text": "speedrunner, that's the one who's always",
+    "start": 1368.48,
+    "duration": 3.439
+  },
+  {
+    "text": "first on every review. As soon as you",
+    "start": 1370.48,
+    "duration": 2.88
+  },
+  {
+    "text": "get that notification, they open up the",
+    "start": 1371.919,
+    "duration": 3.361
+  },
+  {
+    "text": "review and says, \"Vote up or vote down,",
+    "start": 1373.36,
+    "duration": 4.48
+  },
+  {
+    "text": "gives you some quick feedback.\" A play",
+    "start": 1375.28,
+    "duration": 4.16
+  },
+  {
+    "text": "tester, that's the one who would",
+    "start": 1377.84,
+    "duration": 3.6
+  },
+  {
+    "text": "actually try to run the code and try try",
+    "start": 1379.44,
+    "duration": 3.52
+  },
+  {
+    "text": "it out, you know, open it in the engine",
+    "start": 1381.44,
+    "duration": 2.8
+  },
+  {
+    "text": "and things like that. really try to",
+    "start": 1382.96,
+    "duration": 3.28
+  },
+  {
+    "text": "think more from like almost like a QA's",
+    "start": 1384.24,
+    "duration": 4.64
+  },
+  {
+    "text": "perspective from the beginning.",
+    "start": 1386.24,
+    "duration": 4.16
+  },
+  {
+    "text": "And then we have the gatekeeper.",
+    "start": 1388.88,
+    "duration": 3.2
+  },
+  {
+    "text": "Typically the least liked person,",
+    "start": 1390.4,
+    "duration": 2.88
+  },
+  {
+    "text": "especially by those who always get",
+    "start": 1392.08,
+    "duration": 2.8
+  },
+  {
+    "text": "denials like, hey, you haven't followed",
+    "start": 1393.28,
+    "duration": 3.2
+  },
+  {
+    "text": "the coding standard here. You haven't",
+    "start": 1394.88,
+    "duration": 3.84
+  },
+  {
+    "text": "complied with X and so forth. And if you",
+    "start": 1396.48,
+    "duration": 3.76
+  },
+  {
+    "text": "have a group, if you have a team, so if",
+    "start": 1398.72,
+    "duration": 2.959
+  },
+  {
+    "text": "you're a team of five and each of you",
+    "start": 1400.24,
+    "duration": 3.2
+  },
+  {
+    "text": "picked like one of these characters,",
+    "start": 1401.679,
+    "duration": 2.801
+  },
+  {
+    "text": "you're going to have a really really",
+    "start": 1403.44,
+    "duration": 3.76
+  },
+  {
+    "text": "high quality code review process. But",
+    "start": 1404.48,
+    "duration": 4.0
+  },
+  {
+    "text": "then you have these bad guys on the",
+    "start": 1407.2,
+    "duration": 2.8
+  },
+  {
+    "text": "right hand side. So I don't know hope",
+    "start": 1408.48,
+    "duration": 3.199
+  },
+  {
+    "text": "hopefully no one recognizes these, but",
+    "start": 1410.0,
+    "duration": 3.679
+  },
+  {
+    "text": "the the coward, that's a person who",
+    "start": 1411.679,
+    "duration": 3.681
+  },
+  {
+    "text": "always follows what other people are",
+    "start": 1413.679,
+    "duration": 3.281
+  },
+  {
+    "text": "doing. They never say they never",
+    "start": 1415.36,
+    "duration": 2.96
+  },
+  {
+    "text": "contribute anything to code review",
+    "start": 1416.96,
+    "duration": 3.599
+  },
+  {
+    "text": "whatsoever. They wait until someone else",
+    "start": 1418.32,
+    "duration": 3.68
+  },
+  {
+    "text": "votes up and then they go in and vote",
+    "start": 1420.559,
+    "duration": 3.761
+  },
+  {
+    "text": "up. The ostrich here, that's a person",
+    "start": 1422.0,
+    "duration": 4.0
+  },
+  {
+    "text": "who just ignores it completely. Never",
+    "start": 1424.32,
+    "duration": 3.359
+  },
+  {
+    "text": "want to want to contribute. Just want to",
+    "start": 1426.0,
+    "duration": 3.28
+  },
+  {
+    "text": "do their own work without helping or",
+    "start": 1427.679,
+    "duration": 3.761
+  },
+  {
+    "text": "looking at something else. And the scope",
+    "start": 1429.28,
+    "duration": 4.32
+  },
+  {
+    "text": "creep is someone who would yeah just add",
+    "start": 1431.44,
+    "duration": 3.359
+  },
+  {
+    "text": "extra work. Oh, while you're looking at",
+    "start": 1433.6,
+    "duration": 2.64
+  },
+  {
+    "text": "this code, why don't you also do these",
+    "start": 1434.799,
+    "duration": 4.321
+  },
+  {
+    "text": "other things?",
+    "start": 1436.24,
+    "duration": 4.72
+  },
+  {
+    "text": "So even before we start talking about",
+    "start": 1439.12,
+    "duration": 3.76
+  },
+  {
+    "text": "what code review do we we offer in terms",
+    "start": 1440.96,
+    "duration": 4.24
+  },
+  {
+    "text": "of code review capabilities really think",
+    "start": 1442.88,
+    "duration": 4.0
+  },
+  {
+    "text": "about what are the review characters",
+    "start": 1445.2,
+    "duration": 3.44
+  },
+  {
+    "text": "that you have on your team and if you're",
+    "start": 1446.88,
+    "duration": 3.2
+  },
+  {
+    "text": "missing something can we pick something",
+    "start": 1448.64,
+    "duration": 4.08
+  },
+  {
+    "text": "up and and and can I cover some of those",
+    "start": 1450.08,
+    "duration": 4.32
+  },
+  {
+    "text": "characteristics",
+    "start": 1452.72,
+    "duration": 3.6
+  },
+  {
+    "text": "and then you have your character next up",
+    "start": 1454.4,
+    "duration": 4.08
+  },
+  {
+    "text": "pick your weapons so these are more some",
+    "start": 1456.32,
+    "duration": 4.239
+  },
+  {
+    "text": "general recommendations on what's what's",
+    "start": 1458.48,
+    "duration": 3.92
+  },
+  {
+    "text": "needed to have a good code review",
+    "start": 1460.559,
+    "duration": 4.321
+  },
+  {
+    "text": "process so on the left hand side those",
+    "start": 1462.4,
+    "duration": 4.08
+  },
+  {
+    "text": "are things that you need for some kind",
+    "start": 1464.88,
+    "duration": 3.279
+  },
+  {
+    "text": "of author the one who's actually writing",
+    "start": 1466.48,
+    "duration": 3.76
+  },
+  {
+    "text": "the code. You have to keep your review",
+    "start": 1468.159,
+    "duration": 3.76
+  },
+  {
+    "text": "small. Of course, if you can offer a",
+    "start": 1470.24,
+    "duration": 4.0
+  },
+  {
+    "text": "map, if you can tell people why have I",
+    "start": 1471.919,
+    "duration": 4.0
+  },
+  {
+    "text": "done this change, why have I chosen to",
+    "start": 1474.24,
+    "duration": 3.439
+  },
+  {
+    "text": "solve it this way? You have your change",
+    "start": 1475.919,
+    "duration": 3.12
+  },
+  {
+    "text": "list description, but you also have a",
+    "start": 1477.679,
+    "duration": 3.441
+  },
+  {
+    "text": "review description. And we have added a",
+    "start": 1479.039,
+    "duration": 3.601
+  },
+  {
+    "text": "lot of capabilities. You can add like",
+    "start": 1481.12,
+    "duration": 3.2
+  },
+  {
+    "text": "images and stuff if you want to like as",
+    "start": 1482.64,
+    "duration": 4.72
+  },
+  {
+    "text": "attachments to the code review side.",
+    "start": 1484.32,
+    "duration": 4.88
+  },
+  {
+    "text": "Then you've done your work as the author",
+    "start": 1487.36,
+    "duration": 4.64
+  },
+  {
+    "text": "of code. So then for the actual reviewer",
+    "start": 1489.2,
+    "duration": 5.28
+  },
+  {
+    "text": "of code, well then you know use a",
+    "start": 1492.0,
+    "duration": 5.279
+  },
+  {
+    "text": "stopwatch. you know, don't spend hours",
+    "start": 1494.48,
+    "duration": 5.12
+  },
+  {
+    "text": "upon hours to understand something. Gate",
+    "start": 1497.279,
+    "duration": 3.361
+  },
+  {
+    "text": "something and if you still don't",
+    "start": 1499.6,
+    "duration": 2.88
+  },
+  {
+    "text": "understand it, it's time to start asking",
+    "start": 1500.64,
+    "duration": 4.32
+  },
+  {
+    "text": "questions. The other things, I'm not",
+    "start": 1502.48,
+    "duration": 3.679
+  },
+  {
+    "text": "going to go through all of them, you",
+    "start": 1504.96,
+    "duration": 3.44
+  },
+  {
+    "text": "know, referring to the ST guidelines and",
+    "start": 1506.159,
+    "duration": 3.76
+  },
+  {
+    "text": "so forth. But I think towards the end",
+    "start": 1508.4,
+    "duration": 3.84
+  },
+  {
+    "text": "are two very important ones to review",
+    "start": 1509.919,
+    "duration": 4.24
+  },
+  {
+    "text": "with respect and empathy and balance",
+    "start": 1512.24,
+    "duration": 4.0
+  },
+  {
+    "text": "criticism with positive feedback because",
+    "start": 1514.159,
+    "duration": 4.081
+  },
+  {
+    "text": "sometimes we get like feature",
+    "start": 1516.24,
+    "duration": 4.4
+  },
+  {
+    "text": "suggestions that indicate that, you",
+    "start": 1518.24,
+    "duration": 3.76
+  },
+  {
+    "text": "know, you're not really friendly to each",
+    "start": 1520.64,
+    "duration": 2.72
+  },
+  {
+    "text": "other at all times when it comes to code",
+    "start": 1522.0,
+    "duration": 3.12
+  },
+  {
+    "text": "reviewing. So remember that when you're",
+    "start": 1523.36,
+    "duration": 4.88
+  },
+  {
+    "text": "doing that. So that's two things about a",
+    "start": 1525.12,
+    "duration": 4.24
+  },
+  {
+    "text": "collaboration. Think about your",
+    "start": 1528.24,
+    "duration": 2.88
+  },
+  {
+    "text": "character and think about what tools",
+    "start": 1529.36,
+    "duration": 3.679
+  },
+  {
+    "text": "you're bringing to the code review. Now",
+    "start": 1531.12,
+    "duration": 3.52
+  },
+  {
+    "text": "let's get back to some more technical",
+    "start": 1533.039,
+    "duration": 5.281
+  },
+  {
+    "text": "stuff. Speed. So three parts to speed up",
+    "start": 1534.64,
+    "duration": 6.08
+  },
+  {
+    "text": "your code review process. First",
+    "start": 1538.32,
+    "duration": 5.68
+  },
+  {
+    "text": "automation and builds and so forth. So",
+    "start": 1540.72,
+    "duration": 5.04
+  },
+  {
+    "text": "we have I don't know if you've seen that",
+    "start": 1544.0,
+    "duration": 3.279
+  },
+  {
+    "text": "in in code there's there's an option",
+    "start": 1545.76,
+    "duration": 3.919
+  },
+  {
+    "text": "called tests. These are almost like web",
+    "start": 1547.279,
+    "duration": 5.52
+  },
+  {
+    "text": "hooks actually. So what you can do in in",
+    "start": 1549.679,
+    "duration": 4.641
+  },
+  {
+    "text": "code view and it's in a UI. I'll show",
+    "start": 1552.799,
+    "duration": 4.0
+  },
+  {
+    "text": "you a screenshot in a second. You just",
+    "start": 1554.32,
+    "duration": 4.8
+  },
+  {
+    "text": "define a URL in a body and you have a",
+    "start": 1556.799,
+    "duration": 4.88
+  },
+  {
+    "text": "templating language and you define this",
+    "start": 1559.12,
+    "duration": 4.4
+  },
+  {
+    "text": "test and then you set up an endpoint",
+    "start": 1561.679,
+    "duration": 3.6
+  },
+  {
+    "text": "somewhere else. And this could be in",
+    "start": 1563.52,
+    "duration": 3.36
+  },
+  {
+    "text": "your build server or it can be a test",
+    "start": 1565.279,
+    "duration": 3.28
+  },
+  {
+    "text": "system that you have or a custom service",
+    "start": 1566.88,
+    "duration": 3.76
+  },
+  {
+    "text": "that you run that's going to receive",
+    "start": 1568.559,
+    "duration": 4.24
+  },
+  {
+    "text": "those test executions.",
+    "start": 1570.64,
+    "duration": 4.56
+  },
+  {
+    "text": "And then we expect pass or a failback",
+    "start": 1572.799,
+    "duration": 4.0
+  },
+  {
+    "text": "and you can include messages and things",
+    "start": 1575.2,
+    "duration": 4.0
+  },
+  {
+    "text": "like that that we will then surface and",
+    "start": 1576.799,
+    "duration": 5.201
+  },
+  {
+    "text": "show in P4 code review. And these can be",
+    "start": 1579.2,
+    "duration": 5.599
+  },
+  {
+    "text": "automatic or manual and they can also be",
+    "start": 1582.0,
+    "duration": 5.36
+  },
+  {
+    "text": "uh enforced so to say. So they need to",
+    "start": 1584.799,
+    "duration": 4.641
+  },
+  {
+    "text": "pass. So looking at the screenshot",
+    "start": 1587.36,
+    "duration": 3.36
+  },
+  {
+    "text": "you're not going to see the text here so",
+    "start": 1589.44,
+    "duration": 3.04
+  },
+  {
+    "text": "don't worry about that. But you do all",
+    "start": 1590.72,
+    "duration": 4.64
+  },
+  {
+    "text": "of this in the UI. So automating things",
+    "start": 1592.48,
+    "duration": 5.679
+  },
+  {
+    "text": "in P4 code review is relatively",
+    "start": 1595.36,
+    "duration": 4.559
+  },
+  {
+    "text": "straightforward to try out. You set up",
+    "start": 1598.159,
+    "duration": 4.721
+  },
+  {
+    "text": "your test, you tie it to your workflow.",
+    "start": 1599.919,
+    "duration": 4.401
+  },
+  {
+    "text": "So that's where you can see all the the",
+    "start": 1602.88,
+    "duration": 3.2
+  },
+  {
+    "text": "arguments and things you have and then",
+    "start": 1604.32,
+    "duration": 4.0
+  },
+  {
+    "text": "you get a quick feedback immediately",
+    "start": 1606.08,
+    "duration": 4.32
+  },
+  {
+    "text": "into the tool which has passed, which",
+    "start": 1608.32,
+    "duration": 3.359
+  },
+  {
+    "text": "has failed and then you have options",
+    "start": 1610.4,
+    "duration": 2.96
+  },
+  {
+    "text": "there if you're going to allow to to",
+    "start": 1611.679,
+    "duration": 3.521
+  },
+  {
+    "text": "rerun them manually and so forth as",
+    "start": 1613.36,
+    "duration": 3.52
+  },
+  {
+    "text": "well.",
+    "start": 1615.2,
+    "duration": 3.52
+  },
+  {
+    "text": "We also offer a number of readym made",
+    "start": 1616.88,
+    "duration": 4.159
+  },
+  {
+    "text": "integrations. So there's Ji, there's",
+    "start": 1618.72,
+    "duration": 4.64
+  },
+  {
+    "text": "Team City, there's Jenkins, and we also",
+    "start": 1621.039,
+    "duration": 4.081
+  },
+  {
+    "text": "have a REST API that we know many people",
+    "start": 1623.36,
+    "duration": 3.76
+  },
+  {
+    "text": "are using for for various integration",
+    "start": 1625.12,
+    "duration": 3.919
+  },
+  {
+    "text": "needs.",
+    "start": 1627.12,
+    "duration": 4.48
+  },
+  {
+    "text": "And now you've been you haven't heard",
+    "start": 1629.039,
+    "duration": 4.401
+  },
+  {
+    "text": "the word artificial intelligence or AI",
+    "start": 1631.6,
+    "duration": 3.199
+  },
+  {
+    "text": "for almost 40 minutes, I think. So",
+    "start": 1633.44,
+    "duration": 4.16
+  },
+  {
+    "text": "apologies for that, but here we are. So",
+    "start": 1634.799,
+    "duration": 5.601
+  },
+  {
+    "text": "we also have to mention um what we're",
+    "start": 1637.6,
+    "duration": 6.64
+  },
+  {
+    "text": "doing when it comes to AI. And in P4",
+    "start": 1640.4,
+    "duration": 5.759
+  },
+  {
+    "text": "this week, we're going to launch an MCP",
+    "start": 1644.24,
+    "duration": 3.76
+  },
+  {
+    "text": "server. So it will give you a lot of",
+    "start": 1646.159,
+    "duration": 4.561
+  },
+  {
+    "text": "options and when it comes to integrating",
+    "start": 1648.0,
+    "duration": 4.32
+  },
+  {
+    "text": "and and you know sitting in Visual",
+    "start": 1650.72,
+    "duration": 2.959
+  },
+  {
+    "text": "Studio and asking for things to be",
+    "start": 1652.32,
+    "duration": 2.8
+  },
+  {
+    "text": "versioned and things like that. So this",
+    "start": 1653.679,
+    "duration": 3.201
+  },
+  {
+    "text": "will be open source. It will be",
+    "start": 1655.12,
+    "duration": 5.36
+  },
+  {
+    "text": "published did we say tomorrow? Hopefully",
+    "start": 1656.88,
+    "duration": 5.6
+  },
+  {
+    "text": "tomorrow. Yep.",
+    "start": 1660.48,
+    "duration": 5.6
+  },
+  {
+    "text": "Um and on the code review side this is",
+    "start": 1662.48,
+    "duration": 5.76
+  },
+  {
+    "text": "also an area where we have found a lot",
+    "start": 1666.08,
+    "duration": 5.12
+  },
+  {
+    "text": "of opportunities when it comes to to AI",
+    "start": 1668.24,
+    "duration": 4.799
+  },
+  {
+    "text": "and there's a lot of kind of shortcuts",
+    "start": 1671.2,
+    "duration": 4.88
+  },
+  {
+    "text": "that AI offers. So we we have launched",
+    "start": 1673.039,
+    "duration": 4.561
+  },
+  {
+    "text": "our first feature which relates to",
+    "start": 1676.08,
+    "duration": 3.44
+  },
+  {
+    "text": "actually the reviewing side of code",
+    "start": 1677.6,
+    "duration": 3.679
+  },
+  {
+    "text": "review. So we know there's a lot of AI",
+    "start": 1679.52,
+    "duration": 3.519
+  },
+  {
+    "text": "tools out there already focusing on the",
+    "start": 1681.279,
+    "duration": 4.0
+  },
+  {
+    "text": "kind of when you're writing the code but",
+    "start": 1683.039,
+    "duration": 4.561
+  },
+  {
+    "text": "we have started to deliver a number of",
+    "start": 1685.279,
+    "duration": 4.481
+  },
+  {
+    "text": "capabilities when it comes to how we can",
+    "start": 1687.6,
+    "duration": 4.319
+  },
+  {
+    "text": "support the actual reviewers of the",
+    "start": 1689.76,
+    "duration": 5.2
+  },
+  {
+    "text": "code. So right now you can select any",
+    "start": 1691.919,
+    "duration": 4.721
+  },
+  {
+    "text": "code in code review and you can hit the",
+    "start": 1694.96,
+    "duration": 3.68
+  },
+  {
+    "text": "I button and it will give you back some",
+    "start": 1696.64,
+    "duration": 3.68
+  },
+  {
+    "text": "explanation and help you get started",
+    "start": 1698.64,
+    "duration": 5.2
+  },
+  {
+    "text": "with it. We are releasing very soon also",
+    "start": 1700.32,
+    "duration": 4.959
+  },
+  {
+    "text": "some improvements when it comes to the",
+    "start": 1703.84,
+    "duration": 3.36
+  },
+  {
+    "text": "comments and the tasks so that when",
+    "start": 1705.279,
+    "duration": 3.28
+  },
+  {
+    "text": "you're writing a comment you can get",
+    "start": 1707.2,
+    "duration": 3.52
+  },
+  {
+    "text": "help with spelling or improving the",
+    "start": 1708.559,
+    "duration": 3.681
+  },
+  {
+    "text": "comment and those kind of capabilities",
+    "start": 1710.72,
+    "duration": 4.0
+  },
+  {
+    "text": "that you would be expecting. And next up",
+    "start": 1712.24,
+    "duration": 4.72
+  },
+  {
+    "text": "we will start to work on the the review",
+    "start": 1714.72,
+    "duration": 4.16
+  },
+  {
+    "text": "process itself. So as soon as an author",
+    "start": 1716.96,
+    "duration": 4.719
+  },
+  {
+    "text": "requests review uh the ability to do",
+    "start": 1718.88,
+    "duration": 5.6
+  },
+  {
+    "text": "pre-review checks. So an AI can check",
+    "start": 1721.679,
+    "duration": 4.321
+  },
+  {
+    "text": "specific things that you would like it",
+    "start": 1724.48,
+    "duration": 3.679
+  },
+  {
+    "text": "to check to help automate and give you",
+    "start": 1726.0,
+    "duration": 4.0
+  },
+  {
+    "text": "quicker feedback for for some of those",
+    "start": 1728.159,
+    "duration": 3.681
+  },
+  {
+    "text": "reviews that are not possible to",
+    "start": 1730.0,
+    "duration": 4.96
+  },
+  {
+    "text": "automate without without AI so to say.",
+    "start": 1731.84,
+    "duration": 7.199
+  },
+  {
+    "text": "But that's coming sometime next year.",
+    "start": 1734.96,
+    "duration": 6.4
+  },
+  {
+    "text": "So to speed up your review process,",
+    "start": 1739.039,
+    "duration": 4.081
+  },
+  {
+    "text": "automate as much as you can, use the",
+    "start": 1741.36,
+    "duration": 3.919
+  },
+  {
+    "text": "integrations that we have and then start",
+    "start": 1743.12,
+    "duration": 4.08
+  },
+  {
+    "text": "discover if any of these AI capabilities",
+    "start": 1745.279,
+    "duration": 4.161
+  },
+  {
+    "text": "are useful for you. I will also mention",
+    "start": 1747.2,
+    "duration": 4.24
+  },
+  {
+    "text": "that these AI capabilities will never be",
+    "start": 1749.44,
+    "duration": 3.599
+  },
+  {
+    "text": "sort of mandatory or you have to use",
+    "start": 1751.44,
+    "duration": 3.52
+  },
+  {
+    "text": "them. They're turned off by default.",
+    "start": 1753.039,
+    "duration": 3.36
+  },
+  {
+    "text": "We're choosing a model where we",
+    "start": 1754.96,
+    "duration": 3.599
+  },
+  {
+    "text": "integrate with with various models. So",
+    "start": 1756.399,
+    "duration": 4.16
+  },
+  {
+    "text": "you can also free to choose if you're",
+    "start": 1758.559,
+    "duration": 3.521
+  },
+  {
+    "text": "working at a studio, have developed your",
+    "start": 1760.559,
+    "duration": 5.641
+  },
+  {
+    "text": "own models, for example, etc.",
+    "start": 1762.08,
+    "duration": 4.12
+  },
+  {
+    "text": "All right,",
+    "start": 1767.76,
+    "duration": 3.84
+  },
+  {
+    "text": "next up, let's talk about the maybe the",
+    "start": 1769.36,
+    "duration": 4.08
+  },
+  {
+    "text": "the most important part of code review,",
+    "start": 1771.6,
+    "duration": 6.0
+  },
+  {
+    "text": "the quality. And I think the first thing",
+    "start": 1773.44,
+    "duration": 5.599
+  },
+  {
+    "text": "you should really think about how you're",
+    "start": 1777.6,
+    "duration": 3.28
+  },
+  {
+    "text": "using P for code review is how do you",
+    "start": 1779.039,
+    "duration": 5.841
+  },
+  {
+    "text": "define your project. So that's really",
+    "start": 1780.88,
+    "duration": 5.76
+  },
+  {
+    "text": "the foundational step of of what you",
+    "start": 1784.88,
+    "duration": 4.64
+  },
+  {
+    "text": "have in in in code review.",
+    "start": 1786.64,
+    "duration": 6.48
+  },
+  {
+    "text": "In P4 code review, it's really just a",
+    "start": 1789.52,
+    "duration": 6.0
+  },
+  {
+    "text": "set of of branches that you define a",
+    "start": 1793.12,
+    "duration": 4.48
+  },
+  {
+    "text": "project and then you tie that to some",
+    "start": 1795.52,
+    "duration": 5.92
+  },
+  {
+    "text": "rules and some people.",
+    "start": 1797.6,
+    "duration": 6.24
+  },
+  {
+    "text": "In many cases, people make it relatively",
+    "start": 1801.44,
+    "duration": 4.32
+  },
+  {
+    "text": "simple. They put a stream family and I",
+    "start": 1803.84,
+    "duration": 3.76
+  },
+  {
+    "text": "think many also create maybe oneo per",
+    "start": 1805.76,
+    "duration": 3.519
+  },
+  {
+    "text": "project or similar. So they map their",
+    "start": 1807.6,
+    "duration": 5.12
+  },
+  {
+    "text": "project to a stream family.",
+    "start": 1809.279,
+    "duration": 5.601
+  },
+  {
+    "text": "Clean, simple, straightforward",
+    "start": 1812.72,
+    "duration": 4.24
+  },
+  {
+    "text": "especially from an admin standpoint. I",
+    "start": 1814.88,
+    "duration": 4.0
+  },
+  {
+    "text": "think that's how many people do it. I've",
+    "start": 1816.96,
+    "duration": 3.439
+  },
+  {
+    "text": "seen many cases though where people",
+    "start": 1818.88,
+    "duration": 4.159
+  },
+  {
+    "text": "choose the another approach. So they",
+    "start": 1820.399,
+    "duration": 5.28
+  },
+  {
+    "text": "decided well I let's split up so our",
+    "start": 1823.039,
+    "duration": 4.161
+  },
+  {
+    "text": "actual project I'm going to split that",
+    "start": 1825.679,
+    "duration": 3.921
+  },
+  {
+    "text": "up into let's say you know three or four",
+    "start": 1827.2,
+    "duration": 5.76
+  },
+  {
+    "text": "or 10 projects in in P4 code review. So",
+    "start": 1829.6,
+    "duration": 4.959
+  },
+  {
+    "text": "it could be that one of them is where I",
+    "start": 1832.96,
+    "duration": 3.04
+  },
+  {
+    "text": "put, you know, my my feature teams and",
+    "start": 1834.559,
+    "duration": 3.281
+  },
+  {
+    "text": "they work in their the streams or the",
+    "start": 1836.0,
+    "duration": 3.039
+  },
+  {
+    "text": "paths that they're working in their",
+    "start": 1837.84,
+    "duration": 3.68
+  },
+  {
+    "text": "mainstream and devstream. Maybe my tools",
+    "start": 1839.039,
+    "duration": 4.88
+  },
+  {
+    "text": "team, we put them somewhere separate.",
+    "start": 1841.52,
+    "duration": 4.159
+  },
+  {
+    "text": "Maybe we set up one of these private",
+    "start": 1843.919,
+    "duration": 4.0
+  },
+  {
+    "text": "projects that we offer. So you have",
+    "start": 1845.679,
+    "duration": 5.36
+  },
+  {
+    "text": "anything that's sensitive or or you know",
+    "start": 1847.919,
+    "duration": 4.401
+  },
+  {
+    "text": "code that really no one should touch,",
+    "start": 1851.039,
+    "duration": 2.721
+  },
+  {
+    "text": "but if someone touches it, we're going",
+    "start": 1852.32,
+    "duration": 2.719
+  },
+  {
+    "text": "to ensure that the right people are",
+    "start": 1853.76,
+    "duration": 3.039
+  },
+  {
+    "text": "looking at it.",
+    "start": 1855.039,
+    "duration": 3.921
+  },
+  {
+    "text": "So you have this kind of of of balance",
+    "start": 1856.799,
+    "duration": 3.841
+  },
+  {
+    "text": "there between like having just a single",
+    "start": 1858.96,
+    "duration": 6.24
+  },
+  {
+    "text": "project and having a lot of projects and",
+    "start": 1860.64,
+    "duration": 6.72
+  },
+  {
+    "text": "what this really impacts is when you",
+    "start": 1865.2,
+    "duration": 3.92
+  },
+  {
+    "text": "make a change. So this is someone who",
+    "start": 1867.36,
+    "duration": 4.48
+  },
+  {
+    "text": "added a couple of files who's going to",
+    "start": 1869.12,
+    "duration": 4.32
+  },
+  {
+    "text": "look at it right automatically",
+    "start": 1871.84,
+    "duration": 3.28
+  },
+  {
+    "text": "populating so the right individuals and",
+    "start": 1873.44,
+    "duration": 5.28
+  },
+  {
+    "text": "groups are there and also ensuring that",
+    "start": 1875.12,
+    "duration": 5.279
+  },
+  {
+    "text": "the the blocking approval I don't know",
+    "start": 1878.72,
+    "duration": 3.839
+  },
+  {
+    "text": "if you can read that at the top right",
+    "start": 1880.399,
+    "duration": 3.841
+  },
+  {
+    "text": "what is it that needs to happen for",
+    "start": 1882.559,
+    "duration": 3.441
+  },
+  {
+    "text": "something to get approved and allowed",
+    "start": 1884.24,
+    "duration": 4.319
+  },
+  {
+    "text": "into our our mainline for example so",
+    "start": 1886.0,
+    "duration": 4.32
+  },
+  {
+    "text": "that's really what I'm talking about how",
+    "start": 1888.559,
+    "duration": 4.24
+  },
+  {
+    "text": "do we define that and how complex do we",
+    "start": 1890.32,
+    "duration": 4.16
+  },
+  {
+    "text": "have to make that automatic population",
+    "start": 1892.799,
+    "duration": 4.161
+  },
+  {
+    "text": "of users",
+    "start": 1894.48,
+    "duration": 2.48
+  },
+  {
+    "text": "So to summarize the the the kind of high",
+    "start": 1898.64,
+    "duration": 6.159
+  },
+  {
+    "text": "level how I would do it normally a good",
+    "start": 1902.64,
+    "duration": 4.8
+  },
+  {
+    "text": "way of doing it is to think about your",
+    "start": 1904.799,
+    "duration": 4.081
+  },
+  {
+    "text": "production code and your critical",
+    "start": 1907.44,
+    "duration": 4.8
+  },
+  {
+    "text": "systems as a separate thing they that's",
+    "start": 1908.88,
+    "duration": 5.519
+  },
+  {
+    "text": "one project because that really where",
+    "start": 1912.24,
+    "duration": 4.08
+  },
+  {
+    "text": "you want to have that quality focus",
+    "start": 1914.399,
+    "duration": 3.201
+  },
+  {
+    "text": "whereas if you're doing rapid",
+    "start": 1916.32,
+    "duration": 3.68
+  },
+  {
+    "text": "prototyping or having like non-critical",
+    "start": 1917.6,
+    "duration": 4.799
+  },
+  {
+    "text": "scripts and tools",
+    "start": 1920.0,
+    "duration": 4.08
+  },
+  {
+    "text": "don't avoid code reviewing just because",
+    "start": 1922.399,
+    "duration": 3.201
+  },
+  {
+    "text": "it thinks to slow you down there, but",
+    "start": 1924.08,
+    "duration": 3.52
+  },
+  {
+    "text": "use just a different model and put that",
+    "start": 1925.6,
+    "duration": 4.24
+  },
+  {
+    "text": "in a different project. So those kind of",
+    "start": 1927.6,
+    "duration": 4.16
+  },
+  {
+    "text": "of changes can follow different rules",
+    "start": 1929.84,
+    "duration": 4.719
+  },
+  {
+    "text": "that allows you to to move faster and to",
+    "start": 1931.76,
+    "duration": 4.88
+  },
+  {
+    "text": "help you collaborate. Maybe use other",
+    "start": 1934.559,
+    "duration": 4.561
+  },
+  {
+    "text": "automations there. Um, and probably",
+    "start": 1936.64,
+    "duration": 5.039
+  },
+  {
+    "text": "you're also going to use a a postcomit",
+    "start": 1939.12,
+    "duration": 6.0
+  },
+  {
+    "text": "review process for that potentially.",
+    "start": 1941.679,
+    "duration": 5.281
+  },
+  {
+    "text": "Um, on the left hand side there, we're",
+    "start": 1945.12,
+    "duration": 3.439
+  },
+  {
+    "text": "talking about the the pre-commit review",
+    "start": 1946.96,
+    "duration": 3.92
+  },
+  {
+    "text": "model. So I just want to briefly talk",
+    "start": 1948.559,
+    "duration": 3.6
+  },
+  {
+    "text": "about some of the differences here",
+    "start": 1950.88,
+    "duration": 3.76
+  },
+  {
+    "text": "because this is a lot of studios are",
+    "start": 1952.159,
+    "duration": 5.441
+  },
+  {
+    "text": "mixing using that. So the pre-commit",
+    "start": 1954.64,
+    "duration": 5.2
+  },
+  {
+    "text": "review model means of course that before",
+    "start": 1957.6,
+    "duration": 3.679
+  },
+  {
+    "text": "something goes into your mainline for",
+    "start": 1959.84,
+    "duration": 4.079
+  },
+  {
+    "text": "example you do make sure that the review",
+    "start": 1961.279,
+    "duration": 5.201
+  },
+  {
+    "text": "is approved and it's completed and this",
+    "start": 1963.919,
+    "duration": 4.64
+  },
+  {
+    "text": "is very good because it it ensures that",
+    "start": 1966.48,
+    "duration": 4.4
+  },
+  {
+    "text": "it's a stable code that we're working",
+    "start": 1968.559,
+    "duration": 4.161
+  },
+  {
+    "text": "with at all times. You have very low",
+    "start": 1970.88,
+    "duration": 3.44
+  },
+  {
+    "text": "probability of breaking something",
+    "start": 1972.72,
+    "duration": 4.24
+  },
+  {
+    "text": "actually. uh it works very well with",
+    "start": 1974.32,
+    "duration": 4.56
+  },
+  {
+    "text": "also running some of these integrations",
+    "start": 1976.96,
+    "duration": 3.76
+  },
+  {
+    "text": "with Jenkins and so forth to ensure that",
+    "start": 1978.88,
+    "duration": 3.84
+  },
+  {
+    "text": "things build before it makes it into the",
+    "start": 1980.72,
+    "duration": 4.959
+  },
+  {
+    "text": "the production code. Uh but it can also",
+    "start": 1982.72,
+    "duration": 4.799
+  },
+  {
+    "text": "be considered a slowdown. So that's why",
+    "start": 1985.679,
+    "duration": 3.6
+  },
+  {
+    "text": "I think it's important to separate your",
+    "start": 1987.519,
+    "duration": 3.76
+  },
+  {
+    "text": "projects out so that for the things",
+    "start": 1989.279,
+    "duration": 4.64
+  },
+  {
+    "text": "where you need to move much faster, you",
+    "start": 1991.279,
+    "duration": 5.441
+  },
+  {
+    "text": "don't let this this uh pre-committ model",
+    "start": 1993.919,
+    "duration": 6.24
+  },
+  {
+    "text": "get in the way so to say.",
+    "start": 1996.72,
+    "duration": 4.799
+  },
+  {
+    "text": "And I also have a note there in the",
+    "start": 2000.159,
+    "duration": 3.041
+  },
+  {
+    "text": "bottom left about it's it's probably",
+    "start": 2001.519,
+    "duration": 3.28
+  },
+  {
+    "text": "especially good for code plugins and and",
+    "start": 2003.2,
+    "duration": 5.44
+  },
+  {
+    "text": "and essential functionality blueprints",
+    "start": 2004.799,
+    "duration": 5.681
+  },
+  {
+    "text": "postcomit review models. That means you",
+    "start": 2008.64,
+    "duration": 3.519
+  },
+  {
+    "text": "can you can make your changes you can",
+    "start": 2010.48,
+    "duration": 2.96
+  },
+  {
+    "text": "put it in your code you can run it and",
+    "start": 2012.159,
+    "duration": 3.041
+  },
+  {
+    "text": "test it and all of that and then the",
+    "start": 2013.44,
+    "duration": 3.28
+  },
+  {
+    "text": "review can happen whenever it is",
+    "start": 2015.2,
+    "duration": 5.12
+  },
+  {
+    "text": "convenient. So much more faster paced uh",
+    "start": 2016.72,
+    "duration": 5.6
+  },
+  {
+    "text": "you can review you know immediately or",
+    "start": 2020.32,
+    "duration": 3.28
+  },
+  {
+    "text": "you can choose to create the review much",
+    "start": 2022.32,
+    "duration": 2.8
+  },
+  {
+    "text": "later.",
+    "start": 2023.6,
+    "duration": 4.079
+  },
+  {
+    "text": "um it's of course going to lead to more",
+    "start": 2025.12,
+    "duration": 4.88
+  },
+  {
+    "text": "problems potentially and it might in",
+    "start": 2027.679,
+    "duration": 5.84
+  },
+  {
+    "text": "some cases be a better fit for art",
+    "start": 2030.0,
+    "duration": 8.0
+  },
+  {
+    "text": "and the pre-commit review model if for",
+    "start": 2033.519,
+    "duration": 6.081
+  },
+  {
+    "text": "anyone who's new to perforce but most of",
+    "start": 2038.0,
+    "duration": 3.44
+  },
+  {
+    "text": "you were were using this already it",
+    "start": 2039.6,
+    "duration": 4.559
+  },
+  {
+    "text": "depends on something called shelving. So",
+    "start": 2041.44,
+    "duration": 4.479
+  },
+  {
+    "text": "if if anyone is wondering well how can",
+    "start": 2044.159,
+    "duration": 4.96
+  },
+  {
+    "text": "we have a central version control system",
+    "start": 2045.919,
+    "duration": 4.72
+  },
+  {
+    "text": "and we can have everyone sharing code",
+    "start": 2049.119,
+    "duration": 3.201
+  },
+  {
+    "text": "and so forth and reviewing that without",
+    "start": 2050.639,
+    "duration": 4.48
+  },
+  {
+    "text": "it actually impacting the central code.",
+    "start": 2052.32,
+    "duration": 4.88
+  },
+  {
+    "text": "Well this shelving works in that way",
+    "start": 2055.119,
+    "duration": 4.321
+  },
+  {
+    "text": "that when you create a shelf uh we put",
+    "start": 2057.2,
+    "duration": 4.24
+  },
+  {
+    "text": "it among our shelves. So we have A B C D",
+    "start": 2059.44,
+    "duration": 4.639
+  },
+  {
+    "text": "four files here and we made changes to B",
+    "start": 2061.44,
+    "duration": 5.84
+  },
+  {
+    "text": "C and D but that is still not being",
+    "start": 2064.079,
+    "duration": 5.6
+  },
+  {
+    "text": "submitted into your main line. So in",
+    "start": 2067.28,
+    "duration": 4.319
+  },
+  {
+    "text": "this case, B and C was approved with",
+    "start": 2069.679,
+    "duration": 4.321
+  },
+  {
+    "text": "this green checkbox and file number D",
+    "start": 2071.599,
+    "duration": 4.0
+  },
+  {
+    "text": "fail. So that's not something that ever",
+    "start": 2074.0,
+    "duration": 3.599
+  },
+  {
+    "text": "going to make it into the mainline. And",
+    "start": 2075.599,
+    "duration": 3.841
+  },
+  {
+    "text": "then you can have a submit either from",
+    "start": 2077.599,
+    "duration": 4.0
+  },
+  {
+    "text": "code review directly or via some other",
+    "start": 2079.44,
+    "duration": 4.8
+  },
+  {
+    "text": "script or from P4V into your mainline",
+    "start": 2081.599,
+    "duration": 4.56
+  },
+  {
+    "text": "when as soon as something gets gets",
+    "start": 2084.24,
+    "duration": 4.0
+  },
+  {
+    "text": "approved.",
+    "start": 2086.159,
+    "duration": 4.0
+  },
+  {
+    "text": "So that's the magic behind how we do",
+    "start": 2088.24,
+    "duration": 5.599
+  },
+  {
+    "text": "this pre-commit review model in in um P4",
+    "start": 2090.159,
+    "duration": 6.48
+  },
+  {
+    "text": "code review.",
+    "start": 2093.839,
+    "duration": 5.28
+  },
+  {
+    "text": "All right. So quality last part here",
+    "start": 2096.639,
+    "duration": 6.48
+  },
+  {
+    "text": "about that now these rules. So you have",
+    "start": 2099.119,
+    "duration": 5.681
+  },
+  {
+    "text": "your projects, we divided that up",
+    "start": 2103.119,
+    "duration": 3.201
+  },
+  {
+    "text": "according to the criticality of the",
+    "start": 2104.8,
+    "duration": 3.2
+  },
+  {
+    "text": "code. And then there's a lot of",
+    "start": 2106.32,
+    "duration": 3.759
+  },
+  {
+    "text": "functionality and flexibility in P for",
+    "start": 2108.0,
+    "duration": 4.8
+  },
+  {
+    "text": "code review to determine what should it",
+    "start": 2110.079,
+    "duration": 4.561
+  },
+  {
+    "text": "take. And I think these are like five",
+    "start": 2112.8,
+    "duration": 4.559
+  },
+  {
+    "text": "basic questions to ask where can you",
+    "start": 2114.64,
+    "duration": 4.8
+  },
+  {
+    "text": "approve your own code in general? That's",
+    "start": 2117.359,
+    "duration": 4.081
+  },
+  {
+    "text": "a bad idea, right? So you set up a rule",
+    "start": 2119.44,
+    "duration": 4.0
+  },
+  {
+    "text": "to say you need at least one other set",
+    "start": 2121.44,
+    "duration": 4.639
+  },
+  {
+    "text": "of eyes to look at everything. Are there",
+    "start": 2123.44,
+    "duration": 4.72
+  },
+  {
+    "text": "specific people that must approve of it?",
+    "start": 2126.079,
+    "duration": 4.161
+  },
+  {
+    "text": "So this is where the branches setup and",
+    "start": 2128.16,
+    "duration": 3.679
+  },
+  {
+    "text": "the project setup can become very",
+    "start": 2130.24,
+    "duration": 3.28
+  },
+  {
+    "text": "valuable because of course it normally",
+    "start": 2131.839,
+    "duration": 3.041
+  },
+  {
+    "text": "is the way well there is someone who",
+    "start": 2133.52,
+    "duration": 3.44
+  },
+  {
+    "text": "knows this code really well but may not",
+    "start": 2134.88,
+    "duration": 3.84
+  },
+  {
+    "text": "know other code very well. So we can use",
+    "start": 2136.96,
+    "duration": 4.56
+  },
+  {
+    "text": "this separation of branches to to make",
+    "start": 2138.72,
+    "duration": 5.68
+  },
+  {
+    "text": "sure that if someone changes this code",
+    "start": 2141.52,
+    "duration": 4.88
+  },
+  {
+    "text": "that the developer Joe knows extremely",
+    "start": 2144.4,
+    "duration": 3.84
+  },
+  {
+    "text": "well I've written developer Joe will",
+    "start": 2146.4,
+    "duration": 2.959
+  },
+  {
+    "text": "always have to look at it. Right? So",
+    "start": 2148.24,
+    "duration": 4.24
+  },
+  {
+    "text": "that we call that a moderator.",
+    "start": 2149.359,
+    "duration": 5.601
+  },
+  {
+    "text": "Um should there be any open unresolved",
+    "start": 2152.48,
+    "duration": 4.48
+  },
+  {
+    "text": "tasks? Normally that's a no. Right? We",
+    "start": 2154.96,
+    "duration": 3.76
+  },
+  {
+    "text": "want to make sure we reach a resolution",
+    "start": 2156.96,
+    "duration": 3.28
+  },
+  {
+    "text": "to everything. So that's something we",
+    "start": 2158.72,
+    "duration": 3.2
+  },
+  {
+    "text": "can enforce.",
+    "start": 2160.24,
+    "duration": 4.64
+  },
+  {
+    "text": "Um automatic test results that have been",
+    "start": 2161.92,
+    "duration": 4.72
+  },
+  {
+    "text": "need to pass first also a good thing to",
+    "start": 2164.88,
+    "duration": 4.239
+  },
+  {
+    "text": "have if you can do that. And other",
+    "start": 2166.64,
+    "duration": 4.16
+  },
+  {
+    "text": "things you can do. So there's a lot of",
+    "start": 2169.119,
+    "duration": 5.601
+  },
+  {
+    "text": "possibilities here uh to make sure that",
+    "start": 2170.8,
+    "duration": 5.52
+  },
+  {
+    "text": "you can vote up because that's one thing",
+    "start": 2174.72,
+    "duration": 3.2
+  },
+  {
+    "text": "you can do. You can make a vote, cast a",
+    "start": 2176.32,
+    "duration": 4.56
+  },
+  {
+    "text": "vote on a review. But what is it? What",
+    "start": 2177.92,
+    "duration": 5.52
+  },
+  {
+    "text": "does it take to actually approve",
+    "start": 2180.88,
+    "duration": 4.64
+  },
+  {
+    "text": "something? So the simplest possible",
+    "start": 2183.44,
+    "duration": 5.2
+  },
+  {
+    "text": "thing is just to say hey we require a",
+    "start": 2185.52,
+    "duration": 5.04
+  },
+  {
+    "text": "minimum up vote of one and it can't be",
+    "start": 2188.64,
+    "duration": 3.68
+  },
+  {
+    "text": "yourself. That's like the most basic",
+    "start": 2190.56,
+    "duration": 3.84
+  },
+  {
+    "text": "rule system you can have I think and",
+    "start": 2192.32,
+    "duration": 3.759
+  },
+  {
+    "text": "still then you have probably improved",
+    "start": 2194.4,
+    "duration": 3.6
+  },
+  {
+    "text": "quality quite a bit if you're not doing",
+    "start": 2196.079,
+    "duration": 5.801
+  },
+  {
+    "text": "code review today.",
+    "start": 2198.0,
+    "duration": 3.88
+  },
+  {
+    "text": "All right. So",
+    "start": 2202.56,
+    "duration": 5.36
+  },
+  {
+    "text": "putting this back into the context then",
+    "start": 2206.0,
+    "duration": 5.8
+  },
+  {
+    "text": "that I mentioned in the beginning",
+    "start": 2207.92,
+    "duration": 3.88
+  },
+  {
+    "text": "if we're looking at a chaotic system uh",
+    "start": 2212.0,
+    "duration": 4.8
+  },
+  {
+    "text": "project where you're just starting to to",
+    "start": 2214.64,
+    "duration": 3.76
+  },
+  {
+    "text": "you know in that you really need to get",
+    "start": 2216.8,
+    "duration": 3.92
+  },
+  {
+    "text": "in control of some way I think that you",
+    "start": 2218.4,
+    "duration": 5.04
+  },
+  {
+    "text": "can really use pre-review commit reviews",
+    "start": 2220.72,
+    "duration": 5.44
+  },
+  {
+    "text": "to get in order. You force a system onto",
+    "start": 2223.44,
+    "duration": 4.88
+  },
+  {
+    "text": "something chaotic to ensure that you",
+    "start": 2226.16,
+    "duration": 3.84
+  },
+  {
+    "text": "reach alignment in one of these",
+    "start": 2228.32,
+    "duration": 3.2
+  },
+  {
+    "text": "directions and get get out of that",
+    "start": 2230.0,
+    "duration": 4.079
+  },
+  {
+    "text": "chaotic situation.",
+    "start": 2231.52,
+    "duration": 4.24
+  },
+  {
+    "text": "And if you're in a complex scenario, and",
+    "start": 2234.079,
+    "duration": 3.121
+  },
+  {
+    "text": "this is where I think, as I mentioned",
+    "start": 2235.76,
+    "duration": 3.12
+  },
+  {
+    "text": "initially, a lot of game projects are",
+    "start": 2237.2,
+    "duration": 5.04
+  },
+  {
+    "text": "most of the time, it's very powerful to",
+    "start": 2238.88,
+    "duration": 5.84
+  },
+  {
+    "text": "utilize both the pre-commit review model",
+    "start": 2242.24,
+    "duration": 4.879
+  },
+  {
+    "text": "and the postcomit review model. And I",
+    "start": 2244.72,
+    "duration": 4.16
+  },
+  {
+    "text": "highlighted there also that this mentor",
+    "start": 2247.119,
+    "duration": 4.161
+  },
+  {
+    "text": "and this architect person, they can",
+    "start": 2248.88,
+    "duration": 4.0
+  },
+  {
+    "text": "really use code review to share",
+    "start": 2251.28,
+    "duration": 2.88
+  },
+  {
+    "text": "knowledge and to ensure that you're",
+    "start": 2252.88,
+    "duration": 3.36
+  },
+  {
+    "text": "building a stable system. So you use",
+    "start": 2254.16,
+    "duration": 3.919
+  },
+  {
+    "text": "once again the pre-commit system for",
+    "start": 2256.24,
+    "duration": 4.0
+  },
+  {
+    "text": "your your critical software and you use",
+    "start": 2258.079,
+    "duration": 4.081
+  },
+  {
+    "text": "the the postcommit for the less critical",
+    "start": 2260.24,
+    "duration": 4.16
+  },
+  {
+    "text": "but you make that separation because",
+    "start": 2262.16,
+    "duration": 4.72
+  },
+  {
+    "text": "that allows you to both learn run fast",
+    "start": 2264.4,
+    "duration": 4.24
+  },
+  {
+    "text": "where you need to run fast but also",
+    "start": 2266.88,
+    "duration": 3.76
+  },
+  {
+    "text": "ensure that you're getting so much",
+    "start": 2268.64,
+    "duration": 3.92
+  },
+  {
+    "text": "structure so you're moving down into",
+    "start": 2270.64,
+    "duration": 4.32
+  },
+  {
+    "text": "something that is easier to manage and",
+    "start": 2272.56,
+    "duration": 6.08
+  },
+  {
+    "text": "and going to give you higher success",
+    "start": 2274.96,
+    "duration": 5.36
+  },
+  {
+    "text": "if you're in the complicated scenario.",
+    "start": 2278.64,
+    "duration": 3.199
+  },
+  {
+    "text": "This is where I think I find many of our",
+    "start": 2280.32,
+    "duration": 3.44
+  },
+  {
+    "text": "customers outside of of game development",
+    "start": 2281.839,
+    "duration": 3.681
+  },
+  {
+    "text": "actually many people have a lot of",
+    "start": 2283.76,
+    "duration": 3.359
+  },
+  {
+    "text": "regulatory needs they need to comply",
+    "start": 2285.52,
+    "duration": 3.76
+  },
+  {
+    "text": "with. They 100% use pre-commit reviews",
+    "start": 2287.119,
+    "duration": 4.801
+  },
+  {
+    "text": "for everything that they do. And then",
+    "start": 2289.28,
+    "duration": 4.24
+  },
+  {
+    "text": "once again if you are in that very very",
+    "start": 2291.92,
+    "duration": 3.919
+  },
+  {
+    "text": "simple checklist approach, you're in a",
+    "start": 2293.52,
+    "duration": 4.4
+  },
+  {
+    "text": "project or a way where it's actually",
+    "start": 2295.839,
+    "duration": 3.441
+  },
+  {
+    "text": "very straightforward. Everybody knows",
+    "start": 2297.92,
+    "duration": 2.88
+  },
+  {
+    "text": "what to do and we know exactly how to do",
+    "start": 2299.28,
+    "duration": 4.079
+  },
+  {
+    "text": "it. Well, why let the code review tool",
+    "start": 2300.8,
+    "duration": 4.08
+  },
+  {
+    "text": "slow you down, right? why not move to a",
+    "start": 2303.359,
+    "duration": 3.601
+  },
+  {
+    "text": "post commit process so you can make sure",
+    "start": 2304.88,
+    "duration": 3.76
+  },
+  {
+    "text": "that you can run as fast as you can with",
+    "start": 2306.96,
+    "duration": 6.08
+  },
+  {
+    "text": "that that that simple model.",
+    "start": 2308.64,
+    "duration": 6.959
+  },
+  {
+    "text": "So that's that's a summary of things I",
+    "start": 2313.04,
+    "duration": 3.76
+  },
+  {
+    "text": "wanted to share with you today about",
+    "start": 2315.599,
+    "duration": 3.361
+  },
+  {
+    "text": "achieving speed or collaboration speed",
+    "start": 2316.8,
+    "duration": 4.88
+  },
+  {
+    "text": "and quality with code review. And for",
+    "start": 2318.96,
+    "duration": 5.04
+  },
+  {
+    "text": "anyone who's doing art review I want to",
+    "start": 2321.68,
+    "duration": 4.64
+  },
+  {
+    "text": "mention that DAM has kind of opened up",
+    "start": 2324.0,
+    "duration": 4.32
+  },
+  {
+    "text": "the same kind similar capabilities but",
+    "start": 2326.32,
+    "duration": 6.08
+  },
+  {
+    "text": "for digital art assets. So",
+    "start": 2328.32,
+    "duration": 5.92
+  },
+  {
+    "text": "one of the main differences I found at",
+    "start": 2332.4,
+    "duration": 3.439
+  },
+  {
+    "text": "least coming more from code review side",
+    "start": 2334.24,
+    "duration": 3.359
+  },
+  {
+    "text": "now now being more and more involved in",
+    "start": 2335.839,
+    "duration": 4.161
+  },
+  {
+    "text": "in art reviews is that there's a very",
+    "start": 2337.599,
+    "duration": 4.641
+  },
+  {
+    "text": "fundamental question being asked all the",
+    "start": 2340.0,
+    "duration": 4.56
+  },
+  {
+    "text": "time. What is an asset? What is it that",
+    "start": 2342.24,
+    "duration": 4.16
+  },
+  {
+    "text": "we actually reviewing? Do we have",
+    "start": 2344.56,
+    "duration": 4.4
+  },
+  {
+    "text": "everything that we need to review? So",
+    "start": 2346.4,
+    "duration": 4.16
+  },
+  {
+    "text": "one of the major differences with this",
+    "start": 2348.96,
+    "duration": 3.68
+  },
+  {
+    "text": "tool is that you have this concept of",
+    "start": 2350.56,
+    "duration": 4.32
+  },
+  {
+    "text": "what we call an asset bundle. So it",
+    "start": 2352.64,
+    "duration": 4.0
+  },
+  {
+    "text": "allows you to group things together that",
+    "start": 2354.88,
+    "duration": 4.0
+  },
+  {
+    "text": "don't necessarily live at the same place",
+    "start": 2356.64,
+    "duration": 4.88
+  },
+  {
+    "text": "in the depo. So it could be both kind of",
+    "start": 2358.88,
+    "duration": 4.719
+  },
+  {
+    "text": "your working files and your renditions",
+    "start": 2361.52,
+    "duration": 3.839
+  },
+  {
+    "text": "and your materials and textures and",
+    "start": 2363.599,
+    "duration": 3.201
+  },
+  {
+    "text": "other things, but you can put them all",
+    "start": 2365.359,
+    "duration": 4.24
+  },
+  {
+    "text": "together and you can create a review",
+    "start": 2366.8,
+    "duration": 4.319
+  },
+  {
+    "text": "where you actually set up now I'm",
+    "start": 2369.599,
+    "duration": 3.681
+  },
+  {
+    "text": "actually want to review this whole piece",
+    "start": 2371.119,
+    "duration": 4.0
+  },
+  {
+    "text": "as a whole. And you can add context to",
+    "start": 2373.28,
+    "duration": 4.48
+  },
+  {
+    "text": "that and and metadata and and links to",
+    "start": 2375.119,
+    "duration": 4.96
+  },
+  {
+    "text": "other sources. And then of course you",
+    "start": 2377.76,
+    "duration": 4.88
+  },
+  {
+    "text": "have this kind of abilities to draw on",
+    "start": 2380.079,
+    "duration": 4.481
+  },
+  {
+    "text": "stuff and on 3D models and images and",
+    "start": 2382.64,
+    "duration": 4.56
+  },
+  {
+    "text": "and some of these file formats to help",
+    "start": 2384.56,
+    "duration": 5.44
+  },
+  {
+    "text": "that.",
+    "start": 2387.2,
+    "duration": 4.399
+  },
+  {
+    "text": "All right.",
+    "start": 2390.0,
+    "duration": 3.839
+  },
+  {
+    "text": "So you all qualified for the beast now",
+    "start": 2391.599,
+    "duration": 4.48
+  },
+  {
+    "text": "because you stayed to the end. Um if you",
+    "start": 2393.839,
+    "duration": 3.601
+  },
+  {
+    "text": "want to learn even more about what we're",
+    "start": 2396.079,
+    "duration": 3.201
+  },
+  {
+    "text": "doing, we're having a booth here. We're",
+    "start": 2397.44,
+    "duration": 4.32
+  },
+  {
+    "text": "also having a webinar about a midyear",
+    "start": 2399.28,
+    "duration": 4.319
+  },
+  {
+    "text": "update. So if you want to listen to",
+    "start": 2401.76,
+    "duration": 3.2
+  },
+  {
+    "text": "something more that we do, you can scan",
+    "start": 2403.599,
+    "duration": 4.801
+  },
+  {
+    "text": "that code. Um, and otherwise we're going",
+    "start": 2404.96,
+    "duration": 6.72
+  },
+  {
+    "text": "to open up for for uh questions and say",
+    "start": 2408.4,
+    "duration": 6.439
+  },
+  {
+    "text": "thank you.",
+    "start": 2411.68,
+    "duration": 3.159
+  }
+]

@@ -81,6 +81,13 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
         estimatedMinutes: pathInfo.estimatedMinutes || null,
         _source: 'youtube',
         _externalUrl: course.youtube_url,
+        type: 'youtube',
+        url: course.youtube_url,
+        channel: course.channel_name || course.channel || null,
+        channelTrust: course.channel_trust || null,
+        topics: course.topics || [],
+        description: course.description || '',
+        durationMinutes: course.duration_seconds ? Math.round(course.duration_seconds / 60) : 10,
       });
       continue;
     }
@@ -120,6 +127,11 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
         estimatedMinutes: pathInfo.estimatedMinutes || null,
         _source: 'epic_docs',
         _externalUrl: docUrl,
+        type: 'doc',
+        url: docUrl,
+        topics: course.topics || [],
+        description: course.description || '',
+        readTimeMinutes: 10,
       });
       continue;
     }

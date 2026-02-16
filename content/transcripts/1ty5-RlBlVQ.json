@@ -1,0 +1,5377 @@
+[
+  {
+    "text": "Hi, I'm Alex McAdams and I'm a physics",
+    "start": 1.52,
+    "duration": 5.04
+  },
+  {
+    "text": "programmer working on Chaos Cloth for",
+    "start": 4.72,
+    "duration": 3.919
+  },
+  {
+    "text": "Unreal Engine. Uh, before coming to",
+    "start": 6.56,
+    "duration": 3.92
+  },
+  {
+    "text": "Epic, I was an engineer at Disney",
+    "start": 8.639,
+    "duration": 3.681
+  },
+  {
+    "text": "Animation, also working on hair and",
+    "start": 10.48,
+    "duration": 4.239
+  },
+  {
+    "text": "cloth simulation. I worked with Jared",
+    "start": 12.32,
+    "duration": 4.959
+  },
+  {
+    "text": "Monson on series cloth for the Witcher 4",
+    "start": 14.719,
+    "duration": 5.761
+  },
+  {
+    "text": "Unreal 5 tech demo, and we're excited to",
+    "start": 17.279,
+    "duration": 5.361
+  },
+  {
+    "text": "use this experience to share some of the",
+    "start": 20.48,
+    "duration": 4.639
+  },
+  {
+    "text": "best practices for using Chaos Cloth in",
+    "start": 22.64,
+    "duration": 5.12
+  },
+  {
+    "text": "AAA game workflows.",
+    "start": 25.119,
+    "duration": 5.361
+  },
+  {
+    "text": "It's just a quick video to remind you of",
+    "start": 27.76,
+    "duration": 7.72
+  },
+  {
+    "text": "what the cloth looked like.",
+    "start": 30.48,
+    "duration": 5.0
+  },
+  {
+    "text": "So, in this talk, we're going to go",
+    "start": 46.879,
+    "duration": 3.921
+  },
+  {
+    "text": "through the process of setting up cloth",
+    "start": 49.039,
+    "duration": 4.16
+  },
+  {
+    "text": "assets for a game, from design to",
+    "start": 50.8,
+    "duration": 4.8
+  },
+  {
+    "text": "rigging and in-game controls with the",
+    "start": 53.199,
+    "duration": 4.321
+  },
+  {
+    "text": "inevitable compromises that you end up",
+    "start": 55.6,
+    "duration": 5.84
+  },
+  {
+    "text": "making when under project deadlines.",
+    "start": 57.52,
+    "duration": 5.839
+  },
+  {
+    "text": "So, before you start building your cloth",
+    "start": 61.44,
+    "duration": 3.6
+  },
+  {
+    "text": "asset, you'll need to consider both",
+    "start": 63.359,
+    "duration": 3.601
+  },
+  {
+    "text": "artistic and performance goals for your",
+    "start": 65.04,
+    "duration": 3.92
+  },
+  {
+    "text": "cloth.",
+    "start": 66.96,
+    "duration": 4.0
+  },
+  {
+    "text": "Often",
+    "start": 68.96,
+    "duration": 4.08
+  },
+  {
+    "text": "times this process starts with concept",
+    "start": 70.96,
+    "duration": 4.56
+  },
+  {
+    "text": "art like this, sometimes with a few",
+    "start": 73.04,
+    "duration": 5.119
+  },
+  {
+    "text": "variations. Now can be a good time to",
+    "start": 75.52,
+    "duration": 4.8
+  },
+  {
+    "text": "raise potential simulation issues and",
+    "start": 78.159,
+    "duration": 5.361
+  },
+  {
+    "text": "brainstorm solutions. For example, this",
+    "start": 80.32,
+    "duration": 5.119
+  },
+  {
+    "text": "version of series cloak has a lot of",
+    "start": 83.52,
+    "duration": 4.239
+  },
+  {
+    "text": "small folds that can pose simulation",
+    "start": 85.439,
+    "duration": 4.961
+  },
+  {
+    "text": "challenges both in terms of resolution",
+    "start": 87.759,
+    "duration": 4.801
+  },
+  {
+    "text": "required to simulate the folds as well",
+    "start": 90.4,
+    "duration": 3.92
+  },
+  {
+    "text": "as the number of potential self-colision",
+    "start": 92.56,
+    "duration": 4.4
+  },
+  {
+    "text": "issues.",
+    "start": 94.32,
+    "duration": 5.36
+  },
+  {
+    "text": "Thankfully, a heavier, simpler sim to",
+    "start": 96.96,
+    "duration": 7.479
+  },
+  {
+    "text": "simulate version was ultimately chosen.",
+    "start": 99.68,
+    "duration": 4.759
+  },
+  {
+    "text": "Now, when determining the level of",
+    "start": 105.439,
+    "duration": 2.96
+  },
+  {
+    "text": "detail we want to include in our",
+    "start": 106.96,
+    "duration": 3.68
+  },
+  {
+    "text": "simulation proxy mesh, we need to",
+    "start": 108.399,
+    "duration": 4.4
+  },
+  {
+    "text": "consider both performance targets and",
+    "start": 110.64,
+    "duration": 4.799
+  },
+  {
+    "text": "art direction. In particular, for Siri,",
+    "start": 112.799,
+    "duration": 4.721
+  },
+  {
+    "text": "we had a budget of under 1 millisecond",
+    "start": 115.439,
+    "duration": 5.04
+  },
+  {
+    "text": "on PS5, and we knew that her cloak was",
+    "start": 117.52,
+    "duration": 5.279
+  },
+  {
+    "text": "made from long, heavy material.",
+    "start": 120.479,
+    "duration": 3.92
+  },
+  {
+    "text": "Furthermore, we had to prepare for",
+    "start": 122.799,
+    "duration": 4.241
+  },
+  {
+    "text": "complex collisions between Siri's body,",
+    "start": 124.399,
+    "duration": 6.601
+  },
+  {
+    "text": "swords, and the horse.",
+    "start": 127.04,
+    "duration": 3.96
+  },
+  {
+    "text": "While Chaos Cloth has a wide range of",
+    "start": 131.52,
+    "duration": 3.52
+  },
+  {
+    "text": "features to support anything from",
+    "start": 133.44,
+    "duration": 3.76
+  },
+  {
+    "text": "real-time game simulations up to",
+    "start": 135.04,
+    "duration": 4.16
+  },
+  {
+    "text": "cinematic quality cloth, we'll be",
+    "start": 137.2,
+    "duration": 3.28
+  },
+  {
+    "text": "focusing on which settings are",
+    "start": 139.2,
+    "duration": 3.36
+  },
+  {
+    "text": "appropriate for game quality cloth in",
+    "start": 140.48,
+    "duration": 5.28
+  },
+  {
+    "text": "this talk. In particular, when targeting",
+    "start": 142.56,
+    "duration": 5.52
+  },
+  {
+    "text": "a typical game, we recommend simulation",
+    "start": 145.76,
+    "duration": 5.36
+  },
+  {
+    "text": "meshes with a resolution of around 200",
+    "start": 148.08,
+    "duration": 6.4
+  },
+  {
+    "text": "to 600 simulated vertices. Significantly",
+    "start": 151.12,
+    "duration": 5.44
+  },
+  {
+    "text": "more vertices can push into the",
+    "start": 154.48,
+    "duration": 4.16
+  },
+  {
+    "text": "cinematic cloth quality, which can",
+    "start": 156.56,
+    "duration": 6.2
+  },
+  {
+    "text": "require more complex setups.",
+    "start": 158.64,
+    "duration": 4.12
+  },
+  {
+    "text": "Uh, for setups with a typical level of",
+    "start": 163.12,
+    "duration": 4.72
+  },
+  {
+    "text": "features for cloaks and capes and things",
+    "start": 165.599,
+    "duration": 4.72
+  },
+  {
+    "text": "like that, we tend to recommend around",
+    "start": 167.84,
+    "duration": 5.92
+  },
+  {
+    "text": "350 simulated vertices. This allows for",
+    "start": 170.319,
+    "duration": 5.521
+  },
+  {
+    "text": "enough degrees of freedom while staying",
+    "start": 173.76,
+    "duration": 4.88
+  },
+  {
+    "text": "in a half to 1 millisecond range on",
+    "start": 175.84,
+    "duration": 6.479
+  },
+  {
+    "text": "current generation hardware.",
+    "start": 178.64,
+    "duration": 6.319
+  },
+  {
+    "text": "I also wanted to highlight that for 5.6",
+    "start": 182.319,
+    "duration": 4.481
+  },
+  {
+    "text": "we've done some optimization targeting",
+    "start": 184.959,
+    "duration": 4.0
+  },
+  {
+    "text": "platforms such as mobile and I found",
+    "start": 186.8,
+    "duration": 4.88
+  },
+  {
+    "text": "that around 200 simulated vertices works",
+    "start": 188.959,
+    "duration": 4.961
+  },
+  {
+    "text": "well coming in at around 1 millisecond",
+    "start": 191.68,
+    "duration": 6.16
+  },
+  {
+    "text": "per frame on these platforms.",
+    "start": 193.92,
+    "duration": 5.84
+  },
+  {
+    "text": "So once we've got the specifications for",
+    "start": 197.84,
+    "duration": 6.08
+  },
+  {
+    "text": "our cloth asset, it's time to rig it.",
+    "start": 199.76,
+    "duration": 4.16
+  },
+  {
+    "text": "One of the first inputs you'll need to",
+    "start": 204.08,
+    "duration": 3.6
+  },
+  {
+    "text": "generate for your cloth asset is your",
+    "start": 205.68,
+    "duration": 4.72
+  },
+  {
+    "text": "simulation proxy mesh. We've talked a",
+    "start": 207.68,
+    "duration": 4.8
+  },
+  {
+    "text": "bit about the recommended resolution,",
+    "start": 210.4,
+    "duration": 4.0
+  },
+  {
+    "text": "but we also need to consider things like",
+    "start": 212.48,
+    "duration": 5.2
+  },
+  {
+    "text": "edge flow.",
+    "start": 214.4,
+    "duration": 4.96
+  },
+  {
+    "text": "The main thing to remember when creating",
+    "start": 217.68,
+    "duration": 4.0
+  },
+  {
+    "text": "your simulation mesh is that cloth can",
+    "start": 219.36,
+    "duration": 5.36
+  },
+  {
+    "text": "only bend along mesh edges. At cinematic",
+    "start": 221.68,
+    "duration": 4.88
+  },
+  {
+    "text": "quality, this can have an effect on",
+    "start": 224.72,
+    "duration": 4.079
+  },
+  {
+    "text": "wrinkle bias, but mostly you have enough",
+    "start": 226.56,
+    "duration": 3.84
+  },
+  {
+    "text": "degrees of freedom to bend any way you",
+    "start": 228.799,
+    "duration": 4.72
+  },
+  {
+    "text": "want. On the other hand, on this game",
+    "start": 230.4,
+    "duration": 5.119
+  },
+  {
+    "text": "quality, edge flow will have a real",
+    "start": 233.519,
+    "duration": 3.601
+  },
+  {
+    "text": "effect on the bulk behavior of your",
+    "start": 235.519,
+    "duration": 5.521
+  },
+  {
+    "text": "simulation. Uh the right image here, uh",
+    "start": 237.12,
+    "duration": 5.92
+  },
+  {
+    "text": "it shows the simulation proxy we used",
+    "start": 241.04,
+    "duration": 4.08
+  },
+  {
+    "text": "for series cloak. And we found that",
+    "start": 243.04,
+    "duration": 5.199
+  },
+  {
+    "text": "similar quadbased meshes with attention",
+    "start": 245.12,
+    "duration": 5.6
+  },
+  {
+    "text": "to diagonal triangulation tends to work",
+    "start": 248.239,
+    "duration": 4.72
+  },
+  {
+    "text": "well when making similar cloaks and",
+    "start": 250.72,
+    "duration": 5.239
+  },
+  {
+    "text": "capes.",
+    "start": 252.959,
+    "duration": 3.0
+  },
+  {
+    "text": "We have a few different ways to import",
+    "start": 256.479,
+    "duration": 4.241
+  },
+  {
+    "text": "your meshes into the cloth asset, but",
+    "start": 258.32,
+    "duration": 4.24
+  },
+  {
+    "text": "one that gives the most control is by",
+    "start": 260.72,
+    "duration": 3.919
+  },
+  {
+    "text": "importing from a skeletal mesh. The",
+    "start": 262.56,
+    "duration": 3.84
+  },
+  {
+    "text": "cloth asset will import both the mesh",
+    "start": 264.639,
+    "duration": 5.041
+  },
+  {
+    "text": "geometry as well as any normals, UVs,",
+    "start": 266.4,
+    "duration": 5.28
+  },
+  {
+    "text": "skin weights, and render colors and",
+    "start": 269.68,
+    "duration": 5.44
+  },
+  {
+    "text": "materials. And new in 5.6, we also",
+    "start": 271.68,
+    "duration": 5.2
+  },
+  {
+    "text": "support importing simulation morph",
+    "start": 275.12,
+    "duration": 4.76
+  },
+  {
+    "text": "targets.",
+    "start": 276.88,
+    "duration": 3.0
+  },
+  {
+    "text": "Another type of asset you author outside",
+    "start": 279.919,
+    "duration": 4.72
+  },
+  {
+    "text": "of the cloth editor and import in is the",
+    "start": 282.0,
+    "duration": 5.04
+  },
+  {
+    "text": "physics asset. This asset contains",
+    "start": 284.639,
+    "duration": 4.0
+  },
+  {
+    "text": "kinematic collision bodies for the",
+    "start": 287.04,
+    "duration": 3.68
+  },
+  {
+    "text": "simulation that are driven by a skeletal",
+    "start": 288.639,
+    "duration": 4.961
+  },
+  {
+    "text": "mesh. While the physics asset supports a",
+    "start": 290.72,
+    "duration": 5.84
+  },
+  {
+    "text": "way uh a range of types of collisions",
+    "start": 293.6,
+    "duration": 5.52
+  },
+  {
+    "text": "including convexes and skin meshes, uh",
+    "start": 296.56,
+    "duration": 4.48
+  },
+  {
+    "text": "we recommend using simple rounded",
+    "start": 299.12,
+    "duration": 3.92
+  },
+  {
+    "text": "primitives like this. So tapered",
+    "start": 301.04,
+    "duration": 4.4
+  },
+  {
+    "text": "capsules, capsules, and spheres wherever",
+    "start": 303.04,
+    "duration": 4.8
+  },
+  {
+    "text": "possible. They're both performant and",
+    "start": 305.44,
+    "duration": 6.92
+  },
+  {
+    "text": "they lack corners that can cause snags.",
+    "start": 307.84,
+    "duration": 4.52
+  },
+  {
+    "text": "Once you have these assets, we'll use",
+    "start": 314.16,
+    "duration": 3.759
+  },
+  {
+    "text": "the chaos cloth editor to do the rest of",
+    "start": 316.08,
+    "duration": 5.64
+  },
+  {
+    "text": "our cloth asset rigging.",
+    "start": 317.919,
+    "duration": 3.801
+  },
+  {
+    "text": "The core of the chaos cloth editor is a",
+    "start": 322.4,
+    "duration": 5.44
+  },
+  {
+    "text": "data flow graph. This node graph is a",
+    "start": 325.12,
+    "duration": 5.04
+  },
+  {
+    "text": "construction graph made up of nodes",
+    "start": 327.84,
+    "duration": 4.48
+  },
+  {
+    "text": "corresponding to operations like adding",
+    "start": 330.16,
+    "duration": 4.56
+  },
+  {
+    "text": "constraints, remeshing, painting weight",
+    "start": 332.32,
+    "duration": 5.2
+  },
+  {
+    "text": "maps, or editing solver settings. The",
+    "start": 334.72,
+    "duration": 4.72
+  },
+  {
+    "text": "terminal node of the graph compiles this",
+    "start": 337.52,
+    "duration": 6.2
+  },
+  {
+    "text": "data into the final cloth asset.",
+    "start": 339.44,
+    "duration": 4.28
+  },
+  {
+    "text": "The editor has two viewports which you",
+    "start": 343.919,
+    "duration": 4.241
+  },
+  {
+    "text": "can see here. The construction viewport",
+    "start": 345.84,
+    "duration": 4.56
+  },
+  {
+    "text": "by default is on the left and it",
+    "start": 348.16,
+    "duration": 3.92
+  },
+  {
+    "text": "corresponds with the state of the asset",
+    "start": 350.4,
+    "duration": 3.92
+  },
+  {
+    "text": "up to the corres uh the currently",
+    "start": 352.08,
+    "duration": 4.8
+  },
+  {
+    "text": "selected node. From here, we can view",
+    "start": 354.32,
+    "duration": 5.12
+  },
+  {
+    "text": "the assets three sets of geometry, the",
+    "start": 356.88,
+    "duration": 5.2
+  },
+  {
+    "text": "render geometry, the 3D simulation",
+    "start": 359.44,
+    "duration": 5.28
+  },
+  {
+    "text": "proxy, and a 2D panel-based version of",
+    "start": 362.08,
+    "duration": 6.36
+  },
+  {
+    "text": "the simulation proxy.",
+    "start": 364.72,
+    "duration": 3.72
+  },
+  {
+    "text": "The right-hand viewport is what we call",
+    "start": 368.72,
+    "duration": 4.24
+  },
+  {
+    "text": "the simulation viewport and can be used",
+    "start": 370.72,
+    "duration": 4.56
+  },
+  {
+    "text": "to preview your cloth asset with",
+    "start": 372.96,
+    "duration": 4.64
+  },
+  {
+    "text": "optional animations and also that's",
+    "start": 375.28,
+    "duration": 5.44
+  },
+  {
+    "text": "where our simulation debug display is.",
+    "start": 377.6,
+    "duration": 5.039
+  },
+  {
+    "text": "If you're familiar with the skeletal",
+    "start": 380.72,
+    "duration": 4.08
+  },
+  {
+    "text": "meshbased cloth editor, this corresponds",
+    "start": 382.639,
+    "duration": 5.961
+  },
+  {
+    "text": "with the viewport there.",
+    "start": 384.8,
+    "duration": 3.8
+  },
+  {
+    "text": "If you're interested in learning more",
+    "start": 388.72,
+    "duration": 3.28
+  },
+  {
+    "text": "about how to use dataf flow, I'd",
+    "start": 390.08,
+    "duration": 2.959
+  },
+  {
+    "text": "recommend you check out the",
+    "start": 392.0,
+    "duration": 2.96
+  },
+  {
+    "text": "non-destructive workflows for chaos",
+    "start": 393.039,
+    "duration": 4.16
+  },
+  {
+    "text": "physics in UA5 session later this",
+    "start": 394.96,
+    "duration": 5.239
+  },
+  {
+    "text": "afternoon.",
+    "start": 397.199,
+    "duration": 3.0
+  },
+  {
+    "text": "Now, Chaos Cloth offers several types of",
+    "start": 400.639,
+    "duration": 4.161
+  },
+  {
+    "text": "constraints, but some of the biggest",
+    "start": 402.96,
+    "duration": 3.519
+  },
+  {
+    "text": "decision points are which constraint",
+    "start": 404.8,
+    "duration": 4.239
+  },
+  {
+    "text": "types to use for stretching, bending,",
+    "start": 406.479,
+    "duration": 4.641
+  },
+  {
+    "text": "and self collisions. So, I'm going to",
+    "start": 409.039,
+    "duration": 3.521
+  },
+  {
+    "text": "walk through these options and our",
+    "start": 411.12,
+    "duration": 5.48
+  },
+  {
+    "text": "recommendations for game assets.",
+    "start": 412.56,
+    "duration": 4.04
+  },
+  {
+    "text": "On both our stretch and bin simulation",
+    "start": 416.88,
+    "duration": 4.0
+  },
+  {
+    "text": "nodes, one of the properties you'll find",
+    "start": 419.199,
+    "duration": 5.041
+  },
+  {
+    "text": "is solver type with the option of PBD or",
+    "start": 420.88,
+    "duration": 4.96
+  },
+  {
+    "text": "XPVD.",
+    "start": 424.24,
+    "duration": 3.6
+  },
+  {
+    "text": "For assets with the resolution we're",
+    "start": 425.84,
+    "duration": 5.359
+  },
+  {
+    "text": "using here, we recommend using PBD. It's",
+    "start": 427.84,
+    "duration": 5.759
+  },
+  {
+    "text": "computationally fast and has a simple to",
+    "start": 431.199,
+    "duration": 5.201
+  },
+  {
+    "text": "author zero to one stiffness values. Uh",
+    "start": 433.599,
+    "duration": 5.281
+  },
+  {
+    "text": "the main feature that XPBD offers is",
+    "start": 436.4,
+    "duration": 4.639
+  },
+  {
+    "text": "constraint damping, but we found this",
+    "start": 438.88,
+    "duration": 4.0
+  },
+  {
+    "text": "feature is more useful for the high",
+    "start": 441.039,
+    "duration": 4.641
+  },
+  {
+    "text": "resolution cinematic quality cloth with",
+    "start": 442.88,
+    "duration": 6.52
+  },
+  {
+    "text": "high subframe counts.",
+    "start": 445.68,
+    "duration": 3.72
+  },
+  {
+    "text": "Now, let's take a look a little bit more",
+    "start": 449.919,
+    "duration": 5.28
+  },
+  {
+    "text": "at our stretch constraints.",
+    "start": 451.52,
+    "duration": 5.679
+  },
+  {
+    "text": "Uh the first checked box you'll see is",
+    "start": 455.199,
+    "duration": 4.961
+  },
+  {
+    "text": "whether or not to use 3D rest links. You",
+    "start": 457.199,
+    "duration": 4.801
+  },
+  {
+    "text": "want to keep this checked on unless you",
+    "start": 460.16,
+    "duration": 3.84
+  },
+  {
+    "text": "have a simulation mesh that was authored",
+    "start": 462.0,
+    "duration": 4.88
+  },
+  {
+    "text": "in a panel-based cloth editing package",
+    "start": 464.0,
+    "duration": 4.96
+  },
+  {
+    "text": "uh that can be used to generate a size",
+    "start": 466.88,
+    "duration": 5.12
+  },
+  {
+    "text": "2D mesh. So the top is an example where",
+    "start": 468.96,
+    "duration": 5.84
+  },
+  {
+    "text": "we do have that 2D panel mesh that's the",
+    "start": 472.0,
+    "duration": 6.24
+  },
+  {
+    "text": "correct size. Um but in our case uh we",
+    "start": 474.8,
+    "duration": 5.28
+  },
+  {
+    "text": "have just a simulation mesh that was",
+    "start": 478.24,
+    "duration": 4.16
+  },
+  {
+    "text": "generated from the 3D render mesh. So",
+    "start": 480.08,
+    "duration": 6.76
+  },
+  {
+    "text": "we'll be using the 3D rest links.",
+    "start": 482.4,
+    "duration": 4.44
+  },
+  {
+    "text": "Uh once you've done those first two",
+    "start": 487.28,
+    "duration": 4.08
+  },
+  {
+    "text": "selections, you can also have the option",
+    "start": 489.44,
+    "duration": 5.039
+  },
+  {
+    "text": "to add an area constraint which can add",
+    "start": 491.36,
+    "duration": 6.16
+  },
+  {
+    "text": "extra stability to the simulation. We",
+    "start": 494.479,
+    "duration": 4.641
+  },
+  {
+    "text": "recommend adding it depending on which",
+    "start": 497.52,
+    "duration": 3.28
+  },
+  {
+    "text": "bending model you choose. So I'll talk",
+    "start": 499.12,
+    "duration": 6.519
+  },
+  {
+    "text": "about this a little bit more in a bit.",
+    "start": 500.8,
+    "duration": 4.839
+  },
+  {
+    "text": "The last uh stretch constraint option I",
+    "start": 506.0,
+    "duration": 4.72
+  },
+  {
+    "text": "wanted to highlight was enable stretch",
+    "start": 508.319,
+    "duration": 6.321
+  },
+  {
+    "text": "warp and W scale. Uh this allows you to",
+    "start": 510.72,
+    "duration": 6.319
+  },
+  {
+    "text": "change the rest length of the mesh at",
+    "start": 514.64,
+    "duration": 5.399
+  },
+  {
+    "text": "runtime.",
+    "start": 517.039,
+    "duration": 3.0
+  },
+  {
+    "text": "So that was stretch constraints. Now",
+    "start": 523.2,
+    "duration": 2.8
+  },
+  {
+    "text": "let's take a look at bending",
+    "start": 524.959,
+    "duration": 3.44
+  },
+  {
+    "text": "constraints. The big choice you have is",
+    "start": 526.0,
+    "duration": 5.12
+  },
+  {
+    "text": "between what we call hinge or faces",
+    "start": 528.399,
+    "duration": 5.201
+  },
+  {
+    "text": "spring.",
+    "start": 531.12,
+    "duration": 4.24
+  },
+  {
+    "text": "The hinge constraint is a angle",
+    "start": 533.6,
+    "duration": 4.239
+  },
+  {
+    "text": "constraint on each edge of the mesh. The",
+    "start": 535.36,
+    "duration": 5.2
+  },
+  {
+    "text": "faces spring is a spring that con is",
+    "start": 537.839,
+    "duration": 4.641
+  },
+  {
+    "text": "that connects opposite vertices from an",
+    "start": 540.56,
+    "duration": 4.08
+  },
+  {
+    "text": "edge. So the hinge is like the",
+    "start": 542.48,
+    "duration": 4.16
+  },
+  {
+    "text": "constraint on the blue and the faces",
+    "start": 544.64,
+    "duration": 6.56
+  },
+  {
+    "text": "spring is the red spring.",
+    "start": 546.64,
+    "duration": 6.319
+  },
+  {
+    "text": "Hinge constraints are good at holding a",
+    "start": 551.2,
+    "duration": 3.92
+  },
+  {
+    "text": "specific angle and work well for cloth",
+    "start": 552.959,
+    "duration": 4.721
+  },
+  {
+    "text": "that has a lot of structure. We use the",
+    "start": 555.12,
+    "duration": 5.76
+  },
+  {
+    "text": "Mon series hood for this reason. Uh, one",
+    "start": 557.68,
+    "duration": 5.12
+  },
+  {
+    "text": "drawback of the hinge constraint is it",
+    "start": 560.88,
+    "duration": 3.84
+  },
+  {
+    "text": "can be less stable under a lot of",
+    "start": 562.8,
+    "duration": 4.32
+  },
+  {
+    "text": "stretching. And this is part of why we",
+    "start": 564.72,
+    "duration": 4.08
+  },
+  {
+    "text": "like to use it with the area constraint",
+    "start": 567.12,
+    "duration": 5.159
+  },
+  {
+    "text": "I mentioned before.",
+    "start": 568.8,
+    "duration": 3.479
+  },
+  {
+    "text": "The face spring constraint is good for",
+    "start": 573.519,
+    "duration": 4.081
+  },
+  {
+    "text": "softer, more dynamic objects like the",
+    "start": 575.44,
+    "duration": 5.04
+  },
+  {
+    "text": "cloak. Uh, this constraint is very cheap",
+    "start": 577.6,
+    "duration": 6.08
+  },
+  {
+    "text": "and stable, but it can't hold specific",
+    "start": 580.48,
+    "duration": 6.919
+  },
+  {
+    "text": "angles as well.",
+    "start": 583.68,
+    "duration": 3.719
+  },
+  {
+    "text": "Uh so the final simulation property",
+    "start": 588.56,
+    "duration": 4.08
+  },
+  {
+    "text": "choice I wanted to talk about is our",
+    "start": 590.399,
+    "duration": 5.601
+  },
+  {
+    "text": "self-colision options.",
+    "start": 592.64,
+    "duration": 5.44
+  },
+  {
+    "text": "The most expensive option is the full",
+    "start": 596.0,
+    "duration": 3.839
+  },
+  {
+    "text": "self collisions with self intersection",
+    "start": 598.08,
+    "duration": 3.84
+  },
+  {
+    "text": "detection. This is all the bells and",
+    "start": 599.839,
+    "duration": 4.961
+  },
+  {
+    "text": "whistles with pervertex thickness, full",
+    "start": 601.92,
+    "duration": 5.2
+  },
+  {
+    "text": "layering and intersection resolution.",
+    "start": 604.8,
+    "duration": 4.4
+  },
+  {
+    "text": "But it can be very expensive and it",
+    "start": 607.12,
+    "duration": 3.44
+  },
+  {
+    "text": "would have completely blown up our",
+    "start": 609.2,
+    "duration": 5.24
+  },
+  {
+    "text": "submillisecond budget.",
+    "start": 610.56,
+    "duration": 3.88
+  },
+  {
+    "text": "For this reason, we have a much cheaper",
+    "start": 614.56,
+    "duration": 4.64
+  },
+  {
+    "text": "self-colision sphere repulsions. The",
+    "start": 616.56,
+    "duration": 4.719
+  },
+  {
+    "text": "simple repulsion spheres, they're cheap",
+    "start": 619.2,
+    "duration": 4.0
+  },
+  {
+    "text": "to calculate, but they don't know how to",
+    "start": 621.279,
+    "duration": 4.401
+  },
+  {
+    "text": "untangle the cloth if they pass through",
+    "start": 623.2,
+    "duration": 5.72
+  },
+  {
+    "text": "each other.",
+    "start": 625.68,
+    "duration": 3.24
+  },
+  {
+    "text": "This is where our new cloth cloth",
+    "start": 629.44,
+    "duration": 5.56
+  },
+  {
+    "text": "constraints can come in handy.",
+    "start": 630.959,
+    "duration": 4.041
+  },
+  {
+    "text": "Cloth cloth constraints allow you to",
+    "start": 638.399,
+    "duration": 3.601
+  },
+  {
+    "text": "generate springs between arbitrary cloth",
+    "start": 639.92,
+    "duration": 4.72
+  },
+  {
+    "text": "points. Currently in 5.6, Six, we have a",
+    "start": 642.0,
+    "duration": 4.24
+  },
+  {
+    "text": "few different procedural methods to",
+    "start": 644.64,
+    "duration": 3.52
+  },
+  {
+    "text": "calibrate these constraints within the",
+    "start": 646.24,
+    "duration": 4.64
+  },
+  {
+    "text": "cloth editor. The main feature that",
+    "start": 648.16,
+    "duration": 4.64
+  },
+  {
+    "text": "makes these useful for supporting self",
+    "start": 650.88,
+    "duration": 3.84
+  },
+  {
+    "text": "collisions is that you have a separate",
+    "start": 652.8,
+    "duration": 4.56
+  },
+  {
+    "text": "compression versus extension stiffness.",
+    "start": 654.72,
+    "duration": 4.96
+  },
+  {
+    "text": "So in the case of series cloak, we set",
+    "start": 657.36,
+    "duration": 4.24
+  },
+  {
+    "text": "the springs to only engage when they",
+    "start": 659.68,
+    "duration": 4.8
+  },
+  {
+    "text": "shorten beyond an initial configuration.",
+    "start": 661.6,
+    "duration": 4.64
+  },
+  {
+    "text": "This keeps the cloak from collapsing in",
+    "start": 664.48,
+    "duration": 3.919
+  },
+  {
+    "text": "on itself while remaining free to expand",
+    "start": 666.24,
+    "duration": 5.159
+  },
+  {
+    "text": "out.",
+    "start": 668.399,
+    "duration": 3.0
+  },
+  {
+    "text": "The last configuration node I wanted to",
+    "start": 672.32,
+    "duration": 6.0
+  },
+  {
+    "text": "talk about is our solver settings.",
+    "start": 674.32,
+    "duration": 6.079
+  },
+  {
+    "text": "Solver settings control how each sub",
+    "start": 678.32,
+    "duration": 4.959
+  },
+  {
+    "text": "each frame is subdivided. The first",
+    "start": 680.399,
+    "duration": 4.721
+  },
+  {
+    "text": "level of the subdivision is the number",
+    "start": 683.279,
+    "duration": 4.56
+  },
+  {
+    "text": "of substeps per frame. In this case, we",
+    "start": 685.12,
+    "duration": 4.959
+  },
+  {
+    "text": "have two substeps per frame denoted in",
+    "start": 687.839,
+    "duration": 4.24
+  },
+  {
+    "text": "orange and where the total cost of the",
+    "start": 690.079,
+    "duration": 4.641
+  },
+  {
+    "text": "frame is equal to the substep cost plus",
+    "start": 692.079,
+    "duration": 6.161
+  },
+  {
+    "text": "a fixed frame setup and finalized cost.",
+    "start": 694.72,
+    "duration": 6.16
+  },
+  {
+    "text": "Each substep is further divided by a",
+    "start": 698.24,
+    "duration": 5.279
+  },
+  {
+    "text": "number of iterations. Here we have two",
+    "start": 700.88,
+    "duration": 5.76
+  },
+  {
+    "text": "red iterations per substep.",
+    "start": 703.519,
+    "duration": 4.88
+  },
+  {
+    "text": "Similar to the frame level, there's also",
+    "start": 706.64,
+    "duration": 4.24
+  },
+  {
+    "text": "an additional cost per substep where we",
+    "start": 708.399,
+    "duration": 5.041
+  },
+  {
+    "text": "advance time for kinematic objects as",
+    "start": 710.88,
+    "duration": 6.6
+  },
+  {
+    "text": "well as set up self collisions.",
+    "start": 713.44,
+    "duration": 4.04
+  },
+  {
+    "text": "We recommend starting out with a minimum",
+    "start": 718.079,
+    "duration": 5.681
+  },
+  {
+    "text": "of one substep.",
+    "start": 720.88,
+    "duration": 5.759
+  },
+  {
+    "text": "to the view. Uh, one one iteration and",
+    "start": 723.76,
+    "duration": 5.44
+  },
+  {
+    "text": "one substep and testing with it only",
+    "start": 726.639,
+    "duration": 4.801
+  },
+  {
+    "text": "increasing substeps and iterations to",
+    "start": 729.2,
+    "duration": 5.68
+  },
+  {
+    "text": "improve fidelity. In particular, if you",
+    "start": 731.44,
+    "duration": 5.04
+  },
+  {
+    "text": "find you're missing collisions,",
+    "start": 734.88,
+    "duration": 4.32
+  },
+  {
+    "text": "increasing substeps can help.",
+    "start": 736.48,
+    "duration": 4.72
+  },
+  {
+    "text": "Substroving",
+    "start": 739.2,
+    "duration": 4.079
+  },
+  {
+    "text": "constraint convergence, for example,",
+    "start": 741.2,
+    "duration": 4.56
+  },
+  {
+    "text": "reducing stretchiness.",
+    "start": 743.279,
+    "duration": 5.441
+  },
+  {
+    "text": "Increasing substeps will also reduce the",
+    "start": 745.76,
+    "duration": 4.56
+  },
+  {
+    "text": "amount of numerical damping in your",
+    "start": 748.72,
+    "duration": 4.48
+  },
+  {
+    "text": "simulation which can make the cloth over",
+    "start": 750.32,
+    "duration": 5.04
+  },
+  {
+    "text": "up over overactive at higher subset",
+    "start": 753.2,
+    "duration": 4.4
+  },
+  {
+    "text": "counts. This is why we have that XPBD",
+    "start": 755.36,
+    "duration": 5.44
+  },
+  {
+    "text": "constraint that I mentioned earlier. Um",
+    "start": 757.6,
+    "duration": 5.359
+  },
+  {
+    "text": "one re way to increase convergence",
+    "start": 760.8,
+    "duration": 4.24
+  },
+  {
+    "text": "without this effect is to instead",
+    "start": 762.959,
+    "duration": 4.721
+  },
+  {
+    "text": "increase the number of iterations.",
+    "start": 765.04,
+    "duration": 5.359
+  },
+  {
+    "text": "Uh increasing iterations tend to be less",
+    "start": 767.68,
+    "duration": 4.88
+  },
+  {
+    "text": "effective at improving overall",
+    "start": 770.399,
+    "duration": 3.761
+  },
+  {
+    "text": "convergence than the equivalent number",
+    "start": 772.56,
+    "duration": 3.76
+  },
+  {
+    "text": "of substeps. So it may take some",
+    "start": 774.16,
+    "duration": 3.679
+  },
+  {
+    "text": "experimentation to find the right",
+    "start": 776.32,
+    "duration": 3.28
+  },
+  {
+    "text": "balance.",
+    "start": 777.839,
+    "duration": 3.761
+  },
+  {
+    "text": "However, in this case of series cloak,",
+    "start": 779.6,
+    "duration": 4.72
+  },
+  {
+    "text": "we use two substeps and two iterations",
+    "start": 781.6,
+    "duration": 5.2
+  },
+  {
+    "text": "which tend to be a common for simulation",
+    "start": 784.32,
+    "duration": 4.0
+  },
+  {
+    "text": "meshes of the size and weight,",
+    "start": 786.8,
+    "duration": 2.8
+  },
+  {
+    "text": "especially when you have the more",
+    "start": 788.32,
+    "duration": 5.4
+  },
+  {
+    "text": "complex collisions that we had.",
+    "start": 789.6,
+    "duration": 4.12
+  },
+  {
+    "text": "So that's it for the basic cloth asset",
+    "start": 794.639,
+    "duration": 4.561
+  },
+  {
+    "text": "rigging guidelines. Now I'd like to hand",
+    "start": 796.48,
+    "duration": 4.4
+  },
+  {
+    "text": "it over to Jared to explain how to take",
+    "start": 799.2,
+    "duration": 3.439
+  },
+  {
+    "text": "these building blocks and build a game",
+    "start": 800.88,
+    "duration": 5.28
+  },
+  {
+    "text": "ready cloth setup.",
+    "start": 802.639,
+    "duration": 3.521
+  },
+  {
+    "text": "All right. Thank you, Alex. Uh, my name",
+    "start": 808.56,
+    "duration": 4.079
+  },
+  {
+    "text": "is Jared Monson. I'm a senior techn",
+    "start": 810.48,
+    "duration": 5.039
+  },
+  {
+    "text": "technical animator at Epic. Uh, and was",
+    "start": 812.639,
+    "duration": 4.401
+  },
+  {
+    "text": "working with Alex obviously here on the",
+    "start": 815.519,
+    "duration": 4.801
+  },
+  {
+    "text": "cloth. Um, it's awesome when you have",
+    "start": 817.04,
+    "duration": 6.239
+  },
+  {
+    "text": "good engineers because it makes my job a",
+    "start": 820.32,
+    "duration": 5.519
+  },
+  {
+    "text": "lot easier. And, uh, when I say, \"Hey, I",
+    "start": 823.279,
+    "duration": 5.841
+  },
+  {
+    "text": "need this thing.\" Uh, you know, the the",
+    "start": 825.839,
+    "duration": 5.521
+  },
+  {
+    "text": "physics engineers are great and are able",
+    "start": 829.12,
+    "duration": 4.0
+  },
+  {
+    "text": "to give me the things that I need most",
+    "start": 831.36,
+    "duration": 5.24
+  },
+  {
+    "text": "of the time. So",
+    "start": 833.12,
+    "duration": 3.48
+  },
+  {
+    "text": "all right so for my portion of the talk",
+    "start": 837.36,
+    "duration": 4.159
+  },
+  {
+    "text": "I'm going to kind of focus a little bit",
+    "start": 839.6,
+    "duration": 4.479
+  },
+  {
+    "text": "more on conceptual things and not so",
+    "start": 841.519,
+    "duration": 5.361
+  },
+  {
+    "text": "much on uh like individual nodes and",
+    "start": 844.079,
+    "duration": 6.0
+  },
+  {
+    "text": "settings simply because uh I feel like",
+    "start": 846.88,
+    "duration": 4.8
+  },
+  {
+    "text": "you know everybody's project is going to",
+    "start": 850.079,
+    "duration": 3.2
+  },
+  {
+    "text": "be different and what you know settings",
+    "start": 851.68,
+    "duration": 4.56
+  },
+  {
+    "text": "or values might work for me may or may",
+    "start": 853.279,
+    "duration": 5.68
+  },
+  {
+    "text": "not work uh for you but we do have",
+    "start": 856.24,
+    "duration": 4.56
+  },
+  {
+    "text": "similar problems and so I want to like",
+    "start": 858.959,
+    "duration": 3.44
+  },
+  {
+    "text": "said focus a little bit more on approach",
+    "start": 860.8,
+    "duration": 3.12
+  },
+  {
+    "text": "and some of the things that I use to",
+    "start": 862.399,
+    "duration": 4.0
+  },
+  {
+    "text": "help solve some of those problems. Um,",
+    "start": 863.92,
+    "duration": 4.719
+  },
+  {
+    "text": "there's a lot of great docs and even",
+    "start": 866.399,
+    "duration": 4.481
+  },
+  {
+    "text": "other talks as well, both here at this",
+    "start": 868.639,
+    "duration": 5.2
+  },
+  {
+    "text": "conference and online as far as helping",
+    "start": 870.88,
+    "duration": 5.04
+  },
+  {
+    "text": "you get a little bit more into some of",
+    "start": 873.839,
+    "duration": 3.761
+  },
+  {
+    "text": "those individual nodes and settings. So,",
+    "start": 875.92,
+    "duration": 3.12
+  },
+  {
+    "text": "I I definitely recommend checking those",
+    "start": 877.6,
+    "duration": 6.72
+  },
+  {
+    "text": "out. So, uh, let's move on. So I we",
+    "start": 879.04,
+    "duration": 7.52
+  },
+  {
+    "text": "learned a lot obviously in this demo and",
+    "start": 884.32,
+    "duration": 7.199
+  },
+  {
+    "text": "how cloth can work in a in a more",
+    "start": 886.56,
+    "duration": 7.44
+  },
+  {
+    "text": "game type scenario um and production",
+    "start": 891.519,
+    "duration": 4.961
+  },
+  {
+    "text": "environment. So what I wanted to do is",
+    "start": 894.0,
+    "duration": 5.839
+  },
+  {
+    "text": "kind of break uh my area into some these",
+    "start": 896.48,
+    "duration": 6.479
+  },
+  {
+    "text": "focus areas and like and I feel like",
+    "start": 899.839,
+    "duration": 5.36
+  },
+  {
+    "text": "each of these areas are pretty important",
+    "start": 902.959,
+    "duration": 4.56
+  },
+  {
+    "text": "to help you solve problems that you",
+    "start": 905.199,
+    "duration": 5.041
+  },
+  {
+    "text": "might have. So something that we I'm",
+    "start": 907.519,
+    "duration": 4.481
+  },
+  {
+    "text": "calling the cloth cloth controller",
+    "start": 910.24,
+    "duration": 3.12
+  },
+  {
+    "text": "function. Uh we'll talk about the",
+    "start": 912.0,
+    "duration": 4.0
+  },
+  {
+    "text": "velocity scale node. Um your anime mesh",
+    "start": 913.36,
+    "duration": 4.64
+  },
+  {
+    "text": "poses attribute maps and then also the",
+    "start": 916.0,
+    "duration": 3.92
+  },
+  {
+    "text": "editor sears to help you debug and see",
+    "start": 918.0,
+    "duration": 5.199
+  },
+  {
+    "text": "what's going on in your in your cloth",
+    "start": 919.92,
+    "duration": 5.12
+  },
+  {
+    "text": "setups.",
+    "start": 923.199,
+    "duration": 3.361
+  },
+  {
+    "text": "Uh before we get too much further",
+    "start": 925.04,
+    "duration": 4.64
+  },
+  {
+    "text": "though, I did want to talk about the",
+    "start": 926.56,
+    "duration": 5.6
+  },
+  {
+    "text": "kind importance important and how it's",
+    "start": 929.68,
+    "duration": 3.599
+  },
+  {
+    "text": "important to understand the difference",
+    "start": 932.16,
+    "duration": 2.479
+  },
+  {
+    "text": "between the cloth component and the",
+    "start": 933.279,
+    "duration": 3.68
+  },
+  {
+    "text": "cloth interactor.",
+    "start": 934.639,
+    "duration": 5.121
+  },
+  {
+    "text": "The cloth component is the component",
+    "start": 936.959,
+    "duration": 6.721
+  },
+  {
+    "text": "itself and those uh it sets component",
+    "start": 939.76,
+    "duration": 6.24
+  },
+  {
+    "text": "level attributes that affect the whole",
+    "start": 943.68,
+    "duration": 5.2
+  },
+  {
+    "text": "cloth like adding or remove collisions,",
+    "start": 946.0,
+    "duration": 4.959
+  },
+  {
+    "text": "teleports, resets,",
+    "start": 948.88,
+    "duration": 6.56
+  },
+  {
+    "text": "um it handles whether it collides with",
+    "start": 950.959,
+    "duration": 5.921
+  },
+  {
+    "text": "environmental objects and things like",
+    "start": 955.44,
+    "duration": 3.36
+  },
+  {
+    "text": "that. So it's more of the global uh",
+    "start": 956.88,
+    "duration": 4.399
+  },
+  {
+    "text": "values and then the interactor is what",
+    "start": 958.8,
+    "duration": 4.479
+  },
+  {
+    "text": "you need to set dynamic values in the",
+    "start": 961.279,
+    "duration": 4.24
+  },
+  {
+    "text": "cloth asset itself. So these are the",
+    "start": 963.279,
+    "duration": 4.48
+  },
+  {
+    "text": "things where I want to change you know",
+    "start": 965.519,
+    "duration": 4.641
+  },
+  {
+    "text": "velocity scale or friction or dampening",
+    "start": 967.759,
+    "duration": 5.681
+  },
+  {
+    "text": "or uh any of those things and that's the",
+    "start": 970.16,
+    "duration": 6.4
+  },
+  {
+    "text": "uh that's the variable interactor is",
+    "start": 973.44,
+    "duration": 4.56
+  },
+  {
+    "text": "what you need to help set those on the",
+    "start": 976.56,
+    "duration": 3.76
+  },
+  {
+    "text": "fly.",
+    "start": 978.0,
+    "duration": 5.92
+  },
+  {
+    "text": "Uh and and to get the interactor you",
+    "start": 980.32,
+    "duration": 4.959
+  },
+  {
+    "text": "start with the component it's derived",
+    "start": 983.92,
+    "duration": 4.56
+  },
+  {
+    "text": "from the component itself and then you",
+    "start": 985.279,
+    "duration": 5.041
+  },
+  {
+    "text": "can set like up here there I have a",
+    "start": 988.48,
+    "duration": 5.12
+  },
+  {
+    "text": "example of setting friction.",
+    "start": 990.32,
+    "duration": 4.879
+  },
+  {
+    "text": "So the clo clo cloth interactor is",
+    "start": 993.6,
+    "duration": 2.88
+  },
+  {
+    "text": "really important to have. That's I mean",
+    "start": 995.199,
+    "duration": 4.88
+  },
+  {
+    "text": "that's the thing that we set it at.",
+    "start": 996.48,
+    "duration": 4.96
+  },
+  {
+    "text": "So let's start off talking about the",
+    "start": 1000.079,
+    "duration": 4.961
+  },
+  {
+    "text": "cloth controller function. This uh is",
+    "start": 1001.44,
+    "duration": 5.199
+  },
+  {
+    "text": "like I said it's the heart of the cloth",
+    "start": 1005.04,
+    "duration": 4.479
+  },
+  {
+    "text": "setup and it's basically a state machine",
+    "start": 1006.639,
+    "duration": 8.241
+  },
+  {
+    "text": "uh for Siri as as she walks around. So,",
+    "start": 1009.519,
+    "duration": 10.081
+  },
+  {
+    "text": "uh, this function like I realized that",
+    "start": 1014.88,
+    "duration": 7.04
+  },
+  {
+    "text": "one set of values just wasn't going to",
+    "start": 1019.6,
+    "duration": 3.919
+  },
+  {
+    "text": "work for all the different things that",
+    "start": 1021.92,
+    "duration": 3.039
+  },
+  {
+    "text": "Siri was doing, whether walking,",
+    "start": 1023.519,
+    "duration": 4.32
+  },
+  {
+    "text": "running, on the horse. Um, there was",
+    "start": 1024.959,
+    "duration": 4.321
+  },
+  {
+    "text": "certain scenarios like when she was on",
+    "start": 1027.839,
+    "duration": 3.521
+  },
+  {
+    "text": "the Vista and we needed some, you know,",
+    "start": 1029.28,
+    "duration": 4.88
+  },
+  {
+    "text": "more dynamic wind that just",
+    "start": 1031.36,
+    "duration": 4.559
+  },
+  {
+    "text": "one set of values is just not going to",
+    "start": 1034.16,
+    "duration": 4.48
+  },
+  {
+    "text": "work. So what this function does is",
+    "start": 1035.919,
+    "duration": 5.681
+  },
+  {
+    "text": "basically go through and depending on",
+    "start": 1038.64,
+    "duration": 5.039
+  },
+  {
+    "text": "what she's doing, it sets certain states",
+    "start": 1041.6,
+    "duration": 4.16
+  },
+  {
+    "text": "and then based off those states, I set",
+    "start": 1043.679,
+    "duration": 4.561
+  },
+  {
+    "text": "cloth values.",
+    "start": 1045.76,
+    "duration": 7.279
+  },
+  {
+    "text": "Uh for this demo, I essentially split",
+    "start": 1048.24,
+    "duration": 6.72
+  },
+  {
+    "text": "this into two functions. One that set",
+    "start": 1053.039,
+    "duration": 3.841
+  },
+  {
+    "text": "the current state and then one that set",
+    "start": 1054.96,
+    "duration": 4.16
+  },
+  {
+    "text": "the current or set the values based off",
+    "start": 1056.88,
+    "duration": 5.52
+  },
+  {
+    "text": "the current state. Um, and for this",
+    "start": 1059.12,
+    "duration": 6.559
+  },
+  {
+    "text": "demo, like she didn't do any combat or",
+    "start": 1062.4,
+    "duration": 5.12
+  },
+  {
+    "text": "anything, so it was relatively small.",
+    "start": 1065.679,
+    "duration": 5.521
+  },
+  {
+    "text": "But, you know, I recommend kind of if in",
+    "start": 1067.52,
+    "duration": 5.2
+  },
+  {
+    "text": "a bigger game, you probably want to plan",
+    "start": 1071.2,
+    "duration": 4.0
+  },
+  {
+    "text": "ahead a little bit and organize this as",
+    "start": 1072.72,
+    "duration": 4.48
+  },
+  {
+    "text": "because it could get kind of pretty big",
+    "start": 1075.2,
+    "duration": 5.12
+  },
+  {
+    "text": "uh pretty quick.",
+    "start": 1077.2,
+    "duration": 4.8
+  },
+  {
+    "text": "So, to keep me organized, I created a",
+    "start": 1080.32,
+    "duration": 4.16
+  },
+  {
+    "text": "strct asset with values that I wanted to",
+    "start": 1082.0,
+    "duration": 5.52
+  },
+  {
+    "text": "change uh for each state. Um, and you",
+    "start": 1084.48,
+    "duration": 5.04
+  },
+  {
+    "text": "can see just over here we have I have a",
+    "start": 1087.52,
+    "duration": 3.519
+  },
+  {
+    "text": "default state which was when she was",
+    "start": 1089.52,
+    "duration": 3.44
+  },
+  {
+    "text": "walking and that was what I set",
+    "start": 1091.039,
+    "duration": 3.841
+  },
+  {
+    "text": "everything off",
+    "start": 1092.96,
+    "duration": 4.4
+  },
+  {
+    "text": "to look good by default and then for",
+    "start": 1094.88,
+    "duration": 5.36
+  },
+  {
+    "text": "running mounting uh cancer when she was",
+    "start": 1097.36,
+    "duration": 4.72
+  },
+  {
+    "text": "on the horse or galloping and then also",
+    "start": 1100.24,
+    "duration": 4.319
+  },
+  {
+    "text": "I have a special u settings for when she",
+    "start": 1102.08,
+    "duration": 5.12
+  },
+  {
+    "text": "was on the vista. So, I set up the",
+    "start": 1104.559,
+    "duration": 6.401
+  },
+  {
+    "text": "strruct strruct asset. Um,",
+    "start": 1107.2,
+    "duration": 6.0
+  },
+  {
+    "text": "and",
+    "start": 1110.96,
+    "duration": 4.719
+  },
+  {
+    "text": "I would like as I this was kind of the",
+    "start": 1113.2,
+    "duration": 4.479
+  },
+  {
+    "text": "first time that I had set this up and I",
+    "start": 1115.679,
+    "duration": 4.561
+  },
+  {
+    "text": "I would error on adding more attributes",
+    "start": 1117.679,
+    "duration": 4.081
+  },
+  {
+    "text": "to the strct than less attributes",
+    "start": 1120.24,
+    "duration": 4.16
+  },
+  {
+    "text": "because it's always easier just to, you",
+    "start": 1121.76,
+    "duration": 4.24
+  },
+  {
+    "text": "know,",
+    "start": 1124.4,
+    "duration": 3.84
+  },
+  {
+    "text": "not it's easier to have those than go",
+    "start": 1126.0,
+    "duration": 4.799
+  },
+  {
+    "text": "back and add them. So, um, if I was to",
+    "start": 1128.24,
+    "duration": 3.84
+  },
+  {
+    "text": "do this again, I would have probably",
+    "start": 1130.799,
+    "duration": 4.801
+  },
+  {
+    "text": "added more cloth values by default.",
+    "start": 1132.08,
+    "duration": 6.4
+  },
+  {
+    "text": "Um, and then for Perf reasons, you",
+    "start": 1135.6,
+    "duration": 4.88
+  },
+  {
+    "text": "probably at some point would want to",
+    "start": 1138.48,
+    "duration": 6.84
+  },
+  {
+    "text": "nativeize this as well, this blueprint.",
+    "start": 1140.48,
+    "duration": 4.84
+  },
+  {
+    "text": "Okay, so the cloth controller function",
+    "start": 1149.12,
+    "duration": 3.919
+  },
+  {
+    "text": "reads in various variables like bools,",
+    "start": 1150.72,
+    "duration": 5.04
+  },
+  {
+    "text": "booleans, uh, like is she on the horse,",
+    "start": 1153.039,
+    "duration": 4.801
+  },
+  {
+    "text": "uh, and floats like speed 2D, how fast",
+    "start": 1155.76,
+    "duration": 3.68
+  },
+  {
+    "text": "is she going? And then based off those",
+    "start": 1157.84,
+    "duration": 3.92
+  },
+  {
+    "text": "values, cough attributes are then",
+    "start": 1159.44,
+    "duration": 5.76
+  },
+  {
+    "text": "updated on the fly. At the vista, a",
+    "start": 1161.76,
+    "duration": 6.64
+  },
+  {
+    "text": "state set where she's says, \"Hey, I'm at",
+    "start": 1165.2,
+    "duration": 5.839
+  },
+  {
+    "text": "the vista.\" And then I change and update",
+    "start": 1168.4,
+    "duration": 4.48
+  },
+  {
+    "text": "wind variables and wind values, things",
+    "start": 1171.039,
+    "duration": 3.441
+  },
+  {
+    "text": "like lift and drag and a bunch of other",
+    "start": 1172.88,
+    "duration": 2.64
+  },
+  {
+    "text": "things just to get a little more",
+    "start": 1174.48,
+    "duration": 3.76
+  },
+  {
+    "text": "dramatic effect uh for when she's at",
+    "start": 1175.52,
+    "duration": 6.24
+  },
+  {
+    "text": "that at that spot. And then when Siri",
+    "start": 1178.24,
+    "duration": 6.72
+  },
+  {
+    "text": "mounts the horse, I have uh on the",
+    "start": 1181.76,
+    "duration": 5.52
+  },
+  {
+    "text": "animation I set a meta curve that just",
+    "start": 1184.96,
+    "duration": 3.839
+  },
+  {
+    "text": "says, \"Hey, this is the mount left or",
+    "start": 1187.28,
+    "duration": 3.519
+  },
+  {
+    "text": "this is the mount right.\" And then based",
+    "start": 1188.799,
+    "duration": 4.88
+  },
+  {
+    "text": "off of those, I set like actually use a",
+    "start": 1190.799,
+    "duration": 4.161
+  },
+  {
+    "text": "little bit of wind values and other",
+    "start": 1193.679,
+    "duration": 3.12
+  },
+  {
+    "text": "things to kind of help get the cloak up",
+    "start": 1194.96,
+    "duration": 4.16
+  },
+  {
+    "text": "and over there. And then set friction",
+    "start": 1196.799,
+    "duration": 3.76
+  },
+  {
+    "text": "and a bunch of stuff like that. Just",
+    "start": 1199.12,
+    "duration": 6.04
+  },
+  {
+    "text": "again based off of whatever she's doing.",
+    "start": 1200.559,
+    "duration": 4.601
+  },
+  {
+    "text": "All right, let's talk about velocity",
+    "start": 1205.84,
+    "duration": 3.839
+  },
+  {
+    "text": "scale. uh velocity scale is a node",
+    "start": 1207.2,
+    "duration": 5.76
+  },
+  {
+    "text": "that's in the cloth graph and uh it is",
+    "start": 1209.679,
+    "duration": 6.481
+  },
+  {
+    "text": "huge to help uh control your simulation.",
+    "start": 1212.96,
+    "duration": 6.0
+  },
+  {
+    "text": "So the velocity scale controls how much",
+    "start": 1216.16,
+    "duration": 5.2
+  },
+  {
+    "text": "movement is inherited from the world",
+    "start": 1218.96,
+    "duration": 6.0
+  },
+  {
+    "text": "space and there are clamps for velocity",
+    "start": 1221.36,
+    "duration": 5.679
+  },
+  {
+    "text": "and acceleration as well as like an",
+    "start": 1224.96,
+    "duration": 4.32
+  },
+  {
+    "text": "overall scale. Uh and this video just",
+    "start": 1227.039,
+    "duration": 4.321
+  },
+  {
+    "text": "shows a quick example of how that",
+    "start": 1229.28,
+    "duration": 4.08
+  },
+  {
+    "text": "affects how it can affect your",
+    "start": 1231.36,
+    "duration": 3.12
+  },
+  {
+    "text": "simulation.",
+    "start": 1233.36,
+    "duration": 3.52
+  },
+  {
+    "text": "I set velocity scale on pretty much",
+    "start": 1234.48,
+    "duration": 6.079
+  },
+  {
+    "text": "every state she's in. It just it allows",
+    "start": 1236.88,
+    "duration": 5.76
+  },
+  {
+    "text": "you to control all the motion that's",
+    "start": 1240.559,
+    "duration": 5.881
+  },
+  {
+    "text": "coming into that simulation.",
+    "start": 1242.64,
+    "duration": 3.8
+  },
+  {
+    "text": "Uh so that's the node. The velocity",
+    "start": 1247.84,
+    "duration": 5.12
+  },
+  {
+    "text": "scale, you have both linear and angular",
+    "start": 1250.08,
+    "duration": 6.479
+  },
+  {
+    "text": "control. And then I So there's a",
+    "start": 1252.96,
+    "duration": 5.52
+  },
+  {
+    "text": "velocity scale and then there's also",
+    "start": 1256.559,
+    "duration": 4.081
+  },
+  {
+    "text": "clamps. And I prefer to use the clamps",
+    "start": 1258.48,
+    "duration": 5.52
+  },
+  {
+    "text": "on the veloc uh velocity uh over the",
+    "start": 1260.64,
+    "duration": 5.919
+  },
+  {
+    "text": "over the scale because",
+    "start": 1264.0,
+    "duration": 6.24
+  },
+  {
+    "text": "in the scale node or excuse me the",
+    "start": 1266.559,
+    "duration": 5.12
+  },
+  {
+    "text": "Alex and I were talking earlier is a",
+    "start": 1270.24,
+    "duration": 4.08
+  },
+  {
+    "text": "good example scale if somebody's running",
+    "start": 1271.679,
+    "duration": 5.441
+  },
+  {
+    "text": "at you know one mile per hour at a fast",
+    "start": 1274.32,
+    "duration": 5.28
+  },
+  {
+    "text": "the scale essentially just if you put it",
+    "start": 1277.12,
+    "duration": 4.88
+  },
+  {
+    "text": "at 0.5 they're now going it acts like",
+    "start": 1279.6,
+    "duration": 4.559
+  },
+  {
+    "text": "he's going half that speed versus a",
+    "start": 1282.0,
+    "duration": 4.88
+  },
+  {
+    "text": "scale clamp or excuse me versus a clamp",
+    "start": 1284.159,
+    "duration": 4.481
+  },
+  {
+    "text": "it doesn't do anything until it hits",
+    "start": 1286.88,
+    "duration": 3.84
+  },
+  {
+    "text": "that point and then clamps it won't let",
+    "start": 1288.64,
+    "duration": 4.88
+  },
+  {
+    "text": "it go any further. So, I felt like the",
+    "start": 1290.72,
+    "duration": 4.319
+  },
+  {
+    "text": "clamps worked really well because I",
+    "start": 1293.52,
+    "duration": 4.159
+  },
+  {
+    "text": "still wanted like a lot of motion and",
+    "start": 1295.039,
+    "duration": 5.601
+  },
+  {
+    "text": "and uh",
+    "start": 1297.679,
+    "duration": 5.12
+  },
+  {
+    "text": "activity I guess in the cloth. Um and",
+    "start": 1300.64,
+    "duration": 3.84
+  },
+  {
+    "text": "the scale works really well and it just",
+    "start": 1302.799,
+    "duration": 3.281
+  },
+  {
+    "text": "excuse me the clamp worked very well",
+    "start": 1304.48,
+    "duration": 3.679
+  },
+  {
+    "text": "because it wouldn't let too much",
+    "start": 1306.08,
+    "duration": 5.44
+  },
+  {
+    "text": "information get passed into it.",
+    "start": 1308.159,
+    "duration": 5.841
+  },
+  {
+    "text": "Uh here I set the max linear velocity",
+    "start": 1311.52,
+    "duration": 5.279
+  },
+  {
+    "text": "based off of if Siri's running or",
+    "start": 1314.0,
+    "duration": 5.679
+  },
+  {
+    "text": "walking. And then the velocity scale is",
+    "start": 1316.799,
+    "duration": 5.601
+  },
+  {
+    "text": "a vector value. Um, so you have control",
+    "start": 1319.679,
+    "duration": 6.0
+  },
+  {
+    "text": "over X, Y, and Z.",
+    "start": 1322.4,
+    "duration": 5.12
+  },
+  {
+    "text": "Uh, to avoid popping between the",
+    "start": 1325.679,
+    "duration": 3.761
+  },
+  {
+    "text": "transitions, I also created an in F",
+    "start": 1327.52,
+    "duration": 4.399
+  },
+  {
+    "text": "interp function that just blend between",
+    "start": 1329.44,
+    "duration": 3.76
+  },
+  {
+    "text": "a smooth blend between the different",
+    "start": 1331.919,
+    "duration": 4.88
+  },
+  {
+    "text": "values so you didn't get to pop.",
+    "start": 1333.2,
+    "duration": 5.04
+  },
+  {
+    "text": "Uh, this video shows the effect of",
+    "start": 1336.799,
+    "duration": 3.681
+  },
+  {
+    "text": "velocity scale as Siri is walking and",
+    "start": 1338.24,
+    "duration": 4.319
+  },
+  {
+    "text": "running around. So more of a motion is",
+    "start": 1340.48,
+    "duration": 4.64
+  },
+  {
+    "text": "applied in the forward axis uh to help",
+    "start": 1342.559,
+    "duration": 5.681
+  },
+  {
+    "text": "push the cloak back and also in the up",
+    "start": 1345.12,
+    "duration": 6.48
+  },
+  {
+    "text": "and down axis to give a little bit more",
+    "start": 1348.24,
+    "duration": 6.08
+  },
+  {
+    "text": "movement uh up and down. So one of the",
+    "start": 1351.6,
+    "duration": 6.64
+  },
+  {
+    "text": "problems that we ran into was her uh the",
+    "start": 1354.32,
+    "duration": 5.359
+  },
+  {
+    "text": "collisions on her feet would get",
+    "start": 1358.24,
+    "duration": 3.28
+  },
+  {
+    "text": "sometimes get caught up in the bottom of",
+    "start": 1359.679,
+    "duration": 3.921
+  },
+  {
+    "text": "her cape because it's pretty long. And",
+    "start": 1361.52,
+    "duration": 3.519
+  },
+  {
+    "text": "so just giving a little bit more",
+    "start": 1363.6,
+    "duration": 3.68
+  },
+  {
+    "text": "velocity in that direction just help",
+    "start": 1365.039,
+    "duration": 6.041
+  },
+  {
+    "text": "push it out a little further.",
+    "start": 1367.28,
+    "duration": 3.8
+  },
+  {
+    "text": "Uh the same principles apply to Siri",
+    "start": 1371.28,
+    "duration": 3.92
+  },
+  {
+    "text": "when she's mounted on the horse. So",
+    "start": 1373.36,
+    "duration": 4.72
+  },
+  {
+    "text": "based off of speed, uh the velocity I",
+    "start": 1375.2,
+    "duration": 4.88
+  },
+  {
+    "text": "update the velocity scale as well as",
+    "start": 1378.08,
+    "duration": 5.44
+  },
+  {
+    "text": "lift and drag and friction and also the",
+    "start": 1380.08,
+    "duration": 8.16
+  },
+  {
+    "text": "um warp scale. Um, I also shrink I I end",
+    "start": 1383.52,
+    "duration": 7.44
+  },
+  {
+    "text": "up shrinking the cape a little bit um",
+    "start": 1388.24,
+    "duration": 5.2
+  },
+  {
+    "text": "just to one we didn't want to cover up",
+    "start": 1390.96,
+    "duration": 5.92
+  },
+  {
+    "text": "all of the horse uh with her",
+    "start": 1393.44,
+    "duration": 6.239
+  },
+  {
+    "text": "cloak and it also just yeah it made it",
+    "start": 1396.88,
+    "duration": 5.12
+  },
+  {
+    "text": "behave a little nicer. So yeah, she goes",
+    "start": 1399.679,
+    "duration": 4.401
+  },
+  {
+    "text": "into gallop. I ramp into some different",
+    "start": 1402.0,
+    "duration": 4.4
+  },
+  {
+    "text": "variables just to help get that cloak up",
+    "start": 1404.08,
+    "duration": 3.92
+  },
+  {
+    "text": "and and make it look a little more",
+    "start": 1406.4,
+    "duration": 4.6
+  },
+  {
+    "text": "dynamic.",
+    "start": 1408.0,
+    "duration": 3.0
+  },
+  {
+    "text": "All right, let's talk about the anime",
+    "start": 1413.28,
+    "duration": 5.04
+  },
+  {
+    "text": "mesh. So in your cloth asset, you have",
+    "start": 1415.2,
+    "duration": 4.719
+  },
+  {
+    "text": "the simulation mesh and then you have",
+    "start": 1418.32,
+    "duration": 4.239
+  },
+  {
+    "text": "the render mesh. And the simulation mesh",
+    "start": 1419.919,
+    "duration": 4.88
+  },
+  {
+    "text": "is based off of your anime mesh or it's",
+    "start": 1422.559,
+    "duration": 6.0
+  },
+  {
+    "text": "the base mesh. And so consider it this",
+    "start": 1424.799,
+    "duration": 5.12
+  },
+  {
+    "text": "essentially the foundation of your",
+    "start": 1428.559,
+    "duration": 2.961
+  },
+  {
+    "text": "simulation",
+    "start": 1429.919,
+    "duration": 4.88
+  },
+  {
+    "text": "and that anime mesh totally influences",
+    "start": 1431.52,
+    "duration": 6.159
+  },
+  {
+    "text": "what can totally in influence what your",
+    "start": 1434.799,
+    "duration": 5.12
+  },
+  {
+    "text": "simulation is doing. So like max",
+    "start": 1437.679,
+    "duration": 4.561
+  },
+  {
+    "text": "distance, anim drive, back stops,",
+    "start": 1439.919,
+    "duration": 4.401
+  },
+  {
+    "text": "resets, they're all based off of your",
+    "start": 1442.24,
+    "duration": 5.12
+  },
+  {
+    "text": "anom mesh position.",
+    "start": 1444.32,
+    "duration": 4.8
+  },
+  {
+    "text": "So in here you can see the base pose for",
+    "start": 1447.36,
+    "duration": 4.0
+  },
+  {
+    "text": "when Siri is riding on the horse. That",
+    "start": 1449.12,
+    "duration": 4.96
+  },
+  {
+    "text": "purple mesh is it's swept over to the",
+    "start": 1451.36,
+    "duration": 4.88
+  },
+  {
+    "text": "side to keep it away from the scabbards",
+    "start": 1454.08,
+    "duration": 4.56
+  },
+  {
+    "text": "because the scabbards were very tricky.",
+    "start": 1456.24,
+    "duration": 4.799
+  },
+  {
+    "text": "Uh and we it would get caught up a lot.",
+    "start": 1458.64,
+    "duration": 5.44
+  },
+  {
+    "text": "So, we helped art direct it to that side",
+    "start": 1461.039,
+    "duration": 6.161
+  },
+  {
+    "text": "and then just to help keep keep them",
+    "start": 1464.08,
+    "duration": 5.36
+  },
+  {
+    "text": "away and also avoid penetrations with uh",
+    "start": 1467.2,
+    "duration": 4.079
+  },
+  {
+    "text": "the other saddle and other things in the",
+    "start": 1469.44,
+    "duration": 4.32
+  },
+  {
+    "text": "back.",
+    "start": 1471.279,
+    "duration": 5.921
+  },
+  {
+    "text": "This is series uh base walk pose or just",
+    "start": 1473.76,
+    "duration": 7.68
+  },
+  {
+    "text": "when she's running around. Um so, one of",
+    "start": 1477.2,
+    "duration": 5.68
+  },
+  {
+    "text": "the again the other thing was we wanted",
+    "start": 1481.44,
+    "duration": 3.359
+  },
+  {
+    "text": "to make sure that that uh purple mesh",
+    "start": 1482.88,
+    "duration": 4.08
+  },
+  {
+    "text": "wasn't clipping with the scabards by",
+    "start": 1484.799,
+    "duration": 5.681
+  },
+  {
+    "text": "default. And uh that's",
+    "start": 1486.96,
+    "duration": 5.52
+  },
+  {
+    "text": "I kind of spread it out a little bit",
+    "start": 1490.48,
+    "duration": 4.64
+  },
+  {
+    "text": "just to help I felt like it gave a",
+    "start": 1492.48,
+    "duration": 4.0
+  },
+  {
+    "text": "little more flare when it was walking",
+    "start": 1495.12,
+    "duration": 4.0
+  },
+  {
+    "text": "around. Um and all these same things",
+    "start": 1496.48,
+    "duration": 4.319
+  },
+  {
+    "text": "apply to the hood as well. I have a base",
+    "start": 1499.12,
+    "duration": 4.559
+  },
+  {
+    "text": "mesh um starting post for the hood and",
+    "start": 1500.799,
+    "duration": 4.721
+  },
+  {
+    "text": "again same all same principles apply for",
+    "start": 1503.679,
+    "duration": 4.841
+  },
+  {
+    "text": "that.",
+    "start": 1505.52,
+    "duration": 3.0
+  },
+  {
+    "text": "So you can influence the sim mesh by",
+    "start": 1509.12,
+    "duration": 5.76
+  },
+  {
+    "text": "rigging and posing the anime mesh.",
+    "start": 1512.559,
+    "duration": 4.801
+  },
+  {
+    "text": "basically giving you arc directability.",
+    "start": 1514.88,
+    "duration": 6.08
+  },
+  {
+    "text": "So, uh you can see here the pretty basic",
+    "start": 1517.36,
+    "duration": 6.24
+  },
+  {
+    "text": "rigs uh set up in the anime mesh and you",
+    "start": 1520.96,
+    "duration": 6.88
+  },
+  {
+    "text": "could go as crazy as you wanted. Um but",
+    "start": 1523.6,
+    "duration": 6.64
+  },
+  {
+    "text": "you don't have to have it, but again",
+    "start": 1527.84,
+    "duration": 4.0
+  },
+  {
+    "text": "that gives you the ability to art direct",
+    "start": 1530.24,
+    "duration": 4.24
+  },
+  {
+    "text": "and uh kind of guide the simulation a",
+    "start": 1531.84,
+    "duration": 4.319
+  },
+  {
+    "text": "bit more.",
+    "start": 1534.48,
+    "duration": 2.96
+  },
+  {
+    "text": "One of the cool things that Alex",
+    "start": 1536.159,
+    "duration": 2.88
+  },
+  {
+    "text": "mentioned as well is we just added morph",
+    "start": 1537.44,
+    "duration": 4.64
+  },
+  {
+    "text": "targets which was really super awesome",
+    "start": 1539.039,
+    "duration": 5.361
+  },
+  {
+    "text": "because one of the things we ran into is",
+    "start": 1542.08,
+    "duration": 5.44
+  },
+  {
+    "text": "uh the hood we would animate down. Um",
+    "start": 1544.4,
+    "duration": 5.68
+  },
+  {
+    "text": "and while it worked pretty well, it",
+    "start": 1547.52,
+    "duration": 4.56
+  },
+  {
+    "text": "still was a little bit crunchy uh as far",
+    "start": 1550.08,
+    "duration": 4.0
+  },
+  {
+    "text": "as the mesh goes. The me meshes weren't",
+    "start": 1552.08,
+    "duration": 4.079
+  },
+  {
+    "text": "super clean. And so I was like, \"Hey,",
+    "start": 1554.08,
+    "duration": 4.0
+  },
+  {
+    "text": "you know, Alex would be really cool.\"",
+    "start": 1556.159,
+    "duration": 4.64
+  },
+  {
+    "text": "And so Alex hooked me up. And so now we",
+    "start": 1558.08,
+    "duration": 5.52
+  },
+  {
+    "text": "have uh morph targets that so I trigger",
+    "start": 1560.799,
+    "duration": 5.521
+  },
+  {
+    "text": "a morph target um in the animated pose",
+    "start": 1563.6,
+    "duration": 4.559
+  },
+  {
+    "text": "just to clean up the edges and then it",
+    "start": 1566.32,
+    "duration": 4.32
+  },
+  {
+    "text": "really helps the cloth behave a lot",
+    "start": 1568.159,
+    "duration": 4.321
+  },
+  {
+    "text": "nicer.",
+    "start": 1570.64,
+    "duration": 3.36
+  },
+  {
+    "text": "And we could have done that for the",
+    "start": 1572.48,
+    "duration": 3.84
+  },
+  {
+    "text": "horse as well. Like you could like even",
+    "start": 1574.0,
+    "duration": 4.4
+  },
+  {
+    "text": "pose have a nice simulated pose on the",
+    "start": 1576.32,
+    "duration": 6.76
+  },
+  {
+    "text": "back of the horse and then use that.",
+    "start": 1578.4,
+    "duration": 4.68
+  },
+  {
+    "text": "All right. So attribute maps. Uh this is",
+    "start": 1583.279,
+    "duration": 5.361
+  },
+  {
+    "text": "something that was",
+    "start": 1585.44,
+    "duration": 6.88
+  },
+  {
+    "text": "ended up being a a kind of a big bigger",
+    "start": 1588.64,
+    "duration": 4.72
+  },
+  {
+    "text": "deal than I thought it was going to be.",
+    "start": 1592.32,
+    "duration": 2.4
+  },
+  {
+    "text": "So obviously you have attribute maps",
+    "start": 1593.36,
+    "duration": 2.72
+  },
+  {
+    "text": "that you paint in the cloth asset editor",
+    "start": 1594.72,
+    "duration": 3.28
+  },
+  {
+    "text": "for max distance and all your different",
+    "start": 1596.08,
+    "duration": 3.44
+  },
+  {
+    "text": "things which is really cool. But",
+    "start": 1598.0,
+    "duration": 4.64
+  },
+  {
+    "text": "something that we ended up doing was",
+    "start": 1599.52,
+    "duration": 5.92
+  },
+  {
+    "text": "uh it's possible to swap maps on the",
+    "start": 1602.64,
+    "duration": 5.36
+  },
+  {
+    "text": "fly. So going back to the hood uh when",
+    "start": 1605.44,
+    "duration": 5.2
+  },
+  {
+    "text": "the hood was up I had a max distance map",
+    "start": 1608.0,
+    "duration": 4.4
+  },
+  {
+    "text": "painted for and that worked really well",
+    "start": 1610.64,
+    "duration": 3.6
+  },
+  {
+    "text": "for while the hood is up. At any point",
+    "start": 1612.4,
+    "duration": 4.08
+  },
+  {
+    "text": "in time, Siri could take her hood on or",
+    "start": 1614.24,
+    "duration": 6.48
+  },
+  {
+    "text": "off. And when she took it off,",
+    "start": 1616.48,
+    "duration": 6.4
+  },
+  {
+    "text": "like the map worked, but I could see a",
+    "start": 1620.72,
+    "duration": 3.839
+  },
+  {
+    "text": "little bit of kind of fighting and stuff",
+    "start": 1622.88,
+    "duration": 4.399
+  },
+  {
+    "text": "like that. And so, um, I ended up",
+    "start": 1624.559,
+    "duration": 4.561
+  },
+  {
+    "text": "painting another map for when the hood",
+    "start": 1627.279,
+    "duration": 3.681
+  },
+  {
+    "text": "was down. And then I have a variable",
+    "start": 1629.12,
+    "duration": 3.76
+  },
+  {
+    "text": "again that says when the hood's down, we",
+    "start": 1630.96,
+    "duration": 5.36
+  },
+  {
+    "text": "swap maps and then use the map that, uh,",
+    "start": 1632.88,
+    "duration": 5.6
+  },
+  {
+    "text": "max distance map, which the hood is",
+    "start": 1636.32,
+    "duration": 4.479
+  },
+  {
+    "text": "down. And that again just gives me",
+    "start": 1638.48,
+    "duration": 5.52
+  },
+  {
+    "text": "another level of control that when it's",
+    "start": 1640.799,
+    "duration": 5.681
+  },
+  {
+    "text": "down or in a different position, we we",
+    "start": 1644.0,
+    "duration": 4.48
+  },
+  {
+    "text": "can swap it on the fly. And then I just",
+    "start": 1646.48,
+    "duration": 4.64
+  },
+  {
+    "text": "hide the transition or hide the pop",
+    "start": 1648.48,
+    "duration": 4.24
+  },
+  {
+    "text": "essentially when when the hood is going",
+    "start": 1651.12,
+    "duration": 4.0
+  },
+  {
+    "text": "down. So again, depending on whatever",
+    "start": 1652.72,
+    "duration": 5.68
+  },
+  {
+    "text": "situation and you have, you could swap",
+    "start": 1655.12,
+    "duration": 7.52
+  },
+  {
+    "text": "swap maps, which is really cool.",
+    "start": 1658.4,
+    "duration": 6.56
+  },
+  {
+    "text": "All right, so",
+    "start": 1662.64,
+    "duration": 6.48
+  },
+  {
+    "text": "let's talk about some sears. uh sears uh",
+    "start": 1664.96,
+    "duration": 6.8
+  },
+  {
+    "text": "essentially are debug features and that",
+    "start": 1669.12,
+    "duration": 4.24
+  },
+  {
+    "text": "help us see what's going on in the",
+    "start": 1671.76,
+    "duration": 3.68
+  },
+  {
+    "text": "engine and they're really important to",
+    "start": 1673.36,
+    "duration": 4.559
+  },
+  {
+    "text": "help debug and understand what is",
+    "start": 1675.44,
+    "duration": 4.719
+  },
+  {
+    "text": "actually going on.",
+    "start": 1677.919,
+    "duration": 4.561
+  },
+  {
+    "text": "So here are some of the cars that I use",
+    "start": 1680.159,
+    "duration": 6.801
+  },
+  {
+    "text": "the most um and",
+    "start": 1682.48,
+    "duration": 5.84
+  },
+  {
+    "text": "I just wanted to highlight them because",
+    "start": 1686.96,
+    "duration": 3.04
+  },
+  {
+    "text": "again I think they're super important.",
+    "start": 1688.32,
+    "duration": 4.88
+  },
+  {
+    "text": "Um so the first one is well let's start",
+    "start": 1690.0,
+    "duration": 5.44
+  },
+  {
+    "text": "over there. So in order to turn or see",
+    "start": 1693.2,
+    "duration": 4.16
+  },
+  {
+    "text": "any of these, you have to have the debug",
+    "start": 1695.44,
+    "duration": 5.52
+  },
+  {
+    "text": "enable uh function. So that paos",
+    "start": 1697.36,
+    "duration": 6.72
+  },
+  {
+    "text": "debug enabled. That one is turns the",
+    "start": 1700.96,
+    "duration": 5.28
+  },
+  {
+    "text": "debug drawing on or off. You have to",
+    "start": 1704.08,
+    "duration": 4.319
+  },
+  {
+    "text": "have it on to see any of these. So once",
+    "start": 1706.24,
+    "duration": 5.28
+  },
+  {
+    "text": "you've have that turned on, uh the one",
+    "start": 1708.399,
+    "duration": 6.241
+  },
+  {
+    "text": "kind of the top left there is the uh",
+    "start": 1711.52,
+    "duration": 5.84
+  },
+  {
+    "text": "debug draw collision that actually shows",
+    "start": 1714.64,
+    "duration": 5.2
+  },
+  {
+    "text": "you your collision shapes um and for",
+    "start": 1717.36,
+    "duration": 4.88
+  },
+  {
+    "text": "just the cloth asset itself. And so you",
+    "start": 1719.84,
+    "duration": 5.439
+  },
+  {
+    "text": "can see what's going on there. The next",
+    "start": 1722.24,
+    "duration": 6.24
+  },
+  {
+    "text": "one is the anime mesh uh which is the",
+    "start": 1725.279,
+    "duration": 6.241
+  },
+  {
+    "text": "purple one again that showing what's",
+    "start": 1728.48,
+    "duration": 6.319
+  },
+  {
+    "text": "what's my base mesh doing. That had a",
+    "start": 1731.52,
+    "duration": 5.519
+  },
+  {
+    "text": "again that was a huge deal for me to",
+    "start": 1734.799,
+    "duration": 4.641
+  },
+  {
+    "text": "understand what's actually happening. Is",
+    "start": 1737.039,
+    "duration": 5.441
+  },
+  {
+    "text": "it in the right pose? Um and things like",
+    "start": 1739.44,
+    "duration": 7.28
+  },
+  {
+    "text": "that. Uh the another one is the debug",
+    "start": 1742.48,
+    "duration": 6.16
+  },
+  {
+    "text": "draw teleport reset. This is a new one",
+    "start": 1746.72,
+    "duration": 4.319
+  },
+  {
+    "text": "that Alex added. Uh especially during",
+    "start": 1748.64,
+    "duration": 4.639
+  },
+  {
+    "text": "cinematics, uh when we would get pops in",
+    "start": 1751.039,
+    "duration": 4.401
+  },
+  {
+    "text": "between trans transitions, we weren't",
+    "start": 1753.279,
+    "duration": 4.64
+  },
+  {
+    "text": "sure what did it was it teleporting? Did",
+    "start": 1755.44,
+    "duration": 5.119
+  },
+  {
+    "text": "it reset? Like what what happened? And",
+    "start": 1757.919,
+    "duration": 5.12
+  },
+  {
+    "text": "so that will turn green. That mesh will",
+    "start": 1760.559,
+    "duration": 4.321
+  },
+  {
+    "text": "turn green if there's a teleport that's",
+    "start": 1763.039,
+    "duration": 4.24
+  },
+  {
+    "text": "happening or it will turn red if a reset",
+    "start": 1764.88,
+    "duration": 3.919
+  },
+  {
+    "text": "is happening. So it helped us",
+    "start": 1767.279,
+    "duration": 3.52
+  },
+  {
+    "text": "understand, you know, what just",
+    "start": 1768.799,
+    "duration": 4.321
+  },
+  {
+    "text": "happened.",
+    "start": 1770.799,
+    "duration": 4.401
+  },
+  {
+    "text": "And then the other one in the bottom uh",
+    "start": 1773.12,
+    "duration": 4.96
+  },
+  {
+    "text": "right here is you can hopefully kind of",
+    "start": 1775.2,
+    "duration": 6.24
+  },
+  {
+    "text": "see it in the transition, but it's the",
+    "start": 1778.08,
+    "duration": 6.479
+  },
+  {
+    "text": "draw on foreground. So, by default, the",
+    "start": 1781.44,
+    "duration": 6.64
+  },
+  {
+    "text": "the wire mesh draws through the mesh and",
+    "start": 1784.559,
+    "duration": 5.681
+  },
+  {
+    "text": "I find it to be kind of distracting and",
+    "start": 1788.08,
+    "duration": 4.479
+  },
+  {
+    "text": "not super helpful. So, that actually",
+    "start": 1790.24,
+    "duration": 4.88
+  },
+  {
+    "text": "makes the wireframe not draw through.",
+    "start": 1792.559,
+    "duration": 4.881
+  },
+  {
+    "text": "Um, and is something that I like to use",
+    "start": 1795.12,
+    "duration": 5.799
+  },
+  {
+    "text": "most of the time.",
+    "start": 1797.44,
+    "duration": 3.479
+  },
+  {
+    "text": "Uh the one other CRA that I used ended",
+    "start": 1801.36,
+    "duration": 6.72
+  },
+  {
+    "text": "up using a lot is the T override FPS. Uh",
+    "start": 1804.159,
+    "duration": 7.041
+  },
+  {
+    "text": "and what that does is it specifies it",
+    "start": 1808.08,
+    "duration": 5.28
+  },
+  {
+    "text": "forces PI to use whatever frame rate you",
+    "start": 1811.2,
+    "duration": 4.719
+  },
+  {
+    "text": "specify um even if it has to slow down",
+    "start": 1813.36,
+    "duration": 5.36
+  },
+  {
+    "text": "the play rate. Um and what that does is",
+    "start": 1815.919,
+    "duration": 5.041
+  },
+  {
+    "text": "essentially G gave me more accurate vis",
+    "start": 1818.72,
+    "duration": 4.959
+  },
+  {
+    "text": "visuals in the editor for what the cloth",
+    "start": 1820.96,
+    "duration": 6.4
+  },
+  {
+    "text": "would actually do when it's running at",
+    "start": 1823.679,
+    "duration": 7.441
+  },
+  {
+    "text": "actual 60 fps. So sometimes in pi, you",
+    "start": 1827.36,
+    "duration": 6.4
+  },
+  {
+    "text": "know, depending on various performance",
+    "start": 1831.12,
+    "duration": 4.32
+  },
+  {
+    "text": "things, you may or may not get super",
+    "start": 1833.76,
+    "duration": 4.159
+  },
+  {
+    "text": "accurate results. And so this helped uh",
+    "start": 1835.44,
+    "duration": 4.16
+  },
+  {
+    "text": "really dial in. And then actually one",
+    "start": 1837.919,
+    "duration": 4.161
+  },
+  {
+    "text": "trick that I use this a lot too is going",
+    "start": 1839.6,
+    "duration": 3.76
+  },
+  {
+    "text": "through cinematics. Sometimes we had",
+    "start": 1842.08,
+    "duration": 3.04
+  },
+  {
+    "text": "long cinematics. I would just turn the",
+    "start": 1843.36,
+    "duration": 3.439
+  },
+  {
+    "text": "frame rate to 5 fps and then it would",
+    "start": 1845.12,
+    "duration": 3.76
+  },
+  {
+    "text": "just essentially fast forward so I could",
+    "start": 1846.799,
+    "duration": 5.281
+  },
+  {
+    "text": "just see the part that I needed. So uh a",
+    "start": 1848.88,
+    "duration": 6.919
+  },
+  {
+    "text": "little little trick.",
+    "start": 1852.08,
+    "duration": 3.719
+  },
+  {
+    "text": "uh the one so there's a ton of CVRs and",
+    "start": 1856.08,
+    "duration": 5.44
+  },
+  {
+    "text": "depending on what you're doing it's some",
+    "start": 1859.279,
+    "duration": 4.081
+  },
+  {
+    "text": "really hard to remember all the things",
+    "start": 1861.52,
+    "duration": 6.159
+  },
+  {
+    "text": "and what they do so in income editor",
+    "start": 1863.36,
+    "duration": 7.439
+  },
+  {
+    "text": "utility widgets so uh utility widgets",
+    "start": 1867.679,
+    "duration": 6.561
+  },
+  {
+    "text": "are really great uh for this very thing",
+    "start": 1870.799,
+    "duration": 5.201
+  },
+  {
+    "text": "this is just a small example of what I",
+    "start": 1874.24,
+    "duration": 5.2
+  },
+  {
+    "text": "did um based off all the different",
+    "start": 1876.0,
+    "duration": 5.679
+  },
+  {
+    "text": "things I just made a little widget with",
+    "start": 1879.44,
+    "duration": 4.08
+  },
+  {
+    "text": "an easy buttons that just turn on and",
+    "start": 1881.679,
+    "duration": 4.48
+  },
+  {
+    "text": "off see bars which really helps speed up",
+    "start": 1883.52,
+    "duration": 6.08
+  },
+  {
+    "text": "time and debugging because yeah trying",
+    "start": 1886.159,
+    "duration": 5.201
+  },
+  {
+    "text": "to remember the exact names and",
+    "start": 1889.6,
+    "duration": 3.28
+  },
+  {
+    "text": "everything like that was pretty",
+    "start": 1891.36,
+    "duration": 3.12
+  },
+  {
+    "text": "difficult. So the nice thing about",
+    "start": 1892.88,
+    "duration": 3.76
+  },
+  {
+    "text": "utility widgets too is they're actually",
+    "start": 1894.48,
+    "duration": 4.72
+  },
+  {
+    "text": "really easy to just move on to other",
+    "start": 1896.64,
+    "duration": 4.24
+  },
+  {
+    "text": "projects and things like that. copy",
+    "start": 1899.2,
+    "duration": 5.04
+  },
+  {
+    "text": "over. Uh, and yeah, like it's in my",
+    "start": 1900.88,
+    "duration": 5.679
+  },
+  {
+    "text": "opinion totally worth the effort making",
+    "start": 1904.24,
+    "duration": 4.799
+  },
+  {
+    "text": "a utility widget, especially for a",
+    "start": 1906.559,
+    "duration": 3.6
+  },
+  {
+    "text": "bigger project where you know you're",
+    "start": 1909.039,
+    "duration": 4.841
+  },
+  {
+    "text": "going to be doing a lot of work.",
+    "start": 1910.159,
+    "duration": 3.721
+  },
+  {
+    "text": "All right, let's talk about just uh we",
+    "start": 1916.24,
+    "duration": 4.159
+  },
+  {
+    "text": "call the special case toolbox. Um,",
+    "start": 1918.64,
+    "duration": 4.48
+  },
+  {
+    "text": "there's every part in project that has",
+    "start": 1920.399,
+    "duration": 4.321
+  },
+  {
+    "text": "you kind of like your main flow of",
+    "start": 1923.12,
+    "duration": 2.96
+  },
+  {
+    "text": "things and you kind of figure that out,",
+    "start": 1924.72,
+    "duration": 3.28
+  },
+  {
+    "text": "but then there's always exceptions to",
+    "start": 1926.08,
+    "duration": 4.479
+  },
+  {
+    "text": "the rule. And so these were some of the",
+    "start": 1928.0,
+    "duration": 4.96
+  },
+  {
+    "text": "uh solutions that I did to kind of help",
+    "start": 1930.559,
+    "duration": 7.321
+  },
+  {
+    "text": "for those more unique solutions.",
+    "start": 1932.96,
+    "duration": 4.92
+  },
+  {
+    "text": "All right. So we'll talk about the Vista",
+    "start": 1938.24,
+    "duration": 3.919
+  },
+  {
+    "text": "wind uh show you some collision tricks,",
+    "start": 1939.84,
+    "duration": 4.8
+  },
+  {
+    "text": "how I use control rig and then some uh",
+    "start": 1942.159,
+    "duration": 3.601
+  },
+  {
+    "text": "things that we learned from the",
+    "start": 1944.64,
+    "duration": 3.44
+  },
+  {
+    "text": "cinematics.",
+    "start": 1945.76,
+    "duration": 3.919
+  },
+  {
+    "text": "So the Vista wind there's a volume",
+    "start": 1948.08,
+    "duration": 3.68
+  },
+  {
+    "text": "trigger uh set up because it was a very",
+    "start": 1949.679,
+    "duration": 4.401
+  },
+  {
+    "text": "specific unique area in the world and we",
+    "start": 1951.76,
+    "duration": 4.08
+  },
+  {
+    "text": "knew at that specific point we wanted to",
+    "start": 1954.08,
+    "duration": 4.4
+  },
+  {
+    "text": "have specific things done. So, I just",
+    "start": 1955.84,
+    "duration": 4.719
+  },
+  {
+    "text": "set up a volume trigger which has an",
+    "start": 1958.48,
+    "duration": 4.96
+  },
+  {
+    "text": "overlap event. It says, \"Hey, I'm at the",
+    "start": 1960.559,
+    "duration": 5.6
+  },
+  {
+    "text": "vista.\" And then based uh on in the",
+    "start": 1963.44,
+    "duration": 4.32
+  },
+  {
+    "text": "controller function, I look for that",
+    "start": 1966.159,
+    "duration": 2.801
+  },
+  {
+    "text": "variable. And when it's at that",
+    "start": 1967.76,
+    "duration": 3.36
+  },
+  {
+    "text": "variable, I set those specific wind",
+    "start": 1968.96,
+    "duration": 5.76
+  },
+  {
+    "text": "values and uh like the cloth attributes",
+    "start": 1971.12,
+    "duration": 5.52
+  },
+  {
+    "text": "like lift and drag and all that kind of",
+    "start": 1974.72,
+    "duration": 3.92
+  },
+  {
+    "text": "stuff. Again, just to get a more",
+    "start": 1976.64,
+    "duration": 3.68
+  },
+  {
+    "text": "cinematic, little more dramatic effect",
+    "start": 1978.64,
+    "duration": 3.759
+  },
+  {
+    "text": "there. And that's the only spot I use",
+    "start": 1980.32,
+    "duration": 5.4
+  },
+  {
+    "text": "those values.",
+    "start": 1982.399,
+    "duration": 3.321
+  },
+  {
+    "text": "Uh so one of the great things is to be",
+    "start": 1986.24,
+    "duration": 5.36
+  },
+  {
+    "text": "able to dynamically add and remove",
+    "start": 1989.76,
+    "duration": 5.44
+  },
+  {
+    "text": "collisions. So when by default Siri",
+    "start": 1991.6,
+    "duration": 5.199
+  },
+  {
+    "text": "doesn't know the cloth doesn't know",
+    "start": 1995.2,
+    "duration": 3.44
+  },
+  {
+    "text": "about the horse and has any collisions",
+    "start": 1996.799,
+    "duration": 3.841
+  },
+  {
+    "text": "for that in the physics asset because",
+    "start": 1998.64,
+    "duration": 3.68
+  },
+  {
+    "text": "you don't want to carry around all those",
+    "start": 2000.64,
+    "duration": 4.24
+  },
+  {
+    "text": "extra physics assets when you or physics",
+    "start": 2002.32,
+    "duration": 5.28
+  },
+  {
+    "text": "capsules uh when you didn't need to. So",
+    "start": 2004.88,
+    "duration": 6.48
+  },
+  {
+    "text": "the add collision source uh is a a node",
+    "start": 2007.6,
+    "duration": 6.0
+  },
+  {
+    "text": "that you can use to dynamically add and",
+    "start": 2011.36,
+    "duration": 4.24
+  },
+  {
+    "text": "remove collisions. So when Siri gets on",
+    "start": 2013.6,
+    "duration": 5.36
+  },
+  {
+    "text": "the horse, we run this function. Uh I",
+    "start": 2015.6,
+    "duration": 5.04
+  },
+  {
+    "text": "set up those collisions on the horse",
+    "start": 2018.96,
+    "duration": 5.12
+  },
+  {
+    "text": "asset itself, we trigger this. It adds",
+    "start": 2020.64,
+    "duration": 5.519
+  },
+  {
+    "text": "those collisions. So then now when",
+    "start": 2024.08,
+    "duration": 3.839
+  },
+  {
+    "text": "Siri's on the horse, the clo clo cloak",
+    "start": 2026.159,
+    "duration": 4.321
+  },
+  {
+    "text": "can react appropriately to what's uh",
+    "start": 2027.919,
+    "duration": 4.401
+  },
+  {
+    "text": "declined with the horse. And then when",
+    "start": 2030.48,
+    "duration": 4.079
+  },
+  {
+    "text": "she gets off the horse, we dump those uh",
+    "start": 2032.32,
+    "duration": 4.56
+  },
+  {
+    "text": "collisions so we don't have to pay for",
+    "start": 2034.559,
+    "duration": 4.881
+  },
+  {
+    "text": "them or use them anymore.",
+    "start": 2036.88,
+    "duration": 4.159
+  },
+  {
+    "text": "Uh and the cool thing for this as well",
+    "start": 2039.44,
+    "duration": 4.4
+  },
+  {
+    "text": "is that works for Arban as well. So any",
+    "start": 2041.039,
+    "duration": 4.961
+  },
+  {
+    "text": "like rigid body dynamics you can",
+    "start": 2043.84,
+    "duration": 3.679
+  },
+  {
+    "text": "dynamically add and remove. So if you",
+    "start": 2046.0,
+    "duration": 2.879
+  },
+  {
+    "text": "had like a backpack or something in a",
+    "start": 2047.519,
+    "duration": 2.56
+  },
+  {
+    "text": "hair and you needed to collide with",
+    "start": 2048.879,
+    "duration": 3.681
+  },
+  {
+    "text": "that, you can add and remove collision.",
+    "start": 2050.079,
+    "duration": 4.0
+  },
+  {
+    "text": "So that's a really cool really cool",
+    "start": 2052.56,
+    "duration": 3.839
+  },
+  {
+    "text": "node.",
+    "start": 2054.079,
+    "duration": 4.8
+  },
+  {
+    "text": "Uh one new feature we added to capsules",
+    "start": 2056.399,
+    "duration": 5.52
+  },
+  {
+    "text": "was a one-sided collision. It might be",
+    "start": 2058.879,
+    "duration": 6.0
+  },
+  {
+    "text": "kind of hard to see, but in the top",
+    "start": 2061.919,
+    "duration": 5.521
+  },
+  {
+    "text": "the one of the issues we had with a",
+    "start": 2064.879,
+    "duration": 4.161
+  },
+  {
+    "text": "collapsle and kind of the tail of the",
+    "start": 2067.44,
+    "duration": 4.399
+  },
+  {
+    "text": "hood was as series head would turn, it",
+    "start": 2069.04,
+    "duration": 5.52
+  },
+  {
+    "text": "would kind of wrap around the capsule.",
+    "start": 2071.839,
+    "duration": 7.04
+  },
+  {
+    "text": "Uh, and so what this one-sided collision",
+    "start": 2074.56,
+    "duration": 6.799
+  },
+  {
+    "text": "does is in the positive X, it always",
+    "start": 2078.879,
+    "duration": 5.2
+  },
+  {
+    "text": "pushes out that way. Uh, and just helps",
+    "start": 2081.359,
+    "duration": 5.841
+  },
+  {
+    "text": "prevent your cloth from wrapping around",
+    "start": 2084.079,
+    "duration": 6.76
+  },
+  {
+    "text": "basically to the backside.",
+    "start": 2087.2,
+    "duration": 3.639
+  },
+  {
+    "text": "Um, the other thing is, so we mentioned",
+    "start": 2091.04,
+    "duration": 5.119
+  },
+  {
+    "text": "this before, the scabbards were always",
+    "start": 2094.639,
+    "duration": 3.681
+  },
+  {
+    "text": "really tricky to keep them out of the",
+    "start": 2096.159,
+    "duration": 4.481
+  },
+  {
+    "text": "cloth and getting tangled up. And so",
+    "start": 2098.32,
+    "duration": 4.96
+  },
+  {
+    "text": "during the uh, mounting sequence, I",
+    "start": 2100.64,
+    "duration": 5.12
+  },
+  {
+    "text": "actually do have a bone above the",
+    "start": 2103.28,
+    "duration": 4.96
+  },
+  {
+    "text": "collision object that I just animate up",
+    "start": 2105.76,
+    "duration": 4.319
+  },
+  {
+    "text": "a little bit out of the way. So as she's",
+    "start": 2108.24,
+    "duration": 5.28
+  },
+  {
+    "text": "kind of throwing her uh, legs around, we",
+    "start": 2110.079,
+    "duration": 5.601
+  },
+  {
+    "text": "just slightly move those scabbards",
+    "start": 2113.52,
+    "duration": 3.52
+  },
+  {
+    "text": "collisions up out of the way. Just give",
+    "start": 2115.68,
+    "duration": 3.76
+  },
+  {
+    "text": "it a little more breathing room and get",
+    "start": 2117.04,
+    "duration": 4.24
+  },
+  {
+    "text": "over to the edge. uh so when it can get",
+    "start": 2119.44,
+    "duration": 4.639
+  },
+  {
+    "text": "over the horse and then we can slide",
+    "start": 2121.28,
+    "duration": 4.48
+  },
+  {
+    "text": "them back down once it's once it's",
+    "start": 2124.079,
+    "duration": 7.481
+  },
+  {
+    "text": "there. So just feel free to cheat.",
+    "start": 2125.76,
+    "duration": 5.8
+  },
+  {
+    "text": "Uh external collisions. So uh in the",
+    "start": 2132.4,
+    "duration": 5.04
+  },
+  {
+    "text": "demo there's a little sequence right",
+    "start": 2135.04,
+    "duration": 4.96
+  },
+  {
+    "text": "here where she goes through the uh kind",
+    "start": 2137.44,
+    "duration": 5.36
+  },
+  {
+    "text": "of a tight spot in the cliff. Um and",
+    "start": 2140.0,
+    "duration": 4.8
+  },
+  {
+    "text": "collisions can be external collisions",
+    "start": 2142.8,
+    "duration": 4.319
+  },
+  {
+    "text": "having an on all the time is kind of",
+    "start": 2144.8,
+    "duration": 5.279
+  },
+  {
+    "text": "expensive. And so it's the same trick",
+    "start": 2147.119,
+    "duration": 4.881
+  },
+  {
+    "text": "here. I had a collision box that said,",
+    "start": 2150.079,
+    "duration": 4.961
+  },
+  {
+    "text": "\"Hey, I'm at the spot.\" I temporarily",
+    "start": 2152.0,
+    "duration": 5.76
+  },
+  {
+    "text": "turn on the external collisions. And",
+    "start": 2155.04,
+    "duration": 4.4
+  },
+  {
+    "text": "then in the collision, excuse me, in the",
+    "start": 2157.76,
+    "duration": 6.88
+  },
+  {
+    "text": "world, we have a couple um spheres,",
+    "start": 2159.44,
+    "duration": 7.52
+  },
+  {
+    "text": "excuse me, capsules set up against the",
+    "start": 2164.64,
+    "duration": 4.56
+  },
+  {
+    "text": "uh cliff there. And then as she goes",
+    "start": 2166.96,
+    "duration": 3.68
+  },
+  {
+    "text": "through it, we get a nice collision with",
+    "start": 2169.2,
+    "duration": 3.52
+  },
+  {
+    "text": "it. And then soon as she leaves it, I",
+    "start": 2170.64,
+    "duration": 3.76
+  },
+  {
+    "text": "turn the collision back off. So we're",
+    "start": 2172.72,
+    "duration": 5.32
+  },
+  {
+    "text": "not paying for it.",
+    "start": 2174.4,
+    "duration": 3.64
+  },
+  {
+    "text": "All right, control rig. Um,",
+    "start": 2179.599,
+    "duration": 5.441
+  },
+  {
+    "text": "one of the other issues that we kind of",
+    "start": 2183.04,
+    "duration": 4.559
+  },
+  {
+    "text": "ran into, so the hood by default and the",
+    "start": 2185.04,
+    "duration": 5.44
+  },
+  {
+    "text": "skeleton is parented to the base neck.",
+    "start": 2187.599,
+    "duration": 4.881
+  },
+  {
+    "text": "And so, which is great for when the hood",
+    "start": 2190.48,
+    "duration": 3.84
+  },
+  {
+    "text": "is up, it follows the head and does what",
+    "start": 2192.48,
+    "duration": 4.639
+  },
+  {
+    "text": "it needs to there. Um, but when the hood",
+    "start": 2194.32,
+    "duration": 5.759
+  },
+  {
+    "text": "is off, uh, I didn't want it to follow",
+    "start": 2197.119,
+    "duration": 5.201
+  },
+  {
+    "text": "the neck. I wanted to follow the spine.",
+    "start": 2200.079,
+    "duration": 4.081
+  },
+  {
+    "text": "And one of the problems too with that",
+    "start": 2202.32,
+    "duration": 5.36
+  },
+  {
+    "text": "was the anime mesh uh when it was",
+    "start": 2204.16,
+    "duration": 5.28
+  },
+  {
+    "text": "rotating with the spine, it would like",
+    "start": 2207.68,
+    "duration": 4.0
+  },
+  {
+    "text": "kind of clip through and push through",
+    "start": 2209.44,
+    "duration": 3.84
+  },
+  {
+    "text": "some of the shoulder causing it to",
+    "start": 2211.68,
+    "duration": 3.2
+  },
+  {
+    "text": "really get jittery and cause some",
+    "start": 2213.28,
+    "duration": 5.28
+  },
+  {
+    "text": "problems. So we came up with",
+    "start": 2214.88,
+    "duration": 8.0
+  },
+  {
+    "text": "pretty easy uh control rig to simply",
+    "start": 2218.56,
+    "duration": 6.48
+  },
+  {
+    "text": "basically follow the neck when the hood",
+    "start": 2222.88,
+    "duration": 4.4
+  },
+  {
+    "text": "is up and follow the spine when you're",
+    "start": 2225.04,
+    "duration": 5.2
+  },
+  {
+    "text": "done or when it was down. So, uh, really",
+    "start": 2227.28,
+    "duration": 6.0
+  },
+  {
+    "text": "easy and worked really well and, uh,",
+    "start": 2230.24,
+    "duration": 7.879
+  },
+  {
+    "text": "saved us a bunch of heartache, actually.",
+    "start": 2233.28,
+    "duration": 4.839
+  },
+  {
+    "text": "So, also control rig, there's a, it's",
+    "start": 2238.64,
+    "duration": 4.24
+  },
+  {
+    "text": "called the spherical pose reader. Uh,",
+    "start": 2240.8,
+    "duration": 5.039
+  },
+  {
+    "text": "and this is one of my new favorite uh,",
+    "start": 2242.88,
+    "duration": 5.68
+  },
+  {
+    "text": "functions, but basically",
+    "start": 2245.839,
+    "duration": 5.76
+  },
+  {
+    "text": "uh, here we have again the the hood tail",
+    "start": 2248.56,
+    "duration": 6.16
+  },
+  {
+    "text": "um, with her with her scabbards. it was",
+    "start": 2251.599,
+    "duration": 5.52
+  },
+  {
+    "text": "clipping and and just like it was just",
+    "start": 2254.72,
+    "duration": 4.24
+  },
+  {
+    "text": "right at the perfect spot to cause",
+    "start": 2257.119,
+    "duration": 4.161
+  },
+  {
+    "text": "problems basically is what it was. And",
+    "start": 2258.96,
+    "duration": 4.639
+  },
+  {
+    "text": "so with this spherical pose reader in",
+    "start": 2261.28,
+    "duration": 4.96
+  },
+  {
+    "text": "the anime mesh itself, uh what I did was",
+    "start": 2263.599,
+    "duration": 4.801
+  },
+  {
+    "text": "there's set up that vector and you set",
+    "start": 2266.24,
+    "duration": 4.8
+  },
+  {
+    "text": "up that uh the sphere and the green",
+    "start": 2268.4,
+    "duration": 4.719
+  },
+  {
+    "text": "spots where it's 100% and then it fades",
+    "start": 2271.04,
+    "duration": 5.12
+  },
+  {
+    "text": "off basically based on that. So, as she",
+    "start": 2273.119,
+    "duration": 5.041
+  },
+  {
+    "text": "turns her head, I just physically",
+    "start": 2276.16,
+    "duration": 4.64
+  },
+  {
+    "text": "animated that tail down to get it out of",
+    "start": 2278.16,
+    "duration": 4.4
+  },
+  {
+    "text": "the way and to help, you know, the cloth",
+    "start": 2280.8,
+    "duration": 4.0
+  },
+  {
+    "text": "and collision just not have to fight so",
+    "start": 2282.56,
+    "duration": 6.64
+  },
+  {
+    "text": "much uh to against the capsule for the",
+    "start": 2284.8,
+    "duration": 6.96
+  },
+  {
+    "text": "scabbard. I also did that for the arm",
+    "start": 2289.2,
+    "duration": 6.0
+  },
+  {
+    "text": "swing. Um, so as Siri's kind of walking",
+    "start": 2291.76,
+    "duration": 5.2
+  },
+  {
+    "text": "or running, uh, we were getting a lot of",
+    "start": 2295.2,
+    "duration": 4.72
+  },
+  {
+    "text": "kind of like just issues from hitting",
+    "start": 2296.96,
+    "duration": 5.76
+  },
+  {
+    "text": "her elbow against the cape. And so, same",
+    "start": 2299.92,
+    "duration": 4.24
+  },
+  {
+    "text": "thing. I have a vector that points down",
+    "start": 2302.72,
+    "duration": 5.119
+  },
+  {
+    "text": "to um a pose reader. And then as her arm",
+    "start": 2304.16,
+    "duration": 5.919
+  },
+  {
+    "text": "basically gets to this position, I",
+    "start": 2307.839,
+    "duration": 4.721
+  },
+  {
+    "text": "essentially push back. Uh there's a",
+    "start": 2310.079,
+    "duration": 4.561
+  },
+  {
+    "text": "joint on the cape that I just push back",
+    "start": 2312.56,
+    "duration": 3.68
+  },
+  {
+    "text": "a little bit and kind of rotate. And",
+    "start": 2314.64,
+    "duration": 3.12
+  },
+  {
+    "text": "again, just gives it a little more",
+    "start": 2316.24,
+    "duration": 3.52
+  },
+  {
+    "text": "breathing room and doesn't have to fight",
+    "start": 2317.76,
+    "duration": 5.8
+  },
+  {
+    "text": "so hard with the collision.",
+    "start": 2319.76,
+    "duration": 3.8
+  },
+  {
+    "text": "All right, let's talk about cinematic",
+    "start": 2324.16,
+    "duration": 4.56
+  },
+  {
+    "text": "sequences uh real quick.",
+    "start": 2325.599,
+    "duration": 6.0
+  },
+  {
+    "text": "So pre-posing uh pre-pose if possible.",
+    "start": 2328.72,
+    "duration": 4.72
+  },
+  {
+    "text": "So put characters in the correct pose on",
+    "start": 2331.599,
+    "duration": 3.921
+  },
+  {
+    "text": "the frame before the cut. And this will",
+    "start": 2333.44,
+    "duration": 4.32
+  },
+  {
+    "text": "give a physics a chance to cut or excuse",
+    "start": 2335.52,
+    "duration": 4.64
+  },
+  {
+    "text": "me to get into the right pose and settle",
+    "start": 2337.76,
+    "duration": 4.56
+  },
+  {
+    "text": "before you actually get on the uh",
+    "start": 2340.16,
+    "duration": 4.56
+  },
+  {
+    "text": "actually view that camera. It sounds",
+    "start": 2342.32,
+    "duration": 5.92
+  },
+  {
+    "text": "simple or it sounds straightforward, but",
+    "start": 2344.72,
+    "duration": 6.08
+  },
+  {
+    "text": "uh it makes a huge difference. It really",
+    "start": 2348.24,
+    "duration": 5.52
+  },
+  {
+    "text": "does. That's not always possible, but uh",
+    "start": 2350.8,
+    "duration": 4.64
+  },
+  {
+    "text": "especially when you do, you know, like",
+    "start": 2353.76,
+    "duration": 2.96
+  },
+  {
+    "text": "you're doing back and forth cut scenes",
+    "start": 2355.44,
+    "duration": 3.6
+  },
+  {
+    "text": "between characters, if you can keep the",
+    "start": 2356.72,
+    "duration": 4.96
+  },
+  {
+    "text": "characters within relative position, it",
+    "start": 2359.04,
+    "duration": 5.12
+  },
+  {
+    "text": "makes a huge huge difference. We fought",
+    "start": 2361.68,
+    "duration": 4.0
+  },
+  {
+    "text": "a lot of pops and different things like",
+    "start": 2364.16,
+    "duration": 3.6
+  },
+  {
+    "text": "that. And just pre-posing made a big",
+    "start": 2365.68,
+    "duration": 3.76
+  },
+  {
+    "text": "difference.",
+    "start": 2367.76,
+    "duration": 3.52
+  },
+  {
+    "text": "Uh event tracks. So in sequencer",
+    "start": 2369.44,
+    "duration": 4.0
+  },
+  {
+    "text": "although sequencer evaluates ranges of",
+    "start": 2371.28,
+    "duration": 5.68
+  },
+  {
+    "text": "time property tracks only apply the",
+    "start": 2373.44,
+    "duration": 6.32
+  },
+  {
+    "text": "keyed value of the current time",
+    "start": 2376.96,
+    "duration": 4.48
+  },
+  {
+    "text": "regardless of how many keys we've",
+    "start": 2379.76,
+    "duration": 3.76
+  },
+  {
+    "text": "crossed between the last frame and the",
+    "start": 2381.44,
+    "duration": 5.04
+  },
+  {
+    "text": "current frame. Basically keys depending",
+    "start": 2383.52,
+    "duration": 4.8
+  },
+  {
+    "text": "on your current time it's possible for",
+    "start": 2386.48,
+    "duration": 5.04
+  },
+  {
+    "text": "them to get skipped. Uh so event tracks",
+    "start": 2388.32,
+    "duration": 4.24
+  },
+  {
+    "text": "are different. they will",
+    "start": 2391.52,
+    "duration": 3.04
+  },
+  {
+    "text": "deterministically trigger in the order",
+    "start": 2392.56,
+    "duration": 4.32
+  },
+  {
+    "text": "they appear on the timeline and are",
+    "start": 2394.56,
+    "duration": 4.24
+  },
+  {
+    "text": "guaranteed to be triggered even if they",
+    "start": 2396.88,
+    "duration": 4.8
+  },
+  {
+    "text": "don't land exactly on an evaluated time.",
+    "start": 2398.8,
+    "duration": 5.36
+  },
+  {
+    "text": "So if we have say we need to do a",
+    "start": 2401.68,
+    "duration": 4.56
+  },
+  {
+    "text": "teleport or a reset or something on the",
+    "start": 2404.16,
+    "duration": 5.6
+  },
+  {
+    "text": "clock on the clo clo cloth um and you",
+    "start": 2406.24,
+    "duration": 5.839
+  },
+  {
+    "text": "set a key frame depending on how good",
+    "start": 2409.76,
+    "duration": 5.76
+  },
+  {
+    "text": "your frame time is it may or may not get",
+    "start": 2412.079,
+    "duration": 6.321
+  },
+  {
+    "text": "evaluated versus an event it always",
+    "start": 2415.52,
+    "duration": 4.559
+  },
+  {
+    "text": "fires. So things that are really",
+    "start": 2418.4,
+    "duration": 4.56
+  },
+  {
+    "text": "critical and that you need uh to hit for",
+    "start": 2420.079,
+    "duration": 7.241
+  },
+  {
+    "text": "sure on certain frames, use events.",
+    "start": 2422.96,
+    "duration": 4.36
+  },
+  {
+    "text": "Um",
+    "start": 2427.839,
+    "duration": 4.0
+  },
+  {
+    "text": "okay, so spot shot specific functions.",
+    "start": 2429.359,
+    "duration": 5.681
+  },
+  {
+    "text": "Um creating cloth or excuse me, specific",
+    "start": 2431.839,
+    "duration": 5.28
+  },
+  {
+    "text": "functions in the blueprint, the",
+    "start": 2435.04,
+    "duration": 4.96
+  },
+  {
+    "text": "sequencer blueprint. Um you know, it",
+    "start": 2437.119,
+    "duration": 4.801
+  },
+  {
+    "text": "gives you that opportunity to for",
+    "start": 2440.0,
+    "duration": 3.68
+  },
+  {
+    "text": "whatever that shot needs, you can kind",
+    "start": 2441.92,
+    "duration": 3.199
+  },
+  {
+    "text": "of do a little bit of magic there. That",
+    "start": 2443.68,
+    "duration": 4.399
+  },
+  {
+    "text": "only applies uh to there.",
+    "start": 2445.119,
+    "duration": 4.641
+  },
+  {
+    "text": "We'll talk a little bit real quick about",
+    "start": 2448.079,
+    "duration": 5.76
+  },
+  {
+    "text": "teleport and reset and how we tackled",
+    "start": 2449.76,
+    "duration": 6.64
+  },
+  {
+    "text": "some of those. This is kind of my order",
+    "start": 2453.839,
+    "duration": 4.721
+  },
+  {
+    "text": "of operation. First, do no harm and",
+    "start": 2456.4,
+    "duration": 4.88
+  },
+  {
+    "text": "teleport. Teleport removes any external",
+    "start": 2458.56,
+    "duration": 4.4
+  },
+  {
+    "text": "forces and essentially pauses the",
+    "start": 2461.28,
+    "duration": 3.92
+  },
+  {
+    "text": "current pose of the uh cloth and then",
+    "start": 2462.96,
+    "duration": 4.879
+  },
+  {
+    "text": "resumes it in that same pose after the",
+    "start": 2465.2,
+    "duration": 5.76
+  },
+  {
+    "text": "teleport. And this should work for most",
+    "start": 2467.839,
+    "duration": 4.321
+  },
+  {
+    "text": "situations, especially if you're",
+    "start": 2470.96,
+    "duration": 3.28
+  },
+  {
+    "text": "pre-pose or anything like that. Uh",
+    "start": 2472.16,
+    "duration": 4.64
+  },
+  {
+    "text": "teleporting is usually the best way to",
+    "start": 2474.24,
+    "duration": 6.48
+  },
+  {
+    "text": "go. Uh the next one for re is reset.",
+    "start": 2476.8,
+    "duration": 6.319
+  },
+  {
+    "text": "Reset will restart your simulation based",
+    "start": 2480.72,
+    "duration": 5.44
+  },
+  {
+    "text": "off the current animation pose. So going",
+    "start": 2483.119,
+    "duration": 5.841
+  },
+  {
+    "text": "back to that purple uh wireframe,",
+    "start": 2486.16,
+    "duration": 5.04
+  },
+  {
+    "text": "whatever that pose is in is what reset",
+    "start": 2488.96,
+    "duration": 6.24
+  },
+  {
+    "text": "will put your cloth in. So, if we, for",
+    "start": 2491.2,
+    "duration": 6.56
+  },
+  {
+    "text": "example, if Siri was on the horse and",
+    "start": 2495.2,
+    "duration": 5.52
+  },
+  {
+    "text": "her cloth was in the walking default",
+    "start": 2497.76,
+    "duration": 4.96
+  },
+  {
+    "text": "pose, that's just down and I hit a",
+    "start": 2500.72,
+    "duration": 5.76
+  },
+  {
+    "text": "reset, that would start the cloth inside",
+    "start": 2502.72,
+    "duration": 6.399
+  },
+  {
+    "text": "the collision and then it would pop out.",
+    "start": 2506.48,
+    "duration": 4.72
+  },
+  {
+    "text": "So, it's really important to make sure",
+    "start": 2509.119,
+    "duration": 3.441
+  },
+  {
+    "text": "that your anime mesh is in the right",
+    "start": 2511.2,
+    "duration": 4.8
+  },
+  {
+    "text": "pose, especially when you do reset.",
+    "start": 2512.56,
+    "duration": 5.6
+  },
+  {
+    "text": "Uh sometimes that doesn't always work,",
+    "start": 2516.0,
+    "duration": 4.96
+  },
+  {
+    "text": "but uh global dampening is the next one",
+    "start": 2518.16,
+    "duration": 4.88
+  },
+  {
+    "text": "that I use a lot where I had a function",
+    "start": 2520.96,
+    "duration": 3.6
+  },
+  {
+    "text": "that would turn global dampening all the",
+    "start": 2523.04,
+    "duration": 3.12
+  },
+  {
+    "text": "way up to one just for one like one",
+    "start": 2524.56,
+    "duration": 3.2
+  },
+  {
+    "text": "frame and then I'd ramp it back down and",
+    "start": 2526.16,
+    "duration": 6.12
+  },
+  {
+    "text": "that seemed to work very well.",
+    "start": 2527.76,
+    "duration": 4.52
+  },
+  {
+    "text": "All right. So, one of the things that",
+    "start": 2533.2,
+    "duration": 4.08
+  },
+  {
+    "text": "you know like, oh, I wish I'd known this",
+    "start": 2535.04,
+    "duration": 4.559
+  },
+  {
+    "text": "before uh at the start of the project",
+    "start": 2537.28,
+    "duration": 7.12
+  },
+  {
+    "text": "was the fur cards ended up uh we I wish",
+    "start": 2539.599,
+    "duration": 6.72
+  },
+  {
+    "text": "what I had done is on the simulation",
+    "start": 2544.4,
+    "duration": 5.04
+  },
+  {
+    "text": "mesh. Right now, the simulation mesh",
+    "start": 2546.319,
+    "duration": 5.921
+  },
+  {
+    "text": "doesn't it just does the main co cape.",
+    "start": 2549.44,
+    "duration": 4.56
+  },
+  {
+    "text": "It's in the shape of the main cape and",
+    "start": 2552.24,
+    "duration": 3.599
+  },
+  {
+    "text": "doesn't take an account for the extra",
+    "start": 2554.0,
+    "duration": 4.4
+  },
+  {
+    "text": "width of the fur cards. I wish I had",
+    "start": 2555.839,
+    "duration": 4.641
+  },
+  {
+    "text": "gone back and made the simulation mesh",
+    "start": 2558.4,
+    "duration": 4.0
+  },
+  {
+    "text": "go all the way out to the edges of the",
+    "start": 2560.48,
+    "duration": 4.48
+  },
+  {
+    "text": "fur cards. It would have mapped a lot",
+    "start": 2562.4,
+    "duration": 4.24
+  },
+  {
+    "text": "better in the proxy node and then the",
+    "start": 2564.96,
+    "duration": 2.8
+  },
+  {
+    "text": "collisions would have been better",
+    "start": 2566.64,
+    "duration": 3.199
+  },
+  {
+    "text": "because you have an actual edge uh on",
+    "start": 2567.76,
+    "duration": 4.319
+  },
+  {
+    "text": "the fur cards and that would have pre",
+    "start": 2569.839,
+    "duration": 5.121
+  },
+  {
+    "text": "prevented some kind of weird pops and",
+    "start": 2572.079,
+    "duration": 4.641
+  },
+  {
+    "text": "that happened there. So that was one",
+    "start": 2574.96,
+    "duration": 5.44
+  },
+  {
+    "text": "thing that u I wish I had done",
+    "start": 2576.72,
+    "duration": 5.28
+  },
+  {
+    "text": "more.",
+    "start": 2580.4,
+    "duration": 4.32
+  },
+  {
+    "text": "All right. So again, knowing that we had",
+    "start": 2582.0,
+    "duration": 9.2
+  },
+  {
+    "text": "a 60 hertz uh frame bug target and uh",
+    "start": 2584.72,
+    "duration": 11.28
+  },
+  {
+    "text": "300 plus sim uh simulated vertices, we",
+    "start": 2591.2,
+    "duration": 6.08
+  },
+  {
+    "text": "knew that there was just going to be",
+    "start": 2596.0,
+    "duration": 5.52
+  },
+  {
+    "text": "some comp like compromises because",
+    "start": 2597.28,
+    "duration": 5.839
+  },
+  {
+    "text": "man, we just we had to hit those targets",
+    "start": 2601.52,
+    "duration": 5.839
+  },
+  {
+    "text": "and we knew we couldn't have it all. So",
+    "start": 2603.119,
+    "duration": 5.601
+  },
+  {
+    "text": "some of those things were like juicy",
+    "start": 2607.359,
+    "duration": 2.96
+  },
+  {
+    "text": "folds, right? because there's only so",
+    "start": 2608.72,
+    "duration": 4.16
+  },
+  {
+    "text": "much resolution and like every vert",
+    "start": 2610.319,
+    "duration": 5.841
+  },
+  {
+    "text": "counts like getting super intricate uh",
+    "start": 2612.88,
+    "duration": 5.04
+  },
+  {
+    "text": "folds just probably wasn't really going",
+    "start": 2616.16,
+    "duration": 5.679
+  },
+  {
+    "text": "to be that big of or a reality for us.",
+    "start": 2617.92,
+    "duration": 6.08
+  },
+  {
+    "text": "uh perfect collisions. Again, we're",
+    "start": 2621.839,
+    "duration": 5.041
+  },
+  {
+    "text": "working with low res. While we had",
+    "start": 2624.0,
+    "duration": 4.319
+  },
+  {
+    "text": "really good collisions, actually, I",
+    "start": 2626.88,
+    "duration": 4.239
+  },
+  {
+    "text": "think we did uh really well and we were",
+    "start": 2628.319,
+    "duration": 4.641
+  },
+  {
+    "text": "able to keep this cloth out of the",
+    "start": 2631.119,
+    "duration": 4.881
+  },
+  {
+    "text": "scabbards, which was yeah, a big deal.",
+    "start": 2632.96,
+    "duration": 6.0
+  },
+  {
+    "text": "Um we still were able to make it work.",
+    "start": 2636.0,
+    "duration": 4.4
+  },
+  {
+    "text": "You're going to have a low vert count,",
+    "start": 2638.96,
+    "duration": 3.359
+  },
+  {
+    "text": "especially if you're going to be hitting",
+    "start": 2640.4,
+    "duration": 4.16
+  },
+  {
+    "text": "performance targets. That's just a just",
+    "start": 2642.319,
+    "duration": 4.401
+  },
+  {
+    "text": "a reality of it right now. And then",
+    "start": 2644.56,
+    "duration": 4.08
+  },
+  {
+    "text": "corrective blueprint work will be likely",
+    "start": 2646.72,
+    "duration": 2.96
+  },
+  {
+    "text": "like I showed you in the cloth",
+    "start": 2648.64,
+    "duration": 3.36
+  },
+  {
+    "text": "controller function. There's just again",
+    "start": 2649.68,
+    "duration": 4.88
+  },
+  {
+    "text": "you can't rely 100% on the sim uh",
+    "start": 2652.0,
+    "duration": 5.28
+  },
+  {
+    "text": "simulation itself like self collisions",
+    "start": 2654.56,
+    "duration": 4.0
+  },
+  {
+    "text": "and things like that. So you're just",
+    "start": 2657.28,
+    "duration": 2.4
+  },
+  {
+    "text": "you're going to have to do a little",
+    "start": 2658.56,
+    "duration": 3.2
+  },
+  {
+    "text": "little bit of fix up work to help smooth",
+    "start": 2659.68,
+    "duration": 4.32
+  },
+  {
+    "text": "things over.",
+    "start": 2661.76,
+    "duration": 5.92
+  },
+  {
+    "text": "So hopefully we've shown you that uh you",
+    "start": 2664.0,
+    "duration": 6.079
+  },
+  {
+    "text": "know you can get really great results",
+    "start": 2667.68,
+    "duration": 5.36
+  },
+  {
+    "text": "with chaos cloth in games. Um I'm really",
+    "start": 2670.079,
+    "duration": 4.641
+  },
+  {
+    "text": "happy with how things turned out and we",
+    "start": 2673.04,
+    "duration": 4.96
+  },
+  {
+    "text": "thought it worked and looks really good.",
+    "start": 2674.72,
+    "duration": 5.04
+  },
+  {
+    "text": "Um,",
+    "start": 2678.0,
+    "duration": 3.68
+  },
+  {
+    "text": "and hopefully, you know, this inspires",
+    "start": 2679.76,
+    "duration": 5.839
+  },
+  {
+    "text": "you to uh do more cloth in your uh games",
+    "start": 2681.68,
+    "duration": 6.56
+  },
+  {
+    "text": "and projects. Um, and with, you know, a",
+    "start": 2685.599,
+    "duration": 4.161
+  },
+  {
+    "text": "little bit of hard work, you can have",
+    "start": 2688.24,
+    "duration": 5.04
+  },
+  {
+    "text": "really awesome cloth as well. Um,",
+    "start": 2689.76,
+    "duration": 5.68
+  },
+  {
+    "text": "thank you. I appreciate it. We'll do a",
+    "start": 2693.28,
+    "duration": 4.079
+  },
+  {
+    "text": "little bit of Q&A. I'll have Alex come",
+    "start": 2695.44,
+    "duration": 5.679
+  },
+  {
+    "text": "back up. Um, I appreciate it everybody",
+    "start": 2697.359,
+    "duration": 7.041
+  },
+  {
+    "text": "coming today and and hopefully we'll",
+    "start": 2701.119,
+    "duration": 6.681
+  },
+  {
+    "text": "this help.",
+    "start": 2704.4,
+    "duration": 3.4
+  }
+]

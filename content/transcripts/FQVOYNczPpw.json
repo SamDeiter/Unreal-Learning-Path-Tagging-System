@@ -1,0 +1,6512 @@
+[
+  {
+    "text": "Uh, welcome everybody. Thanks for coming",
+    "start": 1.68,
+    "duration": 3.84
+  },
+  {
+    "text": "to my talk. I know I'm up against uh,",
+    "start": 3.36,
+    "duration": 4.32
+  },
+  {
+    "text": "nanite foliage, so I appreciate you all",
+    "start": 5.52,
+    "duration": 3.76
+  },
+  {
+    "text": "being here. Um, I don't have a lot of",
+    "start": 7.68,
+    "duration": 4.16
+  },
+  {
+    "text": "eye candy. I do have some number candy,",
+    "start": 9.28,
+    "duration": 4.72
+  },
+  {
+    "text": "I guess, later on, which is going to be",
+    "start": 11.84,
+    "duration": 4.32
+  },
+  {
+    "text": "fun. Um, yeah, and this is my talk",
+    "start": 14.0,
+    "duration": 3.68
+  },
+  {
+    "text": "about, you know, what we're doing on the",
+    "start": 16.16,
+    "duration": 3.119
+  },
+  {
+    "text": "Unreal Engine team about the shader",
+    "start": 17.68,
+    "duration": 3.359
+  },
+  {
+    "text": "problem. Uh, my name is Dan Ostitis. I",
+    "start": 19.279,
+    "duration": 3.361
+  },
+  {
+    "text": "work on the rendering architecture team.",
+    "start": 21.039,
+    "duration": 3.361
+  },
+  {
+    "text": "Our our purview is primarily shader",
+    "start": 22.64,
+    "duration": 3.04
+  },
+  {
+    "text": "system, material system, that kind of",
+    "start": 24.4,
+    "duration": 4.48
+  },
+  {
+    "text": "thing. So, let's get into it.",
+    "start": 25.68,
+    "duration": 5.919
+  },
+  {
+    "text": "uh agenda for today. First, I want to",
+    "start": 28.88,
+    "duration": 4.0
+  },
+  {
+    "text": "just describe the motivation for some of",
+    "start": 31.599,
+    "duration": 2.64
+  },
+  {
+    "text": "the major changes we've made in the UAE",
+    "start": 32.88,
+    "duration": 2.88
+  },
+  {
+    "text": "shader system over the past few engine",
+    "start": 34.239,
+    "duration": 4.241
+  },
+  {
+    "text": "releases. Uh I'll give you some",
+    "start": 35.76,
+    "duration": 4.08
+  },
+  {
+    "text": "background information on the shader",
+    "start": 38.48,
+    "duration": 2.64
+  },
+  {
+    "text": "system in general. Just stuff that's",
+    "start": 39.84,
+    "duration": 2.559
+  },
+  {
+    "text": "going to be helpful to know to",
+    "start": 41.12,
+    "duration": 2.08
+  },
+  {
+    "text": "understand the rest of the",
+    "start": 42.399,
+    "duration": 2.081
+  },
+  {
+    "text": "presentation's contents if you don't",
+    "start": 43.2,
+    "duration": 3.44
+  },
+  {
+    "text": "know it already.",
+    "start": 44.48,
+    "duration": 3.919
+  },
+  {
+    "text": "Uh we'll get into a discussion of what",
+    "start": 46.64,
+    "duration": 3.52
+  },
+  {
+    "text": "leads to high shader counts and why",
+    "start": 48.399,
+    "duration": 3.84
+  },
+  {
+    "text": "we're dealing with constant unbounded",
+    "start": 50.16,
+    "duration": 4.879
+  },
+  {
+    "text": "growth in this space.",
+    "start": 52.239,
+    "duration": 4.721
+  },
+  {
+    "text": "uh some strategies to reduce shader",
+    "start": 55.039,
+    "duration": 3.441
+  },
+  {
+    "text": "counts in your own projects without",
+    "start": 56.96,
+    "duration": 4.16
+  },
+  {
+    "text": "having to make any engine changes.",
+    "start": 58.48,
+    "duration": 4.079
+  },
+  {
+    "text": "Uh I'll touch a little bit on the on",
+    "start": 61.12,
+    "duration": 3.039
+  },
+  {
+    "text": "demand shader compilation mechanism that",
+    "start": 62.559,
+    "duration": 5.92
+  },
+  {
+    "text": "came around in UE5 early days of U5.",
+    "start": 64.159,
+    "duration": 5.761
+  },
+  {
+    "text": "Uh and then the bulk of the talk is",
+    "start": 68.479,
+    "duration": 2.32
+  },
+  {
+    "text": "going to be details about all the",
+    "start": 69.92,
+    "duration": 2.08
+  },
+  {
+    "text": "systemic improvements we made to the",
+    "start": 70.799,
+    "duration": 3.521
+  },
+  {
+    "text": "shader system between U52 and now uh",
+    "start": 72.0,
+    "duration": 3.92
+  },
+  {
+    "text": "that have been attempting to deal with",
+    "start": 74.32,
+    "duration": 4.08
+  },
+  {
+    "text": "this problem. Uh then we'll get into the",
+    "start": 75.92,
+    "duration": 5.199
+  },
+  {
+    "text": "results. Uh some cook stats and numbers",
+    "start": 78.4,
+    "duration": 4.96
+  },
+  {
+    "text": "and finally just a glimpse into some",
+    "start": 81.119,
+    "duration": 3.68
+  },
+  {
+    "text": "future work that we're going to continue",
+    "start": 83.36,
+    "duration": 3.6
+  },
+  {
+    "text": "to be addressing to you know just",
+    "start": 84.799,
+    "duration": 4.0
+  },
+  {
+    "text": "improve the situation systemically as",
+    "start": 86.96,
+    "duration": 5.24
+  },
+  {
+    "text": "best we can.",
+    "start": 88.799,
+    "duration": 3.401
+  },
+  {
+    "text": "So motivation uh what was the reason we",
+    "start": 92.96,
+    "duration": 5.199
+  },
+  {
+    "text": "took took this work on in the first",
+    "start": 96.479,
+    "duration": 3.68
+  },
+  {
+    "text": "place? Um I imagine if you're here or",
+    "start": 98.159,
+    "duration": 3.201
+  },
+  {
+    "text": "you're watching this video after the",
+    "start": 100.159,
+    "duration": 2.32
+  },
+  {
+    "text": "fact you're probably familiar with the",
+    "start": 101.36,
+    "duration": 2.48
+  },
+  {
+    "text": "shader system. you're familiar with",
+    "start": 102.479,
+    "duration": 3.121
+  },
+  {
+    "text": "massive shader counts, large amounts of",
+    "start": 103.84,
+    "duration": 3.04
+  },
+  {
+    "text": "compilation time, the problems that",
+    "start": 105.6,
+    "duration": 3.36
+  },
+  {
+    "text": "we've had for years and years and years.",
+    "start": 106.88,
+    "duration": 3.68
+  },
+  {
+    "text": "Um, so most of what I'm going to talk",
+    "start": 108.96,
+    "duration": 3.199
+  },
+  {
+    "text": "about is specifically pertaining to cook",
+    "start": 110.56,
+    "duration": 2.96
+  },
+  {
+    "text": "times. So project cook times, if you",
+    "start": 112.159,
+    "duration": 2.24
+  },
+  {
+    "text": "care about that kind of thing, that's",
+    "start": 113.52,
+    "duration": 2.08
+  },
+  {
+    "text": "that's what I'm going to be digging",
+    "start": 114.399,
+    "duration": 6.0
+  },
+  {
+    "text": "into. Um, so around middle of 2022, uh,",
+    "start": 115.6,
+    "duration": 6.0
+  },
+  {
+    "text": "we'd kind of reached a breaking point",
+    "start": 120.399,
+    "duration": 3.281
+  },
+  {
+    "text": "internally. Uh, cooks of some of our",
+    "start": 121.6,
+    "duration": 3.36
+  },
+  {
+    "text": "internal projects were frequently",
+    "start": 123.68,
+    "duration": 2.56
+  },
+  {
+    "text": "basically needing to recompile every",
+    "start": 124.96,
+    "duration": 3.359
+  },
+  {
+    "text": "single shader. Uh, in some cases, these",
+    "start": 126.24,
+    "duration": 3.92
+  },
+  {
+    "text": "cooks were timing out. When cooks timed",
+    "start": 128.319,
+    "duration": 3.761
+  },
+  {
+    "text": "out, that meant we didn't get QA builds.",
+    "start": 130.16,
+    "duration": 3.439
+  },
+  {
+    "text": "QA couldn't validate builds to get to",
+    "start": 132.08,
+    "duration": 2.799
+  },
+  {
+    "text": "content creators. It was just a huge",
+    "start": 133.599,
+    "duration": 2.801
+  },
+  {
+    "text": "workflow disruption. So it was it was",
+    "start": 134.879,
+    "duration": 3.681
+  },
+  {
+    "text": "bad times for everybody.",
+    "start": 136.4,
+    "duration": 4.479
+  },
+  {
+    "text": "Now the main driver of this problem here",
+    "start": 138.56,
+    "duration": 4.48
+  },
+  {
+    "text": "was uh just frequent shader code changes",
+    "start": 140.879,
+    "duration": 4.481
+  },
+  {
+    "text": "from our rendering team uh stressing uh",
+    "start": 143.04,
+    "duration": 3.839
+  },
+  {
+    "text": "the the shader drive data cache",
+    "start": 145.36,
+    "duration": 4.16
+  },
+  {
+    "text": "mechanism uh DDC we call it. So we're",
+    "start": 146.879,
+    "duration": 4.481
+  },
+  {
+    "text": "only caching full shader maps. Full",
+    "start": 149.52,
+    "duration": 3.92
+  },
+  {
+    "text": "shader maps generally contain tens to",
+    "start": 151.36,
+    "duration": 4.879
+  },
+  {
+    "text": "hundreds of shaders each. uh and the",
+    "start": 153.44,
+    "duration": 5.2
+  },
+  {
+    "text": "cache key of these shaders was based on",
+    "start": 156.239,
+    "duration": 4.881
+  },
+  {
+    "text": "a hash of all the source and a bunch of",
+    "start": 158.64,
+    "duration": 3.599
+  },
+  {
+    "text": "other settings that went into the",
+    "start": 161.12,
+    "duration": 3.68
+  },
+  {
+    "text": "shaders in that shader map. Um so this",
+    "start": 162.239,
+    "duration": 4.801
+  },
+  {
+    "text": "meant even trivial changes like changing",
+    "start": 164.8,
+    "duration": 3.76
+  },
+  {
+    "text": "whites space or comments in a shader",
+    "start": 167.04,
+    "duration": 3.199
+  },
+  {
+    "text": "file could incur like a recompile of",
+    "start": 168.56,
+    "duration": 4.48
+  },
+  {
+    "text": "every single shader in the project. Um",
+    "start": 170.239,
+    "duration": 5.121
+  },
+  {
+    "text": "so you know changes to like comment ush",
+    "start": 173.04,
+    "duration": 3.68
+  },
+  {
+    "text": "file meant every shader maps",
+    "start": 175.36,
+    "duration": 2.72
+  },
+  {
+    "text": "invalidated. Every shader in the world's",
+    "start": 176.72,
+    "duration": 4.239
+  },
+  {
+    "text": "recompiling um which is obviously not",
+    "start": 178.08,
+    "duration": 4.32
+  },
+  {
+    "text": "great in a stream with active shader",
+    "start": 180.959,
+    "duration": 2.56
+  },
+  {
+    "text": "development. This meant, you know,",
+    "start": 182.4,
+    "duration": 2.72
+  },
+  {
+    "text": "basically we're recompiling everything",
+    "start": 183.519,
+    "duration": 2.8
+  },
+  {
+    "text": "all the time, every day, you know,",
+    "start": 185.12,
+    "duration": 2.96
+  },
+  {
+    "text": "multiple times a day, which is not",
+    "start": 186.319,
+    "duration": 4.161
+  },
+  {
+    "text": "great. So, we had some temporary",
+    "start": 188.08,
+    "duration": 4.879
+  },
+  {
+    "text": "workarounds. Uh, but spoiler alert, they",
+    "start": 190.48,
+    "duration": 5.759
+  },
+  {
+    "text": "sucked. Um, first of all, we had a",
+    "start": 192.959,
+    "duration": 4.721
+  },
+  {
+    "text": "shader submission Friday where shader",
+    "start": 196.239,
+    "duration": 2.801
+  },
+  {
+    "text": "devs were only per permitted to submit",
+    "start": 197.68,
+    "duration": 2.88
+  },
+  {
+    "text": "shader code on Friday afternoons to",
+    "start": 199.04,
+    "duration": 2.8
+  },
+  {
+    "text": "allow the automated builds to catch up",
+    "start": 200.56,
+    "duration": 2.48
+  },
+  {
+    "text": "over the weekend. And you can imagine",
+    "start": 201.84,
+    "duration": 2.88
+  },
+  {
+    "text": "this did not really go over that well.",
+    "start": 203.04,
+    "duration": 4.16
+  },
+  {
+    "text": "It didn't last very long. Uh, we",
+    "start": 204.72,
+    "duration": 3.76
+  },
+  {
+    "text": "improved the situation a little bit by",
+    "start": 207.2,
+    "duration": 2.64
+  },
+  {
+    "text": "separating shader deps into a separate",
+    "start": 208.48,
+    "duration": 3.6
+  },
+  {
+    "text": "stream. Essentially, we had automated CI",
+    "start": 209.84,
+    "duration": 3.679
+  },
+  {
+    "text": "process that was pulling in changes from",
+    "start": 212.08,
+    "duration": 3.2
+  },
+  {
+    "text": "main, churning through the content,",
+    "start": 213.519,
+    "duration": 3.601
+  },
+  {
+    "text": "pre-populating the shared DDC and",
+    "start": 215.28,
+    "duration": 3.44
+  },
+  {
+    "text": "eventually merging that shader code back",
+    "start": 217.12,
+    "duration": 4.399
+  },
+  {
+    "text": "into the main line. Uh, but this just in",
+    "start": 218.72,
+    "duration": 4.96
+  },
+  {
+    "text": "practice meant long delays between the",
+    "start": 221.519,
+    "duration": 3.761
+  },
+  {
+    "text": "work being finished and getting into the",
+    "start": 223.68,
+    "duration": 4.16
+  },
+  {
+    "text": "hands of users. And often like we get",
+    "start": 225.28,
+    "duration": 3.92
+  },
+  {
+    "text": "bad luck with a string of build health",
+    "start": 227.84,
+    "duration": 2.959
+  },
+  {
+    "text": "and we just have no progress on this",
+    "start": 229.2,
+    "duration": 3.52
+  },
+  {
+    "text": "process for like days at a time. So, it",
+    "start": 230.799,
+    "duration": 4.401
+  },
+  {
+    "text": "was just really not sustainable. Um, so",
+    "start": 232.72,
+    "duration": 4.4
+  },
+  {
+    "text": "we formed a strike team to kind of track",
+    "start": 235.2,
+    "duration": 3.44
+  },
+  {
+    "text": "tackle this problem from as many angles",
+    "start": 237.12,
+    "duration": 4.24
+  },
+  {
+    "text": "as possible.",
+    "start": 238.64,
+    "duration": 2.72
+  },
+  {
+    "text": "So the background information probably",
+    "start": 242.08,
+    "duration": 3.6
+  },
+  {
+    "text": "some of you are aware of this already.",
+    "start": 244.48,
+    "duration": 2.319
+  },
+  {
+    "text": "So bear with me it's not going to take",
+    "start": 245.68,
+    "duration": 3.36
+  },
+  {
+    "text": "very long. Uh just some stuff I'm going",
+    "start": 246.799,
+    "duration": 3.36
+  },
+  {
+    "text": "to refer to in the remainder of the",
+    "start": 249.04,
+    "duration": 3.919
+  },
+  {
+    "text": "talk. So first I want to talk about the",
+    "start": 250.159,
+    "duration": 4.08
+  },
+  {
+    "text": "distinction between global and material",
+    "start": 252.959,
+    "duration": 2.721
+  },
+  {
+    "text": "shaders. So the global shaders are the",
+    "start": 254.239,
+    "duration": 2.72
+  },
+  {
+    "text": "ones that are all basically handcoded",
+    "start": 255.68,
+    "duration": 3.519
+  },
+  {
+    "text": "HLSL typically written entirely by a",
+    "start": 256.959,
+    "duration": 4.96
+  },
+  {
+    "text": "programmer uh used for like specific",
+    "start": 259.199,
+    "duration": 4.481
+  },
+  {
+    "text": "passes compute tasks that kind of thing",
+    "start": 261.919,
+    "duration": 4.081
+  },
+  {
+    "text": "unrelated to scene objects or or not",
+    "start": 263.68,
+    "duration": 3.68
+  },
+  {
+    "text": "specifically attached to a scene object",
+    "start": 266.0,
+    "duration": 3.68
+  },
+  {
+    "text": "more accurately. um versus material",
+    "start": 267.36,
+    "duration": 3.36
+  },
+  {
+    "text": "shaders which are things that are",
+    "start": 269.68,
+    "duration": 2.88
+  },
+  {
+    "text": "applied to objects in the scene. Uh",
+    "start": 270.72,
+    "duration": 3.039
+  },
+  {
+    "text": "they're constructed from a combination",
+    "start": 272.56,
+    "duration": 3.359
+  },
+  {
+    "text": "of handcoded HLSL and the material",
+    "start": 273.759,
+    "duration": 3.921
+  },
+  {
+    "text": "graphs that are translated in HLSL",
+    "start": 275.919,
+    "duration": 4.161
+  },
+  {
+    "text": "automatically. So what that means",
+    "start": 277.68,
+    "duration": 4.0
+  },
+  {
+    "text": "basically is that global shaders are not",
+    "start": 280.08,
+    "duration": 3.119
+  },
+  {
+    "text": "content dependent. Well, material",
+    "start": 281.68,
+    "duration": 4.079
+  },
+  {
+    "text": "shaders are content dependent. So in",
+    "start": 283.199,
+    "duration": 4.081
+  },
+  {
+    "text": "large projects generally speaking",
+    "start": 285.759,
+    "duration": 3.44
+  },
+  {
+    "text": "material shaders dominate compile time,",
+    "start": 287.28,
+    "duration": 4.4
+  },
+  {
+    "text": "cook time, etc. There are other",
+    "start": 289.199,
+    "duration": 4.081
+  },
+  {
+    "text": "categories of shaders as well. Niagara,",
+    "start": 291.68,
+    "duration": 3.2
+  },
+  {
+    "text": "compute framework, etc. to also generate",
+    "start": 293.28,
+    "duration": 2.96
+  },
+  {
+    "text": "shaders but they're generally in",
+    "start": 294.88,
+    "duration": 2.879
+  },
+  {
+    "text": "practice the numbers are much smaller so",
+    "start": 296.24,
+    "duration": 2.88
+  },
+  {
+    "text": "they don't impact have the same impact",
+    "start": 297.759,
+    "duration": 2.561
+  },
+  {
+    "text": "on cook time so I'm not going to really",
+    "start": 299.12,
+    "duration": 4.0
+  },
+  {
+    "text": "talk about those in this talk",
+    "start": 300.32,
+    "duration": 4.879
+  },
+  {
+    "text": "so shader types uh these are basically",
+    "start": 303.12,
+    "duration": 4.799
+  },
+  {
+    "text": "the C++ and HLSL code that are mashed",
+    "start": 305.199,
+    "duration": 4.481
+  },
+  {
+    "text": "together to generate shaders uh each",
+    "start": 307.919,
+    "duration": 3.201
+  },
+  {
+    "text": "implementation of shader type roughly",
+    "start": 309.68,
+    "duration": 2.959
+  },
+  {
+    "text": "maps to a single rendering pass in the",
+    "start": 311.12,
+    "duration": 3.919
+  },
+  {
+    "text": "engine so for material shaders you got",
+    "start": 312.639,
+    "duration": 4.161
+  },
+  {
+    "text": "things like your base passes shadow pass",
+    "start": 315.039,
+    "duration": 4.241
+  },
+  {
+    "text": "depth pass velocity etc where global",
+    "start": 316.8,
+    "duration": 4.48
+  },
+  {
+    "text": "shadow types tend to be more things like",
+    "start": 319.28,
+    "duration": 3.919
+  },
+  {
+    "text": "post effects lighting passes full screen",
+    "start": 321.28,
+    "duration": 5.919
+  },
+  {
+    "text": "things compute related stuff.",
+    "start": 323.199,
+    "duration": 5.761
+  },
+  {
+    "text": "We've also got vertex factories. These",
+    "start": 327.199,
+    "duration": 3.601
+  },
+  {
+    "text": "are further variations of shaders that",
+    "start": 328.96,
+    "duration": 3.36
+  },
+  {
+    "text": "deal with unpacking different types of",
+    "start": 330.8,
+    "duration": 4.0
+  },
+  {
+    "text": "vertex data. So meshes, particles, hair,",
+    "start": 332.32,
+    "duration": 4.8
+  },
+  {
+    "text": "water, that kind of thing. Uh and the",
+    "start": 334.8,
+    "duration": 4.88
+  },
+  {
+    "text": "same material in source material assets",
+    "start": 337.12,
+    "duration": 3.919
+  },
+  {
+    "text": "can generate shaders for multiple vertex",
+    "start": 339.68,
+    "duration": 5.28
+  },
+  {
+    "text": "factories depending on the usage flags.",
+    "start": 341.039,
+    "duration": 6.801
+  },
+  {
+    "text": "Uh shader formats are the term we just",
+    "start": 344.96,
+    "duration": 4.64
+  },
+  {
+    "text": "use to refer to the shader related code",
+    "start": 347.84,
+    "duration": 3.44
+  },
+  {
+    "text": "and data types for a single runtime",
+    "start": 349.6,
+    "duration": 4.24
+  },
+  {
+    "text": "target. Um, now most platforms only have",
+    "start": 351.28,
+    "duration": 4.56
+  },
+  {
+    "text": "one runtime target, but PC can target",
+    "start": 353.84,
+    "duration": 4.32
+  },
+  {
+    "text": "multiple. So you got SM5, SM6, you've",
+    "start": 355.84,
+    "duration": 3.76
+  },
+  {
+    "text": "got Vulcan, you've got the mobile",
+    "start": 358.16,
+    "duration": 3.12
+  },
+  {
+    "text": "render. All these can be generated for",
+    "start": 359.6,
+    "duration": 4.64
+  },
+  {
+    "text": "PC. Uh, each shader format has a",
+    "start": 361.28,
+    "duration": 4.479
+  },
+  {
+    "text": "corresponding compiler implementation in",
+    "start": 364.24,
+    "duration": 4.16
+  },
+  {
+    "text": "C++ that usually calls into a comp",
+    "start": 365.759,
+    "duration": 4.16
+  },
+  {
+    "text": "external compiler tool, but also does a",
+    "start": 368.4,
+    "duration": 3.04
+  },
+  {
+    "text": "bunch of UE specific kind of",
+    "start": 369.919,
+    "duration": 3.28
+  },
+  {
+    "text": "pre-processing and post-processing on",
+    "start": 371.44,
+    "duration": 4.64
+  },
+  {
+    "text": "the data.",
+    "start": 373.199,
+    "duration": 4.801
+  },
+  {
+    "text": "Now shader compilation phases when",
+    "start": 376.08,
+    "duration": 3.92
+  },
+  {
+    "text": "you're running in the editor uh engine",
+    "start": 378.0,
+    "duration": 3.759
+  },
+  {
+    "text": "startup map loading and play an editor",
+    "start": 380.0,
+    "duration": 3.199
+  },
+  {
+    "text": "all have to compile different sets of",
+    "start": 381.759,
+    "duration": 2.961
+  },
+  {
+    "text": "shaders at different times is why we",
+    "start": 383.199,
+    "duration": 3.761
+  },
+  {
+    "text": "always have different delays on you know",
+    "start": 384.72,
+    "duration": 4.16
+  },
+  {
+    "text": "seeing waiting for shaders in in the",
+    "start": 386.96,
+    "duration": 3.76
+  },
+  {
+    "text": "editor. Uh I just wanted to explain the",
+    "start": 388.88,
+    "duration": 4.319
+  },
+  {
+    "text": "reason for that. Um first global shaders",
+    "start": 390.72,
+    "duration": 4.0
+  },
+  {
+    "text": "default shaders these are all kind of",
+    "start": 393.199,
+    "duration": 3.041
+  },
+  {
+    "text": "prerequisites for running the editor at",
+    "start": 394.72,
+    "duration": 3.039
+  },
+  {
+    "text": "all. Uh so they're they're done during",
+    "start": 396.24,
+    "duration": 4.239
+  },
+  {
+    "text": "the startup phase. Um, when you load a",
+    "start": 397.759,
+    "duration": 4.801
+  },
+  {
+    "text": "map in the editor, uh, we're going to",
+    "start": 400.479,
+    "duration": 3.681
+  },
+  {
+    "text": "basically compile all the shaders that",
+    "start": 402.56,
+    "duration": 3.04
+  },
+  {
+    "text": "are needed to render that map in the",
+    "start": 404.16,
+    "duration": 3.759
+  },
+  {
+    "text": "editor context versus plan editor where",
+    "start": 405.6,
+    "duration": 4.48
+  },
+  {
+    "text": "you're running game logic, uh, loading",
+    "start": 407.919,
+    "duration": 4.0
+  },
+  {
+    "text": "additional assets and and you need to",
+    "start": 410.08,
+    "duration": 3.28
+  },
+  {
+    "text": "compile different shaders to render",
+    "start": 411.919,
+    "duration": 3.921
+  },
+  {
+    "text": "things in game context.",
+    "start": 413.36,
+    "duration": 4.48
+  },
+  {
+    "text": "Now, contrasting that to what occurs",
+    "start": 415.84,
+    "duration": 3.919
+  },
+  {
+    "text": "during a cook, we have the same exact",
+    "start": 417.84,
+    "duration": 3.6
+  },
+  {
+    "text": "initialization phase except it's based",
+    "start": 419.759,
+    "duration": 3.201
+  },
+  {
+    "text": "on the number of whichever target",
+    "start": 421.44,
+    "duration": 2.56
+  },
+  {
+    "text": "platforms you're targeting for your",
+    "start": 422.96,
+    "duration": 2.72
+  },
+  {
+    "text": "cook. So all the global shaders, all the",
+    "start": 424.0,
+    "duration": 3.199
+  },
+  {
+    "text": "default shaders compile for every target",
+    "start": 425.68,
+    "duration": 4.16
+  },
+  {
+    "text": "platform. But then basically cooks just",
+    "start": 427.199,
+    "duration": 4.161
+  },
+  {
+    "text": "are processing packages, loading a",
+    "start": 429.84,
+    "duration": 4.32
+  },
+  {
+    "text": "package up, saving a package out. Uh and",
+    "start": 431.36,
+    "duration": 4.16
+  },
+  {
+    "text": "during that process, those packages will",
+    "start": 434.16,
+    "duration": 2.56
+  },
+  {
+    "text": "say, \"Hey, I need to compile a bunch of",
+    "start": 435.52,
+    "duration": 3.679
+  },
+  {
+    "text": "shaders.\" So we block the the package",
+    "start": 436.72,
+    "duration": 4.24
+  },
+  {
+    "text": "save until all that shader compilation's",
+    "start": 439.199,
+    "duration": 4.321
+  },
+  {
+    "text": "completed.",
+    "start": 440.96,
+    "duration": 4.079
+  },
+  {
+    "text": "Finally, a shader invalidation. That's",
+    "start": 443.52,
+    "duration": 3.2
+  },
+  {
+    "text": "just the term we use to describe any",
+    "start": 445.039,
+    "duration": 3.921
+  },
+  {
+    "text": "code or content changes which trigger",
+    "start": 446.72,
+    "duration": 4.96
+  },
+  {
+    "text": "shaders recompiling. Uh this can be just",
+    "start": 448.96,
+    "duration": 4.799
+  },
+  {
+    "text": "a change to a base material, shader code",
+    "start": 451.68,
+    "duration": 3.68
+  },
+  {
+    "text": "change, various version bumps we have in",
+    "start": 453.759,
+    "duration": 4.0
+  },
+  {
+    "text": "the engine. Full invalidation is one",
+    "start": 455.36,
+    "duration": 4.48
+  },
+  {
+    "text": "which requires all shaders to recompile.",
+    "start": 457.759,
+    "duration": 4.72
+  },
+  {
+    "text": "So uh we have a shader version ussh",
+    "start": 459.84,
+    "duration": 5.52
+  },
+  {
+    "text": "header file which we we bump a gooid in",
+    "start": 462.479,
+    "duration": 4.801
+  },
+  {
+    "text": "to to force all shaders to recompile. We",
+    "start": 465.36,
+    "duration": 2.959
+  },
+  {
+    "text": "typically have to do this if we change",
+    "start": 467.28,
+    "duration": 2.72
+  },
+  {
+    "text": "some kind of core serialization format,",
+    "start": 468.319,
+    "duration": 3.6
+  },
+  {
+    "text": "core data format or just for some reason",
+    "start": 470.0,
+    "duration": 5.84
+  },
+  {
+    "text": "we want to compile everything again.",
+    "start": 471.919,
+    "duration": 5.921
+  },
+  {
+    "text": "So uh let's dig into the key problem",
+    "start": 475.84,
+    "duration": 4.16
+  },
+  {
+    "text": "then. Why do we have so many shaders?",
+    "start": 477.84,
+    "duration": 3.44
+  },
+  {
+    "text": "So, as I mentioned on the previous",
+    "start": 480.0,
+    "duration": 3.28
+  },
+  {
+    "text": "slide, material shaders are generally by",
+    "start": 481.28,
+    "duration": 3.759
+  },
+  {
+    "text": "far the most numerous. Uh, so we're just",
+    "start": 483.28,
+    "duration": 4.4
+  },
+  {
+    "text": "going to consider those here. So, we've",
+    "start": 485.039,
+    "duration": 4.56
+  },
+  {
+    "text": "got a simplified equation here gives us",
+    "start": 487.68,
+    "duration": 3.519
+  },
+  {
+    "text": "an upper bound for the total material",
+    "start": 489.599,
+    "duration": 4.081
+  },
+  {
+    "text": "permutation count, which is the number",
+    "start": 491.199,
+    "duration": 4.881
+  },
+  {
+    "text": "of materials multiplied by the number of",
+    "start": 493.68,
+    "duration": 4.16
+  },
+  {
+    "text": "vertex factories multiplied by the",
+    "start": 496.08,
+    "duration": 3.6
+  },
+  {
+    "text": "number of shader types multiplied by",
+    "start": 497.84,
+    "duration": 2.799
+  },
+  {
+    "text": "number of shader formats. There's a lot",
+    "start": 499.68,
+    "duration": 3.04
+  },
+  {
+    "text": "of terms here obviously. So, the reason",
+    "start": 500.639,
+    "duration": 3.361
+  },
+  {
+    "text": "I say this is upperbound is because",
+    "start": 502.72,
+    "duration": 2.479
+  },
+  {
+    "text": "obviously you're not going to have all",
+    "start": 504.0,
+    "duration": 2.72
+  },
+  {
+    "text": "vertex factories, all shader types",
+    "start": 505.199,
+    "duration": 3.361
+  },
+  {
+    "text": "enabled for all materials, but you could",
+    "start": 506.72,
+    "duration": 3.44
+  },
+  {
+    "text": "in theory.",
+    "start": 508.56,
+    "duration": 3.919
+  },
+  {
+    "text": "Uh so this top magenta term in the",
+    "start": 510.16,
+    "duration": 4.64
+  },
+  {
+    "text": "equation is uh is is content dependent",
+    "start": 512.479,
+    "duration": 3.44
+  },
+  {
+    "text": "essentially. So artists creating new",
+    "start": 514.8,
+    "duration": 2.719
+  },
+  {
+    "text": "materials or new material instances can",
+    "start": 515.919,
+    "duration": 3.68
+  },
+  {
+    "text": "add new shaders to a project. Whereas",
+    "start": 517.519,
+    "duration": 3.921
+  },
+  {
+    "text": "all the orange terms are essentially an",
+    "start": 519.599,
+    "duration": 4.161
+  },
+  {
+    "text": "engineering control. Uh so rendering",
+    "start": 521.44,
+    "duration": 3.76
+  },
+  {
+    "text": "engineers adding new features are quite",
+    "start": 523.76,
+    "duration": 2.8
+  },
+  {
+    "text": "frequently adding new shader types to a",
+    "start": 525.2,
+    "duration": 2.88
+  },
+  {
+    "text": "project or new permutations of shader",
+    "start": 526.56,
+    "duration": 3.44
+  },
+  {
+    "text": "types. Less frequently allowed new vertx",
+    "start": 528.08,
+    "duration": 3.199
+  },
+  {
+    "text": "factories. It's not it's not quite as",
+    "start": 530.0,
+    "duration": 3.6
+  },
+  {
+    "text": "common. Um shader formats also generally",
+    "start": 531.279,
+    "duration": 3.841
+  },
+  {
+    "text": "in engineering's control. These tend not",
+    "start": 533.6,
+    "duration": 2.799
+  },
+  {
+    "text": "to change very often. And it's basically",
+    "start": 535.12,
+    "duration": 3.04
+  },
+  {
+    "text": "just down to what kind of configurations",
+    "start": 536.399,
+    "duration": 4.401
+  },
+  {
+    "text": "your project's targeting.",
+    "start": 538.16,
+    "duration": 4.0
+  },
+  {
+    "text": "But the key point I want to make here is",
+    "start": 540.8,
+    "duration": 3.039
+  },
+  {
+    "text": "that two at least two of these variables",
+    "start": 542.16,
+    "duration": 4.48
+  },
+  {
+    "text": "grow regularly over time. Uh and that's",
+    "start": 543.839,
+    "duration": 4.481
+  },
+  {
+    "text": "where the the crux of the problem is. We",
+    "start": 546.64,
+    "duration": 3.12
+  },
+  {
+    "text": "have to figure out some way of keeping",
+    "start": 548.32,
+    "duration": 4.56
+  },
+  {
+    "text": "up with that growth.",
+    "start": 549.76,
+    "duration": 5.759
+  },
+  {
+    "text": "So um",
+    "start": 552.88,
+    "duration": 5.2
+  },
+  {
+    "text": "sorry digging a bit deeper uh this",
+    "start": 555.519,
+    "duration": 3.841
+  },
+  {
+    "text": "content term is actually kind of an",
+    "start": 558.08,
+    "duration": 2.64
+  },
+  {
+    "text": "oversimplification. There's there's a",
+    "start": 559.36,
+    "duration": 2.64
+  },
+  {
+    "text": "lot more levers that content actually",
+    "start": 560.72,
+    "duration": 3.52
+  },
+  {
+    "text": "has to create ter new permutations. So",
+    "start": 562.0,
+    "duration": 4.0
+  },
+  {
+    "text": "in reality we can create new and new",
+    "start": 564.24,
+    "duration": 4.24
+  },
+  {
+    "text": "materials, new new material instances,",
+    "start": 566.0,
+    "duration": 4.24
+  },
+  {
+    "text": "add static switches to a material or a",
+    "start": 568.48,
+    "duration": 3.52
+  },
+  {
+    "text": "material function, add quality level",
+    "start": 570.24,
+    "duration": 3.279
+  },
+  {
+    "text": "variations to a material material",
+    "start": 572.0,
+    "duration": 3.6
+  },
+  {
+    "text": "function. And again, all these can but",
+    "start": 573.519,
+    "duration": 3.921
+  },
+  {
+    "text": "don't necessarily result in permutations",
+    "start": 575.6,
+    "duration": 4.16
+  },
+  {
+    "text": "being created. And this depends entirely",
+    "start": 577.44,
+    "duration": 3.92
+  },
+  {
+    "text": "on how material instances differ from",
+    "start": 579.76,
+    "duration": 2.88
+  },
+  {
+    "text": "their base material. So if the base",
+    "start": 581.36,
+    "duration": 3.2
+  },
+  {
+    "text": "material exposes static switches,",
+    "start": 582.64,
+    "duration": 3.28
+  },
+  {
+    "text": "changing the values on that on a",
+    "start": 584.56,
+    "duration": 2.8
+  },
+  {
+    "text": "material instance will result in",
+    "start": 585.92,
+    "duration": 2.8
+  },
+  {
+    "text": "permutations being created for that",
+    "start": 587.36,
+    "duration": 3.76
+  },
+  {
+    "text": "unique set of static parameter values.",
+    "start": 588.72,
+    "duration": 4.559
+  },
+  {
+    "text": "Um, you can also just toggle material",
+    "start": 591.12,
+    "duration": 3.76
+  },
+  {
+    "text": "property overrides and instances which",
+    "start": 593.279,
+    "duration": 3.12
+  },
+  {
+    "text": "can uh result in activation of",
+    "start": 594.88,
+    "duration": 3.44
+  },
+  {
+    "text": "additional shader types. So we don't",
+    "start": 596.399,
+    "duration": 3.44
+  },
+  {
+    "text": "automatically create all possible",
+    "start": 598.32,
+    "duration": 4.0
+  },
+  {
+    "text": "variations of the base material. We only",
+    "start": 599.839,
+    "duration": 4.161
+  },
+  {
+    "text": "create those that are required by the",
+    "start": 602.32,
+    "duration": 3.12
+  },
+  {
+    "text": "supererset of instances that exist in",
+    "start": 604.0,
+    "duration": 2.72
+  },
+  {
+    "text": "your project. So this is goes back to",
+    "start": 605.44,
+    "duration": 2.48
+  },
+  {
+    "text": "what I said before about this all being",
+    "start": 606.72,
+    "duration": 3.36
+  },
+  {
+    "text": "an upper bound.",
+    "start": 607.92,
+    "duration": 5.68
+  },
+  {
+    "text": "Um, so basically one other key note is",
+    "start": 610.08,
+    "duration": 5.36
+  },
+  {
+    "text": "if you have multiple material instances",
+    "start": 613.6,
+    "duration": 3.76
+  },
+  {
+    "text": "that all happen to the exact same",
+    "start": 615.44,
+    "duration": 3.6
+  },
+  {
+    "text": "parameter values and have the same base",
+    "start": 617.36,
+    "duration": 2.719
+  },
+  {
+    "text": "material, they'll be duplicated in",
+    "start": 619.04,
+    "duration": 2.479
+  },
+  {
+    "text": "memory. So we're not, you know, we're",
+    "start": 620.079,
+    "duration": 4.801
+  },
+  {
+    "text": "not wasting space when we don't have to.",
+    "start": 621.519,
+    "duration": 4.961
+  },
+  {
+    "text": "Uh I do want to dig into the static",
+    "start": 624.88,
+    "duration": 3.28
+  },
+  {
+    "text": "switch issue a bit more though because",
+    "start": 626.48,
+    "duration": 4.0
+  },
+  {
+    "text": "uh this is one of the biggest pitfalls",
+    "start": 628.16,
+    "duration": 4.239
+  },
+  {
+    "text": "uh in in some of our internal projects",
+    "start": 630.48,
+    "duration": 4.16
+  },
+  {
+    "text": "at least is they're very widespread use.",
+    "start": 632.399,
+    "duration": 4.321
+  },
+  {
+    "text": "Uh and each boolean switch you add to a",
+    "start": 634.64,
+    "duration": 3.439
+  },
+  {
+    "text": "material could potentially increase the",
+    "start": 636.72,
+    "duration": 2.88
+  },
+  {
+    "text": "number of shaders compiled for that",
+    "start": 638.079,
+    "duration": 5.2
+  },
+  {
+    "text": "material by up to 2x. Right? So",
+    "start": 639.6,
+    "duration": 5.84
+  },
+  {
+    "text": "a long time ago dynamic branching was",
+    "start": 643.279,
+    "duration": 5.521
+  },
+  {
+    "text": "expensive on GPUs by default always. Uh,",
+    "start": 645.44,
+    "duration": 4.8
+  },
+  {
+    "text": "so the idea of reducing instruction",
+    "start": 648.8,
+    "duration": 3.279
+  },
+  {
+    "text": "count to optimize shader execution cost",
+    "start": 650.24,
+    "duration": 3.52
+  },
+  {
+    "text": "was kind of like the de facto standard",
+    "start": 652.079,
+    "duration": 4.161
+  },
+  {
+    "text": "way of optimizing materials. The thing",
+    "start": 653.76,
+    "duration": 4.72
+  },
+  {
+    "text": "is it's not really as relevant on modern",
+    "start": 656.24,
+    "duration": 3.76
+  },
+  {
+    "text": "hardware, but that's still kind of",
+    "start": 658.48,
+    "duration": 2.799
+  },
+  {
+    "text": "standard practice for a lot of content",
+    "start": 660.0,
+    "duration": 3.2
+  },
+  {
+    "text": "creators. I've had conversations many",
+    "start": 661.279,
+    "duration": 3.361
+  },
+  {
+    "text": "times with with artists who say, \"Oh, I",
+    "start": 663.2,
+    "duration": 2.48
+  },
+  {
+    "text": "can't do this because it's going to add",
+    "start": 664.64,
+    "duration": 2.72
+  },
+  {
+    "text": "shader instructions and I'm wasting",
+    "start": 665.68,
+    "duration": 3.68
+  },
+  {
+    "text": "instructions.\" And say, \"Well, maybe you",
+    "start": 667.36,
+    "duration": 4.56
+  },
+  {
+    "text": "should measure it.\" Right? So, that's my",
+    "start": 669.36,
+    "duration": 5.12
+  },
+  {
+    "text": "my my suggestion is basically",
+    "start": 671.92,
+    "duration": 4.64
+  },
+  {
+    "text": "don't always add static switches unless",
+    "start": 674.48,
+    "duration": 3.919
+  },
+  {
+    "text": "you really need to. Uh we do have a",
+    "start": 676.56,
+    "duration": 3.04
+  },
+  {
+    "text": "similar problem with global shaders too",
+    "start": 678.399,
+    "duration": 3.361
+  },
+  {
+    "text": "even though they're engineering control",
+    "start": 679.6,
+    "duration": 4.72
+  },
+  {
+    "text": "but basically that's a historical issue",
+    "start": 681.76,
+    "duration": 4.8
+  },
+  {
+    "text": "you know years and years ago it was just",
+    "start": 684.32,
+    "duration": 4.88
+  },
+  {
+    "text": "default permute don't dynamic branch in",
+    "start": 686.56,
+    "duration": 4.88
+  },
+  {
+    "text": "a global shader and going back and kind",
+    "start": 689.2,
+    "duration": 3.92
+  },
+  {
+    "text": "of undoing this is a very long time",
+    "start": 691.44,
+    "duration": 5.639
+  },
+  {
+    "text": "consuming lengthy process",
+    "start": 693.12,
+    "duration": 3.959
+  },
+  {
+    "text": "so um older versions of uee did some",
+    "start": 697.519,
+    "duration": 4.401
+  },
+  {
+    "text": "level of shader and shader compilation",
+    "start": 700.32,
+    "duration": 3.12
+  },
+  {
+    "text": "dduplication",
+    "start": 701.92,
+    "duration": 2.96
+  },
+  {
+    "text": "so as I just mentioned material",
+    "start": 703.44,
+    "duration": 2.72
+  },
+  {
+    "text": "instances with matching parameters will",
+    "start": 704.88,
+    "duration": 2.56
+  },
+  {
+    "text": "share the same shader map so We don't",
+    "start": 706.16,
+    "duration": 2.72
+  },
+  {
+    "text": "even actually submit compile jobs for",
+    "start": 707.44,
+    "duration": 2.8
+  },
+  {
+    "text": "those. Those are just the cheapest way",
+    "start": 708.88,
+    "duration": 5.199
+  },
+  {
+    "text": "of uh avoiding shader compilation. Now,",
+    "start": 710.24,
+    "duration": 5.68
+  },
+  {
+    "text": "at the point of submitting a shader",
+    "start": 714.079,
+    "duration": 3.681
+  },
+  {
+    "text": "compilation job, if all the code and",
+    "start": 715.92,
+    "duration": 4.0
+  },
+  {
+    "text": "compilation settings match exactly, the",
+    "start": 717.76,
+    "duration": 3.6
+  },
+  {
+    "text": "compilation itself is going to be done",
+    "start": 719.92,
+    "duration": 4.08
+  },
+  {
+    "text": "only once and the results are shared uh",
+    "start": 721.36,
+    "duration": 4.88
+  },
+  {
+    "text": "and cached into into memory for reuse",
+    "start": 724.0,
+    "duration": 4.72
+  },
+  {
+    "text": "later on. Um this can be the case",
+    "start": 726.24,
+    "duration": 4.0
+  },
+  {
+    "text": "basically when a shader type isn't",
+    "start": 728.72,
+    "duration": 3.119
+  },
+  {
+    "text": "influenced by differences in static",
+    "start": 730.24,
+    "duration": 3.279
+  },
+  {
+    "text": "switches or material property override",
+    "start": 731.839,
+    "duration": 3.361
+  },
+  {
+    "text": "values.",
+    "start": 733.519,
+    "duration": 4.0
+  },
+  {
+    "text": "Now after compilation duplicate shader",
+    "start": 735.2,
+    "duration": 4.319
+  },
+  {
+    "text": "bite code outputs uh what comes out of",
+    "start": 737.519,
+    "duration": 3.44
+  },
+  {
+    "text": "the compiler is only stored once in the",
+    "start": 739.519,
+    "duration": 3.361
+  },
+  {
+    "text": "final runtime shader library. So any",
+    "start": 740.959,
+    "duration": 3.601
+  },
+  {
+    "text": "jobs which result in identical output",
+    "start": 742.88,
+    "duration": 3.04
+  },
+  {
+    "text": "will just reference a single shared",
+    "start": 744.56,
+    "duration": 3.519
+  },
+  {
+    "text": "asset. Uh so this prevents additional",
+    "start": 745.92,
+    "duration": 4.159
+  },
+  {
+    "text": "runtime memory usage additional PSO",
+    "start": 748.079,
+    "duration": 3.521
+  },
+  {
+    "text": "compilation costs on platforms which",
+    "start": 750.079,
+    "duration": 4.56
+  },
+  {
+    "text": "have PSO compilation at runtime. And and",
+    "start": 751.6,
+    "duration": 4.88
+  },
+  {
+    "text": "this final bite code dduplication is",
+    "start": 754.639,
+    "duration": 4.241
+  },
+  {
+    "text": "actually the the most impactful. uh we",
+    "start": 756.48,
+    "duration": 5.68
+  },
+  {
+    "text": "we save a lot here, but to to do this we",
+    "start": 758.88,
+    "duration": 4.24
+  },
+  {
+    "text": "see we're just doing a lot of",
+    "start": 762.16,
+    "duration": 2.88
+  },
+  {
+    "text": "unnecessary compilation work. We we just",
+    "start": 763.12,
+    "duration": 3.36
+  },
+  {
+    "text": "can't tell it's unnecessary until after",
+    "start": 765.04,
+    "duration": 3.52
+  },
+  {
+    "text": "the compiler runs dead strips unused",
+    "start": 766.48,
+    "duration": 3.68
+  },
+  {
+    "text": "code and we get the the output the other",
+    "start": 768.56,
+    "duration": 4.6
+  },
+  {
+    "text": "end.",
+    "start": 770.16,
+    "duration": 3.0
+  },
+  {
+    "text": "So with all this in mind, there's a few",
+    "start": 773.36,
+    "duration": 3.12
+  },
+  {
+    "text": "strategies I can suggest to manage",
+    "start": 774.8,
+    "duration": 3.52
+  },
+  {
+    "text": "shader codes without needing to make any",
+    "start": 776.48,
+    "duration": 4.32
+  },
+  {
+    "text": "changes to the engine. And first and",
+    "start": 778.32,
+    "duration": 4.319
+  },
+  {
+    "text": "maybe most obvious is just keep tight",
+    "start": 780.8,
+    "duration": 3.2
+  },
+  {
+    "text": "control over the number of materials you",
+    "start": 782.639,
+    "duration": 3.2
+  },
+  {
+    "text": "create for your project. Fewer base",
+    "start": 784.0,
+    "duration": 3.12
+  },
+  {
+    "text": "materials means fewer potential",
+    "start": 785.839,
+    "duration": 3.041
+  },
+  {
+    "text": "permutation variations that can created",
+    "start": 787.12,
+    "duration": 3.519
+  },
+  {
+    "text": "down the line and artists should",
+    "start": 788.88,
+    "duration": 3.12
+  },
+  {
+    "text": "generally prefer to be creating material",
+    "start": 790.639,
+    "duration": 3.041
+  },
+  {
+    "text": "instances whenever possible. They're",
+    "start": 792.0,
+    "duration": 4.72
+  },
+  {
+    "text": "more likely to be duplicated.",
+    "start": 793.68,
+    "duration": 4.8
+  },
+  {
+    "text": "Second is just avoid static switches and",
+    "start": 796.72,
+    "duration": 3.44
+  },
+  {
+    "text": "base materials and material functions",
+    "start": 798.48,
+    "duration": 3.68
+  },
+  {
+    "text": "whenever you can. Uh prefer uniform",
+    "start": 800.16,
+    "duration": 3.6
+  },
+  {
+    "text": "parameters even at the cost of increased",
+    "start": 802.16,
+    "duration": 3.84
+  },
+  {
+    "text": "instruction count and don't assume that",
+    "start": 803.76,
+    "duration": 4.24
+  },
+  {
+    "text": "higher instruction count means slower",
+    "start": 806.0,
+    "duration": 4.16
+  },
+  {
+    "text": "just profile.",
+    "start": 808.0,
+    "duration": 4.48
+  },
+  {
+    "text": "um it it possibly it's not going to help",
+    "start": 810.16,
+    "duration": 3.679
+  },
+  {
+    "text": "in the way you think it will especially",
+    "start": 812.48,
+    "duration": 3.919
+  },
+  {
+    "text": "on more modern hardware.",
+    "start": 813.839,
+    "duration": 5.361
+  },
+  {
+    "text": "Now caveat it's not always possible to",
+    "start": 816.399,
+    "duration": 6.0
+  },
+  {
+    "text": "avoid static switches. Uh material",
+    "start": 819.2,
+    "duration": 4.96
+  },
+  {
+    "text": "translator currently doesn't handle",
+    "start": 822.399,
+    "duration": 3.44
+  },
+  {
+    "text": "denic branching around uniform",
+    "start": 824.16,
+    "duration": 3.919
+  },
+  {
+    "text": "parameters very well. It computes both",
+    "start": 825.839,
+    "duration": 3.921
+  },
+  {
+    "text": "inputs and then selects only the result",
+    "start": 828.079,
+    "duration": 3.76
+  },
+  {
+    "text": "which is obviously not ideal. This is",
+    "start": 829.76,
+    "duration": 3.12
+  },
+  {
+    "text": "one of the things our new material",
+    "start": 831.839,
+    "duration": 2.721
+  },
+  {
+    "text": "translator is going to address. So stay",
+    "start": 832.88,
+    "duration": 3.199
+  },
+  {
+    "text": "tuned. It's in development right now. We",
+    "start": 834.56,
+    "duration": 3.44
+  },
+  {
+    "text": "don't have any promised versions yet but",
+    "start": 836.079,
+    "duration": 4.481
+  },
+  {
+    "text": "it's coming. Um, you also might need a",
+    "start": 838.0,
+    "duration": 4.399
+  },
+  {
+    "text": "swat static switch to branch around a",
+    "start": 840.56,
+    "duration": 4.48
+  },
+  {
+    "text": "texture sample. Uh, both just to avoid",
+    "start": 842.399,
+    "duration": 4.321
+  },
+  {
+    "text": "memory loads or even just to avoid",
+    "start": 845.04,
+    "duration": 3.12
+  },
+  {
+    "text": "exceeding sample limits and preventing",
+    "start": 846.72,
+    "duration": 2.799
+  },
+  {
+    "text": "your shaders from compiling at all in",
+    "start": 848.16,
+    "duration": 3.28
+  },
+  {
+    "text": "the first place. So, these are, you",
+    "start": 849.519,
+    "duration": 3.201
+  },
+  {
+    "text": "know, some of the valid reasons to have",
+    "start": 851.44,
+    "duration": 2.959
+  },
+  {
+    "text": "sweat switches right now, but we're",
+    "start": 852.72,
+    "duration": 5.359
+  },
+  {
+    "text": "hoping to do some stuff to improve this.",
+    "start": 854.399,
+    "duration": 5.761
+  },
+  {
+    "text": "Uh, third is just analyzing what shaders",
+    "start": 858.079,
+    "duration": 3.921
+  },
+  {
+    "text": "are actually used in your game. Um, we",
+    "start": 860.16,
+    "duration": 4.16
+  },
+  {
+    "text": "find often we just have things that are",
+    "start": 862.0,
+    "duration": 4.56
+  },
+  {
+    "text": "compiled that are never used. um look at",
+    "start": 864.32,
+    "duration": 4.0
+  },
+  {
+    "text": "your materials, disable any unne",
+    "start": 866.56,
+    "duration": 3.839
+  },
+  {
+    "text": "unnecessary material usage flags, unused",
+    "start": 868.32,
+    "duration": 3.519
+  },
+  {
+    "text": "rendering features can be disabled",
+    "start": 870.399,
+    "duration": 3.281
+  },
+  {
+    "text": "sometimes by carss and settings, that",
+    "start": 871.839,
+    "duration": 3.68
+  },
+  {
+    "text": "kind of thing. Uh we do have a couple of",
+    "start": 873.68,
+    "duration": 3.519
+  },
+  {
+    "text": "new features in 56 that can help you",
+    "start": 875.519,
+    "duration": 5.521
+  },
+  {
+    "text": "analyze this stuff. Um first is a uh a",
+    "start": 877.199,
+    "duration": 5.2
+  },
+  {
+    "text": "runtime command called list shaders. You",
+    "start": 881.04,
+    "duration": 2.479
+  },
+  {
+    "text": "can see the output of that on the left",
+    "start": 882.399,
+    "duration": 2.88
+  },
+  {
+    "text": "here. Basically just tells you all the",
+    "start": 883.519,
+    "duration": 3.361
+  },
+  {
+    "text": "shaders have been loaded and created at",
+    "start": 885.279,
+    "duration": 4.881
+  },
+  {
+    "text": "runtime. And on the right is a is a cook",
+    "start": 886.88,
+    "duration": 4.959
+  },
+  {
+    "text": "artifact of the shader type stats which",
+    "start": 890.16,
+    "duration": 3.359
+  },
+  {
+    "text": "is another CSV which basically tells you",
+    "start": 891.839,
+    "duration": 3.12
+  },
+  {
+    "text": "all the shaders that were compiled",
+    "start": 893.519,
+    "duration": 3.361
+  },
+  {
+    "text": "during the cook and packaged into the",
+    "start": 894.959,
+    "duration": 4.161
+  },
+  {
+    "text": "shader library. Uh so any discrepancies",
+    "start": 896.88,
+    "duration": 4.639
+  },
+  {
+    "text": "between these two lists uh can basically",
+    "start": 899.12,
+    "duration": 3.839
+  },
+  {
+    "text": "be leads into features that you might be",
+    "start": 901.519,
+    "duration": 2.961
+  },
+  {
+    "text": "able to disable or usage flags you might",
+    "start": 902.959,
+    "duration": 3.281
+  },
+  {
+    "text": "be able to turn off. So you find any",
+    "start": 904.48,
+    "duration": 2.96
+  },
+  {
+    "text": "unused shaders that don't have any",
+    "start": 906.24,
+    "duration": 3.599
+  },
+  {
+    "text": "apparent toggle, please reach out to us.",
+    "start": 907.44,
+    "duration": 4.079
+  },
+  {
+    "text": "Uh we're going through this process a",
+    "start": 909.839,
+    "duration": 2.881
+  },
+  {
+    "text": "lot internally right now and trying to",
+    "start": 911.519,
+    "duration": 2.88
+  },
+  {
+    "text": "analyze and and turn things off where we",
+    "start": 912.72,
+    "duration": 4.479
+  },
+  {
+    "text": "can. uh but our use cases are probably",
+    "start": 914.399,
+    "duration": 4.0
+  },
+  {
+    "text": "very different than yours. So we're",
+    "start": 917.199,
+    "duration": 4.76
+  },
+  {
+    "text": "probably going to miss some.",
+    "start": 918.399,
+    "duration": 3.56
+  },
+  {
+    "text": "Now this is just a brief detour uh to",
+    "start": 922.399,
+    "duration": 3.841
+  },
+  {
+    "text": "talk about uh on demand shader",
+    "start": 924.639,
+    "duration": 3.76
+  },
+  {
+    "text": "compilation. Uh this was a this came",
+    "start": 926.24,
+    "duration": 4.719
+  },
+  {
+    "text": "about in E5. It roughly speaking allows",
+    "start": 928.399,
+    "duration": 4.961
+  },
+  {
+    "text": "you to run with incomplete and initially",
+    "start": 930.959,
+    "duration": 3.68
+  },
+  {
+    "text": "empty material shader maps in the",
+    "start": 933.36,
+    "duration": 4.4
+  },
+  {
+    "text": "editor. Uh so only shaders required by",
+    "start": 934.639,
+    "duration": 4.721
+  },
+  {
+    "text": "the visible scene will be compiled when",
+    "start": 937.76,
+    "duration": 4.079
+  },
+  {
+    "text": "they're needed on demand. Um, while this",
+    "start": 939.36,
+    "duration": 4.08
+  },
+  {
+    "text": "compilation is in progress, objects are",
+    "start": 941.839,
+    "duration": 2.641
+  },
+  {
+    "text": "just going to render with the default",
+    "start": 943.44,
+    "duration": 3.28
+  },
+  {
+    "text": "materials. Now, as the request's",
+    "start": 944.48,
+    "duration": 3.919
+  },
+  {
+    "text": "complete, we replace the shader maps and",
+    "start": 946.72,
+    "duration": 2.96
+  },
+  {
+    "text": "the render objects are invalidated and",
+    "start": 948.399,
+    "duration": 2.641
+  },
+  {
+    "text": "then picked up the new materials on the",
+    "start": 949.68,
+    "duration": 4.159
+  },
+  {
+    "text": "fly. Um, so this means that, you know,",
+    "start": 951.04,
+    "duration": 4.239
+  },
+  {
+    "text": "map load and play and editor, those two",
+    "start": 953.839,
+    "duration": 2.8
+  },
+  {
+    "text": "compilation phases I mentioned before",
+    "start": 955.279,
+    "duration": 2.641
+  },
+  {
+    "text": "are just compiling a lot less shaders",
+    "start": 956.639,
+    "duration": 2.88
+  },
+  {
+    "text": "than they were in U4 days. So, it's it's",
+    "start": 957.92,
+    "duration": 3.52
+  },
+  {
+    "text": "it's a much much better situation than",
+    "start": 959.519,
+    "duration": 3.361
+  },
+  {
+    "text": "it was. It's not perfect, but it's",
+    "start": 961.44,
+    "duration": 4.319
+  },
+  {
+    "text": "better. Um, this, however, is basically",
+    "start": 962.88,
+    "duration": 4.319
+  },
+  {
+    "text": "an editor workflow thing. It doesn't",
+    "start": 965.759,
+    "duration": 2.961
+  },
+  {
+    "text": "really impact the cook process at all.",
+    "start": 967.199,
+    "duration": 2.721
+  },
+  {
+    "text": "I'm not really going to delve into a lot",
+    "start": 968.72,
+    "duration": 3.119
+  },
+  {
+    "text": "of detail here, but there is a reason I",
+    "start": 969.92,
+    "duration": 3.919
+  },
+  {
+    "text": "bring it up, and it's that it introduced",
+    "start": 971.839,
+    "duration": 4.401
+  },
+  {
+    "text": "a per shader cache. Um, basically",
+    "start": 973.839,
+    "duration": 3.841
+  },
+  {
+    "text": "results of a single shader compilation",
+    "start": 976.24,
+    "duration": 3.92
+  },
+  {
+    "text": "job is cached in DDC. Uh, meaning the",
+    "start": 977.68,
+    "duration": 4.0
+  },
+  {
+    "text": "results of any ODSE requests could be",
+    "start": 980.16,
+    "duration": 3.359
+  },
+  {
+    "text": "persisted from one editor session to the",
+    "start": 981.68,
+    "duration": 4.24
+  },
+  {
+    "text": "next. Now, at the time, this only",
+    "start": 983.519,
+    "duration": 5.281
+  },
+  {
+    "text": "happened locally. So, only one user uh",
+    "start": 985.92,
+    "duration": 4.56
+  },
+  {
+    "text": "could share results over and over again.",
+    "start": 988.8,
+    "duration": 3.92
+  },
+  {
+    "text": "It wasn't put into shared caches at all.",
+    "start": 990.48,
+    "duration": 4.4
+  },
+  {
+    "text": "Uh, and and again, like I said, only an",
+    "start": 992.72,
+    "duration": 5.919
+  },
+  {
+    "text": "editor. So um but this is a key key kind",
+    "start": 994.88,
+    "duration": 4.959
+  },
+  {
+    "text": "of piece of groundwork and made us",
+    "start": 998.639,
+    "duration": 2.64
+  },
+  {
+    "text": "realize that per shader caching was",
+    "start": 999.839,
+    "duration": 2.881
+  },
+  {
+    "text": "somewhat viable. It just needed some",
+    "start": 1001.279,
+    "duration": 4.321
+  },
+  {
+    "text": "work.",
+    "start": 1002.72,
+    "duration": 5.119
+  },
+  {
+    "text": "So just a bit of a diagram to kind of",
+    "start": 1005.6,
+    "duration": 4.0
+  },
+  {
+    "text": "show you the the old version of the",
+    "start": 1007.839,
+    "duration": 4.56
+  },
+  {
+    "text": "shader compilation flow. Uh only full",
+    "start": 1009.6,
+    "duration": 5.2
+  },
+  {
+    "text": "shader maps cast DDC any misses on DDC",
+    "start": 1012.399,
+    "duration": 4.161
+  },
+  {
+    "text": "queries necessated that all shaders for",
+    "start": 1014.8,
+    "duration": 3.2
+  },
+  {
+    "text": "the shader map would be either compiled",
+    "start": 1016.56,
+    "duration": 3.519
+  },
+  {
+    "text": "or possibly and not really terribly",
+    "start": 1018.0,
+    "duration": 3.759
+  },
+  {
+    "text": "commonly retrieved from the previously",
+    "start": 1020.079,
+    "duration": 3.361
+  },
+  {
+    "text": "mentioned in memory shader compiled job",
+    "start": 1021.759,
+    "duration": 4.721
+  },
+  {
+    "text": "cache. Uh the reason why like this cache",
+    "start": 1023.44,
+    "duration": 5.359
+  },
+  {
+    "text": "on average wasn't very impactful is",
+    "start": 1026.48,
+    "duration": 3.92
+  },
+  {
+    "text": "because the cache key for the individual",
+    "start": 1028.799,
+    "duration": 4.081
+  },
+  {
+    "text": "shaders was also based on full source",
+    "start": 1030.4,
+    "duration": 3.84
+  },
+  {
+    "text": "not pre-process source or anything like",
+    "start": 1032.88,
+    "duration": 3.039
+  },
+  {
+    "text": "that. So uh this effectively only",
+    "start": 1034.24,
+    "duration": 2.799
+  },
+  {
+    "text": "happened when different instances of the",
+    "start": 1035.919,
+    "duration": 2.721
+  },
+  {
+    "text": "same material contain shaders which",
+    "start": 1037.039,
+    "duration": 3.361
+  },
+  {
+    "text": "weren't dependent on you know static",
+    "start": 1038.64,
+    "duration": 4.159
+  },
+  {
+    "text": "parameters or usage flags or or sorry",
+    "start": 1040.4,
+    "duration": 3.919
+  },
+  {
+    "text": "static parameters or material property",
+    "start": 1042.799,
+    "duration": 4.24
+  },
+  {
+    "text": "overrides.",
+    "start": 1044.319,
+    "duration": 3.841
+  },
+  {
+    "text": "So with that I'm going to move on to",
+    "start": 1047.039,
+    "duration": 2.721
+  },
+  {
+    "text": "what is the bulk of the talk. Uh it's",
+    "start": 1048.16,
+    "duration": 2.879
+  },
+  {
+    "text": "the it's the work that came out of our",
+    "start": 1049.76,
+    "duration": 3.68
+  },
+  {
+    "text": "strike team.",
+    "start": 1051.039,
+    "duration": 4.721
+  },
+  {
+    "text": "So our first big win uh came in the form",
+    "start": 1053.44,
+    "duration": 3.76
+  },
+  {
+    "text": "of a library we refer to as the shader",
+    "start": 1055.76,
+    "duration": 3.12
+  },
+  {
+    "text": "minifier.",
+    "start": 1057.2,
+    "duration": 4.56
+  },
+  {
+    "text": "So we were profiling DXE the DirectX",
+    "start": 1058.88,
+    "duration": 4.56
+  },
+  {
+    "text": "shader compiler and we saw just a lot of",
+    "start": 1061.76,
+    "duration": 3.919
+  },
+  {
+    "text": "time spent in frontend parsing ASD",
+    "start": 1063.44,
+    "duration": 4.88
+  },
+  {
+    "text": "creation that kind of thing. Um UE",
+    "start": 1065.679,
+    "duration": 5.521
+  },
+  {
+    "text": "shaders tend to be very large after",
+    "start": 1068.32,
+    "duration": 4.56
+  },
+  {
+    "text": "pre-processing like over a megabyte in",
+    "start": 1071.2,
+    "duration": 2.88
+  },
+  {
+    "text": "size thousands and thousands of",
+    "start": 1072.88,
+    "duration": 3.6
+  },
+  {
+    "text": "functions uh often very little of which",
+    "start": 1074.08,
+    "duration": 3.92
+  },
+  {
+    "text": "was actually used in the final shader",
+    "start": 1076.48,
+    "duration": 5.36
+  },
+  {
+    "text": "but it was still being parsed. Um so the",
+    "start": 1078.0,
+    "duration": 6.16
+  },
+  {
+    "text": "idea came about uh what if we do a",
+    "start": 1081.84,
+    "duration": 4.32
+  },
+  {
+    "text": "coarse dead stripping prepass? Can we do",
+    "start": 1084.16,
+    "duration": 3.68
+  },
+  {
+    "text": "this fast enough to offset the cost of",
+    "start": 1086.16,
+    "duration": 4.399
+  },
+  {
+    "text": "it by gains in compile time? And it",
+    "start": 1087.84,
+    "duration": 4.24
+  },
+  {
+    "text": "turns out the answer is yes and by quite",
+    "start": 1090.559,
+    "duration": 3.36
+  },
+  {
+    "text": "a margin.",
+    "start": 1092.08,
+    "duration": 3.599
+  },
+  {
+    "text": "So the rest process here is we divide",
+    "start": 1093.919,
+    "duration": 3.521
+  },
+  {
+    "text": "our shader source files into chunks. The",
+    "start": 1095.679,
+    "duration": 3.441
+  },
+  {
+    "text": "chunks are things like function, cbuffer",
+    "start": 1097.44,
+    "duration": 4.32
+  },
+  {
+    "text": "declarations, uh variable declarations,",
+    "start": 1099.12,
+    "duration": 5.04
+  },
+  {
+    "text": "etc. We find all the chunks that are",
+    "start": 1101.76,
+    "duration": 4.96
+  },
+  {
+    "text": "relevant to a a single entry point or a",
+    "start": 1104.16,
+    "duration": 4.48
+  },
+  {
+    "text": "set of entry points and then we just",
+    "start": 1106.72,
+    "duration": 3.44
+  },
+  {
+    "text": "emit a new copy of a source containing",
+    "start": 1108.64,
+    "duration": 3.52
+  },
+  {
+    "text": "only those chunks.",
+    "start": 1110.16,
+    "duration": 5.759
+  },
+  {
+    "text": "So results we basically that front end",
+    "start": 1112.16,
+    "duration": 6.24
+  },
+  {
+    "text": "compile cost almost disappeared. It it",
+    "start": 1115.919,
+    "duration": 4.481
+  },
+  {
+    "text": "you know pretty much evaporated. Uh our",
+    "start": 1118.4,
+    "duration": 3.36
+  },
+  {
+    "text": "overall compile time especially on some",
+    "start": 1120.4,
+    "duration": 2.8
+  },
+  {
+    "text": "of the worst case shaders which stripped",
+    "start": 1121.76,
+    "duration": 4.08
+  },
+  {
+    "text": "most the code improved significantly. So",
+    "start": 1123.2,
+    "duration": 4.24
+  },
+  {
+    "text": "we rolled this out. It was experimental",
+    "start": 1125.84,
+    "duration": 4.56
+  },
+  {
+    "text": "in 51 and 52. It was on by default in 53",
+    "start": 1127.44,
+    "duration": 4.08
+  },
+  {
+    "text": "for everything except for metal and",
+    "start": 1130.4,
+    "duration": 3.84
+  },
+  {
+    "text": "OpenGL. And then I think in 54 it was on",
+    "start": 1131.52,
+    "duration": 5.519
+  },
+  {
+    "text": "by default for everything.",
+    "start": 1134.24,
+    "duration": 4.64
+  },
+  {
+    "text": "Now, spoiler alert, with this in place,",
+    "start": 1137.039,
+    "duration": 3.361
+  },
+  {
+    "text": "we started just noticing that a lot of",
+    "start": 1138.88,
+    "duration": 4.159
+  },
+  {
+    "text": "shaders were exactly the same uh from",
+    "start": 1140.4,
+    "duration": 4.24
+  },
+  {
+    "text": "different materials, different passes,",
+    "start": 1143.039,
+    "duration": 3.441
+  },
+  {
+    "text": "things that like don't even make sense",
+    "start": 1144.64,
+    "duration": 4.08
+  },
+  {
+    "text": "to be related, like that they just were",
+    "start": 1146.48,
+    "duration": 4.72
+  },
+  {
+    "text": "identical. So, uh this led us to think",
+    "start": 1148.72,
+    "duration": 3.76
+  },
+  {
+    "text": "we can probably take advantage of this",
+    "start": 1151.2,
+    "duration": 2.719
+  },
+  {
+    "text": "somehow to further improve our",
+    "start": 1152.48,
+    "duration": 5.319
+  },
+  {
+    "text": "pre-ompilation dduplication.",
+    "start": 1153.919,
+    "duration": 3.88
+  },
+  {
+    "text": "So, next we actually revisited our",
+    "start": 1157.919,
+    "duration": 4.401
+  },
+  {
+    "text": "pre-processing library as well. Uh so in",
+    "start": 1160.08,
+    "duration": 4.64
+  },
+  {
+    "text": "5.1 and earlier we were relying on MCVP",
+    "start": 1162.32,
+    "duration": 5.12
+  },
+  {
+    "text": "which is like really old like mid2000s",
+    "start": 1164.72,
+    "duration": 5.52
+  },
+  {
+    "text": "C++ library uh pre-process all our",
+    "start": 1167.44,
+    "duration": 4.239
+  },
+  {
+    "text": "shaders was not really maintained not",
+    "start": 1170.24,
+    "duration": 4.799
+  },
+  {
+    "text": "owned by anybody uh quite slow uh we we",
+    "start": 1171.679,
+    "duration": 5.041
+  },
+  {
+    "text": "profiled it compared it against DXE's",
+    "start": 1175.039,
+    "duration": 2.88
+  },
+  {
+    "text": "pre-processor and found it was like",
+    "start": 1176.72,
+    "duration": 4.319
+  },
+  {
+    "text": "almost twice as slow um it also wasn't",
+    "start": 1177.919,
+    "duration": 4.64
+  },
+  {
+    "text": "thread safe so we always had to run",
+    "start": 1181.039,
+    "duration": 3.361
+  },
+  {
+    "text": "pre-processing in our shader compile",
+    "start": 1182.559,
+    "duration": 4.24
+  },
+  {
+    "text": "worker separate executable process uh in",
+    "start": 1184.4,
+    "duration": 5.76
+  },
+  {
+    "text": "order to paralyze so we did evaluate DXE",
+    "start": 1186.799,
+    "duration": 5.041
+  },
+  {
+    "text": "itself as I mentioned",
+    "start": 1190.16,
+    "duration": 3.36
+  },
+  {
+    "text": "Uh but we did abandon this approach",
+    "start": 1191.84,
+    "duration": 3.76
+  },
+  {
+    "text": "because first of all the the way it",
+    "start": 1193.52,
+    "duration": 4.32
+  },
+  {
+    "text": "output code was just really weird and",
+    "start": 1195.6,
+    "duration": 4.079
+  },
+  {
+    "text": "inflexible. There was no configurability",
+    "start": 1197.84,
+    "duration": 3.04
+  },
+  {
+    "text": "whatsoever. We didn't want to have to",
+    "start": 1199.679,
+    "duration": 3.281
+  },
+  {
+    "text": "make changes to it. Uh and in general we",
+    "start": 1200.88,
+    "duration": 4.32
+  },
+  {
+    "text": "also just didn't want to have to rely on",
+    "start": 1202.96,
+    "duration": 4.32
+  },
+  {
+    "text": "DXC for all of our target platforms.",
+    "start": 1205.2,
+    "duration": 3.359
+  },
+  {
+    "text": "Something we don't really have direct",
+    "start": 1207.28,
+    "duration": 5.68
+  },
+  {
+    "text": "control over. Um now Epic around the",
+    "start": 1208.559,
+    "duration": 6.321
+  },
+  {
+    "text": "same time acquired RAD game tools which",
+    "start": 1212.96,
+    "duration": 3.599
+  },
+  {
+    "text": "was great. Came to light. They had a",
+    "start": 1214.88,
+    "duration": 3.679
+  },
+  {
+    "text": "fast pure C pre-processor that came",
+    "start": 1216.559,
+    "duration": 3.841
+  },
+  {
+    "text": "about as part of like a shelved RAD",
+    "start": 1218.559,
+    "duration": 4.721
+  },
+  {
+    "text": "compiler project. Um so we started",
+    "start": 1220.4,
+    "duration": 5.6
+  },
+  {
+    "text": "testing it. Um early tests showed quite",
+    "start": 1223.28,
+    "duration": 4.639
+  },
+  {
+    "text": "a good improvement over DXE and even",
+    "start": 1226.0,
+    "duration": 4.64
+  },
+  {
+    "text": "better over MCVP. Though it was",
+    "start": 1227.919,
+    "duration": 4.24
+  },
+  {
+    "text": "incomplete and needed some work to make",
+    "start": 1230.64,
+    "duration": 3.12
+  },
+  {
+    "text": "it fit for a purpose in in the shader",
+    "start": 1232.159,
+    "duration": 4.0
+  },
+  {
+    "text": "comp file system. So most notably we had",
+    "start": 1233.76,
+    "duration": 4.32
+  },
+  {
+    "text": "to add this file loading virtualization",
+    "start": 1236.159,
+    "duration": 3.52
+  },
+  {
+    "text": "mechanism because we have you know",
+    "start": 1238.08,
+    "duration": 3.839
+  },
+  {
+    "text": "virtual shader file paths in UEIE. Uh we",
+    "start": 1239.679,
+    "duration": 3.521
+  },
+  {
+    "text": "also did a big pass to improve",
+    "start": 1241.919,
+    "duration": 4.24
+  },
+  {
+    "text": "stability, memory usage, performance. Um",
+    "start": 1243.2,
+    "duration": 4.0
+  },
+  {
+    "text": "heavily optimized a bunch of the",
+    "start": 1246.159,
+    "duration": 2.321
+  },
+  {
+    "text": "bottlenecks that appeared when we were",
+    "start": 1247.2,
+    "duration": 3.12
+  },
+  {
+    "text": "analyzing how it performed on our large",
+    "start": 1248.48,
+    "duration": 4.559
+  },
+  {
+    "text": "shader codebase. But yeah, with these",
+    "start": 1250.32,
+    "duration": 4.239
+  },
+  {
+    "text": "improvements in place, it was uh",
+    "start": 1253.039,
+    "duration": 3.921
+  },
+  {
+    "text": "introduces experimental also in U52 and",
+    "start": 1254.559,
+    "duration": 4.081
+  },
+  {
+    "text": "enabled by default in 53 at which point",
+    "start": 1256.96,
+    "duration": 3.599
+  },
+  {
+    "text": "we kicked MCVP to the curb and everyone",
+    "start": 1258.64,
+    "duration": 4.399
+  },
+  {
+    "text": "was happy.",
+    "start": 1260.559,
+    "duration": 4.401
+  },
+  {
+    "text": "So the most critical work in this whole",
+    "start": 1263.039,
+    "duration": 3.601
+  },
+  {
+    "text": "process follows on from what I noted two",
+    "start": 1264.96,
+    "duration": 3.68
+  },
+  {
+    "text": "slides ago which is that shaders just",
+    "start": 1266.64,
+    "duration": 3.279
+  },
+  {
+    "text": "tend to become identical after",
+    "start": 1268.64,
+    "duration": 4.48
+  },
+  {
+    "text": "pre-processing and minification. So we",
+    "start": 1269.919,
+    "duration": 5.041
+  },
+  {
+    "text": "had this per shader DDC caching",
+    "start": 1273.12,
+    "duration": 4.32
+  },
+  {
+    "text": "mechanism from ODSC and we theorized and",
+    "start": 1274.96,
+    "duration": 3.76
+  },
+  {
+    "text": "confirmed with some analysis that",
+    "start": 1277.44,
+    "duration": 3.04
+  },
+  {
+    "text": "pre-processing and minifying the source",
+    "start": 1278.72,
+    "duration": 3.36
+  },
+  {
+    "text": "for each individual shader during the",
+    "start": 1280.48,
+    "duration": 3.92
+  },
+  {
+    "text": "job submission process and then enabling",
+    "start": 1282.08,
+    "duration": 4.24
+  },
+  {
+    "text": "this per shader cache by default and",
+    "start": 1284.4,
+    "duration": 3.92
+  },
+  {
+    "text": "allowing it to cache to shared caches",
+    "start": 1286.32,
+    "duration": 3.359
+  },
+  {
+    "text": "generating cache keys for this layer",
+    "start": 1288.32,
+    "duration": 2.96
+  },
+  {
+    "text": "based on a hash of the pre-processed and",
+    "start": 1289.679,
+    "duration": 3.841
+  },
+  {
+    "text": "strip source uh would allow us to",
+    "start": 1291.28,
+    "duration": 3.44
+  },
+  {
+    "text": "significantly reduce the number of",
+    "start": 1293.52,
+    "duration": 3.76
+  },
+  {
+    "text": "shaders compiled in the hook. Again,",
+    "start": 1294.72,
+    "duration": 4.88
+  },
+  {
+    "text": "some work required to accomplish this.",
+    "start": 1297.28,
+    "duration": 4.16
+  },
+  {
+    "text": "Um,",
+    "start": 1299.6,
+    "duration": 4.16
+  },
+  {
+    "text": "the main thing was we had to refactor",
+    "start": 1301.44,
+    "duration": 3.76
+  },
+  {
+    "text": "all of our shader formats. So,",
+    "start": 1303.76,
+    "duration": 3.279
+  },
+  {
+    "text": "pre-processing and compilation were",
+    "start": 1305.2,
+    "duration": 3.52
+  },
+  {
+    "text": "previously part of a monolithic compile",
+    "start": 1307.039,
+    "duration": 2.88
+  },
+  {
+    "text": "step. They were kind of intrinsically",
+    "start": 1308.72,
+    "duration": 2.16
+  },
+  {
+    "text": "linked. So, there was just a lot of",
+    "start": 1309.919,
+    "duration": 2.401
+  },
+  {
+    "text": "refactoring work to separate these two",
+    "start": 1310.88,
+    "duration": 4.24
+  },
+  {
+    "text": "things out. Um, we did a big",
+    "start": 1312.32,
+    "duration": 4.4
+  },
+  {
+    "text": "optimization pass on shader job",
+    "start": 1315.12,
+    "duration": 4.32
+  },
+  {
+    "text": "creation, shader job cre uh submission,",
+    "start": 1316.72,
+    "duration": 5.12
+  },
+  {
+    "text": "and we we also paralyzed it. So uh it",
+    "start": 1319.44,
+    "duration": 4.4
+  },
+  {
+    "text": "was previously mostly serial work on the",
+    "start": 1321.84,
+    "duration": 4.64
+  },
+  {
+    "text": "game thread uh and just a lot of time",
+    "start": 1323.84,
+    "duration": 4.0
+  },
+  {
+    "text": "lowhanging fruit there to gain on",
+    "start": 1326.48,
+    "duration": 3.679
+  },
+  {
+    "text": "algorithmic improvements.",
+    "start": 1327.84,
+    "duration": 3.76
+  },
+  {
+    "text": "And then finally uh we flipped the",
+    "start": 1330.159,
+    "duration": 2.88
+  },
+  {
+    "text": "switch on allowing individual shaders to",
+    "start": 1331.6,
+    "duration": 3.199
+  },
+  {
+    "text": "be sh cached to the shared caches. So",
+    "start": 1333.039,
+    "duration": 3.76
+  },
+  {
+    "text": "lifting the editor only and local only",
+    "start": 1334.799,
+    "duration": 5.921
+  },
+  {
+    "text": "restrictions that OTSC came with. Now",
+    "start": 1336.799,
+    "duration": 5.601
+  },
+  {
+    "text": "the final step here revealed some",
+    "start": 1340.72,
+    "duration": 4.16
+  },
+  {
+    "text": "bottlenecks within DDC. uh most notably",
+    "start": 1342.4,
+    "duration": 3.92
+  },
+  {
+    "text": "that the shared file system the DC",
+    "start": 1344.88,
+    "duration": 3.279
+  },
+  {
+    "text": "mechanism just couldn't handle the load",
+    "start": 1346.32,
+    "duration": 3.92
+  },
+  {
+    "text": "of you know millions of requests during",
+    "start": 1348.159,
+    "duration": 3.921
+  },
+  {
+    "text": "a cook uh and this actually became the",
+    "start": 1350.24,
+    "duration": 3.04
+  },
+  {
+    "text": "primary cook bottleneck and actually",
+    "start": 1352.08,
+    "duration": 2.719
+  },
+  {
+    "text": "slowed our cooks down so it was kind of",
+    "start": 1353.28,
+    "duration": 4.16
+  },
+  {
+    "text": "taking us backwards however we have zen",
+    "start": 1354.799,
+    "duration": 5.601
+  },
+  {
+    "text": "server so we just punted file system DDC",
+    "start": 1357.44,
+    "duration": 4.88
+  },
+  {
+    "text": "to the curb internally spin up shared",
+    "start": 1360.4,
+    "duration": 3.519
+  },
+  {
+    "text": "zen server mechanisms in a bunch of",
+    "start": 1362.32,
+    "duration": 3.92
+  },
+  {
+    "text": "locations and uh and that just kind of",
+    "start": 1363.919,
+    "duration": 5.12
+  },
+  {
+    "text": "solved the problem um we also did some",
+    "start": 1366.24,
+    "duration": 4.72
+  },
+  {
+    "text": "restructuring of how DDC's response",
+    "start": 1369.039,
+    "duration": 4.721
+  },
+  {
+    "text": "tasks were uh uh prioritized",
+    "start": 1370.96,
+    "duration": 4.719
+  },
+  {
+    "text": "to allow better interle and background",
+    "start": 1373.76,
+    "duration": 4.159
+  },
+  {
+    "text": "work. So which basically meant the DDC",
+    "start": 1375.679,
+    "duration": 3.681
+  },
+  {
+    "text": "requests completed faster. We could kick",
+    "start": 1377.919,
+    "duration": 3.12
+  },
+  {
+    "text": "off shader compile jobs faster or get",
+    "start": 1379.36,
+    "duration": 4.08
+  },
+  {
+    "text": "higher throughput and faster cooks. That",
+    "start": 1381.039,
+    "duration": 6.441
+  },
+  {
+    "text": "was pretty impactful as well.",
+    "start": 1383.44,
+    "duration": 4.04
+  },
+  {
+    "text": "Sorry.",
+    "start": 1389.2,
+    "duration": 4.64
+  },
+  {
+    "text": "So on top of the improved dduplication",
+    "start": 1390.799,
+    "duration": 5.12
+  },
+  {
+    "text": "rate, uh there's actually a lot of other",
+    "start": 1393.84,
+    "duration": 3.28
+  },
+  {
+    "text": "benefits from caching based on",
+    "start": 1395.919,
+    "duration": 3.841
+  },
+  {
+    "text": "pre-processed minified source. Uh and",
+    "start": 1397.12,
+    "duration": 4.16
+  },
+  {
+    "text": "the biggest advantage comes from the",
+    "start": 1399.76,
+    "duration": 3.2
+  },
+  {
+    "text": "fact that the beak shader invalidations",
+    "start": 1401.28,
+    "duration": 3.12
+  },
+  {
+    "text": "which were the crux of most of our cook",
+    "start": 1402.96,
+    "duration": 3.04
+  },
+  {
+    "text": "problems become much less frequent. And",
+    "start": 1404.4,
+    "duration": 3.04
+  },
+  {
+    "text": "there's a few reasons why this is the",
+    "start": 1406.0,
+    "duration": 5.52
+  },
+  {
+    "text": "case. Uh first we added a final kind of",
+    "start": 1407.44,
+    "duration": 6.08
+  },
+  {
+    "text": "pre-processing step to strip comments",
+    "start": 1411.52,
+    "duration": 3.44
+  },
+  {
+    "text": "normalize whites space everything else",
+    "start": 1413.52,
+    "duration": 3.039
+  },
+  {
+    "text": "to make shaders look as close as",
+    "start": 1414.96,
+    "duration": 3.44
+  },
+  {
+    "text": "possible which meant those trivial",
+    "start": 1416.559,
+    "duration": 3.281
+  },
+  {
+    "text": "invalidations things like changing",
+    "start": 1418.4,
+    "duration": 2.96
+  },
+  {
+    "text": "comments and changing whites space no",
+    "start": 1419.84,
+    "duration": 3.28
+  },
+  {
+    "text": "longer cause recompilation which is",
+    "start": 1421.36,
+    "duration": 3.6
+  },
+  {
+    "text": "great.",
+    "start": 1423.12,
+    "duration": 3.919
+  },
+  {
+    "text": "uh small changes in a shared header uh",
+    "start": 1424.96,
+    "duration": 3.599
+  },
+  {
+    "text": "to like isolated functions won't",
+    "start": 1427.039,
+    "duration": 3.12
+  },
+  {
+    "text": "necessarily trigger a large invalidation",
+    "start": 1428.559,
+    "duration": 3.521
+  },
+  {
+    "text": "anymore. Only the the shaders which",
+    "start": 1430.159,
+    "duration": 3.441
+  },
+  {
+    "text": "actually use the code tend to be",
+    "start": 1432.08,
+    "duration": 3.12
+  },
+  {
+    "text": "recompiled because otherwise minifier",
+    "start": 1433.6,
+    "duration": 5.199
+  },
+  {
+    "text": "probably strips those functions. Great.",
+    "start": 1435.2,
+    "duration": 5.44
+  },
+  {
+    "text": "Uh this is a fun one. I don't know if",
+    "start": 1438.799,
+    "duration": 3.521
+  },
+  {
+    "text": "you've caught this before, but in like",
+    "start": 1440.64,
+    "duration": 4.8
+  },
+  {
+    "text": "three 53 and earlier uh if you changed",
+    "start": 1442.32,
+    "duration": 5.2
+  },
+  {
+    "text": "an Xbox header, all the PS5 shaders",
+    "start": 1445.44,
+    "duration": 4.88
+  },
+  {
+    "text": "would compile. Um and [laughter]",
+    "start": 1447.52,
+    "duration": 4.72
+  },
+  {
+    "text": "it it it sounds dumb but the reason this",
+    "start": 1450.32,
+    "duration": 3.44
+  },
+  {
+    "text": "was happening was because our hashing",
+    "start": 1452.24,
+    "duration": 4.4
+  },
+  {
+    "text": "mechanism that uh you know for hashing",
+    "start": 1453.76,
+    "duration": 5.2
+  },
+  {
+    "text": "the shader source uh we don't have",
+    "start": 1456.64,
+    "duration": 3.44
+  },
+  {
+    "text": "enough context at that point to do",
+    "start": 1458.96,
+    "duration": 2.64
+  },
+  {
+    "text": "pre-processing. So we can't strip out",
+    "start": 1460.08,
+    "duration": 3.28
+  },
+  {
+    "text": "all those includes. So our the hashing",
+    "start": 1461.6,
+    "duration": 3.12
+  },
+  {
+    "text": "is basically just a dumb scan of all the",
+    "start": 1463.36,
+    "duration": 2.799
+  },
+  {
+    "text": "include directives loads as any of the",
+    "start": 1464.72,
+    "duration": 3.28
+  },
+  {
+    "text": "files it can. It's permissive. So if it",
+    "start": 1466.159,
+    "duration": 3.601
+  },
+  {
+    "text": "can't load the file it just ignores it.",
+    "start": 1468.0,
+    "duration": 3.919
+  },
+  {
+    "text": "Uh but that meant yeah if you could",
+    "start": 1469.76,
+    "duration": 3.84
+  },
+  {
+    "text": "found a file on disk or like had some",
+    "start": 1471.919,
+    "duration": 3.681
+  },
+  {
+    "text": "you know we had some PS5 specific code",
+    "start": 1473.6,
+    "duration": 4.16
+  },
+  {
+    "text": "in the header that's going to invalidate",
+    "start": 1475.6,
+    "duration": 3.76
+  },
+  {
+    "text": "all shaders on all platforms even though",
+    "start": 1477.76,
+    "duration": 4.48
+  },
+  {
+    "text": "it should only touch PS5. So obviously",
+    "start": 1479.36,
+    "duration": 4.88
+  },
+  {
+    "text": "during pre-processing all the includes",
+    "start": 1482.24,
+    "duration": 3.84
+  },
+  {
+    "text": "are removed this issue just magically",
+    "start": 1484.24,
+    "duration": 4.84
+  },
+  {
+    "text": "disappears.",
+    "start": 1486.08,
+    "duration": 3.0
+  },
+  {
+    "text": "So uh also obviously enabling uh per",
+    "start": 1489.44,
+    "duration": 7.359
+  },
+  {
+    "text": "shader caching meant that uh on average",
+    "start": 1494.24,
+    "duration": 3.919
+  },
+  {
+    "text": "fewer shaders are compiled because",
+    "start": 1496.799,
+    "duration": 3.681
+  },
+  {
+    "text": "you're sharing results between uh uh you",
+    "start": 1498.159,
+    "duration": 4.4
+  },
+  {
+    "text": "know multiple users. Uh so chances are",
+    "start": 1500.48,
+    "duration": 2.88
+  },
+  {
+    "text": "pretty good someone has already",
+    "start": 1502.559,
+    "duration": 2.24
+  },
+  {
+    "text": "requested and compiled the shader",
+    "start": 1503.36,
+    "duration": 3.12
+  },
+  {
+    "text": "especially for active projects on large",
+    "start": 1504.799,
+    "duration": 3.76
+  },
+  {
+    "text": "teams whose you know shared binary",
+    "start": 1506.48,
+    "duration": 3.679
+  },
+  {
+    "text": "builds people who aren't modifying",
+    "start": 1508.559,
+    "duration": 3.441
+  },
+  {
+    "text": "materials just rarely have to compile",
+    "start": 1510.159,
+    "duration": 6.561
+  },
+  {
+    "text": "any shaders at all anymore. Um, we so we",
+    "start": 1512.0,
+    "duration": 6.799
+  },
+  {
+    "text": "analyzed performance on this around like",
+    "start": 1516.72,
+    "duration": 3.92
+  },
+  {
+    "text": "the 55 time frame because we weren't",
+    "start": 1518.799,
+    "duration": 3.521
+  },
+  {
+    "text": "100% sure that it was going to be faster",
+    "start": 1520.64,
+    "duration": 3.6
+  },
+  {
+    "text": "to cache than it was to compile a lot of",
+    "start": 1522.32,
+    "duration": 4.0
+  },
+  {
+    "text": "these shaders. But after a lot of",
+    "start": 1524.24,
+    "duration": 3.439
+  },
+  {
+    "text": "measurements, we determined it made",
+    "start": 1526.32,
+    "duration": 2.88
+  },
+  {
+    "text": "sense to just turn this on by default.",
+    "start": 1527.679,
+    "duration": 3.681
+  },
+  {
+    "text": "So both for cooks and for editor per",
+    "start": 1529.2,
+    "duration": 4.0
+  },
+  {
+    "text": "shader caching is now on by default in",
+    "start": 1531.36,
+    "duration": 5.64
+  },
+  {
+    "text": "55 and later.",
+    "start": 1533.2,
+    "duration": 3.8
+  },
+  {
+    "text": "So effectively now we have two layers of",
+    "start": 1537.2,
+    "duration": 4.4
+  },
+  {
+    "text": "caching for shaders. So the previous",
+    "start": 1539.12,
+    "duration": 4.48
+  },
+  {
+    "text": "shader map and caching still exists and",
+    "start": 1541.6,
+    "duration": 3.679
+  },
+  {
+    "text": "functions basically exactly the same way",
+    "start": 1543.6,
+    "duration": 3.36
+  },
+  {
+    "text": "it did before. Uh but the big",
+    "start": 1545.279,
+    "duration": 3.121
+  },
+  {
+    "text": "distinction is when we get a miss on the",
+    "start": 1546.96,
+    "duration": 3.839
+  },
+  {
+    "text": "shader map cache, we just generally",
+    "start": 1548.4,
+    "duration": 3.68
+  },
+  {
+    "text": "retrieve cache results for all the",
+    "start": 1550.799,
+    "duration": 2.641
+  },
+  {
+    "text": "individual shaders rather than need to",
+    "start": 1552.08,
+    "duration": 3.599
+  },
+  {
+    "text": "actually do any compilation. Uh so cash",
+    "start": 1553.44,
+    "duration": 4.64
+  },
+  {
+    "text": "hits on shader maps actually just bypass",
+    "start": 1555.679,
+    "duration": 6.281
+  },
+  {
+    "text": "the pre-processing cost.",
+    "start": 1558.08,
+    "duration": 3.88
+  },
+  {
+    "text": "So those are the big ticket items, but",
+    "start": 1562.08,
+    "duration": 2.719
+  },
+  {
+    "text": "there was a bunch of other work that",
+    "start": 1563.84,
+    "duration": 2.079
+  },
+  {
+    "text": "came out of the strike team as well. So",
+    "start": 1564.799,
+    "duration": 3.921
+  },
+  {
+    "text": "I'll just run through that here quickly.",
+    "start": 1565.919,
+    "duration": 5.041
+  },
+  {
+    "text": "uh first number of similar vertex",
+    "start": 1568.72,
+    "duration": 4.16
+  },
+  {
+    "text": "factories were merged and this kind of",
+    "start": 1570.96,
+    "duration": 3.44
+  },
+  {
+    "text": "just reduced the overall shader count by",
+    "start": 1572.88,
+    "duration": 3.039
+  },
+  {
+    "text": "a small but not significant and not",
+    "start": 1574.4,
+    "duration": 4.0
+  },
+  {
+    "text": "insignificant margin and had negligible",
+    "start": 1575.919,
+    "duration": 4.721
+  },
+  {
+    "text": "runtime performance cost. Uh and this",
+    "start": 1578.4,
+    "duration": 4.159
+  },
+  {
+    "text": "one saves both compile time but also",
+    "start": 1580.64,
+    "duration": 3.84
+  },
+  {
+    "text": "saves runtime memory and PSO compilation",
+    "start": 1582.559,
+    "duration": 3.36
+  },
+  {
+    "text": "cost as well because it meant we had",
+    "start": 1584.48,
+    "duration": 2.64
+  },
+  {
+    "text": "less shaders in the final shader",
+    "start": 1585.919,
+    "duration": 3.601
+  },
+  {
+    "text": "library.",
+    "start": 1587.12,
+    "duration": 4.4
+  },
+  {
+    "text": "So we also had this problem for a long",
+    "start": 1589.52,
+    "duration": 3.6
+  },
+  {
+    "text": "time. We knew we were incurring extra",
+    "start": 1591.52,
+    "duration": 3.84
+  },
+  {
+    "text": "duplication of shader data in DDC uh",
+    "start": 1593.12,
+    "duration": 3.439
+  },
+  {
+    "text": "because of how the shader map records",
+    "start": 1595.36,
+    "duration": 2.24
+  },
+  {
+    "text": "are structured. Essentially, these are",
+    "start": 1596.559,
+    "duration": 3.201
+  },
+  {
+    "text": "just raw bite arrays of of of shader",
+    "start": 1597.6,
+    "duration": 3.84
+  },
+  {
+    "text": "code that's packed into each individual",
+    "start": 1599.76,
+    "duration": 3.68
+  },
+  {
+    "text": "shader map. Uh, which meant multiple",
+    "start": 1601.44,
+    "duration": 3.44
+  },
+  {
+    "text": "shader ramps that did share the same",
+    "start": 1603.44,
+    "duration": 3.599
+  },
+  {
+    "text": "code in runtime weren't sharing it in",
+    "start": 1604.88,
+    "duration": 6.0
+  },
+  {
+    "text": "DDC. Um, and we actually uh this this",
+    "start": 1607.039,
+    "duration": 5.361
+  },
+  {
+    "text": "affected both the cook memory as well as",
+    "start": 1610.88,
+    "duration": 4.56
+  },
+  {
+    "text": "DDC overhead. So, um, and at various",
+    "start": 1612.4,
+    "duration": 4.159
+  },
+  {
+    "text": "points in the cook, we're basically",
+    "start": 1615.44,
+    "duration": 2.88
+  },
+  {
+    "text": "copying these buffers around from, you",
+    "start": 1616.559,
+    "duration": 4.24
+  },
+  {
+    "text": "know, the job results into the shader",
+    "start": 1618.32,
+    "duration": 5.12
+  },
+  {
+    "text": "map output object into the inmemory",
+    "start": 1620.799,
+    "duration": 4.0
+  },
+  {
+    "text": "cache, then finally into the shader",
+    "start": 1623.44,
+    "duration": 2.719
+  },
+  {
+    "text": "library. So there's like multiple levels",
+    "start": 1624.799,
+    "duration": 4.801
+  },
+  {
+    "text": "of of duplication which is unnecessary.",
+    "start": 1626.159,
+    "duration": 5.201
+  },
+  {
+    "text": "Um",
+    "start": 1629.6,
+    "duration": 3.679
+  },
+  {
+    "text": "also once we enabled per shader caching",
+    "start": 1631.36,
+    "duration": 3.439
+  },
+  {
+    "text": "we weren't duplicating between the",
+    "start": 1633.279,
+    "duration": 3.121
+  },
+  {
+    "text": "shader map and the per shader bucket",
+    "start": 1634.799,
+    "duration": 3.441
+  },
+  {
+    "text": "either. So that was basically it was",
+    "start": 1636.4,
+    "duration": 3.519
+  },
+  {
+    "text": "more than doubling our DDC overhead. It",
+    "start": 1638.24,
+    "duration": 3.439
+  },
+  {
+    "text": "was a huge huge increase in overhead for",
+    "start": 1639.919,
+    "duration": 3.12
+  },
+  {
+    "text": "the initial kind of roll out of our",
+    "start": 1641.679,
+    "duration": 5.12
+  },
+  {
+    "text": "pre-process cache. Um so we did address",
+    "start": 1643.039,
+    "duration": 5.601
+  },
+  {
+    "text": "this before it got released. Um we",
+    "start": 1646.799,
+    "duration": 3.521
+  },
+  {
+    "text": "exploited a nice property of DDC here",
+    "start": 1648.64,
+    "duration": 3.919
+  },
+  {
+    "text": "which is that value attachments on a DDC",
+    "start": 1650.32,
+    "duration": 3.599
+  },
+  {
+    "text": "record are stored in a content address",
+    "start": 1652.559,
+    "duration": 4.24
+  },
+  {
+    "text": "store. of a cast mechanism. So basically",
+    "start": 1653.919,
+    "duration": 4.24
+  },
+  {
+    "text": "to minimize this footprint fix this",
+    "start": 1656.799,
+    "duration": 2.641
+  },
+  {
+    "text": "problem, all we need to do is separate",
+    "start": 1658.159,
+    "duration": 3.52
+  },
+  {
+    "text": "these bite code arrays into value",
+    "start": 1659.44,
+    "duration": 3.839
+  },
+  {
+    "text": "attachments. If their hashes are",
+    "start": 1661.679,
+    "duration": 2.641
+  },
+  {
+    "text": "identical, they're automatically going",
+    "start": 1663.279,
+    "duration": 2.88
+  },
+  {
+    "text": "to be duplicated by DDC even across",
+    "start": 1664.32,
+    "duration": 4.16
+  },
+  {
+    "text": "buckets. So it was a fairly easy change.",
+    "start": 1666.159,
+    "duration": 4.081
+  },
+  {
+    "text": "Um so with this in mind, we create a",
+    "start": 1668.48,
+    "duration": 4.64
+  },
+  {
+    "text": "shared buffer for code uh immediately on",
+    "start": 1670.24,
+    "duration": 4.88
+  },
+  {
+    "text": "job completion. We keep this in the",
+    "start": 1673.12,
+    "duration": 4.24
+  },
+  {
+    "text": "inmemory cache and pass it around as a",
+    "start": 1675.12,
+    "duration": 5.039
+  },
+  {
+    "text": "pointer instead. So this reduced GDC",
+    "start": 1677.36,
+    "duration": 4.48
+  },
+  {
+    "text": "storage overhead, got us back into the",
+    "start": 1680.159,
+    "duration": 3.281
+  },
+  {
+    "text": "range we were prior to introducing per",
+    "start": 1681.84,
+    "duration": 3.28
+  },
+  {
+    "text": "shader caching in the first place, but",
+    "start": 1683.44,
+    "duration": 3.839
+  },
+  {
+    "text": "it also was a big memory optimization",
+    "start": 1685.12,
+    "duration": 4.4
+  },
+  {
+    "text": "for cooks uh especi especially when",
+    "start": 1687.279,
+    "duration": 5.041
+  },
+  {
+    "text": "you're compiling a lot of shaders. Uh we",
+    "start": 1689.52,
+    "duration": 5.519
+  },
+  {
+    "text": "did also a similar optimization for uh",
+    "start": 1692.32,
+    "duration": 5.12
+  },
+  {
+    "text": "symbol buffers shader debug symbols with",
+    "start": 1695.039,
+    "duration": 5.12
+  },
+  {
+    "text": "similar uh large gains.",
+    "start": 1697.44,
+    "duration": 5.76
+  },
+  {
+    "text": "So with both of these in place, our our",
+    "start": 1700.159,
+    "duration": 5.041
+  },
+  {
+    "text": "job cache mechanism which already did",
+    "start": 1703.2,
+    "duration": 3.839
+  },
+  {
+    "text": "have a memory limit, it wasn't really",
+    "start": 1705.2,
+    "duration": 5.52
+  },
+  {
+    "text": "doing a lot. Uh now that job cache owns",
+    "start": 1707.039,
+    "duration": 5.52
+  },
+  {
+    "text": "the bite code and symbol buffers as",
+    "start": 1710.72,
+    "duration": 4.16
+  },
+  {
+    "text": "well. So effectively it introduced a",
+    "start": 1712.559,
+    "duration": 5.12
+  },
+  {
+    "text": "nice hard memory limit on how much",
+    "start": 1714.88,
+    "duration": 4.56
+  },
+  {
+    "text": "shader output data we stored in memory",
+    "start": 1717.679,
+    "duration": 3.681
+  },
+  {
+    "text": "during a cook. If we exceed the limit,",
+    "start": 1719.44,
+    "duration": 3.92
+  },
+  {
+    "text": "we just evict things. But if we need",
+    "start": 1721.36,
+    "duration": 3.199
+  },
+  {
+    "text": "those things later again, they're d",
+    "start": 1723.36,
+    "duration": 2.24
+  },
+  {
+    "text": "they're in the cook. We have them in",
+    "start": 1724.559,
+    "duration": 2.801
+  },
+  {
+    "text": "DDC. So we just retrieve them again. So",
+    "start": 1725.6,
+    "duration": 4.079
+  },
+  {
+    "text": "it's kind of like the the eviction is",
+    "start": 1727.36,
+    "duration": 3.84
+  },
+  {
+    "text": "not really that impactful. We didn't",
+    "start": 1729.679,
+    "duration": 2.88
+  },
+  {
+    "text": "really notice any problems from doing",
+    "start": 1731.2,
+    "duration": 3.599
+  },
+  {
+    "text": "that. So it's it's it's good to have",
+    "start": 1732.559,
+    "duration": 4.401
+  },
+  {
+    "text": "kind of like a fixed memory limit for",
+    "start": 1734.799,
+    "duration": 3.681
+  },
+  {
+    "text": "shader compilation which we never had",
+    "start": 1736.96,
+    "duration": 4.52
+  },
+  {
+    "text": "before.",
+    "start": 1738.48,
+    "duration": 3.0
+  },
+  {
+    "text": "Missed a couple points there. Uh we also",
+    "start": 1742.0,
+    "duration": 4.32
+  },
+  {
+    "text": "did it around a lowle optimizations to",
+    "start": 1744.559,
+    "duration": 3.761
+  },
+  {
+    "text": "DXE itself. Um this was primarily",
+    "start": 1746.32,
+    "duration": 3.28
+  },
+  {
+    "text": "focused on improving performance of",
+    "start": 1748.32,
+    "duration": 3.599
+  },
+  {
+    "text": "inlining and exporting debug",
+    "start": 1749.6,
+    "duration": 5.199
+  },
+  {
+    "text": "information. So um the target here was",
+    "start": 1751.919,
+    "duration": 4.24
+  },
+  {
+    "text": "to address the compile time of some",
+    "start": 1754.799,
+    "duration": 3.201
+  },
+  {
+    "text": "particularly bad outlier shaders were",
+    "start": 1756.159,
+    "duration": 3.681
+  },
+  {
+    "text": "taking over a minute to compile a single",
+    "start": 1758.0,
+    "duration": 4.48
+  },
+  {
+    "text": "permutation. Um as well as reducing the",
+    "start": 1759.84,
+    "duration": 4.48
+  },
+  {
+    "text": "compile time discrepancy from cooking uh",
+    "start": 1762.48,
+    "duration": 5.919
+  },
+  {
+    "text": "with symbols on versus symbols off. Um",
+    "start": 1764.32,
+    "duration": 6.719
+  },
+  {
+    "text": "so on D3DSM6 which is the one that uses",
+    "start": 1768.399,
+    "duration": 5.601
+  },
+  {
+    "text": "our modified version of u of DXE uh the",
+    "start": 1771.039,
+    "duration": 4.801
+  },
+  {
+    "text": "situation is much improved here but this",
+    "start": 1774.0,
+    "duration": 3.2
+  },
+  {
+    "text": "obviously only addressed one shader",
+    "start": 1775.84,
+    "duration": 3.439
+  },
+  {
+    "text": "format. Vulcan has its own set of",
+    "start": 1777.2,
+    "duration": 3.44
+  },
+  {
+    "text": "problems which remain to be addressed",
+    "start": 1779.279,
+    "duration": 3.12
+  },
+  {
+    "text": "unfortunately.",
+    "start": 1780.64,
+    "duration": 4.399
+  },
+  {
+    "text": "Um we also implemented caching and",
+    "start": 1782.399,
+    "duration": 4.4
+  },
+  {
+    "text": "material translation results. So we",
+    "start": 1785.039,
+    "duration": 3.36
+  },
+  {
+    "text": "noticed that large materials could take",
+    "start": 1786.799,
+    "duration": 3.521
+  },
+  {
+    "text": "hundreds of milliseconds to translate.",
+    "start": 1788.399,
+    "duration": 4.321
+  },
+  {
+    "text": "Uh while uh roundtrip time to our Zen",
+    "start": 1790.32,
+    "duration": 4.079
+  },
+  {
+    "text": "shared DDC is usually single or double",
+    "start": 1792.72,
+    "duration": 4.88
+  },
+  {
+    "text": "digit milliseconds. So um we did",
+    "start": 1794.399,
+    "duration": 4.64
+  },
+  {
+    "text": "implement this as a race to avoid the",
+    "start": 1797.6,
+    "duration": 2.959
+  },
+  {
+    "text": "possibility the cache request would take",
+    "start": 1799.039,
+    "duration": 3.12
+  },
+  {
+    "text": "longer than translation itself which",
+    "start": 1800.559,
+    "duration": 3.12
+  },
+  {
+    "text": "tended to be common for some very small",
+    "start": 1802.159,
+    "duration": 3.921
+  },
+  {
+    "text": "materials. Um so whichever of the",
+    "start": 1803.679,
+    "duration": 4.081
+  },
+  {
+    "text": "translation or DC request completes",
+    "start": 1806.08,
+    "duration": 5.719
+  },
+  {
+    "text": "first causes the other one to abort.",
+    "start": 1807.76,
+    "duration": 4.039
+  },
+  {
+    "text": "And one final piece of the puzzle here",
+    "start": 1812.399,
+    "duration": 4.16
+  },
+  {
+    "text": "is Unreal Build Accelerator or UBA for",
+    "start": 1814.159,
+    "duration": 4.081
+  },
+  {
+    "text": "short. Um, if you're not already aware",
+    "start": 1816.559,
+    "duration": 3.041
+  },
+  {
+    "text": "of this, it's an Epic developed",
+    "start": 1818.24,
+    "duration": 3.679
+  },
+  {
+    "text": "distributed build system. Uh, and out of",
+    "start": 1819.6,
+    "duration": 4.319
+  },
+  {
+    "text": "the box, it just performs better than",
+    "start": 1821.919,
+    "duration": 3.521
+  },
+  {
+    "text": "other external products on identical",
+    "start": 1823.919,
+    "duration": 3.441
+  },
+  {
+    "text": "hardware. I don't have any actual hard",
+    "start": 1825.44,
+    "duration": 3.68
+  },
+  {
+    "text": "numbers to back this up, but it's",
+    "start": 1827.36,
+    "duration": 2.88
+  },
+  {
+    "text": "anecdotally it's been consistently",
+    "start": 1829.12,
+    "duration": 2.64
+  },
+  {
+    "text": "faster for everyone who's tried this.",
+    "start": 1830.24,
+    "duration": 3.6
+  },
+  {
+    "text": "So, we suggest exploring it if you if",
+    "start": 1831.76,
+    "duration": 4.88
+  },
+  {
+    "text": "you have if you have the means. Um now",
+    "start": 1833.84,
+    "duration": 4.16
+  },
+  {
+    "text": "this was built specifically to improve",
+    "start": 1836.64,
+    "duration": 3.2
+  },
+  {
+    "text": "code builds initially but we also use it",
+    "start": 1838.0,
+    "duration": 3.6
+  },
+  {
+    "text": "for distributed shader compilation now",
+    "start": 1839.84,
+    "duration": 3.52
+  },
+  {
+    "text": "and we've had a really good",
+    "start": 1841.6,
+    "duration": 3.439
+  },
+  {
+    "text": "collaboration with the primary developer",
+    "start": 1843.36,
+    "duration": 3.039
+  },
+  {
+    "text": "added a bunch of features specifically",
+    "start": 1845.039,
+    "duration": 4.0
+  },
+  {
+    "text": "useful for shader compilation. Um so I",
+    "start": 1846.399,
+    "duration": 5.441
+  },
+  {
+    "text": "got a couple of examples um is a virtual",
+    "start": 1849.039,
+    "duration": 4.24
+  },
+  {
+    "text": "input output file mechanism. So our",
+    "start": 1851.84,
+    "duration": 2.64
+  },
+  {
+    "text": "shader compile worker files were",
+    "start": 1853.279,
+    "duration": 4.321
+  },
+  {
+    "text": "previously being written out to disk uh",
+    "start": 1854.48,
+    "duration": 5.04
+  },
+  {
+    "text": "and that just cost IO and it's not",
+    "start": 1857.6,
+    "duration": 4.72
+  },
+  {
+    "text": "really necessary. So um now we just keep",
+    "start": 1859.52,
+    "duration": 4.24
+  },
+  {
+    "text": "that in memory. We register a virtual",
+    "start": 1862.32,
+    "duration": 3.12
+  },
+  {
+    "text": "file with UBA and how it handles",
+    "start": 1863.76,
+    "duration": 3.519
+  },
+  {
+    "text": "automatically distributing that uh",
+    "start": 1865.44,
+    "duration": 4.0
+  },
+  {
+    "text": "content to workers as needed. This isn't",
+    "start": 1867.279,
+    "duration": 4.0
+  },
+  {
+    "text": "rolled out yet. I'll cave yet. We're",
+    "start": 1869.44,
+    "duration": 4.239
+  },
+  {
+    "text": "aiming for 58. There's still a few kinks",
+    "start": 1871.279,
+    "duration": 5.201
+  },
+  {
+    "text": "to work out, but uh it's coming.",
+    "start": 1873.679,
+    "duration": 4.88
+  },
+  {
+    "text": "Uh we also have some visualization",
+    "start": 1876.48,
+    "duration": 3.52
+  },
+  {
+    "text": "improvements to the UBA visualizer you",
+    "start": 1878.559,
+    "duration": 4.24
+  },
+  {
+    "text": "see on the right here. So, uh our our",
+    "start": 1880.0,
+    "duration": 5.6
+  },
+  {
+    "text": "shader jobs are batched in groups. Um",
+    "start": 1882.799,
+    "duration": 4.88
+  },
+  {
+    "text": "and you can see like the the list of all",
+    "start": 1885.6,
+    "duration": 3.76
+  },
+  {
+    "text": "the jobs uh all the shaders that",
+    "start": 1887.679,
+    "duration": 3.281
+  },
+  {
+    "text": "compiled in this one batch of jobs right",
+    "start": 1889.36,
+    "duration": 3.679
+  },
+  {
+    "text": "here. We also have a the blue line at",
+    "start": 1890.96,
+    "duration": 5.12
+  },
+  {
+    "text": "the top there which gives you a a",
+    "start": 1893.039,
+    "duration": 4.64
+  },
+  {
+    "text": "graph over time of how many processes",
+    "start": 1896.08,
+    "duration": 3.04
+  },
+  {
+    "text": "are in flight at once which was really",
+    "start": 1897.679,
+    "duration": 3.36
+  },
+  {
+    "text": "useful to help us analyze you know how",
+    "start": 1899.12,
+    "duration": 3.76
+  },
+  {
+    "text": "often during a cook we are you making",
+    "start": 1901.039,
+    "duration": 6.281
+  },
+  {
+    "text": "good use of shared helpers in UBA.",
+    "start": 1902.88,
+    "duration": 4.44
+  },
+  {
+    "text": "So uh having gone through the details of",
+    "start": 1913.76,
+    "duration": 4.399
+  },
+  {
+    "text": "all these optimizations let's revisit",
+    "start": 1916.559,
+    "duration": 3.281
+  },
+  {
+    "text": "that compilation flow diagram from",
+    "start": 1918.159,
+    "duration": 2.88
+  },
+  {
+    "text": "earlier with the new components in",
+    "start": 1919.84,
+    "duration": 4.559
+  },
+  {
+    "text": "place. Uh so first shader maps query DDC",
+    "start": 1921.039,
+    "duration": 5.36
+  },
+  {
+    "text": "as before keys still constructed from",
+    "start": 1924.399,
+    "duration": 4.801
+  },
+  {
+    "text": "raw source files raw source file hashes",
+    "start": 1926.399,
+    "duration": 4.64
+  },
+  {
+    "text": "but it's just serves to avoid additional",
+    "start": 1929.2,
+    "duration": 3.199
+  },
+  {
+    "text": "cost if everything is guaranteed to be",
+    "start": 1931.039,
+    "duration": 2.961
+  },
+  {
+    "text": "up to date. So in case that no shader",
+    "start": 1932.399,
+    "duration": 3.76
+  },
+  {
+    "text": "code is changed at all. But if we get a",
+    "start": 1934.0,
+    "duration": 3.44
+  },
+  {
+    "text": "miss on the shader map query, instead of",
+    "start": 1936.159,
+    "duration": 2.64
+  },
+  {
+    "text": "compiling all shaders, we're going to",
+    "start": 1937.44,
+    "duration": 3.68
+  },
+  {
+    "text": "execute pre-processing and minification,",
+    "start": 1938.799,
+    "duration": 3.6
+  },
+  {
+    "text": "generate cache keys for all the",
+    "start": 1941.12,
+    "duration": 3.36
+  },
+  {
+    "text": "individual shaders based on that uh uh",
+    "start": 1942.399,
+    "duration": 4.081
+  },
+  {
+    "text": "pre-processed output. And then we run",
+    "start": 1944.48,
+    "duration": 3.36
+  },
+  {
+    "text": "another query for each shader, which",
+    "start": 1946.48,
+    "duration": 3.28
+  },
+  {
+    "text": "first checks the in-memory cache,",
+    "start": 1947.84,
+    "duration": 3.52
+  },
+  {
+    "text": "followed by quering DDC if we didn't",
+    "start": 1949.76,
+    "duration": 4.0
+  },
+  {
+    "text": "find it in memory. And then only then",
+    "start": 1951.36,
+    "duration": 4.08
+  },
+  {
+    "text": "any out compiled jobs were actually",
+    "start": 1953.76,
+    "duration": 3.36
+  },
+  {
+    "text": "execute and cache the results. So then",
+    "start": 1955.44,
+    "duration": 4.4
+  },
+  {
+    "text": "we combine the results of any cache hits",
+    "start": 1957.12,
+    "duration": 4.399
+  },
+  {
+    "text": "uh with the results of any shaders that",
+    "start": 1959.84,
+    "duration": 3.36
+  },
+  {
+    "text": "compiled and cache the new complete",
+    "start": 1961.519,
+    "duration": 5.201
+  },
+  {
+    "text": "shader map in memory.",
+    "start": 1963.2,
+    "duration": 3.52
+  },
+  {
+    "text": "So, I mentioned earlier the uh the the",
+    "start": 1966.96,
+    "duration": 5.76
+  },
+  {
+    "text": "number candy and and and here we go. Uh",
+    "start": 1970.32,
+    "duration": 3.839
+  },
+  {
+    "text": "there's a lot of data on this slide, so",
+    "start": 1972.72,
+    "duration": 2.319
+  },
+  {
+    "text": "I'm going to I'm going to run you",
+    "start": 1974.159,
+    "duration": 3.441
+  },
+  {
+    "text": "through it. Um gathered these numbers. I",
+    "start": 1975.039,
+    "duration": 4.24
+  },
+  {
+    "text": "I just ran a number of cooks of the city",
+    "start": 1977.6,
+    "duration": 4.799
+  },
+  {
+    "text": "sample project on both 51 and on 57 the",
+    "start": 1979.279,
+    "duration": 4.801
+  },
+  {
+    "text": "state well the state of 57 around early",
+    "start": 1982.399,
+    "duration": 3.12
+  },
+  {
+    "text": "August. I haven't updated these numbers",
+    "start": 1984.08,
+    "duration": 2.959
+  },
+  {
+    "text": "since then, so I don't think there's",
+    "start": 1985.519,
+    "duration": 2.481
+  },
+  {
+    "text": "going to be much difference in the in",
+    "start": 1987.039,
+    "duration": 2.961
+  },
+  {
+    "text": "the final release.",
+    "start": 1988.0,
+    "duration": 4.08
+  },
+  {
+    "text": "Um and this was specifically just",
+    "start": 1990.0,
+    "duration": 5.12
+  },
+  {
+    "text": "compiling D3DSM6. Um, that was the only",
+    "start": 1992.08,
+    "duration": 4.4
+  },
+  {
+    "text": "shader format that was enabled in City",
+    "start": 1995.12,
+    "duration": 3.36
+  },
+  {
+    "text": "Sample in 5.1. We do have Vulcan enabled",
+    "start": 1996.48,
+    "duration": 3.84
+  },
+  {
+    "text": "on City Sample by default right now, but",
+    "start": 1998.48,
+    "duration": 3.28
+  },
+  {
+    "text": "uh, but I turned that off for this test",
+    "start": 2000.32,
+    "duration": 2.56
+  },
+  {
+    "text": "just so we're comparing apples to",
+    "start": 2001.76,
+    "duration": 2.88
+  },
+  {
+    "text": "apples.",
+    "start": 2002.88,
+    "duration": 3.279
+  },
+  {
+    "text": "Uh, so there were three tests that I",
+    "start": 2004.64,
+    "duration": 3.44
+  },
+  {
+    "text": "ran. First is a full invalidation. So I",
+    "start": 2006.159,
+    "duration": 4.561
+  },
+  {
+    "text": "bumped shader version ush causes all",
+    "start": 2008.08,
+    "duration": 4.56
+  },
+  {
+    "text": "shaders to recompile. Did the same thing",
+    "start": 2010.72,
+    "duration": 3.76
+  },
+  {
+    "text": "again but with symbols on. And then",
+    "start": 2012.64,
+    "duration": 3.6
+  },
+  {
+    "text": "finally I did a partial invalidation. I",
+    "start": 2014.48,
+    "duration": 2.96
+  },
+  {
+    "text": "just made a small change to a single",
+    "start": 2016.24,
+    "duration": 3.52
+  },
+  {
+    "text": "function in common. H which is the",
+    "start": 2017.44,
+    "duration": 4.16
+  },
+  {
+    "text": "pseudo volume texture function which is",
+    "start": 2019.76,
+    "duration": 4.399
+  },
+  {
+    "text": "used by only a small handful of shaders.",
+    "start": 2021.6,
+    "duration": 4.72
+  },
+  {
+    "text": "Uh so I also ran all these tests with a",
+    "start": 2024.159,
+    "duration": 3.841
+  },
+  {
+    "text": "fully primed DDC from a previous cook",
+    "start": 2026.32,
+    "duration": 3.199
+  },
+  {
+    "text": "just to make sure that only shader work",
+    "start": 2028.0,
+    "duration": 3.84
+  },
+  {
+    "text": "is being done in these cooks. So uh no",
+    "start": 2029.519,
+    "duration": 4.16
+  },
+  {
+    "text": "other impact.",
+    "start": 2031.84,
+    "duration": 3.28
+  },
+  {
+    "text": "So I want to highlight a few things that",
+    "start": 2033.679,
+    "duration": 2.48
+  },
+  {
+    "text": "can be attributed to the work we've",
+    "start": 2035.12,
+    "duration": 3.279
+  },
+  {
+    "text": "done. First you see the number of",
+    "start": 2036.159,
+    "duration": 4.321
+  },
+  {
+    "text": "shaders requested and the number of",
+    "start": 2038.399,
+    "duration": 3.76
+  },
+  {
+    "text": "shaders compiled are quite a bit lower",
+    "start": 2040.48,
+    "duration": 4.4
+  },
+  {
+    "text": "on 57 than 51. This is showing the",
+    "start": 2042.159,
+    "duration": 4.561
+  },
+  {
+    "text": "impact of both uh uh the shader",
+    "start": 2044.88,
+    "duration": 4.88
+  },
+  {
+    "text": "reduction and dduplication improvements.",
+    "start": 2046.72,
+    "duration": 4.959
+  },
+  {
+    "text": "Cook durations across the board you can",
+    "start": 2049.76,
+    "duration": 3.839
+  },
+  {
+    "text": "see are significantly better. 37 minutes",
+    "start": 2051.679,
+    "duration": 3.521
+  },
+  {
+    "text": "to 14 minutes for for a full",
+    "start": 2053.599,
+    "duration": 3.76
+  },
+  {
+    "text": "invalidation and an hour and 15 to 15",
+    "start": 2055.2,
+    "duration": 3.679
+  },
+  {
+    "text": "minutes for a full invalidation with",
+    "start": 2057.359,
+    "duration": 5.841
+  },
+  {
+    "text": "symbols on. Uh so",
+    "start": 2058.879,
+    "duration": 6.321
+  },
+  {
+    "text": "basically and also you'll notice the",
+    "start": 2063.2,
+    "duration": 4.479
+  },
+  {
+    "text": "symbols on cook the discrepancy between",
+    "start": 2065.2,
+    "duration": 4.399
+  },
+  {
+    "text": "those cooks on 57 is basically",
+    "start": 2067.679,
+    "duration": 4.48
+  },
+  {
+    "text": "disappeared. Um the compile time is",
+    "start": 2069.599,
+    "duration": 4.32
+  },
+  {
+    "text": "still higher. It's just we parallelizing",
+    "start": 2072.159,
+    "duration": 3.68
+  },
+  {
+    "text": "way better. So that that compile time is",
+    "start": 2073.919,
+    "duration": 4.96
+  },
+  {
+    "text": "essentially hidden. Now",
+    "start": 2075.839,
+    "duration": 4.641
+  },
+  {
+    "text": "uh you also notice the average",
+    "start": 2078.879,
+    "duration": 2.881
+  },
+  {
+    "text": "pre-processing time is quite a bit",
+    "start": 2080.48,
+    "duration": 3.84
+  },
+  {
+    "text": "better. Uh this is in addition even",
+    "start": 2081.76,
+    "duration": 4.159
+  },
+  {
+    "text": "though we've added two additional",
+    "start": 2084.32,
+    "duration": 3.279
+  },
+  {
+    "text": "pre-processing passes in the minifier",
+    "start": 2085.919,
+    "duration": 3.76
+  },
+  {
+    "text": "and the white you know the normalization",
+    "start": 2087.599,
+    "duration": 5.52
+  },
+  {
+    "text": "pass. Um I there was one note here in",
+    "start": 2089.679,
+    "duration": 6.72
+  },
+  {
+    "text": "that now we pre-process every shader not",
+    "start": 2093.119,
+    "duration": 4.48
+  },
+  {
+    "text": "just the ones that actually make it to",
+    "start": 2096.399,
+    "duration": 2.801
+  },
+  {
+    "text": "the compiler. So the the averages are",
+    "start": 2097.599,
+    "duration": 3.281
+  },
+  {
+    "text": "calculated based on the the higher of",
+    "start": 2099.2,
+    "duration": 3.2
+  },
+  {
+    "text": "those two numbers, the requested number",
+    "start": 2100.88,
+    "duration": 3.199
+  },
+  {
+    "text": "rather than the compiled number on 57",
+    "start": 2102.4,
+    "duration": 3.76
+  },
+  {
+    "text": "versus 51. So we pre-process more but it",
+    "start": 2104.079,
+    "duration": 6.321
+  },
+  {
+    "text": "costs less. So it's still good.",
+    "start": 2106.16,
+    "duration": 6.64
+  },
+  {
+    "text": "Um we see quite a bit of improvement to",
+    "start": 2110.4,
+    "duration": 4.959
+  },
+  {
+    "text": "average compile time uh with symbols off",
+    "start": 2112.8,
+    "duration": 4.319
+  },
+  {
+    "text": "and and a much better improvement with",
+    "start": 2115.359,
+    "duration": 3.841
+  },
+  {
+    "text": "symbols on. This is attributed to both",
+    "start": 2117.119,
+    "duration": 3.681
+  },
+  {
+    "text": "the combination of minifier reducing the",
+    "start": 2119.2,
+    "duration": 4.48
+  },
+  {
+    "text": "front end cost and our DXC optimizations",
+    "start": 2120.8,
+    "duration": 5.84
+  },
+  {
+    "text": "kind of improving the remainder.",
+    "start": 2123.68,
+    "duration": 5.36
+  },
+  {
+    "text": "Um, we see a bit of an increase on cache",
+    "start": 2126.64,
+    "duration": 4.959
+  },
+  {
+    "text": "hit rate. Uh, I do want to say with city",
+    "start": 2129.04,
+    "duration": 4.559
+  },
+  {
+    "text": "sample, this is kind of an outlier. City",
+    "start": 2131.599,
+    "duration": 4.641
+  },
+  {
+    "text": "sample having a 32% cash hit rate on 5.1",
+    "start": 2133.599,
+    "duration": 4.48
+  },
+  {
+    "text": "was very unusual. We saw on most",
+    "start": 2136.24,
+    "duration": 3.839
+  },
+  {
+    "text": "projects this was way lower. City sample",
+    "start": 2138.079,
+    "duration": 3.441
+  },
+  {
+    "text": "was a good test case because it had a",
+    "start": 2140.079,
+    "duration": 3.121
+  },
+  {
+    "text": "lot of shaders to compile. So that's the",
+    "start": 2141.52,
+    "duration": 4.16
+  },
+  {
+    "text": "one I used. Uh, in practice, we find the",
+    "start": 2143.2,
+    "duration": 4.159
+  },
+  {
+    "text": "discrete",
+    "start": 2145.68,
+    "duration": 3.919
+  },
+  {
+    "text": "hit rate much bigger on other real game",
+    "start": 2147.359,
+    "duration": 4.561
+  },
+  {
+    "text": "projects.",
+    "start": 2149.599,
+    "duration": 5.361
+  },
+  {
+    "text": "So the main win here uh at least for our",
+    "start": 2151.92,
+    "duration": 4.4
+  },
+  {
+    "text": "internal projects is the big difference",
+    "start": 2154.96,
+    "duration": 2.8
+  },
+  {
+    "text": "between the two partial invalidation",
+    "start": 2156.32,
+    "duration": 4.32
+  },
+  {
+    "text": "cooks. So we went from 37 to 12 minutes.",
+    "start": 2157.76,
+    "duration": 5.839
+  },
+  {
+    "text": "Um so that small change in common ush",
+    "start": 2160.64,
+    "duration": 4.959
+  },
+  {
+    "text": "was basically a full invalidation on 51.",
+    "start": 2163.599,
+    "duration": 3.441
+  },
+  {
+    "text": "As you see we basically recompiled every",
+    "start": 2165.599,
+    "duration": 4.48
+  },
+  {
+    "text": "single shader uh versus 21 shaders",
+    "start": 2167.04,
+    "duration": 5.44
+  },
+  {
+    "text": "compiled in in 57. So that's a big",
+    "start": 2170.079,
+    "duration": 6.401
+  },
+  {
+    "text": "improvement obviously. Um,",
+    "start": 2172.48,
+    "duration": 6.32
+  },
+  {
+    "text": "we also have a bit of a sneak peak of a",
+    "start": 2176.48,
+    "duration": 3.599
+  },
+  {
+    "text": "sneak peek of the incremental cook",
+    "start": 2178.8,
+    "duration": 3.68
+  },
+  {
+    "text": "mechanism. Um, you could see that those",
+    "start": 2180.079,
+    "duration": 4.721
+  },
+  {
+    "text": "two cooks there that the the the wall",
+    "start": 2182.48,
+    "duration": 3.599
+  },
+  {
+    "text": "time improvement was not proportional to",
+    "start": 2184.8,
+    "duration": 2.72
+  },
+  {
+    "text": "how much shader compilation we were no",
+    "start": 2186.079,
+    "duration": 3.52
+  },
+  {
+    "text": "longer doing. So that indicates to me",
+    "start": 2187.52,
+    "duration": 3.68
+  },
+  {
+    "text": "that it wasn't shader compilation that",
+    "start": 2189.599,
+    "duration": 2.801
+  },
+  {
+    "text": "was the bottleneck in those cooks",
+    "start": 2191.2,
+    "duration": 3.76
+  },
+  {
+    "text": "anymore. And this incremental cook uh",
+    "start": 2192.4,
+    "duration": 5.439
+  },
+  {
+    "text": "kind of proves that you know 37 minutes",
+    "start": 2194.96,
+    "duration": 4.8
+  },
+  {
+    "text": "down to 3 minutes. Uh there was a bit of",
+    "start": 2197.839,
+    "duration": 3.601
+  },
+  {
+    "text": "DDC storage impact here because",
+    "start": 2199.76,
+    "duration": 3.2
+  },
+  {
+    "text": "essentially we're still changing the",
+    "start": 2201.44,
+    "duration": 3.52
+  },
+  {
+    "text": "shader map keys. So we need to repackage",
+    "start": 2202.96,
+    "duration": 3.6
+  },
+  {
+    "text": "the shader maps. But because we're",
+    "start": 2204.96,
+    "duration": 3.04
+  },
+  {
+    "text": "dduplicated by code, the impact is",
+    "start": 2206.56,
+    "duration": 4.48
+  },
+  {
+    "text": "pretty small. It's only 20 megabytes.",
+    "start": 2208.0,
+    "duration": 6.48
+  },
+  {
+    "text": "Now there is a bit of a cost. Um DDC",
+    "start": 2211.04,
+    "duration": 5.44
+  },
+  {
+    "text": "storage requirements are still about 20%",
+    "start": 2214.48,
+    "duration": 5.84
+  },
+  {
+    "text": "higher in 57 than 51 because of uh with",
+    "start": 2216.48,
+    "duration": 6.24
+  },
+  {
+    "text": "symbols disabled. Sorry. Um but I we",
+    "start": 2220.32,
+    "duration": 4.0
+  },
+  {
+    "text": "feel this is really well worth all the",
+    "start": 2222.72,
+    "duration": 3.84
+  },
+  {
+    "text": "other improvements. Uh if you're cooking",
+    "start": 2224.32,
+    "duration": 3.519
+  },
+  {
+    "text": "with symbols on though, we are actually",
+    "start": 2226.56,
+    "duration": 2.72
+  },
+  {
+    "text": "saving quite a bit of space here because",
+    "start": 2227.839,
+    "duration": 3.681
+  },
+  {
+    "text": "the the the cost of not dduplicating",
+    "start": 2229.28,
+    "duration": 3.6
+  },
+  {
+    "text": "those in memory was really hurting us",
+    "start": 2231.52,
+    "duration": 3.839
+  },
+  {
+    "text": "before.",
+    "start": 2232.88,
+    "duration": 3.76
+  },
+  {
+    "text": "I also wanted to show you a graph of",
+    "start": 2235.359,
+    "duration": 2.641
+  },
+  {
+    "text": "memory usage over time on the same",
+    "start": 2236.64,
+    "duration": 2.88
+  },
+  {
+    "text": "cooks. Well, not exactly the same cooks",
+    "start": 2238.0,
+    "duration": 3.28
+  },
+  {
+    "text": "because this is uh tracing was enabled.",
+    "start": 2239.52,
+    "duration": 3.04
+  },
+  {
+    "text": "So it extended the wall time a little",
+    "start": 2241.28,
+    "duration": 4.24
+  },
+  {
+    "text": "bit, but um you can compare memory usage",
+    "start": 2242.56,
+    "duration": 5.279
+  },
+  {
+    "text": "before and after. And you can see",
+    "start": 2245.52,
+    "duration": 5.52
+  },
+  {
+    "text": "basically it peaked about 20 GB lower in",
+    "start": 2247.839,
+    "duration": 6.721
+  },
+  {
+    "text": "57 than 5.1. Um so cooks are both",
+    "start": 2251.04,
+    "duration": 5.44
+  },
+  {
+    "text": "significantly faster and less memory",
+    "start": 2254.56,
+    "duration": 3.44
+  },
+  {
+    "text": "intensive",
+    "start": 2256.48,
+    "duration": 3.76
+  },
+  {
+    "text": "and and uh my measurements suggest or",
+    "start": 2258.0,
+    "duration": 3.359
+  },
+  {
+    "text": "previous measurements suggested that",
+    "start": 2260.24,
+    "duration": 2.64
+  },
+  {
+    "text": "these the shared buffer optimizations I",
+    "start": 2261.359,
+    "duration": 3.041
+  },
+  {
+    "text": "mentioned earlier were responsible for",
+    "start": 2262.88,
+    "duration": 5.32
+  },
+  {
+    "text": "basically most of this improvement.",
+    "start": 2264.4,
+    "duration": 3.8
+  },
+  {
+    "text": "Great. So my intent for this talk was to",
+    "start": 2268.4,
+    "duration": 4.8
+  },
+  {
+    "text": "summarize kind of the last few years of",
+    "start": 2271.599,
+    "duration": 3.841
+  },
+  {
+    "text": "effort uh to improve the default state",
+    "start": 2273.2,
+    "duration": 4.72
+  },
+  {
+    "text": "of compiling shaders in UI but we are",
+    "start": 2275.44,
+    "duration": 3.84
+  },
+  {
+    "text": "not finished by any stretch of the",
+    "start": 2277.92,
+    "duration": 4.24
+  },
+  {
+    "text": "imagination. Um, I'll caveat that not",
+    "start": 2279.28,
+    "duration": 4.559
+  },
+  {
+    "text": "everything I mention here is guaranteed",
+    "start": 2282.16,
+    "duration": 3.52
+  },
+  {
+    "text": "to actually happen. Uh, we don't",
+    "start": 2283.839,
+    "duration": 3.121
+  },
+  {
+    "text": "actually have timelines for a lot of it,",
+    "start": 2285.68,
+    "duration": 2.56
+  },
+  {
+    "text": "but at the very minimum, they're kind of",
+    "start": 2286.96,
+    "duration": 2.72
+  },
+  {
+    "text": "validated ideas that we have in the",
+    "start": 2288.24,
+    "duration": 3.44
+  },
+  {
+    "text": "pipeline.",
+    "start": 2289.68,
+    "duration": 4.0
+  },
+  {
+    "text": "Uh, so first is just we want to provide",
+    "start": 2291.68,
+    "duration": 3.679
+  },
+  {
+    "text": "better in editor mechanisms to allow",
+    "start": 2293.68,
+    "duration": 3.28
+  },
+  {
+    "text": "content creators to see and understand",
+    "start": 2295.359,
+    "duration": 2.881
+  },
+  {
+    "text": "when changes they're making are",
+    "start": 2296.96,
+    "duration": 3.6
+  },
+  {
+    "text": "incurring additional permutations. Um,",
+    "start": 2298.24,
+    "duration": 3.839
+  },
+  {
+    "text": "as you can see by the explanation of it",
+    "start": 2300.56,
+    "duration": 3.279
+  },
+  {
+    "text": "at the start of this the talk, it's not",
+    "start": 2302.079,
+    "duration": 3.52
+  },
+  {
+    "text": "really trivial or easy to understand for",
+    "start": 2303.839,
+    "duration": 3.121
+  },
+  {
+    "text": "the average content creator or even the",
+    "start": 2305.599,
+    "duration": 3.76
+  },
+  {
+    "text": "aid engineer for that matter.",
+    "start": 2306.96,
+    "duration": 6.0
+  },
+  {
+    "text": "Um, vertex factories I think may not be",
+    "start": 2309.359,
+    "duration": 5.041
+  },
+  {
+    "text": "necessary at least on a lot of modern",
+    "start": 2312.96,
+    "duration": 3.04
+  },
+  {
+    "text": "GPUs. Uh, we should be able to just",
+    "start": 2314.4,
+    "duration": 2.88
+  },
+  {
+    "text": "dynam, you know, write dynamically",
+    "start": 2316.0,
+    "duration": 3.359
+  },
+  {
+    "text": "branching vertex fetch code. Uh, the",
+    "start": 2317.28,
+    "duration": 3.839
+  },
+  {
+    "text": "question is just what platforms we can",
+    "start": 2319.359,
+    "duration": 3.76
+  },
+  {
+    "text": "do it on. What's the GPU time impact? Is",
+    "start": 2321.119,
+    "duration": 4.401
+  },
+  {
+    "text": "it acceptable? Um, but if we can make it",
+    "start": 2323.119,
+    "duration": 3.841
+  },
+  {
+    "text": "work, it should be a big reduction in",
+    "start": 2325.52,
+    "duration": 3.12
+  },
+  {
+    "text": "the number of shaders we actually uh",
+    "start": 2326.96,
+    "duration": 3.36
+  },
+  {
+    "text": "need overall in even in the runtime",
+    "start": 2328.64,
+    "duration": 4.56
+  },
+  {
+    "text": "final shader library. Um, it's also",
+    "start": 2330.32,
+    "duration": 4.08
+  },
+  {
+    "text": "possible that if we can't go fully",
+    "start": 2333.2,
+    "duration": 2.32
+  },
+  {
+    "text": "dynamic, we still might be able to",
+    "start": 2334.4,
+    "duration": 2.88
+  },
+  {
+    "text": "collapse some additional targeted vertex",
+    "start": 2335.52,
+    "duration": 3.2
+  },
+  {
+    "text": "factories that are similar enough to not",
+    "start": 2337.28,
+    "duration": 3.36
+  },
+  {
+    "text": "have any performance regression. So,",
+    "start": 2338.72,
+    "duration": 4.96
+  },
+  {
+    "text": "we're we're looking into that right now.",
+    "start": 2340.64,
+    "duration": 4.64
+  },
+  {
+    "text": "Uh, as I mentioned previously, the new",
+    "start": 2343.68,
+    "duration": 3.52
+  },
+  {
+    "text": "material translator is coming,",
+    "start": 2345.28,
+    "duration": 5.12
+  },
+  {
+    "text": "implementations underway. Um, there's a",
+    "start": 2347.2,
+    "duration": 4.56
+  },
+  {
+    "text": "number of areas where this is going to",
+    "start": 2350.4,
+    "duration": 3.36
+  },
+  {
+    "text": "help us in terms of shader reduction.",
+    "start": 2351.76,
+    "duration": 4.24
+  },
+  {
+    "text": "Um, so first is as I mentioned before,",
+    "start": 2353.76,
+    "duration": 3.76
+  },
+  {
+    "text": "proper dynamic branching, reduce the",
+    "start": 2356.0,
+    "duration": 2.8
+  },
+  {
+    "text": "need for static switches to avoid",
+    "start": 2357.52,
+    "duration": 4.48
+  },
+  {
+    "text": "expensive work. Um, no, the one that I",
+    "start": 2358.8,
+    "duration": 4.799
+  },
+  {
+    "text": "think is potentially more promising is",
+    "start": 2362.0,
+    "duration": 3.119
+  },
+  {
+    "text": "combining proper dynamic branching with",
+    "start": 2363.599,
+    "duration": 3.201
+  },
+  {
+    "text": "bindless means we're able to just",
+    "start": 2365.119,
+    "duration": 3.041
+  },
+  {
+    "text": "convert all of our static switches that",
+    "start": 2366.8,
+    "duration": 3.279
+  },
+  {
+    "text": "are hiding texture samples to dynamic",
+    "start": 2368.16,
+    "duration": 3.6
+  },
+  {
+    "text": "branches and just reduce tons of",
+    "start": 2370.079,
+    "duration": 3.361
+  },
+  {
+    "text": "permutations without actually having any",
+    "start": 2371.76,
+    "duration": 2.72
+  },
+  {
+    "text": "impact at all because we're not going to",
+    "start": 2373.44,
+    "duration": 2.56
+  },
+  {
+    "text": "be exceeding sampler limits anymore. And",
+    "start": 2374.48,
+    "duration": 2.879
+  },
+  {
+    "text": "we also won't be loading the redundant",
+    "start": 2376.0,
+    "duration": 4.76
+  },
+  {
+    "text": "data in the GPU.",
+    "start": 2377.359,
+    "duration": 3.401
+  },
+  {
+    "text": "So, um, we're still compiling a lot more",
+    "start": 2380.88,
+    "duration": 4.4
+  },
+  {
+    "text": "shaders than we need. Uh generally we're",
+    "start": 2383.359,
+    "duration": 3.441
+  },
+  {
+    "text": "still seeing about two to two and a half",
+    "start": 2385.28,
+    "duration": 3.44
+  },
+  {
+    "text": "times as many compile jobs as we are",
+    "start": 2386.8,
+    "duration": 5.36
+  },
+  {
+    "text": "seeing final result by code output. Uh",
+    "start": 2388.72,
+    "duration": 5.04
+  },
+  {
+    "text": "so a limitation of minifier is it",
+    "start": 2392.16,
+    "duration": 3.36
+  },
+  {
+    "text": "doesn't modify functions. It only calls",
+    "start": 2393.76,
+    "duration": 3.92
+  },
+  {
+    "text": "them as a whole piece. Uh so with",
+    "start": 2395.52,
+    "duration": 4.24
+  },
+  {
+    "text": "materials our translator outputs",
+    "start": 2397.68,
+    "duration": 3.6
+  },
+  {
+    "text": "everything in one single monolithic",
+    "start": 2399.76,
+    "duration": 3.839
+  },
+  {
+    "text": "function which contains a bunch of what",
+    "start": 2401.28,
+    "duration": 3.92
+  },
+  {
+    "text": "is dead code but we can't tell it's dead",
+    "start": 2403.599,
+    "duration": 3.041
+  },
+  {
+    "text": "code especially for things like shadow",
+    "start": 2405.2,
+    "duration": 3.04
+  },
+  {
+    "text": "depth velocity passes. All you really",
+    "start": 2406.64,
+    "duration": 3.52
+  },
+  {
+    "text": "need is your position and your opacity",
+    "start": 2408.24,
+    "duration": 3.04
+  },
+  {
+    "text": "in the case you're doing kind of alpha",
+    "start": 2410.16,
+    "duration": 3.439
+  },
+  {
+    "text": "masking stuff. So what the new",
+    "start": 2411.28,
+    "duration": 3.52
+  },
+  {
+    "text": "translator is going to have is a",
+    "start": 2413.599,
+    "duration": 3.681
+  },
+  {
+    "text": "decoupling of the translation/compile",
+    "start": 2414.8,
+    "duration": 4.799
+  },
+  {
+    "text": "time uh compile step from code",
+    "start": 2417.28,
+    "duration": 4.96
+  },
+  {
+    "text": "generation output. So we'll be able to",
+    "start": 2419.599,
+    "duration": 4.961
+  },
+  {
+    "text": "output multiple code gen passes very",
+    "start": 2422.24,
+    "duration": 3.839
+  },
+  {
+    "text": "quickly and easily without incurring a",
+    "start": 2424.56,
+    "duration": 3.76
+  },
+  {
+    "text": "big cost. So essentially we could then",
+    "start": 2426.079,
+    "duration": 5.121
+  },
+  {
+    "text": "take you know uh for depth and shadow",
+    "start": 2428.32,
+    "duration": 4.799
+  },
+  {
+    "text": "passes just a version of the material",
+    "start": 2431.2,
+    "duration": 3.76
+  },
+  {
+    "text": "code that only outputs you know vertex",
+    "start": 2433.119,
+    "duration": 3.681
+  },
+  {
+    "text": "positions opacity WPO and anything that",
+    "start": 2434.96,
+    "duration": 3.52
+  },
+  {
+    "text": "affects that kind of stuff and strip you",
+    "start": 2436.8,
+    "duration": 3.36
+  },
+  {
+    "text": "know basically not generate the code",
+    "start": 2438.48,
+    "duration": 3.04
+  },
+  {
+    "text": "that is going to be dead stripped by the",
+    "start": 2440.16,
+    "duration": 3.52
+  },
+  {
+    "text": "compiler in the first place and then",
+    "start": 2441.52,
+    "duration": 4.079
+  },
+  {
+    "text": "significantly improve our RD duplication",
+    "start": 2443.68,
+    "duration": 4.88
+  },
+  {
+    "text": "rate. Um our goal is to get as close to",
+    "start": 2445.599,
+    "duration": 4.641
+  },
+  {
+    "text": "one as possible. I don't know how close",
+    "start": 2448.56,
+    "duration": 2.96
+  },
+  {
+    "text": "we're actually going to get but we're",
+    "start": 2450.24,
+    "duration": 4.08
+  },
+  {
+    "text": "we're we're working on it.",
+    "start": 2451.52,
+    "duration": 4.88
+  },
+  {
+    "text": "Now, if you do want more details about",
+    "start": 2454.32,
+    "duration": 3.84
+  },
+  {
+    "text": "the new material translator, not",
+    "start": 2456.4,
+    "duration": 3.28
+  },
+  {
+    "text": "specifically related to reducing shader",
+    "start": 2458.16,
+    "duration": 3.679
+  },
+  {
+    "text": "counts, you can go back and watch the",
+    "start": 2459.68,
+    "duration": 4.159
+  },
+  {
+    "text": "Unreal Materials talk from Camille K. It",
+    "start": 2461.839,
+    "duration": 2.961
+  },
+  {
+    "text": "was this morning, so it's already",
+    "start": 2463.839,
+    "duration": 2.161
+  },
+  {
+    "text": "happened, but the video will be posted",
+    "start": 2464.8,
+    "duration": 2.88
+  },
+  {
+    "text": "later. There's a there's a there's a few",
+    "start": 2466.0,
+    "duration": 2.96
+  },
+  {
+    "text": "minutes at the end of that talk talking",
+    "start": 2467.68,
+    "duration": 2.639
+  },
+  {
+    "text": "about more details of what the new",
+    "start": 2468.96,
+    "duration": 4.72
+  },
+  {
+    "text": "translator is about.",
+    "start": 2470.319,
+    "duration": 5.361
+  },
+  {
+    "text": "So, pre-processing is still quite heavy",
+    "start": 2473.68,
+    "duration": 4.24
+  },
+  {
+    "text": "even when we're doing it fully parallel.",
+    "start": 2475.68,
+    "duration": 3.84
+  },
+  {
+    "text": "Um",
+    "start": 2477.92,
+    "duration": 3.36
+  },
+  {
+    "text": "and on lower low core count systems",
+    "start": 2479.52,
+    "duration": 3.2
+  },
+  {
+    "text": "we've found this can be a new bottleneck",
+    "start": 2481.28,
+    "duration": 4.319
+  },
+  {
+    "text": "that wasn't there prior to 55. Um we've",
+    "start": 2482.72,
+    "duration": 6.96
+  },
+  {
+    "text": "had a few UDNS related to this. Uh so we",
+    "start": 2485.599,
+    "duration": 5.841
+  },
+  {
+    "text": "want to introduce a a shader module",
+    "start": 2489.68,
+    "duration": 2.8
+  },
+  {
+    "text": "concept essentially that's going to",
+    "start": 2491.44,
+    "duration": 2.639
+  },
+  {
+    "text": "allow us to have shared libraries of",
+    "start": 2492.48,
+    "duration": 3.04
+  },
+  {
+    "text": "pre-processed code that we can just copy",
+    "start": 2494.079,
+    "duration": 3.28
+  },
+  {
+    "text": "verbatim into the output shader rather",
+    "start": 2495.52,
+    "duration": 3.36
+  },
+  {
+    "text": "than having to pre-process the entire",
+    "start": 2497.359,
+    "duration": 2.881
+  },
+  {
+    "text": "code for every single shader. And that",
+    "start": 2498.88,
+    "duration": 2.32
+  },
+  {
+    "text": "should allow us to cut down the",
+    "start": 2500.24,
+    "duration": 2.56
+  },
+  {
+    "text": "pre-processing cost significantly and",
+    "start": 2501.2,
+    "duration": 3.6
+  },
+  {
+    "text": "and increase the you know the throughput",
+    "start": 2502.8,
+    "duration": 4.319
+  },
+  {
+    "text": "of of submitting compile jobs especially",
+    "start": 2504.8,
+    "duration": 5.44
+  },
+  {
+    "text": "in the editor. So I want to also expand",
+    "start": 2507.119,
+    "duration": 4.96
+  },
+  {
+    "text": "our usage of the UBA virtual files once",
+    "start": 2510.24,
+    "duration": 2.8
+  },
+  {
+    "text": "we've rolled out the initial",
+    "start": 2512.079,
+    "duration": 2.481
+  },
+  {
+    "text": "functionality. I mentioned before we",
+    "start": 2513.04,
+    "duration": 3.6
+  },
+  {
+    "text": "batching shader compile jobs to reduce",
+    "start": 2514.56,
+    "duration": 4.24
+  },
+  {
+    "text": "sending redundant shared data to to",
+    "start": 2516.64,
+    "duration": 4.479
+  },
+  {
+    "text": "workers over and over again. Uh but we",
+    "start": 2518.8,
+    "duration": 3.84
+  },
+  {
+    "text": "can also do that by this virtual file",
+    "start": 2521.119,
+    "duration": 3.361
+  },
+  {
+    "text": "mechanism. We can define things like our",
+    "start": 2522.64,
+    "duration": 4.16
+  },
+  {
+    "text": "shader parameter metadata material",
+    "start": 2524.48,
+    "duration": 3.92
+  },
+  {
+    "text": "shader compiler environment settings",
+    "start": 2526.8,
+    "duration": 3.36
+  },
+  {
+    "text": "once store them in memory and then just",
+    "start": 2528.4,
+    "duration": 4.8
+  },
+  {
+    "text": "have UBA distribute dduplicate uh for",
+    "start": 2530.16,
+    "duration": 5.12
+  },
+  {
+    "text": "us. It just happens automatically. And",
+    "start": 2533.2,
+    "duration": 3.28
+  },
+  {
+    "text": "what this will allow us to do is",
+    "start": 2535.28,
+    "duration": 2.48
+  },
+  {
+    "text": "basically get rid of job batching",
+    "start": 2536.48,
+    "duration": 3.04
+  },
+  {
+    "text": "entirely which means we should be able",
+    "start": 2537.76,
+    "duration": 3.2
+  },
+  {
+    "text": "to load balance a lot better, get much",
+    "start": 2539.52,
+    "duration": 4.599
+  },
+  {
+    "text": "better throughput.",
+    "start": 2540.96,
+    "duration": 3.159
+  },
+  {
+    "text": "Uh and finally, we've had a bunch of",
+    "start": 2544.16,
+    "duration": 3.36
+  },
+  {
+    "text": "requests to implement some form of ODSC",
+    "start": 2545.44,
+    "duration": 4.159
+  },
+  {
+    "text": "for global shaders. Now, it's not quite",
+    "start": 2547.52,
+    "duration": 3.68
+  },
+  {
+    "text": "the same situation as materials because",
+    "start": 2549.599,
+    "duration": 3.041
+  },
+  {
+    "text": "global shaders don't have a valid",
+    "start": 2551.2,
+    "duration": 3.44
+  },
+  {
+    "text": "fallback. Uh, but at the very least, we",
+    "start": 2552.64,
+    "duration": 3.36
+  },
+  {
+    "text": "should be able to asynchronously submit",
+    "start": 2554.64,
+    "duration": 2.8
+  },
+  {
+    "text": "all the global shader compile jobs and",
+    "start": 2556.0,
+    "duration": 2.64
+  },
+  {
+    "text": "just block on a result when it's",
+    "start": 2557.44,
+    "duration": 4.84
+  },
+  {
+    "text": "actually needed for rendering.",
+    "start": 2558.64,
+    "duration": 3.64
+  },
+  {
+    "text": "And yeah, so uh obviously this was not",
+    "start": 2562.4,
+    "duration": 4.16
+  },
+  {
+    "text": "all my work. There's a lot of people",
+    "start": 2565.119,
+    "duration": 2.801
+  },
+  {
+    "text": "that contributed to this initiative in",
+    "start": 2566.56,
+    "duration": 3.2
+  },
+  {
+    "text": "one way or another. So, uh this is not",
+    "start": 2567.92,
+    "duration": 3.36
+  },
+  {
+    "text": "in any particular order, but thanks to",
+    "start": 2569.76,
+    "duration": 4.48
+  },
+  {
+    "text": "all these people listed here. Um it was",
+    "start": 2571.28,
+    "duration": 4.4
+  },
+  {
+    "text": "a big team effort and I think a pretty",
+    "start": 2574.24,
+    "duration": 3.28
+  },
+  {
+    "text": "successful result and we are continuing",
+    "start": 2575.68,
+    "duration": 3.919
+  },
+  {
+    "text": "to work on this stuff. So uh please",
+    "start": 2577.52,
+    "duration": 4.0
+  },
+  {
+    "text": "reach out to us if you have any feedback",
+    "start": 2579.599,
+    "duration": 4.881
+  },
+  {
+    "text": "in this in this space and I think I have",
+    "start": 2581.52,
+    "duration": 4.559
+  },
+  {
+    "text": "a few minutes left for questions. So,",
+    "start": 2584.48,
+    "duration": 5.474
+  },
+  {
+    "text": "thank you very much. [applause]",
+    "start": 2586.079,
+    "duration": 3.875
+  },
+  {
+    "text": "[applause]",
+    "start": 2592.519,
+    "duration": 2.02
+  }
+]

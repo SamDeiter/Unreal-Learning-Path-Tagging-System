@@ -1,0 +1,4317 @@
+[
+  {
+    "text": "Hello everyone. Thanks for coming to my",
+    "start": 1.6,
+    "duration": 3.759
+  },
+  {
+    "text": "talk.",
+    "start": 3.84,
+    "duration": 6.48
+  },
+  {
+    "text": "Um, so a bit about me first. So I'm Ko.",
+    "start": 5.359,
+    "duration": 7.761
+  },
+  {
+    "text": "I'm a senior rendering engineer at Rare.",
+    "start": 10.32,
+    "duration": 5.519
+  },
+  {
+    "text": "Uh, I joined in 2021.",
+    "start": 13.12,
+    "duration": 5.2
+  },
+  {
+    "text": "We're based in the UK, uh, in the middle",
+    "start": 15.839,
+    "duration": 4.641
+  },
+  {
+    "text": "of it. Uh, and we've just celebrated our",
+    "start": 18.32,
+    "duration": 5.76
+  },
+  {
+    "text": "40th year of making games. Some of the",
+    "start": 20.48,
+    "duration": 5.039
+  },
+  {
+    "text": "games you'll recognize like Sea of",
+    "start": 24.08,
+    "duration": 4.08
+  },
+  {
+    "text": "Thieves, Golden Eye, Banjo Kazouie, and",
+    "start": 25.519,
+    "duration": 4.641
+  },
+  {
+    "text": "many, many more.",
+    "start": 28.16,
+    "duration": 4.88
+  },
+  {
+    "text": "Um, we are also part of the Xbox game",
+    "start": 30.16,
+    "duration": 6.239
+  },
+  {
+    "text": "studios and prior to that I worked on",
+    "start": 33.04,
+    "duration": 6.0
+  },
+  {
+    "text": "mobile games where I contributed to",
+    "start": 36.399,
+    "duration": 5.761
+  },
+  {
+    "text": "games like um in the Sonic franchise and",
+    "start": 39.04,
+    "duration": 6.32
+  },
+  {
+    "text": "the Warhammer titles as well. And these",
+    "start": 42.16,
+    "duration": 6.399
+  },
+  {
+    "text": "days my main interests lie in GPU based",
+    "start": 45.36,
+    "duration": 5.039
+  },
+  {
+    "text": "simulations and performance",
+    "start": 48.559,
+    "duration": 3.52
+  },
+  {
+    "text": "optimizations.",
+    "start": 50.399,
+    "duration": 5.921
+  },
+  {
+    "text": "Today the um topic of my talk is around",
+    "start": 52.079,
+    "duration": 6.721
+  },
+  {
+    "text": "R&D work that I've been leading at Rare",
+    "start": 56.32,
+    "duration": 5.2
+  },
+  {
+    "text": "to make static meshes like vines fully",
+    "start": 58.8,
+    "duration": 5.359
+  },
+  {
+    "text": "dynamic and interactive.",
+    "start": 61.52,
+    "duration": 4.48
+  },
+  {
+    "text": "So I'll start off by showing what the",
+    "start": 64.159,
+    "duration": 4.161
+  },
+  {
+    "text": "effect looks like and then I'll",
+    "start": 66.0,
+    "duration": 4.799
+  },
+  {
+    "text": "deconstruct it uh and describe it piece",
+    "start": 68.32,
+    "duration": 5.2
+  },
+  {
+    "text": "by piece.",
+    "start": 70.799,
+    "duration": 4.481
+  },
+  {
+    "text": "It's a physics simulation of an",
+    "start": 73.52,
+    "duration": 4.72
+  },
+  {
+    "text": "aggregate of vines and it runs in real",
+    "start": 75.28,
+    "duration": 5.839
+  },
+  {
+    "text": "time with support for interactions.",
+    "start": 78.24,
+    "duration": 5.199
+  },
+  {
+    "text": "Uh you'll observe that it receives gusts",
+    "start": 81.119,
+    "duration": 4.561
+  },
+  {
+    "text": "of winds and that it collides with both",
+    "start": 83.439,
+    "duration": 4.72
+  },
+  {
+    "text": "the environment assets and animated",
+    "start": 85.68,
+    "duration": 4.64
+  },
+  {
+    "text": "characters.",
+    "start": 88.159,
+    "duration": 3.521
+  },
+  {
+    "text": "When the character walks through the",
+    "start": 90.32,
+    "duration": 3.28
+  },
+  {
+    "text": "vines, you'll see that it splits and",
+    "start": 91.68,
+    "duration": 4.72
+  },
+  {
+    "text": "wraps around their body.",
+    "start": 93.6,
+    "duration": 4.559
+  },
+  {
+    "text": "The goal of a system like this is to",
+    "start": 96.4,
+    "duration": 3.759
+  },
+  {
+    "text": "make our games worlds feel more",
+    "start": 98.159,
+    "duration": 4.64
+  },
+  {
+    "text": "interactive by having more dynamic",
+    "start": 100.159,
+    "duration": 5.121
+  },
+  {
+    "text": "environmental elements that react to",
+    "start": 102.799,
+    "duration": 4.32
+  },
+  {
+    "text": "both the player and non-player",
+    "start": 105.28,
+    "duration": 6.28
+  },
+  {
+    "text": "characters uh in the scene.",
+    "start": 107.119,
+    "duration": 4.441
+  },
+  {
+    "text": "So let's have a look at the components",
+    "start": 111.6,
+    "duration": 3.44
+  },
+  {
+    "text": "in play to make an effect like this",
+    "start": 113.2,
+    "duration": 4.08
+  },
+  {
+    "text": "work.",
+    "start": 115.04,
+    "duration": 4.96
+  },
+  {
+    "text": "The system is built using a variety of",
+    "start": 117.28,
+    "duration": 6.08
+  },
+  {
+    "text": "uh native Unreal features. We use",
+    "start": 120.0,
+    "duration": 6.0
+  },
+  {
+    "text": "Niagara to run compute shaders with",
+    "start": 123.36,
+    "duration": 5.119
+  },
+  {
+    "text": "simulation stages on a grid 2D",
+    "start": 126.0,
+    "duration": 5.2
+  },
+  {
+    "text": "collection and use both built-in and",
+    "start": 128.479,
+    "duration": 6.081
+  },
+  {
+    "text": "some custom Niagara data interfaces.",
+    "start": 131.2,
+    "duration": 5.679
+  },
+  {
+    "text": "Then we use nanite meshes and",
+    "start": 134.56,
+    "duration": 5.6
+  },
+  {
+    "text": "efficiently deform them to uh using a",
+    "start": 136.879,
+    "duration": 7.921
+  },
+  {
+    "text": "joint based animation technique. Um",
+    "start": 140.16,
+    "duration": 7.6
+  },
+  {
+    "text": "we integrate world forces like winds of",
+    "start": 144.8,
+    "duration": 6.799
+  },
+  {
+    "text": "gusts um to grant the effect in the rest",
+    "start": 147.76,
+    "duration": 6.8
+  },
+  {
+    "text": "of the dynamic world. And finally we",
+    "start": 151.599,
+    "duration": 5.36
+  },
+  {
+    "text": "also um support collisions with the",
+    "start": 154.56,
+    "duration": 5.12
+  },
+  {
+    "text": "world signed distance field and animated",
+    "start": 156.959,
+    "duration": 4.401
+  },
+  {
+    "text": "characters.",
+    "start": 159.68,
+    "duration": 4.96
+  },
+  {
+    "text": "Um at the end I'll also talk a bit about",
+    "start": 161.36,
+    "duration": 5.68
+  },
+  {
+    "text": "debugging uh debugging tools and",
+    "start": 164.64,
+    "duration": 5.4
+  },
+  {
+    "text": "performance.",
+    "start": 167.04,
+    "duration": 3.0
+  },
+  {
+    "text": "So I'm aware that maybe not everyone is",
+    "start": 170.72,
+    "duration": 4.879
+  },
+  {
+    "text": "aware of position based dynamics or how",
+    "start": 173.599,
+    "duration": 3.201
+  },
+  {
+    "text": "it works. So I thought it would be",
+    "start": 175.599,
+    "duration": 5.28
+  },
+  {
+    "text": "useful to go through a quick primer um",
+    "start": 176.8,
+    "duration": 6.32
+  },
+  {
+    "text": "before I go any further.",
+    "start": 180.879,
+    "duration": 5.681
+  },
+  {
+    "text": "So it's a physics solver algorithm. It",
+    "start": 183.12,
+    "duration": 6.399
+  },
+  {
+    "text": "handles the integration of forces",
+    "start": 186.56,
+    "duration": 6.959
+  },
+  {
+    "text": "upon nodes and uh it tries to enforce uh",
+    "start": 189.519,
+    "duration": 8.44
+  },
+  {
+    "text": "constraints uh between nodes.",
+    "start": 193.519,
+    "duration": 4.44
+  },
+  {
+    "text": "So as an example for vines a natural",
+    "start": 198.319,
+    "duration": 5.84
+  },
+  {
+    "text": "representation is uh a chain like these",
+    "start": 200.72,
+    "duration": 6.159
+  },
+  {
+    "text": "where nodes are represented by circles",
+    "start": 204.159,
+    "duration": 5.281
+  },
+  {
+    "text": "and each is connected to the previous uh",
+    "start": 206.879,
+    "duration": 5.121
+  },
+  {
+    "text": "to the next one from top to bottom using",
+    "start": 209.44,
+    "duration": 6.84
+  },
+  {
+    "text": "these uh chains.",
+    "start": 212.0,
+    "duration": 4.28
+  },
+  {
+    "text": "In general, nodes can be thought of as",
+    "start": 216.64,
+    "duration": 4.4
+  },
+  {
+    "text": "particles uh with properties like",
+    "start": 218.64,
+    "duration": 5.04
+  },
+  {
+    "text": "positions and orientation",
+    "start": 221.04,
+    "duration": 4.8
+  },
+  {
+    "text": "and constraints are applied to the",
+    "start": 223.68,
+    "duration": 4.479
+  },
+  {
+    "text": "interconnection between nodes. For",
+    "start": 225.84,
+    "duration": 4.56
+  },
+  {
+    "text": "example, here we have a length",
+    "start": 228.159,
+    "duration": 3.761
+  },
+  {
+    "text": "constraint.",
+    "start": 230.4,
+    "duration": 3.839
+  },
+  {
+    "text": "um it defines the desired length between",
+    "start": 231.92,
+    "duration": 5.36
+  },
+  {
+    "text": "two nodes uh to connect it to each other",
+    "start": 234.239,
+    "duration": 5.681
+  },
+  {
+    "text": "and the constraint will move the nodes",
+    "start": 237.28,
+    "duration": 5.599
+  },
+  {
+    "text": "either away or towards each other to",
+    "start": 239.92,
+    "duration": 6.64
+  },
+  {
+    "text": "satisfy the original length.",
+    "start": 242.879,
+    "duration": 5.681
+  },
+  {
+    "text": "Then you get angle constraints that",
+    "start": 246.56,
+    "duration": 4.0
+  },
+  {
+    "text": "control the maximum angle between a",
+    "start": 248.56,
+    "duration": 4.8
+  },
+  {
+    "text": "series of nodes. This can be useful to",
+    "start": 250.56,
+    "duration": 5.919
+  },
+  {
+    "text": "avoid unrealistic uh bending angles on",
+    "start": 253.36,
+    "duration": 5.92
+  },
+  {
+    "text": "materials like ropes.",
+    "start": 256.479,
+    "duration": 5.04
+  },
+  {
+    "text": "You can get volume constraints. They can",
+    "start": 259.28,
+    "duration": 4.16
+  },
+  {
+    "text": "be useful to retain the volume of a",
+    "start": 261.519,
+    "duration": 6.561
+  },
+  {
+    "text": "shape when you push or pull a node.",
+    "start": 263.44,
+    "duration": 6.08
+  },
+  {
+    "text": "We can look at collisions with the",
+    "start": 268.08,
+    "duration": 3.52
+  },
+  {
+    "text": "environment and characters as another",
+    "start": 269.52,
+    "duration": 3.92
+  },
+  {
+    "text": "type of constraint.",
+    "start": 271.6,
+    "duration": 3.92
+  },
+  {
+    "text": "Nodes shouldn't be penetrating in the",
+    "start": 273.44,
+    "duration": 4.4
+  },
+  {
+    "text": "surface of these objects and if found to",
+    "start": 275.52,
+    "duration": 4.64
+  },
+  {
+    "text": "do so, we should push them out until",
+    "start": 277.84,
+    "duration": 6.0
+  },
+  {
+    "text": "they are lying at the surface.",
+    "start": 280.16,
+    "duration": 5.36
+  },
+  {
+    "text": "These are just some of the most obvious",
+    "start": 283.84,
+    "duration": 4.32
+  },
+  {
+    "text": "types of constraints, but it's actually",
+    "start": 285.52,
+    "duration": 4.399
+  },
+  {
+    "text": "pretty straightforward to add some more",
+    "start": 288.16,
+    "duration": 3.759
+  },
+  {
+    "text": "bespoke ones that make sense in your",
+    "start": 289.919,
+    "duration": 5.481
+  },
+  {
+    "text": "particular game.",
+    "start": 291.919,
+    "duration": 3.481
+  },
+  {
+    "text": "The iterative physics solver algorithm",
+    "start": 295.52,
+    "duration": 6.239
+  },
+  {
+    "text": "performs two steps. First, it integrates",
+    "start": 298.32,
+    "duration": 6.72
+  },
+  {
+    "text": "the internal and external forces. The",
+    "start": 301.759,
+    "duration": 6.321
+  },
+  {
+    "text": "internal forces is the velocity that",
+    "start": 305.04,
+    "duration": 5.04
+  },
+  {
+    "text": "already existed in the simulation from a",
+    "start": 308.08,
+    "duration": 4.8
+  },
+  {
+    "text": "previous frame. And the external forces",
+    "start": 310.08,
+    "duration": 5.2
+  },
+  {
+    "text": "usually include gravity but it can be",
+    "start": 312.88,
+    "duration": 4.64
+  },
+  {
+    "text": "anything. So in our case we also include",
+    "start": 315.28,
+    "duration": 3.84
+  },
+  {
+    "text": "wind.",
+    "start": 317.52,
+    "duration": 3.679
+  },
+  {
+    "text": "And then the second step is to enforce",
+    "start": 319.12,
+    "duration": 4.079
+  },
+  {
+    "text": "the constraints. So this is done through",
+    "start": 321.199,
+    "duration": 4.481
+  },
+  {
+    "text": "multiple iterations as it's hard to",
+    "start": 323.199,
+    "duration": 6.081
+  },
+  {
+    "text": "compute the final position otherwise.",
+    "start": 325.68,
+    "duration": 6.239
+  },
+  {
+    "text": "One thing to note with uh position based",
+    "start": 329.28,
+    "duration": 5.12
+  },
+  {
+    "text": "dynamics is that we're not storing",
+    "start": 331.919,
+    "duration": 4.241
+  },
+  {
+    "text": "velocity properties on the nodes.",
+    "start": 334.4,
+    "duration": 4.079
+  },
+  {
+    "text": "Instead, we keep the position on uh",
+    "start": 336.16,
+    "duration": 4.0
+  },
+  {
+    "text": "position value of the current and the",
+    "start": 338.479,
+    "duration": 4.0
+  },
+  {
+    "text": "previous frame and compute the velocity",
+    "start": 340.16,
+    "duration": 4.24
+  },
+  {
+    "text": "from their difference. This is meant to",
+    "start": 342.479,
+    "duration": 4.961
+  },
+  {
+    "text": "keep the simulation more stable.",
+    "start": 344.4,
+    "duration": 5.44
+  },
+  {
+    "text": "In our implementation, we only use",
+    "start": 347.44,
+    "duration": 4.72
+  },
+  {
+    "text": "length constraints between two nodes",
+    "start": 349.84,
+    "duration": 4.0
+  },
+  {
+    "text": "along a chain and also support",
+    "start": 352.16,
+    "duration": 4.68
+  },
+  {
+    "text": "collisions.",
+    "start": 353.84,
+    "duration": 3.0
+  },
+  {
+    "text": "So looking at a length constraint",
+    "start": 357.039,
+    "duration": 4.241
+  },
+  {
+    "text": "solver, this is how node positions are",
+    "start": 358.639,
+    "duration": 5.361
+  },
+  {
+    "text": "iteratively refined. Let's say this is",
+    "start": 361.28,
+    "duration": 5.44
+  },
+  {
+    "text": "our starting point. Then we integrate",
+    "start": 364.0,
+    "duration": 4.639
+  },
+  {
+    "text": "some forces. So gravity will pull the",
+    "start": 366.72,
+    "duration": 3.68
+  },
+  {
+    "text": "nodes down. And let's say there's some",
+    "start": 368.639,
+    "duration": 3.761
+  },
+  {
+    "text": "wind that has also pushed them towards",
+    "start": 370.4,
+    "duration": 5.04
+  },
+  {
+    "text": "the right. Note that I pin the node at",
+    "start": 372.4,
+    "duration": 4.96
+  },
+  {
+    "text": "the very top. Let's say we've attached",
+    "start": 375.44,
+    "duration": 5.28
+  },
+  {
+    "text": "it to a wall or a tree.",
+    "start": 377.36,
+    "duration": 6.48
+  },
+  {
+    "text": "So now we start the iterative process",
+    "start": 380.72,
+    "duration": 6.0
+  },
+  {
+    "text": "and handle the first length constraint.",
+    "start": 383.84,
+    "duration": 6.16
+  },
+  {
+    "text": "We can notice that the uh current length",
+    "start": 386.72,
+    "duration": 5.84
+  },
+  {
+    "text": "is longer than the original length. So",
+    "start": 390.0,
+    "duration": 5.039
+  },
+  {
+    "text": "the difference is the amount that we",
+    "start": 392.56,
+    "duration": 5.04
+  },
+  {
+    "text": "need to correct. Uh given that one of",
+    "start": 395.039,
+    "duration": 4.801
+  },
+  {
+    "text": "these nodes is spinned, we'll just move",
+    "start": 397.6,
+    "duration": 4.96
+  },
+  {
+    "text": "the other nodes towards the node at the",
+    "start": 399.84,
+    "duration": 4.799
+  },
+  {
+    "text": "very top by the entire correction",
+    "start": 402.56,
+    "duration": 7.359
+  },
+  {
+    "text": "distance to satisfy that desired length.",
+    "start": 404.639,
+    "duration": 6.961
+  },
+  {
+    "text": "Next, we'll handle the second length",
+    "start": 409.919,
+    "duration": 4.081
+  },
+  {
+    "text": "constraint. And as this is also",
+    "start": 411.6,
+    "duration": 5.439
+  },
+  {
+    "text": "exceeding the desired length. Um, but",
+    "start": 414.0,
+    "duration": 5.039
+  },
+  {
+    "text": "since neither of these nodes are pinned,",
+    "start": 417.039,
+    "duration": 4.081
+  },
+  {
+    "text": "we actually will spread the correction",
+    "start": 419.039,
+    "duration": 4.321
+  },
+  {
+    "text": "length evenly between the two nodes and",
+    "start": 421.12,
+    "duration": 4.88
+  },
+  {
+    "text": "move both a bit towards each other to",
+    "start": 423.36,
+    "duration": 6.16
+  },
+  {
+    "text": "satisfy that length constraint.",
+    "start": 426.0,
+    "duration": 5.44
+  },
+  {
+    "text": "And we keep doing this until we reach",
+    "start": 429.52,
+    "duration": 4.56
+  },
+  {
+    "text": "the end of the chain. Now, if you've",
+    "start": 431.44,
+    "duration": 5.28
+  },
+  {
+    "text": "noticed, the second node in this chain",
+    "start": 434.08,
+    "duration": 4.72
+  },
+  {
+    "text": "was moved down as part of this solving",
+    "start": 436.72,
+    "duration": 4.16
+  },
+  {
+    "text": "the second constraint. Therefore,",
+    "start": 438.8,
+    "duration": 4.88
+  },
+  {
+    "text": "doesn't satisfy the initial um length",
+    "start": 440.88,
+    "duration": 4.8
+  },
+  {
+    "text": "constraint at the top anymore. So this",
+    "start": 443.68,
+    "duration": 4.72
+  },
+  {
+    "text": "is where the iterative um algorithm",
+    "start": 445.68,
+    "duration": 4.239
+  },
+  {
+    "text": "progressively corrects the positions",
+    "start": 448.4,
+    "duration": 3.68
+  },
+  {
+    "text": "further and further towards a correct",
+    "start": 449.919,
+    "duration": 4.481
+  },
+  {
+    "text": "solution. So again we calculate the",
+    "start": 452.08,
+    "duration": 3.839
+  },
+  {
+    "text": "difference between the current length",
+    "start": 454.4,
+    "duration": 3.519
+  },
+  {
+    "text": "and the desired length and move the",
+    "start": 455.919,
+    "duration": 4.081
+  },
+  {
+    "text": "unpin node to satisfy the intended",
+    "start": 457.919,
+    "duration": 3.68
+  },
+  {
+    "text": "length",
+    "start": 460.0,
+    "duration": 3.759
+  },
+  {
+    "text": "before moving on to the next constraint",
+    "start": 461.599,
+    "duration": 5.201
+  },
+  {
+    "text": "and so forth. Eventually with enough",
+    "start": 463.759,
+    "duration": 4.88
+  },
+  {
+    "text": "iterations all the constraints will be",
+    "start": 466.8,
+    "duration": 4.839
+  },
+  {
+    "text": "satisfied",
+    "start": 468.639,
+    "duration": 3.0
+  },
+  {
+    "text": "and I'll show the original configuration",
+    "start": 472.16,
+    "duration": 4.56
+  },
+  {
+    "text": "of the chain behind here. So you can see",
+    "start": 474.0,
+    "duration": 5.28
+  },
+  {
+    "text": "that um the the the length was",
+    "start": 476.72,
+    "duration": 4.8
+  },
+  {
+    "text": "maintained whilst the forces were",
+    "start": 479.28,
+    "duration": 4.72
+  },
+  {
+    "text": "successfully applied.",
+    "start": 481.52,
+    "duration": 5.2
+  },
+  {
+    "text": "In practice we set an fixed number of",
+    "start": 484.0,
+    "duration": 5.28
+  },
+  {
+    "text": "iterations that seems to work for this",
+    "start": 486.72,
+    "duration": 5.44
+  },
+  {
+    "text": "effect or this asset. And it's worth",
+    "start": 489.28,
+    "duration": 4.639
+  },
+  {
+    "text": "noting that the longer a chain like this",
+    "start": 492.16,
+    "duration": 3.92
+  },
+  {
+    "text": "is, the more iterations we may need to",
+    "start": 493.919,
+    "duration": 5.601
+  },
+  {
+    "text": "converge to a correct solution.",
+    "start": 496.08,
+    "duration": 5.44
+  },
+  {
+    "text": "But it's also a dial that can be tweaked",
+    "start": 499.52,
+    "duration": 4.0
+  },
+  {
+    "text": "to reduce the cost of the simulation if",
+    "start": 501.52,
+    "duration": 3.679
+  },
+  {
+    "text": "we are happy to forgive a bit of",
+    "start": 503.52,
+    "duration": 4.679
+  },
+  {
+    "text": "stretching.",
+    "start": 505.199,
+    "duration": 3.0
+  },
+  {
+    "text": "So you might have noticed by now that",
+    "start": 509.52,
+    "duration": 4.319
+  },
+  {
+    "text": "this is a serial process, which is a bit",
+    "start": 511.199,
+    "duration": 4.96
+  },
+  {
+    "text": "of a crime on a GPU since it's built for",
+    "start": 513.839,
+    "duration": 3.841
+  },
+  {
+    "text": "parallelism.",
+    "start": 516.159,
+    "duration": 3.841
+  },
+  {
+    "text": "Unfortunately, that is the nature of the",
+    "start": 517.68,
+    "duration": 4.96
+  },
+  {
+    "text": "solver. um we need to solve the position",
+    "start": 520.0,
+    "duration": 4.64
+  },
+  {
+    "text": "of the previous node in order to place",
+    "start": 522.64,
+    "duration": 5.28
+  },
+  {
+    "text": "the next node in the right place.",
+    "start": 524.64,
+    "duration": 4.48
+  },
+  {
+    "text": "But given that there is no",
+    "start": 527.92,
+    "duration": 2.96
+  },
+  {
+    "text": "interdependencies between different",
+    "start": 529.12,
+    "duration": 3.92
+  },
+  {
+    "text": "chains, we can run this solver for many",
+    "start": 530.88,
+    "duration": 4.399
+  },
+  {
+    "text": "chains in parallel which is where the",
+    "start": 533.04,
+    "duration": 4.88
+  },
+  {
+    "text": "GPU excels.",
+    "start": 535.279,
+    "duration": 4.24
+  },
+  {
+    "text": "So let's come back to our own",
+    "start": 537.92,
+    "duration": 3.52
+  },
+  {
+    "text": "implementation and I'll go over some",
+    "start": 539.519,
+    "duration": 5.32
+  },
+  {
+    "text": "details now.",
+    "start": 541.44,
+    "duration": 3.399
+  },
+  {
+    "text": "First let's have a look at our vine",
+    "start": 545.44,
+    "duration": 5.28
+  },
+  {
+    "text": "mesh. We bake some metadata into the",
+    "start": 547.279,
+    "duration": 6.721
+  },
+  {
+    "text": "vertex attribute channels.",
+    "start": 550.72,
+    "duration": 5.36
+  },
+  {
+    "text": "The vertex colors red channel will",
+    "start": 554.0,
+    "duration": 4.8
+  },
+  {
+    "text": "represent the total length of a vine as",
+    "start": 556.08,
+    "duration": 4.4
+  },
+  {
+    "text": "a fraction of the entire object's",
+    "start": 558.8,
+    "duration": 5.08
+  },
+  {
+    "text": "bounding box.",
+    "start": 560.48,
+    "duration": 3.4
+  },
+  {
+    "text": "In the green channel, a gradient will be",
+    "start": 563.92,
+    "duration": 5.599
+  },
+  {
+    "text": "representing how far along a vert a",
+    "start": 566.8,
+    "duration": 5.12
+  },
+  {
+    "text": "particular vertex is located along that",
+    "start": 569.519,
+    "duration": 4.561
+  },
+  {
+    "text": "vine.",
+    "start": 571.92,
+    "duration": 5.12
+  },
+  {
+    "text": "And we then also store a pivot location",
+    "start": 574.08,
+    "duration": 5.439
+  },
+  {
+    "text": "at the very top of the vine across the",
+    "start": 577.04,
+    "duration": 6.56
+  },
+  {
+    "text": "UV 1 and two here highlighted in orange.",
+    "start": 579.519,
+    "duration": 5.601
+  },
+  {
+    "text": "There are a few more channels displayed",
+    "start": 583.6,
+    "duration": 3.359
+  },
+  {
+    "text": "here that are part of our larger",
+    "start": 585.12,
+    "duration": 5.12
+  },
+  {
+    "text": "material um setup for foliage. They're",
+    "start": 586.959,
+    "duration": 7.481
+  },
+  {
+    "text": "beyond the scope of this talk.",
+    "start": 590.24,
+    "duration": 4.2
+  },
+  {
+    "text": "With this data, we can we know where",
+    "start": 594.72,
+    "duration": 5.119
+  },
+  {
+    "text": "each vine starts",
+    "start": 597.36,
+    "duration": 5.599
+  },
+  {
+    "text": "points at the top and how long it is. So",
+    "start": 599.839,
+    "duration": 5.921
+  },
+  {
+    "text": "we can allocate the PBD nodes along them",
+    "start": 602.959,
+    "duration": 6.081
+  },
+  {
+    "text": "to represent a chain.",
+    "start": 605.76,
+    "duration": 4.96
+  },
+  {
+    "text": "The amount of nodes over a given",
+    "start": 609.04,
+    "duration": 4.96
+  },
+  {
+    "text": "distance is configurable. Um and it's a",
+    "start": 610.72,
+    "duration": 5.28
+  },
+  {
+    "text": "a value that again balances cost and",
+    "start": 614.0,
+    "duration": 5.0
+  },
+  {
+    "text": "fidelity.",
+    "start": 616.0,
+    "duration": 3.0
+  },
+  {
+    "text": "Physics solver is implemented with",
+    "start": 619.6,
+    "duration": 5.84
+  },
+  {
+    "text": "compute shaders in Niagara and the PBD",
+    "start": 621.6,
+    "duration": 6.479
+  },
+  {
+    "text": "node properties are stored in a grid 2D",
+    "start": 625.44,
+    "duration": 4.16
+  },
+  {
+    "text": "collection.",
+    "start": 628.079,
+    "duration": 3.281
+  },
+  {
+    "text": "I'm not actually using any Niagara",
+    "start": 629.6,
+    "duration": 3.919
+  },
+  {
+    "text": "particles except for visual debugging",
+    "start": 631.36,
+    "duration": 5.36
+  },
+  {
+    "text": "like here.",
+    "start": 633.519,
+    "duration": 5.76
+  },
+  {
+    "text": "Once the simulation is ran, the output",
+    "start": 636.72,
+    "duration": 5.359
+  },
+  {
+    "text": "is a position normal and tangent for",
+    "start": 639.279,
+    "duration": 5.12
+  },
+  {
+    "text": "each node which are then written into",
+    "start": 642.079,
+    "duration": 5.521
+  },
+  {
+    "text": "different rows of a render target.",
+    "start": 644.399,
+    "duration": 5.601
+  },
+  {
+    "text": "The vine mesh material has then the same",
+    "start": 647.6,
+    "duration": 4.72
+  },
+  {
+    "text": "render target bound and samples it to",
+    "start": 650.0,
+    "duration": 5.12
+  },
+  {
+    "text": "offset the location of the vertices",
+    "start": 652.32,
+    "duration": 4.8
+  },
+  {
+    "text": "based on corresponding nodes that they",
+    "start": 655.12,
+    "duration": 4.88
+  },
+  {
+    "text": "are nearest to. The same way you can",
+    "start": 657.12,
+    "duration": 5.52
+  },
+  {
+    "text": "imagine with skinned mesh vertices u",
+    "start": 660.0,
+    "duration": 5.519
+  },
+  {
+    "text": "will move based on joint uh nearby",
+    "start": 662.64,
+    "duration": 6.56
+  },
+  {
+    "text": "joints on a CPUdriven animation.",
+    "start": 665.519,
+    "duration": 5.361
+  },
+  {
+    "text": "We use this technique in a few of our",
+    "start": 669.2,
+    "duration": 3.84
+  },
+  {
+    "text": "effects and refer to it as texture joint",
+    "start": 670.88,
+    "duration": 5.76
+  },
+  {
+    "text": "animations or TJA.",
+    "start": 673.04,
+    "duration": 5.039
+  },
+  {
+    "text": "And finally the results of this",
+    "start": 676.64,
+    "duration": 3.12
+  },
+  {
+    "text": "defamation is then fed into the",
+    "start": 678.079,
+    "duration": 3.44
+  },
+  {
+    "text": "materials world position offset",
+    "start": 679.76,
+    "duration": 4.759
+  },
+  {
+    "text": "property.",
+    "start": 681.519,
+    "duration": 3.0
+  },
+  {
+    "text": "Now let's have a look at the simulation",
+    "start": 685.279,
+    "duration": 4.721
+  },
+  {
+    "text": "setup in Niagara.",
+    "start": 687.04,
+    "duration": 5.359
+  },
+  {
+    "text": "During the emitter spawn stage, we",
+    "start": 690.0,
+    "duration": 5.04
+  },
+  {
+    "text": "initialize a few properties.",
+    "start": 692.399,
+    "duration": 5.841
+  },
+  {
+    "text": "The foliage Niagara data interface is",
+    "start": 695.04,
+    "duration": 6.32
+  },
+  {
+    "text": "custom made and is used to read the mesh",
+    "start": 698.24,
+    "duration": 5.599
+  },
+  {
+    "text": "vertex data shown earlier.",
+    "start": 701.36,
+    "duration": 4.88
+  },
+  {
+    "text": "We also initialize the rigid mesh",
+    "start": 703.839,
+    "duration": 5.761
+  },
+  {
+    "text": "collision query Niagara data interface",
+    "start": 706.24,
+    "duration": 6.32
+  },
+  {
+    "text": "um which is built in in Unreal and is",
+    "start": 709.6,
+    "duration": 4.88
+  },
+  {
+    "text": "used to find uh collisions with",
+    "start": 712.56,
+    "duration": 4.92
+  },
+  {
+    "text": "characters.",
+    "start": 714.48,
+    "duration": 3.0
+  },
+  {
+    "text": "Then we count the number of unique",
+    "start": 717.6,
+    "duration": 3.44
+  },
+  {
+    "text": "chains in the mesh and the number of",
+    "start": 719.12,
+    "duration": 3.68
+  },
+  {
+    "text": "nodes that are required based on the",
+    "start": 721.04,
+    "duration": 4.88
+  },
+  {
+    "text": "length of each of those vines and create",
+    "start": 722.8,
+    "duration": 5.52
+  },
+  {
+    "text": "and initialize the grid 2D collection in",
+    "start": 725.92,
+    "duration": 7.52
+  },
+  {
+    "text": "which we will store the PBD node data.",
+    "start": 728.32,
+    "duration": 7.04
+  },
+  {
+    "text": "We also create and initialize a couple",
+    "start": 733.44,
+    "duration": 4.56
+  },
+  {
+    "text": "of render targets. One of them is to",
+    "start": 735.36,
+    "duration": 4.88
+  },
+  {
+    "text": "output the what to to represent the",
+    "start": 738.0,
+    "duration": 4.16
+  },
+  {
+    "text": "output of the simulation and the other",
+    "start": 740.24,
+    "duration": 6.32
+  },
+  {
+    "text": "one is for some metadata for each vine.",
+    "start": 742.16,
+    "duration": 6.56
+  },
+  {
+    "text": "A few more settings then to control the",
+    "start": 746.56,
+    "duration": 3.92
+  },
+  {
+    "text": "simulation.",
+    "start": 748.72,
+    "duration": 4.48
+  },
+  {
+    "text": "And finally we use another custom",
+    "start": 750.48,
+    "duration": 5.359
+  },
+  {
+    "text": "Niagara data interface called material",
+    "start": 753.2,
+    "duration": 4.96
+  },
+  {
+    "text": "instance dynamic which allows us to set",
+    "start": 755.839,
+    "duration": 4.881
+  },
+  {
+    "text": "a few global parameters on the material.",
+    "start": 758.16,
+    "duration": 6.2
+  },
+  {
+    "text": "More on that later.",
+    "start": 760.72,
+    "duration": 3.64
+  },
+  {
+    "text": "The emitter update stage is very simple.",
+    "start": 765.6,
+    "duration": 4.96
+  },
+  {
+    "text": "We just sample the current wind",
+    "start": 768.959,
+    "duration": 5.201
+  },
+  {
+    "text": "direction and query query the rigid mesh",
+    "start": 770.56,
+    "duration": 6.399
+  },
+  {
+    "text": "collision Nagar data interface to find",
+    "start": 774.16,
+    "duration": 4.799
+  },
+  {
+    "text": "the current relevant actors within the",
+    "start": 776.959,
+    "duration": 4.161
+  },
+  {
+    "text": "bands of the emitter.",
+    "start": 778.959,
+    "duration": 5.201
+  },
+  {
+    "text": "There's also a disabled um burst spawn",
+    "start": 781.12,
+    "duration": 6.399
+  },
+  {
+    "text": "stage uh or particles visible here. This",
+    "start": 784.16,
+    "duration": 5.84
+  },
+  {
+    "text": "is just for debugging. Again, the",
+    "start": 787.519,
+    "duration": 6.681
+  },
+  {
+    "text": "simulation is not using particles.",
+    "start": 790.0,
+    "duration": 4.2
+  },
+  {
+    "text": "So after the emitter update stage, we",
+    "start": 795.92,
+    "duration": 5.359
+  },
+  {
+    "text": "have a few simulation stages.",
+    "start": 798.32,
+    "duration": 5.92
+  },
+  {
+    "text": "First, the initialization of the grid 2D",
+    "start": 801.279,
+    "duration": 4.961
+  },
+  {
+    "text": "collection in which we'll store the PBD",
+    "start": 804.24,
+    "duration": 4.719
+  },
+  {
+    "text": "nodes with default values. We do this",
+    "start": 806.24,
+    "duration": 5.68
+  },
+  {
+    "text": "only once.",
+    "start": 808.959,
+    "duration": 5.281
+  },
+  {
+    "text": "Then we initialize a metadata render",
+    "start": 811.92,
+    "duration": 5.28
+  },
+  {
+    "text": "target which I'll get back to in a slide",
+    "start": 814.24,
+    "duration": 4.96
+  },
+  {
+    "text": "or two.",
+    "start": 817.2,
+    "duration": 5.04
+  },
+  {
+    "text": "Then we render the PBD solver. And",
+    "start": 819.2,
+    "duration": 4.96
+  },
+  {
+    "text": "finally, we write both the current frame",
+    "start": 822.24,
+    "duration": 4.24
+  },
+  {
+    "text": "and previous frame values of the nodes",
+    "start": 824.16,
+    "duration": 4.88
+  },
+  {
+    "text": "position, normal, and tangent to the",
+    "start": 826.48,
+    "duration": 6.76
+  },
+  {
+    "text": "nodes data render target.",
+    "start": 829.04,
+    "duration": 4.2
+  },
+  {
+    "text": "The PBD solver logic logic looks a bit",
+    "start": 833.839,
+    "duration": 5.041
+  },
+  {
+    "text": "like this. First, we dispatch one",
+    "start": 836.56,
+    "duration": 5.2
+  },
+  {
+    "text": "wavefront per chain. Each thread",
+    "start": 838.88,
+    "duration": 5.92
+  },
+  {
+    "text": "represents a PBD node.",
+    "start": 841.76,
+    "duration": 5.92
+  },
+  {
+    "text": "Each node loads its data into the grid",
+    "start": 844.8,
+    "duration": 4.64
+  },
+  {
+    "text": "from the grid 2D into group shared",
+    "start": 847.68,
+    "duration": 3.44
+  },
+  {
+    "text": "memory. If you're not aware, that is",
+    "start": 849.44,
+    "duration": 5.199
+  },
+  {
+    "text": "local memory on the GPU.",
+    "start": 851.12,
+    "duration": 5.6
+  },
+  {
+    "text": "Then each node samples the wind noise",
+    "start": 854.639,
+    "duration": 4.081
+  },
+  {
+    "text": "function and stores the results also in",
+    "start": 856.72,
+    "duration": 4.64
+  },
+  {
+    "text": "group shared memory.",
+    "start": 858.72,
+    "duration": 4.799
+  },
+  {
+    "text": "And then the first thread will run the",
+    "start": 861.36,
+    "duration": 4.0
+  },
+  {
+    "text": "serial iterative solver over group",
+    "start": 863.519,
+    "duration": 4.081
+  },
+  {
+    "text": "shared memory for all the nodes. That",
+    "start": 865.36,
+    "duration": 4.96
+  },
+  {
+    "text": "looks a bit like this. First we",
+    "start": 867.6,
+    "duration": 5.2
+  },
+  {
+    "text": "integrate the physics forces. Then we",
+    "start": 870.32,
+    "duration": 4.24
+  },
+  {
+    "text": "loop a number of times over the",
+    "start": 872.8,
+    "duration": 3.839
+  },
+  {
+    "text": "constraints and finally resolve the",
+    "start": 874.56,
+    "duration": 3.76
+  },
+  {
+    "text": "collisions.",
+    "start": 876.639,
+    "duration": 4.241
+  },
+  {
+    "text": "Once all this work is done, all the",
+    "start": 878.32,
+    "duration": 5.12
+  },
+  {
+    "text": "threads resume work and retrieve the",
+    "start": 880.88,
+    "duration": 4.319
+  },
+  {
+    "text": "updated positions from group shared",
+    "start": 883.44,
+    "duration": 4.0
+  },
+  {
+    "text": "memory to write them back into the group",
+    "start": 885.199,
+    "duration": 5.44
+  },
+  {
+    "text": "grit 2D collection.",
+    "start": 887.44,
+    "duration": 5.44
+  },
+  {
+    "text": "Then we can compute the normal and",
+    "start": 890.639,
+    "duration": 5.44
+  },
+  {
+    "text": "tangent from neighboring nodes and",
+    "start": 892.88,
+    "duration": 5.199
+  },
+  {
+    "text": "finally write these to the output render",
+    "start": 896.079,
+    "duration": 3.921
+  },
+  {
+    "text": "target.",
+    "start": 898.079,
+    "duration": 4.0
+  },
+  {
+    "text": "And practically speaking, all of this is",
+    "start": 900.0,
+    "duration": 4.399
+  },
+  {
+    "text": "written in a custom HLSL node in",
+    "start": 902.079,
+    "duration": 5.2
+  },
+  {
+    "text": "Niagara. Um, and the iterative solver",
+    "start": 904.399,
+    "duration": 4.641
+  },
+  {
+    "text": "part is actually located in a header",
+    "start": 907.279,
+    "duration": 5.12
+  },
+  {
+    "text": "file that has made it more manageable to",
+    "start": 909.04,
+    "duration": 5.84
+  },
+  {
+    "text": "write the code and also it's more easily",
+    "start": 912.399,
+    "duration": 4.161
+  },
+  {
+    "text": "testable.",
+    "start": 914.88,
+    "duration": 4.0
+  },
+  {
+    "text": "If you're curious about uh shader code",
+    "start": 916.56,
+    "duration": 4.48
+  },
+  {
+    "text": "testing, I can recommend my colleague",
+    "start": 918.88,
+    "duration": 5.04
+  },
+  {
+    "text": "Keat Stockdale GDC 2024 presentation on",
+    "start": 921.04,
+    "duration": 5.359
+  },
+  {
+    "text": "the subject.",
+    "start": 923.92,
+    "duration": 4.56
+  },
+  {
+    "text": "The downside of using an external header",
+    "start": 926.399,
+    "duration": 5.521
+  },
+  {
+    "text": "file is that Niagara actually parses the",
+    "start": 928.48,
+    "duration": 6.88
+  },
+  {
+    "text": "text in the custom HLSL node and only",
+    "start": 931.92,
+    "duration": 6.4
+  },
+  {
+    "text": "populates the Niagara data interface",
+    "start": 935.36,
+    "duration": 5.52
+  },
+  {
+    "text": "functions in the final shader file that",
+    "start": 938.32,
+    "duration": 5.28
+  },
+  {
+    "text": "have been called in there. um not the",
+    "start": 940.88,
+    "duration": 4.88
+  },
+  {
+    "text": "ones that have been called in the",
+    "start": 943.6,
+    "duration": 4.72
+  },
+  {
+    "text": "external header file. So workaround for",
+    "start": 945.76,
+    "duration": 4.8
+  },
+  {
+    "text": "that is to do some dummy function calls",
+    "start": 948.32,
+    "duration": 5.04
+  },
+  {
+    "text": "in the custom HSL node so that the",
+    "start": 950.56,
+    "duration": 5.04
+  },
+  {
+    "text": "function will be populated and we call",
+    "start": 953.36,
+    "duration": 4.64
+  },
+  {
+    "text": "we can call them later.",
+    "start": 955.6,
+    "duration": 4.32
+  },
+  {
+    "text": "The compiler should ignore these dummy",
+    "start": 958.0,
+    "duration": 3.68
+  },
+  {
+    "text": "function calls as long as we don't use",
+    "start": 959.92,
+    "duration": 4.159
+  },
+  {
+    "text": "their uh results.",
+    "start": 961.68,
+    "duration": 5.44
+  },
+  {
+    "text": "And sometimes it's also viable to find",
+    "start": 964.079,
+    "duration": 5.76
+  },
+  {
+    "text": "and include some other HL headers that",
+    "start": 967.12,
+    "duration": 4.959
+  },
+  {
+    "text": "the Niagara data interfaces would call",
+    "start": 969.839,
+    "duration": 4.881
+  },
+  {
+    "text": "themselves or forward declaring some",
+    "start": 972.079,
+    "duration": 4.161
+  },
+  {
+    "text": "functions. But it's something that I",
+    "start": 974.72,
+    "duration": 3.84
+  },
+  {
+    "text": "guess could be improved a bit uh in the",
+    "start": 976.24,
+    "duration": 5.32
+  },
+  {
+    "text": "future.",
+    "start": 978.56,
+    "duration": 3.0
+  },
+  {
+    "text": "Let's look at the simulation data next.",
+    "start": 982.639,
+    "duration": 4.681
+  },
+  {
+    "text": "In terms of data flowing through the",
+    "start": 987.92,
+    "duration": 4.719
+  },
+  {
+    "text": "system, we've got a grid 2D collection",
+    "start": 989.6,
+    "duration": 5.52
+  },
+  {
+    "text": "which has an entry for each PBD node and",
+    "start": 992.639,
+    "duration": 4.401
+  },
+  {
+    "text": "that holds the current position,",
+    "start": 995.12,
+    "duration": 4.959
+  },
+  {
+    "text": "previous position, normal tangent,",
+    "start": 997.04,
+    "duration": 5.84
+  },
+  {
+    "text": "whether the node is pinned or not, uh",
+    "start": 1000.079,
+    "duration": 4.481
+  },
+  {
+    "text": "whether it collided against something",
+    "start": 1002.88,
+    "duration": 5.759
+  },
+  {
+    "text": "last frame and its mass.",
+    "start": 1004.56,
+    "duration": 6.959
+  },
+  {
+    "text": "We then have two render targets uh which",
+    "start": 1008.639,
+    "duration": 5.521
+  },
+  {
+    "text": "the Niagara simulation writes to and the",
+    "start": 1011.519,
+    "duration": 4.961
+  },
+  {
+    "text": "material reads in",
+    "start": 1014.16,
+    "duration": 4.88
+  },
+  {
+    "text": "the simulation results render target",
+    "start": 1016.48,
+    "duration": 6.08
+  },
+  {
+    "text": "with three rows for each PBD node both",
+    "start": 1019.04,
+    "duration": 6.399
+  },
+  {
+    "text": "node position normal and tangent and",
+    "start": 1022.56,
+    "duration": 5.04
+  },
+  {
+    "text": "then repeated to hold the previous frame",
+    "start": 1025.439,
+    "duration": 3.921
+  },
+  {
+    "text": "values as well. So we can compute",
+    "start": 1027.6,
+    "duration": 4.959
+  },
+  {
+    "text": "correct motion vectors.",
+    "start": 1029.36,
+    "duration": 6.0
+  },
+  {
+    "text": "Uh in this example we have three vines.",
+    "start": 1032.559,
+    "duration": 5.36
+  },
+  {
+    "text": "One with two nodes in blue, one with",
+    "start": 1035.36,
+    "duration": 4.559
+  },
+  {
+    "text": "four nodes in orange and finally one",
+    "start": 1037.919,
+    "duration": 5.52
+  },
+  {
+    "text": "with three nodes in purple.",
+    "start": 1039.919,
+    "duration": 5.76
+  },
+  {
+    "text": "And then secondly we have the metadata",
+    "start": 1043.439,
+    "duration": 5.201
+  },
+  {
+    "text": "render target. We initialize this",
+    "start": 1045.679,
+    "duration": 6.161
+  },
+  {
+    "text": "texture only once and uh it's very small",
+    "start": 1048.64,
+    "duration": 5.84
+  },
+  {
+    "text": "two columns and it holds in the first",
+    "start": 1051.84,
+    "duration": 5.199
+  },
+  {
+    "text": "column the node index range for that",
+    "start": 1054.48,
+    "duration": 4.48
+  },
+  {
+    "text": "given chain",
+    "start": 1057.039,
+    "duration": 4.081
+  },
+  {
+    "text": "um and its chain length as well. And",
+    "start": 1058.96,
+    "duration": 4.4
+  },
+  {
+    "text": "then in the second column, the branch",
+    "start": 1061.12,
+    "duration": 4.08
+  },
+  {
+    "text": "pivot.",
+    "start": 1063.36,
+    "duration": 3.6
+  },
+  {
+    "text": "This is all we need to figure out the",
+    "start": 1065.2,
+    "duration": 4.4
+  },
+  {
+    "text": "location of a vertex based on the",
+    "start": 1066.96,
+    "duration": 5.04
+  },
+  {
+    "text": "simulated node positions.",
+    "start": 1069.6,
+    "duration": 5.199
+  },
+  {
+    "text": "We first identify which chain a vertex",
+    "start": 1072.0,
+    "duration": 5.28
+  },
+  {
+    "text": "belongs to by looking at the vertex UV",
+    "start": 1074.799,
+    "duration": 6.0
+  },
+  {
+    "text": "data. Then we assemble u to assemble the",
+    "start": 1077.28,
+    "duration": 5.68
+  },
+  {
+    "text": "the chain uh branch pivot and then we",
+    "start": 1080.799,
+    "duration": 4.24
+  },
+  {
+    "text": "look through the metadata render target",
+    "start": 1082.96,
+    "duration": 4.719
+  },
+  {
+    "text": "to find an entry with the same branch",
+    "start": 1085.039,
+    "duration": 4.721
+  },
+  {
+    "text": "pivot in the right column and in the",
+    "start": 1087.679,
+    "duration": 5.281
+  },
+  {
+    "text": "left column we'll be able to get the uh",
+    "start": 1089.76,
+    "duration": 5.52
+  },
+  {
+    "text": "node index range for that particular",
+    "start": 1092.96,
+    "duration": 4.64
+  },
+  {
+    "text": "chain.",
+    "start": 1095.28,
+    "duration": 4.8
+  },
+  {
+    "text": "Um as I mentioned there's a chain length",
+    "start": 1097.6,
+    "duration": 5.92
+  },
+  {
+    "text": "in that column as well. Um if we look at",
+    "start": 1100.08,
+    "duration": 6.24
+  },
+  {
+    "text": "how far a vertex is from the pivot and",
+    "start": 1103.52,
+    "duration": 4.8
+  },
+  {
+    "text": "divide it by this chain length, we'll",
+    "start": 1106.32,
+    "duration": 4.0
+  },
+  {
+    "text": "get a normalized distance value within",
+    "start": 1108.32,
+    "duration": 4.8
+  },
+  {
+    "text": "that chain and that value is then used",
+    "start": 1110.32,
+    "duration": 4.8
+  },
+  {
+    "text": "to interpolate between the node index",
+    "start": 1113.12,
+    "duration": 3.76
+  },
+  {
+    "text": "range in the render target on the left",
+    "start": 1115.12,
+    "duration": 4.32
+  },
+  {
+    "text": "hand side to sample the position normal",
+    "start": 1116.88,
+    "duration": 6.0
+  },
+  {
+    "text": "and tangent values.",
+    "start": 1119.44,
+    "duration": 6.479
+  },
+  {
+    "text": "So as an illustration, take this chain",
+    "start": 1122.88,
+    "duration": 5.039
+  },
+  {
+    "text": "and let's say we've identified it was",
+    "start": 1125.919,
+    "duration": 5.521
+  },
+  {
+    "text": "part of the second vine. I'll visualize",
+    "start": 1127.919,
+    "duration": 7.601
+  },
+  {
+    "text": "a triangle on the vine mesh and um I'll",
+    "start": 1131.44,
+    "duration": 6.96
+  },
+  {
+    "text": "also focus let's focus on that orange uh",
+    "start": 1135.52,
+    "duration": 6.64
+  },
+  {
+    "text": "vertex highlighted with the circle. If",
+    "start": 1138.4,
+    "duration": 5.92
+  },
+  {
+    "text": "we put that in the range of the second",
+    "start": 1142.16,
+    "duration": 4.879
+  },
+  {
+    "text": "chain node data, we can then sample all",
+    "start": 1144.32,
+    "duration": 5.28
+  },
+  {
+    "text": "of the rows to get an interpolated value",
+    "start": 1147.039,
+    "duration": 6.841
+  },
+  {
+    "text": "for that row for that vertex.",
+    "start": 1149.6,
+    "duration": 4.28
+  },
+  {
+    "text": "Next, let's look at the material.",
+    "start": 1156.0,
+    "duration": 5.919
+  },
+  {
+    "text": "One of the restrictions uh we have with",
+    "start": 1159.52,
+    "duration": 4.56
+  },
+  {
+    "text": "Niagara is that we can't render nanite",
+    "start": 1161.919,
+    "duration": 4.081
+  },
+  {
+    "text": "meshes although I hear there's some",
+    "start": 1164.08,
+    "duration": 4.8
+  },
+  {
+    "text": "progress being made on that. Um so for",
+    "start": 1166.0,
+    "duration": 4.64
+  },
+  {
+    "text": "this effect we were keen on retaining",
+    "start": 1168.88,
+    "duration": 3.6
+  },
+  {
+    "text": "the same mesh fidelity as the rest of",
+    "start": 1170.64,
+    "duration": 4.48
+  },
+  {
+    "text": "our environment. The so the approach",
+    "start": 1172.48,
+    "duration": 4.88
+  },
+  {
+    "text": "that I took was to create our render",
+    "start": 1175.12,
+    "duration": 4.48
+  },
+  {
+    "text": "targets outside of Niagara in a",
+    "start": 1177.36,
+    "duration": 6.24
+  },
+  {
+    "text": "blueprint and then assign them on the on",
+    "start": 1179.6,
+    "duration": 6.319
+  },
+  {
+    "text": "both the Niagara system through a user",
+    "start": 1183.6,
+    "duration": 4.88
+  },
+  {
+    "text": "parameter and on the material instance",
+    "start": 1185.919,
+    "duration": 4.88
+  },
+  {
+    "text": "created and assigned on the static mesh",
+    "start": 1188.48,
+    "duration": 4.72
+  },
+  {
+    "text": "component that renders the vines. So",
+    "start": 1190.799,
+    "duration": 4.321
+  },
+  {
+    "text": "this way we're not using any Niagara",
+    "start": 1193.2,
+    "duration": 4.32
+  },
+  {
+    "text": "renderers and we are free to use nanite",
+    "start": 1195.12,
+    "duration": 5.28
+  },
+  {
+    "text": "meshes the usual way.",
+    "start": 1197.52,
+    "duration": 5.12
+  },
+  {
+    "text": "Now the thing is when you use Niagara",
+    "start": 1200.4,
+    "duration": 4.96
+  },
+  {
+    "text": "renderers you can bind emitter values to",
+    "start": 1202.64,
+    "duration": 5.76
+  },
+  {
+    "text": "the material instance through them. I",
+    "start": 1205.36,
+    "duration": 5.199
+  },
+  {
+    "text": "needed to set a few of these but without",
+    "start": 1208.4,
+    "duration": 4.639
+  },
+  {
+    "text": "having a renderer. So I needed to devise",
+    "start": 1210.559,
+    "duration": 5.761
+  },
+  {
+    "text": "a new method to do so.",
+    "start": 1213.039,
+    "duration": 6.801
+  },
+  {
+    "text": "Niagara system user parameters can take",
+    "start": 1216.32,
+    "duration": 6.4
+  },
+  {
+    "text": "U objects of any type. So I added one",
+    "start": 1219.84,
+    "duration": 5.6
+  },
+  {
+    "text": "and fed in the material instance that I",
+    "start": 1222.72,
+    "duration": 5.52
+  },
+  {
+    "text": "created earlier. And then I wrote the",
+    "start": 1225.44,
+    "duration": 5.119
+  },
+  {
+    "text": "material instance dynamic Niagara data",
+    "start": 1228.24,
+    "duration": 4.559
+  },
+  {
+    "text": "interface that I mentioned earlier to",
+    "start": 1230.559,
+    "duration": 4.961
+  },
+  {
+    "text": "set arbitrary values on it by material",
+    "start": 1232.799,
+    "duration": 4.721
+  },
+  {
+    "text": "parameter name.",
+    "start": 1235.52,
+    "duration": 3.92
+  },
+  {
+    "text": "In this screenshot, I'm setting a few",
+    "start": 1237.52,
+    "duration": 4.639
+  },
+  {
+    "text": "scalar parameters. Uh but it also",
+    "start": 1239.44,
+    "duration": 5.84
+  },
+  {
+    "text": "supports float force and I'm glad to say",
+    "start": 1242.159,
+    "duration": 5.121
+  },
+  {
+    "text": "that it's been adopted by the Niagara",
+    "start": 1245.28,
+    "duration": 7.48
+  },
+  {
+    "text": "team. So it should land in uh UE 5.7.",
+    "start": 1247.28,
+    "duration": 5.48
+  },
+  {
+    "text": "Then in terms of uh material logic flow",
+    "start": 1254.159,
+    "duration": 6.161
+  },
+  {
+    "text": "that looks like this. So we take the",
+    "start": 1257.2,
+    "duration": 6.4
+  },
+  {
+    "text": "vertex we are working on. We look at the",
+    "start": 1260.32,
+    "duration": 6.239
+  },
+  {
+    "text": "branch pivot and use it to identify a",
+    "start": 1263.6,
+    "duration": 5.6
+  },
+  {
+    "text": "chain it belongs to in the meta data",
+    "start": 1266.559,
+    "duration": 5.12
+  },
+  {
+    "text": "render target.",
+    "start": 1269.2,
+    "duration": 4.56
+  },
+  {
+    "text": "Then we identify the branch node index",
+    "start": 1271.679,
+    "duration": 5.041
+  },
+  {
+    "text": "range. interpolate between this index",
+    "start": 1273.76,
+    "duration": 5.039
+  },
+  {
+    "text": "range based on how far along the vertex",
+    "start": 1276.72,
+    "duration": 4.88
+  },
+  {
+    "text": "is located in that chain and sample the",
+    "start": 1278.799,
+    "duration": 7.801
+  },
+  {
+    "text": "node position normal and tangent.",
+    "start": 1281.6,
+    "duration": 5.0
+  },
+  {
+    "text": "Um that will then position the vertex",
+    "start": 1286.96,
+    "duration": 6.32
+  },
+  {
+    "text": "relative to the PBD node transformation.",
+    "start": 1289.679,
+    "duration": 5.281
+  },
+  {
+    "text": "The difference between this newly",
+    "start": 1293.28,
+    "duration": 3.519
+  },
+  {
+    "text": "computed vertex position and the",
+    "start": 1294.96,
+    "duration": 5.44
+  },
+  {
+    "text": "non-animated position forms an offset.",
+    "start": 1296.799,
+    "duration": 6.161
+  },
+  {
+    "text": "Since all of our logic runs in local",
+    "start": 1300.4,
+    "duration": 4.96
+  },
+  {
+    "text": "space, we then transform that into world",
+    "start": 1302.96,
+    "duration": 4.48
+  },
+  {
+    "text": "space and finally feed it into world",
+    "start": 1305.36,
+    "duration": 6.199
+  },
+  {
+    "text": "position offset in the material.",
+    "start": 1307.44,
+    "duration": 4.119
+  },
+  {
+    "text": "Let's have a look at some results.",
+    "start": 1313.36,
+    "duration": 5.84
+  },
+  {
+    "text": "So with the fundamentals of uh the",
+    "start": 1316.159,
+    "duration": 6.0
+  },
+  {
+    "text": "solver, this is how far we get. It's",
+    "start": 1319.2,
+    "duration": 4.56
+  },
+  {
+    "text": "already nice, but we can definitely add",
+    "start": 1322.159,
+    "duration": 4.961
+  },
+  {
+    "text": "some more features to it.",
+    "start": 1323.76,
+    "duration": 5.44
+  },
+  {
+    "text": "At Rare, we we like to make our worlds",
+    "start": 1327.12,
+    "duration": 4.08
+  },
+  {
+    "text": "feel grandered and dynamic. And one of",
+    "start": 1329.2,
+    "duration": 3.92
+  },
+  {
+    "text": "the contributing aspects to that is our",
+    "start": 1331.2,
+    "duration": 4.88
+  },
+  {
+    "text": "wind system. At a basic level, it's just",
+    "start": 1333.12,
+    "duration": 5.439
+  },
+  {
+    "text": "a uniform global wind direction vector",
+    "start": 1336.08,
+    "duration": 5.2
+  },
+  {
+    "text": "which changes over time. It's a value",
+    "start": 1338.559,
+    "duration": 4.48
+  },
+  {
+    "text": "that we can retrieve anywhere in",
+    "start": 1341.28,
+    "duration": 4.8
+  },
+  {
+    "text": "blueprints, materials in Niagara.",
+    "start": 1343.039,
+    "duration": 5.52
+  },
+  {
+    "text": "If we plug it into the simulation, we",
+    "start": 1346.08,
+    "duration": 4.8
+  },
+  {
+    "text": "get quite disappointing chains like",
+    "start": 1348.559,
+    "duration": 6.081
+  },
+  {
+    "text": "these are very straight and boring. the",
+    "start": 1350.88,
+    "duration": 5.36
+  },
+  {
+    "text": "really the quality of the results of a",
+    "start": 1354.64,
+    "duration": 3.6
+  },
+  {
+    "text": "physics simulation depends on having",
+    "start": 1356.24,
+    "duration": 5.2
+  },
+  {
+    "text": "quality inputs.",
+    "start": 1358.24,
+    "duration": 5.84
+  },
+  {
+    "text": "So to get more interesting motion um we",
+    "start": 1361.44,
+    "duration": 5.2
+  },
+  {
+    "text": "wanted to sample or to get different",
+    "start": 1364.08,
+    "duration": 5.52
+  },
+  {
+    "text": "values of wind at each node. If you",
+    "start": 1366.64,
+    "duration": 6.64
+  },
+  {
+    "text": "think of real life wind is not uniform.",
+    "start": 1369.6,
+    "duration": 6.079
+  },
+  {
+    "text": "So that's what we want. So after",
+    "start": 1373.28,
+    "duration": 4.96
+  },
+  {
+    "text": "initially experimenting with sampling",
+    "start": 1375.679,
+    "duration": 5.041
+  },
+  {
+    "text": "some fractal brand and motion functions",
+    "start": 1378.24,
+    "duration": 5.919
+  },
+  {
+    "text": "at every PBD node, I ended up preferring",
+    "start": 1380.72,
+    "duration": 5.6
+  },
+  {
+    "text": "a just sampling a pearl in noise 3D",
+    "start": 1384.159,
+    "duration": 5.681
+  },
+  {
+    "text": "texture using the PBD nodes coordinates",
+    "start": 1386.32,
+    "duration": 7.52
+  },
+  {
+    "text": "and also panning the texture over time.",
+    "start": 1389.84,
+    "duration": 5.92
+  },
+  {
+    "text": "This has helped to reduce repetit",
+    "start": 1393.84,
+    "duration": 4.4
+  },
+  {
+    "text": "repetitive patterns in and also",
+    "start": 1395.76,
+    "duration": 6.2
+  },
+  {
+    "text": "algorithmic complexity.",
+    "start": 1398.24,
+    "duration": 3.72
+  },
+  {
+    "text": "The texture sample value is then",
+    "start": 1402.64,
+    "duration": 4.32
+  },
+  {
+    "text": "multiplied with the global wind",
+    "start": 1404.72,
+    "duration": 4.48
+  },
+  {
+    "text": "direction vector and applied as an",
+    "start": 1406.96,
+    "duration": 4.079
+  },
+  {
+    "text": "external force to the nodes in the",
+    "start": 1409.2,
+    "duration": 4.4
+  },
+  {
+    "text": "simulation. And now it looks like wind",
+    "start": 1411.039,
+    "duration": 5.76
+  },
+  {
+    "text": "is sort of traveling through the vines.",
+    "start": 1413.6,
+    "duration": 5.76
+  },
+  {
+    "text": "If instead of this you had a 3D wind",
+    "start": 1416.799,
+    "duration": 4.561
+  },
+  {
+    "text": "fluid simulation, you could sample that",
+    "start": 1419.36,
+    "duration": 5.559
+  },
+  {
+    "text": "instead. Of course,",
+    "start": 1421.36,
+    "duration": 3.559
+  },
+  {
+    "text": "another addition I made was to give the",
+    "start": 1426.559,
+    "duration": 4.401
+  },
+  {
+    "text": "option to specify different mass values",
+    "start": 1428.64,
+    "duration": 4.8
+  },
+  {
+    "text": "for different nodes along the chain. By",
+    "start": 1430.96,
+    "duration": 5.36
+  },
+  {
+    "text": "using a set of mass curves, we",
+    "start": 1433.44,
+    "duration": 5.04
+  },
+  {
+    "text": "identified the curve that is authored to",
+    "start": 1436.32,
+    "duration": 4.88
+  },
+  {
+    "text": "put the closest matching chain length",
+    "start": 1438.48,
+    "duration": 5.04
+  },
+  {
+    "text": "and sample the curve on the GPU to",
+    "start": 1441.2,
+    "duration": 7.04
+  },
+  {
+    "text": "assign the mass to the nodes themselves.",
+    "start": 1443.52,
+    "duration": 7.36
+  },
+  {
+    "text": "Mass will control how much a node moves",
+    "start": 1448.24,
+    "duration": 5.28
+  },
+  {
+    "text": "when forces are applied, but also when",
+    "start": 1450.88,
+    "duration": 5.12
+  },
+  {
+    "text": "solving constraints. For example, with a",
+    "start": 1453.52,
+    "duration": 4.88
+  },
+  {
+    "text": "length constraint, if two nodes with",
+    "start": 1456.0,
+    "duration": 4.24
+  },
+  {
+    "text": "different mass values are linked",
+    "start": 1458.4,
+    "duration": 4.159
+  },
+  {
+    "text": "together, the one with a higher mass",
+    "start": 1460.24,
+    "duration": 4.4
+  },
+  {
+    "text": "value will show more resistance to to",
+    "start": 1462.559,
+    "duration": 3.841
+  },
+  {
+    "text": "moving than the one with a lower mass",
+    "start": 1464.64,
+    "duration": 4.72
+  },
+  {
+    "text": "value. The correction value is then not",
+    "start": 1466.4,
+    "duration": 5.68
+  },
+  {
+    "text": "spread evenly, but instead computed as a",
+    "start": 1469.36,
+    "duration": 6.84
+  },
+  {
+    "text": "ratio of the two masses.",
+    "start": 1472.08,
+    "duration": 4.12
+  },
+  {
+    "text": "Let's talk about collisions.",
+    "start": 1477.2,
+    "duration": 5.52
+  },
+  {
+    "text": "So we can add collisions by sampling the",
+    "start": 1480.08,
+    "duration": 5.04
+  },
+  {
+    "text": "global scene sign distance field through",
+    "start": 1482.72,
+    "duration": 4.559
+  },
+  {
+    "text": "the collision query Niagara data",
+    "start": 1485.12,
+    "duration": 5.36
+  },
+  {
+    "text": "interface to push nodes out of overlaps",
+    "start": 1487.279,
+    "duration": 7.801
+  },
+  {
+    "text": "onto the surface of the meshes.",
+    "start": 1490.48,
+    "duration": 4.6
+  },
+  {
+    "text": "Colliding with skinned animated",
+    "start": 1504.64,
+    "duration": 4.96
+  },
+  {
+    "text": "characters is also possible. I've set up",
+    "start": 1506.32,
+    "duration": 4.88
+  },
+  {
+    "text": "a few collision spheres on this",
+    "start": 1509.6,
+    "duration": 4.16
+  },
+  {
+    "text": "character skeleton. These collision",
+    "start": 1511.2,
+    "duration": 4.959
+  },
+  {
+    "text": "spheres can be queried with the built-in",
+    "start": 1513.76,
+    "duration": 4.799
+  },
+  {
+    "text": "rigid mesh collision query Niagara data",
+    "start": 1516.159,
+    "duration": 4.481
+  },
+  {
+    "text": "interface which will find the ones",
+    "start": 1518.559,
+    "duration": 4.72
+  },
+  {
+    "text": "within the bands of the emitter.",
+    "start": 1520.64,
+    "duration": 4.96
+  },
+  {
+    "text": "Then Niagara provides some functions to",
+    "start": 1523.279,
+    "duration": 4.64
+  },
+  {
+    "text": "push nodes out of intersections with",
+    "start": 1525.6,
+    "duration": 4.559
+  },
+  {
+    "text": "these collision shapes along the closest",
+    "start": 1527.919,
+    "duration": 5.441
+  },
+  {
+    "text": "surface normal, but it only gives you",
+    "start": 1530.159,
+    "duration": 5.361
+  },
+  {
+    "text": "the current intersection state. it",
+    "start": 1533.36,
+    "duration": 4.0
+  },
+  {
+    "text": "didn't really handle fast moving",
+    "start": 1535.52,
+    "duration": 5.279
+  },
+  {
+    "text": "collision shapes too well",
+    "start": 1537.36,
+    "duration": 6.0
+  },
+  {
+    "text": "and that issue is called tunneling. So",
+    "start": 1540.799,
+    "duration": 5.36
+  },
+  {
+    "text": "if you have um a moving collision sphere",
+    "start": 1543.36,
+    "duration": 5.6
+  },
+  {
+    "text": "like this which will go through a PBD",
+    "start": 1546.159,
+    "duration": 5.52
+  },
+  {
+    "text": "node over the duration of one frame, we",
+    "start": 1548.96,
+    "duration": 4.4
+  },
+  {
+    "text": "actually only have discrete times at",
+    "start": 1551.679,
+    "duration": 3.761
+  },
+  {
+    "text": "which to evaluate the position of the",
+    "start": 1553.36,
+    "duration": 4.64
+  },
+  {
+    "text": "collision sphere. So in reality it will",
+    "start": 1555.44,
+    "duration": 5.119
+  },
+  {
+    "text": "be here on one frame and then there on",
+    "start": 1558.0,
+    "duration": 5.84
+  },
+  {
+    "text": "the next frame. at neither of these um",
+    "start": 1560.559,
+    "duration": 6.321
+  },
+  {
+    "text": "frames we overlap with the PBD node to",
+    "start": 1563.84,
+    "duration": 5.52
+  },
+  {
+    "text": "push it out of the way. So uh we can't",
+    "start": 1566.88,
+    "duration": 4.96
+  },
+  {
+    "text": "detect that.",
+    "start": 1569.36,
+    "duration": 4.64
+  },
+  {
+    "text": "We could use substepping between the",
+    "start": 1571.84,
+    "duration": 4.4
+  },
+  {
+    "text": "previous and current frame positions of",
+    "start": 1574.0,
+    "duration": 6.48
+  },
+  {
+    "text": "the sphere like so and push the PBD node",
+    "start": 1576.24,
+    "duration": 7.439
+  },
+  {
+    "text": "out. But it's quite unclear how many",
+    "start": 1580.48,
+    "duration": 5.04
+  },
+  {
+    "text": "times we should substep to get a good",
+    "start": 1583.679,
+    "duration": 4.24
+  },
+  {
+    "text": "coverage. And the more we do, the more",
+    "start": 1585.52,
+    "duration": 4.96
+  },
+  {
+    "text": "computational cost uh of evaluating the",
+    "start": 1587.919,
+    "duration": 6.24
+  },
+  {
+    "text": "collisions at each position increases.",
+    "start": 1590.48,
+    "duration": 5.439
+  },
+  {
+    "text": "Even with what looks like a decent",
+    "start": 1594.159,
+    "duration": 4.161
+  },
+  {
+    "text": "coverage here, when we pushed the PBD",
+    "start": 1595.919,
+    "duration": 6.561
+  },
+  {
+    "text": "node, it didn't actually go far enough.",
+    "start": 1598.32,
+    "duration": 6.8
+  },
+  {
+    "text": "So instead, I implemented a swept sphere",
+    "start": 1602.48,
+    "duration": 5.36
+  },
+  {
+    "text": "collision algorithm to take the sphere",
+    "start": 1605.12,
+    "duration": 6.32
+  },
+  {
+    "text": "at frame n and n minus one and make a",
+    "start": 1607.84,
+    "duration": 6.0
+  },
+  {
+    "text": "capsule off of it.",
+    "start": 1611.44,
+    "duration": 4.16
+  },
+  {
+    "text": "capsules are easily defined",
+    "start": 1613.84,
+    "duration": 3.839
+  },
+  {
+    "text": "analytically.",
+    "start": 1615.6,
+    "duration": 4.079
+  },
+  {
+    "text": "Then we can evaluate whether the PBD",
+    "start": 1617.679,
+    "duration": 3.921
+  },
+  {
+    "text": "node overlaps with the capsule. And if",
+    "start": 1619.679,
+    "duration": 4.321
+  },
+  {
+    "text": "it does, we can push it out towards the",
+    "start": 1621.6,
+    "duration": 5.76
+  },
+  {
+    "text": "closest surface.",
+    "start": 1624.0,
+    "duration": 5.12
+  },
+  {
+    "text": "It doesn't actually matter how fast the",
+    "start": 1627.36,
+    "duration": 3.6
+  },
+  {
+    "text": "sphere moves over the duration of one",
+    "start": 1629.12,
+    "duration": 4.08
+  },
+  {
+    "text": "frame will always be able to cover the",
+    "start": 1630.96,
+    "duration": 4.16
+  },
+  {
+    "text": "entire volume it has moved between the",
+    "start": 1633.2,
+    "duration": 4.719
+  },
+  {
+    "text": "two frames.",
+    "start": 1635.12,
+    "duration": 4.799
+  },
+  {
+    "text": "Other collision shapes can be handled as",
+    "start": 1637.919,
+    "duration": 3.521
+  },
+  {
+    "text": "well, of course, although they're not",
+    "start": 1639.919,
+    "duration": 4.0
+  },
+  {
+    "text": "quite as straightforward to implement.",
+    "start": 1641.44,
+    "duration": 6.08
+  },
+  {
+    "text": "Um, so far we've just pushed the PBD",
+    "start": 1643.919,
+    "duration": 6.801
+  },
+  {
+    "text": "node along the surface normal, but if",
+    "start": 1647.52,
+    "duration": 4.96
+  },
+  {
+    "text": "you think of how the collision sphere is",
+    "start": 1650.72,
+    "duration": 4.0
+  },
+  {
+    "text": "moving through, you'd kind of expect the",
+    "start": 1652.48,
+    "duration": 4.0
+  },
+  {
+    "text": "PBD node to inherit some of that",
+    "start": 1654.72,
+    "duration": 3.36
+  },
+  {
+    "text": "velocity.",
+    "start": 1656.48,
+    "duration": 3.76
+  },
+  {
+    "text": "So by biasing that vector a bit in the",
+    "start": 1658.08,
+    "duration": 3.76
+  },
+  {
+    "text": "same direction as the collision shape",
+    "start": 1660.24,
+    "duration": 5.6
+  },
+  {
+    "text": "movement, we get a better result.",
+    "start": 1661.84,
+    "duration": 6.4
+  },
+  {
+    "text": "And then finally, it's also easy to add",
+    "start": 1665.84,
+    "duration": 4.56
+  },
+  {
+    "text": "friction to the simulation by dampening",
+    "start": 1668.24,
+    "duration": 4.48
+  },
+  {
+    "text": "the forces applied to a node when it",
+    "start": 1670.4,
+    "duration": 3.92
+  },
+  {
+    "text": "collided with something on the last",
+    "start": 1672.72,
+    "duration": 4.6
+  },
+  {
+    "text": "frame.",
+    "start": 1674.32,
+    "duration": 3.0
+  },
+  {
+    "text": "A physics simulation can be a bit of a",
+    "start": 1678.559,
+    "duration": 4.0
+  },
+  {
+    "text": "black box at times. So building",
+    "start": 1680.799,
+    "duration": 3.681
+  },
+  {
+    "text": "ourselves good debugging tools can be",
+    "start": 1682.559,
+    "duration": 4.321
+  },
+  {
+    "text": "invaluable.",
+    "start": 1684.48,
+    "duration": 4.079
+  },
+  {
+    "text": "I already showed the character collision",
+    "start": 1686.88,
+    "duration": 4.48
+  },
+  {
+    "text": "debug visualization earlier. [snorts] In",
+    "start": 1688.559,
+    "duration": 4.961
+  },
+  {
+    "text": "this video, you can see the per node",
+    "start": 1691.36,
+    "duration": 5.52
+  },
+  {
+    "text": "wind noise forces being applied in green",
+    "start": 1693.52,
+    "duration": 5.36
+  },
+  {
+    "text": "alongside the static and current",
+    "start": 1696.88,
+    "duration": 4.159
+  },
+  {
+    "text": "position of the PBD nodes in blue and",
+    "start": 1698.88,
+    "duration": 5.2
+  },
+  {
+    "text": "red. And this is possible using the draw",
+    "start": 1701.039,
+    "duration": 7.161
+  },
+  {
+    "text": "debug Niagara data interface.",
+    "start": 1704.08,
+    "duration": 4.12
+  },
+  {
+    "text": "I mentioned earlier the simulation",
+    "start": 1708.64,
+    "duration": 4.48
+  },
+  {
+    "text": "doesn't use particles, but we can spawn",
+    "start": 1710.32,
+    "duration": 5.12
+  },
+  {
+    "text": "particles for debugging, then move them",
+    "start": 1713.12,
+    "duration": 4.799
+  },
+  {
+    "text": "to the same position and orientation as",
+    "start": 1715.44,
+    "duration": 5.359
+  },
+  {
+    "text": "the PBD nodes in the simulation and then",
+    "start": 1717.919,
+    "duration": 6.681
+  },
+  {
+    "text": "visualize them with gizmos.",
+    "start": 1720.799,
+    "duration": 3.801
+  },
+  {
+    "text": "With Niagara particles, we can now also",
+    "start": 1725.12,
+    "duration": 4.799
+  },
+  {
+    "text": "rely on the very handy Niagara debugger",
+    "start": 1727.84,
+    "duration": 5.439
+  },
+  {
+    "text": "tool to look at values on the PBD nodes",
+    "start": 1729.919,
+    "duration": 5.12
+  },
+  {
+    "text": "like whether it's colliding, what its",
+    "start": 1733.279,
+    "duration": 4.321
+  },
+  {
+    "text": "mass is, or anything we want as long as",
+    "start": 1735.039,
+    "duration": 4.88
+  },
+  {
+    "text": "we copy their values onto the particle",
+    "start": 1737.6,
+    "duration": 5.319
+  },
+  {
+    "text": "properties.",
+    "start": 1739.919,
+    "duration": 3.0
+  },
+  {
+    "text": "Let's talk about performance.",
+    "start": 1744.159,
+    "duration": 5.361
+  },
+  {
+    "text": "The graph at the bottom here, it comes",
+    "start": 1747.279,
+    "duration": 5.041
+  },
+  {
+    "text": "from a Pix GPU capture on an Xbox Series",
+    "start": 1749.52,
+    "duration": 5.039
+  },
+  {
+    "text": "X and it represents all the function",
+    "start": 1752.32,
+    "duration": 3.92
+  },
+  {
+    "text": "calls invoked when running through the",
+    "start": 1754.559,
+    "duration": 4.24
+  },
+  {
+    "text": "shader. I don't expect you to read the",
+    "start": 1756.24,
+    "duration": 5.12
+  },
+  {
+    "text": "text in them. Just look at the sizes of",
+    "start": 1758.799,
+    "duration": 6.24
+  },
+  {
+    "text": "the blocks. Um the size of them",
+    "start": 1761.36,
+    "duration": 6.24
+  },
+  {
+    "text": "represents the amount of instructions um",
+    "start": 1765.039,
+    "duration": 3.921
+  },
+  {
+    "text": "that well amount of cycles their",
+    "start": 1767.6,
+    "duration": 4.559
+  },
+  {
+    "text": "instructions take.",
+    "start": 1768.96,
+    "duration": 4.719
+  },
+  {
+    "text": "So remember that we are using an",
+    "start": 1772.159,
+    "duration": 3.201
+  },
+  {
+    "text": "iterative solver. So we're not just",
+    "start": 1773.679,
+    "duration": 3.6
+  },
+  {
+    "text": "going from the left to right along this",
+    "start": 1775.36,
+    "duration": 4.0
+  },
+  {
+    "text": "diagram. We're actually looping over",
+    "start": 1777.279,
+    "duration": 4.801
+  },
+  {
+    "text": "some of these instructions many times.",
+    "start": 1779.36,
+    "duration": 4.72
+  },
+  {
+    "text": "So optimizing bottlenecks we find here",
+    "start": 1782.08,
+    "duration": 4.959
+  },
+  {
+    "text": "will make a big difference.",
+    "start": 1784.08,
+    "duration": 4.8
+  },
+  {
+    "text": "Using the asset I've been showing",
+    "start": 1787.039,
+    "duration": 3.681
+  },
+  {
+    "text": "throughout this presentation which has",
+    "start": 1788.88,
+    "duration": 5.44
+  },
+  {
+    "text": "53 vines of varying lengths. Performance",
+    "start": 1790.72,
+    "duration": 6.079
+  },
+  {
+    "text": "didn't look too great with 1.88",
+    "start": 1794.32,
+    "duration": 5.04
+  },
+  {
+    "text": "milliseconds as a starting point. But",
+    "start": 1796.799,
+    "duration": 4.161
+  },
+  {
+    "text": "the bottleneck was quite obvious. So,",
+    "start": 1799.36,
+    "duration": 4.319
+  },
+  {
+    "text": "we're stalling on world sign distance",
+    "start": 1800.96,
+    "duration": 6.959
+  },
+  {
+    "text": "field texture fetches highlighted here.",
+    "start": 1803.679,
+    "duration": 8.641
+  },
+  {
+    "text": "It's a bit small, so let me zoom in.",
+    "start": 1807.919,
+    "duration": 7.521
+  },
+  {
+    "text": "Um, sampling the world's sign distance",
+    "start": 1812.32,
+    "duration": 5.52
+  },
+  {
+    "text": "field for the environmental collision on",
+    "start": 1815.44,
+    "duration": 5.119
+  },
+  {
+    "text": "every node on every iteration is quite",
+    "start": 1817.84,
+    "duration": 4.319
+  },
+  {
+    "text": "costly.",
+    "start": 1820.559,
+    "duration": 3.201
+  },
+  {
+    "text": "If we only sampled it on the last",
+    "start": 1822.159,
+    "duration": 4.4
+  },
+  {
+    "text": "iteration, it might invalidate some of",
+    "start": 1823.76,
+    "duration": 4.96
+  },
+  {
+    "text": "the PBD length constraints during that",
+    "start": 1826.559,
+    "duration": 4.641
+  },
+  {
+    "text": "frame. However, they will be rectified",
+    "start": 1828.72,
+    "duration": 4.959
+  },
+  {
+    "text": "in the next frame and in practice it",
+    "start": 1831.2,
+    "duration": 4.64
+  },
+  {
+    "text": "gave us acceptable results. So doing",
+    "start": 1833.679,
+    "duration": 4.72
+  },
+  {
+    "text": "less work is more efficient. So that's",
+    "start": 1835.84,
+    "duration": 4.24
+  },
+  {
+    "text": "an easy pragmatic solution that we've",
+    "start": 1838.399,
+    "duration": 3.601
+  },
+  {
+    "text": "adopted.",
+    "start": 1840.08,
+    "duration": 4.479
+  },
+  {
+    "text": "Next, if we actually look at the uh",
+    "start": 1842.0,
+    "duration": 4.799
+  },
+  {
+    "text": "functions in play,",
+    "start": 1844.559,
+    "duration": 5.84
+  },
+  {
+    "text": "we can notice that these two chunks look",
+    "start": 1846.799,
+    "duration": 5.6
+  },
+  {
+    "text": "pretty similar.",
+    "start": 1850.399,
+    "duration": 4.16
+  },
+  {
+    "text": "It turns out that the native collision",
+    "start": 1852.399,
+    "duration": 5.041
+  },
+  {
+    "text": "query Niagara data interface evaluates",
+    "start": 1854.559,
+    "duration": 6.161
+  },
+  {
+    "text": "the sign distance fields distance twice.",
+    "start": 1857.44,
+    "duration": 6.0
+  },
+  {
+    "text": "Once to return the distance and once to",
+    "start": 1860.72,
+    "duration": 4.559
+  },
+  {
+    "text": "during the computation of the surface",
+    "start": 1863.44,
+    "duration": 4.239
+  },
+  {
+    "text": "gradient. So by merging these two",
+    "start": 1865.279,
+    "duration": 4.561
+  },
+  {
+    "text": "functions together we can avoid an extra",
+    "start": 1867.679,
+    "duration": 4.0
+  },
+  {
+    "text": "evaluation.",
+    "start": 1869.84,
+    "duration": 3.92
+  },
+  {
+    "text": "And then on the left hand side we can",
+    "start": 1871.679,
+    "duration": 5.201
+  },
+  {
+    "text": "see a repeating pattern of these uh pink",
+    "start": 1873.76,
+    "duration": 5.68
+  },
+  {
+    "text": "and green chunks. These are the actual",
+    "start": 1876.88,
+    "duration": 4.799
+  },
+  {
+    "text": "sign distance fields texture samples to",
+    "start": 1879.44,
+    "duration": 5.119
+  },
+  {
+    "text": "compute the gradient. There are six of",
+    "start": 1881.679,
+    "duration": 5.281
+  },
+  {
+    "text": "them as the engine uses central",
+    "start": 1884.559,
+    "duration": 4.401
+  },
+  {
+    "text": "differences as the algorithm to compute",
+    "start": 1886.96,
+    "duration": 5.04
+  },
+  {
+    "text": "the gradient and it will need to sample",
+    "start": 1888.96,
+    "duration": 5.36
+  },
+  {
+    "text": "in the positive and negative direction",
+    "start": 1892.0,
+    "duration": 4.559
+  },
+  {
+    "text": "on all three axes around the current",
+    "start": 1894.32,
+    "duration": 5.52
+  },
+  {
+    "text": "sample. Compute the gradient.",
+    "start": 1896.559,
+    "duration": 4.96
+  },
+  {
+    "text": "If we switch over to a forward",
+    "start": 1899.84,
+    "duration": 4.0
+  },
+  {
+    "text": "difference algorithm, we can get rid of",
+    "start": 1901.519,
+    "duration": 5.121
+  },
+  {
+    "text": "half of these samples. Uh, and together",
+    "start": 1903.84,
+    "duration": 5.52
+  },
+  {
+    "text": "with the last two optimizations, we've",
+    "start": 1906.64,
+    "duration": 5.279
+  },
+  {
+    "text": "gone from eight texture samples to four",
+    "start": 1909.36,
+    "duration": 4.4
+  },
+  {
+    "text": "for every node, which makes a big",
+    "start": 1911.919,
+    "duration": 6.321
+  },
+  {
+    "text": "difference as it shrinks down.",
+    "start": 1913.76,
+    "duration": 6.56
+  },
+  {
+    "text": "Finally, we also found it acceptable for",
+    "start": 1918.24,
+    "duration": 4.4
+  },
+  {
+    "text": "our assets to not be longer than 32",
+    "start": 1920.32,
+    "duration": 4.64
+  },
+  {
+    "text": "nodes per vine. So we were able to",
+    "start": 1922.64,
+    "duration": 5.44
+  },
+  {
+    "text": "enable wave 32 on our dispatch which",
+    "start": 1924.96,
+    "duration": 6.319
+  },
+  {
+    "text": "increased the wave occupancy and allows",
+    "start": 1928.08,
+    "duration": 5.199
+  },
+  {
+    "text": "us to run more instances of this effect",
+    "start": 1931.279,
+    "duration": 4.721
+  },
+  {
+    "text": "in parallel to maximize the GPU",
+    "start": 1933.279,
+    "duration": 5.361
+  },
+  {
+    "text": "utilization.",
+    "start": 1936.0,
+    "duration": 6.08
+  },
+  {
+    "text": "And now the cost is 22 milliseconds and",
+    "start": 1938.64,
+    "duration": 6.08
+  },
+  {
+    "text": "when we have 10 instances of this effect",
+    "start": 1942.08,
+    "duration": 4.56
+  },
+  {
+    "text": "it barely moves the needle because we",
+    "start": 1944.72,
+    "duration": 4.799
+  },
+  {
+    "text": "can go wide on the GPU.",
+    "start": 1946.64,
+    "duration": 5.039
+  },
+  {
+    "text": "As I said at the start, this is R&D",
+    "start": 1949.519,
+    "duration": 4.561
+  },
+  {
+    "text": "work. So these numbers are not final. We",
+    "start": 1951.679,
+    "duration": 4.72
+  },
+  {
+    "text": "may find further Perf improvements or",
+    "start": 1954.08,
+    "duration": 4.64
+  },
+  {
+    "text": "change how this is set up, but for now,",
+    "start": 1956.399,
+    "duration": 4.321
+  },
+  {
+    "text": "this is in a good enough place to carry",
+    "start": 1958.72,
+    "duration": 5.0
+  },
+  {
+    "text": "forward.",
+    "start": 1960.72,
+    "duration": 3.0
+  },
+  {
+    "text": "Moving on to lessons learned.",
+    "start": 1964.32,
+    "duration": 4.719
+  },
+  {
+    "text": "We've been looking at the performance",
+    "start": 1967.12,
+    "duration": 4.799
+  },
+  {
+    "text": "costs of Nanite deformation in general",
+    "start": 1969.039,
+    "duration": 5.201
+  },
+  {
+    "text": "and found that Nanite incurs a high cost",
+    "start": 1971.919,
+    "duration": 5.041
+  },
+  {
+    "text": "when doing vertex deformation. This is",
+    "start": 1974.24,
+    "duration": 5.279
+  },
+  {
+    "text": "due to working with a visibility buffer.",
+    "start": 1976.96,
+    "duration": 5.36
+  },
+  {
+    "text": "The vertex shader logic is executed on a",
+    "start": 1979.519,
+    "duration": 5.76
+  },
+  {
+    "text": "per pixel basis but not just once as it",
+    "start": 1982.32,
+    "duration": 4.959
+  },
+  {
+    "text": "has to compute the value for the three",
+    "start": 1985.279,
+    "duration": 5.361
+  },
+  {
+    "text": "vertex vertices in the triangle before",
+    "start": 1987.279,
+    "duration": 5.76
+  },
+  {
+    "text": "calculating the barentric coordinates to",
+    "start": 1990.64,
+    "duration": 4.08
+  },
+  {
+    "text": "perform world position offset and use",
+    "start": 1993.039,
+    "duration": 3.601
+  },
+  {
+    "text": "that as the input to the pixel shader",
+    "start": 1994.72,
+    "duration": 3.52
+  },
+  {
+    "text": "logic.",
+    "start": 1996.64,
+    "duration": 3.36
+  },
+  {
+    "text": "But that's not the end of it as the",
+    "start": 1998.24,
+    "duration": 4.159
+  },
+  {
+    "text": "engine needs to compute the previous",
+    "start": 2000.0,
+    "duration": 4.48
+  },
+  {
+    "text": "frame position values to be able to",
+    "start": 2002.399,
+    "duration": 5.041
+  },
+  {
+    "text": "generate motion vectors. So it needs to",
+    "start": 2004.48,
+    "duration": 6.319
+  },
+  {
+    "text": "do this for three more vertices. So we",
+    "start": 2007.44,
+    "duration": 5.76
+  },
+  {
+    "text": "will run the vertex shader at least six",
+    "start": 2010.799,
+    "duration": 7.201
+  },
+  {
+    "text": "times per pixel per nanite raster pass.",
+    "start": 2013.2,
+    "duration": 6.64
+  },
+  {
+    "text": "With this effect, we've moved a lot of",
+    "start": 2018.0,
+    "duration": 3.919
+  },
+  {
+    "text": "our computational work into a compute",
+    "start": 2019.84,
+    "duration": 4.48
+  },
+  {
+    "text": "shader that only needs to run once and",
+    "start": 2021.919,
+    "duration": 5.201
+  },
+  {
+    "text": "cach the results in a render target.",
+    "start": 2024.32,
+    "duration": 4.8
+  },
+  {
+    "text": "These are then sampled in the vertex",
+    "start": 2027.12,
+    "duration": 4.48
+  },
+  {
+    "text": "shader passes, but it reduces the",
+    "start": 2029.12,
+    "duration": 6.24
+  },
+  {
+    "text": "performance impact a lot.",
+    "start": 2031.6,
+    "duration": 5.6
+  },
+  {
+    "text": "One of the things that caught me was",
+    "start": 2035.36,
+    "duration": 4.159
+  },
+  {
+    "text": "that nanite meshes started stretching",
+    "start": 2037.2,
+    "duration": 4.319
+  },
+  {
+    "text": "triangles in unexpected ways when",
+    "start": 2039.519,
+    "duration": 4.4
+  },
+  {
+    "text": "deforming it. Thankfully, there's now a",
+    "start": 2041.519,
+    "duration": 5.76
+  },
+  {
+    "text": "setting in Unreal to um on on the mesh",
+    "start": 2043.919,
+    "duration": 5.44
+  },
+  {
+    "text": "assets to specify a maximum length that",
+    "start": 2047.279,
+    "duration": 5.36
+  },
+  {
+    "text": "an edge can have to reduce um this",
+    "start": 2049.359,
+    "duration": 5.52
+  },
+  {
+    "text": "stretching. you set it to the the",
+    "start": 2052.639,
+    "duration": 4.48
+  },
+  {
+    "text": "smallest bending angle uh bend bending",
+    "start": 2054.879,
+    "duration": 5.52
+  },
+  {
+    "text": "length a mesh can undergo uh we get rid",
+    "start": 2057.119,
+    "duration": 5.76
+  },
+  {
+    "text": "of these issues.",
+    "start": 2060.399,
+    "duration": 4.881
+  },
+  {
+    "text": "And then one of the great advantages of",
+    "start": 2062.879,
+    "duration": 4.401
+  },
+  {
+    "text": "building a system like this in Niagara",
+    "start": 2065.28,
+    "duration": 4.879
+  },
+  {
+    "text": "is that it's VFX artist and tech artist",
+    "start": 2067.28,
+    "duration": 4.879
+  },
+  {
+    "text": "friendly. They can easily start",
+    "start": 2070.159,
+    "duration": 4.161
+  },
+  {
+    "text": "expanding on the simulation tech. They",
+    "start": 2072.159,
+    "duration": 4.24
+  },
+  {
+    "text": "have lots of built-in modules at their",
+    "start": 2074.32,
+    "duration": 5.359
+  },
+  {
+    "text": "disposition to and to add flourishes.",
+    "start": 2076.399,
+    "duration": 5.28
+  },
+  {
+    "text": "um I didn't need to build any extra",
+    "start": 2079.679,
+    "duration": 6.121
+  },
+  {
+    "text": "authoring tools for them.",
+    "start": 2081.679,
+    "duration": 4.121
+  },
+  {
+    "text": "In terms of future work, um finding ways",
+    "start": 2086.96,
+    "duration": 5.36
+  },
+  {
+    "text": "to alleviate the serial nature of the",
+    "start": 2090.24,
+    "duration": 4.72
+  },
+  {
+    "text": "solver would be a good idea. Maybe by",
+    "start": 2092.32,
+    "duration": 4.799
+  },
+  {
+    "text": "solving positions at a coarser level",
+    "start": 2094.96,
+    "duration": 4.24
+  },
+  {
+    "text": "first and then solving intermediate",
+    "start": 2097.119,
+    "duration": 5.361
+  },
+  {
+    "text": "positions in parallel.",
+    "start": 2099.2,
+    "duration": 4.879
+  },
+  {
+    "text": "So far, I've only taken care of",
+    "start": 2102.48,
+    "duration": 3.84
+  },
+  {
+    "text": "integrating linear momentum, no angular",
+    "start": 2104.079,
+    "duration": 3.841
+  },
+  {
+    "text": "momentum.",
+    "start": 2106.32,
+    "duration": 3.759
+  },
+  {
+    "text": "that would add some natural twisting",
+    "start": 2107.92,
+    "duration": 4.08
+  },
+  {
+    "text": "motion which could be a nice addition as",
+    "start": 2110.079,
+    "duration": 4.321
+  },
+  {
+    "text": "well.",
+    "start": 2112.0,
+    "duration": 4.64
+  },
+  {
+    "text": "Having multiple instances of the same",
+    "start": 2114.4,
+    "duration": 4.48
+  },
+  {
+    "text": "material instance",
+    "start": 2116.64,
+    "duration": 4.959
+  },
+  {
+    "text": "um would reduce the amount of nanot",
+    "start": 2118.88,
+    "duration": 5.44
+  },
+  {
+    "text": "rusta passes. This should be possible by",
+    "start": 2121.599,
+    "duration": 4.721
+  },
+  {
+    "text": "sharing the simulation output render",
+    "start": 2124.32,
+    "duration": 5.84
+  },
+  {
+    "text": "target across multiple instances.",
+    "start": 2126.32,
+    "duration": 6.0
+  },
+  {
+    "text": "It's all it's already possible to pin",
+    "start": 2130.16,
+    "duration": 5.36
+  },
+  {
+    "text": "nodes down but there's not great control",
+    "start": 2132.32,
+    "duration": 6.799
+  },
+  {
+    "text": "over which ones. So, um, adding a bit of",
+    "start": 2135.52,
+    "duration": 6.16
+  },
+  {
+    "text": "tooling to to let artists, um, pick",
+    "start": 2139.119,
+    "duration": 4.081
+  },
+  {
+    "text": "which ones would allow them to create",
+    "start": 2141.68,
+    "duration": 5.0
+  },
+  {
+    "text": "interesting scenes.",
+    "start": 2143.2,
+    "duration": 3.48
+  },
+  {
+    "text": "Structures with multiple branching",
+    "start": 2147.2,
+    "duration": 4.08
+  },
+  {
+    "text": "directions instead of a single chain",
+    "start": 2149.2,
+    "duration": 3.68
+  },
+  {
+    "text": "would also be quite interesting, I",
+    "start": 2151.28,
+    "duration": 5.36
+  },
+  {
+    "text": "think, to build other type of foliage.",
+    "start": 2152.88,
+    "duration": 6.0
+  },
+  {
+    "text": "Um, this is a prototype, but you can see",
+    "start": 2156.64,
+    "duration": 4.24
+  },
+  {
+    "text": "that it's more like a tree or a bush",
+    "start": 2158.88,
+    "duration": 4.479
+  },
+  {
+    "text": "structure where multiple branches are",
+    "start": 2160.88,
+    "duration": 5.04
+  },
+  {
+    "text": "connected to the same parent branch.",
+    "start": 2163.359,
+    "duration": 6.48
+  },
+  {
+    "text": "either at a tip or even partway through",
+    "start": 2165.92,
+    "duration": 6.24
+  },
+  {
+    "text": "as the red sphere pushes nodes away. We",
+    "start": 2169.839,
+    "duration": 5.681
+  },
+  {
+    "text": "can observe some organic motion emerging",
+    "start": 2172.16,
+    "duration": 5.679
+  },
+  {
+    "text": "as they the connected branches are also",
+    "start": 2175.52,
+    "duration": 4.96
+  },
+  {
+    "text": "moving along. Now",
+    "start": 2177.839,
+    "duration": 4.721
+  },
+  {
+    "text": "this version also features angle",
+    "start": 2180.48,
+    "duration": 5.52
+  },
+  {
+    "text": "constraints. So when a branch a branch",
+    "start": 2182.56,
+    "duration": 5.36
+  },
+  {
+    "text": "will return back towards their original",
+    "start": 2186.0,
+    "duration": 4.72
+  },
+  {
+    "text": "angle relative to their parent. This",
+    "start": 2187.92,
+    "duration": 5.12
+  },
+  {
+    "text": "way, the entire structure returns to the",
+    "start": 2190.72,
+    "duration": 3.92
+  },
+  {
+    "text": "original configuration when we've",
+    "start": 2193.04,
+    "duration": 4.48
+  },
+  {
+    "text": "stopped disturbing it.",
+    "start": 2194.64,
+    "duration": 4.719
+  },
+  {
+    "text": "You could expand this further by being",
+    "start": 2197.52,
+    "duration": 4.48
+  },
+  {
+    "text": "more stateful and having branches snap",
+    "start": 2199.359,
+    "duration": 4.881
+  },
+  {
+    "text": "when pushed too far or at least stay",
+    "start": 2202.0,
+    "duration": 4.8
+  },
+  {
+    "text": "bent in a certain direction. I think",
+    "start": 2204.24,
+    "duration": 4.4
+  },
+  {
+    "text": "there's some exciting opportunities in",
+    "start": 2206.8,
+    "duration": 3.84
+  },
+  {
+    "text": "this space to make for more interactive",
+    "start": 2208.64,
+    "duration": 3.92
+  },
+  {
+    "text": "environments in which players can feel",
+    "start": 2210.64,
+    "duration": 5.24
+  },
+  {
+    "text": "truly immersed.",
+    "start": 2212.56,
+    "duration": 3.32
+  },
+  {
+    "text": "That wraps up my talk on attractive",
+    "start": 2216.16,
+    "duration": 3.84
+  },
+  {
+    "text": "vine. So I want to thank my colleagues",
+    "start": 2218.0,
+    "duration": 4.96
+  },
+  {
+    "text": "Andrew Catling, EMTT Green, Brian Smith,",
+    "start": 2220.0,
+    "duration": 4.48
+  },
+  {
+    "text": "and Shannon Webster for their",
+    "start": 2222.96,
+    "duration": 3.28
+  },
+  {
+    "text": "contributions.",
+    "start": 2224.48,
+    "duration": 3.599
+  },
+  {
+    "text": "If you have any questions, you can ask",
+    "start": 2226.24,
+    "duration": 3.68
+  },
+  {
+    "text": "me now or you can find me after the talk",
+    "start": 2228.079,
+    "duration": 4.841
+  },
+  {
+    "text": "as well. Thank you.",
+    "start": 2229.92,
+    "duration": 5.02
+  },
+  {
+    "text": "[applause]",
+    "start": 2232.92,
+    "duration": 2.02
+  },
+  {
+    "text": "[cheering]",
+    "start": 2236.85,
+    "duration": 2.02
+  }
+]

@@ -1,0 +1,5517 @@
+[
+  {
+    "text": "Good afternoon. Thank you very much for",
+    "start": 1.52,
+    "duration": 4.88
+  },
+  {
+    "text": "attending this talk. So today um we're",
+    "start": 3.76,
+    "duration": 4.32
+  },
+  {
+    "text": "going to talk about non-destructive",
+    "start": 6.4,
+    "duration": 5.119
+  },
+  {
+    "text": "workflows for chaos physics uh in U5. My",
+    "start": 8.08,
+    "duration": 6.08
+  },
+  {
+    "text": "name is Cedric Caillou. I'm a lead",
+    "start": 11.519,
+    "duration": 7.84
+  },
+  {
+    "text": "physics programmer on the chaos team. Um",
+    "start": 14.16,
+    "duration": 6.879
+  },
+  {
+    "text": "so the agenda will be we're going to",
+    "start": 19.359,
+    "duration": 4.801
+  },
+  {
+    "text": "talk about the motivations of why we've",
+    "start": 21.039,
+    "duration": 5.441
+  },
+  {
+    "text": "developed those workflows in UEIE. U",
+    "start": 24.16,
+    "duration": 4.56
+  },
+  {
+    "text": "then we introduce data flow which is the",
+    "start": 26.48,
+    "duration": 5.36
+  },
+  {
+    "text": "solution to that. Um and then we'll go",
+    "start": 28.72,
+    "duration": 5.839
+  },
+  {
+    "text": "through a bunch of examples",
+    "start": 31.84,
+    "duration": 6.08
+  },
+  {
+    "text": "um mostly focus around destruction uh",
+    "start": 34.559,
+    "duration": 5.761
+  },
+  {
+    "text": "even though like those workflows can",
+    "start": 37.92,
+    "duration": 4.959
+  },
+  {
+    "text": "apply as well to other type of physics",
+    "start": 40.32,
+    "duration": 5.84
+  },
+  {
+    "text": "asset and then um we'll do we'll dive",
+    "start": 42.879,
+    "duration": 6.641
+  },
+  {
+    "text": "into a bit of a how you can integrate",
+    "start": 46.16,
+    "duration": 6.16
+  },
+  {
+    "text": "those um tools and workflows inside your",
+    "start": 49.52,
+    "duration": 6.8
+  },
+  {
+    "text": "pipeline. Um I got a future",
+    "start": 52.32,
+    "duration": 6.0
+  },
+  {
+    "text": "uh bullet point there, but there's",
+    "start": 56.32,
+    "duration": 4.399
+  },
+  {
+    "text": "nothing for that in my talk. So, I",
+    "start": 58.32,
+    "duration": 4.399
+  },
+  {
+    "text": "should have removed it. Sorry. Well,",
+    "start": 60.719,
+    "duration": 3.44
+  },
+  {
+    "text": "it's going to be Q&A and then we can",
+    "start": 62.719,
+    "duration": 2.8
+  },
+  {
+    "text": "talk about the future if you want to.",
+    "start": 64.159,
+    "duration": 3.841
+  },
+  {
+    "text": "You can ask me the questions.",
+    "start": 65.519,
+    "duration": 5.521
+  },
+  {
+    "text": "So, motivation behind those",
+    "start": 68.0,
+    "duration": 5.76
+  },
+  {
+    "text": "nondestructible workflows. So, I'm",
+    "start": 71.04,
+    "duration": 4.96
+  },
+  {
+    "text": "pretty sure you've you've used",
+    "start": 73.76,
+    "duration": 4.56
+  },
+  {
+    "text": "non-destructive workflows before. Um",
+    "start": 76.0,
+    "duration": 5.439
+  },
+  {
+    "text": "there's many tools that exist uh and",
+    "start": 78.32,
+    "duration": 6.0
+  },
+  {
+    "text": "some of them may be uh obvious to you",
+    "start": 81.439,
+    "duration": 5.68
+  },
+  {
+    "text": "but I want to make sure we remind oursel",
+    "start": 84.32,
+    "duration": 4.479
+  },
+  {
+    "text": "what's",
+    "start": 87.119,
+    "duration": 3.201
+  },
+  {
+    "text": "um",
+    "start": 88.799,
+    "duration": 3.201
+  },
+  {
+    "text": "what do we what problem we need to solve",
+    "start": 90.32,
+    "duration": 3.2
+  },
+  {
+    "text": "basically",
+    "start": 92.0,
+    "duration": 3.119
+  },
+  {
+    "text": "um",
+    "start": 93.52,
+    "duration": 4.639
+  },
+  {
+    "text": "so there is iteration there's repetition",
+    "start": 95.119,
+    "duration": 5.121
+  },
+  {
+    "text": "uh and we can sometime confuse one for",
+    "start": 98.159,
+    "duration": 5.121
+  },
+  {
+    "text": "the other uh repetition is basically we",
+    "start": 100.24,
+    "duration": 5.12
+  },
+  {
+    "text": "tend especially when you have to do a",
+    "start": 103.28,
+    "duration": 4.24
+  },
+  {
+    "text": "lot of assets you tend to repeat the",
+    "start": 105.36,
+    "duration": 3.84
+  },
+  {
+    "text": "same operation and over and over and we",
+    "start": 107.52,
+    "duration": 4.8
+  },
+  {
+    "text": "want to avoid that. Uh we want to",
+    "start": 109.2,
+    "duration": 4.48
+  },
+  {
+    "text": "iterate to basically increase the",
+    "start": 112.32,
+    "duration": 5.28
+  },
+  {
+    "text": "quality of the assets and um",
+    "start": 113.68,
+    "duration": 5.84
+  },
+  {
+    "text": "and without without like destruct",
+    "start": 117.6,
+    "duration": 3.68
+  },
+  {
+    "text": "non-destructive workflows then you",
+    "start": 119.52,
+    "duration": 4.4
+  },
+  {
+    "text": "basically are very reliant on the source",
+    "start": 121.28,
+    "duration": 7.679
+  },
+  {
+    "text": "asset changes. So you do work on setting",
+    "start": 123.92,
+    "duration": 6.559
+  },
+  {
+    "text": "up an asset. So for example like I'm",
+    "start": 128.959,
+    "duration": 3.521
+  },
+  {
+    "text": "going to tell a story about this bridge.",
+    "start": 130.479,
+    "duration": 4.161
+  },
+  {
+    "text": "You certainly seen it before. It's part",
+    "start": 132.48,
+    "duration": 6.72
+  },
+  {
+    "text": "of the um the Matrix Awaken demo. And so",
+    "start": 134.64,
+    "duration": 6.959
+  },
+  {
+    "text": "we had an artist working on this for a",
+    "start": 139.2,
+    "duration": 6.399
+  },
+  {
+    "text": "long time trying to make it like making",
+    "start": 141.599,
+    "duration": 6.64
+  },
+  {
+    "text": "look like destructively interesting. I",
+    "start": 145.599,
+    "duration": 4.241
+  },
+  {
+    "text": "don't know if it's a term, but yeah, it",
+    "start": 148.239,
+    "duration": 4.481
+  },
+  {
+    "text": "works. And then and then so it took a a",
+    "start": 149.84,
+    "duration": 5.36
+  },
+  {
+    "text": "lot of time um setting up like different",
+    "start": 152.72,
+    "duration": 4.48
+  },
+  {
+    "text": "part of the road and making sure like",
+    "start": 155.2,
+    "duration": 4.16
+  },
+  {
+    "text": "they collapse in on the right timing and",
+    "start": 157.2,
+    "duration": 4.08
+  },
+  {
+    "text": "everything. and",
+    "start": 159.36,
+    "duration": 5.68
+  },
+  {
+    "text": "and then art basically changed the way",
+    "start": 161.28,
+    "duration": 5.599
+  },
+  {
+    "text": "the look the the bridge looked like it",
+    "start": 165.04,
+    "duration": 3.6
+  },
+  {
+    "text": "was like you know improving the meshes",
+    "start": 166.879,
+    "duration": 3.36
+  },
+  {
+    "text": "and everything and then this work has to",
+    "start": 168.64,
+    "duration": 3.52
+  },
+  {
+    "text": "be redone again and that's a lot of work",
+    "start": 170.239,
+    "duration": 6.241
+  },
+  {
+    "text": "and it's not a very efficient workflow",
+    "start": 172.16,
+    "duration": 7.12
+  },
+  {
+    "text": "and uh and then so there's ways to",
+    "start": 176.48,
+    "duration": 5.039
+  },
+  {
+    "text": "iterate in Unreal because you have you",
+    "start": 179.28,
+    "duration": 4.8
+  },
+  {
+    "text": "say you have undo redo but unredo only",
+    "start": 181.519,
+    "duration": 4.72
+  },
+  {
+    "text": "exists during your session once you",
+    "start": 184.08,
+    "duration": 5.76
+  },
+  {
+    "text": "close uh Unreal or it crashes is it can",
+    "start": 186.239,
+    "duration": 6.321
+  },
+  {
+    "text": "happen. Uh then you have to redo",
+    "start": 189.84,
+    "duration": 5.28
+  },
+  {
+    "text": "everything. Um also prevent exploration",
+    "start": 192.56,
+    "duration": 5.28
+  },
+  {
+    "text": "and discovery because as you know you",
+    "start": 195.12,
+    "duration": 4.56
+  },
+  {
+    "text": "can only move forward. You can never",
+    "start": 197.84,
+    "duration": 4.24
+  },
+  {
+    "text": "basically say I'm going to try this path",
+    "start": 199.68,
+    "duration": 4.639
+  },
+  {
+    "text": "you know go down the rabbit hole of",
+    "start": 202.08,
+    "duration": 3.519
+  },
+  {
+    "text": "exploring you know this way of",
+    "start": 204.319,
+    "duration": 4.801
+  },
+  {
+    "text": "fracturing then you go back and then",
+    "start": 205.599,
+    "duration": 5.521
+  },
+  {
+    "text": "if those operation are hard and and hard",
+    "start": 209.12,
+    "duration": 4.72
+  },
+  {
+    "text": "to reverb then it's it's it doesn't it",
+    "start": 211.12,
+    "duration": 4.56
+  },
+  {
+    "text": "doesn't incentivize you to basically",
+    "start": 213.84,
+    "duration": 4.0
+  },
+  {
+    "text": "explore those different ways and then",
+    "start": 215.68,
+    "duration": 4.88
+  },
+  {
+    "text": "you get stuck in a maybe subpar quality",
+    "start": 217.84,
+    "duration": 5.52
+  },
+  {
+    "text": "you know uh otherwise that you you would",
+    "start": 220.56,
+    "duration": 4.959
+  },
+  {
+    "text": "have like be able to achieve a different",
+    "start": 223.36,
+    "duration": 4.64
+  },
+  {
+    "text": "way that is more interesting uh and I",
+    "start": 225.519,
+    "duration": 4.881
+  },
+  {
+    "text": "also like there's the problem of like as",
+    "start": 228.0,
+    "duration": 4.239
+  },
+  {
+    "text": "you set up those workflows, especially",
+    "start": 230.4,
+    "duration": 4.399
+  },
+  {
+    "text": "in physics, there's a lot of parameters",
+    "start": 232.239,
+    "duration": 4.56
+  },
+  {
+    "text": "that you have to enter and play with",
+    "start": 234.799,
+    "duration": 4.961
+  },
+  {
+    "text": "those parameters and you have to either",
+    "start": 236.799,
+    "duration": 4.72
+  },
+  {
+    "text": "you have to document it along the way,",
+    "start": 239.76,
+    "duration": 3.92
+  },
+  {
+    "text": "but if you have to redo this asset, you",
+    "start": 241.519,
+    "duration": 3.841
+  },
+  {
+    "text": "better have like to take note of all",
+    "start": 243.68,
+    "duration": 3.52
+  },
+  {
+    "text": "those steps so that you redo it exactly",
+    "start": 245.36,
+    "duration": 3.439
+  },
+  {
+    "text": "the same way otherwise you're going to",
+    "start": 247.2,
+    "duration": 3.52
+  },
+  {
+    "text": "do it differently and then may not be",
+    "start": 248.799,
+    "duration": 4.881
+  },
+  {
+    "text": "the same the the what you wanted in the",
+    "start": 250.72,
+    "duration": 5.28
+  },
+  {
+    "text": "first place.",
+    "start": 253.68,
+    "duration": 4.88
+  },
+  {
+    "text": "The second part is like scaling with",
+    "start": 256.0,
+    "duration": 5.359
+  },
+  {
+    "text": "quality. Um so often you start with prop",
+    "start": 258.56,
+    "duration": 5.359
+  },
+  {
+    "text": "production. You do a few assets to",
+    "start": 261.359,
+    "duration": 5.041
+  },
+  {
+    "text": "explore you know what you can do and",
+    "start": 263.919,
+    "duration": 6.0
+  },
+  {
+    "text": "then and then then it's time for you",
+    "start": 266.4,
+    "duration": 5.76
+  },
+  {
+    "text": "know production very large world you",
+    "start": 269.919,
+    "duration": 4.56
+  },
+  {
+    "text": "start many assets and then you start",
+    "start": 272.16,
+    "duration": 5.039
+  },
+  {
+    "text": "iterating. First of all, you you may",
+    "start": 274.479,
+    "duration": 6.481
+  },
+  {
+    "text": "have multiple artists um that worked on",
+    "start": 277.199,
+    "duration": 6.401
+  },
+  {
+    "text": "setting up those assets, but then the",
+    "start": 280.96,
+    "duration": 4.32
+  },
+  {
+    "text": "problem is like they may not have the",
+    "start": 283.6,
+    "duration": 3.68
+  },
+  {
+    "text": "same way of setting up those assets. So,",
+    "start": 285.28,
+    "duration": 3.919
+  },
+  {
+    "text": "or they get better and better and better",
+    "start": 287.28,
+    "duration": 4.88
+  },
+  {
+    "text": "over time at getting those assets um set",
+    "start": 289.199,
+    "duration": 5.921
+  },
+  {
+    "text": "up. So the first ones you've done are",
+    "start": 292.16,
+    "duration": 5.28
+  },
+  {
+    "text": "they okay but now like the new ones are",
+    "start": 295.12,
+    "duration": 4.32
+  },
+  {
+    "text": "even better but are you going to go back",
+    "start": 297.44,
+    "duration": 4.72
+  },
+  {
+    "text": "to the old ones and resetting resetting",
+    "start": 299.44,
+    "duration": 5.039
+  },
+  {
+    "text": "re setting them up again because they",
+    "start": 302.16,
+    "duration": 4.08
+  },
+  {
+    "text": "it's going to be expensive and you don't",
+    "start": 304.479,
+    "duration": 3.44
+  },
+  {
+    "text": "have time you want to just add new",
+    "start": 306.24,
+    "duration": 4.0
+  },
+  {
+    "text": "assets basically. Uh there's another",
+    "start": 307.919,
+    "duration": 5.12
+  },
+  {
+    "text": "problem which is you you set up those",
+    "start": 310.24,
+    "duration": 4.959
+  },
+  {
+    "text": "asset you set up your levels and often",
+    "start": 313.039,
+    "duration": 5.361
+  },
+  {
+    "text": "with physics um you end up with the",
+    "start": 315.199,
+    "duration": 6.401
+  },
+  {
+    "text": "level is final you get then your you",
+    "start": 318.4,
+    "duration": 5.76
+  },
+  {
+    "text": "optimize your rendering and then physics",
+    "start": 321.6,
+    "duration": 4.319
+  },
+  {
+    "text": "start showing up now in the chart of",
+    "start": 324.16,
+    "duration": 4.319
+  },
+  {
+    "text": "performance and then people are like oh",
+    "start": 325.919,
+    "duration": 4.881
+  },
+  {
+    "text": "we need like to have like half of the",
+    "start": 328.479,
+    "duration": 4.881
+  },
+  {
+    "text": "number of rigid body that we should have",
+    "start": 330.8,
+    "duration": 4.8
+  },
+  {
+    "text": "and then what you do do you ask your",
+    "start": 333.36,
+    "duration": 4.32
+  },
+  {
+    "text": "artist to now edit like hundreds and",
+    "start": 335.6,
+    "duration": 4.4
+  },
+  {
+    "text": "hundreds of asset back and to reset.",
+    "start": 337.68,
+    "duration": 4.959
+  },
+  {
+    "text": "It's very expensive and often what",
+    "start": 340.0,
+    "duration": 4.32
+  },
+  {
+    "text": "happens like you're going to cut down",
+    "start": 342.639,
+    "duration": 3.601
+  },
+  {
+    "text": "physics or you're going to remove assets",
+    "start": 344.32,
+    "duration": 4.96
+  },
+  {
+    "text": "and you know we like destruction. We",
+    "start": 346.24,
+    "duration": 4.399
+  },
+  {
+    "text": "want more destruction not less",
+    "start": 349.28,
+    "duration": 5.359
+  },
+  {
+    "text": "destruction. Um",
+    "start": 350.639,
+    "duration": 6.4
+  },
+  {
+    "text": "so that's that's kind of the framework",
+    "start": 354.639,
+    "duration": 4.481
+  },
+  {
+    "text": "we're going to start like working from",
+    "start": 357.039,
+    "duration": 4.801
+  },
+  {
+    "text": "and how do we solve that? So we",
+    "start": 359.12,
+    "duration": 7.04
+  },
+  {
+    "text": "implemented data flow and data flow is a",
+    "start": 361.84,
+    "duration": 7.04
+  },
+  {
+    "text": "it's kind of like a framework and we're",
+    "start": 366.16,
+    "duration": 5.28
+  },
+  {
+    "text": "currently using it in lots of different",
+    "start": 368.88,
+    "duration": 5.12
+  },
+  {
+    "text": "physics assets. So we used in class",
+    "start": 371.44,
+    "duration": 6.24
+  },
+  {
+    "text": "asset editor which is if you have used",
+    "start": 374.0,
+    "duration": 5.68
+  },
+  {
+    "text": "um and real you the most familiar with",
+    "start": 377.68,
+    "duration": 5.68
+  },
+  {
+    "text": "like uh dealing with with data flow. Um",
+    "start": 379.68,
+    "duration": 6.0
+  },
+  {
+    "text": "it's also like in a geometric collection",
+    "start": 383.36,
+    "duration": 5.52
+  },
+  {
+    "text": "asset editor for destruction.",
+    "start": 385.68,
+    "duration": 5.68
+  },
+  {
+    "text": "uh the flesh asset editor. So you may",
+    "start": 388.88,
+    "duration": 4.4
+  },
+  {
+    "text": "not be familiar with this one. It's been",
+    "start": 391.36,
+    "duration": 4.48
+  },
+  {
+    "text": "used it's more like mostly used offline.",
+    "start": 393.28,
+    "duration": 4.56
+  },
+  {
+    "text": "So you've seen the horse like in the in",
+    "start": 395.84,
+    "duration": 5.44
+  },
+  {
+    "text": "the keynote. Uh we use this to bake",
+    "start": 397.84,
+    "duration": 6.56
+  },
+  {
+    "text": "simulation and we we can run the",
+    "start": 401.28,
+    "duration": 5.52
+  },
+  {
+    "text": "simulation for 36 hours with muscles and",
+    "start": 404.4,
+    "duration": 4.239
+  },
+  {
+    "text": "everything. And so it's different",
+    "start": 406.8,
+    "duration": 3.2
+  },
+  {
+    "text": "workflows as the other one, but it's",
+    "start": 408.639,
+    "duration": 4.481
+  },
+  {
+    "text": "exactly the same editor. So that's in UI",
+    "start": 410.0,
+    "duration": 4.8
+  },
+  {
+    "text": "5.5.",
+    "start": 413.12,
+    "duration": 4.079
+  },
+  {
+    "text": "And then in UI6 we've introduced two new",
+    "start": 414.8,
+    "duration": 4.88
+  },
+  {
+    "text": "assets. So the groom asset editor. So",
+    "start": 417.199,
+    "duration": 5.521
+  },
+  {
+    "text": "now you can set up your groom asset",
+    "start": 419.68,
+    "duration": 6.48
+  },
+  {
+    "text": "simulation um directly in in dataf flow.",
+    "start": 422.72,
+    "duration": 5.759
+  },
+  {
+    "text": "Uh and then the outfit asset editor",
+    "start": 426.16,
+    "duration": 6.159
+  },
+  {
+    "text": "which is a way to combine multiple class",
+    "start": 428.479,
+    "duration": 7.041
+  },
+  {
+    "text": "asset into a single outfit and there",
+    "start": 432.319,
+    "duration": 6.801
+  },
+  {
+    "text": "will be more to come.",
+    "start": 435.52,
+    "duration": 5.679
+  },
+  {
+    "text": "Um so it's a framework like I was",
+    "start": 439.12,
+    "duration": 5.12
+  },
+  {
+    "text": "saying. Um it's made primarily of a it's",
+    "start": 441.199,
+    "duration": 7.601
+  },
+  {
+    "text": "dataf is an asset on its own. Um it's",
+    "start": 444.24,
+    "duration": 7.04
+  },
+  {
+    "text": "basically a graph system, an evaluation",
+    "start": 448.8,
+    "duration": 6.32
+  },
+  {
+    "text": "system and uh it has it comes with like",
+    "start": 451.28,
+    "duration": 6.96
+  },
+  {
+    "text": "editor and tools and um and has some",
+    "start": 455.12,
+    "duration": 9.079
+  },
+  {
+    "text": "APIs like blueprint APIs and C++ APIs.",
+    "start": 458.24,
+    "duration": 5.959
+  },
+  {
+    "text": "So it's an asset. So when you have like",
+    "start": 464.479,
+    "duration": 5.521
+  },
+  {
+    "text": "a physics asset for example like in that",
+    "start": 466.56,
+    "duration": 5.44
+  },
+  {
+    "text": "case like I got a little screenshot",
+    "start": 470.0,
+    "duration": 4.8
+  },
+  {
+    "text": "there u you see like the DF sample is",
+    "start": 472.0,
+    "duration": 5.44
+  },
+  {
+    "text": "the data flow asset and then you get the",
+    "start": 474.8,
+    "duration": 4.64
+  },
+  {
+    "text": "geometry collection sample it's own",
+    "start": 477.44,
+    "duration": 3.68
+  },
+  {
+    "text": "geometry collection and then we link the",
+    "start": 479.44,
+    "duration": 2.96
+  },
+  {
+    "text": "two by having the geometry collection",
+    "start": 481.12,
+    "duration": 3.68
+  },
+  {
+    "text": "that has a reference to the data flow",
+    "start": 482.4,
+    "duration": 6.88
+  },
+  {
+    "text": "asset and the node that it needs to use",
+    "start": 484.8,
+    "duration": 7.679
+  },
+  {
+    "text": "to evaluate the asset. So this way we",
+    "start": 489.28,
+    "duration": 6.16
+  },
+  {
+    "text": "can use a single type of asset and use",
+    "start": 492.479,
+    "duration": 5.28
+  },
+  {
+    "text": "it in multiple type of like physics",
+    "start": 495.44,
+    "duration": 5.28
+  },
+  {
+    "text": "assets. So this is the link we we have",
+    "start": 497.759,
+    "duration": 4.72
+  },
+  {
+    "text": "uh the data flow set contains the main",
+    "start": 500.72,
+    "duration": 4.08
+  },
+  {
+    "text": "graph the subg graphs and the variable",
+    "start": 502.479,
+    "duration": 3.761
+  },
+  {
+    "text": "definition. This is the only thing it",
+    "start": 504.8,
+    "duration": 4.88
+  },
+  {
+    "text": "contains. Um it's it's really a recipe",
+    "start": 506.24,
+    "duration": 7.44
+  },
+  {
+    "text": "to re to create basically your asset. Um",
+    "start": 509.68,
+    "duration": 6.32
+  },
+  {
+    "text": "the integration is very uh",
+    "start": 513.68,
+    "duration": 4.88
+  },
+  {
+    "text": "straightforward. So you we have a an",
+    "start": 516.0,
+    "duration": 4.159
+  },
+  {
+    "text": "interface to implement if some some of",
+    "start": 518.56,
+    "duration": 3.52
+  },
+  {
+    "text": "you are interested to maybe use data",
+    "start": 520.159,
+    "duration": 4.161
+  },
+  {
+    "text": "flow for your own asset. Uh it's pretty",
+    "start": 522.08,
+    "duration": 5.879
+  },
+  {
+    "text": "straightforward to do.",
+    "start": 524.32,
+    "duration": 3.639
+  },
+  {
+    "text": "So I was saying it's a graph and a",
+    "start": 528.72,
+    "duration": 6.0
+  },
+  {
+    "text": "system and an system. So it's a graph as",
+    "start": 531.12,
+    "duration": 6.399
+  },
+  {
+    "text": "you know it like we have too many graphs",
+    "start": 534.72,
+    "duration": 5.84
+  },
+  {
+    "text": "in Unreal. So many graph I say so many",
+    "start": 537.519,
+    "duration": 5.76
+  },
+  {
+    "text": "graph in Unreal. Um and then so this one",
+    "start": 540.56,
+    "duration": 4.56
+  },
+  {
+    "text": "is slightly different from the blueprint",
+    "start": 543.279,
+    "duration": 4.161
+  },
+  {
+    "text": "graph that most of you know. Uh it",
+    "start": 545.12,
+    "duration": 4.399
+  },
+  {
+    "text": "doesn't have any execution pin. So it's",
+    "start": 547.44,
+    "duration": 3.76
+  },
+  {
+    "text": "not like a left to right kind of like",
+    "start": 549.519,
+    "duration": 3.76
+  },
+  {
+    "text": "reading thing. Uh only the only thing",
+    "start": 551.2,
+    "duration": 3.92
+  },
+  {
+    "text": "that circulates through the graph is",
+    "start": 553.279,
+    "duration": 5.601
+  },
+  {
+    "text": "data and uh it's a poolbased evaluation",
+    "start": 555.12,
+    "duration": 5.12
+  },
+  {
+    "text": "which means like there's a that's why",
+    "start": 558.88,
+    "duration": 3.44
+  },
+  {
+    "text": "there is a terminal node and terminal",
+    "start": 560.24,
+    "duration": 6.0
+  },
+  {
+    "text": "node is like named terminal as like this",
+    "start": 562.32,
+    "duration": 7.519
+  },
+  {
+    "text": "is what needs to generate the assets. So",
+    "start": 566.24,
+    "duration": 6.88
+  },
+  {
+    "text": "when when this node is triggered uh and",
+    "start": 569.839,
+    "duration": 6.881
+  },
+  {
+    "text": "I explained how this this happen the it",
+    "start": 573.12,
+    "duration": 5.44
+  },
+  {
+    "text": "it looks at its input what's is",
+    "start": 576.72,
+    "duration": 3.2
+  },
+  {
+    "text": "connected to its input and will",
+    "start": 578.56,
+    "duration": 3.44
+  },
+  {
+    "text": "basically start pulling the data from it",
+    "start": 579.92,
+    "duration": 4.72
+  },
+  {
+    "text": "and then and then climb up to you know",
+    "start": 582.0,
+    "duration": 5.2
+  },
+  {
+    "text": "whatever place in the graph it's it can",
+    "start": 584.64,
+    "duration": 4.639
+  },
+  {
+    "text": "go to basically fetch the data and and",
+    "start": 587.2,
+    "duration": 4.72
+  },
+  {
+    "text": "generate like the final the final one.",
+    "start": 589.279,
+    "duration": 6.081
+  },
+  {
+    "text": "Um the data is cached",
+    "start": 591.92,
+    "duration": 6.56
+  },
+  {
+    "text": "at at each output of the graph which",
+    "start": 595.36,
+    "duration": 5.28
+  },
+  {
+    "text": "means um there's a little screenshot",
+    "start": 598.48,
+    "duration": 3.44
+  },
+  {
+    "text": "there's a little screenshot at the",
+    "start": 600.64,
+    "duration": 4.72
+  },
+  {
+    "text": "bottom that shows you uh it's yeah I",
+    "start": 601.92,
+    "duration": 5.52
+  },
+  {
+    "text": "could have been clearer on this one but",
+    "start": 605.36,
+    "duration": 4.0
+  },
+  {
+    "text": "there's a some performance data at the",
+    "start": 607.44,
+    "duration": 4.64
+  },
+  {
+    "text": "top and some of them are red so in that",
+    "start": 609.36,
+    "duration": 4.64
+  },
+  {
+    "text": "case basically I change a variable",
+    "start": 612.08,
+    "duration": 4.96
+  },
+  {
+    "text": "they're all like a black uh node at the",
+    "start": 614.0,
+    "duration": 5.68
+  },
+  {
+    "text": "bottom and then only basically the the",
+    "start": 617.04,
+    "duration": 4.239
+  },
+  {
+    "text": "right side of the graph has been",
+    "start": 619.68,
+    "duration": 4.24
+  },
+  {
+    "text": "re-evaluated and not the left part. So",
+    "start": 621.279,
+    "duration": 4.081
+  },
+  {
+    "text": "it means like if you have very expensive",
+    "start": 623.92,
+    "duration": 4.64
+  },
+  {
+    "text": "like part of the graph then you don't",
+    "start": 625.36,
+    "duration": 4.96
+  },
+  {
+    "text": "and if you don't touch it you would",
+    "start": 628.56,
+    "duration": 3.6
+  },
+  {
+    "text": "never have to pay again for it. It will",
+    "start": 630.32,
+    "duration": 3.759
+  },
+  {
+    "text": "basically just rever the thing that you",
+    "start": 632.16,
+    "duration": 4.08
+  },
+  {
+    "text": "change which is nice especially in very",
+    "start": 634.079,
+    "duration": 4.161
+  },
+  {
+    "text": "complex setup.",
+    "start": 636.24,
+    "duration": 4.32
+  },
+  {
+    "text": "Um",
+    "start": 638.24,
+    "duration": 4.64
+  },
+  {
+    "text": "so talk about everything. So sorry just",
+    "start": 640.56,
+    "duration": 6.16
+  },
+  {
+    "text": "checking and then uh so it's editor and",
+    "start": 642.88,
+    "duration": 6.72
+  },
+  {
+    "text": "tools and so the editor and the tools",
+    "start": 646.72,
+    "duration": 5.6
+  },
+  {
+    "text": "are exactly the same for all the assets.",
+    "start": 649.6,
+    "duration": 5.679
+  },
+  {
+    "text": "So the advantage of that is that it's",
+    "start": 652.32,
+    "duration": 4.639
+  },
+  {
+    "text": "whenever we develop a new feature",
+    "start": 655.279,
+    "duration": 5.201
+  },
+  {
+    "text": "whenever we improve something we we add",
+    "start": 656.959,
+    "duration": 5.841
+  },
+  {
+    "text": "something to it then all the assets",
+    "start": 660.48,
+    "duration": 4.32
+  },
+  {
+    "text": "based on the data flow editor basically",
+    "start": 662.8,
+    "duration": 4.159
+  },
+  {
+    "text": "will basically benefit of it. So which",
+    "start": 664.8,
+    "duration": 4.8
+  },
+  {
+    "text": "is like an a nice kind of for code",
+    "start": 666.959,
+    "duration": 4.081
+  },
+  {
+    "text": "maintenance and and basically",
+    "start": 669.6,
+    "duration": 4.0
+  },
+  {
+    "text": "improvement of of the tools in general.",
+    "start": 671.04,
+    "duration": 7.6
+  },
+  {
+    "text": "Uh so the the UI is pretty busy and",
+    "start": 673.6,
+    "duration": 7.359
+  },
+  {
+    "text": "setting up those layout like always like",
+    "start": 678.64,
+    "duration": 5.759
+  },
+  {
+    "text": "tricky. So we have like a graph editor",
+    "start": 680.959,
+    "duration": 5.201
+  },
+  {
+    "text": "uh a simulation view. So we have two",
+    "start": 684.399,
+    "duration": 3.68
+  },
+  {
+    "text": "view two 3D views. We have a simulation",
+    "start": 686.16,
+    "duration": 4.08
+  },
+  {
+    "text": "views and a construction view. And I go",
+    "start": 688.079,
+    "duration": 4.081
+  },
+  {
+    "text": "in detail after like about how they are",
+    "start": 690.24,
+    "duration": 5.599
+  },
+  {
+    "text": "used and what what is their purpose. Um,",
+    "start": 692.16,
+    "duration": 5.84
+  },
+  {
+    "text": "of course we have like asset details for",
+    "start": 695.839,
+    "duration": 5.281
+  },
+  {
+    "text": "your normal properties. Uh, node node",
+    "start": 698.0,
+    "duration": 5.04
+  },
+  {
+    "text": "details. So each node contrary to a",
+    "start": 701.12,
+    "duration": 4.399
+  },
+  {
+    "text": "blueprints when you you have like a",
+    "start": 703.04,
+    "duration": 6.479
+  },
+  {
+    "text": "details for your nodes. Um, and then you",
+    "start": 705.519,
+    "duration": 5.681
+  },
+  {
+    "text": "get like a collection spreadsheet. We",
+    "start": 709.519,
+    "duration": 4.401
+  },
+  {
+    "text": "get a scene outliner and some vertex",
+    "start": 711.2,
+    "duration": 5.36
+  },
+  {
+    "text": "painting tools basically.",
+    "start": 713.92,
+    "duration": 6.32
+  },
+  {
+    "text": "So the graph editor so very familiar. It",
+    "start": 716.56,
+    "duration": 5.92
+  },
+  {
+    "text": "it looks and feel like the your",
+    "start": 720.24,
+    "duration": 5.599
+  },
+  {
+    "text": "blueprint uh graph and it use the same",
+    "start": 722.48,
+    "duration": 5.599
+  },
+  {
+    "text": "technology under the hood. Anyway, um",
+    "start": 725.839,
+    "duration": 4.641
+  },
+  {
+    "text": "like I say, no exact pin. It's it's only",
+    "start": 728.079,
+    "duration": 5.361
+  },
+  {
+    "text": "like a data connection. Uh the concept",
+    "start": 730.48,
+    "duration": 5.599
+  },
+  {
+    "text": "of function is called subgraph. Um",
+    "start": 733.44,
+    "duration": 6.48
+  },
+  {
+    "text": "slightly different uh but basically yeah",
+    "start": 736.079,
+    "duration": 6.88
+  },
+  {
+    "text": "rather the same. Uh and then we have",
+    "start": 739.92,
+    "duration": 4.64
+  },
+  {
+    "text": "built-in",
+    "start": 742.959,
+    "duration": 4.721
+  },
+  {
+    "text": "u output watch. So as you can see on the",
+    "start": 744.56,
+    "duration": 5.839
+  },
+  {
+    "text": "on the the two node on the left uh so",
+    "start": 747.68,
+    "duration": 4.0
+  },
+  {
+    "text": "you can right click on a pin and",
+    "start": 750.399,
+    "duration": 4.081
+  },
+  {
+    "text": "basically say watch like this value and",
+    "start": 751.68,
+    "duration": 4.959
+  },
+  {
+    "text": "then as the graph basically evaluates",
+    "start": 754.48,
+    "duration": 5.039
+  },
+  {
+    "text": "you those value will basically update in",
+    "start": 756.639,
+    "duration": 5.841
+  },
+  {
+    "text": "real time. Um and then we have like",
+    "start": 759.519,
+    "duration": 4.961
+  },
+  {
+    "text": "performance data on top of it. So you",
+    "start": 762.48,
+    "duration": 5.039
+  },
+  {
+    "text": "can identify where your graph which part",
+    "start": 764.48,
+    "duration": 4.56
+  },
+  {
+    "text": "of your graph is basically performance",
+    "start": 767.519,
+    "duration": 3.681
+  },
+  {
+    "text": "or not. uh if if you're looking for",
+    "start": 769.04,
+    "duration": 4.4
+  },
+  {
+    "text": "having like you know be able to generate",
+    "start": 771.2,
+    "duration": 6.0
+  },
+  {
+    "text": "like asset very quickly.",
+    "start": 773.44,
+    "duration": 6.72
+  },
+  {
+    "text": "So the simulation viewport is is like",
+    "start": 777.2,
+    "duration": 4.319
+  },
+  {
+    "text": "what you see is what you get is your",
+    "start": 780.16,
+    "duration": 4.16
+  },
+  {
+    "text": "final product takes the terminal node",
+    "start": 781.519,
+    "duration": 4.401
+  },
+  {
+    "text": "generate the asset and display the",
+    "start": 784.32,
+    "duration": 5.04
+  },
+  {
+    "text": "asset. There's a there's a play button,",
+    "start": 785.92,
+    "duration": 5.2
+  },
+  {
+    "text": "a simulation button. So you can simulate",
+    "start": 789.36,
+    "duration": 4.64
+  },
+  {
+    "text": "as well your object right directly in in",
+    "start": 791.12,
+    "duration": 5.519
+  },
+  {
+    "text": "data flow without having to go to PI and",
+    "start": 794.0,
+    "duration": 4.639
+  },
+  {
+    "text": "before for pushing destruction you'd",
+    "start": 796.639,
+    "duration": 3.841
+  },
+  {
+    "text": "have to put like your object inside the",
+    "start": 798.639,
+    "duration": 4.801
+  },
+  {
+    "text": "scene and then play PIIE and then see",
+    "start": 800.48,
+    "duration": 4.72
+  },
+  {
+    "text": "the result and go back and then change",
+    "start": 803.44,
+    "duration": 4.079
+  },
+  {
+    "text": "it again when now like everything is in",
+    "start": 805.2,
+    "duration": 3.92
+  },
+  {
+    "text": "one place. So which is way more",
+    "start": 807.519,
+    "duration": 4.641
+  },
+  {
+    "text": "convenient and and easy to use.",
+    "start": 809.12,
+    "duration": 6.32
+  },
+  {
+    "text": "um the this scene is actually driven by",
+    "start": 812.16,
+    "duration": 6.56
+  },
+  {
+    "text": "a blueprint. So if you want to add other",
+    "start": 815.44,
+    "duration": 5.519
+  },
+  {
+    "text": "object in this particular scene to you",
+    "start": 818.72,
+    "duration": 4.799
+  },
+  {
+    "text": "know because you want to be more in C2",
+    "start": 820.959,
+    "duration": 4.88
+  },
+  {
+    "text": "or or or I think like effects maybe you",
+    "start": 823.519,
+    "duration": 5.361
+  },
+  {
+    "text": "put like you can listen to events to",
+    "start": 825.839,
+    "duration": 5.521
+  },
+  {
+    "text": "trigger some nar particles or something.",
+    "start": 828.88,
+    "duration": 3.6
+  },
+  {
+    "text": "It's like it's up to you. You can",
+    "start": 831.36,
+    "duration": 3.039
+  },
+  {
+    "text": "replace this preview blueprints uh in",
+    "start": 832.48,
+    "duration": 3.919
+  },
+  {
+    "text": "the settings. So that's quite",
+    "start": 834.399,
+    "duration": 4.401
+  },
+  {
+    "text": "convenient. Can be used for caching as",
+    "start": 836.399,
+    "duration": 4.88
+  },
+  {
+    "text": "well. um",
+    "start": 838.8,
+    "duration": 5.279
+  },
+  {
+    "text": "uh when when for example you want to",
+    "start": 841.279,
+    "duration": 6.56
+  },
+  {
+    "text": "cache in a specific context",
+    "start": 844.079,
+    "duration": 5.2
+  },
+  {
+    "text": "the construction viewport. So this is",
+    "start": 847.839,
+    "duration": 3.12
+  },
+  {
+    "text": "the one in data flow you're going to use",
+    "start": 849.279,
+    "duration": 3.841
+  },
+  {
+    "text": "the most. Um whenever you click on a",
+    "start": 850.959,
+    "duration": 4.961
+  },
+  {
+    "text": "node or you pin the node. So this is",
+    "start": 853.12,
+    "duration": 4.56
+  },
+  {
+    "text": "this little like pin button in the in",
+    "start": 855.92,
+    "duration": 5.2
+  },
+  {
+    "text": "the corner. Um the node will basically",
+    "start": 857.68,
+    "duration": 5.839
+  },
+  {
+    "text": "render in this viewport but it doesn't",
+    "start": 861.12,
+    "duration": 4.079
+  },
+  {
+    "text": "render like with full materials and",
+    "start": 863.519,
+    "duration": 4.081
+  },
+  {
+    "text": "everything. It's basically just to",
+    "start": 865.199,
+    "duration": 4.161
+  },
+  {
+    "text": "inform you about like what this what is",
+    "start": 867.6,
+    "duration": 4.08
+  },
+  {
+    "text": "the output of this node and then and",
+    "start": 869.36,
+    "duration": 4.719
+  },
+  {
+    "text": "then some of the you know debug details",
+    "start": 871.68,
+    "duration": 4.08
+  },
+  {
+    "text": "about it. So in that case the plane",
+    "start": 874.079,
+    "duration": 6.0
+  },
+  {
+    "text": "cutter will show you final mesh when",
+    "start": 875.76,
+    "duration": 6.48
+  },
+  {
+    "text": "it's cut and then the planes that",
+    "start": 880.079,
+    "duration": 4.0
+  },
+  {
+    "text": "basically will use to cut. So it's very",
+    "start": 882.24,
+    "duration": 4.88
+  },
+  {
+    "text": "very nice for like debugging you know",
+    "start": 884.079,
+    "duration": 5.44
+  },
+  {
+    "text": "when things like don't go the way you",
+    "start": 887.12,
+    "duration": 3.92
+  },
+  {
+    "text": "want.",
+    "start": 889.519,
+    "duration": 3.841
+  },
+  {
+    "text": "Um this window is also used for",
+    "start": 891.04,
+    "duration": 4.32
+  },
+  {
+    "text": "interactive painting. So if you if you",
+    "start": 893.36,
+    "duration": 3.44
+  },
+  {
+    "text": "select a node that's like as a tool",
+    "start": 895.36,
+    "duration": 2.96
+  },
+  {
+    "text": "associated with it, it will just bring",
+    "start": 896.8,
+    "duration": 3.599
+  },
+  {
+    "text": "the tool up and then it looks like a bit",
+    "start": 898.32,
+    "duration": 3.92
+  },
+  {
+    "text": "the modeling tool. You get like a cancel",
+    "start": 900.399,
+    "duration": 5.68
+  },
+  {
+    "text": "and you know accept button basically. Uh",
+    "start": 902.24,
+    "duration": 5.76
+  },
+  {
+    "text": "we have a bunch of extra visualization.",
+    "start": 906.079,
+    "duration": 3.681
+  },
+  {
+    "text": "You can see the normals the vertx ids",
+    "start": 908.0,
+    "duration": 3.36
+  },
+  {
+    "text": "and all this kind of stuff. So we try to",
+    "start": 909.76,
+    "duration": 2.72
+  },
+  {
+    "text": "we're going to add more and more",
+    "start": 911.36,
+    "duration": 4.08
+  },
+  {
+    "text": "features as we go and um if you feel",
+    "start": 912.48,
+    "duration": 4.719
+  },
+  {
+    "text": "like something is needed then please",
+    "start": 915.44,
+    "duration": 3.6
+  },
+  {
+    "text": "reach out to us. We'll be happy to we",
+    "start": 917.199,
+    "duration": 4.161
+  },
+  {
+    "text": "can do it. Uh it support multiple views.",
+    "start": 919.04,
+    "duration": 4.159
+  },
+  {
+    "text": "So it's not just 3D views. support like",
+    "start": 921.36,
+    "duration": 4.56
+  },
+  {
+    "text": "2D views especially for the close panel",
+    "start": 923.199,
+    "duration": 4.561
+  },
+  {
+    "text": "editor for example when you can see the",
+    "start": 925.92,
+    "duration": 5.76
+  },
+  {
+    "text": "your cloth panels basically uh UV view",
+    "start": 927.76,
+    "duration": 6.24
+  },
+  {
+    "text": "so if each node can decide which view it",
+    "start": 931.68,
+    "duration": 4.64
+  },
+  {
+    "text": "basically can display and then so if you",
+    "start": 934.0,
+    "duration": 4.639
+  },
+  {
+    "text": "do an UV unwrap for example node then it",
+    "start": 936.32,
+    "duration": 5.199
+  },
+  {
+    "text": "will display your UVs basically uh each",
+    "start": 938.639,
+    "duration": 5.521
+  },
+  {
+    "text": "asset editor also has the opportunity to",
+    "start": 941.519,
+    "duration": 6.961
+  },
+  {
+    "text": "able to um extend those views u so if",
+    "start": 944.16,
+    "duration": 6.72
+  },
+  {
+    "text": "you ever use data flow in your own you",
+    "start": 948.48,
+    "duration": 4.479
+  },
+  {
+    "text": "know for your own asset youble ble to do",
+    "start": 950.88,
+    "duration": 5.44
+  },
+  {
+    "text": "lots of you know extension there.",
+    "start": 952.959,
+    "duration": 5.041
+  },
+  {
+    "text": "Uh",
+    "start": 956.32,
+    "duration": 3.92
+  },
+  {
+    "text": "since 5.6 we've added like variable and",
+    "start": 958.0,
+    "duration": 3.759
+  },
+  {
+    "text": "subgraph. So very useful for",
+    "start": 960.24,
+    "duration": 4.959
+  },
+  {
+    "text": "parameterization of the graph. Um so",
+    "start": 961.759,
+    "duration": 5.44
+  },
+  {
+    "text": "it's it looks looks and feel like the my",
+    "start": 965.199,
+    "duration": 4.08
+  },
+  {
+    "text": "blueprint. So you have a the function at",
+    "start": 967.199,
+    "duration": 6.64
+  },
+  {
+    "text": "the top the variables. Um your you can",
+    "start": 969.279,
+    "duration": 6.641
+  },
+  {
+    "text": "just drag a variable in the graph and",
+    "start": 973.839,
+    "duration": 3.521
+  },
+  {
+    "text": "you know it becomes a node that you can",
+    "start": 975.92,
+    "duration": 4.32
+  },
+  {
+    "text": "use. uh you",
+    "start": 977.36,
+    "duration": 5.2
+  },
+  {
+    "text": "small change small difference from",
+    "start": 980.24,
+    "duration": 4.959
+  },
+  {
+    "text": "blueprints in data flow you can only",
+    "start": 982.56,
+    "duration": 4.32
+  },
+  {
+    "text": "read a variable you cannot set a",
+    "start": 985.199,
+    "duration": 3.361
+  },
+  {
+    "text": "variable variables are basically just",
+    "start": 986.88,
+    "duration": 4.72
+  },
+  {
+    "text": "more kind of like input parameters um",
+    "start": 988.56,
+    "duration": 6.399
+  },
+  {
+    "text": "this how you should see see them um and",
+    "start": 991.6,
+    "duration": 4.799
+  },
+  {
+    "text": "then we have at the bottom we have like",
+    "start": 994.959,
+    "duration": 4.56
+  },
+  {
+    "text": "what we call the overrides so the data",
+    "start": 996.399,
+    "duration": 5.12
+  },
+  {
+    "text": "flow defines a bunch of parameters and",
+    "start": 999.519,
+    "duration": 6.081
+  },
+  {
+    "text": "can define their defaults and each asset",
+    "start": 1001.519,
+    "duration": 5.921
+  },
+  {
+    "text": "that is using this data flow graph",
+    "start": 1005.6,
+    "duration": 4.239
+  },
+  {
+    "text": "because you can have like 20 assets",
+    "start": 1007.44,
+    "duration": 5.759
+  },
+  {
+    "text": "using the same single data flow graph",
+    "start": 1009.839,
+    "duration": 5.281
+  },
+  {
+    "text": "can basically overrides those variables.",
+    "start": 1013.199,
+    "duration": 3.121
+  },
+  {
+    "text": "So which is very convenient. So for",
+    "start": 1015.12,
+    "duration": 4.0
+  },
+  {
+    "text": "example like you have a fracture data",
+    "start": 1016.32,
+    "duration": 5.759
+  },
+  {
+    "text": "flow and then um you have like I don't",
+    "start": 1019.12,
+    "duration": 4.48
+  },
+  {
+    "text": "know like three stone asset that's using",
+    "start": 1022.079,
+    "duration": 3.681
+  },
+  {
+    "text": "the same data flow but you feel like",
+    "start": 1023.6,
+    "duration": 4.64
+  },
+  {
+    "text": "this particular stone should asset",
+    "start": 1025.76,
+    "duration": 4.72
+  },
+  {
+    "text": "should have like maybe less should be",
+    "start": 1028.24,
+    "duration": 4.079
+  },
+  {
+    "text": "less fractured or something then you",
+    "start": 1030.48,
+    "duration": 3.04
+  },
+  {
+    "text": "could have like a parameter for the",
+    "start": 1032.319,
+    "duration": 2.48
+  },
+  {
+    "text": "number of fractures for example. We'll",
+    "start": 1033.52,
+    "duration": 3.279
+  },
+  {
+    "text": "go in detail. I'll show an example so it",
+    "start": 1034.799,
+    "duration": 3.76
+  },
+  {
+    "text": "make more sense like as we go through",
+    "start": 1036.799,
+    "duration": 3.28
+  },
+  {
+    "text": "it.",
+    "start": 1038.559,
+    "duration": 4.081
+  },
+  {
+    "text": "Uh we also have more we have inspection",
+    "start": 1040.079,
+    "duration": 5.12
+  },
+  {
+    "text": "tool. So the visual when you click on a",
+    "start": 1042.64,
+    "duration": 5.919
+  },
+  {
+    "text": "node you see the debug view. It's useful",
+    "start": 1045.199,
+    "duration": 5.041
+  },
+  {
+    "text": "but sometime you won't like to see",
+    "start": 1048.559,
+    "duration": 3.601
+  },
+  {
+    "text": "actual numbers you know like it's the",
+    "start": 1050.24,
+    "duration": 3.76
+  },
+  {
+    "text": "data needs to be kind of more inspected",
+    "start": 1052.16,
+    "duration": 4.8
+  },
+  {
+    "text": "in depth. So we have like a an like a",
+    "start": 1054.0,
+    "duration": 5.039
+  },
+  {
+    "text": "collection spreadsheet. Collections been",
+    "start": 1056.96,
+    "duration": 3.76
+  },
+  {
+    "text": "like the like geometry collection we use",
+    "start": 1059.039,
+    "duration": 3.841
+  },
+  {
+    "text": "it as well. collection I use for like",
+    "start": 1060.72,
+    "duration": 4.88
+  },
+  {
+    "text": "most of the physics asset and then so it",
+    "start": 1062.88,
+    "duration": 5.039
+  },
+  {
+    "text": "stores like a bunch of attributes stored",
+    "start": 1065.6,
+    "duration": 3.92
+  },
+  {
+    "text": "inside groups and then so you can",
+    "start": 1067.919,
+    "duration": 3.521
+  },
+  {
+    "text": "explore all those ones by drilling it",
+    "start": 1069.52,
+    "duration": 5.519
+  },
+  {
+    "text": "down and seeing all those those data. Uh",
+    "start": 1071.44,
+    "duration": 5.359
+  },
+  {
+    "text": "the panel can be locked as well. You can",
+    "start": 1075.039,
+    "duration": 3.52
+  },
+  {
+    "text": "have multiple of those. So you can you",
+    "start": 1076.799,
+    "duration": 4.081
+  },
+  {
+    "text": "could look at an one node and pin it and",
+    "start": 1078.559,
+    "duration": 3.921
+  },
+  {
+    "text": "then look at another node and pin and",
+    "start": 1080.88,
+    "duration": 3.44
+  },
+  {
+    "text": "compare the value and so you can do all",
+    "start": 1082.48,
+    "duration": 3.92
+  },
+  {
+    "text": "that.",
+    "start": 1084.32,
+    "duration": 4.56
+  },
+  {
+    "text": "Um so we have a vertx attribute tool. So",
+    "start": 1086.4,
+    "duration": 6.0
+  },
+  {
+    "text": "it's used extensively with um the class",
+    "start": 1088.88,
+    "duration": 5.6
+  },
+  {
+    "text": "asset editor for example where you want",
+    "start": 1092.4,
+    "duration": 3.92
+  },
+  {
+    "text": "to paint maps and you know where you",
+    "start": 1094.48,
+    "duration": 4.559
+  },
+  {
+    "text": "want your kinematic vertices and where",
+    "start": 1096.32,
+    "duration": 5.12
+  },
+  {
+    "text": "you want like the dynamic ones or or",
+    "start": 1099.039,
+    "duration": 5.041
+  },
+  {
+    "text": "like a some weight maps for how like the",
+    "start": 1101.44,
+    "duration": 5.2
+  },
+  {
+    "text": "class like you know stick to the normal",
+    "start": 1104.08,
+    "duration": 6.24
+  },
+  {
+    "text": "animation or not. Um so",
+    "start": 1106.64,
+    "duration": 5.6
+  },
+  {
+    "text": "so like I say it's it's displayed in the",
+    "start": 1110.32,
+    "duration": 4.32
+  },
+  {
+    "text": "debug in a the debug view basically in",
+    "start": 1112.24,
+    "duration": 4.08
+  },
+  {
+    "text": "the construction view and then yeah you",
+    "start": 1114.64,
+    "duration": 2.88
+  },
+  {
+    "text": "have those little accept and console",
+    "start": 1116.32,
+    "duration": 3.2
+  },
+  {
+    "text": "buttons you can play you can paint on",
+    "start": 1117.52,
+    "duration": 4.08
+  },
+  {
+    "text": "your mesh and when you accept the data",
+    "start": 1119.52,
+    "duration": 3.519
+  },
+  {
+    "text": "is stored basically in the node that's",
+    "start": 1121.6,
+    "duration": 4.56
+  },
+  {
+    "text": "correspond to that uh it can be chained",
+    "start": 1123.039,
+    "duration": 5.52
+  },
+  {
+    "text": "they can be chained as well you can do",
+    "start": 1126.16,
+    "duration": 4.879
+  },
+  {
+    "text": "additive or replacement so you can even",
+    "start": 1128.559,
+    "duration": 4.321
+  },
+  {
+    "text": "like if you if you're happy with this",
+    "start": 1131.039,
+    "duration": 3.361
+  },
+  {
+    "text": "map but you want to play in a second map",
+    "start": 1132.88,
+    "duration": 2.799
+  },
+  {
+    "text": "you try something and then you don't",
+    "start": 1134.4,
+    "duration": 2.72
+  },
+  {
+    "text": "like override the other one you can just",
+    "start": 1135.679,
+    "duration": 3.201
+  },
+  {
+    "text": "add another node and basically keep on",
+    "start": 1137.12,
+    "duration": 5.28
+  },
+  {
+    "text": "adding on those ones.",
+    "start": 1138.88,
+    "duration": 6.159
+  },
+  {
+    "text": "So this one, yeah, I want to the nodes",
+    "start": 1142.4,
+    "duration": 4.159
+  },
+  {
+    "text": "that do that are basically they're not",
+    "start": 1145.039,
+    "duration": 3.841
+  },
+  {
+    "text": "really procedural because now if you",
+    "start": 1146.559,
+    "duration": 5.041
+  },
+  {
+    "text": "were to change the inputs back if you go",
+    "start": 1148.88,
+    "duration": 4.48
+  },
+  {
+    "text": "back to like the motivation we say, oh",
+    "start": 1151.6,
+    "duration": 3.12
+  },
+  {
+    "text": "yeah, that'd be great to change the",
+    "start": 1153.36,
+    "duration": 4.72
+  },
+  {
+    "text": "input uh mesh and in that case like",
+    "start": 1154.72,
+    "duration": 4.8
+  },
+  {
+    "text": "those tools are dependent on the input",
+    "start": 1158.08,
+    "duration": 4.32
+  },
+  {
+    "text": "mesh. So be aware that like if you",
+    "start": 1159.52,
+    "duration": 5.76
+  },
+  {
+    "text": "change input mesh then those value would",
+    "start": 1162.4,
+    "duration": 5.279
+  },
+  {
+    "text": "change or they remap to the weird",
+    "start": 1165.28,
+    "duration": 4.8
+  },
+  {
+    "text": "indices because the the the topology of",
+    "start": 1167.679,
+    "duration": 4.24
+  },
+  {
+    "text": "your mesh has changed. So keep in mind",
+    "start": 1170.08,
+    "duration": 4.08
+  },
+  {
+    "text": "it's useful for if you have one asset if",
+    "start": 1171.919,
+    "duration": 3.76
+  },
+  {
+    "text": "you have a euro asset or if you",
+    "start": 1174.16,
+    "duration": 3.2
+  },
+  {
+    "text": "guarantee that like this data flow graph",
+    "start": 1175.679,
+    "duration": 4.081
+  },
+  {
+    "text": "will be used for this one single mesh",
+    "start": 1177.36,
+    "duration": 4.64
+  },
+  {
+    "text": "that's useful or we have some tools that",
+    "start": 1179.76,
+    "duration": 4.4
+  },
+  {
+    "text": "can do",
+    "start": 1182.0,
+    "duration": 5.039
+  },
+  {
+    "text": "um like projection of mesh from from one",
+    "start": 1184.16,
+    "duration": 5.28
+  },
+  {
+    "text": "mesh to the other as well. can use that",
+    "start": 1187.039,
+    "duration": 4.64
+  },
+  {
+    "text": "uh and we'll add more uh but it's still",
+    "start": 1189.44,
+    "duration": 4.88
+  },
+  {
+    "text": "recommended to kind of like use more uh",
+    "start": 1191.679,
+    "duration": 4.88
+  },
+  {
+    "text": "procedural way of basically defining",
+    "start": 1194.32,
+    "duration": 5.12
+  },
+  {
+    "text": "those areas.",
+    "start": 1196.559,
+    "duration": 5.441
+  },
+  {
+    "text": "Uh recently we've added the vertex",
+    "start": 1199.44,
+    "duration": 6.16
+  },
+  {
+    "text": "weight uh tool. So this is actually um",
+    "start": 1202.0,
+    "duration": 6.64
+  },
+  {
+    "text": "we grabbed it from the the skeletal mesh",
+    "start": 1205.6,
+    "duration": 6.16
+  },
+  {
+    "text": "editor where you can paint like uh ver",
+    "start": 1208.64,
+    "duration": 6.08
+  },
+  {
+    "text": "uh vertx bone weights. Uh so this way",
+    "start": 1211.76,
+    "duration": 4.32
+  },
+  {
+    "text": "it's like the look and feel is ex",
+    "start": 1214.72,
+    "duration": 3.12
+  },
+  {
+    "text": "exactly the same and any improvement",
+    "start": 1216.08,
+    "duration": 4.4
+  },
+  {
+    "text": "that's done in one will be done in the",
+    "start": 1217.84,
+    "duration": 4.32
+  },
+  {
+    "text": "other one. So trying to go in that",
+    "start": 1220.48,
+    "duration": 3.36
+  },
+  {
+    "text": "direction you know trying to avoid",
+    "start": 1222.16,
+    "duration": 3.84
+  },
+  {
+    "text": "reinventing the wheel and making sure",
+    "start": 1223.84,
+    "duration": 4.16
+  },
+  {
+    "text": "the tools are consistent across you know",
+    "start": 1226.0,
+    "duration": 4.32
+  },
+  {
+    "text": "different tools. I think it's important",
+    "start": 1228.0,
+    "duration": 6.08
+  },
+  {
+    "text": "for artists in general. Uh",
+    "start": 1230.32,
+    "duration": 6.719
+  },
+  {
+    "text": "for now it works. So you can paint",
+    "start": 1234.08,
+    "duration": 4.88
+  },
+  {
+    "text": "weights for bones. So you select a bone",
+    "start": 1237.039,
+    "duration": 3.681
+  },
+  {
+    "text": "in the in the outliner and then you can",
+    "start": 1238.96,
+    "duration": 3.599
+  },
+  {
+    "text": "paint weights. I eventually would love",
+    "start": 1240.72,
+    "duration": 4.24
+  },
+  {
+    "text": "to have like this tool to be able to do",
+    "start": 1242.559,
+    "duration": 4.881
+  },
+  {
+    "text": "more than that. Uh so working towards",
+    "start": 1244.96,
+    "duration": 4.48
+  },
+  {
+    "text": "that to be able to paint different",
+    "start": 1247.44,
+    "duration": 5.599
+  },
+  {
+    "text": "attributes in in in relation to a",
+    "start": 1249.44,
+    "duration": 6.239
+  },
+  {
+    "text": "specific selection. Um ideas like this",
+    "start": 1253.039,
+    "duration": 4.64
+  },
+  {
+    "text": "would be how do would you paint for",
+    "start": 1255.679,
+    "duration": 3.521
+  },
+  {
+    "text": "example",
+    "start": 1257.679,
+    "duration": 4.401
+  },
+  {
+    "text": "um attachment of a muscle like",
+    "start": 1259.2,
+    "duration": 5.28
+  },
+  {
+    "text": "attachment of a muscle to something else",
+    "start": 1262.08,
+    "duration": 3.839
+  },
+  {
+    "text": "for example like you could do something",
+    "start": 1264.48,
+    "duration": 3.28
+  },
+  {
+    "text": "like that. especially in the case of",
+    "start": 1265.919,
+    "duration": 5.361
+  },
+  {
+    "text": "like you know muscular skeletal kind of",
+    "start": 1267.76,
+    "duration": 5.2
+  },
+  {
+    "text": "like",
+    "start": 1271.28,
+    "duration": 4.8
+  },
+  {
+    "text": "flesh assets.",
+    "start": 1272.96,
+    "duration": 5.839
+  },
+  {
+    "text": "So we have API. So we have C++ API. So",
+    "start": 1276.08,
+    "duration": 5.52
+  },
+  {
+    "text": "we have a lot of nodes. I'll there's a a",
+    "start": 1278.799,
+    "duration": 4.88
+  },
+  {
+    "text": "map after like a screenshot that shows",
+    "start": 1281.6,
+    "duration": 4.72
+  },
+  {
+    "text": "how many nodes we have. And then so you",
+    "start": 1283.679,
+    "duration": 4.0
+  },
+  {
+    "text": "can write your own nodes. It's very",
+    "start": 1286.32,
+    "duration": 3.76
+  },
+  {
+    "text": "straightforward, very easy. So if you if",
+    "start": 1287.679,
+    "duration": 4.0
+  },
+  {
+    "text": "you eat a road bug, you say, \"Oh, I wish",
+    "start": 1290.08,
+    "duration": 3.52
+  },
+  {
+    "text": "this node existed.\" Then you can write",
+    "start": 1291.679,
+    "duration": 3.521
+  },
+  {
+    "text": "your own. It's very straightforward.",
+    "start": 1293.6,
+    "duration": 4.0
+  },
+  {
+    "text": "Like it's like writing a strct if you're",
+    "start": 1295.2,
+    "duration": 6.16
+  },
+  {
+    "text": "familiar with like C++. um you basically",
+    "start": 1297.6,
+    "duration": 5.84
+  },
+  {
+    "text": "have a bunch of view properties and you",
+    "start": 1301.36,
+    "duration": 4.0
+  },
+  {
+    "text": "define what's like an input and output",
+    "start": 1303.44,
+    "duration": 4.08
+  },
+  {
+    "text": "and define a constructor and an eval",
+    "start": 1305.36,
+    "duration": 4.08
+  },
+  {
+    "text": "function and that's it. That's really",
+    "start": 1307.52,
+    "duration": 5.76
+  },
+  {
+    "text": "simple. Um so very straightforward. Uh",
+    "start": 1309.44,
+    "duration": 6.56
+  },
+  {
+    "text": "we also have uh editor extension so you",
+    "start": 1313.28,
+    "duration": 5.6
+  },
+  {
+    "text": "can add menus and based on your asset as",
+    "start": 1316.0,
+    "duration": 4.4
+  },
+  {
+    "text": "well or or like the kind of node that",
+    "start": 1318.88,
+    "duration": 4.0
+  },
+  {
+    "text": "you select. Um and then we have a",
+    "start": 1320.4,
+    "duration": 4.8
+  },
+  {
+    "text": "utility blueprint API that we've added",
+    "start": 1322.88,
+    "duration": 4.08
+  },
+  {
+    "text": "so you can create data flow assets. So",
+    "start": 1325.2,
+    "duration": 4.32
+  },
+  {
+    "text": "you can add nodes to data flow assets.",
+    "start": 1326.96,
+    "duration": 3.599
+  },
+  {
+    "text": "So you could create you could",
+    "start": 1329.52,
+    "duration": 4.8
+  },
+  {
+    "text": "procedorally generate data flow which is",
+    "start": 1330.559,
+    "duration": 6.401
+  },
+  {
+    "text": "not procedural basically workflow. So",
+    "start": 1334.32,
+    "duration": 5.599
+  },
+  {
+    "text": "it's can kind of like you know it's",
+    "start": 1336.96,
+    "duration": 6.48
+  },
+  {
+    "text": "quite meta some ways. Uh and then uh you",
+    "start": 1339.919,
+    "duration": 5.921
+  },
+  {
+    "text": "can set your override uh variable. So",
+    "start": 1343.44,
+    "duration": 4.0
+  },
+  {
+    "text": "you could take an an asset like a",
+    "start": 1345.84,
+    "duration": 3.199
+  },
+  {
+    "text": "geometry collection asset and say I want",
+    "start": 1347.44,
+    "duration": 4.08
+  },
+  {
+    "text": "to override those parameters and then",
+    "start": 1349.039,
+    "duration": 4.321
+  },
+  {
+    "text": "you can also regenerate the asset. So",
+    "start": 1351.52,
+    "duration": 4.32
+  },
+  {
+    "text": "it's useful in pipelines where you want",
+    "start": 1353.36,
+    "duration": 5.36
+  },
+  {
+    "text": "to to just in one click you know do some",
+    "start": 1355.84,
+    "duration": 5.199
+  },
+  {
+    "text": "either variation of of an asset or",
+    "start": 1358.72,
+    "duration": 4.319
+  },
+  {
+    "text": "something like that. Uh I'll go in",
+    "start": 1361.039,
+    "duration": 3.601
+  },
+  {
+    "text": "detail in the pipeline integration",
+    "start": 1363.039,
+    "duration": 3.76
+  },
+  {
+    "text": "actually.",
+    "start": 1364.64,
+    "duration": 4.0
+  },
+  {
+    "text": "So so that's a screenshot of like it's",
+    "start": 1366.799,
+    "duration": 3.521
+  },
+  {
+    "text": "it's a no screenshot. So we have a lot",
+    "start": 1368.64,
+    "duration": 4.399
+  },
+  {
+    "text": "of nodes. Uh we have about like 500",
+    "start": 1370.32,
+    "duration": 4.96
+  },
+  {
+    "text": "available node as like as of today and",
+    "start": 1373.039,
+    "duration": 3.681
+  },
+  {
+    "text": "we're going to keep adding more and",
+    "start": 1375.28,
+    "duration": 3.04
+  },
+  {
+    "text": "more. So it's going to grow as a",
+    "start": 1376.72,
+    "duration": 5.12
+  },
+  {
+    "text": "library. Uh some assets are very some",
+    "start": 1378.32,
+    "duration": 5.599
+  },
+  {
+    "text": "nodes are very asset specific of course.",
+    "start": 1381.84,
+    "duration": 4.079
+  },
+  {
+    "text": "So we have like class specific asset and",
+    "start": 1383.919,
+    "duration": 4.321
+  },
+  {
+    "text": "flash asset specific asset and nodes",
+    "start": 1385.919,
+    "duration": 5.361
+  },
+  {
+    "text": "sorry and then uh but a lot of them are",
+    "start": 1388.24,
+    "duration": 4.559
+  },
+  {
+    "text": "basically just general so math",
+    "start": 1391.28,
+    "duration": 5.2
+  },
+  {
+    "text": "collections mesh selection utilities and",
+    "start": 1392.799,
+    "duration": 7.681
+  },
+  {
+    "text": "so feel free to explore the since 5.6",
+    "start": 1396.48,
+    "duration": 6.64
+  },
+  {
+    "text": "the the menu to select a node to find a",
+    "start": 1400.48,
+    "duration": 4.96
+  },
+  {
+    "text": "node is is way more contextual than it",
+    "start": 1403.12,
+    "duration": 4.64
+  },
+  {
+    "text": "used to be. So, and then we're going to",
+    "start": 1405.44,
+    "duration": 4.64
+  },
+  {
+    "text": "keep on like pushing to make it easier",
+    "start": 1407.76,
+    "duration": 6.0
+  },
+  {
+    "text": "to discover new nodes or to to um to",
+    "start": 1410.08,
+    "duration": 6.479
+  },
+  {
+    "text": "explore like this space basically. Okay,",
+    "start": 1413.76,
+    "duration": 4.159
+  },
+  {
+    "text": "I'm going to go through a destruction",
+    "start": 1416.559,
+    "duration": 3.36
+  },
+  {
+    "text": "example.",
+    "start": 1417.919,
+    "duration": 4.401
+  },
+  {
+    "text": "Little joke common non-destructive",
+    "start": 1419.919,
+    "duration": 5.12
+  },
+  {
+    "text": "destruction workflow. Great.",
+    "start": 1422.32,
+    "duration": 5.92
+  },
+  {
+    "text": "Um okay, so we start let's say we want",
+    "start": 1425.039,
+    "duration": 6.401
+  },
+  {
+    "text": "to do concrete barriers simple, you",
+    "start": 1428.24,
+    "duration": 5.679
+  },
+  {
+    "text": "know, uh use everywhere in every game",
+    "start": 1431.44,
+    "duration": 5.599
+  },
+  {
+    "text": "almost. Uh and I said we want a generic",
+    "start": 1433.919,
+    "duration": 5.681
+  },
+  {
+    "text": "destruction destructible recipe um kind",
+    "start": 1437.039,
+    "duration": 5.361
+  },
+  {
+    "text": "of a uniform fracture want to of course",
+    "start": 1439.6,
+    "duration": 4.8
+  },
+  {
+    "text": "like the we want the inside to look",
+    "start": 1442.4,
+    "duration": 4.159
+  },
+  {
+    "text": "good. So we want to unwrap the UVs have",
+    "start": 1444.4,
+    "duration": 4.88
+  },
+  {
+    "text": "an internal materials bake some internal",
+    "start": 1446.559,
+    "duration": 4.801
+  },
+  {
+    "text": "texture to do some interesting metal you",
+    "start": 1449.28,
+    "duration": 5.44
+  },
+  {
+    "text": "know work. um have a of course like",
+    "start": 1451.36,
+    "duration": 4.96
+  },
+  {
+    "text": "control anchoring so they nicely",
+    "start": 1454.72,
+    "duration": 4.64
+  },
+  {
+    "text": "anchored on the ground and then uh have",
+    "start": 1456.32,
+    "duration": 4.88
+  },
+  {
+    "text": "of course like a a good-looking",
+    "start": 1459.36,
+    "duration": 3.76
+  },
+  {
+    "text": "connection connection graph so it's like",
+    "start": 1461.2,
+    "duration": 3.44
+  },
+  {
+    "text": "when you destroy it it it doesn't like",
+    "start": 1463.12,
+    "duration": 4.159
+  },
+  {
+    "text": "crumble it all at once basically and of",
+    "start": 1464.64,
+    "duration": 6.399
+  },
+  {
+    "text": "course some optimized collision.",
+    "start": 1467.279,
+    "duration": 6.161
+  },
+  {
+    "text": "So first we're going to define our like",
+    "start": 1471.039,
+    "duration": 4.24
+  },
+  {
+    "text": "parameters of the graph. So we're going",
+    "start": 1473.44,
+    "duration": 3.68
+  },
+  {
+    "text": "to going to say of course like we have",
+    "start": 1475.279,
+    "duration": 4.481
+  },
+  {
+    "text": "many barriers. So like we want the graph",
+    "start": 1477.12,
+    "duration": 3.919
+  },
+  {
+    "text": "to work for all of them. So, we're going",
+    "start": 1479.76,
+    "duration": 3.76
+  },
+  {
+    "text": "to put like an an input mesh as the as",
+    "start": 1481.039,
+    "duration": 6.88
+  },
+  {
+    "text": "the as one of the parameter. Uh, of",
+    "start": 1483.52,
+    "duration": 7.2
+  },
+  {
+    "text": "course, each each of because we have a",
+    "start": 1487.919,
+    "duration": 4.161
+  },
+  {
+    "text": "we're going to have a unique internal",
+    "start": 1490.72,
+    "duration": 3.36
+  },
+  {
+    "text": "texture that's going to be baked. We",
+    "start": 1492.08,
+    "duration": 3.199
+  },
+  {
+    "text": "we're going to have an internal texture.",
+    "start": 1494.08,
+    "duration": 3.36
+  },
+  {
+    "text": "We're going to",
+    "start": 1495.279,
+    "duration": 5.76
+  },
+  {
+    "text": "um plug in an internal material instance",
+    "start": 1497.44,
+    "duration": 4.88
+  },
+  {
+    "text": "that's going to come with the internal",
+    "start": 1501.039,
+    "duration": 3.681
+  },
+  {
+    "text": "texture. Um, we want the height of the",
+    "start": 1502.32,
+    "duration": 4.479
+  },
+  {
+    "text": "anchoring. So we only anchor the bottom",
+    "start": 1504.72,
+    "duration": 5.839
+  },
+  {
+    "text": "of the barrier but just the bottom and",
+    "start": 1506.799,
+    "duration": 5.76
+  },
+  {
+    "text": "then so how high do we anchor it you",
+    "start": 1510.559,
+    "duration": 3.921
+  },
+  {
+    "text": "know and then the number of fracture",
+    "start": 1512.559,
+    "duration": 3.761
+  },
+  {
+    "text": "pieces basically so fairly",
+    "start": 1514.48,
+    "duration": 4.4
+  },
+  {
+    "text": "straightforward like simple",
+    "start": 1516.32,
+    "duration": 4.959
+  },
+  {
+    "text": "okay so we start with fracturing so you",
+    "start": 1518.88,
+    "duration": 3.919
+  },
+  {
+    "text": "have your input mesh which is your",
+    "start": 1521.279,
+    "duration": 5.361
+  },
+  {
+    "text": "variable you we have a first citizen",
+    "start": 1522.799,
+    "duration": 5.281
+  },
+  {
+    "text": "kind of object that I mentioned earlier",
+    "start": 1526.64,
+    "duration": 2.96
+  },
+  {
+    "text": "which is called the collection so",
+    "start": 1528.08,
+    "duration": 3.839
+  },
+  {
+    "text": "geometry collection I mean the it's in",
+    "start": 1529.6,
+    "duration": 5.28
+  },
+  {
+    "text": "the name and then uh but yeah like I say",
+    "start": 1531.919,
+    "duration": 4.24
+  },
+  {
+    "text": "like the other assets are basically",
+    "start": 1534.88,
+    "duration": 2.88
+  },
+  {
+    "text": "using collection behind the scene even",
+    "start": 1536.159,
+    "duration": 3.361
+  },
+  {
+    "text": "though they don't always like surface it",
+    "start": 1537.76,
+    "duration": 3.84
+  },
+  {
+    "text": "but you see that you see it in data flow",
+    "start": 1539.52,
+    "duration": 3.44
+  },
+  {
+    "text": "basically. So you have a static mesh to",
+    "start": 1541.6,
+    "duration": 2.959
+  },
+  {
+    "text": "collection. So now you have a collection",
+    "start": 1542.96,
+    "duration": 4.0
+  },
+  {
+    "text": "you can explore it with your collection",
+    "start": 1544.559,
+    "duration": 4.161
+  },
+  {
+    "text": "um spreadsheet. You can see how it's",
+    "start": 1546.96,
+    "duration": 3.36
+  },
+  {
+    "text": "like it lay out the data with like the",
+    "start": 1548.72,
+    "duration": 3.439
+  },
+  {
+    "text": "vertices and the faces group and",
+    "start": 1550.32,
+    "duration": 4.64
+  },
+  {
+    "text": "everything. And then we do a uniform",
+    "start": 1552.159,
+    "duration": 4.64
+  },
+  {
+    "text": "fracture. So it's a single node that",
+    "start": 1554.96,
+    "duration": 3.76
+  },
+  {
+    "text": "match like the your very well-known you",
+    "start": 1556.799,
+    "duration": 5.041
+  },
+  {
+    "text": "know fracture uh editor. We have plenty",
+    "start": 1558.72,
+    "duration": 4.959
+  },
+  {
+    "text": "of node. I'll I'll go in the next slide",
+    "start": 1561.84,
+    "duration": 4.0
+  },
+  {
+    "text": "about like how you can do that. And then",
+    "start": 1563.679,
+    "duration": 3.921
+  },
+  {
+    "text": "as you can see so you have the number of",
+    "start": 1565.84,
+    "duration": 3.439
+  },
+  {
+    "text": "fractures that's plugged in to the mean",
+    "start": 1567.6,
+    "duration": 5.28
+  },
+  {
+    "text": "and max vero site and then so when you",
+    "start": 1569.279,
+    "duration": 5.441
+  },
+  {
+    "text": "click on this uniform fracture this is",
+    "start": 1572.88,
+    "duration": 4.799
+  },
+  {
+    "text": "what you see you see your barrier. So",
+    "start": 1574.72,
+    "duration": 4.559
+  },
+  {
+    "text": "like which is the default value of your",
+    "start": 1577.679,
+    "duration": 3.6
+  },
+  {
+    "text": "input mesh and then you can see it's",
+    "start": 1579.279,
+    "duration": 3.441
+  },
+  {
+    "text": "like fractured like you see all the",
+    "start": 1581.279,
+    "duration": 5.361
+  },
+  {
+    "text": "lines basically on at the edge.",
+    "start": 1582.72,
+    "duration": 6.959
+  },
+  {
+    "text": "And yeah, I wanted to to say so right",
+    "start": 1586.64,
+    "duration": 5.44
+  },
+  {
+    "text": "now we do a static mesh to collection,",
+    "start": 1589.679,
+    "duration": 4.081
+  },
+  {
+    "text": "but we you could do blueprint to",
+    "start": 1592.08,
+    "duration": 2.719
+  },
+  {
+    "text": "collection, you can do geometry",
+    "start": 1593.76,
+    "duration": 2.159
+  },
+  {
+    "text": "collection to collection. So you could",
+    "start": 1594.799,
+    "duration": 2.721
+  },
+  {
+    "text": "build a geometry collection and then",
+    "start": 1595.919,
+    "duration": 3.041
+  },
+  {
+    "text": "make another geometry collection out of",
+    "start": 1597.52,
+    "duration": 3.2
+  },
+  {
+    "text": "it. So it's useful for if you do",
+    "start": 1598.96,
+    "duration": 4.719
+  },
+  {
+    "text": "multiplatform for example you do your",
+    "start": 1600.72,
+    "duration": 4.559
+  },
+  {
+    "text": "first geometry collection is like break",
+    "start": 1603.679,
+    "duration": 4.48
+  },
+  {
+    "text": "like one level is very crude and then",
+    "start": 1605.279,
+    "duration": 4.64
+  },
+  {
+    "text": "this is maybe for your low end and then",
+    "start": 1608.159,
+    "duration": 3.361
+  },
+  {
+    "text": "you can make for your high end you can",
+    "start": 1609.919,
+    "duration": 3.36
+  },
+  {
+    "text": "make another geometry collection out of",
+    "start": 1611.52,
+    "duration": 3.68
+  },
+  {
+    "text": "it that's break like a second level",
+    "start": 1613.279,
+    "duration": 4.081
+  },
+  {
+    "text": "basically of fracture or something else",
+    "start": 1615.2,
+    "duration": 3.76
+  },
+  {
+    "text": "that's an example the blueprint to",
+    "start": 1617.36,
+    "duration": 3.679
+  },
+  {
+    "text": "collection is very useful I was showing",
+    "start": 1618.96,
+    "duration": 4.16
+  },
+  {
+    "text": "uh to someone today you can can build",
+    "start": 1621.039,
+    "duration": 4.161
+  },
+  {
+    "text": "very complex uh you know put lots of",
+    "start": 1623.12,
+    "duration": 3.679
+  },
+  {
+    "text": "mesh together and then you turn it into",
+    "start": 1625.2,
+    "duration": 2.8
+  },
+  {
+    "text": "a single geometry collection it's going",
+    "start": 1626.799,
+    "duration": 2.721
+  },
+  {
+    "text": "to go through all the static meshes and",
+    "start": 1628.0,
+    "duration": 4.159
+  },
+  {
+    "text": "turn it into one single",
+    "start": 1629.52,
+    "duration": 4.32
+  },
+  {
+    "text": "collection and then we have skeletal",
+    "start": 1632.159,
+    "duration": 3.12
+  },
+  {
+    "text": "mesh to collection that's going to",
+    "start": 1633.84,
+    "duration": 4.16
+  },
+  {
+    "text": "basically yeah I don't think we ever",
+    "start": 1635.279,
+    "duration": 4.481
+  },
+  {
+    "text": "really used it a lot maybe there's",
+    "start": 1638.0,
+    "duration": 4.559
+  },
+  {
+    "text": "application for you but it exists uh and",
+    "start": 1639.76,
+    "duration": 5.279
+  },
+  {
+    "text": "for fracture you get vo fracture it's",
+    "start": 1642.559,
+    "duration": 4.321
+  },
+  {
+    "text": "it's like the uniform fracture but you",
+    "start": 1645.039,
+    "duration": 4.88
+  },
+  {
+    "text": "can you get to add the where the points",
+    "start": 1646.88,
+    "duration": 5.12
+  },
+  {
+    "text": "are in term of like you know vorono",
+    "start": 1649.919,
+    "duration": 3.36
+  },
+  {
+    "text": "sites and everything so you can be",
+    "start": 1652.0,
+    "duration": 3.52
+  },
+  {
+    "text": "really creative and you can you can even",
+    "start": 1653.279,
+    "duration": 4.321
+  },
+  {
+    "text": "write your own scatter points or",
+    "start": 1655.52,
+    "duration": 3.759
+  },
+  {
+    "text": "something like if you want And we have a",
+    "start": 1657.6,
+    "duration": 3.199
+  },
+  {
+    "text": "bunch of of them that you can use",
+    "start": 1659.279,
+    "duration": 4.321
+  },
+  {
+    "text": "already like radial and and uniform and",
+    "start": 1660.799,
+    "duration": 4.801
+  },
+  {
+    "text": "grid and everything. Uh we have a mesh",
+    "start": 1663.6,
+    "duration": 4.959
+  },
+  {
+    "text": "cutter. Um we'll see example of that and",
+    "start": 1665.6,
+    "duration": 5.12
+  },
+  {
+    "text": "then plane cutter and then a slice",
+    "start": 1668.559,
+    "duration": 4.801
+  },
+  {
+    "text": "cutter. So and then we'll certainly add",
+    "start": 1670.72,
+    "duration": 4.24
+  },
+  {
+    "text": "like more and more to it. Usually the",
+    "start": 1673.36,
+    "duration": 3.36
+  },
+  {
+    "text": "mesh cutter is extremely useful. You can",
+    "start": 1674.96,
+    "duration": 6.599
+  },
+  {
+    "text": "do very be very creative with it.",
+    "start": 1676.72,
+    "duration": 4.839
+  },
+  {
+    "text": "But yeah, sorry I'm just going back to",
+    "start": 1681.679,
+    "duration": 3.441
+  },
+  {
+    "text": "that. So this is in the context of",
+    "start": 1683.6,
+    "duration": 3.28
+  },
+  {
+    "text": "destruction.",
+    "start": 1685.12,
+    "duration": 4.72
+  },
+  {
+    "text": "Whenever you find um a node in in data",
+    "start": 1686.88,
+    "duration": 4.56
+  },
+  {
+    "text": "flow always try to explore if there is",
+    "start": 1689.84,
+    "duration": 3.76
+  },
+  {
+    "text": "like variation of this node and there's",
+    "start": 1691.44,
+    "duration": 3.92
+  },
+  {
+    "text": "certainly a lot a lot of stuff we've",
+    "start": 1693.6,
+    "duration": 3.92
+  },
+  {
+    "text": "written already in in the context of",
+    "start": 1695.36,
+    "duration": 4.559
+  },
+  {
+    "text": "other assets for example.",
+    "start": 1697.52,
+    "duration": 3.68
+  },
+  {
+    "text": "Okay so we're going to take care of the",
+    "start": 1699.919,
+    "duration": 4.961
+  },
+  {
+    "text": "internal surfaces. Um so we know to say",
+    "start": 1701.2,
+    "duration": 6.079
+  },
+  {
+    "text": "select me the internal faces. Uh we",
+    "start": 1704.88,
+    "duration": 4.72
+  },
+  {
+    "text": "wrote this node but you could also we",
+    "start": 1707.279,
+    "duration": 3.52
+  },
+  {
+    "text": "have a more general node that's called",
+    "start": 1709.6,
+    "duration": 3.439
+  },
+  {
+    "text": "like select",
+    "start": 1710.799,
+    "duration": 4.721
+  },
+  {
+    "text": "select by attribute. So you can say hey",
+    "start": 1713.039,
+    "duration": 4.561
+  },
+  {
+    "text": "can you select me where this attribute",
+    "start": 1715.52,
+    "duration": 4.48
+  },
+  {
+    "text": "has this value. So you can explore your",
+    "start": 1717.6,
+    "duration": 4.319
+  },
+  {
+    "text": "you know collection spreadsheet and find",
+    "start": 1720.0,
+    "duration": 4.48
+  },
+  {
+    "text": "and so you can do like very clever kind",
+    "start": 1721.919,
+    "duration": 5.281
+  },
+  {
+    "text": "of like general selection without having",
+    "start": 1724.48,
+    "duration": 4.559
+  },
+  {
+    "text": "to paint them basically you can say find",
+    "start": 1727.2,
+    "duration": 4.32
+  },
+  {
+    "text": "all where all like I don't know like the",
+    "start": 1729.039,
+    "duration": 4.561
+  },
+  {
+    "text": "the the vertx position is more than this",
+    "start": 1731.52,
+    "duration": 4.159
+  },
+  {
+    "text": "value or something",
+    "start": 1733.6,
+    "duration": 4.72
+  },
+  {
+    "text": "and then uh and then so we assign a",
+    "start": 1735.679,
+    "duration": 4.641
+  },
+  {
+    "text": "material. So we have this we have this",
+    "start": 1738.32,
+    "duration": 3.2
+  },
+  {
+    "text": "internal material that we want to",
+    "start": 1740.32,
+    "duration": 2.56
+  },
+  {
+    "text": "assign. So we're going to assign it to",
+    "start": 1741.52,
+    "duration": 5.039
+  },
+  {
+    "text": "this particular faces and",
+    "start": 1742.88,
+    "duration": 5.279
+  },
+  {
+    "text": "and then we're going to add a UV channel",
+    "start": 1746.559,
+    "duration": 3.6
+  },
+  {
+    "text": "and then unwrap",
+    "start": 1748.159,
+    "duration": 3.921
+  },
+  {
+    "text": "the UVs for those particular faces. So",
+    "start": 1750.159,
+    "duration": 3.841
+  },
+  {
+    "text": "you see we plugged we plugged in the",
+    "start": 1752.08,
+    "duration": 3.28
+  },
+  {
+    "text": "basically the face selection. The",
+    "start": 1754.0,
+    "duration": 3.52
+  },
+  {
+    "text": "selection is some kind of this external",
+    "start": 1755.36,
+    "duration": 3.84
+  },
+  {
+    "text": "object that you kind of just like can",
+    "start": 1757.52,
+    "duration": 4.32
+  },
+  {
+    "text": "pass through. Uh and then we get that.",
+    "start": 1759.2,
+    "duration": 4.88
+  },
+  {
+    "text": "So we get all our internal faces are now",
+    "start": 1761.84,
+    "duration": 7.6
+  },
+  {
+    "text": "like laid out in a nice UV set.",
+    "start": 1764.08,
+    "duration": 8.4
+  },
+  {
+    "text": "uh then we we can bake the texture. So",
+    "start": 1769.44,
+    "duration": 5.2
+  },
+  {
+    "text": "in that case we decide to bake the",
+    "start": 1772.48,
+    "duration": 4.64
+  },
+  {
+    "text": "distance from the",
+    "start": 1774.64,
+    "duration": 4.8
+  },
+  {
+    "text": "external surface. So that would give us",
+    "start": 1777.12,
+    "duration": 4.559
+  },
+  {
+    "text": "like basically an information about how",
+    "start": 1779.44,
+    "duration": 4.719
+  },
+  {
+    "text": "every pixel is how far it is from the",
+    "start": 1781.679,
+    "duration": 6.161
+  },
+  {
+    "text": "the internal uh the external faces and",
+    "start": 1784.159,
+    "duration": 5.361
+  },
+  {
+    "text": "then we can use it as a kind of like a",
+    "start": 1787.84,
+    "duration": 4.559
+  },
+  {
+    "text": "way to display some form of a you know",
+    "start": 1789.52,
+    "duration": 5.36
+  },
+  {
+    "text": "layering inside the the material inside",
+    "start": 1792.399,
+    "duration": 3.921
+  },
+  {
+    "text": "for the inside material. So the the",
+    "start": 1794.88,
+    "duration": 3.039
+  },
+  {
+    "text": "object looks as like some form of",
+    "start": 1796.32,
+    "duration": 3.04
+  },
+  {
+    "text": "thickness. it's more interesting than",
+    "start": 1797.919,
+    "duration": 3.521
+  },
+  {
+    "text": "just like looking like a sin shell or",
+    "start": 1799.36,
+    "duration": 6.08
+  },
+  {
+    "text": "something like a painted object. Uh then",
+    "start": 1801.44,
+    "duration": 7.2
+  },
+  {
+    "text": "so in that case we there was a we had a",
+    "start": 1805.44,
+    "duration": 4.64
+  },
+  {
+    "text": "geometry collection terminal but in that",
+    "start": 1808.64,
+    "duration": 3.039
+  },
+  {
+    "text": "case we have a texture terminal and you",
+    "start": 1810.08,
+    "duration": 3.28
+  },
+  {
+    "text": "would say oh how can you have two",
+    "start": 1811.679,
+    "duration": 2.961
+  },
+  {
+    "text": "terminals basically in the same data",
+    "start": 1813.36,
+    "duration": 4.0
+  },
+  {
+    "text": "flow node. Uh but we can in that case",
+    "start": 1814.64,
+    "duration": 4.96
+  },
+  {
+    "text": "basically the geometry collection",
+    "start": 1817.36,
+    "duration": 3.36
+  },
+  {
+    "text": "terminal is going to read like the",
+    "start": 1819.6,
+    "duration": 2.959
+  },
+  {
+    "text": "current asset you currently run on but",
+    "start": 1820.72,
+    "duration": 4.72
+  },
+  {
+    "text": "the terminal the terminal the texture",
+    "start": 1822.559,
+    "duration": 5.84
+  },
+  {
+    "text": "terminal basically will basically fail",
+    "start": 1825.44,
+    "duration": 5.119
+  },
+  {
+    "text": "if you don't pass anything because it's",
+    "start": 1828.399,
+    "duration": 5.52
+  },
+  {
+    "text": "it says I'm geometry collection I I'm a",
+    "start": 1830.559,
+    "duration": 4.961
+  },
+  {
+    "text": "texture terminal so I shouldn't I",
+    "start": 1833.919,
+    "duration": 3.041
+  },
+  {
+    "text": "shouldn't do anything and normally does",
+    "start": 1835.52,
+    "duration": 3.12
+  },
+  {
+    "text": "nothing but in that case we have an",
+    "start": 1836.96,
+    "duration": 3.68
+  },
+  {
+    "text": "input where we can specify a specific",
+    "start": 1838.64,
+    "duration": 4.0
+  },
+  {
+    "text": "texture to write to and it's going to",
+    "start": 1840.64,
+    "duration": 4.56
+  },
+  {
+    "text": "it's going to basically write to it. So",
+    "start": 1842.64,
+    "duration": 5.519
+  },
+  {
+    "text": "we get our texture now. Uh let's take",
+    "start": 1845.2,
+    "duration": 5.52
+  },
+  {
+    "text": "out the anchoring. So on the right side",
+    "start": 1848.159,
+    "duration": 4.88
+  },
+  {
+    "text": "you can see we have we basically select",
+    "start": 1850.72,
+    "duration": 4.959
+  },
+  {
+    "text": "by a box and then we select those little",
+    "start": 1853.039,
+    "duration": 4.481
+  },
+  {
+    "text": "dots are basically the the actual bones",
+    "start": 1855.679,
+    "duration": 3.041
+  },
+  {
+    "text": "of the geometry collection that we",
+    "start": 1857.52,
+    "duration": 4.399
+  },
+  {
+    "text": "wanted to to select. Uh so the way we do",
+    "start": 1858.72,
+    "duration": 5.28
+  },
+  {
+    "text": "it is basically we pass the collection",
+    "start": 1861.919,
+    "duration": 4.24
+  },
+  {
+    "text": "to this function called get anchor",
+    "start": 1864.0,
+    "duration": 6.399
+  },
+  {
+    "text": "bounds and then we it give us this",
+    "start": 1866.159,
+    "duration": 6.0
+  },
+  {
+    "text": "bonding box which is like bottom bonding",
+    "start": 1870.399,
+    "duration": 4.721
+  },
+  {
+    "text": "box and then we we select by bonding box",
+    "start": 1872.159,
+    "duration": 4.721
+  },
+  {
+    "text": "which is a procedural way of selecting",
+    "start": 1875.12,
+    "duration": 3.679
+  },
+  {
+    "text": "as as I was mentioning earlier and then",
+    "start": 1876.88,
+    "duration": 4.399
+  },
+  {
+    "text": "we can set the anchor state and then so",
+    "start": 1878.799,
+    "duration": 3.841
+  },
+  {
+    "text": "the way you do it is that it's a",
+    "start": 1881.279,
+    "duration": 3.361
+  },
+  {
+    "text": "subgraph so it has input and outputs a",
+    "start": 1882.64,
+    "duration": 4.72
+  },
+  {
+    "text": "bit like functions in there in in a in a",
+    "start": 1884.64,
+    "duration": 4.56
+  },
+  {
+    "text": "blueprint and then so we get the bonding",
+    "start": 1887.36,
+    "duration": 3.679
+  },
+  {
+    "text": "box of the collection",
+    "start": 1889.2,
+    "duration": 4.16
+  },
+  {
+    "text": "we expand it to do some kind of vector",
+    "start": 1891.039,
+    "duration": 4.801
+  },
+  {
+    "text": "mass and based on the parameter that we",
+    "start": 1893.36,
+    "duration": 4.08
+  },
+  {
+    "text": "add before which is the the height of",
+    "start": 1895.84,
+    "duration": 4.24
+  },
+  {
+    "text": "the of the anchor basically output like",
+    "start": 1897.44,
+    "duration": 5.04
+  },
+  {
+    "text": "a bonding box. So it's nice we keep our",
+    "start": 1900.08,
+    "duration": 4.88
+  },
+  {
+    "text": "main graph like nice and neat like it",
+    "start": 1902.48,
+    "duration": 4.88
+  },
+  {
+    "text": "doesn't we don't get all this basically",
+    "start": 1904.96,
+    "duration": 3.92
+  },
+  {
+    "text": "noise inside the main graph and it's",
+    "start": 1907.36,
+    "duration": 3.039
+  },
+  {
+    "text": "like nicely done and can be reused",
+    "start": 1908.88,
+    "duration": 6.24
+  },
+  {
+    "text": "potentially by another graph somewhere.",
+    "start": 1910.399,
+    "duration": 7.041
+  },
+  {
+    "text": "Then we go to uh the connection graph.",
+    "start": 1915.12,
+    "duration": 5.12
+  },
+  {
+    "text": "We just use a proximity node. This one",
+    "start": 1917.44,
+    "duration": 4.719
+  },
+  {
+    "text": "has like plenty of parameters. So yeah,",
+    "start": 1920.24,
+    "duration": 3.52
+  },
+  {
+    "text": "I didn't mention like every single node",
+    "start": 1922.159,
+    "duration": 5.921
+  },
+  {
+    "text": "has like plenty of parameters. Um so",
+    "start": 1923.76,
+    "duration": 5.68
+  },
+  {
+    "text": "play with it, you know, it's like",
+    "start": 1928.08,
+    "duration": 3.439
+  },
+  {
+    "text": "there's there's a lot of stuff you can",
+    "start": 1929.44,
+    "duration": 4.64
+  },
+  {
+    "text": "do with it. Uh then we're happy. We can",
+    "start": 1931.519,
+    "duration": 4.88
+  },
+  {
+    "text": "visualize it. We say, \"Okay, that looks",
+    "start": 1934.08,
+    "duration": 6.16
+  },
+  {
+    "text": "well connected.\" And then uh then it's",
+    "start": 1936.399,
+    "duration": 5.52
+  },
+  {
+    "text": "time to generate like your collision.",
+    "start": 1940.24,
+    "duration": 3.6
+  },
+  {
+    "text": "And um in the past we have like some",
+    "start": 1941.919,
+    "duration": 3.441
+  },
+  {
+    "text": "kind of automatic generation of",
+    "start": 1943.84,
+    "duration": 3.839
+  },
+  {
+    "text": "collision in the fracture editor tool",
+    "start": 1945.36,
+    "duration": 4.24
+  },
+  {
+    "text": "but they they don't give you a lot of",
+    "start": 1947.679,
+    "duration": 4.24
+  },
+  {
+    "text": "like control and uh with data flow you",
+    "start": 1949.6,
+    "duration": 3.919
+  },
+  {
+    "text": "have way more fine control because you",
+    "start": 1951.919,
+    "duration": 3.921
+  },
+  {
+    "text": "could select like half of the of the",
+    "start": 1953.519,
+    "duration": 3.921
+  },
+  {
+    "text": "object and you know generate like",
+    "start": 1955.84,
+    "duration": 3.52
+  },
+  {
+    "text": "collision in one way and then select the",
+    "start": 1957.44,
+    "duration": 3.599
+  },
+  {
+    "text": "other one and so you can be really",
+    "start": 1959.36,
+    "duration": 4.08
+  },
+  {
+    "text": "inventive in the way you do it. So in",
+    "start": 1961.039,
+    "duration": 4.721
+  },
+  {
+    "text": "that case we say oh find all the leaf",
+    "start": 1963.44,
+    "duration": 4.719
+  },
+  {
+    "text": "bones of the hierarchy and then generate",
+    "start": 1965.76,
+    "duration": 4.48
+  },
+  {
+    "text": "like convex cells and we gen convex",
+    "start": 1968.159,
+    "duration": 4.561
+  },
+  {
+    "text": "cells we simplify them because you know",
+    "start": 1970.24,
+    "duration": 4.72
+  },
+  {
+    "text": "simplified convex are faster than the",
+    "start": 1972.72,
+    "duration": 6.16
+  },
+  {
+    "text": "more complex ones and then uh and then",
+    "start": 1974.96,
+    "duration": 5.36
+  },
+  {
+    "text": "now we want to generate the root",
+    "start": 1978.88,
+    "duration": 4.0
+  },
+  {
+    "text": "collision. So in that case we select the",
+    "start": 1980.32,
+    "duration": 5.04
+  },
+  {
+    "text": "root bone. So it's a there's a note for",
+    "start": 1982.88,
+    "duration": 5.44
+  },
+  {
+    "text": "that and then you we generate the convex",
+    "start": 1985.36,
+    "duration": 6.0
+  },
+  {
+    "text": "cell from the children uh hull. So we",
+    "start": 1988.32,
+    "duration": 4.8
+  },
+  {
+    "text": "have the holes and now we generate like",
+    "start": 1991.36,
+    "duration": 4.4
+  },
+  {
+    "text": "a IO level hull based on like the hull",
+    "start": 1993.12,
+    "duration": 5.36
+  },
+  {
+    "text": "of the children. Uh and then we simply",
+    "start": 1995.76,
+    "duration": 4.56
+  },
+  {
+    "text": "it on top of this. So they give us like",
+    "start": 1998.48,
+    "duration": 4.64
+  },
+  {
+    "text": "a very nice kind of like uh convex all",
+    "start": 2000.32,
+    "duration": 4.56
+  },
+  {
+    "text": "that we can use uh for a game that's",
+    "start": 2003.12,
+    "duration": 4.399
+  },
+  {
+    "text": "going to be efficient and fast for you",
+    "start": 2004.88,
+    "duration": 6.399
+  },
+  {
+    "text": "know collecting and breaking stuff.",
+    "start": 2007.519,
+    "duration": 5.921
+  },
+  {
+    "text": "And then the final node. So the terminal",
+    "start": 2011.279,
+    "duration": 4.081
+  },
+  {
+    "text": "node which is your that's going to be",
+    "start": 2013.44,
+    "duration": 3.2
+  },
+  {
+    "text": "the one that's going to be basically",
+    "start": 2015.36,
+    "duration": 4.159
+  },
+  {
+    "text": "bake everything. not bake as cooking but",
+    "start": 2016.64,
+    "duration": 4.0
+  },
+  {
+    "text": "like it's going to basically take",
+    "start": 2019.519,
+    "duration": 2.4
+  },
+  {
+    "text": "everything all the input of the",
+    "start": 2020.64,
+    "duration": 2.879
+  },
+  {
+    "text": "collection and basically save it inside",
+    "start": 2021.919,
+    "duration": 6.48
+  },
+  {
+    "text": "your your geometry collection asset.",
+    "start": 2023.519,
+    "duration": 6.721
+  },
+  {
+    "text": "There's a bon of parameters as well the",
+    "start": 2028.399,
+    "duration": 4.64
+  },
+  {
+    "text": "materials and the instance meshes uh",
+    "start": 2030.24,
+    "duration": 4.4
+  },
+  {
+    "text": "because they they're different they're",
+    "start": 2033.039,
+    "duration": 3.041
+  },
+  {
+    "text": "not stored in the collection and so they",
+    "start": 2034.64,
+    "duration": 5.279
+  },
+  {
+    "text": "need to be passed around. Um and then in",
+    "start": 2036.08,
+    "duration": 7.439
+  },
+  {
+    "text": "the simulation view you can then play",
+    "start": 2039.919,
+    "duration": 5.441
+  },
+  {
+    "text": "you know simulate and you can see the",
+    "start": 2043.519,
+    "duration": 4.4
+  },
+  {
+    "text": "result of that. As you can see if you",
+    "start": 2045.36,
+    "duration": 4.719
+  },
+  {
+    "text": "pay attention you can see like the",
+    "start": 2047.919,
+    "duration": 3.68
+  },
+  {
+    "text": "thickness like the material making the",
+    "start": 2050.079,
+    "duration": 3.28
+  },
+  {
+    "text": "thickness and like so all this material",
+    "start": 2051.599,
+    "duration": 3.681
+  },
+  {
+    "text": "is basically all this is done by thanks",
+    "start": 2053.359,
+    "duration": 3.52
+  },
+  {
+    "text": "to the texture that was like baking the",
+    "start": 2055.28,
+    "duration": 3.599
+  },
+  {
+    "text": "distance from the surface. So it gives",
+    "start": 2056.879,
+    "duration": 4.0
+  },
+  {
+    "text": "the impression that this object has a",
+    "start": 2058.879,
+    "duration": 4.24
+  },
+  {
+    "text": "real inside and it's like it's not like",
+    "start": 2060.879,
+    "duration": 7.081
+  },
+  {
+    "text": "this this like thin shell basically.",
+    "start": 2063.119,
+    "duration": 4.841
+  },
+  {
+    "text": "So now we got we got this recipe, we got",
+    "start": 2068.879,
+    "duration": 4.0
+  },
+  {
+    "text": "this asset. So now we can start playing",
+    "start": 2071.28,
+    "duration": 3.76
+  },
+  {
+    "text": "with it. So in that case, this little",
+    "start": 2072.879,
+    "duration": 5.361
+  },
+  {
+    "text": "like uh video shows you like you can",
+    "start": 2075.04,
+    "duration": 4.639
+  },
+  {
+    "text": "select the input mesh and change the",
+    "start": 2078.24,
+    "duration": 3.76
+  },
+  {
+    "text": "input mesh and you'd have to redo that",
+    "start": 2079.679,
+    "duration": 3.841
+  },
+  {
+    "text": "all the time. You know, it's just like",
+    "start": 2082.0,
+    "duration": 3.76
+  },
+  {
+    "text": "you do that, you press the button, it's",
+    "start": 2083.52,
+    "duration": 4.72
+  },
+  {
+    "text": "in the so it's in the fracture editor.",
+    "start": 2085.76,
+    "duration": 4.56
+  },
+  {
+    "text": "We basically this whenever like you",
+    "start": 2088.24,
+    "duration": 3.919
+  },
+  {
+    "text": "select like a geometry collection that",
+    "start": 2090.32,
+    "duration": 3.519
+  },
+  {
+    "text": "has a data flow, we'll show the",
+    "start": 2092.159,
+    "duration": 3.68
+  },
+  {
+    "text": "overrides basically of this asset. And",
+    "start": 2093.839,
+    "duration": 4.641
+  },
+  {
+    "text": "then so you can select like the the",
+    "start": 2095.839,
+    "duration": 5.681
+  },
+  {
+    "text": "other the other mesh and then there you",
+    "start": 2098.48,
+    "duration": 5.28
+  },
+  {
+    "text": "go you got like another geometric you",
+    "start": 2101.52,
+    "duration": 4.48
+  },
+  {
+    "text": "get the this geometry collection now is",
+    "start": 2103.76,
+    "duration": 3.76
+  },
+  {
+    "text": "like generated from this particular",
+    "start": 2106.0,
+    "duration": 4.56
+  },
+  {
+    "text": "mesh. So it's very useful very you know",
+    "start": 2107.52,
+    "duration": 5.28
+  },
+  {
+    "text": "in C2 kind of like kind of like testing",
+    "start": 2110.56,
+    "duration": 4.88
+  },
+  {
+    "text": "it's in your level",
+    "start": 2112.8,
+    "duration": 6.64
+  },
+  {
+    "text": "and it's yeah like a one click button",
+    "start": 2115.44,
+    "duration": 6.399
+  },
+  {
+    "text": "and then then you can do the same for",
+    "start": 2119.44,
+    "duration": 4.639
+  },
+  {
+    "text": "testing. So for like I made a little gym",
+    "start": 2121.839,
+    "duration": 3.681
+  },
+  {
+    "text": "where like there's like this like big",
+    "start": 2124.079,
+    "duration": 3.681
+  },
+  {
+    "text": "boulder that rolls down the an",
+    "start": 2125.52,
+    "duration": 4.64
+  },
+  {
+    "text": "artificial hill and then basically break",
+    "start": 2127.76,
+    "duration": 4.88
+  },
+  {
+    "text": "this object and in one case I got like",
+    "start": 2130.16,
+    "duration": 4.72
+  },
+  {
+    "text": "10 fragments. the other one I got like",
+    "start": 2132.64,
+    "duration": 4.56
+  },
+  {
+    "text": "100 fragments and I can quickly just you",
+    "start": 2134.88,
+    "duration": 4.479
+  },
+  {
+    "text": "know iterate and check and when I'm",
+    "start": 2137.2,
+    "duration": 3.68
+  },
+  {
+    "text": "happy with it I'm saying okay so that's",
+    "start": 2139.359,
+    "duration": 4.081
+  },
+  {
+    "text": "that's what works for this asset and and",
+    "start": 2140.88,
+    "duration": 4.479
+  },
+  {
+    "text": "off you go you know and if somebody says",
+    "start": 2143.44,
+    "duration": 4.08
+  },
+  {
+    "text": "you well there's too many because it's",
+    "start": 2145.359,
+    "duration": 4.161
+  },
+  {
+    "text": "too slow now you can still go back to 50",
+    "start": 2147.52,
+    "duration": 4.64
+  },
+  {
+    "text": "so it's still good enough but you know",
+    "start": 2149.52,
+    "duration": 4.88
+  },
+  {
+    "text": "middle ground between performance and",
+    "start": 2152.16,
+    "duration": 6.52
+  },
+  {
+    "text": "and good-looking destruction",
+    "start": 2154.4,
+    "duration": 4.28
+  },
+  {
+    "text": "so I'm going to show some examples so",
+    "start": 2160.32,
+    "duration": 3.12
+  },
+  {
+    "text": "it's it's from the content example",
+    "start": 2161.76,
+    "duration": 3.76
+  },
+  {
+    "text": "Actually, if you grab the contain",
+    "start": 2163.44,
+    "duration": 4.72
+  },
+  {
+    "text": "example in 5.6, you you'll see those",
+    "start": 2165.52,
+    "duration": 4.319
+  },
+  {
+    "text": "stuff and you can access the data flows",
+    "start": 2168.16,
+    "duration": 3.52
+  },
+  {
+    "text": "and you can explore how they've done",
+    "start": 2169.839,
+    "duration": 6.24
+  },
+  {
+    "text": "artists have gone through um spend time",
+    "start": 2171.68,
+    "duration": 6.64
+  },
+  {
+    "text": "basically documenting and there's like a",
+    "start": 2176.079,
+    "duration": 4.721
+  },
+  {
+    "text": "command box around it and explaining why",
+    "start": 2178.32,
+    "duration": 4.32
+  },
+  {
+    "text": "they do this and that and how they do",
+    "start": 2180.8,
+    "duration": 3.92
+  },
+  {
+    "text": "it. So uh yeah in that case so it's a",
+    "start": 2182.64,
+    "duration": 4.479
+  },
+  {
+    "text": "little like this little kind of a round",
+    "start": 2184.72,
+    "duration": 4.879
+  },
+  {
+    "text": "object and we create like a thin shell",
+    "start": 2187.119,
+    "duration": 5.361
+  },
+  {
+    "text": "and and then by using um we take the",
+    "start": 2189.599,
+    "duration": 6.161
+  },
+  {
+    "text": "object we shrink it we use a mesh cutter",
+    "start": 2192.48,
+    "duration": 5.92
+  },
+  {
+    "text": "that cuts basically the thin shell like",
+    "start": 2195.76,
+    "duration": 5.12
+  },
+  {
+    "text": "the the the outer layer and then then we",
+    "start": 2198.4,
+    "duration": 4.64
+  },
+  {
+    "text": "do a slice cutter for the inside and",
+    "start": 2200.88,
+    "duration": 3.92
+  },
+  {
+    "text": "then there is like texturing as well",
+    "start": 2203.04,
+    "duration": 4.079
+  },
+  {
+    "text": "that happens and yeah so it looks this",
+    "start": 2204.8,
+    "duration": 5.44
+  },
+  {
+    "text": "super fun kind of description not very",
+    "start": 2207.119,
+    "duration": 4.72
+  },
+  {
+    "text": "usable in a game maybe maybe somebody",
+    "start": 2210.24,
+    "duration": 3.52
+  },
+  {
+    "text": "wants to make a came with like food",
+    "start": 2211.839,
+    "duration": 6.28
+  },
+  {
+    "text": "object or something. I don't know. Yeah,",
+    "start": 2213.76,
+    "duration": 4.359
+  },
+  {
+    "text": "this one is really fun as well. It's",
+    "start": 2218.32,
+    "duration": 4.64
+  },
+  {
+    "text": "like start from a cone",
+    "start": 2219.92,
+    "duration": 4.8
+  },
+  {
+    "text": "uh like a kind of a cone object and then",
+    "start": 2222.96,
+    "duration": 4.639
+  },
+  {
+    "text": "and then we artificially we spread",
+    "start": 2224.72,
+    "duration": 4.879
+  },
+  {
+    "text": "points and then we curl the points from",
+    "start": 2227.599,
+    "duration": 4.401
+  },
+  {
+    "text": "the inside of the mesh and then we add",
+    "start": 2229.599,
+    "duration": 5.921
+  },
+  {
+    "text": "we spawn basically uh meshes inside and",
+    "start": 2232.0,
+    "duration": 5.92
+  },
+  {
+    "text": "then we turn the the entire thing into a",
+    "start": 2235.52,
+    "duration": 5.92
+  },
+  {
+    "text": "single geometry collection and so yeah",
+    "start": 2237.92,
+    "duration": 5.919
+  },
+  {
+    "text": "same it's kind of like just kind of fun",
+    "start": 2241.44,
+    "duration": 4.88
+  },
+  {
+    "text": "not particularly useful but it's it",
+    "start": 2243.839,
+    "duration": 4.081
+  },
+  {
+    "text": "shows you like the kind of tool you have",
+    "start": 2246.32,
+    "duration": 4.4
+  },
+  {
+    "text": "to your you that are available to you to",
+    "start": 2247.92,
+    "duration": 5.6
+  },
+  {
+    "text": "basically do a all sort of like you know",
+    "start": 2250.72,
+    "duration": 5.84
+  },
+  {
+    "text": "kind of crazy stuff and feel free to",
+    "start": 2253.52,
+    "duration": 4.88
+  },
+  {
+    "text": "share when whenever you do some",
+    "start": 2256.56,
+    "duration": 3.36
+  },
+  {
+    "text": "something fun like this like feel free",
+    "start": 2258.4,
+    "duration": 3.12
+  },
+  {
+    "text": "to share with us like we we love this",
+    "start": 2259.92,
+    "duration": 3.679
+  },
+  {
+    "text": "kind of stuff.",
+    "start": 2261.52,
+    "duration": 5.44
+  },
+  {
+    "text": "Uh another example like so now we start",
+    "start": 2263.599,
+    "duration": 4.961
+  },
+  {
+    "text": "like instead of starting with like those",
+    "start": 2266.96,
+    "duration": 3.28
+  },
+  {
+    "text": "kind of artificial meshes we start like",
+    "start": 2268.56,
+    "duration": 4.32
+  },
+  {
+    "text": "with a quicksaw mesh and then in that",
+    "start": 2270.24,
+    "duration": 5.119
+  },
+  {
+    "text": "case the artist went and did some kind",
+    "start": 2272.88,
+    "duration": 4.16
+  },
+  {
+    "text": "of like the fracture is based on a",
+    "start": 2275.359,
+    "duration": 3.921
+  },
+  {
+    "text": "convex. So basically computing the",
+    "start": 2277.04,
+    "duration": 4.319
+  },
+  {
+    "text": "convex",
+    "start": 2279.28,
+    "duration": 3.76
+  },
+  {
+    "text": "like doing convex de composition of the",
+    "start": 2281.359,
+    "duration": 5.76
+  },
+  {
+    "text": "object use the convex as meshes and use",
+    "start": 2283.04,
+    "duration": 7.039
+  },
+  {
+    "text": "them for cutting the object and then so",
+    "start": 2287.119,
+    "duration": 5.441
+  },
+  {
+    "text": "you can you can you know the world is",
+    "start": 2290.079,
+    "duration": 4.481
+  },
+  {
+    "text": "your o you can really just go step by",
+    "start": 2292.56,
+    "duration": 3.6
+  },
+  {
+    "text": "step and kind of like do crazy kind of",
+    "start": 2294.56,
+    "duration": 3.279
+  },
+  {
+    "text": "combination of those things and also",
+    "start": 2296.16,
+    "duration": 4.8
+  },
+  {
+    "text": "like there is a and then and then use a",
+    "start": 2297.839,
+    "duration": 5.201
+  },
+  {
+    "text": "node that calls like a geometry script",
+    "start": 2300.96,
+    "duration": 5.119
+  },
+  {
+    "text": "that basically kind of shrink the object",
+    "start": 2303.04,
+    "duration": 5.76
+  },
+  {
+    "text": "from the inside and booting it out out.",
+    "start": 2306.079,
+    "duration": 4.161
+  },
+  {
+    "text": "So it's like it makes the inside of the",
+    "start": 2308.8,
+    "duration": 4.96
+  },
+  {
+    "text": "object like you know hollow and uh so",
+    "start": 2310.24,
+    "duration": 6.0
+  },
+  {
+    "text": "yeah can jump into those geometry script",
+    "start": 2313.76,
+    "duration": 5.12
+  },
+  {
+    "text": "and back and change and and modify",
+    "start": 2316.24,
+    "duration": 4.16
+  },
+  {
+    "text": "something that would be extremely",
+    "start": 2318.88,
+    "duration": 2.959
+  },
+  {
+    "text": "difficult to do in the fracture editor",
+    "start": 2320.4,
+    "duration": 2.88
+  },
+  {
+    "text": "because you would have to jump from one",
+    "start": 2321.839,
+    "duration": 2.881
+  },
+  {
+    "text": "tool to the other and do those things",
+    "start": 2323.28,
+    "duration": 3.36
+  },
+  {
+    "text": "and now everything is like in one go and",
+    "start": 2324.72,
+    "duration": 3.28
+  },
+  {
+    "text": "then you could take this object and",
+    "start": 2326.64,
+    "duration": 4.16
+  },
+  {
+    "text": "change with another object or and then",
+    "start": 2328.0,
+    "duration": 4.56
+  },
+  {
+    "text": "do the exact same thing and it just work",
+    "start": 2330.8,
+    "duration": 4.799
+  },
+  {
+    "text": "in one click basically.",
+    "start": 2332.56,
+    "duration": 4.72
+  },
+  {
+    "text": "And then other stuff like for example",
+    "start": 2335.599,
+    "duration": 4.721
+  },
+  {
+    "text": "like material specific fractures. So",
+    "start": 2337.28,
+    "duration": 5.68
+  },
+  {
+    "text": "the wall on the left uh and then and",
+    "start": 2340.32,
+    "duration": 4.48
+  },
+  {
+    "text": "then you can you can take for example",
+    "start": 2342.96,
+    "duration": 4.96
+  },
+  {
+    "text": "like this like um statue and then",
+    "start": 2344.8,
+    "duration": 5.12
+  },
+  {
+    "text": "basically turn it into some kind of like",
+    "start": 2347.92,
+    "duration": 5.679
+  },
+  {
+    "text": "a brick style kind of a you know",
+    "start": 2349.92,
+    "duration": 5.679
+  },
+  {
+    "text": "destruction. And it's basically taking",
+    "start": 2353.599,
+    "duration": 4.801
+  },
+  {
+    "text": "the object you you find a bonding box",
+    "start": 2355.599,
+    "duration": 5.281
+  },
+  {
+    "text": "you spread like bricks, you know, around",
+    "start": 2358.4,
+    "duration": 4.56
+  },
+  {
+    "text": "this volume and you you intersect the",
+    "start": 2360.88,
+    "duration": 4.88
+  },
+  {
+    "text": "two and then you take the result and",
+    "start": 2362.96,
+    "duration": 4.32
+  },
+  {
+    "text": "there's plenty of way you can do those",
+    "start": 2365.76,
+    "duration": 2.96
+  },
+  {
+    "text": "things and it's very easy. It was",
+    "start": 2367.28,
+    "duration": 3.12
+  },
+  {
+    "text": "extremely difficult before now it's like",
+    "start": 2368.72,
+    "duration": 4.639
+  },
+  {
+    "text": "it's like it's almost like fun to do. Uh",
+    "start": 2370.4,
+    "duration": 5.439
+  },
+  {
+    "text": "this one is kind of interesting like",
+    "start": 2373.359,
+    "duration": 4.161
+  },
+  {
+    "text": "internal materials. You can see like how",
+    "start": 2375.839,
+    "duration": 3.201
+  },
+  {
+    "text": "the wood inside is completely",
+    "start": 2377.52,
+    "duration": 2.96
+  },
+  {
+    "text": "procedural. Basically the material is",
+    "start": 2379.04,
+    "duration": 3.76
+  },
+  {
+    "text": "also very procal use using basically",
+    "start": 2380.48,
+    "duration": 3.599
+  },
+  {
+    "text": "based on the baked textures and",
+    "start": 2382.8,
+    "duration": 4.279
+  },
+  {
+    "text": "everything.",
+    "start": 2384.079,
+    "duration": 3.0
+  },
+  {
+    "text": "So how do you integrate this in your",
+    "start": 2388.16,
+    "duration": 3.439
+  },
+  {
+    "text": "pipeline? Because that's one thing. So",
+    "start": 2390.4,
+    "duration": 2.719
+  },
+  {
+    "text": "now you got your assets, they all based",
+    "start": 2391.599,
+    "duration": 4.321
+  },
+  {
+    "text": "on data flow. It's easy to go back and",
+    "start": 2393.119,
+    "duration": 4.321
+  },
+  {
+    "text": "change them if you you know you need to",
+    "start": 2395.92,
+    "duration": 3.439
+  },
+  {
+    "text": "retune them. So you're saving a lot of",
+    "start": 2397.44,
+    "duration": 4.399
+  },
+  {
+    "text": "time. So that's nice.",
+    "start": 2399.359,
+    "duration": 6.401
+  },
+  {
+    "text": "Um and then uh so",
+    "start": 2401.839,
+    "duration": 6.0
+  },
+  {
+    "text": "you can do different things. So we have",
+    "start": 2405.76,
+    "duration": 5.359
+  },
+  {
+    "text": "a blueprint API uh which means like it",
+    "start": 2407.839,
+    "duration": 5.601
+  },
+  {
+    "text": "means it's automatically exposed to",
+    "start": 2411.119,
+    "duration": 5.041
+  },
+  {
+    "text": "Python as well. So I know that a lot of",
+    "start": 2413.44,
+    "duration": 5.28
+  },
+  {
+    "text": "people love Python and then uh and then",
+    "start": 2416.16,
+    "duration": 4.64
+  },
+  {
+    "text": "so in that case I just show a little",
+    "start": 2418.72,
+    "duration": 3.92
+  },
+  {
+    "text": "example. We have we have ways to create",
+    "start": 2420.8,
+    "duration": 5.92
+  },
+  {
+    "text": "nodes and connect nodes uh to make data",
+    "start": 2422.64,
+    "duration": 5.439
+  },
+  {
+    "text": "flows if you want to make data flow",
+    "start": 2426.72,
+    "duration": 2.96
+  },
+  {
+    "text": "proctory. I don't know if that's a thing",
+    "start": 2428.079,
+    "duration": 3.841
+  },
+  {
+    "text": "but yeah it is possible. And then so",
+    "start": 2429.68,
+    "duration": 4.0
+  },
+  {
+    "text": "yeah this little this little like",
+    "start": 2431.92,
+    "duration": 3.36
+  },
+  {
+    "text": "snippet basically this is what it does.",
+    "start": 2433.68,
+    "duration": 3.76
+  },
+  {
+    "text": "It creates a little graph on the side.",
+    "start": 2435.28,
+    "duration": 5.6
+  },
+  {
+    "text": "Uh the grouping API API also like you",
+    "start": 2437.44,
+    "duration": 5.12
+  },
+  {
+    "text": "know allow you to do other things like",
+    "start": 2440.88,
+    "duration": 3.199
+  },
+  {
+    "text": "like setting up like overrides and",
+    "start": 2442.56,
+    "duration": 3.12
+  },
+  {
+    "text": "everything. I'm going to show it in next",
+    "start": 2444.079,
+    "duration": 2.881
+  },
+  {
+    "text": "slide and then so you could do it in",
+    "start": 2445.68,
+    "duration": 3.679
+  },
+  {
+    "text": "Python too.",
+    "start": 2446.96,
+    "duration": 4.639
+  },
+  {
+    "text": "So in that case I actually made a little",
+    "start": 2449.359,
+    "duration": 5.361
+  },
+  {
+    "text": "asset converter. So it's basically using",
+    "start": 2451.599,
+    "duration": 5.601
+  },
+  {
+    "text": "a utility blueprint",
+    "start": 2454.72,
+    "duration": 4.879
+  },
+  {
+    "text": "so that I have a bunch of static meshes.",
+    "start": 2457.2,
+    "duration": 3.84
+  },
+  {
+    "text": "If I right click on the mesh and",
+    "start": 2459.599,
+    "duration": 3.441
+  },
+  {
+    "text": "basically select",
+    "start": 2461.04,
+    "duration": 5.76
+  },
+  {
+    "text": "um you know like the it adds an an entry",
+    "start": 2463.04,
+    "duration": 6.079
+  },
+  {
+    "text": "in the menu and I can I can basically",
+    "start": 2466.8,
+    "duration": 4.799
+  },
+  {
+    "text": "convert to a geometry collection and it",
+    "start": 2469.119,
+    "duration": 4.72
+  },
+  {
+    "text": "what it does is basically select the",
+    "start": 2471.599,
+    "duration": 5.361
+  },
+  {
+    "text": "mesh go through the mesh and then assign",
+    "start": 2473.839,
+    "duration": 5.041
+  },
+  {
+    "text": "the data flow graph run the data flow",
+    "start": 2476.96,
+    "duration": 3.68
+  },
+  {
+    "text": "graph and then and then here you go you",
+    "start": 2478.88,
+    "duration": 3.52
+  },
+  {
+    "text": "get your meshes and that's like one",
+    "start": 2480.64,
+    "duration": 5.12
+  },
+  {
+    "text": "click conversion. So uh on some of our",
+    "start": 2482.4,
+    "duration": 4.88
+  },
+  {
+    "text": "project we had like thousands and",
+    "start": 2485.76,
+    "duration": 3.44
+  },
+  {
+    "text": "thousands of destructible assets and",
+    "start": 2487.28,
+    "duration": 4.0
+  },
+  {
+    "text": "then we our artists basically write like",
+    "start": 2489.2,
+    "duration": 5.84
+  },
+  {
+    "text": "a a gigantic graph that kind of try to",
+    "start": 2491.28,
+    "duration": 5.76
+  },
+  {
+    "text": "you know support every kind of size and",
+    "start": 2495.04,
+    "duration": 4.319
+  },
+  {
+    "text": "and and different you know condition",
+    "start": 2497.04,
+    "duration": 5.279
+  },
+  {
+    "text": "that those those assets are in and",
+    "start": 2499.359,
+    "duration": 5.361
+  },
+  {
+    "text": "basically now the artist is no more no",
+    "start": 2502.319,
+    "duration": 5.04
+  },
+  {
+    "text": "longer needed. it's is he can just move",
+    "start": 2504.72,
+    "duration": 4.16
+  },
+  {
+    "text": "to another project or help like other",
+    "start": 2507.359,
+    "duration": 3.76
+  },
+  {
+    "text": "stuff and and now designers like can",
+    "start": 2508.88,
+    "duration": 4.64
+  },
+  {
+    "text": "they can make you know their source",
+    "start": 2511.119,
+    "duration": 5.121
+  },
+  {
+    "text": "object and then and then turn it into a",
+    "start": 2513.52,
+    "duration": 4.24
+  },
+  {
+    "text": "destructible without to know about",
+    "start": 2516.24,
+    "duration": 3.359
+  },
+  {
+    "text": "destruction. So which is really really",
+    "start": 2517.76,
+    "duration": 4.16
+  },
+  {
+    "text": "useful and save a lot of time and grunt",
+    "start": 2519.599,
+    "duration": 4.321
+  },
+  {
+    "text": "work especially like you know the",
+    "start": 2521.92,
+    "duration": 4.64
+  },
+  {
+    "text": "unsatis unsatisfactory like steps of",
+    "start": 2523.92,
+    "duration": 4.08
+  },
+  {
+    "text": "like setting up those things that are",
+    "start": 2526.56,
+    "duration": 3.039
+  },
+  {
+    "text": "very seems like repetitive and",
+    "start": 2528.0,
+    "duration": 4.079
+  },
+  {
+    "text": "everything. So kind of a you know",
+    "start": 2529.599,
+    "duration": 4.321
+  },
+  {
+    "text": "solving the problem we discussing",
+    "start": 2532.079,
+    "duration": 5.201
+  },
+  {
+    "text": "earlier and then focusing mostly on",
+    "start": 2533.92,
+    "duration": 6.56
+  },
+  {
+    "text": "quality basically.",
+    "start": 2537.28,
+    "duration": 5.28
+  },
+  {
+    "text": "Uh",
+    "start": 2540.48,
+    "duration": 4.4
+  },
+  {
+    "text": "yeah so this is how the converter looks",
+    "start": 2542.56,
+    "duration": 6.08
+  },
+  {
+    "text": "like. Um there's like this there's this",
+    "start": 2544.88,
+    "duration": 7.76
+  },
+  {
+    "text": "uh get or create like a a geometry",
+    "start": 2548.64,
+    "duration": 5.6
+  },
+  {
+    "text": "collection from mesh like node that",
+    "start": 2552.64,
+    "duration": 3.28
+  },
+  {
+    "text": "effectively has more in it but it's kind",
+    "start": 2554.24,
+    "duration": 3.599
+  },
+  {
+    "text": "of like it's more about like does the",
+    "start": 2555.92,
+    "duration": 3.679
+  },
+  {
+    "text": "asset already exist or it does doesn't",
+    "start": 2557.839,
+    "duration": 3.921
+  },
+  {
+    "text": "exist create one or not. So it's it's",
+    "start": 2559.599,
+    "duration": 3.681
+  },
+  {
+    "text": "like it doesn't have like some magic in",
+    "start": 2561.76,
+    "duration": 3.44
+  },
+  {
+    "text": "it like don't worry but yeah mostly like",
+    "start": 2563.28,
+    "duration": 3.68
+  },
+  {
+    "text": "what it does like get the geometry",
+    "start": 2565.2,
+    "duration": 4.0
+  },
+  {
+    "text": "collection asset set the data flow asset",
+    "start": 2566.96,
+    "duration": 5.44
+  },
+  {
+    "text": "on it override like the mesh on it",
+    "start": 2569.2,
+    "duration": 5.919
+  },
+  {
+    "text": "override the input mesh parameter on it",
+    "start": 2572.4,
+    "duration": 4.959
+  },
+  {
+    "text": "and then re say regenerate the asset",
+    "start": 2575.119,
+    "duration": 4.881
+  },
+  {
+    "text": "basically and that's really what you",
+    "start": 2577.359,
+    "duration": 5.521
+  },
+  {
+    "text": "need like three nodes basically and uh",
+    "start": 2580.0,
+    "duration": 5.52
+  },
+  {
+    "text": "and then yeah you can it scales now you",
+    "start": 2582.88,
+    "duration": 5.52
+  },
+  {
+    "text": "can even even like late in production",
+    "start": 2585.52,
+    "duration": 4.559
+  },
+  {
+    "text": "somebody says oh we need to regenerate",
+    "start": 2588.4,
+    "duration": 3.36
+  },
+  {
+    "text": "all those assets, you can select them",
+    "start": 2590.079,
+    "duration": 4.881
+  },
+  {
+    "text": "all, right click, let the computer",
+    "start": 2591.76,
+    "duration": 4.96
+  },
+  {
+    "text": "working for you, and then and then off",
+    "start": 2594.96,
+    "duration": 4.399
+  },
+  {
+    "text": "you go.",
+    "start": 2596.72,
+    "duration": 5.2
+  },
+  {
+    "text": "So, yeah. So, thank you. Um, if you have",
+    "start": 2599.359,
+    "duration": 4.401
+  },
+  {
+    "text": "any question, I'm happy to answer them.",
+    "start": 2601.92,
+    "duration": 4.84
+  },
+  {
+    "text": "Um,",
+    "start": 2603.76,
+    "duration": 3.0
+  },
+  {
+    "text": "[Applause]",
+    "start": 2608.98,
+    "duration": 4.239
+  }
+]

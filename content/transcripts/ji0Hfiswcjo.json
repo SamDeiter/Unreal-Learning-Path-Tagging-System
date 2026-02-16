@@ -1,0 +1,5932 @@
+[
+  {
+    "text": "Good morning everyone. I hope you're",
+    "start": 1.6,
+    "duration": 3.92
+  },
+  {
+    "text": "having a great Unreal Fest so far. Looks",
+    "start": 3.04,
+    "duration": 4.48
+  },
+  {
+    "text": "like a pretty good turnout today. My",
+    "start": 5.52,
+    "duration": 3.52
+  },
+  {
+    "text": "name is Kevin. I lead one of the",
+    "start": 7.52,
+    "duration": 4.239
+  },
+  {
+    "text": "rendering teams at Epic. And my name is",
+    "start": 9.04,
+    "duration": 5.759
+  },
+  {
+    "text": "Yoswaf. I am expert engine core tech",
+    "start": 11.759,
+    "duration": 5.201
+  },
+  {
+    "text": "engineer at CD Project Red. And I'm",
+    "start": 14.799,
+    "duration": 4.56
+  },
+  {
+    "text": "super excited to be here with Kevin to",
+    "start": 16.96,
+    "duration": 4.479
+  },
+  {
+    "text": "bring some developer outlook on the",
+    "start": 19.359,
+    "duration": 2.881
+  },
+  {
+    "text": "topic.",
+    "start": 21.439,
+    "duration": 2.481
+  },
+  {
+    "text": ">> So today we will be taking you behind",
+    "start": 22.24,
+    "duration": 3.36
+  },
+  {
+    "text": "the scenes of the Witcher 4 Unreal",
+    "start": 23.92,
+    "duration": 3.92
+  },
+  {
+    "text": "Engine 5 tech demo which you hopefully",
+    "start": 25.6,
+    "duration": 3.599
+  },
+  {
+    "text": "saw yesterday. Actually raise your",
+    "start": 27.84,
+    "duration": 3.92
+  },
+  {
+    "text": "hands. Who who saw this thing yesterday?",
+    "start": 29.199,
+    "duration": 2.88
+  },
+  {
+    "text": ">> Nice.",
+    "start": 31.76,
+    "duration": 1.6
+  },
+  {
+    "text": ">> All right, you you've come to the right",
+    "start": 32.079,
+    "duration": 3.681
+  },
+  {
+    "text": "session for sure. So, our main focus",
+    "start": 33.36,
+    "duration": 4.08
+  },
+  {
+    "text": "today is the performance aspect of the",
+    "start": 35.76,
+    "duration": 3.92
+  },
+  {
+    "text": "demo, both from the CPU and the GPU",
+    "start": 37.44,
+    "duration": 4.24
+  },
+  {
+    "text": "side. We'll talk about some new things",
+    "start": 39.68,
+    "duration": 3.84
+  },
+  {
+    "text": "we did for the demo and also some",
+    "start": 41.68,
+    "duration": 3.68
+  },
+  {
+    "text": "general good practices and hopefully you",
+    "start": 43.52,
+    "duration": 3.519
+  },
+  {
+    "text": "take away a lot of knowledge of how to",
+    "start": 45.36,
+    "duration": 3.84
+  },
+  {
+    "text": "get your large open world game to run at",
+    "start": 47.039,
+    "duration": 5.36
+  },
+  {
+    "text": "60 fps on current gen consoles.",
+    "start": 49.2,
+    "duration": 5.519
+  },
+  {
+    "text": "So, here's what's in store for us today.",
+    "start": 52.399,
+    "duration": 3.68
+  },
+  {
+    "text": "We'll give you a peek at the goals we",
+    "start": 54.719,
+    "duration": 2.721
+  },
+  {
+    "text": "set up for ourselves at the start of the",
+    "start": 56.079,
+    "duration": 3.761
+  },
+  {
+    "text": "project to give some context. We'll talk",
+    "start": 57.44,
+    "duration": 4.0
+  },
+  {
+    "text": "about some some of the frame budgeting",
+    "start": 59.84,
+    "duration": 3.6
+  },
+  {
+    "text": "philosophy and then move into the",
+    "start": 61.44,
+    "duration": 4.24
+  },
+  {
+    "text": "details on the key CPU and GPU",
+    "start": 63.44,
+    "duration": 3.679
+  },
+  {
+    "text": "improvements and how those were",
+    "start": 65.68,
+    "duration": 3.36
+  },
+  {
+    "text": "implemented in the demo. But first,",
+    "start": 67.119,
+    "duration": 3.121
+  },
+  {
+    "text": "let's hear a little bit about the",
+    "start": 69.04,
+    "duration": 3.92
+  },
+  {
+    "text": "collaboration behind the demo. Yeah, we",
+    "start": 70.24,
+    "duration": 5.36
+  },
+  {
+    "text": "have been given the great opportunity to",
+    "start": 72.96,
+    "duration": 5.199
+  },
+  {
+    "text": "combine the best of both worlds, the",
+    "start": 75.6,
+    "duration": 4.64
+  },
+  {
+    "text": "technical expertise at our friends at",
+    "start": 78.159,
+    "duration": 5.521
+  },
+  {
+    "text": "Epic with our experience at City Project",
+    "start": 80.24,
+    "duration": 6.0
+  },
+  {
+    "text": "Red in building big dense open world",
+    "start": 83.68,
+    "duration": 3.36
+  },
+  {
+    "text": "games.",
+    "start": 86.24,
+    "duration": 2.32
+  },
+  {
+    "text": ">> So, we've essentially worked as one",
+    "start": 87.04,
+    "duration": 2.96
+  },
+  {
+    "text": "large team coming up with solutions",
+    "start": 88.56,
+    "duration": 3.12
+  },
+  {
+    "text": "together, reviewing each other's work,",
+    "start": 90.0,
+    "duration": 3.439
+  },
+  {
+    "text": "and generally fought hard to make this",
+    "start": 91.68,
+    "duration": 3.36
+  },
+  {
+    "text": "into an awesome demo for you guys, but",
+    "start": 93.439,
+    "duration": 3.281
+  },
+  {
+    "text": "also to improve the engine along the",
+    "start": 95.04,
+    "duration": 2.32
+  },
+  {
+    "text": "way.",
+    "start": 96.72,
+    "duration": 2.56
+  },
+  {
+    "text": ">> The collaboration was a win-win",
+    "start": 97.36,
+    "duration": 5.04
+  },
+  {
+    "text": "scenario. Our teams work together and",
+    "start": 99.28,
+    "duration": 5.28
+  },
+  {
+    "text": "because of that we were able to achieve",
+    "start": 102.4,
+    "duration": 4.64
+  },
+  {
+    "text": "things that we couldn't if we were",
+    "start": 104.56,
+    "duration": 5.599
+  },
+  {
+    "text": "separated without the groundwork done by",
+    "start": 107.04,
+    "duration": 5.52
+  },
+  {
+    "text": "epic engine core teams we wouldn't be",
+    "start": 110.159,
+    "duration": 4.801
+  },
+  {
+    "text": "able to build all the game systems that",
+    "start": 112.56,
+    "duration": 5.36
+  },
+  {
+    "text": "were necessary to bring demo to life",
+    "start": 114.96,
+    "duration": 4.72
+  },
+  {
+    "text": "during the sessions we going to talk",
+    "start": 117.92,
+    "duration": 3.76
+  },
+  {
+    "text": "that we did things together and we're",
+    "start": 119.68,
+    "duration": 4.399
+  },
+  {
+    "text": "going to with you indistinctively but",
+    "start": 121.68,
+    "duration": 4.16
+  },
+  {
+    "text": "the credits has to go where the credits",
+    "start": 124.079,
+    "duration": 5.04
+  },
+  {
+    "text": "are due and to the both sides because",
+    "start": 125.84,
+    "duration": 7.6
+  },
+  {
+    "text": "the work was very collaborative.",
+    "start": 129.119,
+    "duration": 6.001
+  },
+  {
+    "text": ">> So, what is this demo exactly? Well,",
+    "start": 133.44,
+    "duration": 3.84
+  },
+  {
+    "text": "it's an open world tech demo running on",
+    "start": 135.12,
+    "duration": 4.72
+  },
+  {
+    "text": "PS5 at 60 fps with all the latest Unreal",
+    "start": 137.28,
+    "duration": 4.56
+  },
+  {
+    "text": "Engine 5 features. We've done some",
+    "start": 139.84,
+    "duration": 3.84
+  },
+  {
+    "text": "awesome demos in the past to showcase",
+    "start": 141.84,
+    "duration": 4.0
+  },
+  {
+    "text": "Unreal Engine, but now was the time to",
+    "start": 143.68,
+    "duration": 3.919
+  },
+  {
+    "text": "really push the core of the engine and",
+    "start": 145.84,
+    "duration": 3.92
+  },
+  {
+    "text": "focus on that 60 FPS in performance in",
+    "start": 147.599,
+    "duration": 4.72
+  },
+  {
+    "text": "general. Note that this demo showcases",
+    "start": 149.76,
+    "duration": 5.04
+  },
+  {
+    "text": "the current tech of of the the current",
+    "start": 152.319,
+    "duration": 4.401
+  },
+  {
+    "text": "state of the tech and it's not the final",
+    "start": 154.8,
+    "duration": 4.24
+  },
+  {
+    "text": "representation of The Witcher 4 game. We",
+    "start": 156.72,
+    "duration": 5.44
+  },
+  {
+    "text": "aimed at 60 fps because it strikes a",
+    "start": 159.04,
+    "duration": 6.32
+  },
+  {
+    "text": "balance. On one hand, it creates much",
+    "start": 162.16,
+    "duration": 5.6
+  },
+  {
+    "text": "smoother appearance than lower 40 or 30",
+    "start": 165.36,
+    "duration": 5.36
+  },
+  {
+    "text": "fps. On the other, it still gives us a",
+    "start": 167.76,
+    "duration": 6.0
+  },
+  {
+    "text": "plenty of room for stunning visuals. We",
+    "start": 170.72,
+    "duration": 4.96
+  },
+  {
+    "text": "wanted to reach it on the current gen",
+    "start": 173.76,
+    "duration": 5.04
+  },
+  {
+    "text": "consoles so we can make sure that it's",
+    "start": 175.68,
+    "duration": 5.839
+  },
+  {
+    "text": "attainable on the hardware and displays",
+    "start": 178.8,
+    "duration": 6.159
+  },
+  {
+    "text": "widely available in our living rooms.",
+    "start": 181.519,
+    "duration": 5.841
+  },
+  {
+    "text": "The key goal of the demo was to bring",
+    "start": 184.959,
+    "duration": 5.521
+  },
+  {
+    "text": "the hardware rate global illumination",
+    "start": 187.36,
+    "duration": 5.599
+  },
+  {
+    "text": "for specular and diffuse lightning in",
+    "start": 190.48,
+    "duration": 4.0
+  },
+  {
+    "text": "60fps",
+    "start": 192.959,
+    "duration": 3.92
+  },
+  {
+    "text": "so we can support the dynamic day and",
+    "start": 194.48,
+    "duration": 4.8
+  },
+  {
+    "text": "night cycle and moving objects in",
+    "start": 196.879,
+    "duration": 5.521
+  },
+  {
+    "text": "reflection in really high details. We",
+    "start": 199.28,
+    "duration": 6.08
+  },
+  {
+    "text": "wanted to build a technical backbone for",
+    "start": 202.4,
+    "duration": 6.479
+  },
+  {
+    "text": "building dense dynamic forest with all",
+    "start": 205.36,
+    "duration": 6.4
+  },
+  {
+    "text": "needed pipelines to support it along all",
+    "start": 208.879,
+    "duration": 6.0
+  },
+  {
+    "text": "the render passes with all the pipelines",
+    "start": 211.76,
+    "duration": 5.92
+  },
+  {
+    "text": "to alter the asset and assemble the",
+    "start": 214.879,
+    "duration": 6.161
+  },
+  {
+    "text": "scene. We especially focused on spruce",
+    "start": 217.68,
+    "duration": 5.919
+  },
+  {
+    "text": "trees. It is not only because it's one",
+    "start": 221.04,
+    "duration": 4.8
+  },
+  {
+    "text": "of the most common tree types in a",
+    "start": 223.599,
+    "duration": 4.241
+  },
+  {
+    "text": "Witcher home country, but also because",
+    "start": 225.84,
+    "duration": 4.72
+  },
+  {
+    "text": "this is one of the most challenging uh",
+    "start": 227.84,
+    "duration": 5.759
+  },
+  {
+    "text": "three tree three species we can have.",
+    "start": 230.56,
+    "duration": 5.28
+  },
+  {
+    "text": "We knew that we have to be able to build",
+    "start": 233.599,
+    "duration": 5.041
+  },
+  {
+    "text": "it at scale. The demo run showcases just",
+    "start": 235.84,
+    "duration": 5.599
+  },
+  {
+    "text": "a fraction of the world we built of the",
+    "start": 238.64,
+    "duration": 5.12
+  },
+  {
+    "text": "world we created. We build up the forest",
+    "start": 241.439,
+    "duration": 5.201
+  },
+  {
+    "text": "up to horizon with many organic",
+    "start": 243.76,
+    "duration": 5.92
+  },
+  {
+    "text": "beautiful and vibrant spots.",
+    "start": 246.64,
+    "duration": 5.599
+  },
+  {
+    "text": "But we still have been able to provide a",
+    "start": 249.68,
+    "duration": 5.199
+  },
+  {
+    "text": "hitchfree experience to fulfill this",
+    "start": 252.239,
+    "duration": 5.201
+  },
+  {
+    "text": "roaming Witcher fantasy we have where",
+    "start": 254.879,
+    "duration": 4.64
+  },
+  {
+    "text": "the technical limitations do not",
+    "start": 257.44,
+    "duration": 5.44
+  },
+  {
+    "text": "interfere with the joy of the copyright.",
+    "start": 259.519,
+    "duration": 6.081
+  },
+  {
+    "text": "So when we finally approach the Vest we",
+    "start": 262.88,
+    "duration": 4.56
+  },
+  {
+    "text": "can present you with the place that",
+    "start": 265.6,
+    "duration": 4.319
+  },
+  {
+    "text": "seems to have a life of its own where",
+    "start": 267.44,
+    "duration": 5.6
+  },
+  {
+    "text": "the Siri is just a visitor but she still",
+    "start": 269.919,
+    "duration": 6.241
+  },
+  {
+    "text": "can cross her paths with NPC's daily",
+    "start": 273.04,
+    "duration": 4.8
+  },
+  {
+    "text": "routines.",
+    "start": 276.16,
+    "duration": 4.319
+  },
+  {
+    "text": "We knew it will be only possible if we",
+    "start": 277.84,
+    "duration": 4.799
+  },
+  {
+    "text": "will focus on better hardware",
+    "start": 280.479,
+    "duration": 5.681
+  },
+  {
+    "text": "utilization. We spent a lot of time on",
+    "start": 282.639,
+    "duration": 5.441
+  },
+  {
+    "text": "removing things from the critical path",
+    "start": 286.16,
+    "duration": 4.319
+  },
+  {
+    "text": "and running them as synchronously but",
+    "start": 288.08,
+    "duration": 4.96
+  },
+  {
+    "text": "also in parallel.",
+    "start": 290.479,
+    "duration": 4.641
+  },
+  {
+    "text": "We have been working on the technical",
+    "start": 293.04,
+    "duration": 5.2
+  },
+  {
+    "text": "demo but the technology we are trying to",
+    "start": 295.12,
+    "duration": 6.079
+  },
+  {
+    "text": "build is meant for for a full-fledged",
+    "start": 298.24,
+    "duration": 5.28
+  },
+  {
+    "text": "Witcher game. So we had to ensure that",
+    "start": 301.199,
+    "duration": 4.961
+  },
+  {
+    "text": "we know how we will be able to scale",
+    "start": 303.52,
+    "duration": 5.519
+  },
+  {
+    "text": "into full gameplay features. We built",
+    "start": 306.16,
+    "duration": 5.92
+  },
+  {
+    "text": "with consoles limitation in mind but all",
+    "start": 309.039,
+    "duration": 5.761
+  },
+  {
+    "text": "the changes we with it will benefit PC",
+    "start": 312.08,
+    "duration": 5.839
+  },
+  {
+    "text": "on or any future hardware.",
+    "start": 314.8,
+    "duration": 7.04
+  },
+  {
+    "text": "So how we approach that when you build a",
+    "start": 317.919,
+    "duration": 6.081
+  },
+  {
+    "text": "open world experience one of the most",
+    "start": 321.84,
+    "duration": 4.32
+  },
+  {
+    "text": "important concept is budgeting. When",
+    "start": 324.0,
+    "duration": 5.36
+  },
+  {
+    "text": "running at 60 fps we have just 16.6 6",
+    "start": 326.16,
+    "duration": 5.92
+  },
+  {
+    "text": "millisecond to simulate the scene. We",
+    "start": 329.36,
+    "duration": 6.24
+  },
+  {
+    "text": "have 16.6 millisecond to prepare the",
+    "start": 332.08,
+    "duration": 6.88
+  },
+  {
+    "text": "data for the GPU and then 16.6",
+    "start": 335.6,
+    "duration": 5.76
+  },
+  {
+    "text": "millisecond to render the scene in the",
+    "start": 338.96,
+    "duration": 5.36
+  },
+  {
+    "text": "best quality we possibly can. Our role",
+    "start": 341.36,
+    "duration": 7.119
+  },
+  {
+    "text": "as engineers is to help our gameplay and",
+    "start": 344.32,
+    "duration": 6.64
+  },
+  {
+    "text": "art departments to understand the scene",
+    "start": 348.479,
+    "duration": 5.28
+  },
+  {
+    "text": "they are trying to build on what engine",
+    "start": 350.96,
+    "duration": 5.6
+  },
+  {
+    "text": "features they should focus so they can",
+    "start": 353.759,
+    "duration": 5.121
+  },
+  {
+    "text": "magnify the artistic vision they have",
+    "start": 356.56,
+    "duration": 5.44
+  },
+  {
+    "text": "without sacrificing the image quality",
+    "start": 358.88,
+    "duration": 5.52
+  },
+  {
+    "text": "and frame rate.",
+    "start": 362.0,
+    "duration": 4.56
+  },
+  {
+    "text": "In case of our demo we can recognize at",
+    "start": 364.4,
+    "duration": 4.96
+  },
+  {
+    "text": "least two major scene types. The first",
+    "start": 366.56,
+    "duration": 6.4
+  },
+  {
+    "text": "one is cover wilderness. It is full of",
+    "start": 369.36,
+    "duration": 6.72
+  },
+  {
+    "text": "natural moving foliage, full of details,",
+    "start": 372.96,
+    "duration": 5.76
+  },
+  {
+    "text": "density with gorgeous lightning and",
+    "start": 376.08,
+    "duration": 5.6
+  },
+  {
+    "text": "crisp shadows. It heavily relies on",
+    "start": 378.72,
+    "duration": 5.52
+  },
+  {
+    "text": "volutric effects for immersion and to",
+    "start": 381.68,
+    "duration": 5.12
+  },
+  {
+    "text": "evoke the sense of wonder.",
+    "start": 384.24,
+    "duration": 6.0
+  },
+  {
+    "text": "But it's also a significant part of the",
+    "start": 386.8,
+    "duration": 6.0
+  },
+  {
+    "text": "long vista shot in the world that has to",
+    "start": 390.24,
+    "duration": 5.04
+  },
+  {
+    "text": "invite you to explore. We had to be able",
+    "start": 392.8,
+    "duration": 5.679
+  },
+  {
+    "text": "to build it at scale carefully balancing",
+    "start": 395.28,
+    "duration": 6.08
+  },
+  {
+    "text": "handcrafted areas with offline and",
+    "start": 398.479,
+    "duration": 5.361
+  },
+  {
+    "text": "runtime PCG scattering. We have to",
+    "start": 401.36,
+    "duration": 4.16
+  },
+  {
+    "text": "ensure that the traveling is not the",
+    "start": 403.84,
+    "duration": 5.6
+  },
+  {
+    "text": "chore but rather a smooth experience.",
+    "start": 405.52,
+    "duration": 6.239
+  },
+  {
+    "text": "The second scene type we have is our",
+    "start": 409.44,
+    "duration": 5.199
+  },
+  {
+    "text": "wildest market. The whole area is with",
+    "start": 411.759,
+    "duration": 5.28
+  },
+  {
+    "text": "much shorter vision range. We focus",
+    "start": 414.639,
+    "duration": 6.56
+  },
+  {
+    "text": "there on NPC on the quality of the",
+    "start": 417.039,
+    "duration": 6.56
+  },
+  {
+    "text": "animation and the simulation of their",
+    "start": 421.199,
+    "duration": 4.881
+  },
+  {
+    "text": "daily routines. We want to ensure the",
+    "start": 423.599,
+    "duration": 5.681
+  },
+  {
+    "text": "quality of animation allows us to",
+    "start": 426.08,
+    "duration": 6.16
+  },
+  {
+    "text": "present them and put them into situation",
+    "start": 429.28,
+    "duration": 4.96
+  },
+  {
+    "text": "when where we can have dynamic",
+    "start": 432.24,
+    "duration": 4.0
+  },
+  {
+    "text": "interactions.",
+    "start": 434.24,
+    "duration": 3.92
+  },
+  {
+    "text": "But the tech demo is not only about",
+    "start": 436.24,
+    "duration": 3.679
+  },
+  {
+    "text": "balancing those features and picking",
+    "start": 438.16,
+    "duration": 4.0
+  },
+  {
+    "text": "battles. It's also about pushing for",
+    "start": 439.919,
+    "duration": 5.201
+  },
+  {
+    "text": "things that we couldn't afford before.",
+    "start": 442.16,
+    "duration": 5.84
+  },
+  {
+    "text": "sometimes due to hardware limitation,",
+    "start": 445.12,
+    "duration": 4.479
+  },
+  {
+    "text": "sometimes due to limitation of the",
+    "start": 448.0,
+    "duration": 4.479
+  },
+  {
+    "text": "implementation itself. To make that",
+    "start": 449.599,
+    "duration": 4.961
+  },
+  {
+    "text": "happen, we prepared a lot of the tech",
+    "start": 452.479,
+    "duration": 5.521
+  },
+  {
+    "text": "that will be showcased on amest Orlando.",
+    "start": 454.56,
+    "duration": 5.84
+  },
+  {
+    "text": "And I highly recommend at least those",
+    "start": 458.0,
+    "duration": 4.8
+  },
+  {
+    "text": "three talks that will go deeper into",
+    "start": 460.4,
+    "duration": 4.079
+  },
+  {
+    "text": "things that we wouldn't be able to",
+    "start": 462.8,
+    "duration": 4.959
+  },
+  {
+    "text": "explore today.",
+    "start": 464.479,
+    "duration": 5.921
+  },
+  {
+    "text": "But now I would like to take you behind",
+    "start": 467.759,
+    "duration": 5.761
+  },
+  {
+    "text": "the scene of our most CPU intensive",
+    "start": 470.4,
+    "duration": 5.84
+  },
+  {
+    "text": "frames where we have our market beat",
+    "start": 473.52,
+    "duration": 5.92
+  },
+  {
+    "text": "with 300 NPCs",
+    "start": 476.24,
+    "duration": 6.56
+  },
+  {
+    "text": "but the topic it's going to be very",
+    "start": 479.44,
+    "duration": 6.24
+  },
+  {
+    "text": "complex and we won't be able to get into",
+    "start": 482.8,
+    "duration": 5.36
+  },
+  {
+    "text": "a lot of details. I will showcase the",
+    "start": 485.68,
+    "duration": 4.799
+  },
+  {
+    "text": "annual insight frame but the frame",
+    "start": 488.16,
+    "duration": 5.68
+  },
+  {
+    "text": "itself won't tell you much. Before we",
+    "start": 490.479,
+    "duration": 5.921
+  },
+  {
+    "text": "jump into those details, I will try to",
+    "start": 493.84,
+    "duration": 4.88
+  },
+  {
+    "text": "make a short breakdown with high level",
+    "start": 496.4,
+    "duration": 5.199
+  },
+  {
+    "text": "approach what you're going to see in the",
+    "start": 498.72,
+    "duration": 5.199
+  },
+  {
+    "text": "final picture.",
+    "start": 501.599,
+    "duration": 5.28
+  },
+  {
+    "text": "I will I will I will start with those",
+    "start": 503.919,
+    "duration": 4.56
+  },
+  {
+    "text": "threads.",
+    "start": 506.879,
+    "duration": 4.241
+  },
+  {
+    "text": "Every line represents single threat of",
+    "start": 508.479,
+    "duration": 4.161
+  },
+  {
+    "text": "execution.",
+    "start": 511.12,
+    "duration": 4.719
+  },
+  {
+    "text": "And we also we have our GPU that renders",
+    "start": 512.64,
+    "duration": 6.56
+  },
+  {
+    "text": "the scene. In case of our demo, we run",
+    "start": 515.839,
+    "duration": 5.841
+  },
+  {
+    "text": "configuration in in which game thread is",
+    "start": 519.2,
+    "duration": 5.84
+  },
+  {
+    "text": "simulating frame number n.",
+    "start": 521.68,
+    "duration": 5.52
+  },
+  {
+    "text": "Render frame is frame behind with n",
+    "start": 525.04,
+    "duration": 5.84
+  },
+  {
+    "text": "minus one and GPU runs two frames",
+    "start": 527.2,
+    "duration": 7.28
+  },
+  {
+    "text": "behind. This setup was needed for us to",
+    "start": 530.88,
+    "duration": 7.04
+  },
+  {
+    "text": "ensure that we handle any unexpected one",
+    "start": 534.48,
+    "duration": 6.16
+  },
+  {
+    "text": "frame hitch that you can always expect",
+    "start": 537.92,
+    "duration": 5.359
+  },
+  {
+    "text": "in open world games.",
+    "start": 540.64,
+    "duration": 4.8
+  },
+  {
+    "text": "But diving into game game frame",
+    "start": 543.279,
+    "duration": 5.161
+  },
+  {
+    "text": "execution",
+    "start": 545.44,
+    "duration": 3.0
+  },
+  {
+    "text": "everything starts with QIX. It handles",
+    "start": 548.64,
+    "duration": 5.52
+  },
+  {
+    "text": "execution orders kickstart all the game",
+    "start": 551.6,
+    "duration": 5.679
+  },
+  {
+    "text": "system that need to run this frame",
+    "start": 554.16,
+    "duration": 6.0
+  },
+  {
+    "text": "and immediately our demo execution",
+    "start": 557.279,
+    "duration": 5.68
+  },
+  {
+    "text": "separates execution in two ways. We have",
+    "start": 560.16,
+    "duration": 5.52
+  },
+  {
+    "text": "classical game thread objects update but",
+    "start": 562.959,
+    "duration": 6.641
+  },
+  {
+    "text": "also at the same time we span dozen of",
+    "start": 565.68,
+    "duration": 6.8
+  },
+  {
+    "text": "update game update state tasks that run",
+    "start": 569.6,
+    "duration": 5.28
+  },
+  {
+    "text": "concurrently on the worker threads.",
+    "start": 572.48,
+    "duration": 6.64
+  },
+  {
+    "text": "Those tasks govern the demo AI behavior",
+    "start": 574.88,
+    "duration": 7.04
+  },
+  {
+    "text": "smart objects interactions and are even",
+    "start": 579.12,
+    "duration": 6.64
+  },
+  {
+    "text": "responsible for ticking skeletal meshes.",
+    "start": 581.92,
+    "duration": 6.96
+  },
+  {
+    "text": "With skeletal mesh updates, time comes",
+    "start": 585.76,
+    "duration": 6.079
+  },
+  {
+    "text": "for animation update. And to finish",
+    "start": 588.88,
+    "duration": 5.519
+  },
+  {
+    "text": "animation update, we have to inject",
+    "start": 591.839,
+    "duration": 5.201
+  },
+  {
+    "text": "finalization task back into the game",
+    "start": 594.399,
+    "duration": 5.44
+  },
+  {
+    "text": "thread to synchronize the state with all",
+    "start": 597.04,
+    "duration": 6.32
+  },
+  {
+    "text": "other engine systems",
+    "start": 599.839,
+    "duration": 6.241
+  },
+  {
+    "text": "with root with root motion extracted",
+    "start": 603.36,
+    "duration": 5.039
+  },
+  {
+    "text": "from those animation. Now we can combine",
+    "start": 606.08,
+    "duration": 6.72
+  },
+  {
+    "text": "it with uh pathfinding information.",
+    "start": 608.399,
+    "duration": 6.081
+  },
+  {
+    "text": "We can combine it with path finding",
+    "start": 612.8,
+    "duration": 5.52
+  },
+  {
+    "text": "information that will interl with",
+    "start": 614.48,
+    "duration": 6.0
+  },
+  {
+    "text": "animation evaluation process. It it",
+    "start": 618.32,
+    "duration": 3.84
+  },
+  {
+    "text": "doesn't have to wait for all animation",
+    "start": 620.48,
+    "duration": 5.52
+  },
+  {
+    "text": "to finish. And once again to finalize",
+    "start": 622.16,
+    "duration": 6.239
+  },
+  {
+    "text": "that process, we inject finalization",
+    "start": 626.0,
+    "duration": 6.8
+  },
+  {
+    "text": "tasks back back to the game thread.",
+    "start": 628.399,
+    "duration": 6.721
+  },
+  {
+    "text": "Now time comes for game thread system",
+    "start": 632.8,
+    "duration": 5.92
+  },
+  {
+    "text": "updates. We still rely on quite a few",
+    "start": 635.12,
+    "duration": 5.44
+  },
+  {
+    "text": "game thread bound systems like",
+    "start": 638.72,
+    "duration": 4.32
+  },
+  {
+    "text": "streaming, ECG generation and timer",
+    "start": 640.56,
+    "duration": 4.399
+  },
+  {
+    "text": "manager.",
+    "start": 643.04,
+    "duration": 4.96
+  },
+  {
+    "text": "And finally, game simulation ends with",
+    "start": 644.959,
+    "duration": 5.761
+  },
+  {
+    "text": "end of frame update where we prepare all",
+    "start": 648.0,
+    "duration": 5.92
+  },
+  {
+    "text": "the data that is needed to send to the",
+    "start": 650.72,
+    "duration": 8.0
+  },
+  {
+    "text": "GPU and we kickstart next frame.",
+    "start": 653.92,
+    "duration": 7.52
+  },
+  {
+    "text": "But now we will start process and",
+    "start": 658.72,
+    "duration": 4.96
+  },
+  {
+    "text": "preparing the data on the ren render",
+    "start": 661.44,
+    "duration": 6.079
+  },
+  {
+    "text": "thread side. Starting with just received",
+    "start": 663.68,
+    "duration": 5.44
+  },
+  {
+    "text": "data from the game thread, all the",
+    "start": 667.519,
+    "duration": 3.681
+  },
+  {
+    "text": "updates we got.",
+    "start": 669.12,
+    "duration": 5.68
+  },
+  {
+    "text": "Next, we update the visibility lumen. We",
+    "start": 671.2,
+    "duration": 6.96
+  },
+  {
+    "text": "update the GPU data for our primitives",
+    "start": 674.8,
+    "duration": 6.08
+  },
+  {
+    "text": "and we start building render dependency",
+    "start": 678.16,
+    "duration": 4.48
+  },
+  {
+    "text": "graph.",
+    "start": 680.88,
+    "duration": 4.72
+  },
+  {
+    "text": "We execute bunch of rate tracing related",
+    "start": 682.64,
+    "duration": 5.759
+  },
+  {
+    "text": "processing tasks that once again can run",
+    "start": 685.6,
+    "duration": 5.2
+  },
+  {
+    "text": "in parallel.",
+    "start": 688.399,
+    "duration": 7.041
+  },
+  {
+    "text": "And finally, we execute RDG that will",
+    "start": 690.8,
+    "duration": 10.24
+  },
+  {
+    "text": "span dozens of parallel execution tasks.",
+    "start": 695.44,
+    "duration": 8.56
+  },
+  {
+    "text": "If we look at this frame from the",
+    "start": 701.04,
+    "duration": 5.6
+  },
+  {
+    "text": "perspective of just that slide, it all",
+    "start": 704.0,
+    "duration": 5.839
+  },
+  {
+    "text": "seems quite straightfor straightforward.",
+    "start": 706.64,
+    "duration": 5.759
+  },
+  {
+    "text": "But we omit here a lot of the details.",
+    "start": 709.839,
+    "duration": 4.481
+  },
+  {
+    "text": "Some of the things are hidden behind the",
+    "start": 712.399,
+    "duration": 4.801
+  },
+  {
+    "text": "abstraction and we don't include here",
+    "start": 714.32,
+    "duration": 5.44
+  },
+  {
+    "text": "things like a synchronous loading audio",
+    "start": 717.2,
+    "duration": 6.16
+  },
+  {
+    "text": "system or texture streaming or physics.",
+    "start": 719.76,
+    "duration": 5.84
+  },
+  {
+    "text": "We wouldn't be able to fit them all in",
+    "start": 723.36,
+    "duration": 5.039
+  },
+  {
+    "text": "such a simplified slide. The full frame",
+    "start": 725.6,
+    "duration": 5.28
+  },
+  {
+    "text": "with all important information looks",
+    "start": 728.399,
+    "duration": 5.281
+  },
+  {
+    "text": "more like that.",
+    "start": 730.88,
+    "duration": 4.639
+  },
+  {
+    "text": "So",
+    "start": 733.68,
+    "duration": 4.48
+  },
+  {
+    "text": "I am really hopeful that you are already",
+    "start": 735.519,
+    "duration": 5.841
+  },
+  {
+    "text": "familiar with anal insight and with the",
+    "start": 738.16,
+    "duration": 6.0
+  },
+  {
+    "text": "context of the bit we just did I would",
+    "start": 741.36,
+    "duration": 5.599
+  },
+  {
+    "text": "try to retrace my steps and go through",
+    "start": 744.16,
+    "duration": 6.64
+  },
+  {
+    "text": "the frame once again.",
+    "start": 746.959,
+    "duration": 7.361
+  },
+  {
+    "text": "So we have our QIX in case of our demo",
+    "start": 750.8,
+    "duration": 7.039
+  },
+  {
+    "text": "it manages 2.5,000 of the ticking",
+    "start": 754.32,
+    "duration": 7.28
+  },
+  {
+    "text": "objects across all those threads. It it",
+    "start": 757.839,
+    "duration": 6.081
+  },
+  {
+    "text": "it was possible due to changes to dis",
+    "start": 761.6,
+    "duration": 4.88
+  },
+  {
+    "text": "tick task t task manager that added the",
+    "start": 763.92,
+    "duration": 5.68
+  },
+  {
+    "text": "better support for worker thread ticking",
+    "start": 766.48,
+    "duration": 5.84
+  },
+  {
+    "text": "objects",
+    "start": 769.6,
+    "duration": 5.6
+  },
+  {
+    "text": "and we handle state update. To handle",
+    "start": 772.32,
+    "duration": 5.6
+  },
+  {
+    "text": "state update we heavily rely on mass",
+    "start": 775.2,
+    "duration": 5.68
+  },
+  {
+    "text": "systems. It is responsible for things",
+    "start": 777.92,
+    "duration": 6.8
+  },
+  {
+    "text": "like LOD changes for NPC pathf finding",
+    "start": 780.88,
+    "duration": 6.16
+  },
+  {
+    "text": "smart objects interactions",
+    "start": 784.72,
+    "duration": 5.359
+  },
+  {
+    "text": "but special attention deserves mass to",
+    "start": 787.04,
+    "duration": 6.72
+  },
+  {
+    "text": "anim next translator. This processor it",
+    "start": 790.079,
+    "duration": 7.121
+  },
+  {
+    "text": "on it's it's not only governs the update",
+    "start": 793.76,
+    "duration": 6.0
+  },
+  {
+    "text": "for the skeletal meshes but also it",
+    "start": 797.2,
+    "duration": 6.079
+  },
+  {
+    "text": "replaces a thick behavior for our crowd",
+    "start": 799.76,
+    "duration": 6.16
+  },
+  {
+    "text": "skeletal meshes. it it is responsible",
+    "start": 803.279,
+    "duration": 6.161
+  },
+  {
+    "text": "for taking over 800 skeletal meshes each",
+    "start": 805.92,
+    "duration": 5.76
+  },
+  {
+    "text": "frame.",
+    "start": 809.44,
+    "duration": 4.32
+  },
+  {
+    "text": "To evaluate the animation, we are",
+    "start": 811.68,
+    "duration": 5.839
+  },
+  {
+    "text": "relying on an Unreal Unreal animation",
+    "start": 813.76,
+    "duration": 6.319
+  },
+  {
+    "text": "framework or as it was previously known",
+    "start": 817.519,
+    "duration": 4.801
+  },
+  {
+    "text": "anime next. It is responsible for",
+    "start": 820.079,
+    "duration": 5.76
+  },
+  {
+    "text": "evaluating over 400 animation graphs for",
+    "start": 822.32,
+    "duration": 6.48
+  },
+  {
+    "text": "our scala meshes with around 54",
+    "start": 825.839,
+    "duration": 5.281
+  },
+  {
+    "text": "milliseconds of parallel work and just",
+    "start": 828.8,
+    "duration": 6.0
+  },
+  {
+    "text": "2.6 6 milliseconds of finalization tasks",
+    "start": 831.12,
+    "duration": 6.56
+  },
+  {
+    "text": "on a game thread. And once again, I",
+    "start": 834.8,
+    "duration": 5.68
+  },
+  {
+    "text": "recommend dedicated session for this.",
+    "start": 837.68,
+    "duration": 6.08
+  },
+  {
+    "text": "Coming next, mover with simulation in",
+    "start": 840.48,
+    "duration": 6.159
+  },
+  {
+    "text": "parallel and just 1.3 millisecond of",
+    "start": 843.76,
+    "duration": 5.92
+  },
+  {
+    "text": "finalization tasks on a game thread with",
+    "start": 846.639,
+    "duration": 4.961
+  },
+  {
+    "text": "yet another reminder that there is a",
+    "start": 849.68,
+    "duration": 4.399
+  },
+  {
+    "text": "talk that you should definitely see on",
+    "start": 851.6,
+    "duration": 5.359
+  },
+  {
+    "text": "the topic.",
+    "start": 854.079,
+    "duration": 5.921
+  },
+  {
+    "text": "And we end game frame with end of frame",
+    "start": 856.959,
+    "duration": 5.68
+  },
+  {
+    "text": "updates. The implementation was",
+    "start": 860.0,
+    "duration": 5.76
+  },
+  {
+    "text": "overhauled and now it should scale much",
+    "start": 862.639,
+    "duration": 7.44
+  },
+  {
+    "text": "better with CPU core count",
+    "start": 865.76,
+    "duration": 6.8
+  },
+  {
+    "text": "for rendering update. I will just point",
+    "start": 870.079,
+    "duration": 5.521
+  },
+  {
+    "text": "out skeletal mesh update optimization",
+    "start": 872.56,
+    "duration": 5.44
+  },
+  {
+    "text": "with processing removed from critical",
+    "start": 875.6,
+    "duration": 5.52
+  },
+  {
+    "text": "path. It we have just around 3",
+    "start": 878.0,
+    "duration": 5.76
+  },
+  {
+    "text": "millisecond of processing on the render",
+    "start": 881.12,
+    "duration": 5.36
+  },
+  {
+    "text": "thread side for all the crowd related",
+    "start": 883.76,
+    "duration": 5.36
+  },
+  {
+    "text": "skeletal meshes.",
+    "start": 886.48,
+    "duration": 5.68
+  },
+  {
+    "text": "The whole demo uses rate tracing. So to",
+    "start": 889.12,
+    "duration": 6.0
+  },
+  {
+    "text": "be able to catch up with our fastmoving",
+    "start": 892.16,
+    "duration": 5.679
+  },
+  {
+    "text": "scenes where we have around 20,000",
+    "start": 895.12,
+    "duration": 5.04
+  },
+  {
+    "text": "primitives and hundreds of thousands of",
+    "start": 897.839,
+    "duration": 5.44
+  },
+  {
+    "text": "instances, we had to ensure that the",
+    "start": 900.16,
+    "duration": 5.84
+  },
+  {
+    "text": "gathering and the processing of data is",
+    "start": 903.279,
+    "duration": 5.281
+  },
+  {
+    "text": "up to the task. The execution was",
+    "start": 906.0,
+    "duration": 5.199
+  },
+  {
+    "text": "removed from the critical path and now",
+    "start": 908.56,
+    "duration": 5.6
+  },
+  {
+    "text": "run in parallel.",
+    "start": 911.199,
+    "duration": 5.921
+  },
+  {
+    "text": "Changes were made to increase render",
+    "start": 914.16,
+    "duration": 6.0
+  },
+  {
+    "text": "dependency graph processing capabilities",
+    "start": 917.12,
+    "duration": 5.6
+  },
+  {
+    "text": "and again especially worth noting",
+    "start": 920.16,
+    "duration": 5.119
+  },
+  {
+    "text": "parallel command list translations with",
+    "start": 922.72,
+    "duration": 5.6
+  },
+  {
+    "text": "over 16 milliseconds worth of work. We",
+    "start": 925.279,
+    "duration": 5.761
+  },
+  {
+    "text": "would be ari bound if those changes",
+    "start": 928.32,
+    "duration": 6.28
+  },
+  {
+    "text": "wouldn't be implemented",
+    "start": 931.04,
+    "duration": 3.56
+  },
+  {
+    "text": "with 13 CPU cores available for us on",
+    "start": 935.199,
+    "duration": 6.961
+  },
+  {
+    "text": "the console. We uh here each is",
+    "start": 939.12,
+    "duration": 5.44
+  },
+  {
+    "text": "represented as a color where basically",
+    "start": 942.16,
+    "duration": 5.359
+  },
+  {
+    "text": "the color represent occupancy of the",
+    "start": 944.56,
+    "duration": 6.0
+  },
+  {
+    "text": "given CPU at that specific moment. We",
+    "start": 947.519,
+    "duration": 6.56
+  },
+  {
+    "text": "reached around 87%",
+    "start": 950.56,
+    "duration": 7.92
+  },
+  {
+    "text": "utilization of all available cycles.",
+    "start": 954.079,
+    "duration": 6.161
+  },
+  {
+    "text": "Of course, we still have room for",
+    "start": 958.48,
+    "duration": 4.159
+  },
+  {
+    "text": "improvement. At the beginning of the",
+    "start": 960.24,
+    "duration": 4.8
+  },
+  {
+    "text": "frame, we cannot too late saturate",
+    "start": 962.639,
+    "duration": 6.0
+  },
+  {
+    "text": "workers with uh tasks. And again during",
+    "start": 965.04,
+    "duration": 6.479
+  },
+  {
+    "text": "physics we wait for those final",
+    "start": 968.639,
+    "duration": 5.841
+  },
+  {
+    "text": "animation and mo movement updates to",
+    "start": 971.519,
+    "duration": 5.601
+  },
+  {
+    "text": "finish before we will we go to the next",
+    "start": 974.48,
+    "duration": 5.76
+  },
+  {
+    "text": "stage of the of the frame. And finally",
+    "start": 977.12,
+    "duration": 7.519
+  },
+  {
+    "text": "there is this short space when we submit",
+    "start": 980.24,
+    "duration": 6.719
+  },
+  {
+    "text": "where where we have archi submission",
+    "start": 984.639,
+    "duration": 7.081
+  },
+  {
+    "text": "tasks nothing interle with that.",
+    "start": 986.959,
+    "duration": 4.761
+  },
+  {
+    "text": "But going back to our frame how we can",
+    "start": 991.759,
+    "duration": 5.921
+  },
+  {
+    "text": "put the game play into that specific",
+    "start": 995.36,
+    "duration": 5.44
+  },
+  {
+    "text": "frame. In this scenario we have actually",
+    "start": 997.68,
+    "duration": 5.68
+  },
+  {
+    "text": "on the game thread around 2 millisecond",
+    "start": 1000.8,
+    "duration": 4.64
+  },
+  {
+    "text": "worth of weights",
+    "start": 1003.36,
+    "duration": 5.279
+  },
+  {
+    "text": "um on our critical path. As we wait for",
+    "start": 1005.44,
+    "duration": 5.44
+  },
+  {
+    "text": "those animations and mo movement",
+    "start": 1008.639,
+    "duration": 5.2
+  },
+  {
+    "text": "finalization tasks, combining it with",
+    "start": 1010.88,
+    "duration": 6.879
+  },
+  {
+    "text": "13% of the CPU utilization left, we can",
+    "start": 1013.839,
+    "duration": 6.401
+  },
+  {
+    "text": "we can redirect some of those cycles",
+    "start": 1017.759,
+    "duration": 5.281
+  },
+  {
+    "text": "into limited gameplay functionality,",
+    "start": 1020.24,
+    "duration": 5.92
+  },
+  {
+    "text": "pushing the animation evaluation towards",
+    "start": 1023.04,
+    "duration": 7.519
+  },
+  {
+    "text": "this gap that we have during physics.",
+    "start": 1026.16,
+    "duration": 7.519
+  },
+  {
+    "text": "But if we change the balance of the",
+    "start": 1030.559,
+    "duration": 7.201
+  },
+  {
+    "text": "crowd a bit, if we just see 200 instead",
+    "start": 1033.679,
+    "duration": 7.601
+  },
+  {
+    "text": "of 300 NPCs, we greatly reduce the game",
+    "start": 1037.76,
+    "duration": 7.6
+  },
+  {
+    "text": "frame time to just 11.5 milliseconds as",
+    "start": 1041.28,
+    "duration": 6.639
+  },
+  {
+    "text": "we reduce the number of evaluated",
+    "start": 1045.36,
+    "duration": 6.64
+  },
+  {
+    "text": "animations and we remove the real NPCs",
+    "start": 1047.919,
+    "duration": 9.401
+  },
+  {
+    "text": "and just simulate so-called steps.",
+    "start": 1052.0,
+    "duration": 5.32
+  },
+  {
+    "text": "If we count all the empty spaces that we",
+    "start": 1060.88,
+    "duration": 5.6
+  },
+  {
+    "text": "have during the frame, it's like 1",
+    "start": 1064.4,
+    "duration": 4.96
+  },
+  {
+    "text": "millcond worth of weights. And at the",
+    "start": 1066.48,
+    "duration": 5.28
+  },
+  {
+    "text": "end, we actually have 5 milliseconds",
+    "start": 1069.36,
+    "duration": 6.8
+  },
+  {
+    "text": "left before our 16.6 millisecond limit",
+    "start": 1071.76,
+    "duration": 6.32
+  },
+  {
+    "text": "surpasses.",
+    "start": 1076.16,
+    "duration": 4.24
+  },
+  {
+    "text": "And actually, if you look at the whole",
+    "start": 1078.08,
+    "duration": 8.16
+  },
+  {
+    "text": "CPU utilization, it gets lower to 60%.",
+    "start": 1080.4,
+    "duration": 9.04
+  },
+  {
+    "text": "We have those four quite a big gaps that",
+    "start": 1086.24,
+    "duration": 6.4
+  },
+  {
+    "text": "we see uh that we represent here on the",
+    "start": 1089.44,
+    "duration": 7.68
+  },
+  {
+    "text": "on the uh presentation and we believe we",
+    "start": 1092.64,
+    "duration": 7.6
+  },
+  {
+    "text": "can build much more complex gameplay",
+    "start": 1097.12,
+    "duration": 7.04
+  },
+  {
+    "text": "systems due to those additional cycles.",
+    "start": 1100.24,
+    "duration": 6.559
+  },
+  {
+    "text": "We see this as a good prognosis that",
+    "start": 1104.16,
+    "duration": 5.519
+  },
+  {
+    "text": "what we built has a room to grow and we",
+    "start": 1106.799,
+    "duration": 5.921
+  },
+  {
+    "text": "have some ideas how we can implement",
+    "start": 1109.679,
+    "duration": 7.961
+  },
+  {
+    "text": "much deeper gameplay systems.",
+    "start": 1112.72,
+    "duration": 4.92
+  },
+  {
+    "text": "All right, let's take a look at what we",
+    "start": 1118.16,
+    "duration": 4.56
+  },
+  {
+    "text": "did to achieve 60 on the GPU on a",
+    "start": 1120.64,
+    "duration": 3.919
+  },
+  {
+    "text": "current gen console with Lumen using",
+    "start": 1122.72,
+    "duration": 3.52
+  },
+  {
+    "text": "hardware rate tracing for both global",
+    "start": 1124.559,
+    "duration": 4.0
+  },
+  {
+    "text": "illumination and reflections. And we",
+    "start": 1126.24,
+    "duration": 4.0
+  },
+  {
+    "text": "made it even more challenging by adding",
+    "start": 1128.559,
+    "duration": 4.0
+  },
+  {
+    "text": "a dense dynamic force into the mix with",
+    "start": 1130.24,
+    "duration": 4.64
+  },
+  {
+    "text": "all rendered with brand new nanite tech.",
+    "start": 1132.559,
+    "duration": 4.0
+  },
+  {
+    "text": "So now that you have Unreal Insights",
+    "start": 1134.88,
+    "duration": 3.36
+  },
+  {
+    "text": "seared into your retinas from that last",
+    "start": 1136.559,
+    "duration": 3.681
+  },
+  {
+    "text": "section, let's take a look at some more",
+    "start": 1138.24,
+    "duration": 4.24
+  },
+  {
+    "text": "Unreal Insights.",
+    "start": 1140.24,
+    "duration": 4.319
+  },
+  {
+    "text": "Let's start with a very important topic",
+    "start": 1142.48,
+    "duration": 4.72
+  },
+  {
+    "text": "for performance profiling. So profiling",
+    "start": 1144.559,
+    "duration": 4.561
+  },
+  {
+    "text": "and knowing your data is key for",
+    "start": 1147.2,
+    "duration": 4.0
+  },
+  {
+    "text": "understanding how to optimize. This",
+    "start": 1149.12,
+    "duration": 4.32
+  },
+  {
+    "text": "begins with having all of the data. So",
+    "start": 1151.2,
+    "duration": 3.359
+  },
+  {
+    "text": "with 5.6,",
+    "start": 1153.44,
+    "duration": 3.44
+  },
+  {
+    "text": "We bring you a brand new GPU profiler",
+    "start": 1154.559,
+    "duration": 4.401
+  },
+  {
+    "text": "backend which is more accurate and can",
+    "start": 1156.88,
+    "duration": 3.52
+  },
+  {
+    "text": "report much more data to Unreal",
+    "start": 1158.96,
+    "duration": 4.0
+  },
+  {
+    "text": "Insights. So this screenshot here shows",
+    "start": 1160.4,
+    "duration": 4.8
+  },
+  {
+    "text": "you two GPU tracks in our insights where",
+    "start": 1162.96,
+    "duration": 3.839
+  },
+  {
+    "text": "you might have been used to only seeing",
+    "start": 1165.2,
+    "duration": 4.56
+  },
+  {
+    "text": "one. Top one is the graphics queue. This",
+    "start": 1166.799,
+    "duration": 5.361
+  },
+  {
+    "text": "is what you were used to and the bottom",
+    "start": 1169.76,
+    "duration": 4.4
+  },
+  {
+    "text": "one is the asynchronous compute queue.",
+    "start": 1172.16,
+    "duration": 3.84
+  },
+  {
+    "text": "So this was not possible to display",
+    "start": 1174.16,
+    "duration": 4.32
+  },
+  {
+    "text": "before and it wasn't really telling the",
+    "start": 1176.0,
+    "duration": 5.52
+  },
+  {
+    "text": "whole story then but now it is.",
+    "start": 1178.48,
+    "duration": 5.12
+  },
+  {
+    "text": "Another new feature are these red arrows",
+    "start": 1181.52,
+    "duration": 3.76
+  },
+  {
+    "text": "showing dependencies between selected",
+    "start": 1183.6,
+    "duration": 3.6
+  },
+  {
+    "text": "events. So you can clearly understand",
+    "start": 1185.28,
+    "duration": 4.72
+  },
+  {
+    "text": "the flow and scheduling of GPU events",
+    "start": 1187.2,
+    "duration": 5.52
+  },
+  {
+    "text": "between cues throughout the frame. The",
+    "start": 1190.0,
+    "duration": 3.919
+  },
+  {
+    "text": "improvements here aren't limited to",
+    "start": 1192.72,
+    "duration": 3.28
+  },
+  {
+    "text": "Unreal insights either. Like you'll get",
+    "start": 1193.919,
+    "duration": 4.401
+  },
+  {
+    "text": "better GPU reporting from stat GPU and",
+    "start": 1196.0,
+    "duration": 4.88
+  },
+  {
+    "text": "profile GPU or you'll be able to see",
+    "start": 1198.32,
+    "duration": 4.239
+  },
+  {
+    "text": "weights and other timings instead of",
+    "start": 1200.88,
+    "duration": 4.08
+  },
+  {
+    "text": "just the raw executed time. So if you're",
+    "start": 1202.559,
+    "duration": 4.0
+  },
+  {
+    "text": "not using Unreal insights for GPU",
+    "start": 1204.96,
+    "duration": 5.04
+  },
+  {
+    "text": "profiling, this is the time to start.",
+    "start": 1206.559,
+    "duration": 5.201
+  },
+  {
+    "text": "And let's talk about this asynchronous",
+    "start": 1210.0,
+    "duration": 3.679
+  },
+  {
+    "text": "compute or async compute as I'm going to",
+    "start": 1211.76,
+    "duration": 4.4
+  },
+  {
+    "text": "call it. The very basic explanation is",
+    "start": 1213.679,
+    "duration": 4.321
+  },
+  {
+    "text": "that you can optionally launch compute",
+    "start": 1216.16,
+    "duration": 3.759
+  },
+  {
+    "text": "work on a separate queue next to the",
+    "start": 1218.0,
+    "duration": 4.64
+  },
+  {
+    "text": "graphics queue. This will give the GPU a",
+    "start": 1219.919,
+    "duration": 5.201
+  },
+  {
+    "text": "chance to overlap compute with graphics",
+    "start": 1222.64,
+    "duration": 4.399
+  },
+  {
+    "text": "work when there's room for both. And",
+    "start": 1225.12,
+    "duration": 4.32
+  },
+  {
+    "text": "often times there is room since, you",
+    "start": 1227.039,
+    "duration": 4.401
+  },
+  {
+    "text": "know, shaders are never really scheduled",
+    "start": 1229.44,
+    "duration": 4.719
+  },
+  {
+    "text": "with 100% resource utilization. So this",
+    "start": 1231.44,
+    "duration": 4.239
+  },
+  {
+    "text": "gives us a way to shorten the overall",
+    "start": 1234.159,
+    "duration": 4.4
+  },
+  {
+    "text": "frame by going a little wider.",
+    "start": 1235.679,
+    "duration": 4.641
+  },
+  {
+    "text": "Now with this crash course in our bag,",
+    "start": 1238.559,
+    "duration": 3.681
+  },
+  {
+    "text": "let's compare a frame with and without",
+    "start": 1240.32,
+    "duration": 4.719
+  },
+  {
+    "text": "the async compute enabled.",
+    "start": 1242.24,
+    "duration": 4.48
+  },
+  {
+    "text": "So at a quick glance, we see that this",
+    "start": 1245.039,
+    "duration": 3.441
+  },
+  {
+    "text": "gives us about 1 and a half milliseconds",
+    "start": 1246.72,
+    "duration": 4.88
+  },
+  {
+    "text": "back in total. Not bad. And if we start",
+    "start": 1248.48,
+    "duration": 5.12
+  },
+  {
+    "text": "looking a little closer, we can see that",
+    "start": 1251.6,
+    "duration": 4.0
+  },
+  {
+    "text": "many of the passes that we offload to",
+    "start": 1253.6,
+    "duration": 3.68
+  },
+  {
+    "text": "async compute start at very different",
+    "start": 1255.6,
+    "duration": 3.439
+  },
+  {
+    "text": "locations in the frame and they run for",
+    "start": 1257.28,
+    "duration": 4.0
+  },
+  {
+    "text": "much longer. But that's okay as we're",
+    "start": 1259.039,
+    "duration": 3.76
+  },
+  {
+    "text": "now running together with other things.",
+    "start": 1261.28,
+    "duration": 3.759
+  },
+  {
+    "text": "We're overlapping this work. This makes",
+    "start": 1262.799,
+    "duration": 4.161
+  },
+  {
+    "text": "it harder to compare the cost of",
+    "start": 1265.039,
+    "duration": 4.081
+  },
+  {
+    "text": "individual passes. of course since they",
+    "start": 1266.96,
+    "duration": 3.52
+  },
+  {
+    "text": "kind of grow and they overlap with other",
+    "start": 1269.12,
+    "duration": 2.559
+  },
+  {
+    "text": "things. So if you want to profile",
+    "start": 1270.48,
+    "duration": 2.88
+  },
+  {
+    "text": "individual passes and know how long they",
+    "start": 1271.679,
+    "duration": 3.281
+  },
+  {
+    "text": "take, you still have to disable async",
+    "start": 1273.36,
+    "duration": 3.76
+  },
+  {
+    "text": "compute for this.",
+    "start": 1274.96,
+    "duration": 3.52
+  },
+  {
+    "text": "You can also see that this allows the",
+    "start": 1277.12,
+    "duration": 3.36
+  },
+  {
+    "text": "cues to start at different points.",
+    "start": 1278.48,
+    "duration": 3.84
+  },
+  {
+    "text": "Meaning some of the work of this frame",
+    "start": 1280.48,
+    "duration": 3.92
+  },
+  {
+    "text": "could have started overlapping work from",
+    "start": 1282.32,
+    "duration": 4.56
+  },
+  {
+    "text": "previous frames. And that way we can",
+    "start": 1284.4,
+    "duration": 4.8
+  },
+  {
+    "text": "utilize a GPU to its fullest even at the",
+    "start": 1286.88,
+    "duration": 3.44
+  },
+  {
+    "text": "very end of the frame where it's",
+    "start": 1289.2,
+    "duration": 2.719
+  },
+  {
+    "text": "typically hard to find meaningfully",
+    "start": 1290.32,
+    "duration": 4.0
+  },
+  {
+    "text": "overlapping work.",
+    "start": 1291.919,
+    "duration": 4.481
+  },
+  {
+    "text": "So now for this particular demo, what's",
+    "start": 1294.32,
+    "duration": 4.0
+  },
+  {
+    "text": "what's new? So if we zoom in a little",
+    "start": 1296.4,
+    "duration": 4.0
+  },
+  {
+    "text": "bit, we can see this part here where we",
+    "start": 1298.32,
+    "duration": 4.4
+  },
+  {
+    "text": "now run the GPU skin cache jobs on the",
+    "start": 1300.4,
+    "duration": 3.84
+  },
+  {
+    "text": "on the async compute Q. That's the",
+    "start": 1302.72,
+    "duration": 5.36
+  },
+  {
+    "text": "underlined at the bottom there.",
+    "start": 1304.24,
+    "duration": 6.319
+  },
+  {
+    "text": "And as the arrows show, this work",
+    "start": 1308.08,
+    "duration": 3.839
+  },
+  {
+    "text": "overlaps with the previous frame",
+    "start": 1310.559,
+    "duration": 2.961
+  },
+  {
+    "text": "post-processing where we didn't really",
+    "start": 1311.919,
+    "duration": 4.401
+  },
+  {
+    "text": "have anything to overlap before. We also",
+    "start": 1313.52,
+    "duration": 4.399
+  },
+  {
+    "text": "offloaded a few more things to the async",
+    "start": 1316.32,
+    "duration": 3.839
+  },
+  {
+    "text": "compute like the wind simulation and we",
+    "start": 1317.919,
+    "duration": 3.361
+  },
+  {
+    "text": "actually ended up moving lumen",
+    "start": 1320.159,
+    "duration": 3.441
+  },
+  {
+    "text": "reflections back to the graphics queue",
+    "start": 1321.28,
+    "duration": 3.84
+  },
+  {
+    "text": "which in our case saved us time because",
+    "start": 1323.6,
+    "duration": 3.04
+  },
+  {
+    "text": "we didn't have enough stuff to overlap",
+    "start": 1325.12,
+    "duration": 4.08
+  },
+  {
+    "text": "with. So that's a lesson to simply not",
+    "start": 1326.64,
+    "duration": 4.159
+  },
+  {
+    "text": "throw everything at the async compute",
+    "start": 1329.2,
+    "duration": 3.359
+  },
+  {
+    "text": "queue because if there's nothing to",
+    "start": 1330.799,
+    "duration": 3.441
+  },
+  {
+    "text": "overlap with it can actually backfire",
+    "start": 1332.559,
+    "duration": 3.441
+  },
+  {
+    "text": "and cost you some extra. So it's",
+    "start": 1334.24,
+    "duration": 3.12
+  },
+  {
+    "text": "important that you profile your",
+    "start": 1336.0,
+    "duration": 2.88
+  },
+  {
+    "text": "particular setup and you can now do that",
+    "start": 1337.36,
+    "duration": 4.4
+  },
+  {
+    "text": "with a new GPU profiler.",
+    "start": 1338.88,
+    "duration": 4.96
+  },
+  {
+    "text": "So recommended that you take a look at",
+    "start": 1341.76,
+    "duration": 3.36
+  },
+  {
+    "text": "how things are scheduled in your",
+    "start": 1343.84,
+    "duration": 2.719
+  },
+  {
+    "text": "particular case with your particular",
+    "start": 1345.12,
+    "duration": 3.76
+  },
+  {
+    "text": "content. It might be different from what",
+    "start": 1346.559,
+    "duration": 4.0
+  },
+  {
+    "text": "we've set up the defaults to be. And a",
+    "start": 1348.88,
+    "duration": 3.76
+  },
+  {
+    "text": "lot of the rendering features have sears",
+    "start": 1350.559,
+    "duration": 4.801
+  },
+  {
+    "text": "to control the enable disable async",
+    "start": 1352.64,
+    "duration": 3.919
+  },
+  {
+    "text": "compute. So you can actually play with",
+    "start": 1355.36,
+    "duration": 2.72
+  },
+  {
+    "text": "this yourself and look at insights now",
+    "start": 1356.559,
+    "duration": 4.081
+  },
+  {
+    "text": "to see how things are scheduled. Note",
+    "start": 1358.08,
+    "duration": 4.8
+  },
+  {
+    "text": "that not every GPU supports this, but",
+    "start": 1360.64,
+    "duration": 4.399
+  },
+  {
+    "text": "all the newer GPUs, new consoles, most",
+    "start": 1362.88,
+    "duration": 4.4
+  },
+  {
+    "text": "previous gen consoles, etc. do. So it's",
+    "start": 1365.039,
+    "duration": 4.481
+  },
+  {
+    "text": "a pretty good idea to have a look. All",
+    "start": 1367.28,
+    "duration": 4.96
+  },
+  {
+    "text": "right, now it's time for some features.",
+    "start": 1369.52,
+    "duration": 4.24
+  },
+  {
+    "text": "Um, the be at the beginning of the",
+    "start": 1372.24,
+    "duration": 4.4
+  },
+  {
+    "text": "project, right, we we saw it was pretty",
+    "start": 1373.76,
+    "duration": 5.12
+  },
+  {
+    "text": "obvious that rendering foliage the old",
+    "start": 1376.64,
+    "duration": 4.24
+  },
+  {
+    "text": "way wasn't really an option. As the team",
+    "start": 1378.88,
+    "duration": 4.08
+  },
+  {
+    "text": "were facing pretty tough requirements",
+    "start": 1380.88,
+    "duration": 4.24
+  },
+  {
+    "text": "with high density forest in an open",
+    "start": 1382.96,
+    "duration": 3.92
+  },
+  {
+    "text": "world with quality never seen before,",
+    "start": 1385.12,
+    "duration": 5.76
+  },
+  {
+    "text": "all running at 60 fps on a PS5.",
+    "start": 1386.88,
+    "duration": 5.76
+  },
+  {
+    "text": "So, let me first explain here how the",
+    "start": 1390.88,
+    "duration": 4.88
+  },
+  {
+    "text": "old way didn't really cut it. So, Nanite",
+    "start": 1392.64,
+    "duration": 4.96
+  },
+  {
+    "text": "doesn't like alpha mask geometry as it",
+    "start": 1395.76,
+    "duration": 3.52
+  },
+  {
+    "text": "introduces overdraw in addition to",
+    "start": 1397.6,
+    "duration": 3.199
+  },
+  {
+    "text": "having to execute a potentially",
+    "start": 1399.28,
+    "duration": 4.879
+  },
+  {
+    "text": "expensive opacity mask function. Also,",
+    "start": 1400.799,
+    "duration": 5.681
+  },
+  {
+    "text": "we don't want to be forced to render",
+    "start": 1404.159,
+    "duration": 4.081
+  },
+  {
+    "text": "foliage as flat cards now that we know",
+    "start": 1406.48,
+    "duration": 5.439
+  },
+  {
+    "text": "what Nan is capable of complexity wise.",
+    "start": 1408.24,
+    "duration": 5.36
+  },
+  {
+    "text": "So, what about triangles then? Well,",
+    "start": 1411.919,
+    "duration": 3.281
+  },
+  {
+    "text": "imagine hundreds of thousands of pine",
+    "start": 1413.6,
+    "duration": 4.16
+  },
+  {
+    "text": "needles modeled as geometry. That would",
+    "start": 1415.2,
+    "duration": 4.959
+  },
+  {
+    "text": "cause suboptimal cluster coloring and",
+    "start": 1417.76,
+    "duration": 4.32
+  },
+  {
+    "text": "poor simplification in the distance with",
+    "start": 1420.159,
+    "duration": 4.0
+  },
+  {
+    "text": "today's nanites. I know we have the",
+    "start": 1422.08,
+    "duration": 4.079
+  },
+  {
+    "text": "preserve area option on the mesh for to",
+    "start": 1424.159,
+    "duration": 3.361
+  },
+  {
+    "text": "combat some of this, but it isn't",
+    "start": 1426.159,
+    "duration": 3.681
+  },
+  {
+    "text": "perfect. And also, if these were all",
+    "start": 1427.52,
+    "duration": 4.32
+  },
+  {
+    "text": "unique triangles in a tree, the the",
+    "start": 1429.84,
+    "duration": 3.52
+  },
+  {
+    "text": "assets on disk would be absolutely",
+    "start": 1431.84,
+    "duration": 3.44
+  },
+  {
+    "text": "massive.",
+    "start": 1433.36,
+    "duration": 3.679
+  },
+  {
+    "text": "And for wind, we used to rely on world",
+    "start": 1435.28,
+    "duration": 4.16
+  },
+  {
+    "text": "position offset in the material to move",
+    "start": 1437.039,
+    "duration": 4.241
+  },
+  {
+    "text": "leaves and branches. I'm sure many of",
+    "start": 1439.44,
+    "duration": 3.04
+  },
+  {
+    "text": "you are doing that right now. It's",
+    "start": 1441.28,
+    "duration": 3.2
+  },
+  {
+    "text": "pretty it's pretty common. Well, it's",
+    "start": 1442.48,
+    "duration": 3.679
+  },
+  {
+    "text": "not a great match for nanite either",
+    "start": 1444.48,
+    "duration": 3.76
+  },
+  {
+    "text": "since it adds pervert calculations and",
+    "start": 1446.159,
+    "duration": 3.921
+  },
+  {
+    "text": "forces sub-optimal cluster bounds. Since",
+    "start": 1448.24,
+    "duration": 3.12
+  },
+  {
+    "text": "we don't know how a material will move",
+    "start": 1450.08,
+    "duration": 2.56
+  },
+  {
+    "text": "the verdicts, we have to be very",
+    "start": 1451.36,
+    "duration": 3.04
+  },
+  {
+    "text": "conservative in how those bounds are set",
+    "start": 1452.64,
+    "duration": 3.279
+  },
+  {
+    "text": "up.",
+    "start": 1454.4,
+    "duration": 3.519
+  },
+  {
+    "text": "So what's the solution? Well, the team",
+    "start": 1455.919,
+    "duration": 3.841
+  },
+  {
+    "text": "embarked on a lengthy research effort",
+    "start": 1457.919,
+    "duration": 4.161
+  },
+  {
+    "text": "and ended up with this, an all new",
+    "start": 1459.76,
+    "duration": 4.799
+  },
+  {
+    "text": "rendering pipeline within Nanite to",
+    "start": 1462.08,
+    "duration": 4.479
+  },
+  {
+    "text": "enable rendering fully modeled trees",
+    "start": 1464.559,
+    "duration": 4.081
+  },
+  {
+    "text": "down to the individual pine needle while",
+    "start": 1466.559,
+    "duration": 4.081
+  },
+  {
+    "text": "also scaling to large open worlds, be",
+    "start": 1468.64,
+    "duration": 4.0
+  },
+  {
+    "text": "memory efficient, performant, highly",
+    "start": 1470.64,
+    "duration": 4.639
+  },
+  {
+    "text": "dynamic, and without the need for LODs.",
+    "start": 1472.64,
+    "duration": 5.279
+  },
+  {
+    "text": "You know, the the nanite way.",
+    "start": 1475.279,
+    "duration": 5.28
+  },
+  {
+    "text": "So to combat dis disc size constraints,",
+    "start": 1477.919,
+    "duration": 4.721
+  },
+  {
+    "text": "the new nanite assemblies feature allows",
+    "start": 1480.559,
+    "duration": 3.761
+  },
+  {
+    "text": "us to build up a tree out of a set of",
+    "start": 1482.64,
+    "duration": 3.68
+  },
+  {
+    "text": "instance branches, which means we can",
+    "start": 1484.32,
+    "duration": 4.8
+  },
+  {
+    "text": "have very large trees with very large",
+    "start": 1486.32,
+    "duration": 5.599
+  },
+  {
+    "text": "detail quality at the same time.",
+    "start": 1489.12,
+    "duration": 4.88
+  },
+  {
+    "text": "In the distance, Net will start",
+    "start": 1491.919,
+    "duration": 4.0
+  },
+  {
+    "text": "rendering voxels instead of triangles",
+    "start": 1494.0,
+    "duration": 4.0
+  },
+  {
+    "text": "seamlessly to solve the problem of",
+    "start": 1495.919,
+    "duration": 4.24
+  },
+  {
+    "text": "rendering dense and dynamic aggregate",
+    "start": 1498.0,
+    "duration": 5.2
+  },
+  {
+    "text": "triangle meshes. These voxels are",
+    "start": 1500.159,
+    "duration": 4.961
+  },
+  {
+    "text": "imperceptible to the eye as they will be",
+    "start": 1503.2,
+    "duration": 3.839
+  },
+  {
+    "text": "pixel sized",
+    "start": 1505.12,
+    "duration": 5.439
+  },
+  {
+    "text": "and wind is simulated through",
+    "start": 1507.039,
+    "duration": 5.361
+  },
+  {
+    "text": "a bone hierarchy as these are skeletal",
+    "start": 1510.559,
+    "duration": 4.401
+  },
+  {
+    "text": "meshes. No more one position offset and",
+    "start": 1512.4,
+    "duration": 4.24
+  },
+  {
+    "text": "we can use fixed function nanite with",
+    "start": 1514.96,
+    "duration": 4.16
+  },
+  {
+    "text": "optimal cluster bounds.",
+    "start": 1516.64,
+    "duration": 5.44
+  },
+  {
+    "text": "So here's a brief demonstration of a",
+    "start": 1519.12,
+    "duration": 4.64
+  },
+  {
+    "text": "tree created and rendered with this",
+    "start": 1522.08,
+    "duration": 4.079
+  },
+  {
+    "text": "tech. This is the pine tree we showcase",
+    "start": 1523.76,
+    "duration": 4.64
+  },
+  {
+    "text": "in the demo up close. We call this the",
+    "start": 1526.159,
+    "duration": 4.241
+  },
+  {
+    "text": "hero tree. And as you can see, going",
+    "start": 1528.4,
+    "duration": 4.0
+  },
+  {
+    "text": "from up close with individual pine",
+    "start": 1530.4,
+    "duration": 4.399
+  },
+  {
+    "text": "needles to far away is seamless. And",
+    "start": 1532.4,
+    "duration": 3.68
+  },
+  {
+    "text": "while you can't tell, it's actually",
+    "start": 1534.799,
+    "duration": 3.441
+  },
+  {
+    "text": "rendered using voxels once clusters",
+    "start": 1536.08,
+    "duration": 4.4
+  },
+  {
+    "text": "become small enough. So this allows us",
+    "start": 1538.24,
+    "duration": 4.0
+  },
+  {
+    "text": "to keep that voluometric tree look and",
+    "start": 1540.48,
+    "duration": 4.24
+  },
+  {
+    "text": "not have to resort to billboards or LODs",
+    "start": 1542.24,
+    "duration": 5.52
+  },
+  {
+    "text": "or anything baked in the distance.",
+    "start": 1544.72,
+    "duration": 5.04
+  },
+  {
+    "text": "And here it is again in its full glory.",
+    "start": 1547.76,
+    "duration": 3.84
+  },
+  {
+    "text": "It's made out of 41 million total",
+    "start": 1549.76,
+    "duration": 3.76
+  },
+  {
+    "text": "triangles across 12 instance assembly",
+    "start": 1551.6,
+    "duration": 4.72
+  },
+  {
+    "text": "parts with a total of over 2,000 of",
+    "start": 1553.52,
+    "duration": 5.44
+  },
+  {
+    "text": "these assembly parts instanced. and uh",
+    "start": 1556.32,
+    "duration": 5.52
+  },
+  {
+    "text": "all that with 850 bones in the skeleton.",
+    "start": 1558.96,
+    "duration": 4.719
+  },
+  {
+    "text": "And to the left here, you can see uh two",
+    "start": 1561.84,
+    "duration": 3.439
+  },
+  {
+    "text": "examples of what an assembly part might",
+    "start": 1563.679,
+    "duration": 3.681
+  },
+  {
+    "text": "look like for this tree. Um and you",
+    "start": 1565.279,
+    "duration": 4.081
+  },
+  {
+    "text": "know, you just use these parts to build",
+    "start": 1567.36,
+    "duration": 4.319
+  },
+  {
+    "text": "up the tree.",
+    "start": 1569.36,
+    "duration": 4.0
+  },
+  {
+    "text": "And let's look at some numbers from the",
+    "start": 1571.679,
+    "duration": 4.161
+  },
+  {
+    "text": "demo. So this here is the Vista shot of",
+    "start": 1573.36,
+    "duration": 5.28
+  },
+  {
+    "text": "the forest that you saw in the demo. In",
+    "start": 1575.84,
+    "duration": 4.4
+  },
+  {
+    "text": "this Vista shot, we are rendering about",
+    "start": 1578.64,
+    "duration": 3.84
+  },
+  {
+    "text": "20,000 trees with a source triangle",
+    "start": 1580.24,
+    "duration": 3.6
+  },
+  {
+    "text": "count in the billions, right? But it",
+    "start": 1582.48,
+    "duration": 2.4
+  },
+  {
+    "text": "doesn't really matter because this is",
+    "start": 1583.84,
+    "duration": 3.76
+  },
+  {
+    "text": "all nanites. Uh across the whole valley,",
+    "start": 1584.88,
+    "duration": 5.2
+  },
+  {
+    "text": "we scattered over 100,000 trees and",
+    "start": 1587.6,
+    "duration": 4.559
+  },
+  {
+    "text": "shrubs across 28 species and multiple",
+    "start": 1590.08,
+    "duration": 4.64
+  },
+  {
+    "text": "biomes. And tree assets actually range",
+    "start": 1592.159,
+    "duration": 4.481
+  },
+  {
+    "text": "from, you know, the 1 million to above",
+    "start": 1594.72,
+    "duration": 3.439
+  },
+  {
+    "text": "10 million triangles in the general",
+    "start": 1596.64,
+    "duration": 3.919
+  },
+  {
+    "text": "case. They're a little bit smaller than",
+    "start": 1598.159,
+    "duration": 4.64
+  },
+  {
+    "text": "the the hero tree. And they have several",
+    "start": 1600.559,
+    "duration": 3.681
+  },
+  {
+    "text": "hundred skeletal bones depending on the",
+    "start": 1602.799,
+    "duration": 2.801
+  },
+  {
+    "text": "species and the size of the tree, of",
+    "start": 1604.24,
+    "duration": 3.52
+  },
+  {
+    "text": "course. And this is where nanite",
+    "start": 1605.6,
+    "duration": 4.079
+  },
+  {
+    "text": "assemblies really help as we can reuse",
+    "start": 1607.76,
+    "duration": 5.84
+  },
+  {
+    "text": "branches and twigs to build up a tree.",
+    "start": 1609.679,
+    "duration": 6.641
+  },
+  {
+    "text": "And the wind simulation is driven by a",
+    "start": 1613.6,
+    "duration": 5.439
+  },
+  {
+    "text": "wind compute shader which runs wind",
+    "start": 1616.32,
+    "duration": 4.16
+  },
+  {
+    "text": "procedurally and applies it to the",
+    "start": 1619.039,
+    "duration": 3.441
+  },
+  {
+    "text": "skeletal bones. In this shot, we're",
+    "start": 1620.48,
+    "duration": 4.079
+  },
+  {
+    "text": "updating about 100,000 bones, which",
+    "start": 1622.48,
+    "duration": 4.16
+  },
+  {
+    "text": "takes about.1 milliseconds on the GPU.",
+    "start": 1624.559,
+    "duration": 4.881
+  },
+  {
+    "text": "So, it's very fast and scalable.",
+    "start": 1626.64,
+    "duration": 4.399
+  },
+  {
+    "text": "And animation stops being applied",
+    "start": 1629.44,
+    "duration": 3.599
+  },
+  {
+    "text": "automatically on trees below a certain",
+    "start": 1631.039,
+    "duration": 3.601
+  },
+  {
+    "text": "screen size, which effectively brings",
+    "start": 1633.039,
+    "duration": 3.041
+  },
+  {
+    "text": "the wind pretty far out into the",
+    "start": 1634.64,
+    "duration": 3.36
+  },
+  {
+    "text": "distance for better immersion. This also",
+    "start": 1636.08,
+    "duration": 3.68
+  },
+  {
+    "text": "applies to grass and shrubs, which are",
+    "start": 1638.0,
+    "duration": 4.4
+  },
+  {
+    "text": "also skeletal meshes.",
+    "start": 1639.76,
+    "duration": 4.24
+  },
+  {
+    "text": "So, a little disclaimer here before we",
+    "start": 1642.4,
+    "duration": 3.6
+  },
+  {
+    "text": "move on. Uh, since this tech needs a",
+    "start": 1644.0,
+    "duration": 3.2
+  },
+  {
+    "text": "little more time in the oven, it isn't",
+    "start": 1646.0,
+    "duration": 3.36
+  },
+  {
+    "text": "coming with 5.6, but will instead soon",
+    "start": 1647.2,
+    "duration": 4.24
+  },
+  {
+    "text": "drop into UEFI mainline in preparation",
+    "start": 1649.36,
+    "duration": 4.64
+  },
+  {
+    "text": "for 5.7. So, the early birds out there",
+    "start": 1651.44,
+    "duration": 4.719
+  },
+  {
+    "text": "could give it a try on GitHub. And once",
+    "start": 1654.0,
+    "duration": 4.0
+  },
+  {
+    "text": "ready though, we plan on supporting it",
+    "start": 1656.159,
+    "duration": 3.601
+  },
+  {
+    "text": "with great example content directly",
+    "start": 1658.0,
+    "duration": 3.279
+  },
+  {
+    "text": "downloadable from Fab. So, you can start",
+    "start": 1659.76,
+    "duration": 5.2
+  },
+  {
+    "text": "playing with it when available.",
+    "start": 1661.279,
+    "duration": 6.0
+  },
+  {
+    "text": "And while we're on the topic of Nanite,",
+    "start": 1664.96,
+    "duration": 3.76
+  },
+  {
+    "text": "I'd like to drop some performance tips",
+    "start": 1667.279,
+    "duration": 2.88
+  },
+  {
+    "text": "and tricks that helps us along the way",
+    "start": 1668.72,
+    "duration": 4.079
+  },
+  {
+    "text": "on this project. So, Nanite renders a",
+    "start": 1670.159,
+    "duration": 4.161
+  },
+  {
+    "text": "lot of its triangles using software",
+    "start": 1672.799,
+    "duration": 3.201
+  },
+  {
+    "text": "rasterization in compute. That's kind of",
+    "start": 1674.32,
+    "duration": 4.0
+  },
+  {
+    "text": "the secret sauce. So, we're not bound by",
+    "start": 1676.0,
+    "duration": 4.159
+  },
+  {
+    "text": "the hardware requirements of having to",
+    "start": 1678.32,
+    "duration": 4.4
+  },
+  {
+    "text": "calculate derivatives using a 2x2 pixel",
+    "start": 1680.159,
+    "duration": 5.52
+  },
+  {
+    "text": "helper lane. What we do is we figure out",
+    "start": 1682.72,
+    "duration": 4.64
+  },
+  {
+    "text": "if the material can safely use an",
+    "start": 1685.679,
+    "duration": 3.521
+  },
+  {
+    "text": "analytical derivatives instead and",
+    "start": 1687.36,
+    "duration": 3.28
+  },
+  {
+    "text": "therefore skip launching any of these",
+    "start": 1689.2,
+    "duration": 3.76
+  },
+  {
+    "text": "helper lanes. And this can drastically",
+    "start": 1690.64,
+    "duration": 3.68
+  },
+  {
+    "text": "reduce the number of pixel shader",
+    "start": 1692.96,
+    "duration": 3.52
+  },
+  {
+    "text": "invocations in your frame, but only if",
+    "start": 1694.32,
+    "duration": 4.4
+  },
+  {
+    "text": "your material can support this. And you",
+    "start": 1696.48,
+    "duration": 3.76
+  },
+  {
+    "text": "can check what objects are contributing",
+    "start": 1698.72,
+    "duration": 3.199
+  },
+  {
+    "text": "to launching these helper lanes with",
+    "start": 1700.24,
+    "duration": 3.919
+  },
+  {
+    "text": "this debug view mode here. And nanite",
+    "start": 1701.919,
+    "duration": 4.24
+  },
+  {
+    "text": "stats will also show you the number of",
+    "start": 1704.159,
+    "duration": 3.681
+  },
+  {
+    "text": "helper lanes that you have going on. And",
+    "start": 1706.159,
+    "duration": 3.441
+  },
+  {
+    "text": "getting this close to zero is is the",
+    "start": 1707.84,
+    "duration": 4.24
+  },
+  {
+    "text": "goal.",
+    "start": 1709.6,
+    "duration": 5.12
+  },
+  {
+    "text": "Also, whenever possible, try to avoid",
+    "start": 1712.08,
+    "duration": 4.0
+  },
+  {
+    "text": "making your nanite materials",
+    "start": 1714.72,
+    "duration": 3.76
+  },
+  {
+    "text": "programmable. This is when you are using",
+    "start": 1716.08,
+    "duration": 4.88
+  },
+  {
+    "text": "material features which aren't supported",
+    "start": 1718.48,
+    "duration": 4.079
+  },
+  {
+    "text": "in the fixed function fast path of",
+    "start": 1720.96,
+    "duration": 4.4
+  },
+  {
+    "text": "nanite like masked world position offset",
+    "start": 1722.559,
+    "duration": 5.84
+  },
+  {
+    "text": "or pixel depth offset. You can easily",
+    "start": 1725.36,
+    "duration": 4.96
+  },
+  {
+    "text": "see what is taking the fast path or not",
+    "start": 1728.399,
+    "duration": 3.841
+  },
+  {
+    "text": "using this debug view mode here. Pixel",
+    "start": 1730.32,
+    "duration": 4.0
+  },
+  {
+    "text": "programmable.",
+    "start": 1732.24,
+    "duration": 4.48
+  },
+  {
+    "text": "And be careful with nanotellation. It's",
+    "start": 1734.32,
+    "duration": 4.239
+  },
+  {
+    "text": "not free.",
+    "start": 1736.72,
+    "duration": 3.679
+  },
+  {
+    "text": "Make sure you set up your displacement",
+    "start": 1738.559,
+    "duration": 3.84
+  },
+  {
+    "text": "range in the material that fits the",
+    "start": 1740.399,
+    "duration": 3.28
+  },
+  {
+    "text": "actually intended displacement.",
+    "start": 1742.399,
+    "duration": 2.561
+  },
+  {
+    "text": "Otherwise, you're just expanding the",
+    "start": 1743.679,
+    "duration": 2.801
+  },
+  {
+    "text": "bounds of these clusters more than",
+    "start": 1744.96,
+    "duration": 4.0
+  },
+  {
+    "text": "necessary. In this demo, we actually",
+    "start": 1746.48,
+    "duration": 4.319
+  },
+  {
+    "text": "only use nanite tessellation for the",
+    "start": 1748.96,
+    "duration": 4.16
+  },
+  {
+    "text": "landscape.",
+    "start": 1750.799,
+    "duration": 4.561
+  },
+  {
+    "text": "And in general, you want your meshes and",
+    "start": 1753.12,
+    "duration": 4.32
+  },
+  {
+    "text": "materials to support nanite as much as",
+    "start": 1755.36,
+    "duration": 4.0
+  },
+  {
+    "text": "possible where it makes sense. So be on",
+    "start": 1757.44,
+    "duration": 3.44
+  },
+  {
+    "text": "the lookout for objects which might not",
+    "start": 1759.36,
+    "duration": 3.199
+  },
+  {
+    "text": "have been set up correctly for that. And",
+    "start": 1760.88,
+    "duration": 3.6
+  },
+  {
+    "text": "you can use the nanite mask view mode.",
+    "start": 1762.559,
+    "duration": 3.281
+  },
+  {
+    "text": "So green is good in this case. And",
+    "start": 1764.48,
+    "duration": 2.72
+  },
+  {
+    "text": "there's some water there which doesn't",
+    "start": 1765.84,
+    "duration": 4.8
+  },
+  {
+    "text": "support it and some Niagara birds.",
+    "start": 1767.2,
+    "duration": 5.44
+  },
+  {
+    "text": "All right, that's it for nanite. Let's",
+    "start": 1770.64,
+    "duration": 3.44
+  },
+  {
+    "text": "uh look at lumen and hardware rate",
+    "start": 1772.64,
+    "duration": 4.639
+  },
+  {
+    "text": "tracing. So here's a shot in the village",
+    "start": 1774.08,
+    "duration": 4.719
+  },
+  {
+    "text": "showing what the rate tracing scene",
+    "start": 1777.279,
+    "duration": 4.161
+  },
+  {
+    "text": "instances look like. We keep the near",
+    "start": 1778.799,
+    "duration": 4.961
+  },
+  {
+    "text": "field loaded to up about 150 meters",
+    "start": 1781.44,
+    "duration": 4.64
+  },
+  {
+    "text": "which includes landscape, foliage,",
+    "start": 1783.76,
+    "duration": 5.039
+  },
+  {
+    "text": "static and dynamic geometry.",
+    "start": 1786.08,
+    "duration": 4.24
+  },
+  {
+    "text": "We have a rate tracing geometry pool",
+    "start": 1788.799,
+    "duration": 3.521
+  },
+  {
+    "text": "budget of about 400 megabytes but mostly",
+    "start": 1790.32,
+    "duration": 4.8
+  },
+  {
+    "text": "peak around 300. And we budgeted for",
+    "start": 1792.32,
+    "duration": 4.719
+  },
+  {
+    "text": "half a millisecond roughly in rate",
+    "start": 1795.12,
+    "duration": 4.08
+  },
+  {
+    "text": "tracing scene updates on the GPU and",
+    "start": 1797.039,
+    "duration": 6.601
+  },
+  {
+    "text": "it's all running on async compute.",
+    "start": 1799.2,
+    "duration": 4.44
+  },
+  {
+    "text": "And so that's the near field up to 150",
+    "start": 1803.76,
+    "duration": 4.08
+  },
+  {
+    "text": "m. What do we then do beyond that? Well,",
+    "start": 1805.6,
+    "duration": 4.319
+  },
+  {
+    "text": "that's the far field and it's a separate",
+    "start": 1807.84,
+    "duration": 4.24
+  },
+  {
+    "text": "set of proxies far away that we use for",
+    "start": 1809.919,
+    "duration": 4.24
+  },
+  {
+    "text": "tracing faster arrays over longer",
+    "start": 1812.08,
+    "duration": 3.92
+  },
+  {
+    "text": "distances.",
+    "start": 1814.159,
+    "duration": 3.921
+  },
+  {
+    "text": "This is a set of this is a set up as a",
+    "start": 1816.0,
+    "duration": 4.08
+  },
+  {
+    "text": "separate top level acceleration",
+    "start": 1818.08,
+    "duration": 3.92
+  },
+  {
+    "text": "structure. So we can start by tracing",
+    "start": 1820.08,
+    "duration": 3.44
+  },
+  {
+    "text": "the near field here and be smart about",
+    "start": 1822.0,
+    "duration": 3.2
+  },
+  {
+    "text": "it and then decide if we need to go",
+    "start": 1823.52,
+    "duration": 4.8
+  },
+  {
+    "text": "further into the far field. It contains",
+    "start": 1825.2,
+    "duration": 4.64
+  },
+  {
+    "text": "only static geometry. So we don't have",
+    "start": 1828.32,
+    "duration": 3.44
+  },
+  {
+    "text": "to update it every frame. And typically",
+    "start": 1829.84,
+    "duration": 4.24
+  },
+  {
+    "text": "this is stuff like hod or landscape or",
+    "start": 1831.76,
+    "duration": 4.72
+  },
+  {
+    "text": "larger set pieces in general. And in",
+    "start": 1834.08,
+    "duration": 3.76
+  },
+  {
+    "text": "Lumen, we can actually make use of the",
+    "start": 1836.48,
+    "duration": 3.36
+  },
+  {
+    "text": "far field as an optimization. So we've",
+    "start": 1837.84,
+    "duration": 3.76
+  },
+  {
+    "text": "introduced a mode where we can trace",
+    "start": 1839.84,
+    "duration": 4.079
+  },
+  {
+    "text": "only for occlusion in the far field and",
+    "start": 1841.6,
+    "duration": 3.76
+  },
+  {
+    "text": "not have to pay the cost for lighting",
+    "start": 1843.919,
+    "duration": 4.48
+  },
+  {
+    "text": "those hits.",
+    "start": 1845.36,
+    "duration": 4.559
+  },
+  {
+    "text": "So in the village we have another",
+    "start": 1848.399,
+    "duration": 4.081
+  },
+  {
+    "text": "challenge animated characters and there",
+    "start": 1849.919,
+    "duration": 4.961
+  },
+  {
+    "text": "are a lot of them. We can't keep the",
+    "start": 1852.48,
+    "duration": 4.16
+  },
+  {
+    "text": "simply simply keep them static, right?",
+    "start": 1854.88,
+    "duration": 3.36
+  },
+  {
+    "text": "Because they would be tosed in the RT",
+    "start": 1856.64,
+    "duration": 3.6
+  },
+  {
+    "text": "scene and it would mismatch what we see.",
+    "start": 1858.24,
+    "duration": 4.0
+  },
+  {
+    "text": "So what we do is we stagger the updates",
+    "start": 1860.24,
+    "duration": 4.24
+  },
+  {
+    "text": "to about 40,000 dynamic triangles per",
+    "start": 1862.24,
+    "duration": 5.52
+  },
+  {
+    "text": "frame and we update the most important",
+    "start": 1864.48,
+    "duration": 5.439
+  },
+  {
+    "text": "characters only. Uh and these are the",
+    "start": 1867.76,
+    "duration": 4.48
+  },
+  {
+    "text": "ones nearby. So we know that by adding",
+    "start": 1869.919,
+    "duration": 3.521
+  },
+  {
+    "text": "more characters to the scene, we don't",
+    "start": 1872.24,
+    "duration": 3.439
+  },
+  {
+    "text": "blow the budget as as they come on come",
+    "start": 1873.44,
+    "duration": 5.76
+  },
+  {
+    "text": "on screen. Under the hood, there were uh",
+    "start": 1875.679,
+    "duration": 5.521
+  },
+  {
+    "text": "several other improvements in this area",
+    "start": 1879.2,
+    "duration": 4.0
+  },
+  {
+    "text": "as well. So running the GPU skin cache",
+    "start": 1881.2,
+    "duration": 4.16
+  },
+  {
+    "text": "on the async compute is one I mentioned",
+    "start": 1883.2,
+    "duration": 4.479
+  },
+  {
+    "text": "earlier. Another one is actually tying",
+    "start": 1885.36,
+    "duration": 4.96
+  },
+  {
+    "text": "the GPU skin cache to the rate tracing",
+    "start": 1887.679,
+    "duration": 4.961
+  },
+  {
+    "text": "scene updates. That way we don't spend",
+    "start": 1890.32,
+    "duration": 4.0
+  },
+  {
+    "text": "cycles filling up the skin cache with",
+    "start": 1892.64,
+    "duration": 4.08
+  },
+  {
+    "text": "meshes we're not going to use. And",
+    "start": 1894.32,
+    "duration": 4.8
+  },
+  {
+    "text": "landscape it's also a pretty big part of",
+    "start": 1896.72,
+    "duration": 4.0
+  },
+  {
+    "text": "the dynamic instances as you can tell",
+    "start": 1899.12,
+    "duration": 3.279
+  },
+  {
+    "text": "from this debug muote here. Like they're",
+    "start": 1900.72,
+    "duration": 3.92
+  },
+  {
+    "text": "green as well as the characters. It's",
+    "start": 1902.399,
+    "duration": 3.76
+  },
+  {
+    "text": "actually pretty large chunk of the",
+    "start": 1904.64,
+    "duration": 3.2
+  },
+  {
+    "text": "dynamic instance budget. So it has its",
+    "start": 1906.159,
+    "duration": 4.081
+  },
+  {
+    "text": "own time sliced update on LOD changes",
+    "start": 1907.84,
+    "duration": 4.079
+  },
+  {
+    "text": "and in general we have a lower lot for",
+    "start": 1910.24,
+    "duration": 3.36
+  },
+  {
+    "text": "the landscape as well. So it's faster to",
+    "start": 1911.919,
+    "duration": 4.081
+  },
+  {
+    "text": "trace and faster to update.",
+    "start": 1913.6,
+    "duration": 4.799
+  },
+  {
+    "text": "As the dynamic budget is very tight, we",
+    "start": 1916.0,
+    "duration": 4.32
+  },
+  {
+    "text": "opted to not animate the trees in the",
+    "start": 1918.399,
+    "duration": 5.12
+  },
+  {
+    "text": "ray tracing scene. So to make tracing",
+    "start": 1920.32,
+    "duration": 5.359
+  },
+  {
+    "text": "the forest and allow allowing for the",
+    "start": 1923.519,
+    "duration": 3.841
+  },
+  {
+    "text": "right amount of light occlusion, we",
+    "start": 1925.679,
+    "duration": 4.321
+  },
+  {
+    "text": "created a special path for building um",
+    "start": 1927.36,
+    "duration": 4.319
+  },
+  {
+    "text": "rate tracing proxies for foliage",
+    "start": 1930.0,
+    "duration": 4.0
+  },
+  {
+    "text": "specifically. And this effectively takes",
+    "start": 1931.679,
+    "duration": 4.48
+  },
+  {
+    "text": "the source mesh and generates a triangle",
+    "start": 1934.0,
+    "duration": 3.919
+  },
+  {
+    "text": "cloud to match the occlusion density",
+    "start": 1936.159,
+    "duration": 4.321
+  },
+  {
+    "text": "needed for indirect lighting.",
+    "start": 1937.919,
+    "duration": 5.841
+  },
+  {
+    "text": "So for the 41 million triangle hero tree",
+    "start": 1940.48,
+    "duration": 6.4
+  },
+  {
+    "text": "u that can end up with as few as 225",
+    "start": 1943.76,
+    "duration": 4.32
+  },
+  {
+    "text": "triangles in the rate tracing",
+    "start": 1946.88,
+    "duration": 2.799
+  },
+  {
+    "text": "representation you know which does what",
+    "start": 1948.08,
+    "duration": 2.959
+  },
+  {
+    "text": "we need for the lighting and the",
+    "start": 1949.679,
+    "duration": 3.521
+  },
+  {
+    "text": "occlusion but it's obviously not going",
+    "start": 1951.039,
+    "duration": 3.76
+  },
+  {
+    "text": "to look great in a mirror reflection cuz",
+    "start": 1953.2,
+    "duration": 3.76
+  },
+  {
+    "text": "you would see those triangles there. Uh",
+    "start": 1954.799,
+    "duration": 4.321
+  },
+  {
+    "text": "but for our purposes of hitting 60 fps",
+    "start": 1956.96,
+    "duration": 3.92
+  },
+  {
+    "text": "on current gen consoles with a massive",
+    "start": 1959.12,
+    "duration": 3.2
+  },
+  {
+    "text": "forest, this is a pretty good",
+    "start": 1960.88,
+    "duration": 3.2
+  },
+  {
+    "text": "compromise. And even on water",
+    "start": 1962.32,
+    "duration": 3.52
+  },
+  {
+    "text": "reflections actually it looks all right",
+    "start": 1964.08,
+    "duration": 3.28
+  },
+  {
+    "text": "because there's always some movement in",
+    "start": 1965.84,
+    "duration": 4.88
+  },
+  {
+    "text": "there normal maps and waves.",
+    "start": 1967.36,
+    "duration": 5.6
+  },
+  {
+    "text": "So here I highlight the main lumen",
+    "start": 1970.72,
+    "duration": 4.48
+  },
+  {
+    "text": "passes. So we got lumen scene lighting",
+    "start": 1972.96,
+    "duration": 4.64
+  },
+  {
+    "text": "lumen uh screen probe gather lumen",
+    "start": 1975.2,
+    "duration": 5.04
+  },
+  {
+    "text": "reflections just get an idea of where",
+    "start": 1977.6,
+    "duration": 4.72
+  },
+  {
+    "text": "lumen contributes to the frame here. And",
+    "start": 1980.24,
+    "duration": 4.559
+  },
+  {
+    "text": "this is with async compute u disabled.",
+    "start": 1982.32,
+    "duration": 4.079
+  },
+  {
+    "text": "So you actually see the real kind of",
+    "start": 1984.799,
+    "duration": 3.921
+  },
+  {
+    "text": "sizes of these boxes. And there are a",
+    "start": 1986.399,
+    "duration": 4.16
+  },
+  {
+    "text": "few more. Uh these are updating lumen",
+    "start": 1988.72,
+    "duration": 4.079
+  },
+  {
+    "text": "cards. There's a second lumen reflection",
+    "start": 1990.559,
+    "duration": 4.24
+  },
+  {
+    "text": "path inside of single layer water. And I",
+    "start": 1992.799,
+    "duration": 3.921
+  },
+  {
+    "text": "also included the rate tracing scene",
+    "start": 1994.799,
+    "duration": 4.48
+  },
+  {
+    "text": "update here. And as you can see, lumen",
+    "start": 1996.72,
+    "duration": 4.319
+  },
+  {
+    "text": "and hardware rate tracing are central",
+    "start": 1999.279,
+    "duration": 3.601
+  },
+  {
+    "text": "parts of the frame budget. And there's a",
+    "start": 2001.039,
+    "duration": 3.441
+  },
+  {
+    "text": "lot of performance to be gained here by",
+    "start": 2002.88,
+    "duration": 2.88
+  },
+  {
+    "text": "paying attention to your content and",
+    "start": 2004.48,
+    "duration": 4.0
+  },
+  {
+    "text": "setting it up properly.",
+    "start": 2005.76,
+    "duration": 4.72
+  },
+  {
+    "text": "Let's look at a few performance pitfall",
+    "start": 2008.48,
+    "duration": 5.039
+  },
+  {
+    "text": "examples and how we solve them. So",
+    "start": 2010.48,
+    "duration": 5.199
+  },
+  {
+    "text": "here's a view in Vald, the village with",
+    "start": 2013.519,
+    "duration": 4.321
+  },
+  {
+    "text": "various reflective puddles. It's not an",
+    "start": 2015.679,
+    "duration": 4.72
+  },
+  {
+    "text": "uncommon view and Lumen can trace",
+    "start": 2017.84,
+    "duration": 4.64
+  },
+  {
+    "text": "dedicated hardware accelerated rays for",
+    "start": 2020.399,
+    "duration": 4.64
+  },
+  {
+    "text": "each reflective pixel which can be very",
+    "start": 2022.48,
+    "duration": 4.4
+  },
+  {
+    "text": "expensive especially on platforms and",
+    "start": 2025.039,
+    "duration": 3.601
+  },
+  {
+    "text": "graphics cards that don't have all that",
+    "start": 2026.88,
+    "duration": 4.159
+  },
+  {
+    "text": "much rate tracing power.",
+    "start": 2028.64,
+    "duration": 4.08
+  },
+  {
+    "text": "So the solution here is to set up an",
+    "start": 2031.039,
+    "duration": 3.921
+  },
+  {
+    "text": "appropriate roughness threshold. This",
+    "start": 2032.72,
+    "duration": 3.839
+  },
+  {
+    "text": "means that roughness values of your",
+    "start": 2034.96,
+    "duration": 3.92
+  },
+  {
+    "text": "materials above a certain threshold will",
+    "start": 2036.559,
+    "duration": 4.321
+  },
+  {
+    "text": "instead of tracing the expensive rays",
+    "start": 2038.88,
+    "duration": 3.44
+  },
+  {
+    "text": "fall back and get the data from the",
+    "start": 2040.88,
+    "duration": 3.36
+  },
+  {
+    "text": "lumen radiance cache, which is much less",
+    "start": 2042.32,
+    "duration": 4.88
+  },
+  {
+    "text": "detail, but also but also much faster.",
+    "start": 2044.24,
+    "duration": 4.56
+  },
+  {
+    "text": "And here's what that looks like. We got",
+    "start": 2047.2,
+    "duration": 4.0
+  },
+  {
+    "text": "a point4 threshold versus a one, which",
+    "start": 2048.8,
+    "duration": 4.72
+  },
+  {
+    "text": "is no threshold effectively. Um, it's",
+    "start": 2051.2,
+    "duration": 3.84
+  },
+  {
+    "text": "pretty much imperceptible difference,",
+    "start": 2053.52,
+    "duration": 3.599
+  },
+  {
+    "text": "but well worth being three times faster",
+    "start": 2055.04,
+    "duration": 4.0
+  },
+  {
+    "text": "in this example.",
+    "start": 2057.119,
+    "duration": 3.28
+  },
+  {
+    "text": "There's also the option to set up",
+    "start": 2059.04,
+    "duration": 3.039
+  },
+  {
+    "text": "separate thresholds for foliage because",
+    "start": 2060.399,
+    "duration": 2.801
+  },
+  {
+    "text": "that might you might have different",
+    "start": 2062.079,
+    "duration": 2.721
+  },
+  {
+    "text": "considerations for that that type of",
+    "start": 2063.2,
+    "duration": 3.52
+  },
+  {
+    "text": "content.",
+    "start": 2064.8,
+    "duration": 3.44
+  },
+  {
+    "text": "So you can easily figure this out by",
+    "start": 2066.72,
+    "duration": 3.199
+  },
+  {
+    "text": "looking at the debug view modes to show",
+    "start": 2068.24,
+    "duration": 3.52
+  },
+  {
+    "text": "pixels that are actually tracing the",
+    "start": 2069.919,
+    "duration": 3.841
+  },
+  {
+    "text": "expensive path. Um you can also look at",
+    "start": 2071.76,
+    "duration": 4.159
+  },
+  {
+    "text": "the lumen reflection passes in Unreal",
+    "start": 2073.76,
+    "duration": 3.919
+  },
+  {
+    "text": "Insights now to see if they're expensive",
+    "start": 2075.919,
+    "duration": 3.041
+  },
+  {
+    "text": "or not. I guess that's the the most",
+    "start": 2077.679,
+    "duration": 4.561
+  },
+  {
+    "text": "important bit to look at.",
+    "start": 2078.96,
+    "duration": 4.879
+  },
+  {
+    "text": "And another one worth mentioning here is",
+    "start": 2082.24,
+    "duration": 3.28
+  },
+  {
+    "text": "the water reflections on single layer",
+    "start": 2083.839,
+    "duration": 4.08
+  },
+  {
+    "text": "water shading model. So there's a large",
+    "start": 2085.52,
+    "duration": 4.639
+  },
+  {
+    "text": "chance that your game or project has",
+    "start": 2087.919,
+    "duration": 4.081
+  },
+  {
+    "text": "water in there and we actually always",
+    "start": 2090.159,
+    "duration": 4.161
+  },
+  {
+    "text": "trace these dedicated expensive rays on",
+    "start": 2092.0,
+    "duration": 4.72
+  },
+  {
+    "text": "water. So what's easy to forget here is",
+    "start": 2094.32,
+    "duration": 3.6
+  },
+  {
+    "text": "that we're also lighting what's",
+    "start": 2096.72,
+    "duration": 2.56
+  },
+  {
+    "text": "underneath the water. You can't see it",
+    "start": 2097.92,
+    "duration": 3.52
+  },
+  {
+    "text": "here, but there's stuff under here when",
+    "start": 2099.28,
+    "duration": 4.16
+  },
+  {
+    "text": "we the passes before we actually render",
+    "start": 2101.44,
+    "duration": 3.919
+  },
+  {
+    "text": "that. We light it and then we just put",
+    "start": 2103.44,
+    "duration": 3.679
+  },
+  {
+    "text": "water on top and we render that and we",
+    "start": 2105.359,
+    "duration": 4.641
+  },
+  {
+    "text": "light that as well. What's even worse is",
+    "start": 2107.119,
+    "duration": 5.121
+  },
+  {
+    "text": "obviously your materials around the",
+    "start": 2110.0,
+    "duration": 3.839
+  },
+  {
+    "text": "water, under the water are typically",
+    "start": 2112.24,
+    "duration": 4.8
+  },
+  {
+    "text": "very wet. So they will be below that th",
+    "start": 2113.839,
+    "duration": 5.041
+  },
+  {
+    "text": "roughness threshold again triggering",
+    "start": 2117.04,
+    "duration": 3.84
+  },
+  {
+    "text": "those expensive reflections from last",
+    "start": 2118.88,
+    "duration": 4.4
+  },
+  {
+    "text": "example. So we introduced an",
+    "start": 2120.88,
+    "duration": 4.08
+  },
+  {
+    "text": "optimization here where you can provide",
+    "start": 2123.28,
+    "duration": 3.52
+  },
+  {
+    "text": "a depth value where water is considered",
+    "start": 2124.96,
+    "duration": 4.0
+  },
+  {
+    "text": "opaque and we can call all lumen",
+    "start": 2126.8,
+    "duration": 4.24
+  },
+  {
+    "text": "contributions under that making for",
+    "start": 2128.96,
+    "duration": 3.92
+  },
+  {
+    "text": "significant optimizations in deeper",
+    "start": 2131.04,
+    "duration": 4.72
+  },
+  {
+    "text": "waters. So this is the mask where we",
+    "start": 2132.88,
+    "duration": 4.239
+  },
+  {
+    "text": "don't calculate the lighting below",
+    "start": 2135.76,
+    "duration": 4.16
+  },
+  {
+    "text": "water. And in this shot, you know, we",
+    "start": 2137.119,
+    "duration": 4.96
+  },
+  {
+    "text": "save well above a millisecond because",
+    "start": 2139.92,
+    "duration": 3.679
+  },
+  {
+    "text": "pretty much all the water is deeper than",
+    "start": 2142.079,
+    "duration": 3.841
+  },
+  {
+    "text": "the threshold. But obviously in if this",
+    "start": 2143.599,
+    "duration": 4.48
+  },
+  {
+    "text": "was shallow water like a river up a or a",
+    "start": 2145.92,
+    "duration": 4.0
+  },
+  {
+    "text": "creek up the up the mountain, you know,",
+    "start": 2148.079,
+    "duration": 4.241
+  },
+  {
+    "text": "this optimization wouldn't apply. So",
+    "start": 2149.92,
+    "duration": 3.84
+  },
+  {
+    "text": "don't forget to profile your content",
+    "start": 2152.32,
+    "duration": 3.279
+  },
+  {
+    "text": "here.",
+    "start": 2153.76,
+    "duration": 3.44
+  },
+  {
+    "text": "All right. As we leave this section, I",
+    "start": 2155.599,
+    "duration": 3.441
+  },
+  {
+    "text": "want to touch on lumen hardware versus",
+    "start": 2157.2,
+    "duration": 4.48
+  },
+  {
+    "text": "software tracing. It is particularly",
+    "start": 2159.04,
+    "duration": 4.319
+  },
+  {
+    "text": "important to differentiate between the",
+    "start": 2161.68,
+    "duration": 4.56
+  },
+  {
+    "text": "two since both approaches fundamentally",
+    "start": 2163.359,
+    "duration": 4.561
+  },
+  {
+    "text": "trace against different representations",
+    "start": 2166.24,
+    "duration": 3.839
+  },
+  {
+    "text": "and have different feature sets. It's",
+    "start": 2167.92,
+    "duration": 3.919
+  },
+  {
+    "text": "really difficult to author lighting for",
+    "start": 2170.079,
+    "duration": 3.441
+  },
+  {
+    "text": "everything once and just have it work",
+    "start": 2171.839,
+    "duration": 4.641
+  },
+  {
+    "text": "out of the box for both paths. And since",
+    "start": 2173.52,
+    "duration": 5.04
+  },
+  {
+    "text": "hardware rate tracing is what we",
+    "start": 2176.48,
+    "duration": 4.08
+  },
+  {
+    "text": "consider to be the future of lumen,",
+    "start": 2178.56,
+    "duration": 4.48
+  },
+  {
+    "text": "we've gone all in on optimizing that to",
+    "start": 2180.56,
+    "duration": 5.44
+  },
+  {
+    "text": "be usable on consoles on 60fps.",
+    "start": 2183.04,
+    "duration": 4.24
+  },
+  {
+    "text": "And there are also several improvements",
+    "start": 2186.0,
+    "duration": 3.2
+  },
+  {
+    "text": "in hardware over software other than the",
+    "start": 2187.28,
+    "duration": 3.92
+  },
+  {
+    "text": "higher quality we have. You know, we can",
+    "start": 2189.2,
+    "duration": 4.08
+  },
+  {
+    "text": "trace skeletal meshes. You're no longer",
+    "start": 2191.2,
+    "duration": 4.08
+  },
+  {
+    "text": "reliant on the static distance field. So",
+    "start": 2193.28,
+    "duration": 3.44
+  },
+  {
+    "text": "you can remove those and save a ton of",
+    "start": 2195.28,
+    "duration": 3.2
+  },
+  {
+    "text": "memory.",
+    "start": 2196.72,
+    "duration": 3.84
+  },
+  {
+    "text": "So the choice should be pretty clear,",
+    "start": 2198.48,
+    "duration": 3.84
+  },
+  {
+    "text": "right? At least we do recommend hardware",
+    "start": 2200.56,
+    "duration": 4.4
+  },
+  {
+    "text": "rate tracing going forward. And as proof",
+    "start": 2202.32,
+    "duration": 5.12
+  },
+  {
+    "text": "of our claims, other than this demo, of",
+    "start": 2204.96,
+    "duration": 4.0
+  },
+  {
+    "text": "course, we have been shipping hardware",
+    "start": 2207.44,
+    "duration": 3.6
+  },
+  {
+    "text": "rate tracing Lumen on current gen",
+    "start": 2208.96,
+    "duration": 4.56
+  },
+  {
+    "text": "consoles in Fortnite since last December",
+    "start": 2211.04,
+    "duration": 5.36
+  },
+  {
+    "text": "at 60 fps. So whether you're getting",
+    "start": 2213.52,
+    "duration": 5.12
+  },
+  {
+    "text": "started or are looking to switch a",
+    "start": 2216.4,
+    "duration": 3.84
+  },
+  {
+    "text": "project from software to hardware",
+    "start": 2218.64,
+    "duration": 3.92
+  },
+  {
+    "text": "tracing, I highly recommend our Lumen",
+    "start": 2220.24,
+    "duration": 3.76
+  },
+  {
+    "text": "and hardware rate tracing performance",
+    "start": 2222.56,
+    "duration": 3.12
+  },
+  {
+    "text": "guides in our official documentation.",
+    "start": 2224.0,
+    "duration": 4.0
+  },
+  {
+    "text": "These are packed with good stuff. So",
+    "start": 2225.68,
+    "duration": 4.8
+  },
+  {
+    "text": "with that said, 5.6 brings a very long",
+    "start": 2228.0,
+    "duration": 4.48
+  },
+  {
+    "text": "list of Lumen optimizations, far too",
+    "start": 2230.48,
+    "duration": 3.28
+  },
+  {
+    "text": "many for me to go through in this",
+    "start": 2232.48,
+    "duration": 3.44
+  },
+  {
+    "text": "session. So we'll leave it at that for",
+    "start": 2233.76,
+    "duration": 4.48
+  },
+  {
+    "text": "now. Uh but you can go to the release",
+    "start": 2235.92,
+    "duration": 6.24
+  },
+  {
+    "text": "notes and read about all it.",
+    "start": 2238.24,
+    "duration": 6.16
+  },
+  {
+    "text": "Virtual shadow maps go hand inhand with",
+    "start": 2242.16,
+    "duration": 4.64
+  },
+  {
+    "text": "Nanite and we've been hard at work at",
+    "start": 2244.4,
+    "duration": 4.4
+  },
+  {
+    "text": "optimizing shadow map rendering for",
+    "start": 2246.8,
+    "duration": 5.76
+  },
+  {
+    "text": "large open world dense forest games.",
+    "start": 2248.8,
+    "duration": 6.16
+  },
+  {
+    "text": "First of all, Nanite vox representation",
+    "start": 2252.56,
+    "duration": 4.0
+  },
+  {
+    "text": "already helps here because it's also",
+    "start": 2254.96,
+    "duration": 4.32
+  },
+  {
+    "text": "faster to render in the shadow maps. On",
+    "start": 2256.56,
+    "duration": 4.4
+  },
+  {
+    "text": "top of that, there are several other",
+    "start": 2259.28,
+    "duration": 3.76
+  },
+  {
+    "text": "bespoke optimizations which help out in",
+    "start": 2260.96,
+    "duration": 4.24
+  },
+  {
+    "text": "more dynamic scenes.",
+    "start": 2263.04,
+    "duration": 4.96
+  },
+  {
+    "text": "One big one we call receiver masks. It's",
+    "start": 2265.2,
+    "duration": 5.36
+  },
+  {
+    "text": "essentially creating a tighter culling",
+    "start": 2268.0,
+    "duration": 4.8
+  },
+  {
+    "text": "for us by subdividing each VSSM page",
+    "start": 2270.56,
+    "duration": 4.559
+  },
+  {
+    "text": "into 64 tiles. And in this shot, it",
+    "start": 2272.8,
+    "duration": 4.24
+  },
+  {
+    "text": "brings the nite VSSM shadow depth cost",
+    "start": 2275.119,
+    "duration": 3.601
+  },
+  {
+    "text": "down significantly. And it doesn't",
+    "start": 2277.04,
+    "duration": 3.12
+  },
+  {
+    "text": "really change any of the visuals. So you",
+    "start": 2278.72,
+    "duration": 2.8
+  },
+  {
+    "text": "don't have to worry about it. It's just",
+    "start": 2280.16,
+    "duration": 4.32
+  },
+  {
+    "text": "faster. And for trees, uh, as I",
+    "start": 2281.52,
+    "duration": 4.559
+  },
+  {
+    "text": "mentioned before, we automatically stop",
+    "start": 2284.48,
+    "duration": 3.44
+  },
+  {
+    "text": "animating them in the distance based on",
+    "start": 2286.079,
+    "duration": 3.921
+  },
+  {
+    "text": "screen screen size. So we can actually",
+    "start": 2287.92,
+    "duration": 4.56
+  },
+  {
+    "text": "make use of this in the shadow rendering",
+    "start": 2290.0,
+    "duration": 4.72
+  },
+  {
+    "text": "by making the non-animating trees",
+    "start": 2292.48,
+    "duration": 3.68
+  },
+  {
+    "text": "statically cached. so we don't have to",
+    "start": 2294.72,
+    "duration": 2.72
+  },
+  {
+    "text": "keep rendering them when they're really",
+    "start": 2296.16,
+    "duration": 4.439
+  },
+  {
+    "text": "far away.",
+    "start": 2297.44,
+    "duration": 3.159
+  },
+  {
+    "text": "We've added a few more tricks to VSSM",
+    "start": 2300.64,
+    "duration": 3.68
+  },
+  {
+    "text": "when it comes to automatically balancing",
+    "start": 2302.64,
+    "duration": 4.08
+  },
+  {
+    "text": "quality and performance, like",
+    "start": 2304.32,
+    "duration": 4.16
+  },
+  {
+    "text": "automatically lowering the VSSM quality",
+    "start": 2306.72,
+    "duration": 3.28
+  },
+  {
+    "text": "in areas that are out of focus from",
+    "start": 2308.48,
+    "duration": 3.76
+  },
+  {
+    "text": "depth of field. And this helps greatly",
+    "start": 2310.0,
+    "duration": 4.16
+  },
+  {
+    "text": "to lower the cost and make room for",
+    "start": 2312.24,
+    "duration": 3.52
+  },
+  {
+    "text": "higher quality effects in cinematic",
+    "start": 2314.16,
+    "duration": 3.52
+  },
+  {
+    "text": "conversations, for example. As you can",
+    "start": 2315.76,
+    "duration": 3.359
+  },
+  {
+    "text": "see here, you know, all the blur in the",
+    "start": 2317.68,
+    "duration": 2.56
+  },
+  {
+    "text": "background, you don't need the highest",
+    "start": 2319.119,
+    "duration": 4.081
+  },
+  {
+    "text": "quality shadows there potentially. And",
+    "start": 2320.24,
+    "duration": 4.48
+  },
+  {
+    "text": "since it's hard to control every single",
+    "start": 2323.2,
+    "duration": 3.76
+  },
+  {
+    "text": "frame in an open world game, we often",
+    "start": 2324.72,
+    "duration": 4.32
+  },
+  {
+    "text": "see some areas being more expensive than",
+    "start": 2326.96,
+    "duration": 4.32
+  },
+  {
+    "text": "others. This is especially true for",
+    "start": 2329.04,
+    "duration": 4.16
+  },
+  {
+    "text": "shadow rendering as it's dependent on a",
+    "start": 2331.28,
+    "duration": 4.16
+  },
+  {
+    "text": "lot of factors like sun angle, how close",
+    "start": 2333.2,
+    "duration": 4.24
+  },
+  {
+    "text": "to the shadow receivers you are and and",
+    "start": 2335.44,
+    "duration": 4.08
+  },
+  {
+    "text": "many more things.",
+    "start": 2337.44,
+    "duration": 4.159
+  },
+  {
+    "text": "Normally to compensate for this, we use",
+    "start": 2339.52,
+    "duration": 4.24
+  },
+  {
+    "text": "dynamic resolution which works well to",
+    "start": 2341.599,
+    "duration": 4.561
+  },
+  {
+    "text": "absorb, you know, temporary expensive",
+    "start": 2343.76,
+    "duration": 4.24
+  },
+  {
+    "text": "parts of the frame.",
+    "start": 2346.16,
+    "duration": 3.679
+  },
+  {
+    "text": "The downside is that if the shadow",
+    "start": 2348.0,
+    "duration": 3.68
+  },
+  {
+    "text": "rendering becomes expensive, the whole",
+    "start": 2349.839,
+    "duration": 4.0
+  },
+  {
+    "text": "frame lowers resolution to compensate,",
+    "start": 2351.68,
+    "duration": 4.72
+  },
+  {
+    "text": "which is not always a fair trade-off.",
+    "start": 2353.839,
+    "duration": 4.801
+  },
+  {
+    "text": "So, we've introduced a VSSM throttling",
+    "start": 2356.4,
+    "duration": 4.4
+  },
+  {
+    "text": "system where only the VSSM quality will",
+    "start": 2358.64,
+    "duration": 4.88
+  },
+  {
+    "text": "lower when going over shadow budgets.",
+    "start": 2360.8,
+    "duration": 4.799
+  },
+  {
+    "text": "This way, we can keep things crisp in",
+    "start": 2363.52,
+    "duration": 3.599
+  },
+  {
+    "text": "the general case and mitigate",
+    "start": 2365.599,
+    "duration": 3.441
+  },
+  {
+    "text": "performance issues stemming from VSM",
+    "start": 2367.119,
+    "duration": 4.24
+  },
+  {
+    "text": "specifically when needed.",
+    "start": 2369.04,
+    "duration": 4.559
+  },
+  {
+    "text": "So, last item I'll mention give on on",
+    "start": 2371.359,
+    "duration": 3.841
+  },
+  {
+    "text": "VSSM is to give some love to the",
+    "start": 2373.599,
+    "duration": 4.0
+  },
+  {
+    "text": "non-nanite skin meshes. So this is an",
+    "start": 2375.2,
+    "duration": 4.879
+  },
+  {
+    "text": "optimization where we simply recomputee",
+    "start": 2377.599,
+    "duration": 4.48
+  },
+  {
+    "text": "the mesh bounds at runtime inside of the",
+    "start": 2380.079,
+    "duration": 3.681
+  },
+  {
+    "text": "GPU skin cache shader since we're",
+    "start": 2382.079,
+    "duration": 2.961
+  },
+  {
+    "text": "already touching all those vertices",
+    "start": 2383.76,
+    "duration": 2.96
+  },
+  {
+    "text": "there anyway. We can just you know make",
+    "start": 2385.04,
+    "duration": 3.2
+  },
+  {
+    "text": "the bounds up and send them to the next",
+    "start": 2386.72,
+    "duration": 3.84
+  },
+  {
+    "text": "pass. And this leads to significantly",
+    "start": 2388.24,
+    "duration": 4.32
+  },
+  {
+    "text": "more optimal bounds and it's independent",
+    "start": 2390.56,
+    "duration": 3.519
+  },
+  {
+    "text": "from the content which is great because",
+    "start": 2392.56,
+    "duration": 4.08
+  },
+  {
+    "text": "now it just kind of works. And there's",
+    "start": 2394.079,
+    "duration": 3.921
+  },
+  {
+    "text": "there's been a whole host of not so",
+    "start": 2396.64,
+    "duration": 3.28
+  },
+  {
+    "text": "visible general optimizations as well to",
+    "start": 2398.0,
+    "duration": 4.16
+  },
+  {
+    "text": "shave off cost where it matters",
+    "start": 2399.92,
+    "duration": 3.76
+  },
+  {
+    "text": "especially when it comes to dynamic time",
+    "start": 2402.16,
+    "duration": 4.16
+  },
+  {
+    "text": "of day and dynamic scenes. So we are",
+    "start": 2403.68,
+    "duration": 4.8
+  },
+  {
+    "text": "working very hard to shift the core",
+    "start": 2406.32,
+    "duration": 4.799
+  },
+  {
+    "text": "philosophy of VSSM Perf mainly being",
+    "start": 2408.48,
+    "duration": 4.879
+  },
+  {
+    "text": "about static caching to being able to",
+    "start": 2411.119,
+    "duration": 4.161
+  },
+  {
+    "text": "perform out of the box with dynamic time",
+    "start": 2413.359,
+    "duration": 5.041
+  },
+  {
+    "text": "of day scenes as well.",
+    "start": 2415.28,
+    "duration": 4.48
+  },
+  {
+    "text": "All right. So what about performance",
+    "start": 2418.4,
+    "duration": 3.04
+  },
+  {
+    "text": "when it comes to resolution then? So how",
+    "start": 2419.76,
+    "duration": 4.56
+  },
+  {
+    "text": "does TSR fit into all of this? Let's",
+    "start": 2421.44,
+    "duration": 4.399
+  },
+  {
+    "text": "take a look at the resolution through",
+    "start": 2424.32,
+    "duration": 4.0
+  },
+  {
+    "text": "the pipeline here. So this is a totally",
+    "start": 2425.839,
+    "duration": 4.881
+  },
+  {
+    "text": "vanilla frame with no upscaling or fancy",
+    "start": 2428.32,
+    "duration": 4.4
+  },
+  {
+    "text": "resolution tricks. Very simplified of",
+    "start": 2430.72,
+    "duration": 3.359
+  },
+  {
+    "text": "course. most of the frame is hitting",
+    "start": 2432.72,
+    "duration": 4.16
+  },
+  {
+    "text": "away in that geometry box to the left.",
+    "start": 2434.079,
+    "duration": 4.801
+  },
+  {
+    "text": "So the x-axis here you can see it at the",
+    "start": 2436.88,
+    "duration": 4.16
+  },
+  {
+    "text": "bottom it shows the GPU frame how it",
+    "start": 2438.88,
+    "duration": 4.88
+  },
+  {
+    "text": "flows towards the right. The height of",
+    "start": 2441.04,
+    "duration": 5.44
+  },
+  {
+    "text": "the boxes denote the resolution. Uh",
+    "start": 2443.76,
+    "duration": 4.319
+  },
+  {
+    "text": "things will not be fully to scale here",
+    "start": 2446.48,
+    "duration": 3.52
+  },
+  {
+    "text": "but it's for demonstration purposes of",
+    "start": 2448.079,
+    "duration": 3.52
+  },
+  {
+    "text": "course.",
+    "start": 2450.0,
+    "duration": 3.52
+  },
+  {
+    "text": "So let's save some perf here by",
+    "start": 2451.599,
+    "duration": 3.921
+  },
+  {
+    "text": "rendering most of the frame at a lower",
+    "start": 2453.52,
+    "duration": 4.16
+  },
+  {
+    "text": "resolution and introduce TSR to upscale.",
+    "start": 2455.52,
+    "duration": 4.799
+  },
+  {
+    "text": "This is a pretty standard setup.",
+    "start": 2457.68,
+    "duration": 4.72
+  },
+  {
+    "text": "We'll call this the primary resolution.",
+    "start": 2460.319,
+    "duration": 3.681
+  },
+  {
+    "text": "And this is great. Now we can actually",
+    "start": 2462.4,
+    "duration": 3.199
+  },
+  {
+    "text": "render even more stuff in our scene as",
+    "start": 2464.0,
+    "duration": 3.68
+  },
+  {
+    "text": "nanites and virtual shadow maps scale",
+    "start": 2465.599,
+    "duration": 4.561
+  },
+  {
+    "text": "with primary resolution.",
+    "start": 2467.68,
+    "duration": 4.96
+  },
+  {
+    "text": "But let's say we have a large open world",
+    "start": 2470.16,
+    "duration": 4.88
+  },
+  {
+    "text": "game with frame times that vary a lot",
+    "start": 2472.64,
+    "duration": 5.12
+  },
+  {
+    "text": "across the world. It's almost impossible",
+    "start": 2475.04,
+    "duration": 4.559
+  },
+  {
+    "text": "to optimize every single frame in your",
+    "start": 2477.76,
+    "duration": 4.0
+  },
+  {
+    "text": "dynamic game to perform exactly the",
+    "start": 2479.599,
+    "duration": 5.76
+  },
+  {
+    "text": "same. So we introduce dynamic resolution",
+    "start": 2481.76,
+    "duration": 6.16
+  },
+  {
+    "text": "instead of a fixed primary resolution.",
+    "start": 2485.359,
+    "duration": 5.041
+  },
+  {
+    "text": "So, dynamic resolution helps you to even",
+    "start": 2487.92,
+    "duration": 4.48
+  },
+  {
+    "text": "out the bumps and keep your frame rate",
+    "start": 2490.4,
+    "duration": 4.56
+  },
+  {
+    "text": "in budget. It doesn't solve any of the",
+    "start": 2492.4,
+    "duration": 4.719
+  },
+  {
+    "text": "hitching potentially as it only looks at",
+    "start": 2494.96,
+    "duration": 3.84
+  },
+  {
+    "text": "historical frame costs, but you can",
+    "start": 2497.119,
+    "duration": 3.121
+  },
+  {
+    "text": "configure the headroom in the dynamic",
+    "start": 2498.8,
+    "duration": 3.12
+  },
+  {
+    "text": "resolution if you want to leave room for",
+    "start": 2500.24,
+    "duration": 3.92
+  },
+  {
+    "text": "for more",
+    "start": 2501.92,
+    "duration": 4.56
+  },
+  {
+    "text": "uh for more hitching.",
+    "start": 2504.16,
+    "duration": 4.159
+  },
+  {
+    "text": "We ended up setting a dynamic resolution",
+    "start": 2506.48,
+    "duration": 5.52
+  },
+  {
+    "text": "range of 800 to 1080p. And these are not",
+    "start": 2508.319,
+    "duration": 6.081
+  },
+  {
+    "text": "entirely arbitrary numbers. For one,",
+    "start": 2512.0,
+    "duration": 4.64
+  },
+  {
+    "text": "your max resolution determines the",
+    "start": 2514.4,
+    "duration": 4.8
+  },
+  {
+    "text": "memory usage of all your screen buffers,",
+    "start": 2516.64,
+    "duration": 5.36
+  },
+  {
+    "text": "but more importantly, TSAR can't upscale",
+    "start": 2519.2,
+    "duration": 6.08
+  },
+  {
+    "text": "endlessly, of course. So, 2x upscaling",
+    "start": 2522.0,
+    "duration": 6.56
+  },
+  {
+    "text": "is a pretty pretty good spot for TSR.",
+    "start": 2525.28,
+    "duration": 5.76
+  },
+  {
+    "text": "And if you look at this now, as you can",
+    "start": 2528.56,
+    "duration": 5.36
+  },
+  {
+    "text": "see here, after TSR, we still run a",
+    "start": 2531.04,
+    "duration": 5.039
+  },
+  {
+    "text": "bunch of passes at full final output",
+    "start": 2533.92,
+    "duration": 4.96
+  },
+  {
+    "text": "resolution, in this case 4K. And that's",
+    "start": 2536.079,
+    "duration": 4.561
+  },
+  {
+    "text": "pretty expensive.",
+    "start": 2538.88,
+    "duration": 3.92
+  },
+  {
+    "text": "So let's introduce secondary screen",
+    "start": 2540.64,
+    "duration": 4.64
+  },
+  {
+    "text": "percentage. So this is where we use TSR",
+    "start": 2542.8,
+    "duration": 4.96
+  },
+  {
+    "text": "to upscale to a lower resolution than",
+    "start": 2545.28,
+    "duration": 4.88
+  },
+  {
+    "text": "the final output resolution. Let's say",
+    "start": 2547.76,
+    "duration": 6.0
+  },
+  {
+    "text": "1440p instead of 4K. Then we run all",
+    "start": 2550.16,
+    "duration": 5.52
+  },
+  {
+    "text": "those end of frame passes at that",
+    "start": 2553.76,
+    "duration": 4.319
+  },
+  {
+    "text": "slightly lower resolution instead. And",
+    "start": 2555.68,
+    "duration": 4.48
+  },
+  {
+    "text": "this saves you a lot more than just, you",
+    "start": 2558.079,
+    "duration": 4.961
+  },
+  {
+    "text": "know, the TSR pass cost. And as a final",
+    "start": 2560.16,
+    "duration": 5.28
+  },
+  {
+    "text": "step here to get to 4K, we do a spatial",
+    "start": 2563.04,
+    "duration": 5.039
+  },
+  {
+    "text": "upscale from 1440p to 4K. And this is",
+    "start": 2565.44,
+    "duration": 6.08
+  },
+  {
+    "text": "roughly the setup we use for the demo.",
+    "start": 2568.079,
+    "duration": 5.04
+  },
+  {
+    "text": "So, let's compare the cost with and",
+    "start": 2571.52,
+    "duration": 2.96
+  },
+  {
+    "text": "without this secondary screen",
+    "start": 2573.119,
+    "duration": 4.161
+  },
+  {
+    "text": "percentage. So, to the left here, TSR",
+    "start": 2574.48,
+    "duration": 5.599
+  },
+  {
+    "text": "goes from 1080 to 4K and thus runs all",
+    "start": 2577.28,
+    "duration": 4.559
+  },
+  {
+    "text": "of those enderframe passes at the more",
+    "start": 2580.079,
+    "duration": 4.721
+  },
+  {
+    "text": "expensive 4K resolution. On the right,",
+    "start": 2581.839,
+    "duration": 6.881
+  },
+  {
+    "text": "we upscale from 1080 to 1440. We do",
+    "start": 2584.8,
+    "duration": 6.64
+  },
+  {
+    "text": "these passes at 1440 and then we upscale",
+    "start": 2588.72,
+    "duration": 5.84
+  },
+  {
+    "text": "to 4K before the UI. So, in this case,",
+    "start": 2591.44,
+    "duration": 5.36
+  },
+  {
+    "text": "it saves us almost a whole millisecond",
+    "start": 2594.56,
+    "duration": 4.4
+  },
+  {
+    "text": "in a 16.6 millisecond frame. That's",
+    "start": 2596.8,
+    "duration": 4.24
+  },
+  {
+    "text": "that's pretty big.",
+    "start": 2598.96,
+    "duration": 4.24
+  },
+  {
+    "text": "So quality obviously does take a hit,",
+    "start": 2601.04,
+    "duration": 4.0
+  },
+  {
+    "text": "but it's better it's a better hit than",
+    "start": 2603.2,
+    "duration": 3.6
+  },
+  {
+    "text": "letting your dynamic resolution absorb",
+    "start": 2605.04,
+    "duration": 5.44
+  },
+  {
+    "text": "this cost by if you reduce the primary",
+    "start": 2606.8,
+    "duration": 5.44
+  },
+  {
+    "text": "rendering resolution, you'll probably",
+    "start": 2610.48,
+    "duration": 4.639
+  },
+  {
+    "text": "end up dropping below that 2x ideal TSR",
+    "start": 2612.24,
+    "duration": 6.48
+  },
+  {
+    "text": "upscale and have worse quality.",
+    "start": 2615.119,
+    "duration": 5.361
+  },
+  {
+    "text": "All right. So, you might be asking",
+    "start": 2618.72,
+    "duration": 3.119
+  },
+  {
+    "text": "yourselves, you know, with all these new",
+    "start": 2620.48,
+    "duration": 3.119
+  },
+  {
+    "text": "features, the right settings for",
+    "start": 2621.839,
+    "duration": 3.76
+  },
+  {
+    "text": "upscaling and resolution and dynamic",
+    "start": 2623.599,
+    "duration": 5.361
+  },
+  {
+    "text": "resolution, are we hitting a solid 60?",
+    "start": 2625.599,
+    "duration": 6.48
+  },
+  {
+    "text": "Yes, but let's talk about hitches. So,",
+    "start": 2628.96,
+    "duration": 4.399
+  },
+  {
+    "text": "as I mentioned before, dynamic",
+    "start": 2632.079,
+    "duration": 3.121
+  },
+  {
+    "text": "resolution works by measuring the cost",
+    "start": 2633.359,
+    "duration": 5.361
+  },
+  {
+    "text": "of past frames to determine the the",
+    "start": 2635.2,
+    "duration": 5.28
+  },
+  {
+    "text": "resolution we need to keep the next",
+    "start": 2638.72,
+    "duration": 4.399
+  },
+  {
+    "text": "frames in budget.",
+    "start": 2640.48,
+    "duration": 4.48
+  },
+  {
+    "text": "So if there's suddenly a frame with an",
+    "start": 2643.119,
+    "duration": 4.0
+  },
+  {
+    "text": "outsized cost, it's not going to have",
+    "start": 2644.96,
+    "duration": 4.399
+  },
+  {
+    "text": "time to react and mitigate. So we run",
+    "start": 2647.119,
+    "duration": 4.401
+  },
+  {
+    "text": "the risk of dropping a frame. And if",
+    "start": 2649.359,
+    "duration": 3.681
+  },
+  {
+    "text": "this happens regularly, it can",
+    "start": 2651.52,
+    "duration": 3.2
+  },
+  {
+    "text": "negatively impact the experience and",
+    "start": 2653.04,
+    "duration": 4.0
+  },
+  {
+    "text": "make it feel inconsistent. This is what",
+    "start": 2654.72,
+    "duration": 4.399
+  },
+  {
+    "text": "we call hitching. And the source of",
+    "start": 2657.04,
+    "duration": 4.0
+  },
+  {
+    "text": "these hitches on the GPU can be a number",
+    "start": 2659.119,
+    "duration": 4.24
+  },
+  {
+    "text": "of things like spawning expensive",
+    "start": 2661.04,
+    "duration": 4.72
+  },
+  {
+    "text": "effects or some larger buffer",
+    "start": 2663.359,
+    "duration": 4.321
+  },
+  {
+    "text": "reallocation.",
+    "start": 2665.76,
+    "duration": 4.559
+  },
+  {
+    "text": "And a very common one is camera cuts",
+    "start": 2667.68,
+    "duration": 5.04
+  },
+  {
+    "text": "because we rely on previous frame data",
+    "start": 2670.319,
+    "duration": 4.961
+  },
+  {
+    "text": "to effectively do occlusion culling. And",
+    "start": 2672.72,
+    "duration": 4.8
+  },
+  {
+    "text": "if the camera swaps to some other random",
+    "start": 2675.28,
+    "duration": 4.079
+  },
+  {
+    "text": "view, we lose all that data and we have",
+    "start": 2677.52,
+    "duration": 3.28
+  },
+  {
+    "text": "to render a lot more things with a lot",
+    "start": 2679.359,
+    "duration": 3.121
+  },
+  {
+    "text": "more overdraw.",
+    "start": 2680.8,
+    "duration": 3.6
+  },
+  {
+    "text": "Cinematics and conversations are typical",
+    "start": 2682.48,
+    "duration": 3.52
+  },
+  {
+    "text": "examples of this like this one where",
+    "start": 2684.4,
+    "duration": 3.28
+  },
+  {
+    "text": "this merchants gets devoured by the",
+    "start": 2686.0,
+    "duration": 3.599
+  },
+  {
+    "text": "manticor.",
+    "start": 2687.68,
+    "duration": 3.919
+  },
+  {
+    "text": "And to combat this, we've introduced a",
+    "start": 2689.599,
+    "duration": 4.081
+  },
+  {
+    "text": "system which will prime the lost data",
+    "start": 2691.599,
+    "duration": 4.321
+  },
+  {
+    "text": "after a camera cut with lower resolution",
+    "start": 2693.68,
+    "duration": 4.639
+  },
+  {
+    "text": "data from the rate tracing scene. This",
+    "start": 2695.92,
+    "duration": 4.159
+  },
+  {
+    "text": "way, we don't simply resort to nothing",
+    "start": 2698.319,
+    "duration": 4.0
+  },
+  {
+    "text": "after a camera cut, but instead have at",
+    "start": 2700.079,
+    "duration": 4.481
+  },
+  {
+    "text": "least something to fall back on. So the",
+    "start": 2702.319,
+    "duration": 4.081
+  },
+  {
+    "text": "images here, they show the nanite",
+    "start": 2704.56,
+    "duration": 3.92
+  },
+  {
+    "text": "overdraw debug view mode in the one",
+    "start": 2706.4,
+    "duration": 4.64
+  },
+  {
+    "text": "frame after a camera cut. And as you can",
+    "start": 2708.48,
+    "duration": 4.0
+  },
+  {
+    "text": "see, we have a much more healthy",
+    "start": 2711.04,
+    "duration": 3.44
+  },
+  {
+    "text": "situation after priming it. It's still",
+    "start": 2712.48,
+    "duration": 3.839
+  },
+  {
+    "text": "not perfect. I mean, this should be much",
+    "start": 2714.48,
+    "duration": 4.879
+  },
+  {
+    "text": "cooler, uh, ideally, but it's much",
+    "start": 2716.319,
+    "duration": 5.76
+  },
+  {
+    "text": "better than this",
+    "start": 2719.359,
+    "duration": 5.361
+  },
+  {
+    "text": "without the priming.",
+    "start": 2722.079,
+    "duration": 4.081
+  },
+  {
+    "text": "So, if you're interested in hitches, or",
+    "start": 2724.72,
+    "duration": 3.84
+  },
+  {
+    "text": "rather the removal of hitches, I highly",
+    "start": 2726.16,
+    "duration": 3.919
+  },
+  {
+    "text": "recommend checking out IR's talk here at",
+    "start": 2728.56,
+    "duration": 4.64
+  },
+  {
+    "text": "Unreal Fest this afternoon.",
+    "start": 2730.079,
+    "duration": 5.04
+  },
+  {
+    "text": "And with that, we've reached the end. I",
+    "start": 2733.2,
+    "duration": 3.52
+  },
+  {
+    "text": "thank you all for listening, and we also",
+    "start": 2735.119,
+    "duration": 2.881
+  },
+  {
+    "text": "thank the whole team who worked",
+    "start": 2736.72,
+    "duration": 3.359
+  },
+  {
+    "text": "incredibly hard on this demo to make all",
+    "start": 2738.0,
+    "duration": 4.4
+  },
+  {
+    "text": "these improvements possible. And I would",
+    "start": 2740.079,
+    "duration": 4.641
+  },
+  {
+    "text": "like to thank Kevin and our friends at",
+    "start": 2742.4,
+    "duration": 4.48
+  },
+  {
+    "text": "Epic for inviting me here today.",
+    "start": 2744.72,
+    "duration": 4.399
+  },
+  {
+    "text": ">> Yep. I think we've pretty much run out",
+    "start": 2746.88,
+    "duration": 4.959
+  },
+  {
+    "text": "of time on this stage today. So, we will",
+    "start": 2749.119,
+    "duration": 4.72
+  },
+  {
+    "text": "be available at the DevHub after a short",
+    "start": 2751.839,
+    "duration": 3.52
+  },
+  {
+    "text": "break. If you have any questions, come",
+    "start": 2753.839,
+    "duration": 3.921
+  },
+  {
+    "text": "to talk to us. We'll answer everything.",
+    "start": 2755.359,
+    "duration": 4.161
+  },
+  {
+    "text": "Um, that's it. Thank you everybody.",
+    "start": 2757.76,
+    "duration": 3.04
+  },
+  {
+    "text": ">> Thank you.",
+    "start": 2759.52,
+    "duration": 5.499
+  },
+  {
+    "text": "[Applause]",
+    "start": 2760.8,
+    "duration": 4.219
+  }
+]

@@ -1,0 +1,3797 @@
+[
+  {
+    "text": "All right. So, welcome to this session",
+    "start": 5.6,
+    "duration": 7.119
+  },
+  {
+    "text": "on earlier insights and performance",
+    "start": 10.24,
+    "duration": 4.0
+  },
+  {
+    "text": "optimization.",
+    "start": 12.719,
+    "duration": 3.601
+  },
+  {
+    "text": "My name is Ken Kuano and I'm a real",
+    "start": 14.24,
+    "duration": 5.039
+  },
+  {
+    "text": "software engineer at Epic Games Japan.",
+    "start": 16.32,
+    "duration": 6.0
+  },
+  {
+    "text": "In this talk, we walk you through how to",
+    "start": 19.279,
+    "duration": 5.601
+  },
+  {
+    "text": "approach performance analysis in game",
+    "start": 22.32,
+    "duration": 6.0
+  },
+  {
+    "text": "development and how to use anar insight",
+    "start": 24.88,
+    "duration": 6.639
+  },
+  {
+    "text": "to identify and resolve the performance",
+    "start": 28.32,
+    "duration": 5.52
+  },
+  {
+    "text": "issues effectively.",
+    "start": 31.519,
+    "duration": 5.2
+  },
+  {
+    "text": "By the end of this session, I hope you",
+    "start": 33.84,
+    "duration": 5.52
+  },
+  {
+    "text": "have a deeper understanding of an engine",
+    "start": 36.719,
+    "duration": 6.16
+  },
+  {
+    "text": "and an insight and feel confident",
+    "start": 39.36,
+    "duration": 6.16
+  },
+  {
+    "text": "tackling performance bottlenecks in your",
+    "start": 42.879,
+    "duration": 4.561
+  },
+  {
+    "text": "own project.",
+    "start": 45.52,
+    "duration": 4.16
+  },
+  {
+    "text": "Here's",
+    "start": 47.44,
+    "duration": 4.48
+  },
+  {
+    "text": "what we'll be covering today. We'll",
+    "start": 49.68,
+    "duration": 5.039
+  },
+  {
+    "text": "begin by understanding what performance",
+    "start": 51.92,
+    "duration": 6.24
+  },
+  {
+    "text": "issues actually are and how they relate",
+    "start": 54.719,
+    "duration": 7.281
+  },
+  {
+    "text": "to an engine underlying architecture.",
+    "start": 58.16,
+    "duration": 6.48
+  },
+  {
+    "text": "In this first half of this session, we",
+    "start": 62.0,
+    "duration": 5.119
+  },
+  {
+    "text": "will take a stepbystep look at how to",
+    "start": 64.64,
+    "duration": 4.479
+  },
+  {
+    "text": "analyze the performance using an",
+    "start": 67.119,
+    "duration": 3.521
+  },
+  {
+    "text": "insight.",
+    "start": 69.119,
+    "duration": 4.081
+  },
+  {
+    "text": "Then in the second half, we'll dig into",
+    "start": 70.64,
+    "duration": 6.519
+  },
+  {
+    "text": "more complex scenarios.",
+    "start": 73.2,
+    "duration": 3.959
+  },
+  {
+    "text": "Let's get started with section one. In",
+    "start": 77.6,
+    "duration": 5.44
+  },
+  {
+    "text": "this part, I'll explain how games work",
+    "start": 80.24,
+    "duration": 6.48
+  },
+  {
+    "text": "under the food in introduce unended",
+    "start": 83.04,
+    "duration": 6.24
+  },
+  {
+    "text": "architecture and give your career",
+    "start": 86.72,
+    "duration": 4.88
+  },
+  {
+    "text": "picture of the performance challenges we",
+    "start": 89.28,
+    "duration": 4.479
+  },
+  {
+    "text": "typically encounter.",
+    "start": 91.6,
+    "duration": 5.36
+  },
+  {
+    "text": "For first, let's briefly revisit what we",
+    "start": 93.759,
+    "duration": 6.881
+  },
+  {
+    "text": "mean by performance issue.",
+    "start": 96.96,
+    "duration": 6.479
+  },
+  {
+    "text": "Let's begin with a quick question. When",
+    "start": 100.64,
+    "duration": 6.08
+  },
+  {
+    "text": "you hear the phrase performance issues,",
+    "start": 103.439,
+    "duration": 6.241
+  },
+  {
+    "text": "what kind of situation comes to mind? I",
+    "start": 106.72,
+    "duration": 6.079
+  },
+  {
+    "text": "define a performance issues as a state",
+    "start": 109.68,
+    "duration": 6.0
+  },
+  {
+    "text": "where the game cannot maintain a stable",
+    "start": 112.799,
+    "duration": 5.6
+  },
+  {
+    "text": "playable frame rate.",
+    "start": 115.68,
+    "duration": 6.32
+  },
+  {
+    "text": "Does that match your expectation?",
+    "start": 118.399,
+    "duration": 6.32
+  },
+  {
+    "text": "Let's take a look at a concrete example",
+    "start": 122.0,
+    "duration": 4.88
+  },
+  {
+    "text": "of good performance.",
+    "start": 124.719,
+    "duration": 4.721
+  },
+  {
+    "text": "This video shows a scenario where there",
+    "start": 126.88,
+    "duration": 6.439
+  },
+  {
+    "text": "are no performance issues.",
+    "start": 129.44,
+    "duration": 3.879
+  },
+  {
+    "text": "Okay. So, as you can see, the character",
+    "start": 134.959,
+    "duration": 7.441
+  },
+  {
+    "text": "is moving smoothly at 120 FPS, but I'm",
+    "start": 137.36,
+    "duration": 7.599
+  },
+  {
+    "text": "sorry. So, I recorded the setting to 60",
+    "start": 142.4,
+    "duration": 5.28
+  },
+  {
+    "text": "FPS, but it's okay with no visible",
+    "start": 144.959,
+    "duration": 5.92
+  },
+  {
+    "text": "hitching or slow down. Now, let's look",
+    "start": 147.68,
+    "duration": 5.279
+  },
+  {
+    "text": "at the scenario where performance issues",
+    "start": 150.879,
+    "duration": 4.321
+  },
+  {
+    "text": "are present. We'll start with the",
+    "start": 152.959,
+    "duration": 4.961
+  },
+  {
+    "text": "example on the left.",
+    "start": 155.2,
+    "duration": 5.6
+  },
+  {
+    "text": "Here, the character moves. This is an",
+    "start": 157.92,
+    "duration": 6.399
+  },
+  {
+    "text": "example of chichin. Now take a look at",
+    "start": 160.8,
+    "duration": 6.96
+  },
+  {
+    "text": "the screen on the right.",
+    "start": 164.319,
+    "duration": 6.56
+  },
+  {
+    "text": "At first runs the movements appears",
+    "start": 167.76,
+    "duration": 6.96
+  },
+  {
+    "text": "smoothly but at time the screen seems to",
+    "start": 170.879,
+    "duration": 6.321
+  },
+  {
+    "text": "freeze. This is an example of frame",
+    "start": 174.72,
+    "duration": 7.2
+  },
+  {
+    "text": "drops. These momentary delays hittes or",
+    "start": 177.2,
+    "duration": 7.84
+  },
+  {
+    "text": "frame drops can negatively impact",
+    "start": 181.92,
+    "duration": 6.16
+  },
+  {
+    "text": "playability and should be identified and",
+    "start": 185.04,
+    "duration": 6.08
+  },
+  {
+    "text": "resolved before release.",
+    "start": 188.08,
+    "duration": 5.36
+  },
+  {
+    "text": "Performance issues like these need to be",
+    "start": 191.12,
+    "duration": 4.96
+  },
+  {
+    "text": "addressed through optimization.",
+    "start": 193.44,
+    "duration": 5.28
+  },
+  {
+    "text": "Optimizing performance enable us to",
+    "start": 196.08,
+    "duration": 6.0
+  },
+  {
+    "text": "deliver smooth and responsive responsive",
+    "start": 198.72,
+    "duration": 5.84
+  },
+  {
+    "text": "game play. From a development",
+    "start": 202.08,
+    "duration": 4.96
+  },
+  {
+    "text": "perspective, optimization helps to",
+    "start": 204.56,
+    "duration": 5.52
+  },
+  {
+    "text": "prevent crashes, shorten the road time",
+    "start": 207.04,
+    "duration": 6.24
+  },
+  {
+    "text": "and speed up debugging and iteration.",
+    "start": 210.08,
+    "duration": 5.76
+  },
+  {
+    "text": "For all these respon reasons,",
+    "start": 213.28,
+    "duration": 6.08
+  },
+  {
+    "text": "performance optimization is essential.",
+    "start": 215.84,
+    "duration": 7.44
+  },
+  {
+    "text": "So what can we actually do to improve",
+    "start": 219.36,
+    "duration": 6.0
+  },
+  {
+    "text": "performance?",
+    "start": 223.28,
+    "duration": 4.4
+  },
+  {
+    "text": "That's right. The first step is to use",
+    "start": 225.36,
+    "duration": 5.439
+  },
+  {
+    "text": "static command that gives you a quick",
+    "start": 227.68,
+    "duration": 4.479
+  },
+  {
+    "text": "overview of the performance",
+    "start": 230.799,
+    "duration": 4.481
+  },
+  {
+    "text": "characteristic of your project. Pay",
+    "start": 232.159,
+    "duration": 5.681
+  },
+  {
+    "text": "attention to the values that appear.",
+    "start": 235.28,
+    "duration": 5.519
+  },
+  {
+    "text": "They'll give you a rough idea of where",
+    "start": 237.84,
+    "duration": 6.64
+  },
+  {
+    "text": "potential bottleneck might be.",
+    "start": 240.799,
+    "duration": 5.681
+  },
+  {
+    "text": "Start unit command display several",
+    "start": 244.48,
+    "duration": 6.64
+  },
+  {
+    "text": "performance related varied rain game",
+    "start": 246.48,
+    "duration": 6.16
+  },
+  {
+    "text": "roll",
+    "start": 251.12,
+    "duration": 5.119
+  },
+  {
+    "text": "and GPU. The dat of each are shown in",
+    "start": 252.64,
+    "duration": 7.119
+  },
+  {
+    "text": "this table. These mainly represents the",
+    "start": 256.239,
+    "duration": 5.761
+  },
+  {
+    "text": "power frame processing time for each",
+    "start": 259.759,
+    "duration": 3.921
+  },
+  {
+    "text": "thread.",
+    "start": 262.0,
+    "duration": 5.28
+  },
+  {
+    "text": "For a title targeting 60 fps, the time",
+    "start": 263.68,
+    "duration": 6.72
+  },
+  {
+    "text": "for each should stay within a 16.6",
+    "start": 267.28,
+    "duration": 4.8
+  },
+  {
+    "text": "millisecond.",
+    "start": 270.4,
+    "duration": 3.76
+  },
+  {
+    "text": "On the other hand, if any of these",
+    "start": 272.08,
+    "duration": 5.28
+  },
+  {
+    "text": "barriers exceed 60.6 millisecond, that",
+    "start": 274.16,
+    "duration": 5.2
+  },
+  {
+    "text": "means a performance issues likely",
+    "start": 277.36,
+    "duration": 5.0
+  },
+  {
+    "text": "occurring.",
+    "start": 279.36,
+    "duration": 3.0
+  },
+  {
+    "text": "The item shown by subunit flow, the data",
+    "start": 282.56,
+    "duration": 5.52
+  },
+  {
+    "text": "flow reading up to rendering. For",
+    "start": 285.68,
+    "duration": 5.36
+  },
+  {
+    "text": "example, imagine the player is using the",
+    "start": 288.08,
+    "duration": 5.839
+  },
+  {
+    "text": "controller to move a character",
+    "start": 291.04,
+    "duration": 5.68
+  },
+  {
+    "text": "on the game thread. The input event is",
+    "start": 293.919,
+    "duration": 5.041
+  },
+  {
+    "text": "detected and the character position is",
+    "start": 296.72,
+    "duration": 4.24
+  },
+  {
+    "text": "updated.",
+    "start": 298.96,
+    "duration": 4.4
+  },
+  {
+    "text": "Then on the render thread draw commands",
+    "start": 300.96,
+    "duration": 6.0
+  },
+  {
+    "text": "are generated for rendering.",
+    "start": 303.36,
+    "duration": 6.16
+  },
+  {
+    "text": "Those commands are passed to the ar",
+    "start": 306.96,
+    "duration": 5.56
+  },
+  {
+    "text": "thread",
+    "start": 309.52,
+    "duration": 3.0
+  },
+  {
+    "text": "where they are translated and finally",
+    "start": 313.36,
+    "duration": 5.2
+  },
+  {
+    "text": "sent to GPU.",
+    "start": 315.84,
+    "duration": 5.04
+  },
+  {
+    "text": "In this way the character is rendered on",
+    "start": 318.56,
+    "duration": 7.68
+  },
+  {
+    "text": "screen through a flow from GPU to GPU.",
+    "start": 320.88,
+    "duration": 7.599
+  },
+  {
+    "text": "The previous diagram shows the data flow",
+    "start": 326.24,
+    "duration": 5.44
+  },
+  {
+    "text": "for a single frame. But in DRT a game",
+    "start": 328.479,
+    "duration": 6.241
+  },
+  {
+    "text": "runs as a continuous sequence of frames.",
+    "start": 331.68,
+    "duration": 5.12
+  },
+  {
+    "text": "So the timeline actually looks like",
+    "start": 334.72,
+    "duration": 5.36
+  },
+  {
+    "text": "this. This is a simple explanation of",
+    "start": 336.8,
+    "duration": 6.64
+  },
+  {
+    "text": "the data flow and architecture. But this",
+    "start": 340.08,
+    "duration": 5.839
+  },
+  {
+    "text": "thread is the engine are processed in",
+    "start": 343.44,
+    "duration": 5.599
+  },
+  {
+    "text": "parallel. This gives a general idea of",
+    "start": 345.919,
+    "duration": 6.881
+  },
+  {
+    "text": "how things actually work.",
+    "start": 349.039,
+    "duration": 5.841
+  },
+  {
+    "text": "If a performance issued occurs",
+    "start": 352.8,
+    "duration": 4.72
+  },
+  {
+    "text": "somewhere, the timeline will show",
+    "start": 354.88,
+    "duration": 5.36
+  },
+  {
+    "text": "increased processing time for specific",
+    "start": 357.52,
+    "duration": 5.519
+  },
+  {
+    "text": "thread or unit. As a result, rendering",
+    "start": 360.24,
+    "duration": 7.04
+  },
+  {
+    "text": "updates get delayed and the output on",
+    "start": 363.039,
+    "duration": 7.521
+  },
+  {
+    "text": "screen is no longer updated smoothly. To",
+    "start": 367.28,
+    "duration": 6.639
+  },
+  {
+    "text": "address this kind of issue, we first use",
+    "start": 370.56,
+    "duration": 5.52
+  },
+  {
+    "text": "that we needed to identify the general",
+    "start": 373.919,
+    "duration": 5.041
+  },
+  {
+    "text": "bottleneck. Then at the next step, we",
+    "start": 376.08,
+    "duration": 5.44
+  },
+  {
+    "text": "use annual insight to perform a more",
+    "start": 378.96,
+    "duration": 6.6
+  },
+  {
+    "text": "detailed performance analysis.",
+    "start": 381.52,
+    "duration": 4.04
+  },
+  {
+    "text": "So let's now begin section two, basic",
+    "start": 385.759,
+    "duration": 5.761
+  },
+  {
+    "text": "analysis. So far, we review a common",
+    "start": 388.479,
+    "duration": 6.801
+  },
+  {
+    "text": "performance concerned in general terms.",
+    "start": 391.52,
+    "duration": 6.16
+  },
+  {
+    "text": "In this section, we explore how to",
+    "start": 395.28,
+    "duration": 5.44
+  },
+  {
+    "text": "investigate them using angular insight.",
+    "start": 397.68,
+    "duration": 6.32
+  },
+  {
+    "text": "Our focus will be on three key areas.",
+    "start": 400.72,
+    "duration": 7.599
+  },
+  {
+    "text": "game thread, render thread, and EPU.",
+    "start": 404.0,
+    "duration": 6.8
+  },
+  {
+    "text": "For each, we'll cover what bottlenecks",
+    "start": 408.319,
+    "duration": 5.761
+  },
+  {
+    "text": "are likely to appear and how you can use",
+    "start": 410.8,
+    "duration": 5.839
+  },
+  {
+    "text": "the tool in annual insight to uncover",
+    "start": 414.08,
+    "duration": 7.2
+  },
+  {
+    "text": "the and address them effectively.",
+    "start": 416.639,
+    "duration": 7.761
+  },
+  {
+    "text": "Before diving into performance analysis,",
+    "start": 421.28,
+    "duration": 5.44
+  },
+  {
+    "text": "it's important to start with a proper",
+    "start": 424.4,
+    "duration": 4.96
+  },
+  {
+    "text": "dress capture and your insight. Use the",
+    "start": 426.72,
+    "duration": 5.919
+  },
+  {
+    "text": "trace option to specify the data you",
+    "start": 429.36,
+    "duration": 6.32
+  },
+  {
+    "text": "want to correct. And then there are",
+    "start": 432.639,
+    "duration": 5.441
+  },
+  {
+    "text": "various options such as embeding such",
+    "start": 435.68,
+    "duration": 6.799
+  },
+  {
+    "text": "screenshots or bookmarks. Then more",
+    "start": 438.08,
+    "duration": 6.08
+  },
+  {
+    "text": "deliberate",
+    "start": 442.479,
+    "duration": 5.601
+  },
+  {
+    "text": "your v your trace capture",
+    "start": 444.16,
+    "duration": 6.479
+  },
+  {
+    "text": "your trace setup the easier your",
+    "start": 448.08,
+    "duration": 5.679
+  },
+  {
+    "text": "analysis will be.",
+    "start": 450.639,
+    "duration": 6.56
+  },
+  {
+    "text": "The captured data is then loaded into an",
+    "start": 453.759,
+    "duration": 7.041
+  },
+  {
+    "text": "insight to start analysis performance.",
+    "start": 457.199,
+    "duration": 5.681
+  },
+  {
+    "text": "It is important to understand anal",
+    "start": 460.8,
+    "duration": 7.36
+  },
+  {
+    "text": "insight's UI for performance analysis.",
+    "start": 462.88,
+    "duration": 8.879
+  },
+  {
+    "text": "The frames tab shows a bar of frame time",
+    "start": 468.16,
+    "duration": 6.4
+  },
+  {
+    "text": "for the entire thread session. You'll",
+    "start": 471.759,
+    "duration": 6.081
+  },
+  {
+    "text": "see birds where spikes or pitches",
+    "start": 474.56,
+    "duration": 5.039
+  },
+  {
+    "text": "occurred.",
+    "start": 477.84,
+    "duration": 4.72
+  },
+  {
+    "text": "This helps you quickly identify which",
+    "start": 479.599,
+    "duration": 6.0
+  },
+  {
+    "text": "frames were the slowest and where to",
+    "start": 482.56,
+    "duration": 6.72
+  },
+  {
+    "text": "begin your investigation.",
+    "start": 485.599,
+    "duration": 6.88
+  },
+  {
+    "text": "Next, go to the timer or counter tab.",
+    "start": 489.28,
+    "duration": 6.08
+  },
+  {
+    "text": "They list the event that run during the",
+    "start": 492.479,
+    "duration": 5.921
+  },
+  {
+    "text": "selected range and show how much time",
+    "start": 495.36,
+    "duration": 5.76
+  },
+  {
+    "text": "each one consume.",
+    "start": 498.4,
+    "duration": 5.6
+  },
+  {
+    "text": "This helps to locate expensive or",
+    "start": 501.12,
+    "duration": 6.079
+  },
+  {
+    "text": "repeatedly executed function those that",
+    "start": 504.0,
+    "duration": 7.16
+  },
+  {
+    "text": "may be worth optimizing.",
+    "start": 507.199,
+    "duration": 3.961
+  },
+  {
+    "text": "The most important tool in annual",
+    "start": 511.28,
+    "duration": 5.28
+  },
+  {
+    "text": "insight is a timing view. This is where",
+    "start": 513.44,
+    "duration": 6.64
+  },
+  {
+    "text": "you can see exactly what each thread was",
+    "start": 516.56,
+    "duration": 7.12
+  },
+  {
+    "text": "doing frame by frame around that shared",
+    "start": 520.08,
+    "duration": 7.84
+  },
+  {
+    "text": "timeline. Since Unreal is a highly much",
+    "start": 523.68,
+    "duration": 7.92
+  },
+  {
+    "text": "threaded engine, many bottlenecks are",
+    "start": 527.92,
+    "duration": 6.16
+  },
+  {
+    "text": "caused by synchronization between",
+    "start": 531.6,
+    "duration": 4.0
+  },
+  {
+    "text": "thread.",
+    "start": 534.08,
+    "duration": 4.56
+  },
+  {
+    "text": "Not just individual processing time. Tim",
+    "start": 535.6,
+    "duration": 6.239
+  },
+  {
+    "text": "timing view let you spot and diagnose",
+    "start": 538.64,
+    "duration": 6.56
+  },
+  {
+    "text": "those issues.",
+    "start": 541.839,
+    "duration": 5.601
+  },
+  {
+    "text": "The timing view shows multiple thread",
+    "start": 545.2,
+    "duration": 5.36
+  },
+  {
+    "text": "arigned horizontally letting you compare",
+    "start": 547.44,
+    "duration": 5.28
+  },
+  {
+    "text": "their behavior across the same time",
+    "start": 550.56,
+    "duration": 5.44
+  },
+  {
+    "text": "span. By closing observing the",
+    "start": 552.72,
+    "duration": 5.76
+  },
+  {
+    "text": "relationship between threads, we can",
+    "start": 556.0,
+    "duration": 5.04
+  },
+  {
+    "text": "trace where performance bottlenecks are",
+    "start": 558.48,
+    "duration": 6.359
+  },
+  {
+    "text": "actually originating.",
+    "start": 561.04,
+    "duration": 3.799
+  },
+  {
+    "text": "Here's a simple approach to finding",
+    "start": 566.24,
+    "duration": 6.0
+  },
+  {
+    "text": "bottleneck. First s the frame list by",
+    "start": 568.16,
+    "duration": 8.799
+  },
+  {
+    "text": "frame and find the strongest frame and",
+    "start": 572.24,
+    "duration": 8.56
+  },
+  {
+    "text": "zoom in on that time frame and look at",
+    "start": 576.959,
+    "duration": 5.761
+  },
+  {
+    "text": "the threads.",
+    "start": 580.8,
+    "duration": 4.4
+  },
+  {
+    "text": "Then find the thread with the longest",
+    "start": 582.72,
+    "duration": 6.0
+  },
+  {
+    "text": "processing bar and find the event marker",
+    "start": 585.2,
+    "duration": 6.56
+  },
+  {
+    "text": "that took the longest time.",
+    "start": 588.72,
+    "duration": 5.76
+  },
+  {
+    "text": "At this point, ignore markers such as",
+    "start": 591.76,
+    "duration": 6.32
+  },
+  {
+    "text": "idle time and wearful task as they are",
+    "start": 594.48,
+    "duration": 5.84
+  },
+  {
+    "text": "passive delayed and not active",
+    "start": 598.08,
+    "duration": 5.24
+  },
+  {
+    "text": "processing.",
+    "start": 600.32,
+    "duration": 3.0
+  },
+  {
+    "text": "Okay, so let's now begin examine the",
+    "start": 603.6,
+    "duration": 5.52
+  },
+  {
+    "text": "game thread in detail. This thread is",
+    "start": 606.24,
+    "duration": 6.24
+  },
+  {
+    "text": "responsible for game logic because of",
+    "start": 609.12,
+    "duration": 6.08
+  },
+  {
+    "text": "its central role. It's often the first",
+    "start": 612.48,
+    "duration": 5.76
+  },
+  {
+    "text": "press performance problems arise. We'll",
+    "start": 615.2,
+    "duration": 4.96
+  },
+  {
+    "text": "walk through how to investigate the",
+    "start": 618.24,
+    "duration": 5.76
+  },
+  {
+    "text": "thread step by step.",
+    "start": 620.16,
+    "duration": 6.56
+  },
+  {
+    "text": "To profile the game thread effectively,",
+    "start": 624.0,
+    "duration": 5.6
+  },
+  {
+    "text": "use the following press command. That's",
+    "start": 626.72,
+    "duration": 5.2
+  },
+  {
+    "text": "that named event flag is especially",
+    "start": 629.6,
+    "duration": 5.2
+  },
+  {
+    "text": "useful. It record named event like",
+    "start": 631.92,
+    "duration": 5.599
+  },
+  {
+    "text": "function code. You can also add a",
+    "start": 634.8,
+    "duration": 6.4
+  },
+  {
+    "text": "channel like animation or net depending",
+    "start": 637.519,
+    "duration": 7.841
+  },
+  {
+    "text": "on what you want to analyze.",
+    "start": 641.2,
+    "duration": 6.48
+  },
+  {
+    "text": "This is a default timeline view when you",
+    "start": 645.36,
+    "duration": 5.039
+  },
+  {
+    "text": "open a capture. Start by scanning",
+    "start": 647.68,
+    "duration": 5.839
+  },
+  {
+    "text": "through the frames and identifying those",
+    "start": 650.399,
+    "duration": 6.241
+  },
+  {
+    "text": "with long processing time. Once you spot",
+    "start": 653.519,
+    "duration": 6.56
+  },
+  {
+    "text": "a strong frame, zoom into it to examine",
+    "start": 656.64,
+    "duration": 6.08
+  },
+  {
+    "text": "the details more broadly. This is the",
+    "start": 660.079,
+    "duration": 5.281
+  },
+  {
+    "text": "first step toward pinpointing the",
+    "start": 662.72,
+    "duration": 5.76
+  },
+  {
+    "text": "performance issue.",
+    "start": 665.36,
+    "duration": 6.0
+  },
+  {
+    "text": "Once you identify a spike frame, zoom",
+    "start": 668.48,
+    "duration": 5.52
+  },
+  {
+    "text": "into the first zoom into the game thread",
+    "start": 671.36,
+    "duration": 5.52
+  },
+  {
+    "text": "to see what it was doing during the",
+    "start": 674.0,
+    "duration": 6.16
+  },
+  {
+    "text": "time. By examine each block in the",
+    "start": 676.88,
+    "duration": 6.24
+  },
+  {
+    "text": "timeline, you can uncover the actual",
+    "start": 680.16,
+    "duration": 5.919
+  },
+  {
+    "text": "operation that caused by that cause the",
+    "start": 683.12,
+    "duration": 5.839
+  },
+  {
+    "text": "throwway.",
+    "start": 686.079,
+    "duration": 6.401
+  },
+  {
+    "text": "As you zoom in further, look for",
+    "start": 688.959,
+    "duration": 6.0
+  },
+  {
+    "text": "individual events that are noticeable no",
+    "start": 692.48,
+    "duration": 5.76
+  },
+  {
+    "text": "longer than the others. These are your",
+    "start": 694.959,
+    "duration": 5.841
+  },
+  {
+    "text": "prime suspects functions that",
+    "start": 698.24,
+    "duration": 5.279
+  },
+  {
+    "text": "significant extend the frame processing",
+    "start": 700.8,
+    "duration": 6.56
+  },
+  {
+    "text": "time. By identifying the wrongest marker",
+    "start": 703.519,
+    "duration": 6.401
+  },
+  {
+    "text": "within the thread, you can directly",
+    "start": 707.36,
+    "duration": 6.24
+  },
+  {
+    "text": "trace the core bottl net.",
+    "start": 709.92,
+    "duration": 5.68
+  },
+  {
+    "text": "The kora view located in the bottom",
+    "start": 713.6,
+    "duration": 4.72
+  },
+  {
+    "text": "right shows a large",
+    "start": 715.6,
+    "duration": 5.84
+  },
+  {
+    "text": "breakdown of function code. It display",
+    "start": 718.32,
+    "duration": 5.44
+  },
+  {
+    "text": "the code the stack core stack for",
+    "start": 721.44,
+    "duration": 5.44
+  },
+  {
+    "text": "selected time range making it easy to",
+    "start": 723.76,
+    "duration": 6.16
+  },
+  {
+    "text": "press which function for what and where",
+    "start": 726.88,
+    "duration": 6.88
+  },
+  {
+    "text": "the most time was spent.",
+    "start": 729.92,
+    "duration": 6.479
+  },
+  {
+    "text": "In the cora view hot icon appear in",
+    "start": 733.76,
+    "duration": 5.199
+  },
+  {
+    "text": "areas with significant longer processing",
+    "start": 736.399,
+    "duration": 6.56
+  },
+  {
+    "text": "time. Start start your investigation",
+    "start": 738.959,
+    "duration": 7.041
+  },
+  {
+    "text": "these hotspots.",
+    "start": 742.959,
+    "duration": 5.281
+  },
+  {
+    "text": "This diagram simplify the game thread",
+    "start": 746.0,
+    "duration": 4.639
+  },
+  {
+    "text": "activity activity across multiple",
+    "start": 748.24,
+    "duration": 6.48
+  },
+  {
+    "text": "threads. As you can see, frame 12 runs",
+    "start": 750.639,
+    "duration": 6.64
+  },
+  {
+    "text": "longer than the others.",
+    "start": 754.72,
+    "duration": 5.2
+  },
+  {
+    "text": "It continues processing all the way to",
+    "start": 757.279,
+    "duration": 5.521
+  },
+  {
+    "text": "the end.",
+    "start": 759.92,
+    "duration": 6.56
+  },
+  {
+    "text": "This clearly marks it was a bottleneck.",
+    "start": 762.8,
+    "duration": 6.32
+  },
+  {
+    "text": "Recognizing this problem visually is a",
+    "start": 766.48,
+    "duration": 5.359
+  },
+  {
+    "text": "key skill in purple performance",
+    "start": 769.12,
+    "duration": 5.279
+  },
+  {
+    "text": "profiling.",
+    "start": 771.839,
+    "duration": 4.081
+  },
+  {
+    "text": "When you encounter game thread",
+    "start": 774.399,
+    "duration": 3.68
+  },
+  {
+    "text": "bottlenecks, there are two main",
+    "start": 775.92,
+    "duration": 5.76
+  },
+  {
+    "text": "strategies to optimize. Optimize.",
+    "start": 778.079,
+    "duration": 6.481
+  },
+  {
+    "text": "First, reduce unnecessary game thread",
+    "start": 781.68,
+    "duration": 8.159
+  },
+  {
+    "text": "road. I eliminate redundant text or",
+    "start": 784.56,
+    "duration": 8.399
+  },
+  {
+    "text": "cover convert blueprint logic into",
+    "start": 789.839,
+    "duration": 7.521
+  },
+  {
+    "text": "native code. Second offload non critical",
+    "start": 792.959,
+    "duration": 7.201
+  },
+  {
+    "text": "task to async thread",
+    "start": 797.36,
+    "duration": 5.919
+  },
+  {
+    "text": "things like sound processing or",
+    "start": 800.16,
+    "duration": 5.679
+  },
+  {
+    "text": "background pressing can run outside the",
+    "start": 803.279,
+    "duration": 5.761
+  },
+  {
+    "text": "main loop. Both approaches aim to",
+    "start": 805.839,
+    "duration": 6.161
+  },
+  {
+    "text": "shorten the timeline bar and ease main",
+    "start": 809.04,
+    "duration": 6.32
+  },
+  {
+    "text": "thread pressure.",
+    "start": 812.0,
+    "duration": 6.079
+  },
+  {
+    "text": "I won't go into full optimization method",
+    "start": 815.36,
+    "duration": 5.76
+  },
+  {
+    "text": "today but for those interested this",
+    "start": 818.079,
+    "duration": 5.76
+  },
+  {
+    "text": "slide links to a previous annual fast",
+    "start": 821.12,
+    "duration": 5.279
+  },
+  {
+    "text": "session that focused on game thread",
+    "start": 823.839,
+    "duration": 5.68
+  },
+  {
+    "text": "performance. This slide covered",
+    "start": 826.399,
+    "duration": 6.0
+  },
+  {
+    "text": "practical techniques and how to use it",
+    "start": 829.519,
+    "duration": 6.481
+  },
+  {
+    "text": "insight for deeper analysis. So if you",
+    "start": 832.399,
+    "duration": 6.481
+  },
+  {
+    "text": "need to tune your game thread, this is a",
+    "start": 836.0,
+    "duration": 6.68
+  },
+  {
+    "text": "great place to start.",
+    "start": 838.88,
+    "duration": 3.8
+  },
+  {
+    "text": "When profiling the game thread, there",
+    "start": 842.88,
+    "duration": 5.44
+  },
+  {
+    "text": "are few key things to keep in mind.",
+    "start": 844.88,
+    "duration": 6.399
+  },
+  {
+    "text": "First, we want to look for processing",
+    "start": 848.32,
+    "duration": 6.4
+  },
+  {
+    "text": "that consistently taking a long time.",
+    "start": 851.279,
+    "duration": 5.521
+  },
+  {
+    "text": "This could be heavy logic that will",
+    "start": 854.72,
+    "duration": 5.919
+  },
+  {
+    "text": "regard every frame or everything.",
+    "start": 856.8,
+    "duration": 6.32
+  },
+  {
+    "text": "We also need to consider thread",
+    "start": 860.639,
+    "duration": 5.361
+  },
+  {
+    "text": "dependencies. If the game thread is just",
+    "start": 863.12,
+    "duration": 6.159
+  },
+  {
+    "text": "waiting for something else like a one",
+    "start": 866.0,
+    "duration": 5.839
+  },
+  {
+    "text": "worker thread or async loading thread,",
+    "start": 869.279,
+    "duration": 6.961
+  },
+  {
+    "text": "it may not be the actual button.",
+    "start": 871.839,
+    "duration": 8.8
+  },
+  {
+    "text": "So when you analyze a dalizing dates,",
+    "start": 876.24,
+    "duration": 6.719
+  },
+  {
+    "text": "don't assume the game thread is always",
+    "start": 880.639,
+    "duration": 6.32
+  },
+  {
+    "text": "to brain. It could just be stored by",
+    "start": 882.959,
+    "duration": 8.041
+  },
+  {
+    "text": "another part of the system.",
+    "start": 886.959,
+    "duration": 4.041
+  },
+  {
+    "text": "Now let's take a look at the render",
+    "start": 891.12,
+    "duration": 6.56
+  },
+  {
+    "text": "thread. In my case, the render threads",
+    "start": 893.68,
+    "duration": 6.88
+  },
+  {
+    "text": "end up being the second most common",
+    "start": 897.68,
+    "duration": 6.719
+  },
+  {
+    "text": "bottleneck right after game.",
+    "start": 900.56,
+    "duration": 7.6
+  },
+  {
+    "text": "Heavy or complex scene lot of overdraw",
+    "start": 904.399,
+    "duration": 9.361
+  },
+  {
+    "text": "can all press all serious strain or",
+    "start": 908.16,
+    "duration": 8.479
+  },
+  {
+    "text": "threat.",
+    "start": 913.76,
+    "duration": 6.4
+  },
+  {
+    "text": "That's why it's critical to analyze it",
+    "start": 916.639,
+    "duration": 6.241
+  },
+  {
+    "text": "properly.",
+    "start": 920.16,
+    "duration": 5.44
+  },
+  {
+    "text": "To properly analyze the render thread,",
+    "start": 922.88,
+    "duration": 5.68
+  },
+  {
+    "text": "enable this channel in the thread. This",
+    "start": 925.6,
+    "duration": 5.52
+  },
+  {
+    "text": "will give you access to the entire",
+    "start": 928.56,
+    "duration": 5.2
+  },
+  {
+    "text": "rendering pipeline including command",
+    "start": 931.12,
+    "duration": 6.88
+  },
+  {
+    "text": "submission and render graph activity.",
+    "start": 933.76,
+    "duration": 7.12
+  },
+  {
+    "text": "A wrong render thread time suggests that",
+    "start": 938.0,
+    "duration": 6.079
+  },
+  {
+    "text": "there isn't too many draft drawing codes",
+    "start": 940.88,
+    "duration": 7.04
+  },
+  {
+    "text": "or render thread render command Q is",
+    "start": 944.079,
+    "duration": 7.281
+  },
+  {
+    "text": "broke down. It is important to visualize",
+    "start": 947.92,
+    "duration": 7.279
+  },
+  {
+    "text": "each thread each render path in detail",
+    "start": 951.36,
+    "duration": 6.88
+  },
+  {
+    "text": "to see exactly where the timing time is",
+    "start": 955.199,
+    "duration": 5.601
+  },
+  {
+    "text": "going.",
+    "start": 958.24,
+    "duration": 4.719
+  },
+  {
+    "text": "Okay, let's now look at the render",
+    "start": 960.8,
+    "duration": 5.279
+  },
+  {
+    "text": "thread using the familiar timing insight",
+    "start": 962.959,
+    "duration": 4.56
+  },
+  {
+    "text": "view.",
+    "start": 966.079,
+    "duration": 3.841
+  },
+  {
+    "text": "If you look at the upper section of this",
+    "start": 967.519,
+    "duration": 5.041
+  },
+  {
+    "text": "thread, you you will notice some red",
+    "start": 969.92,
+    "duration": 4.32
+  },
+  {
+    "text": "birds.",
+    "start": 972.56,
+    "duration": 4.48
+  },
+  {
+    "text": "If you see spikes here, the next step is",
+    "start": 974.24,
+    "duration": 5.599
+  },
+  {
+    "text": "dig into the timing and isolate which",
+    "start": 977.04,
+    "duration": 7.359
+  },
+  {
+    "text": "threads are taking the most time.",
+    "start": 979.839,
+    "duration": 10.161
+  },
+  {
+    "text": "Here we are zoomed into frame 600.",
+    "start": 984.399,
+    "duration": 8.641
+  },
+  {
+    "text": "The game set completed",
+    "start": 990.0,
+    "duration": 5.44
+  },
+  {
+    "text": "in 27.1",
+    "start": 993.04,
+    "duration": 3.919
+  },
+  {
+    "text": "millisecond.",
+    "start": 995.44,
+    "duration": 4.8
+  },
+  {
+    "text": "But the render threaded took 51.9",
+    "start": 996.959,
+    "duration": 7.041
+  },
+  {
+    "text": "millcond that's a sign significant gap",
+    "start": 1000.24,
+    "duration": 6.24
+  },
+  {
+    "text": "and because of it the game thread is the",
+    "start": 1004.0,
+    "duration": 6.16
+  },
+  {
+    "text": "next frame frame 6001",
+    "start": 1006.48,
+    "duration": 6.88
+  },
+  {
+    "text": "ends up storing.",
+    "start": 1010.16,
+    "duration": 4.96
+  },
+  {
+    "text": "If you look at the render thread",
+    "start": 1013.36,
+    "duration": 4.32
+  },
+  {
+    "text": "processing you actually see additional",
+    "start": 1015.12,
+    "duration": 5.6
+  },
+  {
+    "text": "processing occurring. This is a textbook",
+    "start": 1017.68,
+    "duration": 5.839
+  },
+  {
+    "text": "case of bottlenecks propagation across",
+    "start": 1020.72,
+    "duration": 6.56
+  },
+  {
+    "text": "thread where the render thread dra li",
+    "start": 1023.519,
+    "duration": 8.481
+  },
+  {
+    "text": "and affects the overall frame rate.",
+    "start": 1027.28,
+    "duration": 6.559
+  },
+  {
+    "text": "This",
+    "start": 1032.0,
+    "duration": 4.16
+  },
+  {
+    "text": "this diagram illustrates the power",
+    "start": 1033.839,
+    "duration": 4.561
+  },
+  {
+    "text": "relationship between game thread and the",
+    "start": 1036.16,
+    "duration": 5.919
+  },
+  {
+    "text": "render thread. It shows that they run",
+    "start": 1038.4,
+    "duration": 5.36
+  },
+  {
+    "text": "independently.",
+    "start": 1042.079,
+    "duration": 5.6
+  },
+  {
+    "text": "But if one takes too long, the other may",
+    "start": 1043.76,
+    "duration": 7.919
+  },
+  {
+    "text": "still be broke indirectly.",
+    "start": 1047.679,
+    "duration": 6.24
+  },
+  {
+    "text": "You can see that the render thread is",
+    "start": 1051.679,
+    "duration": 5.841
+  },
+  {
+    "text": "delayed in the area corresponding to",
+    "start": 1053.919,
+    "duration": 7.081
+  },
+  {
+    "text": "frame 12.",
+    "start": 1057.52,
+    "duration": 3.48
+  },
+  {
+    "text": "It's important to observe which threads",
+    "start": 1061.039,
+    "duration": 6.64
+  },
+  {
+    "text": "are working and which are idle. This",
+    "start": 1063.6,
+    "duration": 7.439
+  },
+  {
+    "text": "kind of embarrass tells us that the",
+    "start": 1067.679,
+    "duration": 7.281
+  },
+  {
+    "text": "render threats need to be optimized not",
+    "start": 1071.039,
+    "duration": 8.481
+  },
+  {
+    "text": "just to speed itself up but to allow us",
+    "start": 1074.96,
+    "duration": 7.28
+  },
+  {
+    "text": "to allow other thread to progress",
+    "start": 1079.52,
+    "duration": 5.72
+  },
+  {
+    "text": "effectively.",
+    "start": 1082.24,
+    "duration": 3.0
+  },
+  {
+    "text": "The render thread sits directly upstream",
+    "start": 1089.039,
+    "duration": 6.801
+  },
+  {
+    "text": "from GPU. So any derived here can",
+    "start": 1092.0,
+    "duration": 8.72
+  },
+  {
+    "text": "repoint to GPU or RS thread. To evaluate",
+    "start": 1095.84,
+    "duration": 7.76
+  },
+  {
+    "text": "whether the bottlenecks ride on GPU or",
+    "start": 1100.72,
+    "duration": 5.92
+  },
+  {
+    "text": "GPU side, we need to compare their",
+    "start": 1103.6,
+    "duration": 6.16
+  },
+  {
+    "text": "processing time. If the render thread is",
+    "start": 1106.64,
+    "duration": 6.8
+  },
+  {
+    "text": "taking longer than GPU that suggest GP",
+    "start": 1109.76,
+    "duration": 8.32
+  },
+  {
+    "text": "GPU is a limited factor.",
+    "start": 1113.44,
+    "duration": 7.68
+  },
+  {
+    "text": "On the other hand, if GPU is the one",
+    "start": 1118.08,
+    "duration": 5.52
+  },
+  {
+    "text": "running longer while the render thread",
+    "start": 1121.12,
+    "duration": 5.2
+  },
+  {
+    "text": "has already finished, then the",
+    "start": 1123.6,
+    "duration": 6.24
+  },
+  {
+    "text": "bottleneck is rightly on GPU.",
+    "start": 1126.32,
+    "duration": 7.52
+  },
+  {
+    "text": "The important things is not just to",
+    "start": 1129.84,
+    "duration": 7.839
+  },
+  {
+    "text": "it's not just to look at one part in",
+    "start": 1133.84,
+    "duration": 5.36
+  },
+  {
+    "text": "isolation,",
+    "start": 1137.679,
+    "duration": 4.721
+  },
+  {
+    "text": "but to understand how the render thread,",
+    "start": 1139.2,
+    "duration": 8.44
+  },
+  {
+    "text": "RHI, and the GPU are interacting.",
+    "start": 1142.4,
+    "duration": 5.24
+  },
+  {
+    "text": "Okay. So now we come to the final",
+    "start": 1148.0,
+    "duration": 7.16
+  },
+  {
+    "text": "component GPU performance.",
+    "start": 1151.12,
+    "duration": 4.04
+  },
+  {
+    "text": "Until now we've focused on GPU G C G C G",
+    "start": 1156.4,
+    "duration": 3.279
+  },
+  {
+    "text": "C G C G C G C G C G C G C G C GPU bounce",
+    "start": 1158.88,
+    "duration": 4.24
+  },
+  {
+    "text": "threat but rendering",
+    "start": 1159.679,
+    "duration": 6.801
+  },
+  {
+    "text": "ultimately happened on GPU",
+    "start": 1163.12,
+    "duration": 7.04
+  },
+  {
+    "text": "heavy post processing shadow passes or",
+    "start": 1166.48,
+    "duration": 7.439
+  },
+  {
+    "text": "writing complexity can all result in GPU",
+    "start": 1170.16,
+    "duration": 7.759
+  },
+  {
+    "text": "bottlenecks that hurt rendering",
+    "start": 1173.919,
+    "duration": 7.281
+  },
+  {
+    "text": "to profile the GPU you can use the GPU",
+    "start": 1177.919,
+    "duration": 6.961
+  },
+  {
+    "text": "channel or the fourth channel GPU",
+    "start": 1181.2,
+    "duration": 7.04
+  },
+  {
+    "text": "analysis focus on identifying longer",
+    "start": 1184.88,
+    "duration": 6.88
+  },
+  {
+    "text": "render passes. If needed, use a",
+    "start": 1188.24,
+    "duration": 7.04
+  },
+  {
+    "text": "dedicated GPU profiler or debugger tool",
+    "start": 1191.76,
+    "duration": 6.56
+  },
+  {
+    "text": "to go even deeper,",
+    "start": 1195.28,
+    "duration": 6.399
+  },
+  {
+    "text": "especially when shed level analysis is",
+    "start": 1198.32,
+    "duration": 6.359
+  },
+  {
+    "text": "required.",
+    "start": 1201.679,
+    "duration": 3.0
+  },
+  {
+    "text": "Note that accurate profaring of GPU",
+    "start": 1204.88,
+    "duration": 5.84
+  },
+  {
+    "text": "required that the rendering resolution",
+    "start": 1208.0,
+    "duration": 6.4
+  },
+  {
+    "text": "be kept constant. For example, fixing",
+    "start": 1210.72,
+    "duration": 6.48
+  },
+  {
+    "text": "dynamic resolution or screen percentage",
+    "start": 1214.4,
+    "duration": 5.12
+  },
+  {
+    "text": "will measure performance at the target",
+    "start": 1217.2,
+    "duration": 4.4
+  },
+  {
+    "text": "screen resolution.",
+    "start": 1219.52,
+    "duration": 4.96
+  },
+  {
+    "text": "Also, if you want to measure the pure",
+    "start": 1221.6,
+    "duration": 6.16
+  },
+  {
+    "text": "mode of the rendering pass, you should",
+    "start": 1224.48,
+    "duration": 6.079
+  },
+  {
+    "text": "disable async compute using this console",
+    "start": 1227.76,
+    "duration": 5.799
+  },
+  {
+    "text": "command.",
+    "start": 1230.559,
+    "duration": 3.0
+  },
+  {
+    "text": "Let's also look at the GPU tracing in",
+    "start": 1234.0,
+    "duration": 7.76
+  },
+  {
+    "text": "inside the budget in 5.6. The GPU",
+    "start": 1236.799,
+    "duration": 7.601
+  },
+  {
+    "text": "profile has been overhauled.",
+    "start": 1241.76,
+    "duration": 4.799
+  },
+  {
+    "text": "You can now visualize the graphics and a",
+    "start": 1244.4,
+    "duration": 4.32
+  },
+  {
+    "text": "computer operation in a theorical",
+    "start": 1246.559,
+    "duration": 6.401
+  },
+  {
+    "text": "timeline. This allows for much more",
+    "start": 1248.72,
+    "duration": 8.24
+  },
+  {
+    "text": "intuitive analysis even without relying",
+    "start": 1252.96,
+    "duration": 7.52
+  },
+  {
+    "text": "on platform specific tool.",
+    "start": 1256.96,
+    "duration": 6.88
+  },
+  {
+    "text": "And if you select a track, you can also",
+    "start": 1260.48,
+    "duration": 5.28
+  },
+  {
+    "text": "view the dependencies between the",
+    "start": 1263.84,
+    "duration": 6.8
+  },
+  {
+    "text": "graphics pipe and the computer pipe.",
+    "start": 1265.76,
+    "duration": 7.44
+  },
+  {
+    "text": "Let's explain what each state in the GPU",
+    "start": 1270.64,
+    "duration": 6.0
+  },
+  {
+    "text": "timeline mean. GPU work refers to the",
+    "start": 1273.2,
+    "duration": 6.479
+  },
+  {
+    "text": "time GPU is actually rendering or",
+    "start": 1276.64,
+    "duration": 6.399
+  },
+  {
+    "text": "computing which should be high",
+    "start": 1279.679,
+    "duration": 6.0
+  },
+  {
+    "text": "utilization.",
+    "start": 1283.039,
+    "duration": 6.481
+  },
+  {
+    "text": "GPU wait means GPU is stop waiting for",
+    "start": 1285.679,
+    "duration": 6.641
+  },
+  {
+    "text": "dependencies to finish and I don't mean",
+    "start": 1289.52,
+    "duration": 6.8
+  },
+  {
+    "text": "the GPU is completely inactive.",
+    "start": 1292.32,
+    "duration": 7.28
+  },
+  {
+    "text": "This may happen when we sync is enabled",
+    "start": 1296.32,
+    "duration": 8.16
+  },
+  {
+    "text": "or under right workload. But if too",
+    "start": 1299.6,
+    "duration": 8.24
+  },
+  {
+    "text": "long, it means that the GPU is not",
+    "start": 1304.48,
+    "duration": 8.24
+  },
+  {
+    "text": "feeding the GPU fast enough.",
+    "start": 1307.84,
+    "duration": 6.88
+  },
+  {
+    "text": "Weight fence and signal fence are",
+    "start": 1312.72,
+    "duration": 4.319
+  },
+  {
+    "text": "synchronization mechanism used to",
+    "start": 1314.72,
+    "duration": 5.04
+  },
+  {
+    "text": "coordinate work between different",
+    "start": 1317.039,
+    "duration": 5.601
+  },
+  {
+    "text": "graphics and computer pipes. Signal",
+    "start": 1319.76,
+    "duration": 6.0
+  },
+  {
+    "text": "fancy is used to indic indicate that",
+    "start": 1322.64,
+    "duration": 7.36
+  },
+  {
+    "text": "work one on one GPU queue is complete",
+    "start": 1325.76,
+    "duration": 8.12
+  },
+  {
+    "text": "while weight transponding",
+    "start": 1330.0,
+    "duration": 3.88
+  },
+  {
+    "text": "signal f is process. Therefore to use",
+    "start": 1334.559,
+    "duration": 6.961
+  },
+  {
+    "text": "the computer pipe effectively you should",
+    "start": 1338.559,
+    "duration": 5.041
+  },
+  {
+    "text": "also be aware of the dependencies",
+    "start": 1341.52,
+    "duration": 5.92
+  },
+  {
+    "text": "between these fences.",
+    "start": 1343.6,
+    "duration": 7.439
+  },
+  {
+    "text": "If you encounter problem that cannot be",
+    "start": 1347.44,
+    "duration": 6.479
+  },
+  {
+    "text": "identified by insight, you can use these",
+    "start": 1351.039,
+    "duration": 5.441
+  },
+  {
+    "text": "DPU profilers and the debuggers to",
+    "start": 1353.919,
+    "duration": 4.721
+  },
+  {
+    "text": "identify the problem.",
+    "start": 1356.48,
+    "duration": 4.16
+  },
+  {
+    "text": "You have several options on window",
+    "start": 1358.64,
+    "duration": 4.88
+  },
+  {
+    "text": "platform, but you should use dedicated",
+    "start": 1360.64,
+    "duration": 6.32
+  },
+  {
+    "text": "profiler tools on console platform. They",
+    "start": 1363.52,
+    "duration": 5.76
+  },
+  {
+    "text": "allow you to examine each graphics",
+    "start": 1366.96,
+    "duration": 6.0
+  },
+  {
+    "text": "resource and command in detail debug",
+    "start": 1369.28,
+    "duration": 6.96
+  },
+  {
+    "text": "debug shaders and dig deeper into",
+    "start": 1372.96,
+    "duration": 7.0
+  },
+  {
+    "text": "performance issues.",
+    "start": 1376.24,
+    "duration": 3.72
+  },
+  {
+    "text": "Now to conclude this chapter, let me",
+    "start": 1380.72,
+    "duration": 5.36
+  },
+  {
+    "text": "briefly summarize what I have described",
+    "start": 1383.52,
+    "duration": 5.519
+  },
+  {
+    "text": "so far. Game threads, render thread and",
+    "start": 1386.08,
+    "duration": 5.92
+  },
+  {
+    "text": "GPU need to be optimized if they're",
+    "start": 1389.039,
+    "duration": 5.841
+  },
+  {
+    "text": "bottlenecks themselves. But it's",
+    "start": 1392.0,
+    "duration": 5.36
+  },
+  {
+    "text": "important to remember that the frame",
+    "start": 1394.88,
+    "duration": 6.0
+  },
+  {
+    "text": "time is often shape shaped by a chain of",
+    "start": 1397.36,
+    "duration": 7.84
+  },
+  {
+    "text": "dependencies. Game to render to RHI to",
+    "start": 1400.88,
+    "duration": 5.919
+  },
+  {
+    "text": "GPU",
+    "start": 1405.2,
+    "duration": 5.52
+  },
+  {
+    "text": "and insights helps us to see how these",
+    "start": 1406.799,
+    "duration": 7.281
+  },
+  {
+    "text": "stage connect and where each frames",
+    "start": 1410.72,
+    "duration": 5.839
+  },
+  {
+    "text": "delay originate.",
+    "start": 1414.08,
+    "duration": 4.8
+  },
+  {
+    "text": "Use that visibility to guide your",
+    "start": 1416.559,
+    "duration": 5.961
+  },
+  {
+    "text": "optimization effort.",
+    "start": 1418.88,
+    "duration": 3.64
+  },
+  {
+    "text": "Let's now move into section three",
+    "start": 1422.72,
+    "duration": 4.72
+  },
+  {
+    "text": "advanced analysis.",
+    "start": 1424.64,
+    "duration": 5.2
+  },
+  {
+    "text": "In the previous sections, we focused on",
+    "start": 1427.44,
+    "duration": 4.88
+  },
+  {
+    "text": "individual threads and simple",
+    "start": 1429.84,
+    "duration": 5.76
+  },
+  {
+    "text": "bottleneckets. Here we'll deal with more",
+    "start": 1432.32,
+    "duration": 6.56
+  },
+  {
+    "text": "complex performance problems where",
+    "start": 1435.6,
+    "duration": 6.559
+  },
+  {
+    "text": "multiple threads interact and overap.",
+    "start": 1438.88,
+    "duration": 5.84
+  },
+  {
+    "text": "We'll focus on two specific areas that",
+    "start": 1442.159,
+    "duration": 6.321
+  },
+  {
+    "text": "often introduce talle but significant",
+    "start": 1444.72,
+    "duration": 8.64
+  },
+  {
+    "text": "issues. worker thread and fio.",
+    "start": 1448.48,
+    "duration": 7.439
+  },
+  {
+    "text": "Let's begin with worker thread. This is",
+    "start": 1453.36,
+    "duration": 6.4
+  },
+  {
+    "text": "where the advantages and pful of m",
+    "start": 1455.919,
+    "duration": 6.801
+  },
+  {
+    "text": "threading provide and where a lot of",
+    "start": 1459.76,
+    "duration": 5.279
+  },
+  {
+    "text": "real world performance issues tend to",
+    "start": 1462.72,
+    "duration": 5.439
+  },
+  {
+    "text": "show up.",
+    "start": 1465.039,
+    "duration": 5.921
+  },
+  {
+    "text": "To investigate worker thread behavior,",
+    "start": 1468.159,
+    "duration": 5.921
+  },
+  {
+    "text": "use the trace command like this. This",
+    "start": 1470.96,
+    "duration": 6.16
+  },
+  {
+    "text": "lets let you see which task were",
+    "start": 1474.08,
+    "duration": 7.44
+  },
+  {
+    "text": "executed on which thread threads and how",
+    "start": 1477.12,
+    "duration": 6.559
+  },
+  {
+    "text": "long they took.",
+    "start": 1481.52,
+    "duration": 5.68
+  },
+  {
+    "text": "If heavy works gets concentrated on a",
+    "start": 1483.679,
+    "duration": 6.161
+  },
+  {
+    "text": "few threads, the benefits of",
+    "start": 1487.2,
+    "duration": 6.479
+  },
+  {
+    "text": "polarization break down and sometimes",
+    "start": 1489.84,
+    "duration": 8.0
+  },
+  {
+    "text": "even the main thread gets blocked.",
+    "start": 1493.679,
+    "duration": 6.88
+  },
+  {
+    "text": "Worker threads are used for m threading",
+    "start": 1497.84,
+    "duration": 5.839
+  },
+  {
+    "text": "and come into come in two types",
+    "start": 1500.559,
+    "duration": 5.921
+  },
+  {
+    "text": "foreground and background thread.",
+    "start": 1503.679,
+    "duration": 6.0
+  },
+  {
+    "text": "Foreground thread forground workers",
+    "start": 1506.48,
+    "duration": 5.12
+  },
+  {
+    "text": "runtime",
+    "start": 1509.679,
+    "duration": 5.041
+  },
+  {
+    "text": "sensitive task and can block the game",
+    "start": 1511.6,
+    "duration": 6.24
+  },
+  {
+    "text": "thread. Background workers handle the",
+    "start": 1514.72,
+    "duration": 6.319
+  },
+  {
+    "text": "task like async asset loading or AI",
+    "start": 1517.84,
+    "duration": 4.959
+  },
+  {
+    "text": "computation",
+    "start": 1521.039,
+    "duration": 4.88
+  },
+  {
+    "text": "when profiling tech for task that take",
+    "start": 1522.799,
+    "duration": 4.88
+  },
+  {
+    "text": "too long.",
+    "start": 1525.919,
+    "duration": 4.721
+  },
+  {
+    "text": "Idle thread that could be used more",
+    "start": 1527.679,
+    "duration": 4.641
+  },
+  {
+    "text": "efficiently",
+    "start": 1530.64,
+    "duration": 4.32
+  },
+  {
+    "text": "and whether you are actually utilizing",
+    "start": 1532.32,
+    "duration": 7.479
+  },
+  {
+    "text": "enough concurrent thread.",
+    "start": 1534.96,
+    "duration": 4.839
+  },
+  {
+    "text": "Let's take a closer look at the",
+    "start": 1539.919,
+    "duration": 4.64
+  },
+  {
+    "text": "performance analysis of our worker",
+    "start": 1541.919,
+    "duration": 4.0
+  },
+  {
+    "text": "thread.",
+    "start": 1544.559,
+    "duration": 4.321
+  },
+  {
+    "text": "For example, when analyzing the",
+    "start": 1545.919,
+    "duration": 5.521
+  },
+  {
+    "text": "performance of the game thread, if the",
+    "start": 1548.88,
+    "duration": 5.36
+  },
+  {
+    "text": "game thread itself occupies most of the",
+    "start": 1551.44,
+    "duration": 5.44
+  },
+  {
+    "text": "frame, then the game thread is the",
+    "start": 1554.24,
+    "duration": 6.16
+  },
+  {
+    "text": "button. However, if the game thread is",
+    "start": 1556.88,
+    "duration": 5.679
+  },
+  {
+    "text": "waiting for task as shown in this",
+    "start": 1560.4,
+    "duration": 5.2
+  },
+  {
+    "text": "figure, we need to pay attention to",
+    "start": 1562.559,
+    "duration": 5.6
+  },
+  {
+    "text": "other threads as well.",
+    "start": 1565.6,
+    "duration": 5.76
+  },
+  {
+    "text": "What task is g this game game thread",
+    "start": 1568.159,
+    "duration": 6.321
+  },
+  {
+    "text": "waiting for?",
+    "start": 1571.36,
+    "duration": 5.919
+  },
+  {
+    "text": "In such a case, select an event near the",
+    "start": 1574.48,
+    "duration": 6.24
+  },
+  {
+    "text": "weight event. Then you can view the task",
+    "start": 1577.279,
+    "duration": 7.121
+  },
+  {
+    "text": "dependency as shown this in the figure.",
+    "start": 1580.72,
+    "duration": 7.12
+  },
+  {
+    "text": "The selected event in the one that will",
+    "start": 1584.4,
+    "duration": 5.759
+  },
+  {
+    "text": "be called next to the weight event on",
+    "start": 1587.84,
+    "duration": 6.079
+  },
+  {
+    "text": "the game thread. But this event will",
+    "start": 1590.159,
+    "duration": 6.4
+  },
+  {
+    "text": "wait for the pink arrow to complete",
+    "start": 1593.919,
+    "duration": 6.0
+  },
+  {
+    "text": "before moving. This means that the game",
+    "start": 1596.559,
+    "duration": 7.041
+  },
+  {
+    "text": "is waiting for this process to complete.",
+    "start": 1599.919,
+    "duration": 5.521
+  },
+  {
+    "text": "Now",
+    "start": 1603.6,
+    "duration": 4.24
+  },
+  {
+    "text": "red sect the task waiting for processing",
+    "start": 1605.44,
+    "duration": 7.04
+  },
+  {
+    "text": "to see the details of this this process.",
+    "start": 1607.84,
+    "duration": 7.92
+  },
+  {
+    "text": "You can see that this processing is done",
+    "start": 1612.48,
+    "duration": 5.52
+  },
+  {
+    "text": "in the worker thread running behind the",
+    "start": 1615.76,
+    "duration": 6.0
+  },
+  {
+    "text": "game thread and that the physics update",
+    "start": 1618.0,
+    "duration": 6.64
+  },
+  {
+    "text": "processing is being performed.",
+    "start": 1621.76,
+    "duration": 5.36
+  },
+  {
+    "text": "In this figure, the game thread is not",
+    "start": 1624.64,
+    "duration": 6.639
+  },
+  {
+    "text": "the botto. So there is no problem. But",
+    "start": 1627.12,
+    "duration": 6.559
+  },
+  {
+    "text": "it is important to understand that",
+    "start": 1631.279,
+    "duration": 5.52
+  },
+  {
+    "text": "asynchronous processing like this can",
+    "start": 1633.679,
+    "duration": 4.801
+  },
+  {
+    "text": "wait.",
+    "start": 1636.799,
+    "duration": 3.601
+  },
+  {
+    "text": "Here's",
+    "start": 1638.48,
+    "duration": 4.64
+  },
+  {
+    "text": "another example. This time with the",
+    "start": 1640.4,
+    "duration": 5.92
+  },
+  {
+    "text": "render thread. We can see it dropped",
+    "start": 1643.12,
+    "duration": 6.08
+  },
+  {
+    "text": "while waiting for a task.",
+    "start": 1646.32,
+    "duration": 6.4
+  },
+  {
+    "text": "Again, the underlying issue is rightly",
+    "start": 1649.2,
+    "duration": 7.04
+  },
+  {
+    "text": "in another thread. Let's explore what",
+    "start": 1652.72,
+    "duration": 8.24
+  },
+  {
+    "text": "that thread is doing.",
+    "start": 1656.24,
+    "duration": 7.52
+  },
+  {
+    "text": "When we click on the block section, we",
+    "start": 1660.96,
+    "duration": 4.8
+  },
+  {
+    "text": "can see that the render thread is",
+    "start": 1663.76,
+    "duration": 4.88
+  },
+  {
+    "text": "waiting for several task to finish.",
+    "start": 1665.76,
+    "duration": 6.08
+  },
+  {
+    "text": "This occurs before render graph builder",
+    "start": 1668.64,
+    "duration": 4.72
+  },
+  {
+    "text": "step.",
+    "start": 1671.84,
+    "duration": 4.4
+  },
+  {
+    "text": "All builder task need to be completed",
+    "start": 1673.36,
+    "duration": 7.039
+  },
+  {
+    "text": "first. If we want to optimize this, we",
+    "start": 1676.24,
+    "duration": 7.679
+  },
+  {
+    "text": "look at speeding up those async build",
+    "start": 1680.399,
+    "duration": 6.52
+  },
+  {
+    "text": "operation.",
+    "start": 1683.919,
+    "duration": 3.0
+  },
+  {
+    "text": "We highlight one of these are the",
+    "start": 1688.32,
+    "duration": 6.479
+  },
+  {
+    "text": "dependency task by tracking its timing.",
+    "start": 1690.559,
+    "duration": 8.561
+  },
+  {
+    "text": "We can see when that async job began",
+    "start": 1694.799,
+    "duration": 8.24
+  },
+  {
+    "text": "asse like this is common and",
+    "start": 1699.12,
+    "duration": 7.039
+  },
+  {
+    "text": "understanding when and where it starts",
+    "start": 1703.039,
+    "duration": 8.201
+  },
+  {
+    "text": "is key to performance analysis.",
+    "start": 1706.159,
+    "duration": 5.081
+  },
+  {
+    "text": "Here's a spec simplifice",
+    "start": 1711.919,
+    "duration": 6.801
+  },
+  {
+    "text": "that during the frame 12 the worker",
+    "start": 1715.84,
+    "duration": 6.16
+  },
+  {
+    "text": "thread is busy while the game thread is",
+    "start": 1718.72,
+    "duration": 5.92
+  },
+  {
+    "text": "relatively short.",
+    "start": 1722.0,
+    "duration": 5.2
+  },
+  {
+    "text": "that suggest a heavy task is running on",
+    "start": 1724.64,
+    "duration": 6.08
+  },
+  {
+    "text": "the worker thread and driving",
+    "start": 1727.2,
+    "duration": 6.079
+  },
+  {
+    "text": "the frame and the time frame time",
+    "start": 1730.72,
+    "duration": 5.559
+  },
+  {
+    "text": "overload.",
+    "start": 1733.279,
+    "duration": 3.0
+  },
+  {
+    "text": "In this kind of a situation the the",
+    "start": 1736.88,
+    "duration": 5.36
+  },
+  {
+    "text": "solution wise in optimizing the worker",
+    "start": 1739.52,
+    "duration": 6.0
+  },
+  {
+    "text": "thread comparing thread timeline let you",
+    "start": 1742.24,
+    "duration": 6.0
+  },
+  {
+    "text": "clearly identify where the real",
+    "start": 1745.52,
+    "duration": 6.56
+  },
+  {
+    "text": "bottleneck is happening.",
+    "start": 1748.24,
+    "duration": 6.0
+  },
+  {
+    "text": "Of course, the real project involved",
+    "start": 1752.08,
+    "duration": 4.4
+  },
+  {
+    "text": "more than just the games and the worker",
+    "start": 1754.24,
+    "duration": 5.84
+  },
+  {
+    "text": "thread. The render and RJ threads also",
+    "start": 1756.48,
+    "duration": 6.48
+  },
+  {
+    "text": "depending on worker thread. So a factory",
+    "start": 1760.08,
+    "duration": 5.92
+  },
+  {
+    "text": "performance work means understanding how",
+    "start": 1762.96,
+    "duration": 6.76
+  },
+  {
+    "text": "these thread interact",
+    "start": 1766.0,
+    "duration": 3.72
+  },
+  {
+    "text": "in connection with worker thread. A few",
+    "start": 1770.559,
+    "duration": 7.36
+  },
+  {
+    "text": "words about context switch in order.",
+    "start": 1773.6,
+    "duration": 7.28
+  },
+  {
+    "text": "When thread switching frequently",
+    "start": 1777.919,
+    "duration": 6.48
+  },
+  {
+    "text": "TPU incurs extra overhead due to the",
+    "start": 1780.88,
+    "duration": 7.44
+  },
+  {
+    "text": "need to save and restore state context",
+    "start": 1784.399,
+    "duration": 5.52
+  },
+  {
+    "text": "switching",
+    "start": 1788.32,
+    "duration": 6.2
+  },
+  {
+    "text": "can be used to analyze the sage.",
+    "start": 1789.919,
+    "duration": 4.601
+  },
+  {
+    "text": "To correctly analyze context switch use",
+    "start": 1794.72,
+    "duration": 6.24
+  },
+  {
+    "text": "the context switch channel. Context",
+    "start": 1797.679,
+    "duration": 7.6
+  },
+  {
+    "text": "switch is CPU saving the state context",
+    "start": 1800.96,
+    "duration": 6.8
+  },
+  {
+    "text": "of the currently running thread and the",
+    "start": 1805.279,
+    "duration": 6.241
+  },
+  {
+    "text": "switching to another thread. Therefore,",
+    "start": 1807.76,
+    "duration": 6.159
+  },
+  {
+    "text": "if there are too many short-term lived",
+    "start": 1811.52,
+    "duration": 6.399
+  },
+  {
+    "text": "thread, context switching may occur ex",
+    "start": 1813.919,
+    "duration": 5.681
+  },
+  {
+    "text": "excessively",
+    "start": 1817.919,
+    "duration": 4.721
+  },
+  {
+    "text": "causing worker thread or game thread to",
+    "start": 1819.6,
+    "duration": 5.92
+  },
+  {
+    "text": "block other thread.",
+    "start": 1822.64,
+    "duration": 5.6
+  },
+  {
+    "text": "Reading these reasons why threads are",
+    "start": 1825.52,
+    "duration": 5.36
+  },
+  {
+    "text": "stacked is extremely important to",
+    "start": 1828.24,
+    "duration": 4.4
+  },
+  {
+    "text": "roosterizing",
+    "start": 1830.88,
+    "duration": 4.76
+  },
+  {
+    "text": "insects.",
+    "start": 1832.64,
+    "duration": 3.0
+  },
+  {
+    "text": "This graph shows which corre which cord",
+    "start": 1835.679,
+    "duration": 7.841
+  },
+  {
+    "text": "were running which thread over time. If",
+    "start": 1839.52,
+    "duration": 7.519
+  },
+  {
+    "text": "one core is dominated by a single",
+    "start": 1843.52,
+    "duration": 6.879
+  },
+  {
+    "text": "thread, it may be blocked other. If",
+    "start": 1847.039,
+    "duration": 6.321
+  },
+  {
+    "text": "switching is excessive, that's another",
+    "start": 1850.399,
+    "duration": 6.88
+  },
+  {
+    "text": "red flag. Check whether your CPU usage",
+    "start": 1853.36,
+    "duration": 8.76
+  },
+  {
+    "text": "is actually balanced and efficient.",
+    "start": 1857.279,
+    "duration": 4.841
+  },
+  {
+    "text": "Now let's move on to our second major",
+    "start": 1863.279,
+    "duration": 6.721
+  },
+  {
+    "text": "topic. V IO bar while access bottleneck",
+    "start": 1866.399,
+    "duration": 6.4
+  },
+  {
+    "text": "often show up during the loading up",
+    "start": 1870.0,
+    "duration": 7.279
+  },
+  {
+    "text": "screen or streaming heavy section of the",
+    "start": 1872.799,
+    "duration": 7.48
+  },
+  {
+    "text": "game",
+    "start": 1877.279,
+    "duration": 3.0
+  },
+  {
+    "text": "to analyze bar IO bottl.",
+    "start": 1880.88,
+    "duration": 6.64
+  },
+  {
+    "text": "We recommend using this command. This",
+    "start": 1884.48,
+    "duration": 6.079
+  },
+  {
+    "text": "setup helps you detect the performance",
+    "start": 1887.52,
+    "duration": 7.6
+  },
+  {
+    "text": "issues caused by things like broking IO",
+    "start": 1890.559,
+    "duration": 7.84
+  },
+  {
+    "text": "codes during game play or wrong store in",
+    "start": 1895.12,
+    "duration": 6.559
+  },
+  {
+    "text": "the async loading SW. These problem",
+    "start": 1898.399,
+    "duration": 7.441
+  },
+  {
+    "text": "often occur during map loading or game",
+    "start": 1901.679,
+    "duration": 8.201
+  },
+  {
+    "text": "save road operation.",
+    "start": 1905.84,
+    "duration": 4.04
+  },
+  {
+    "text": "As a point to reminder, remember the",
+    "start": 1910.64,
+    "duration": 6.08
+  },
+  {
+    "text": "game thread does not direct fire access",
+    "start": 1913.76,
+    "duration": 6.0
+  },
+  {
+    "text": "in asset rolling.",
+    "start": 1916.72,
+    "duration": 6.88
+  },
+  {
+    "text": "It issued an IO request which is handled",
+    "start": 1919.76,
+    "duration": 7.759
+  },
+  {
+    "text": "by a dete dedicated fire IO thread.",
+    "start": 1923.6,
+    "duration": 7.919
+  },
+  {
+    "text": "Therefore, when investigating IO delays,",
+    "start": 1927.519,
+    "duration": 6.561
+  },
+  {
+    "text": "check to see which thread access to the",
+    "start": 1931.519,
+    "duration": 8.081
+  },
+  {
+    "text": "file and if it is too long for RA asset",
+    "start": 1934.08,
+    "duration": 8.52
+  },
+  {
+    "text": "load.",
+    "start": 1939.6,
+    "duration": 3.0
+  },
+  {
+    "text": "Let's take a look at how far IO appeared",
+    "start": 1943.2,
+    "duration": 5.839
+  },
+  {
+    "text": "in annual insight.",
+    "start": 1946.399,
+    "duration": 5.921
+  },
+  {
+    "text": "This timeline comes from the asset loing",
+    "start": 1949.039,
+    "duration": 6.321
+  },
+  {
+    "text": "inside view and shows actually IO",
+    "start": 1952.32,
+    "duration": 7.56
+  },
+  {
+    "text": "activity during the capture session.",
+    "start": 1955.36,
+    "duration": 4.52
+  },
+  {
+    "text": "Each truck here gives you a visual",
+    "start": 1961.44,
+    "duration": 6.64
+  },
+  {
+    "text": "reference for where we happened and",
+    "start": 1963.679,
+    "duration": 6.161
+  },
+  {
+    "text": "which thread",
+    "start": 1968.08,
+    "duration": 5.599
+  },
+  {
+    "text": "or subsystem handled them. By analyzing",
+    "start": 1969.84,
+    "duration": 8.959
+  },
+  {
+    "text": "this view, we can pinpoint the ex exact",
+    "start": 1973.679,
+    "duration": 10.12
+  },
+  {
+    "text": "moment and location of a farm.",
+    "start": 1978.799,
+    "duration": 5.0
+  },
+  {
+    "text": "If you are investigating a certain roing",
+    "start": 1984.72,
+    "duration": 5.199
+  },
+  {
+    "text": "performance, nevering the loading track",
+    "start": 1987.12,
+    "duration": 5.12
+  },
+  {
+    "text": "is very useful.",
+    "start": 1989.919,
+    "duration": 5.201
+  },
+  {
+    "text": "It lets you see which asset was",
+    "start": 1992.24,
+    "duration": 6.24
+  },
+  {
+    "text": "processed and along each stage of",
+    "start": 1995.12,
+    "duration": 6.919
+  },
+  {
+    "text": "loading group.",
+    "start": 1998.48,
+    "duration": 3.559
+  },
+  {
+    "text": "For lower level analysis, you should",
+    "start": 2002.799,
+    "duration": 8.88
+  },
+  {
+    "text": "enable the IO activity and IO IO store.",
+    "start": 2006.48,
+    "duration": 8.559
+  },
+  {
+    "text": "IO activity shows which part were access",
+    "start": 2011.679,
+    "duration": 7.36
+  },
+  {
+    "text": "and IO store activity shows chunk level",
+    "start": 2015.039,
+    "duration": 7.76
+  },
+  {
+    "text": "data. Together they help determine",
+    "start": 2019.039,
+    "duration": 6.961
+  },
+  {
+    "text": "whether your file access patterns and",
+    "start": 2022.799,
+    "duration": 7.0
+  },
+  {
+    "text": "efficient or not.",
+    "start": 2026.0,
+    "duration": 3.799
+  },
+  {
+    "text": "Asset rolling insight also include the",
+    "start": 2029.919,
+    "duration": 5.921
+  },
+  {
+    "text": "statistic about each package.",
+    "start": 2032.159,
+    "duration": 5.681
+  },
+  {
+    "text": "This include the total processing time",
+    "start": 2035.84,
+    "duration": 5.28
+  },
+  {
+    "text": "per package and break down the specific",
+    "start": 2037.84,
+    "duration": 5.28
+  },
+  {
+    "text": "to serialization.",
+    "start": 2041.12,
+    "duration": 5.36
+  },
+  {
+    "text": "It's a great way to spot programmatic",
+    "start": 2043.12,
+    "duration": 7.08
+  },
+  {
+    "text": "packages quickly.",
+    "start": 2046.48,
+    "duration": 3.72
+  },
+  {
+    "text": "Here's a simple product diagram of how",
+    "start": 2050.879,
+    "duration": 5.601
+  },
+  {
+    "text": "our set request are issued and",
+    "start": 2053.679,
+    "duration": 4.48
+  },
+  {
+    "text": "fulfilled.",
+    "start": 2056.48,
+    "duration": 4.639
+  },
+  {
+    "text": "He start with a request from the game",
+    "start": 2058.159,
+    "duration": 5.2
+  },
+  {
+    "text": "thread",
+    "start": 2061.119,
+    "duration": 5.921
+  },
+  {
+    "text": "pro through async loading then into the",
+    "start": 2063.359,
+    "duration": 10.961
+  },
+  {
+    "text": "IO system and finally the physical file.",
+    "start": 2067.04,
+    "duration": 11.52
+  },
+  {
+    "text": "This helps to large the fire IO flow",
+    "start": 2074.32,
+    "duration": 8.599
+  },
+  {
+    "text": "from request to read.",
+    "start": 2078.56,
+    "duration": 4.359
+  },
+  {
+    "text": "Once loading is complete, the data",
+    "start": 2083.28,
+    "duration": 5.52
+  },
+  {
+    "text": "returns to the game thread for the ser",
+    "start": 2085.679,
+    "duration": 8.2
+  },
+  {
+    "text": "the serialization and initialization.",
+    "start": 2088.8,
+    "duration": 5.079
+  },
+  {
+    "text": "At the same time, we record asset",
+    "start": 2095.28,
+    "duration": 7.96
+  },
+  {
+    "text": "activity in the loading graph.",
+    "start": 2098.56,
+    "duration": 4.68
+  },
+  {
+    "text": "This present the full asset loading",
+    "start": 2103.359,
+    "duration": 6.0
+  },
+  {
+    "text": "cycle. Once complete, the asset is ready",
+    "start": 2105.839,
+    "duration": 7.081
+  },
+  {
+    "text": "for game play.",
+    "start": 2109.359,
+    "duration": 3.561
+  },
+  {
+    "text": "When optimiz optimization is needed in",
+    "start": 2113.359,
+    "duration": 6.0
+  },
+  {
+    "text": "such as asset loading process, we",
+    "start": 2116.24,
+    "duration": 5.92
+  },
+  {
+    "text": "believe there are three key points.",
+    "start": 2119.359,
+    "duration": 5.361
+  },
+  {
+    "text": "First, improve blocking process such as",
+    "start": 2122.16,
+    "duration": 4.88
+  },
+  {
+    "text": "decorization.",
+    "start": 2124.72,
+    "duration": 5.52
+  },
+  {
+    "text": "Second, reduce weight time. This could",
+    "start": 2127.04,
+    "duration": 7.039
+  },
+  {
+    "text": "mean avoiding large fires or changing",
+    "start": 2130.24,
+    "duration": 6.96
+  },
+  {
+    "text": "the timing of asset ro.",
+    "start": 2134.079,
+    "duration": 6.0
+  },
+  {
+    "text": "Third, optimize the far access itself",
+    "start": 2137.2,
+    "duration": 6.159
+  },
+  {
+    "text": "such as adjusting asset layout or",
+    "start": 2140.079,
+    "duration": 7.04
+  },
+  {
+    "text": "chunking site. These steps go a long way",
+    "start": 2143.359,
+    "duration": 6.161
+  },
+  {
+    "text": "in improving fire IO performance",
+    "start": 2147.119,
+    "duration": 5.401
+  },
+  {
+    "text": "overall.",
+    "start": 2149.52,
+    "duration": 3.0
+  },
+  {
+    "text": "To wrap up this section, here the key",
+    "start": 2153.119,
+    "duration": 6.881
+  },
+  {
+    "text": "takeaway for task graph. Pay attention",
+    "start": 2156.72,
+    "duration": 5.52
+  },
+  {
+    "text": "to whether threads are being used",
+    "start": 2160.0,
+    "duration": 4.16
+  },
+  {
+    "text": "efficiently",
+    "start": 2162.24,
+    "duration": 5.04
+  },
+  {
+    "text": "for fire. analyze the performance by",
+    "start": 2164.16,
+    "duration": 5.199
+  },
+  {
+    "text": "paying attention to whether the",
+    "start": 2167.28,
+    "duration": 5.2
+  },
+  {
+    "text": "streaming is controlled by preventing",
+    "start": 2169.359,
+    "duration": 6.961
+  },
+  {
+    "text": "broken and access concentration among",
+    "start": 2172.48,
+    "duration": 5.599
+  },
+  {
+    "text": "thread.",
+    "start": 2176.32,
+    "duration": 3.759
+  },
+  {
+    "text": "There are the things that start unit",
+    "start": 2178.079,
+    "duration": 5.52
+  },
+  {
+    "text": "command arrow cannot tell you and the",
+    "start": 2180.079,
+    "duration": 6.481
+  },
+  {
+    "text": "best part of this chapter is that you",
+    "start": 2183.599,
+    "duration": 5.76
+  },
+  {
+    "text": "can use any insight to see the structure",
+    "start": 2186.56,
+    "duration": 7.559
+  },
+  {
+    "text": "of code and effect.",
+    "start": 2189.359,
+    "duration": 4.76
+  },
+  {
+    "text": "Okay. So let's move into the final",
+    "start": 2195.04,
+    "duration": 5.84
+  },
+  {
+    "text": "section best practice and mindset.",
+    "start": 2197.2,
+    "duration": 7.04
+  },
+  {
+    "text": "Now that we've covered the analysis",
+    "start": 2200.88,
+    "duration": 5.12
+  },
+  {
+    "text": "techniques,",
+    "start": 2204.24,
+    "duration": 4.72
+  },
+  {
+    "text": "we wrap up by discussing how to apply",
+    "start": 2206.0,
+    "duration": 6.96
+  },
+  {
+    "text": "them and what kind of mindset is helpful",
+    "start": 2208.96,
+    "duration": 8.28
+  },
+  {
+    "text": "when working on optimization.",
+    "start": 2212.96,
+    "duration": 4.28
+  },
+  {
+    "text": "Let's start with a quick recap of what",
+    "start": 2218.72,
+    "duration": 6.32
+  },
+  {
+    "text": "we covered. We use stat unit to detect",
+    "start": 2221.2,
+    "duration": 7.44
+  },
+  {
+    "text": "the surface level symptoms. Then perform",
+    "start": 2225.04,
+    "duration": 6.319
+  },
+  {
+    "text": "the detailed analysis with anar set to",
+    "start": 2228.64,
+    "duration": 6.0
+  },
+  {
+    "text": "drill down from high level observation",
+    "start": 2231.359,
+    "duration": 7.521
+  },
+  {
+    "text": "to lowle root causes and",
+    "start": 2234.64,
+    "duration": 6.56
+  },
+  {
+    "text": "with repeated measurement and",
+    "start": 2238.88,
+    "duration": 4.08
+  },
+  {
+    "text": "validation.",
+    "start": 2241.2,
+    "duration": 5.919
+  },
+  {
+    "text": "We worked toward effective optimization.",
+    "start": 2242.96,
+    "duration": 6.8
+  },
+  {
+    "text": "This might sound like a familiar",
+    "start": 2247.119,
+    "duration": 6.801
+  },
+  {
+    "text": "workflow, but in this talk,",
+    "start": 2249.76,
+    "duration": 8.24
+  },
+  {
+    "text": "I hope the example gave you a concrete",
+    "start": 2253.92,
+    "duration": 9.8
+  },
+  {
+    "text": "sense of how to apply it in practice.",
+    "start": 2258.0,
+    "duration": 5.72
+  },
+  {
+    "text": "When it comes to perform performance",
+    "start": 2264.48,
+    "duration": 5.84
+  },
+  {
+    "text": "tuning, there are four key principles to",
+    "start": 2266.8,
+    "duration": 5.6
+  },
+  {
+    "text": "keep in mind.",
+    "start": 2270.32,
+    "duration": 5.84
+  },
+  {
+    "text": "First, always start with data.",
+    "start": 2272.4,
+    "duration": 5.76
+  },
+  {
+    "text": "Don't guess",
+    "start": 2276.16,
+    "duration": 6.88
+  },
+  {
+    "text": "measure. Second, avoid assumption.",
+    "start": 2278.16,
+    "duration": 9.6
+  },
+  {
+    "text": "Trust your tools instead of gut feeling.",
+    "start": 2283.04,
+    "duration": 8.799
+  },
+  {
+    "text": "Third, prioritize what matters most.",
+    "start": 2287.76,
+    "duration": 7.76
+  },
+  {
+    "text": "Focus on high impact B.",
+    "start": 2291.839,
+    "duration": 7.681
+  },
+  {
+    "text": "And finally, verify your changes. Always",
+    "start": 2295.52,
+    "duration": 8.079
+  },
+  {
+    "text": "retest after each adjustment.",
+    "start": 2299.52,
+    "duration": 8.72
+  },
+  {
+    "text": "The mindset you want is what might I be",
+    "start": 2303.599,
+    "duration": 6.321
+  },
+  {
+    "text": "missing?",
+    "start": 2308.24,
+    "duration": 4.879
+  },
+  {
+    "text": "That attitude is what leads to",
+    "start": 2309.92,
+    "duration": 6.84
+  },
+  {
+    "text": "meaningful improvement.",
+    "start": 2313.119,
+    "duration": 3.641
+  },
+  {
+    "text": "Here are some concrete optimization",
+    "start": 2317.2,
+    "duration": 5.44
+  },
+  {
+    "text": "guidelines. Design your",
+    "start": 2319.28,
+    "duration": 7.44
+  },
+  {
+    "text": "system to do as little as possible.",
+    "start": 2322.64,
+    "duration": 7.52
+  },
+  {
+    "text": "Keep things simple. If you can't avoid",
+    "start": 2326.72,
+    "duration": 7.28
+  },
+  {
+    "text": "processing if it should and",
+    "start": 2330.16,
+    "duration": 9.04
+  },
+  {
+    "text": "when adding your new system think can",
+    "start": 2334.0,
+    "duration": 9.44
+  },
+  {
+    "text": "this be paralized can it be pulled or",
+    "start": 2339.2,
+    "duration": 8.8
+  },
+  {
+    "text": "reused? Can it prior priority be managed",
+    "start": 2343.44,
+    "duration": 7.44
+  },
+  {
+    "text": "with something like the significant",
+    "start": 2348.0,
+    "duration": 4.4
+  },
+  {
+    "text": "manager?",
+    "start": 2350.88,
+    "duration": 4.719
+  },
+  {
+    "text": "The consistent goal should always be to",
+    "start": 2352.4,
+    "duration": 9.8
+  },
+  {
+    "text": "minimize processing wherever you can.",
+    "start": 2355.599,
+    "duration": 6.601
+  },
+  {
+    "text": "Before we close, I want to point you to",
+    "start": 2362.48,
+    "duration": 6.48
+  },
+  {
+    "text": "a few helpful resources. You don't need",
+    "start": 2365.44,
+    "duration": 6.88
+  },
+  {
+    "text": "to memorize every detail. What's more",
+    "start": 2368.96,
+    "duration": 7.119
+  },
+  {
+    "text": "important is knowing where to look when",
+    "start": 2372.32,
+    "duration": 6.96
+  },
+  {
+    "text": "you need answers.",
+    "start": 2376.079,
+    "duration": 6.081
+  },
+  {
+    "text": "And that brings us to the end of this",
+    "start": 2379.28,
+    "duration": 5.92
+  },
+  {
+    "text": "talk. I hope this session has given you",
+    "start": 2382.16,
+    "duration": 6.64
+  },
+  {
+    "text": "a solid first step towards using Ana",
+    "start": 2385.2,
+    "duration": 6.639
+  },
+  {
+    "text": "insight to create faster more stable",
+    "start": 2388.8,
+    "duration": 5.6
+  },
+  {
+    "text": "game experiences. So thank you for",
+    "start": 2391.839,
+    "duration": 4.611
+  },
+  {
+    "text": "listening.",
+    "start": 2394.4,
+    "duration": 6.88
+  },
+  {
+    "text": "[Applause]",
+    "start": 2396.45,
+    "duration": 4.83
+  }
+]

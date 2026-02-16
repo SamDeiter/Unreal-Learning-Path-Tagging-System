@@ -1,0 +1,4447 @@
+[
+  {
+    "text": "Hi. Hello. I'm Max, tech artist from",
+    "start": 1.439,
+    "duration": 5.681
+  },
+  {
+    "text": "CDPR and we and I'm Hugh BS and I work",
+    "start": 4.24,
+    "duration": 5.6
+  },
+  {
+    "text": "on the procedural team as a senior tools",
+    "start": 7.12,
+    "duration": 4.559
+  },
+  {
+    "text": "programmer with a focus on runtime",
+    "start": 9.84,
+    "duration": 4.56
+  },
+  {
+    "text": "generation and GPU execution.",
+    "start": 11.679,
+    "duration": 5.44
+  },
+  {
+    "text": ">> And here we are to talk mostly about uh",
+    "start": 14.4,
+    "duration": 6.32
+  },
+  {
+    "text": "PCG in visual for demo. Uh not about",
+    "start": 17.119,
+    "duration": 5.841
+  },
+  {
+    "text": "this specifically the folage but about",
+    "start": 20.72,
+    "duration": 5.52
+  },
+  {
+    "text": "its distribution in the world. As you",
+    "start": 22.96,
+    "duration": 6.479
+  },
+  {
+    "text": "see, it's uh pretty dense. Um at least",
+    "start": 26.24,
+    "duration": 6.8
+  },
+  {
+    "text": "in my opinion, looks pretty um pretty",
+    "start": 29.439,
+    "duration": 5.276
+  },
+  {
+    "text": "good.",
+    "start": 33.04,
+    "duration": 2.88
+  },
+  {
+    "text": "[snorts]",
+    "start": 34.715,
+    "duration": 4.205
+  },
+  {
+    "text": "Um",
+    "start": 35.92,
+    "duration": 3.0
+  },
+  {
+    "text": "uh so I'll be talking mostly about uh",
+    "start": 39.76,
+    "duration": 5.68
+  },
+  {
+    "text": "the practical use of PCG. So how I used",
+    "start": 42.64,
+    "duration": 6.48
+  },
+  {
+    "text": "the system in the demo and Hugh is going",
+    "start": 45.44,
+    "duration": 6.16
+  },
+  {
+    "text": "to expand a bit more on its uh technical",
+    "start": 49.12,
+    "duration": 5.84
+  },
+  {
+    "text": "side on its performance future and stuff",
+    "start": 51.6,
+    "duration": 5.439
+  },
+  {
+    "text": "like this.",
+    "start": 54.96,
+    "duration": 5.04
+  },
+  {
+    "text": "Uh a quick reminder what the runtime PCG",
+    "start": 57.039,
+    "duration": 5.121
+  },
+  {
+    "text": "it is because it's um it will be very",
+    "start": 60.0,
+    "duration": 5.519
+  },
+  {
+    "text": "much relevant. Um it's just a trigger in",
+    "start": 62.16,
+    "duration": 6.959
+  },
+  {
+    "text": "the PCG. Uh and uh it will uh signal the",
+    "start": 65.519,
+    "duration": 5.681
+  },
+  {
+    "text": "system when to update it. There are",
+    "start": 69.119,
+    "duration": 3.921
+  },
+  {
+    "text": "different triggers. runtime specifically",
+    "start": 71.2,
+    "duration": 3.68
+  },
+  {
+    "text": "of course means it will be triggered in",
+    "start": 73.04,
+    "duration": 5.28
+  },
+  {
+    "text": "runtime and it's almost always used with",
+    "start": 74.88,
+    "duration": 8.32
+  },
+  {
+    "text": "partitioned u setting uh what it means",
+    "start": 78.32,
+    "duration": 7.2
+  },
+  {
+    "text": "that uh PCG will divide the world into",
+    "start": 83.2,
+    "duration": 5.52
+  },
+  {
+    "text": "this um gridlike structure and every",
+    "start": 85.52,
+    "duration": 5.279
+  },
+  {
+    "text": "cell will be updated when you get close",
+    "start": 88.72,
+    "duration": 4.64
+  },
+  {
+    "text": "to it which is depicted on this image.",
+    "start": 90.799,
+    "duration": 4.161
+  },
+  {
+    "text": "Uh",
+    "start": 93.36,
+    "duration": 4.56
+  },
+  {
+    "text": "otherwise it's just a normal PCG.",
+    "start": 94.96,
+    "duration": 5.519
+  },
+  {
+    "text": "A great benefit for uh this approach is",
+    "start": 97.92,
+    "duration": 5.12
+  },
+  {
+    "text": "that whenever you modify a parameter uh",
+    "start": 100.479,
+    "duration": 4.96
+  },
+  {
+    "text": "rather in in editor or in runtime it",
+    "start": 103.04,
+    "duration": 4.24
+  },
+  {
+    "text": "doesn't matter uh the things will be",
+    "start": 105.439,
+    "duration": 5.841
+  },
+  {
+    "text": "updated uh immediately which is um very",
+    "start": 107.28,
+    "duration": 7.519
+  },
+  {
+    "text": "important for artistic work.",
+    "start": 111.28,
+    "duration": 6.96
+  },
+  {
+    "text": "Uh another important thing we wanted for",
+    "start": 114.799,
+    "duration": 7.041
+  },
+  {
+    "text": "the vure for tech demo is um for this",
+    "start": 118.24,
+    "duration": 6.879
+  },
+  {
+    "text": "runtime PCG to be executed on GPU.",
+    "start": 121.84,
+    "duration": 5.84
+  },
+  {
+    "text": "uh because uh as you'll see later I'm",
+    "start": 125.119,
+    "duration": 5.601
+  },
+  {
+    "text": "mostly using it for grass",
+    "start": 127.68,
+    "duration": 5.12
+  },
+  {
+    "text": "uh and grass is mostly visual uh",
+    "start": 130.72,
+    "duration": 4.239
+  },
+  {
+    "text": "component of the picture and you don't",
+    "start": 132.8,
+    "duration": 4.96
+  },
+  {
+    "text": "want really visual components to fight",
+    "start": 134.959,
+    "duration": 5.681
+  },
+  {
+    "text": "for performance with gameplay uh related",
+    "start": 137.76,
+    "duration": 6.24
+  },
+  {
+    "text": "uh tasks. Luckily uh PCG team just",
+    "start": 140.64,
+    "duration": 6.72
+  },
+  {
+    "text": "released uh the GPU uh support which is",
+    "start": 144.0,
+    "duration": 6.48
+  },
+  {
+    "text": "not really a mode per se but just a set",
+    "start": 147.36,
+    "duration": 7.04
+  },
+  {
+    "text": "of uh nodes. Um some of them are just a",
+    "start": 150.48,
+    "duration": 6.0
+  },
+  {
+    "text": "checkbox as you see in the picture. You",
+    "start": 154.4,
+    "duration": 4.16
+  },
+  {
+    "text": "click it, the note works just the same",
+    "start": 156.48,
+    "duration": 6.8
+  },
+  {
+    "text": "but on GPU. Uh but there are some uh GPU",
+    "start": 158.56,
+    "duration": 7.28
+  },
+  {
+    "text": "specific nodes which are uh especially",
+    "start": 163.28,
+    "duration": 5.039
+  },
+  {
+    "text": "powerful. Um that's what you see on this",
+    "start": 165.84,
+    "duration": 4.96
+  },
+  {
+    "text": "picture. Uh they are categorized as",
+    "start": 168.319,
+    "duration": 5.121
+  },
+  {
+    "text": "custom HLSL",
+    "start": 170.8,
+    "duration": 4.56
+  },
+  {
+    "text": "and they are especially great because",
+    "start": 173.44,
+    "duration": 4.64
+  },
+  {
+    "text": "they are essentially a blank canvas. You",
+    "start": 175.36,
+    "duration": 4.879
+  },
+  {
+    "text": "can write your own logic there. Um you",
+    "start": 178.08,
+    "duration": 4.239
+  },
+  {
+    "text": "can combine multiple logical steps even",
+    "start": 180.239,
+    "duration": 6.321
+  },
+  {
+    "text": "in the same node. Um there are different",
+    "start": 182.319,
+    "duration": 7.681
+  },
+  {
+    "text": "flavors for the node. Uh and they mostly",
+    "start": 186.56,
+    "duration": 5.84
+  },
+  {
+    "text": "differ in how the node structure it",
+    "start": 190.0,
+    "duration": 4.64
+  },
+  {
+    "text": "works inside. So for example, point",
+    "start": 192.4,
+    "duration": 4.479
+  },
+  {
+    "text": "generator uh will generate certain",
+    "start": 194.64,
+    "duration": 5.04
+  },
+  {
+    "text": "amount of uh operations based on however",
+    "start": 196.879,
+    "duration": 5.201
+  },
+  {
+    "text": "many you say like on the interface of",
+    "start": 199.68,
+    "duration": 5.36
+  },
+  {
+    "text": "the node you say like yeah make me a,000",
+    "start": 202.08,
+    "duration": 4.64
+  },
+  {
+    "text": "points.",
+    "start": 205.04,
+    "duration": 3.839
+  },
+  {
+    "text": "uh while point processor you give it a",
+    "start": 206.72,
+    "duration": 4.32
+  },
+  {
+    "text": "set of points and it will just look at",
+    "start": 208.879,
+    "duration": 3.92
+  },
+  {
+    "text": "this set and decide on the number of",
+    "start": 211.04,
+    "duration": 6.08
+  },
+  {
+    "text": "points how many uh iterations to do.",
+    "start": 212.799,
+    "duration": 7.601
+  },
+  {
+    "text": "Um for the note you get this uh UI which",
+    "start": 217.12,
+    "duration": 7.119
+  },
+  {
+    "text": "is three text panels. The first one is",
+    "start": 220.4,
+    "duration": 6.16
+  },
+  {
+    "text": "uh well I call it hints but uh actually",
+    "start": 224.239,
+    "duration": 5.121
+  },
+  {
+    "text": "it's just a declarations for functions.",
+    "start": 226.56,
+    "duration": 7.52
+  },
+  {
+    "text": "The these functions are um dynamic. So",
+    "start": 229.36,
+    "duration": 6.4
+  },
+  {
+    "text": "whenever you change inputs for the node,",
+    "start": 234.08,
+    "duration": 3.68
+  },
+  {
+    "text": "you'll get different kinds of uh",
+    "start": 235.76,
+    "duration": 4.72
+  },
+  {
+    "text": "functions. So it's very handy. The",
+    "start": 237.76,
+    "duration": 4.559
+  },
+  {
+    "text": "middle panel is for your own functions.",
+    "start": 240.48,
+    "duration": 5.92
+  },
+  {
+    "text": "Uh it's for code u optimization and code",
+    "start": 242.319,
+    "duration": 8.64
+  },
+  {
+    "text": "organization. And final small uh panel",
+    "start": 246.4,
+    "duration": 6.96
+  },
+  {
+    "text": "here is for your own logic. It's the",
+    "start": 250.959,
+    "duration": 4.801
+  },
+  {
+    "text": "main work area. In my case, you can you",
+    "start": 253.36,
+    "duration": 4.32
+  },
+  {
+    "text": "see it's just five lines to spawn the",
+    "start": 255.76,
+    "duration": 5.439
+  },
+  {
+    "text": "grid of um trees on a landscape. So no",
+    "start": 257.68,
+    "duration": 5.76
+  },
+  {
+    "text": "boiler plate at all which is in my",
+    "start": 261.199,
+    "duration": 4.801
+  },
+  {
+    "text": "opinion awesome.",
+    "start": 263.44,
+    "duration": 5.6
+  },
+  {
+    "text": "Now where the PCG runtime sits or like",
+    "start": 266.0,
+    "duration": 5.52
+  },
+  {
+    "text": "PCG in general sits in the fage pipeline",
+    "start": 269.04,
+    "duration": 4.719
+  },
+  {
+    "text": "for the demo",
+    "start": 271.52,
+    "duration": 6.0
+  },
+  {
+    "text": "uh we uh identified multiple criterias",
+    "start": 273.759,
+    "duration": 6.641
+  },
+  {
+    "text": "and uh one of them is asset importance.",
+    "start": 277.52,
+    "duration": 5.44
+  },
+  {
+    "text": "So the big assets, hero assets, stuff",
+    "start": 280.4,
+    "duration": 5.04
+  },
+  {
+    "text": "like this, uh they will be placed almost",
+    "start": 282.96,
+    "duration": 6.0
+  },
+  {
+    "text": "guaranteed by artists. Um",
+    "start": 285.44,
+    "duration": 5.36
+  },
+  {
+    "text": "and so it's not really PCG at all. And",
+    "start": 288.96,
+    "duration": 2.959
+  },
+  {
+    "text": "that's what you see on this picture.",
+    "start": 290.8,
+    "duration": 4.48
+  },
+  {
+    "text": "It's purely handplaced assets.",
+    "start": 291.919,
+    "duration": 6.961
+  },
+  {
+    "text": "Uh next, we give artist a tool, uh PCG",
+    "start": 295.28,
+    "duration": 6.8
+  },
+  {
+    "text": "based one, uh to fill areas with like",
+    "start": 298.88,
+    "duration": 6.48
+  },
+  {
+    "text": "generic polish, let's say. Um the tool",
+    "start": 302.08,
+    "duration": 7.28
+  },
+  {
+    "text": "is uh for um mediumsiz assets like from",
+    "start": 305.36,
+    "duration": 6.559
+  },
+  {
+    "text": "sharp to a tree.",
+    "start": 309.36,
+    "duration": 6.0
+  },
+  {
+    "text": "Um the logic for placing them is uh kind",
+    "start": 311.919,
+    "duration": 6.72
+  },
+  {
+    "text": "of not as complex as u",
+    "start": 315.36,
+    "duration": 6.64
+  },
+  {
+    "text": "um hero assets of course uh but also not",
+    "start": 318.639,
+    "duration": 6.081
+  },
+  {
+    "text": "as simple as just randomly placing stuff",
+    "start": 322.0,
+    "duration": 6.72
+  },
+  {
+    "text": "which means um that we can potentially",
+    "start": 324.72,
+    "duration": 5.84
+  },
+  {
+    "text": "come up with the BCG graph but this",
+    "start": 328.72,
+    "duration": 4.56
+  },
+  {
+    "text": "graph is not runtime. It's uh it will be",
+    "start": 330.56,
+    "duration": 4.88
+  },
+  {
+    "text": "pre-baked foliage.",
+    "start": 333.28,
+    "duration": 4.8
+  },
+  {
+    "text": "And finally, to finish the picture, we",
+    "start": 335.44,
+    "duration": 5.36
+  },
+  {
+    "text": "need some grass. Um although it doesn't",
+    "start": 338.08,
+    "duration": 4.64
+  },
+  {
+    "text": "seem like it, there are more grass",
+    "start": 340.8,
+    "duration": 4.0
+  },
+  {
+    "text": "instances here than all other foliage",
+    "start": 342.72,
+    "duration": 5.84
+  },
+  {
+    "text": "combined. Uh which means we cannot um",
+    "start": 344.8,
+    "duration": 6.48
+  },
+  {
+    "text": "unlike previous slide, we cannot bake",
+    "start": 348.56,
+    "duration": 4.56
+  },
+  {
+    "text": "this foliage. We have to generate it in",
+    "start": 351.28,
+    "duration": 4.96
+  },
+  {
+    "text": "runtime because otherwise um we'll run",
+    "start": 353.12,
+    "duration": 7.12
+  },
+  {
+    "text": "it into the performance issues.",
+    "start": 356.24,
+    "duration": 6.16
+  },
+  {
+    "text": "Uh another [sighs and gasps]",
+    "start": 360.24,
+    "duration": 6.16
+  },
+  {
+    "text": "uh big criteria is uh area importance.",
+    "start": 362.4,
+    "duration": 6.48
+  },
+  {
+    "text": "So uh not only asset is important but",
+    "start": 366.4,
+    "duration": 5.6
+  },
+  {
+    "text": "where it is placed. So if it's some edge",
+    "start": 368.88,
+    "duration": 5.439
+  },
+  {
+    "text": "of the map or some area that nobody",
+    "start": 372.0,
+    "duration": 5.44
+  },
+  {
+    "text": "cares about. Uh more likely than not the",
+    "start": 374.319,
+    "duration": 5.521
+  },
+  {
+    "text": "PCG or like any procedural generation",
+    "start": 377.44,
+    "duration": 5.52
+  },
+  {
+    "text": "will be used to place stuff there. While",
+    "start": 379.84,
+    "duration": 5.44
+  },
+  {
+    "text": "for quest areas and like key visual",
+    "start": 382.96,
+    "duration": 4.959
+  },
+  {
+    "text": "areas almost guaranteed it will be",
+    "start": 385.28,
+    "duration": 5.44
+  },
+  {
+    "text": "mostly filled by artists by hand and",
+    "start": 387.919,
+    "duration": 5.361
+  },
+  {
+    "text": "anything in between well you decide",
+    "start": 390.72,
+    "duration": 4.88
+  },
+  {
+    "text": "that's how I imagine this distribution",
+    "start": 393.28,
+    "duration": 5.68
+  },
+  {
+    "text": "in my mind.",
+    "start": 395.6,
+    "duration": 6.8
+  },
+  {
+    "text": "Uh and that's how it works out um in the",
+    "start": 398.96,
+    "duration": 5.12
+  },
+  {
+    "text": "demo.",
+    "start": 402.4,
+    "duration": 4.799
+  },
+  {
+    "text": "Uh this is panel side by side. Uh the",
+    "start": 404.08,
+    "duration": 5.2
+  },
+  {
+    "text": "first one is just handplaced. Uh middle",
+    "start": 407.199,
+    "duration": 4.881
+  },
+  {
+    "text": "one is hand place plus pre-baked. And",
+    "start": 409.28,
+    "duration": 7.32
+  },
+  {
+    "text": "finally is the complete picture picture.",
+    "start": 412.08,
+    "duration": 4.52
+  },
+  {
+    "text": "Uh quick word about the tool we used in",
+    "start": 425.28,
+    "duration": 8.72
+  },
+  {
+    "text": "um for pre-baking stuff.",
+    "start": 429.84,
+    "duration": 6.56
+  },
+  {
+    "text": "Uh this is a task system we made uh that",
+    "start": 434.0,
+    "duration": 5.28
+  },
+  {
+    "text": "collects data from different sources uh",
+    "start": 436.4,
+    "duration": 6.4
+  },
+  {
+    "text": "from uh unreal world for from uh other",
+    "start": 439.28,
+    "duration": 7.44
+  },
+  {
+    "text": "applications and it um organizes in into",
+    "start": 442.8,
+    "duration": 6.64
+  },
+  {
+    "text": "PCG readable data.",
+    "start": 446.72,
+    "duration": 5.68
+  },
+  {
+    "text": "Um it's fully preset based so only one",
+    "start": 449.44,
+    "duration": 4.96
+  },
+  {
+    "text": "person have to know how it works inside",
+    "start": 452.4,
+    "duration": 6.639
+  },
+  {
+    "text": "and he will prepare um all of the cool",
+    "start": 454.4,
+    "duration": 7.84
+  },
+  {
+    "text": "biomes if if you will. Um it works on",
+    "start": 459.039,
+    "duration": 7.121
+  },
+  {
+    "text": "tiles um which means artist will not um",
+    "start": 462.24,
+    "duration": 5.84
+  },
+  {
+    "text": "clash together. There will not be",
+    "start": 466.16,
+    "duration": 3.599
+  },
+  {
+    "text": "checkout problems unless they work on",
+    "start": 468.08,
+    "duration": 4.72
+  },
+  {
+    "text": "one specific tile. Exactly.",
+    "start": 469.759,
+    "duration": 8.321
+  },
+  {
+    "text": "And the tool is optimized for um mostly",
+    "start": 472.8,
+    "duration": 7.76
+  },
+  {
+    "text": "quality and uh flexibility rather than",
+    "start": 478.08,
+    "duration": 6.88
+  },
+  {
+    "text": "speed. Um which makes it uh well in my",
+    "start": 480.56,
+    "duration": 6.72
+  },
+  {
+    "text": "opinion great for this mediumsiz",
+    "start": 484.96,
+    "duration": 5.04
+  },
+  {
+    "text": "foliage.",
+    "start": 487.28,
+    "duration": 6.96
+  },
+  {
+    "text": "Now for uh the grass",
+    "start": 490.0,
+    "duration": 8.24
+  },
+  {
+    "text": "um the way it's made uh it's not only uh",
+    "start": 494.24,
+    "duration": 5.44
+  },
+  {
+    "text": "partitioned runtime it's also",
+    "start": 498.24,
+    "duration": 4.399
+  },
+  {
+    "text": "hierarchical and it means that there is",
+    "start": 499.68,
+    "duration": 6.16
+  },
+  {
+    "text": "a uh every cell will be subdivided into",
+    "start": 502.639,
+    "duration": 5.361
+  },
+  {
+    "text": "more more cells.",
+    "start": 505.84,
+    "duration": 5.919
+  },
+  {
+    "text": "Um the benefit here is that we have the",
+    "start": 508.0,
+    "duration": 5.76
+  },
+  {
+    "text": "one huge cell over the whole world",
+    "start": 511.759,
+    "duration": 5.441
+  },
+  {
+    "text": "depicted in blue here. And this uh one",
+    "start": 513.76,
+    "duration": 5.6
+  },
+  {
+    "text": "cell is essentially for stuff you want",
+    "start": 517.2,
+    "duration": 5.36
+  },
+  {
+    "text": "to happen only once. Uh so like reading",
+    "start": 519.36,
+    "duration": 5.52
+  },
+  {
+    "text": "graph parameters uh some organization",
+    "start": 522.56,
+    "duration": 6.16
+  },
+  {
+    "text": "stuff uh there and um I'm personally",
+    "start": 524.88,
+    "duration": 7.12
+  },
+  {
+    "text": "decide to dump all of the CPU work there",
+    "start": 528.72,
+    "duration": 6.32
+  },
+  {
+    "text": "and then uh you pass all of this uh data",
+    "start": 532.0,
+    "duration": 5.2
+  },
+  {
+    "text": "that you collected on the big cell to",
+    "start": 535.04,
+    "duration": 6.32
+  },
+  {
+    "text": "smaller cells um and do some other work.",
+    "start": 537.2,
+    "duration": 8.8
+  },
+  {
+    "text": "uh for example this um red uh cells",
+    "start": 541.36,
+    "duration": 9.36
+  },
+  {
+    "text": "depicted here it's 12 28 m per one cell",
+    "start": 546.0,
+    "duration": 7.279
+  },
+  {
+    "text": "uh and there I'm doing some work that",
+    "start": 550.72,
+    "duration": 5.6
+  },
+  {
+    "text": "has high overhead but has to happen at",
+    "start": 553.279,
+    "duration": 6.081
+  },
+  {
+    "text": "some point and once I've collected all",
+    "start": 556.32,
+    "duration": 5.12
+  },
+  {
+    "text": "of this data I will pass it to the",
+    "start": 559.36,
+    "duration": 5.2
+  },
+  {
+    "text": "smallest tiny cell there are just 32 m",
+    "start": 561.44,
+    "duration": 6.0
+  },
+  {
+    "text": "in size uh and there will be a lot of",
+    "start": 564.56,
+    "duration": 6.0
+  },
+  {
+    "text": "them of course because of the size",
+    "start": 567.44,
+    "duration": 5.04
+  },
+  {
+    "text": "uh and the final scatter will happen on",
+    "start": 570.56,
+    "duration": 4.88
+  },
+  {
+    "text": "them.",
+    "start": 572.48,
+    "duration": 6.4
+  },
+  {
+    "text": "This is the like logical overview of",
+    "start": 575.44,
+    "duration": 6.8
+  },
+  {
+    "text": "where that data comes uh from to the",
+    "start": 578.88,
+    "duration": 6.88
+  },
+  {
+    "text": "graph. And I have two main sources. One",
+    "start": 582.24,
+    "duration": 6.8
+  },
+  {
+    "text": "is landscape and one is um graph",
+    "start": 585.76,
+    "duration": 5.84
+  },
+  {
+    "text": "parameters. For landscape, it's pretty",
+    "start": 589.04,
+    "duration": 4.56
+  },
+  {
+    "text": "easy. Uh I'm getting the height map, of",
+    "start": 591.6,
+    "duration": 4.56
+  },
+  {
+    "text": "course, the normals and through material",
+    "start": 593.6,
+    "duration": 5.28
+  },
+  {
+    "text": "I'm getting grass maps.",
+    "start": 596.16,
+    "duration": 6.239
+  },
+  {
+    "text": "for parameters. It's um nothing too",
+    "start": 598.88,
+    "duration": 5.12
+  },
+  {
+    "text": "special. It's slightly more but it's",
+    "start": 602.399,
+    "duration": 4.241
+  },
+  {
+    "text": "slightly more tricky. Uh I'm getting the",
+    "start": 604.0,
+    "duration": 5.92
+  },
+  {
+    "text": "I have two arrays of assets. One is",
+    "start": 606.64,
+    "duration": 6.0
+  },
+  {
+    "text": "skeletal, one is uh static",
+    "start": 609.92,
+    "duration": 6.0
+  },
+  {
+    "text": "um and one structure which is a setting",
+    "start": 612.64,
+    "duration": 5.52
+  },
+  {
+    "text": "per one grass map. So there is a a",
+    "start": 615.92,
+    "duration": 5.039
+  },
+  {
+    "text": "decent chunk of parameters.",
+    "start": 618.16,
+    "duration": 4.88
+  },
+  {
+    "text": "Um",
+    "start": 620.959,
+    "duration": 4.88
+  },
+  {
+    "text": "yeah and once all of this are uh passed",
+    "start": 623.04,
+    "duration": 4.96
+  },
+  {
+    "text": "into the graph that's how uh the",
+    "start": 625.839,
+    "duration": 4.56
+  },
+  {
+    "text": "processes look like the logical overview",
+    "start": 628.0,
+    "duration": 6.48
+  },
+  {
+    "text": "of it. You can notice that I'm using",
+    "start": 630.399,
+    "duration": 7.841
+  },
+  {
+    "text": "uh CPU almost all exclusively on this",
+    "start": 634.48,
+    "duration": 6.88
+  },
+  {
+    "text": "unbounded grid uh because I'm I'm trying",
+    "start": 638.24,
+    "duration": 5.52
+  },
+  {
+    "text": "to avoid the CPU as much as possible and",
+    "start": 641.36,
+    "duration": 5.44
+  },
+  {
+    "text": "once um the data is collected there I'm",
+    "start": 643.76,
+    "duration": 7.12
+  },
+  {
+    "text": "dumping it into the GPU right away.",
+    "start": 646.8,
+    "duration": 5.84
+  },
+  {
+    "text": "Um you can notice that landscape and",
+    "start": 650.88,
+    "duration": 6.0
+  },
+  {
+    "text": "grass maps are read on the 120 28 m",
+    "start": 652.64,
+    "duration": 6.56
+  },
+  {
+    "text": "grid. As I mentioned the idea here is",
+    "start": 656.88,
+    "duration": 3.76
+  },
+  {
+    "text": "that of course you can read the",
+    "start": 659.2,
+    "duration": 4.8
+  },
+  {
+    "text": "landscape uh on the huge unbounded cell",
+    "start": 660.64,
+    "duration": 4.56
+  },
+  {
+    "text": "but then you're getting the whole",
+    "start": 664.0,
+    "duration": 3.44
+  },
+  {
+    "text": "landscape at once which is has memory",
+    "start": 665.2,
+    "duration": 5.68
+  },
+  {
+    "text": "implications. file if you'll read them",
+    "start": 667.44,
+    "duration": 6.88
+  },
+  {
+    "text": "um on the smallest cell um it's also",
+    "start": 670.88,
+    "duration": 5.519
+  },
+  {
+    "text": "possible but then uh these operations",
+    "start": 674.32,
+    "duration": 5.12
+  },
+  {
+    "text": "have um a noticeable overhead",
+    "start": 676.399,
+    "duration": 5.041
+  },
+  {
+    "text": "uh so you'll get a into a performance",
+    "start": 679.44,
+    "duration": 4.72
+  },
+  {
+    "text": "issues this that way",
+    "start": 681.44,
+    "duration": 5.519
+  },
+  {
+    "text": "and I'm doing the scatter on both of the",
+    "start": 684.16,
+    "duration": 7.2
+  },
+  {
+    "text": "um grids and you'll see why in a second",
+    "start": 686.959,
+    "duration": 6.241
+  },
+  {
+    "text": "that's the whole graph if you ever",
+    "start": 691.36,
+    "duration": 5.12
+  },
+  {
+    "text": "worked with PCG you know it's very tiny",
+    "start": 693.2,
+    "duration": 6.56
+  },
+  {
+    "text": "small graph and Even then uh the blue",
+    "start": 696.48,
+    "duration": 5.68
+  },
+  {
+    "text": "box uh which is the most of the graph is",
+    "start": 699.76,
+    "duration": 5.04
+  },
+  {
+    "text": "just reading the parameters. It can be",
+    "start": 702.16,
+    "duration": 6.16
+  },
+  {
+    "text": "collapsed into the smaller um like",
+    "start": 704.8,
+    "duration": 7.599
+  },
+  {
+    "text": "subgraphs or some sort of uh",
+    "start": 708.32,
+    "duration": 6.56
+  },
+  {
+    "text": "loop but then it will be slightly harder",
+    "start": 712.399,
+    "duration": 4.161
+  },
+  {
+    "text": "to explain but in production you",
+    "start": 714.88,
+    "duration": 4.8
+  },
+  {
+    "text": "probably will do it.",
+    "start": 716.56,
+    "duration": 5.6
+  },
+  {
+    "text": "Now I'll go through every part of this",
+    "start": 719.68,
+    "duration": 5.279
+  },
+  {
+    "text": "graph. I'll explain everything.",
+    "start": 722.16,
+    "duration": 5.6
+  },
+  {
+    "text": "Uh so this part is nothing too special.",
+    "start": 724.959,
+    "duration": 4.961
+  },
+  {
+    "text": "It's just reading the inputs for",
+    "start": 727.76,
+    "duration": 5.6
+  },
+  {
+    "text": "landscape and um settings. As I",
+    "start": 729.92,
+    "duration": 6.719
+  },
+  {
+    "text": "mentioned, we have a structure of um for",
+    "start": 733.36,
+    "duration": 6.24
+  },
+  {
+    "text": "every grass map I have some kind of a",
+    "start": 736.639,
+    "duration": 5.521
+  },
+  {
+    "text": "structure and the settings as part of",
+    "start": 739.6,
+    "duration": 5.2
+  },
+  {
+    "text": "the structure. Um I'm keeping a close",
+    "start": 742.16,
+    "duration": 5.76
+  },
+  {
+    "text": "mind uh in of the order of the settings",
+    "start": 744.8,
+    "duration": 6.159
+  },
+  {
+    "text": "because um if the order because I'm",
+    "start": 747.92,
+    "duration": 6.0
+  },
+  {
+    "text": "using the order as a key to link all of",
+    "start": 750.959,
+    "duration": 4.961
+  },
+  {
+    "text": "them.",
+    "start": 753.92,
+    "duration": 5.039
+  },
+  {
+    "text": "That's another part of the inputs. Um",
+    "start": 755.92,
+    "duration": 6.32
+  },
+  {
+    "text": "this one is for assets. Um there are two",
+    "start": 758.959,
+    "duration": 5.361
+  },
+  {
+    "text": "streams. One is for static, one is for",
+    "start": 762.24,
+    "duration": 5.36
+  },
+  {
+    "text": "skeletal. Um and it's necessary because",
+    "start": 764.32,
+    "duration": 6.0
+  },
+  {
+    "text": "well for static uh let's say for a rocks",
+    "start": 767.6,
+    "duration": 4.799
+  },
+  {
+    "text": "you don't need uh skeletal and vice",
+    "start": 770.32,
+    "duration": 5.208
+  },
+  {
+    "text": "versa for uh grass you do need skeletal",
+    "start": 772.399,
+    "duration": 3.68
+  },
+  {
+    "text": "[snorts]",
+    "start": 775.528,
+    "duration": 2.632
+  },
+  {
+    "text": "uh then I'm classifying what what is",
+    "start": 776.079,
+    "duration": 4.88
+  },
+  {
+    "text": "going where uh adding and also I'm",
+    "start": 778.16,
+    "duration": 7.44
+  },
+  {
+    "text": "adding a one placeholder uh item to this",
+    "start": 780.959,
+    "duration": 7.921
+  },
+  {
+    "text": "stream uh just to make uh just to make",
+    "start": 785.6,
+    "duration": 6.0
+  },
+  {
+    "text": "sure the data will not be collapsed",
+    "start": 788.88,
+    "duration": 5.199
+  },
+  {
+    "text": "um because well as I mentioned order is",
+    "start": 791.6,
+    "duration": 4.96
+  },
+  {
+    "text": "important in my graph.",
+    "start": 794.079,
+    "duration": 4.32
+  },
+  {
+    "text": "uh and if artist did not provide any",
+    "start": 796.56,
+    "duration": 5.68
+  },
+  {
+    "text": "assets the data will go away",
+    "start": 798.399,
+    "duration": 7.761
+  },
+  {
+    "text": "that's the another part of the uh",
+    "start": 802.24,
+    "duration": 6.48
+  },
+  {
+    "text": "computation on the unbounded grid here",
+    "start": 806.16,
+    "duration": 5.2
+  },
+  {
+    "text": "I'm doing weight reormalization",
+    "start": 808.72,
+    "duration": 4.72
+  },
+  {
+    "text": "uh of course it can be done later for",
+    "start": 811.36,
+    "duration": 5.039
+  },
+  {
+    "text": "example when I'm scattering uh but since",
+    "start": 813.44,
+    "duration": 6.0
+  },
+  {
+    "text": "this operation is common for all uh",
+    "start": 816.399,
+    "duration": 6.161
+  },
+  {
+    "text": "tiles it's better to do it only once on",
+    "start": 819.44,
+    "duration": 5.92
+  },
+  {
+    "text": "the input side rather than in the nodes",
+    "start": 822.56,
+    "duration": 5.76
+  },
+  {
+    "text": "U like in custom shell cell nodes. Uh so",
+    "start": 825.36,
+    "duration": 6.0
+  },
+  {
+    "text": "it's a tiny performance optimization but",
+    "start": 828.32,
+    "duration": 5.44
+  },
+  {
+    "text": "just so you know.",
+    "start": 831.36,
+    "duration": 6.32
+  },
+  {
+    "text": "And finally for um inputs you of course",
+    "start": 833.76,
+    "duration": 6.639
+  },
+  {
+    "text": "want for your artist to have some way to",
+    "start": 837.68,
+    "duration": 5.599
+  },
+  {
+    "text": "paint where stuff goes. Luckily Unreal",
+    "start": 840.399,
+    "duration": 4.8
+  },
+  {
+    "text": "already have a system for it which is",
+    "start": 843.279,
+    "duration": 5.841
+  },
+  {
+    "text": "this uh landscape grass system. uh I'm I",
+    "start": 845.199,
+    "duration": 6.561
+  },
+  {
+    "text": "have almost complete setup for it except",
+    "start": 849.12,
+    "duration": 5.519
+  },
+  {
+    "text": "uh I don't provide any assets to the to",
+    "start": 851.76,
+    "duration": 5.84
+  },
+  {
+    "text": "this landscape grass system and that way",
+    "start": 854.639,
+    "duration": 5.681
+  },
+  {
+    "text": "uh the generate grass map node can fetch",
+    "start": 857.6,
+    "duration": 5.359
+  },
+  {
+    "text": "the grass maps and create PCG textures",
+    "start": 860.32,
+    "duration": 7.56
+  },
+  {
+    "text": "for me to sample down the line",
+    "start": 862.959,
+    "duration": 4.921
+  },
+  {
+    "text": "and finally for uh nodes I'm doing the",
+    "start": 868.0,
+    "duration": 6.48
+  },
+  {
+    "text": "you know point generation of course and",
+    "start": 872.399,
+    "duration": 4.081
+  },
+  {
+    "text": "you can notice that I have two exactly",
+    "start": 874.48,
+    "duration": 3.599
+  },
+  {
+    "text": "same setup",
+    "start": 876.48,
+    "duration": 3.44
+  },
+  {
+    "text": "uh and that's for a reason. Uh initially",
+    "start": 878.079,
+    "duration": 4.481
+  },
+  {
+    "text": "there was only one uh the this orange",
+    "start": 879.92,
+    "duration": 4.24
+  },
+  {
+    "text": "grid",
+    "start": 882.56,
+    "duration": 4.719
+  },
+  {
+    "text": "uh which I kind of renamed to be a dense",
+    "start": 884.16,
+    "duration": 5.6
+  },
+  {
+    "text": "uh grass scattering. Um and what happens",
+    "start": 887.279,
+    "duration": 4.081
+  },
+  {
+    "text": "there is of course I'm just scattering",
+    "start": 889.76,
+    "duration": 8.079
+  },
+  {
+    "text": "some points. Uh but uh if you you see a",
+    "start": 891.36,
+    "duration": 9.039
+  },
+  {
+    "text": "great deal of transition between this",
+    "start": 897.839,
+    "duration": 4.8
+  },
+  {
+    "text": "points and nothing. So if it's uh dense",
+    "start": 900.399,
+    "duration": 5.281
+  },
+  {
+    "text": "the grass and nothing you'll see a huge",
+    "start": 902.639,
+    "duration": 6.081
+  },
+  {
+    "text": "jump. An artist constantly asked me to",
+    "start": 905.68,
+    "duration": 5.44
+  },
+  {
+    "text": "increase the radius of course. So you",
+    "start": 908.72,
+    "duration": 4.96
+  },
+  {
+    "text": "can't really fight uh this transition by",
+    "start": 911.12,
+    "duration": 5.04
+  },
+  {
+    "text": "increasing the radius infinitely. Uh",
+    "start": 913.68,
+    "duration": 4.88
+  },
+  {
+    "text": "then you'll run into the number of",
+    "start": 916.16,
+    "duration": 5.119
+  },
+  {
+    "text": "instances uh issue.",
+    "start": 918.56,
+    "duration": 4.959
+  },
+  {
+    "text": "So the solution I used is I added",
+    "start": 921.279,
+    "duration": 4.961
+  },
+  {
+    "text": "another scattering pass with this medium",
+    "start": 923.519,
+    "duration": 4.801
+  },
+  {
+    "text": "uh grid on the medium grid which I",
+    "start": 926.24,
+    "duration": 4.48
+  },
+  {
+    "text": "called sparse foliage. each. It's",
+    "start": 928.32,
+    "duration": 4.72
+  },
+  {
+    "text": "exactly the same setup just fewer number",
+    "start": 930.72,
+    "duration": 6.479
+  },
+  {
+    "text": "of points and u to compensate for um",
+    "start": 933.04,
+    "duration": 6.72
+  },
+  {
+    "text": "lack in density I'm also scaling them up",
+    "start": 937.199,
+    "duration": 6.32
+  },
+  {
+    "text": "a bit. Uh and also they are uh cooled",
+    "start": 939.76,
+    "duration": 6.079
+  },
+  {
+    "text": "away using minimum draw distance and",
+    "start": 943.519,
+    "duration": 4.401
+  },
+  {
+    "text": "maximum draw distance. So for the closed",
+    "start": 945.839,
+    "duration": 5.281
+  },
+  {
+    "text": "grid um there is no minimum draw",
+    "start": 947.92,
+    "duration": 6.56
+  },
+  {
+    "text": "distance for the dense one you know it",
+    "start": 951.12,
+    "duration": 5.36
+  },
+  {
+    "text": "just matches the previous one. Of",
+    "start": 954.48,
+    "duration": 3.359
+  },
+  {
+    "text": "course, the picture here is not to",
+    "start": 956.48,
+    "duration": 4.0
+  },
+  {
+    "text": "scale. Just just a note. The actual",
+    "start": 957.839,
+    "duration": 7.521
+  },
+  {
+    "text": "radius is 128 m for the dense and 256",
+    "start": 960.48,
+    "duration": 8.159
+  },
+  {
+    "text": "for sparse.",
+    "start": 965.36,
+    "duration": 5.279
+  },
+  {
+    "text": "Um there's of course drawbacks to this",
+    "start": 968.639,
+    "duration": 5.2
+  },
+  {
+    "text": "approach. Uh if you zoom very closely uh",
+    "start": 970.639,
+    "duration": 5.76
+  },
+  {
+    "text": "you'll see the uh transition between",
+    "start": 973.839,
+    "duration": 5.761
+  },
+  {
+    "text": "dense and uh sparse uh because you'll",
+    "start": 976.399,
+    "duration": 6.481
+  },
+  {
+    "text": "see the scaling of the assets. And for",
+    "start": 979.6,
+    "duration": 6.4
+  },
+  {
+    "text": "transition from sparse to nothing, um",
+    "start": 982.88,
+    "duration": 6.0
+  },
+  {
+    "text": "I'm recoloring assets to match the color",
+    "start": 986.0,
+    "duration": 5.04
+  },
+  {
+    "text": "of the ground at the very edge. So it",
+    "start": 988.88,
+    "duration": 4.56
+  },
+  {
+    "text": "kind of hides the assets themselves, but",
+    "start": 991.04,
+    "duration": 4.479
+  },
+  {
+    "text": "I cannot really recolor the shadows from",
+    "start": 993.44,
+    "duration": 3.519
+  },
+  {
+    "text": "the assets. So you'll see the black",
+    "start": 995.519,
+    "duration": 4.161
+  },
+  {
+    "text": "spotes u disappear.",
+    "start": 996.959,
+    "duration": 4.721
+  },
+  {
+    "text": "But luckily, if you don't zoom that",
+    "start": 999.68,
+    "duration": 4.719
+  },
+  {
+    "text": "close as on the screenshots, you'll you",
+    "start": 1001.68,
+    "duration": 5.92
+  },
+  {
+    "text": "won't won't see any issues. There is",
+    "start": 1004.399,
+    "duration": 5.521
+  },
+  {
+    "text": "another one uh related to performance uh",
+    "start": 1007.6,
+    "duration": 6.08
+  },
+  {
+    "text": "that Hugh will uh show later",
+    "start": 1009.92,
+    "duration": 6.24
+  },
+  {
+    "text": "but if you your performance fine then",
+    "start": 1013.68,
+    "duration": 5.68
+  },
+  {
+    "text": "all fine",
+    "start": 1016.16,
+    "duration": 5.84
+  },
+  {
+    "text": "and now for [sighs] code in the this",
+    "start": 1019.36,
+    "duration": 5.52
+  },
+  {
+    "text": "custom HL cells I showed a bit late a",
+    "start": 1022.0,
+    "duration": 6.079
+  },
+  {
+    "text": "bit earlier uh that's where another",
+    "start": 1024.88,
+    "duration": 7.76
+  },
+  {
+    "text": "great uh chunk of uh graph is hiding",
+    "start": 1028.079,
+    "duration": 7.84
+  },
+  {
+    "text": "um with these custom HL cells unlike uh",
+    "start": 1032.64,
+    "duration": 5.679
+  },
+  {
+    "text": "surface sampler you don't get um",
+    "start": 1035.919,
+    "duration": 4.321
+  },
+  {
+    "text": "automatically points already generated",
+    "start": 1038.319,
+    "duration": 4.081
+  },
+  {
+    "text": "for you. You have to find out their",
+    "start": 1040.24,
+    "duration": 5.36
+  },
+  {
+    "text": "position by yourself. The note comes",
+    "start": 1042.4,
+    "duration": 6.159
+  },
+  {
+    "text": "with the grid function and adding offset",
+    "start": 1045.6,
+    "duration": 5.52
+  },
+  {
+    "text": "to the function is super easy.",
+    "start": 1048.559,
+    "duration": 5.281
+  },
+  {
+    "text": "Um but also Unreal comes with its source",
+    "start": 1051.12,
+    "duration": 4.799
+  },
+  {
+    "text": "codes open for you which you can browse.",
+    "start": 1053.84,
+    "duration": 5.44
+  },
+  {
+    "text": "And uh I found the Halton sequence there",
+    "start": 1055.919,
+    "duration": 5.281
+  },
+  {
+    "text": "which in my mind at least looks a bit",
+    "start": 1059.28,
+    "duration": 5.279
+  },
+  {
+    "text": "more dense than um grid offset. Not as",
+    "start": 1061.2,
+    "duration": 5.2
+  },
+  {
+    "text": "dense as poison like somewhere in",
+    "start": 1064.559,
+    "duration": 5.12
+  },
+  {
+    "text": "between but still very good.",
+    "start": 1066.4,
+    "duration": 6.88
+  },
+  {
+    "text": "And next um we uh have to figure out",
+    "start": 1069.679,
+    "duration": 5.681
+  },
+  {
+    "text": "which rough category of assets we want",
+    "start": 1073.28,
+    "duration": 4.0
+  },
+  {
+    "text": "to scatter.",
+    "start": 1075.36,
+    "duration": 4.64
+  },
+  {
+    "text": "Um, in the setup I showed earlier, uh, I",
+    "start": 1077.28,
+    "duration": 6.24
+  },
+  {
+    "text": "had this grass maps generated",
+    "start": 1080.0,
+    "duration": 5.6
+  },
+  {
+    "text": "and, uh, here I'm just sampling these",
+    "start": 1083.52,
+    "duration": 3.92
+  },
+  {
+    "text": "grass maps. Uh, it's essentially a",
+    "start": 1085.6,
+    "duration": 4.56
+  },
+  {
+    "text": "texture at this point. And, um, I'm",
+    "start": 1087.44,
+    "duration": 7.28
+  },
+  {
+    "text": "figuring out, um, which is the",
+    "start": 1090.16,
+    "duration": 6.56
+  },
+  {
+    "text": "their value essentially and I'm using",
+    "start": 1094.72,
+    "duration": 4.64
+  },
+  {
+    "text": "this value as a,",
+    "start": 1096.72,
+    "duration": 6.0
+  },
+  {
+    "text": "um, bias in randomization. That mean it",
+    "start": 1099.36,
+    "duration": 5.679
+  },
+  {
+    "text": "means that if you have multiple layers",
+    "start": 1102.72,
+    "duration": 3.839
+  },
+  {
+    "text": "overlapping",
+    "start": 1105.039,
+    "duration": 4.0
+  },
+  {
+    "text": "um you'll get a still smooth transition",
+    "start": 1106.559,
+    "duration": 7.041
+  },
+  {
+    "text": "between your uh grass uh layers because",
+    "start": 1109.039,
+    "duration": 8.88
+  },
+  {
+    "text": "adjacent um items might get uh different",
+    "start": 1113.6,
+    "duration": 7.04
+  },
+  {
+    "text": "layers uh just randomly selected and",
+    "start": 1117.919,
+    "duration": 4.561
+  },
+  {
+    "text": "other than that I'm just figuring out",
+    "start": 1120.64,
+    "duration": 4.32
+  },
+  {
+    "text": "what is the ID for the layer and using",
+    "start": 1122.48,
+    "duration": 4.88
+  },
+  {
+    "text": "it as a key to select appropriate",
+    "start": 1124.96,
+    "duration": 7.839
+  },
+  {
+    "text": "settings and asset um asset array.",
+    "start": 1127.36,
+    "duration": 5.439
+  },
+  {
+    "text": "And finally we figured out what is the",
+    "start": 1133.6,
+    "duration": 4.56
+  },
+  {
+    "text": "point position. We figured out a rough",
+    "start": 1136.32,
+    "duration": 4.0
+  },
+  {
+    "text": "category of assets we want to scatter on",
+    "start": 1138.16,
+    "duration": 6.399
+  },
+  {
+    "text": "this point. Now we just have to select a",
+    "start": 1140.32,
+    "duration": 7.52
+  },
+  {
+    "text": "uh an asset from this category. That's",
+    "start": 1144.559,
+    "duration": 5.841
+  },
+  {
+    "text": "what happens here.",
+    "start": 1147.84,
+    "duration": 5.6
+  },
+  {
+    "text": "Um the way I'm doing it I have a uh",
+    "start": 1150.4,
+    "duration": 4.72
+  },
+  {
+    "text": "noise flowing through world calculated",
+    "start": 1153.44,
+    "duration": 3.92
+  },
+  {
+    "text": "just like you would do in any shader.",
+    "start": 1155.12,
+    "duration": 3.76
+  },
+  {
+    "text": "And this noise doesn't have any",
+    "start": 1157.36,
+    "duration": 3.679
+  },
+  {
+    "text": "particular meaning to it. It's just for",
+    "start": 1158.88,
+    "duration": 5.52
+  },
+  {
+    "text": "artists to have this asset grouping in",
+    "start": 1161.039,
+    "duration": 5.921
+  },
+  {
+    "text": "the UI. As you can see, they have a",
+    "start": 1164.4,
+    "duration": 5.76
+  },
+  {
+    "text": "range where they can decide on um for",
+    "start": 1166.96,
+    "duration": 6.959
+  },
+  {
+    "text": "each asset on what range it should live.",
+    "start": 1170.16,
+    "duration": 5.68
+  },
+  {
+    "text": "And this creates this more natural",
+    "start": 1173.919,
+    "duration": 4.64
+  },
+  {
+    "text": "groupings um of assets as you see this",
+    "start": 1175.84,
+    "duration": 6.16
+  },
+  {
+    "text": "blue boxes for example.",
+    "start": 1178.559,
+    "duration": 6.0
+  },
+  {
+    "text": "Um",
+    "start": 1182.0,
+    "duration": 5.039
+  },
+  {
+    "text": "so in in essence what happens is that",
+    "start": 1184.559,
+    "duration": 5.36
+  },
+  {
+    "text": "there are kind like a fertility map. You",
+    "start": 1187.039,
+    "duration": 4.88
+  },
+  {
+    "text": "might imagine",
+    "start": 1189.919,
+    "duration": 3.76
+  },
+  {
+    "text": "it looks a bit more natural than just",
+    "start": 1191.919,
+    "duration": 5.281
+  },
+  {
+    "text": "randomly selecting assets.",
+    "start": 1193.679,
+    "duration": 7.601
+  },
+  {
+    "text": "Um so you can imagine that all of this",
+    "start": 1197.2,
+    "duration": 7.76
+  },
+  {
+    "text": "um setup was pretty u tricky on the",
+    "start": 1201.28,
+    "duration": 6.56
+  },
+  {
+    "text": "early development of PCG.",
+    "start": 1204.96,
+    "duration": 5.52
+  },
+  {
+    "text": "Luckily, I had Hugh helping me and whole",
+    "start": 1207.84,
+    "duration": 5.6
+  },
+  {
+    "text": "PCG team. So, let's hear from him what",
+    "start": 1210.48,
+    "duration": 8.16
+  },
+  {
+    "text": "uh other uh technical things there are.",
+    "start": 1213.44,
+    "duration": 7.494
+  },
+  {
+    "text": ">> Thank you, Max.",
+    "start": 1218.64,
+    "duration": 4.314
+  },
+  {
+    "text": "[applause]",
+    "start": 1220.934,
+    "duration": 2.02
+  },
+  {
+    "text": ">> Yeah. So as we started building the",
+    "start": 1228.72,
+    "duration": 4.4
+  },
+  {
+    "text": "grass graph and putting PCG through its",
+    "start": 1230.96,
+    "duration": 4.48
+  },
+  {
+    "text": "paces, we identified a few principles",
+    "start": 1233.12,
+    "duration": 4.24
+  },
+  {
+    "text": "for authoring high performance graphs",
+    "start": 1235.44,
+    "duration": 4.96
+  },
+  {
+    "text": "that we want to share today. Firstly, we",
+    "start": 1237.36,
+    "duration": 5.439
+  },
+  {
+    "text": "use hierarchical generation to reduce",
+    "start": 1240.4,
+    "duration": 4.56
+  },
+  {
+    "text": "the frequency that work is done as Maxim",
+    "start": 1242.799,
+    "duration": 5.041
+  },
+  {
+    "text": "illustrated. Secondly, we use GPU nodes",
+    "start": 1244.96,
+    "duration": 4.88
+  },
+  {
+    "text": "where possible which are dispatched",
+    "start": 1247.84,
+    "duration": 3.6
+  },
+  {
+    "text": "using compute shaders and run",
+    "start": 1249.84,
+    "duration": 4.719
+  },
+  {
+    "text": "efficiently on GPU hardware. Thirdly, we",
+    "start": 1251.44,
+    "duration": 6.479
+  },
+  {
+    "text": "minimize CPU toGPU data transfers which",
+    "start": 1254.559,
+    "duration": 5.681
+  },
+  {
+    "text": "are relatively expensive and we'll we'll",
+    "start": 1257.919,
+    "duration": 5.281
+  },
+  {
+    "text": "examine this in more detail",
+    "start": 1260.24,
+    "duration": 4.96
+  },
+  {
+    "text": "using a simple example graph which",
+    "start": 1263.2,
+    "duration": 4.08
+  },
+  {
+    "text": "scatters assets on a landscape and uses",
+    "start": 1265.2,
+    "duration": 5.12
+  },
+  {
+    "text": "a custom HLSL node.",
+    "start": 1267.28,
+    "duration": 5.279
+  },
+  {
+    "text": "Inspecting the graph, we notice a small",
+    "start": 1270.32,
+    "duration": 3.92
+  },
+  {
+    "text": "yellow up and down arrows on the",
+    "start": 1272.559,
+    "duration": 3.6
+  },
+  {
+    "text": "highlighted nodes which are indicating",
+    "start": 1274.24,
+    "duration": 4.72
+  },
+  {
+    "text": "GPU uploads and readbacks respectively",
+    "start": 1276.159,
+    "duration": 4.481
+  },
+  {
+    "text": "and thus highlighting potential",
+    "start": 1278.96,
+    "duration": 3.839
+  },
+  {
+    "text": "performance issues. We'll look at each",
+    "start": 1280.64,
+    "duration": 4.88
+  },
+  {
+    "text": "in turn. Starting with the static mesh",
+    "start": 1282.799,
+    "duration": 4.721
+  },
+  {
+    "text": "spawner. This is currently set to",
+    "start": 1285.52,
+    "duration": 4.32
+  },
+  {
+    "text": "execute on CPU and will trigger an",
+    "start": 1287.52,
+    "duration": 4.0
+  },
+  {
+    "text": "expensive download of the point data",
+    "start": 1289.84,
+    "duration": 5.839
+  },
+  {
+    "text": "after the custom HLSL node executes.",
+    "start": 1291.52,
+    "duration": 6.24
+  },
+  {
+    "text": "For this, the fix is simple. We have a",
+    "start": 1295.679,
+    "duration": 4.24
+  },
+  {
+    "text": "GPU backend implemented for the static",
+    "start": 1297.76,
+    "duration": 4.32
+  },
+  {
+    "text": "mesh spawner and it can be enabled using",
+    "start": 1299.919,
+    "duration": 4.961
+  },
+  {
+    "text": "the node setting below. The two GPU",
+    "start": 1302.08,
+    "duration": 4.959
+  },
+  {
+    "text": "nodes will now execute together and pass",
+    "start": 1304.88,
+    "duration": 4.0
+  },
+  {
+    "text": "the data directly without involving the",
+    "start": 1307.039,
+    "duration": 4.64
+  },
+  {
+    "text": "CPU. We are continuously working to",
+    "start": 1308.88,
+    "duration": 4.88
+  },
+  {
+    "text": "expand GPU support across our built-in",
+    "start": 1311.679,
+    "duration": 3.761
+  },
+  {
+    "text": "nodes. So, it's worth period",
+    "start": 1313.76,
+    "duration": 5.76
+  },
+  {
+    "text": "periodically checking each release.",
+    "start": 1315.44,
+    "duration": 5.68
+  },
+  {
+    "text": "Now, we turn our attention to the",
+    "start": 1319.52,
+    "duration": 3.519
+  },
+  {
+    "text": "highlighted surface sampler node which",
+    "start": 1321.12,
+    "duration": 3.84
+  },
+  {
+    "text": "is running on the CPU before doing an",
+    "start": 1323.039,
+    "duration": 5.361
+  },
+  {
+    "text": "expensive upload of data to the GPU. We",
+    "start": 1324.96,
+    "duration": 5.12
+  },
+  {
+    "text": "don't yet have a GPU backend for the",
+    "start": 1328.4,
+    "duration": 4.24
+  },
+  {
+    "text": "surface sampler. So the solution instead",
+    "start": 1330.08,
+    "duration": 4.479
+  },
+  {
+    "text": "is to implement the sampling logic in a",
+    "start": 1332.64,
+    "duration": 4.08
+  },
+  {
+    "text": "custom HLSL node such as a point",
+    "start": 1334.559,
+    "duration": 4.161
+  },
+  {
+    "text": "generator similar to the approach",
+    "start": 1336.72,
+    "duration": 6.16
+  },
+  {
+    "text": "covered by Maxim in the previous slides.",
+    "start": 1338.72,
+    "duration": 6.079
+  },
+  {
+    "text": "Notice we now have an upload on the get",
+    "start": 1342.88,
+    "duration": 3.919
+  },
+  {
+    "text": "landscape data node which is uploading a",
+    "start": 1344.799,
+    "duration": 4.0
+  },
+  {
+    "text": "patch of landscape heights within the",
+    "start": 1346.799,
+    "duration": 4.561
+  },
+  {
+    "text": "generation area to the GPU. There are",
+    "start": 1348.799,
+    "duration": 4.24
+  },
+  {
+    "text": "options to remove this upload which",
+    "start": 1351.36,
+    "duration": 5.199
+  },
+  {
+    "text": "we'll cover in the later slides.",
+    "start": 1353.039,
+    "duration": 5.52
+  },
+  {
+    "text": "Next, let's look at the get texture data",
+    "start": 1356.559,
+    "duration": 4.48
+  },
+  {
+    "text": "node, which is doing a readback of the",
+    "start": 1358.559,
+    "duration": 4.801
+  },
+  {
+    "text": "texture data to the CPU so that it's",
+    "start": 1361.039,
+    "duration": 6.0
+  },
+  {
+    "text": "available for other CPU nodes to use.",
+    "start": 1363.36,
+    "duration": 5.199
+  },
+  {
+    "text": "In this graph, we don't require the",
+    "start": 1367.039,
+    "duration": 3.681
+  },
+  {
+    "text": "texture data on the CPU. So, we can",
+    "start": 1368.559,
+    "duration": 4.24
+  },
+  {
+    "text": "disable the readback using the skip",
+    "start": 1370.72,
+    "duration": 4.72
+  },
+  {
+    "text": "readback to CPU node setting. This",
+    "start": 1372.799,
+    "duration": 4.401
+  },
+  {
+    "text": "setting also applies to other nodes that",
+    "start": 1375.44,
+    "duration": 3.599
+  },
+  {
+    "text": "output textures such as the generate",
+    "start": 1377.2,
+    "duration": 4.88
+  },
+  {
+    "text": "grass maps node.",
+    "start": 1379.039,
+    "duration": 5.12
+  },
+  {
+    "text": "That leaves a final upload which occurs",
+    "start": 1382.08,
+    "duration": 4.24
+  },
+  {
+    "text": "after this attribute is created.",
+    "start": 1384.159,
+    "duration": 4.0
+  },
+  {
+    "text": "Obtaining attributes from the CPU is",
+    "start": 1386.32,
+    "duration": 4.08
+  },
+  {
+    "text": "common for example for graph parameters",
+    "start": 1388.159,
+    "duration": 5.361
+  },
+  {
+    "text": "which are CPU by nature. Despite being a",
+    "start": 1390.4,
+    "duration": 5.2
+  },
+  {
+    "text": "small amount of data, this upload will",
+    "start": 1393.52,
+    "duration": 5.76
+  },
+  {
+    "text": "have a significant and measurable cost.",
+    "start": 1395.6,
+    "duration": 5.68
+  },
+  {
+    "text": "A good solution for this which Maxim",
+    "start": 1399.28,
+    "duration": 3.6
+  },
+  {
+    "text": "also touched on is to enable",
+    "start": 1401.28,
+    "duration": 3.36
+  },
+  {
+    "text": "hierarchical generation in the graph",
+    "start": 1402.88,
+    "duration": 4.0
+  },
+  {
+    "text": "settings and perform this upload once at",
+    "start": 1404.64,
+    "duration": 4.96
+  },
+  {
+    "text": "the unbounded grid level either using an",
+    "start": 1406.88,
+    "duration": 4.88
+  },
+  {
+    "text": "empty attribute set processor node which",
+    "start": 1409.6,
+    "duration": 4.64
+  },
+  {
+    "text": "has been added for 5.7 or by using a",
+    "start": 1411.76,
+    "duration": 3.919
+  },
+  {
+    "text": "custom kernel type to build the",
+    "start": 1414.24,
+    "duration": 4.24
+  },
+  {
+    "text": "attribute set. Note that the uploaded",
+    "start": 1415.679,
+    "duration": 5.201
+  },
+  {
+    "text": "data flows down the high grids without",
+    "start": 1418.48,
+    "duration": 5.04
+  },
+  {
+    "text": "repeated readbacks and re-uploads. The",
+    "start": 1420.88,
+    "duration": 4.88
+  },
+  {
+    "text": "data is uploaded to the GPU just once",
+    "start": 1423.52,
+    "duration": 4.159
+  },
+  {
+    "text": "and is cached there while the component",
+    "start": 1425.76,
+    "duration": 4.88
+  },
+  {
+    "text": "is generated.",
+    "start": 1427.679,
+    "duration": 5.201
+  },
+  {
+    "text": "In a similar vein, GPU data can also",
+    "start": 1430.64,
+    "duration": 4.56
+  },
+  {
+    "text": "flow into and out of subgraphs without",
+    "start": 1432.88,
+    "duration": 4.64
+  },
+  {
+    "text": "repeated readbacks. So these are also",
+    "start": 1435.2,
+    "duration": 4.16
+  },
+  {
+    "text": "safe to use with all subgraph types",
+    "start": 1437.52,
+    "duration": 3.6
+  },
+  {
+    "text": "supported.",
+    "start": 1439.36,
+    "duration": 4.16
+  },
+  {
+    "text": "Either way, the final graph with all the",
+    "start": 1441.12,
+    "duration": 4.64
+  },
+  {
+    "text": "optimizations we've just applied will",
+    "start": 1443.52,
+    "duration": 3.92
+  },
+  {
+    "text": "execute much more efficiently than the",
+    "start": 1445.76,
+    "duration": 5.399
+  },
+  {
+    "text": "one we started with.",
+    "start": 1447.44,
+    "duration": 3.719
+  },
+  {
+    "text": "So revisiting the get landscape data",
+    "start": 1452.32,
+    "duration": 5.12
+  },
+  {
+    "text": "node. Firstly, when running on GPU, we",
+    "start": 1454.4,
+    "duration": 5.2
+  },
+  {
+    "text": "recommend enabling get height only and",
+    "start": 1457.44,
+    "duration": 4.16
+  },
+  {
+    "text": "disabling get layer weights, which can",
+    "start": 1459.6,
+    "duration": 3.84
+  },
+  {
+    "text": "save some setup time and resources on",
+    "start": 1461.6,
+    "duration": 4.559
+  },
+  {
+    "text": "the CPU. The landscape layer weights are",
+    "start": 1463.44,
+    "duration": 5.52
+  },
+  {
+    "text": "not directly accessible on the GPU and",
+    "start": 1466.159,
+    "duration": 4.481
+  },
+  {
+    "text": "should be sampled via grass maps",
+    "start": 1468.96,
+    "duration": 4.64
+  },
+  {
+    "text": "instead. As Maxim showed, even with",
+    "start": 1470.64,
+    "duration": 4.88
+  },
+  {
+    "text": "these settings, there is a game thread",
+    "start": 1473.6,
+    "duration": 3.84
+  },
+  {
+    "text": "cost to uploading landscape heights to",
+    "start": 1475.52,
+    "duration": 3.84
+  },
+  {
+    "text": "the GPU, which is around half a",
+    "start": 1477.44,
+    "duration": 5.119
+  },
+  {
+    "text": "millisecond on base PS5 to generate a 32",
+    "start": 1479.36,
+    "duration": 6.48
+  },
+  {
+    "text": "m grid cell.",
+    "start": 1482.559,
+    "duration": 5.521
+  },
+  {
+    "text": "As an alternative, if a height runtime",
+    "start": 1485.84,
+    "duration": 3.839
+  },
+  {
+    "text": "virtual texture is configured on the",
+    "start": 1488.08,
+    "duration": 3.599
+  },
+  {
+    "text": "landscape components, the system can use",
+    "start": 1489.679,
+    "duration": 3.761
+  },
+  {
+    "text": "this to obtain heights directly on the",
+    "start": 1491.679,
+    "duration": 4.88
+  },
+  {
+    "text": "GPU. This is efficient, but comes with",
+    "start": 1493.44,
+    "duration": 5.68
+  },
+  {
+    "text": "no guarantees of res residency within",
+    "start": 1496.559,
+    "duration": 4.72
+  },
+  {
+    "text": "the virtual texture. So, it's possible",
+    "start": 1499.12,
+    "duration": 3.919
+  },
+  {
+    "text": "to sample the height before the virtual",
+    "start": 1501.279,
+    "duration": 4.561
+  },
+  {
+    "text": "texture is sufficiently populated. To",
+    "start": 1503.039,
+    "duration": 5.601
+  },
+  {
+    "text": "address this, we have a preload path",
+    "start": 1505.84,
+    "duration": 4.56
+  },
+  {
+    "text": "that sends load requests to the virtual",
+    "start": 1508.64,
+    "duration": 4.0
+  },
+  {
+    "text": "texture system. And we used an initial",
+    "start": 1510.4,
+    "duration": 4.8
+  },
+  {
+    "text": "warm-up time delay to give the virtual",
+    "start": 1512.64,
+    "duration": 4.88
+  },
+  {
+    "text": "textures time to populate, which got us",
+    "start": 1515.2,
+    "duration": 4.32
+  },
+  {
+    "text": "over the line for the demo, but we aim",
+    "start": 1517.52,
+    "duration": 3.6
+  },
+  {
+    "text": "to have a more robust solution for",
+    "start": 1519.52,
+    "duration": 6.08
+  },
+  {
+    "text": "sampling virtual textures in the future.",
+    "start": 1521.12,
+    "duration": 6.24
+  },
+  {
+    "text": "In the meantime, we have this new hot",
+    "start": 1525.6,
+    "duration": 3.84
+  },
+  {
+    "text": "off the press node that just landed in",
+    "start": 1527.36,
+    "duration": 4.72
+  },
+  {
+    "text": "the 5.7 branch that can generate a",
+    "start": 1529.44,
+    "duration": 4.8
+  },
+  {
+    "text": "height texture using the same underlying",
+    "start": 1532.08,
+    "duration": 5.28
+  },
+  {
+    "text": "path as the grass map generation. It",
+    "start": 1534.24,
+    "duration": 5.6
+  },
+  {
+    "text": "generates on the GPU so it has low CPU",
+    "start": 1537.36,
+    "duration": 4.559
+  },
+  {
+    "text": "overhead. It does not depend on virtual",
+    "start": 1539.84,
+    "duration": 5.36
+  },
+  {
+    "text": "texture streaming and it comes with low",
+    "start": 1541.919,
+    "duration": 5.201
+  },
+  {
+    "text": "additional cost over just generating the",
+    "start": 1545.2,
+    "duration": 4.64
+  },
+  {
+    "text": "grass maps. It currently generates a",
+    "start": 1547.12,
+    "duration": 4.72
+  },
+  {
+    "text": "high texture only. So normals have to be",
+    "start": 1549.84,
+    "duration": 5.4
+  },
+  {
+    "text": "computed manually.",
+    "start": 1551.84,
+    "duration": 3.4
+  },
+  {
+    "text": "So now let's move on to CPU performance",
+    "start": 1555.44,
+    "duration": 5.68
+  },
+  {
+    "text": "for GPU PCG graphs. This is",
+    "start": 1558.799,
+    "duration": 4.641
+  },
+  {
+    "text": "predominantly render setup and resource",
+    "start": 1561.12,
+    "duration": 3.84
+  },
+  {
+    "text": "management.",
+    "start": 1563.44,
+    "duration": 3.359
+  },
+  {
+    "text": "While shipping the demo, we reduce the",
+    "start": 1564.96,
+    "duration": 4.0
+  },
+  {
+    "text": "average game thread time spent in PCG",
+    "start": 1566.799,
+    "duration": 5.12
+  },
+  {
+    "text": "for this type of graph by almost 50%. We",
+    "start": 1568.96,
+    "duration": 5.36
+  },
+  {
+    "text": "are focusing on this again for 5.7 and",
+    "start": 1571.919,
+    "duration": 6.64
+  },
+  {
+    "text": "have so far reduced this a further 10%.",
+    "start": 1574.32,
+    "duration": 6.08
+  },
+  {
+    "text": "The graph below shows a capture of the",
+    "start": 1578.559,
+    "duration": 3.761
+  },
+  {
+    "text": "game thread time used by the PCG",
+    "start": 1580.4,
+    "duration": 4.399
+  },
+  {
+    "text": "subsystem over a playthrough of the demo",
+    "start": 1582.32,
+    "duration": 6.64
+  },
+  {
+    "text": "on base PS5. The CPU processes task for",
+    "start": 1584.799,
+    "duration": 6.721
+  },
+  {
+    "text": "pending cells up to a prescribed per",
+    "start": 1588.96,
+    "duration": 5.12
+  },
+  {
+    "text": "frame processing budget. And we set a",
+    "start": 1591.52,
+    "duration": 5.44
+  },
+  {
+    "text": "base budget of 2 milliseconds. The busy",
+    "start": 1594.08,
+    "duration": 4.56
+  },
+  {
+    "text": "parts of the graph, especially around",
+    "start": 1596.96,
+    "duration": 3.599
+  },
+  {
+    "text": "the middle, are heavy sections of the",
+    "start": 1598.64,
+    "duration": 4.32
+  },
+  {
+    "text": "demo where the camera is moving fast and",
+    "start": 1600.559,
+    "duration": 5.36
+  },
+  {
+    "text": "triggering many cell generations.",
+    "start": 1602.96,
+    "duration": 5.12
+  },
+  {
+    "text": "The 2 millisecond budget is relatively",
+    "start": 1605.919,
+    "duration": 4.801
+  },
+  {
+    "text": "large, especially at 60fps,",
+    "start": 1608.08,
+    "duration": 4.24
+  },
+  {
+    "text": "and we originally planned to reduce",
+    "start": 1610.72,
+    "duration": 3.36
+  },
+  {
+    "text": "this, but there turned out to be ample",
+    "start": 1612.32,
+    "duration": 4.479
+  },
+  {
+    "text": "CPU time available for most of the demo,",
+    "start": 1614.08,
+    "duration": 4.64
+  },
+  {
+    "text": "albeit with a couple of exceptions we'll",
+    "start": 1616.799,
+    "duration": 4.561
+  },
+  {
+    "text": "discuss in later slides. So we left it",
+    "start": 1618.72,
+    "duration": 4.8
+  },
+  {
+    "text": "at this value to maximize the throughput",
+    "start": 1621.36,
+    "duration": 4.48
+  },
+  {
+    "text": "of cell generation and therefore",
+    "start": 1623.52,
+    "duration": 3.84
+  },
+  {
+    "text": "minimize something that we call",
+    "start": 1625.84,
+    "duration": 4.16
+  },
+  {
+    "text": "generation latency",
+    "start": 1627.36,
+    "duration": 4.559
+  },
+  {
+    "text": "which is a time from when a cell is",
+    "start": 1630.0,
+    "duration": 3.6
+  },
+  {
+    "text": "scheduled for generation to when",
+    "start": 1631.919,
+    "duration": 4.081
+  },
+  {
+    "text": "generation is complete. If this time is",
+    "start": 1633.6,
+    "duration": 4.959
+  },
+  {
+    "text": "too large for a given camera speed the",
+    "start": 1636.0,
+    "duration": 4.4
+  },
+  {
+    "text": "generation may lag behind and the",
+    "start": 1638.559,
+    "duration": 6.36
+  },
+  {
+    "text": "instances will visibly pop in.",
+    "start": 1640.4,
+    "duration": 4.519
+  },
+  {
+    "text": "This effect is illustrated further in",
+    "start": 1646.0,
+    "duration": 4.159
+  },
+  {
+    "text": "this diagram. The camera at the center",
+    "start": 1647.919,
+    "duration": 4.161
+  },
+  {
+    "text": "is moving forwards and the highlighted",
+    "start": 1650.159,
+    "duration": 4.0
+  },
+  {
+    "text": "grid cell starts generating when it",
+    "start": 1652.08,
+    "duration": 4.8
+  },
+  {
+    "text": "overlaps the generation radius in red.",
+    "start": 1654.159,
+    "duration": 4.88
+  },
+  {
+    "text": "If the generation takes too long, the",
+    "start": 1656.88,
+    "duration": 4.64
+  },
+  {
+    "text": "grid cell may overlap the primitive call",
+    "start": 1659.039,
+    "duration": 5.201
+  },
+  {
+    "text": "distance in white before generation",
+    "start": 1661.52,
+    "duration": 5.2
+  },
+  {
+    "text": "while generation is in progress and the",
+    "start": 1664.24,
+    "duration": 4.4
+  },
+  {
+    "text": "instances will visibly pop in when it",
+    "start": 1666.72,
+    "duration": 4.559
+  },
+  {
+    "text": "completes. So there's a balancing act",
+    "start": 1668.64,
+    "duration": 4.88
+  },
+  {
+    "text": "between the camera speed, generation",
+    "start": 1671.279,
+    "duration": 5.361
+  },
+  {
+    "text": "radius, primitive call distance, and the",
+    "start": 1673.52,
+    "duration": 6.159
+  },
+  {
+    "text": "in and uh the processing budget being",
+    "start": 1676.64,
+    "duration": 6.0
+  },
+  {
+    "text": "the key factors. Also, a test or",
+    "start": 1679.679,
+    "duration": 4.081
+  },
+  {
+    "text": "shipping build will generate",
+    "start": 1682.64,
+    "duration": 2.88
+  },
+  {
+    "text": "substantially faster than a development",
+    "start": 1683.76,
+    "duration": 4.08
+  },
+  {
+    "text": "build. So as you can imagine, it's a bit",
+    "start": 1685.52,
+    "duration": 4.8
+  },
+  {
+    "text": "of a handful.",
+    "start": 1687.84,
+    "duration": 4.319
+  },
+  {
+    "text": "But to help with balancing these, we",
+    "start": 1690.32,
+    "duration": 4.0
+  },
+  {
+    "text": "added in world debug draw to visualize",
+    "start": 1692.159,
+    "duration": 4.721
+  },
+  {
+    "text": "the progress of the generation. The red",
+    "start": 1694.32,
+    "duration": 4.32
+  },
+  {
+    "text": "wireframe sphere is the generation",
+    "start": 1696.88,
+    "duration": 4.56
+  },
+  {
+    "text": "radius and wireframe boxes with grid",
+    "start": 1698.64,
+    "duration": 4.88
+  },
+  {
+    "text": "coordinate labels are drawn around grid",
+    "start": 1701.44,
+    "duration": 5.28
+  },
+  {
+    "text": "cells while they are generating.",
+    "start": 1703.52,
+    "duration": 5.44
+  },
+  {
+    "text": "This is a useful visualization to",
+    "start": 1706.72,
+    "duration": 3.76
+  },
+  {
+    "text": "understand how the generation is",
+    "start": 1708.96,
+    "duration": 4.24
+  },
+  {
+    "text": "progressing during playthroughs.",
+    "start": 1710.48,
+    "duration": 5.199
+  },
+  {
+    "text": "We also often took video captures and",
+    "start": 1713.2,
+    "duration": 4.64
+  },
+  {
+    "text": "step through the videos frame by frame",
+    "start": 1715.679,
+    "duration": 4.961
+  },
+  {
+    "text": "to correlate PCG generation with any",
+    "start": 1717.84,
+    "duration": 6.92
+  },
+  {
+    "text": "visible pops in the build.",
+    "start": 1720.64,
+    "duration": 4.12
+  },
+  {
+    "text": "So revisiting the processing budget, we",
+    "start": 1731.12,
+    "duration": 4.64
+  },
+  {
+    "text": "have the ability to set the budget at",
+    "start": 1734.08,
+    "duration": 3.839
+  },
+  {
+    "text": "runtime. So while the default budget was",
+    "start": 1735.76,
+    "duration": 4.48
+  },
+  {
+    "text": "left at 2 milliseconds, we dynamically",
+    "start": 1737.919,
+    "duration": 5.76
+  },
+  {
+    "text": "change this budget in two key places.",
+    "start": 1740.24,
+    "duration": 5.439
+  },
+  {
+    "text": "We reduce the budget to a minimal value",
+    "start": 1743.679,
+    "duration": 3.681
+  },
+  {
+    "text": "when entering the village using a",
+    "start": 1745.679,
+    "duration": 4.561
+  },
+  {
+    "text": "trigger volume. Here the PCG system is",
+    "start": 1747.36,
+    "duration": 4.96
+  },
+  {
+    "text": "dispatching one set of operations per",
+    "start": 1750.24,
+    "duration": 4.72
+  },
+  {
+    "text": "frame on game thread and worker threads",
+    "start": 1752.32,
+    "duration": 5.359
+  },
+  {
+    "text": "before yielding. Setting the budget this",
+    "start": 1754.96,
+    "duration": 4.56
+  },
+  {
+    "text": "low increased generation latency",
+    "start": 1757.679,
+    "duration": 4.321
+  },
+  {
+    "text": "significantly, but it was okay here due",
+    "start": 1759.52,
+    "duration": 6.6
+  },
+  {
+    "text": "to the slower camera motion.",
+    "start": 1762.0,
+    "duration": 4.12
+  },
+  {
+    "text": "The other key section was the",
+    "start": 1767.12,
+    "duration": 3.84
+  },
+  {
+    "text": "marketplace sequence during which we",
+    "start": 1768.72,
+    "duration": 4.64
+  },
+  {
+    "text": "paused the system outright to minimize",
+    "start": 1770.96,
+    "duration": 4.959
+  },
+  {
+    "text": "costs on the game thread. The camera",
+    "start": 1773.36,
+    "duration": 4.48
+  },
+  {
+    "text": "motion is relatively contained in this",
+    "start": 1775.919,
+    "duration": 4.161
+  },
+  {
+    "text": "sequence and there were no issues such",
+    "start": 1777.84,
+    "duration": 4.079
+  },
+  {
+    "text": "as the range of the grass being visibly",
+    "start": 1780.08,
+    "duration": 5.56
+  },
+  {
+    "text": "limited or other.",
+    "start": 1781.919,
+    "duration": 3.721
+  },
+  {
+    "text": "Now to talk numbers, the game thread",
+    "start": 1787.919,
+    "duration": 5.921
+  },
+  {
+    "text": "time spent in the PCG subsystem was 180",
+    "start": 1790.64,
+    "duration": 6.56
+  },
+  {
+    "text": "microsc average over the whole run. Of",
+    "start": 1793.84,
+    "duration": 6.4
+  },
+  {
+    "text": "this 130 microsconds was fixed overhead",
+    "start": 1797.2,
+    "duration": 5.599
+  },
+  {
+    "text": "arising from the runtime generation",
+    "start": 1800.24,
+    "duration": 4.48
+  },
+  {
+    "text": "scanning grid cells for generation and",
+    "start": 1802.799,
+    "duration": 4.801
+  },
+  {
+    "text": "clean up. We aim to drive this cost down",
+    "start": 1804.72,
+    "duration": 7.319
+  },
+  {
+    "text": "by our continuing push on optimization.",
+    "start": 1807.6,
+    "duration": 4.439
+  },
+  {
+    "text": "Now moving on to GPU performance. The",
+    "start": 1812.72,
+    "duration": 4.959
+  },
+  {
+    "text": "graph below shows the GPU time spent",
+    "start": 1815.2,
+    "duration": 5.04
+  },
+  {
+    "text": "executing PCG work over a playthrough of",
+    "start": 1817.679,
+    "duration": 5.281
+  },
+  {
+    "text": "the demo. The work is executed",
+    "start": 1820.24,
+    "duration": 6.0
+  },
+  {
+    "text": "intermittently when cells generate. Note",
+    "start": 1822.96,
+    "duration": 5.439
+  },
+  {
+    "text": "that this is unfiltered data with",
+    "start": 1826.24,
+    "duration": 3.919
+  },
+  {
+    "text": "measurement noise and we verified",
+    "start": 1828.399,
+    "duration": 3.361
+  },
+  {
+    "text": "carefully that the spikes here are not",
+    "start": 1830.159,
+    "duration": 3.76
+  },
+  {
+    "text": "indicating a larger PCG workload on",
+    "start": 1831.76,
+    "duration": 4.0
+  },
+  {
+    "text": "those frames.",
+    "start": 1833.919,
+    "duration": 4.401
+  },
+  {
+    "text": "The average cost over the whole run was",
+    "start": 1835.76,
+    "duration": 4.96
+  },
+  {
+    "text": "minimal but more relevant is the cost",
+    "start": 1838.32,
+    "duration": 4.64
+  },
+  {
+    "text": "average for frames when PCG work was",
+    "start": 1840.72,
+    "duration": 6.079
+  },
+  {
+    "text": "done and this was around 71 microsconds.",
+    "start": 1842.96,
+    "duration": 6.16
+  },
+  {
+    "text": "The instance counts per tiles are around",
+    "start": 1846.799,
+    "duration": 5.201
+  },
+  {
+    "text": "10 to 20,000 and the generation kernels",
+    "start": 1849.12,
+    "duration": 4.559
+  },
+  {
+    "text": "did not come close to saturating the",
+    "start": 1852.0,
+    "duration": 5.12
+  },
+  {
+    "text": "base PS5 GPU. And also our theoretical",
+    "start": 1853.679,
+    "duration": 5.36
+  },
+  {
+    "text": "occupancy for our kernels was almost",
+    "start": 1857.12,
+    "duration": 4.799
+  },
+  {
+    "text": "90%. So we posit that in the future this",
+    "start": 1859.039,
+    "duration": 5.281
+  },
+  {
+    "text": "workload could be off moved off the GPU",
+    "start": 1861.919,
+    "duration": 4.561
+  },
+  {
+    "text": "critical path entirely and moved on to",
+    "start": 1864.32,
+    "duration": 5.56
+  },
+  {
+    "text": "async compute.",
+    "start": 1866.48,
+    "duration": 3.4
+  },
+  {
+    "text": "For the memory side of things, the demo",
+    "start": 1871.36,
+    "duration": 4.08
+  },
+  {
+    "text": "was well below the overall memory",
+    "start": 1873.679,
+    "duration": 4.48
+  },
+  {
+    "text": "budget. and detailed memory analysis did",
+    "start": 1875.44,
+    "duration": 5.68
+  },
+  {
+    "text": "not bubble up the priority list for 5.6.",
+    "start": 1878.159,
+    "duration": 6.0
+  },
+  {
+    "text": "In particular, the PC the PCG cache was",
+    "start": 1881.12,
+    "duration": 4.96
+  },
+  {
+    "text": "left enabled for the demo which would",
+    "start": 1884.159,
+    "duration": 4.561
+  },
+  {
+    "text": "have accumulated some data over time.",
+    "start": 1886.08,
+    "duration": 4.64
+  },
+  {
+    "text": "This has however become a big focus for",
+    "start": 1888.72,
+    "duration": 4.64
+  },
+  {
+    "text": "5.7. We now have the vast majority of",
+    "start": 1890.72,
+    "duration": 5.439
+  },
+  {
+    "text": "PCG allocations tagged",
+    "start": 1893.36,
+    "duration": 4.799
+  },
+  {
+    "text": "so that they're attributed properly in",
+    "start": 1896.159,
+    "duration": 3.841
+  },
+  {
+    "text": "memory traces which can generate",
+    "start": 1898.159,
+    "duration": 4.961
+  },
+  {
+    "text": "detailed reports like the one shown. The",
+    "start": 1900.0,
+    "duration": 5.679
+  },
+  {
+    "text": "core memory usage of PCG excluding the",
+    "start": 1903.12,
+    "duration": 4.799
+  },
+  {
+    "text": "data generated typically takes low",
+    "start": 1905.679,
+    "duration": 6.761
+  },
+  {
+    "text": "numbers of megabytes in our test graphs.",
+    "start": 1907.919,
+    "duration": 4.521
+  },
+  {
+    "text": "In the next section, I want to mention",
+    "start": 1913.919,
+    "duration": 4.0
+  },
+  {
+    "text": "some tools that aid in using PCG in",
+    "start": 1915.519,
+    "duration": 5.28
+  },
+  {
+    "text": "production.",
+    "start": 1917.919,
+    "duration": 5.441
+  },
+  {
+    "text": "Firstly, some highle tools relevant to",
+    "start": 1920.799,
+    "duration": 5.12
+  },
+  {
+    "text": "all disciplines. These two C bars pause",
+    "start": 1923.36,
+    "duration": 4.88
+  },
+  {
+    "text": "and unpause the runtime generation and",
+    "start": 1925.919,
+    "duration": 4.64
+  },
+  {
+    "text": "trigger a refresh of nearby cells. So",
+    "start": 1928.24,
+    "duration": 4.24
+  },
+  {
+    "text": "very useful for just general sanity",
+    "start": 1930.559,
+    "duration": 6.12
+  },
+  {
+    "text": "checks and initial debugging.",
+    "start": 1932.48,
+    "duration": 4.199
+  },
+  {
+    "text": "In 5.7 we added an inbuilt debug overlay",
+    "start": 1936.72,
+    "duration": 4.959
+  },
+  {
+    "text": "that gives some insight into what the",
+    "start": 1939.919,
+    "duration": 5.441
+  },
+  {
+    "text": "system is doing on each frame.",
+    "start": 1941.679,
+    "duration": 6.0
+  },
+  {
+    "text": "And this car enables a debug draw",
+    "start": 1945.36,
+    "duration": 3.919
+  },
+  {
+    "text": "showing the generation radius and",
+    "start": 1947.679,
+    "duration": 3.36
+  },
+  {
+    "text": "currently generating cells that we saw",
+    "start": 1949.279,
+    "duration": 4.76
+  },
+  {
+    "text": "previously.",
+    "start": 1951.039,
+    "duration": 3.0
+  },
+  {
+    "text": "Finally, for the virtual texture usage,",
+    "start": 1954.72,
+    "duration": 4.16
+  },
+  {
+    "text": "we have C bars to enable and disable the",
+    "start": 1956.88,
+    "duration": 3.76
+  },
+  {
+    "text": "virtual texture path and to configure",
+    "start": 1958.88,
+    "duration": 5.399
+  },
+  {
+    "text": "the warm-up time",
+    "start": 1960.64,
+    "duration": 3.639
+  },
+  {
+    "text": "for HLSL authors. Besides the usual",
+    "start": 1965.2,
+    "duration": 4.16
+  },
+  {
+    "text": "debug and inspection features you're",
+    "start": 1967.679,
+    "duration": 4.401
+  },
+  {
+    "text": "used to in PCG working also for GPU",
+    "start": 1969.36,
+    "duration": 5.439
+  },
+  {
+    "text": "nodes, we also have a shader debug print",
+    "start": 1972.08,
+    "duration": 4.319
+  },
+  {
+    "text": "which will expose a function that can",
+    "start": 1974.799,
+    "duration": 3.441
+  },
+  {
+    "text": "write an array of values which will be",
+    "start": 1976.399,
+    "duration": 5.76
+  },
+  {
+    "text": "printed to the log after execution.",
+    "start": 1978.24,
+    "duration": 6.319
+  },
+  {
+    "text": "And in 5.7, we've added a debug feature",
+    "start": 1982.159,
+    "duration": 5.441
+  },
+  {
+    "text": "that randomly initializes GPU memory",
+    "start": 1984.559,
+    "duration": 6.321
+  },
+  {
+    "text": "buffers before execution, which helps to",
+    "start": 1987.6,
+    "duration": 5.679
+  },
+  {
+    "text": "test that all data is properly written",
+    "start": 1990.88,
+    "duration": 4.56
+  },
+  {
+    "text": "and also to reproduce undefined behavior",
+    "start": 1993.279,
+    "duration": 4.24
+  },
+  {
+    "text": "bugs, which can be hard to pin down,",
+    "start": 1995.44,
+    "duration": 3.92
+  },
+  {
+    "text": "especially when uninitialized data is",
+    "start": 1997.519,
+    "duration": 4.721
+  },
+  {
+    "text": "often zero by chance. Any data",
+    "start": 1999.36,
+    "duration": 5.36
+  },
+  {
+    "text": "initialization issues or logic errors in",
+    "start": 2002.24,
+    "duration": 4.64
+  },
+  {
+    "text": "kernels can seem to run fine on one",
+    "start": 2004.72,
+    "duration": 4.72
+  },
+  {
+    "text": "device but crash on others. So this tool",
+    "start": 2006.88,
+    "duration": 4.56
+  },
+  {
+    "text": "is important for production stability",
+    "start": 2009.44,
+    "duration": 3.52
+  },
+  {
+    "text": "and we recommend running with these",
+    "start": 2011.44,
+    "duration": 4.52
+  },
+  {
+    "text": "regularly.",
+    "start": 2012.96,
+    "duration": 3.0
+  },
+  {
+    "text": "Now for engineers or those familiar with",
+    "start": 2017.12,
+    "duration": 5.039
+  },
+  {
+    "text": "debugging tools, starting with the CPU",
+    "start": 2019.679,
+    "duration": 4.081
+  },
+  {
+    "text": "side, we've improved the break and",
+    "start": 2022.159,
+    "duration": 4.0
+  },
+  {
+    "text": "debugger node setting so that also works",
+    "start": 2023.76,
+    "duration": 5.12
+  },
+  {
+    "text": "for GPU nodes and it triggers a break",
+    "start": 2026.159,
+    "duration": 4.561
+  },
+  {
+    "text": "point when the compute graph containing",
+    "start": 2028.88,
+    "duration": 5.519
+  },
+  {
+    "text": "the GPU node executes.",
+    "start": 2030.72,
+    "duration": 5.6
+  },
+  {
+    "text": "We also now scope this to the currently",
+    "start": 2034.399,
+    "duration": 3.921
+  },
+  {
+    "text": "inspected grid cell to avoid a flood of",
+    "start": 2036.32,
+    "duration": 5.239
+  },
+  {
+    "text": "break points.",
+    "start": 2038.32,
+    "duration": 3.239
+  },
+  {
+    "text": "And for those set up for GPU debugging,",
+    "start": 2042.72,
+    "duration": 4.319
+  },
+  {
+    "text": "we have added the trigger render capture",
+    "start": 2045.2,
+    "duration": 4.639
+  },
+  {
+    "text": "feature in 5.7 which will do a scoped",
+    "start": 2047.039,
+    "duration": 7.32
+  },
+  {
+    "text": "capture of the dispatch for that kernel.",
+    "start": 2049.839,
+    "duration": 4.52
+  },
+  {
+    "text": "And now for performance owners and",
+    "start": 2055.919,
+    "duration": 4.561
+  },
+  {
+    "text": "optimization, we have additional C bars",
+    "start": 2057.919,
+    "duration": 4.24
+  },
+  {
+    "text": "which I'll go through very quickly, but",
+    "start": 2060.48,
+    "duration": 3.359
+  },
+  {
+    "text": "check the help text and documentation",
+    "start": 2062.159,
+    "duration": 3.68
+  },
+  {
+    "text": "for more information.",
+    "start": 2063.839,
+    "duration": 4.56
+  },
+  {
+    "text": "We have C bars for the frame budgets. We",
+    "start": 2065.839,
+    "duration": 4.161
+  },
+  {
+    "text": "have a C bar that throttles the number",
+    "start": 2068.399,
+    "duration": 4.401
+  },
+  {
+    "text": "of generating components which limits",
+    "start": 2070.0,
+    "duration": 4.399
+  },
+  {
+    "text": "how many are allowed to generate",
+    "start": 2072.8,
+    "duration": 3.2
+  },
+  {
+    "text": "simultaneously.",
+    "start": 2074.399,
+    "duration": 3.601
+  },
+  {
+    "text": "And we have a C bar to configure a pool",
+    "start": 2076.0,
+    "duration": 6.359
+  },
+  {
+    "text": "used to recycle partition actors.",
+    "start": 2078.0,
+    "duration": 4.359
+  },
+  {
+    "text": "And related to runtime memory, PCG has a",
+    "start": 2083.04,
+    "duration": 5.119
+  },
+  {
+    "text": "cache where the outputs of CPU nodes are",
+    "start": 2086.24,
+    "duration": 4.879
+  },
+  {
+    "text": "stored to save re-evaluation which can",
+    "start": 2088.159,
+    "duration": 5.44
+  },
+  {
+    "text": "save compute time but increase memory.",
+    "start": 2091.119,
+    "duration": 4.56
+  },
+  {
+    "text": "The cache can be configured using DC",
+    "start": 2093.599,
+    "duration": 4.881
+  },
+  {
+    "text": "bars and we have a postgeneration GC",
+    "start": 2095.679,
+    "duration": 5.44
+  },
+  {
+    "text": "trigger which can be set to trigger an",
+    "start": 2098.48,
+    "duration": 4.4
+  },
+  {
+    "text": "incremental or full garbage collection",
+    "start": 2101.119,
+    "duration": 5.161
+  },
+  {
+    "text": "after generation.",
+    "start": 2102.88,
+    "duration": 3.4
+  },
+  {
+    "text": "Finally, for GPU profiling, this can be",
+    "start": 2107.52,
+    "duration": 4.8
+  },
+  {
+    "text": "a challenge at the moment due to the PCG",
+    "start": 2109.92,
+    "duration": 4.32
+  },
+  {
+    "text": "work being intermittent rather than",
+    "start": 2112.32,
+    "duration": 4.0
+  },
+  {
+    "text": "running every frame. Sometimes this",
+    "start": 2114.24,
+    "duration": 4.24
+  },
+  {
+    "text": "means refreshing generation and trying",
+    "start": 2116.32,
+    "duration": 3.92
+  },
+  {
+    "text": "to trigger a capture on the right frame,",
+    "start": 2118.48,
+    "duration": 4.24
+  },
+  {
+    "text": "which is not a great workflow. To",
+    "start": 2120.24,
+    "duration": 5.2
+  },
+  {
+    "text": "streamline this a bit in 5.7, we added a",
+    "start": 2122.72,
+    "duration": 4.8
+  },
+  {
+    "text": "feature to repeatedly dispatch a kernel",
+    "start": 2125.44,
+    "duration": 4.399
+  },
+  {
+    "text": "instead of dispatching it only once so",
+    "start": 2127.52,
+    "duration": 6.4
+  },
+  {
+    "text": "that a trace can be captured reliably.",
+    "start": 2129.839,
+    "duration": 6.161
+  },
+  {
+    "text": "We hope to improve this situation going",
+    "start": 2133.92,
+    "duration": 4.08
+  },
+  {
+    "text": "forwards and I'll revisit this in a",
+    "start": 2136.0,
+    "duration": 4.24
+  },
+  {
+    "text": "future work section but I wanted to",
+    "start": 2138.0,
+    "duration": 4.0
+  },
+  {
+    "text": "leave these steps here so they can be",
+    "start": 2140.24,
+    "duration": 3.119
+  },
+  {
+    "text": "referred to later when the talk is",
+    "start": 2142.0,
+    "duration": 4.359
+  },
+  {
+    "text": "uploaded.",
+    "start": 2143.359,
+    "duration": 3.0
+  },
+  {
+    "text": "So that brings us to the end of the tool",
+    "start": 2146.88,
+    "duration": 4.32
+  },
+  {
+    "text": "section and to the final forward-looking",
+    "start": 2148.96,
+    "duration": 4.56
+  },
+  {
+    "text": "part of the presentation starting with",
+    "start": 2151.2,
+    "duration": 4.0
+  },
+  {
+    "text": "current challenges and improvement",
+    "start": 2153.52,
+    "duration": 3.52
+  },
+  {
+    "text": "directions.",
+    "start": 2155.2,
+    "duration": 4.0
+  },
+  {
+    "text": "Firstly, Maxim illustrated the double",
+    "start": 2157.04,
+    "duration": 4.16
+  },
+  {
+    "text": "ring setup and some of the limitations",
+    "start": 2159.2,
+    "duration": 4.48
+  },
+  {
+    "text": "of this approach. It would be valuable",
+    "start": 2161.2,
+    "duration": 4.159
+  },
+  {
+    "text": "to find a new approach or some",
+    "start": 2163.68,
+    "duration": 3.919
+  },
+  {
+    "text": "combination of existing approaches that",
+    "start": 2165.359,
+    "duration": 5.361
+  },
+  {
+    "text": "can efficiently generate a long range",
+    "start": 2167.599,
+    "duration": 5.201
+  },
+  {
+    "text": "appearance that is faithful to the near",
+    "start": 2170.72,
+    "duration": 4.399
+  },
+  {
+    "text": "field instances.",
+    "start": 2172.8,
+    "duration": 4.559
+  },
+  {
+    "text": "As a side note, nano folage was enabled",
+    "start": 2175.119,
+    "duration": 4.561
+  },
+  {
+    "text": "on the grass instances in the demo and",
+    "start": 2177.359,
+    "duration": 4.641
+  },
+  {
+    "text": "it helped greatly, but individual",
+    "start": 2179.68,
+    "duration": 4.64
+  },
+  {
+    "text": "instances ultimately do not scale to the",
+    "start": 2182.0,
+    "duration": 4.8
+  },
+  {
+    "text": "far distance.",
+    "start": 2184.32,
+    "duration": 4.24
+  },
+  {
+    "text": "Secondly, virtual textures are a",
+    "start": 2186.8,
+    "duration": 4.799
+  },
+  {
+    "text": "powerful source of data",
+    "start": 2188.56,
+    "duration": 5.279
+  },
+  {
+    "text": "and it would be useful to have a way to",
+    "start": 2191.599,
+    "duration": 5.121
+  },
+  {
+    "text": "query virtual texture residency and/or",
+    "start": 2193.839,
+    "duration": 4.561
+  },
+  {
+    "text": "more gracefully deal with partial",
+    "start": 2196.72,
+    "duration": 3.68
+  },
+  {
+    "text": "residency in runtime generation use",
+    "start": 2198.4,
+    "duration": 3.84
+  },
+  {
+    "text": "cases.",
+    "start": 2200.4,
+    "duration": 4.0
+  },
+  {
+    "text": "And finally, as we discussed earlier,",
+    "start": 2202.24,
+    "duration": 4.48
+  },
+  {
+    "text": "generation latency can be a trick tricky",
+    "start": 2204.4,
+    "duration": 5.199
+  },
+  {
+    "text": "topic. In the demo, we benefited from",
+    "start": 2206.72,
+    "duration": 4.48
+  },
+  {
+    "text": "the camera motion being one long",
+    "start": 2209.599,
+    "duration": 3.76
+  },
+  {
+    "text": "continuous path, whereas teleport will",
+    "start": 2211.2,
+    "duration": 4.56
+  },
+  {
+    "text": "exacerbate this issues.",
+    "start": 2213.359,
+    "duration": 4.561
+  },
+  {
+    "text": "We have a PCG gen source component which",
+    "start": 2215.76,
+    "duration": 4.079
+  },
+  {
+    "text": "triggers component which triggers",
+    "start": 2217.92,
+    "duration": 4.159
+  },
+  {
+    "text": "generation at its location in the world",
+    "start": 2219.839,
+    "duration": 4.561
+  },
+  {
+    "text": "and is designed to address this but we",
+    "start": 2222.079,
+    "duration": 3.921
+  },
+  {
+    "text": "haven't yet used it extensively in",
+    "start": 2224.4,
+    "duration": 3.679
+  },
+  {
+    "text": "production. We anticipate continued",
+    "start": 2226.0,
+    "duration": 4.4
+  },
+  {
+    "text": "effort and R&D going into minimizing the",
+    "start": 2228.079,
+    "duration": 6.28
+  },
+  {
+    "text": "impact of generation latency.",
+    "start": 2230.4,
+    "duration": 3.959
+  },
+  {
+    "text": "And now some additional future work",
+    "start": 2236.079,
+    "duration": 4.641
+  },
+  {
+    "text": "directions. As mentioned previously, we",
+    "start": 2237.839,
+    "duration": 5.121
+  },
+  {
+    "text": "will continue to push on optimization",
+    "start": 2240.72,
+    "duration": 4.399
+  },
+  {
+    "text": "including driving processing costs down",
+    "start": 2242.96,
+    "duration": 5.36
+  },
+  {
+    "text": "on the CPU side and also explore async",
+    "start": 2245.119,
+    "duration": 5.761
+  },
+  {
+    "text": "compute for GPU work.",
+    "start": 2248.32,
+    "duration": 5.2
+  },
+  {
+    "text": "One major component of the CPU cost is",
+    "start": 2250.88,
+    "duration": 5.52
+  },
+  {
+    "text": "setting up actors and actor components.",
+    "start": 2253.52,
+    "duration": 4.8
+  },
+  {
+    "text": "We will ship experimental support for",
+    "start": 2256.4,
+    "duration": 4.0
+  },
+  {
+    "text": "spawning primitives via fast geo",
+    "start": 2258.32,
+    "duration": 4.96
+  },
+  {
+    "text": "components in 5.7 and we are aiming to",
+    "start": 2260.4,
+    "duration": 4.8
+  },
+  {
+    "text": "build on that to add a mode that doesn't",
+    "start": 2263.28,
+    "duration": 4.24
+  },
+  {
+    "text": "use actors for the generation grid at",
+    "start": 2265.2,
+    "duration": 3.84
+  },
+  {
+    "text": "all.",
+    "start": 2267.52,
+    "duration": 3.92
+  },
+  {
+    "text": "Besides that, we will continue to push",
+    "start": 2269.04,
+    "duration": 4.64
+  },
+  {
+    "text": "on expanding functionality.",
+    "start": 2271.44,
+    "duration": 4.48
+  },
+  {
+    "text": "In 5.7, we have a first version of",
+    "start": 2273.68,
+    "duration": 5.679
+  },
+  {
+    "text": "support for override pins, including the",
+    "start": 2275.92,
+    "duration": 5.6
+  },
+  {
+    "text": "point count on the point generator node,",
+    "start": 2279.359,
+    "duration": 5.121
+  },
+  {
+    "text": "and we'll extend this over time.",
+    "start": 2281.52,
+    "duration": 4.96
+  },
+  {
+    "text": "We are also exposing the basic compute",
+    "start": 2284.48,
+    "duration": 4.4
+  },
+  {
+    "text": "types and classes for 5.7 to allow you",
+    "start": 2286.48,
+    "duration": 5.84
+  },
+  {
+    "text": "to write your own GPU node backends.",
+    "start": 2288.88,
+    "duration": 5.36
+  },
+  {
+    "text": "And we will also add support for GPU",
+    "start": 2292.32,
+    "duration": 5.84
+  },
+  {
+    "text": "generation of instance skin measures.",
+    "start": 2294.24,
+    "duration": 6.0
+  },
+  {
+    "text": "Next, many of the supporting tools are",
+    "start": 2298.16,
+    "duration": 4.32
+  },
+  {
+    "text": "in an early state for GPU and we look",
+    "start": 2300.24,
+    "duration": 4.8
+  },
+  {
+    "text": "forward to improving them over time. The",
+    "start": 2302.48,
+    "duration": 4.639
+  },
+  {
+    "text": "profiling window in particular needs a",
+    "start": 2305.04,
+    "duration": 4.319
+  },
+  {
+    "text": "big update to reflect GPU memory usage",
+    "start": 2307.119,
+    "duration": 4.72
+  },
+  {
+    "text": "and GPU execution costs and that's high",
+    "start": 2309.359,
+    "duration": 5.601
+  },
+  {
+    "text": "on our list. And finally, we're excited",
+    "start": 2311.839,
+    "duration": 5.28
+  },
+  {
+    "text": "for the PCG framework to transition to",
+    "start": 2314.96,
+    "duration": 5.52
+  },
+  {
+    "text": "stable production ready state for 5.7.",
+    "start": 2317.119,
+    "duration": 4.561
+  },
+  {
+    "text": "That means we are committed to",
+    "start": 2320.48,
+    "duration": 3.28
+  },
+  {
+    "text": "supporting our current feature set, not",
+    "start": 2321.68,
+    "duration": 4.0
+  },
+  {
+    "text": "breaking existing projects, and we're",
+    "start": 2323.76,
+    "duration": 3.68
+  },
+  {
+    "text": "going full steam ahead with PCG",
+    "start": 2325.68,
+    "duration": 3.6
+  },
+  {
+    "text": "development.",
+    "start": 2327.44,
+    "duration": 4.32
+  },
+  {
+    "text": "Within that, the PCG GPU feature is",
+    "start": 2329.28,
+    "duration": 4.88
+  },
+  {
+    "text": "transitioning from experimental to beta",
+    "start": 2331.76,
+    "duration": 4.8
+  },
+  {
+    "text": "as our focus shifts to stability,",
+    "start": 2334.16,
+    "duration": 5.12
+  },
+  {
+    "text": "platform support, performance, as well",
+    "start": 2336.56,
+    "duration": 5.68
+  },
+  {
+    "text": "as expanding GPU support to more nodes",
+    "start": 2339.28,
+    "duration": 6.2
+  },
+  {
+    "text": "as mentioned.",
+    "start": 2342.24,
+    "duration": 3.24
+  },
+  {
+    "text": "And before before we wrap, we both",
+    "start": 2347.359,
+    "duration": 4.0
+  },
+  {
+    "text": "wanted to give a huge shout out to just",
+    "start": 2349.44,
+    "duration": 3.679
+  },
+  {
+    "text": "a subset of the many people that",
+    "start": 2351.359,
+    "duration": 4.961
+  },
+  {
+    "text": "contributed to this work.",
+    "start": 2353.119,
+    "duration": 4.96
+  },
+  {
+    "text": "And with that, I'll thank you very much",
+    "start": 2356.32,
+    "duration": 4.327
+  },
+  {
+    "text": "and invite questions.",
+    "start": 2358.079,
+    "duration": 4.588
+  },
+  {
+    "text": "[applause]",
+    "start": 2360.647,
+    "duration": 2.02
+  },
+  {
+    "text": "[applause]",
+    "start": 2365.232,
+    "duration": 2.02
+  }
+]

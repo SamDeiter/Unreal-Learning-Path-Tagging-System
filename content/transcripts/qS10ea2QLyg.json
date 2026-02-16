@@ -1,0 +1,2607 @@
+[
+  {
+    "text": "Thanks for coming everybody. Welcome to",
+    "start": 1.439,
+    "duration": 5.121
+  },
+  {
+    "text": "working smarter with Scenraph.",
+    "start": 3.52,
+    "duration": 5.76
+  },
+  {
+    "text": "I'm Rodney Hul. I'm a senior uh product",
+    "start": 6.56,
+    "duration": 5.199
+  },
+  {
+    "text": "designer at Epic Games. So I've been",
+    "start": 9.28,
+    "duration": 4.08
+  },
+  {
+    "text": "with Epic Games for about three years",
+    "start": 11.759,
+    "duration": 4.401
+  },
+  {
+    "text": "now. Uh joined right before we launched",
+    "start": 13.36,
+    "duration": 5.839
+  },
+  {
+    "text": "UFN to help with workflows and then now",
+    "start": 16.16,
+    "duration": 6.48
+  },
+  {
+    "text": "I mainly work on the scene graph team.",
+    "start": 19.199,
+    "duration": 5.361
+  },
+  {
+    "text": "Uh so the things we're going to be",
+    "start": 22.64,
+    "duration": 3.52
+  },
+  {
+    "text": "talking about today, we're going to go",
+    "start": 24.56,
+    "duration": 4.32
+  },
+  {
+    "text": "over a just a quick overview of scene",
+    "start": 26.16,
+    "duration": 5.519
+  },
+  {
+    "text": "graph. Uh we will build a prefab",
+    "start": 28.88,
+    "duration": 4.4
+  },
+  {
+    "text": "together.",
+    "start": 31.679,
+    "duration": 3.281
+  },
+  {
+    "text": "We're going to look at the new sample",
+    "start": 33.28,
+    "duration": 4.56
+  },
+  {
+    "text": "project we're shipping with beta. And",
+    "start": 34.96,
+    "duration": 5.439
+  },
+  {
+    "text": "we're going to look at a project made in",
+    "start": 37.84,
+    "duration": 4.64
+  },
+  {
+    "text": "scene graph versus using creative",
+    "start": 40.399,
+    "duration": 4.241
+  },
+  {
+    "text": "devices.",
+    "start": 42.48,
+    "duration": 6.48
+  },
+  {
+    "text": "So for scene graph overview we have",
+    "start": 44.64,
+    "duration": 6.399
+  },
+  {
+    "text": "uh scene graph is our unified structure",
+    "start": 48.96,
+    "duration": 3.759
+  },
+  {
+    "text": "for connecting all the objects in our",
+    "start": 51.039,
+    "duration": 5.121
+  },
+  {
+    "text": "scene. It represents game objects as a",
+    "start": 52.719,
+    "duration": 5.36
+  },
+  {
+    "text": "parent child tree structure and we'll",
+    "start": 56.16,
+    "duration": 3.76
+  },
+  {
+    "text": "talk a lot about that today and kind of",
+    "start": 58.079,
+    "duration": 3.761
+  },
+  {
+    "text": "how we organize things to get the most",
+    "start": 59.92,
+    "duration": 5.36
+  },
+  {
+    "text": "benefit out of that. Um singaph is easy",
+    "start": 61.84,
+    "duration": 5.76
+  },
+  {
+    "text": "to navigate and manipulate through",
+    "start": 65.28,
+    "duration": 4.879
+  },
+  {
+    "text": "burst.",
+    "start": 67.6,
+    "duration": 5.76
+  },
+  {
+    "text": "So singraft has three main concepts. Uh",
+    "start": 70.159,
+    "duration": 6.481
+  },
+  {
+    "text": "our first concept is the component. Um",
+    "start": 73.36,
+    "duration": 5.28
+  },
+  {
+    "text": "the component is the data and logic for",
+    "start": 76.64,
+    "duration": 4.24
+  },
+  {
+    "text": "your game. So think of like transform,",
+    "start": 78.64,
+    "duration": 5.36
+  },
+  {
+    "text": "meshes, particles, sound. Those are all",
+    "start": 80.88,
+    "duration": 5.12
+  },
+  {
+    "text": "components that we can add to our",
+    "start": 84.0,
+    "duration": 5.439
+  },
+  {
+    "text": "entities. Entity is a container for your",
+    "start": 86.0,
+    "duration": 5.04
+  },
+  {
+    "text": "components.",
+    "start": 89.439,
+    "duration": 4.401
+  },
+  {
+    "text": "And then finally, prefabs are multiple",
+    "start": 91.04,
+    "duration": 4.719
+  },
+  {
+    "text": "entities and their components grouped",
+    "start": 93.84,
+    "duration": 5.52
+  },
+  {
+    "text": "together in a class.",
+    "start": 95.759,
+    "duration": 6.161
+  },
+  {
+    "text": "So, let's take a look at how we build a",
+    "start": 99.36,
+    "duration": 4.96
+  },
+  {
+    "text": "prefab and how those all those concepts",
+    "start": 101.92,
+    "duration": 4.64
+  },
+  {
+    "text": "work together.",
+    "start": 104.32,
+    "duration": 4.479
+  },
+  {
+    "text": "So, we have our scene here. We have a",
+    "start": 106.56,
+    "duration": 5.12
+  },
+  {
+    "text": "little trail leading into a cave. Um,",
+    "start": 108.799,
+    "duration": 4.96
+  },
+  {
+    "text": "our scene's pretty dark. It needs some",
+    "start": 111.68,
+    "duration": 4.64
+  },
+  {
+    "text": "lights and uh we really want to draw the",
+    "start": 113.759,
+    "duration": 4.241
+  },
+  {
+    "text": "players attention and lead them into",
+    "start": 116.32,
+    "duration": 3.839
+  },
+  {
+    "text": "that cave.",
+    "start": 118.0,
+    "duration": 5.68
+  },
+  {
+    "text": "So, we can start by adding an entity to",
+    "start": 120.159,
+    "duration": 6.401
+  },
+  {
+    "text": "our scene. And when we add this entity,",
+    "start": 123.68,
+    "duration": 5.199
+  },
+  {
+    "text": "you'll see it's just empty besides",
+    "start": 126.56,
+    "duration": 5.039
+  },
+  {
+    "text": "having a transform component on it. So",
+    "start": 128.879,
+    "duration": 5.841
+  },
+  {
+    "text": "we'll need to add a mesh component to",
+    "start": 131.599,
+    "duration": 7.681
+  },
+  {
+    "text": "it. And here we'll add our light post.",
+    "start": 134.72,
+    "duration": 7.12
+  },
+  {
+    "text": "And so",
+    "start": 139.28,
+    "duration": 7.2
+  },
+  {
+    "text": "now we can add a child entity to this.",
+    "start": 141.84,
+    "duration": 7.119
+  },
+  {
+    "text": "And again we can go add a component. Go",
+    "start": 146.48,
+    "duration": 5.04
+  },
+  {
+    "text": "to mesh component and we can add our",
+    "start": 148.959,
+    "duration": 6.401
+  },
+  {
+    "text": "lantern that's in our project.",
+    "start": 151.52,
+    "duration": 6.16
+  },
+  {
+    "text": "Now we have a very simple setup. Uh",
+    "start": 155.36,
+    "duration": 4.08
+  },
+  {
+    "text": "we'll just position this lantern into",
+    "start": 157.68,
+    "duration": 4.76
+  },
+  {
+    "text": "place.",
+    "start": 159.44,
+    "duration": 3.0
+  },
+  {
+    "text": "Now when we move our light post, our",
+    "start": 167.68,
+    "duration": 4.24
+  },
+  {
+    "text": "lantern goes with it because the lantern",
+    "start": 169.76,
+    "duration": 4.64
+  },
+  {
+    "text": "is a child. Um so it makes it really",
+    "start": 171.92,
+    "duration": 6.64
+  },
+  {
+    "text": "easy to organize things in your scene.",
+    "start": 174.4,
+    "duration": 7.199
+  },
+  {
+    "text": "Just get this popped into place. Rotate",
+    "start": 178.56,
+    "duration": 6.24
+  },
+  {
+    "text": "it how we want.",
+    "start": 181.599,
+    "duration": 3.201
+  },
+  {
+    "text": "Now that we're happy with that, we can",
+    "start": 185.36,
+    "duration": 4.239
+  },
+  {
+    "text": "go and save it as a prefab.",
+    "start": 187.04,
+    "duration": 7.88
+  },
+  {
+    "text": "So here we get uh we name our prefab",
+    "start": 189.599,
+    "duration": 5.321
+  },
+  {
+    "text": "and once we save this prefab, it opens",
+    "start": 199.2,
+    "duration": 5.759
+  },
+  {
+    "text": "in our prefab editor. So in our prefab",
+    "start": 202.239,
+    "duration": 4.64
+  },
+  {
+    "text": "editor, we can make changes if we want",
+    "start": 204.959,
+    "duration": 5.041
+  },
+  {
+    "text": "here, but we can just save for now. And",
+    "start": 206.879,
+    "duration": 5.521
+  },
+  {
+    "text": "now the entities that we've placed in",
+    "start": 210.0,
+    "duration": 4.159
+  },
+  {
+    "text": "the world have been replaced with the",
+    "start": 212.4,
+    "duration": 4.64
+  },
+  {
+    "text": "prefab version. So we can duplicate",
+    "start": 214.159,
+    "duration": 4.881
+  },
+  {
+    "text": "these out and create more instances in",
+    "start": 217.04,
+    "duration": 4.0
+  },
+  {
+    "text": "our world. And these are all linked to",
+    "start": 219.04,
+    "duration": 5.759
+  },
+  {
+    "text": "the base prefab. So you'll see we get",
+    "start": 221.04,
+    "duration": 5.68
+  },
+  {
+    "text": "when we get these positioned up, we'll",
+    "start": 224.799,
+    "duration": 3.44
+  },
+  {
+    "text": "start making changes and have them",
+    "start": 226.72,
+    "duration": 5.32
+  },
+  {
+    "text": "propagate through the world.",
+    "start": 228.239,
+    "duration": 3.801
+  },
+  {
+    "text": "So, we can go back to our lantern and",
+    "start": 239.519,
+    "duration": 7.08
+  },
+  {
+    "text": "open it in our prefab editor.",
+    "start": 242.319,
+    "duration": 4.28
+  },
+  {
+    "text": "Now, we can come in, add another entity",
+    "start": 248.799,
+    "duration": 5.121
+  },
+  {
+    "text": "in here. We can name these",
+    "start": 250.799,
+    "duration": 5.041
+  },
+  {
+    "text": "uh just so we know what they are. It's",
+    "start": 253.92,
+    "duration": 4.4
+  },
+  {
+    "text": "just a little easier for organization.",
+    "start": 255.84,
+    "duration": 4.799
+  },
+  {
+    "text": "And we come in and we'll add a light",
+    "start": 258.32,
+    "duration": 4.96
+  },
+  {
+    "text": "component to this.",
+    "start": 260.639,
+    "duration": 4.56
+  },
+  {
+    "text": "And now we'll get our light component",
+    "start": 263.28,
+    "duration": 5.639
+  },
+  {
+    "text": "positioned into place.",
+    "start": 265.199,
+    "duration": 3.72
+  },
+  {
+    "text": "And now once we save our prefab, all of",
+    "start": 269.12,
+    "duration": 4.4
+  },
+  {
+    "text": "our instances in the world are going to",
+    "start": 271.68,
+    "duration": 3.44
+  },
+  {
+    "text": "get this change and it's going to",
+    "start": 273.52,
+    "duration": 3.679
+  },
+  {
+    "text": "propagate through all of them. So now",
+    "start": 275.12,
+    "duration": 4.0
+  },
+  {
+    "text": "all of our lanterns have light in the",
+    "start": 277.199,
+    "duration": 3.521
+  },
+  {
+    "text": "world. We update it in one place,",
+    "start": 279.12,
+    "duration": 3.76
+  },
+  {
+    "text": "propagates through every every instance",
+    "start": 280.72,
+    "duration": 5.199
+  },
+  {
+    "text": "in the world. We can add another entity",
+    "start": 282.88,
+    "duration": 7.28
+  },
+  {
+    "text": "to this and we can rename it and we'll",
+    "start": 285.919,
+    "duration": 8.56
+  },
+  {
+    "text": "add a particle component to this.",
+    "start": 290.16,
+    "duration": 4.319
+  },
+  {
+    "text": "And now we have some moths flying around",
+    "start": 296.56,
+    "duration": 4.24
+  },
+  {
+    "text": "our our lantern. And now it's starting",
+    "start": 298.56,
+    "duration": 4.88
+  },
+  {
+    "text": "to come to life.",
+    "start": 300.8,
+    "duration": 5.44
+  },
+  {
+    "text": "And again, we'll and we can reparent",
+    "start": 303.44,
+    "duration": 4.64
+  },
+  {
+    "text": "this",
+    "start": 306.24,
+    "duration": 3.84
+  },
+  {
+    "text": "to where it makes sense. And we rename",
+    "start": 308.08,
+    "duration": 4.559
+  },
+  {
+    "text": "our lantern.",
+    "start": 310.08,
+    "duration": 5.28
+  },
+  {
+    "text": "Again, we're going to save save this",
+    "start": 312.639,
+    "duration": 5.761
+  },
+  {
+    "text": "prefab. All that that change is going to",
+    "start": 315.36,
+    "duration": 7.839
+  },
+  {
+    "text": "go to every instance in the world. All",
+    "start": 318.4,
+    "duration": 4.799
+  },
+  {
+    "text": "right. So now we can",
+    "start": 325.84,
+    "duration": 6.4
+  },
+  {
+    "text": "we can add some movement to this lantern",
+    "start": 329.52,
+    "duration": 4.959
+  },
+  {
+    "text": "to get it to be a little more believable",
+    "start": 332.24,
+    "duration": 4.48
+  },
+  {
+    "text": "and have a little life in the world. U",
+    "start": 334.479,
+    "duration": 4.321
+  },
+  {
+    "text": "so using our you know parent child",
+    "start": 336.72,
+    "duration": 5.68
+  },
+  {
+    "text": "structure um we're creating a entity",
+    "start": 338.8,
+    "duration": 6.16
+  },
+  {
+    "text": "that's at the top of the lantern where",
+    "start": 342.4,
+    "duration": 4.799
+  },
+  {
+    "text": "it meets the light post and we're going",
+    "start": 344.96,
+    "duration": 4.959
+  },
+  {
+    "text": "to animate that and then every all the",
+    "start": 347.199,
+    "duration": 4.961
+  },
+  {
+    "text": "children underneath it. So the the mesh",
+    "start": 349.919,
+    "duration": 6.641
+  },
+  {
+    "text": "and the light itself is going to animate",
+    "start": 352.16,
+    "duration": 8.0
+  },
+  {
+    "text": "along with it. So we're using the um",
+    "start": 356.56,
+    "duration": 5.6
+  },
+  {
+    "text": "child parent child structure to our",
+    "start": 360.16,
+    "duration": 4.479
+  },
+  {
+    "text": "advantage here um to make it easy to",
+    "start": 362.16,
+    "duration": 5.12
+  },
+  {
+    "text": "just animate in one place. Um so I've",
+    "start": 364.639,
+    "duration": 4.641
+  },
+  {
+    "text": "added a custom verse component which is",
+    "start": 367.28,
+    "duration": 4.639
+  },
+  {
+    "text": "called our simple mover component. And",
+    "start": 369.28,
+    "duration": 5.28
+  },
+  {
+    "text": "this mainly exposes the data into the",
+    "start": 371.919,
+    "duration": 4.4
+  },
+  {
+    "text": "details panel. We can set up our",
+    "start": 374.56,
+    "duration": 5.12
+  },
+  {
+    "text": "animation with. Here I'm setting I'm",
+    "start": 376.319,
+    "duration": 5.281
+  },
+  {
+    "text": "positioning the lantern to have its",
+    "start": 379.68,
+    "duration": 4.0
+  },
+  {
+    "text": "start position and then I'm I'm only",
+    "start": 381.6,
+    "duration": 4.8
+  },
+  {
+    "text": "adding one key frame here to have uh an",
+    "start": 383.68,
+    "duration": 4.639
+  },
+  {
+    "text": "end position.",
+    "start": 386.4,
+    "duration": 4.639
+  },
+  {
+    "text": "So really efficient, really easy to set",
+    "start": 388.319,
+    "duration": 5.201
+  },
+  {
+    "text": "up and just with a single key frame, we",
+    "start": 391.039,
+    "duration": 4.72
+  },
+  {
+    "text": "can get the movement we want. We set our",
+    "start": 393.52,
+    "duration": 5.519
+  },
+  {
+    "text": "duration and we can set our our movement",
+    "start": 395.759,
+    "duration": 5.361
+  },
+  {
+    "text": "mode, the easing mode. So we'd want this",
+    "start": 399.039,
+    "duration": 5.041
+  },
+  {
+    "text": "to ease in and out. Um so if we look at",
+    "start": 401.12,
+    "duration": 5.76
+  },
+  {
+    "text": "that in game now with what a single key",
+    "start": 404.08,
+    "duration": 5.2
+  },
+  {
+    "text": "frame we have it moving the lights moves",
+    "start": 406.88,
+    "duration": 5.52
+  },
+  {
+    "text": "with it. Um so we have a little more",
+    "start": 409.28,
+    "duration": 7.759
+  },
+  {
+    "text": "believability to to our scene. Um and we",
+    "start": 412.4,
+    "duration": 6.96
+  },
+  {
+    "text": "did it in one place and it updated every",
+    "start": 417.039,
+    "duration": 5.201
+  },
+  {
+    "text": "instance that we have in the game.",
+    "start": 419.36,
+    "duration": 6.239
+  },
+  {
+    "text": "So if we look at the code here, um we",
+    "start": 422.24,
+    "duration": 5.519
+  },
+  {
+    "text": "I'm setting up",
+    "start": 425.599,
+    "duration": 5.361
+  },
+  {
+    "text": "uh just a enume that allows the user to",
+    "start": 427.759,
+    "duration": 6.16
+  },
+  {
+    "text": "select which type of movement they want.",
+    "start": 430.96,
+    "duration": 5.92
+  },
+  {
+    "text": "And then I'm exposing with at editable,",
+    "start": 433.919,
+    "duration": 5.921
+  },
+  {
+    "text": "I'm exposing some fields to the details",
+    "start": 436.88,
+    "duration": 4.719
+  },
+  {
+    "text": "panel just like you would with a verse",
+    "start": 439.84,
+    "duration": 4.079
+  },
+  {
+    "text": "device.",
+    "start": 441.599,
+    "duration": 5.761
+  },
+  {
+    "text": "And then when the simulation begins I",
+    "start": 443.919,
+    "duration": 5.521
+  },
+  {
+    "text": "get the key frame movement component",
+    "start": 447.36,
+    "duration": 5.279
+  },
+  {
+    "text": "which is our component that is doing all",
+    "start": 449.44,
+    "duration": 6.319
+  },
+  {
+    "text": "the animation. Um our simple movement",
+    "start": 452.639,
+    "duration": 5.761
+  },
+  {
+    "text": "component here is a verse component that",
+    "start": 455.759,
+    "duration": 4.961
+  },
+  {
+    "text": "mainly is just data that we're feeding",
+    "start": 458.4,
+    "duration": 5.359
+  },
+  {
+    "text": "into the key frame movement component.",
+    "start": 460.72,
+    "duration": 5.599
+  },
+  {
+    "text": "And uh so if we have a key frame",
+    "start": 463.759,
+    "duration": 4.241
+  },
+  {
+    "text": "movement component then we can go ahead",
+    "start": 466.319,
+    "duration": 4.32
+  },
+  {
+    "text": "and feed in all the data for it. But if",
+    "start": 468.0,
+    "duration": 4.16
+  },
+  {
+    "text": "we don't have a key frame movement",
+    "start": 470.639,
+    "duration": 3.28
+  },
+  {
+    "text": "component, we can just create one at",
+    "start": 472.16,
+    "duration": 4.64
+  },
+  {
+    "text": "runtime, add it to the entity, and then",
+    "start": 473.919,
+    "duration": 5.28
+  },
+  {
+    "text": "set it all up. So, we have a lot of",
+    "start": 476.8,
+    "duration": 5.679
+  },
+  {
+    "text": "flexibility there. You you get away with",
+    "start": 479.199,
+    "duration": 5.44
+  },
+  {
+    "text": "um you know, if you forget to put it on",
+    "start": 482.479,
+    "duration": 4.0
+  },
+  {
+    "text": "there, you get away with it because we",
+    "start": 484.639,
+    "duration": 3.68
+  },
+  {
+    "text": "just anticipate that and handle it",
+    "start": 486.479,
+    "duration": 3.84
+  },
+  {
+    "text": "correctly.",
+    "start": 488.319,
+    "duration": 4.72
+  },
+  {
+    "text": "And then uh this is just how we're",
+    "start": 490.319,
+    "duration": 4.88
+  },
+  {
+    "text": "feeding the data in. We're we can go",
+    "start": 493.039,
+    "duration": 5.201
+  },
+  {
+    "text": "through our enume and and using a switch",
+    "start": 495.199,
+    "duration": 5.201
+  },
+  {
+    "text": "statement to to feed in which movement",
+    "start": 498.24,
+    "duration": 5.76
+  },
+  {
+    "text": "mode and then if the if our user has set",
+    "start": 500.4,
+    "duration": 5.68
+  },
+  {
+    "text": "it to autoplay then we tell the key",
+    "start": 504.0,
+    "duration": 4.08
+  },
+  {
+    "text": "frame movement component just to start",
+    "start": 506.08,
+    "duration": 4.799
+  },
+  {
+    "text": "playing.",
+    "start": 508.08,
+    "duration": 5.439
+  },
+  {
+    "text": "Uh so we can also add interaction to our",
+    "start": 510.879,
+    "duration": 6.001
+  },
+  {
+    "text": "lantern um using our interactable",
+    "start": 513.519,
+    "duration": 6.561
+  },
+  {
+    "text": "component. Our interactable component",
+    "start": 516.88,
+    "duration": 6.56
+  },
+  {
+    "text": "will give us a an event we can subscribe",
+    "start": 520.08,
+    "duration": 5.92
+  },
+  {
+    "text": "to uh for when the player interacts with",
+    "start": 523.44,
+    "duration": 4.56
+  },
+  {
+    "text": "it and it gives the the prompt on the",
+    "start": 526.0,
+    "duration": 5.92
+  },
+  {
+    "text": "lantern. And then we have a uh component",
+    "start": 528.0,
+    "duration": 6.48
+  },
+  {
+    "text": "that handles all the turning the lights",
+    "start": 531.92,
+    "duration": 6.56
+  },
+  {
+    "text": "on and off. And uh so if we look at it",
+    "start": 534.48,
+    "duration": 5.68
+  },
+  {
+    "text": "in game here, we get our interaction",
+    "start": 538.48,
+    "duration": 4.0
+  },
+  {
+    "text": "prompt and when the player interacts",
+    "start": 540.16,
+    "duration": 4.0
+  },
+  {
+    "text": "with it, the light turns off. We turn",
+    "start": 542.48,
+    "duration": 4.479
+  },
+  {
+    "text": "the emissive off on the mesh and the",
+    "start": 544.16,
+    "duration": 5.679
+  },
+  {
+    "text": "moths get bored and they fly away and we",
+    "start": 546.959,
+    "duration": 5.281
+  },
+  {
+    "text": "turn it back on, crank the emissive back",
+    "start": 549.839,
+    "duration": 5.281
+  },
+  {
+    "text": "up, turn the light back on.",
+    "start": 552.24,
+    "duration": 6.0
+  },
+  {
+    "text": "And so the code is very simple for that.",
+    "start": 555.12,
+    "duration": 5.2
+  },
+  {
+    "text": "We start by adding a material instance",
+    "start": 558.24,
+    "duration": 5.52
+  },
+  {
+    "text": "to our lantern. Uh we find our",
+    "start": 560.32,
+    "duration": 5.92
+  },
+  {
+    "text": "interactable component and we subscribe",
+    "start": 563.76,
+    "duration": 5.84
+  },
+  {
+    "text": "to our succeeded event. And then we find",
+    "start": 566.24,
+    "duration": 6.0
+  },
+  {
+    "text": "our mesh component and we add our",
+    "start": 569.6,
+    "duration": 5.359
+  },
+  {
+    "text": "material instance to it.",
+    "start": 572.24,
+    "duration": 4.159
+  },
+  {
+    "text": "Then when the player does the",
+    "start": 574.959,
+    "duration": 4.481
+  },
+  {
+    "text": "interaction, uh, we go through and we",
+    "start": 576.399,
+    "duration": 6.0
+  },
+  {
+    "text": "set the emissive and we find our light",
+    "start": 579.44,
+    "duration": 5.2
+  },
+  {
+    "text": "component. We enable it and we find our",
+    "start": 582.399,
+    "duration": 3.921
+  },
+  {
+    "text": "particle component and we call play on",
+    "start": 584.64,
+    "duration": 6.48
+  },
+  {
+    "text": "it. It's like pretty easy. Um, so now",
+    "start": 586.32,
+    "duration": 7.519
+  },
+  {
+    "text": "let's say we want to place one of these",
+    "start": 591.12,
+    "duration": 6.08
+  },
+  {
+    "text": "lanterns inside the cave. Uh, we're",
+    "start": 593.839,
+    "duration": 5.281
+  },
+  {
+    "text": "going to have a couple issues here. When",
+    "start": 597.2,
+    "duration": 4.16
+  },
+  {
+    "text": "we we drag and drop our, you know, new",
+    "start": 599.12,
+    "duration": 4.96
+  },
+  {
+    "text": "instance in, um, it's inside the cave.",
+    "start": 601.36,
+    "duration": 3.919
+  },
+  {
+    "text": "The cave is probably not going to be",
+    "start": 604.08,
+    "duration": 3.199
+  },
+  {
+    "text": "windy, so we don't want it to animate,",
+    "start": 605.279,
+    "duration": 5.761
+  },
+  {
+    "text": "right? So, we can come in here. We can",
+    "start": 607.279,
+    "duration": 6.401
+  },
+  {
+    "text": "just remove our animation components",
+    "start": 611.04,
+    "duration": 5.84
+  },
+  {
+    "text": "from it. And now it no longer animates.",
+    "start": 613.68,
+    "duration": 6.399
+  },
+  {
+    "text": "We can just zero out our rotation",
+    "start": 616.88,
+    "duration": 5.199
+  },
+  {
+    "text": "on it. And now we have a lantern that's",
+    "start": 620.079,
+    "duration": 3.681
+  },
+  {
+    "text": "not going to rotate. Our light is a",
+    "start": 622.079,
+    "duration": 3.521
+  },
+  {
+    "text": "little too bright for this setting. So",
+    "start": 623.76,
+    "duration": 5.199
+  },
+  {
+    "text": "we can come in here and uh turn down the",
+    "start": 625.6,
+    "duration": 5.6
+  },
+  {
+    "text": "intensity.",
+    "start": 628.959,
+    "duration": 4.401
+  },
+  {
+    "text": "So we can do this with using our",
+    "start": 631.2,
+    "duration": 5.12
+  },
+  {
+    "text": "override system. So these overrides are",
+    "start": 633.36,
+    "duration": 7.68
+  },
+  {
+    "text": "layered on top of of uh the prefab",
+    "start": 636.32,
+    "duration": 6.8
+  },
+  {
+    "text": "instance. So we can go and make changes",
+    "start": 641.04,
+    "duration": 4.799
+  },
+  {
+    "text": "to our base prefab. This instance will",
+    "start": 643.12,
+    "duration": 4.959
+  },
+  {
+    "text": "get those changes, but then we'll apply",
+    "start": 645.839,
+    "duration": 4.481
+  },
+  {
+    "text": "any additional changes we did as",
+    "start": 648.079,
+    "duration": 5.121
+  },
+  {
+    "text": "overrides on top. So, we still have that",
+    "start": 650.32,
+    "duration": 5.759
+  },
+  {
+    "text": "connection to the main prefab where we",
+    "start": 653.2,
+    "duration": 3.92
+  },
+  {
+    "text": "can add a bunch of different",
+    "start": 656.079,
+    "duration": 3.361
+  },
+  {
+    "text": "functionality or just change up what we",
+    "start": 657.12,
+    "duration": 5.44
+  },
+  {
+    "text": "need to for special cases. And if we",
+    "start": 659.44,
+    "duration": 6.56
+  },
+  {
+    "text": "look at that in game and now our our",
+    "start": 662.56,
+    "duration": 7.04
+  },
+  {
+    "text": "lantern is is not swaying and we still",
+    "start": 666.0,
+    "duration": 6.16
+  },
+  {
+    "text": "have all this interaction uh that we had",
+    "start": 669.6,
+    "duration": 4.4
+  },
+  {
+    "text": "with all the other ones and it's still",
+    "start": 672.16,
+    "duration": 5.799
+  },
+  {
+    "text": "connected to the base prefab.",
+    "start": 674.0,
+    "duration": 3.959
+  },
+  {
+    "text": "So, let's talk about how you do it with",
+    "start": 679.12,
+    "duration": 6.08
+  },
+  {
+    "text": "creative devices. Um, you'd need to",
+    "start": 681.279,
+    "duration": 6.161
+  },
+  {
+    "text": "duplicate all these creative devices and",
+    "start": 685.2,
+    "duration": 4.48
+  },
+  {
+    "text": "have a bunch of them in the scene. So,",
+    "start": 687.44,
+    "duration": 3.68
+  },
+  {
+    "text": "you'd have, you know, a bunch of light",
+    "start": 689.68,
+    "duration": 4.399
+  },
+  {
+    "text": "devices. You'd have you'd need verse",
+    "start": 691.12,
+    "duration": 5.92
+  },
+  {
+    "text": "devices to hook to do the animation. You",
+    "start": 694.079,
+    "duration": 4.401
+  },
+  {
+    "text": "need button devices for the",
+    "start": 697.04,
+    "duration": 3.76
+  },
+  {
+    "text": "interactions. And all of these are just",
+    "start": 698.48,
+    "duration": 4.56
+  },
+  {
+    "text": "duplicated throughout the scene with no",
+    "start": 700.8,
+    "duration": 5.68
+  },
+  {
+    "text": "connection to to each other. And when",
+    "start": 703.04,
+    "duration": 5.68
+  },
+  {
+    "text": "you have to change something, you got to",
+    "start": 706.48,
+    "duration": 5.84
+  },
+  {
+    "text": "do it in every single place. Here,",
+    "start": 708.72,
+    "duration": 5.52
+  },
+  {
+    "text": "everything, all of our logic, all of our",
+    "start": 712.32,
+    "duration": 4.32
+  },
+  {
+    "text": "data is contained inside one single",
+    "start": 714.24,
+    "duration": 5.92
+  },
+  {
+    "text": "prefab that we update in one place. And",
+    "start": 716.64,
+    "duration": 7.84
+  },
+  {
+    "text": "update it, save it, and you're done.",
+    "start": 720.16,
+    "duration": 7.52
+  },
+  {
+    "text": "So, let's take a look at our scene graph",
+    "start": 724.48,
+    "duration": 6.159
+  },
+  {
+    "text": "example project that we're shipping with",
+    "start": 727.68,
+    "duration": 5.92
+  },
+  {
+    "text": "uh our beta.",
+    "start": 730.639,
+    "duration": 6.64
+  },
+  {
+    "text": "Um, so all the light component examples",
+    "start": 733.6,
+    "duration": 5.28
+  },
+  {
+    "text": "are in here. All the code that you saw",
+    "start": 737.279,
+    "duration": 4.641
+  },
+  {
+    "text": "before is in here for you to to look at",
+    "start": 738.88,
+    "duration": 6.399
+  },
+  {
+    "text": "and use. And uh we have a few other",
+    "start": 741.92,
+    "duration": 6.4
+  },
+  {
+    "text": "examples we can look at in here. So we",
+    "start": 745.279,
+    "duration": 6.721
+  },
+  {
+    "text": "can spawn prefabs at runtime. So when we",
+    "start": 748.32,
+    "duration": 5.36
+  },
+  {
+    "text": "I step into the trigger here, we're",
+    "start": 752.0,
+    "duration": 3.68
+  },
+  {
+    "text": "spawning the full prefab that has the",
+    "start": 753.68,
+    "duration": 4.32
+  },
+  {
+    "text": "animation, has all the interaction with",
+    "start": 755.68,
+    "duration": 4.08
+  },
+  {
+    "text": "it.",
+    "start": 758.0,
+    "duration": 4.16
+  },
+  {
+    "text": "And uh when we step out of the trigger,",
+    "start": 759.76,
+    "duration": 4.8
+  },
+  {
+    "text": "we can remove it from the world. And the",
+    "start": 762.16,
+    "duration": 5.44
+  },
+  {
+    "text": "code for that is pretty easy. Um so we",
+    "start": 764.56,
+    "duration": 6.32
+  },
+  {
+    "text": "have our simulation entity. Our",
+    "start": 767.6,
+    "duration": 5.44
+  },
+  {
+    "text": "simulation entity is the root entity of",
+    "start": 770.88,
+    "duration": 4.56
+  },
+  {
+    "text": "the world. So when we add something to",
+    "start": 773.04,
+    "duration": 3.919
+  },
+  {
+    "text": "it, we're adding it to the root of the",
+    "start": 775.44,
+    "duration": 5.92
+  },
+  {
+    "text": "world. And um so our entities need a",
+    "start": 776.959,
+    "duration": 6.88
+  },
+  {
+    "text": "parent. So when you just need to add it",
+    "start": 781.36,
+    "duration": 4.479
+  },
+  {
+    "text": "to the world, you get the simulation",
+    "start": 783.839,
+    "duration": 4.56
+  },
+  {
+    "text": "entity and add it there. here waiting",
+    "start": 785.839,
+    "duration": 4.56
+  },
+  {
+    "text": "two seconds and then calling remove from",
+    "start": 788.399,
+    "duration": 5.44
+  },
+  {
+    "text": "parent when an entity or prefab doesn't",
+    "start": 790.399,
+    "duration": 6.0
+  },
+  {
+    "text": "have a parent in the it is removed from",
+    "start": 793.839,
+    "duration": 4.24
+  },
+  {
+    "text": "the world. So that's how we get rid of",
+    "start": 796.399,
+    "duration": 4.321
+  },
+  {
+    "text": "things.",
+    "start": 798.079,
+    "duration": 5.921
+  },
+  {
+    "text": "We also have collision detection now. So",
+    "start": 800.72,
+    "duration": 6.96
+  },
+  {
+    "text": "our cow mesh is colliding with the UFO",
+    "start": 804.0,
+    "duration": 5.44
+  },
+  {
+    "text": "mesh and when that happens we get an",
+    "start": 807.68,
+    "duration": 4.24
+  },
+  {
+    "text": "event that we can run some logic on. So",
+    "start": 809.44,
+    "duration": 5.199
+  },
+  {
+    "text": "it's pretty easy. We have our we get our",
+    "start": 811.92,
+    "duration": 5.44
+  },
+  {
+    "text": "mesh component. we subscribe to our",
+    "start": 814.639,
+    "duration": 4.801
+  },
+  {
+    "text": "entity entered event and entity exit",
+    "start": 817.36,
+    "duration": 4.24
+  },
+  {
+    "text": "event and we can run any logic we want",
+    "start": 819.44,
+    "duration": 5.04
+  },
+  {
+    "text": "that way. So when an entity when a mesh",
+    "start": 821.6,
+    "duration": 4.32
+  },
+  {
+    "text": "touches another mesh that's when the",
+    "start": 824.48,
+    "duration": 5.32
+  },
+  {
+    "text": "entity entered happens.",
+    "start": 825.92,
+    "duration": 3.88
+  },
+  {
+    "text": "We also have u we can find overlaps. So",
+    "start": 830.16,
+    "duration": 6.88
+  },
+  {
+    "text": "we can find if a if entities are",
+    "start": 833.6,
+    "duration": 7.599
+  },
+  {
+    "text": "overlapping a volume. So here using a",
+    "start": 837.04,
+    "duration": 7.2
+  },
+  {
+    "text": "capsule collision volume uh we can",
+    "start": 841.199,
+    "duration": 5.281
+  },
+  {
+    "text": "determine if a cow is underneath the UFO",
+    "start": 844.24,
+    "duration": 5.039
+  },
+  {
+    "text": "and if it is we abduct it. Um the code",
+    "start": 846.48,
+    "duration": 4.56
+  },
+  {
+    "text": "for that's pretty simple like just",
+    "start": 849.279,
+    "duration": 5.041
+  },
+  {
+    "text": "define a collision capsule inverse um",
+    "start": 851.04,
+    "duration": 5.84
+  },
+  {
+    "text": "and get the transform where you want it",
+    "start": 854.32,
+    "duration": 5.92
+  },
+  {
+    "text": "to start. Then we go and we find the",
+    "start": 856.88,
+    "duration": 4.959
+  },
+  {
+    "text": "overlap anything that's overlapping.",
+    "start": 860.24,
+    "duration": 3.76
+  },
+  {
+    "text": "Here I'm just taking the first entity",
+    "start": 861.839,
+    "duration": 4.881
+  },
+  {
+    "text": "that overlaps with it and casting it to",
+    "start": 864.0,
+    "duration": 5.68
+  },
+  {
+    "text": "the cow to see, hey, did we overlap a",
+    "start": 866.72,
+    "duration": 6.88
+  },
+  {
+    "text": "cow? If we did, let's abduct it.",
+    "start": 869.68,
+    "duration": 6.64
+  },
+  {
+    "text": "And we also have ray tracing now. So",
+    "start": 873.6,
+    "duration": 4.4
+  },
+  {
+    "text": "here we can detect if anything's",
+    "start": 876.32,
+    "duration": 5.199
+  },
+  {
+    "text": "obstructing uh the cow from so our cows",
+    "start": 878.0,
+    "duration": 5.6
+  },
+  {
+    "text": "inside the dome will not be abducted,",
+    "start": 881.519,
+    "duration": 4.161
+  },
+  {
+    "text": "but any that are outside the domes, they",
+    "start": 883.6,
+    "duration": 4.4
+  },
+  {
+    "text": "can be abducted. So here we're just",
+    "start": 885.68,
+    "duration": 5.44
+  },
+  {
+    "text": "we're taking we're raycasting down our",
+    "start": 888.0,
+    "duration": 5.839
+  },
+  {
+    "text": "straight down with our mesh and just",
+    "start": 891.12,
+    "duration": 5.92
+  },
+  {
+    "text": "finding what we hit along the way. So",
+    "start": 893.839,
+    "duration": 5.841
+  },
+  {
+    "text": "really powerful u lots of use cases for",
+    "start": 897.04,
+    "duration": 4.96
+  },
+  {
+    "text": "this in games used all over the place.",
+    "start": 899.68,
+    "duration": 4.32
+  },
+  {
+    "text": "So this is uh great to have and the",
+    "start": 902.0,
+    "duration": 4.399
+  },
+  {
+    "text": "code's pretty simple for it. So we're",
+    "start": 904.0,
+    "duration": 4.88
+  },
+  {
+    "text": "just defining",
+    "start": 906.399,
+    "duration": 5.921
+  },
+  {
+    "text": "um how where the sweep happens. So we're",
+    "start": 908.88,
+    "duration": 6.24
+  },
+  {
+    "text": "I'm going down 300 units. So just taking",
+    "start": 912.32,
+    "duration": 4.48
+  },
+  {
+    "text": "the mesh and just it just pretends like",
+    "start": 915.12,
+    "duration": 3.44
+  },
+  {
+    "text": "it just like if hey if we move the mesh",
+    "start": 916.8,
+    "duration": 3.52
+  },
+  {
+    "text": "down 300 units like what are we going to",
+    "start": 918.56,
+    "duration": 4.0
+  },
+  {
+    "text": "hit along the way?",
+    "start": 920.32,
+    "duration": 4.639
+  },
+  {
+    "text": "So for our sweep hit and we run find",
+    "start": 922.56,
+    "duration": 4.32
+  },
+  {
+    "text": "sweep hits and then again I'm just",
+    "start": 924.959,
+    "duration": 4.641
+  },
+  {
+    "text": "casting to a cow and if it is the cow",
+    "start": 926.88,
+    "duration": 8.199
+  },
+  {
+    "text": "then we do our abduction logic.",
+    "start": 929.6,
+    "duration": 5.479
+  },
+  {
+    "text": "Uh so let's take a look at a project",
+    "start": 936.079,
+    "duration": 4.88
+  },
+  {
+    "text": "that a colleague of mine Jay Billya did",
+    "start": 938.079,
+    "duration": 5.841
+  },
+  {
+    "text": "for uh an Unreal Fest presentation. So",
+    "start": 940.959,
+    "duration": 5.12
+  },
+  {
+    "text": "he did this project in UFN using",
+    "start": 943.92,
+    "duration": 5.44
+  },
+  {
+    "text": "creative devices. So this is the Fort",
+    "start": 946.079,
+    "duration": 6.161
+  },
+  {
+    "text": "Vader project where you have invaders",
+    "start": 949.36,
+    "duration": 4.8
+  },
+  {
+    "text": "marching back and forth and try to shoot",
+    "start": 952.24,
+    "duration": 3.68
+  },
+  {
+    "text": "them down out of the sky while they",
+    "start": 954.16,
+    "duration": 6.72
+  },
+  {
+    "text": "shoot at you. Um so he shoots one down.",
+    "start": 955.92,
+    "duration": 7.76
+  },
+  {
+    "text": "It's a satisfying fall and explosion",
+    "start": 960.88,
+    "duration": 5.519
+  },
+  {
+    "text": "when they hit the ground. Uh so very",
+    "start": 963.68,
+    "duration": 5.76
+  },
+  {
+    "text": "cool sample project. Uh lots of",
+    "start": 966.399,
+    "duration": 5.281
+  },
+  {
+    "text": "complexity with using creative devices",
+    "start": 969.44,
+    "duration": 6.16
+  },
+  {
+    "text": "with this. Um, so first he you have",
+    "start": 971.68,
+    "duration": 5.76
+  },
+  {
+    "text": "multiple creative devices needed for",
+    "start": 975.6,
+    "duration": 3.84
+  },
+  {
+    "text": "each invader. For each of those invaders",
+    "start": 977.44,
+    "duration": 4.079
+  },
+  {
+    "text": "he has on screen, he has to duplicate",
+    "start": 979.44,
+    "duration": 4.319
+  },
+  {
+    "text": "all those devices, set them all up",
+    "start": 981.519,
+    "duration": 5.041
+  },
+  {
+    "text": "again. Like these invaders have four",
+    "start": 983.759,
+    "duration": 5.76
+  },
+  {
+    "text": "audio devices for each one. So there's",
+    "start": 986.56,
+    "duration": 6.88
+  },
+  {
+    "text": "just a lot of like duplication and it's",
+    "start": 989.519,
+    "duration": 7.521
+  },
+  {
+    "text": "a it's a big setup. Uh, the invaders are",
+    "start": 993.44,
+    "duration": 6.079
+  },
+  {
+    "text": "hardcoded. Their height is hardcoded.",
+    "start": 997.04,
+    "duration": 6.159
+  },
+  {
+    "text": "there. Um he",
+    "start": 999.519,
+    "duration": 5.921
+  },
+  {
+    "text": "uh since creative devices don't have",
+    "start": 1003.199,
+    "duration": 4.88
+  },
+  {
+    "text": "collision detection, he needs to know",
+    "start": 1005.44,
+    "duration": 5.6
+  },
+  {
+    "text": "how far they fall exactly before hitting",
+    "start": 1008.079,
+    "duration": 6.241
+  },
+  {
+    "text": "the floor to play the effect. And then",
+    "start": 1011.04,
+    "duration": 6.4
+  },
+  {
+    "text": "so it's almost 700 lines of code for",
+    "start": 1014.32,
+    "duration": 6.8
+  },
+  {
+    "text": "like this little example and 200 of that",
+    "start": 1017.44,
+    "duration": 6.56
+  },
+  {
+    "text": "is just movement code.",
+    "start": 1021.12,
+    "duration": 5.439
+  },
+  {
+    "text": "So if we look at let's think about like",
+    "start": 1024.0,
+    "duration": 4.319
+  },
+  {
+    "text": "how we could do this in scene graph. Can",
+    "start": 1026.559,
+    "duration": 4.161
+  },
+  {
+    "text": "we make it easier? Can we make it more",
+    "start": 1028.319,
+    "duration": 5.921
+  },
+  {
+    "text": "extendable? Can we just make it quicker?",
+    "start": 1030.72,
+    "duration": 6.64
+  },
+  {
+    "text": "Less code? How can we do it? Uh, so",
+    "start": 1034.24,
+    "duration": 5.439
+  },
+  {
+    "text": "first we need a way to spawn all of our",
+    "start": 1037.36,
+    "duration": 4.479
+  },
+  {
+    "text": "invaders.",
+    "start": 1039.679,
+    "duration": 3.841
+  },
+  {
+    "text": "And then we need to set up our invaders",
+    "start": 1041.839,
+    "duration": 4.24
+  },
+  {
+    "text": "so they have collision detection. Uh, we",
+    "start": 1043.52,
+    "duration": 6.0
+  },
+  {
+    "text": "can have a player ship now and we can",
+    "start": 1046.079,
+    "duration": 6.401
+  },
+  {
+    "text": "have that player ship fire missiles.",
+    "start": 1049.52,
+    "duration": 7.12
+  },
+  {
+    "text": "So, our invader manager is a prefab that",
+    "start": 1052.48,
+    "duration": 6.96
+  },
+  {
+    "text": "spawns our invaders as nested prefabs.",
+    "start": 1056.64,
+    "duration": 5.36
+  },
+  {
+    "text": "So, you can have as many layers deep as",
+    "start": 1059.44,
+    "duration": 5.119
+  },
+  {
+    "text": "you want of prefabs inside of prefabs.",
+    "start": 1062.0,
+    "duration": 5.679
+  },
+  {
+    "text": "So, this is super handy uh for just",
+    "start": 1064.559,
+    "duration": 4.881
+  },
+  {
+    "text": "being able to manage everything. Then",
+    "start": 1067.679,
+    "duration": 4.561
+  },
+  {
+    "text": "our our invaders need to animate. So, if",
+    "start": 1069.44,
+    "duration": 4.32
+  },
+  {
+    "text": "we march them back and forth and move",
+    "start": 1072.24,
+    "duration": 3.84
+  },
+  {
+    "text": "them down, we're only moving the the",
+    "start": 1073.76,
+    "duration": 5.76
+  },
+  {
+    "text": "invader manager. That's the parent. And",
+    "start": 1076.08,
+    "duration": 5.36
+  },
+  {
+    "text": "we only move one entity here and then",
+    "start": 1079.52,
+    "duration": 3.6
+  },
+  {
+    "text": "all the children just move along with",
+    "start": 1081.44,
+    "duration": 3.76
+  },
+  {
+    "text": "it. So we only have to do that animation",
+    "start": 1083.12,
+    "duration": 4.24
+  },
+  {
+    "text": "in one spot for moving them left and",
+    "start": 1085.2,
+    "duration": 4.64
+  },
+  {
+    "text": "right and down.",
+    "start": 1087.36,
+    "duration": 4.72
+  },
+  {
+    "text": "Uh so for the code for that, this is how",
+    "start": 1089.84,
+    "duration": 4.4
+  },
+  {
+    "text": "we spawn the invaders. We just loop",
+    "start": 1092.08,
+    "duration": 4.959
+  },
+  {
+    "text": "through and then spo spawn the um number",
+    "start": 1094.24,
+    "duration": 5.439
+  },
+  {
+    "text": "of columns and rows that we need and",
+    "start": 1097.039,
+    "duration": 5.041
+  },
+  {
+    "text": "again add them to the invader manager",
+    "start": 1099.679,
+    "duration": 5.36
+  },
+  {
+    "text": "and set their transform. And all these",
+    "start": 1102.08,
+    "duration": 6.4
+  },
+  {
+    "text": "fields are exposed in in the details",
+    "start": 1105.039,
+    "duration": 5.441
+  },
+  {
+    "text": "panel. So we can quickly tune how many",
+    "start": 1108.48,
+    "duration": 3.68
+  },
+  {
+    "text": "we need. If we want, you know, 20",
+    "start": 1110.48,
+    "duration": 4.16
+  },
+  {
+    "text": "invaders, we want five rows, six rows,",
+    "start": 1112.16,
+    "duration": 4.8
+  },
+  {
+    "text": "we can just change that up. Where if you",
+    "start": 1114.64,
+    "duration": 4.8
+  },
+  {
+    "text": "to do this with creative devices, you're",
+    "start": 1116.96,
+    "duration": 4.32
+  },
+  {
+    "text": "duplicating a bunch of stuff in the",
+    "start": 1119.44,
+    "duration": 4.239
+  },
+  {
+    "text": "world or deleting stuff. So it's this is",
+    "start": 1121.28,
+    "duration": 4.24
+  },
+  {
+    "text": "a lot more manageable, easier, and",
+    "start": 1123.679,
+    "duration": 4.481
+  },
+  {
+    "text": "quicker to do.",
+    "start": 1125.52,
+    "duration": 5.6
+  },
+  {
+    "text": "So our invaders, they need to have",
+    "start": 1128.16,
+    "duration": 4.96
+  },
+  {
+    "text": "collision detection.",
+    "start": 1131.12,
+    "duration": 4.96
+  },
+  {
+    "text": "Um, they also need",
+    "start": 1133.12,
+    "duration": 6.88
+  },
+  {
+    "text": "to animate and they have to explode when",
+    "start": 1136.08,
+    "duration": 5.36
+  },
+  {
+    "text": "they hit the ground and then they're",
+    "start": 1140.0,
+    "duration": 2.96
+  },
+  {
+    "text": "going to remove themselves from the",
+    "start": 1141.44,
+    "duration": 4.64
+  },
+  {
+    "text": "world when they're when they're dead.",
+    "start": 1142.96,
+    "duration": 6.48
+  },
+  {
+    "text": "Uh, so this is the method for when the",
+    "start": 1146.08,
+    "duration": 5.76
+  },
+  {
+    "text": "invader gets hit by a missile, we get",
+    "start": 1149.44,
+    "duration": 4.56
+  },
+  {
+    "text": "the simulation entity because now we're",
+    "start": 1151.84,
+    "duration": 5.44
+  },
+  {
+    "text": "going to instead of being a child of the",
+    "start": 1154.0,
+    "duration": 5.679
+  },
+  {
+    "text": "invader manager, we need to reparent it",
+    "start": 1157.28,
+    "duration": 4.72
+  },
+  {
+    "text": "to the simulation entity. So we can",
+    "start": 1159.679,
+    "duration": 5.281
+  },
+  {
+    "text": "animate it independently of the so it's",
+    "start": 1162.0,
+    "duration": 5.039
+  },
+  {
+    "text": "not mar so it will no longer march back",
+    "start": 1164.96,
+    "duration": 3.76
+  },
+  {
+    "text": "and forth and needs to animate falling",
+    "start": 1167.039,
+    "duration": 5.281
+  },
+  {
+    "text": "to the ground. And then we get our VFX",
+    "start": 1168.72,
+    "duration": 5.44
+  },
+  {
+    "text": "component and sound component. So you",
+    "start": 1172.32,
+    "duration": 3.44
+  },
+  {
+    "text": "get some feedback when they're when",
+    "start": 1174.16,
+    "duration": 2.96
+  },
+  {
+    "text": "they're hit. They'll play a particle and",
+    "start": 1175.76,
+    "duration": 4.4
+  },
+  {
+    "text": "they'll play a sound.",
+    "start": 1177.12,
+    "duration": 5.12
+  },
+  {
+    "text": "So to get them to fall to the ground is",
+    "start": 1180.16,
+    "duration": 4.56
+  },
+  {
+    "text": "super easy. You just set I just set one",
+    "start": 1182.24,
+    "duration": 5.679
+  },
+  {
+    "text": "key frame that moves them down and uh",
+    "start": 1184.72,
+    "duration": 4.8
+  },
+  {
+    "text": "then",
+    "start": 1187.919,
+    "duration": 3.521
+  },
+  {
+    "text": "uh get the key frame movement component",
+    "start": 1189.52,
+    "duration": 4.56
+  },
+  {
+    "text": "and just call play on it.",
+    "start": 1191.44,
+    "duration": 5.84
+  },
+  {
+    "text": "Uh so for our player ship um our player",
+    "start": 1194.08,
+    "duration": 5.36
+  },
+  {
+    "text": "ship needs to move left and right and it",
+    "start": 1197.28,
+    "duration": 4.88
+  },
+  {
+    "text": "needs to fire missiles. Pretty simple.",
+    "start": 1199.44,
+    "duration": 5.92
+  },
+  {
+    "text": "Um so with scene graph we now have",
+    "start": 1202.16,
+    "duration": 7.04
+  },
+  {
+    "text": "access to the movement tick. Um so we",
+    "start": 1205.36,
+    "duration": 6.08
+  },
+  {
+    "text": "have access to tick events and delta",
+    "start": 1209.2,
+    "duration": 5.52
+  },
+  {
+    "text": "time so we can smoothly translate the",
+    "start": 1211.44,
+    "duration": 5.92
+  },
+  {
+    "text": "ship left and right. Um the most the",
+    "start": 1214.72,
+    "duration": 4.48
+  },
+  {
+    "text": "important thing about this one is uh",
+    "start": 1217.36,
+    "duration": 3.679
+  },
+  {
+    "text": "just using",
+    "start": 1219.2,
+    "duration": 4.64
+  },
+  {
+    "text": "um local transform because we don't we",
+    "start": 1221.039,
+    "duration": 4.241
+  },
+  {
+    "text": "can spawn our ship anywhere in the world",
+    "start": 1223.84,
+    "duration": 2.959
+  },
+  {
+    "text": "and we don't care and it will still work",
+    "start": 1225.28,
+    "duration": 3.44
+  },
+  {
+    "text": "because we're just translating it in",
+    "start": 1226.799,
+    "duration": 4.961
+  },
+  {
+    "text": "local space for it.",
+    "start": 1228.72,
+    "duration": 7.68
+  },
+  {
+    "text": "Um, and then we get our uh we get a",
+    "start": 1231.76,
+    "duration": 7.039
+  },
+  {
+    "text": "child entity from the player ship. And",
+    "start": 1236.4,
+    "duration": 4.72
+  },
+  {
+    "text": "that is just a empty entity that only",
+    "start": 1238.799,
+    "duration": 4.801
+  },
+  {
+    "text": "has a transform component on it. And we",
+    "start": 1241.12,
+    "duration": 5.6
+  },
+  {
+    "text": "use that as the it's at the top of the",
+    "start": 1243.6,
+    "duration": 5.52
+  },
+  {
+    "text": "ship. So we use that transform to know",
+    "start": 1246.72,
+    "duration": 4.959
+  },
+  {
+    "text": "where to spawn the missile from. So it's",
+    "start": 1249.12,
+    "duration": 5.12
+  },
+  {
+    "text": "spawning from the top of the ship. And",
+    "start": 1251.679,
+    "duration": 5.601
+  },
+  {
+    "text": "then we get uh we spawn our missile. We",
+    "start": 1254.24,
+    "duration": 6.16
+  },
+  {
+    "text": "add it to the simulation entity. We set",
+    "start": 1257.28,
+    "duration": 5.519
+  },
+  {
+    "text": "its transform and we play a sound when",
+    "start": 1260.4,
+    "duration": 4.8
+  },
+  {
+    "text": "we fire.",
+    "start": 1262.799,
+    "duration": 4.88
+  },
+  {
+    "text": "So our player missile is really easy. It",
+    "start": 1265.2,
+    "duration": 4.64
+  },
+  {
+    "text": "just animates going up and it has",
+    "start": 1267.679,
+    "duration": 5.601
+  },
+  {
+    "text": "collision detection.",
+    "start": 1269.84,
+    "duration": 6.64
+  },
+  {
+    "text": "So for uh we get our mesh component here",
+    "start": 1273.28,
+    "duration": 5.36
+  },
+  {
+    "text": "and we",
+    "start": 1276.48,
+    "duration": 5.04
+  },
+  {
+    "text": "um we're waiting for the entity entered",
+    "start": 1278.64,
+    "duration": 4.48
+  },
+  {
+    "text": "event. So here we're just waiting for",
+    "start": 1281.52,
+    "duration": 4.48
+  },
+  {
+    "text": "that collision to happen. So like that",
+    "start": 1283.12,
+    "duration": 4.88
+  },
+  {
+    "text": "code will just wait for that and then",
+    "start": 1286.0,
+    "duration": 4.88
+  },
+  {
+    "text": "once that collision happens then we uh",
+    "start": 1288.0,
+    "duration": 5.76
+  },
+  {
+    "text": "call the logic for the missile hit and",
+    "start": 1290.88,
+    "duration": 5.2
+  },
+  {
+    "text": "we remove the missile from from the",
+    "start": 1293.76,
+    "duration": 4.48
+  },
+  {
+    "text": "scene.",
+    "start": 1296.08,
+    "duration": 5.599
+  },
+  {
+    "text": "We also have a a floor. Uh it's just a",
+    "start": 1298.24,
+    "duration": 6.4
+  },
+  {
+    "text": "plane that's invisible that's just there",
+    "start": 1301.679,
+    "duration": 5.761
+  },
+  {
+    "text": "for the collision detection for when a",
+    "start": 1304.64,
+    "duration": 7.279
+  },
+  {
+    "text": "invader falls, hits the floor. Um we can",
+    "start": 1307.44,
+    "duration": 7.2
+  },
+  {
+    "text": "get that uh that entity entered event",
+    "start": 1311.919,
+    "duration": 4.64
+  },
+  {
+    "text": "from the floor.",
+    "start": 1314.64,
+    "duration": 3.76
+  },
+  {
+    "text": "So taking a look at it all together, we",
+    "start": 1316.559,
+    "duration": 3.36
+  },
+  {
+    "text": "can move our ship, we can fire our",
+    "start": 1318.4,
+    "duration": 3.84
+  },
+  {
+    "text": "missiles, our invaders are marching back",
+    "start": 1319.919,
+    "duration": 4.24
+  },
+  {
+    "text": "and forth, we hit them, they fall to the",
+    "start": 1322.24,
+    "duration": 4.319
+  },
+  {
+    "text": "ground. They can be any height. We don't",
+    "start": 1324.159,
+    "duration": 4.961
+  },
+  {
+    "text": "care. Like we can just wait for that",
+    "start": 1326.559,
+    "duration": 6.161
+  },
+  {
+    "text": "collision event. Uh then they when they",
+    "start": 1329.12,
+    "duration": 5.679
+  },
+  {
+    "text": "hit the ground, they explode. Um and",
+    "start": 1332.72,
+    "duration": 5.76
+  },
+  {
+    "text": "then like with our with our animation uh",
+    "start": 1334.799,
+    "duration": 5.681
+  },
+  {
+    "text": "on the invader manager, we can speed",
+    "start": 1338.48,
+    "duration": 4.319
+  },
+  {
+    "text": "them up and do whatever we want. That's",
+    "start": 1340.48,
+    "duration": 5.52
+  },
+  {
+    "text": "really really simple, really quick uh to",
+    "start": 1342.799,
+    "duration": 5.201
+  },
+  {
+    "text": "do. That was a lot less code and like",
+    "start": 1346.0,
+    "duration": 3.919
+  },
+  {
+    "text": "five prefabs and a few components,",
+    "start": 1348.0,
+    "duration": 5.6
+  },
+  {
+    "text": "right? So to wrap up, building with",
+    "start": 1349.919,
+    "duration": 5.201
+  },
+  {
+    "text": "scene graph is more efficient when",
+    "start": 1353.6,
+    "duration": 4.8
+  },
+  {
+    "text": "leveraging components and prefabs.",
+    "start": 1355.12,
+    "duration": 5.2
+  },
+  {
+    "text": "Collision detection unlocks new gameplay",
+    "start": 1358.4,
+    "duration": 4.0
+  },
+  {
+    "text": "possibilities.",
+    "start": 1360.32,
+    "duration": 4.479
+  },
+  {
+    "text": "Uh by reducing device duplication,",
+    "start": 1362.4,
+    "duration": 4.639
+  },
+  {
+    "text": "Scraph streamlines workflows and lowers",
+    "start": 1364.799,
+    "duration": 5.441
+  },
+  {
+    "text": "the risk of mistakes.",
+    "start": 1367.039,
+    "duration": 6.161
+  },
+  {
+    "text": "Beta June 7th. Please try it out and",
+    "start": 1370.24,
+    "duration": 5.52
+  },
+  {
+    "text": "give us feedback. Yes. I mean, we're all",
+    "start": 1373.2,
+    "duration": 4.28
+  },
+  {
+    "text": "excited.",
+    "start": 1375.76,
+    "duration": 3.74
+  },
+  {
+    "text": "[applause]",
+    "start": 1377.48,
+    "duration": 2.02
+  },
+  {
+    "text": "It it took way too long. But uh",
+    "start": 1382.32,
+    "duration": 3.04
+  },
+  {
+    "text": "[laughter]",
+    "start": 1384.685,
+    "duration": 2.515
+  },
+  {
+    "text": "that's it. If like anybody has any other",
+    "start": 1385.36,
+    "duration": 5.679
+  },
+  {
+    "text": "questions, I'll be at our uh UEFN booth.",
+    "start": 1387.2,
+    "duration": 6.0
+  },
+  {
+    "text": "So feel free to drop by and come ask",
+    "start": 1391.039,
+    "duration": 6.147
+  },
+  {
+    "text": "questions. Thank you all. [applause]",
+    "start": 1393.2,
+    "duration": 3.986
+  }
+]

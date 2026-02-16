@@ -1,0 +1,2367 @@
+[
+  {
+    "text": "Good morning.",
+    "start": 1.52,
+    "duration": 4.72
+  },
+  {
+    "text": "Um, thank you for coming. Um, my name is",
+    "start": 3.52,
+    "duration": 5.92
+  },
+  {
+    "text": "Alysa Forbes. I work at CCP Games London",
+    "start": 6.24,
+    "duration": 6.319
+  },
+  {
+    "text": "as lead core tech engineer. Um, uh,",
+    "start": 9.44,
+    "duration": 4.64
+  },
+  {
+    "text": "thank you for waking up early to come to",
+    "start": 12.559,
+    "duration": 3.841
+  },
+  {
+    "text": "this talk. Um, I'm going to speaking",
+    "start": 14.08,
+    "duration": 6.959
+  },
+  {
+    "text": "about uh, wall hacks um, and why we care",
+    "start": 16.4,
+    "duration": 7.52
+  },
+  {
+    "text": "about them at CCP L uh, London and our",
+    "start": 21.039,
+    "duration": 5.121
+  },
+  {
+    "text": "game and",
+    "start": 23.92,
+    "duration": 4.64
+  },
+  {
+    "text": "um, how we solve them on the server",
+    "start": 26.16,
+    "duration": 5.039
+  },
+  {
+    "text": "side.",
+    "start": 28.56,
+    "duration": 2.639
+  },
+  {
+    "text": "Click it. Click. Okay. So, I'm going to",
+    "start": 34.0,
+    "duration": 5.12
+  },
+  {
+    "text": "talk about what a whole hack is exactly.",
+    "start": 37.04,
+    "duration": 4.0
+  },
+  {
+    "text": "Uh why they happen, why we were",
+    "start": 39.12,
+    "duration": 3.599
+  },
+  {
+    "text": "motivated to sol prevent them in our",
+    "start": 41.04,
+    "duration": 3.839
+  },
+  {
+    "text": "game. Then I'm going to cover our",
+    "start": 42.719,
+    "duration": 3.84
+  },
+  {
+    "text": "approach to solving the problem before",
+    "start": 44.879,
+    "duration": 3.68
+  },
+  {
+    "text": "moving into like a deeper dive into the",
+    "start": 46.559,
+    "duration": 4.48
+  },
+  {
+    "text": "implementation. Finally, I'm going to",
+    "start": 48.559,
+    "duration": 4.32
+  },
+  {
+    "text": "wrap up with some remarks on how well it",
+    "start": 51.039,
+    "duration": 5.761
+  },
+  {
+    "text": "went and some performance uh data before",
+    "start": 52.879,
+    "duration": 7.68
+  },
+  {
+    "text": "take any questions you might have.",
+    "start": 56.8,
+    "duration": 3.759
+  },
+  {
+    "text": "So, what is the wall hack exactly? Uh,",
+    "start": 63.92,
+    "duration": 5.76
+  },
+  {
+    "text": "we at CCB London are working on E",
+    "start": 67.2,
+    "duration": 6.239
+  },
+  {
+    "text": "Vanguard, um, an MMO FPS where action",
+    "start": 69.68,
+    "duration": 7.36
+  },
+  {
+    "text": "takes place in a series of alien worlds.",
+    "start": 73.439,
+    "duration": 5.841
+  },
+  {
+    "text": "Um, our level designers work hard",
+    "start": 77.04,
+    "duration": 4.16
+  },
+  {
+    "text": "creating environments for players to",
+    "start": 79.28,
+    "duration": 4.24
+  },
+  {
+    "text": "explore and fight in, thinking about",
+    "start": 81.2,
+    "duration": 4.64
+  },
+  {
+    "text": "cover and sight lines, um, hiding",
+    "start": 83.52,
+    "duration": 5.36
+  },
+  {
+    "text": "places, loot crates, generally create",
+    "start": 85.84,
+    "duration": 5.599
+  },
+  {
+    "text": "tactically interesting encounters. Wall",
+    "start": 88.88,
+    "duration": 4.72
+  },
+  {
+    "text": "hacks essentially undo all that work,",
+    "start": 91.439,
+    "duration": 4.401
+  },
+  {
+    "text": "uh, exploiting information on the client",
+    "start": 93.6,
+    "duration": 4.08
+  },
+  {
+    "text": "that the player shouldn't know about,",
+    "start": 95.84,
+    "duration": 3.599
+  },
+  {
+    "text": "effectively giving cheaters the power to",
+    "start": 97.68,
+    "duration": 4.16
+  },
+  {
+    "text": "see through walls.",
+    "start": 99.439,
+    "duration": 4.161
+  },
+  {
+    "text": "Um,",
+    "start": 101.84,
+    "duration": 4.319
+  },
+  {
+    "text": "here's an example of a simul hack in our",
+    "start": 103.6,
+    "duration": 5.44
+  },
+  {
+    "text": "game.",
+    "start": 106.159,
+    "duration": 4.96
+  },
+  {
+    "text": "Um, it's taken from a locally running",
+    "start": 109.04,
+    "duration": 6.719
+  },
+  {
+    "text": "instance and I've put uh in the player",
+    "start": 111.119,
+    "duration": 8.32
+  },
+  {
+    "text": "viewport um data that the client knows",
+    "start": 115.759,
+    "duration": 6.481
+  },
+  {
+    "text": "about about where enemies are. So, put",
+    "start": 119.439,
+    "duration": 6.0
+  },
+  {
+    "text": "enemy locations and distance and little",
+    "start": 122.24,
+    "duration": 5.92
+  },
+  {
+    "text": "green targets in their back. As you can",
+    "start": 125.439,
+    "duration": 7.281
+  },
+  {
+    "text": "see, kind of reveals",
+    "start": 128.16,
+    "duration": 7.36
+  },
+  {
+    "text": "where enemies are,",
+    "start": 132.72,
+    "duration": 7.12
+  },
+  {
+    "text": "giving players like an unfair advantage.",
+    "start": 135.52,
+    "duration": 7.2
+  },
+  {
+    "text": "Okay, so um to talk about how we fix the",
+    "start": 139.84,
+    "duration": 4.32
+  },
+  {
+    "text": "problem, I'm going to a little go into a",
+    "start": 142.72,
+    "duration": 3.599
+  },
+  {
+    "text": "little bit on why it happens. Um to",
+    "start": 144.16,
+    "duration": 4.56
+  },
+  {
+    "text": "cover some basics, uh the architecture",
+    "start": 146.319,
+    "duration": 4.161
+  },
+  {
+    "text": "of a multiplayer game like ours is that",
+    "start": 148.72,
+    "duration": 4.159
+  },
+  {
+    "text": "there exists a central server which",
+    "start": 150.48,
+    "duration": 4.24
+  },
+  {
+    "text": "contains the game state. it knows",
+    "start": 152.879,
+    "duration": 3.281
+  },
+  {
+    "text": "everything about the game and",
+    "start": 154.72,
+    "duration": 3.04
+  },
+  {
+    "text": "coordinates the action amongst multiple",
+    "start": 156.16,
+    "duration": 5.359
+  },
+  {
+    "text": "game clients. Um the process by which",
+    "start": 157.76,
+    "duration": 5.199
+  },
+  {
+    "text": "clients kept up to date about what's",
+    "start": 161.519,
+    "duration": 2.881
+  },
+  {
+    "text": "happening in the game is called",
+    "start": 162.959,
+    "duration": 4.081
+  },
+  {
+    "text": "replication. For example, to simplify a",
+    "start": 164.4,
+    "duration": 4.4
+  },
+  {
+    "text": "little bit, when a client joins the",
+    "start": 167.04,
+    "duration": 3.52
+  },
+  {
+    "text": "game, an actor representing that player",
+    "start": 168.8,
+    "duration": 3.519
+  },
+  {
+    "text": "is replicated across all the clients in",
+    "start": 170.56,
+    "duration": 3.44
+  },
+  {
+    "text": "the game. And as they move around the",
+    "start": 172.319,
+    "duration": 4.161
+  },
+  {
+    "text": "world, their position and other",
+    "start": 174.0,
+    "duration": 4.64
+  },
+  {
+    "text": "attributes are continually replicated as",
+    "start": 176.48,
+    "duration": 4.08
+  },
+  {
+    "text": "well. And this goes for the enemies,",
+    "start": 178.64,
+    "duration": 4.16
+  },
+  {
+    "text": "loot crates, and other game objects in",
+    "start": 180.56,
+    "duration": 4.0
+  },
+  {
+    "text": "the world. and is essentially what",
+    "start": 182.8,
+    "duration": 3.2
+  },
+  {
+    "text": "drives the immersive multiplayer",
+    "start": 184.56,
+    "duration": 4.319
+  },
+  {
+    "text": "experience. Um",
+    "start": 186.0,
+    "duration": 5.76
+  },
+  {
+    "text": "um when an actor should exist on the",
+    "start": 188.879,
+    "duration": 4.801
+  },
+  {
+    "text": "client and receive updates, we call it",
+    "start": 191.76,
+    "duration": 4.559
+  },
+  {
+    "text": "relevant for that client. Uh common",
+    "start": 193.68,
+    "duration": 5.76
+  },
+  {
+    "text": "relevancy metrics uh used by Unreal's",
+    "start": 196.319,
+    "duration": 5.761
+  },
+  {
+    "text": "replication system are to use distance",
+    "start": 199.44,
+    "duration": 4.799
+  },
+  {
+    "text": "from the player. For example, each actor",
+    "start": 202.08,
+    "duration": 4.799
+  },
+  {
+    "text": "has like a net k distance outside of",
+    "start": 204.239,
+    "duration": 4.881
+  },
+  {
+    "text": "which that actor will stop being",
+    "start": 206.879,
+    "duration": 4.401
+  },
+  {
+    "text": "replicated for that client. And there",
+    "start": 209.12,
+    "duration": 4.08
+  },
+  {
+    "text": "are other systems such as grid",
+    "start": 211.28,
+    "duration": 4.879
+  },
+  {
+    "text": "spatialization which apply that concept",
+    "start": 213.2,
+    "duration": 6.8
+  },
+  {
+    "text": "to optimize for open worlds and actors.",
+    "start": 216.159,
+    "duration": 6.401
+  },
+  {
+    "text": "Um what these systems don't take into",
+    "start": 220.0,
+    "duration": 6.159
+  },
+  {
+    "text": "account is what a player can see or what",
+    "start": 222.56,
+    "duration": 5.84
+  },
+  {
+    "text": "they should be able to see and hear. So",
+    "start": 226.159,
+    "duration": 4.64
+  },
+  {
+    "text": "they expose that information unnecessary",
+    "start": 228.4,
+    "duration": 4.32
+  },
+  {
+    "text": "to the client.",
+    "start": 230.799,
+    "duration": 4.641
+  },
+  {
+    "text": "So to fix this",
+    "start": 232.72,
+    "duration": 5.68
+  },
+  {
+    "text": "uh we fix it on the server side by only",
+    "start": 235.44,
+    "duration": 5.28
+  },
+  {
+    "text": "replicating what the player should be",
+    "start": 238.4,
+    "duration": 4.399
+  },
+  {
+    "text": "able to see what they should be able to",
+    "start": 240.72,
+    "duration": 4.56
+  },
+  {
+    "text": "hear. Uh the system was originally",
+    "start": 242.799,
+    "duration": 4.561
+  },
+  {
+    "text": "conceived as simply visibility based",
+    "start": 245.28,
+    "duration": 3.599
+  },
+  {
+    "text": "replication.",
+    "start": 247.36,
+    "duration": 3.92
+  },
+  {
+    "text": "Um, and we called it fog of war because",
+    "start": 248.879,
+    "duration": 4.481
+  },
+  {
+    "text": "it, well, it was catchy and because it",
+    "start": 251.28,
+    "duration": 3.679
+  },
+  {
+    "text": "described more generally the approach of",
+    "start": 253.36,
+    "duration": 3.999
+  },
+  {
+    "text": "using environmental factors to limit",
+    "start": 254.959,
+    "duration": 6.361
+  },
+  {
+    "text": "what the client should know about.",
+    "start": 257.359,
+    "duration": 3.961
+  },
+  {
+    "text": "Um, taking visibility first, um, the",
+    "start": 263.36,
+    "duration": 5.119
+  },
+  {
+    "text": "question becomes of all the game objects",
+    "start": 266.72,
+    "duration": 4.16
+  },
+  {
+    "text": "in the world, which ones does the player",
+    "start": 268.479,
+    "duration": 4.321
+  },
+  {
+    "text": "have line of sight on? So we use",
+    "start": 270.88,
+    "duration": 5.28
+  },
+  {
+    "text": "serverside line traces to establish line",
+    "start": 272.8,
+    "duration": 5.76
+  },
+  {
+    "text": "of sight. Uh by continually tracing",
+    "start": 276.16,
+    "duration": 6.0
+  },
+  {
+    "text": "between the player and other actors and",
+    "start": 278.56,
+    "duration": 5.68
+  },
+  {
+    "text": "finding out where traces get blocked, we",
+    "start": 282.16,
+    "duration": 4.4
+  },
+  {
+    "text": "can determine whether that actor should",
+    "start": 284.24,
+    "duration": 5.519
+  },
+  {
+    "text": "be replicated for player. Um the image",
+    "start": 286.56,
+    "duration": 6.16
+  },
+  {
+    "text": "here is a uh screenshot showing some fog",
+    "start": 289.759,
+    "duration": 5.921
+  },
+  {
+    "text": "of war debug visuals around an NPC. Uh",
+    "start": 292.72,
+    "duration": 3.919
+  },
+  {
+    "text": "hopefully you can make out the little",
+    "start": 295.68,
+    "duration": 3.2
+  },
+  {
+    "text": "green dots in the image. They show the",
+    "start": 296.639,
+    "duration": 4.881
+  },
+  {
+    "text": "location of uh where line traces are",
+    "start": 298.88,
+    "duration": 5.599
+  },
+  {
+    "text": "being made around the NPC to equivalent",
+    "start": 301.52,
+    "duration": 6.399
+  },
+  {
+    "text": "points around the player. Um we make",
+    "start": 304.479,
+    "duration": 6.241
+  },
+  {
+    "text": "traces on the visibility channel and uh",
+    "start": 307.919,
+    "duration": 4.961
+  },
+  {
+    "text": "they run asynchronously to not block the",
+    "start": 310.72,
+    "duration": 4.96
+  },
+  {
+    "text": "game thread and we use simple test",
+    "start": 312.88,
+    "duration": 6.4
+  },
+  {
+    "text": "traces because we don't care about what",
+    "start": 315.68,
+    "duration": 7.2
+  },
+  {
+    "text": "uh blocks the trace only whether it is",
+    "start": 319.28,
+    "duration": 6.08
+  },
+  {
+    "text": "um if any line traces are blocked.",
+    "start": 322.88,
+    "duration": 3.84
+  },
+  {
+    "text": "Sorry. If any line traces are not",
+    "start": 325.36,
+    "duration": 3.279
+  },
+  {
+    "text": "blocked, then line of sight is",
+    "start": 326.72,
+    "duration": 5.12
+  },
+  {
+    "text": "established and the NPC is considered",
+    "start": 328.639,
+    "duration": 6.161
+  },
+  {
+    "text": "unfoged relative to the player and vice",
+    "start": 331.84,
+    "duration": 6.079
+  },
+  {
+    "text": "versa if it's a player. Um, for example,",
+    "start": 334.8,
+    "duration": 5.839
+  },
+  {
+    "text": "since all the line traces here are not",
+    "start": 337.919,
+    "duration": 5.761
+  },
+  {
+    "text": "uh blocked, the NPC is is uh being",
+    "start": 340.639,
+    "duration": 6.041
+  },
+  {
+    "text": "replicated.",
+    "start": 343.68,
+    "duration": 3.0
+  },
+  {
+    "text": "And here's a short video showing this in",
+    "start": 349.039,
+    "duration": 4.16
+  },
+  {
+    "text": "action. So, there are some NPCs hiding",
+    "start": 350.88,
+    "duration": 4.319
+  },
+  {
+    "text": "in this uh geometry.",
+    "start": 353.199,
+    "duration": 4.241
+  },
+  {
+    "text": "and um marked with bright red line to",
+    "start": 355.199,
+    "duration": 4.481
+  },
+  {
+    "text": "show when they're being replicated.",
+    "start": 357.44,
+    "duration": 6.0
+  },
+  {
+    "text": "And as we glimpse them across the",
+    "start": 359.68,
+    "duration": 5.28
+  },
+  {
+    "text": "halfpipe through the window, we can see",
+    "start": 363.44,
+    "duration": 3.759
+  },
+  {
+    "text": "that the actors are appearing on the",
+    "start": 364.96,
+    "duration": 3.76
+  },
+  {
+    "text": "client,",
+    "start": 367.199,
+    "duration": 3.84
+  },
+  {
+    "text": "but when they move out of view, they",
+    "start": 368.72,
+    "duration": 4.24
+  },
+  {
+    "text": "stop being replicated.",
+    "start": 371.039,
+    "duration": 3.6
+  },
+  {
+    "text": "So, it kind of keeps their position",
+    "start": 372.96,
+    "duration": 6.2
+  },
+  {
+    "text": "hidden unless we can see them.",
+    "start": 374.639,
+    "duration": 4.521
+  },
+  {
+    "text": "So what are the what do we have to",
+    "start": 387.36,
+    "duration": 4.0
+  },
+  {
+    "text": "consider when designing the system? The",
+    "start": 389.6,
+    "duration": 4.64
+  },
+  {
+    "text": "the two main concerns are fidelity and",
+    "start": 391.36,
+    "duration": 4.72
+  },
+  {
+    "text": "performance. So there are a couple of",
+    "start": 394.24,
+    "duration": 3.84
+  },
+  {
+    "text": "ways that the system can fail. Um, it",
+    "start": 396.08,
+    "duration": 3.839
+  },
+  {
+    "text": "can replicate actors that the player",
+    "start": 398.08,
+    "duration": 3.6
+  },
+  {
+    "text": "shouldn't know about, which rewards",
+    "start": 399.919,
+    "duration": 4.161
+  },
+  {
+    "text": "cheaters, or it can fail by not",
+    "start": 401.68,
+    "duration": 4.88
+  },
+  {
+    "text": "replicating actors that the player",
+    "start": 404.08,
+    "duration": 4.239
+  },
+  {
+    "text": "should be able to see or replicating",
+    "start": 406.56,
+    "duration": 4.639
+  },
+  {
+    "text": "them late, which uh is kind of gameplay",
+    "start": 408.319,
+    "duration": 5.841
+  },
+  {
+    "text": "destroying. Um,",
+    "start": 411.199,
+    "duration": 5.12
+  },
+  {
+    "text": "uh, which so it's gameplay for",
+    "start": 414.16,
+    "duration": 4.24
+  },
+  {
+    "text": "everybody.",
+    "start": 416.319,
+    "duration": 6.32
+  },
+  {
+    "text": "Um, popping joke. Um,",
+    "start": 418.4,
+    "duration": 6.56
+  },
+  {
+    "text": "actors are not points, they have volume.",
+    "start": 422.639,
+    "duration": 5.28
+  },
+  {
+    "text": "an actor standing partially obscured by",
+    "start": 424.96,
+    "duration": 5.359
+  },
+  {
+    "text": "um scenery might happen to have a trace",
+    "start": 427.919,
+    "duration": 5.521
+  },
+  {
+    "text": "point blocked and incorrectly fog that",
+    "start": 430.319,
+    "duration": 6.401
+  },
+  {
+    "text": "actor. Um but it would be impractical to",
+    "start": 433.44,
+    "duration": 4.96
+  },
+  {
+    "text": "trace across a whole area of an actor.",
+    "start": 436.72,
+    "duration": 4.96
+  },
+  {
+    "text": "So we have to choose points carefully to",
+    "start": 438.4,
+    "duration": 7.12
+  },
+  {
+    "text": "kind of um ensure coverage while not uh",
+    "start": 441.68,
+    "duration": 5.519
+  },
+  {
+    "text": "um being ridiculous the number of traces",
+    "start": 445.52,
+    "duration": 4.799
+  },
+  {
+    "text": "we're making. Um the footage I've shown",
+    "start": 447.199,
+    "duration": 5.361
+  },
+  {
+    "text": "has shown a pattern where we establish",
+    "start": 450.319,
+    "duration": 4.801
+  },
+  {
+    "text": "the testing where we have a few widely",
+    "start": 452.56,
+    "duration": 4.56
+  },
+  {
+    "text": "spaced couple of widely spaced points",
+    "start": 455.12,
+    "duration": 5.76
+  },
+  {
+    "text": "and points clustered in the middle which",
+    "start": 457.12,
+    "duration": 6.72
+  },
+  {
+    "text": "in practice tends to uh work for the",
+    "start": 460.88,
+    "duration": 7.28
+  },
+  {
+    "text": "kinds of levels that we have we have. Um",
+    "start": 463.84,
+    "duration": 6.079
+  },
+  {
+    "text": "replication lag is another important",
+    "start": 468.16,
+    "duration": 3.52
+  },
+  {
+    "text": "concern because when you begin",
+    "start": 469.919,
+    "duration": 4.481
+  },
+  {
+    "text": "replicating an actor to a client it",
+    "start": 471.68,
+    "duration": 4.239
+  },
+  {
+    "text": "doesn't appear immediately. there can be",
+    "start": 474.4,
+    "duration": 5.04
+  },
+  {
+    "text": "a a lag of up to a second um which are",
+    "start": 475.919,
+    "duration": 6.881
+  },
+  {
+    "text": "again great great popin.",
+    "start": 479.44,
+    "duration": 5.84
+  },
+  {
+    "text": "On the flip side of fidelity is server",
+    "start": 482.8,
+    "duration": 5.28
+  },
+  {
+    "text": "performance. Um like if you think about",
+    "start": 485.28,
+    "duration": 5.599
+  },
+  {
+    "text": "a fully loaded server with um 18 players",
+    "start": 488.08,
+    "duration": 5.2
+  },
+  {
+    "text": "and 200 game objects, that's like",
+    "start": 490.879,
+    "duration": 4.88
+  },
+  {
+    "text": "thousands of of pairs. And if you",
+    "start": 493.28,
+    "duration": 4.8
+  },
+  {
+    "text": "multiply that by number by say eight or",
+    "start": 495.759,
+    "duration": 5.84
+  },
+  {
+    "text": "nine traces per pair, that would quickly",
+    "start": 498.08,
+    "duration": 5.839
+  },
+  {
+    "text": "overwhelm the server. And we aim to hit",
+    "start": 501.599,
+    "duration": 5.04
+  },
+  {
+    "text": "60 frames per second on the server. So",
+    "start": 503.919,
+    "duration": 4.56
+  },
+  {
+    "text": "that's uh we need to try and think about",
+    "start": 506.639,
+    "duration": 5.201
+  },
+  {
+    "text": "how to avoid that.",
+    "start": 508.479,
+    "duration": 6.48
+  },
+  {
+    "text": "And we also need to replicate audio. So",
+    "start": 511.84,
+    "duration": 4.559
+  },
+  {
+    "text": "we want to be able to hear players we",
+    "start": 514.959,
+    "duration": 3.681
+  },
+  {
+    "text": "can't necessarily see. And we want to",
+    "start": 516.399,
+    "duration": 3.841
+  },
+  {
+    "text": "make sure that teammates are still",
+    "start": 518.64,
+    "duration": 6.839
+  },
+  {
+    "text": "unfoged relevant to one another. Um",
+    "start": 520.24,
+    "duration": 5.239
+  },
+  {
+    "text": "um so the first thing to notice we",
+    "start": 525.92,
+    "duration": 2.72
+  },
+  {
+    "text": "obviously don't need to perform a line",
+    "start": 527.519,
+    "duration": 4.161
+  },
+  {
+    "text": "of sight check every frame. Um",
+    "start": 528.64,
+    "duration": 4.879
+  },
+  {
+    "text": "um we can exploit that closer actors",
+    "start": 531.68,
+    "duration": 3.68
+  },
+  {
+    "text": "probably require more fidelity because",
+    "start": 533.519,
+    "duration": 6.0
+  },
+  {
+    "text": "pop in would be more obvious and uh more",
+    "start": 535.36,
+    "duration": 6.32
+  },
+  {
+    "text": "distant actors they occupy a smaller",
+    "start": 539.519,
+    "duration": 4.32
+  },
+  {
+    "text": "radius on the screen. So we require",
+    "start": 541.68,
+    "duration": 5.599
+  },
+  {
+    "text": "fewer visibility points to uh establish",
+    "start": 543.839,
+    "duration": 6.081
+  },
+  {
+    "text": "line of sight. We can also be more",
+    "start": 547.279,
+    "duration": 4.24
+  },
+  {
+    "text": "relaxed about checking actors that are",
+    "start": 549.92,
+    "duration": 3.68
+  },
+  {
+    "text": "already unfoged. It doesn't really hurt",
+    "start": 551.519,
+    "duration": 4.561
+  },
+  {
+    "text": "gameplay that much if an actor is",
+    "start": 553.6,
+    "duration": 4.64
+  },
+  {
+    "text": "visible for a few extra seconds when it",
+    "start": 556.08,
+    "duration": 3.84
+  },
+  {
+    "text": "goes into cover.",
+    "start": 558.24,
+    "duration": 4.64
+  },
+  {
+    "text": "Um, and it's probably preferable to not",
+    "start": 559.92,
+    "duration": 5.44
+  },
+  {
+    "text": "fog and unfog repeatedly if an actor",
+    "start": 562.88,
+    "duration": 5.68
+  },
+  {
+    "text": "moves in and out to cover um to avoid",
+    "start": 565.36,
+    "duration": 6.24
+  },
+  {
+    "text": "replication costs of re-replicating um",
+    "start": 568.56,
+    "duration": 5.68
+  },
+  {
+    "text": "repeatedly. So we can exploit these like",
+    "start": 571.6,
+    "duration": 5.44
+  },
+  {
+    "text": "little uh uh these opportunities for",
+    "start": 574.24,
+    "duration": 4.88
+  },
+  {
+    "text": "optimization and we can establish a",
+    "start": 577.04,
+    "duration": 4.32
+  },
+  {
+    "text": "trace budget per frame. So, we ran in",
+    "start": 579.12,
+    "duration": 8.64
+  },
+  {
+    "text": "our game a command l that um uh randomly",
+    "start": 581.36,
+    "duration": 9.12
+  },
+  {
+    "text": "uh traced across the map uh repeatedly",
+    "start": 587.76,
+    "duration": 5.199
+  },
+  {
+    "text": "to kind of figure out a reasonable",
+    "start": 590.48,
+    "duration": 4.64
+  },
+  {
+    "text": "number of traces we could make every",
+    "start": 592.959,
+    "duration": 6.601
+  },
+  {
+    "text": "frame that wouldn't were on the server.",
+    "start": 595.12,
+    "duration": 4.44
+  },
+  {
+    "text": "Um and so these are sort of level of",
+    "start": 602.8,
+    "duration": 3.76
+  },
+  {
+    "text": "detail parameters that we established.",
+    "start": 604.72,
+    "duration": 5.36
+  },
+  {
+    "text": "Um, so for very close actors, we we we",
+    "start": 606.56,
+    "duration": 7.12
+  },
+  {
+    "text": "we want to be able to um very accurately",
+    "start": 610.08,
+    "duration": 6.4
+  },
+  {
+    "text": "tell if we can see a player. Um, so we",
+    "start": 613.68,
+    "duration": 5.52
+  },
+  {
+    "text": "use nine traces and we check every",
+    "start": 616.48,
+    "duration": 5.76
+  },
+  {
+    "text": "single frame since um, popping was",
+    "start": 619.2,
+    "duration": 5.52
+  },
+  {
+    "text": "probably most obvious at that point. But",
+    "start": 622.24,
+    "duration": 4.48
+  },
+  {
+    "text": "for more distant actors, we can be much",
+    "start": 624.72,
+    "duration": 5.04
+  },
+  {
+    "text": "more relaxed. um like at least on our",
+    "start": 626.72,
+    "duration": 5.92
+  },
+  {
+    "text": "levels, the line of sight that the the",
+    "start": 629.76,
+    "duration": 5.28
+  },
+  {
+    "text": "kind of um lines of sight we have um",
+    "start": 632.64,
+    "duration": 3.92
+  },
+  {
+    "text": "mean that we can get away with checking",
+    "start": 635.04,
+    "duration": 5.52
+  },
+  {
+    "text": "like every half a second and uh using",
+    "start": 636.56,
+    "duration": 6.08
+  },
+  {
+    "text": "comparatively fewer traces. And for",
+    "start": 640.56,
+    "duration": 3.76
+  },
+  {
+    "text": "really distant actors, which are",
+    "start": 642.64,
+    "duration": 4.16
+  },
+  {
+    "text": "essentially uh points on the screen, um",
+    "start": 644.32,
+    "duration": 6.079
+  },
+  {
+    "text": "we can be uh even more relaxed again. Um",
+    "start": 646.8,
+    "duration": 6.56
+  },
+  {
+    "text": "and when unfoged, we can also just check",
+    "start": 650.399,
+    "duration": 7.801
+  },
+  {
+    "text": "quite quite um infrequently, too.",
+    "start": 653.36,
+    "duration": 4.84
+  },
+  {
+    "text": "Um",
+    "start": 659.6,
+    "duration": 3.919
+  },
+  {
+    "text": "so we solve replication lag by",
+    "start": 661.519,
+    "duration": 4.241
+  },
+  {
+    "text": "projecting visibility points ahead of",
+    "start": 663.519,
+    "duration": 4.161
+  },
+  {
+    "text": "where the players moving. So if an actor",
+    "start": 665.76,
+    "duration": 4.96
+  },
+  {
+    "text": "has a movement component then we uh look",
+    "start": 667.68,
+    "duration": 6.0
+  },
+  {
+    "text": "at the velocity uh component of that of",
+    "start": 670.72,
+    "duration": 7.44
+  },
+  {
+    "text": "their movement and move the trace points",
+    "start": 673.68,
+    "duration": 6.0
+  },
+  {
+    "text": "correspondingly.",
+    "start": 678.16,
+    "duration": 4.56
+  },
+  {
+    "text": "This shows that in action. This NPC is",
+    "start": 679.68,
+    "duration": 4.719
+  },
+  {
+    "text": "running back and forth and we can see",
+    "start": 682.72,
+    "duration": 4.0
+  },
+  {
+    "text": "that the points being projected ahead of",
+    "start": 684.399,
+    "duration": 6.081
+  },
+  {
+    "text": "them. Um, which essentially gives us",
+    "start": 686.72,
+    "duration": 7.119
+  },
+  {
+    "text": "time when they run out from behind the",
+    "start": 690.48,
+    "duration": 5.52
+  },
+  {
+    "text": "wall.",
+    "start": 693.839,
+    "duration": 4.641
+  },
+  {
+    "text": "We've already seen them at the point",
+    "start": 696.0,
+    "duration": 4.64
+  },
+  {
+    "text": "that they appear. So, they're fully",
+    "start": 698.48,
+    "duration": 4.64
+  },
+  {
+    "text": "replicated. Without that projection,",
+    "start": 700.64,
+    "duration": 3.92
+  },
+  {
+    "text": "they would just sort of pop into",
+    "start": 703.12,
+    "duration": 3.6
+  },
+  {
+    "text": "existence sort of like past the end of",
+    "start": 704.56,
+    "duration": 5.399
+  },
+  {
+    "text": "the wall.",
+    "start": 706.72,
+    "duration": 3.239
+  },
+  {
+    "text": "Um so to handle audio we use the idea of",
+    "start": 714.88,
+    "duration": 7.92
+  },
+  {
+    "text": "um exposure events. So we can the fog of",
+    "start": 718.079,
+    "duration": 8.161
+  },
+  {
+    "text": "war system can is aware when an audio",
+    "start": 722.8,
+    "duration": 7.2
+  },
+  {
+    "text": "event plays. We log an event",
+    "start": 726.24,
+    "duration": 6.56
+  },
+  {
+    "text": "of a certain radius over a certain time.",
+    "start": 730.0,
+    "duration": 7.12
+  },
+  {
+    "text": "Um, and within that radius, that",
+    "start": 732.8,
+    "duration": 7.52
+  },
+  {
+    "text": "player or NPC will be unfoged for uh",
+    "start": 737.12,
+    "duration": 5.44
+  },
+  {
+    "text": "players around them. I can hopefully",
+    "start": 740.32,
+    "duration": 4.8
+  },
+  {
+    "text": "demonstrate this here.",
+    "start": 742.56,
+    "duration": 6.24
+  },
+  {
+    "text": "So, this tirelessly running NPC is",
+    "start": 745.12,
+    "duration": 5.2
+  },
+  {
+    "text": "running back and forth. And we can hear",
+    "start": 748.8,
+    "duration": 4.4
+  },
+  {
+    "text": "within this uh boundary, this yellow",
+    "start": 750.32,
+    "duration": 6.16
+  },
+  {
+    "text": "boundary, they uh their audio is being",
+    "start": 753.2,
+    "duration": 8.16
+  },
+  {
+    "text": "replicated. And we use that radius",
+    "start": 756.48,
+    "duration": 6.56
+  },
+  {
+    "text": "as well as line of sight to determine",
+    "start": 761.36,
+    "duration": 4.24
+  },
+  {
+    "text": "where to replicate them. So when they",
+    "start": 763.04,
+    "duration": 4.56
+  },
+  {
+    "text": "fall outside that boundary, they stop",
+    "start": 765.6,
+    "duration": 5.16
+  },
+  {
+    "text": "being replicated.",
+    "start": 767.6,
+    "duration": 3.16
+  },
+  {
+    "text": "Um it's worth bringing up the need to",
+    "start": 774.959,
+    "duration": 6.0
+  },
+  {
+    "text": "perform extra checks because um to bring",
+    "start": 777.519,
+    "duration": 6.0
+  },
+  {
+    "text": "up um example of this guy standing in",
+    "start": 780.959,
+    "duration": 4.56
+  },
+  {
+    "text": "this little half pipe. You can see that",
+    "start": 783.519,
+    "duration": 3.841
+  },
+  {
+    "text": "some of the visibility points that we're",
+    "start": 785.519,
+    "duration": 4.161
+  },
+  {
+    "text": "using are actually outside of the the",
+    "start": 787.36,
+    "duration": 3.84
+  },
+  {
+    "text": "walls that they're standing in, they",
+    "start": 789.68,
+    "duration": 3.44
+  },
+  {
+    "text": "overlap, which means for players",
+    "start": 791.2,
+    "duration": 4.72
+  },
+  {
+    "text": "standing next to them, next to the wall,",
+    "start": 793.12,
+    "duration": 4.56
+  },
+  {
+    "text": "this player would be this NPC would",
+    "start": 795.92,
+    "duration": 4.24
+  },
+  {
+    "text": "always be unfoged. So, we add a second",
+    "start": 797.68,
+    "duration": 7.839
+  },
+  {
+    "text": "check to uh verify that any point that",
+    "start": 800.16,
+    "duration": 7.679
+  },
+  {
+    "text": "establishes a line of sight can be",
+    "start": 805.519,
+    "duration": 6.721
+  },
+  {
+    "text": "traced back to the parent actor. Um so",
+    "start": 807.839,
+    "duration": 6.0
+  },
+  {
+    "text": "every line of sight check actually",
+    "start": 812.24,
+    "duration": 5.68
+  },
+  {
+    "text": "requires two traces uh to um confirm",
+    "start": 813.839,
+    "duration": 8.0
+  },
+  {
+    "text": "that they should be unvog",
+    "start": 817.92,
+    "duration": 5.359
+  },
+  {
+    "text": "uh it's very helpful for reducing",
+    "start": 821.839,
+    "duration": 5.161
+  },
+  {
+    "text": "accidental unfoging.",
+    "start": 823.279,
+    "duration": 3.721
+  },
+  {
+    "text": "And here's an example of the system",
+    "start": 828.399,
+    "duration": 5.361
+  },
+  {
+    "text": "running in Vanguard. You can see the",
+    "start": 830.56,
+    "duration": 5.2
+  },
+  {
+    "text": "behind this ridge. This is the wall hack",
+    "start": 833.76,
+    "duration": 4.72
+  },
+  {
+    "text": "simulation that we had earlier. So we",
+    "start": 835.76,
+    "duration": 5.439
+  },
+  {
+    "text": "can kind of see where everyone is.",
+    "start": 838.48,
+    "duration": 3.52
+  },
+  {
+    "text": ">> Don't come any closer.",
+    "start": 841.199,
+    "duration": 3.121
+  },
+  {
+    "text": ">> When we enable fog of war, it hides",
+    "start": 842.0,
+    "duration": 3.76
+  },
+  {
+    "text": "everything that we can't that we're not",
+    "start": 844.32,
+    "duration": 3.28
+  },
+  {
+    "text": "supposed to see.",
+    "start": 845.76,
+    "duration": 3.28
+  },
+  {
+    "text": ">> This guy we can still see cuz he's on",
+    "start": 847.6,
+    "duration": 4.76
+  },
+  {
+    "text": "top of the ridge.",
+    "start": 849.04,
+    "duration": 3.32
+  },
+  {
+    "text": "And then we can see the people down",
+    "start": 855.44,
+    "duration": 4.079
+  },
+  {
+    "text": "again there when we reach the top. Um as",
+    "start": 856.959,
+    "duration": 4.081
+  },
+  {
+    "text": "you'd expect.",
+    "start": 859.519,
+    "duration": 4.521
+  },
+  {
+    "text": ">> Um",
+    "start": 861.04,
+    "duration": 3.0
+  },
+  {
+    "text": "so how do we do this? what uh I can run",
+    "start": 864.8,
+    "duration": 4.56
+  },
+  {
+    "text": "through a high level overview of what we",
+    "start": 867.519,
+    "duration": 5.601
+  },
+  {
+    "text": "implemented to do make this happen. Um",
+    "start": 869.36,
+    "duration": 5.839
+  },
+  {
+    "text": "the work consists of two main components",
+    "start": 873.12,
+    "duration": 4.399
+  },
+  {
+    "text": "uh a subsystem fog of war subsystem",
+    "start": 875.199,
+    "duration": 3.921
+  },
+  {
+    "text": "which is a game engine subsystem running",
+    "start": 877.519,
+    "duration": 4.081
+  },
+  {
+    "text": "whenever the game is and a custom",
+    "start": 879.12,
+    "duration": 4.719
+  },
+  {
+    "text": "replication node um because we use rep",
+    "start": 881.6,
+    "duration": 4.799
+  },
+  {
+    "text": "graph. So we implemented a node that",
+    "start": 883.839,
+    "duration": 4.481
+  },
+  {
+    "text": "uses the fog of war status to decide",
+    "start": 886.399,
+    "duration": 4.721
+  },
+  {
+    "text": "what to replicate. The subsystem tracks",
+    "start": 888.32,
+    "duration": 4.72
+  },
+  {
+    "text": "fogful actors. It performs physically",
+    "start": 891.12,
+    "duration": 4.56
+  },
+  {
+    "text": "checks, handles audio exposure events",
+    "start": 893.04,
+    "duration": 5.28
+  },
+  {
+    "text": "and emits events as appropriate. A fog",
+    "start": 895.68,
+    "duration": 6.32
+  },
+  {
+    "text": "of war event is just uh a map of player",
+    "start": 898.32,
+    "duration": 7.36
+  },
+  {
+    "text": "actors. Um the lists of actors that have",
+    "start": 902.0,
+    "duration": 7.76
+  },
+  {
+    "text": "been fogged or unfoged. So it's only",
+    "start": 905.68,
+    "duration": 8.0
+  },
+  {
+    "text": "sending information when things change.",
+    "start": 909.76,
+    "duration": 5.6
+  },
+  {
+    "text": "Um, looking a bit deeper into the",
+    "start": 913.68,
+    "duration": 4.56
+  },
+  {
+    "text": "subsystem, um, it maintains an array of",
+    "start": 915.36,
+    "duration": 6.479
+  },
+  {
+    "text": "unique visibility pairs, um, which are",
+    "start": 918.24,
+    "duration": 5.2
+  },
+  {
+    "text": "pairs of actors that can be fogged",
+    "start": 921.839,
+    "duration": 3.601
+  },
+  {
+    "text": "relative to one another. And the",
+    "start": 923.44,
+    "duration": 4.959
+  },
+  {
+    "text": "subsystem hooks into actor creation",
+    "start": 925.44,
+    "duration": 5.199
+  },
+  {
+    "text": "destroy delegates and it looks for",
+    "start": 928.399,
+    "duration": 4.641
+  },
+  {
+    "text": "specific classes of actors to decide",
+    "start": 930.639,
+    "duration": 5.281
+  },
+  {
+    "text": "what to include in uh, the fog of war",
+    "start": 933.04,
+    "duration": 4.72
+  },
+  {
+    "text": "pairs.",
+    "start": 935.92,
+    "duration": 4.32
+  },
+  {
+    "text": "A unique bleed pair consists of a player",
+    "start": 937.76,
+    "duration": 5.6
+  },
+  {
+    "text": "and any other object which is foggable",
+    "start": 940.24,
+    "duration": 5.279
+  },
+  {
+    "text": "in the game.",
+    "start": 943.36,
+    "duration": 4.4
+  },
+  {
+    "text": "And the main thing that this subsystem",
+    "start": 945.519,
+    "duration": 4.161
+  },
+  {
+    "text": "does is iterate through those visibility",
+    "start": 947.76,
+    "duration": 6.4
+  },
+  {
+    "text": "pairs. Um I put uh some pseudo code for",
+    "start": 949.68,
+    "duration": 6.48
+  },
+  {
+    "text": "the tick function that's executed every",
+    "start": 954.16,
+    "duration": 6.32
+  },
+  {
+    "text": "frame. Essentially it um checks uh to",
+    "start": 956.16,
+    "duration": 7.76
+  },
+  {
+    "text": "see whether because uh traces are uh",
+    "start": 960.48,
+    "duration": 5.359
+  },
+  {
+    "text": "asynchronous. We look for the results of",
+    "start": 963.92,
+    "duration": 4.88
+  },
+  {
+    "text": "the previous frames checks first and if",
+    "start": 965.839,
+    "duration": 4.24
+  },
+  {
+    "text": "anything's changed then we emit the",
+    "start": 968.8,
+    "duration": 5.36
+  },
+  {
+    "text": "focore event and then we add any",
+    "start": 970.079,
+    "duration": 6.88
+  },
+  {
+    "text": "scheduled visibility checks",
+    "start": 974.16,
+    "duration": 6.96
+  },
+  {
+    "text": "um to a list and sort that by lateness",
+    "start": 976.959,
+    "duration": 6.24
+  },
+  {
+    "text": "and then run through all of the checks",
+    "start": 981.12,
+    "duration": 4.56
+  },
+  {
+    "text": "up to our trace budget",
+    "start": 983.199,
+    "duration": 6.161
+  },
+  {
+    "text": "um forming line of sight checks. Um I've",
+    "start": 985.68,
+    "duration": 5.519
+  },
+  {
+    "text": "added at the bottom you can see there's",
+    "start": 989.36,
+    "duration": 5.279
+  },
+  {
+    "text": "an sort of escape hatch um condition",
+    "start": 991.199,
+    "duration": 6.161
+  },
+  {
+    "text": "which where if we exceed the trace",
+    "start": 994.639,
+    "duration": 7.361
+  },
+  {
+    "text": "budget for a frame we make all close uh",
+    "start": 997.36,
+    "duration": 8.56
+  },
+  {
+    "text": "pairs visible which it's like a reduces",
+    "start": 1002.0,
+    "duration": 5.44
+  },
+  {
+    "text": "load on the system because they're the",
+    "start": 1005.92,
+    "duration": 5.359
+  },
+  {
+    "text": "most burdensome check and avoids",
+    "start": 1007.44,
+    "duration": 6.399
+  },
+  {
+    "text": "minimize hopefully any pop-in caused by",
+    "start": 1011.279,
+    "duration": 5.36
+  },
+  {
+    "text": "pairs not getting to be checked in time",
+    "start": 1013.839,
+    "duration": 5.68
+  },
+  {
+    "text": "and sort of falling behind and popping",
+    "start": 1016.639,
+    "duration": 7.481
+  },
+  {
+    "text": "in a bit late replicating late.",
+    "start": 1019.519,
+    "duration": 4.601
+  },
+  {
+    "text": "Um the visibility pair is the uh handles",
+    "start": 1025.439,
+    "duration": 6.88
+  },
+  {
+    "text": "uh or it contains a state of all the",
+    "start": 1029.919,
+    "duration": 4.721
+  },
+  {
+    "text": "state required for checking to objects.",
+    "start": 1032.319,
+    "duration": 6.24
+  },
+  {
+    "text": "Um uh the time last checked uh when the",
+    "start": 1034.64,
+    "duration": 6.0
+  },
+  {
+    "text": "next check should occur. It has",
+    "start": 1038.559,
+    "duration": 3.52
+  },
+  {
+    "text": "functions for performing the checks",
+    "start": 1040.64,
+    "duration": 4.319
+  },
+  {
+    "text": "themselves, taking into account uh level",
+    "start": 1042.079,
+    "duration": 6.96
+  },
+  {
+    "text": "of distance and um also handles audio",
+    "start": 1044.959,
+    "duration": 7.561
+  },
+  {
+    "text": "exposure events.",
+    "start": 1049.039,
+    "duration": 3.481
+  },
+  {
+    "text": "Um audio exposure events uh we implement",
+    "start": 1055.52,
+    "duration": 4.32
+  },
+  {
+    "text": "with a component that can be attached to",
+    "start": 1058.16,
+    "duration": 5.519
+  },
+  {
+    "text": "any actor um and it has a a function for",
+    "start": 1059.84,
+    "duration": 7.6
+  },
+  {
+    "text": "adding an event which uh declares that",
+    "start": 1063.679,
+    "duration": 7.281
+  },
+  {
+    "text": "owner unfoged for the appropriate time.",
+    "start": 1067.44,
+    "duration": 5.84
+  },
+  {
+    "text": "Um,",
+    "start": 1070.96,
+    "duration": 6.079
+  },
+  {
+    "text": "exposure events unfog just one member of",
+    "start": 1073.28,
+    "duration": 5.759
+  },
+  {
+    "text": "the the pair and light line of sight",
+    "start": 1077.039,
+    "duration": 6.441
+  },
+  {
+    "text": "which uh unfogs both",
+    "start": 1079.039,
+    "duration": 4.441
+  },
+  {
+    "text": "and the custom replication node that we",
+    "start": 1086.96,
+    "duration": 4.88
+  },
+  {
+    "text": "implemented um it's based on epics",
+    "start": 1088.88,
+    "duration": 6.08
+  },
+  {
+    "text": "dynamic spatial frequency repraph node",
+    "start": 1091.84,
+    "duration": 7.52
+  },
+  {
+    "text": "um it which uh dynamically modifies",
+    "start": 1094.96,
+    "duration": 6.56
+  },
+  {
+    "text": "replication frequency of actors",
+    "start": 1099.36,
+    "duration": 4.319
+  },
+  {
+    "text": "depending on how far they away from the",
+    "start": 1101.52,
+    "duration": 6.08
+  },
+  {
+    "text": "player. Um, we implemented that node and",
+    "start": 1103.679,
+    "duration": 5.761
+  },
+  {
+    "text": "moved the dynamic spatial frequency",
+    "start": 1107.6,
+    "duration": 5.04
+  },
+  {
+    "text": "calculations to a background task um",
+    "start": 1109.44,
+    "duration": 5.52
+  },
+  {
+    "text": "because which saves a fair bit of time",
+    "start": 1112.64,
+    "duration": 5.52
+  },
+  {
+    "text": "on the game thread and it also looks for",
+    "start": 1114.96,
+    "duration": 5.76
+  },
+  {
+    "text": "fog of war events and uses them in",
+    "start": 1118.16,
+    "duration": 4.879
+  },
+  {
+    "text": "deciding whether or not to replicate um",
+    "start": 1120.72,
+    "duration": 4.16
+  },
+  {
+    "text": "an actor.",
+    "start": 1123.039,
+    "duration": 3.601
+  },
+  {
+    "text": "Um",
+    "start": 1124.88,
+    "duration": 5.039
+  },
+  {
+    "text": "it also uh we also have a a custom uh",
+    "start": 1126.64,
+    "duration": 4.96
+  },
+  {
+    "text": "replication graph which instantiates",
+    "start": 1129.919,
+    "duration": 4.241
+  },
+  {
+    "text": "this node and we found it we had to uh",
+    "start": 1131.6,
+    "duration": 7.12
+  },
+  {
+    "text": "filter RBC events on the uh on the fog",
+    "start": 1134.16,
+    "duration": 7.44
+  },
+  {
+    "text": "status of an actor um prevent issues",
+    "start": 1138.72,
+    "duration": 6.24
+  },
+  {
+    "text": "where um sending an RPC event to an",
+    "start": 1141.6,
+    "duration": 5.68
+  },
+  {
+    "text": "actor that is fogged would briefly",
+    "start": 1144.96,
+    "duration": 5.76
+  },
+  {
+    "text": "create that um actor on the client and",
+    "start": 1147.28,
+    "duration": 7.92
+  },
+  {
+    "text": "then uh uninstantiate them after the uh",
+    "start": 1150.72,
+    "duration": 6.72
+  },
+  {
+    "text": "all have been processed.",
+    "start": 1155.2,
+    "duration": 5.24
+  },
+  {
+    "text": "Um",
+    "start": 1157.44,
+    "duration": 3.0
+  },
+  {
+    "text": "so we implemented the system in our game",
+    "start": 1161.44,
+    "duration": 4.8
+  },
+  {
+    "text": "uh",
+    "start": 1164.48,
+    "duration": 3.36
+  },
+  {
+    "text": "um midway through development. So",
+    "start": 1166.24,
+    "duration": 4.319
+  },
+  {
+    "text": "already we already had some um uh levels",
+    "start": 1167.84,
+    "duration": 8.88
+  },
+  {
+    "text": "of gameplay um written and we sort of",
+    "start": 1170.559,
+    "duration": 9.36
+  },
+  {
+    "text": "added the system and we discovered that",
+    "start": 1176.72,
+    "duration": 6.64
+  },
+  {
+    "text": "the main issue was that um actors would",
+    "start": 1179.919,
+    "duration": 6.161
+  },
+  {
+    "text": "be written on the client not sort of",
+    "start": 1183.36,
+    "duration": 4.72
+  },
+  {
+    "text": "expecting actors to persist on the",
+    "start": 1186.08,
+    "duration": 4.24
+  },
+  {
+    "text": "client. They weren't really written for",
+    "start": 1188.08,
+    "duration": 4.32
+  },
+  {
+    "text": "actors uh considering actors would",
+    "start": 1190.32,
+    "duration": 6.239
+  },
+  {
+    "text": "disappear or uh like due to fogging. For",
+    "start": 1192.4,
+    "duration": 7.12
+  },
+  {
+    "text": "example, uh projectile owners would um",
+    "start": 1196.559,
+    "duration": 5.601
+  },
+  {
+    "text": "disappear uh being fogged while the",
+    "start": 1199.52,
+    "duration": 7.36
+  },
+  {
+    "text": "projectile was in uh mid combat. Um so",
+    "start": 1202.16,
+    "duration": 7.519
+  },
+  {
+    "text": "essentially the work was to",
+    "start": 1206.88,
+    "duration": 5.2
+  },
+  {
+    "text": "um",
+    "start": 1209.679,
+    "duration": 5.601
+  },
+  {
+    "text": "add a lot of safeguards around that.",
+    "start": 1212.08,
+    "duration": 5.04
+  },
+  {
+    "text": "Um, we also had issues around the the",
+    "start": 1215.28,
+    "duration": 3.84
+  },
+  {
+    "text": "visibility channel occasionally like not",
+    "start": 1217.12,
+    "duration": 4.16
+  },
+  {
+    "text": "being configured properly. So, actors",
+    "start": 1219.12,
+    "duration": 6.0
+  },
+  {
+    "text": "with fog in full view of the player. Um,",
+    "start": 1221.28,
+    "duration": 6.399
+  },
+  {
+    "text": "so it's like a long process of uh",
+    "start": 1225.12,
+    "duration": 5.039
+  },
+  {
+    "text": "adapting what we had to work with the",
+    "start": 1227.679,
+    "duration": 4.641
+  },
+  {
+    "text": "system.",
+    "start": 1230.159,
+    "duration": 4.481
+  },
+  {
+    "text": "Uh turrets were particularly troublesome",
+    "start": 1232.32,
+    "duration": 5.76
+  },
+  {
+    "text": "because they were embedded into scenery",
+    "start": 1234.64,
+    "duration": 6.72
+  },
+  {
+    "text": "often and this would hide vis visibility",
+    "start": 1238.08,
+    "duration": 5.44
+  },
+  {
+    "text": "points within the scenery and cause them",
+    "start": 1241.36,
+    "duration": 5.12
+  },
+  {
+    "text": "to fog erratically.",
+    "start": 1243.52,
+    "duration": 5.96
+  },
+  {
+    "text": "Um",
+    "start": 1246.48,
+    "duration": 3.0
+  },
+  {
+    "text": "and performance-wise uh it runs quite",
+    "start": 1249.679,
+    "duration": 4.321
+  },
+  {
+    "text": "well. Um",
+    "start": 1252.159,
+    "duration": 4.081
+  },
+  {
+    "text": "uh you can see on this uh trace graph",
+    "start": 1254.0,
+    "duration": 4.64
+  },
+  {
+    "text": "this uh real insights graph there's uh",
+    "start": 1256.24,
+    "duration": 5.6
+  },
+  {
+    "text": "the at the bottom there is the uh",
+    "start": 1258.64,
+    "duration": 5.039
+  },
+  {
+    "text": "background task containing all the uh",
+    "start": 1261.84,
+    "duration": 4.64
+  },
+  {
+    "text": "the raycasts of the system and at the",
+    "start": 1263.679,
+    "duration": 5.841
+  },
+  {
+    "text": "top left uh a tick for the fog system",
+    "start": 1266.48,
+    "duration": 4.4
+  },
+  {
+    "text": "where it's checking results and",
+    "start": 1269.52,
+    "duration": 4.88
+  },
+  {
+    "text": "performing fogging and unfoging um runs",
+    "start": 1270.88,
+    "duration": 6.56
+  },
+  {
+    "text": "like it's uh it tends to run under half",
+    "start": 1274.4,
+    "duration": 6.88
+  },
+  {
+    "text": "a millisecond on the game thread and",
+    "start": 1277.44,
+    "duration": 7.68
+  },
+  {
+    "text": "um perhaps up to a millisecond on the uh",
+    "start": 1281.28,
+    "duration": 5.36
+  },
+  {
+    "text": "in the background task which is",
+    "start": 1285.12,
+    "duration": 4.24
+  },
+  {
+    "text": "acceptable for our purposes. We we have",
+    "start": 1286.64,
+    "duration": 4.8
+  },
+  {
+    "text": "it running with all players, NPCs and",
+    "start": 1289.36,
+    "duration": 6.0
+  },
+  {
+    "text": "loot boxes in the game and uh in testing",
+    "start": 1291.44,
+    "duration": 6.96
+  },
+  {
+    "text": "it's generally proven to be um good",
+    "start": 1295.36,
+    "duration": 6.72
+  },
+  {
+    "text": "enough for for our for our purposes. Um",
+    "start": 1298.4,
+    "duration": 7.84
+  },
+  {
+    "text": "yeah, so that pretty much is my talk. Um",
+    "start": 1302.08,
+    "duration": 6.479
+  },
+  {
+    "text": "thank you for listening and I'm happy to",
+    "start": 1306.24,
+    "duration": 6.0
+  },
+  {
+    "text": "take any questions you might have.",
+    "start": 1308.559,
+    "duration": 3.681
+  }
+]

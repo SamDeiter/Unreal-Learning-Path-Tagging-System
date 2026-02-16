@@ -1,0 +1,4202 @@
+[
+  {
+    "text": "So, my name is Luis. Uh, I'm an AI",
+    "start": 1.68,
+    "duration": 3.679
+  },
+  {
+    "text": "machine learning engineer for Boeing.",
+    "start": 3.679,
+    "duration": 3.2
+  },
+  {
+    "text": "Uh, my name is Taylor Loper. I'm a",
+    "start": 5.359,
+    "duration": 2.881
+  },
+  {
+    "text": "software engineer for the Boeing",
+    "start": 6.879,
+    "duration": 4.361
+  },
+  {
+    "text": "company.",
+    "start": 8.24,
+    "duration": 3.0
+  },
+  {
+    "text": "Oh, wait. Do we go",
+    "start": 12.4,
+    "duration": 4.24
+  },
+  {
+    "text": "Sorry.",
+    "start": 15.12,
+    "duration": 3.68
+  },
+  {
+    "text": "You should be able to tell how good of a",
+    "start": 16.64,
+    "duration": 3.92
+  },
+  {
+    "text": "engineer I am by how bad I am at",
+    "start": 18.8,
+    "duration": 4.559
+  },
+  {
+    "text": "presenting. Um,",
+    "start": 20.56,
+    "duration": 4.959
+  },
+  {
+    "text": "yeah. So, uh, me and Luis have we, you",
+    "start": 23.359,
+    "duration": 3.76
+  },
+  {
+    "text": "know, we've been I've been using the",
+    "start": 25.519,
+    "duration": 2.721
+  },
+  {
+    "text": "Unreal Engine for about, you know, a",
+    "start": 27.119,
+    "duration": 2.48
+  },
+  {
+    "text": "little over 12 years when it first came",
+    "start": 28.24,
+    "duration": 4.24
+  },
+  {
+    "text": "out as a subscription service. I",
+    "start": 29.599,
+    "duration": 5.281
+  },
+  {
+    "text": "actually learned it by watching Epic's",
+    "start": 32.48,
+    "duration": 4.16
+  },
+  {
+    "text": "YouTube videos as they released, which",
+    "start": 34.88,
+    "duration": 3.44
+  },
+  {
+    "text": "is, you know, it was possible to do back",
+    "start": 36.64,
+    "duration": 3.599
+  },
+  {
+    "text": "then. Now there's so many tutorials like",
+    "start": 38.32,
+    "duration": 4.399
+  },
+  {
+    "text": "to to consume it all is is impossible.",
+    "start": 40.239,
+    "duration": 5.681
+  },
+  {
+    "text": "Um, me and Louise have uh, you know,",
+    "start": 42.719,
+    "duration": 5.601
+  },
+  {
+    "text": "we've worked in the AI field for a",
+    "start": 45.92,
+    "duration": 4.479
+  },
+  {
+    "text": "number of years now. We hold patents and",
+    "start": 48.32,
+    "duration": 4.48
+  },
+  {
+    "text": "we publish papers, but we're not",
+    "start": 50.399,
+    "duration": 4.32
+  },
+  {
+    "text": "actually here to talk to you about AI or",
+    "start": 52.8,
+    "duration": 4.0
+  },
+  {
+    "text": "ML or neural networks. We're gonna talk",
+    "start": 54.719,
+    "duration": 3.201
+  },
+  {
+    "text": "to you about something much more",
+    "start": 56.8,
+    "duration": 3.68
+  },
+  {
+    "text": "interesting and that's data. Um, how we",
+    "start": 57.92,
+    "duration": 5.84
+  },
+  {
+    "text": "generate data. Um, and this might be",
+    "start": 60.48,
+    "duration": 5.28
+  },
+  {
+    "text": "this might feel like a lab sometimes.",
+    "start": 63.76,
+    "duration": 3.039
+  },
+  {
+    "text": "We're going to go over some of the",
+    "start": 65.76,
+    "duration": 3.359
+  },
+  {
+    "text": "technical stuff and some of some actual",
+    "start": 66.799,
+    "duration": 4.32
+  },
+  {
+    "text": "code. Uh, but we just wanted to give you",
+    "start": 69.119,
+    "duration": 5.36
+  },
+  {
+    "text": "an idea of like how to how to generate,",
+    "start": 71.119,
+    "duration": 6.081
+  },
+  {
+    "text": "you know, a pipeline.",
+    "start": 74.479,
+    "duration": 6.801
+  },
+  {
+    "text": "So one thing to understand is",
+    "start": 77.2,
+    "duration": 6.32
+  },
+  {
+    "text": "there's a number of kind of overlapping",
+    "start": 81.28,
+    "duration": 5.36
+  },
+  {
+    "text": "domains here that make this possible. Uh",
+    "start": 83.52,
+    "duration": 4.56
+  },
+  {
+    "text": "so just you know to start at the bottom",
+    "start": 86.64,
+    "duration": 4.08
+  },
+  {
+    "text": "that ground truth or digital twin this",
+    "start": 88.08,
+    "duration": 4.32
+  },
+  {
+    "text": "is you know when we talk about this in",
+    "start": 90.72,
+    "duration": 3.68
+  },
+  {
+    "text": "this presentation uh we're really",
+    "start": 92.4,
+    "duration": 4.56
+  },
+  {
+    "text": "talking about like an authoritative",
+    "start": 94.4,
+    "duration": 4.56
+  },
+  {
+    "text": "an authoritative source of truth. So",
+    "start": 96.96,
+    "duration": 3.76
+  },
+  {
+    "text": "that might be a sensor reading might be",
+    "start": 98.96,
+    "duration": 4.0
+  },
+  {
+    "text": "an IMU might be a digital elevation",
+    "start": 100.72,
+    "duration": 5.28
+  },
+  {
+    "text": "model a CAD model. Um it's uh you know",
+    "start": 102.96,
+    "duration": 7.119
+  },
+  {
+    "text": "CAD model is used in production. Um",
+    "start": 106.0,
+    "duration": 6.32
+  },
+  {
+    "text": "and then you know just kind of the what",
+    "start": 110.079,
+    "duration": 4.641
+  },
+  {
+    "text": "linking that to the digital twin. Now",
+    "start": 112.32,
+    "duration": 4.56
+  },
+  {
+    "text": "when we talk about simulation",
+    "start": 114.72,
+    "duration": 4.88
+  },
+  {
+    "text": "like when I say sim or simulation we're",
+    "start": 116.88,
+    "duration": 4.96
+  },
+  {
+    "text": "using the Unreal Engine to simulate the",
+    "start": 119.6,
+    "duration": 4.64
+  },
+  {
+    "text": "visible light spectrum. So that's the",
+    "start": 121.84,
+    "duration": 4.48
+  },
+  {
+    "text": "simulation we're we're doing here. Um",
+    "start": 124.24,
+    "duration": 3.76
+  },
+  {
+    "text": "and that includes you know so so it kind",
+    "start": 126.32,
+    "duration": 3.2
+  },
+  {
+    "text": "of lines up 3D rendering right? So",
+    "start": 128.0,
+    "duration": 3.84
+  },
+  {
+    "text": "that's your that's your geometry, your",
+    "start": 129.52,
+    "duration": 5.12
+  },
+  {
+    "text": "materials, and your lighting. Um, and",
+    "start": 131.84,
+    "duration": 4.88
+  },
+  {
+    "text": "then camera emulation or or virtual",
+    "start": 134.64,
+    "duration": 4.72
+  },
+  {
+    "text": "production. That's this is an area Epic",
+    "start": 136.72,
+    "duration": 4.0
+  },
+  {
+    "text": "has made, you know, they put a lot of",
+    "start": 139.36,
+    "duration": 2.64
+  },
+  {
+    "text": "effort into this over the last few",
+    "start": 140.72,
+    "duration": 3.28
+  },
+  {
+    "text": "years. I'm sure everybody is, you know,",
+    "start": 142.0,
+    "duration": 4.4
+  },
+  {
+    "text": "familiar with the Mandalorian. Uh,",
+    "start": 144.0,
+    "duration": 4.319
+  },
+  {
+    "text": "they've they've just made great strides",
+    "start": 146.4,
+    "duration": 3.6
+  },
+  {
+    "text": "in this and we've leaned very heavily on",
+    "start": 148.319,
+    "duration": 3.92
+  },
+  {
+    "text": "that technology. Uh, you know, they",
+    "start": 150.0,
+    "duration": 4.16
+  },
+  {
+    "text": "they're they'll call it virtual",
+    "start": 152.239,
+    "duration": 3.521
+  },
+  {
+    "text": "production. We call that uh hardware",
+    "start": 154.16,
+    "duration": 4.0
+  },
+  {
+    "text": "emulation or camera emulation in kind of",
+    "start": 155.76,
+    "duration": 6.04
+  },
+  {
+    "text": "the engineering field.",
+    "start": 158.16,
+    "duration": 3.64
+  },
+  {
+    "text": "So basic knowledge requirements we it",
+    "start": 163.36,
+    "duration": 5.519
+  },
+  {
+    "text": "was kind of hard to uh you know I don't",
+    "start": 165.44,
+    "duration": 7.439
+  },
+  {
+    "text": "know figure out the the the target",
+    "start": 168.879,
+    "duration": 6.321
+  },
+  {
+    "text": "audience for this. There's again it's",
+    "start": 172.879,
+    "duration": 4.0
+  },
+  {
+    "text": "just a lot of data. I don't expect",
+    "start": 175.2,
+    "duration": 3.2
+  },
+  {
+    "text": "everybody in here to know to be an",
+    "start": 176.879,
+    "duration": 2.64
+  },
+  {
+    "text": "expert in each one of these bullet",
+    "start": 178.4,
+    "duration": 2.88
+  },
+  {
+    "text": "points but you know we'll touch on each",
+    "start": 179.519,
+    "duration": 5.201
+  },
+  {
+    "text": "one of them. Um, we essentially tried to",
+    "start": 181.28,
+    "duration": 6.64
+  },
+  {
+    "text": "gear this towards, you know, possibly uh",
+    "start": 184.72,
+    "duration": 5.04
+  },
+  {
+    "text": "you're either a data scientist and",
+    "start": 187.92,
+    "duration": 3.599
+  },
+  {
+    "text": "you're familiar with the Unreal Engine,",
+    "start": 189.76,
+    "duration": 3.68
+  },
+  {
+    "text": "but but you know, you might not know the",
+    "start": 191.519,
+    "duration": 3.521
+  },
+  {
+    "text": "full process of generating synthetic",
+    "start": 193.44,
+    "duration": 3.76
+  },
+  {
+    "text": "data and you have a data need you think",
+    "start": 195.04,
+    "duration": 4.559
+  },
+  {
+    "text": "it can you think it can resolve or you",
+    "start": 197.2,
+    "duration": 4.56
+  },
+  {
+    "text": "might be an expert in Unreal and you're",
+    "start": 199.599,
+    "duration": 4.64
+  },
+  {
+    "text": "supporting you know an AI or or ML team",
+    "start": 201.76,
+    "duration": 4.64
+  },
+  {
+    "text": "as you know as a sort of supplier for",
+    "start": 204.239,
+    "duration": 5.161
+  },
+  {
+    "text": "data.",
+    "start": 206.4,
+    "duration": 3.0
+  },
+  {
+    "text": "All right. So, we're going to talk about",
+    "start": 209.84,
+    "duration": 2.24
+  },
+  {
+    "text": "why we use synthetic data. Obviously,",
+    "start": 210.799,
+    "duration": 2.641
+  },
+  {
+    "text": "that's important. And then we'll go just",
+    "start": 212.08,
+    "duration": 2.96
+  },
+  {
+    "text": "go through some steps on how you import",
+    "start": 213.44,
+    "duration": 4.56
+  },
+  {
+    "text": "data, the prepping of assets, populating",
+    "start": 215.04,
+    "duration": 4.72
+  },
+  {
+    "text": "sequencer, and then actually getting",
+    "start": 218.0,
+    "duration": 5.36
+  },
+  {
+    "text": "that data back out in the form you want.",
+    "start": 219.76,
+    "duration": 7.039
+  },
+  {
+    "text": "So, why use it? The first is cost. So,",
+    "start": 223.36,
+    "duration": 5.2
+  },
+  {
+    "text": "as",
+    "start": 226.799,
+    "duration": 3.36
+  },
+  {
+    "text": "as as you as you might be aware, you",
+    "start": 228.56,
+    "duration": 4.16
+  },
+  {
+    "text": "know, there's kind of uh",
+    "start": 230.159,
+    "duration": 4.241
+  },
+  {
+    "text": "when you start off, you're either going",
+    "start": 232.72,
+    "duration": 3.599
+  },
+  {
+    "text": "to, you know, you have data or you're",
+    "start": 234.4,
+    "duration": 4.0
+  },
+  {
+    "text": "going to pay to acquire data or you're",
+    "start": 236.319,
+    "duration": 3.681
+  },
+  {
+    "text": "going to pay to have that data labeled,",
+    "start": 238.4,
+    "duration": 3.839
+  },
+  {
+    "text": "right? So, that might be uh just",
+    "start": 240.0,
+    "duration": 4.48
+  },
+  {
+    "text": "starting from the cheapest is uh you",
+    "start": 242.239,
+    "duration": 3.841
+  },
+  {
+    "text": "know, classification. And then you've",
+    "start": 244.48,
+    "duration": 3.759
+  },
+  {
+    "text": "got you know, bounding boxes for object",
+    "start": 246.08,
+    "duration": 4.32
+  },
+  {
+    "text": "detection. Then you've got segmentation",
+    "start": 248.239,
+    "duration": 3.841
+  },
+  {
+    "text": "masks and then and then probably pose",
+    "start": 250.4,
+    "duration": 4.399
+  },
+  {
+    "text": "estimations is the most expensive.",
+    "start": 252.08,
+    "duration": 5.04
+  },
+  {
+    "text": "Generally speaking, that work is is",
+    "start": 254.799,
+    "duration": 5.521
+  },
+  {
+    "text": "usually outsourced um to a third party.",
+    "start": 257.12,
+    "duration": 6.0
+  },
+  {
+    "text": "But if you have any type of data",
+    "start": 260.32,
+    "duration": 6.0
+  },
+  {
+    "text": "controls, if that's proprietary data, if",
+    "start": 263.12,
+    "duration": 5.6
+  },
+  {
+    "text": "that has any type of ear marking, if you",
+    "start": 266.32,
+    "duration": 5.599
+  },
+  {
+    "text": "know export controlled, ITAR,",
+    "start": 268.72,
+    "duration": 5.759
+  },
+  {
+    "text": "uh you any higher levels classification",
+    "start": 271.919,
+    "duration": 6.0
+  },
+  {
+    "text": "and that that cost skyrockets.",
+    "start": 274.479,
+    "duration": 5.521
+  },
+  {
+    "text": "Um and then scalability, you know,",
+    "start": 277.919,
+    "duration": 4.321
+  },
+  {
+    "text": "assuming uh you have a prototype, right?",
+    "start": 280.0,
+    "duration": 4.24
+  },
+  {
+    "text": "I I need to I need to track two classes",
+    "start": 282.24,
+    "duration": 4.64
+  },
+  {
+    "text": "and I need 10,000 images just to see if",
+    "start": 284.24,
+    "duration": 5.12
+  },
+  {
+    "text": "this thing works, right? You do it, it",
+    "start": 286.88,
+    "duration": 5.2
+  },
+  {
+    "text": "does work. Now I need 10 classes and a",
+    "start": 289.36,
+    "duration": 5.2
+  },
+  {
+    "text": "million images. The ability to scale",
+    "start": 292.08,
+    "duration": 5.36
+  },
+  {
+    "text": "like that is is is very possible uh",
+    "start": 294.56,
+    "duration": 4.32
+  },
+  {
+    "text": "using synthetic data, especially with",
+    "start": 297.44,
+    "duration": 3.92
+  },
+  {
+    "text": "the Unreal Engine. Hardware procurement",
+    "start": 298.88,
+    "duration": 4.08
+  },
+  {
+    "text": "is another one, right? So, you know, a",
+    "start": 301.36,
+    "duration": 3.119
+  },
+  {
+    "text": "lot of times we kind of put a camera in",
+    "start": 302.96,
+    "duration": 3.04
+  },
+  {
+    "text": "a place and we look at the field of view",
+    "start": 304.479,
+    "duration": 3.601
+  },
+  {
+    "text": "and we make a best guess, you know, is",
+    "start": 306.0,
+    "duration": 4.16
+  },
+  {
+    "text": "this camera going to do it? We're able",
+    "start": 308.08,
+    "duration": 3.6
+  },
+  {
+    "text": "to load these cameras into a virtual",
+    "start": 310.16,
+    "duration": 3.28
+  },
+  {
+    "text": "scene, you know, render the CAD models.",
+    "start": 311.68,
+    "duration": 3.76
+  },
+  {
+    "text": "We can see exactly what does that camera",
+    "start": 313.44,
+    "duration": 3.84
+  },
+  {
+    "text": "see? Does that camera see what I need it",
+    "start": 315.44,
+    "duration": 4.0
+  },
+  {
+    "text": "to see? Um, and that help that really",
+    "start": 317.28,
+    "duration": 3.759
+  },
+  {
+    "text": "helps you whittle away at hardware",
+    "start": 319.44,
+    "duration": 2.64
+  },
+  {
+    "text": "procurement. You might start with a",
+    "start": 321.039,
+    "duration": 2.961
+  },
+  {
+    "text": "hundred cameras. You know, you end up",
+    "start": 322.08,
+    "duration": 3.6
+  },
+  {
+    "text": "with six and then you load those six in",
+    "start": 324.0,
+    "duration": 3.52
+  },
+  {
+    "text": "and you're like, okay, what does this",
+    "start": 325.68,
+    "duration": 4.4
+  },
+  {
+    "text": "see the actual thing I needed to? Um,",
+    "start": 327.52,
+    "duration": 4.16
+  },
+  {
+    "text": "and then digital twin. Obviously, this",
+    "start": 330.08,
+    "duration": 3.2
+  },
+  {
+    "text": "is you'll hear this in presentation",
+    "start": 331.68,
+    "duration": 3.04
+  },
+  {
+    "text": "after presentation, but it's a it's a",
+    "start": 333.28,
+    "duration": 3.28
+  },
+  {
+    "text": "pretty big deal. The digital twin is,",
+    "start": 334.72,
+    "duration": 3.68
+  },
+  {
+    "text": "you know, essentially the ability to to",
+    "start": 336.56,
+    "duration": 5.199
+  },
+  {
+    "text": "tie this data back in and and your your",
+    "start": 338.4,
+    "duration": 5.44
+  },
+  {
+    "text": "physical twin to benefit from that,",
+    "start": 341.759,
+    "duration": 4.481
+  },
+  {
+    "text": "right? So, we kind always say build the",
+    "start": 343.84,
+    "duration": 4.56
+  },
+  {
+    "text": "game first or electrons are cheap. This",
+    "start": 346.24,
+    "duration": 4.16
+  },
+  {
+    "text": "lets us, you know, this lets us fail in",
+    "start": 348.4,
+    "duration": 4.239
+  },
+  {
+    "text": "the lab, right? And not not with the",
+    "start": 350.4,
+    "duration": 4.639
+  },
+  {
+    "text": "physical hardware.",
+    "start": 352.639,
+    "duration": 5.441
+  },
+  {
+    "text": "So, next is data scarcity. It may not be",
+    "start": 355.039,
+    "duration": 4.641
+  },
+  {
+    "text": "a money issue with the data. You know,",
+    "start": 358.08,
+    "duration": 2.88
+  },
+  {
+    "text": "you may have all the money in the world.",
+    "start": 359.68,
+    "duration": 3.76
+  },
+  {
+    "text": "The data may just not exist. So, you",
+    "start": 360.96,
+    "duration": 4.4
+  },
+  {
+    "text": "might be working with a camera that is",
+    "start": 363.44,
+    "duration": 3.36
+  },
+  {
+    "text": "in development, hasn't been released",
+    "start": 365.36,
+    "duration": 6.16
+  },
+  {
+    "text": "yet. Um, you might be working uh, you",
+    "start": 366.8,
+    "duration": 6.16
+  },
+  {
+    "text": "know, with scheduling. There's there's",
+    "start": 371.52,
+    "duration": 3.119
+  },
+  {
+    "text": "risks. So, if we need to do a flight",
+    "start": 372.96,
+    "duration": 3.28
+  },
+  {
+    "text": "test, right, we kind of schedule out a",
+    "start": 374.639,
+    "duration": 4.881
+  },
+  {
+    "text": "flight test. There's risks to that. Uh,",
+    "start": 376.24,
+    "duration": 4.959
+  },
+  {
+    "text": "the weather might cancel that flight,",
+    "start": 379.52,
+    "duration": 3.119
+  },
+  {
+    "text": "right? And then then that flight gets",
+    "start": 381.199,
+    "duration": 3.041
+  },
+  {
+    "text": "kicked back a week or two, right? That's",
+    "start": 382.639,
+    "duration": 3.68
+  },
+  {
+    "text": "a week or two of wasted well, not wasted",
+    "start": 384.24,
+    "duration": 3.519
+  },
+  {
+    "text": "time, but right, you kind of put it in",
+    "start": 386.319,
+    "duration": 3.361
+  },
+  {
+    "text": "your thumbs. Um, that doesn't happen",
+    "start": 387.759,
+    "duration": 4.88
+  },
+  {
+    "text": "with synthetic data. the speed of data",
+    "start": 389.68,
+    "duration": 5.04
+  },
+  {
+    "text": "generation. It that kind of speaks for",
+    "start": 392.639,
+    "duration": 5.601
+  },
+  {
+    "text": "itself. It's very fast. Um and in future",
+    "start": 394.72,
+    "duration": 5.36
+  },
+  {
+    "text": "data gaps,",
+    "start": 398.24,
+    "duration": 4.959
+  },
+  {
+    "text": "this is where it gets really weird. Um",
+    "start": 400.08,
+    "duration": 6.48
+  },
+  {
+    "text": "so if you have again if you have a an",
+    "start": 403.199,
+    "duration": 6.801
+  },
+  {
+    "text": "authoritative source of truth,",
+    "start": 406.56,
+    "duration": 5.12
+  },
+  {
+    "text": "I just taking a cat a CAD model for",
+    "start": 410.0,
+    "duration": 3.6
+  },
+  {
+    "text": "example, right? We have a new component",
+    "start": 411.68,
+    "duration": 3.6
+  },
+  {
+    "text": "and we are going to install that",
+    "start": 413.6,
+    "duration": 4.8
+  },
+  {
+    "text": "component in a system and we want to be",
+    "start": 415.28,
+    "duration": 5.359
+  },
+  {
+    "text": "able but that that component hasn't been",
+    "start": 418.4,
+    "duration": 4.72
+  },
+  {
+    "text": "manufactured yet but we want to the day",
+    "start": 420.639,
+    "duration": 4.56
+  },
+  {
+    "text": "it arrives at our factory we want to",
+    "start": 423.12,
+    "duration": 4.639
+  },
+  {
+    "text": "track that component through the factory",
+    "start": 425.199,
+    "duration": 5.681
+  },
+  {
+    "text": "until it is installed you know on in the",
+    "start": 427.759,
+    "duration": 4.88
+  },
+  {
+    "text": "system",
+    "start": 430.88,
+    "duration": 4.879
+  },
+  {
+    "text": "we can actually train a model to to",
+    "start": 432.639,
+    "duration": 4.56
+  },
+  {
+    "text": "recognize something it's never that",
+    "start": 435.759,
+    "duration": 2.961
+  },
+  {
+    "text": "nobody's ever seen before right because",
+    "start": 437.199,
+    "duration": 3.761
+  },
+  {
+    "text": "it's hasn't been built yet right so so",
+    "start": 438.72,
+    "duration": 4.24
+  },
+  {
+    "text": "we can have this kind of sort like day",
+    "start": 440.96,
+    "duration": 4.32
+  },
+  {
+    "text": "zero functionality to recognize objects",
+    "start": 442.96,
+    "duration": 4.32
+  },
+  {
+    "text": "that that",
+    "start": 445.28,
+    "duration": 7.039
+  },
+  {
+    "text": "um again have haven't been created yet.",
+    "start": 447.28,
+    "duration": 7.039
+  },
+  {
+    "text": "Interoperability hardware changes. You",
+    "start": 452.319,
+    "duration": 3.28
+  },
+  {
+    "text": "know, a lot of times if you if you",
+    "start": 454.319,
+    "duration": 2.801
+  },
+  {
+    "text": "upgrade a system, you don't just throw",
+    "start": 455.599,
+    "duration": 2.88
+  },
+  {
+    "text": "the old system away and start from",
+    "start": 457.12,
+    "duration": 2.4
+  },
+  {
+    "text": "scratch, right? You're going to upgrade",
+    "start": 458.479,
+    "duration": 2.241
+  },
+  {
+    "text": "sort of components of it. You're going",
+    "start": 459.52,
+    "duration": 2.48
+  },
+  {
+    "text": "to study it. You're going to see where",
+    "start": 460.72,
+    "duration": 2.879
+  },
+  {
+    "text": "what you can keep, what you can get rid",
+    "start": 462.0,
+    "duration": 3.28
+  },
+  {
+    "text": "of. You assuming you're just updating",
+    "start": 463.599,
+    "duration": 3.761
+  },
+  {
+    "text": "the camera. Again, this kind of ties",
+    "start": 465.28,
+    "duration": 3.759
+  },
+  {
+    "text": "back into that hardware procurement, the",
+    "start": 467.36,
+    "duration": 3.44
+  },
+  {
+    "text": "the ability to change portions of that",
+    "start": 469.039,
+    "duration": 7.44
+  },
+  {
+    "text": "system and and test out um the accuracy.",
+    "start": 470.8,
+    "duration": 8.16
+  },
+  {
+    "text": "If you",
+    "start": 476.479,
+    "duration": 4.321
+  },
+  {
+    "text": "if you're familiar with computer vision,",
+    "start": 478.96,
+    "duration": 4.959
+  },
+  {
+    "text": "this might mean more to you.",
+    "start": 480.8,
+    "duration": 5.44
+  },
+  {
+    "text": "For better or worse, your labels will be",
+    "start": 483.919,
+    "duration": 5.921
+  },
+  {
+    "text": "perfect. So, just be aware of that. Um",
+    "start": 486.24,
+    "duration": 5.12
+  },
+  {
+    "text": "and then operational design domain,",
+    "start": 489.84,
+    "duration": 2.96
+  },
+  {
+    "text": "which Louise will talk to you here in",
+    "start": 491.36,
+    "duration": 4.239
+  },
+  {
+    "text": "just a moment. Um, once you start",
+    "start": 492.8,
+    "duration": 4.48
+  },
+  {
+    "text": "generating synthetic data, it's very",
+    "start": 495.599,
+    "duration": 4.961
+  },
+  {
+    "text": "easy to just to just run, right? I mean,",
+    "start": 497.28,
+    "duration": 4.96
+  },
+  {
+    "text": "it's to go from, oh, here's a 100",
+    "start": 500.56,
+    "duration": 3.359
+  },
+  {
+    "text": "images. I can generate a million images",
+    "start": 502.24,
+    "duration": 4.239
+  },
+  {
+    "text": "and I've got labels for all of them. If",
+    "start": 503.919,
+    "duration": 5.361
+  },
+  {
+    "text": "you don't have this defined, you'll",
+    "start": 506.479,
+    "duration": 5.601
+  },
+  {
+    "text": "you'll end up with a lot of",
+    "start": 509.28,
+    "duration": 4.8
+  },
+  {
+    "text": "uh essentially just worthless data. Like",
+    "start": 512.08,
+    "duration": 3.92
+  },
+  {
+    "text": "it's it's very easy to, you know, it's",
+    "start": 514.08,
+    "duration": 4.16
+  },
+  {
+    "text": "very uh important that you sort of",
+    "start": 516.0,
+    "duration": 5.76
+  },
+  {
+    "text": "define your your issue. And then lastly,",
+    "start": 518.24,
+    "duration": 5.76
+  },
+  {
+    "text": "just again to be aware, if you control",
+    "start": 521.76,
+    "duration": 4.16
+  },
+  {
+    "text": "the data, you control the bias, right?",
+    "start": 524.0,
+    "duration": 3.839
+  },
+  {
+    "text": "If there's a bias in your model, it you",
+    "start": 525.92,
+    "duration": 4.24
+  },
+  {
+    "text": "can almost always tie it back to the",
+    "start": 527.839,
+    "duration": 4.801
+  },
+  {
+    "text": "data. All right. Now, Luis is going to",
+    "start": 530.16,
+    "duration": 6.72
+  },
+  {
+    "text": "cover the operational design domain.",
+    "start": 532.64,
+    "duration": 8.8
+  },
+  {
+    "text": "Okay. Um, so just what is this? What is",
+    "start": 536.88,
+    "duration": 5.84
+  },
+  {
+    "text": "an operational design domain? So, I'm",
+    "start": 541.44,
+    "duration": 2.32
+  },
+  {
+    "text": "going to talk about this just in the",
+    "start": 542.72,
+    "duration": 3.44
+  },
+  {
+    "text": "context of like a real world example. So",
+    "start": 543.76,
+    "duration": 4.88
+  },
+  {
+    "text": "outside of the engine um outside of any",
+    "start": 546.16,
+    "duration": 6.16
+  },
+  {
+    "text": "of this stuff uh one concept in computer",
+    "start": 548.64,
+    "duration": 7.12
+  },
+  {
+    "text": "vision is you define your space first.",
+    "start": 552.32,
+    "duration": 5.28
+  },
+  {
+    "text": "Uh a lot of times especially in computer",
+    "start": 555.76,
+    "duration": 4.56
+  },
+  {
+    "text": "vision your system is an n-dimensional",
+    "start": 557.6,
+    "duration": 5.359
+  },
+  {
+    "text": "space or you know an image can be you",
+    "start": 560.32,
+    "duration": 3.76
+  },
+  {
+    "text": "know depending on your view you know",
+    "start": 562.959,
+    "duration": 2.401
+  },
+  {
+    "text": "it's there's n dimensions there's lot",
+    "start": 564.08,
+    "duration": 3.12
+  },
+  {
+    "text": "lots of pixels lots of combinations so",
+    "start": 565.36,
+    "duration": 4.479
+  },
+  {
+    "text": "we got to parameterize our system and so",
+    "start": 567.2,
+    "duration": 5.04
+  },
+  {
+    "text": "we do that first uh we think in this",
+    "start": 569.839,
+    "duration": 5.68
+  },
+  {
+    "text": "case uh our system is air refueling um",
+    "start": 572.24,
+    "duration": 6.24
+  },
+  {
+    "text": "so this is a KC46 airplane um in the",
+    "start": 575.519,
+    "duration": 4.32
+  },
+  {
+    "text": "bottom images there you see that",
+    "start": 578.48,
+    "duration": 3.52
+  },
+  {
+    "text": "vertical thing uh with wings it's",
+    "start": 579.839,
+    "duration": 4.56
+  },
+  {
+    "text": "basically a pipe with wings uh that's",
+    "start": 582.0,
+    "duration": 4.48
+  },
+  {
+    "text": "what connects to the receiving aircraft",
+    "start": 584.399,
+    "duration": 5.12
+  },
+  {
+    "text": "to pass fuel midair. So, we have, you",
+    "start": 586.48,
+    "duration": 4.72
+  },
+  {
+    "text": "know, obviously a boom, another",
+    "start": 589.519,
+    "duration": 4.241
+  },
+  {
+    "text": "airplane. We have its position and",
+    "start": 591.2,
+    "duration": 5.36
+  },
+  {
+    "text": "orientation. Uh, we have the way the the",
+    "start": 593.76,
+    "duration": 5.04
+  },
+  {
+    "text": "the materials look. We can have a a",
+    "start": 596.56,
+    "duration": 4.8
+  },
+  {
+    "text": "brand new leading edge, a worn in one.",
+    "start": 598.8,
+    "duration": 4.88
+  },
+  {
+    "text": "We fly over different terrain and the",
+    "start": 601.36,
+    "duration": 3.68
+  },
+  {
+    "text": "sun can be in different positions",
+    "start": 603.68,
+    "duration": 4.56
+  },
+  {
+    "text": "affecting the image. Um, so this is all",
+    "start": 605.04,
+    "duration": 5.52
+  },
+  {
+    "text": "important to parameterize outside of",
+    "start": 608.24,
+    "duration": 4.64
+  },
+  {
+    "text": "Unreal. And then once we say okay well",
+    "start": 610.56,
+    "duration": 5.2
+  },
+  {
+    "text": "we expect the airplane to roll plus or",
+    "start": 612.88,
+    "duration": 4.959
+  },
+  {
+    "text": "minus 5 degrees you know during air",
+    "start": 615.76,
+    "duration": 5.04
+  },
+  {
+    "text": "refueling now we have a range and then",
+    "start": 617.839,
+    "duration": 4.881
+  },
+  {
+    "text": "we can map that to Unreal and create",
+    "start": 620.8,
+    "duration": 4.479
+  },
+  {
+    "text": "these images. So in this case you know",
+    "start": 622.72,
+    "duration": 4.48
+  },
+  {
+    "text": "we got receiver we call it receiving",
+    "start": 625.279,
+    "duration": 3.841
+  },
+  {
+    "text": "aircraft pose materials background some",
+    "start": 627.2,
+    "duration": 3.36
+  },
+  {
+    "text": "position. So and then we can even do the",
+    "start": 629.12,
+    "duration": 3.44
+  },
+  {
+    "text": "night uh stuff so we can model the",
+    "start": 630.56,
+    "duration": 3.6
+  },
+  {
+    "text": "lights and illumination and how that",
+    "start": 632.56,
+    "duration": 3.839
+  },
+  {
+    "text": "looks in Unreal. So all controllable um",
+    "start": 634.16,
+    "duration": 4.16
+  },
+  {
+    "text": "in Unreal to be able to map our",
+    "start": 636.399,
+    "duration": 5.041
+  },
+  {
+    "text": "operating space.",
+    "start": 638.32,
+    "duration": 6.079
+  },
+  {
+    "text": "So here's a here's a flight condition.",
+    "start": 641.44,
+    "duration": 4.959
+  },
+  {
+    "text": "So I guess show of hands who who thinks",
+    "start": 644.399,
+    "duration": 4.88
+  },
+  {
+    "text": "the left image is real",
+    "start": 646.399,
+    "duration": 5.201
+  },
+  {
+    "text": "versus who thinks the right image is",
+    "start": 649.279,
+    "duration": 4.641
+  },
+  {
+    "text": "real?",
+    "start": 651.6,
+    "duration": 4.56
+  },
+  {
+    "text": "Okay, so it's the left the left image is",
+    "start": 653.92,
+    "duration": 5.84
+  },
+  {
+    "text": "real. Um yeah, see you kind of maybe",
+    "start": 656.16,
+    "duration": 5.28
+  },
+  {
+    "text": "noticed that. Good thing I said that",
+    "start": 659.76,
+    "duration": 5.04
+  },
+  {
+    "text": "quick. Um so this is important. We want",
+    "start": 661.44,
+    "duration": 5.519
+  },
+  {
+    "text": "test data that represents our our space",
+    "start": 664.8,
+    "duration": 4.719
+  },
+  {
+    "text": "so we can fly the real condition create",
+    "start": 666.959,
+    "duration": 4.241
+  },
+  {
+    "text": "it in Unreal. So here we use the",
+    "start": 669.519,
+    "duration": 3.44
+  },
+  {
+    "text": "aircraft pose from the flight data the",
+    "start": 671.2,
+    "duration": 3.6
+  },
+  {
+    "text": "materials from the paint specs so we can",
+    "start": 672.959,
+    "duration": 2.801
+  },
+  {
+    "text": "and and there's some more work to be",
+    "start": 674.8,
+    "duration": 2.96
+  },
+  {
+    "text": "done on that but that it it looks",
+    "start": 675.76,
+    "duration": 4.56
+  },
+  {
+    "text": "representative you know the color um we",
+    "start": 677.76,
+    "duration": 4.48
+  },
+  {
+    "text": "get the lat long altitude from the GPS",
+    "start": 680.32,
+    "duration": 3.36
+  },
+  {
+    "text": "buses on the airplane to get that",
+    "start": 682.24,
+    "duration": 3.92
+  },
+  {
+    "text": "geospatial position. Um and then we can",
+    "start": 683.68,
+    "duration": 3.76
+  },
+  {
+    "text": "get the sun from the time of day. So you",
+    "start": 686.16,
+    "duration": 3.04
+  },
+  {
+    "text": "can see the shadows are lining up. We're",
+    "start": 687.44,
+    "duration": 5.28
+  },
+  {
+    "text": "flying over the same terrain. Um, and so",
+    "start": 689.2,
+    "duration": 5.36
+  },
+  {
+    "text": "now we have representative test data to",
+    "start": 692.72,
+    "duration": 4.559
+  },
+  {
+    "text": "model our system and then to to test our",
+    "start": 694.56,
+    "duration": 6.279
+  },
+  {
+    "text": "computer vision algorithms.",
+    "start": 697.279,
+    "duration": 3.56
+  },
+  {
+    "text": "Okay. So now I'm going to hand it over",
+    "start": 701.519,
+    "duration": 2.32
+  },
+  {
+    "text": "back to Taylor. We're going to talk",
+    "start": 702.959,
+    "duration": 3.681
+  },
+  {
+    "text": "about how we get data in the engine.",
+    "start": 703.839,
+    "duration": 4.641
+  },
+  {
+    "text": "I'm curious about some of those hands",
+    "start": 706.64,
+    "duration": 3.199
+  },
+  {
+    "text": "because I feel like every time we ask",
+    "start": 708.48,
+    "duration": 2.64
+  },
+  {
+    "text": "people that, they think we're trying to",
+    "start": 709.839,
+    "duration": 2.801
+  },
+  {
+    "text": "trick them and they see the left one,",
+    "start": 711.12,
+    "duration": 3.04
+  },
+  {
+    "text": "they're like, \"That looks too real.\"",
+    "start": 712.64,
+    "duration": 3.84
+  },
+  {
+    "text": "They're trying to trick me. So it might",
+    "start": 714.16,
+    "duration": 3.359
+  },
+  {
+    "text": "there might be a little bit something",
+    "start": 716.48,
+    "duration": 2.64
+  },
+  {
+    "text": "there. All right. So this we're going to",
+    "start": 717.519,
+    "duration": 3.921
+  },
+  {
+    "text": "import data. Um, all right. Data comes",
+    "start": 719.12,
+    "duration": 3.839
+  },
+  {
+    "text": "in obviously all kinds of forms and",
+    "start": 721.44,
+    "duration": 3.12
+  },
+  {
+    "text": "sizes. We're just going to use a CSV",
+    "start": 722.959,
+    "duration": 3.12
+  },
+  {
+    "text": "file for for this, right? Everybody",
+    "start": 724.56,
+    "duration": 3.839
+  },
+  {
+    "text": "recognizes this. This is a CSV file open",
+    "start": 726.079,
+    "duration": 5.601
+  },
+  {
+    "text": "in Excel. Um, you got your index. We're",
+    "start": 728.399,
+    "duration": 5.601
+  },
+  {
+    "text": "going to use these X, Y, and Z values",
+    "start": 731.68,
+    "duration": 4.959
+  },
+  {
+    "text": "to, you know, to populate uh, you know,",
+    "start": 734.0,
+    "duration": 5.04
+  },
+  {
+    "text": "to add sockets to a static mesh. Roll",
+    "start": 736.639,
+    "duration": 4.561
+  },
+  {
+    "text": "pitch yaw just random latl long has all",
+    "start": 739.04,
+    "duration": 4.799
+  },
+  {
+    "text": "been zeroed out. You can ignore that",
+    "start": 741.2,
+    "duration": 4.0
+  },
+  {
+    "text": "when you're actually working with real",
+    "start": 743.839,
+    "duration": 4.081
+  },
+  {
+    "text": "data though. Um so well anyway so we're",
+    "start": 745.2,
+    "duration": 4.56
+  },
+  {
+    "text": "going to convert this to a a data table",
+    "start": 747.92,
+    "duration": 3.84
+  },
+  {
+    "text": "and we're going to use Python to do",
+    "start": 749.76,
+    "duration": 4.079
+  },
+  {
+    "text": "that. Um and there there's a few you",
+    "start": 751.76,
+    "duration": 3.6
+  },
+  {
+    "text": "know there's a few benefits to that. One",
+    "start": 753.839,
+    "duration": 3.041
+  },
+  {
+    "text": "is you know these data tables are in",
+    "start": 755.36,
+    "duration": 3.039
+  },
+  {
+    "text": "binary format. They're very fast to",
+    "start": 756.88,
+    "duration": 3.199
+  },
+  {
+    "text": "read. It makes it viable to read that at",
+    "start": 758.399,
+    "duration": 4.24
+  },
+  {
+    "text": "runtime. Uh and there's also type safety",
+    "start": 760.079,
+    "duration": 4.081
+  },
+  {
+    "text": "when you're dealing with massive amounts",
+    "start": 762.639,
+    "duration": 4.561
+  },
+  {
+    "text": "of data. Uh that's a it's very good",
+    "start": 764.16,
+    "duration": 5.679
+  },
+  {
+    "text": "thing to have. uh and and just you know",
+    "start": 767.2,
+    "duration": 4.16
+  },
+  {
+    "text": "generally again this is this is very",
+    "start": 769.839,
+    "duration": 3.44
+  },
+  {
+    "text": "simplified but you might have you know a",
+    "start": 771.36,
+    "duration": 4.719
+  },
+  {
+    "text": "couple hundred columns and you know tens",
+    "start": 773.279,
+    "duration": 4.321
+  },
+  {
+    "text": "of thousands if not hundreds of",
+    "start": 776.079,
+    "duration": 3.281
+  },
+  {
+    "text": "thousands of of rows you know that's",
+    "start": 777.6,
+    "duration": 3.679
+  },
+  {
+    "text": "what that's the that's the data you're",
+    "start": 779.36,
+    "duration": 3.68
+  },
+  {
+    "text": "ingesting and Unreal Engine can handle",
+    "start": 781.279,
+    "duration": 4.081
+  },
+  {
+    "text": "it. So if you see up here at the top,",
+    "start": 783.04,
+    "duration": 3.52
+  },
+  {
+    "text": "you know, we've just got an editor",
+    "start": 785.36,
+    "duration": 4.0
+  },
+  {
+    "text": "utility uh uh button, right? So we use",
+    "start": 786.56,
+    "duration": 4.88
+  },
+  {
+    "text": "these editor utility widgets. User",
+    "start": 789.36,
+    "duration": 3.84
+  },
+  {
+    "text": "clicks the button, it goes in and it",
+    "start": 791.44,
+    "duration": 3.6
+  },
+  {
+    "text": "reads a very specific this is, you know,",
+    "start": 793.2,
+    "duration": 5.04
+  },
+  {
+    "text": "a hard-coded Python file, right? Um that",
+    "start": 795.04,
+    "duration": 6.479
+  },
+  {
+    "text": "that example CSV import.py.",
+    "start": 798.24,
+    "duration": 4.8
+  },
+  {
+    "text": "We read the text and then we feed the",
+    "start": 801.519,
+    "duration": 3.521
+  },
+  {
+    "text": "sizzle execute Python script. So just",
+    "start": 803.04,
+    "duration": 3.359
+  },
+  {
+    "text": "out of curiosity, how many people here",
+    "start": 805.04,
+    "duration": 3.12
+  },
+  {
+    "text": "know that that the Unreal Engine ships",
+    "start": 806.399,
+    "duration": 4.801
+  },
+  {
+    "text": "with an embedded version of Python?",
+    "start": 808.16,
+    "duration": 5.28
+  },
+  {
+    "text": "That's awesome. It is so powerful. It's",
+    "start": 811.2,
+    "duration": 4.72
+  },
+  {
+    "text": "so cool. Um, so I mean here you can see",
+    "start": 813.44,
+    "duration": 3.839
+  },
+  {
+    "text": "we're feeding it two arguments. We're",
+    "start": 815.92,
+    "duration": 3.28
+  },
+  {
+    "text": "feeding it where the CSV file is and",
+    "start": 817.279,
+    "duration": 3.201
+  },
+  {
+    "text": "we're feeding it where we want that data",
+    "start": 819.2,
+    "duration": 4.0
+  },
+  {
+    "text": "table to save out, right? And then",
+    "start": 820.48,
+    "duration": 4.56
+  },
+  {
+    "text": "here's the here's again just a very",
+    "start": 823.2,
+    "duration": 4.4
+  },
+  {
+    "text": "simple simple Python script of what",
+    "start": 825.04,
+    "duration": 3.919
+  },
+  {
+    "text": "that's doing, right? We pass those",
+    "start": 827.6,
+    "duration": 4.239
+  },
+  {
+    "text": "arguments in uh and then we load you",
+    "start": 828.959,
+    "duration": 4.641
+  },
+  {
+    "text": "know we we've already defined a strct",
+    "start": 831.839,
+    "duration": 3.601
+  },
+  {
+    "text": "which is again just the basically the",
+    "start": 833.6,
+    "duration": 5.44
+  },
+  {
+    "text": "col the column names that you saw. Um we",
+    "start": 835.44,
+    "duration": 5.68
+  },
+  {
+    "text": "you know we read that in uh and then we",
+    "start": 839.04,
+    "duration": 4.159
+  },
+  {
+    "text": "save that then we save that as a data",
+    "start": 841.12,
+    "duration": 4.32
+  },
+  {
+    "text": "table. All right. Now prepping the",
+    "start": 843.199,
+    "duration": 4.401
+  },
+  {
+    "text": "assets",
+    "start": 845.44,
+    "duration": 4.639
+  },
+  {
+    "text": "again very similar to what you saw but",
+    "start": 847.6,
+    "duration": 5.52
+  },
+  {
+    "text": "in this case we're getting the actor you",
+    "start": 850.079,
+    "duration": 4.32
+  },
+  {
+    "text": "know we're getting the selected actor.",
+    "start": 853.12,
+    "duration": 2.32
+  },
+  {
+    "text": "We're just getting the first one that",
+    "start": 854.399,
+    "duration": 3.521
+  },
+  {
+    "text": "you selected. These are editor",
+    "start": 855.44,
+    "duration": 5.519
+  },
+  {
+    "text": "functions. Um right so just that you",
+    "start": 857.92,
+    "duration": 5.039
+  },
+  {
+    "text": "can't you won't be able to package this",
+    "start": 860.959,
+    "duration": 3.201
+  },
+  {
+    "text": "into a game. Right? This is kind of",
+    "start": 862.959,
+    "duration": 3.281
+  },
+  {
+    "text": "fixed to the editor. uh just to make",
+    "start": 864.16,
+    "duration": 4.4
+  },
+  {
+    "text": "that clear. Uh and then you know we're",
+    "start": 866.24,
+    "duration": 3.68
+  },
+  {
+    "text": "getting the static mesh, we're getting",
+    "start": 868.56,
+    "duration": 3.92
+  },
+  {
+    "text": "its you know it's uh you know the actual",
+    "start": 869.92,
+    "duration": 5.919
+  },
+  {
+    "text": "uh directory location of that asset and",
+    "start": 872.48,
+    "duration": 4.799
+  },
+  {
+    "text": "then we're going to save it as a string.",
+    "start": 875.839,
+    "duration": 3.281
+  },
+  {
+    "text": "The next thing we do is we go and we",
+    "start": 877.279,
+    "duration": 3.36
+  },
+  {
+    "text": "read every single line in that data",
+    "start": 879.12,
+    "duration": 3.76
+  },
+  {
+    "text": "table and we take the x y and z and we",
+    "start": 880.639,
+    "duration": 5.121
+  },
+  {
+    "text": "package those into an array of vectors.",
+    "start": 882.88,
+    "duration": 4.8
+  },
+  {
+    "text": "Then just like before you know we read",
+    "start": 885.76,
+    "duration": 4.0
+  },
+  {
+    "text": "that into this execute python script but",
+    "start": 887.68,
+    "duration": 4.56
+  },
+  {
+    "text": "we're passing it an array of vectors and",
+    "start": 889.76,
+    "duration": 5.04
+  },
+  {
+    "text": "you know a string. And the reason we use",
+    "start": 892.24,
+    "duration": 5.599
+  },
+  {
+    "text": "that read text node is it lets your",
+    "start": 894.8,
+    "duration": 4.64
+  },
+  {
+    "text": "developers",
+    "start": 897.839,
+    "duration": 3.921
+  },
+  {
+    "text": "develop Python in whatever IDE they're",
+    "start": 899.44,
+    "duration": 4.0
+  },
+  {
+    "text": "comfortable with, right? So you don't",
+    "start": 901.76,
+    "duration": 3.199
+  },
+  {
+    "text": "have to do it in the engine. You know,",
+    "start": 903.44,
+    "duration": 3.04
+  },
+  {
+    "text": "you use Visual Studio Code, whatever",
+    "start": 904.959,
+    "duration": 3.041
+  },
+  {
+    "text": "whatever you're comfortable with, right?",
+    "start": 906.48,
+    "duration": 3.359
+  },
+  {
+    "text": "We just we read it in when you're done.",
+    "start": 908.0,
+    "duration": 3.76
+  },
+  {
+    "text": "And the idea that, you know, I mean, you",
+    "start": 909.839,
+    "duration": 4.401
+  },
+  {
+    "text": "can see here just the the sheer fact",
+    "start": 911.76,
+    "duration": 4.16
+  },
+  {
+    "text": "that you can pass an array of vectors,",
+    "start": 914.24,
+    "duration": 3.12
+  },
+  {
+    "text": "like you can start to imagine what you",
+    "start": 915.92,
+    "duration": 3.279
+  },
+  {
+    "text": "can do with that. And additionally, you",
+    "start": 917.36,
+    "duration": 3.839
+  },
+  {
+    "text": "can get arguments back out of Python. So",
+    "start": 919.199,
+    "duration": 3.76
+  },
+  {
+    "text": "you might do your analysis in Python,",
+    "start": 921.199,
+    "duration": 3.041
+  },
+  {
+    "text": "right? And then you get, you know, an",
+    "start": 922.959,
+    "duration": 2.88
+  },
+  {
+    "text": "array of, you know, maybe those are, you",
+    "start": 924.24,
+    "duration": 4.399
+  },
+  {
+    "text": "know, a point cloud or or",
+    "start": 925.839,
+    "duration": 4.081
+  },
+  {
+    "text": "whatever it is. You can get that data",
+    "start": 928.639,
+    "duration": 3.2
+  },
+  {
+    "text": "back out of a Python script. So that",
+    "start": 929.92,
+    "duration": 5.76
+  },
+  {
+    "text": "integration is is is very useful. What",
+    "start": 931.839,
+    "duration": 5.68
+  },
+  {
+    "text": "this Python script does again, it just",
+    "start": 935.68,
+    "duration": 3.92
+  },
+  {
+    "text": "takes that ve that vector array, we",
+    "start": 937.519,
+    "duration": 5.68
+  },
+  {
+    "text": "passed it. Um, you know, we we turn it",
+    "start": 939.6,
+    "duration": 5.919
+  },
+  {
+    "text": "into an actual Unreal vector just again",
+    "start": 943.199,
+    "duration": 5.521
+  },
+  {
+    "text": "for type safety. um we load the me the",
+    "start": 945.519,
+    "duration": 5.281
+  },
+  {
+    "text": "location of the mesh and then for each",
+    "start": 948.72,
+    "duration": 4.88
+  },
+  {
+    "text": "one of those vectors we are creating a",
+    "start": 950.8,
+    "duration": 4.719
+  },
+  {
+    "text": "key point you'll see line 15 you know",
+    "start": 953.6,
+    "duration": 3.52
+  },
+  {
+    "text": "keyoint underscore and it's just an",
+    "start": 955.519,
+    "duration": 3.921
+  },
+  {
+    "text": "index right so you know here we're I",
+    "start": 957.12,
+    "duration": 3.839
+  },
+  {
+    "text": "think we're adding eight right so you",
+    "start": 959.44,
+    "duration": 4.399
+  },
+  {
+    "text": "have key point zero through seven",
+    "start": 960.959,
+    "duration": 4.401
+  },
+  {
+    "text": "I just point that out because you can",
+    "start": 963.839,
+    "duration": 3.201
+  },
+  {
+    "text": "use this to put key points for different",
+    "start": 965.36,
+    "duration": 3.919
+  },
+  {
+    "text": "purposes um you can have well let me go",
+    "start": 967.04,
+    "duration": 3.44
+  },
+  {
+    "text": "to the next slide right so this is the",
+    "start": 969.279,
+    "duration": 5.12
+  },
+  {
+    "text": "end result we read in the CSV file and",
+    "start": 970.48,
+    "duration": 6.479
+  },
+  {
+    "text": "now we've added sockets to a mesh",
+    "start": 974.399,
+    "duration": 4.56
+  },
+  {
+    "text": "You can again if you do that if you do",
+    "start": 976.959,
+    "duration": 4.081
+  },
+  {
+    "text": "this sort of analysis in in Python you",
+    "start": 978.959,
+    "duration": 3.361
+  },
+  {
+    "text": "you might come up with a you know",
+    "start": 981.04,
+    "duration": 2.4
+  },
+  {
+    "text": "different points for different use",
+    "start": 982.32,
+    "duration": 2.72
+  },
+  {
+    "text": "cases. So like maybe you want to segment",
+    "start": 983.44,
+    "duration": 3.759
+  },
+  {
+    "text": "out a portion of the aircraft, right? So",
+    "start": 985.04,
+    "duration": 4.479
+  },
+  {
+    "text": "I want to get a bounding box around just",
+    "start": 987.199,
+    "duration": 4.161
+  },
+  {
+    "text": "the engine, right? So you could, you",
+    "start": 989.519,
+    "duration": 3.281
+  },
+  {
+    "text": "know, you name those key points, you",
+    "start": 991.36,
+    "duration": 3.2
+  },
+  {
+    "text": "know, engine, right? And then, you know,",
+    "start": 992.8,
+    "duration": 4.08
+  },
+  {
+    "text": "engine one, engine two, what, whatever",
+    "start": 994.56,
+    "duration": 4.32
+  },
+  {
+    "text": "that is. Um, you know, we'll use them",
+    "start": 996.88,
+    "duration": 3.84
+  },
+  {
+    "text": "for bounding boxes. We'll use them for",
+    "start": 998.88,
+    "duration": 4.16
+  },
+  {
+    "text": "key point. So we use them for key points",
+    "start": 1000.72,
+    "duration": 5.28
+  },
+  {
+    "text": "here to do a to do a keyoint detection",
+    "start": 1003.04,
+    "duration": 4.799
+  },
+  {
+    "text": "and a pose estimation, right? So we're",
+    "start": 1006.0,
+    "duration": 3.36
+  },
+  {
+    "text": "trying to get the pose of that aircraft,",
+    "start": 1007.839,
+    "duration": 3.201
+  },
+  {
+    "text": "right? So we can use those sockets. We",
+    "start": 1009.36,
+    "duration": 2.96
+  },
+  {
+    "text": "know where they are. They're tied to",
+    "start": 1011.04,
+    "duration": 3.2
+  },
+  {
+    "text": "vertices on the aircraft. And then we",
+    "start": 1012.32,
+    "duration": 3.439
+  },
+  {
+    "text": "can, you know, we have a model that can",
+    "start": 1014.24,
+    "duration": 3.039
+  },
+  {
+    "text": "inference against those images and give",
+    "start": 1015.759,
+    "duration": 5.281
+  },
+  {
+    "text": "us a pose of the aircraft.",
+    "start": 1017.279,
+    "duration": 7.401
+  },
+  {
+    "text": "What am I missing here?",
+    "start": 1021.04,
+    "duration": 3.64
+  },
+  {
+    "text": "Okay.",
+    "start": 1024.799,
+    "duration": 3.441
+  },
+  {
+    "text": "Okay. And Luis is going to talk to you",
+    "start": 1026.559,
+    "duration": 4.64
+  },
+  {
+    "text": "about populating the sequencer.",
+    "start": 1028.24,
+    "duration": 7.04
+  },
+  {
+    "text": "Okay. Um, I'm the AI ML guy. I'm not the",
+    "start": 1031.199,
+    "duration": 6.961
+  },
+  {
+    "text": "Unreal expert. Um, but some butcher some",
+    "start": 1035.28,
+    "duration": 4.32
+  },
+  {
+    "text": "of the following stuff, but Taylor",
+    "start": 1038.16,
+    "duration": 3.039
+  },
+  {
+    "text": "mentioned that you guys might like the",
+    "start": 1039.6,
+    "duration": 5.839
+  },
+  {
+    "text": "spaghetti graphs. Um, so, uh, what",
+    "start": 1041.199,
+    "duration": 5.201
+  },
+  {
+    "text": "Taylor showed you was kind of a",
+    "start": 1045.439,
+    "duration": 3.12
+  },
+  {
+    "text": "simplified example of getting data in,",
+    "start": 1046.4,
+    "duration": 4.159
+  },
+  {
+    "text": "um, using editor utility widgets and",
+    "start": 1048.559,
+    "duration": 3.681
+  },
+  {
+    "text": "blueprints, uh, to do something with",
+    "start": 1050.559,
+    "duration": 4.161
+  },
+  {
+    "text": "that data. Um, and so here we're doing",
+    "start": 1052.24,
+    "duration": 4.48
+  },
+  {
+    "text": "much more stuff with this data. So",
+    "start": 1054.72,
+    "duration": 3.92
+  },
+  {
+    "text": "there, this is representing how we're",
+    "start": 1056.72,
+    "duration": 3.92
+  },
+  {
+    "text": "we're taking a CSV file, we're importing",
+    "start": 1058.64,
+    "duration": 4.399
+  },
+  {
+    "text": "it, and then we're we're feeding that uh",
+    "start": 1060.64,
+    "duration": 4.399
+  },
+  {
+    "text": "that information to all of our actors in",
+    "start": 1063.039,
+    "duration": 3.601
+  },
+  {
+    "text": "our scene. So it can be the receiving",
+    "start": 1065.039,
+    "duration": 4.64
+  },
+  {
+    "text": "aircraft, the boom position, uh the geo",
+    "start": 1066.64,
+    "duration": 5.12
+  },
+  {
+    "text": "reference, the position of the sun, or",
+    "start": 1069.679,
+    "duration": 4.961
+  },
+  {
+    "text": "the orientation of the sun. Um so it",
+    "start": 1071.76,
+    "duration": 4.48
+  },
+  {
+    "text": "goes through all of those nodes, uh you",
+    "start": 1074.64,
+    "duration": 3.2
+  },
+  {
+    "text": "know, with just the click of a button.",
+    "start": 1076.24,
+    "duration": 3.04
+  },
+  {
+    "text": "Um so just to kind of show you guys the",
+    "start": 1077.84,
+    "duration": 3.04
+  },
+  {
+    "text": "complexity that we're able to achieve,",
+    "start": 1079.28,
+    "duration": 4.48
+  },
+  {
+    "text": "uh thanks to the editor utility widgets.",
+    "start": 1080.88,
+    "duration": 5.52
+  },
+  {
+    "text": "Um and so now what we'll do is we'll",
+    "start": 1083.76,
+    "duration": 5.2
+  },
+  {
+    "text": "zoom into one of these sections and uh",
+    "start": 1086.4,
+    "duration": 6.92
+  },
+  {
+    "text": "see how we can set an actor's position.",
+    "start": 1088.96,
+    "duration": 4.36
+  },
+  {
+    "text": "Okay.",
+    "start": 1094.96,
+    "duration": 4.959
+  },
+  {
+    "text": "Um, so here we set up our sequencer. Um,",
+    "start": 1097.28,
+    "duration": 4.639
+  },
+  {
+    "text": "and we've got, you know, some some actor",
+    "start": 1099.919,
+    "duration": 3.281
+  },
+  {
+    "text": "with its transform there. So this",
+    "start": 1101.919,
+    "duration": 3.201
+  },
+  {
+    "text": "assumes that, uh, we already assigned",
+    "start": 1103.2,
+    "duration": 4.24
+  },
+  {
+    "text": "possessibles as a movie scene binding",
+    "start": 1105.12,
+    "duration": 4.4
+  },
+  {
+    "text": "proxy type.",
+    "start": 1107.44,
+    "duration": 3.28
+  },
+  {
+    "text": "Uh, but we'll navigate through the",
+    "start": 1109.52,
+    "duration": 2.96
+  },
+  {
+    "text": "tracks to add position and orientation",
+    "start": 1110.72,
+    "duration": 4.0
+  },
+  {
+    "text": "keys. So next we'll get the movie scene",
+    "start": 1112.48,
+    "duration": 6.12
+  },
+  {
+    "text": "3D transform track.",
+    "start": 1114.72,
+    "duration": 3.88
+  },
+  {
+    "text": "Uh, then movie scene selection section.",
+    "start": 1119.12,
+    "duration": 5.04
+  },
+  {
+    "text": "Sorry. Movie scene section",
+    "start": 1121.12,
+    "duration": 5.28
+  },
+  {
+    "text": "and then the channels and those are",
+    "start": 1124.16,
+    "duration": 4.08
+  },
+  {
+    "text": "color labeled. They're below in",
+    "start": 1126.4,
+    "duration": 4.84
+  },
+  {
+    "text": "sequencer.",
+    "start": 1128.24,
+    "duration": 3.0
+  },
+  {
+    "text": "Those channels end up here. So once once",
+    "start": 1134.0,
+    "duration": 3.28
+  },
+  {
+    "text": "we get the channels of our actors",
+    "start": 1136.0,
+    "duration": 3.919
+  },
+  {
+    "text": "transform uh then we can add a key frame",
+    "start": 1137.28,
+    "duration": 4.32
+  },
+  {
+    "text": "with the values from the data table that",
+    "start": 1139.919,
+    "duration": 3.041
+  },
+  {
+    "text": "we imported. So there's a lot of stuff",
+    "start": 1141.6,
+    "duration": 3.199
+  },
+  {
+    "text": "here but essentially all you're doing is",
+    "start": 1142.96,
+    "duration": 3.599
+  },
+  {
+    "text": "we're setting the frame number. We're",
+    "start": 1144.799,
+    "duration": 3.921
+  },
+  {
+    "text": "setting the value of that key frame and",
+    "start": 1146.559,
+    "duration": 3.601
+  },
+  {
+    "text": "then we're setting an interpolation",
+    "start": 1148.72,
+    "duration": 3.76
+  },
+  {
+    "text": "type. Uh there's more to talk about with",
+    "start": 1150.16,
+    "duration": 4.08
+  },
+  {
+    "text": "interpolation methods, but essentially",
+    "start": 1152.48,
+    "duration": 5.52
+  },
+  {
+    "text": "if uh your sensor rate matches the rate",
+    "start": 1154.24,
+    "duration": 5.52
+  },
+  {
+    "text": "that you're trying to make data in 30",
+    "start": 1158.0,
+    "duration": 3.12
+  },
+  {
+    "text": "frames a second, 30 frames a second, we",
+    "start": 1159.76,
+    "duration": 2.88
+  },
+  {
+    "text": "just set it as constant. And if they're",
+    "start": 1161.12,
+    "duration": 2.96
+  },
+  {
+    "text": "different, then there's other other",
+    "start": 1162.64,
+    "duration": 4.399
+  },
+  {
+    "text": "things that you can do. Um,",
+    "start": 1164.08,
+    "duration": 5.2
+  },
+  {
+    "text": "another thing to note is we use uh we",
+    "start": 1167.039,
+    "duration": 3.601
+  },
+  {
+    "text": "leverage the blueprint function",
+    "start": 1169.28,
+    "duration": 4.48
+  },
+  {
+    "text": "libraries uh to consolidate all of our",
+    "start": 1170.64,
+    "duration": 4.88
+  },
+  {
+    "text": "like calculations and logic that spans",
+    "start": 1173.76,
+    "duration": 4.72
+  },
+  {
+    "text": "our entire project. Um, so if you guys",
+    "start": 1175.52,
+    "duration": 4.08
+  },
+  {
+    "text": "are in computer vision, you know,",
+    "start": 1178.48,
+    "duration": 2.559
+  },
+  {
+    "text": "coordinate transformations are a big",
+    "start": 1179.6,
+    "duration": 3.76
+  },
+  {
+    "text": "thing. Easy to throw them in there and",
+    "start": 1181.039,
+    "duration": 3.921
+  },
+  {
+    "text": "and have a library that does all that",
+    "start": 1183.36,
+    "duration": 3.6
+  },
+  {
+    "text": "stuff. Here we have a simple feet to",
+    "start": 1184.96,
+    "duration": 4.079
+  },
+  {
+    "text": "centimeter conversion uh contained in a",
+    "start": 1186.96,
+    "duration": 4.24
+  },
+  {
+    "text": "macro.",
+    "start": 1189.039,
+    "duration": 4.081
+  },
+  {
+    "text": "Uh, so we're only showing the X and Y",
+    "start": 1191.2,
+    "duration": 3.68
+  },
+  {
+    "text": "positions here, which would be channels",
+    "start": 1193.12,
+    "duration": 4.32
+  },
+  {
+    "text": "zero and one. Um, but the Z position",
+    "start": 1194.88,
+    "duration": 4.32
+  },
+  {
+    "text": "would be channel two. And then roll",
+    "start": 1197.44,
+    "duration": 3.599
+  },
+  {
+    "text": "pitch and yaw would be channels three,",
+    "start": 1199.2,
+    "duration": 5.32
+  },
+  {
+    "text": "four, and five.",
+    "start": 1201.039,
+    "duration": 3.481
+  },
+  {
+    "text": "Okay, so actor blueprints. So we like to",
+    "start": 1206.72,
+    "duration": 5.52
+  },
+  {
+    "text": "store that functionality for for that",
+    "start": 1209.919,
+    "duration": 5.601
+  },
+  {
+    "text": "actor in its in its blueprint. Um, and",
+    "start": 1212.24,
+    "duration": 5.2
+  },
+  {
+    "text": "uh then custom events and functions",
+    "start": 1215.52,
+    "duration": 3.2
+  },
+  {
+    "text": "defined in that blueprint can be",
+    "start": 1217.44,
+    "duration": 3.44
+  },
+  {
+    "text": "accessed through sequencer. Um what's",
+    "start": 1218.72,
+    "duration": 4.079
+  },
+  {
+    "text": "nice about that is it allows you to",
+    "start": 1220.88,
+    "duration": 5.36
+  },
+  {
+    "text": "maintain logic uh in in sequencer as",
+    "start": 1222.799,
+    "duration": 5.601
+  },
+  {
+    "text": "well as runtime applications. So like",
+    "start": 1226.24,
+    "duration": 5.6
+  },
+  {
+    "text": "offline rendering uh in sequencer or",
+    "start": 1228.4,
+    "duration": 5.6
+  },
+  {
+    "text": "real time you know runtime applications.",
+    "start": 1231.84,
+    "duration": 6.56
+  },
+  {
+    "text": "Um and uh the example here is we're uh",
+    "start": 1234.0,
+    "duration": 5.919
+  },
+  {
+    "text": "in this actor for this receiving",
+    "start": 1238.4,
+    "duration": 4.0
+  },
+  {
+    "text": "aircraft we have functions to set the",
+    "start": 1239.919,
+    "duration": 4.401
+  },
+  {
+    "text": "lights. So we added all the lights we",
+    "start": 1242.4,
+    "duration": 4.0
+  },
+  {
+    "text": "added the IAS profiles which by the way",
+    "start": 1244.32,
+    "duration": 4.32
+  },
+  {
+    "text": "super great functionality. uh we all we",
+    "start": 1246.4,
+    "duration": 3.6
+  },
+  {
+    "text": "had to do is talk to our engineering",
+    "start": 1248.64,
+    "duration": 2.88
+  },
+  {
+    "text": "team and and lights for the for the",
+    "start": 1250.0,
+    "duration": 2.559
+  },
+  {
+    "text": "aircraft and they gave us all the",
+    "start": 1251.52,
+    "duration": 3.12
+  },
+  {
+    "text": "profiles and we just drag and drop them",
+    "start": 1252.559,
+    "duration": 4.321
+  },
+  {
+    "text": "uh into the engine into our project and",
+    "start": 1254.64,
+    "duration": 5.36
+  },
+  {
+    "text": "they just worked. Um so super great",
+    "start": 1256.88,
+    "duration": 4.24
+  },
+  {
+    "text": "functionality. So we have those",
+    "start": 1260.0,
+    "duration": 2.48
+  },
+  {
+    "text": "functions that control the lights that",
+    "start": 1261.12,
+    "duration": 3.76
+  },
+  {
+    "text": "dim the lights um and then we can call",
+    "start": 1262.48,
+    "duration": 6.88
+  },
+  {
+    "text": "them in sequencer uh using events.",
+    "start": 1264.88,
+    "duration": 6.48
+  },
+  {
+    "text": "Um and we can we can even do things like",
+    "start": 1269.36,
+    "duration": 3.28
+  },
+  {
+    "text": "triggering the flood lights based on",
+    "start": 1271.36,
+    "duration": 2.88
+  },
+  {
+    "text": "time of day. So because we're also",
+    "start": 1272.64,
+    "duration": 3.36
+  },
+  {
+    "text": "controlling the position of the sun,",
+    "start": 1274.24,
+    "duration": 3.52
+  },
+  {
+    "text": "when it gets too low, boom, the lights",
+    "start": 1276.0,
+    "duration": 4.799
+  },
+  {
+    "text": "come on.",
+    "start": 1277.76,
+    "duration": 6.88
+  },
+  {
+    "text": "Uh, yep. Okay, cool. So now we'll talk",
+    "start": 1280.799,
+    "duration": 5.201
+  },
+  {
+    "text": "about uh, so we talked about getting",
+    "start": 1284.64,
+    "duration": 2.88
+  },
+  {
+    "text": "data in, doing stuff with the data. Now",
+    "start": 1286.0,
+    "duration": 3.039
+  },
+  {
+    "text": "we're going to talk about getting data",
+    "start": 1287.52,
+    "duration": 3.68
+  },
+  {
+    "text": "out uh, in form of exporting images and",
+    "start": 1289.039,
+    "duration": 4.64
+  },
+  {
+    "text": "labels.",
+    "start": 1291.2,
+    "duration": 4.88
+  },
+  {
+    "text": "Okay. Uh, so we use a blueprint actor",
+    "start": 1293.679,
+    "duration": 4.721
+  },
+  {
+    "text": "called the metadata manager uh, to",
+    "start": 1296.08,
+    "duration": 3.92
+  },
+  {
+    "text": "centralize all of our world parameters.",
+    "start": 1298.4,
+    "duration": 3.44
+  },
+  {
+    "text": "So this can be things like the geo",
+    "start": 1300.0,
+    "duration": 4.08
+  },
+  {
+    "text": "reference and the sun. Um but also to",
+    "start": 1301.84,
+    "duration": 4.56
+  },
+  {
+    "text": "collect and manage uh all of our labels",
+    "start": 1304.08,
+    "duration": 4.959
+  },
+  {
+    "text": "and annotations.",
+    "start": 1306.4,
+    "duration": 5.04
+  },
+  {
+    "text": "Um so you can see there we have a we",
+    "start": 1309.039,
+    "duration": 4.401
+  },
+  {
+    "text": "have an aircraft to put a box around it",
+    "start": 1311.44,
+    "duration": 4.0
+  },
+  {
+    "text": "and uh as Taylor was mentioning we use",
+    "start": 1313.44,
+    "duration": 4.96
+  },
+  {
+    "text": "the sockets. So we have sockets that you",
+    "start": 1315.44,
+    "duration": 6.32
+  },
+  {
+    "text": "know we we find the the outer the screen",
+    "start": 1318.4,
+    "duration": 6.0
+  },
+  {
+    "text": "space limits of those sockets. Um so we",
+    "start": 1321.76,
+    "duration": 5.44
+  },
+  {
+    "text": "use a 3D to to 2D uh calculation to get",
+    "start": 1324.4,
+    "duration": 4.56
+  },
+  {
+    "text": "the screen space. And then we found",
+    "start": 1327.2,
+    "duration": 3.839
+  },
+  {
+    "text": "those boundaries. We cured a box. Uh",
+    "start": 1328.96,
+    "duration": 4.8
+  },
+  {
+    "text": "that's what that top uh spaghetti graph",
+    "start": 1331.039,
+    "duration": 4.401
+  },
+  {
+    "text": "is doing. So we generate those",
+    "start": 1333.76,
+    "duration": 4.799
+  },
+  {
+    "text": "annotations. Um and then we format to",
+    "start": 1335.44,
+    "duration": 5.28
+  },
+  {
+    "text": "whatever format you know we need to make",
+    "start": 1338.559,
+    "duration": 4.721
+  },
+  {
+    "text": "it in. Um in this case you'll see below.",
+    "start": 1340.72,
+    "duration": 3.76
+  },
+  {
+    "text": "I don't know if you might recognize that",
+    "start": 1343.28,
+    "duration": 2.72
+  },
+  {
+    "text": "if you guys are in computer vision, but",
+    "start": 1344.48,
+    "duration": 3.36
+  },
+  {
+    "text": "we get a text file out with the label",
+    "start": 1346.0,
+    "duration": 3.919
+  },
+  {
+    "text": "that we want. Um and we can do that",
+    "start": 1347.84,
+    "duration": 4.0
+  },
+  {
+    "text": "either per frame or for the whole",
+    "start": 1349.919,
+    "duration": 5.12
+  },
+  {
+    "text": "sequence. Um,",
+    "start": 1351.84,
+    "duration": 5.36
+  },
+  {
+    "text": "yeah. And then you can see we have RGB,",
+    "start": 1355.039,
+    "duration": 4.241
+  },
+  {
+    "text": "we have a segmentation mask, we have a",
+    "start": 1357.2,
+    "duration": 4.64
+  },
+  {
+    "text": "world normal.",
+    "start": 1359.28,
+    "duration": 3.759
+  },
+  {
+    "text": "Okay. So, Antonio's going to talk a",
+    "start": 1361.84,
+    "duration": 2.24
+  },
+  {
+    "text": "little bit more about that.",
+    "start": 1363.039,
+    "duration": 2.561
+  },
+  {
+    "text": ">> So, you know, as you can see these",
+    "start": 1364.08,
+    "duration": 2.64
+  },
+  {
+    "text": "images over here, right? We've got the",
+    "start": 1365.6,
+    "duration": 3.92
+  },
+  {
+    "text": "RGB one, we've got the the segmentation",
+    "start": 1366.72,
+    "duration": 4.56
+  },
+  {
+    "text": "mask, and we got the world normals.",
+    "start": 1369.52,
+    "duration": 3.6
+  },
+  {
+    "text": "These are all done with post-processing",
+    "start": 1371.28,
+    "duration": 5.12
+  },
+  {
+    "text": "materials. Um and sort of the same way",
+    "start": 1373.12,
+    "duration": 4.88
+  },
+  {
+    "text": "uh Luis had mentioned those trigger",
+    "start": 1376.4,
+    "duration": 4.48
+  },
+  {
+    "text": "events we we have you know essentially a",
+    "start": 1378.0,
+    "duration": 5.52
+  },
+  {
+    "text": "a child class of the of the um",
+    "start": 1380.88,
+    "duration": 5.039
+  },
+  {
+    "text": "post-processing volume that we can send",
+    "start": 1383.52,
+    "duration": 4.399
+  },
+  {
+    "text": "it's we can send that events too and we",
+    "start": 1385.919,
+    "duration": 3.601
+  },
+  {
+    "text": "can say hey we want you know use this",
+    "start": 1387.919,
+    "duration": 3.12
+  },
+  {
+    "text": "post-processing material this one right",
+    "start": 1389.52,
+    "duration": 4.08
+  },
+  {
+    "text": "so segmentation depth and even inside",
+    "start": 1391.039,
+    "duration": 4.88
+  },
+  {
+    "text": "those materials so even inside of this",
+    "start": 1393.6,
+    "duration": 4.0
+  },
+  {
+    "text": "one right you've got parameters right",
+    "start": 1395.919,
+    "duration": 3.521
+  },
+  {
+    "text": "that you can adjust so say you have say",
+    "start": 1397.6,
+    "duration": 3.76
+  },
+  {
+    "text": "you have a depth mask you can change the",
+    "start": 1399.44,
+    "duration": 4.8
+  },
+  {
+    "text": "actual you know the the the actual",
+    "start": 1401.36,
+    "duration": 4.72
+  },
+  {
+    "text": "depth, right? The depth range of that",
+    "start": 1404.24,
+    "duration": 3.6
+  },
+  {
+    "text": "sensor if you're trying to emulate a",
+    "start": 1406.08,
+    "duration": 4.32
+  },
+  {
+    "text": "sensor. Um I will come back I will",
+    "start": 1407.84,
+    "duration": 5.44
+  },
+  {
+    "text": "explain this one. Um",
+    "start": 1410.4,
+    "duration": 4.48
+  },
+  {
+    "text": "but again going back to this you know",
+    "start": 1413.28,
+    "duration": 4.84
+  },
+  {
+    "text": "some of these",
+    "start": 1414.88,
+    "duration": 3.24
+  },
+  {
+    "text": "some of your labels might not be they",
+    "start": 1418.32,
+    "duration": 4.96
+  },
+  {
+    "text": "might not be exported sort of as a you",
+    "start": 1421.6,
+    "duration": 3.36
+  },
+  {
+    "text": "know CSV or text file. They might be",
+    "start": 1423.28,
+    "duration": 4.16
+  },
+  {
+    "text": "actual images. Right? Again as we",
+    "start": 1424.96,
+    "duration": 4.16
+  },
+  {
+    "text": "pointed out segmentation mask in the",
+    "start": 1427.44,
+    "duration": 3.599
+  },
+  {
+    "text": "world normal.",
+    "start": 1429.12,
+    "duration": 3.76
+  },
+  {
+    "text": "We do that with the movie render queue.",
+    "start": 1431.039,
+    "duration": 4.64
+  },
+  {
+    "text": "We got the RGB one. Uh you might also",
+    "start": 1432.88,
+    "duration": 6.0
+  },
+  {
+    "text": "want to um you know segmentation mask",
+    "start": 1435.679,
+    "duration": 5.281
+  },
+  {
+    "text": "and then I think world normals and then",
+    "start": 1438.88,
+    "duration": 3.76
+  },
+  {
+    "text": "we should get the depth mask. Right?",
+    "start": 1440.96,
+    "duration": 3.599
+  },
+  {
+    "text": "Just to show you right you can do all of",
+    "start": 1442.64,
+    "duration": 4.159
+  },
+  {
+    "text": "this uh you know you can generate this",
+    "start": 1444.559,
+    "duration": 4.24
+  },
+  {
+    "text": "data at you know running the same",
+    "start": 1446.799,
+    "duration": 4.721
+  },
+  {
+    "text": "sequence and and just the reason we use",
+    "start": 1448.799,
+    "duration": 4.88
+  },
+  {
+    "text": "sequencer. I've seen a lot of a lot of",
+    "start": 1451.52,
+    "duration": 4.88
+  },
+  {
+    "text": "these Unreal Sims and there's there's no",
+    "start": 1453.679,
+    "duration": 4.401
+  },
+  {
+    "text": "right or wrong way to do it but a lot of",
+    "start": 1456.4,
+    "duration": 4.24
+  },
+  {
+    "text": "them start with you know uh essentially",
+    "start": 1458.08,
+    "duration": 4.88
+  },
+  {
+    "text": "running as an application or at least",
+    "start": 1460.64,
+    "duration": 5.84
+  },
+  {
+    "text": "running in pi uh you know sort of a real",
+    "start": 1462.96,
+    "duration": 5.28
+  },
+  {
+    "text": "time thing which which makes a lot of",
+    "start": 1466.48,
+    "duration": 4.319
+  },
+  {
+    "text": "sense in a lot of use cases for this one",
+    "start": 1468.24,
+    "duration": 4.799
+  },
+  {
+    "text": "we we started off as we just want to",
+    "start": 1470.799,
+    "duration": 3.921
+  },
+  {
+    "text": "generate data that was our that was our",
+    "start": 1473.039,
+    "duration": 3.76
+  },
+  {
+    "text": "requirement we need to generate data",
+    "start": 1474.72,
+    "duration": 5.839
+  },
+  {
+    "text": "sequencer gives a lot of ability to save",
+    "start": 1476.799,
+    "duration": 5.921
+  },
+  {
+    "text": "that save, you know, you save your",
+    "start": 1480.559,
+    "duration": 4.0
+  },
+  {
+    "text": "sequencer, you can you can save that as,",
+    "start": 1482.72,
+    "duration": 3.76
+  },
+  {
+    "text": "you know, using source control. So you",
+    "start": 1484.559,
+    "duration": 4.641
+  },
+  {
+    "text": "so those data sets are reproducible. Um,",
+    "start": 1486.48,
+    "duration": 4.4
+  },
+  {
+    "text": "that's kind of a big deal, right? If I",
+    "start": 1489.2,
+    "duration": 4.16
+  },
+  {
+    "text": "if I generate a data set and somebody,",
+    "start": 1490.88,
+    "duration": 4.32
+  },
+  {
+    "text": "you know, I'm in Huntsville, Alabama,",
+    "start": 1493.36,
+    "duration": 4.4
+  },
+  {
+    "text": "you're in, you know, Seattle, if I",
+    "start": 1495.2,
+    "duration": 3.839
+  },
+  {
+    "text": "generate a data set, you should be able",
+    "start": 1497.76,
+    "duration": 2.96
+  },
+  {
+    "text": "to generate that same exact data set on",
+    "start": 1499.039,
+    "duration": 3.52
+  },
+  {
+    "text": "on your machine. And that that gets into",
+    "start": 1500.72,
+    "duration": 3.28
+  },
+  {
+    "text": "more of the verification validation",
+    "start": 1502.559,
+    "duration": 4.24
+  },
+  {
+    "text": "aspect of it. But this sequencer is very",
+    "start": 1504.0,
+    "duration": 4.96
+  },
+  {
+    "text": "useful for that.",
+    "start": 1506.799,
+    "duration": 4.081
+  },
+  {
+    "text": "Um, and then you know, of course, you",
+    "start": 1508.96,
+    "duration": 3.52
+  },
+  {
+    "text": "can see these, you know, these just all",
+    "start": 1510.88,
+    "duration": 2.72
+  },
+  {
+    "text": "the different things you can do with",
+    "start": 1512.48,
+    "duration": 2.88
+  },
+  {
+    "text": "post-processing effects. You know, I I",
+    "start": 1513.6,
+    "duration": 3.04
+  },
+  {
+    "text": "guess the most important one here is",
+    "start": 1515.36,
+    "duration": 2.799
+  },
+  {
+    "text": "probably that top one where, right, the",
+    "start": 1516.64,
+    "duration": 3.039
+  },
+  {
+    "text": "smallest one obviously. So, it's the",
+    "start": 1518.159,
+    "duration": 3.52
+  },
+  {
+    "text": "most important. Uh, the cutout",
+    "start": 1519.679,
+    "duration": 3.6
+  },
+  {
+    "text": "background, you know, that was kind of",
+    "start": 1521.679,
+    "duration": 3.921
+  },
+  {
+    "text": "like a gold thing, you know, you you",
+    "start": 1523.279,
+    "duration": 4.0
+  },
+  {
+    "text": "used to be for if you're doing like",
+    "start": 1525.6,
+    "duration": 3.36
+  },
+  {
+    "text": "domain randomization, right? If you've",
+    "start": 1527.279,
+    "duration": 3.441
+  },
+  {
+    "text": "got your object cut out, right? And then",
+    "start": 1528.96,
+    "duration": 3.36
+  },
+  {
+    "text": "then you can put whatever images you",
+    "start": 1530.72,
+    "duration": 4.72
+  },
+  {
+    "text": "want behind it. Um",
+    "start": 1532.32,
+    "duration": 5.68
+  },
+  {
+    "text": "again we we try to stick to actual you",
+    "start": 1535.44,
+    "duration": 6.88
+  },
+  {
+    "text": "know full 3D um you know environments.",
+    "start": 1538.0,
+    "duration": 6.159
+  },
+  {
+    "text": "So here we've got this is just a a",
+    "start": 1542.32,
+    "duration": 4.16
+  },
+  {
+    "text": "simple semantic segmentation uh",
+    "start": 1544.159,
+    "duration": 4.241
+  },
+  {
+    "text": "post-processing material. Everything in",
+    "start": 1546.48,
+    "duration": 4.24
+  },
+  {
+    "text": "that big gray box is just baked down",
+    "start": 1548.4,
+    "duration": 3.68
+  },
+  {
+    "text": "into a material function. You'll see",
+    "start": 1550.72,
+    "duration": 4.64
+  },
+  {
+    "text": "below that MF uh was that depth",
+    "start": 1552.08,
+    "duration": 6.079
+  },
+  {
+    "text": "hardcoded. And then the top left we've",
+    "start": 1555.36,
+    "duration": 4.799
+  },
+  {
+    "text": "got our our label number. You know this",
+    "start": 1558.159,
+    "duration": 3.921
+  },
+  {
+    "text": "is label one. And then we've got our our",
+    "start": 1560.159,
+    "duration": 4.0
+  },
+  {
+    "text": "color for that, you know, which again a",
+    "start": 1562.08,
+    "duration": 5.599
+  },
+  {
+    "text": "eight bit uh you know single channel",
+    "start": 1564.159,
+    "duration": 5.281
+  },
+  {
+    "text": "label.",
+    "start": 1567.679,
+    "duration": 3.841
+  },
+  {
+    "text": "If your if your object has a label of",
+    "start": 1569.44,
+    "duration": 3.599
+  },
+  {
+    "text": "one, it's going to come out as white.",
+    "start": 1571.52,
+    "duration": 2.8
+  },
+  {
+    "text": "And then at the bottom, right, we kind",
+    "start": 1573.039,
+    "duration": 3.041
+  },
+  {
+    "text": "of package this all up. If you're if",
+    "start": 1574.32,
+    "duration": 3.44
+  },
+  {
+    "text": "you're label seven, you're it's going to",
+    "start": 1576.08,
+    "duration": 4.56
+  },
+  {
+    "text": "come out as kind of a dark gray.",
+    "start": 1577.76,
+    "duration": 4.399
+  },
+  {
+    "text": "And I'll just you know from my",
+    "start": 1580.64,
+    "duration": 4.08
+  },
+  {
+    "text": "experience working in this field um this",
+    "start": 1582.159,
+    "duration": 4.961
+  },
+  {
+    "text": "is another area where it's very easy to",
+    "start": 1584.72,
+    "duration": 6.4
+  },
+  {
+    "text": "be like oh okay well I use an 8bit image",
+    "start": 1587.12,
+    "duration": 5.84
+  },
+  {
+    "text": "and you can support you know essentially",
+    "start": 1591.12,
+    "duration": 3.84
+  },
+  {
+    "text": "255",
+    "start": 1592.96,
+    "duration": 4.079
+  },
+  {
+    "text": "you know unique actors for semi uh",
+    "start": 1594.96,
+    "duration": 4.959
+  },
+  {
+    "text": "semantic segmentation and you then zero",
+    "start": 1597.039,
+    "duration": 5.361
+  },
+  {
+    "text": "for background you might say oh why",
+    "start": 1599.919,
+    "duration": 4.88
+  },
+  {
+    "text": "don't we use a 16bit EXR and then we can",
+    "start": 1602.4,
+    "duration": 4.159
+  },
+  {
+    "text": "do 16,000",
+    "start": 1604.799,
+    "duration": 4.721
+  },
+  {
+    "text": "um again just a little advice like this",
+    "start": 1606.559,
+    "duration": 5.441
+  },
+  {
+    "text": "if you can do if you can manage 12",
+    "start": 1609.52,
+    "duration": 4.399
+  },
+  {
+    "text": "actor, you know, 10 12 actors, that's",
+    "start": 1612.0,
+    "duration": 4.0
+  },
+  {
+    "text": "probably 80% of your use cases and",
+    "start": 1613.919,
+    "duration": 3.521
+  },
+  {
+    "text": "everything else is going to be some sort",
+    "start": 1616.0,
+    "duration": 4.08
+  },
+  {
+    "text": "of unique solution. Uh, and that also",
+    "start": 1617.44,
+    "duration": 4.64
+  },
+  {
+    "text": "makes it human legible, right? So",
+    "start": 1620.08,
+    "duration": 3.68
+  },
+  {
+    "text": "somebody can get these labels and they",
+    "start": 1622.08,
+    "duration": 3.28
+  },
+  {
+    "text": "can tell the difference between, you",
+    "start": 1623.76,
+    "duration": 2.88
+  },
+  {
+    "text": "know, different ones, right? So if we",
+    "start": 1625.36,
+    "duration": 5.6
+  },
+  {
+    "text": "labeled one 255 and we labeled two 254",
+    "start": 1626.64,
+    "duration": 6.56
+  },
+  {
+    "text": "is depending on the monitor, that's",
+    "start": 1630.96,
+    "duration": 3.68
+  },
+  {
+    "text": "virtually impossible to tell a",
+    "start": 1633.2,
+    "duration": 2.88
+  },
+  {
+    "text": "difference. Um, so it does kind of",
+    "start": 1634.64,
+    "duration": 4.159
+  },
+  {
+    "text": "maintain that human legibility aspect.",
+    "start": 1636.08,
+    "duration": 4.88
+  },
+  {
+    "text": "Um, and then on your static mesh actor,",
+    "start": 1638.799,
+    "duration": 4.081
+  },
+  {
+    "text": "you want to make sure the the render",
+    "start": 1640.96,
+    "duration": 4.079
+  },
+  {
+    "text": "custom depth pass is enabled and that",
+    "start": 1642.88,
+    "duration": 4.399
+  },
+  {
+    "text": "you set that that custom depth stencil",
+    "start": 1645.039,
+    "duration": 3.681
+  },
+  {
+    "text": "value. That stencil value is",
+    "start": 1647.279,
+    "duration": 2.801
+  },
+  {
+    "text": "essentially, you know, your label",
+    "start": 1648.72,
+    "duration": 4.24
+  },
+  {
+    "text": "number. And then you you want this",
+    "start": 1650.08,
+    "duration": 4.64
+  },
+  {
+    "text": "post-proc any of your labeled",
+    "start": 1652.96,
+    "duration": 4.079
+  },
+  {
+    "text": "post-processing materials, you want to",
+    "start": 1654.72,
+    "duration": 5.12
+  },
+  {
+    "text": "happen after the tone mapping. So in in",
+    "start": 1657.039,
+    "duration": 4.64
+  },
+  {
+    "text": "kind of the render pipeline, the the",
+    "start": 1659.84,
+    "duration": 3.76
+  },
+  {
+    "text": "tone mapping is what happens last. If",
+    "start": 1661.679,
+    "duration": 3.921
+  },
+  {
+    "text": "you if you if you do that, I think by",
+    "start": 1663.6,
+    "duration": 3.199
+  },
+  {
+    "text": "default, it's going to try to do it",
+    "start": 1665.6,
+    "duration": 4.16
+  },
+  {
+    "text": "before, you're going to get all kinds of",
+    "start": 1666.799,
+    "duration": 5.681
+  },
+  {
+    "text": "bloom and and lens glare and all all",
+    "start": 1669.76,
+    "duration": 4.32
+  },
+  {
+    "text": "that all those, you know, kind of",
+    "start": 1672.48,
+    "duration": 3.12
+  },
+  {
+    "text": "post-processing camera effects you don't",
+    "start": 1674.08,
+    "duration": 3.839
+  },
+  {
+    "text": "want. Um, also the other thing is",
+    "start": 1675.6,
+    "duration": 5.12
+  },
+  {
+    "text": "obviously don't save your labels as",
+    "start": 1677.919,
+    "duration": 4.961
+  },
+  {
+    "text": "lossy images like JPEG, right? You want",
+    "start": 1680.72,
+    "duration": 4.64
+  },
+  {
+    "text": "some like a PNG image. It will give you",
+    "start": 1682.88,
+    "duration": 6.32
+  },
+  {
+    "text": "I've seen it it give you a headache. Um,",
+    "start": 1685.36,
+    "duration": 6.48
+  },
+  {
+    "text": "okay. So, hardware emulation with the",
+    "start": 1689.2,
+    "duration": 5.44
+  },
+  {
+    "text": "synicam. This is this is really this is",
+    "start": 1691.84,
+    "duration": 4.24
+  },
+  {
+    "text": "just I I don't know this is near and",
+    "start": 1694.64,
+    "duration": 2.96
+  },
+  {
+    "text": "dear to my heart. This is just very cool",
+    "start": 1696.08,
+    "duration": 4.959
+  },
+  {
+    "text": "stuff. Um so with this cynic cam you",
+    "start": 1697.6,
+    "duration": 5.28
+  },
+  {
+    "text": "know we used to years ago it's like okay",
+    "start": 1701.039,
+    "duration": 3.76
+  },
+  {
+    "text": "we'll ma m we can match the field of",
+    "start": 1702.88,
+    "duration": 4.399
+  },
+  {
+    "text": "view and the aspect ratio",
+    "start": 1704.799,
+    "duration": 5.441
+  },
+  {
+    "text": "and then as as epic has gotten into this",
+    "start": 1707.279,
+    "duration": 5.681
+  },
+  {
+    "text": "virtual production um they have they",
+    "start": 1710.24,
+    "duration": 4.799
+  },
+  {
+    "text": "have released a ton of useful tools for",
+    "start": 1712.96,
+    "duration": 4.88
+  },
+  {
+    "text": "this. Uh so the cineic cam you can match",
+    "start": 1715.039,
+    "duration": 4.321
+  },
+  {
+    "text": "again you've got sort of camera you",
+    "start": 1717.84,
+    "duration": 3.199
+  },
+  {
+    "text": "might have its specs like its sensor",
+    "start": 1719.36,
+    "duration": 4.0
+  },
+  {
+    "text": "width and height its focal length those",
+    "start": 1721.039,
+    "duration": 5.201
+  },
+  {
+    "text": "are kind of the big ones. Um",
+    "start": 1723.36,
+    "duration": 4.24
+  },
+  {
+    "text": "if you have those and just so you know",
+    "start": 1726.24,
+    "duration": 3.76
+  },
+  {
+    "text": "these values here this is just a Nikon",
+    "start": 1727.6,
+    "duration": 8.92
+  },
+  {
+    "text": "Z5 camera with a 35 millimeter lens and",
+    "start": 1730.0,
+    "duration": 6.52
+  },
+  {
+    "text": "this video is a Z5 camera with an 80",
+    "start": 1736.559,
+    "duration": 5.84
+  },
+  {
+    "text": "millimeter lens.",
+    "start": 1739.36,
+    "duration": 4.88
+  },
+  {
+    "text": "Right? So, it's it's very easy to match",
+    "start": 1742.399,
+    "duration": 5.721
+  },
+  {
+    "text": "those. Um,",
+    "start": 1744.24,
+    "duration": 3.88
+  },
+  {
+    "text": "and I guess the other thing is, you",
+    "start": 1748.24,
+    "duration": 3.679
+  },
+  {
+    "text": "know, when you take an image inside of",
+    "start": 1749.76,
+    "duration": 4.48
+  },
+  {
+    "text": "the Unreal Engine or or with any virtual",
+    "start": 1751.919,
+    "duration": 4.0
+  },
+  {
+    "text": "camera, it's going to be a perfect",
+    "start": 1754.24,
+    "duration": 3.36
+  },
+  {
+    "text": "pinhole camera, right? So, you're not",
+    "start": 1755.919,
+    "duration": 2.88
+  },
+  {
+    "text": "going to get any type of lens",
+    "start": 1757.6,
+    "duration": 3.36
+  },
+  {
+    "text": "distortion. Um, you know, a lot of times",
+    "start": 1758.799,
+    "duration": 3.681
+  },
+  {
+    "text": "this is what you want, right? Because if",
+    "start": 1760.96,
+    "duration": 3.12
+  },
+  {
+    "text": "you have if you have a, you know, a",
+    "start": 1762.48,
+    "duration": 3.6
+  },
+  {
+    "text": "computer vision model, a lot of times",
+    "start": 1764.08,
+    "duration": 3.36
+  },
+  {
+    "text": "it's going to be a post-processing step",
+    "start": 1766.08,
+    "duration": 3.36
+  },
+  {
+    "text": "where you try to, you know, undistort",
+    "start": 1767.44,
+    "duration": 3.28
+  },
+  {
+    "text": "that image, right? You've calibrated",
+    "start": 1769.44,
+    "duration": 2.959
+  },
+  {
+    "text": "your you've used a calibration board.",
+    "start": 1770.72,
+    "duration": 2.959
+  },
+  {
+    "text": "You've calibrated your camera. You've",
+    "start": 1772.399,
+    "duration": 3.201
+  },
+  {
+    "text": "got the camera intrinsics. You then use",
+    "start": 1773.679,
+    "duration": 4.48
+  },
+  {
+    "text": "that information to remove that, you",
+    "start": 1775.6,
+    "duration": 5.52
+  },
+  {
+    "text": "know, that that lens distortion.",
+    "start": 1778.159,
+    "duration": 5.601
+  },
+  {
+    "text": "So, this can be a good thing",
+    "start": 1781.12,
+    "duration": 3.919
+  },
+  {
+    "text": "unless you're at the point where you're",
+    "start": 1783.76,
+    "duration": 4.24
+  },
+  {
+    "text": "doing, you know, full four full H like",
+    "start": 1785.039,
+    "duration": 4.401
+  },
+  {
+    "text": "hardware in the loop, right? So, you",
+    "start": 1788.0,
+    "duration": 3.679
+  },
+  {
+    "text": "want you actually want what the camera",
+    "start": 1789.44,
+    "duration": 5.119
+  },
+  {
+    "text": "should theoretically see. Um, that's",
+    "start": 1791.679,
+    "duration": 4.48
+  },
+  {
+    "text": "where this little lens component comes",
+    "start": 1794.559,
+    "duration": 3.681
+  },
+  {
+    "text": "in. So if you can add this you know lens",
+    "start": 1796.159,
+    "duration": 4.64
+  },
+  {
+    "text": "component to the syn c synicam actor",
+    "start": 1798.24,
+    "duration": 4.159
+  },
+  {
+    "text": "some of you might recognize these values",
+    "start": 1800.799,
+    "duration": 7.281
+  },
+  {
+    "text": "k123 p12 fx fy that lets you capture you",
+    "start": 1802.399,
+    "duration": 8.561
+  },
+  {
+    "text": "know the distortion of your camera um so",
+    "start": 1808.08,
+    "duration": 4.64
+  },
+  {
+    "text": "you get a you get proper camera",
+    "start": 1810.96,
+    "duration": 3.839
+  },
+  {
+    "text": "distortion there again this is if you're",
+    "start": 1812.72,
+    "duration": 5.36
+  },
+  {
+    "text": "doing full hardware in the loop",
+    "start": 1814.799,
+    "duration": 5.12
+  },
+  {
+    "text": "um",
+    "start": 1818.08,
+    "duration": 4.24
+  },
+  {
+    "text": "you have to manage your color space and",
+    "start": 1819.919,
+    "duration": 4.801
+  },
+  {
+    "text": "I like in this in this slide like I",
+    "start": 1822.32,
+    "duration": 3.599
+  },
+  {
+    "text": "didn't do it justice but there is",
+    "start": 1824.72,
+    "duration": 5.52
+  },
+  {
+    "text": "there's a video by uh Rod Bogart for um",
+    "start": 1825.919,
+    "duration": 7.36
+  },
+  {
+    "text": "you know from I think pixel to the the",
+    "start": 1830.24,
+    "duration": 6.08
+  },
+  {
+    "text": "pipeline of a pixel. So if you it's from",
+    "start": 1833.279,
+    "duration": 5.601
+  },
+  {
+    "text": "uh the Unreal Fest 2024 it goes into",
+    "start": 1836.32,
+    "duration": 5.839
+  },
+  {
+    "text": "detail about this um using uh OCIO to",
+    "start": 1838.88,
+    "duration": 5.039
+  },
+  {
+    "text": "manage that color space. Again",
+    "start": 1842.159,
+    "duration": 3.841
+  },
+  {
+    "text": "absolutely critical that you understand",
+    "start": 1843.919,
+    "duration": 5.521
+  },
+  {
+    "text": "that. I just we didn't go into it here.",
+    "start": 1846.0,
+    "duration": 8.48
+  },
+  {
+    "text": "Um yeah I thanks for your time. I kind",
+    "start": 1849.44,
+    "duration": 9.8
+  },
+  {
+    "text": "of just loops Any questions?",
+    "start": 1854.48,
+    "duration": 4.76
+  }
+]

@@ -1,0 +1,4682 @@
+[
+  {
+    "text": "All right, I guess we'll get started.",
+    "start": 1.6,
+    "duration": 6.159
+  },
+  {
+    "text": "Um, yeah, thanks for coming to my talk.",
+    "start": 4.64,
+    "duration": 5.2
+  },
+  {
+    "text": "I hope you're all having a really good",
+    "start": 7.759,
+    "duration": 4.8
+  },
+  {
+    "text": "first day of sessions and enjoying",
+    "start": 9.84,
+    "duration": 4.32
+  },
+  {
+    "text": "UEFest.",
+    "start": 12.559,
+    "duration": 5.121
+  },
+  {
+    "text": "Um, yeah, so today we're going to talk",
+    "start": 14.16,
+    "duration": 6.32
+  },
+  {
+    "text": "about real world implementation of Simpy",
+    "start": 17.68,
+    "duration": 5.439
+  },
+  {
+    "text": "2110 for ICVX.",
+    "start": 20.48,
+    "duration": 5.44
+  },
+  {
+    "text": "Um this is more targeted towards virtual",
+    "start": 23.119,
+    "duration": 5.121
+  },
+  {
+    "text": "production whether it's for film, TV,",
+    "start": 25.92,
+    "duration": 5.439
+  },
+  {
+    "text": "commercials, other applications of it.",
+    "start": 28.24,
+    "duration": 6.64
+  },
+  {
+    "text": "Um I'm assuming that everyone here has",
+    "start": 31.359,
+    "duration": 6.001
+  },
+  {
+    "text": "um some knowledge of and experience with",
+    "start": 34.88,
+    "duration": 4.72
+  },
+  {
+    "text": "end display already.",
+    "start": 37.36,
+    "duration": 3.76
+  },
+  {
+    "text": "Um",
+    "start": 39.6,
+    "duration": 4.24
+  },
+  {
+    "text": "so we'll go through a quick overview of",
+    "start": 41.12,
+    "duration": 6.72
+  },
+  {
+    "text": "SIMD210. What is it? Um how it compares",
+    "start": 43.84,
+    "duration": 7.28
+  },
+  {
+    "text": "to previous systems and setups.",
+    "start": 47.84,
+    "duration": 5.84
+  },
+  {
+    "text": "um how you design for it um and",
+    "start": 51.12,
+    "duration": 4.8
+  },
+  {
+    "text": "especially one of the features I think",
+    "start": 53.68,
+    "duration": 4.8
+  },
+  {
+    "text": "is kind of underutilized the split inner",
+    "start": 55.92,
+    "duration": 5.36
+  },
+  {
+    "text": "frustm um and then go into some",
+    "start": 58.48,
+    "duration": 5.84
+  },
+  {
+    "text": "practical like tips and like testing",
+    "start": 61.28,
+    "duration": 4.64
+  },
+  {
+    "text": "troubleshooting",
+    "start": 64.32,
+    "duration": 3.119
+  },
+  {
+    "text": "um things that we found out in",
+    "start": 65.92,
+    "duration": 3.92
+  },
+  {
+    "text": "production that I'm hoping will make",
+    "start": 67.439,
+    "duration": 5.201
+  },
+  {
+    "text": "other people trying to use it um give",
+    "start": 69.84,
+    "duration": 6.16
+  },
+  {
+    "text": "them some tips to actually put into",
+    "start": 72.64,
+    "duration": 6.36
+  },
+  {
+    "text": "practice.",
+    "start": 76.0,
+    "duration": 3.0
+  },
+  {
+    "text": "So, a bit about me. Um, my name is Julia",
+    "start": 80.24,
+    "duration": 4.559
+  },
+  {
+    "text": "Louu. I'm a virtual production",
+    "start": 83.04,
+    "duration": 5.119
+  },
+  {
+    "text": "supervisor. Um, I specialize mostly in",
+    "start": 84.799,
+    "duration": 7.121
+  },
+  {
+    "text": "engine technical onset supervision. Um,",
+    "start": 88.159,
+    "duration": 7.521
+  },
+  {
+    "text": "I've done lots of jobs like um tools",
+    "start": 91.92,
+    "duration": 7.28
+  },
+  {
+    "text": "developer, R&D. Um, was an engine",
+    "start": 95.68,
+    "duration": 8.16
+  },
+  {
+    "text": "operator and on set soup. Um, mostly",
+    "start": 99.2,
+    "duration": 8.879
+  },
+  {
+    "text": "using VR, AR like app development. um",
+    "start": 103.84,
+    "duration": 6.4
+  },
+  {
+    "text": "viz, whether it's pre viz, tech viz,",
+    "start": 108.079,
+    "duration": 5.761
+  },
+  {
+    "text": "onset viz, um ICVFX of course and",
+    "start": 110.24,
+    "duration": 6.8
+  },
+  {
+    "text": "virtual art department at studios like",
+    "start": 113.84,
+    "duration": 6.879
+  },
+  {
+    "text": "digital domain deneg um let's see the",
+    "start": 117.04,
+    "duration": 6.719
+  },
+  {
+    "text": "third floor lux machina and currently",
+    "start": 120.719,
+    "duration": 4.561
+  },
+  {
+    "text": "Netflix.",
+    "start": 123.759,
+    "duration": 8.081
+  },
+  {
+    "text": "Um yeah so what about that?",
+    "start": 125.28,
+    "duration": 9.039
+  },
+  {
+    "text": "So, the system that we tested all of",
+    "start": 131.84,
+    "duration": 6.0
+  },
+  {
+    "text": "this on was the Chinachita uh stage 18",
+    "start": 134.319,
+    "duration": 7.681
+  },
+  {
+    "text": "LED volume um in Rome. It's quite a big",
+    "start": 137.84,
+    "duration": 9.52
+  },
+  {
+    "text": "volume. It's 25 m uh diameter with 8 m",
+    "start": 142.0,
+    "duration": 8.64
+  },
+  {
+    "text": "tall and it's got five nodes for the",
+    "start": 147.36,
+    "duration": 5.68
+  },
+  {
+    "text": "main wall, one node for the ceiling, and",
+    "start": 150.64,
+    "duration": 5.92
+  },
+  {
+    "text": "then um a wild wall. And then we had",
+    "start": 153.04,
+    "duration": 6.16
+  },
+  {
+    "text": "spares as well. So it's quite high",
+    "start": 156.56,
+    "duration": 5.6
+  },
+  {
+    "text": "resolution is 18K total for the width of",
+    "start": 159.2,
+    "duration": 6.72
+  },
+  {
+    "text": "the main wall. Um and we implemented",
+    "start": 162.16,
+    "duration": 7.92
+  },
+  {
+    "text": "this early in 2024 around like February",
+    "start": 165.92,
+    "duration": 6.72
+  },
+  {
+    "text": "2024 was when we started implementing",
+    "start": 170.08,
+    "duration": 6.08
+  },
+  {
+    "text": "SIMD into an existing system. Um and",
+    "start": 172.64,
+    "duration": 5.599
+  },
+  {
+    "text": "then we shot with it in production on a",
+    "start": 176.16,
+    "duration": 7.52
+  },
+  {
+    "text": "feature at the end of last year. Um so",
+    "start": 178.239,
+    "duration": 8.08
+  },
+  {
+    "text": "we were able to achieve an 8K",
+    "start": 183.68,
+    "duration": 4.72
+  },
+  {
+    "text": "interference whereas before we were more",
+    "start": 186.319,
+    "duration": 6.081
+  },
+  {
+    "text": "doing like a UHD sort of resolution. Um",
+    "start": 188.4,
+    "duration": 7.199
+  },
+  {
+    "text": "this was tested with dual 6000 ADAS on",
+    "start": 192.4,
+    "duration": 6.64
+  },
+  {
+    "text": "all the nodes. Um previously it had been",
+    "start": 195.599,
+    "duration": 5.841
+  },
+  {
+    "text": "a multi-process setup. Um we'll go into",
+    "start": 199.04,
+    "duration": 5.279
+  },
+  {
+    "text": "that in a bit and this was tested with",
+    "start": 201.44,
+    "duration": 5.879
+  },
+  {
+    "text": "UE54.",
+    "start": 204.319,
+    "duration": 3.0
+  },
+  {
+    "text": "So what is SIMD210?",
+    "start": 209.2,
+    "duration": 6.8
+  },
+  {
+    "text": "So it's a video standard, audio and",
+    "start": 212.959,
+    "duration": 5.441
+  },
+  {
+    "text": "video standard um that replaces",
+    "start": 216.0,
+    "duration": 5.92
+  },
+  {
+    "text": "traditional analog signals like SDI um",
+    "start": 218.4,
+    "duration": 7.6
+  },
+  {
+    "text": "for distributing video. Um so instead of",
+    "start": 221.92,
+    "duration": 6.56
+  },
+  {
+    "text": "like your SDI cables, you splitters and",
+    "start": 226.0,
+    "duration": 5.599
+  },
+  {
+    "text": "your video hub and everything um this",
+    "start": 228.48,
+    "duration": 5.44
+  },
+  {
+    "text": "sends everything over the network. So",
+    "start": 231.599,
+    "duration": 4.56
+  },
+  {
+    "text": "you're sending it over switches, over",
+    "start": 233.92,
+    "duration": 5.44
+  },
+  {
+    "text": "network adapters, over optical fiber.",
+    "start": 236.159,
+    "duration": 6.561
+  },
+  {
+    "text": "Um, so there's lots of benefits to that",
+    "start": 239.36,
+    "duration": 6.4
+  },
+  {
+    "text": "and we'll go into that um in a sec. Um,",
+    "start": 242.72,
+    "duration": 5.28
+  },
+  {
+    "text": "but basically it breaks down each frame",
+    "start": 245.76,
+    "duration": 4.0
+  },
+  {
+    "text": "into packets and then streams them",
+    "start": 248.0,
+    "duration": 4.72
+  },
+  {
+    "text": "across as fast as it can. Um, and then",
+    "start": 249.76,
+    "duration": 6.16
+  },
+  {
+    "text": "sync is handled um by the time stamp in",
+    "start": 252.72,
+    "duration": 6.96
+  },
+  {
+    "text": "the header um of each packet. And uh",
+    "start": 255.92,
+    "duration": 6.96
+  },
+  {
+    "text": "there's a session description protocol.",
+    "start": 259.68,
+    "duration": 5.04
+  },
+  {
+    "text": "It's a file that's gets streamed as well",
+    "start": 262.88,
+    "duration": 3.759
+  },
+  {
+    "text": "that describes what kind of stream",
+    "start": 264.72,
+    "duration": 4.4
+  },
+  {
+    "text": "you're sending. So information like the",
+    "start": 266.639,
+    "duration": 5.441
+  },
+  {
+    "text": "resolution um the color like what",
+    "start": 269.12,
+    "duration": 5.28
+  },
+  {
+    "text": "channels are in there um all that",
+    "start": 272.08,
+    "duration": 5.32
+  },
+  {
+    "text": "information.",
+    "start": 274.4,
+    "duration": 3.0
+  },
+  {
+    "text": "So while SDI you had to specify well",
+    "start": 279.84,
+    "duration": 4.639
+  },
+  {
+    "text": "each port specifies whether it's an",
+    "start": 282.72,
+    "duration": 5.52
+  },
+  {
+    "text": "input or an output um simply 2110 can be",
+    "start": 284.479,
+    "duration": 6.321
+  },
+  {
+    "text": "birectional so you can send and receive",
+    "start": 288.24,
+    "duration": 5.44
+  },
+  {
+    "text": "on the same port um which is quite",
+    "start": 290.8,
+    "duration": 5.52
+  },
+  {
+    "text": "powerful that also makes it very",
+    "start": 293.68,
+    "duration": 6.079
+  },
+  {
+    "text": "flexible and easy to scale. Um whereas",
+    "start": 296.32,
+    "duration": 4.8
+  },
+  {
+    "text": "before you were kind of constrained by",
+    "start": 299.759,
+    "duration": 3.521
+  },
+  {
+    "text": "how many ports say you had available on",
+    "start": 301.12,
+    "duration": 4.96
+  },
+  {
+    "text": "your video matrix, now it's just how",
+    "start": 303.28,
+    "duration": 4.24
+  },
+  {
+    "text": "many ports do you have on your switch",
+    "start": 306.08,
+    "duration": 3.36
+  },
+  {
+    "text": "and how much bandwidth do you have to",
+    "start": 307.52,
+    "duration": 6.08
+  },
+  {
+    "text": "add more devices. Um so that makes it um",
+    "start": 309.44,
+    "duration": 7.92
+  },
+  {
+    "text": "very dynamic and you can add like",
+    "start": 313.6,
+    "duration": 5.76
+  },
+  {
+    "text": "patching a signal isn't a physical patch",
+    "start": 317.36,
+    "duration": 4.0
+  },
+  {
+    "text": "anymore. You just change the multiccast",
+    "start": 319.36,
+    "duration": 4.88
+  },
+  {
+    "text": "address um tell the receiver to look for",
+    "start": 321.36,
+    "duration": 4.88
+  },
+  {
+    "text": "the same address and then that's how you",
+    "start": 324.24,
+    "duration": 5.76
+  },
+  {
+    "text": "connect a stream.",
+    "start": 326.24,
+    "duration": 3.76
+  },
+  {
+    "text": "So, how is this integrated into Unreal?",
+    "start": 332.24,
+    "duration": 6.72
+  },
+  {
+    "text": "So, Unreal uses uh the RiverMax",
+    "start": 336.16,
+    "duration": 6.08
+  },
+  {
+    "text": "implementation of SIMD 2110,",
+    "start": 338.96,
+    "duration": 6.64
+  },
+  {
+    "text": "specifically Simpy 211020, which is for",
+    "start": 342.24,
+    "duration": 6.239
+  },
+  {
+    "text": "uncompressed video. Um, we're usually",
+    "start": 345.6,
+    "duration": 7.2
+  },
+  {
+    "text": "looking for RGB 10 bit um when using it",
+    "start": 348.479,
+    "duration": 6.401
+  },
+  {
+    "text": "for ICVX. you can configure it",
+    "start": 352.8,
+    "duration": 3.36
+  },
+  {
+    "text": "differently, but that's probably the",
+    "start": 354.88,
+    "duration": 5.2
+  },
+  {
+    "text": "most common case. Um, it does require",
+    "start": 356.16,
+    "duration": 7.92
+  },
+  {
+    "text": "specific hardware um especially for the",
+    "start": 360.08,
+    "duration": 7.839
+  },
+  {
+    "text": "network adapters. So, connectex adapters",
+    "start": 364.08,
+    "duration": 6.559
+  },
+  {
+    "text": "um and blue field if you're doing PTP",
+    "start": 367.919,
+    "duration": 5.041
+  },
+  {
+    "text": "timing and these handle like the",
+    "start": 370.639,
+    "duration": 4.801
+  },
+  {
+    "text": "encoding and decoding of the video",
+    "start": 372.96,
+    "duration": 7.92
+  },
+  {
+    "text": "signal. Um, and for Unreal, it does uh",
+    "start": 375.44,
+    "duration": 7.039
+  },
+  {
+    "text": "depend quite heavily on the engine",
+    "start": 380.88,
+    "duration": 3.28
+  },
+  {
+    "text": "version, which version of all your",
+    "start": 382.479,
+    "duration": 5.201
+  },
+  {
+    "text": "drivers and stuff um the SDK version uh",
+    "start": 384.16,
+    "duration": 6.319
+  },
+  {
+    "text": "to use. That's something to be aware of,",
+    "start": 387.68,
+    "duration": 5.2
+  },
+  {
+    "text": "not just install the latest one uh",
+    "start": 390.479,
+    "duration": 5.201
+  },
+  {
+    "text": "because it might not work. But you can",
+    "start": 392.88,
+    "duration": 5.28
+  },
+  {
+    "text": "use it as um in a variety of",
+    "start": 395.68,
+    "duration": 4.639
+  },
+  {
+    "text": "applications like it can be used as a",
+    "start": 398.16,
+    "duration": 4.64
+  },
+  {
+    "text": "media texture. You could plug it into",
+    "start": 400.319,
+    "duration": 5.281
+  },
+  {
+    "text": "say like a material and just apply a",
+    "start": 402.8,
+    "duration": 4.72
+  },
+  {
+    "text": "material with a stream. Say if you have",
+    "start": 405.6,
+    "duration": 5.599
+  },
+  {
+    "text": "like a TV in your scene or something. Um",
+    "start": 407.52,
+    "duration": 5.44
+  },
+  {
+    "text": "or you could do it as an output if you",
+    "start": 411.199,
+    "duration": 3.761
+  },
+  {
+    "text": "wanted to render your viewport or camera",
+    "start": 412.96,
+    "duration": 5.6
+  },
+  {
+    "text": "and send it out. Um or there's the end",
+    "start": 414.96,
+    "duration": 7.0
+  },
+  {
+    "text": "display use.",
+    "start": 418.56,
+    "duration": 3.4
+  },
+  {
+    "text": "So comparing it to previous systems. Um",
+    "start": 424.479,
+    "duration": 7.361
+  },
+  {
+    "text": "so typical previous end display systems",
+    "start": 429.039,
+    "duration": 4.72
+  },
+  {
+    "text": "would have done like single GPUs",
+    "start": 431.84,
+    "duration": 3.6
+  },
+  {
+    "text": "probably the simplest use case that's",
+    "start": 433.759,
+    "duration": 3.921
+  },
+  {
+    "text": "where everything is rendered on one GPU",
+    "start": 435.44,
+    "duration": 5.599
+  },
+  {
+    "text": "and sent out um via the output. Then",
+    "start": 437.68,
+    "duration": 5.68
+  },
+  {
+    "text": "there was multi-GPU where you had two",
+    "start": 441.039,
+    "duration": 5.6
+  },
+  {
+    "text": "GPUs or more per machine um and they",
+    "start": 443.36,
+    "duration": 6.08
+  },
+  {
+    "text": "were connected via SLI. So then you",
+    "start": 446.639,
+    "duration": 5.201
+  },
+  {
+    "text": "could have the interfostum um render on",
+    "start": 449.44,
+    "duration": 5.36
+  },
+  {
+    "text": "the second GPU and share it to the first",
+    "start": 451.84,
+    "duration": 5.6
+  },
+  {
+    "text": "um and then send it out for output.",
+    "start": 454.8,
+    "duration": 5.119
+  },
+  {
+    "text": "or there was multiprocess",
+    "start": 457.44,
+    "duration": 5.84
+  },
+  {
+    "text": "um which is also two or more GPUs but",
+    "start": 459.919,
+    "duration": 5.84
+  },
+  {
+    "text": "it's split into two different processes.",
+    "start": 463.28,
+    "duration": 4.639
+  },
+  {
+    "text": "So you have the first process rendering",
+    "start": 465.759,
+    "duration": 5.361
+  },
+  {
+    "text": "the outer frustm and then a headless um",
+    "start": 467.919,
+    "duration": 6.241
+  },
+  {
+    "text": "instance of Unreal rendering the inner",
+    "start": 471.12,
+    "duration": 6.04
+  },
+  {
+    "text": "frostm",
+    "start": 474.16,
+    "duration": 3.0
+  },
+  {
+    "text": "with simply 2110 you can get a lot more",
+    "start": 478.879,
+    "duration": 5.521
+  },
+  {
+    "text": "different configurations. So like these",
+    "start": 481.84,
+    "duration": 5.759
+  },
+  {
+    "text": "are all examples of like what a config",
+    "start": 484.4,
+    "duration": 5.359
+  },
+  {
+    "text": "might look like. Um you could do a",
+    "start": 487.599,
+    "duration": 4.16
+  },
+  {
+    "text": "single tile. You could have one node",
+    "start": 489.759,
+    "duration": 5.201
+  },
+  {
+    "text": "dedicated to the inner node and it's",
+    "start": 491.759,
+    "duration": 6.081
+  },
+  {
+    "text": "rendering the whole interferm on one GPU",
+    "start": 494.96,
+    "duration": 4.72
+  },
+  {
+    "text": "and then sending it out to all of the",
+    "start": 497.84,
+    "duration": 5.44
+  },
+  {
+    "text": "inner nodes which then do the composite",
+    "start": 499.68,
+    "duration": 6.56
+  },
+  {
+    "text": "um and then send it out. Or you could",
+    "start": 503.28,
+    "duration": 6.479
+  },
+  {
+    "text": "have it split into two different GPUs on",
+    "start": 506.24,
+    "duration": 6.96
+  },
+  {
+    "text": "one um inner node and it sends that out",
+    "start": 509.759,
+    "duration": 6.001
+  },
+  {
+    "text": "as two streams and then the outer node",
+    "start": 513.2,
+    "duration": 5.519
+  },
+  {
+    "text": "composits it or you can expand it. We",
+    "start": 515.76,
+    "duration": 5.92
+  },
+  {
+    "text": "had uh two machines with two GPUs each.",
+    "start": 518.719,
+    "duration": 5.68
+  },
+  {
+    "text": "So we were able to get four tiles and",
+    "start": 521.68,
+    "duration": 5.04
+  },
+  {
+    "text": "then you can use these in any sort of",
+    "start": 524.399,
+    "duration": 5.681
+  },
+  {
+    "text": "configuration. So you could have two",
+    "start": 526.72,
+    "duration": 5.92
+  },
+  {
+    "text": "GPUs rendering two tiles and then one",
+    "start": 530.08,
+    "duration": 4.96
+  },
+  {
+    "text": "GPU rendering a full separate other",
+    "start": 532.64,
+    "duration": 5.68
+  },
+  {
+    "text": "frostm if you wanted. Um you don't",
+    "start": 535.04,
+    "duration": 5.28
+  },
+  {
+    "text": "really need to do any like repatching or",
+    "start": 538.32,
+    "duration": 3.76
+  },
+  {
+    "text": "anything to get it to work. You just set",
+    "start": 540.32,
+    "duration": 3.84
+  },
+  {
+    "text": "it into your config and set the",
+    "start": 542.08,
+    "duration": 4.8
+  },
+  {
+    "text": "multiccast addresses.",
+    "start": 544.16,
+    "duration": 4.96
+  },
+  {
+    "text": "Like one thing to be aware of is that",
+    "start": 546.88,
+    "duration": 4.639
+  },
+  {
+    "text": "with separate processes they do share",
+    "start": 549.12,
+    "duration": 5.52
+  },
+  {
+    "text": "the same CPU and memory resources. So if",
+    "start": 551.519,
+    "duration": 5.121
+  },
+  {
+    "text": "your content is like CPUbound or",
+    "start": 554.64,
+    "duration": 5.04
+  },
+  {
+    "text": "something maybe like it wouldn't be good",
+    "start": 556.64,
+    "duration": 6.16
+  },
+  {
+    "text": "idea to run multiple processes on it but",
+    "start": 559.68,
+    "duration": 5.76
+  },
+  {
+    "text": "that's more an issue of optimization I",
+    "start": 562.8,
+    "duration": 5.64
+  },
+  {
+    "text": "think.",
+    "start": 565.44,
+    "duration": 3.0
+  },
+  {
+    "text": "So previous sync and signal distribution",
+    "start": 569.92,
+    "duration": 4.96
+  },
+  {
+    "text": "needed physical cables from each GPU",
+    "start": 572.24,
+    "duration": 4.719
+  },
+  {
+    "text": "output to the processor or your video",
+    "start": 574.88,
+    "duration": 4.959
+  },
+  {
+    "text": "matrix. If you're doing a full simpy",
+    "start": 576.959,
+    "duration": 5.361
+  },
+  {
+    "text": "setup um that's no longer the case. it",
+    "start": 579.839,
+    "duration": 4.641
+  },
+  {
+    "text": "would just be done over the network and",
+    "start": 582.32,
+    "duration": 4.72
+  },
+  {
+    "text": "then um your processor would need to be",
+    "start": 584.48,
+    "duration": 5.6
+  },
+  {
+    "text": "able to um receive simply 2110 streams",
+    "start": 587.04,
+    "duration": 7.359
+  },
+  {
+    "text": "as well. Um we no longer need um each",
+    "start": 590.08,
+    "duration": 6.0
+  },
+  {
+    "text": "node to render a copy of the inner",
+    "start": 594.399,
+    "duration": 4.56
+  },
+  {
+    "text": "frostm. So in case um like cost was an",
+    "start": 596.08,
+    "duration": 5.6
+  },
+  {
+    "text": "issue, you could just not have a second",
+    "start": 598.959,
+    "duration": 6.32
+  },
+  {
+    "text": "GPU in all of your outer frustm nodes.",
+    "start": 601.68,
+    "duration": 5.44
+  },
+  {
+    "text": "Um,",
+    "start": 605.279,
+    "duration": 5.68
+  },
+  {
+    "text": "and then for you also needed trile sync",
+    "start": 607.12,
+    "duration": 5.44
+  },
+  {
+    "text": "throughout your system. So then you",
+    "start": 610.959,
+    "duration": 4.0
+  },
+  {
+    "text": "needed like your genlock signal coming",
+    "start": 612.56,
+    "duration": 4.88
+  },
+  {
+    "text": "into like a sync card on each machine",
+    "start": 614.959,
+    "duration": 4.241
+  },
+  {
+    "text": "that's then daisy changed and",
+    "start": 617.44,
+    "duration": 4.0
+  },
+  {
+    "text": "everything. Um, if you're doing a full",
+    "start": 619.2,
+    "duration": 6.24
+  },
+  {
+    "text": "setup um, then um, PTP would handle that",
+    "start": 621.44,
+    "duration": 7.2
+  },
+  {
+    "text": "and that's sent over multiccast as well.",
+    "start": 625.44,
+    "duration": 6.56
+  },
+  {
+    "text": "Um, you also needed to have like EDID",
+    "start": 628.64,
+    "duration": 5.52
+  },
+  {
+    "text": "set for all of your outputs. configure",
+    "start": 632.0,
+    "duration": 6.399
+  },
+  {
+    "text": "mosaic um with simpy that you don't",
+    "start": 634.16,
+    "duration": 6.08
+  },
+  {
+    "text": "really need that everything is running",
+    "start": 638.399,
+    "duration": 4.641
+  },
+  {
+    "text": "headless if it's sending a simp network",
+    "start": 640.24,
+    "duration": 5.92
+  },
+  {
+    "text": "uh signal so you don't have to do that",
+    "start": 643.04,
+    "duration": 6.44
+  },
+  {
+    "text": "process anymore",
+    "start": 646.16,
+    "duration": 3.32
+  },
+  {
+    "text": "that kind of configures that",
+    "start": 649.92,
+    "duration": 6.08
+  },
+  {
+    "text": "um another cool thing is that you can",
+    "start": 653.519,
+    "duration": 5.201
+  },
+  {
+    "text": "change the resolution of an output um in",
+    "start": 656.0,
+    "duration": 5.36
+  },
+  {
+    "text": "the session um because it's defined in",
+    "start": 658.72,
+    "duration": 5.679
+  },
+  {
+    "text": "the STP um when you do that it might",
+    "start": 661.36,
+    "duration": 4.8
+  },
+  {
+    "text": "stutter but then it'll update and then",
+    "start": 664.399,
+    "duration": 3.201
+  },
+  {
+    "text": "start sending the stream and all the",
+    "start": 666.16,
+    "duration": 3.84
+  },
+  {
+    "text": "nodes will read the STP and look for",
+    "start": 667.6,
+    "duration": 5.359
+  },
+  {
+    "text": "that resolution instead. Um like media",
+    "start": 670.0,
+    "duration": 6.72
+  },
+  {
+    "text": "textures and media output sources um",
+    "start": 672.959,
+    "duration": 5.281
+  },
+  {
+    "text": "they adapt to the resolution",
+    "start": 676.72,
+    "duration": 3.52
+  },
+  {
+    "text": "automatically.",
+    "start": 678.24,
+    "duration": 4.159
+  },
+  {
+    "text": "Um",
+    "start": 680.24,
+    "duration": 5.76
+  },
+  {
+    "text": "yeah, one thing that is useful is that",
+    "start": 682.399,
+    "duration": 5.521
+  },
+  {
+    "text": "um if you configure all your nodes in",
+    "start": 686.0,
+    "duration": 4.16
+  },
+  {
+    "text": "exactly the same way, say you can get",
+    "start": 687.92,
+    "duration": 5.44
+  },
+  {
+    "text": "two GPUs per node, then all of your",
+    "start": 690.16,
+    "duration": 4.96
+  },
+  {
+    "text": "nodes are interchangeable. Like you can",
+    "start": 693.36,
+    "duration": 3.68
+  },
+  {
+    "text": "swap an inner node with an outer custom",
+    "start": 695.12,
+    "duration": 4.24
+  },
+  {
+    "text": "node. Um you can have spares that could",
+    "start": 697.04,
+    "duration": 4.799
+  },
+  {
+    "text": "stand in for any of the nodes in the",
+    "start": 699.36,
+    "duration": 5.12
+  },
+  {
+    "text": "system. So that's one thing to note for",
+    "start": 701.839,
+    "duration": 5.641
+  },
+  {
+    "text": "flexibility.",
+    "start": 704.48,
+    "duration": 3.0
+  },
+  {
+    "text": "So designing for simply 2110",
+    "start": 708.959,
+    "duration": 8.241
+  },
+  {
+    "text": "um I think for a simpy system there's",
+    "start": 713.36,
+    "duration": 5.919
+  },
+  {
+    "text": "definitely use cases where you'll see",
+    "start": 717.2,
+    "duration": 5.52
+  },
+  {
+    "text": "more benefits um especially for larger",
+    "start": 719.279,
+    "duration": 6.0
+  },
+  {
+    "text": "volume volumes um or flexible like",
+    "start": 722.72,
+    "duration": 5.359
+  },
+  {
+    "text": "pop-up style or like mobile volumes or",
+    "start": 725.279,
+    "duration": 5.841
+  },
+  {
+    "text": "reconfigurable ones um that'll save a",
+    "start": 728.079,
+    "duration": 5.921
+  },
+  {
+    "text": "lot of patching um video cables and",
+    "start": 731.12,
+    "duration": 6.48
+  },
+  {
+    "text": "stuff um and be able to do that quickly",
+    "start": 734.0,
+    "duration": 5.44
+  },
+  {
+    "text": "and you can also scale up much more",
+    "start": 737.6,
+    "duration": 6.72
+  },
+  {
+    "text": "easily. Um, and also for full 3D content",
+    "start": 739.44,
+    "duration": 6.639
+  },
+  {
+    "text": "is a good application of it, especially",
+    "start": 744.32,
+    "duration": 4.72
+  },
+  {
+    "text": "with the split interf um because you get",
+    "start": 746.079,
+    "duration": 5.76
+  },
+  {
+    "text": "a lot more render power. Um, if you're",
+    "start": 749.04,
+    "duration": 4.96
+  },
+  {
+    "text": "doing like plate playback or something,",
+    "start": 751.839,
+    "duration": 4.401
+  },
+  {
+    "text": "you might not see as much benefit",
+    "start": 754.0,
+    "duration": 4.0
+  },
+  {
+    "text": "because the resolution is already baked",
+    "start": 756.24,
+    "duration": 5.2
+  },
+  {
+    "text": "in. And also like if you're using EXRs,",
+    "start": 758.0,
+    "duration": 5.04
+  },
+  {
+    "text": "the processing already handles like",
+    "start": 761.44,
+    "duration": 3.92
+  },
+  {
+    "text": "splitting into tiles and streaming that",
+    "start": 763.04,
+    "duration": 6.52
+  },
+  {
+    "text": "in an optimized way already.",
+    "start": 765.36,
+    "duration": 4.2
+  },
+  {
+    "text": "So integration of 2110. Um it depends on",
+    "start": 773.279,
+    "duration": 8.081
+  },
+  {
+    "text": "whether it's like a new build. Maybe you",
+    "start": 779.2,
+    "duration": 4.4
+  },
+  {
+    "text": "want to go all in on 2110 from the start",
+    "start": 781.36,
+    "duration": 3.919
+  },
+  {
+    "text": "or if you already have an existing",
+    "start": 783.6,
+    "duration": 5.12
+  },
+  {
+    "text": "system with existing hardware. Maybe",
+    "start": 785.279,
+    "duration": 5.521
+  },
+  {
+    "text": "there's some bits that are harder harder",
+    "start": 788.72,
+    "duration": 5.04
+  },
+  {
+    "text": "to replace than others. Like in our case",
+    "start": 790.8,
+    "duration": 5.12
+  },
+  {
+    "text": "um we didn't own the video processor so",
+    "start": 793.76,
+    "duration": 4.8
+  },
+  {
+    "text": "we couldn't swap those out very easily.",
+    "start": 795.92,
+    "duration": 7.76
+  },
+  {
+    "text": "Um but um yeah, so it depends on whether",
+    "start": 798.56,
+    "duration": 7.12
+  },
+  {
+    "text": "you want to do a full switch or like",
+    "start": 803.68,
+    "duration": 3.68
+  },
+  {
+    "text": "it's it's a new build or if you need to",
+    "start": 805.68,
+    "duration": 4.88
+  },
+  {
+    "text": "integrate into existing systems. And",
+    "start": 807.36,
+    "duration": 6.56
+  },
+  {
+    "text": "also to consider whether there's other",
+    "start": 810.56,
+    "duration": 5.279
+  },
+  {
+    "text": "departments say on set or something that",
+    "start": 813.92,
+    "duration": 4.08
+  },
+  {
+    "text": "will want to receive the stream as well",
+    "start": 815.839,
+    "duration": 5.12
+  },
+  {
+    "text": "like if it's for monitoring um like if",
+    "start": 818.0,
+    "duration": 4.32
+  },
+  {
+    "text": "you want to send the feed to video",
+    "start": 820.959,
+    "duration": 3.281
+  },
+  {
+    "text": "village or something if they can receive",
+    "start": 822.32,
+    "duration": 4.079
+  },
+  {
+    "text": "a simp stream or if you need to convert",
+    "start": 824.24,
+    "duration": 5.839
+  },
+  {
+    "text": "it um to something like SDI for them.",
+    "start": 826.399,
+    "duration": 6.401
+  },
+  {
+    "text": "And also another thing to consider is",
+    "start": 830.079,
+    "duration": 5.2
+  },
+  {
+    "text": "like available slots and ports depending",
+    "start": 832.8,
+    "duration": 6.32
+  },
+  {
+    "text": "on your um needs for your nodes. like if",
+    "start": 835.279,
+    "duration": 6.961
+  },
+  {
+    "text": "you have capture cards in them, um is",
+    "start": 839.12,
+    "duration": 4.719
+  },
+  {
+    "text": "there going to be space for like two",
+    "start": 842.24,
+    "duration": 3.92
+  },
+  {
+    "text": "GPUs and a network card and any other",
+    "start": 843.839,
+    "duration": 5.521
+  },
+  {
+    "text": "network adapters uh for other networks?",
+    "start": 846.16,
+    "duration": 7.119
+  },
+  {
+    "text": "Um if you need a sync card, um yeah, we",
+    "start": 849.36,
+    "duration": 5.76
+  },
+  {
+    "text": "had some fun playing Tetris trying to",
+    "start": 853.279,
+    "duration": 6.441
+  },
+  {
+    "text": "fit everything onto one motherboard.",
+    "start": 855.12,
+    "duration": 4.6
+  },
+  {
+    "text": "Um I'll just touch on PTP a bit. Um I",
+    "start": 861.68,
+    "duration": 5.2
+  },
+  {
+    "text": "think this could probably be a talk on",
+    "start": 865.199,
+    "duration": 4.561
+  },
+  {
+    "text": "itself. um configuring PTP and like the",
+    "start": 866.88,
+    "duration": 5.04
+  },
+  {
+    "text": "grandmaster and everything. Um but",
+    "start": 869.76,
+    "duration": 3.84
+  },
+  {
+    "text": "there's lots of good videos on YouTube",
+    "start": 871.92,
+    "duration": 4.24
+  },
+  {
+    "text": "that talk about it. Um so that's",
+    "start": 873.6,
+    "duration": 6.08
+  },
+  {
+    "text": "precision time protocol um that syncs um",
+    "start": 876.16,
+    "duration": 6.64
+  },
+  {
+    "text": "all of the video signals um using",
+    "start": 879.68,
+    "duration": 6.08
+  },
+  {
+    "text": "multiccast. It um sends a sync signal",
+    "start": 882.8,
+    "duration": 6.479
+  },
+  {
+    "text": "and then waits for um well it gets a",
+    "start": 885.76,
+    "duration": 6.72
+  },
+  {
+    "text": "reply um from each of the nodes that",
+    "start": 889.279,
+    "duration": 5.201
+  },
+  {
+    "text": "would say like yes I'm in sync and like",
+    "start": 892.48,
+    "duration": 4.719
+  },
+  {
+    "text": "checks for drift and everything. Um, one",
+    "start": 894.48,
+    "duration": 5.76
+  },
+  {
+    "text": "thing to consider is that Bluefield 2 um",
+    "start": 897.199,
+    "duration": 5.121
+  },
+  {
+    "text": "is reaching end of life very soon. I",
+    "start": 900.24,
+    "duration": 4.32
+  },
+  {
+    "text": "think the it's supposed to be August, so",
+    "start": 902.32,
+    "duration": 5.04
+  },
+  {
+    "text": "maybe already. Um, but Bluefield 3 is",
+    "start": 904.56,
+    "duration": 7.959
+  },
+  {
+    "text": "supported um with Unreal and River.",
+    "start": 907.36,
+    "duration": 5.159
+  },
+  {
+    "text": "So, bandwidth and networking. So, since",
+    "start": 915.92,
+    "duration": 4.56
+  },
+  {
+    "text": "everything is on the network, the",
+    "start": 918.48,
+    "duration": 3.68
+  },
+  {
+    "text": "network configuration is going to be",
+    "start": 920.48,
+    "duration": 4.799
+  },
+  {
+    "text": "very important. Um, you need to get",
+    "start": 922.16,
+    "duration": 4.96
+  },
+  {
+    "text": "switches that are compatible with",
+    "start": 925.279,
+    "duration": 3.601
+  },
+  {
+    "text": "SIMP210.",
+    "start": 927.12,
+    "duration": 4.719
+  },
+  {
+    "text": "Um, and if you need to, um, that can",
+    "start": 928.88,
+    "duration": 6.0
+  },
+  {
+    "text": "support PDP as well. Um, especially",
+    "start": 931.839,
+    "duration": 5.521
+  },
+  {
+    "text": "things like flow control, IGMP,",
+    "start": 934.88,
+    "duration": 4.88
+  },
+  {
+    "text": "snooping, multiccast settings, like",
+    "start": 937.36,
+    "duration": 4.24
+  },
+  {
+    "text": "you'll be able you'll want to be able to",
+    "start": 939.76,
+    "duration": 5.36
+  },
+  {
+    "text": "manage those and configure it to um,",
+    "start": 941.6,
+    "duration": 4.88
+  },
+  {
+    "text": "make sure that you're not seeing things",
+    "start": 945.12,
+    "duration": 4.399
+  },
+  {
+    "text": "like jitter and drop packets um, on your",
+    "start": 946.48,
+    "duration": 5.84
+  },
+  {
+    "text": "network. Um, we also found that like",
+    "start": 949.519,
+    "duration": 4.88
+  },
+  {
+    "text": "mixing speeds on your switch doesn't",
+    "start": 952.32,
+    "duration": 4.319
+  },
+  {
+    "text": "work very well because it will randomly",
+    "start": 954.399,
+    "duration": 4.641
+  },
+  {
+    "text": "discard packets to try and reach the",
+    "start": 956.639,
+    "duration": 6.401
+  },
+  {
+    "text": "lowest um speed. Um, so then you'll see",
+    "start": 959.04,
+    "duration": 6.719
+  },
+  {
+    "text": "like carrying and all sorts of ugly",
+    "start": 963.04,
+    "duration": 5.44
+  },
+  {
+    "text": "artifacts if you try doing that. So",
+    "start": 965.759,
+    "duration": 4.64
+  },
+  {
+    "text": "definitely spend the money to get a good",
+    "start": 968.48,
+    "duration": 5.359
+  },
+  {
+    "text": "switch. Um, and have your transceivers",
+    "start": 970.399,
+    "duration": 6.401
+  },
+  {
+    "text": "match the switch speed as well.",
+    "start": 973.839,
+    "duration": 5.92
+  },
+  {
+    "text": "Um, another thing that we found was that",
+    "start": 976.8,
+    "duration": 5.839
+  },
+  {
+    "text": "um, if the network card is say close to",
+    "start": 979.759,
+    "duration": 4.801
+  },
+  {
+    "text": "the GPUs, there's a chance it could",
+    "start": 982.639,
+    "duration": 3.44
+  },
+  {
+    "text": "overheat",
+    "start": 984.56,
+    "duration": 3.44
+  },
+  {
+    "text": "um, which will also cause packets to",
+    "start": 986.079,
+    "duration": 3.68
+  },
+  {
+    "text": "drop. So that's another thing when",
+    "start": 988.0,
+    "duration": 6.12
+  },
+  {
+    "text": "figuring out your motherboard layout.",
+    "start": 989.759,
+    "duration": 4.361
+  },
+  {
+    "text": "So how much bandwidth do you need? Um,",
+    "start": 997.04,
+    "duration": 4.96
+  },
+  {
+    "text": "generally it's going to be like the",
+    "start": 1000.24,
+    "duration": 4.08
+  },
+  {
+    "text": "dimensions in pixels times the bit depth",
+    "start": 1002.0,
+    "duration": 4.399
+  },
+  {
+    "text": "times the number of channels plus the",
+    "start": 1004.32,
+    "duration": 4.72
+  },
+  {
+    "text": "frame rate that it's sending at. Um,",
+    "start": 1006.399,
+    "duration": 5.201
+  },
+  {
+    "text": "when using it for ICV effects, we",
+    "start": 1009.04,
+    "duration": 5.84
+  },
+  {
+    "text": "actually want to send faster um than our",
+    "start": 1011.6,
+    "duration": 5.84
+  },
+  {
+    "text": "show frame rate. So, say we were sending",
+    "start": 1014.88,
+    "duration": 5.36
+  },
+  {
+    "text": "at 60 fps. That way, there's enough time",
+    "start": 1017.44,
+    "duration": 5.04
+  },
+  {
+    "text": "for the entire frame to arrive in time",
+    "start": 1020.24,
+    "duration": 5.439
+  },
+  {
+    "text": "for it to get composited and displayed.",
+    "start": 1022.48,
+    "duration": 6.079
+  },
+  {
+    "text": "Um, so it was rendering at 24, but it",
+    "start": 1025.679,
+    "duration": 6.321
+  },
+  {
+    "text": "would send at 60 Hz. Um, so typically",
+    "start": 1028.559,
+    "duration": 5.601
+  },
+  {
+    "text": "you'd want something that's like 100",
+    "start": 1032.0,
+    "duration": 5.439
+  },
+  {
+    "text": "Gbit per second or more.",
+    "start": 1034.16,
+    "duration": 5.679
+  },
+  {
+    "text": "Um, another thing that is quite",
+    "start": 1037.439,
+    "duration": 5.041
+  },
+  {
+    "text": "important is to separate your networks.",
+    "start": 1039.839,
+    "duration": 6.161
+  },
+  {
+    "text": "Um, if you have this blasting streams",
+    "start": 1042.48,
+    "duration": 6.319
+  },
+  {
+    "text": "left and right, um, any other network",
+    "start": 1046.0,
+    "duration": 5.12
+  },
+  {
+    "text": "traffic is kind of going to get stuck in",
+    "start": 1048.799,
+    "duration": 4.641
+  },
+  {
+    "text": "it. Um, so if you're doing things like",
+    "start": 1051.12,
+    "duration": 4.32
+  },
+  {
+    "text": "remoting into your operating machine or",
+    "start": 1053.44,
+    "duration": 3.52
+  },
+  {
+    "text": "something, it's going to make the editor",
+    "start": 1055.44,
+    "duration": 3.68
+  },
+  {
+    "text": "very hard to use if you're you haven't",
+    "start": 1056.96,
+    "duration": 4.64
+  },
+  {
+    "text": "separated out your networks. So use",
+    "start": 1059.12,
+    "duration": 4.72
+  },
+  {
+    "text": "VLANs for sure. Separate out your",
+    "start": 1061.6,
+    "duration": 5.12
+  },
+  {
+    "text": "tracking data, any like iPad controls,",
+    "start": 1063.84,
+    "duration": 5.76
+  },
+  {
+    "text": "DMX. Um, make sure those are on separate",
+    "start": 1066.72,
+    "duration": 5.52
+  },
+  {
+    "text": "networks. Um, and if you're using",
+    "start": 1069.6,
+    "duration": 5.04
+  },
+  {
+    "text": "Melanox cards, there's two ports on it",
+    "start": 1072.24,
+    "duration": 4.559
+  },
+  {
+    "text": "on the network card. So that gives you",
+    "start": 1074.64,
+    "duration": 4.159
+  },
+  {
+    "text": "an option. So you could have two simpy",
+    "start": 1076.799,
+    "duration": 4.561
+  },
+  {
+    "text": "networks or you could have one for simp",
+    "start": 1078.799,
+    "duration": 8.12
+  },
+  {
+    "text": "and then one for um another use case.",
+    "start": 1081.36,
+    "duration": 5.559
+  },
+  {
+    "text": "Um so in RiverMax there's a technology",
+    "start": 1090.16,
+    "duration": 5.519
+  },
+  {
+    "text": "called GPU direct which is another",
+    "start": 1093.36,
+    "duration": 6.08
+  },
+  {
+    "text": "optimization. Um instead of transferring",
+    "start": 1095.679,
+    "duration": 6.161
+  },
+  {
+    "text": "the data from like the network card to",
+    "start": 1099.44,
+    "duration": 4.64
+  },
+  {
+    "text": "the CPU to the GPU, it just goes",
+    "start": 1101.84,
+    "duration": 3.76
+  },
+  {
+    "text": "straight between the network card and",
+    "start": 1104.08,
+    "duration": 4.56
+  },
+  {
+    "text": "the GPU. So GPU direct like handles",
+    "start": 1105.6,
+    "duration": 6.16
+  },
+  {
+    "text": "allocating memory. Um it gives you a",
+    "start": 1108.64,
+    "duration": 4.8
+  },
+  {
+    "text": "little bit of a performance boost. I",
+    "start": 1111.76,
+    "duration": 3.36
+  },
+  {
+    "text": "think we were seeing about like two or",
+    "start": 1113.44,
+    "duration": 4.8
+  },
+  {
+    "text": "four frames per second. Um which is",
+    "start": 1115.12,
+    "duration": 7.679
+  },
+  {
+    "text": "pretty good. I mean every frame helps.",
+    "start": 1118.24,
+    "duration": 7.2
+  },
+  {
+    "text": "And then it is important to consider",
+    "start": 1122.799,
+    "duration": 5.921
+  },
+  {
+    "text": "that um then your GPU and network card",
+    "start": 1125.44,
+    "duration": 6.0
+  },
+  {
+    "text": "uh to use this benefit need to be on the",
+    "start": 1128.72,
+    "duration": 4.4
+  },
+  {
+    "text": "same bus. So check that they're under",
+    "start": 1131.44,
+    "duration": 4.08
+  },
+  {
+    "text": "the same root complex.",
+    "start": 1133.12,
+    "duration": 5.6
+  },
+  {
+    "text": "um like check the motherboard manual for",
+    "start": 1135.52,
+    "duration": 5.36
+  },
+  {
+    "text": "the layout to see which bus everything",
+    "start": 1138.72,
+    "duration": 6.24
+  },
+  {
+    "text": "is on. Um and then there's a C bar where",
+    "start": 1140.88,
+    "duration": 6.799
+  },
+  {
+    "text": "you can turn it off globally um in the",
+    "start": 1144.96,
+    "duration": 6.48
+  },
+  {
+    "text": "engine. Um or there's tick boxes on each",
+    "start": 1147.679,
+    "duration": 7.921
+  },
+  {
+    "text": "of the inputs or um like river max",
+    "start": 1151.44,
+    "duration": 6.0
+  },
+  {
+    "text": "sources where you can tick whether to",
+    "start": 1155.6,
+    "duration": 3.52
+  },
+  {
+    "text": "use it or not. But that's just a quick C",
+    "start": 1157.44,
+    "duration": 5.16
+  },
+  {
+    "text": "bar to test.",
+    "start": 1159.12,
+    "duration": 3.48
+  },
+  {
+    "text": "Um, another consideration definitely is",
+    "start": 1164.08,
+    "duration": 5.12
+  },
+  {
+    "text": "power. So the first time we booted up",
+    "start": 1166.88,
+    "duration": 4.4
+  },
+  {
+    "text": "the full cluster with all five nodes in",
+    "start": 1169.2,
+    "duration": 3.76
+  },
+  {
+    "text": "the ceiling and the two inner nodes, we",
+    "start": 1171.28,
+    "duration": 3.84
+  },
+  {
+    "text": "tripped the alarm saying that we were",
+    "start": 1172.96,
+    "duration": 5.28
+  },
+  {
+    "text": "drawing too much power. Um, so that is",
+    "start": 1175.12,
+    "duration": 7.52
+  },
+  {
+    "text": "definitely something to think about. Um,",
+    "start": 1178.24,
+    "duration": 7.36
+  },
+  {
+    "text": "another thing is to use system images if",
+    "start": 1182.64,
+    "duration": 5.039
+  },
+  {
+    "text": "you can. um because it's a lot of",
+    "start": 1185.6,
+    "duration": 4.16
+  },
+  {
+    "text": "configuration on each node and if you",
+    "start": 1187.679,
+    "duration": 4.481
+  },
+  {
+    "text": "miss a setting on one node, you'll be",
+    "start": 1189.76,
+    "duration": 3.76
+  },
+  {
+    "text": "hunting through all of them trying to",
+    "start": 1192.16,
+    "duration": 3.28
+  },
+  {
+    "text": "find like which one is missing this one",
+    "start": 1193.52,
+    "duration": 5.039
+  },
+  {
+    "text": "stupid tick box. So use system images",
+    "start": 1195.44,
+    "duration": 4.64
+  },
+  {
+    "text": "just to make sure that all your systems",
+    "start": 1198.559,
+    "duration": 5.24
+  },
+  {
+    "text": "are set up the same.",
+    "start": 1200.08,
+    "duration": 3.719
+  },
+  {
+    "text": "So the split interferm or the tiled",
+    "start": 1205.84,
+    "duration": 6.959
+  },
+  {
+    "text": "interferm um the main use for this is",
+    "start": 1209.2,
+    "duration": 6.0
+  },
+  {
+    "text": "you get a boost in performance and then",
+    "start": 1212.799,
+    "duration": 5.041
+  },
+  {
+    "text": "you can achieve higher resolution.",
+    "start": 1215.2,
+    "duration": 5.76
+  },
+  {
+    "text": "So, like one of the most common",
+    "start": 1217.84,
+    "duration": 5.52
+  },
+  {
+    "text": "complaints about using ICVF effects and",
+    "start": 1220.96,
+    "duration": 4.64
+  },
+  {
+    "text": "shooting with LED is that the background",
+    "start": 1223.36,
+    "duration": 5.28
+  },
+  {
+    "text": "looks soft and like you're kind of",
+    "start": 1225.6,
+    "duration": 4.88
+  },
+  {
+    "text": "constrained by the performance of your",
+    "start": 1228.64,
+    "duration": 3.84
+  },
+  {
+    "text": "machine and how high of a resolution it",
+    "start": 1230.48,
+    "duration": 3.679
+  },
+  {
+    "text": "can render before you start dropping",
+    "start": 1232.48,
+    "duration": 6.079
+  },
+  {
+    "text": "frames and start seeing like stutters.",
+    "start": 1234.159,
+    "duration": 7.121
+  },
+  {
+    "text": "So, splitting the interface across GPUs,",
+    "start": 1238.559,
+    "duration": 6.641
+  },
+  {
+    "text": "you get a lot more render power. Um",
+    "start": 1241.28,
+    "duration": 6.48
+  },
+  {
+    "text": "like our previous solution to this um on",
+    "start": 1245.2,
+    "duration": 4.32
+  },
+  {
+    "text": "those about to die was just to use the",
+    "start": 1247.76,
+    "duration": 4.0
+  },
+  {
+    "text": "entire wall as a frustm basically and we",
+    "start": 1249.52,
+    "duration": 5.84
+  },
+  {
+    "text": "tracked the outer frustm um which then",
+    "start": 1251.76,
+    "duration": 5.76
+  },
+  {
+    "text": "gave us high resolution but then you",
+    "start": 1255.36,
+    "duration": 4.4
+  },
+  {
+    "text": "lose things like depth of field.",
+    "start": 1257.52,
+    "duration": 4.159
+  },
+  {
+    "text": "Everything is on like the same focus",
+    "start": 1259.76,
+    "duration": 7.039
+  },
+  {
+    "text": "plane. Um and you can't easily turn on",
+    "start": 1261.679,
+    "duration": 8.401
+  },
+  {
+    "text": "like make the the frustm blue or turn on",
+    "start": 1266.799,
+    "duration": 5.041
+  },
+  {
+    "text": "chroma. you'd have to like put something",
+    "start": 1270.08,
+    "duration": 3.599
+  },
+  {
+    "text": "there or turn the frustm back on and",
+    "start": 1271.84,
+    "duration": 4.719
+  },
+  {
+    "text": "then switch it to chroma. Um, and you",
+    "start": 1273.679,
+    "duration": 4.48
+  },
+  {
+    "text": "also lose some color correction",
+    "start": 1276.559,
+    "duration": 5.281
+  },
+  {
+    "text": "abilities like um, one thing that some",
+    "start": 1278.159,
+    "duration": 6.241
+  },
+  {
+    "text": "DBs do is they'll grade certain um,",
+    "start": 1281.84,
+    "duration": 5.36
+  },
+  {
+    "text": "sections of the wall and they'll like",
+    "start": 1284.4,
+    "duration": 4.48
+  },
+  {
+    "text": "use that to grade their shadows or",
+    "start": 1287.2,
+    "duration": 3.68
+  },
+  {
+    "text": "something. But if your entire wall is",
+    "start": 1288.88,
+    "duration": 4.64
+  },
+  {
+    "text": "your frustm, you can't really easily um,",
+    "start": 1290.88,
+    "duration": 4.72
+  },
+  {
+    "text": "switch an entire section of it to a",
+    "start": 1293.52,
+    "duration": 4.8
+  },
+  {
+    "text": "different color. Um so splitting the",
+    "start": 1295.6,
+    "duration": 6.48
+  },
+  {
+    "text": "inner frostm um takes care of like those",
+    "start": 1298.32,
+    "duration": 5.68
+  },
+  {
+    "text": "issues and it gives us more render",
+    "start": 1302.08,
+    "duration": 4.92
+  },
+  {
+    "text": "power.",
+    "start": 1304.0,
+    "duration": 3.0
+  },
+  {
+    "text": "So like how do we split it? Um I think",
+    "start": 1307.36,
+    "duration": 5.679
+  },
+  {
+    "text": "the most common configuration for like",
+    "start": 1310.96,
+    "duration": 4.16
+  },
+  {
+    "text": "if you're doing four tiles is just to",
+    "start": 1313.039,
+    "duration": 4.801
+  },
+  {
+    "text": "split it in a cross. Um which makes",
+    "start": 1315.12,
+    "duration": 5.919
+  },
+  {
+    "text": "sense. Um but you can also split it in",
+    "start": 1317.84,
+    "duration": 4.88
+  },
+  {
+    "text": "different directions if say you're",
+    "start": 1321.039,
+    "duration": 4.401
+  },
+  {
+    "text": "seeing artifacts. um like depending on",
+    "start": 1322.72,
+    "duration": 5.6
+  },
+  {
+    "text": "your camera move um you can have it go",
+    "start": 1325.44,
+    "duration": 4.96
+  },
+  {
+    "text": "in a different direction. So like if",
+    "start": 1328.32,
+    "duration": 4.8
+  },
+  {
+    "text": "you're doing a horizontal split um you",
+    "start": 1330.4,
+    "duration": 4.96
+  },
+  {
+    "text": "can fix things that are issues on",
+    "start": 1333.12,
+    "duration": 4.72
+  },
+  {
+    "text": "vertical seams um especially if your",
+    "start": 1335.36,
+    "duration": 4.4
+  },
+  {
+    "text": "camera's panning. So then it's because",
+    "start": 1337.84,
+    "duration": 3.76
+  },
+  {
+    "text": "it's moving along the same direction of",
+    "start": 1339.76,
+    "duration": 3.36
+  },
+  {
+    "text": "the seams. You won't see those as",
+    "start": 1341.6,
+    "duration": 4.64
+  },
+  {
+    "text": "prominently or like um the same for",
+    "start": 1343.12,
+    "duration": 8.919
+  },
+  {
+    "text": "vertical split for um horizontal seams.",
+    "start": 1346.24,
+    "duration": 5.799
+  },
+  {
+    "text": "And then like operating a simply 2110",
+    "start": 1355.44,
+    "duration": 6.0
+  },
+  {
+    "text": "cluster for like engine TDs and",
+    "start": 1359.039,
+    "duration": 4.801
+  },
+  {
+    "text": "operators is generally going to be the",
+    "start": 1361.44,
+    "duration": 4.8
+  },
+  {
+    "text": "same as operating another end display",
+    "start": 1363.84,
+    "duration": 5.199
+  },
+  {
+    "text": "setup. Um there are some things to keep",
+    "start": 1366.24,
+    "duration": 5.76
+  },
+  {
+    "text": "in mind with like setting resolution and",
+    "start": 1369.039,
+    "duration": 6.481
+  },
+  {
+    "text": "overcan and such. Um, so you can set",
+    "start": 1372.0,
+    "duration": 6.48
+  },
+  {
+    "text": "your custom resolution on the ICVFX",
+    "start": 1375.52,
+    "duration": 4.96
+  },
+  {
+    "text": "camera component in the custom",
+    "start": 1378.48,
+    "duration": 4.96
+  },
+  {
+    "text": "resolution section. Um, and then you can",
+    "start": 1380.48,
+    "duration": 5.36
+  },
+  {
+    "text": "increase the screen percentage um to do",
+    "start": 1383.44,
+    "duration": 6.08
+  },
+  {
+    "text": "a multiplier on it. Um,",
+    "start": 1385.84,
+    "duration": 8.079
+  },
+  {
+    "text": "and then is it one thing to note is that",
+    "start": 1389.52,
+    "duration": 6.639
+  },
+  {
+    "text": "like if you change the resolution or",
+    "start": 1393.919,
+    "duration": 4.081
+  },
+  {
+    "text": "something during the session, you are",
+    "start": 1396.159,
+    "duration": 3.681
+  },
+  {
+    "text": "going to get like a stutter while it",
+    "start": 1398.0,
+    "duration": 4.72
+  },
+  {
+    "text": "updates. So, best not to do it in the",
+    "start": 1399.84,
+    "duration": 5.76
+  },
+  {
+    "text": "middle of a take. Um,",
+    "start": 1402.72,
+    "duration": 4.72
+  },
+  {
+    "text": "but you can change things like the",
+    "start": 1405.6,
+    "duration": 3.92
+  },
+  {
+    "text": "overcan if you turn adapt resolution",
+    "start": 1407.44,
+    "duration": 3.76
+  },
+  {
+    "text": "off. So, if you're like in the middle of",
+    "start": 1409.52,
+    "duration": 3.84
+  },
+  {
+    "text": "a take and you see the camera is about",
+    "start": 1411.2,
+    "duration": 4.24
+  },
+  {
+    "text": "to go out out of the frustm, you can",
+    "start": 1413.36,
+    "duration": 3.92
+  },
+  {
+    "text": "increase the overcan a bit and that will",
+    "start": 1415.44,
+    "duration": 5.0
+  },
+  {
+    "text": "be fine.",
+    "start": 1417.28,
+    "duration": 3.16
+  },
+  {
+    "text": "So building content for the split interf",
+    "start": 1423.84,
+    "duration": 6.079
+  },
+  {
+    "text": "I think most of these things are best",
+    "start": 1427.679,
+    "duration": 5.681
+  },
+  {
+    "text": "practice for end display anyway like if",
+    "start": 1429.919,
+    "duration": 6.561
+  },
+  {
+    "text": "you were say doing a multiprocess or",
+    "start": 1433.36,
+    "duration": 5.52
+  },
+  {
+    "text": "multi-GPU setup you would still have",
+    "start": 1436.48,
+    "duration": 4.4
+  },
+  {
+    "text": "issues with like the nodes rendering",
+    "start": 1438.88,
+    "duration": 4.08
+  },
+  {
+    "text": "non-deterministically or something. So",
+    "start": 1440.88,
+    "duration": 4.72
+  },
+  {
+    "text": "these things are still best practice. Um",
+    "start": 1442.96,
+    "duration": 6.36
+  },
+  {
+    "text": "but with the split interf",
+    "start": 1445.6,
+    "duration": 3.72
+  },
+  {
+    "text": "screen space effects. Um things like",
+    "start": 1453.2,
+    "duration": 6.24
+  },
+  {
+    "text": "bloom vignette, screen space fog, SSAO,",
+    "start": 1455.84,
+    "duration": 5.68
+  },
+  {
+    "text": "SSAO you might be able to get away with",
+    "start": 1459.44,
+    "duration": 6.32
+  },
+  {
+    "text": "if you have a really tiny radius, but um",
+    "start": 1461.52,
+    "duration": 6.8
+  },
+  {
+    "text": "yeah, best not to use it. Um, instead",
+    "start": 1465.76,
+    "duration": 4.0
+  },
+  {
+    "text": "try to look for things that are using",
+    "start": 1468.32,
+    "duration": 4.56
+  },
+  {
+    "text": "like rolled um, camera view or",
+    "start": 1469.76,
+    "duration": 5.44
+  },
+  {
+    "text": "projection clip space instead. So you",
+    "start": 1472.88,
+    "duration": 4.0
+  },
+  {
+    "text": "could still do like post-process and",
+    "start": 1475.2,
+    "duration": 3.44
+  },
+  {
+    "text": "stuff, just try to use those faces",
+    "start": 1476.88,
+    "duration": 5.52
+  },
+  {
+    "text": "instead of screen space.",
+    "start": 1478.64,
+    "duration": 6.48
+  },
+  {
+    "text": "Another thing to use is overcan. It",
+    "start": 1482.4,
+    "duration": 4.879
+  },
+  {
+    "text": "helps blend the seams between each of",
+    "start": 1485.12,
+    "duration": 4.24
+  },
+  {
+    "text": "the tiles because it'll be a hard line",
+    "start": 1487.279,
+    "duration": 3.841
+  },
+  {
+    "text": "where the seam is. There isn't like a",
+    "start": 1489.36,
+    "duration": 4.64
+  },
+  {
+    "text": "feather or anything in there. Now, um so",
+    "start": 1491.12,
+    "duration": 5.919
+  },
+  {
+    "text": "you can over scan a little bit to help",
+    "start": 1494.0,
+    "duration": 5.919
+  },
+  {
+    "text": "fix like especially things like culling",
+    "start": 1497.039,
+    "duration": 6.081
+  },
+  {
+    "text": "and like lighting artifacts. Um it'll",
+    "start": 1499.919,
+    "duration": 6.081
+  },
+  {
+    "text": "help those blend a little bit. Um the",
+    "start": 1503.12,
+    "duration": 5.12
+  },
+  {
+    "text": "cool thing is that it over only overcans",
+    "start": 1506.0,
+    "duration": 5.76
+  },
+  {
+    "text": "on the um seam the interior seams. So",
+    "start": 1508.24,
+    "duration": 5.28
+  },
+  {
+    "text": "it's not like overcanning outside the",
+    "start": 1511.76,
+    "duration": 3.279
+  },
+  {
+    "text": "frustr",
+    "start": 1513.52,
+    "duration": 3.68
+  },
+  {
+    "text": "losing resolution there. So it's just",
+    "start": 1515.039,
+    "duration": 6.201
+  },
+  {
+    "text": "where the overlaps are.",
+    "start": 1517.2,
+    "duration": 4.04
+  },
+  {
+    "text": "Um, Niagara effects, of course, they",
+    "start": 1522.159,
+    "duration": 4.721
+  },
+  {
+    "text": "should be deterministic.",
+    "start": 1524.96,
+    "duration": 5.839
+  },
+  {
+    "text": "Um, if say you're using PCG or",
+    "start": 1526.88,
+    "duration": 5.84
+  },
+  {
+    "text": "something, um, if you've cached it, it's",
+    "start": 1530.799,
+    "duration": 3.281
+  },
+  {
+    "text": "probably fine, but if it's like",
+    "start": 1532.72,
+    "duration": 3.28
+  },
+  {
+    "text": "regenerating PCG, you probably want that",
+    "start": 1534.08,
+    "duration": 5.28
+  },
+  {
+    "text": "to be deterministic as well. Um, and to",
+    "start": 1536.0,
+    "duration": 5.6
+  },
+  {
+    "text": "set your sort priorities on things like",
+    "start": 1539.36,
+    "duration": 3.76
+  },
+  {
+    "text": "post-process",
+    "start": 1541.6,
+    "duration": 3.36
+  },
+  {
+    "text": "um, and translucent materials,",
+    "start": 1543.12,
+    "duration": 3.84
+  },
+  {
+    "text": "especially big things like say you have",
+    "start": 1544.96,
+    "duration": 4.56
+  },
+  {
+    "text": "volumetrics that are like fog or",
+    "start": 1546.96,
+    "duration": 4.48
+  },
+  {
+    "text": "something and you have multiple layers",
+    "start": 1549.52,
+    "duration": 4.0
+  },
+  {
+    "text": "of fog, you want to set your priority so",
+    "start": 1551.44,
+    "duration": 4.08
+  },
+  {
+    "text": "it knows which one to draw on top and",
+    "start": 1553.52,
+    "duration": 4.399
+  },
+  {
+    "text": "like um, that order is consistent.",
+    "start": 1555.52,
+    "duration": 4.72
+  },
+  {
+    "text": "Otherwise, you'll see some mismatches",
+    "start": 1557.919,
+    "duration": 6.041
+  },
+  {
+    "text": "between the tiles.",
+    "start": 1560.24,
+    "duration": 3.72
+  },
+  {
+    "text": "So blueprinting for split interferm",
+    "start": 1565.76,
+    "duration": 6.48
+  },
+  {
+    "text": "um I think it's usually the ones that",
+    "start": 1569.76,
+    "duration": 4.64
+  },
+  {
+    "text": "are driven by time that are most likely",
+    "start": 1572.24,
+    "duration": 6.4
+  },
+  {
+    "text": "to have seen in them um where some of",
+    "start": 1574.4,
+    "duration": 5.92
+  },
+  {
+    "text": "them might be like slightly off",
+    "start": 1578.64,
+    "duration": 3.279
+  },
+  {
+    "text": "especially if it's like doing something",
+    "start": 1580.32,
+    "duration": 3.68
+  },
+  {
+    "text": "on the transform like the translation or",
+    "start": 1581.919,
+    "duration": 4.321
+  },
+  {
+    "text": "rotation or something.",
+    "start": 1584.0,
+    "duration": 5.36
+  },
+  {
+    "text": "Um, some things might be easier to do",
+    "start": 1586.24,
+    "duration": 4.799
+  },
+  {
+    "text": "um, using sequencer if you're trying to",
+    "start": 1589.36,
+    "duration": 4.0
+  },
+  {
+    "text": "do something like very precise timing.",
+    "start": 1591.039,
+    "duration": 3.921
+  },
+  {
+    "text": "Um, but if it's something that's just",
+    "start": 1593.36,
+    "duration": 3.76
+  },
+  {
+    "text": "like in the background, just something",
+    "start": 1594.96,
+    "duration": 4.8
+  },
+  {
+    "text": "moving to give it a bit of life, you",
+    "start": 1597.12,
+    "duration": 5.679
+  },
+  {
+    "text": "could do it um, in a blueprint.",
+    "start": 1599.76,
+    "duration": 5.279
+  },
+  {
+    "text": "Uh, I don't recommend using timelines.",
+    "start": 1602.799,
+    "duration": 6.401
+  },
+  {
+    "text": "They tend to be quite heavy. Um, like",
+    "start": 1605.039,
+    "duration": 6.24
+  },
+  {
+    "text": "um, they're also quite hard to control",
+    "start": 1609.2,
+    "duration": 5.04
+  },
+  {
+    "text": "sometimes. So try to avoid timeline",
+    "start": 1611.279,
+    "duration": 6.921
+  },
+  {
+    "text": "nodes whenever you can.",
+    "start": 1614.24,
+    "duration": 3.96
+  },
+  {
+    "text": "The way I usually go about making",
+    "start": 1618.32,
+    "duration": 5.359
+  },
+  {
+    "text": "blueprints for um the system is to use",
+    "start": 1620.4,
+    "duration": 7.279
+  },
+  {
+    "text": "the um tickable actor class as a base.",
+    "start": 1623.679,
+    "duration": 6.48
+  },
+  {
+    "text": "Um usually the first one, the one that's",
+    "start": 1627.679,
+    "duration": 6.0
+  },
+  {
+    "text": "highlighted, the view VP viewport ticket",
+    "start": 1630.159,
+    "duration": 7.12
+  },
+  {
+    "text": "tickable um actor base, that one works",
+    "start": 1633.679,
+    "duration": 5.921
+  },
+  {
+    "text": "both in editor and on the wall. So you",
+    "start": 1637.279,
+    "duration": 4.081
+  },
+  {
+    "text": "can see it updating in your editor on",
+    "start": 1639.6,
+    "duration": 5.12
+  },
+  {
+    "text": "tick as well. Um like generally you",
+    "start": 1641.36,
+    "duration": 4.64
+  },
+  {
+    "text": "don't want to have too many actors that",
+    "start": 1644.72,
+    "duration": 2.88
+  },
+  {
+    "text": "are ticking. So you could have one",
+    "start": 1646.0,
+    "duration": 3.44
+  },
+  {
+    "text": "controller that's using this base class",
+    "start": 1647.6,
+    "duration": 5.04
+  },
+  {
+    "text": "updating like a bunch of instances of um",
+    "start": 1649.44,
+    "duration": 6.239
+  },
+  {
+    "text": "your actors in the scene. Um and it's",
+    "start": 1652.64,
+    "duration": 5.519
+  },
+  {
+    "text": "pretty easy to use. Like it just exposes",
+    "start": 1655.679,
+    "duration": 5.201
+  },
+  {
+    "text": "the event editor tick and then you can",
+    "start": 1658.159,
+    "duration": 4.481
+  },
+  {
+    "text": "connect connect that like you would um",
+    "start": 1660.88,
+    "duration": 6.0
+  },
+  {
+    "text": "like with your regular tick event.",
+    "start": 1662.64,
+    "duration": 7.2
+  },
+  {
+    "text": "Um, another thing that's helpful is to",
+    "start": 1666.88,
+    "duration": 6.159
+  },
+  {
+    "text": "use the time code node. Um, you can feed",
+    "start": 1669.84,
+    "duration": 5.36
+  },
+  {
+    "text": "that either into an actor with a",
+    "start": 1673.039,
+    "duration": 4.401
+  },
+  {
+    "text": "blueprint or you can like feed it into",
+    "start": 1675.2,
+    "duration": 5.68
+  },
+  {
+    "text": "your materials. Um, so then that can",
+    "start": 1677.44,
+    "duration": 6.0
+  },
+  {
+    "text": "drive like a material or actor using",
+    "start": 1680.88,
+    "duration": 4.48
+  },
+  {
+    "text": "time because it's time code and if you",
+    "start": 1683.44,
+    "duration": 3.76
+  },
+  {
+    "text": "have time code across your system, all",
+    "start": 1685.36,
+    "duration": 3.679
+  },
+  {
+    "text": "of the nodes will be using the same time",
+    "start": 1687.2,
+    "duration": 4.24
+  },
+  {
+    "text": "code to update with.",
+    "start": 1689.039,
+    "duration": 5.441
+  },
+  {
+    "text": "Um, you can also use the delta time um",
+    "start": 1691.44,
+    "duration": 5.28
+  },
+  {
+    "text": "because you're going to have gen lock",
+    "start": 1694.48,
+    "duration": 4.16
+  },
+  {
+    "text": "and sync and all that. So the delta time",
+    "start": 1696.72,
+    "duration": 7.24
+  },
+  {
+    "text": "will always be the time of one frame.",
+    "start": 1698.64,
+    "duration": 5.32
+  },
+  {
+    "text": "Um, so in case you do have cases where",
+    "start": 1706.32,
+    "duration": 5.44
+  },
+  {
+    "text": "you're updating a blueprint and then you",
+    "start": 1709.36,
+    "duration": 5.76
+  },
+  {
+    "text": "see it mismatches across nodes, um,",
+    "start": 1711.76,
+    "duration": 5.2
+  },
+  {
+    "text": "there are some components that you can",
+    "start": 1715.12,
+    "duration": 4.159
+  },
+  {
+    "text": "use um, on your actor, the sync",
+    "start": 1716.96,
+    "duration": 5.92
+  },
+  {
+    "text": "components that will um, sync over um,",
+    "start": 1719.279,
+    "duration": 7.28
+  },
+  {
+    "text": "the end display cluster. Um, so you can",
+    "start": 1722.88,
+    "duration": 6.399
+  },
+  {
+    "text": "add those to your blueprint.",
+    "start": 1726.559,
+    "duration": 6.801
+  },
+  {
+    "text": "Um and also using random values is a big",
+    "start": 1729.279,
+    "duration": 6.0
+  },
+  {
+    "text": "one that can sometimes be",
+    "start": 1733.36,
+    "duration": 3.6
+  },
+  {
+    "text": "non-deterministic.",
+    "start": 1735.279,
+    "duration": 5.441
+  },
+  {
+    "text": "So use um the random stream um that you",
+    "start": 1736.96,
+    "duration": 5.68
+  },
+  {
+    "text": "can set a seed on it. You can set a seed",
+    "start": 1740.72,
+    "duration": 3.439
+  },
+  {
+    "text": "value for to start generating the",
+    "start": 1742.64,
+    "duration": 4.0
+  },
+  {
+    "text": "numbers from um and you have all your",
+    "start": 1744.159,
+    "duration": 5.201
+  },
+  {
+    "text": "different data types like float, int,",
+    "start": 1746.64,
+    "duration": 5.2
+  },
+  {
+    "text": "whatever you want. Um so use those",
+    "start": 1749.36,
+    "duration": 5.48
+  },
+  {
+    "text": "instead.",
+    "start": 1751.84,
+    "duration": 3.0
+  },
+  {
+    "text": "So like we were using lumen and ray",
+    "start": 1757.52,
+    "duration": 6.96
+  },
+  {
+    "text": "tracing nanite all that um lumen",
+    "start": 1760.88,
+    "duration": 5.6
+  },
+  {
+    "text": "particularly like some of the parts of",
+    "start": 1764.48,
+    "duration": 5.12
+  },
+  {
+    "text": "it are temporal so like you'll get some",
+    "start": 1766.48,
+    "duration": 6.0
+  },
+  {
+    "text": "um seams as it's updating",
+    "start": 1769.6,
+    "duration": 5.679
+  },
+  {
+    "text": "um so one way to fix this is to increase",
+    "start": 1772.48,
+    "duration": 4.88
+  },
+  {
+    "text": "the lumen update speed and the final",
+    "start": 1775.279,
+    "duration": 4.721
+  },
+  {
+    "text": "gather update speed. So that will make",
+    "start": 1777.36,
+    "duration": 5.6
+  },
+  {
+    "text": "Lumen update the scene faster, but it",
+    "start": 1780.0,
+    "duration": 5.679
+  },
+  {
+    "text": "doesn't have a cost on performance. Um,",
+    "start": 1782.96,
+    "duration": 5.199
+  },
+  {
+    "text": "so adjust it as high as you can get",
+    "start": 1785.679,
+    "duration": 6.801
+  },
+  {
+    "text": "without dropping frames. Um, another big",
+    "start": 1788.159,
+    "duration": 6.561
+  },
+  {
+    "text": "one for artists is that you need to",
+    "start": 1792.48,
+    "duration": 4.72
+  },
+  {
+    "text": "disable screen traces because it's a",
+    "start": 1794.72,
+    "duration": 5.199
+  },
+  {
+    "text": "screen space effect. Um, it does make",
+    "start": 1797.2,
+    "duration": 4.64
+  },
+  {
+    "text": "your reflections look very pretty, but",
+    "start": 1799.919,
+    "duration": 4.24
+  },
+  {
+    "text": "it causes lots of seams in a split",
+    "start": 1801.84,
+    "duration": 5.6
+  },
+  {
+    "text": "interface. So, um, it's best to build",
+    "start": 1804.159,
+    "duration": 5.12
+  },
+  {
+    "text": "the content with that in mind, not to",
+    "start": 1807.44,
+    "duration": 5.32
+  },
+  {
+    "text": "use that feature.",
+    "start": 1809.279,
+    "duration": 3.481
+  },
+  {
+    "text": "So, upscaling and denoising. Again,",
+    "start": 1815.44,
+    "duration": 4.88
+  },
+  {
+    "text": "these are temporal. So, if you're using",
+    "start": 1817.84,
+    "duration": 4.48
+  },
+  {
+    "text": "like TSR or something, you may see like",
+    "start": 1820.32,
+    "duration": 6.479
+  },
+  {
+    "text": "a trail as like the FTOM moves. Um, I",
+    "start": 1822.32,
+    "duration": 7.68
+  },
+  {
+    "text": "think where is you could see it slightly",
+    "start": 1826.799,
+    "duration": 5.76
+  },
+  {
+    "text": "on here. Um, you can see as it passes",
+    "start": 1830.0,
+    "duration": 5.44
+  },
+  {
+    "text": "across like that door. um you see like a",
+    "start": 1832.559,
+    "duration": 4.961
+  },
+  {
+    "text": "shadow moving across that's where the",
+    "start": 1835.44,
+    "duration": 7.2
+  },
+  {
+    "text": "theme is. Um so",
+    "start": 1837.52,
+    "duration": 8.24
+  },
+  {
+    "text": "um you can change your TSR settings. You",
+    "start": 1842.64,
+    "duration": 6.32
+  },
+  {
+    "text": "can decrease like the time or like the",
+    "start": 1845.76,
+    "duration": 5.6
+  },
+  {
+    "text": "change the number of samples to try and",
+    "start": 1848.96,
+    "duration": 7.04
+  },
+  {
+    "text": "adjust um for that seam. Um, you can",
+    "start": 1851.36,
+    "duration": 7.36
+  },
+  {
+    "text": "also tune things like max roughness to",
+    "start": 1856.0,
+    "duration": 6.08
+  },
+  {
+    "text": "trace or like max rate intensity. Just",
+    "start": 1858.72,
+    "duration": 6.64
+  },
+  {
+    "text": "um adjust like how bright um or like",
+    "start": 1862.08,
+    "duration": 5.68
+  },
+  {
+    "text": "especially for noise um you'll see like",
+    "start": 1865.36,
+    "duration": 5.199
+  },
+  {
+    "text": "a trail of like sparkles when the frost",
+    "start": 1867.76,
+    "duration": 4.32
+  },
+  {
+    "text": "moves across sometimes. So if you",
+    "start": 1870.559,
+    "duration": 3.6
+  },
+  {
+    "text": "decrease that um it won't be as",
+    "start": 1872.08,
+    "duration": 4.24
+  },
+  {
+    "text": "reflective or shiny. So you might be",
+    "start": 1874.159,
+    "duration": 5.441
+  },
+  {
+    "text": "able to fix some of the seams that way.",
+    "start": 1876.32,
+    "duration": 9.2
+  },
+  {
+    "text": "Um you can also use DLSS and DLSS DLSSR",
+    "start": 1879.6,
+    "duration": 7.92
+  },
+  {
+    "text": "um to help u with denoising and",
+    "start": 1885.52,
+    "duration": 5.84
+  },
+  {
+    "text": "upscaling as well. Um we use those in",
+    "start": 1887.52,
+    "duration": 6.0
+  },
+  {
+    "text": "production. Those also give you an",
+    "start": 1891.36,
+    "duration": 3.919
+  },
+  {
+    "text": "additional performance boost because it",
+    "start": 1893.52,
+    "duration": 3.44
+  },
+  {
+    "text": "reduces the screen percentage that",
+    "start": 1895.279,
+    "duration": 3.76
+  },
+  {
+    "text": "you're rendering. So like you can render",
+    "start": 1896.96,
+    "duration": 4.319
+  },
+  {
+    "text": "at say like 80% screen percentage and",
+    "start": 1899.039,
+    "duration": 7.48
+  },
+  {
+    "text": "then let DLSS do the uprising on it.",
+    "start": 1901.279,
+    "duration": 5.24
+  },
+  {
+    "text": "So, another useful thing for artists,",
+    "start": 1910.559,
+    "duration": 4.561
+  },
+  {
+    "text": "especially if they don't have a cluster",
+    "start": 1913.679,
+    "duration": 4.641
+  },
+  {
+    "text": "to test the content on beforehand, is to",
+    "start": 1915.12,
+    "duration": 6.24
+  },
+  {
+    "text": "preview it in the editor. Um, you can",
+    "start": 1918.32,
+    "duration": 5.44
+  },
+  {
+    "text": "turn on the preview editor on the actor",
+    "start": 1921.36,
+    "duration": 5.039
+  },
+  {
+    "text": "directly, and you'll see it in your um",
+    "start": 1923.76,
+    "duration": 6.24
+  },
+  {
+    "text": "viewport um updating. It can be a bit",
+    "start": 1926.399,
+    "duration": 6.081
+  },
+  {
+    "text": "heavy on performance. Um, so previewing",
+    "start": 1930.0,
+    "duration": 4.32
+  },
+  {
+    "text": "the cluster, you won't be able to test",
+    "start": 1932.48,
+    "duration": 3.76
+  },
+  {
+    "text": "like performance and optimization as",
+    "start": 1934.32,
+    "duration": 4.16
+  },
+  {
+    "text": "much, but you can check for seams and",
+    "start": 1936.24,
+    "duration": 5.2
+  },
+  {
+    "text": "that kind of thing. You can also launch",
+    "start": 1938.48,
+    "duration": 5.439
+  },
+  {
+    "text": "the editor or launch end display",
+    "start": 1941.44,
+    "duration": 4.4
+  },
+  {
+    "text": "directly from the editor using the end",
+    "start": 1943.919,
+    "duration": 4.561
+  },
+  {
+    "text": "display quick launch feature. Um, that",
+    "start": 1945.84,
+    "duration": 4.959
+  },
+  {
+    "text": "basically lets you launch as if you were",
+    "start": 1948.48,
+    "duration": 5.679
+  },
+  {
+    "text": "launching the node um on your machine.",
+    "start": 1950.799,
+    "duration": 5.521
+  },
+  {
+    "text": "So again, it won't be performant, but",
+    "start": 1954.159,
+    "duration": 4.081
+  },
+  {
+    "text": "you can see if there's going to be seams",
+    "start": 1956.32,
+    "duration": 6.199
+  },
+  {
+    "text": "or um other artifacts.",
+    "start": 1958.24,
+    "duration": 4.279
+  },
+  {
+    "text": "And big thing is still even though we",
+    "start": 1965.039,
+    "duration": 4.0
+  },
+  {
+    "text": "have a lot more render power, you still",
+    "start": 1967.6,
+    "duration": 4.72
+  },
+  {
+    "text": "need to optimize. Um like I think the",
+    "start": 1969.039,
+    "duration": 5.201
+  },
+  {
+    "text": "goal of having more render power is to",
+    "start": 1972.32,
+    "duration": 4.16
+  },
+  {
+    "text": "be able to achieve more photo realism,",
+    "start": 1974.24,
+    "duration": 5.439
+  },
+  {
+    "text": "add more detail. Um",
+    "start": 1976.48,
+    "duration": 5.76
+  },
+  {
+    "text": "so you still want to have optimized",
+    "start": 1979.679,
+    "duration": 4.081
+  },
+  {
+    "text": "content. It's not like you could just",
+    "start": 1982.24,
+    "duration": 4.24
+  },
+  {
+    "text": "throw anything at it, expect it to work.",
+    "start": 1983.76,
+    "duration": 8.08
+  },
+  {
+    "text": "Um, so use um use um insights and",
+    "start": 1986.48,
+    "duration": 8.64
+  },
+  {
+    "text": "profiling to um get better performance",
+    "start": 1991.84,
+    "duration": 5.199
+  },
+  {
+    "text": "beforehand. You probably want to have",
+    "start": 1995.12,
+    "duration": 6.159
+  },
+  {
+    "text": "like about 10 FPS overhead. Um so like",
+    "start": 1997.039,
+    "duration": 6.321
+  },
+  {
+    "text": "then when you get to shoot, you have",
+    "start": 2001.279,
+    "duration": 4.721
+  },
+  {
+    "text": "some room to adjust things or increase",
+    "start": 2003.36,
+    "duration": 5.439
+  },
+  {
+    "text": "like your overcan or resolution a little",
+    "start": 2006.0,
+    "duration": 5.76
+  },
+  {
+    "text": "bit. um but it's only going to run as",
+    "start": 2008.799,
+    "duration": 5.201
+  },
+  {
+    "text": "fast as the slowest node. So if you have",
+    "start": 2011.76,
+    "duration": 4.96
+  },
+  {
+    "text": "one particular section of your scene",
+    "start": 2014.0,
+    "duration": 4.88
+  },
+  {
+    "text": "that's more problematic, the whole scene",
+    "start": 2016.72,
+    "duration": 5.199
+  },
+  {
+    "text": "is going to run um to as fast as it can",
+    "start": 2018.88,
+    "duration": 5.44
+  },
+  {
+    "text": "render that. So that's something to keep",
+    "start": 2021.919,
+    "duration": 5.64
+  },
+  {
+    "text": "in mind.",
+    "start": 2024.32,
+    "duration": 3.239
+  },
+  {
+    "text": "Um so here's a bunch of sears that",
+    "start": 2028.399,
+    "duration": 5.52
+  },
+  {
+    "text": "we used.",
+    "start": 2032.08,
+    "duration": 4.839
+  },
+  {
+    "text": "Yeah.",
+    "start": 2033.919,
+    "duration": 3.0
+  },
+  {
+    "text": "Yeah, lots of sea bars. Um, there's also",
+    "start": 2040.32,
+    "duration": 7.04
+  },
+  {
+    "text": "like RiverMax um sears as well. You",
+    "start": 2044.48,
+    "duration": 4.399
+  },
+  {
+    "text": "probably don't need to touch those that",
+    "start": 2047.36,
+    "duration": 4.319
+  },
+  {
+    "text": "much. Um, most of it you can handle in",
+    "start": 2048.879,
+    "duration": 5.2
+  },
+  {
+    "text": "like the end display config settings.",
+    "start": 2051.679,
+    "duration": 5.121
+  },
+  {
+    "text": "Um, but these are some handy ones just",
+    "start": 2054.079,
+    "duration": 5.961
+  },
+  {
+    "text": "to use.",
+    "start": 2056.8,
+    "duration": 3.24
+  },
+  {
+    "text": "And then testing and troubleshooting.",
+    "start": 2061.2,
+    "duration": 5.76
+  },
+  {
+    "text": "So definitely use Wireshark. um check",
+    "start": 2063.919,
+    "duration": 6.321
+  },
+  {
+    "text": "for any drop packets. Um you can use",
+    "start": 2066.96,
+    "duration": 5.439
+  },
+  {
+    "text": "analyzers like fabrics to check the",
+    "start": 2070.24,
+    "duration": 5.04
+  },
+  {
+    "text": "signal or generate a simp stream if you",
+    "start": 2072.399,
+    "duration": 5.44
+  },
+  {
+    "text": "want to test outside of Unreal. Um just",
+    "start": 2075.28,
+    "duration": 6.16
+  },
+  {
+    "text": "to check your network. Um",
+    "start": 2077.839,
+    "duration": 6.0
+  },
+  {
+    "text": "definitely monitor the network usage.",
+    "start": 2081.44,
+    "duration": 4.08
+  },
+  {
+    "text": "You could just use the one in task",
+    "start": 2083.839,
+    "duration": 4.24
+  },
+  {
+    "text": "manager. That was fine. Um just to see",
+    "start": 2085.52,
+    "duration": 6.079
+  },
+  {
+    "text": "how much is being sent out. And the big",
+    "start": 2088.079,
+    "duration": 6.241
+  },
+  {
+    "text": "one is definitely check the logs cuz",
+    "start": 2091.599,
+    "duration": 4.8
+  },
+  {
+    "text": "it's pretty hard to diagnose things on a",
+    "start": 2094.32,
+    "duration": 3.92
+  },
+  {
+    "text": "cluster especially if you have a lot of",
+    "start": 2096.399,
+    "duration": 4.241
+  },
+  {
+    "text": "nodes. You have to kind of go through",
+    "start": 2098.24,
+    "duration": 4.0
+  },
+  {
+    "text": "all of them and see which one has the",
+    "start": 2100.64,
+    "duration": 4.959
+  },
+  {
+    "text": "issue. So",
+    "start": 2102.24,
+    "duration": 5.359
+  },
+  {
+    "text": "I think one way to approach it is just",
+    "start": 2105.599,
+    "duration": 5.681
+  },
+  {
+    "text": "try to um isolate the issue. So maybe",
+    "start": 2107.599,
+    "duration": 7.041
+  },
+  {
+    "text": "first try testing end to end. Um, you",
+    "start": 2111.28,
+    "duration": 7.6
+  },
+  {
+    "text": "can test um as a media source and output",
+    "start": 2114.64,
+    "duration": 7.52
+  },
+  {
+    "text": "um just from two editors um as a sender",
+    "start": 2118.88,
+    "duration": 5.199
+  },
+  {
+    "text": "receiver. You can also test on the same",
+    "start": 2122.16,
+    "duration": 4.32
+  },
+  {
+    "text": "node, but um it's probably best to test",
+    "start": 2124.079,
+    "duration": 6.0
+  },
+  {
+    "text": "on two separate ones. Um so here's some",
+    "start": 2126.48,
+    "duration": 6.08
+  },
+  {
+    "text": "like setup of like setting up the media",
+    "start": 2130.079,
+    "duration": 4.721
+  },
+  {
+    "text": "output, setting up the media source, and",
+    "start": 2132.56,
+    "duration": 4.799
+  },
+  {
+    "text": "then if it's working, um it should be",
+    "start": 2134.8,
+    "duration": 4.88
+  },
+  {
+    "text": "like that last picture where you where",
+    "start": 2137.359,
+    "duration": 4.161
+  },
+  {
+    "text": "you'll see the viewport or like the",
+    "start": 2139.68,
+    "duration": 5.919
+  },
+  {
+    "text": "camera view. um in your um both your",
+    "start": 2141.52,
+    "duration": 8.04
+  },
+  {
+    "text": "media sender and receiver.",
+    "start": 2145.599,
+    "duration": 3.961
+  },
+  {
+    "text": "Um I think one of the most frustrating",
+    "start": 2151.68,
+    "duration": 6.399
+  },
+  {
+    "text": "issues is when you get a black frustr",
+    "start": 2153.68,
+    "duration": 7.2
+  },
+  {
+    "text": "um it usually means that the config or",
+    "start": 2158.079,
+    "duration": 6.161
+  },
+  {
+    "text": "rivermax wasn't set up correctly. Um so",
+    "start": 2160.88,
+    "duration": 6.239
+  },
+  {
+    "text": "check the log. If you see something like",
+    "start": 2164.24,
+    "duration": 7.599
+  },
+  {
+    "text": "um that um bit of the um output log up",
+    "start": 2167.119,
+    "duration": 8.0
+  },
+  {
+    "text": "there, you'll see like the error. Um",
+    "start": 2171.839,
+    "duration": 5.601
+  },
+  {
+    "text": "it's not very descriptive error message.",
+    "start": 2175.119,
+    "duration": 5.521
+  },
+  {
+    "text": "So it says it wasn't installed or like",
+    "start": 2177.44,
+    "duration": 5.12
+  },
+  {
+    "text": "not initialized. It was actually the",
+    "start": 2180.64,
+    "duration": 4.719
+  },
+  {
+    "text": "wrong version of the SDK. So go back and",
+    "start": 2182.56,
+    "duration": 6.88
+  },
+  {
+    "text": "double check that. Um make sure that um",
+    "start": 2185.359,
+    "duration": 6.321
+  },
+  {
+    "text": "you follow the steps. Um, I'll put a",
+    "start": 2189.44,
+    "duration": 6.48
+  },
+  {
+    "text": "link to the um Unreal Simpy setup guide",
+    "start": 2191.68,
+    "duration": 7.2
+  },
+  {
+    "text": "that has a lot of set steps for like any",
+    "start": 2195.92,
+    "duration": 5.28
+  },
+  {
+    "text": "environment variables and things to make",
+    "start": 2198.88,
+    "duration": 6.08
+  },
+  {
+    "text": "sure they're set. Um,",
+    "start": 2201.2,
+    "duration": 5.44
+  },
+  {
+    "text": "also check that your multiccast",
+    "start": 2204.96,
+    "duration": 3.2
+  },
+  {
+    "text": "addresses and stuff are set up",
+    "start": 2206.64,
+    "duration": 4.24
+  },
+  {
+    "text": "correctly. In 56, it actually does a lot",
+    "start": 2208.16,
+    "duration": 6.32
+  },
+  {
+    "text": "of that config for you. Um, so it'll",
+    "start": 2210.88,
+    "duration": 5.92
+  },
+  {
+    "text": "make a unique multiccast address for",
+    "start": 2214.48,
+    "duration": 4.48
+  },
+  {
+    "text": "each of the streams and connect um,",
+    "start": 2216.8,
+    "duration": 4.08
+  },
+  {
+    "text": "which ones are inputs and outputs for",
+    "start": 2218.96,
+    "duration": 5.76
+  },
+  {
+    "text": "you. Um, but something to double check.",
+    "start": 2220.88,
+    "duration": 7.12
+  },
+  {
+    "text": "And also another one is that uh, if it's",
+    "start": 2224.72,
+    "duration": 5.28
+  },
+  {
+    "text": "not using the right timing source, it'll",
+    "start": 2228.0,
+    "duration": 4.96
+  },
+  {
+    "text": "also come out black. Um, so double check",
+    "start": 2230.0,
+    "duration": 5.119
+  },
+  {
+    "text": "that you have it set to PDP if you're",
+    "start": 2232.96,
+    "duration": 4.32
+  },
+  {
+    "text": "using it or set to system time if you're",
+    "start": 2235.119,
+    "duration": 6.48
+  },
+  {
+    "text": "not. Um so that bottom log um the in the",
+    "start": 2237.28,
+    "duration": 6.4
+  },
+  {
+    "text": "white box is what you want to see is",
+    "start": 2241.599,
+    "duration": 4.801
+  },
+  {
+    "text": "like the stream started successfully and",
+    "start": 2243.68,
+    "duration": 5.679
+  },
+  {
+    "text": "has all the um information about",
+    "start": 2246.4,
+    "duration": 4.64
+  },
+  {
+    "text": "resolution and color and all that. So",
+    "start": 2249.359,
+    "duration": 5.561
+  },
+  {
+    "text": "that's what you want to get.",
+    "start": 2251.04,
+    "duration": 3.88
+  },
+  {
+    "text": "Um stuttering or tearing. Um this one is",
+    "start": 2256.48,
+    "duration": 8.16
+  },
+  {
+    "text": "if your rivermax setup is correct but",
+    "start": 2260.8,
+    "duration": 6.16
+  },
+  {
+    "text": "maybe there's an issue on the network.",
+    "start": 2264.64,
+    "duration": 5.84
+  },
+  {
+    "text": "Um, so we saw things like that. Um,",
+    "start": 2266.96,
+    "duration": 5.52
+  },
+  {
+    "text": "where it starts shaking as it's moving",
+    "start": 2270.48,
+    "duration": 5.84
+  },
+  {
+    "text": "across. Um, or this one on the bottom,",
+    "start": 2272.48,
+    "duration": 5.599
+  },
+  {
+    "text": "like that ball was just meant to go back",
+    "start": 2276.32,
+    "duration": 4.48
+  },
+  {
+    "text": "and forth. Um, so that was actually when",
+    "start": 2278.079,
+    "duration": 5.04
+  },
+  {
+    "text": "we had the mixed speeds on the switch",
+    "start": 2280.8,
+    "duration": 4.799
+  },
+  {
+    "text": "and we were seeing like the drop packets",
+    "start": 2283.119,
+    "duration": 6.24
+  },
+  {
+    "text": "from the mixed speeds. So, um, if you're",
+    "start": 2285.599,
+    "duration": 5.681
+  },
+  {
+    "text": "getting something like that, might be",
+    "start": 2289.359,
+    "duration": 3.681
+  },
+  {
+    "text": "worth checking your network and making",
+    "start": 2291.28,
+    "duration": 3.76
+  },
+  {
+    "text": "sure that that's set up all right.",
+    "start": 2293.04,
+    "duration": 4.079
+  },
+  {
+    "text": "You'll also see in the log when it's",
+    "start": 2295.04,
+    "duration": 7.319
+  },
+  {
+    "text": "dropping packets um as well.",
+    "start": 2297.119,
+    "duration": 5.24
+  },
+  {
+    "text": "Another thing to double check is",
+    "start": 2303.92,
+    "duration": 3.84
+  },
+  {
+    "text": "probably that sync is set up correctly.",
+    "start": 2305.44,
+    "duration": 5.04
+  },
+  {
+    "text": "Um say if you're using tri level or PTP",
+    "start": 2307.76,
+    "duration": 5.76
+  },
+  {
+    "text": "sync um",
+    "start": 2310.48,
+    "duration": 5.28
+  },
+  {
+    "text": "there's a end display test pattern um",
+    "start": 2313.52,
+    "duration": 3.68
+  },
+  {
+    "text": "that's built into the engine that's",
+    "start": 2315.76,
+    "duration": 3.76
+  },
+  {
+    "text": "really handy. it does a moving pattern.",
+    "start": 2317.2,
+    "duration": 4.8
+  },
+  {
+    "text": "So you can just check that that's um",
+    "start": 2319.52,
+    "duration": 4.4
+  },
+  {
+    "text": "you're not getting seams across or",
+    "start": 2322.0,
+    "duration": 3.119
+  },
+  {
+    "text": "they're not traveling at different",
+    "start": 2323.92,
+    "duration": 3.6
+  },
+  {
+    "text": "speeds or something. It should go across",
+    "start": 2325.119,
+    "duration": 6.081
+  },
+  {
+    "text": "the entire cluster. Um so that one you",
+    "start": 2327.52,
+    "duration": 5.44
+  },
+  {
+    "text": "have to add an actor into your scene and",
+    "start": 2331.2,
+    "duration": 3.44
+  },
+  {
+    "text": "then set the C bar. That's the one that",
+    "start": 2332.96,
+    "duration": 5.72
+  },
+  {
+    "text": "I usually use for testing.",
+    "start": 2334.64,
+    "duration": 4.04
+  },
+  {
+    "text": "Um you can also troubleshoot outside of",
+    "start": 2340.32,
+    "duration": 6.56
+  },
+  {
+    "text": "Unreal. Um on the RiverMax SDK GitHub,",
+    "start": 2342.88,
+    "duration": 6.32
+  },
+  {
+    "text": "they have some sample apps that you can",
+    "start": 2346.88,
+    "duration": 5.199
+  },
+  {
+    "text": "compile. Um and there's like a simple",
+    "start": 2349.2,
+    "duration": 8.399
+  },
+  {
+    "text": "sender receiver um in there. So um",
+    "start": 2352.079,
+    "duration": 7.601
+  },
+  {
+    "text": "you can use that to check if like it's",
+    "start": 2357.599,
+    "duration": 5.281
+  },
+  {
+    "text": "just an issue with um like your SIM",
+    "start": 2359.68,
+    "duration": 6.24
+  },
+  {
+    "text": "install or something. Um, but this could",
+    "start": 2362.88,
+    "duration": 5.44
+  },
+  {
+    "text": "be another way to help narrow down the",
+    "start": 2365.92,
+    "duration": 5.4
+  },
+  {
+    "text": "issue.",
+    "start": 2368.32,
+    "duration": 3.0
+  },
+  {
+    "text": "And another big one for like jittering",
+    "start": 2373.119,
+    "duration": 5.281
+  },
+  {
+    "text": "and other artifacts is to check your",
+    "start": 2375.68,
+    "duration": 6.48
+  },
+  {
+    "text": "Windows settings. Um, on the GitHub,",
+    "start": 2378.4,
+    "duration": 5.679
+  },
+  {
+    "text": "there's actually a script that will go",
+    "start": 2382.16,
+    "duration": 3.199
+  },
+  {
+    "text": "through and set all your Windows",
+    "start": 2384.079,
+    "duration": 3.841
+  },
+  {
+    "text": "settings for you, which is pretty handy.",
+    "start": 2385.359,
+    "duration": 4.48
+  },
+  {
+    "text": "It's just a little PowerShell script.",
+    "start": 2387.92,
+    "duration": 3.52
+  },
+  {
+    "text": "So, you can download it from the GitHub",
+    "start": 2389.839,
+    "duration": 4.481
+  },
+  {
+    "text": "and run it and it'll configure um all",
+    "start": 2391.44,
+    "duration": 4.24
+  },
+  {
+    "text": "the things that you don't want to have",
+    "start": 2394.32,
+    "duration": 3.6
+  },
+  {
+    "text": "like it'll disable like flow control and",
+    "start": 2395.68,
+    "duration": 5.439
+  },
+  {
+    "text": "a large um large page support and all",
+    "start": 2397.92,
+    "duration": 5.28
+  },
+  {
+    "text": "that stuff. Um so, all the settings that",
+    "start": 2401.119,
+    "duration": 6.281
+  },
+  {
+    "text": "RiverMax wants for streaming.",
+    "start": 2403.2,
+    "duration": 4.2
+  },
+  {
+    "text": "And then once you get end to end working",
+    "start": 2409.28,
+    "duration": 6.48
+  },
+  {
+    "text": "um troubleshooting on the cluster um",
+    "start": 2412.0,
+    "duration": 5.68
+  },
+  {
+    "text": "it's probably better to start from fewer",
+    "start": 2415.76,
+    "duration": 4.72
+  },
+  {
+    "text": "nodes and then work your way up. Um so",
+    "start": 2417.68,
+    "duration": 5.12
+  },
+  {
+    "text": "in switchboard you can just like disable",
+    "start": 2420.48,
+    "duration": 5.2
+  },
+  {
+    "text": "a node or something just start with um",
+    "start": 2422.8,
+    "duration": 5.52
+  },
+  {
+    "text": "say two nodes like one inner one outer",
+    "start": 2425.68,
+    "duration": 4.64
+  },
+  {
+    "text": "and then work your way up until you get",
+    "start": 2428.32,
+    "duration": 4.72
+  },
+  {
+    "text": "to the full cluster. Um it just helps to",
+    "start": 2430.32,
+    "duration": 4.56
+  },
+  {
+    "text": "narrow down whether it's like an issue",
+    "start": 2433.04,
+    "duration": 4.72
+  },
+  {
+    "text": "with um the setup or if it's one node",
+    "start": 2434.88,
+    "duration": 5.199
+  },
+  {
+    "text": "specifically. Um and you can just",
+    "start": 2437.76,
+    "duration": 3.92
+  },
+  {
+    "text": "override the IP addresses in",
+    "start": 2440.079,
+    "duration": 3.121
+  },
+  {
+    "text": "switchboard. So you can swap them around",
+    "start": 2441.68,
+    "duration": 4.24
+  },
+  {
+    "text": "is like is this node working but that",
+    "start": 2443.2,
+    "duration": 5.44
+  },
+  {
+    "text": "one's not or something like that. You",
+    "start": 2445.92,
+    "duration": 5.12
+  },
+  {
+    "text": "can also receive um the inner frostm",
+    "start": 2448.64,
+    "duration": 5.12
+  },
+  {
+    "text": "stream on any machine. So like another",
+    "start": 2451.04,
+    "duration": 4.559
+  },
+  {
+    "text": "way I was testing was just to like start",
+    "start": 2453.76,
+    "duration": 4.559
+  },
+  {
+    "text": "up the cluster and then try and receive",
+    "start": 2455.599,
+    "duration": 6.641
+  },
+  {
+    "text": "the inner uh node stream onto um like a",
+    "start": 2458.319,
+    "duration": 6.8
+  },
+  {
+    "text": "media source. Um so there's lots of",
+    "start": 2462.24,
+    "duration": 7.0
+  },
+  {
+    "text": "different ways that you can test it.",
+    "start": 2465.119,
+    "duration": 4.121
+  },
+  {
+    "text": "So looking ahead,",
+    "start": 2471.44,
+    "duration": 6.0
+  },
+  {
+    "text": "um I think that",
+    "start": 2474.4,
+    "duration": 5.52
+  },
+  {
+    "text": "um simply 2110 is starting to get more",
+    "start": 2477.44,
+    "duration": 6.32
+  },
+  {
+    "text": "and more adopted into like film um TV",
+    "start": 2479.92,
+    "duration": 6.159
+  },
+  {
+    "text": "broadcast is already using it. Um",
+    "start": 2483.76,
+    "duration": 4.88
+  },
+  {
+    "text": "they've been doing so for a while, but",
+    "start": 2486.079,
+    "duration": 5.441
+  },
+  {
+    "text": "um as more of the hardware starts um",
+    "start": 2488.64,
+    "duration": 5.52
+  },
+  {
+    "text": "supporting SIMD210 and PTP, we'll see",
+    "start": 2491.52,
+    "duration": 6.16
+  },
+  {
+    "text": "more of it get used. um we'll have lots",
+    "start": 2494.16,
+    "duration": 6.08
+  },
+  {
+    "text": "of different uses for it like not just",
+    "start": 2497.68,
+    "duration": 5.52
+  },
+  {
+    "text": "for end display and for um the cluster",
+    "start": 2500.24,
+    "duration": 5.04
+  },
+  {
+    "text": "but also maybe for things like sending",
+    "start": 2503.2,
+    "duration": 4.159
+  },
+  {
+    "text": "out monitoring like doing multi- views",
+    "start": 2505.28,
+    "duration": 5.52
+  },
+  {
+    "text": "and stitching and stuff um or say if",
+    "start": 2507.359,
+    "duration": 5.281
+  },
+  {
+    "text": "you're doing like a simal cam setup you",
+    "start": 2510.8,
+    "duration": 4.4
+  },
+  {
+    "text": "could use that to um send out your",
+    "start": 2512.64,
+    "duration": 5.92
+  },
+  {
+    "text": "Unreal feed um and maybe we could use it",
+    "start": 2515.2,
+    "duration": 5.52
+  },
+  {
+    "text": "the other direction as well receiving",
+    "start": 2518.56,
+    "duration": 4.96
+  },
+  {
+    "text": "camera streams or camera feeds from like",
+    "start": 2520.72,
+    "duration": 4.32
+  },
+  {
+    "text": "say the show camera or if you have",
+    "start": 2523.52,
+    "duration": 3.76
+  },
+  {
+    "text": "witness cams or whatever. ever um",
+    "start": 2525.04,
+    "duration": 5.039
+  },
+  {
+    "text": "getting those into the engine from uh",
+    "start": 2527.28,
+    "duration": 6.12
+  },
+  {
+    "text": "over symphy.",
+    "start": 2530.079,
+    "duration": 3.321
+  },
+  {
+    "text": "So, here's some links to some really",
+    "start": 2535.68,
+    "duration": 6.0
+  },
+  {
+    "text": "good resources, especially the Unreal",
+    "start": 2539.04,
+    "duration": 4.64
+  },
+  {
+    "text": "guide. Um it takes you through a lot of",
+    "start": 2541.68,
+    "duration": 5.84
+  },
+  {
+    "text": "the setup, especially um like on Windows",
+    "start": 2543.68,
+    "duration": 7.439
+  },
+  {
+    "text": "um configuring um your drivers and all",
+    "start": 2547.52,
+    "duration": 5.839
+  },
+  {
+    "text": "that stuff. So, definitely have a look",
+    "start": 2551.119,
+    "duration": 6.24
+  },
+  {
+    "text": "at that. Um the Rivermax GitHub um as I",
+    "start": 2553.359,
+    "duration": 5.921
+  },
+  {
+    "text": "said has lots of resources for testing",
+    "start": 2557.359,
+    "duration": 5.601
+  },
+  {
+    "text": "and the script for tuning as well. And",
+    "start": 2559.28,
+    "duration": 6.319
+  },
+  {
+    "text": "then um there's a more detailed RiverMax",
+    "start": 2562.96,
+    "duration": 4.8
+  },
+  {
+    "text": "tuning guide that goes through like why",
+    "start": 2565.599,
+    "duration": 3.921
+  },
+  {
+    "text": "each of the settings are important and",
+    "start": 2567.76,
+    "duration": 4.319
+  },
+  {
+    "text": "why to use it. So that's also worth",
+    "start": 2569.52,
+    "duration": 5.88
+  },
+  {
+    "text": "looking at.",
+    "start": 2572.079,
+    "duration": 3.321
+  },
+  {
+    "text": "So yeah,",
+    "start": 2576.88,
+    "duration": 5.28
+  },
+  {
+    "text": "um thanks for listening to me ramble",
+    "start": 2579.04,
+    "duration": 6.079
+  },
+  {
+    "text": "about Simpy. Uh, I do want to thank Epic",
+    "start": 2582.16,
+    "duration": 4.48
+  },
+  {
+    "text": "and the virtual production team,",
+    "start": 2585.119,
+    "duration": 4.161
+  },
+  {
+    "text": "especially Alex and Ben. Um, they helped",
+    "start": 2586.64,
+    "duration": 5.04
+  },
+  {
+    "text": "out a lot while we were testing out the",
+    "start": 2589.28,
+    "duration": 4.16
+  },
+  {
+    "text": "system and troubleshooting and setting",
+    "start": 2591.68,
+    "duration": 5.52
+  },
+  {
+    "text": "us fixes and such. Um, and the Dimension",
+    "start": 2593.44,
+    "duration": 6.72
+  },
+  {
+    "text": "team, especially systems it on set",
+    "start": 2597.2,
+    "duration": 5.52
+  },
+  {
+    "text": "content. Um, they helped out with",
+    "start": 2600.16,
+    "duration": 4.88
+  },
+  {
+    "text": "installing the system, uh, figuring out",
+    "start": 2602.72,
+    "duration": 4.24
+  },
+  {
+    "text": "how to build content for making content",
+    "start": 2605.04,
+    "duration": 4.88
+  },
+  {
+    "text": "for a show, um, operating it. So",
+    "start": 2606.96,
+    "duration": 6.32
+  },
+  {
+    "text": "definitely um it was a big group effort",
+    "start": 2609.92,
+    "duration": 7.28
+  },
+  {
+    "text": "to do this. Um and Chinachita Studios",
+    "start": 2613.28,
+    "duration": 6.0
+  },
+  {
+    "text": "for letting us test on their volume and",
+    "start": 2617.2,
+    "duration": 4.159
+  },
+  {
+    "text": "all the long hours to be like can I just",
+    "start": 2619.28,
+    "duration": 3.839
+  },
+  {
+    "text": "have another half hour of the wall",
+    "start": 2621.359,
+    "duration": 7.081
+  },
+  {
+    "text": "please? So just want to thank them",
+    "start": 2623.119,
+    "duration": 5.321
+  },
+  {
+    "text": "and yeah I guess we might have a few",
+    "start": 2628.56,
+    "duration": 5.12
+  },
+  {
+    "text": "minutes for some Q&A but I'll be around",
+    "start": 2631.44,
+    "duration": 5.44
+  },
+  {
+    "text": "and feel free to ping me um if you have",
+    "start": 2633.68,
+    "duration": 5.84
+  },
+  {
+    "text": "any questions.",
+    "start": 2636.88,
+    "duration": 5.8
+  },
+  {
+    "text": "Thank you.",
+    "start": 2639.52,
+    "duration": 3.16
+  }
+]

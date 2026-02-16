@@ -1,0 +1,6032 @@
+[
+  {
+    "text": "Hey everyone, thank you for joining this",
+    "start": 5.759,
+    "duration": 4.561
+  },
+  {
+    "text": "talk uh about network movement abilities",
+    "start": 7.52,
+    "duration": 4.48
+  },
+  {
+    "text": "and best practices for implementing",
+    "start": 10.32,
+    "duration": 3.92
+  },
+  {
+    "text": "them. My name is Shikong. I work at Epic",
+    "start": 12.0,
+    "duration": 3.44
+  },
+  {
+    "text": "Games in the technical developer",
+    "start": 14.24,
+    "duration": 2.72
+  },
+  {
+    "text": "relations team and I specialize in",
+    "start": 15.44,
+    "duration": 3.52
+  },
+  {
+    "text": "gameplay systems like the character",
+    "start": 16.96,
+    "duration": 4.8
+  },
+  {
+    "text": "movement components and gas. Now, we are",
+    "start": 18.96,
+    "duration": 4.72
+  },
+  {
+    "text": "here because every game wants fun",
+    "start": 21.76,
+    "duration": 3.679
+  },
+  {
+    "text": "movement. But it turns out that network",
+    "start": 23.68,
+    "duration": 4.16
+  },
+  {
+    "text": "movement is quite a difficult topic. And",
+    "start": 25.439,
+    "duration": 4.721
+  },
+  {
+    "text": "this is this is multiple reasons. It all",
+    "start": 27.84,
+    "duration": 4.48
+  },
+  {
+    "text": "starts with this uh pesky requirement",
+    "start": 30.16,
+    "duration": 3.52
+  },
+  {
+    "text": "that we want our movement to feel",
+    "start": 32.32,
+    "duration": 3.28
+  },
+  {
+    "text": "responsive. So the moment I tilt my",
+    "start": 33.68,
+    "duration": 3.68
+  },
+  {
+    "text": "joystick, the moment I press a button to",
+    "start": 35.6,
+    "duration": 3.6
+  },
+  {
+    "text": "activate an ability, we want to see an",
+    "start": 37.36,
+    "duration": 3.92
+  },
+  {
+    "text": "effect right away. So the game client",
+    "start": 39.2,
+    "duration": 4.08
+  },
+  {
+    "text": "will predict some of that outcome. But",
+    "start": 41.28,
+    "duration": 4.48
+  },
+  {
+    "text": "we also want our character to appear to",
+    "start": 43.28,
+    "duration": 4.4
+  },
+  {
+    "text": "have the same position on my client, on",
+    "start": 45.76,
+    "duration": 3.92
+  },
+  {
+    "text": "the server, and and on other other",
+    "start": 47.68,
+    "duration": 3.76
+  },
+  {
+    "text": "clients. And if that's not the case,",
+    "start": 49.68,
+    "duration": 3.12
+  },
+  {
+    "text": "then we want to correct that in a way",
+    "start": 51.44,
+    "duration": 3.52
+  },
+  {
+    "text": "that hopefully doesn't feel too jarring.",
+    "start": 52.8,
+    "duration": 4.64
+  },
+  {
+    "text": "We want our gameplay to feel um fair for",
+    "start": 54.96,
+    "duration": 4.32
+  },
+  {
+    "text": "all players. And we also want our",
+    "start": 57.44,
+    "duration": 3.68
+  },
+  {
+    "text": "network networking code to be difficult",
+    "start": 59.28,
+    "duration": 4.32
+  },
+  {
+    "text": "to exploit. Now, these are quite uh",
+    "start": 61.12,
+    "duration": 4.56
+  },
+  {
+    "text": "difficult requirements to strive for all",
+    "start": 63.6,
+    "duration": 3.92
+  },
+  {
+    "text": "at once.",
+    "start": 65.68,
+    "duration": 3.84
+  },
+  {
+    "text": "The goal for today is to have everyone",
+    "start": 67.52,
+    "duration": 3.919
+  },
+  {
+    "text": "here understand the character movement",
+    "start": 69.52,
+    "duration": 3.919
+  },
+  {
+    "text": "components networking model uh to",
+    "start": 71.439,
+    "duration": 3.521
+  },
+  {
+    "text": "foresee the challenges that you will",
+    "start": 73.439,
+    "duration": 4.241
+  },
+  {
+    "text": "encounter when um working with this with",
+    "start": 74.96,
+    "duration": 4.08
+  },
+  {
+    "text": "this model with another replicated",
+    "start": 77.68,
+    "duration": 2.799
+  },
+  {
+    "text": "system. for example, the gameplay",
+    "start": 79.04,
+    "duration": 3.92
+  },
+  {
+    "text": "ability system to know your options for",
+    "start": 80.479,
+    "duration": 4.401
+  },
+  {
+    "text": "addressing those challenges. And I'm",
+    "start": 82.96,
+    "duration": 3.519
+  },
+  {
+    "text": "also going to share some ways to debug",
+    "start": 84.88,
+    "duration": 3.36
+  },
+  {
+    "text": "your movements. And all of this will",
+    "start": 86.479,
+    "duration": 3.761
+  },
+  {
+    "text": "hopefully help you plan your new",
+    "start": 88.24,
+    "duration": 4.64
+  },
+  {
+    "text": "movements, verbs, and abilities.",
+    "start": 90.24,
+    "duration": 4.64
+  },
+  {
+    "text": "This talk is going to be re relevant for",
+    "start": 92.88,
+    "duration": 4.72
+  },
+  {
+    "text": "any worked Unreal game that uses the",
+    "start": 94.88,
+    "duration": 4.4
+  },
+  {
+    "text": "character movement component. Now,",
+    "start": 97.6,
+    "duration": 3.76
+  },
+  {
+    "text": "Unreal also provides this new a new",
+    "start": 99.28,
+    "duration": 3.199
+  },
+  {
+    "text": "movement solution called the mover",
+    "start": 101.36,
+    "duration": 4.32
+  },
+  {
+    "text": "plugin. Uh, as of right now, UI 5.6",
+    "start": 102.479,
+    "duration": 5.201
+  },
+  {
+    "text": "that's still in beta. So we're going to",
+    "start": 105.68,
+    "duration": 3.92
+  },
+  {
+    "text": "focus on the the mature solution that",
+    "start": 107.68,
+    "duration": 4.399
+  },
+  {
+    "text": "most people here will be using.",
+    "start": 109.6,
+    "duration": 4.0
+  },
+  {
+    "text": "If you are interested in the mover",
+    "start": 112.079,
+    "duration": 3.201
+  },
+  {
+    "text": "plugin, there's a great talk from Unreal",
+    "start": 113.6,
+    "duration": 3.519
+  },
+  {
+    "text": "Fest last year called an introduction to",
+    "start": 115.28,
+    "duration": 4.32
+  },
+  {
+    "text": "the move plugin. Now even though I will",
+    "start": 117.119,
+    "duration": 5.28
+  },
+  {
+    "text": "be demonstrating CMC and gas today, the",
+    "start": 119.6,
+    "duration": 4.159
+  },
+  {
+    "text": "knowledge here is really relevant for",
+    "start": 122.399,
+    "duration": 4.32
+  },
+  {
+    "text": "any ability system or any gameplay code",
+    "start": 123.759,
+    "duration": 7.041
+  },
+  {
+    "text": "that uses uh RPCs.",
+    "start": 126.719,
+    "duration": 5.52
+  },
+  {
+    "text": "We're going to cover things in this",
+    "start": 130.8,
+    "duration": 2.64
+  },
+  {
+    "text": "order. First, I'm going to talk about",
+    "start": 132.239,
+    "duration": 3.601
+  },
+  {
+    "text": "networking conditions. Then about uh",
+    "start": 133.44,
+    "duration": 4.08
+  },
+  {
+    "text": "then provide some tips for how to debug",
+    "start": 135.84,
+    "duration": 4.24
+  },
+  {
+    "text": "your movement. Then I'm going to give a",
+    "start": 137.52,
+    "duration": 4.48
+  },
+  {
+    "text": "yeah some information about CMC's",
+    "start": 140.08,
+    "duration": 3.92
+  },
+  {
+    "text": "networking model and then best practices",
+    "start": 142.0,
+    "duration": 3.52
+  },
+  {
+    "text": "for interacting with that model to",
+    "start": 144.0,
+    "duration": 4.4
+  },
+  {
+    "text": "create your movement abilities.",
+    "start": 145.52,
+    "duration": 4.24
+  },
+  {
+    "text": "But first, let's start with networking",
+    "start": 148.4,
+    "duration": 2.96
+  },
+  {
+    "text": "conditions because these are basically",
+    "start": 149.76,
+    "duration": 4.32
+  },
+  {
+    "text": "the the antagonist of this whole story.",
+    "start": 151.36,
+    "duration": 4.56
+  },
+  {
+    "text": "When you send data over the internet,",
+    "start": 154.08,
+    "duration": 3.439
+  },
+  {
+    "text": "you're sending packets and those packets",
+    "start": 155.92,
+    "duration": 4.319
+  },
+  {
+    "text": "will have a delay. So latency that",
+    "start": 157.519,
+    "duration": 4.321
+  },
+  {
+    "text": "latency will be unpredictable and",
+    "start": 160.239,
+    "duration": 3.601
+  },
+  {
+    "text": "variable which we call network jitter.",
+    "start": 161.84,
+    "duration": 3.44
+  },
+  {
+    "text": "That can cause your packets to arrive",
+    "start": 163.84,
+    "duration": 3.92
+  },
+  {
+    "text": "out of order as well. Packets can also",
+    "start": 165.28,
+    "duration": 3.76
+  },
+  {
+    "text": "be lost on the network. So they might",
+    "start": 167.76,
+    "duration": 3.6
+  },
+  {
+    "text": "never arrive. Unreal provides multiple",
+    "start": 169.04,
+    "duration": 3.76
+  },
+  {
+    "text": "ways to communicate between the client",
+    "start": 171.36,
+    "duration": 3.12
+  },
+  {
+    "text": "and server and each come with their own",
+    "start": 172.8,
+    "duration": 3.68
+  },
+  {
+    "text": "characteristics.",
+    "start": 174.48,
+    "duration": 4.08
+  },
+  {
+    "text": "What Unreal provides is reliable RPCs,",
+    "start": 176.48,
+    "duration": 3.52
+  },
+  {
+    "text": "unreliable RPCs and property",
+    "start": 178.56,
+    "duration": 3.759
+  },
+  {
+    "text": "replication. Now RPC remote procedure",
+    "start": 180.0,
+    "duration": 4.4
+  },
+  {
+    "text": "call refers to calling a function on one",
+    "start": 182.319,
+    "duration": 3.761
+  },
+  {
+    "text": "end for example the client but that",
+    "start": 184.4,
+    "duration": 5.28
+  },
+  {
+    "text": "function executing on the server.",
+    "start": 186.08,
+    "duration": 5.439
+  },
+  {
+    "text": "Uh the nice thing about reliable RPCs is",
+    "start": 189.68,
+    "duration": 3.199
+  },
+  {
+    "text": "that when you call them, Unreal",
+    "start": 191.519,
+    "duration": 2.961
+  },
+  {
+    "text": "guarantees that they will execute on the",
+    "start": 192.879,
+    "duration": 3.36
+  },
+  {
+    "text": "other end as long as the object is still",
+    "start": 194.48,
+    "duration": 3.92
+  },
+  {
+    "text": "alive. And another another nice thing is",
+    "start": 196.239,
+    "duration": 4.08
+  },
+  {
+    "text": "that if you call multiple reliable RPCs",
+    "start": 198.4,
+    "duration": 4.24
+  },
+  {
+    "text": "on the same actor or on components",
+    "start": 200.319,
+    "duration": 4.241
+  },
+  {
+    "text": "belonging to that same actor, then all",
+    "start": 202.64,
+    "duration": 3.76
+  },
+  {
+    "text": "of those RPCs within that actor scope",
+    "start": 204.56,
+    "duration": 4.8
+  },
+  {
+    "text": "will also execute in the same order.",
+    "start": 206.4,
+    "duration": 4.96
+  },
+  {
+    "text": "This is implemented by rescending if",
+    "start": 209.36,
+    "duration": 4.48
+  },
+  {
+    "text": "needed. and also to guarantee that they",
+    "start": 211.36,
+    "duration": 4.56
+  },
+  {
+    "text": "execute in the right order. Uh an RPC",
+    "start": 213.84,
+    "duration": 4.24
+  },
+  {
+    "text": "might need to wait before a a previous",
+    "start": 215.92,
+    "duration": 4.72
+  },
+  {
+    "text": "RPC arrives.",
+    "start": 218.08,
+    "duration": 3.92
+  },
+  {
+    "text": "You have to be careful with this though",
+    "start": 220.64,
+    "duration": 3.76
+  },
+  {
+    "text": "because if you send RPCs too frequently,",
+    "start": 222.0,
+    "duration": 4.799
+  },
+  {
+    "text": "then the client may need to like the the",
+    "start": 224.4,
+    "duration": 5.199
+  },
+  {
+    "text": "like one end needs might need to resend",
+    "start": 226.799,
+    "duration": 5.041
+  },
+  {
+    "text": "um yeah might need to hold on to more",
+    "start": 229.599,
+    "duration": 4.321
+  },
+  {
+    "text": "RPCs to resend and that buffer can grow",
+    "start": 231.84,
+    "duration": 4.479
+  },
+  {
+    "text": "and grow and grow and if it if it hits a",
+    "start": 233.92,
+    "duration": 3.36
+  },
+  {
+    "text": "limit then the client will get",
+    "start": 236.319,
+    "duration": 2.961
+  },
+  {
+    "text": "disconnected. So the guarantees are",
+    "start": 237.28,
+    "duration": 3.599
+  },
+  {
+    "text": "nice. They come with some some drawbacks",
+    "start": 239.28,
+    "duration": 3.519
+  },
+  {
+    "text": "and you have to uh make sure you're not",
+    "start": 240.879,
+    "duration": 5.36
+  },
+  {
+    "text": "sending too often. On the other hand, um",
+    "start": 242.799,
+    "duration": 5.36
+  },
+  {
+    "text": "unreliable RPCs don't have any of those",
+    "start": 246.239,
+    "duration": 3.92
+  },
+  {
+    "text": "risks, but also none of those",
+    "start": 248.159,
+    "duration": 4.72
+  },
+  {
+    "text": "guarantees. Now, property replication is",
+    "start": 250.159,
+    "duration": 5.841
+  },
+  {
+    "text": "also is another way to to communicate",
+    "start": 252.879,
+    "duration": 4.88
+  },
+  {
+    "text": "only from server to client, but we'll",
+    "start": 256.0,
+    "duration": 4.72
+  },
+  {
+    "text": "we'll be focusing on RPCs.",
+    "start": 257.759,
+    "duration": 4.561
+  },
+  {
+    "text": "Something that's not guaranteed even for",
+    "start": 260.72,
+    "duration": 4.479
+  },
+  {
+    "text": "a reliable RPCs is that when you send",
+    "start": 262.32,
+    "duration": 5.52
+  },
+  {
+    "text": "two or more RPCs in the same frame then",
+    "start": 265.199,
+    "duration": 4.56
+  },
+  {
+    "text": "they won't necessarily arrive or execute",
+    "start": 267.84,
+    "duration": 3.919
+  },
+  {
+    "text": "in the same frame on the other end. So",
+    "start": 269.759,
+    "duration": 3.761
+  },
+  {
+    "text": "if you have multiple webcam systems like",
+    "start": 271.759,
+    "duration": 4.081
+  },
+  {
+    "text": "CMC and gas then even if something",
+    "start": 273.52,
+    "duration": 4.08
+  },
+  {
+    "text": "executes on client in the same frame it",
+    "start": 275.84,
+    "duration": 2.96
+  },
+  {
+    "text": "doesn't necessarily execute on the",
+    "start": 277.6,
+    "duration": 2.64
+  },
+  {
+    "text": "server in the same frame that will",
+    "start": 278.8,
+    "duration": 3.119
+  },
+  {
+    "text": "affect the outcome and that can cause",
+    "start": 280.24,
+    "duration": 4.0
+  },
+  {
+    "text": "corrections.",
+    "start": 281.919,
+    "duration": 4.801
+  },
+  {
+    "text": "I made a very simple movement ability to",
+    "start": 284.24,
+    "duration": 4.16
+  },
+  {
+    "text": "demonstrate this. So this movement",
+    "start": 286.72,
+    "duration": 3.36
+  },
+  {
+    "text": "ability just teleports my character 2",
+    "start": 288.4,
+    "duration": 3.84
+  },
+  {
+    "text": "meters forward and it's a local",
+    "start": 290.08,
+    "duration": 3.679
+  },
+  {
+    "text": "predicted ability in gas. So what will",
+    "start": 292.24,
+    "duration": 3.28
+  },
+  {
+    "text": "happen is when I press a button my",
+    "start": 293.759,
+    "duration": 3.201
+  },
+  {
+    "text": "client will first execute this. So move",
+    "start": 295.52,
+    "duration": 4.8
+  },
+  {
+    "text": "me forward and it will also send a RPC",
+    "start": 296.96,
+    "duration": 6.32
+  },
+  {
+    "text": "to the server. So gas is try activat uh",
+    "start": 300.32,
+    "duration": 5.28
+  },
+  {
+    "text": "yeah try activatability uh to the",
+    "start": 303.28,
+    "duration": 3.919
+  },
+  {
+    "text": "server. So the server will al also",
+    "start": 305.6,
+    "duration": 5.12
+  },
+  {
+    "text": "execute the same logic. Now if things",
+    "start": 307.199,
+    "duration": 5.921
+  },
+  {
+    "text": "arrive at the same time things go go",
+    "start": 310.72,
+    "duration": 4.08
+  },
+  {
+    "text": "really well. But if it doesn't, for",
+    "start": 313.12,
+    "duration": 4.0
+  },
+  {
+    "text": "example, my ability RPC arrives late,",
+    "start": 314.8,
+    "duration": 4.08
+  },
+  {
+    "text": "then the server receives a move with my",
+    "start": 317.12,
+    "duration": 3.2
+  },
+  {
+    "text": "new position, but doesn't see a reason",
+    "start": 318.88,
+    "duration": 3.44
+  },
+  {
+    "text": "for me to be that far. So the server",
+    "start": 320.32,
+    "duration": 3.439
+  },
+  {
+    "text": "will send a correction and the client",
+    "start": 322.32,
+    "duration": 2.96
+  },
+  {
+    "text": "will take that correction and uh",
+    "start": 323.759,
+    "duration": 3.361
+  },
+  {
+    "text": "teleport the player back or correct the",
+    "start": 325.28,
+    "duration": 4.08
+  },
+  {
+    "text": "player back. Now, then later on when the",
+    "start": 327.12,
+    "duration": 3.68
+  },
+  {
+    "text": "server does arrive the uh does receive",
+    "start": 329.36,
+    "duration": 3.36
+  },
+  {
+    "text": "the RPC, it will be like, hey, what are",
+    "start": 330.8,
+    "duration": 3.36
+  },
+  {
+    "text": "you doing back there? And then and send",
+    "start": 332.72,
+    "duration": 3.44
+  },
+  {
+    "text": "another correction. So you get you get",
+    "start": 334.16,
+    "duration": 4.56
+  },
+  {
+    "text": "corrected back and forth.",
+    "start": 336.16,
+    "duration": 5.28
+  },
+  {
+    "text": "In practice, that looks like this.",
+    "start": 338.72,
+    "duration": 4.72
+  },
+  {
+    "text": "The first few times it goes well but",
+    "start": 341.44,
+    "duration": 5.36
+  },
+  {
+    "text": "when it goes wrong it goes really wrong",
+    "start": 343.44,
+    "duration": 7.52
+  },
+  {
+    "text": "like here. Ouch. Ouch. Yeah. So even",
+    "start": 346.8,
+    "duration": 6.48
+  },
+  {
+    "text": "with a simple uh ability things can go",
+    "start": 350.96,
+    "duration": 4.239
+  },
+  {
+    "text": "go very wrong due to this network",
+    "start": 353.28,
+    "duration": 3.6
+  },
+  {
+    "text": "jitter.",
+    "start": 355.199,
+    "duration": 3.681
+  },
+  {
+    "text": "In general I call this the RPC arrival",
+    "start": 356.88,
+    "duration": 3.599
+  },
+  {
+    "text": "timing issue. So network jitter and",
+    "start": 358.88,
+    "duration": 3.84
+  },
+  {
+    "text": "packet loss.",
+    "start": 360.479,
+    "duration": 4.321
+  },
+  {
+    "text": "to generalize this problem statement.",
+    "start": 362.72,
+    "duration": 3.68
+  },
+  {
+    "text": "Um, when you are working on movement",
+    "start": 364.8,
+    "duration": 3.839
+  },
+  {
+    "text": "abilities, what your main challenge is",
+    "start": 366.4,
+    "duration": 4.4
+  },
+  {
+    "text": "is that the the client and the server uh",
+    "start": 368.639,
+    "duration": 4.081
+  },
+  {
+    "text": "state for the character and the world",
+    "start": 370.8,
+    "duration": 4.08
+  },
+  {
+    "text": "will always differ slightly. The RPC",
+    "start": 372.72,
+    "duration": 3.759
+  },
+  {
+    "text": "arrival timing issue is one reason for",
+    "start": 374.88,
+    "duration": 3.759
+  },
+  {
+    "text": "this, but also the fact that the server",
+    "start": 376.479,
+    "duration": 4.16
+  },
+  {
+    "text": "and client are fundamentally always a",
+    "start": 378.639,
+    "duration": 4.481
+  },
+  {
+    "text": "little bit distinct is another reason.",
+    "start": 380.639,
+    "duration": 4.321
+  },
+  {
+    "text": "What I mean by this is the client is",
+    "start": 383.12,
+    "duration": 3.76
+  },
+  {
+    "text": "always a little bit ahead of the server",
+    "start": 384.96,
+    "duration": 4.16
+  },
+  {
+    "text": "because it's predicting uh for the for",
+    "start": 386.88,
+    "duration": 4.72
+  },
+  {
+    "text": "your character's location, but the",
+    "start": 389.12,
+    "duration": 4.16
+  },
+  {
+    "text": "server will be ahead of of your client",
+    "start": 391.6,
+    "duration": 3.92
+  },
+  {
+    "text": "for server controlled actors like NPCs",
+    "start": 393.28,
+    "duration": 4.32
+  },
+  {
+    "text": "and projectiles. Meanwhile, other",
+    "start": 395.52,
+    "duration": 3.6
+  },
+  {
+    "text": "clients are ahead of the server for",
+    "start": 397.6,
+    "duration": 3.36
+  },
+  {
+    "text": "their position and they are two steps",
+    "start": 399.12,
+    "duration": 3.519
+  },
+  {
+    "text": "ahead of your client for for their",
+    "start": 400.96,
+    "duration": 3.6
+  },
+  {
+    "text": "character position.",
+    "start": 402.639,
+    "duration": 5.12
+  },
+  {
+    "text": "To add uh more complexity, uh the your",
+    "start": 404.56,
+    "duration": 4.72
+  },
+  {
+    "text": "client, the server and other clients",
+    "start": 407.759,
+    "duration": 3.601
+  },
+  {
+    "text": "will also take a tick at different delta",
+    "start": 409.28,
+    "duration": 3.759
+  },
+  {
+    "text": "times. Even if they're configured with",
+    "start": 411.36,
+    "duration": 3.839
+  },
+  {
+    "text": "the same frame rate, hitches can cause",
+    "start": 413.039,
+    "duration": 4.801
+  },
+  {
+    "text": "different uh delta times. Now, all of",
+    "start": 415.199,
+    "duration": 4.641
+  },
+  {
+    "text": "these noise factors cause divergence",
+    "start": 417.84,
+    "duration": 3.68
+  },
+  {
+    "text": "between the server and clients. That",
+    "start": 419.84,
+    "duration": 3.199
+  },
+  {
+    "text": "makes it difficult to keep all of these",
+    "start": 421.52,
+    "duration": 3.92
+  },
+  {
+    "text": "world states in sync, but also difficult",
+    "start": 423.039,
+    "duration": 5.041
+  },
+  {
+    "text": "for the server to validate whether your",
+    "start": 425.44,
+    "duration": 5.599
+  },
+  {
+    "text": "uh your sent move is correct. And even",
+    "start": 428.08,
+    "duration": 4.64
+  },
+  {
+    "text": "more so when you need to validate a",
+    "start": 431.039,
+    "duration": 3.041
+  },
+  {
+    "text": "predicted move based on a predicted",
+    "start": 432.72,
+    "duration": 3.28
+  },
+  {
+    "text": "ability or a predicted ability based on",
+    "start": 434.08,
+    "duration": 3.839
+  },
+  {
+    "text": "a predicted move. And when you're not",
+    "start": 436.0,
+    "duration": 3.759
+  },
+  {
+    "text": "aware of all of these uh like noise",
+    "start": 437.919,
+    "duration": 4.081
+  },
+  {
+    "text": "factors that leads to unnecessary",
+    "start": 439.759,
+    "duration": 3.521
+  },
+  {
+    "text": "movement corrections and ability",
+    "start": 442.0,
+    "duration": 3.28
+  },
+  {
+    "text": "rejections unless you know what you're",
+    "start": 443.28,
+    "duration": 4.479
+  },
+  {
+    "text": "doing you see all of this coming and you",
+    "start": 445.28,
+    "duration": 4.479
+  },
+  {
+    "text": "take this into account and have your own",
+    "start": 447.759,
+    "duration": 4.16
+  },
+  {
+    "text": "solutions for this.",
+    "start": 449.759,
+    "duration": 4.56
+  },
+  {
+    "text": "Now before I move on to more theory I",
+    "start": 451.919,
+    "duration": 4.321
+  },
+  {
+    "text": "want to give some ways to debug your",
+    "start": 454.319,
+    "duration": 3.44
+  },
+  {
+    "text": "movement.",
+    "start": 456.24,
+    "duration": 3.12
+  },
+  {
+    "text": "The first one is basic. You can enable",
+    "start": 457.759,
+    "duration": 4.081
+  },
+  {
+    "text": "network emulation in PI to emulate",
+    "start": 459.36,
+    "duration": 5.119
+  },
+  {
+    "text": "latency and packet loss.",
+    "start": 461.84,
+    "duration": 4.4
+  },
+  {
+    "text": "You can find us this under your advanced",
+    "start": 464.479,
+    "duration": 4.641
+  },
+  {
+    "text": "settings in your play dropown menu or in",
+    "start": 466.24,
+    "duration": 5.519
+  },
+  {
+    "text": "your editor preferences.",
+    "start": 469.12,
+    "duration": 4.639
+  },
+  {
+    "text": "Now this is useful for many purposes. If",
+    "start": 471.759,
+    "duration": 4.0
+  },
+  {
+    "text": "you configure fixed latency, you have a",
+    "start": 473.759,
+    "duration": 4.56
+  },
+  {
+    "text": "way to trigger a correction in a very",
+    "start": 475.759,
+    "duration": 4.401
+  },
+  {
+    "text": "controlled manner. For example, if I",
+    "start": 478.319,
+    "duration": 3.44
+  },
+  {
+    "text": "configure my latency to be 150",
+    "start": 480.16,
+    "duration": 3.36
+  },
+  {
+    "text": "milliseconds and something happens on",
+    "start": 481.759,
+    "duration": 2.88
+  },
+  {
+    "text": "the server that my client didn't",
+    "start": 483.52,
+    "duration": 3.28
+  },
+  {
+    "text": "predict, I know that in in 150",
+    "start": 484.639,
+    "duration": 3.761
+  },
+  {
+    "text": "millconds, my client will receive that",
+    "start": 486.8,
+    "duration": 4.48
+  },
+  {
+    "text": "correction. You can use this to test",
+    "start": 488.4,
+    "duration": 4.96
+  },
+  {
+    "text": "your um correction and reimulation",
+    "start": 491.28,
+    "duration": 3.919
+  },
+  {
+    "text": "logic. Now, what I mean by re simulation",
+    "start": 493.36,
+    "duration": 4.08
+  },
+  {
+    "text": "is that when you send a move, let's say",
+    "start": 495.199,
+    "duration": 4.56
+  },
+  {
+    "text": "I'm walking. So, when you send a move,",
+    "start": 497.44,
+    "duration": 3.92
+  },
+  {
+    "text": "by the time that move arrives on server",
+    "start": 499.759,
+    "duration": 3.361
+  },
+  {
+    "text": "and a response arrives on the client,",
+    "start": 501.36,
+    "duration": 3.44
+  },
+  {
+    "text": "time will have passed. So, if I take the",
+    "start": 503.12,
+    "duration": 3.44
+  },
+  {
+    "text": "server's correction, I will be like",
+    "start": 504.8,
+    "duration": 3.44
+  },
+  {
+    "text": "moved back in time. But I don't want",
+    "start": 506.56,
+    "duration": 3.6
+  },
+  {
+    "text": "that. So what the client will do is it",
+    "start": 508.24,
+    "duration": 4.56
+  },
+  {
+    "text": "will keep a recent history of moves and",
+    "start": 510.16,
+    "duration": 4.48
+  },
+  {
+    "text": "then repredict any moves that happened",
+    "start": 512.8,
+    "duration": 4.4
+  },
+  {
+    "text": "since that last since that uh older time",
+    "start": 514.64,
+    "duration": 4.319
+  },
+  {
+    "text": "stamp so it doesn't feel like the player",
+    "start": 517.2,
+    "duration": 4.56
+  },
+  {
+    "text": "got teleported back in time. Now you",
+    "start": 518.959,
+    "duration": 4.241
+  },
+  {
+    "text": "also have um so when you configure",
+    "start": 521.76,
+    "duration": 3.28
+  },
+  {
+    "text": "variable latency so difference between",
+    "start": 523.2,
+    "duration": 4.0
+  },
+  {
+    "text": "minimum maximum then you will also",
+    "start": 525.04,
+    "duration": 4.16
+  },
+  {
+    "text": "reproduce the RPC arrival timing issue",
+    "start": 527.2,
+    "duration": 4.4
+  },
+  {
+    "text": "you'll get RPCs arriving out of order",
+    "start": 529.2,
+    "duration": 3.92
+  },
+  {
+    "text": "and you have to test for this because",
+    "start": 531.6,
+    "duration": 4.64
+  },
+  {
+    "text": "this is going to happen in the wild.",
+    "start": 533.12,
+    "duration": 5.279
+  },
+  {
+    "text": "If you have packet loss, then some of",
+    "start": 536.24,
+    "duration": 4.4
+  },
+  {
+    "text": "your inputs in moves may also be dropped",
+    "start": 538.399,
+    "duration": 3.521
+  },
+  {
+    "text": "because those moves don't arrive. And",
+    "start": 540.64,
+    "duration": 3.12
+  },
+  {
+    "text": "you also have to test for this. Even",
+    "start": 541.92,
+    "duration": 3.68
+  },
+  {
+    "text": "with reliable RPCs, packet loss can",
+    "start": 543.76,
+    "duration": 5.6
+  },
+  {
+    "text": "cause those uh RPCs to be resent. So",
+    "start": 545.6,
+    "duration": 5.28
+  },
+  {
+    "text": "that's additional latency, another round",
+    "start": 549.36,
+    "duration": 4.64
+  },
+  {
+    "text": "trip. We recommend to test at least with",
+    "start": 550.88,
+    "duration": 4.72
+  },
+  {
+    "text": "average network emulation. So a little",
+    "start": 554.0,
+    "duration": 3.76
+  },
+  {
+    "text": "bit of variable latency and packet loss",
+    "start": 555.6,
+    "duration": 4.4
+  },
+  {
+    "text": "because that will trigger each of these",
+    "start": 557.76,
+    "duration": 4.24
+  },
+  {
+    "text": "problems.",
+    "start": 560.0,
+    "duration": 4.88
+  },
+  {
+    "text": "Now, here's another um nice console",
+    "start": 562.0,
+    "duration": 4.72
+  },
+  {
+    "text": "variable. If you turn on p.net show",
+    "start": 564.88,
+    "duration": 4.32
+  },
+  {
+    "text": "corrections, it will draw on the client",
+    "start": 566.72,
+    "duration": 4.239
+  },
+  {
+    "text": "some debug info when a correction takes",
+    "start": 569.2,
+    "duration": 3.92
+  },
+  {
+    "text": "place. It draws a red capsule for where",
+    "start": 570.959,
+    "duration": 3.681
+  },
+  {
+    "text": "your client predict predicted the",
+    "start": 573.12,
+    "duration": 3.68
+  },
+  {
+    "text": "character to be and a green capsule for",
+    "start": 574.64,
+    "duration": 4.56
+  },
+  {
+    "text": "where the client placed it after taking",
+    "start": 576.8,
+    "duration": 3.84
+  },
+  {
+    "text": "the server correction and after",
+    "start": 579.2,
+    "duration": 3.199
+  },
+  {
+    "text": "reimulating move. So it's a complete",
+    "start": 580.64,
+    "duration": 5.28
+  },
+  {
+    "text": "like before and after uh info.",
+    "start": 582.399,
+    "duration": 6.241
+  },
+  {
+    "text": "This looks like uh this. And you see",
+    "start": 585.92,
+    "duration": 5.039
+  },
+  {
+    "text": "here that when a correction happens, it",
+    "start": 588.64,
+    "duration": 4.24
+  },
+  {
+    "text": "it happens in the stream. Here I have a",
+    "start": 590.959,
+    "duration": 3.601
+  },
+  {
+    "text": "volume that's only on the server will",
+    "start": 592.88,
+    "duration": 3.36
+  },
+  {
+    "text": "push my client push my character",
+    "start": 594.56,
+    "duration": 4.8
+  },
+  {
+    "text": "sideways. And the reason why um the",
+    "start": 596.24,
+    "duration": 4.4
+  },
+  {
+    "text": "corrections happen in the stream is",
+    "start": 599.36,
+    "duration": 3.28
+  },
+  {
+    "text": "because in the time it takes for you to",
+    "start": 600.64,
+    "duration": 4.0
+  },
+  {
+    "text": "to uh receive a response from the",
+    "start": 602.64,
+    "duration": 3.84
+  },
+  {
+    "text": "server, you all have already sent",
+    "start": 604.64,
+    "duration": 4.24
+  },
+  {
+    "text": "multiple bad moves.",
+    "start": 606.48,
+    "duration": 4.0
+  },
+  {
+    "text": "Now net corrections or show net",
+    "start": 608.88,
+    "duration": 3.12
+  },
+  {
+    "text": "corrections is great because you see the",
+    "start": 610.48,
+    "duration": 3.359
+  },
+  {
+    "text": "before and after. But often when you",
+    "start": 612.0,
+    "duration": 3.2
+  },
+  {
+    "text": "make new movements verbs, you also want",
+    "start": 613.839,
+    "duration": 3.841
+  },
+  {
+    "text": "to check what happens uh like in those",
+    "start": 615.2,
+    "duration": 4.0
+  },
+  {
+    "text": "in between steps because all that",
+    "start": 617.68,
+    "duration": 3.04
+  },
+  {
+    "text": "correction and resimulation all happens",
+    "start": 619.2,
+    "duration": 4.16
+  },
+  {
+    "text": "in one tick. What you can do then is add",
+    "start": 620.72,
+    "duration": 5.44
+  },
+  {
+    "text": "events to your visual logger and to play",
+    "start": 623.36,
+    "duration": 5.2
+  },
+  {
+    "text": "back those events uh and inspect them in",
+    "start": 626.16,
+    "duration": 4.239
+  },
+  {
+    "text": "the timeline.",
+    "start": 628.56,
+    "duration": 3.36
+  },
+  {
+    "text": "That can look like this. So I trigger",
+    "start": 630.399,
+    "duration": 4.0
+  },
+  {
+    "text": "the correction again, pause the game, I",
+    "start": 631.92,
+    "duration": 5.2
+  },
+  {
+    "text": "click my event, and then I can see the",
+    "start": 634.399,
+    "duration": 4.88
+  },
+  {
+    "text": "complete breakdown of the correction and",
+    "start": 637.12,
+    "duration": 6.159
+  },
+  {
+    "text": "the result of every reimulated move.",
+    "start": 639.279,
+    "duration": 5.521
+  },
+  {
+    "text": "Some good functions to override for this",
+    "start": 643.279,
+    "duration": 3.921
+  },
+  {
+    "text": "are CMC's on client correction received",
+    "start": 644.8,
+    "duration": 3.84
+  },
+  {
+    "text": "which gets the server correct the",
+    "start": 647.2,
+    "duration": 4.8
+  },
+  {
+    "text": "location and save moves um post update",
+    "start": 648.64,
+    "duration": 5.28
+  },
+  {
+    "text": "function which gets the result of each",
+    "start": 652.0,
+    "duration": 6.0
+  },
+  {
+    "text": "reimulated uh reimulated move.",
+    "start": 653.92,
+    "duration": 5.52
+  },
+  {
+    "text": "Now here's a trick that's quite quirky",
+    "start": 658.0,
+    "duration": 3.12
+  },
+  {
+    "text": "but useful when testing locally on a",
+    "start": 659.44,
+    "duration": 3.6
+  },
+  {
+    "text": "machine and when you're running uh the",
+    "start": 661.12,
+    "duration": 3.279
+  },
+  {
+    "text": "server and the client under a single",
+    "start": 663.04,
+    "duration": 3.2
+  },
+  {
+    "text": "process. You can make use of the fact",
+    "start": 664.399,
+    "duration": 4.081
+  },
+  {
+    "text": "then that uh the server and client share",
+    "start": 666.24,
+    "duration": 4.64
+  },
+  {
+    "text": "the same memory and variable name space",
+    "start": 668.48,
+    "duration": 4.16
+  },
+  {
+    "text": "to instantly communicate between the",
+    "start": 670.88,
+    "duration": 4.399
+  },
+  {
+    "text": "server and client for testing purposes",
+    "start": 672.64,
+    "duration": 5.28
+  },
+  {
+    "text": "even with network emulation enabled. I'm",
+    "start": 675.279,
+    "duration": 4.961
+  },
+  {
+    "text": "using this here to visualize the",
+    "start": 677.92,
+    "duration": 5.52
+  },
+  {
+    "text": "server's character position on my client",
+    "start": 680.24,
+    "duration": 5.039
+  },
+  {
+    "text": "so I can see the effect of latency. So",
+    "start": 683.44,
+    "duration": 4.079
+  },
+  {
+    "text": "how far the server is behind but also if",
+    "start": 685.279,
+    "duration": 6.56
+  },
+  {
+    "text": "they are accumulating error over time.",
+    "start": 687.519,
+    "duration": 7.121
+  },
+  {
+    "text": "Some um a useful tip here is if you are",
+    "start": 691.839,
+    "duration": 4.481
+  },
+  {
+    "text": "testing with the server and multiple",
+    "start": 694.64,
+    "duration": 3.84
+  },
+  {
+    "text": "clients all still locally and under a",
+    "start": 696.32,
+    "duration": 4.0
+  },
+  {
+    "text": "single process then you might want to",
+    "start": 698.48,
+    "duration": 4.64
+  },
+  {
+    "text": "have like a like the same index for a",
+    "start": 700.32,
+    "duration": 4.72
+  },
+  {
+    "text": "player between the server and client.",
+    "start": 703.12,
+    "duration": 3.6
+  },
+  {
+    "text": "One way you can do this is by grabbing",
+    "start": 705.04,
+    "duration": 4.799
+  },
+  {
+    "text": "the uh the game state player array",
+    "start": 706.72,
+    "duration": 5.2
+  },
+  {
+    "text": "making a copy of that sorting that and",
+    "start": 709.839,
+    "duration": 4.961
+  },
+  {
+    "text": "then find one players player state in",
+    "start": 711.92,
+    "duration": 5.2
+  },
+  {
+    "text": "that array. Then the server and client",
+    "start": 714.8,
+    "duration": 5.2
+  },
+  {
+    "text": "will agree on the index per character.",
+    "start": 717.12,
+    "duration": 4.399
+  },
+  {
+    "text": "You have to sort the the player array",
+    "start": 720.0,
+    "duration": 3.44
+  },
+  {
+    "text": "because the game states player array is",
+    "start": 721.519,
+    "duration": 4.0
+  },
+  {
+    "text": "sorted differently per client because we",
+    "start": 723.44,
+    "duration": 4.399
+  },
+  {
+    "text": "decided at one point to always have your",
+    "start": 725.519,
+    "duration": 5.521
+  },
+  {
+    "text": "player state at index zero.",
+    "start": 727.839,
+    "duration": 4.721
+  },
+  {
+    "text": "Now let's dive into the character",
+    "start": 731.04,
+    "duration": 3.039
+  },
+  {
+    "text": "movement components networking model. So",
+    "start": 732.56,
+    "duration": 3.76
+  },
+  {
+    "text": "what are we dealing with and because we",
+    "start": 734.079,
+    "duration": 4.88
+  },
+  {
+    "text": "need to work together with it.",
+    "start": 736.32,
+    "duration": 4.16
+  },
+  {
+    "text": "I'm going to focus primarily on",
+    "start": 738.959,
+    "duration": 3.521
+  },
+  {
+    "text": "autonomous proxies which means the",
+    "start": 740.48,
+    "duration": 4.24
+  },
+  {
+    "text": "character that I'm controlling and the",
+    "start": 742.48,
+    "duration": 4.08
+  },
+  {
+    "text": "the networking that happens between my",
+    "start": 744.72,
+    "duration": 3.6
+  },
+  {
+    "text": "client and the server about that",
+    "start": 746.56,
+    "duration": 3.76
+  },
+  {
+    "text": "character. The reason I'm I'm focusing",
+    "start": 748.32,
+    "duration": 4.079
+  },
+  {
+    "text": "on autonomous proxies is because sim",
+    "start": 750.32,
+    "duration": 3.68
+  },
+  {
+    "text": "proxies, so other clients, their",
+    "start": 752.399,
+    "duration": 3.601
+  },
+  {
+    "text": "representations of my character are",
+    "start": 754.0,
+    "duration": 4.16
+  },
+  {
+    "text": "quite simple by default. Other clients",
+    "start": 756.0,
+    "duration": 3.519
+  },
+  {
+    "text": "will just take the last server position",
+    "start": 758.16,
+    "duration": 3.28
+  },
+  {
+    "text": "and smooth towards that position. And in",
+    "start": 759.519,
+    "duration": 3.44
+  },
+  {
+    "text": "some cases, the difference is too large",
+    "start": 761.44,
+    "duration": 2.959
+  },
+  {
+    "text": "and they will just teleport a little",
+    "start": 762.959,
+    "duration": 3.361
+  },
+  {
+    "text": "bit. So the complexity is in the",
+    "start": 764.399,
+    "duration": 5.281
+  },
+  {
+    "text": "autonomous proxy and the server.",
+    "start": 766.32,
+    "duration": 5.36
+  },
+  {
+    "text": "Let's start with how my client sends",
+    "start": 769.68,
+    "duration": 4.959
+  },
+  {
+    "text": "moves for my character. my so the client",
+    "start": 771.68,
+    "duration": 5.839
+  },
+  {
+    "text": "sends moves to the server many times per",
+    "start": 774.639,
+    "duration": 4.64
+  },
+  {
+    "text": "uh per second and the server will will",
+    "start": 777.519,
+    "duration": 6.12
+  },
+  {
+    "text": "send a response for each of those moves.",
+    "start": 779.279,
+    "duration": 4.36
+  },
+  {
+    "text": "If you look into the character movement",
+    "start": 783.92,
+    "duration": 4.64
+  },
+  {
+    "text": "components uh code, you'll encounter two",
+    "start": 785.519,
+    "duration": 5.041
+  },
+  {
+    "text": "important move classes. There's a saved",
+    "start": 788.56,
+    "duration": 3.76
+  },
+  {
+    "text": "move and there's network move. There's",
+    "start": 790.56,
+    "duration": 4.56
+  },
+  {
+    "text": "network move. In the saved move, the",
+    "start": 792.32,
+    "duration": 4.24
+  },
+  {
+    "text": "client records everything that's needed",
+    "start": 795.12,
+    "duration": 4.0
+  },
+  {
+    "text": "in order to reimulate uh recent moves if",
+    "start": 796.56,
+    "duration": 5.279
+  },
+  {
+    "text": "needed. The network move is really",
+    "start": 799.12,
+    "duration": 4.159
+  },
+  {
+    "text": "contains everything that the server",
+    "start": 801.839,
+    "duration": 3.281
+  },
+  {
+    "text": "needs to in order to execute the same",
+    "start": 803.279,
+    "duration": 4.56
+  },
+  {
+    "text": "movement. Now both the save move and the",
+    "start": 805.12,
+    "duration": 5.92
+  },
+  {
+    "text": "network move contain a client time stamp",
+    "start": 807.839,
+    "duration": 6.401
+  },
+  {
+    "text": "which the server will use to update the",
+    "start": 811.04,
+    "duration": 5.599
+  },
+  {
+    "text": "character movement with with the same",
+    "start": 814.24,
+    "duration": 5.279
+  },
+  {
+    "text": "delta times and also in some inputs like",
+    "start": 816.639,
+    "duration": 4.961
+  },
+  {
+    "text": "my control rotation whether I want to",
+    "start": 819.519,
+    "duration": 3.921
+  },
+  {
+    "text": "jump and crouch and the acceleration",
+    "start": 821.6,
+    "duration": 3.919
+  },
+  {
+    "text": "that the client applied.",
+    "start": 823.44,
+    "duration": 3.76
+  },
+  {
+    "text": "The clients will also send some outcome,",
+    "start": 825.519,
+    "duration": 3.361
+  },
+  {
+    "text": "but this is mostly used on the server to",
+    "start": 827.2,
+    "duration": 3.439
+  },
+  {
+    "text": "compare.",
+    "start": 828.88,
+    "duration": 3.36
+  },
+  {
+    "text": "I want to note here that the client time",
+    "start": 830.639,
+    "duration": 3.76
+  },
+  {
+    "text": "stamp that we send is not like the",
+    "start": 832.24,
+    "duration": 4.24
+  },
+  {
+    "text": "client's world time, but rather it's a",
+    "start": 834.399,
+    "duration": 4.161
+  },
+  {
+    "text": "CMC specific time stamp that gets rolled",
+    "start": 836.48,
+    "duration": 4.24
+  },
+  {
+    "text": "over back to zero. And this is mainly",
+    "start": 838.56,
+    "duration": 3.92
+  },
+  {
+    "text": "because so we can save some bits when",
+    "start": 840.72,
+    "duration": 4.479
+  },
+  {
+    "text": "networking. So don't assume that this is",
+    "start": 842.48,
+    "duration": 5.52
+  },
+  {
+    "text": "a a constantly increasing time. It it",
+    "start": 845.199,
+    "duration": 6.88
+  },
+  {
+    "text": "also has no meaning on other clients.",
+    "start": 848.0,
+    "duration": 7.36
+  },
+  {
+    "text": "I'm going to dig into two more important",
+    "start": 852.079,
+    "duration": 5.521
+  },
+  {
+    "text": "uh aspects of move sending move",
+    "start": 855.36,
+    "duration": 4.8
+  },
+  {
+    "text": "combining and important moves. So every",
+    "start": 857.6,
+    "duration": 4.4
+  },
+  {
+    "text": "time the server receives a move, it's",
+    "start": 860.16,
+    "duration": 4.88
+  },
+  {
+    "text": "it's more stuff to process and moves are",
+    "start": 862.0,
+    "duration": 4.079
+  },
+  {
+    "text": "quite expensive because you're doing",
+    "start": 865.04,
+    "duration": 2.88
+  },
+  {
+    "text": "line traces, you'd have to do collision",
+    "start": 866.079,
+    "duration": 4.801
+  },
+  {
+    "text": "checks. So if a client is running at 100",
+    "start": 867.92,
+    "duration": 5.68
+  },
+  {
+    "text": "120 FPS and the server has like many of",
+    "start": 870.88,
+    "duration": 4.639
+  },
+  {
+    "text": "these clients uh many players connected,",
+    "start": 873.6,
+    "duration": 4.32
+  },
+  {
+    "text": "that's a lot of server workloads. So to",
+    "start": 875.519,
+    "duration": 4.401
+  },
+  {
+    "text": "manage that a little bit, what we do is",
+    "start": 877.92,
+    "duration": 4.4
+  },
+  {
+    "text": "we let the client combine similar moves",
+    "start": 879.92,
+    "duration": 4.32
+  },
+  {
+    "text": "before sending it to the server. As long",
+    "start": 882.32,
+    "duration": 3.44
+  },
+  {
+    "text": "as that movement is similar over",
+    "start": 884.24,
+    "duration": 3.36
+  },
+  {
+    "text": "multiple ticks. So for example, if I'm",
+    "start": 885.76,
+    "duration": 3.519
+  },
+  {
+    "text": "moving in a straight line or or if I'm",
+    "start": 887.6,
+    "duration": 3.52
+  },
+  {
+    "text": "strafing one direction or if I'm just",
+    "start": 889.279,
+    "duration": 3.841
+  },
+  {
+    "text": "falling through the air, these types of",
+    "start": 891.12,
+    "duration": 3.6
+  },
+  {
+    "text": "moves the client will combine over",
+    "start": 893.12,
+    "duration": 3.2
+  },
+  {
+    "text": "multiple ticks before sending to to the",
+    "start": 894.72,
+    "duration": 3.119
+  },
+  {
+    "text": "server.",
+    "start": 896.32,
+    "duration": 3.44
+  },
+  {
+    "text": "The logic for whether moves can can be",
+    "start": 897.839,
+    "duration": 3.68
+  },
+  {
+    "text": "combined can be found in save move can",
+    "start": 899.76,
+    "duration": 4.079
+  },
+  {
+    "text": "combine with. And as you are working on",
+    "start": 901.519,
+    "duration": 4.0
+  },
+  {
+    "text": "your new movement ver verbs, you often",
+    "start": 903.839,
+    "duration": 3.521
+  },
+  {
+    "text": "have to revisit this function and",
+    "start": 905.519,
+    "duration": 4.961
+  },
+  {
+    "text": "override it. The maximum time that the",
+    "start": 907.36,
+    "duration": 5.44
+  },
+  {
+    "text": "client will combine moves with is is",
+    "start": 910.48,
+    "duration": 3.599
+  },
+  {
+    "text": "configurable as well. You can either e",
+    "start": 912.8,
+    "duration": 3.68
+  },
+  {
+    "text": "either override CMC's get client net",
+    "start": 914.079,
+    "duration": 5.281
+  },
+  {
+    "text": "send delta time or configure uh client",
+    "start": 916.48,
+    "duration": 4.64
+  },
+  {
+    "text": "net send move delta time in your default",
+    "start": 919.36,
+    "duration": 3.36
+  },
+  {
+    "text": "game.ini.",
+    "start": 921.12,
+    "duration": 3.36
+  },
+  {
+    "text": "In a fresh Unreal project, this is",
+    "start": 922.72,
+    "duration": 4.32
+  },
+  {
+    "text": "configured so that you send uh about 60",
+    "start": 924.48,
+    "duration": 4.64
+  },
+  {
+    "text": "moves per second. So you combine moves",
+    "start": 927.04,
+    "duration": 6.2
+  },
+  {
+    "text": "up to a 60th of a second.",
+    "start": 929.12,
+    "duration": 4.12
+  },
+  {
+    "text": "Now move combining introduces a delay",
+    "start": 934.0,
+    "duration": 4.639
+  },
+  {
+    "text": "and a delay can work against you. It's a",
+    "start": 936.399,
+    "duration": 4.56
+  },
+  {
+    "text": "very common cause of um movement and",
+    "start": 938.639,
+    "duration": 5.041
+  },
+  {
+    "text": "decing problems. So when you are working",
+    "start": 940.959,
+    "duration": 5.841
+  },
+  {
+    "text": "on movement and you see that um you see",
+    "start": 943.68,
+    "duration": 5.2
+  },
+  {
+    "text": "that like you you suspect that maybe",
+    "start": 946.8,
+    "duration": 4.719
+  },
+  {
+    "text": "move combining is the cause then you can",
+    "start": 948.88,
+    "duration": 4.879
+  },
+  {
+    "text": "turn on like turn off move combining by",
+    "start": 951.519,
+    "duration": 4.081
+  },
+  {
+    "text": "setting p.net enable move combining to",
+    "start": 953.759,
+    "duration": 4.32
+  },
+  {
+    "text": "zero to rule to rule it out. Use this",
+    "start": 955.6,
+    "duration": 3.919
+  },
+  {
+    "text": "for testing purposes only because if you",
+    "start": 958.079,
+    "duration": 3.601
+  },
+  {
+    "text": "send uh move every tick that can get",
+    "start": 959.519,
+    "duration": 3.841
+  },
+  {
+    "text": "quite quite expensive on the server and",
+    "start": 961.68,
+    "duration": 4.56
+  },
+  {
+    "text": "also cause a lot of network traffic.",
+    "start": 963.36,
+    "duration": 5.36
+  },
+  {
+    "text": "Another tip is that at any any uh point",
+    "start": 966.24,
+    "duration": 4.32
+  },
+  {
+    "text": "in time you can call CMC flush server",
+    "start": 968.72,
+    "duration": 3.679
+  },
+  {
+    "text": "moves on the client and that will send",
+    "start": 970.56,
+    "duration": 4.56
+  },
+  {
+    "text": "any combined move that it has uh yeah",
+    "start": 972.399,
+    "duration": 5.44
+  },
+  {
+    "text": "combined over the last few frames.",
+    "start": 975.12,
+    "duration": 5.44
+  },
+  {
+    "text": "Um now gas does this already when you",
+    "start": 977.839,
+    "duration": 4.161
+  },
+  {
+    "text": "when you activate a local predicted",
+    "start": 980.56,
+    "duration": 4.959
+  },
+  {
+    "text": "ability. So it's not a uh low hanging",
+    "start": 982.0,
+    "duration": 5.519
+  },
+  {
+    "text": "fruit there. But if you use a different",
+    "start": 985.519,
+    "duration": 3.601
+  },
+  {
+    "text": "ability system or if you send your own",
+    "start": 987.519,
+    "duration": 3.76
+  },
+  {
+    "text": "gameplay RPCs which really want the",
+    "start": 989.12,
+    "duration": 3.68
+  },
+  {
+    "text": "server to have the latest character",
+    "start": 991.279,
+    "duration": 3.92
+  },
+  {
+    "text": "position, then you can call flush server",
+    "start": 992.8,
+    "duration": 5.399
+  },
+  {
+    "text": "moves.",
+    "start": 995.199,
+    "duration": 3.0
+  },
+  {
+    "text": "But you still have to take into account",
+    "start": 999.92,
+    "duration": 3.76
+  },
+  {
+    "text": "that even if you flush server moves,",
+    "start": 1001.759,
+    "duration": 3.921
+  },
+  {
+    "text": "it's still not guaranteed that it will",
+    "start": 1003.68,
+    "duration": 4.159
+  },
+  {
+    "text": "arrive in the same frame on server side",
+    "start": 1005.68,
+    "duration": 5.92
+  },
+  {
+    "text": "as other RBC's you call that frame.",
+    "start": 1007.839,
+    "duration": 6.481
+  },
+  {
+    "text": "Now, tweaking move combining is quite a",
+    "start": 1011.6,
+    "duration": 4.32
+  },
+  {
+    "text": "nuance problem because if you send moves",
+    "start": 1014.32,
+    "duration": 5.28
+  },
+  {
+    "text": "too often, that causes server CPU load.",
+    "start": 1015.92,
+    "duration": 5.839
+  },
+  {
+    "text": "And it's very useful to be aware that if",
+    "start": 1019.6,
+    "duration": 5.199
+  },
+  {
+    "text": "you are playing root motion montages or",
+    "start": 1021.759,
+    "duration": 4.56
+  },
+  {
+    "text": "if you have a root motion source active",
+    "start": 1024.799,
+    "duration": 4.721
+  },
+  {
+    "text": "on on the character, you'll send moves",
+    "start": 1026.319,
+    "duration": 4.48
+  },
+  {
+    "text": "every frame. So, it's something to be",
+    "start": 1029.52,
+    "duration": 2.96
+  },
+  {
+    "text": "aware of. I'm going to go into those",
+    "start": 1030.799,
+    "duration": 3.361
+  },
+  {
+    "text": "root motion sources and montage in a",
+    "start": 1032.48,
+    "duration": 3.04
+  },
+  {
+    "text": "little bit.",
+    "start": 1034.16,
+    "duration": 3.12
+  },
+  {
+    "text": "On the other hand, if you're combining",
+    "start": 1035.52,
+    "duration": 3.76
+  },
+  {
+    "text": "moves over too long of a period on the",
+    "start": 1037.28,
+    "duration": 3.36
+  },
+  {
+    "text": "client, you might think that's really",
+    "start": 1039.28,
+    "duration": 3.759
+  },
+  {
+    "text": "that's really efficient. But that also",
+    "start": 1040.64,
+    "duration": 4.48
+  },
+  {
+    "text": "cause a that also cause a different",
+    "start": 1043.039,
+    "duration": 4.8
+  },
+  {
+    "text": "problem. Client side CPU load. Because",
+    "start": 1045.12,
+    "duration": 4.32
+  },
+  {
+    "text": "what the client does when it sends a",
+    "start": 1047.839,
+    "duration": 6.321
+  },
+  {
+    "text": "combined move is is it will also first",
+    "start": 1049.44,
+    "duration": 6.96
+  },
+  {
+    "text": "restore the characters pre-combined",
+    "start": 1054.16,
+    "duration": 4.32
+  },
+  {
+    "text": "position and then replay that same move",
+    "start": 1056.4,
+    "duration": 5.04
+  },
+  {
+    "text": "client side. And this is meant to uh",
+    "start": 1058.48,
+    "duration": 4.559
+  },
+  {
+    "text": "maximize the outcome of the client the",
+    "start": 1061.44,
+    "duration": 4.32
+  },
+  {
+    "text": "server having the same result. But if",
+    "start": 1063.039,
+    "duration": 4.721
+  },
+  {
+    "text": "you use a large delta time that'll that",
+    "start": 1065.76,
+    "duration": 4.48
+  },
+  {
+    "text": "there are movement modes in CMC that",
+    "start": 1067.76,
+    "duration": 4.72
+  },
+  {
+    "text": "will trigger substepping. It will",
+    "start": 1070.24,
+    "duration": 3.76
+  },
+  {
+    "text": "consume some of the some of the delta",
+    "start": 1072.48,
+    "duration": 5.88
+  },
+  {
+    "text": "time but trigger another iteration.",
+    "start": 1074.0,
+    "duration": 4.36
+  },
+  {
+    "text": "Now another important aspect of uh uh",
+    "start": 1079.2,
+    "duration": 5.2
+  },
+  {
+    "text": "move sending is important moves because",
+    "start": 1082.4,
+    "duration": 4.72
+  },
+  {
+    "text": "your move RPCs suffer from um packet",
+    "start": 1084.4,
+    "duration": 7.44
+  },
+  {
+    "text": "loss there CMC has a mechanism to uh",
+    "start": 1087.12,
+    "duration": 8.32
+  },
+  {
+    "text": "yeah to work with this CMC can mark some",
+    "start": 1091.84,
+    "duration": 6.32
+  },
+  {
+    "text": "moves as important. This logic is in is",
+    "start": 1095.44,
+    "duration": 5.68
+  },
+  {
+    "text": "in safe moves is important move and what",
+    "start": 1098.16,
+    "duration": 4.639
+  },
+  {
+    "text": "it then does is if a move is important",
+    "start": 1101.12,
+    "duration": 3.36
+  },
+  {
+    "text": "it will be it will be sent redundantly.",
+    "start": 1102.799,
+    "duration": 3.521
+  },
+  {
+    "text": "So when you send a new move, then the",
+    "start": 1104.48,
+    "duration": 4.079
+  },
+  {
+    "text": "oldest important move in your recent",
+    "start": 1106.32,
+    "duration": 4.8
+  },
+  {
+    "text": "move buffer will be resent again. This",
+    "start": 1108.559,
+    "duration": 4.401
+  },
+  {
+    "text": "greatly increases the odd of that odds",
+    "start": 1111.12,
+    "duration": 4.16
+  },
+  {
+    "text": "of that move arriving. But it's still",
+    "start": 1112.96,
+    "duration": 4.0
+  },
+  {
+    "text": "not perfect because you know packet loss",
+    "start": 1115.28,
+    "duration": 2.88
+  },
+  {
+    "text": "can still cause everything not to",
+    "start": 1116.96,
+    "duration": 2.719
+  },
+  {
+    "text": "arrive. And if you have multiple",
+    "start": 1118.16,
+    "duration": 3.04
+  },
+  {
+    "text": "important moves in your move buffer,",
+    "start": 1119.679,
+    "duration": 3.36
+  },
+  {
+    "text": "then only the oldest one gets resent. So",
+    "start": 1121.2,
+    "duration": 5.68
+  },
+  {
+    "text": "they can overshadow each other.",
+    "start": 1123.039,
+    "duration": 5.361
+  },
+  {
+    "text": "Just like move combining, if you add new",
+    "start": 1126.88,
+    "duration": 4.24
+  },
+  {
+    "text": "movement verbs is often a reason to",
+    "start": 1128.4,
+    "duration": 7.279
+  },
+  {
+    "text": "revisit your uh important move logic.",
+    "start": 1131.12,
+    "duration": 4.559
+  },
+  {
+    "text": "Here is a overview of what you're",
+    "start": 1136.799,
+    "duration": 4.161
+  },
+  {
+    "text": "sending when you send the move.",
+    "start": 1138.32,
+    "duration": 3.92
+  },
+  {
+    "text": "When you send the move, it's triggered",
+    "start": 1140.96,
+    "duration": 2.88
+  },
+  {
+    "text": "because either the get get client nets",
+    "start": 1142.24,
+    "duration": 3.84
+  },
+  {
+    "text": "send delta time has passed or because",
+    "start": 1143.84,
+    "duration": 5.199
+  },
+  {
+    "text": "the new move was unccombinable.",
+    "start": 1146.08,
+    "duration": 5.36
+  },
+  {
+    "text": "You might also send an important you",
+    "start": 1149.039,
+    "duration": 4.321
+  },
+  {
+    "text": "might also send a a combined move that",
+    "start": 1151.44,
+    "duration": 3.359
+  },
+  {
+    "text": "you've been building up over the past",
+    "start": 1153.36,
+    "duration": 3.28
+  },
+  {
+    "text": "few frames. If that combined move was",
+    "start": 1154.799,
+    "duration": 4.721
+  },
+  {
+    "text": "not not combinable into the new new move",
+    "start": 1156.64,
+    "duration": 5.36
+  },
+  {
+    "text": "and if there's also an important move in",
+    "start": 1159.52,
+    "duration": 4.64
+  },
+  {
+    "text": "your recent uh buffer then get that gets",
+    "start": 1162.0,
+    "duration": 4.08
+  },
+  {
+    "text": "sent as well. So when you send a move",
+    "start": 1164.16,
+    "duration": 6.32
+  },
+  {
+    "text": "it's often uh one up to three moves.",
+    "start": 1166.08,
+    "duration": 6.479
+  },
+  {
+    "text": "Now what does the server do when it",
+    "start": 1170.48,
+    "duration": 4.559
+  },
+  {
+    "text": "receives a move?",
+    "start": 1172.559,
+    "duration": 4.48
+  },
+  {
+    "text": "The server will process every move",
+    "start": 1175.039,
+    "duration": 4.64
+  },
+  {
+    "text": "immediately. So what it will do is it'll",
+    "start": 1177.039,
+    "duration": 5.52
+  },
+  {
+    "text": "take the client provided time stamp and",
+    "start": 1179.679,
+    "duration": 4.561
+  },
+  {
+    "text": "compute the difference between them and",
+    "start": 1182.559,
+    "duration": 4.721
+  },
+  {
+    "text": "use that delta time to advance movement",
+    "start": 1184.24,
+    "duration": 5.04
+  },
+  {
+    "text": "server side. And this is so that network",
+    "start": 1187.28,
+    "duration": 4.32
+  },
+  {
+    "text": "jitter doesn't uh cause the server to",
+    "start": 1189.28,
+    "duration": 4.56
+  },
+  {
+    "text": "use like a different uh yeah different",
+    "start": 1191.6,
+    "duration": 4.4
+  },
+  {
+    "text": "timing than the client. But the server",
+    "start": 1193.84,
+    "duration": 3.52
+  },
+  {
+    "text": "will skip over moves that haven't",
+    "start": 1196.0,
+    "duration": 2.96
+  },
+  {
+    "text": "arrived yet. We really prioritize",
+    "start": 1197.36,
+    "duration": 3.28
+  },
+  {
+    "text": "sending a response as soon as possible",
+    "start": 1198.96,
+    "duration": 3.2
+  },
+  {
+    "text": "and also executing moves as soon as",
+    "start": 1200.64,
+    "duration": 3.6
+  },
+  {
+    "text": "possible. That means the server can skip",
+    "start": 1202.16,
+    "duration": 4.0
+  },
+  {
+    "text": "over move and apply a larger delt and",
+    "start": 1204.24,
+    "duration": 3.6
+  },
+  {
+    "text": "that's another yeah reason for",
+    "start": 1206.16,
+    "duration": 3.2
+  },
+  {
+    "text": "divergence.",
+    "start": 1207.84,
+    "duration": 3.28
+  },
+  {
+    "text": "What the server will do is take the",
+    "start": 1209.36,
+    "duration": 3.6
+  },
+  {
+    "text": "client sent inputs so from your network",
+    "start": 1211.12,
+    "duration": 4.24
+  },
+  {
+    "text": "move data call like apply them to the",
+    "start": 1212.96,
+    "duration": 3.52
+  },
+  {
+    "text": "character and then call perform",
+    "start": 1215.36,
+    "duration": 3.679
+  },
+  {
+    "text": "movement. The client also originally",
+    "start": 1216.48,
+    "duration": 4.64
+  },
+  {
+    "text": "called perform movement to get its",
+    "start": 1219.039,
+    "duration": 4.801
+  },
+  {
+    "text": "movement outcome. The server doesn't",
+    "start": 1221.12,
+    "duration": 5.12
+  },
+  {
+    "text": "roll back the the rest of the world. So",
+    "start": 1223.84,
+    "duration": 4.4
+  },
+  {
+    "text": "that's something to be aware of. That's",
+    "start": 1226.24,
+    "duration": 4.799
+  },
+  {
+    "text": "mostly a cost-saving reason.",
+    "start": 1228.24,
+    "duration": 4.48
+  },
+  {
+    "text": "And if the outcome of the server and the",
+    "start": 1231.039,
+    "duration": 3.041
+  },
+  {
+    "text": "client is too different, then you get a",
+    "start": 1232.72,
+    "duration": 4.64
+  },
+  {
+    "text": "correction. By default, a reason for",
+    "start": 1234.08,
+    "duration": 5.599
+  },
+  {
+    "text": "correction is either a difference in",
+    "start": 1237.36,
+    "duration": 4.72
+  },
+  {
+    "text": "location outcome or a difference in",
+    "start": 1239.679,
+    "duration": 4.24
+  },
+  {
+    "text": "movement mode. The movement mode refers",
+    "start": 1242.08,
+    "duration": 3.44
+  },
+  {
+    "text": "to, you know, that enum where a",
+    "start": 1243.919,
+    "duration": 2.88
+  },
+  {
+    "text": "character is either walking or falling",
+    "start": 1245.52,
+    "duration": 4.08
+  },
+  {
+    "text": "or swimming and so on. And the in terms",
+    "start": 1246.799,
+    "duration": 4.721
+  },
+  {
+    "text": "of positional error, it's configurable",
+    "start": 1249.6,
+    "duration": 4.64
+  },
+  {
+    "text": "in your ini file as max position error",
+    "start": 1251.52,
+    "duration": 5.2
+  },
+  {
+    "text": "squared. By default, it has a reason, it",
+    "start": 1254.24,
+    "duration": 5.76
+  },
+  {
+    "text": "has a value of three squared. I mean so",
+    "start": 1256.72,
+    "duration": 5.12
+  },
+  {
+    "text": "the squared value of three which means",
+    "start": 1260.0,
+    "duration": 7.12
+  },
+  {
+    "text": "um like 1.7 cm of error tolerance.",
+    "start": 1261.84,
+    "duration": 7.12
+  },
+  {
+    "text": "Now the logic for this you can find in",
+    "start": 1267.12,
+    "duration": 3.12
+  },
+  {
+    "text": "server check client error and server",
+    "start": 1268.96,
+    "duration": 3.599
+  },
+  {
+    "text": "exis allowable position error which are",
+    "start": 1270.24,
+    "duration": 4.559
+  },
+  {
+    "text": "great uh functions to study but also to",
+    "start": 1272.559,
+    "duration": 4.0
+  },
+  {
+    "text": "override and we'll give some examples",
+    "start": 1274.799,
+    "duration": 4.0
+  },
+  {
+    "text": "later on.",
+    "start": 1276.559,
+    "duration": 3.921
+  },
+  {
+    "text": "Now here I made a video to demonstrate",
+    "start": 1278.799,
+    "duration": 3.921
+  },
+  {
+    "text": "when a correction triggers. I I'm",
+    "start": 1280.48,
+    "duration": 4.24
+  },
+  {
+    "text": "pressing a button here to intentionally",
+    "start": 1282.72,
+    "duration": 4.64
+  },
+  {
+    "text": "introduce some error client side and I",
+    "start": 1284.72,
+    "duration": 4.56
+  },
+  {
+    "text": "greatly uh I greatly increase the",
+    "start": 1287.36,
+    "duration": 3.6
+  },
+  {
+    "text": "positional error tolerance to",
+    "start": 1289.28,
+    "duration": 3.04
+  },
+  {
+    "text": "demonstrate that the client and server",
+    "start": 1290.96,
+    "duration": 3.199
+  },
+  {
+    "text": "will be applying acceleration",
+    "start": 1292.32,
+    "duration": 4.4
+  },
+  {
+    "text": "independently until a correction happens",
+    "start": 1294.159,
+    "duration": 4.081
+  },
+  {
+    "text": "and when the server starts falling when",
+    "start": 1296.72,
+    "duration": 2.959
+  },
+  {
+    "text": "the client doesn't that cause a",
+    "start": 1298.24,
+    "duration": 2.96
+  },
+  {
+    "text": "correction or here when the client",
+    "start": 1299.679,
+    "duration": 2.801
+  },
+  {
+    "text": "starts falling when the server doesn't",
+    "start": 1301.2,
+    "duration": 5.08
+  },
+  {
+    "text": "that also triggers a correction.",
+    "start": 1302.48,
+    "duration": 3.8
+  },
+  {
+    "text": "Now let's talk about what the client",
+    "start": 1306.88,
+    "duration": 4.88
+  },
+  {
+    "text": "does when it receives a correction.",
+    "start": 1308.64,
+    "duration": 5.84
+  },
+  {
+    "text": "The response that the server sends and",
+    "start": 1311.76,
+    "duration": 4.56
+  },
+  {
+    "text": "all the data in it is in character move",
+    "start": 1314.48,
+    "duration": 4.16
+  },
+  {
+    "text": "response data. What that contains is a",
+    "start": 1316.32,
+    "duration": 4.239
+  },
+  {
+    "text": "timestamps which is the original client",
+    "start": 1318.64,
+    "duration": 3.84
+  },
+  {
+    "text": "send time stamp so that the client knows",
+    "start": 1320.559,
+    "duration": 3.761
+  },
+  {
+    "text": "which move in its move buffer it's a",
+    "start": 1322.48,
+    "duration": 4.64
+  },
+  {
+    "text": "response for. It contains whether the",
+    "start": 1324.32,
+    "duration": 5.52
+  },
+  {
+    "text": "the server found the move okay or not.",
+    "start": 1327.12,
+    "duration": 4.24
+  },
+  {
+    "text": "And if not then the server also sends",
+    "start": 1329.84,
+    "duration": 3.76
+  },
+  {
+    "text": "along correction information that",
+    "start": 1331.36,
+    "duration": 4.16
+  },
+  {
+    "text": "includes your location. The server side",
+    "start": 1333.6,
+    "duration": 4.16
+  },
+  {
+    "text": "decided location, velocity, moving boat,",
+    "start": 1335.52,
+    "duration": 4.159
+  },
+  {
+    "text": "movement base, and also a complete",
+    "start": 1337.76,
+    "duration": 3.68
+  },
+  {
+    "text": "server snapshot of of root motion",
+    "start": 1339.679,
+    "duration": 3.441
+  },
+  {
+    "text": "sources if there were root motion",
+    "start": 1341.44,
+    "duration": 3.76
+  },
+  {
+    "text": "sources active on the server. I'll get",
+    "start": 1343.12,
+    "duration": 4.96
+  },
+  {
+    "text": "to that in a bit. By default, the server",
+    "start": 1345.2,
+    "duration": 4.4
+  },
+  {
+    "text": "does not correct rotation, but if you",
+    "start": 1348.08,
+    "duration": 3.76
+  },
+  {
+    "text": "wanted to, then you can override CMC's",
+    "start": 1349.6,
+    "duration": 3.6
+  },
+  {
+    "text": "should correct rotation function to",
+    "start": 1351.84,
+    "duration": 4.079
+  },
+  {
+    "text": "return true on the server. Now, as you",
+    "start": 1353.2,
+    "duration": 4.56
+  },
+  {
+    "text": "work on new movement abilities and uh",
+    "start": 1355.919,
+    "duration": 4.0
+  },
+  {
+    "text": "yeah, movement types, typically you want",
+    "start": 1357.76,
+    "duration": 4.0
+  },
+  {
+    "text": "to create a subclass of character movers",
+    "start": 1359.919,
+    "duration": 4.081
+  },
+  {
+    "text": "font data so that you add more ways for",
+    "start": 1361.76,
+    "duration": 4.0
+  },
+  {
+    "text": "the server to correct the client. For",
+    "start": 1364.0,
+    "duration": 5.919
+  },
+  {
+    "text": "example, to correct them onto a zipline.",
+    "start": 1365.76,
+    "duration": 6.799
+  },
+  {
+    "text": "Then after take after the client adopts",
+    "start": 1369.919,
+    "duration": 5.441
+  },
+  {
+    "text": "the serverside um outcome, what it will",
+    "start": 1372.559,
+    "duration": 5.041
+  },
+  {
+    "text": "do is it will reimulate most so that it",
+    "start": 1375.36,
+    "duration": 3.52
+  },
+  {
+    "text": "doesn't feel like the client gets moved",
+    "start": 1377.6,
+    "duration": 3.6
+  },
+  {
+    "text": "back in time. Adopting the server",
+    "start": 1378.88,
+    "duration": 4.4
+  },
+  {
+    "text": "outcome happens in client adjust",
+    "start": 1381.2,
+    "duration": 4.32
+  },
+  {
+    "text": "position. And then the next tick in",
+    "start": 1383.28,
+    "duration": 3.36
+  },
+  {
+    "text": "client's update position after the",
+    "start": 1385.52,
+    "duration": 3.92
+  },
+  {
+    "text": "server update every saves move with a",
+    "start": 1386.64,
+    "duration": 4.32
+  },
+  {
+    "text": "with a more recent time stamp will be",
+    "start": 1389.44,
+    "duration": 3.28
+  },
+  {
+    "text": "reimulated.",
+    "start": 1390.96,
+    "duration": 3.599
+  },
+  {
+    "text": "What will happen is that each save move",
+    "start": 1392.72,
+    "duration": 4.48
+  },
+  {
+    "text": "will restore some variables onto the",
+    "start": 1394.559,
+    "duration": 4.641
+  },
+  {
+    "text": "character or on onto the character",
+    "start": 1397.2,
+    "duration": 3.359
+  },
+  {
+    "text": "movement component and then perform",
+    "start": 1399.2,
+    "duration": 3.68
+  },
+  {
+    "text": "movement is called again. So perform",
+    "start": 1400.559,
+    "duration": 4.081
+  },
+  {
+    "text": "movement is a really important function",
+    "start": 1402.88,
+    "duration": 3.44
+  },
+  {
+    "text": "because it gets called when the client",
+    "start": 1404.64,
+    "duration": 3.44
+  },
+  {
+    "text": "originally predicted movement. It gets",
+    "start": 1406.32,
+    "duration": 3.359
+  },
+  {
+    "text": "called on server when the when server",
+    "start": 1408.08,
+    "duration": 4.079
+  },
+  {
+    "text": "executes the the client received move",
+    "start": 1409.679,
+    "duration": 5.041
+  },
+  {
+    "text": "the client sent move and on a correction",
+    "start": 1412.159,
+    "duration": 4.321
+  },
+  {
+    "text": "the the client will call before movement",
+    "start": 1414.72,
+    "duration": 5.48
+  },
+  {
+    "text": "again to reimulate.",
+    "start": 1416.48,
+    "duration": 3.72
+  },
+  {
+    "text": "I want to dig into one more uh feature",
+    "start": 1421.36,
+    "duration": 4.48
+  },
+  {
+    "text": "of CMC before we move on to best",
+    "start": 1423.84,
+    "duration": 5.199
+  },
+  {
+    "text": "practices. Root motion sources.",
+    "start": 1425.84,
+    "duration": 5.12
+  },
+  {
+    "text": "So root motion sources are really the",
+    "start": 1429.039,
+    "duration": 6.081
+  },
+  {
+    "text": "way for uh like are a CMC feature to",
+    "start": 1430.96,
+    "duration": 6.0
+  },
+  {
+    "text": "provide additionally additional velocity",
+    "start": 1435.12,
+    "duration": 4.559
+  },
+  {
+    "text": "modifiers over time.",
+    "start": 1436.96,
+    "duration": 4.719
+  },
+  {
+    "text": "They are implemented as subasses of f",
+    "start": 1439.679,
+    "duration": 5.12
+  },
+  {
+    "text": "root motion source and gas provides",
+    "start": 1441.679,
+    "duration": 4.961
+  },
+  {
+    "text": "ability tasks to manage your root motion",
+    "start": 1444.799,
+    "duration": 4.0
+  },
+  {
+    "text": "sources. The nice thing about root",
+    "start": 1446.64,
+    "duration": 3.919
+  },
+  {
+    "text": "motion sources is that they are",
+    "start": 1448.799,
+    "duration": 3.921
+  },
+  {
+    "text": "evaluated at the right time. So inside",
+    "start": 1450.559,
+    "duration": 6.12
+  },
+  {
+    "text": "your before movement function.",
+    "start": 1452.72,
+    "duration": 3.959
+  },
+  {
+    "text": "So whether you are predicting or the",
+    "start": 1460.88,
+    "duration": 4.24
+  },
+  {
+    "text": "server is executing your move or when",
+    "start": 1463.2,
+    "duration": 4.079
+  },
+  {
+    "text": "you're reimulating those root motion",
+    "start": 1465.12,
+    "duration": 4.72
+  },
+  {
+    "text": "sources are evaluated um in each of",
+    "start": 1467.279,
+    "duration": 4.481
+  },
+  {
+    "text": "those scenarios and with the correct",
+    "start": 1469.84,
+    "duration": 4.24
+  },
+  {
+    "text": "delta time and time since the start of",
+    "start": 1471.76,
+    "duration": 4.64
+  },
+  {
+    "text": "that source. So in the case of",
+    "start": 1474.08,
+    "duration": 4.32
+  },
+  {
+    "text": "prediction it's the client's world time",
+    "start": 1476.4,
+    "duration": 4.399
+  },
+  {
+    "text": "on the server it's the uh the delta time",
+    "start": 1478.4,
+    "duration": 5.519
+  },
+  {
+    "text": "from client u receive moves and on re",
+    "start": 1480.799,
+    "duration": 5.201
+  },
+  {
+    "text": "simulation it's the client's old world",
+    "start": 1483.919,
+    "duration": 5.041
+  },
+  {
+    "text": "delta time.",
+    "start": 1486.0,
+    "duration": 6.48
+  },
+  {
+    "text": "Now root motion sources uh are not sent",
+    "start": 1488.96,
+    "duration": 5.28
+  },
+  {
+    "text": "from the controlling client to the",
+    "start": 1492.48,
+    "duration": 3.76
+  },
+  {
+    "text": "server. Instead when you want to use",
+    "start": 1494.24,
+    "duration": 4.0
+  },
+  {
+    "text": "this the client and the server must",
+    "start": 1496.24,
+    "duration": 4.72
+  },
+  {
+    "text": "apply the same root motion source out of",
+    "start": 1498.24,
+    "duration": 4.24
+  },
+  {
+    "text": "the box. The only way to achieve this is",
+    "start": 1500.96,
+    "duration": 5.44
+  },
+  {
+    "text": "by using uh gas because if you have a",
+    "start": 1502.48,
+    "duration": 5.439
+  },
+  {
+    "text": "local predicted ability in gas, they",
+    "start": 1506.4,
+    "duration": 2.879
+  },
+  {
+    "text": "both they both execute the same",
+    "start": 1507.919,
+    "duration": 3.521
+  },
+  {
+    "text": "blueprint. So they will apply the same",
+    "start": 1509.279,
+    "duration": 4.64
+  },
+  {
+    "text": "root motion source hopefully with the",
+    "start": 1511.44,
+    "duration": 5.359
+  },
+  {
+    "text": "same parameters.",
+    "start": 1513.919,
+    "duration": 4.321
+  },
+  {
+    "text": "I do have to mention here that if you",
+    "start": 1516.799,
+    "duration": 3.921
+  },
+  {
+    "text": "use root motion sources and use gas to",
+    "start": 1518.24,
+    "duration": 4.24
+  },
+  {
+    "text": "trigger this, you still suffer from the",
+    "start": 1520.72,
+    "duration": 4.48
+  },
+  {
+    "text": "RPC arrival timing issue.",
+    "start": 1522.48,
+    "duration": 4.319
+  },
+  {
+    "text": "Root motion sources can be replicated",
+    "start": 1525.2,
+    "duration": 3.599
+  },
+  {
+    "text": "down from the server to client for the",
+    "start": 1526.799,
+    "duration": 3.521
+  },
+  {
+    "text": "autonomous proxy. So for the controlling",
+    "start": 1528.799,
+    "duration": 3.441
+  },
+  {
+    "text": "client that's the case when the server",
+    "start": 1530.32,
+    "duration": 5.12
+  },
+  {
+    "text": "sends a correction and for sim proxies",
+    "start": 1532.24,
+    "duration": 5.039
+  },
+  {
+    "text": "um that's always the case the server",
+    "start": 1535.44,
+    "duration": 4.96
+  },
+  {
+    "text": "sends down root sources to sim proxies",
+    "start": 1537.279,
+    "duration": 6.081
+  },
+  {
+    "text": "the initialization of those uh sim proxy",
+    "start": 1540.4,
+    "duration": 5.04
+  },
+  {
+    "text": "root sources happens through the through",
+    "start": 1543.36,
+    "duration": 5.04
+  },
+  {
+    "text": "an replicated ability task from gas and",
+    "start": 1545.44,
+    "duration": 5.359
+  },
+  {
+    "text": "any updates like any state changes get",
+    "start": 1548.4,
+    "duration": 3.759
+  },
+  {
+    "text": "replicated down from ser to client",
+    "start": 1550.799,
+    "duration": 3.441
+  },
+  {
+    "text": "through the characters rep root motion",
+    "start": 1552.159,
+    "duration": 5.361
+  },
+  {
+    "text": "uh property. Now, root motion montages.",
+    "start": 1554.24,
+    "duration": 5.439
+  },
+  {
+    "text": "Uh, I'm going to skip over this, but I",
+    "start": 1557.52,
+    "duration": 3.84
+  },
+  {
+    "text": "mean I'm going to skim over this, but",
+    "start": 1559.679,
+    "duration": 3.12
+  },
+  {
+    "text": "they have the same advantages and the",
+    "start": 1561.36,
+    "duration": 4.6
+  },
+  {
+    "text": "same drawbacks.",
+    "start": 1562.799,
+    "duration": 3.161
+  },
+  {
+    "text": "I want to reiterate that rubos sources",
+    "start": 1566.64,
+    "duration": 4.159
+  },
+  {
+    "text": "prevent move combining. Be aware of",
+    "start": 1569.2,
+    "duration": 5.44
+  },
+  {
+    "text": "that. So, they can cost uh yeah can",
+    "start": 1570.799,
+    "duration": 5.841
+  },
+  {
+    "text": "trigger costly networking and serverside",
+    "start": 1574.64,
+    "duration": 4.8
+  },
+  {
+    "text": "CPU load.",
+    "start": 1576.64,
+    "duration": 5.84
+  },
+  {
+    "text": "Now, let's dig into some best practices.",
+    "start": 1579.44,
+    "duration": 5.599
+  },
+  {
+    "text": "So the first thing you want to do is to",
+    "start": 1582.48,
+    "duration": 6.799
+  },
+  {
+    "text": "focus on maximizing your accuracy. So a",
+    "start": 1585.039,
+    "duration": 6.0
+  },
+  {
+    "text": "general piece of advice advice I have is",
+    "start": 1589.279,
+    "duration": 4.161
+  },
+  {
+    "text": "to you don't want to fight the character",
+    "start": 1591.039,
+    "duration": 4.24
+  },
+  {
+    "text": "moving component because consider this",
+    "start": 1593.44,
+    "duration": 4.4
+  },
+  {
+    "text": "when the client receives a correct from",
+    "start": 1595.279,
+    "duration": 4.4
+  },
+  {
+    "text": "the server it will teleport the",
+    "start": 1597.84,
+    "duration": 3.52
+  },
+  {
+    "text": "character location to the server side",
+    "start": 1599.679,
+    "duration": 3.681
+  },
+  {
+    "text": "outcome and then reimulate safe move. So",
+    "start": 1601.36,
+    "duration": 3.76
+  },
+  {
+    "text": "if you have anything any effect client",
+    "start": 1603.36,
+    "duration": 4.319
+  },
+  {
+    "text": "side that isn't uh re-evaluated in those",
+    "start": 1605.12,
+    "duration": 4.559
+  },
+  {
+    "text": "steps then you know that effect will be",
+    "start": 1607.679,
+    "duration": 3.921
+  },
+  {
+    "text": "stomped.",
+    "start": 1609.679,
+    "duration": 4.081
+  },
+  {
+    "text": "Instead, what you what you want to do is",
+    "start": 1611.6,
+    "duration": 4.16
+  },
+  {
+    "text": "to handle all of your movement inside",
+    "start": 1613.76,
+    "duration": 4.64
+  },
+  {
+    "text": "perform movement because it is called in",
+    "start": 1615.76,
+    "duration": 5.279
+  },
+  {
+    "text": "each of those contexts and also is",
+    "start": 1618.4,
+    "duration": 6.08
+  },
+  {
+    "text": "called on re simulation.",
+    "start": 1621.039,
+    "duration": 6.401
+  },
+  {
+    "text": "What you want to avoid is modifying your",
+    "start": 1624.48,
+    "duration": 4.72
+  },
+  {
+    "text": "character location and velocity in tick",
+    "start": 1627.44,
+    "duration": 4.16
+  },
+  {
+    "text": "functions. Now, what people tend to do",
+    "start": 1629.2,
+    "duration": 4.4
+  },
+  {
+    "text": "is put their moving logic in character",
+    "start": 1631.6,
+    "duration": 4.559
+  },
+  {
+    "text": "tick or in their CMC tick function. This",
+    "start": 1633.6,
+    "duration": 4.64
+  },
+  {
+    "text": "is bad. And the reason for this is",
+    "start": 1636.159,
+    "duration": 4.4
+  },
+  {
+    "text": "because is because tick is not called on",
+    "start": 1638.24,
+    "duration": 4.0
+  },
+  {
+    "text": "re simulation.",
+    "start": 1640.559,
+    "duration": 4.24
+  },
+  {
+    "text": "You also want to avoid uh modifying",
+    "start": 1642.24,
+    "duration": 4.96
+  },
+  {
+    "text": "velocity and location in other actors",
+    "start": 1644.799,
+    "duration": 4.641
+  },
+  {
+    "text": "tick functions. Um yeah, you want you",
+    "start": 1647.2,
+    "duration": 4.479
+  },
+  {
+    "text": "don't want to modify your character's uh",
+    "start": 1649.44,
+    "duration": 4.479
+  },
+  {
+    "text": "uh location either from other actors.",
+    "start": 1651.679,
+    "duration": 4.401
+  },
+  {
+    "text": "And let me give you an example. If I",
+    "start": 1653.919,
+    "duration": 4.561
+  },
+  {
+    "text": "have a wind volume that will nudge my",
+    "start": 1656.08,
+    "duration": 4.4
+  },
+  {
+    "text": "character in the wind direction on every",
+    "start": 1658.48,
+    "duration": 4.64
+  },
+  {
+    "text": "tick. Well, the time that between the",
+    "start": 1660.48,
+    "duration": 4.319
+  },
+  {
+    "text": "client sending two moves might be",
+    "start": 1663.12,
+    "duration": 3.039
+  },
+  {
+    "text": "different than the time between the",
+    "start": 1664.799,
+    "duration": 4.161
+  },
+  {
+    "text": "server executing those moves. So then",
+    "start": 1666.159,
+    "duration": 4.481
+  },
+  {
+    "text": "the server side the server may have",
+    "start": 1668.96,
+    "duration": 3.76
+  },
+  {
+    "text": "ticked a little more or less and that",
+    "start": 1670.64,
+    "duration": 6.279
+  },
+  {
+    "text": "just cause additional divergence.",
+    "start": 1672.72,
+    "duration": 4.199
+  },
+  {
+    "text": "What you always can do in these cases is",
+    "start": 1676.96,
+    "duration": 4.4
+  },
+  {
+    "text": "to handle uh things in perform movement.",
+    "start": 1678.72,
+    "duration": 5.04
+  },
+  {
+    "text": "So in the case of this this wind volume",
+    "start": 1681.36,
+    "duration": 4.88
+  },
+  {
+    "text": "example, you would have perform movement",
+    "start": 1683.76,
+    "duration": 4.56
+  },
+  {
+    "text": "pull the wind volumes parameters and",
+    "start": 1686.24,
+    "duration": 4.64
+  },
+  {
+    "text": "then and evaluate with the correct delta",
+    "start": 1688.32,
+    "duration": 5.2
+  },
+  {
+    "text": "delta time.",
+    "start": 1690.88,
+    "duration": 4.56
+  },
+  {
+    "text": "Now for handling things inside perform",
+    "start": 1693.52,
+    "duration": 4.24
+  },
+  {
+    "text": "movement there are a couple of options.",
+    "start": 1695.44,
+    "duration": 4.0
+  },
+  {
+    "text": "You can override your CMC's fizz",
+    "start": 1697.76,
+    "duration": 3.68
+  },
+  {
+    "text": "functions. So start new physics which is",
+    "start": 1699.44,
+    "duration": 4.64
+  },
+  {
+    "text": "called uh in all situations and fizz",
+    "start": 1701.44,
+    "duration": 5.599
+  },
+  {
+    "text": "walking, fing custom, f swimming and so",
+    "start": 1704.08,
+    "duration": 5.36
+  },
+  {
+    "text": "on based on your current movement mode.",
+    "start": 1707.039,
+    "duration": 3.76
+  },
+  {
+    "text": "If you need to send additional",
+    "start": 1709.44,
+    "duration": 2.719
+  },
+  {
+    "text": "information from the client to the",
+    "start": 1710.799,
+    "duration": 2.801
+  },
+  {
+    "text": "server so that the server can execute",
+    "start": 1712.159,
+    "duration": 3.681
+  },
+  {
+    "text": "the same move, then you also have a",
+    "start": 1713.6,
+    "duration": 4.319
+  },
+  {
+    "text": "couple of options. You can either extend",
+    "start": 1715.84,
+    "duration": 5.6
+  },
+  {
+    "text": "your CMC's network move data class or",
+    "start": 1717.919,
+    "duration": 6.321
+  },
+  {
+    "text": "you can introduce custom RPCs to update",
+    "start": 1721.44,
+    "duration": 7.479
+  },
+  {
+    "text": "the the server side uh inputs.",
+    "start": 1724.24,
+    "duration": 4.679
+  },
+  {
+    "text": "If you use you can also use root motion",
+    "start": 1729.039,
+    "duration": 4.401
+  },
+  {
+    "text": "sources. The nice thing there is that",
+    "start": 1731.279,
+    "duration": 4.241
+  },
+  {
+    "text": "Unreal provides some yeah some some",
+    "start": 1733.44,
+    "duration": 4.8
+  },
+  {
+    "text": "common ones already.",
+    "start": 1735.52,
+    "duration": 5.2
+  },
+  {
+    "text": "Another nice thing is that because",
+    "start": 1738.24,
+    "duration": 4.72
+  },
+  {
+    "text": "applying the rumor source server side",
+    "start": 1740.72,
+    "duration": 4.24
+  },
+  {
+    "text": "cannot be done by the client only",
+    "start": 1742.96,
+    "duration": 3.599
+  },
+  {
+    "text": "indirectly by triggering the same",
+    "start": 1744.96,
+    "duration": 4.56
+  },
+  {
+    "text": "ability. Uh there is it's a bit harder",
+    "start": 1746.559,
+    "duration": 5.6
+  },
+  {
+    "text": "for the client to lie about the data and",
+    "start": 1749.52,
+    "duration": 4.56
+  },
+  {
+    "text": "parameters.",
+    "start": 1752.159,
+    "duration": 3.76
+  },
+  {
+    "text": "But again the main issue there is that",
+    "start": 1754.08,
+    "duration": 4.24
+  },
+  {
+    "text": "you are sending another RPC. So you are",
+    "start": 1755.919,
+    "duration": 4.0
+  },
+  {
+    "text": "suffering from this RPC arrival timing",
+    "start": 1758.32,
+    "duration": 3.68
+  },
+  {
+    "text": "issue.",
+    "start": 1759.919,
+    "duration": 4.48
+  },
+  {
+    "text": "Now when would you use which? It really",
+    "start": 1762.0,
+    "duration": 5.12
+  },
+  {
+    "text": "comes down to this.",
+    "start": 1764.399,
+    "duration": 4.4
+  },
+  {
+    "text": "You can extend the nice thing about",
+    "start": 1767.12,
+    "duration": 3.84
+  },
+  {
+    "text": "extending net remove data is that this",
+    "start": 1768.799,
+    "duration": 4.161
+  },
+  {
+    "text": "way you can avoid that RPC arrival time",
+    "start": 1770.96,
+    "duration": 4.88
+  },
+  {
+    "text": "issue and that maximizes consistency",
+    "start": 1772.96,
+    "duration": 5.28
+  },
+  {
+    "text": "between client and server. But it al is",
+    "start": 1775.84,
+    "duration": 4.079
+  },
+  {
+    "text": "also it is also a lot more engineering",
+    "start": 1778.24,
+    "duration": 3.6
+  },
+  {
+    "text": "work because whenever you add parameters",
+    "start": 1779.919,
+    "duration": 3.681
+  },
+  {
+    "text": "to network network move data you have to",
+    "start": 1781.84,
+    "duration": 4.24
+  },
+  {
+    "text": "make sure that players or cheaters can't",
+    "start": 1783.6,
+    "duration": 4.48
+  },
+  {
+    "text": "exploit this by lying about those uh",
+    "start": 1786.08,
+    "duration": 5.28
+  },
+  {
+    "text": "those values by manipulating memory. You",
+    "start": 1788.08,
+    "duration": 5.52
+  },
+  {
+    "text": "also have to make sure that your network",
+    "start": 1791.36,
+    "duration": 4.16
+  },
+  {
+    "text": "move data class doesn't get too bloated",
+    "start": 1793.6,
+    "duration": 3.28
+  },
+  {
+    "text": "and you have to serialize it over the",
+    "start": 1795.52,
+    "duration": 3.36
+  },
+  {
+    "text": "network in in an efficient way. For",
+    "start": 1796.88,
+    "duration": 4.32
+  },
+  {
+    "text": "example, if you have like 10 parameters",
+    "start": 1798.88,
+    "duration": 4.24
+  },
+  {
+    "text": "for ziplining, you don't want to send",
+    "start": 1801.2,
+    "duration": 3.44
+  },
+  {
+    "text": "all of those 10 parameters when you're",
+    "start": 1803.12,
+    "duration": 3.439
+  },
+  {
+    "text": "not ziplining.",
+    "start": 1804.64,
+    "duration": 4.08
+  },
+  {
+    "text": "The nice thing about root motion sources",
+    "start": 1806.559,
+    "duration": 4.561
+  },
+  {
+    "text": "is that it's um yeah, it's less",
+    "start": 1808.72,
+    "duration": 3.679
+  },
+  {
+    "text": "engineering work because there are some",
+    "start": 1811.12,
+    "duration": 5.439
+  },
+  {
+    "text": "some default uh uh types already and",
+    "start": 1812.399,
+    "duration": 6.081
+  },
+  {
+    "text": "they also only have a net serialization",
+    "start": 1816.559,
+    "duration": 4.161
+  },
+  {
+    "text": "cost when they're active. So it's a bit",
+    "start": 1818.48,
+    "duration": 4.16
+  },
+  {
+    "text": "um easier to keep that efficient",
+    "start": 1820.72,
+    "duration": 4.64
+  },
+  {
+    "text": "networking wise but again that suffers",
+    "start": 1822.64,
+    "duration": 4.399
+  },
+  {
+    "text": "from the RPC arrival timing issue and",
+    "start": 1825.36,
+    "duration": 4.08
+  },
+  {
+    "text": "also having wood sources active prevents",
+    "start": 1827.039,
+    "duration": 5.921
+  },
+  {
+    "text": "move combining which can be costly.",
+    "start": 1829.44,
+    "duration": 5.52
+  },
+  {
+    "text": "Now I want to share here that Fortnite",
+    "start": 1832.96,
+    "duration": 4.16
+  },
+  {
+    "text": "heavily leans into the approach of",
+    "start": 1834.96,
+    "duration": 3.28
+  },
+  {
+    "text": "routing everything through through",
+    "start": 1837.12,
+    "duration": 4.72
+  },
+  {
+    "text": "network move data where we have a system",
+    "start": 1838.24,
+    "duration": 7.76
+  },
+  {
+    "text": "where you can create classes that extend",
+    "start": 1841.84,
+    "duration": 6.719
+  },
+  {
+    "text": "the extended movement mode and each of",
+    "start": 1846.0,
+    "duration": 4.72
+  },
+  {
+    "text": "those classes can feed their own data",
+    "start": 1848.559,
+    "duration": 4.961
+  },
+  {
+    "text": "into safe moves and into network moves.",
+    "start": 1850.72,
+    "duration": 4.559
+  },
+  {
+    "text": "In Fortnite, we're also slowly moving",
+    "start": 1853.52,
+    "duration": 3.92
+  },
+  {
+    "text": "away from using rule motion sources to",
+    "start": 1855.279,
+    "duration": 5.921
+  },
+  {
+    "text": "reduce serverside uh CPU CPU load. But",
+    "start": 1857.44,
+    "duration": 5.92
+  },
+  {
+    "text": "the best choice for your project really",
+    "start": 1861.2,
+    "duration": 3.92
+  },
+  {
+    "text": "depends on a lot of factors. For",
+    "start": 1863.36,
+    "duration": 3.439
+  },
+  {
+    "text": "example, how much engineering power you",
+    "start": 1865.12,
+    "duration": 4.919
+  },
+  {
+    "text": "have available.",
+    "start": 1866.799,
+    "duration": 3.24
+  },
+  {
+    "text": "The next the next best practice is you",
+    "start": 1874.32,
+    "duration": 4.56
+  },
+  {
+    "text": "really want your server to do the same",
+    "start": 1876.48,
+    "duration": 4.0
+  },
+  {
+    "text": "thing as the client as long as there's",
+    "start": 1878.88,
+    "duration": 4.0
+  },
+  {
+    "text": "no interrupted factors.",
+    "start": 1880.48,
+    "duration": 3.76
+  },
+  {
+    "text": "So you either need to send everything",
+    "start": 1882.88,
+    "duration": 2.56
+  },
+  {
+    "text": "from the client to the server need",
+    "start": 1884.24,
+    "duration": 3.439
+  },
+  {
+    "text": "needed for that",
+    "start": 1885.44,
+    "duration": 3.839
+  },
+  {
+    "text": "but in some cases you don't have to if",
+    "start": 1887.679,
+    "duration": 3.12
+  },
+  {
+    "text": "the server and client can both derive",
+    "start": 1889.279,
+    "duration": 3.52
+  },
+  {
+    "text": "some movement effect in the same way.",
+    "start": 1890.799,
+    "duration": 3.201
+  },
+  {
+    "text": "For example, if you if you have a",
+    "start": 1892.799,
+    "duration": 3.281
+  },
+  {
+    "text": "stationary volume like um current",
+    "start": 1894.0,
+    "duration": 3.679
+  },
+  {
+    "text": "waterfalls",
+    "start": 1896.08,
+    "duration": 3.599
+  },
+  {
+    "text": "or if you can or if both the server and",
+    "start": 1897.679,
+    "duration": 3.921
+  },
+  {
+    "text": "client can evaluate like the same effect",
+    "start": 1899.679,
+    "duration": 4.561
+  },
+  {
+    "text": "from from time from the current time.",
+    "start": 1901.6,
+    "duration": 3.919
+  },
+  {
+    "text": "Now, if you want to do things time",
+    "start": 1904.24,
+    "duration": 4.0
+  },
+  {
+    "text": "based, you should consider sending the",
+    "start": 1905.519,
+    "duration": 5.04
+  },
+  {
+    "text": "client's what the client thinks that the",
+    "start": 1908.24,
+    "duration": 4.4
+  },
+  {
+    "text": "server world time is with the move",
+    "start": 1910.559,
+    "duration": 4.24
+  },
+  {
+    "text": "because by the time that the client's",
+    "start": 1912.64,
+    "duration": 4.72
+  },
+  {
+    "text": "move arrives on the server, the server",
+    "start": 1914.799,
+    "duration": 4.401
+  },
+  {
+    "text": "side uh time stamp has already advanced",
+    "start": 1917.36,
+    "duration": 5.0
+  },
+  {
+    "text": "a bit.",
+    "start": 1919.2,
+    "duration": 3.16
+  },
+  {
+    "text": "What you want to be careful with is",
+    "start": 1923.039,
+    "duration": 3.601
+  },
+  {
+    "text": "having both the server and client be",
+    "start": 1924.88,
+    "duration": 4.0
+  },
+  {
+    "text": "smart. And a prime example for this is",
+    "start": 1926.64,
+    "duration": 4.08
+  },
+  {
+    "text": "if you are working with moving",
+    "start": 1928.88,
+    "duration": 4.32
+  },
+  {
+    "text": "replicated targets. So this concern",
+    "start": 1930.72,
+    "duration": 4.64
+  },
+  {
+    "text": "concerns motion warping as well as root",
+    "start": 1933.2,
+    "duration": 4.64
+  },
+  {
+    "text": "motion sources which both provide ways",
+    "start": 1935.36,
+    "duration": 5.039
+  },
+  {
+    "text": "to for example home towards a moving",
+    "start": 1937.84,
+    "duration": 4.48
+  },
+  {
+    "text": "target.",
+    "start": 1940.399,
+    "duration": 3.681
+  },
+  {
+    "text": "Now the reason this is quite risky is",
+    "start": 1942.32,
+    "duration": 4.239
+  },
+  {
+    "text": "because if the if an NPC is server",
+    "start": 1944.08,
+    "duration": 4.479
+  },
+  {
+    "text": "server controlled the client will",
+    "start": 1946.559,
+    "duration": 4.881
+  },
+  {
+    "text": "already be a little bit behind for that",
+    "start": 1948.559,
+    "duration": 5.281
+  },
+  {
+    "text": "NPC's location and by the time the",
+    "start": 1951.44,
+    "duration": 4.88
+  },
+  {
+    "text": "client's move arrives on the server that",
+    "start": 1953.84,
+    "duration": 5.04
+  },
+  {
+    "text": "NPC will even h will have moved even a",
+    "start": 1956.32,
+    "duration": 4.239
+  },
+  {
+    "text": "bit further. So the client is actually",
+    "start": 1958.88,
+    "duration": 4.0
+  },
+  {
+    "text": "two steps behind or yeah two steps",
+    "start": 1960.559,
+    "duration": 3.921
+  },
+  {
+    "text": "behind by the time that moves ar that",
+    "start": 1962.88,
+    "duration": 4.08
+  },
+  {
+    "text": "move arrives.",
+    "start": 1964.48,
+    "duration": 5.76
+  },
+  {
+    "text": "So I created a um an example ability to",
+    "start": 1966.96,
+    "duration": 5.76
+  },
+  {
+    "text": "to demonstrate this. Here I'm using uh",
+    "start": 1970.24,
+    "duration": 5.279
+  },
+  {
+    "text": "motion warping to warp towards a moving",
+    "start": 1972.72,
+    "duration": 6.0
+  },
+  {
+    "text": "uh actor that is server controlled and",
+    "start": 1975.519,
+    "duration": 5.201
+  },
+  {
+    "text": "the server will also upon receiving this",
+    "start": 1978.72,
+    "duration": 5.52
+  },
+  {
+    "text": "ability RPC activation um will also",
+    "start": 1980.72,
+    "duration": 5.04
+  },
+  {
+    "text": "start motion warping but then with the",
+    "start": 1984.24,
+    "duration": 3.679
+  },
+  {
+    "text": "server side location of that of that uh",
+    "start": 1985.76,
+    "duration": 7.08
+  },
+  {
+    "text": "actor and that can look like this.",
+    "start": 1987.919,
+    "duration": 4.921
+  },
+  {
+    "text": "So you get huge corrections because",
+    "start": 1997.6,
+    "duration": 4.319
+  },
+  {
+    "text": "there's basically a round trip latency",
+    "start": 1998.96,
+    "duration": 5.36
+  },
+  {
+    "text": "of um of difference between the",
+    "start": 2001.919,
+    "duration": 5.401
+  },
+  {
+    "text": "exposition.",
+    "start": 2004.32,
+    "duration": 3.0
+  },
+  {
+    "text": "Now what you can consider instead is to",
+    "start": 2008.0,
+    "duration": 4.96
+  },
+  {
+    "text": "let the client decide a point",
+    "start": 2009.76,
+    "duration": 5.36
+  },
+  {
+    "text": "to uh to motion warp to and then send",
+    "start": 2012.96,
+    "duration": 3.52
+  },
+  {
+    "text": "the same point to the server and then",
+    "start": 2015.12,
+    "duration": 3.12
+  },
+  {
+    "text": "have both motion warp towards that",
+    "start": 2016.48,
+    "duration": 3.6
+  },
+  {
+    "text": "point. Then at least the client and",
+    "start": 2018.24,
+    "duration": 2.799
+  },
+  {
+    "text": "server will both have the same",
+    "start": 2020.08,
+    "duration": 2.479
+  },
+  {
+    "text": "trajectory.",
+    "start": 2021.039,
+    "duration": 3.281
+  },
+  {
+    "text": "But you will still you still might",
+    "start": 2022.559,
+    "duration": 3.921
+  },
+  {
+    "text": "suffer from RPC rival timing issues",
+    "start": 2024.32,
+    "duration": 4.079
+  },
+  {
+    "text": "because we have introduced another RPC",
+    "start": 2026.48,
+    "duration": 4.919
+  },
+  {
+    "text": "here.",
+    "start": 2028.399,
+    "duration": 3.0
+  },
+  {
+    "text": "So this is how that looks when the",
+    "start": 2032.32,
+    "duration": 2.88
+  },
+  {
+    "text": "client decides a point and the server",
+    "start": 2033.76,
+    "duration": 4.24
+  },
+  {
+    "text": "also motion warps to that point.",
+    "start": 2035.2,
+    "duration": 6.04
+  },
+  {
+    "text": "Much better.",
+    "start": 2038.0,
+    "duration": 3.24
+  },
+  {
+    "text": "Now",
+    "start": 2042.72,
+    "duration": 4.24
+  },
+  {
+    "text": "the next best practice is to record your",
+    "start": 2044.32,
+    "duration": 4.4
+  },
+  {
+    "text": "uh reimulation dependencies or your",
+    "start": 2046.96,
+    "duration": 4.399
+  },
+  {
+    "text": "movement dependencies into save moves",
+    "start": 2048.72,
+    "duration": 4.32
+  },
+  {
+    "text": "because",
+    "start": 2051.359,
+    "duration": 3.841
+  },
+  {
+    "text": "when you receive uh when the client",
+    "start": 2053.04,
+    "duration": 3.839
+  },
+  {
+    "text": "receives a correction and reimulates",
+    "start": 2055.2,
+    "duration": 3.919
+  },
+  {
+    "text": "moves some time has already passed in",
+    "start": 2056.879,
+    "duration": 4.161
+  },
+  {
+    "text": "the world. So other actors may have",
+    "start": 2059.119,
+    "duration": 3.52
+  },
+  {
+    "text": "moved further and farther ahead in time.",
+    "start": 2061.04,
+    "duration": 2.96
+  },
+  {
+    "text": "Your attributes may have changed like",
+    "start": 2062.639,
+    "duration": 4.0
+  },
+  {
+    "text": "your gas gameplay attributes.",
+    "start": 2064.0,
+    "duration": 4.399
+  },
+  {
+    "text": "So when you reim reimulate the move, it",
+    "start": 2066.639,
+    "duration": 4.321
+  },
+  {
+    "text": "it might not be totally accurate. What",
+    "start": 2068.399,
+    "duration": 5.2
+  },
+  {
+    "text": "you want to do is to record everything",
+    "start": 2070.96,
+    "duration": 5.52
+  },
+  {
+    "text": "that CMC needs to reimulate that move",
+    "start": 2073.599,
+    "duration": 5.681
+  },
+  {
+    "text": "accurately.",
+    "start": 2076.48,
+    "duration": 4.72
+  },
+  {
+    "text": "When you are calling perform movement or",
+    "start": 2079.28,
+    "duration": 3.359
+  },
+  {
+    "text": "when perform movement is executed, you",
+    "start": 2081.2,
+    "duration": 3.36
+  },
+  {
+    "text": "can check the characters uh client",
+    "start": 2082.639,
+    "duration": 3.52
+  },
+  {
+    "text": "updating boolean and check whether it's",
+    "start": 2084.56,
+    "duration": 3.519
+  },
+  {
+    "text": "true. If it's true, that means you're",
+    "start": 2086.159,
+    "duration": 4.321
+  },
+  {
+    "text": "currently replaying. And then you can",
+    "start": 2088.079,
+    "duration": 4.481
+  },
+  {
+    "text": "get the currently replayed save move by",
+    "start": 2090.48,
+    "duration": 3.76
+  },
+  {
+    "text": "yeah by calling get current replayed",
+    "start": 2092.56,
+    "duration": 4.24
+  },
+  {
+    "text": "save move to get the um yeah the",
+    "start": 2094.24,
+    "duration": 6.839
+  },
+  {
+    "text": "recorded data from that safe move.",
+    "start": 2096.8,
+    "duration": 4.279
+  },
+  {
+    "text": "Let's talk about security.",
+    "start": 2101.359,
+    "duration": 6.641
+  },
+  {
+    "text": "Now whenever you add parameters to a",
+    "start": 2104.64,
+    "duration": 5.36
+  },
+  {
+    "text": "network remove data or whenever you",
+    "start": 2108.0,
+    "duration": 5.92
+  },
+  {
+    "text": "introduce an RPC you have to validate",
+    "start": 2110.0,
+    "duration": 6.16
+  },
+  {
+    "text": "those parameters and whether that RPC is",
+    "start": 2113.92,
+    "duration": 5.96
+  },
+  {
+    "text": "called in the right context.",
+    "start": 2116.16,
+    "duration": 3.72
+  },
+  {
+    "text": "because cheaters will try to exploit",
+    "start": 2119.92,
+    "duration": 3.12
+  },
+  {
+    "text": "this. They will try to lie about the",
+    "start": 2121.359,
+    "duration": 3.921
+  },
+  {
+    "text": "that network move data or call those",
+    "start": 2123.04,
+    "duration": 4.64
+  },
+  {
+    "text": "RPCs with uh yeah with with wrong",
+    "start": 2125.28,
+    "duration": 4.559
+  },
+  {
+    "text": "values. So in the previous example where",
+    "start": 2127.68,
+    "duration": 4.08
+  },
+  {
+    "text": "I let the client send a point to the",
+    "start": 2129.839,
+    "duration": 4.0
+  },
+  {
+    "text": "server, you can imagine cheaters will",
+    "start": 2131.76,
+    "duration": 3.28
+  },
+  {
+    "text": "try to exploit that by just sending a",
+    "start": 2133.839,
+    "duration": 3.041
+  },
+  {
+    "text": "point that's halfway across the map and",
+    "start": 2135.04,
+    "duration": 3.6
+  },
+  {
+    "text": "and if the server just motion warps it",
+    "start": 2136.88,
+    "duration": 3.68
+  },
+  {
+    "text": "so interpolates towards that, you can",
+    "start": 2138.64,
+    "duration": 5.68
+  },
+  {
+    "text": "use that very easily to uh to cheat.",
+    "start": 2140.56,
+    "duration": 6.559
+  },
+  {
+    "text": "So always either uh yeah so always",
+    "start": 2144.32,
+    "duration": 4.4
+  },
+  {
+    "text": "validate either by accepting or",
+    "start": 2147.119,
+    "duration": 4.48
+  },
+  {
+    "text": "rejecting that request",
+    "start": 2148.72,
+    "duration": 5.2
+  },
+  {
+    "text": "or by clamping the value so that for",
+    "start": 2151.599,
+    "duration": 4.641
+  },
+  {
+    "text": "example uh you only motion war towards a",
+    "start": 2153.92,
+    "duration": 6.439
+  },
+  {
+    "text": "point that's close enough to the player.",
+    "start": 2156.24,
+    "duration": 4.119
+  },
+  {
+    "text": "This is also fun when you want to",
+    "start": 2160.4,
+    "duration": 5.199
+  },
+  {
+    "text": "mitigate lag switch exploits. Now, we",
+    "start": 2161.76,
+    "duration": 5.68
+  },
+  {
+    "text": "learned that uh just now that this the",
+    "start": 2165.599,
+    "duration": 4.081
+  },
+  {
+    "text": "server only advances the character",
+    "start": 2167.44,
+    "duration": 4.96
+  },
+  {
+    "text": "movement um when it receives that move",
+    "start": 2169.68,
+    "duration": 5.52
+  },
+  {
+    "text": "RPC from the client. You can imagine",
+    "start": 2172.4,
+    "duration": 4.56
+  },
+  {
+    "text": "that's quite exploitable if a cheater",
+    "start": 2175.2,
+    "duration": 4.8
+  },
+  {
+    "text": "decides not to send any moves.",
+    "start": 2176.96,
+    "duration": 5.84
+  },
+  {
+    "text": "Now, here's a fun fact. By default, CMC",
+    "start": 2180.0,
+    "duration": 4.8
+  },
+  {
+    "text": "won't even take gravity server side if",
+    "start": 2182.8,
+    "duration": 4.72
+  },
+  {
+    "text": "it's not receiving moves. it will look",
+    "start": 2184.8,
+    "duration": 5.36
+  },
+  {
+    "text": "like you are uh falling on other clients",
+    "start": 2187.52,
+    "duration": 3.839
+  },
+  {
+    "text": "because those other clients will",
+    "start": 2190.16,
+    "duration": 2.56
+  },
+  {
+    "text": "extrapolate your movement because there",
+    "start": 2191.359,
+    "duration": 4.641
+  },
+  {
+    "text": "we we prioritize like movement looking",
+    "start": 2192.72,
+    "duration": 5.76
+  },
+  {
+    "text": "smooth but on the server the character",
+    "start": 2196.0,
+    "duration": 4.72
+  },
+  {
+    "text": "will stay in the air if the client stops",
+    "start": 2198.48,
+    "duration": 4.08
+  },
+  {
+    "text": "sending moves in the air. So here when",
+    "start": 2200.72,
+    "duration": 4.24
+  },
+  {
+    "text": "I'm jumping off the stairs I'm not",
+    "start": 2202.56,
+    "duration": 4.32
+  },
+  {
+    "text": "sending moves and you see my server side",
+    "start": 2204.96,
+    "duration": 4.399
+  },
+  {
+    "text": "location remains uh in the air and only",
+    "start": 2206.88,
+    "duration": 3.84
+  },
+  {
+    "text": "when I send moves again then it gets",
+    "start": 2209.359,
+    "duration": 3.281
+  },
+  {
+    "text": "updated and the reason I'm start",
+    "start": 2210.72,
+    "duration": 3.68
+  },
+  {
+    "text": "starting falling again from the air is",
+    "start": 2212.64,
+    "duration": 4.24
+  },
+  {
+    "text": "because the server will will only apply",
+    "start": 2214.4,
+    "duration": 6.52
+  },
+  {
+    "text": "like a maximum delta time.",
+    "start": 2216.88,
+    "duration": 4.04
+  },
+  {
+    "text": "Now what can you do to mitigate this?",
+    "start": 2221.359,
+    "duration": 4.521
+  },
+  {
+    "text": "There are two useful functions for the",
+    "start": 2226.56,
+    "duration": 4.559
+  },
+  {
+    "text": "for you to override. There's force",
+    "start": 2229.119,
+    "duration": 3.681
+  },
+  {
+    "text": "position updates which get called one",
+    "start": 2231.119,
+    "duration": 3.841
+  },
+  {
+    "text": "time when the server hasn't received",
+    "start": 2232.8,
+    "duration": 4.319
+  },
+  {
+    "text": "moves for a while",
+    "start": 2234.96,
+    "duration": 4.0
+  },
+  {
+    "text": "and there's tick tick autonomous proxy",
+    "start": 2237.119,
+    "duration": 4.0
+  },
+  {
+    "text": "which which a server will always call.",
+    "start": 2238.96,
+    "duration": 4.08
+  },
+  {
+    "text": "Now Fortnite uses a com combination of",
+    "start": 2241.119,
+    "duration": 3.841
+  },
+  {
+    "text": "force position updates to raise a flag",
+    "start": 2243.04,
+    "duration": 4.48
+  },
+  {
+    "text": "and then in tick autonomous proxy will",
+    "start": 2244.96,
+    "duration": 4.96
+  },
+  {
+    "text": "um yeah will will tick gravity on the",
+    "start": 2247.52,
+    "duration": 4.4
+  },
+  {
+    "text": "server. This is so that players can't",
+    "start": 2249.92,
+    "duration": 4.24
+  },
+  {
+    "text": "stay in the air in the air forever. So",
+    "start": 2251.92,
+    "duration": 5.12
+  },
+  {
+    "text": "you should also consider how players can",
+    "start": 2254.16,
+    "duration": 5.12
+  },
+  {
+    "text": "exploit using lag switches in your game",
+    "start": 2257.04,
+    "duration": 3.84
+  },
+  {
+    "text": "and then use these functions to mitigate",
+    "start": 2259.28,
+    "duration": 4.6
+  },
+  {
+    "text": "that.",
+    "start": 2260.88,
+    "duration": 3.0
+  },
+  {
+    "text": "There are cases where where you might",
+    "start": 2264.16,
+    "duration": 4.32
+  },
+  {
+    "text": "want to decide not to predict. So you",
+    "start": 2266.0,
+    "duration": 4.32
+  },
+  {
+    "text": "don't want to predict something if it",
+    "start": 2268.48,
+    "duration": 4.32
+  },
+  {
+    "text": "has a chance of a huge correction. In",
+    "start": 2270.32,
+    "duration": 3.92
+  },
+  {
+    "text": "those case you can consider just letting",
+    "start": 2272.8,
+    "duration": 3.84
+  },
+  {
+    "text": "things happen on the server.",
+    "start": 2274.24,
+    "duration": 3.92
+  },
+  {
+    "text": "You also generally don't want to predict",
+    "start": 2276.64,
+    "duration": 2.959
+  },
+  {
+    "text": "movement effects on on other players",
+    "start": 2278.16,
+    "duration": 3.439
+  },
+  {
+    "text": "because your client already has like is",
+    "start": 2279.599,
+    "duration": 4.081
+  },
+  {
+    "text": "already two steps behind for that other",
+    "start": 2281.599,
+    "duration": 4.081
+  },
+  {
+    "text": "player's location and that player can",
+    "start": 2283.68,
+    "duration": 3.679
+  },
+  {
+    "text": "also interrupt whatever you want to do",
+    "start": 2285.68,
+    "duration": 3.679
+  },
+  {
+    "text": "with them. Now, here's a example from",
+    "start": 2287.359,
+    "duration": 4.641
+  },
+  {
+    "text": "from Fortnite. In Fortnite, you have uh",
+    "start": 2289.359,
+    "duration": 5.041
+  },
+  {
+    "text": "a knockback grenade which can knock back",
+    "start": 2292.0,
+    "duration": 4.32
+  },
+  {
+    "text": "other players, but the other player can",
+    "start": 2294.4,
+    "duration": 3.439
+  },
+  {
+    "text": "also put down a wall to prevent that",
+    "start": 2296.32,
+    "duration": 3.36
+  },
+  {
+    "text": "from happening. So if my client will",
+    "start": 2297.839,
+    "duration": 4.081
+  },
+  {
+    "text": "knock that player back, but the other",
+    "start": 2299.68,
+    "duration": 3.6
+  },
+  {
+    "text": "player put down a wall in time and",
+    "start": 2301.92,
+    "duration": 3.919
+  },
+  {
+    "text": "that's that's that request arrived on",
+    "start": 2303.28,
+    "duration": 4.559
+  },
+  {
+    "text": "the server in time, then it just means",
+    "start": 2305.839,
+    "duration": 3.921
+  },
+  {
+    "text": "that on my client, their character is",
+    "start": 2307.839,
+    "duration": 3.361
+  },
+  {
+    "text": "being teleported back and forth, which",
+    "start": 2309.76,
+    "duration": 4.079
+  },
+  {
+    "text": "is not not a nice experience.",
+    "start": 2311.2,
+    "duration": 4.56
+  },
+  {
+    "text": "So in those cases, you can consider just",
+    "start": 2313.839,
+    "duration": 4.0
+  },
+  {
+    "text": "letting the server do it and to mask the",
+    "start": 2315.76,
+    "duration": 4.48
+  },
+  {
+    "text": "latency perhaps with a windup animation",
+    "start": 2317.839,
+    "duration": 6.161
+  },
+  {
+    "text": "or with audio visuals.",
+    "start": 2320.24,
+    "duration": 5.44
+  },
+  {
+    "text": "Now after you've applied those best",
+    "start": 2324.0,
+    "duration": 4.32
+  },
+  {
+    "text": "practices to maximize your accuracy,",
+    "start": 2325.68,
+    "duration": 4.8
+  },
+  {
+    "text": "maximize the odds of your client and",
+    "start": 2328.32,
+    "duration": 3.92
+  },
+  {
+    "text": "server having the same outcome, then",
+    "start": 2330.48,
+    "duration": 3.76
+  },
+  {
+    "text": "what you can do is to add some leniency",
+    "start": 2332.24,
+    "duration": 5.04
+  },
+  {
+    "text": "to the correction",
+    "start": 2334.24,
+    "duration": 6.4
+  },
+  {
+    "text": "to correction uh triggering because even",
+    "start": 2337.28,
+    "duration": 5.28
+  },
+  {
+    "text": "after you apply those best practices,",
+    "start": 2340.64,
+    "duration": 4.24
+  },
+  {
+    "text": "some sources of divergence will remain.",
+    "start": 2342.56,
+    "duration": 4.32
+  },
+  {
+    "text": "If you're using multiple RPCs, then you",
+    "start": 2344.88,
+    "duration": 4.32
+  },
+  {
+    "text": "still have the RPC arrival timing issue.",
+    "start": 2346.88,
+    "duration": 5.28
+  },
+  {
+    "text": "And even if you have only one RPC, you",
+    "start": 2349.2,
+    "duration": 4.72
+  },
+  {
+    "text": "know, CMC moves can be skipped due to",
+    "start": 2352.16,
+    "duration": 3.12
+  },
+  {
+    "text": "moves arriving out of order on the",
+    "start": 2353.92,
+    "duration": 3.199
+  },
+  {
+    "text": "server. So the server applies different",
+    "start": 2355.28,
+    "duration": 3.6
+  },
+  {
+    "text": "large delta time. Inputs might be",
+    "start": 2357.119,
+    "duration": 3.841
+  },
+  {
+    "text": "dropped due to packet loss. Uh the",
+    "start": 2358.88,
+    "duration": 3.76
+  },
+  {
+    "text": "server and client are always still",
+    "start": 2360.96,
+    "duration": 4.24
+  },
+  {
+    "text": "desync. And there are there are factors",
+    "start": 2362.64,
+    "duration": 5.12
+  },
+  {
+    "text": "that the client couldn't predict.",
+    "start": 2365.2,
+    "duration": 4.48
+  },
+  {
+    "text": "Some things like sometimes it's even due",
+    "start": 2367.76,
+    "duration": 3.92
+  },
+  {
+    "text": "to cost saving that we like for example",
+    "start": 2369.68,
+    "duration": 3.919
+  },
+  {
+    "text": "we we don't like we intentionally not",
+    "start": 2371.68,
+    "duration": 3.439
+  },
+  {
+    "text": "roll back the world on the server",
+    "start": 2373.599,
+    "duration": 2.961
+  },
+  {
+    "text": "because that would just be too costly",
+    "start": 2375.119,
+    "duration": 4.921
+  },
+  {
+    "text": "for many players.",
+    "start": 2376.56,
+    "duration": 3.48
+  },
+  {
+    "text": "What you can do then is to be a bit more",
+    "start": 2380.079,
+    "duration": 3.76
+  },
+  {
+    "text": "lenient on correction in some",
+    "start": 2382.4,
+    "duration": 4.16
+  },
+  {
+    "text": "situations. Now remember that there is",
+    "start": 2383.839,
+    "duration": 4.961
+  },
+  {
+    "text": "this uh tweakable max position error",
+    "start": 2386.56,
+    "duration": 4.64
+  },
+  {
+    "text": "squared but since that's fixed is it's",
+    "start": 2388.8,
+    "duration": 5.039
+  },
+  {
+    "text": "often a bit too rigid. What you can do",
+    "start": 2391.2,
+    "duration": 5.04
+  },
+  {
+    "text": "is to override your CMC server exceeds",
+    "start": 2393.839,
+    "duration": 4.721
+  },
+  {
+    "text": "allowable position error to apply a",
+    "start": 2396.24,
+    "duration": 6.32
+  },
+  {
+    "text": "different uh positional error tolerance.",
+    "start": 2398.56,
+    "duration": 7.279
+  },
+  {
+    "text": "This is mainly useful if for your",
+    "start": 2402.56,
+    "duration": 5.12
+  },
+  {
+    "text": "movement ability the trajectory is",
+    "start": 2405.839,
+    "duration": 3.121
+  },
+  {
+    "text": "somewhat the same between client and",
+    "start": 2407.68,
+    "duration": 3.6
+  },
+  {
+    "text": "server but mostly the timing might be a",
+    "start": 2408.96,
+    "duration": 4.159
+  },
+  {
+    "text": "bit different.",
+    "start": 2411.28,
+    "duration": 4.48
+  },
+  {
+    "text": "So, for example, if the your move has",
+    "start": 2413.119,
+    "duration": 3.921
+  },
+  {
+    "text": "the same end point because you're",
+    "start": 2415.76,
+    "duration": 4.56
+  },
+  {
+    "text": "grappling towards a ball or if it has",
+    "start": 2417.04,
+    "duration": 4.559
+  },
+  {
+    "text": "the same trajectory because you're",
+    "start": 2420.32,
+    "duration": 4.32
+  },
+  {
+    "text": "playing uh a root motion montage uh or",
+    "start": 2421.599,
+    "duration": 5.281
+  },
+  {
+    "text": "if due to perhaps due to physics you",
+    "start": 2424.64,
+    "duration": 3.76
+  },
+  {
+    "text": "expect it to end up in the same location",
+    "start": 2426.88,
+    "duration": 4.0
+  },
+  {
+    "text": "because you know uh things will be",
+    "start": 2428.4,
+    "duration": 3.679
+  },
+  {
+    "text": "corrected when you're falling and you",
+    "start": 2430.88,
+    "duration": 4.16
+  },
+  {
+    "text": "hit the ground then you can use a uh",
+    "start": 2432.079,
+    "duration": 5.121
+  },
+  {
+    "text": "temporary contextual like temporary",
+    "start": 2435.04,
+    "duration": 5.68
+  },
+  {
+    "text": "different error tolerance.",
+    "start": 2437.2,
+    "duration": 5.04
+  },
+  {
+    "text": "If you don't expect to end up in the",
+    "start": 2440.72,
+    "duration": 3.76
+  },
+  {
+    "text": "same location, you can still use this,",
+    "start": 2442.24,
+    "duration": 5.44
+  },
+  {
+    "text": "but uh but try to mask that fact by",
+    "start": 2444.48,
+    "duration": 4.96
+  },
+  {
+    "text": "manually correcting the client to the",
+    "start": 2447.68,
+    "duration": 5.48
+  },
+  {
+    "text": "server side position.",
+    "start": 2449.44,
+    "duration": 3.72
+  },
+  {
+    "text": "There might be cases where you want to",
+    "start": 2453.359,
+    "duration": 5.041
+  },
+  {
+    "text": "skip corrections.",
+    "start": 2456.0,
+    "duration": 3.76
+  },
+  {
+    "text": "For example, if you're attaching the",
+    "start": 2458.4,
+    "duration": 3.52
+  },
+  {
+    "text": "character to a vehicle, we already doing",
+    "start": 2459.76,
+    "duration": 3.839
+  },
+  {
+    "text": "our best to keep that vehicle vehicle",
+    "start": 2461.92,
+    "duration": 3.04
+  },
+  {
+    "text": "location synchronized. So, we don't have",
+    "start": 2463.599,
+    "duration": 5.281
+  },
+  {
+    "text": "to do uh character u correction checks.",
+    "start": 2464.96,
+    "duration": 6.0
+  },
+  {
+    "text": "Then for the server side server side you",
+    "start": 2468.88,
+    "duration": 4.0
+  },
+  {
+    "text": "can override server check client error",
+    "start": 2470.96,
+    "duration": 4.0
+  },
+  {
+    "text": "to early return to not consider",
+    "start": 2472.88,
+    "duration": 3.84
+  },
+  {
+    "text": "corrections.",
+    "start": 2474.96,
+    "duration": 3.44
+  },
+  {
+    "text": "You can also decide to skip corrections",
+    "start": 2476.72,
+    "duration": 2.96
+  },
+  {
+    "text": "client side which is useful in",
+    "start": 2478.4,
+    "duration": 2.88
+  },
+  {
+    "text": "situations like if you're playing a",
+    "start": 2479.68,
+    "duration": 3.2
+  },
+  {
+    "text": "synced animation and you want you prefer",
+    "start": 2481.28,
+    "duration": 2.88
+  },
+  {
+    "text": "that synced animation playing out",
+    "start": 2482.88,
+    "duration": 4.4
+  },
+  {
+    "text": "smoothly even like accepting some some",
+    "start": 2484.16,
+    "duration": 6.52
+  },
+  {
+    "text": "uh error.",
+    "start": 2487.28,
+    "duration": 3.4
+  },
+  {
+    "text": "Now let's get into some risky practices",
+    "start": 2492.56,
+    "duration": 5.92
+  },
+  {
+    "text": "but still useful.",
+    "start": 2495.52,
+    "duration": 5.12
+  },
+  {
+    "text": "Sometimes you might want to prioritize",
+    "start": 2498.48,
+    "duration": 4.8
+  },
+  {
+    "text": "player like the players feel and in",
+    "start": 2500.64,
+    "duration": 4.32
+  },
+  {
+    "text": "those cases you let you can let the the",
+    "start": 2503.28,
+    "duration": 4.64
+  },
+  {
+    "text": "server adopt the client side outcome.",
+    "start": 2504.96,
+    "duration": 4.48
+  },
+  {
+    "text": "This is quite risky. So use it",
+    "start": 2507.92,
+    "duration": 4.56
+  },
+  {
+    "text": "sparingly. So if you set CMC's server",
+    "start": 2509.44,
+    "duration": 5.2
+  },
+  {
+    "text": "accept client authoritative position to",
+    "start": 2512.48,
+    "duration": 3.839
+  },
+  {
+    "text": "true, then the server will accept the",
+    "start": 2514.64,
+    "duration": 3.439
+  },
+  {
+    "text": "client side outcome as long as it's",
+    "start": 2516.319,
+    "duration": 4.081
+  },
+  {
+    "text": "within that that error tolerance either",
+    "start": 2518.079,
+    "duration": 3.921
+  },
+  {
+    "text": "that fixed one or that dynamic one that",
+    "start": 2520.4,
+    "duration": 4.76
+  },
+  {
+    "text": "you decided.",
+    "start": 2522.0,
+    "duration": 3.16
+  },
+  {
+    "text": "This is useful for like volatile",
+    "start": 2525.359,
+    "duration": 4.48
+  },
+  {
+    "text": "movement like if you're performing yeah",
+    "start": 2527.359,
+    "duration": 5.281
+  },
+  {
+    "text": "a very sporadic movement or if you're",
+    "start": 2529.839,
+    "duration": 4.801
+  },
+  {
+    "text": "playing a um playing root motion montage",
+    "start": 2532.64,
+    "duration": 4.32
+  },
+  {
+    "text": "and you expect that RPC arrival timing",
+    "start": 2534.64,
+    "duration": 5.679
+  },
+  {
+    "text": "issue then you can add some leniency and",
+    "start": 2536.96,
+    "duration": 5.44
+  },
+  {
+    "text": "let server accept the client's position",
+    "start": 2540.319,
+    "duration": 4.241
+  },
+  {
+    "text": "so that errors don't accumulate over",
+    "start": 2542.4,
+    "duration": 4.48
+  },
+  {
+    "text": "time.",
+    "start": 2544.56,
+    "duration": 3.92
+  },
+  {
+    "text": "Try to avoid using this too much. So",
+    "start": 2546.88,
+    "duration": 4.4
+  },
+  {
+    "text": "first try those other solutions and when",
+    "start": 2548.48,
+    "duration": 4.8
+  },
+  {
+    "text": "you do let the server accept client",
+    "start": 2551.28,
+    "duration": 3.6
+  },
+  {
+    "text": "outcome only do this for short time",
+    "start": 2553.28,
+    "duration": 3.92
+  },
+  {
+    "text": "frames. The drawback is that cheaters",
+    "start": 2554.88,
+    "duration": 4.88
+  },
+  {
+    "text": "can try to lie with each move they can",
+    "start": 2557.2,
+    "duration": 3.84
+  },
+  {
+    "text": "try to exploit that little error",
+    "start": 2559.76,
+    "duration": 2.48
+  },
+  {
+    "text": "tolerance to move just a little bit",
+    "start": 2561.04,
+    "duration": 4.2
+  },
+  {
+    "text": "faster.",
+    "start": 2562.24,
+    "duration": 3.0
+  },
+  {
+    "text": "Now here's a very bad practice. I'm just",
+    "start": 2565.599,
+    "duration": 3.52
+  },
+  {
+    "text": "calling this out because this is very",
+    "start": 2567.52,
+    "duration": 4.079
+  },
+  {
+    "text": "popular. This something you will most",
+    "start": 2569.119,
+    "duration": 4.641
+  },
+  {
+    "text": "most devs will try early on when they're",
+    "start": 2571.599,
+    "duration": 4.24
+  },
+  {
+    "text": "experimenting with CMC. You can also let",
+    "start": 2573.76,
+    "duration": 4.72
+  },
+  {
+    "text": "the server adopt always adopt the client",
+    "start": 2575.839,
+    "duration": 4.401
+  },
+  {
+    "text": "side position because it feels great for",
+    "start": 2578.48,
+    "duration": 4.32
+  },
+  {
+    "text": "the controlling client by setting server",
+    "start": 2580.24,
+    "duration": 4.16
+  },
+  {
+    "text": "accept client authorative positions to",
+    "start": 2582.8,
+    "duration": 3.039
+  },
+  {
+    "text": "true and ignore client movement error",
+    "start": 2584.4,
+    "duration": 3.12
+  },
+  {
+    "text": "checks.",
+    "start": 2585.839,
+    "duration": 4.561
+  },
+  {
+    "text": "Now when you do this you can you you",
+    "start": 2587.52,
+    "duration": 4.48
+  },
+  {
+    "text": "really will get cheaters that will",
+    "start": 2590.4,
+    "duration": 3.84
+  },
+  {
+    "text": "teleport all over. In my personal",
+    "start": 2592.0,
+    "duration": 4.24
+  },
+  {
+    "text": "experience I once uh worked on a ship",
+    "start": 2594.24,
+    "duration": 3.92
+  },
+  {
+    "text": "title where we accidentally left this",
+    "start": 2596.24,
+    "duration": 4.56
+  },
+  {
+    "text": "on. People only took um two hours to",
+    "start": 2598.16,
+    "duration": 5.439
+  },
+  {
+    "text": "find out and um that was in a small",
+    "start": 2600.8,
+    "duration": 4.48
+  },
+  {
+    "text": "indie game. So, it's going it's going to",
+    "start": 2603.599,
+    "duration": 2.961
+  },
+  {
+    "text": "happen in minutes if you're working",
+    "start": 2605.28,
+    "duration": 5.839
+  },
+  {
+    "text": "working on a on a on a popular game.",
+    "start": 2606.56,
+    "duration": 5.92
+  },
+  {
+    "text": "It still might be useful if you're using",
+    "start": 2611.119,
+    "duration": 3.121
+  },
+  {
+    "text": "working on a PV game and you don't care",
+    "start": 2612.48,
+    "duration": 4.08
+  },
+  {
+    "text": "about cheating.",
+    "start": 2614.24,
+    "duration": 5.2
+  },
+  {
+    "text": "Now, that's all I had. It was a lot of",
+    "start": 2616.56,
+    "duration": 4.72
+  },
+  {
+    "text": "information. So, I hope you found this",
+    "start": 2619.44,
+    "duration": 4.48
+  },
+  {
+    "text": "useful. We covered uh how to debug your",
+    "start": 2621.28,
+    "duration": 4.48
+  },
+  {
+    "text": "movements. We covered CMC's networking",
+    "start": 2623.92,
+    "duration": 4.0
+  },
+  {
+    "text": "model. Um we covered all the problems",
+    "start": 2625.76,
+    "duration": 4.48
+  },
+  {
+    "text": "that will that that you'll face like RPC",
+    "start": 2627.92,
+    "duration": 5.84
+  },
+  {
+    "text": "rival timing issue. uh yet fundamental",
+    "start": 2630.24,
+    "duration": 4.72
+  },
+  {
+    "text": "desync between server and clients",
+    "start": 2633.76,
+    "duration": 4.079
+  },
+  {
+    "text": "different delta times",
+    "start": 2634.96,
+    "duration": 5.119
+  },
+  {
+    "text": "and how to best handle these. So first",
+    "start": 2637.839,
+    "duration": 3.921
+  },
+  {
+    "text": "prioritize increasing your accuracy",
+    "start": 2640.079,
+    "duration": 3.201
+  },
+  {
+    "text": "handle everything through perform",
+    "start": 2641.76,
+    "duration": 3.12
+  },
+  {
+    "text": "movement. Replicate everything that's",
+    "start": 2643.28,
+    "duration": 3.12
+  },
+  {
+    "text": "needed that's needed for the server to",
+    "start": 2644.88,
+    "duration": 4.239
+  },
+  {
+    "text": "get the same to do the same move.",
+    "start": 2646.4,
+    "duration": 4.8
+  },
+  {
+    "text": "Make a weighted choice between uh",
+    "start": 2649.119,
+    "duration": 5.361
+  },
+  {
+    "text": "network move data or uh solutions that",
+    "start": 2651.2,
+    "duration": 5.52
+  },
+  {
+    "text": "take other RP that use other more RPCs",
+    "start": 2654.48,
+    "duration": 4.0
+  },
+  {
+    "text": "like root motion resources or custom",
+    "start": 2656.72,
+    "duration": 4.639
+  },
+  {
+    "text": "RPCs based on whether you have",
+    "start": 2658.48,
+    "duration": 6.08
+  },
+  {
+    "text": "engineering power available",
+    "start": 2661.359,
+    "duration": 6.161
+  },
+  {
+    "text": "and also maximize the accuracy for for",
+    "start": 2664.56,
+    "duration": 5.36
+  },
+  {
+    "text": "your re simulation. And after doing all",
+    "start": 2667.52,
+    "duration": 4.559
+  },
+  {
+    "text": "of that, you can consider adding a bit",
+    "start": 2669.92,
+    "duration": 4.56
+  },
+  {
+    "text": "more leniency by having this dynamic",
+    "start": 2672.079,
+    "duration": 4.161
+  },
+  {
+    "text": "error tolerance",
+    "start": 2674.48,
+    "duration": 4.32
+  },
+  {
+    "text": "or by letting the server accept the",
+    "start": 2676.24,
+    "duration": 5.68
+  },
+  {
+    "text": "client outcome a little bit. So I hope",
+    "start": 2678.8,
+    "duration": 4.559
+  },
+  {
+    "text": "you found this useful. Thank you very",
+    "start": 2681.92,
+    "duration": 2.75
+  },
+  {
+    "text": "much.",
+    "start": 2683.359,
+    "duration": 8.41
+  },
+  {
+    "text": "[Applause]",
+    "start": 2684.67,
+    "duration": 7.099
+  }
+]

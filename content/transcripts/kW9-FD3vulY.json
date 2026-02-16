@@ -1,0 +1,3807 @@
+[
+  {
+    "text": "Hey there. Um, I'm Wallace Waynehouse",
+    "start": 1.52,
+    "duration": 5.839
+  },
+  {
+    "text": "from Epic Games and I am a product",
+    "start": 4.64,
+    "duration": 6.4
+  },
+  {
+    "text": "specialist for Reality Scan Desktop. And",
+    "start": 7.359,
+    "duration": 7.041
+  },
+  {
+    "text": "I'm Elliot Round, the co-founder and CTO",
+    "start": 11.04,
+    "duration": 6.72
+  },
+  {
+    "text": "of MXR and we build measured PBR",
+    "start": 14.4,
+    "duration": 6.36
+  },
+  {
+    "text": "technology.",
+    "start": 17.76,
+    "duration": 3.0
+  },
+  {
+    "text": "So these are some of the results that",
+    "start": 31.039,
+    "duration": 3.281
+  },
+  {
+    "text": "Wallace has been capturing more recently",
+    "start": 32.32,
+    "duration": 8.04
+  },
+  {
+    "text": "using Maro and reality capture together",
+    "start": 34.32,
+    "duration": 6.04
+  },
+  {
+    "text": "rendered in Unreal.",
+    "start": 41.2,
+    "duration": 3.56
+  },
+  {
+    "text": "So uh what is this talk about? Um, it's",
+    "start": 53.6,
+    "duration": 6.08
+  },
+  {
+    "text": "basically about making PBR textures and",
+    "start": 56.8,
+    "duration": 6.0
+  },
+  {
+    "text": "how to make scans look real. Um, and",
+    "start": 59.68,
+    "duration": 5.759
+  },
+  {
+    "text": "that involves making materials that",
+    "start": 62.8,
+    "duration": 5.52
+  },
+  {
+    "text": "behave correctly according to light. And",
+    "start": 65.439,
+    "duration": 4.641
+  },
+  {
+    "text": "if you have any experience of making",
+    "start": 68.32,
+    "duration": 4.159
+  },
+  {
+    "text": "PBRs, you might know that that can",
+    "start": 70.08,
+    "duration": 5.52
+  },
+  {
+    "text": "involve using extremely expensive rigs",
+    "start": 72.479,
+    "duration": 5.68
+  },
+  {
+    "text": "um um with special hardware, special",
+    "start": 75.6,
+    "duration": 5.36
+  },
+  {
+    "text": "expertise and or just a lot of artistic",
+    "start": 78.159,
+    "duration": 5.801
+  },
+  {
+    "text": "guesswork.",
+    "start": 80.96,
+    "duration": 3.0
+  },
+  {
+    "text": "So before we go into the workflow,",
+    "start": 84.32,
+    "duration": 5.439
+  },
+  {
+    "text": "probably best to start off with what are",
+    "start": 87.68,
+    "duration": 3.759
+  },
+  {
+    "text": "materials.",
+    "start": 89.759,
+    "duration": 4.641
+  },
+  {
+    "text": "So in 3D you have your mesh, but the",
+    "start": 91.439,
+    "duration": 4.72
+  },
+  {
+    "text": "engine needs to understand how best to",
+    "start": 94.4,
+    "duration": 3.52
+  },
+  {
+    "text": "render that mesh. And this is where",
+    "start": 96.159,
+    "duration": 4.241
+  },
+  {
+    "text": "shaders and materials come into play. So",
+    "start": 97.92,
+    "duration": 4.72
+  },
+  {
+    "text": "to render a pixel, the engine has to",
+    "start": 100.4,
+    "duration": 4.8
+  },
+  {
+    "text": "know does a ray of light pass through?",
+    "start": 102.64,
+    "duration": 4.0
+  },
+  {
+    "text": "Does a ray of light bounce off the",
+    "start": 105.2,
+    "duration": 3.68
+  },
+  {
+    "text": "surface? Does a ray of light reflect?",
+    "start": 106.64,
+    "duration": 4.4
+  },
+  {
+    "text": "Can it have emission? And we use",
+    "start": 108.88,
+    "duration": 4.48
+  },
+  {
+    "text": "materials to create a whole wealth of",
+    "start": 111.04,
+    "duration": 3.92
+  },
+  {
+    "text": "different styles. So some of these could",
+    "start": 113.36,
+    "duration": 4.56
+  },
+  {
+    "text": "be fictitious, they could be fantasy,",
+    "start": 114.96,
+    "duration": 5.36
+  },
+  {
+    "text": "cartoons. Um you can do all kinds of",
+    "start": 117.92,
+    "duration": 4.159
+  },
+  {
+    "text": "different things, but today we're going",
+    "start": 120.32,
+    "duration": 3.92
+  },
+  {
+    "text": "to be talking about PBR, which is a sort",
+    "start": 122.079,
+    "duration": 5.68
+  },
+  {
+    "text": "of umbrella of material types.",
+    "start": 124.24,
+    "duration": 5.999
+  },
+  {
+    "text": "So this is a scene that we put together",
+    "start": 127.759,
+    "duration": 4.48
+  },
+  {
+    "text": "lots of 3D scans. They're all real",
+    "start": 130.239,
+    "duration": 4.561
+  },
+  {
+    "text": "objects. Um but at the moment, none of",
+    "start": 132.239,
+    "duration": 4.241
+  },
+  {
+    "text": "these have PBR properties. So we have",
+    "start": 134.8,
+    "duration": 3.6
+  },
+  {
+    "text": "the shape, we've got lighting, we've got",
+    "start": 136.48,
+    "duration": 3.68
+  },
+  {
+    "text": "some simple shading.",
+    "start": 138.4,
+    "duration": 3.199
+  },
+  {
+    "text": "But they all look like they all look",
+    "start": 140.16,
+    "duration": 2.96
+  },
+  {
+    "text": "very flat. They all look like they're",
+    "start": 141.599,
+    "duration": 3.441
+  },
+  {
+    "text": "made out of clay. You don't really get a",
+    "start": 143.12,
+    "duration": 5.52
+  },
+  {
+    "text": "sense of what each object is made from.",
+    "start": 145.04,
+    "duration": 5.199
+  },
+  {
+    "text": "But as soon as we add the PBR properties",
+    "start": 148.64,
+    "duration": 3.679
+  },
+  {
+    "text": "into the mix, they start interacting",
+    "start": 150.239,
+    "duration": 4.161
+  },
+  {
+    "text": "with light. They start to look a lot",
+    "start": 152.319,
+    "duration": 5.121
+  },
+  {
+    "text": "more realistic and things come to life.",
+    "start": 154.4,
+    "duration": 5.199
+  },
+  {
+    "text": "So comparing the two, we can see, you",
+    "start": 157.44,
+    "duration": 3.92
+  },
+  {
+    "text": "know, what things are made out of metal,",
+    "start": 159.599,
+    "duration": 3.601
+  },
+  {
+    "text": "what things are leather. We can almost",
+    "start": 161.36,
+    "duration": 4.879
+  },
+  {
+    "text": "get a sense of a degree of tactility.",
+    "start": 163.2,
+    "duration": 5.6
+  },
+  {
+    "text": "Um, and they give things a sort of",
+    "start": 166.239,
+    "duration": 5.521
+  },
+  {
+    "text": "grounding within the scene.",
+    "start": 168.8,
+    "duration": 4.4
+  },
+  {
+    "text": "And something that I find really cool",
+    "start": 171.76,
+    "duration": 3.6
+  },
+  {
+    "text": "about PBR is just how well you can",
+    "start": 173.2,
+    "duration": 5.039
+  },
+  {
+    "text": "almost feel the objects. So on one of",
+    "start": 175.36,
+    "duration": 5.44
+  },
+  {
+    "text": "these clips, we have this metal tin.",
+    "start": 178.239,
+    "duration": 5.121
+  },
+  {
+    "text": "It's black, but in the PBR version, we",
+    "start": 180.8,
+    "duration": 4.48
+  },
+  {
+    "text": "can see this is a painted enamel. It's",
+    "start": 183.36,
+    "duration": 3.599
+  },
+  {
+    "text": "quite old. It's quite flaky, and you can",
+    "start": 185.28,
+    "duration": 3.44
+  },
+  {
+    "text": "almost imagine what it would feel like",
+    "start": 186.959,
+    "duration": 5.36
+  },
+  {
+    "text": "to run your hand across the surface.",
+    "start": 188.72,
+    "duration": 5.84
+  },
+  {
+    "text": "So the way that PBR does this, PBR",
+    "start": 192.319,
+    "duration": 4.161
+  },
+  {
+    "text": "stands for physically based rendering",
+    "start": 194.56,
+    "duration": 4.16
+  },
+  {
+    "text": "and it's simulating the sort of rules of",
+    "start": 196.48,
+    "duration": 5.119
+  },
+  {
+    "text": "reality. So simulating how real rays of",
+    "start": 198.72,
+    "duration": 5.28
+  },
+  {
+    "text": "light interact with the surface of a 3D",
+    "start": 201.599,
+    "duration": 4.801
+  },
+  {
+    "text": "object and ensure a degree of energy",
+    "start": 204.0,
+    "duration": 4.8
+  },
+  {
+    "text": "conservation. So when you have a 3D",
+    "start": 206.4,
+    "duration": 4.479
+  },
+  {
+    "text": "object and you place it into your scene",
+    "start": 208.8,
+    "duration": 4.48
+  },
+  {
+    "text": "and you have accurate lighting, the",
+    "start": 210.879,
+    "duration": 3.92
+  },
+  {
+    "text": "object will reflect that lighting",
+    "start": 213.28,
+    "duration": 4.64
+  },
+  {
+    "text": "correctly. Um it won't bounce more light",
+    "start": 214.799,
+    "duration": 5.121
+  },
+  {
+    "text": "off than the light that hits the object",
+    "start": 217.92,
+    "duration": 3.28
+  },
+  {
+    "text": "itself.",
+    "start": 219.92,
+    "duration": 3.039
+  },
+  {
+    "text": "And if you mix this in with things like",
+    "start": 221.2,
+    "duration": 4.399
+  },
+  {
+    "text": "HDRIs, which are lighting environments",
+    "start": 222.959,
+    "duration": 3.92
+  },
+  {
+    "text": "that have been captured from the real",
+    "start": 225.599,
+    "duration": 3.36
+  },
+  {
+    "text": "world, then these objects look even more",
+    "start": 226.879,
+    "duration": 4.241
+  },
+  {
+    "text": "grounded in sort of virtual environment,",
+    "start": 228.959,
+    "duration": 4.161
+  },
+  {
+    "text": "and we can almost tell what they're made",
+    "start": 231.12,
+    "duration": 4.08
+  },
+  {
+    "text": "from and and feel what they're made from",
+    "start": 233.12,
+    "duration": 4.479
+  },
+  {
+    "text": "as well.",
+    "start": 235.2,
+    "duration": 5.36
+  },
+  {
+    "text": "So, what makes up a PBR object? Well,",
+    "start": 237.599,
+    "duration": 5.2
+  },
+  {
+    "text": "there's two kind of key shaders under",
+    "start": 240.56,
+    "duration": 4.8
+  },
+  {
+    "text": "the umbrella of PBR. You have a specular",
+    "start": 242.799,
+    "duration": 5.36
+  },
+  {
+    "text": "workflow and you have metallic workflow.",
+    "start": 245.36,
+    "duration": 4.159
+  },
+  {
+    "text": "You could argue that they're both sort",
+    "start": 248.159,
+    "duration": 3.521
+  },
+  {
+    "text": "of doing the same thing but optimized in",
+    "start": 249.519,
+    "duration": 4.0
+  },
+  {
+    "text": "different ways. Today we're going to go",
+    "start": 251.68,
+    "duration": 4.16
+  },
+  {
+    "text": "through the specular workflow shader. So",
+    "start": 253.519,
+    "duration": 4.321
+  },
+  {
+    "text": "the first thing that we have here is our",
+    "start": 255.84,
+    "duration": 4.799
+  },
+  {
+    "text": "base mesh. It's quite low poly. It's",
+    "start": 257.84,
+    "duration": 4.72
+  },
+  {
+    "text": "rather smooth and it doesn't have any",
+    "start": 260.639,
+    "duration": 4.481
+  },
+  {
+    "text": "complex shading.",
+    "start": 262.56,
+    "duration": 4.48
+  },
+  {
+    "text": "When we add normals into the mix,",
+    "start": 265.12,
+    "duration": 3.76
+  },
+  {
+    "text": "normals describe what's happening",
+    "start": 267.04,
+    "duration": 4.24
+  },
+  {
+    "text": "between the vertices. So it adds a",
+    "start": 268.88,
+    "duration": 4.8
+  },
+  {
+    "text": "little bit of micro detail that we don't",
+    "start": 271.28,
+    "duration": 5.12
+  },
+  {
+    "text": "have to describe as a high poly mesh.",
+    "start": 273.68,
+    "duration": 4.799
+  },
+  {
+    "text": "And when we turn that on, we can start",
+    "start": 276.4,
+    "duration": 3.92
+  },
+  {
+    "text": "to see all the sort of scuffs and",
+    "start": 278.479,
+    "duration": 3.841
+  },
+  {
+    "text": "scratches and the little kind of flicks",
+    "start": 280.32,
+    "duration": 4.64
+  },
+  {
+    "text": "of paint coming off of this old petrol",
+    "start": 282.32,
+    "duration": 4.4
+  },
+  {
+    "text": "can.",
+    "start": 284.96,
+    "duration": 4.239
+  },
+  {
+    "text": "Now, our first sort of true PVR property",
+    "start": 286.72,
+    "duration": 5.44
+  },
+  {
+    "text": "that we have is roughness. So, roughness",
+    "start": 289.199,
+    "duration": 4.801
+  },
+  {
+    "text": "denotes when a ray of light hits the",
+    "start": 292.16,
+    "duration": 4.0
+  },
+  {
+    "text": "surface of an object, does that ray of",
+    "start": 294.0,
+    "duration": 4.4
+  },
+  {
+    "text": "light scatter or does that ray of light",
+    "start": 296.16,
+    "duration": 4.56
+  },
+  {
+    "text": "reflect in a sort of smooth line? And",
+    "start": 298.4,
+    "duration": 4.56
+  },
+  {
+    "text": "when it scatters, it's very rough. We",
+    "start": 300.72,
+    "duration": 4.479
+  },
+  {
+    "text": "denote this with a white value. And when",
+    "start": 302.96,
+    "duration": 4.239
+  },
+  {
+    "text": "it's smooth, we denote this with a black",
+    "start": 305.199,
+    "duration": 5.201
+  },
+  {
+    "text": "value. So with this sort of old rusty",
+    "start": 307.199,
+    "duration": 4.801
+  },
+  {
+    "text": "petrol cam, we can see that the rusty",
+    "start": 310.4,
+    "duration": 3.6
+  },
+  {
+    "text": "areas are white and the painted areas",
+    "start": 312.0,
+    "duration": 4.16
+  },
+  {
+    "text": "that are quite smooth more of a black.",
+    "start": 314.0,
+    "duration": 4.32
+  },
+  {
+    "text": "Um, and then we can also see these thin",
+    "start": 316.16,
+    "duration": 4.4
+  },
+  {
+    "text": "white strips which are all the",
+    "start": 318.32,
+    "duration": 4.48
+  },
+  {
+    "text": "scratches.",
+    "start": 320.56,
+    "duration": 4.24
+  },
+  {
+    "text": "And then we when we apply that to the 3D",
+    "start": 322.8,
+    "duration": 3.52
+  },
+  {
+    "text": "object, we can see which areas are",
+    "start": 324.8,
+    "duration": 4.88
+  },
+  {
+    "text": "reflective and which areas are not.",
+    "start": 326.32,
+    "duration": 5.36
+  },
+  {
+    "text": "The other chop property we have is",
+    "start": 329.68,
+    "duration": 4.799
+  },
+  {
+    "text": "specular. So specular relates to of the",
+    "start": 331.68,
+    "duration": 5.04
+  },
+  {
+    "text": "light that hits the object, how much of",
+    "start": 334.479,
+    "duration": 4.321
+  },
+  {
+    "text": "that light is reflected, how much of",
+    "start": 336.72,
+    "duration": 5.12
+  },
+  {
+    "text": "that energy is actually absorbed. And a",
+    "start": 338.8,
+    "duration": 4.88
+  },
+  {
+    "text": "lot of the specular reflection does tend",
+    "start": 341.84,
+    "duration": 3.84
+  },
+  {
+    "text": "to have a slight color to it. So you see",
+    "start": 343.68,
+    "duration": 5.28
+  },
+  {
+    "text": "this a lot with sort of paints, metals",
+    "start": 345.68,
+    "duration": 5.68
+  },
+  {
+    "text": "like gold and brass where the specular",
+    "start": 348.96,
+    "duration": 4.4
+  },
+  {
+    "text": "reflection isn't white. It might be more",
+    "start": 351.36,
+    "duration": 4.72
+  },
+  {
+    "text": "of an orange or a yellow. When when you",
+    "start": 353.36,
+    "duration": 4.399
+  },
+  {
+    "text": "turn that on, you start to see the real",
+    "start": 356.08,
+    "duration": 3.6
+  },
+  {
+    "text": "difference between the highly reflective",
+    "start": 357.759,
+    "duration": 3.921
+  },
+  {
+    "text": "areas like the paint and the not so",
+    "start": 359.68,
+    "duration": 4.72
+  },
+  {
+    "text": "reflective areas like the rust. And then",
+    "start": 361.68,
+    "duration": 4.72
+  },
+  {
+    "text": "finally, we have the diffuse value. So",
+    "start": 364.4,
+    "duration": 5.12
+  },
+  {
+    "text": "the diffuse is our base color. And this",
+    "start": 366.4,
+    "duration": 5.519
+  },
+  {
+    "text": "gives it the the main appearance. You",
+    "start": 369.52,
+    "duration": 4.72
+  },
+  {
+    "text": "mix that in and you've got your final 3D",
+    "start": 371.919,
+    "duration": 6.84
+  },
+  {
+    "text": "asset. And it looks pretty realistic.",
+    "start": 374.24,
+    "duration": 4.519
+  },
+  {
+    "text": "Here's another video rendered in Unreal.",
+    "start": 381.44,
+    "duration": 4.599
+  },
+  {
+    "text": "in a quick scene, by the way. But that",
+    "start": 387.6,
+    "duration": 4.4
+  },
+  {
+    "text": "that object was done in Maro with",
+    "start": 389.52,
+    "duration": 5.2
+  },
+  {
+    "text": "Reality Capture. And see with a normal",
+    "start": 392.0,
+    "duration": 5.12
+  },
+  {
+    "text": "map, you get like really fine details on",
+    "start": 394.72,
+    "duration": 5.56
+  },
+  {
+    "text": "the surface.",
+    "start": 397.12,
+    "duration": 3.16
+  },
+  {
+    "text": "And that's a different petrol can to the",
+    "start": 401.6,
+    "duration": 2.879
+  },
+  {
+    "text": "one we're actually going to show you",
+    "start": 403.52,
+    "duration": 2.48
+  },
+  {
+    "text": "today because me and Elliot have both",
+    "start": 404.479,
+    "duration": 3.601
+  },
+  {
+    "text": "got petrol cans that we scan in our",
+    "start": 406.0,
+    "duration": 5.08
+  },
+  {
+    "text": "garages.",
+    "start": 408.08,
+    "duration": 3.0
+  },
+  {
+    "text": "So, you might be wondering, um, why",
+    "start": 420.319,
+    "duration": 4.801
+  },
+  {
+    "text": "aren't PBR scans everywhere? And the",
+    "start": 422.72,
+    "duration": 4.08
+  },
+  {
+    "text": "answer is that they're actually not",
+    "start": 425.12,
+    "duration": 5.44
+  },
+  {
+    "text": "particularly easy to make. Um, with",
+    "start": 426.8,
+    "duration": 5.839
+  },
+  {
+    "text": "normal photoggramometry, the way you get",
+    "start": 430.56,
+    "duration": 3.759
+  },
+  {
+    "text": "a texture is you just get a diffuse.",
+    "start": 432.639,
+    "duration": 3.361
+  },
+  {
+    "text": "It's a sort of attempt at an albido",
+    "start": 434.319,
+    "duration": 3.761
+  },
+  {
+    "text": "texture. And essentially it's made by",
+    "start": 436.0,
+    "duration": 5.12
+  },
+  {
+    "text": "just projecting and and mixing every",
+    "start": 438.08,
+    "duration": 5.2
+  },
+  {
+    "text": "single camera onto the surface and",
+    "start": 441.12,
+    "duration": 4.0
+  },
+  {
+    "text": "blending them all together. So you don't",
+    "start": 443.28,
+    "duration": 4.08
+  },
+  {
+    "text": "get any of that material information um",
+    "start": 445.12,
+    "duration": 7.199
+  },
+  {
+    "text": "about the reflections and and roughness.",
+    "start": 447.36,
+    "duration": 7.36
+  },
+  {
+    "text": "Um so traditionally here's two of the",
+    "start": 452.319,
+    "duration": 4.561
+  },
+  {
+    "text": "main ways people might try and make a",
+    "start": 454.72,
+    "duration": 4.08
+  },
+  {
+    "text": "PBR material. There's a third one I'll",
+    "start": 456.88,
+    "duration": 6.319
+  },
+  {
+    "text": "go into later um by hand um which we'll",
+    "start": 458.8,
+    "duration": 6.56
+  },
+  {
+    "text": "go into in a sec. and also using very",
+    "start": 463.199,
+    "duration": 5.361
+  },
+  {
+    "text": "very complicated hardware um with cross",
+    "start": 465.36,
+    "duration": 6.559
+  },
+  {
+    "text": "polarization and phototric stereo.",
+    "start": 468.56,
+    "duration": 5.759
+  },
+  {
+    "text": "So the manual way is kind of like an",
+    "start": 471.919,
+    "duration": 4.321
+  },
+  {
+    "text": "educated guess. What people will do is",
+    "start": 474.319,
+    "duration": 3.681
+  },
+  {
+    "text": "they'll take the diffuse map. A lot of",
+    "start": 476.24,
+    "duration": 3.519
+  },
+  {
+    "text": "you might have had a go at this and then",
+    "start": 478.0,
+    "duration": 4.319
+  },
+  {
+    "text": "when you have an understanding of what",
+    "start": 479.759,
+    "duration": 4.481
+  },
+  {
+    "text": "what the roughness is going to be. So",
+    "start": 482.319,
+    "duration": 4.961
+  },
+  {
+    "text": "basically the darker parts are shinier",
+    "start": 484.24,
+    "duration": 5.44
+  },
+  {
+    "text": "and the uh the the lighter parts are",
+    "start": 487.28,
+    "duration": 5.199
+  },
+  {
+    "text": "rougher. Um, so in this case, you know,",
+    "start": 489.68,
+    "duration": 4.72
+  },
+  {
+    "text": "I made the decision that I wanted the",
+    "start": 492.479,
+    "duration": 5.041
+  },
+  {
+    "text": "the grooves in those tiles to be",
+    "start": 494.4,
+    "duration": 6.16
+  },
+  {
+    "text": "rougher. Um, so I inverted it and then",
+    "start": 497.52,
+    "duration": 4.399
+  },
+  {
+    "text": "messed around with it a bit and got a",
+    "start": 500.56,
+    "duration": 2.96
+  },
+  {
+    "text": "sort of vague roughness map there. It's",
+    "start": 501.919,
+    "duration": 4.321
+  },
+  {
+    "text": "kind of arbitrary. Um, the bump map I",
+    "start": 503.52,
+    "duration": 4.399
+  },
+  {
+    "text": "think I've made a little bit dark there,",
+    "start": 506.24,
+    "duration": 4.56
+  },
+  {
+    "text": "but essentially um, you know, the darker",
+    "start": 507.919,
+    "duration": 5.521
+  },
+  {
+    "text": "parts sink further away. So I've got the",
+    "start": 510.8,
+    "duration": 4.4
+  },
+  {
+    "text": "sort of grooves in the in the tiles",
+    "start": 513.44,
+    "duration": 3.12
+  },
+  {
+    "text": "there. And then you can combine it",
+    "start": 515.2,
+    "duration": 3.68
+  },
+  {
+    "text": "together and and it definitely looks a",
+    "start": 516.56,
+    "duration": 3.76
+  },
+  {
+    "text": "lot more realistic than not doing",
+    "start": 518.88,
+    "duration": 3.839
+  },
+  {
+    "text": "anything at all.",
+    "start": 520.32,
+    "duration": 4.72
+  },
+  {
+    "text": "Um now here we get into the far more",
+    "start": 522.719,
+    "duration": 6.24
+  },
+  {
+    "text": "complicated ways. Um and one way you can",
+    "start": 525.04,
+    "duration": 5.68
+  },
+  {
+    "text": "have a go at making a roughness is using",
+    "start": 528.959,
+    "duration": 4.161
+  },
+  {
+    "text": "cross um polarization where you use two",
+    "start": 530.72,
+    "duration": 5.52
+  },
+  {
+    "text": "polarized filters. Um one in one",
+    "start": 533.12,
+    "duration": 6.08
+  },
+  {
+    "text": "orientation on the flash and one in um",
+    "start": 536.24,
+    "duration": 5.44
+  },
+  {
+    "text": "at 90\u00b0 to it on the lens. And what that",
+    "start": 539.2,
+    "duration": 5.68
+  },
+  {
+    "text": "does is it it blocks out all the glare.",
+    "start": 541.68,
+    "duration": 4.96
+  },
+  {
+    "text": "Now imagine if you do that from every",
+    "start": 544.88,
+    "duration": 3.6
+  },
+  {
+    "text": "single camera position and you have a",
+    "start": 546.64,
+    "duration": 3.84
+  },
+  {
+    "text": "sort of like glare map from every",
+    "start": 548.48,
+    "duration": 3.359
+  },
+  {
+    "text": "picture and then you can blend them all",
+    "start": 550.48,
+    "duration": 3.28
+  },
+  {
+    "text": "together and you get like a glossiness",
+    "start": 551.839,
+    "duration": 4.801
+  },
+  {
+    "text": "map and then if you invert it um it's",
+    "start": 553.76,
+    "duration": 6.56
+  },
+  {
+    "text": "going to be akin to a roughness map. Um",
+    "start": 556.64,
+    "duration": 5.68
+  },
+  {
+    "text": "but you can see that it doesn't work",
+    "start": 560.32,
+    "duration": 3.28
+  },
+  {
+    "text": "perfectly every time. You can see I've",
+    "start": 562.32,
+    "duration": 3.36
+  },
+  {
+    "text": "got that white enamel badge on there and",
+    "start": 563.6,
+    "duration": 4.239
+  },
+  {
+    "text": "you can see in the glossiness map that",
+    "start": 565.68,
+    "duration": 4.159
+  },
+  {
+    "text": "kind of should be white because it it",
+    "start": 567.839,
+    "duration": 3.281
+  },
+  {
+    "text": "should be glossy but it's actually",
+    "start": 569.839,
+    "duration": 3.361
+  },
+  {
+    "text": "turned out black so it's got that um",
+    "start": 571.12,
+    "duration": 4.08
+  },
+  {
+    "text": "completely wrong. So yeah, it doesn't",
+    "start": 573.2,
+    "duration": 3.92
+  },
+  {
+    "text": "work all the time, but um you can get",
+    "start": 575.2,
+    "duration": 4.56
+  },
+  {
+    "text": "amazing results like this. And then if",
+    "start": 577.12,
+    "duration": 4.08
+  },
+  {
+    "text": "you want to get a normal map, there's an",
+    "start": 579.76,
+    "duration": 3.28
+  },
+  {
+    "text": "old technique called phototric stereo,",
+    "start": 581.2,
+    "duration": 4.0
+  },
+  {
+    "text": "but it's an absolute pain in the ass to",
+    "start": 583.04,
+    "duration": 5.12
+  },
+  {
+    "text": "do. Oh, I've lost my mic. Um because you",
+    "start": 585.2,
+    "duration": 5.44
+  },
+  {
+    "text": "need to take an image from the same",
+    "start": 588.16,
+    "duration": 4.96
+  },
+  {
+    "text": "camera position with with several",
+    "start": 590.64,
+    "duration": 4.319
+  },
+  {
+    "text": "different lights and then the math will",
+    "start": 593.12,
+    "duration": 3.68
+  },
+  {
+    "text": "figure out a normal map from that. So",
+    "start": 594.959,
+    "duration": 3.281
+  },
+  {
+    "text": "you can imagine that when you're trying",
+    "start": 596.8,
+    "duration": 3.36
+  },
+  {
+    "text": "to make a PBR material like this, you",
+    "start": 598.24,
+    "duration": 4.159
+  },
+  {
+    "text": "end up with terabytes of data and it's",
+    "start": 600.16,
+    "duration": 3.76
+  },
+  {
+    "text": "not actually that easy to process",
+    "start": 602.399,
+    "duration": 4.321
+  },
+  {
+    "text": "either.",
+    "start": 603.92,
+    "duration": 4.56
+  },
+  {
+    "text": "Uh this is a third one I was going to",
+    "start": 606.72,
+    "duration": 4.32
+  },
+  {
+    "text": "talk about. And basically this is easy",
+    "start": 608.48,
+    "duration": 4.479
+  },
+  {
+    "text": "because you just take your diffuse and",
+    "start": 611.04,
+    "duration": 6.16
+  },
+  {
+    "text": "you just click give me my materials. Um",
+    "start": 612.959,
+    "duration": 6.0
+  },
+  {
+    "text": "but it's kind of flawed and you're going",
+    "start": 617.2,
+    "duration": 3.92
+  },
+  {
+    "text": "to get really really mixed results and",
+    "start": 618.959,
+    "duration": 5.281
+  },
+  {
+    "text": "also it doesn't work on 3D. Um, these",
+    "start": 621.12,
+    "duration": 4.56
+  },
+  {
+    "text": "maps look nice, but actually when you",
+    "start": 624.24,
+    "duration": 2.719
+  },
+  {
+    "text": "put them together, it didn't actually",
+    "start": 625.68,
+    "duration": 2.719
+  },
+  {
+    "text": "look as good as the one that I just",
+    "start": 626.959,
+    "duration": 3.201
+  },
+  {
+    "text": "messed around with with the the diffuse",
+    "start": 628.399,
+    "duration": 4.761
+  },
+  {
+    "text": "for.",
+    "start": 630.16,
+    "duration": 3.0
+  },
+  {
+    "text": "So, we're going to show you how you can",
+    "start": 633.6,
+    "duration": 4.799
+  },
+  {
+    "text": "capture 3D PBR using Maro Measure and",
+    "start": 635.04,
+    "duration": 5.84
+  },
+  {
+    "text": "Reality Scan all by yourself using",
+    "start": 638.399,
+    "duration": 5.361
+  },
+  {
+    "text": "available hardware. Before we do so, I'm",
+    "start": 640.88,
+    "duration": 4.72
+  },
+  {
+    "text": "quite interested to get a show of hands",
+    "start": 643.76,
+    "duration": 5.28
+  },
+  {
+    "text": "who has the camera and who also has a",
+    "start": 645.6,
+    "duration": 5.919
+  },
+  {
+    "text": "flash. So, like a point light or a ring",
+    "start": 649.04,
+    "duration": 4.88
+  },
+  {
+    "text": "flash.",
+    "start": 651.519,
+    "duration": 6.32
+  },
+  {
+    "text": "Okay, quite quite a few of you. So using",
+    "start": 653.92,
+    "duration": 5.599
+  },
+  {
+    "text": "Maro, you'll be able to do just this.",
+    "start": 657.839,
+    "duration": 3.761
+  },
+  {
+    "text": "You'll be able to capture full PBR",
+    "start": 659.519,
+    "duration": 5.841
+  },
+  {
+    "text": "objects. So we built Maro really as a",
+    "start": 661.6,
+    "duration": 5.52
+  },
+  {
+    "text": "way to try and bring PBR to as many",
+    "start": 665.36,
+    "duration": 5.44
+  },
+  {
+    "text": "creators as possible. So previously PBR",
+    "start": 667.12,
+    "duration": 5.839
+  },
+  {
+    "text": "capture has been incredibly tricky or",
+    "start": 670.8,
+    "duration": 4.24
+  },
+  {
+    "text": "using very expensive hardware. It's been",
+    "start": 672.959,
+    "duration": 5.601
+  },
+  {
+    "text": "limited to large game and film studios.",
+    "start": 675.04,
+    "duration": 5.28
+  },
+  {
+    "text": "So we've come up with a method where you",
+    "start": 678.56,
+    "duration": 4.0
+  },
+  {
+    "text": "don't need any complex hardware. So, no",
+    "start": 680.32,
+    "duration": 5.28
+  },
+  {
+    "text": "cross polarization, no fancy rigs, no",
+    "start": 682.56,
+    "duration": 6.0
+  },
+  {
+    "text": "filters and triggers. All you need is a",
+    "start": 685.6,
+    "duration": 5.679
+  },
+  {
+    "text": "camera and a point light. So, this could",
+    "start": 688.56,
+    "duration": 4.24
+  },
+  {
+    "text": "come in many different variants. It",
+    "start": 691.279,
+    "duration": 3.601
+  },
+  {
+    "text": "could be a DSLR with a little point",
+    "start": 692.8,
+    "duration": 4.56
+  },
+  {
+    "text": "light on top. Could be a ring flash.",
+    "start": 694.88,
+    "duration": 4.16
+  },
+  {
+    "text": "Could even be your smartphone with the",
+    "start": 697.36,
+    "duration": 3.68
+  },
+  {
+    "text": "light within it. And this means that it",
+    "start": 699.04,
+    "duration": 4.56
+  },
+  {
+    "text": "could be a AAA game studio, an indie",
+    "start": 701.04,
+    "duration": 5.28
+  },
+  {
+    "text": "studio, hobbyist,",
+    "start": 703.6,
+    "duration": 4.32
+  },
+  {
+    "text": "student, or even just someone that likes",
+    "start": 706.32,
+    "duration": 3.92
+  },
+  {
+    "text": "doing 3D scans. and you can all capture",
+    "start": 707.92,
+    "duration": 5.2
+  },
+  {
+    "text": "PBR properties to the same level.",
+    "start": 710.24,
+    "duration": 4.719
+  },
+  {
+    "text": "And by simplifying this to just a camera",
+    "start": 713.12,
+    "duration": 4.159
+  },
+  {
+    "text": "and a flash, it also acts as a standard",
+    "start": 714.959,
+    "duration": 4.241
+  },
+  {
+    "text": "for capture. So if you're capturing",
+    "start": 717.279,
+    "duration": 4.721
+  },
+  {
+    "text": "assets from different locations",
+    "start": 719.2,
+    "duration": 4.56
+  },
+  {
+    "text": "um through different vendors, you can",
+    "start": 722.0,
+    "duration": 3.44
+  },
+  {
+    "text": "bring all of these assets into the same",
+    "start": 723.76,
+    "duration": 6.36
+  },
+  {
+    "text": "scene and they'll look identical.",
+    "start": 725.44,
+    "duration": 4.68
+  },
+  {
+    "text": "So we do this with flash photography and",
+    "start": 730.24,
+    "duration": 4.96
+  },
+  {
+    "text": "this is done by measuring how a 3D",
+    "start": 732.56,
+    "duration": 4.56
+  },
+  {
+    "text": "object interacts with light. So we",
+    "start": 735.2,
+    "duration": 4.079
+  },
+  {
+    "text": "measure the PBR properties. Based off of",
+    "start": 737.12,
+    "duration": 4.48
+  },
+  {
+    "text": "this reflection, by measuring how it",
+    "start": 739.279,
+    "duration": 4.081
+  },
+  {
+    "text": "bounces off, we can look at the",
+    "start": 741.6,
+    "duration": 3.76
+  },
+  {
+    "text": "specularity. We can look at the",
+    "start": 743.36,
+    "duration": 4.32
+  },
+  {
+    "text": "roughness and we can also understand the",
+    "start": 745.36,
+    "duration": 4.159
+  },
+  {
+    "text": "base color.",
+    "start": 747.68,
+    "duration": 4.08
+  },
+  {
+    "text": "We designed Maro for capturing 3D",
+    "start": 749.519,
+    "duration": 3.921
+  },
+  {
+    "text": "objects that you want to put into your",
+    "start": 751.76,
+    "duration": 3.92
+  },
+  {
+    "text": "larger 3D scenes. So, it's not really",
+    "start": 753.44,
+    "duration": 4.0
+  },
+  {
+    "text": "designed for capturing rooms, but",
+    "start": 755.68,
+    "duration": 3.279
+  },
+  {
+    "text": "anything that you can get around with",
+    "start": 757.44,
+    "duration": 4.32
+  },
+  {
+    "text": "the camera, you can do a full PBR scan.",
+    "start": 758.959,
+    "duration": 5.281
+  },
+  {
+    "text": "We've tried this with fashion apparel,",
+    "start": 761.76,
+    "duration": 6.0
+  },
+  {
+    "text": "so shoes and handbags, uh, small to",
+    "start": 764.24,
+    "duration": 5.36
+  },
+  {
+    "text": "mediumsiz objects for film and games.",
+    "start": 767.76,
+    "duration": 4.4
+  },
+  {
+    "text": "So, lots of props. Uh, even the odd",
+    "start": 769.6,
+    "duration": 4.64
+  },
+  {
+    "text": "cultural heritage piece where you don't",
+    "start": 772.16,
+    "duration": 3.679
+  },
+  {
+    "text": "have to take the artifact out of a",
+    "start": 774.24,
+    "duration": 3.52
+  },
+  {
+    "text": "museum. You simply take the glass",
+    "start": 775.839,
+    "duration": 4.161
+  },
+  {
+    "text": "cabinet off and take a few pictures. And",
+    "start": 777.76,
+    "duration": 4.16
+  },
+  {
+    "text": "we've even captured a few small to",
+    "start": 780.0,
+    "duration": 5.76
+  },
+  {
+    "text": "mediumsiz pieces of furniture.",
+    "start": 781.92,
+    "duration": 6.24
+  },
+  {
+    "text": "So, what can you expect for a Marsite",
+    "start": 785.76,
+    "duration": 5.84
+  },
+  {
+    "text": "measure? So the software itself delivers",
+    "start": 788.16,
+    "duration": 6.32
+  },
+  {
+    "text": "the full array of PBR properties for",
+    "start": 791.6,
+    "duration": 5.6
+  },
+  {
+    "text": "both a metallic and a specular workflow.",
+    "start": 794.48,
+    "duration": 5.44
+  },
+  {
+    "text": "So we give you diffuse, specular,",
+    "start": 797.2,
+    "duration": 6.639
+  },
+  {
+    "text": "albido, metallic, roughness, gloss,",
+    "start": 799.92,
+    "duration": 6.8
+  },
+  {
+    "text": "index, refraction, and normals. These",
+    "start": 803.839,
+    "duration": 5.361
+  },
+  {
+    "text": "can be delivered all the way up from 512",
+    "start": 806.72,
+    "duration": 5.359
+  },
+  {
+    "text": "pixels up to 16K.",
+    "start": 809.2,
+    "duration": 4.96
+  },
+  {
+    "text": "And these can be delivered as JPEGs,",
+    "start": 812.079,
+    "duration": 6.801
+  },
+  {
+    "text": "PGs, and even 32bit EXR files. It works",
+    "start": 814.16,
+    "duration": 7.2
+  },
+  {
+    "text": "best uh probably with freehand. A lot of",
+    "start": 818.88,
+    "duration": 4.079
+  },
+  {
+    "text": "the the scans that we've done tend to be",
+    "start": 821.36,
+    "duration": 3.52
+  },
+  {
+    "text": "with the ring flash, but you can also",
+    "start": 822.959,
+    "duration": 4.56
+  },
+  {
+    "text": "use a rig if you put a small LED on the",
+    "start": 824.88,
+    "duration": 5.68
+  },
+  {
+    "text": "top and do your scan that way. But to",
+    "start": 827.519,
+    "duration": 5.041
+  },
+  {
+    "text": "get the best results, you need to get",
+    "start": 830.56,
+    "duration": 3.44
+  },
+  {
+    "text": "good coverage. And you're going to hear",
+    "start": 832.56,
+    "duration": 3.519
+  },
+  {
+    "text": "me say this a lot. So, the better you",
+    "start": 834.0,
+    "duration": 4.32
+  },
+  {
+    "text": "can get around your 3D object, uh the",
+    "start": 836.079,
+    "duration": 4.401
+  },
+  {
+    "text": "likely are the more likely you are to",
+    "start": 838.32,
+    "duration": 4.8
+  },
+  {
+    "text": "capture all of those reflections. And if",
+    "start": 840.48,
+    "duration": 5.28
+  },
+  {
+    "text": "any of you are sort of photoggramometry",
+    "start": 843.12,
+    "duration": 4.32
+  },
+  {
+    "text": "veterans, this is something that you're",
+    "start": 845.76,
+    "duration": 3.84
+  },
+  {
+    "text": "probably not used to doing or doing it",
+    "start": 847.44,
+    "duration": 4.56
+  },
+  {
+    "text": "in a slightly different way. Uh but if",
+    "start": 849.6,
+    "duration": 4.32
+  },
+  {
+    "text": "you want to get a Maro measured scan,",
+    "start": 852.0,
+    "duration": 3.519
+  },
+  {
+    "text": "just please follow along and you'll get",
+    "start": 853.92,
+    "duration": 5.039
+  },
+  {
+    "text": "a good measured scan out the end.",
+    "start": 855.519,
+    "duration": 5.521
+  },
+  {
+    "text": "So Wallace and I over the next few",
+    "start": 858.959,
+    "duration": 2.961
+  },
+  {
+    "text": "slides are going to show you actually",
+    "start": 861.04,
+    "duration": 3.2
+  },
+  {
+    "text": "how to do one of these. And we're going",
+    "start": 861.92,
+    "duration": 5.599
+  },
+  {
+    "text": "to cover setting up your scene, how to",
+    "start": 864.24,
+    "duration": 5.52
+  },
+  {
+    "text": "actually capture. So the better quality",
+    "start": 867.519,
+    "duration": 4.801
+  },
+  {
+    "text": "your 3D scan source photography is, the",
+    "start": 869.76,
+    "duration": 4.0
+  },
+  {
+    "text": "better the result will be out the other",
+    "start": 872.32,
+    "duration": 3.44
+  },
+  {
+    "text": "end. We're then going to show you how to",
+    "start": 873.76,
+    "duration": 4.8
+  },
+  {
+    "text": "process this through reality scan, how",
+    "start": 875.76,
+    "duration": 5.28
+  },
+  {
+    "text": "to process the PBR through Maro, and",
+    "start": 878.56,
+    "duration": 4.24
+  },
+  {
+    "text": "then finally bringing it all together",
+    "start": 881.04,
+    "duration": 5.359
+  },
+  {
+    "text": "within Unreal Engine.",
+    "start": 882.8,
+    "duration": 6.0
+  },
+  {
+    "text": "So those of you out there who are used",
+    "start": 886.399,
+    "duration": 4.401
+  },
+  {
+    "text": "to doing photoggramometry, you might",
+    "start": 888.8,
+    "duration": 3.92
+  },
+  {
+    "text": "find that this capture method is a bit",
+    "start": 890.8,
+    "duration": 4.24
+  },
+  {
+    "text": "different to normal. Now, for one,",
+    "start": 892.72,
+    "duration": 3.44
+  },
+  {
+    "text": "you're probably going to end up having",
+    "start": 895.04,
+    "duration": 2.88
+  },
+  {
+    "text": "to underexpose things. Now, the reason",
+    "start": 896.16,
+    "duration": 4.239
+  },
+  {
+    "text": "for that is Maro needs to be able to get",
+    "start": 897.92,
+    "duration": 4.159
+  },
+  {
+    "text": "values like through the whole range of",
+    "start": 900.399,
+    "duration": 3.68
+  },
+  {
+    "text": "the brightness of the object. So, those",
+    "start": 902.079,
+    "duration": 3.601
+  },
+  {
+    "text": "high those specular highlights, they",
+    "start": 904.079,
+    "duration": 4.241
+  },
+  {
+    "text": "can't blow out. Um, they need to be",
+    "start": 905.68,
+    "duration": 5.68
+  },
+  {
+    "text": "below one in value. Um, which can",
+    "start": 908.32,
+    "duration": 5.36
+  },
+  {
+    "text": "obviously make the rest of the object",
+    "start": 911.36,
+    "duration": 6.08
+  },
+  {
+    "text": "pretty dark, but Maro uses roars and",
+    "start": 913.68,
+    "duration": 5.76
+  },
+  {
+    "text": "that's like they've got big um color",
+    "start": 917.44,
+    "duration": 3.6
+  },
+  {
+    "text": "depth, so you can pull back a lot of",
+    "start": 919.44,
+    "duration": 3.28
+  },
+  {
+    "text": "that information. Now, the other thing",
+    "start": 921.04,
+    "duration": 3.599
+  },
+  {
+    "text": "we often tell people is don't bother",
+    "start": 922.72,
+    "duration": 4.32
+  },
+  {
+    "text": "using shiny objects. Um, but that's kind",
+    "start": 924.639,
+    "duration": 4.161
+  },
+  {
+    "text": "of the point here. Often like the most",
+    "start": 927.04,
+    "duration": 4.08
+  },
+  {
+    "text": "exciting PBR materials are going to be",
+    "start": 928.8,
+    "duration": 4.479
+  },
+  {
+    "text": "of things with with specular highlights",
+    "start": 931.12,
+    "duration": 5.44
+  },
+  {
+    "text": "and and some reflections. Now, lots of",
+    "start": 933.279,
+    "duration": 4.8
+  },
+  {
+    "text": "images. That's not breaking a rule",
+    "start": 936.56,
+    "duration": 3.519
+  },
+  {
+    "text": "because obviously we do encourage people",
+    "start": 938.079,
+    "duration": 3.921
+  },
+  {
+    "text": "to take as many photos as they possibly",
+    "start": 940.079,
+    "duration": 4.0
+  },
+  {
+    "text": "can because you can always not use them.",
+    "start": 942.0,
+    "duration": 3.519
+  },
+  {
+    "text": "Um, but I think you're going to be",
+    "start": 944.079,
+    "duration": 3.2
+  },
+  {
+    "text": "surprised how many you need here. It's",
+    "start": 945.519,
+    "duration": 3.12
+  },
+  {
+    "text": "it's a lot more than you would need to",
+    "start": 947.279,
+    "duration": 3.521
+  },
+  {
+    "text": "get a really nice uh photoggramometry",
+    "start": 948.639,
+    "duration": 5.161
+  },
+  {
+    "text": "scan.",
+    "start": 950.8,
+    "duration": 3.0
+  },
+  {
+    "text": "So there's four things that you need to",
+    "start": 954.16,
+    "duration": 3.119
+  },
+  {
+    "text": "think about when you're doing a Maro",
+    "start": 955.68,
+    "duration": 3.92
+  },
+  {
+    "text": "measures scan. The first thing is the",
+    "start": 957.279,
+    "duration": 4.56
+  },
+  {
+    "text": "camera. So when you're using the camera,",
+    "start": 959.6,
+    "duration": 4.08
+  },
+  {
+    "text": "it has to be a camera that can shoot raw",
+    "start": 961.839,
+    "duration": 5.36
+  },
+  {
+    "text": "files. And the reason for this is so",
+    "start": 963.68,
+    "duration": 5.44
+  },
+  {
+    "text": "that we can keep as much of that dynamic",
+    "start": 967.199,
+    "duration": 3.361
+  },
+  {
+    "text": "range as possible. So all of the",
+    "start": 969.12,
+    "duration": 3.839
+  },
+  {
+    "text": "highlights, all of the shadows, uh,",
+    "start": 970.56,
+    "duration": 4.079
+  },
+  {
+    "text": "which will often get clipped if you're",
+    "start": 972.959,
+    "duration": 3.601
+  },
+  {
+    "text": "using a JPEG.",
+    "start": 974.639,
+    "duration": 3.921
+  },
+  {
+    "text": "The other thing is the exposure. We want",
+    "start": 976.56,
+    "duration": 4.48
+  },
+  {
+    "text": "to slightly underexpose the image. And",
+    "start": 978.56,
+    "duration": 5.12
+  },
+  {
+    "text": "the reason for this is to again maintain",
+    "start": 981.04,
+    "duration": 5.2
+  },
+  {
+    "text": "that highlight. If we expose normally,",
+    "start": 983.68,
+    "duration": 3.68
+  },
+  {
+    "text": "we're going to clip the highlights and",
+    "start": 986.24,
+    "duration": 2.48
+  },
+  {
+    "text": "we're going to expose for the majority",
+    "start": 987.36,
+    "duration": 4.8
+  },
+  {
+    "text": "of the 3D scene. And also locking off",
+    "start": 988.72,
+    "duration": 4.799
+  },
+  {
+    "text": "your exposure. So a camera that can",
+    "start": 992.16,
+    "duration": 4.0
+  },
+  {
+    "text": "shoot um in manual is really important.",
+    "start": 993.519,
+    "duration": 5.041
+  },
+  {
+    "text": "Uh if you have the exposure changing",
+    "start": 996.16,
+    "duration": 3.599
+  },
+  {
+    "text": "throughout the scan, it's going to",
+    "start": 998.56,
+    "duration": 3.279
+  },
+  {
+    "text": "absolutely mess things up. So find your",
+    "start": 999.759,
+    "duration": 4.0
+  },
+  {
+    "text": "exposure, lock it off, and then move",
+    "start": 1001.839,
+    "duration": 4.24
+  },
+  {
+    "text": "forwards with your scan. The other thing",
+    "start": 1003.759,
+    "duration": 4.241
+  },
+  {
+    "text": "is lighting. So because we're doing a",
+    "start": 1006.079,
+    "duration": 3.44
+  },
+  {
+    "text": "measured scan and we're measuring the",
+    "start": 1008.0,
+    "duration": 4.32
+  },
+  {
+    "text": "response to light, the lighting is key.",
+    "start": 1009.519,
+    "duration": 5.041
+  },
+  {
+    "text": "So what we want to do is get an image",
+    "start": 1012.32,
+    "duration": 4.72
+  },
+  {
+    "text": "where the ambient lighting is has no",
+    "start": 1014.56,
+    "duration": 3.92
+  },
+  {
+    "text": "effect on the image. It is entirely",
+    "start": 1017.04,
+    "duration": 2.64
+  },
+  {
+    "text": "coming from the point of view of the",
+    "start": 1018.48,
+    "duration": 3.2
+  },
+  {
+    "text": "flash. So if you're using a point light",
+    "start": 1019.68,
+    "duration": 4.079
+  },
+  {
+    "text": "source, like a continuous light, it's",
+    "start": 1021.68,
+    "duration": 3.759
+  },
+  {
+    "text": "best to capture this in a really dark",
+    "start": 1023.759,
+    "duration": 4.401
+  },
+  {
+    "text": "room. If you're using a flash like what",
+    "start": 1025.439,
+    "duration": 5.201
+  },
+  {
+    "text": "Willis has here, you can usually, you",
+    "start": 1028.16,
+    "duration": 4.639
+  },
+  {
+    "text": "know, pump it up enough to overpower the",
+    "start": 1030.64,
+    "duration": 5.12
+  },
+  {
+    "text": "ambient lighting in the room. Coverage.",
+    "start": 1032.799,
+    "duration": 4.24
+  },
+  {
+    "text": "keep going on about this, but you want",
+    "start": 1035.76,
+    "duration": 3.52
+  },
+  {
+    "text": "to get enough views of the object. So,",
+    "start": 1037.039,
+    "duration": 3.92
+  },
+  {
+    "text": "usually we'll do a scan where you",
+    "start": 1039.28,
+    "duration": 3.759
+  },
+  {
+    "text": "capture it from the kind of a few rings",
+    "start": 1040.959,
+    "duration": 3.921
+  },
+  {
+    "text": "around the object and then punch in and",
+    "start": 1043.039,
+    "duration": 3.601
+  },
+  {
+    "text": "get a few of the details. And then",
+    "start": 1044.88,
+    "duration": 3.6
+  },
+  {
+    "text": "finally, scale. So, this is something",
+    "start": 1046.64,
+    "duration": 4.0
+  },
+  {
+    "text": "that usually people don't have to worry",
+    "start": 1048.48,
+    "duration": 3.68
+  },
+  {
+    "text": "about too much when you're doing a 3D",
+    "start": 1050.64,
+    "duration": 5.12
+  },
+  {
+    "text": "scan, but for a Maro scan, scale is key.",
+    "start": 1052.16,
+    "duration": 5.68
+  },
+  {
+    "text": "And the reason for this is when you're",
+    "start": 1055.76,
+    "duration": 5.36
+  },
+  {
+    "text": "doing um a picture with the flash, the",
+    "start": 1057.84,
+    "duration": 5.12
+  },
+  {
+    "text": "closer you are to the object, the the",
+    "start": 1061.12,
+    "duration": 3.2
+  },
+  {
+    "text": "quicker that object is going to burn out",
+    "start": 1062.96,
+    "duration": 2.8
+  },
+  {
+    "text": "and it's going to look really bright.",
+    "start": 1064.32,
+    "duration": 3.12
+  },
+  {
+    "text": "And as you move further away, the",
+    "start": 1065.76,
+    "duration": 2.88
+  },
+  {
+    "text": "lighting is going to fall off more",
+    "start": 1067.44,
+    "duration": 2.72
+  },
+  {
+    "text": "quickly. So there's going to be a",
+    "start": 1068.64,
+    "duration": 2.88
+  },
+  {
+    "text": "difference in how bright some of the",
+    "start": 1070.16,
+    "duration": 3.6
+  },
+  {
+    "text": "images are. If we can measure the scale",
+    "start": 1071.52,
+    "duration": 4.24
+  },
+  {
+    "text": "of the scene, Maro can actually account",
+    "start": 1073.76,
+    "duration": 3.84
+  },
+  {
+    "text": "for that. So a few ways that we can do",
+    "start": 1075.76,
+    "duration": 5.12
+  },
+  {
+    "text": "this is either using some markers, which",
+    "start": 1077.6,
+    "duration": 6.88
+  },
+  {
+    "text": "I think we have here. So markers that",
+    "start": 1080.88,
+    "duration": 5.679
+  },
+  {
+    "text": "can be put into reality scan where you",
+    "start": 1084.48,
+    "duration": 4.4
+  },
+  {
+    "text": "know the distance between them. If you",
+    "start": 1086.559,
+    "duration": 4.48
+  },
+  {
+    "text": "haven't got markers, you can put a ruler",
+    "start": 1088.88,
+    "duration": 4.48
+  },
+  {
+    "text": "in the scene. Uh alternatively, you can",
+    "start": 1091.039,
+    "duration": 4.481
+  },
+  {
+    "text": "even just like measure a part of the",
+    "start": 1093.36,
+    "duration": 6.76
+  },
+  {
+    "text": "object and do it that way.",
+    "start": 1095.52,
+    "duration": 4.6
+  },
+  {
+    "text": "So when you're getting your exposure,",
+    "start": 1100.48,
+    "duration": 4.4
+  },
+  {
+    "text": "the easiest way to get this right is to",
+    "start": 1102.799,
+    "duration": 4.481
+  },
+  {
+    "text": "actually take two pictures. So the first",
+    "start": 1104.88,
+    "duration": 3.919
+  },
+  {
+    "text": "image you'll take is with the flash",
+    "start": 1107.28,
+    "duration": 3.36
+  },
+  {
+    "text": "turned off. And ideally, this will be",
+    "start": 1108.799,
+    "duration": 4.161
+  },
+  {
+    "text": "completely black. If it isn't, you can",
+    "start": 1110.64,
+    "duration": 4.56
+  },
+  {
+    "text": "tweak your exposure setting accordingly.",
+    "start": 1112.96,
+    "duration": 3.76
+  },
+  {
+    "text": "And then the second image take with the",
+    "start": 1115.2,
+    "duration": 4.08
+  },
+  {
+    "text": "flash turned on. And if that second",
+    "start": 1116.72,
+    "duration": 4.56
+  },
+  {
+    "text": "image looks nice and slightly",
+    "start": 1119.28,
+    "duration": 4.0
+  },
+  {
+    "text": "underexposed, as you can see here, then",
+    "start": 1121.28,
+    "duration": 5.48
+  },
+  {
+    "text": "you're good to go.",
+    "start": 1123.28,
+    "duration": 3.48
+  },
+  {
+    "text": "So what you can see from this point of",
+    "start": 1128.96,
+    "duration": 5.959
+  },
+  {
+    "text": "view is is that reflected region.",
+    "start": 1130.559,
+    "duration": 4.36
+  },
+  {
+    "text": "So by capturing this reflection here, we",
+    "start": 1135.12,
+    "duration": 5.76
+  },
+  {
+    "text": "can understand what the PBR values are.",
+    "start": 1138.559,
+    "duration": 4.161
+  },
+  {
+    "text": "And we want to get enough images where",
+    "start": 1140.88,
+    "duration": 4.48
+  },
+  {
+    "text": "we almost cover the whole object in that",
+    "start": 1142.72,
+    "duration": 4.959
+  },
+  {
+    "text": "specular reflection.",
+    "start": 1145.36,
+    "duration": 3.84
+  },
+  {
+    "text": "And we picked this object because it's",
+    "start": 1147.679,
+    "duration": 3.36
+  },
+  {
+    "text": "got quite a few interesting material",
+    "start": 1149.2,
+    "duration": 3.839
+  },
+  {
+    "text": "properties on it. Mindful it was quite",
+    "start": 1151.039,
+    "duration": 3.921
+  },
+  {
+    "text": "hard for me to get through uh airport",
+    "start": 1153.039,
+    "duration": 6.121
+  },
+  {
+    "text": "security on my way here.",
+    "start": 1154.96,
+    "duration": 4.2
+  },
+  {
+    "text": "Now, when we're doing a scan, we'll",
+    "start": 1159.84,
+    "duration": 4.32
+  },
+  {
+    "text": "often do a few loops just to make sure",
+    "start": 1162.08,
+    "duration": 4.4
+  },
+  {
+    "text": "you've got the general shape. But when",
+    "start": 1164.16,
+    "duration": 5.28
+  },
+  {
+    "text": "you're capturing something quite planer",
+    "start": 1166.48,
+    "duration": 5.36
+  },
+  {
+    "text": "like this, it's usually good to sort of",
+    "start": 1169.44,
+    "duration": 6.0
+  },
+  {
+    "text": "scrub left and right, up and down. And",
+    "start": 1171.84,
+    "duration": 5.04
+  },
+  {
+    "text": "that will just ensure you that you've",
+    "start": 1175.44,
+    "duration": 3.599
+  },
+  {
+    "text": "got all of the sort of reflective",
+    "start": 1176.88,
+    "duration": 7.0
+  },
+  {
+    "text": "regions in your data set.",
+    "start": 1179.039,
+    "duration": 4.841
+  },
+  {
+    "text": "So this is just an example of of what",
+    "start": 1186.72,
+    "duration": 4.0
+  },
+  {
+    "text": "that looks like. So scrubbing left and",
+    "start": 1188.559,
+    "duration": 4.401
+  },
+  {
+    "text": "right, you can see if you were to almost",
+    "start": 1190.72,
+    "duration": 4.4
+  },
+  {
+    "text": "add all those images together, it's like",
+    "start": 1192.96,
+    "duration": 3.44
+  },
+  {
+    "text": "you're painting the object with light.",
+    "start": 1195.12,
+    "duration": 4.32
+  },
+  {
+    "text": "So the whole thing becomes covered.",
+    "start": 1196.4,
+    "duration": 4.639
+  },
+  {
+    "text": "And if you don't take enough pictures,",
+    "start": 1199.44,
+    "duration": 4.32
+  },
+  {
+    "text": "so this is a sparse scan. What you'll",
+    "start": 1201.039,
+    "duration": 4.721
+  },
+  {
+    "text": "end up with is regions where you have",
+    "start": 1203.76,
+    "duration": 4.24
+  },
+  {
+    "text": "got the PBR property and regions where",
+    "start": 1205.76,
+    "duration": 4.48
+  },
+  {
+    "text": "you haven't. So your roughness pass or",
+    "start": 1208.0,
+    "duration": 3.6
+  },
+  {
+    "text": "your specular will have sort of peaks",
+    "start": 1210.24,
+    "duration": 3.28
+  },
+  {
+    "text": "and troughs within it. So, a general",
+    "start": 1211.6,
+    "duration": 3.76
+  },
+  {
+    "text": "rule of thumb is the shinier the object",
+    "start": 1213.52,
+    "duration": 4.0
+  },
+  {
+    "text": "is, the more images that you'll want to",
+    "start": 1215.36,
+    "duration": 4.0
+  },
+  {
+    "text": "take. And the more matte the object is,",
+    "start": 1217.52,
+    "duration": 3.12
+  },
+  {
+    "text": "you can probably get away with a few",
+    "start": 1219.36,
+    "duration": 3.6
+  },
+  {
+    "text": "less. And just for example, all the",
+    "start": 1220.64,
+    "duration": 4.08
+  },
+  {
+    "text": "scans that we've done of this, it's",
+    "start": 1222.96,
+    "duration": 5.52
+  },
+  {
+    "text": "around I think about 600 to 700. For",
+    "start": 1224.72,
+    "duration": 6.079
+  },
+  {
+    "text": "things like shoes that are quite matte,",
+    "start": 1228.48,
+    "duration": 4.48
+  },
+  {
+    "text": "like leather, you can get around get",
+    "start": 1230.799,
+    "duration": 5.36
+  },
+  {
+    "text": "away with about 300 images.",
+    "start": 1232.96,
+    "duration": 5.28
+  },
+  {
+    "text": "So, we've done the capture. Now, we can",
+    "start": 1236.159,
+    "duration": 3.841
+  },
+  {
+    "text": "go through the rest of the process. So,",
+    "start": 1238.24,
+    "duration": 4.08
+  },
+  {
+    "text": "just top level of the workflow. do your",
+    "start": 1240.0,
+    "duration": 4.64
+  },
+  {
+    "text": "scan, you process the data initially",
+    "start": 1242.32,
+    "duration": 4.56
+  },
+  {
+    "text": "through Maro. You then hand that over to",
+    "start": 1244.64,
+    "duration": 5.919
+  },
+  {
+    "text": "reality capture, reality scan for the um",
+    "start": 1246.88,
+    "duration": 6.56
+  },
+  {
+    "text": "3D. You then go back to Maro where you",
+    "start": 1250.559,
+    "duration": 5.201
+  },
+  {
+    "text": "do the PBR predictions and then you can",
+    "start": 1253.44,
+    "duration": 4.239
+  },
+  {
+    "text": "take both of those elements and bring",
+    "start": 1255.76,
+    "duration": 5.12
+  },
+  {
+    "text": "them into Unreal Engine.",
+    "start": 1257.679,
+    "duration": 6.0
+  },
+  {
+    "text": "So the first stage within Maro is",
+    "start": 1260.88,
+    "duration": 5.36
+  },
+  {
+    "text": "creating a job. So a dialogue will come",
+    "start": 1263.679,
+    "duration": 4.561
+  },
+  {
+    "text": "up where you can input the name of your",
+    "start": 1266.24,
+    "duration": 3.919
+  },
+  {
+    "text": "scan and this allows you to come back to",
+    "start": 1268.24,
+    "duration": 4.72
+  },
+  {
+    "text": "it many times. And from there we can",
+    "start": 1270.159,
+    "duration": 4.88
+  },
+  {
+    "text": "also say where our raw photography is.",
+    "start": 1272.96,
+    "duration": 3.68
+  },
+  {
+    "text": "And when we first load in this raw",
+    "start": 1275.039,
+    "duration": 4.081
+  },
+  {
+    "text": "photography, we can actually change the",
+    "start": 1276.64,
+    "duration": 4.24
+  },
+  {
+    "text": "brightness of the image. This has",
+    "start": 1279.12,
+    "duration": 4.32
+  },
+  {
+    "text": "absolutely no effect on the the PBR",
+    "start": 1280.88,
+    "duration": 3.84
+  },
+  {
+    "text": "predictions that you get out the other",
+    "start": 1283.44,
+    "duration": 3.68
+  },
+  {
+    "text": "end. It just allows you to have a proxy",
+    "start": 1284.72,
+    "duration": 4.48
+  },
+  {
+    "text": "file that you can run through reality",
+    "start": 1287.12,
+    "duration": 3.6
+  },
+  {
+    "text": "scan. So if it's too bright or if it's",
+    "start": 1289.2,
+    "duration": 2.64
+  },
+  {
+    "text": "too dark, you can make a quick",
+    "start": 1290.72,
+    "duration": 3.199
+  },
+  {
+    "text": "adjustment here and then export them to",
+    "start": 1291.84,
+    "duration": 7.56
+  },
+  {
+    "text": "either a JPEG or a EXR file.",
+    "start": 1293.919,
+    "duration": 5.481
+  },
+  {
+    "text": "So uh when you send your your JPEGs",
+    "start": 1300.0,
+    "duration": 5.919
+  },
+  {
+    "text": "through or EXRS through to reality uh",
+    "start": 1303.36,
+    "duration": 4.64
+  },
+  {
+    "text": "scan, uh you have an option to change",
+    "start": 1305.919,
+    "duration": 4.0
+  },
+  {
+    "text": "the exposure. So as I showed earlier,",
+    "start": 1308.0,
+    "duration": 3.6
+  },
+  {
+    "text": "you can just let those highlights blow",
+    "start": 1309.919,
+    "duration": 3.12
+  },
+  {
+    "text": "out at this stage so we can actually get",
+    "start": 1311.6,
+    "duration": 3.52
+  },
+  {
+    "text": "a better um solve from all of the",
+    "start": 1313.039,
+    "duration": 5.441
+  },
+  {
+    "text": "cameras. Um, so I'm going to go through",
+    "start": 1315.12,
+    "duration": 6.4
+  },
+  {
+    "text": "processing in Reality Scan and uh a",
+    "start": 1318.48,
+    "duration": 4.48
+  },
+  {
+    "text": "slightly more advanced method that you",
+    "start": 1321.52,
+    "duration": 3.039
+  },
+  {
+    "text": "won't actually need all the time. So",
+    "start": 1322.96,
+    "duration": 3.76
+  },
+  {
+    "text": "it's going to be very similar to normal",
+    "start": 1324.559,
+    "duration": 4.081
+  },
+  {
+    "text": "processing in Reality Scan. Aligning,",
+    "start": 1326.72,
+    "duration": 4.079
+  },
+  {
+    "text": "meshing, scaling, simplifying,",
+    "start": 1328.64,
+    "duration": 4.72
+  },
+  {
+    "text": "smoothing, uh, unwrap's important, and",
+    "start": 1330.799,
+    "duration": 4.721
+  },
+  {
+    "text": "then obviously exporting the files that",
+    "start": 1333.36,
+    "duration": 4.4
+  },
+  {
+    "text": "Maro is going to need to make those PBR",
+    "start": 1335.52,
+    "duration": 6.8
+  },
+  {
+    "text": "materials. Um, so you're going to",
+    "start": 1337.76,
+    "duration": 7.12
+  },
+  {
+    "text": "probably be using shiny objects and as I",
+    "start": 1342.32,
+    "duration": 4.96
+  },
+  {
+    "text": "was saying earlier, um, they're not",
+    "start": 1344.88,
+    "duration": 5.2
+  },
+  {
+    "text": "great for scanning. So, spec your",
+    "start": 1347.28,
+    "duration": 5.519
+  },
+  {
+    "text": "highlights cause issues in alignment and",
+    "start": 1350.08,
+    "duration": 4.24
+  },
+  {
+    "text": "meshing. Now, the reason for that is in",
+    "start": 1352.799,
+    "duration": 3.841
+  },
+  {
+    "text": "alignment, the way alignment works is it",
+    "start": 1354.32,
+    "duration": 4.239
+  },
+  {
+    "text": "finds common features on the surface of",
+    "start": 1356.64,
+    "duration": 5.039
+  },
+  {
+    "text": "the object and then using those, it can",
+    "start": 1358.559,
+    "duration": 5.441
+  },
+  {
+    "text": "triangulate where the cameras are. So,",
+    "start": 1361.679,
+    "duration": 4.321
+  },
+  {
+    "text": "in alignment, we figure out where all of",
+    "start": 1364.0,
+    "duration": 4.08
+  },
+  {
+    "text": "the camera positions are. Now, in",
+    "start": 1366.0,
+    "duration": 4.72
+  },
+  {
+    "text": "meshing, we assume that we know where",
+    "start": 1368.08,
+    "duration": 4.719
+  },
+  {
+    "text": "those cameras are, and then we go in on",
+    "start": 1370.72,
+    "duration": 5.12
+  },
+  {
+    "text": "a pixel by pixel basis, look for similar",
+    "start": 1372.799,
+    "duration": 5.281
+  },
+  {
+    "text": "pixels in other images, and then figure",
+    "start": 1375.84,
+    "duration": 4.16
+  },
+  {
+    "text": "out a depth map. So, we have a depth",
+    "start": 1378.08,
+    "duration": 3.68
+  },
+  {
+    "text": "value for every single pixel on the",
+    "start": 1380.0,
+    "duration": 3.84
+  },
+  {
+    "text": "object. And then when we have a depth",
+    "start": 1381.76,
+    "duration": 4.159
+  },
+  {
+    "text": "for every camera, we can we can make a",
+    "start": 1383.84,
+    "duration": 3.68
+  },
+  {
+    "text": "nice mesh with millions and millions of",
+    "start": 1385.919,
+    "duration": 3.681
+  },
+  {
+    "text": "triangles. But obviously because we're",
+    "start": 1387.52,
+    "duration": 3.76
+  },
+  {
+    "text": "looking for similar pixels, if it goes",
+    "start": 1389.6,
+    "duration": 3.12
+  },
+  {
+    "text": "to look for a similar pixel and there's",
+    "start": 1391.28,
+    "duration": 3.36
+  },
+  {
+    "text": "a big reflection there, that's going to",
+    "start": 1392.72,
+    "duration": 5.04
+  },
+  {
+    "text": "create a mess in the meshing as well. So",
+    "start": 1394.64,
+    "duration": 4.8
+  },
+  {
+    "text": "we have problems in both alignment and",
+    "start": 1397.76,
+    "duration": 3.84
+  },
+  {
+    "text": "meshing. So how do we help the",
+    "start": 1399.44,
+    "duration": 4.56
+  },
+  {
+    "text": "alignment? Um markers are really",
+    "start": 1401.6,
+    "duration": 3.84
+  },
+  {
+    "text": "helpful. I'm not sure why I've used the",
+    "start": 1404.0,
+    "duration": 2.96
+  },
+  {
+    "text": "circular ones here because um we",
+    "start": 1405.44,
+    "duration": 4.88
+  },
+  {
+    "text": "actually have the option to generate um",
+    "start": 1406.96,
+    "duration": 5.12
+  },
+  {
+    "text": "uh April tags as well, which would be a",
+    "start": 1410.32,
+    "duration": 3.359
+  },
+  {
+    "text": "better option. So imagine those are",
+    "start": 1412.08,
+    "duration": 2.88
+  },
+  {
+    "text": "April tags and not the circular one.",
+    "start": 1413.679,
+    "duration": 2.801
+  },
+  {
+    "text": "Circular ones are fine, but April per",
+    "start": 1414.96,
+    "duration": 3.44
+  },
+  {
+    "text": "tags tend to be a little bit better. And",
+    "start": 1416.48,
+    "duration": 3.28
+  },
+  {
+    "text": "the other thing we can do is we can put",
+    "start": 1418.4,
+    "duration": 2.8
+  },
+  {
+    "text": "stuff in the background. You can see on",
+    "start": 1419.76,
+    "duration": 2.88
+  },
+  {
+    "text": "the stand here, I've put this like",
+    "start": 1421.2,
+    "duration": 3.839
+  },
+  {
+    "text": "highly textured material. And reality",
+    "start": 1422.64,
+    "duration": 4.24
+  },
+  {
+    "text": "scan is going to find loads of tie",
+    "start": 1425.039,
+    "duration": 3.361
+  },
+  {
+    "text": "points in that which will help the",
+    "start": 1426.88,
+    "duration": 3.039
+  },
+  {
+    "text": "alignment because all it doesn't",
+    "start": 1428.4,
+    "duration": 3.519
+  },
+  {
+    "text": "actually matter if the object itself is",
+    "start": 1429.919,
+    "duration": 3.681
+  },
+  {
+    "text": "helping reality scan figure out where",
+    "start": 1431.919,
+    "duration": 3.281
+  },
+  {
+    "text": "the cameras in are. It can be anything",
+    "start": 1433.6,
+    "duration": 3.439
+  },
+  {
+    "text": "in the scene. So the markers are going",
+    "start": 1435.2,
+    "duration": 4.24
+  },
+  {
+    "text": "to help and any highly textured surface",
+    "start": 1437.039,
+    "duration": 4.481
+  },
+  {
+    "text": "you can put like in and around your",
+    "start": 1439.44,
+    "duration": 3.84
+  },
+  {
+    "text": "object will help with the alignment as",
+    "start": 1441.52,
+    "duration": 2.96
+  },
+  {
+    "text": "well.",
+    "start": 1443.28,
+    "duration": 3.04
+  },
+  {
+    "text": "Now helping in meshing. Now actually if",
+    "start": 1444.48,
+    "duration": 4.72
+  },
+  {
+    "text": "we look uh oh no yeah I haven't got the",
+    "start": 1446.32,
+    "duration": 4.719
+  },
+  {
+    "text": "mesh there but actually this mesh turned",
+    "start": 1449.2,
+    "duration": 3.359
+  },
+  {
+    "text": "out fine. If you'd simplified it and",
+    "start": 1451.039,
+    "duration": 3.041
+  },
+  {
+    "text": "smoothed it would have been okay. But",
+    "start": 1452.559,
+    "duration": 3.36
+  },
+  {
+    "text": "sometimes you'll get like massive holes",
+    "start": 1454.08,
+    "duration": 3.52
+  },
+  {
+    "text": "in your geometry and obviously that's no",
+    "start": 1455.919,
+    "duration": 3.601
+  },
+  {
+    "text": "no good at all. So what you can do with",
+    "start": 1457.6,
+    "duration": 3.6
+  },
+  {
+    "text": "meshing is you can actually get some",
+    "start": 1459.52,
+    "duration": 4.72
+  },
+  {
+    "text": "scanning spray spray your object and",
+    "start": 1461.2,
+    "duration": 5.92
+  },
+  {
+    "text": "we'll align those images together with",
+    "start": 1464.24,
+    "duration": 5.439
+  },
+  {
+    "text": "the ones from Maro like the shiny ones.",
+    "start": 1467.12,
+    "duration": 6.159
+  },
+  {
+    "text": "And we can just use the sprayed um",
+    "start": 1469.679,
+    "duration": 6.721
+  },
+  {
+    "text": "images for our mesh. So we get super",
+    "start": 1473.279,
+    "duration": 5.601
+  },
+  {
+    "text": "nice geometry. And then obviously we",
+    "start": 1476.4,
+    "duration": 5.68
+  },
+  {
+    "text": "only send the images for Maro back to",
+    "start": 1478.88,
+    "duration": 5.279
+  },
+  {
+    "text": "Maro.",
+    "start": 1482.08,
+    "duration": 4.4
+  },
+  {
+    "text": "Um so yeah, the markers are going to",
+    "start": 1484.159,
+    "duration": 4.081
+  },
+  {
+    "text": "help in this situation if you want to",
+    "start": 1486.48,
+    "duration": 4.559
+  },
+  {
+    "text": "use this sprayed um workflow because",
+    "start": 1488.24,
+    "duration": 4.16
+  },
+  {
+    "text": "they're going to help because it's not",
+    "start": 1491.039,
+    "duration": 3.12
+  },
+  {
+    "text": "going to see the same features on the",
+    "start": 1492.4,
+    "duration": 3.36
+  },
+  {
+    "text": "surface because one set's sprayed and",
+    "start": 1494.159,
+    "duration": 3.681
+  },
+  {
+    "text": "one set is not. So the markers are going",
+    "start": 1495.76,
+    "duration": 3.6
+  },
+  {
+    "text": "to be have to be the same in both sets",
+    "start": 1497.84,
+    "duration": 4.079
+  },
+  {
+    "text": "of images. And every time I've tried it,",
+    "start": 1499.36,
+    "duration": 4.319
+  },
+  {
+    "text": "everything's all aligned together in one",
+    "start": 1501.919,
+    "duration": 4.0
+  },
+  {
+    "text": "go. And you can see my mesh there,",
+    "start": 1503.679,
+    "duration": 4.88
+  },
+  {
+    "text": "that's meshed using only the sprayed",
+    "start": 1505.919,
+    "duration": 5.681
+  },
+  {
+    "text": "spatade um images. A bit of a typo",
+    "start": 1508.559,
+    "duration": 4.321
+  },
+  {
+    "text": "there.",
+    "start": 1511.6,
+    "duration": 6.48
+  },
+  {
+    "text": "Um okay so scaling um as we said earlier",
+    "start": 1512.88,
+    "duration": 7.36
+  },
+  {
+    "text": "uh you can you can set a scale between",
+    "start": 1518.08,
+    "duration": 4.32
+  },
+  {
+    "text": "the markers but yeah Elliot also pointed",
+    "start": 1520.24,
+    "duration": 3.84
+  },
+  {
+    "text": "out you can just if you know the",
+    "start": 1522.4,
+    "duration": 3.2
+  },
+  {
+    "text": "distance between two points on the",
+    "start": 1524.08,
+    "duration": 4.32
+  },
+  {
+    "text": "object reality scanner also has features",
+    "start": 1525.6,
+    "duration": 4.4
+  },
+  {
+    "text": "to do that and that's really important",
+    "start": 1528.4,
+    "duration": 5.12
+  },
+  {
+    "text": "for Maro to actually figure out um you",
+    "start": 1530.0,
+    "duration": 5.12
+  },
+  {
+    "text": "know how much light's involved because",
+    "start": 1533.52,
+    "duration": 3.519
+  },
+  {
+    "text": "it needs to know how far the light",
+    "start": 1535.12,
+    "duration": 3.919
+  },
+  {
+    "text": "traveled from the flash to the object",
+    "start": 1537.039,
+    "duration": 4.24
+  },
+  {
+    "text": "bounced back hit the sensor and it can't",
+    "start": 1539.039,
+    "duration": 3.681
+  },
+  {
+    "text": "make any calculations without knowing",
+    "start": 1541.279,
+    "duration": 3.121
+  },
+  {
+    "text": "that. So scaling super important. You",
+    "start": 1542.72,
+    "duration": 3.36
+  },
+  {
+    "text": "can't just have an arbitrary scale,",
+    "start": 1544.4,
+    "duration": 3.279
+  },
+  {
+    "text": "which is what you'll get in reality scan",
+    "start": 1546.08,
+    "duration": 2.8
+  },
+  {
+    "text": "unless you actually scale it. It's",
+    "start": 1547.679,
+    "duration": 3.281
+  },
+  {
+    "text": "totally arbitrary. Simplifying and",
+    "start": 1548.88,
+    "duration": 5.6
+  },
+  {
+    "text": "smoothing. You can see my original uh",
+    "start": 1550.96,
+    "duration": 6.0
+  },
+  {
+    "text": "mesh here with 69 million triangles.",
+    "start": 1554.48,
+    "duration": 3.92
+  },
+  {
+    "text": "I've smoothed to 2 million. I think",
+    "start": 1556.96,
+    "duration": 4.24
+  },
+  {
+    "text": "that's probably overkill as well. Um but",
+    "start": 1558.4,
+    "duration": 5.279
+  },
+  {
+    "text": "Maro makes a really nice normal map,",
+    "start": 1561.2,
+    "duration": 3.92
+  },
+  {
+    "text": "very similar to what you'll get with",
+    "start": 1563.679,
+    "duration": 4.48
+  },
+  {
+    "text": "phototric stereo. So, your actual final",
+    "start": 1565.12,
+    "duration": 4.32
+  },
+  {
+    "text": "mesh, as long as it doesn't have massive",
+    "start": 1568.159,
+    "duration": 3.441
+  },
+  {
+    "text": "holes in it, um, and it's smooth and",
+    "start": 1569.44,
+    "duration": 4.16
+  },
+  {
+    "text": "nice and not too many triangles, Maro is",
+    "start": 1571.6,
+    "duration": 5.12
+  },
+  {
+    "text": "going to do a nice job with it. Um, it",
+    "start": 1573.6,
+    "duration": 5.52
+  },
+  {
+    "text": "has to be unwrapped. Um, yeah, because",
+    "start": 1576.72,
+    "duration": 4.72
+  },
+  {
+    "text": "Maro also needs to have an unwrap to",
+    "start": 1579.12,
+    "duration": 4.96
+  },
+  {
+    "text": "work with. So, unwrapped to a single",
+    "start": 1581.44,
+    "duration": 4.56
+  },
+  {
+    "text": "texture. The default in reality scanner",
+    "start": 1584.08,
+    "duration": 4.32
+  },
+  {
+    "text": "is a single 8K texture, but I don't",
+    "start": 1586.0,
+    "duration": 3.919
+  },
+  {
+    "text": "think it actually matters what size it",
+    "start": 1588.4,
+    "duration": 6.24
+  },
+  {
+    "text": "is. It could be 2K, 4K, 8K, or 16K.",
+    "start": 1589.919,
+    "duration": 8.081
+  },
+  {
+    "text": "Um, and then finally we're going to",
+    "start": 1594.64,
+    "duration": 7.44
+  },
+  {
+    "text": "export our files to Maro. So main thing",
+    "start": 1598.0,
+    "duration": 6.799
+  },
+  {
+    "text": "obviously is a mesh and it needs to",
+    "start": 1602.08,
+    "duration": 4.56
+  },
+  {
+    "text": "obviously be unwrapped as well like I",
+    "start": 1604.799,
+    "duration": 3.601
+  },
+  {
+    "text": "said earlier. But Maro also has an",
+    "start": 1606.64,
+    "duration": 4.159
+  },
+  {
+    "text": "option for a mask mesh. So in this",
+    "start": 1608.4,
+    "duration": 3.759
+  },
+  {
+    "text": "situation, you definitely want one",
+    "start": 1610.799,
+    "duration": 3.281
+  },
+  {
+    "text": "because the images underneath are going",
+    "start": 1612.159,
+    "duration": 5.361
+  },
+  {
+    "text": "to be oluded. So when Maro tries to take",
+    "start": 1614.08,
+    "duration": 4.64
+  },
+  {
+    "text": "measurements for anything near the",
+    "start": 1617.52,
+    "duration": 2.56
+  },
+  {
+    "text": "bottom of that, if the table's in the",
+    "start": 1618.72,
+    "duration": 2.559
+  },
+  {
+    "text": "way, it's going to get a completely",
+    "start": 1620.08,
+    "duration": 2.479
+  },
+  {
+    "text": "wrong measurement because it's looking",
+    "start": 1621.279,
+    "duration": 3.921
+  },
+  {
+    "text": "at a table and not the actual object. So",
+    "start": 1622.559,
+    "duration": 5.12
+  },
+  {
+    "text": "if you send the mask in, Maro knows what",
+    "start": 1625.2,
+    "duration": 4.8
+  },
+  {
+    "text": "is the object and what isn't the object.",
+    "start": 1627.679,
+    "duration": 5.041
+  },
+  {
+    "text": "Um, we need ST maps as well, so it knows",
+    "start": 1630.0,
+    "duration": 4.48
+  },
+  {
+    "text": "what to do with the distortion. So it",
+    "start": 1632.72,
+    "duration": 3.199
+  },
+  {
+    "text": "has a perfect understanding of the",
+    "start": 1634.48,
+    "duration": 3.679
+  },
+  {
+    "text": "distortion of the object.",
+    "start": 1635.919,
+    "duration": 4.64
+  },
+  {
+    "text": "Something we can also do at this stage",
+    "start": 1638.159,
+    "duration": 5.361
+  },
+  {
+    "text": "is if for whatever reason you want to UV",
+    "start": 1640.559,
+    "duration": 5.281
+  },
+  {
+    "text": "unwrap your mesh slightly differently,",
+    "start": 1643.52,
+    "duration": 4.399
+  },
+  {
+    "text": "rettopize it, clean it up a little bit,",
+    "start": 1645.84,
+    "duration": 4.4
+  },
+  {
+    "text": "you can do that to the lambic file and",
+    "start": 1647.919,
+    "duration": 4.961
+  },
+  {
+    "text": "send that also into Marso, provided you",
+    "start": 1650.24,
+    "duration": 4.48
+  },
+  {
+    "text": "maintain all of the cameras and the",
+    "start": 1652.88,
+    "duration": 4.88
+  },
+  {
+    "text": "scale. So we've got our 3D data from",
+    "start": 1654.72,
+    "duration": 5.12
+  },
+  {
+    "text": "reality scan. The first thing we're",
+    "start": 1657.76,
+    "duration": 3.919
+  },
+  {
+    "text": "going to do before setting that up is",
+    "start": 1659.84,
+    "duration": 3.76
+  },
+  {
+    "text": "actually putting in our exposure",
+    "start": 1661.679,
+    "duration": 3.681
+  },
+  {
+    "text": "settings. So, one of the first things",
+    "start": 1663.6,
+    "duration": 3.439
+  },
+  {
+    "text": "you'll do during a scan is actually take",
+    "start": 1665.36,
+    "duration": 3.76
+  },
+  {
+    "text": "a picture of a gray card. So, you would",
+    "start": 1667.039,
+    "duration": 4.961
+  },
+  {
+    "text": "pop a gray card up, take a picture,",
+    "start": 1669.12,
+    "duration": 5.039
+  },
+  {
+    "text": "measure the distance, and then Maro will",
+    "start": 1672.0,
+    "duration": 4.32
+  },
+  {
+    "text": "understand what that light falloff is.",
+    "start": 1674.159,
+    "duration": 4.321
+  },
+  {
+    "text": "You only have to do this once. So, if",
+    "start": 1676.32,
+    "duration": 4.079
+  },
+  {
+    "text": "you're using the same camera and light",
+    "start": 1678.48,
+    "duration": 4.24
+  },
+  {
+    "text": "setup, do that once and then you can",
+    "start": 1680.399,
+    "duration": 4.88
+  },
+  {
+    "text": "reuse it many times. Uh, you can have",
+    "start": 1682.72,
+    "duration": 4.559
+  },
+  {
+    "text": "lots of these just in a list. So,",
+    "start": 1685.279,
+    "duration": 3.52
+  },
+  {
+    "text": "different, you know, pairings of",
+    "start": 1687.279,
+    "duration": 3.52
+  },
+  {
+    "text": "exposure and light brightness and you",
+    "start": 1688.799,
+    "duration": 3.921
+  },
+  {
+    "text": "can pick those. So once you've picked",
+    "start": 1690.799,
+    "duration": 5.12
+  },
+  {
+    "text": "that, you then state which version of um",
+    "start": 1692.72,
+    "duration": 4.559
+  },
+  {
+    "text": "photoggramometry application you're",
+    "start": 1695.919,
+    "duration": 4.561
+  },
+  {
+    "text": "using. So here we're using reality scan.",
+    "start": 1697.279,
+    "duration": 5.361
+  },
+  {
+    "text": "You then state where your mesh file is.",
+    "start": 1700.48,
+    "duration": 4.559
+  },
+  {
+    "text": "So you go to your alamic. You can then",
+    "start": 1702.64,
+    "duration": 5.519
+  },
+  {
+    "text": "optionally state where your uh mask is",
+    "start": 1705.039,
+    "duration": 5.12
+  },
+  {
+    "text": "if you want to use a mask. And then",
+    "start": 1708.159,
+    "duration": 5.921
+  },
+  {
+    "text": "finally where your stmap folder is.",
+    "start": 1710.159,
+    "duration": 5.281
+  },
+  {
+    "text": "Once you've done that, you can then go",
+    "start": 1714.08,
+    "duration": 3.199
+  },
+  {
+    "text": "over to your settings. So this is",
+    "start": 1715.44,
+    "duration": 4.479
+  },
+  {
+    "text": "deciding what resolution you would like.",
+    "start": 1717.279,
+    "duration": 5.12
+  },
+  {
+    "text": "we go all the way up to 16K. You can",
+    "start": 1719.919,
+    "duration": 4.561
+  },
+  {
+    "text": "also decide what version of Maro you",
+    "start": 1722.399,
+    "duration": 3.201
+  },
+  {
+    "text": "want to run. So we've got different",
+    "start": 1724.48,
+    "duration": 2.799
+  },
+  {
+    "text": "versions of our models that give",
+    "start": 1725.6,
+    "duration": 3.92
+  },
+  {
+    "text": "slightly different results and then you",
+    "start": 1727.279,
+    "duration": 4.961
+  },
+  {
+    "text": "add this to a queue uh or process it",
+    "start": 1729.52,
+    "duration": 4.639
+  },
+  {
+    "text": "immediately.",
+    "start": 1732.24,
+    "duration": 3.679
+  },
+  {
+    "text": "And out of that workflow, we've now got",
+    "start": 1734.159,
+    "duration": 4.801
+  },
+  {
+    "text": "a lovely 3D mesh from Reality Scan and",
+    "start": 1735.919,
+    "duration": 5.681
+  },
+  {
+    "text": "we've got all of the PBR textures from",
+    "start": 1738.96,
+    "duration": 5.64
+  },
+  {
+    "text": "Maro.",
+    "start": 1741.6,
+    "duration": 3.0
+  },
+  {
+    "text": "And finally, um, we got some, um, some",
+    "start": 1744.88,
+    "duration": 4.88
+  },
+  {
+    "text": "help from Sebastian from Quickixle with",
+    "start": 1747.84,
+    "duration": 4.719
+  },
+  {
+    "text": "this, uh, substrate material. Um, I'm",
+    "start": 1749.76,
+    "duration": 4.48
+  },
+  {
+    "text": "actually no expert here, but I threw",
+    "start": 1752.559,
+    "duration": 3.041
+  },
+  {
+    "text": "this together, and it's just got a few",
+    "start": 1754.24,
+    "duration": 3.439
+  },
+  {
+    "text": "little tweaks, so you can some make some",
+    "start": 1755.6,
+    "duration": 3.76
+  },
+  {
+    "text": "adjustments there, but it's very similar",
+    "start": 1757.679,
+    "duration": 4.161
+  },
+  {
+    "text": "to just making any material in Unreal.",
+    "start": 1759.36,
+    "duration": 6.08
+  },
+  {
+    "text": "You just load load your maps in there.",
+    "start": 1761.84,
+    "duration": 6.319
+  },
+  {
+    "text": "And finally, we just have a few Unreal",
+    "start": 1765.44,
+    "duration": 6.0
+  },
+  {
+    "text": "renders there. And uh, and that's it.",
+    "start": 1768.159,
+    "duration": 3.841
+  },
+  {
+    "text": "Thank you.",
+    "start": 1771.44,
+    "duration": 3.28
+  },
+  {
+    "text": ">> Well, thank you all for coming.",
+    "start": 1772.0,
+    "duration": 6.36
+  },
+  {
+    "text": "Yes. Thank you.",
+    "start": 1774.72,
+    "duration": 3.64
+  }
+]

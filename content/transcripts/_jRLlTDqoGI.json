@@ -1,0 +1,4977 @@
+[
+  {
+    "text": "Hello everyone, thanks for coming. My",
+    "start": 1.52,
+    "duration": 3.92
+  },
+  {
+    "text": "name is Tom Morton. I'm a lead on the",
+    "start": 3.36,
+    "duration": 4.559
+  },
+  {
+    "text": "Unreal Engine physics team and I'm here",
+    "start": 5.44,
+    "duration": 4.96
+  },
+  {
+    "text": "with my colleague Marcus Boberg who is a",
+    "start": 7.919,
+    "duration": 4.8
+  },
+  {
+    "text": "uh senior network programmer also on the",
+    "start": 10.4,
+    "duration": 4.96
+  },
+  {
+    "text": "Unreal Engine physics team. And in this",
+    "start": 12.719,
+    "duration": 4.081
+  },
+  {
+    "text": "talk we're going to talk about physics-",
+    "start": 15.36,
+    "duration": 3.52
+  },
+  {
+    "text": "based character movement with",
+    "start": 16.8,
+    "duration": 3.84
+  },
+  {
+    "text": "networking. So I'm going to start out",
+    "start": 18.88,
+    "duration": 3.68
+  },
+  {
+    "text": "talking about physics based movement and",
+    "start": 20.64,
+    "duration": 4.24
+  },
+  {
+    "text": "how we've uh we're starting to implement",
+    "start": 22.56,
+    "duration": 4.24
+  },
+  {
+    "text": "that in Unreal. And then Marcus is going",
+    "start": 24.88,
+    "duration": 3.12
+  },
+  {
+    "text": "to talk about the networking side of",
+    "start": 26.8,
+    "duration": 2.639
+  },
+  {
+    "text": "things and how we make this work",
+    "start": 28.0,
+    "duration": 4.399
+  },
+  {
+    "text": "smoothly in multiplayer.",
+    "start": 29.439,
+    "duration": 4.481
+  },
+  {
+    "text": "Okay. So for for my part, I'm going to",
+    "start": 32.399,
+    "duration": 3.201
+  },
+  {
+    "text": "start with a bit of motivation. So why",
+    "start": 33.92,
+    "duration": 3.52
+  },
+  {
+    "text": "do we want physics- based movement? What",
+    "start": 35.6,
+    "duration": 3.76
+  },
+  {
+    "text": "kind of things does it bring? And then",
+    "start": 37.44,
+    "duration": 3.36
+  },
+  {
+    "text": "I'm going to talk about what we've done",
+    "start": 39.36,
+    "duration": 4.08
+  },
+  {
+    "text": "and how it works and some of the",
+    "start": 40.8,
+    "duration": 4.8
+  },
+  {
+    "text": "challenges and the status and some of",
+    "start": 43.44,
+    "duration": 3.68
+  },
+  {
+    "text": "the things that you need to know if you",
+    "start": 45.6,
+    "duration": 5.799
+  },
+  {
+    "text": "want to implement this in your games.",
+    "start": 47.12,
+    "duration": 4.279
+  },
+  {
+    "text": "Okay. So starting out on the motivation.",
+    "start": 51.76,
+    "duration": 4.4
+  },
+  {
+    "text": "So I'll start by describing a little bit",
+    "start": 53.84,
+    "duration": 4.239
+  },
+  {
+    "text": "about how the current default character",
+    "start": 56.16,
+    "duration": 4.079
+  },
+  {
+    "text": "works in Unreal. So the current default",
+    "start": 58.079,
+    "duration": 5.28
+  },
+  {
+    "text": "character is a kinematic infinite mass",
+    "start": 60.239,
+    "duration": 5.841
+  },
+  {
+    "text": "character which uh is moved around via",
+    "start": 63.359,
+    "duration": 4.8
+  },
+  {
+    "text": "gameplay code. So you have a kinematic",
+    "start": 66.08,
+    "duration": 4.0
+  },
+  {
+    "text": "capsule and then you use gameplay code",
+    "start": 68.159,
+    "duration": 3.921
+  },
+  {
+    "text": "to move it to where you want to go. It",
+    "start": 70.08,
+    "duration": 4.719
+  },
+  {
+    "text": "does collision via queries, overlap",
+    "start": 72.08,
+    "duration": 4.24
+  },
+  {
+    "text": "queries. So, you decide where you want",
+    "start": 74.799,
+    "duration": 3.521
+  },
+  {
+    "text": "to go, you move it, you check for",
+    "start": 76.32,
+    "duration": 3.6
+  },
+  {
+    "text": "overlaps, you see if you're overlapping",
+    "start": 78.32,
+    "duration": 2.799
+  },
+  {
+    "text": "something, and then you use your",
+    "start": 79.92,
+    "duration": 3.12
+  },
+  {
+    "text": "movement code to pull it back, and then",
+    "start": 81.119,
+    "duration": 3.441
+  },
+  {
+    "text": "potentially move again for the rest of",
+    "start": 83.04,
+    "duration": 4.24
+  },
+  {
+    "text": "the time step. And you can get some",
+    "start": 84.56,
+    "duration": 4.64
+  },
+  {
+    "text": "physics interactions this way. You can",
+    "start": 87.28,
+    "duration": 3.28
+  },
+  {
+    "text": "check that you're overlapping something.",
+    "start": 89.2,
+    "duration": 3.599
+  },
+  {
+    "text": "You can apply a force. Uh you can even",
+    "start": 90.56,
+    "duration": 4.08
+  },
+  {
+    "text": "have a force applied to your character.",
+    "start": 92.799,
+    "duration": 3.36
+  },
+  {
+    "text": "But if you do, then your character",
+    "start": 94.64,
+    "duration": 2.88
+  },
+  {
+    "text": "movement code has to understand that",
+    "start": 96.159,
+    "duration": 3.121
+  },
+  {
+    "text": "force and know how to react to that, and",
+    "start": 97.52,
+    "duration": 3.76
+  },
+  {
+    "text": "you have to build that in. So in",
+    "start": 99.28,
+    "duration": 3.76
+  },
+  {
+    "text": "general, anytime you want to add any",
+    "start": 101.28,
+    "duration": 4.32
+  },
+  {
+    "text": "anything new or any any like custom",
+    "start": 103.04,
+    "duration": 4.32
+  },
+  {
+    "text": "physics or any new physics, then you",
+    "start": 105.6,
+    "duration": 3.28
+  },
+  {
+    "text": "have to code that yourself as part of",
+    "start": 107.36,
+    "duration": 3.6
+  },
+  {
+    "text": "your movement simulation. And in",
+    "start": 108.88,
+    "duration": 4.8
+  },
+  {
+    "text": "general, the movement is is not two-way.",
+    "start": 110.96,
+    "duration": 4.4
+  },
+  {
+    "text": "It's uh it's usually just a just a",
+    "start": 113.68,
+    "duration": 3.2
+  },
+  {
+    "text": "one-way. I apply a force to you, you",
+    "start": 115.36,
+    "duration": 4.0
+  },
+  {
+    "text": "apply a force to me. And so we want to",
+    "start": 116.88,
+    "duration": 4.4
+  },
+  {
+    "text": "do better than that. So what we want is",
+    "start": 119.36,
+    "duration": 4.32
+  },
+  {
+    "text": "a dynamic character that's simulated as",
+    "start": 121.28,
+    "duration": 3.68
+  },
+  {
+    "text": "part of the physics world with real",
+    "start": 123.68,
+    "duration": 4.16
+  },
+  {
+    "text": "two-way interactions. And uh and we want",
+    "start": 124.96,
+    "duration": 4.639
+  },
+  {
+    "text": "physics to matter. So things like the",
+    "start": 127.84,
+    "duration": 3.52
+  },
+  {
+    "text": "mass of your character, the character's",
+    "start": 129.599,
+    "duration": 3.601
+  },
+  {
+    "text": "momentum, the friction, all of those",
+    "start": 131.36,
+    "duration": 3.519
+  },
+  {
+    "text": "things should factor into how the",
+    "start": 133.2,
+    "duration": 3.28
+  },
+  {
+    "text": "character moves and it interacts with",
+    "start": 134.879,
+    "duration": 4.321
+  },
+  {
+    "text": "the rest of the world.",
+    "start": 136.48,
+    "duration": 5.6
+  },
+  {
+    "text": "Uh we can also uh so another goal is to",
+    "start": 139.2,
+    "duration": 4.8
+  },
+  {
+    "text": "try and simplify some of the some of the",
+    "start": 142.08,
+    "duration": 3.28
+  },
+  {
+    "text": "gameplay code that we have to write in",
+    "start": 144.0,
+    "duration": 2.959
+  },
+  {
+    "text": "order to move our capsule around the",
+    "start": 145.36,
+    "duration": 4.239
+  },
+  {
+    "text": "world. So uh even something simple like",
+    "start": 146.959,
+    "duration": 4.401
+  },
+  {
+    "text": "uh I'm trying to move a character, but",
+    "start": 149.599,
+    "duration": 3.841
+  },
+  {
+    "text": "it's moving into a curved surface and I",
+    "start": 151.36,
+    "duration": 3.76
+  },
+  {
+    "text": "have to uh go around that curved",
+    "start": 153.44,
+    "duration": 3.6
+  },
+  {
+    "text": "surface. or if I'm moving into a corner",
+    "start": 155.12,
+    "duration": 3.68
+  },
+  {
+    "text": "and there's multiple collisions that I",
+    "start": 157.04,
+    "duration": 3.52
+  },
+  {
+    "text": "have to resolve with the kinematic",
+    "start": 158.8,
+    "duration": 3.36
+  },
+  {
+    "text": "mover, these things have to be coded.",
+    "start": 160.56,
+    "duration": 3.2
+  },
+  {
+    "text": "These special cases have to be coded",
+    "start": 162.16,
+    "duration": 3.52
+  },
+  {
+    "text": "where I I move here and then I move out",
+    "start": 163.76,
+    "duration": 4.559
+  },
+  {
+    "text": "of penetration. Uh but we already have a",
+    "start": 165.68,
+    "duration": 4.24
+  },
+  {
+    "text": "physics solver. So the physics solver is",
+    "start": 168.319,
+    "duration": 3.92
+  },
+  {
+    "text": "set up to handle multiple collisions,",
+    "start": 169.92,
+    "duration": 4.399
+  },
+  {
+    "text": "multiple bodies, and resolve all of that",
+    "start": 172.239,
+    "duration": 5.121
+  },
+  {
+    "text": "kind of thing. And uh if we can use that",
+    "start": 174.319,
+    "duration": 5.361
+  },
+  {
+    "text": "physics collision instead of queries to",
+    "start": 177.36,
+    "duration": 4.4
+  },
+  {
+    "text": "uh to to do overlaps, then it can",
+    "start": 179.68,
+    "duration": 3.52
+  },
+  {
+    "text": "simplify a lot of the code that we have",
+    "start": 181.76,
+    "duration": 4.479
+  },
+  {
+    "text": "to write. And ultimately, we want to",
+    "start": 183.2,
+    "duration": 5.119
+  },
+  {
+    "text": "unlock real physics- based gameplay. So,",
+    "start": 186.239,
+    "duration": 3.521
+  },
+  {
+    "text": "where physics matters as part of your",
+    "start": 188.319,
+    "duration": 4.241
+  },
+  {
+    "text": "game.",
+    "start": 189.76,
+    "duration": 5.04
+  },
+  {
+    "text": "So, we've developed a new plugin. It's",
+    "start": 192.56,
+    "duration": 4.56
+  },
+  {
+    "text": "called Chaos Mover. So, Chaos Mover",
+    "start": 194.8,
+    "duration": 4.799
+  },
+  {
+    "text": "extends the Mover plugin, which is",
+    "start": 197.12,
+    "duration": 4.16
+  },
+  {
+    "text": "another new system that we're developing",
+    "start": 199.599,
+    "duration": 3.841
+  },
+  {
+    "text": "at Unreal. Uh, if you're unfamiliar with",
+    "start": 201.28,
+    "duration": 3.679
+  },
+  {
+    "text": "Mover, there have been a couple of talks",
+    "start": 203.44,
+    "duration": 3.76
+  },
+  {
+    "text": "about this at previous Unreal Fests. Uh,",
+    "start": 204.959,
+    "duration": 4.161
+  },
+  {
+    "text": "but it's a new way of building",
+    "start": 207.2,
+    "duration": 4.08
+  },
+  {
+    "text": "extensible and modular character",
+    "start": 209.12,
+    "duration": 4.479
+  },
+  {
+    "text": "movement in Unreal. And it's really the",
+    "start": 211.28,
+    "duration": 5.2
+  },
+  {
+    "text": "future of movement in uh in Unreal. And",
+    "start": 213.599,
+    "duration": 4.72
+  },
+  {
+    "text": "so what we've done with Chaos Mover is",
+    "start": 216.48,
+    "duration": 3.759
+  },
+  {
+    "text": "we've we've built a layer on top of that",
+    "start": 218.319,
+    "duration": 3.92
+  },
+  {
+    "text": "that allows you to have a dynamically",
+    "start": 220.239,
+    "duration": 4.72
+  },
+  {
+    "text": "simulated character as part of the mover",
+    "start": 222.239,
+    "duration": 5.36
+  },
+  {
+    "text": "system and one that integrates with",
+    "start": 224.959,
+    "duration": 4.721
+  },
+  {
+    "text": "network physics for physics- based uh",
+    "start": 227.599,
+    "duration": 5.72
+  },
+  {
+    "text": "multiplayer games.",
+    "start": 229.68,
+    "duration": 3.639
+  },
+  {
+    "text": "Uh so kind of back on onto the motiv",
+    "start": 233.519,
+    "duration": 4.481
+  },
+  {
+    "text": "motivation, sorry. So uh what do we want",
+    "start": 235.84,
+    "duration": 3.52
+  },
+  {
+    "text": "to get out of physics based movement?",
+    "start": 238.0,
+    "duration": 3.439
+  },
+  {
+    "text": "And uh at a most basic level, like we",
+    "start": 239.36,
+    "duration": 3.36
+  },
+  {
+    "text": "want to just be able to push into things",
+    "start": 241.439,
+    "duration": 4.641
+  },
+  {
+    "text": "and have that reaction uh be be smooth",
+    "start": 242.72,
+    "duration": 5.92
+  },
+  {
+    "text": "and realistic. And as I said, we want",
+    "start": 246.08,
+    "duration": 4.64
+  },
+  {
+    "text": "things like mass and momentum to matter.",
+    "start": 248.64,
+    "duration": 4.319
+  },
+  {
+    "text": "So if I'm pushing something heavy, uh",
+    "start": 250.72,
+    "duration": 5.12
+  },
+  {
+    "text": "maybe I get slowed down. Uh and if I'm",
+    "start": 252.959,
+    "duration": 4.481
+  },
+  {
+    "text": "pushing something lighter, I can I don't",
+    "start": 255.84,
+    "duration": 2.959
+  },
+  {
+    "text": "get slowed down so much. Maybe I can",
+    "start": 257.44,
+    "duration": 4.079
+  },
+  {
+    "text": "push multiple things at the same time.",
+    "start": 258.799,
+    "duration": 5.12
+  },
+  {
+    "text": "And also momentum. So if I like run up",
+    "start": 261.519,
+    "duration": 3.68
+  },
+  {
+    "text": "to something and hit it, then I should",
+    "start": 263.919,
+    "duration": 3.121
+  },
+  {
+    "text": "be able to nudge something that's a",
+    "start": 265.199,
+    "duration": 3.28
+  },
+  {
+    "text": "little bit heavier. But if I start from",
+    "start": 267.04,
+    "duration": 2.8
+  },
+  {
+    "text": "standing and then I try and push it,",
+    "start": 268.479,
+    "duration": 3.761
+  },
+  {
+    "text": "then I can't overcome friction. Uh so",
+    "start": 269.84,
+    "duration": 3.919
+  },
+  {
+    "text": "all of these things that you you get for",
+    "start": 272.24,
+    "duration": 2.959
+  },
+  {
+    "text": "kind of for free if you have a",
+    "start": 273.759,
+    "duration": 3.921
+  },
+  {
+    "text": "physics-based movement system.",
+    "start": 275.199,
+    "duration": 4.961
+  },
+  {
+    "text": "Uh so we want that kind of dynamism, but",
+    "start": 277.68,
+    "duration": 4.16
+  },
+  {
+    "text": "we also want to give you control over",
+    "start": 280.16,
+    "duration": 3.92
+  },
+  {
+    "text": "like how this works. Uh so for the",
+    "start": 281.84,
+    "duration": 3.84
+  },
+  {
+    "text": "physics character, you can tune exactly",
+    "start": 284.08,
+    "duration": 3.2
+  },
+  {
+    "text": "how much strength your character can",
+    "start": 285.68,
+    "duration": 5.36
+  },
+  {
+    "text": "apply to the rest of the world.",
+    "start": 287.28,
+    "duration": 5.68
+  },
+  {
+    "text": "Uh so as well as pushing things, we want",
+    "start": 291.04,
+    "duration": 3.92
+  },
+  {
+    "text": "the character to obviously be pushed.",
+    "start": 292.96,
+    "duration": 4.32
+  },
+  {
+    "text": "And so the physics character should uh",
+    "start": 294.96,
+    "duration": 4.799
+  },
+  {
+    "text": "be able to react to any external forces",
+    "start": 297.28,
+    "duration": 4.16
+  },
+  {
+    "text": "and collisions that are happening in",
+    "start": 299.759,
+    "duration": 4.321
+  },
+  {
+    "text": "your environment and uh also obviously",
+    "start": 301.44,
+    "duration": 4.96
+  },
+  {
+    "text": "be like pushing back as well as well as",
+    "start": 304.08,
+    "duration": 5.48
+  },
+  {
+    "text": "getting pushed.",
+    "start": 306.4,
+    "duration": 3.16
+  },
+  {
+    "text": "And in general, we want the physics",
+    "start": 311.12,
+    "duration": 2.56
+  },
+  {
+    "text": "character to be able to interact with",
+    "start": 312.479,
+    "duration": 2.801
+  },
+  {
+    "text": "anything that's in the physics world,",
+    "start": 313.68,
+    "duration": 3.2
+  },
+  {
+    "text": "all of the all of the different systems.",
+    "start": 315.28,
+    "duration": 3.52
+  },
+  {
+    "text": "So, uh this one's an interesting one.",
+    "start": 316.88,
+    "duration": 4.4
+  },
+  {
+    "text": "So, standing on a springy platform. So,",
+    "start": 318.8,
+    "duration": 3.76
+  },
+  {
+    "text": "we want the character to be able to",
+    "start": 321.28,
+    "duration": 2.96
+  },
+  {
+    "text": "apply a force down onto the platform to",
+    "start": 322.56,
+    "duration": 3.359
+  },
+  {
+    "text": "compress the spring, and we want the",
+    "start": 324.24,
+    "duration": 4.239
+  },
+  {
+    "text": "spring to apply a restoring force uh to",
+    "start": 325.919,
+    "duration": 5.041
+  },
+  {
+    "text": "to push back up again. And this kind of",
+    "start": 328.479,
+    "duration": 5.44
+  },
+  {
+    "text": "thing is is quite difficult to uh to get",
+    "start": 330.96,
+    "duration": 5.12
+  },
+  {
+    "text": "stable if you're only interacting like",
+    "start": 333.919,
+    "duration": 3.601
+  },
+  {
+    "text": "through forces. So, you really have to",
+    "start": 336.08,
+    "duration": 2.72
+  },
+  {
+    "text": "have something that's integrated into",
+    "start": 337.52,
+    "duration": 3.2
+  },
+  {
+    "text": "the physics solver where it can come to",
+    "start": 338.8,
+    "duration": 5.48
+  },
+  {
+    "text": "a stable equilibrium.",
+    "start": 340.72,
+    "duration": 3.56
+  },
+  {
+    "text": "Uh so I mentioned using physics",
+    "start": 349.12,
+    "duration": 3.04
+  },
+  {
+    "text": "collision can simplify movement code.",
+    "start": 350.56,
+    "duration": 3.44
+  },
+  {
+    "text": "This is uh this is an example of this.",
+    "start": 352.16,
+    "duration": 4.319
+  },
+  {
+    "text": "So this is the kinematic uh mover",
+    "start": 354.0,
+    "duration": 5.44
+  },
+  {
+    "text": "character and uh this is one of the edge",
+    "start": 356.479,
+    "duration": 4.641
+  },
+  {
+    "text": "cases that it doesn't quite handle at",
+    "start": 359.44,
+    "duration": 3.599
+  },
+  {
+    "text": "the moment. So sliding up a slope where",
+    "start": 361.12,
+    "duration": 3.84
+  },
+  {
+    "text": "there's like a slight lip on the wall",
+    "start": 363.039,
+    "duration": 3.841
+  },
+  {
+    "text": "that you're sliding against. And for the",
+    "start": 364.96,
+    "duration": 3.92
+  },
+  {
+    "text": "kinematic character, it's doing queries",
+    "start": 366.88,
+    "duration": 3.759
+  },
+  {
+    "text": "as it's going along. it detects that",
+    "start": 368.88,
+    "duration": 4.56
+  },
+  {
+    "text": "lip. Uh it sees it as a as a ceiling and",
+    "start": 370.639,
+    "duration": 5.12
+  },
+  {
+    "text": "it stops the character from moving. Uh",
+    "start": 373.44,
+    "duration": 5.039
+  },
+  {
+    "text": "now we could uh we could fix this and we",
+    "start": 375.759,
+    "duration": 4.641
+  },
+  {
+    "text": "probably will fix this by doing more",
+    "start": 378.479,
+    "duration": 4.081
+  },
+  {
+    "text": "queries. Uh but as I said like if you",
+    "start": 380.4,
+    "duration": 4.0
+  },
+  {
+    "text": "use physics then this kind of thing gets",
+    "start": 382.56,
+    "duration": 3.199
+  },
+  {
+    "text": "solved for free. So physics handles",
+    "start": 384.4,
+    "duration": 3.28
+  },
+  {
+    "text": "these multiple collisions. The character",
+    "start": 385.759,
+    "duration": 4.0
+  },
+  {
+    "text": "just uh slides along the edge and is",
+    "start": 387.68,
+    "duration": 6.44
+  },
+  {
+    "text": "able to resolve the collision correctly.",
+    "start": 389.759,
+    "duration": 4.361
+  },
+  {
+    "text": "So the if you if you're using the new",
+    "start": 397.84,
+    "duration": 3.919
+  },
+  {
+    "text": "the new mover system, what you start",
+    "start": 400.08,
+    "duration": 4.08
+  },
+  {
+    "text": "with is a mover component. And the mover",
+    "start": 401.759,
+    "duration": 4.481
+  },
+  {
+    "text": "component is where you author all of",
+    "start": 404.16,
+    "duration": 4.56
+  },
+  {
+    "text": "your movement modes, your transitions,",
+    "start": 406.24,
+    "duration": 5.12
+  },
+  {
+    "text": "and your movement settings. And for the",
+    "start": 408.72,
+    "duration": 4.4
+  },
+  {
+    "text": "chaos mover, it's exactly the same. So",
+    "start": 411.36,
+    "duration": 4.16
+  },
+  {
+    "text": "we use the the mover component as well,",
+    "start": 413.12,
+    "duration": 4.56
+  },
+  {
+    "text": "but we have a couple of additions that",
+    "start": 415.52,
+    "duration": 4.959
+  },
+  {
+    "text": "that we have to enable. So on the mover",
+    "start": 417.68,
+    "duration": 4.48
+  },
+  {
+    "text": "component, you have the option to change",
+    "start": 420.479,
+    "duration": 4.641
+  },
+  {
+    "text": "the the backend class of the of the",
+    "start": 422.16,
+    "duration": 5.2
+  },
+  {
+    "text": "mover. So the backend class is the thing",
+    "start": 425.12,
+    "duration": 5.12
+  },
+  {
+    "text": "that controls how the mover simulates.",
+    "start": 427.36,
+    "duration": 4.8
+  },
+  {
+    "text": "So it does things like uh how does it",
+    "start": 430.24,
+    "duration": 3.92
+  },
+  {
+    "text": "tick? How does the the networking of",
+    "start": 432.16,
+    "duration": 4.96
+  },
+  {
+    "text": "input and state work and so to enable",
+    "start": 434.16,
+    "duration": 5.28
+  },
+  {
+    "text": "the physics based movement you have to",
+    "start": 437.12,
+    "duration": 4.56
+  },
+  {
+    "text": "select the chaos mover back end on your",
+    "start": 439.44,
+    "duration": 4.08
+  },
+  {
+    "text": "mover component.",
+    "start": 441.68,
+    "duration": 4.48
+  },
+  {
+    "text": "Uh the other thing that we have is uh we",
+    "start": 443.52,
+    "duration": 5.119
+  },
+  {
+    "text": "have extended uh the movement modes and",
+    "start": 446.16,
+    "duration": 4.08
+  },
+  {
+    "text": "the transitions to physics based",
+    "start": 448.639,
+    "duration": 3.28
+  },
+  {
+    "text": "versions of those. So these are all",
+    "start": 450.24,
+    "duration": 3.92
+  },
+  {
+    "text": "based on the on the standard mover",
+    "start": 451.919,
+    "duration": 4.161
+  },
+  {
+    "text": "walking and falling and those kind of",
+    "start": 454.16,
+    "duration": 4.159
+  },
+  {
+    "text": "things. But we add additional physics",
+    "start": 456.08,
+    "duration": 4.64
+  },
+  {
+    "text": "parameters. So in this case things like",
+    "start": 458.319,
+    "duration": 4.481
+  },
+  {
+    "text": "the force and torque limit that your",
+    "start": 460.72,
+    "duration": 3.68
+  },
+  {
+    "text": "character is allowed to apply when it's",
+    "start": 462.8,
+    "duration": 5.48
+  },
+  {
+    "text": "in a particular movement mode.",
+    "start": 464.4,
+    "duration": 3.88
+  },
+  {
+    "text": "So to move the character around, we've",
+    "start": 469.44,
+    "duration": 4.08
+  },
+  {
+    "text": "developed a custom constraint that's",
+    "start": 471.199,
+    "duration": 3.68
+  },
+  {
+    "text": "integrated with the chaos physics",
+    "start": 473.52,
+    "duration": 3.679
+  },
+  {
+    "text": "solver. And the custom constraint does",
+    "start": 474.879,
+    "duration": 5.04
+  },
+  {
+    "text": "two things. So the first thing is is you",
+    "start": 477.199,
+    "duration": 4.241
+  },
+  {
+    "text": "give it a target for the character to",
+    "start": 479.919,
+    "duration": 3.441
+  },
+  {
+    "text": "move to. And the constraint will try and",
+    "start": 481.44,
+    "duration": 4.879
+  },
+  {
+    "text": "move the body to to reach the target. Uh",
+    "start": 483.36,
+    "duration": 6.16
+  },
+  {
+    "text": "so target position, target orientation.",
+    "start": 486.319,
+    "duration": 5.921
+  },
+  {
+    "text": "But uh but crucially uh it does that",
+    "start": 489.52,
+    "duration": 5.519
+  },
+  {
+    "text": "subject to a force and torque limit. So",
+    "start": 492.24,
+    "duration": 5.44
+  },
+  {
+    "text": "the constraint is only allowed to apply",
+    "start": 495.039,
+    "duration": 4.88
+  },
+  {
+    "text": "uh user supplied force and torque in",
+    "start": 497.68,
+    "duration": 4.88
+  },
+  {
+    "text": "order to reach the target. And so if",
+    "start": 499.919,
+    "duration": 4.321
+  },
+  {
+    "text": "there's uh if there's nothing else in",
+    "start": 502.56,
+    "duration": 2.96
+  },
+  {
+    "text": "the way like if there's no other",
+    "start": 504.24,
+    "duration": 2.639
+  },
+  {
+    "text": "constraints that are preventing the",
+    "start": 505.52,
+    "duration": 3.2
+  },
+  {
+    "text": "character from reaching its target, then",
+    "start": 506.879,
+    "duration": 3.44
+  },
+  {
+    "text": "the movement will be followed exactly.",
+    "start": 508.72,
+    "duration": 2.96
+  },
+  {
+    "text": "So whatever you set as your movement",
+    "start": 510.319,
+    "duration": 3.121
+  },
+  {
+    "text": "target for your character, the character",
+    "start": 511.68,
+    "duration": 3.599
+  },
+  {
+    "text": "will achieve and the physics character",
+    "start": 513.44,
+    "duration": 3.12
+  },
+  {
+    "text": "will move exactly the same as the",
+    "start": 515.279,
+    "duration": 3.44
+  },
+  {
+    "text": "kinematic character.",
+    "start": 516.56,
+    "duration": 4.56
+  },
+  {
+    "text": "But if it uh if it encounters another",
+    "start": 518.719,
+    "duration": 4.0
+  },
+  {
+    "text": "constraint, so say a collision",
+    "start": 521.12,
+    "duration": 2.719
+  },
+  {
+    "text": "constraint, if you're trying to walk",
+    "start": 522.719,
+    "duration": 3.12
+  },
+  {
+    "text": "into a wall, then the constraint solver",
+    "start": 523.839,
+    "duration": 3.601
+  },
+  {
+    "text": "will try and resolve those constraints",
+    "start": 525.839,
+    "duration": 4.0
+  },
+  {
+    "text": "together. And because the collision",
+    "start": 527.44,
+    "duration": 4.24
+  },
+  {
+    "text": "constraint can apply more force than",
+    "start": 529.839,
+    "duration": 3.281
+  },
+  {
+    "text": "your character movement constraint, it",
+    "start": 531.68,
+    "duration": 3.68
+  },
+  {
+    "text": "will in general win. And your movement",
+    "start": 533.12,
+    "duration": 3.76
+  },
+  {
+    "text": "constraint will try and get as close as",
+    "start": 535.36,
+    "duration": 4.0
+  },
+  {
+    "text": "it can to the target while respecting",
+    "start": 536.88,
+    "duration": 4.639
+  },
+  {
+    "text": "the constraint of the of the collision.",
+    "start": 539.36,
+    "duration": 4.08
+  },
+  {
+    "text": "So not not into penetrating walls and",
+    "start": 541.519,
+    "duration": 4.161
+  },
+  {
+    "text": "things like that.",
+    "start": 543.44,
+    "duration": 4.32
+  },
+  {
+    "text": "Uh the second part of the the constraint",
+    "start": 545.68,
+    "duration": 4.32
+  },
+  {
+    "text": "is uh the the ground constraint which",
+    "start": 547.76,
+    "duration": 4.48
+  },
+  {
+    "text": "holds the character up. So the user",
+    "start": 550.0,
+    "duration": 4.88
+  },
+  {
+    "text": "supplies a a ground distance and a",
+    "start": 552.24,
+    "duration": 4.48
+  },
+  {
+    "text": "ground normal and then the constraint",
+    "start": 554.88,
+    "duration": 4.16
+  },
+  {
+    "text": "says that the character uh has to be at",
+    "start": 556.72,
+    "duration": 3.92
+  },
+  {
+    "text": "least that distance from the ground",
+    "start": 559.04,
+    "duration": 4.6
+  },
+  {
+    "text": "plane.",
+    "start": 560.64,
+    "duration": 3.0
+  },
+  {
+    "text": "Uh this is just showing some debug",
+    "start": 564.56,
+    "duration": 3.68
+  },
+  {
+    "text": "visualization of uh of the ground query",
+    "start": 566.32,
+    "duration": 5.199
+  },
+  {
+    "text": "that's happening. Uh so uh we chose to",
+    "start": 568.24,
+    "duration": 5.68
+  },
+  {
+    "text": "use a query system for figuring out the",
+    "start": 571.519,
+    "duration": 4.0
+  },
+  {
+    "text": "the collision with the ground instead of",
+    "start": 573.92,
+    "duration": 3.919
+  },
+  {
+    "text": "instead of just using uh the capsule",
+    "start": 575.519,
+    "duration": 3.601
+  },
+  {
+    "text": "collision for a couple of different",
+    "start": 577.839,
+    "duration": 4.241
+  },
+  {
+    "text": "reasons. Uh one, if you if you just use",
+    "start": 579.12,
+    "duration": 4.719
+  },
+  {
+    "text": "the collision directly, you don't have a",
+    "start": 582.08,
+    "duration": 3.199
+  },
+  {
+    "text": "lot of control over the ride of the",
+    "start": 583.839,
+    "duration": 3.44
+  },
+  {
+    "text": "character, particularly over uneven",
+    "start": 585.279,
+    "duration": 5.041
+  },
+  {
+    "text": "surfaces or going up and down steps. And",
+    "start": 587.279,
+    "duration": 5.68
+  },
+  {
+    "text": "so, uh, if we just if we let the user",
+    "start": 590.32,
+    "duration": 4.24
+  },
+  {
+    "text": "say this is what the distance is, this",
+    "start": 592.959,
+    "duration": 3.681
+  },
+  {
+    "text": "is what the normal is, uh, there's a lot",
+    "start": 594.56,
+    "duration": 4.08
+  },
+  {
+    "text": "more control over how the character like",
+    "start": 596.64,
+    "duration": 4.96
+  },
+  {
+    "text": "moves and and behaves.",
+    "start": 598.64,
+    "duration": 5.04
+  },
+  {
+    "text": "And the the second reason is just using",
+    "start": 601.6,
+    "duration": 4.32
+  },
+  {
+    "text": "collision, you can get cases where say",
+    "start": 603.68,
+    "duration": 3.52
+  },
+  {
+    "text": "things are overlapping when you're like",
+    "start": 605.92,
+    "duration": 3.28
+  },
+  {
+    "text": "moving up steps and maybe the collision",
+    "start": 607.2,
+    "duration": 3.52
+  },
+  {
+    "text": "pops the capsule out and it can",
+    "start": 609.2,
+    "duration": 3.199
+  },
+  {
+    "text": "introduce velocity. So, we didn't want",
+    "start": 610.72,
+    "duration": 2.88
+  },
+  {
+    "text": "that for the character. We didn't want",
+    "start": 612.399,
+    "duration": 2.401
+  },
+  {
+    "text": "the character to be launched if it",
+    "start": 613.6,
+    "duration": 2.88
+  },
+  {
+    "text": "happens to be going over some uneven",
+    "start": 614.8,
+    "duration": 3.76
+  },
+  {
+    "text": "terrain. And so with a custom constraint",
+    "start": 616.48,
+    "duration": 3.84
+  },
+  {
+    "text": "where uh we can push the character out",
+    "start": 618.56,
+    "duration": 4.0
+  },
+  {
+    "text": "of collision but without introducing any",
+    "start": 620.32,
+    "duration": 5.56
+  },
+  {
+    "text": "additional velocity.",
+    "start": 622.56,
+    "duration": 3.32
+  },
+  {
+    "text": "Uh so uh so some teams just use a",
+    "start": 625.92,
+    "duration": 4.64
+  },
+  {
+    "text": "generic uh constraint in order to move a",
+    "start": 628.399,
+    "duration": 4.241
+  },
+  {
+    "text": "physics based character around uh say",
+    "start": 630.56,
+    "duration": 3.76
+  },
+  {
+    "text": "using a drive. That's that's perfectly",
+    "start": 632.64,
+    "duration": 4.48
+  },
+  {
+    "text": "fine. Uh so you can do that and and that",
+    "start": 634.32,
+    "duration": 5.12
+  },
+  {
+    "text": "works well. Uh the reason for having a",
+    "start": 637.12,
+    "duration": 3.6
+  },
+  {
+    "text": "one of the reasons for having a custom",
+    "start": 639.44,
+    "duration": 3.12
+  },
+  {
+    "text": "constraint though is it allows you to",
+    "start": 640.72,
+    "duration": 3.76
+  },
+  {
+    "text": "have like tailored parameters which are",
+    "start": 642.56,
+    "duration": 4.08
+  },
+  {
+    "text": "exactly suited to to character movement.",
+    "start": 644.48,
+    "duration": 4.56
+  },
+  {
+    "text": "So you don't have to have your designers",
+    "start": 646.64,
+    "duration": 4.879
+  },
+  {
+    "text": "like figuring out like what value of",
+    "start": 649.04,
+    "duration": 4.72
+  },
+  {
+    "text": "damping do I need to set on my uh on my",
+    "start": 651.519,
+    "duration": 3.601
+  },
+  {
+    "text": "drive constraint in order to get good",
+    "start": 653.76,
+    "duration": 3.6
+  },
+  {
+    "text": "behavior. Uh and it also splits the",
+    "start": 655.12,
+    "duration": 3.52
+  },
+  {
+    "text": "constraint between the movement",
+    "start": 657.36,
+    "duration": 2.56
+  },
+  {
+    "text": "constraint and the holding the character",
+    "start": 658.64,
+    "duration": 3.6
+  },
+  {
+    "text": "up constraint. Uh so holding the",
+    "start": 659.92,
+    "duration": 3.599
+  },
+  {
+    "text": "character up constraint is a one-way",
+    "start": 662.24,
+    "duration": 3.2
+  },
+  {
+    "text": "constraint rather than just an overall",
+    "start": 663.519,
+    "duration": 3.201
+  },
+  {
+    "text": "like transform constraint where we're",
+    "start": 665.44,
+    "duration": 2.56
+  },
+  {
+    "text": "using a spring to hold the character",
+    "start": 666.72,
+    "duration": 4.6
+  },
+  {
+    "text": "where it is.",
+    "start": 668.0,
+    "duration": 3.32
+  },
+  {
+    "text": "Uh, so the the constraint and actually",
+    "start": 672.64,
+    "duration": 3.759
+  },
+  {
+    "text": "all of the the movement code, so things",
+    "start": 674.48,
+    "duration": 3.599
+  },
+  {
+    "text": "like the mover input and the mover",
+    "start": 676.399,
+    "duration": 3.921
+  },
+  {
+    "text": "state, these are all integrated with the",
+    "start": 678.079,
+    "duration": 4.721
+  },
+  {
+    "text": "chaos visual debugger. And so when",
+    "start": 680.32,
+    "duration": 3.759
+  },
+  {
+    "text": "you're recording things with the chaos",
+    "start": 682.8,
+    "duration": 3.279
+  },
+  {
+    "text": "visual debugger, all of the all of the",
+    "start": 684.079,
+    "duration": 3.681
+  },
+  {
+    "text": "data from the constraints, the input",
+    "start": 686.079,
+    "duration": 3.921
+  },
+  {
+    "text": "data from the mover and the and the",
+    "start": 687.76,
+    "duration": 4.0
+  },
+  {
+    "text": "output state from the mover, they're all",
+    "start": 690.0,
+    "duration": 3.68
+  },
+  {
+    "text": "recorded in the curs visual debugger. So",
+    "start": 691.76,
+    "duration": 3.12
+  },
+  {
+    "text": "you can scrub and inspect the",
+    "start": 693.68,
+    "duration": 3.599
+  },
+  {
+    "text": "parameters. And this is this is really",
+    "start": 694.88,
+    "duration": 4.56
+  },
+  {
+    "text": "useful for say if you're having client",
+    "start": 697.279,
+    "duration": 4.081
+  },
+  {
+    "text": "and server where you want to like check",
+    "start": 699.44,
+    "duration": 4.16
+  },
+  {
+    "text": "if things are in sync you uh because the",
+    "start": 701.36,
+    "duration": 3.919
+  },
+  {
+    "text": "visual debugger records both client and",
+    "start": 703.6,
+    "duration": 4.16
+  },
+  {
+    "text": "server and you can inspect the same tick",
+    "start": 705.279,
+    "duration": 4.721
+  },
+  {
+    "text": "then uh you can do things like look at",
+    "start": 707.76,
+    "duration": 4.639
+  },
+  {
+    "text": "the input say was the input applied on",
+    "start": 710.0,
+    "duration": 4.0
+  },
+  {
+    "text": "exactly the same frame on the client and",
+    "start": 712.399,
+    "duration": 3.44
+  },
+  {
+    "text": "server what was the output of the",
+    "start": 714.0,
+    "duration": 4.24
+  },
+  {
+    "text": "simulation did they diverge was there a",
+    "start": 715.839,
+    "duration": 7.0
+  },
+  {
+    "text": "desync so this is uh really useful",
+    "start": 718.24,
+    "duration": 4.599
+  },
+  {
+    "text": "uh so this is a very simplified diagram",
+    "start": 723.36,
+    "duration": 3.84
+  },
+  {
+    "text": "to kind explain how the chaos mover",
+    "start": 725.04,
+    "duration": 4.72
+  },
+  {
+    "text": "update differs from the the regular",
+    "start": 727.2,
+    "duration": 5.28
+  },
+  {
+    "text": "mover update. So with the regular mover,",
+    "start": 729.76,
+    "duration": 4.4
+  },
+  {
+    "text": "you produce an input. So this is things",
+    "start": 732.48,
+    "duration": 3.599
+  },
+  {
+    "text": "like your pad input, your like button",
+    "start": 734.16,
+    "duration": 3.679
+  },
+  {
+    "text": "press, and that goes to the mover",
+    "start": 736.079,
+    "duration": 4.801
+  },
+  {
+    "text": "simulation update that produces a target",
+    "start": 737.839,
+    "duration": 5.921
+  },
+  {
+    "text": "uh a target uh position and orientation",
+    "start": 740.88,
+    "duration": 5.44
+  },
+  {
+    "text": "for the character. And then you set that",
+    "start": 743.76,
+    "duration": 5.36
+  },
+  {
+    "text": "state on the character directly. And",
+    "start": 746.32,
+    "duration": 4.959
+  },
+  {
+    "text": "because it's using queries for overlaps,",
+    "start": 749.12,
+    "duration": 4.32
+  },
+  {
+    "text": "uh we may have to substep that process.",
+    "start": 751.279,
+    "duration": 4.321
+  },
+  {
+    "text": "So you try and move, you resolve the",
+    "start": 753.44,
+    "duration": 3.44
+  },
+  {
+    "text": "collision, and then you try and move for",
+    "start": 755.6,
+    "duration": 2.96
+  },
+  {
+    "text": "the rest of the step. But essentially,",
+    "start": 756.88,
+    "duration": 3.12
+  },
+  {
+    "text": "the mover says, \"This is where I want to",
+    "start": 758.56,
+    "duration": 2.64
+  },
+  {
+    "text": "go.\" And then you set the state on the",
+    "start": 760.0,
+    "duration": 3.2
+  },
+  {
+    "text": "character directly.",
+    "start": 761.2,
+    "duration": 3.84
+  },
+  {
+    "text": "With the chaos mover, it's it's slightly",
+    "start": 763.2,
+    "duration": 3.439
+  },
+  {
+    "text": "different. So it starts exactly the",
+    "start": 765.04,
+    "duration": 4.16
+  },
+  {
+    "text": "same. You produce uh the same input, and",
+    "start": 766.639,
+    "duration": 4.64
+  },
+  {
+    "text": "then you go to your mover simulation to",
+    "start": 769.2,
+    "duration": 3.92
+  },
+  {
+    "text": "produce a target, but now instead of",
+    "start": 771.279,
+    "duration": 3.041
+  },
+  {
+    "text": "setting that directly onto the",
+    "start": 773.12,
+    "duration": 3.92
+  },
+  {
+    "text": "character, you set a target constraint",
+    "start": 774.32,
+    "duration": 4.88
+  },
+  {
+    "text": "uh a target for the constraint. That",
+    "start": 777.04,
+    "duration": 3.84
+  },
+  {
+    "text": "constraint is then solved as part of the",
+    "start": 779.2,
+    "duration": 4.0
+  },
+  {
+    "text": "physics update and then you read out the",
+    "start": 780.88,
+    "duration": 5.04
+  },
+  {
+    "text": "actual uh state from from the physics",
+    "start": 783.2,
+    "duration": 4.96
+  },
+  {
+    "text": "which may or may not be uh where you set",
+    "start": 785.92,
+    "duration": 5.88
+  },
+  {
+    "text": "the target to be.",
+    "start": 788.16,
+    "duration": 3.64
+  },
+  {
+    "text": "Uh now on to some of the complications.",
+    "start": 793.2,
+    "duration": 5.68
+  },
+  {
+    "text": "So in order to work well in multiplayer",
+    "start": 795.92,
+    "duration": 5.039
+  },
+  {
+    "text": "we require a somewhat deterministic uh",
+    "start": 798.88,
+    "duration": 6.079
+  },
+  {
+    "text": "physics simulation. And uh so what we",
+    "start": 800.959,
+    "duration": 6.241
+  },
+  {
+    "text": "want is if you if you set the same input",
+    "start": 804.959,
+    "duration": 4.641
+  },
+  {
+    "text": "on the client uh and on the server you",
+    "start": 807.2,
+    "duration": 4.48
+  },
+  {
+    "text": "should get roughly the same output. So",
+    "start": 809.6,
+    "duration": 4.08
+  },
+  {
+    "text": "if you don't like if if the simulation",
+    "start": 811.68,
+    "duration": 3.36
+  },
+  {
+    "text": "like starts to diverge it's not",
+    "start": 813.68,
+    "duration": 3.279
+  },
+  {
+    "text": "deterministic and client and server",
+    "start": 815.04,
+    "duration": 3.68
+  },
+  {
+    "text": "disagree then you end up with frequent",
+    "start": 816.959,
+    "duration": 3.68
+  },
+  {
+    "text": "corrections on the client which can",
+    "start": 818.72,
+    "duration": 3.84
+  },
+  {
+    "text": "resolve in which can result in",
+    "start": 820.639,
+    "duration": 4.0
+  },
+  {
+    "text": "stuttering motion and just in general",
+    "start": 822.56,
+    "duration": 4.399
+  },
+  {
+    "text": "not a good feeling. And so we don't",
+    "start": 824.639,
+    "duration": 4.481
+  },
+  {
+    "text": "require exact determinism, but the",
+    "start": 826.959,
+    "duration": 4.081
+  },
+  {
+    "text": "closer to deterministic it is, the less",
+    "start": 829.12,
+    "duration": 4.719
+  },
+  {
+    "text": "corrections that that you'll get. And so",
+    "start": 831.04,
+    "duration": 4.64
+  },
+  {
+    "text": "for physics to be deterministic, we",
+    "start": 833.839,
+    "duration": 3.601
+  },
+  {
+    "text": "require physics to run at a fixed time",
+    "start": 835.68,
+    "duration": 3.2
+  },
+  {
+    "text": "step. This is in general for physics",
+    "start": 837.44,
+    "duration": 3.12
+  },
+  {
+    "text": "simulations. They uh they're only",
+    "start": 838.88,
+    "duration": 3.759
+  },
+  {
+    "text": "deterministic for a fixed uh for a fixed",
+    "start": 840.56,
+    "duration": 5.839
+  },
+  {
+    "text": "time step. Uh but Unreal is in general a",
+    "start": 842.639,
+    "duration": 6.401
+  },
+  {
+    "text": "uh variable tick update. So if you want",
+    "start": 846.399,
+    "duration": 5.841
+  },
+  {
+    "text": "to have a fixed uh fixed physics tick,",
+    "start": 849.04,
+    "duration": 5.44
+  },
+  {
+    "text": "then you have to enable async physics.",
+    "start": 852.24,
+    "duration": 3.839
+  },
+  {
+    "text": "Uh this is something that you can set in",
+    "start": 854.48,
+    "duration": 3.76
+  },
+  {
+    "text": "your project settings. There's a there's",
+    "start": 856.079,
+    "duration": 4.481
+  },
+  {
+    "text": "a setting that says uh enable async",
+    "start": 858.24,
+    "duration": 4.08
+  },
+  {
+    "text": "physics. You have to check that. You can",
+    "start": 860.56,
+    "duration": 4.079
+  },
+  {
+    "text": "set the time step of the async physics",
+    "start": 862.32,
+    "duration": 5.04
+  },
+  {
+    "text": "tick. And what this will do is it will",
+    "start": 864.639,
+    "duration": 4.64
+  },
+  {
+    "text": "mean that physics runs at a fixed tick",
+    "start": 867.36,
+    "duration": 4.479
+  },
+  {
+    "text": "while the game play and the rest of the",
+    "start": 869.279,
+    "duration": 6.24
+  },
+  {
+    "text": "engine runs at a variable tick.",
+    "start": 871.839,
+    "duration": 6.321
+  },
+  {
+    "text": "So this is a roughly roughly how that",
+    "start": 875.519,
+    "duration": 4.641
+  },
+  {
+    "text": "works. So on the bottom you have a",
+    "start": 878.16,
+    "duration": 3.84
+  },
+  {
+    "text": "variable tick game thread. So the",
+    "start": 880.16,
+    "duration": 3.919
+  },
+  {
+    "text": "updates are different sizes. And on the",
+    "start": 882.0,
+    "duration": 3.44
+  },
+  {
+    "text": "top in the yellow you have the fixed",
+    "start": 884.079,
+    "duration": 4.961
+  },
+  {
+    "text": "physics tick. So when enough uh time has",
+    "start": 885.44,
+    "duration": 6.079
+  },
+  {
+    "text": "elapsed that we can launch uh a fixed",
+    "start": 889.04,
+    "duration": 4.239
+  },
+  {
+    "text": "physics tick that fits in that fits into",
+    "start": 891.519,
+    "duration": 4.401
+  },
+  {
+    "text": "the async physics time step the game",
+    "start": 893.279,
+    "duration": 5.441
+  },
+  {
+    "text": "thread will uh will launch a task to to",
+    "start": 895.92,
+    "duration": 6.64
+  },
+  {
+    "text": "start a new uh async physics uh job and",
+    "start": 898.72,
+    "duration": 6.559
+  },
+  {
+    "text": "that will run on its own thread.",
+    "start": 902.56,
+    "duration": 5.2
+  },
+  {
+    "text": "And so crucially uh after it's launched",
+    "start": 905.279,
+    "duration": 3.92
+  },
+  {
+    "text": "this job the the game thread doesn't",
+    "start": 907.76,
+    "duration": 3.04
+  },
+  {
+    "text": "wait for the physics result. It can it",
+    "start": 909.199,
+    "duration": 4.401
+  },
+  {
+    "text": "can carry on ticking. Uh, and so when",
+    "start": 910.8,
+    "duration": 4.96
+  },
+  {
+    "text": "the physics result is is ready, it will",
+    "start": 913.6,
+    "duration": 3.84
+  },
+  {
+    "text": "then get read back to the game thread.",
+    "start": 915.76,
+    "duration": 4.8
+  },
+  {
+    "text": "Um, but we can't set that physics result",
+    "start": 917.44,
+    "duration": 6.72
+  },
+  {
+    "text": "directly onto the onto the game uh just",
+    "start": 920.56,
+    "duration": 5.839
+  },
+  {
+    "text": "the latest physics result because uh if",
+    "start": 924.16,
+    "duration": 4.08
+  },
+  {
+    "text": "we set the the physics result then the",
+    "start": 926.399,
+    "duration": 3.521
+  },
+  {
+    "text": "game thread could keep ticking and there",
+    "start": 928.24,
+    "duration": 3.12
+  },
+  {
+    "text": "could be like one or two ticks before",
+    "start": 929.92,
+    "duration": 3.2
+  },
+  {
+    "text": "you get the next physics result and so",
+    "start": 931.36,
+    "duration": 3.36
+  },
+  {
+    "text": "on. So you could get a stuttered motion",
+    "start": 933.12,
+    "duration": 3.839
+  },
+  {
+    "text": "of your character. So we actually need",
+    "start": 934.72,
+    "duration": 3.84
+  },
+  {
+    "text": "to interpolate the result from the",
+    "start": 936.959,
+    "duration": 3.68
+  },
+  {
+    "text": "previous two physics ticks and that",
+    "start": 938.56,
+    "duration": 3.68
+  },
+  {
+    "text": "enables us to have a smooth physics",
+    "start": 940.639,
+    "duration": 4.401
+  },
+  {
+    "text": "representation on the game thread. Uh",
+    "start": 942.24,
+    "duration": 5.76
+  },
+  {
+    "text": "and um but one of the consequences of",
+    "start": 945.04,
+    "duration": 5.2
+  },
+  {
+    "text": "that is that the game thread",
+    "start": 948.0,
+    "duration": 4.959
+  },
+  {
+    "text": "representation is always slightly behind",
+    "start": 950.24,
+    "duration": 4.959
+  },
+  {
+    "text": "the physics thread representation and at",
+    "start": 952.959,
+    "duration": 4.161
+  },
+  {
+    "text": "the most it can be up to two times the",
+    "start": 955.199,
+    "duration": 5.76
+  },
+  {
+    "text": "async delta time uh away.",
+    "start": 957.12,
+    "duration": 5.44
+  },
+  {
+    "text": "So this has some consequences which I'll",
+    "start": 960.959,
+    "duration": 4.56
+  },
+  {
+    "text": "I'll talk about in a sec.",
+    "start": 962.56,
+    "duration": 5.199
+  },
+  {
+    "text": "Um now because we want the chaos mover",
+    "start": 965.519,
+    "duration": 5.76
+  },
+  {
+    "text": "update to work with physics then uh it",
+    "start": 967.759,
+    "duration": 6.161
+  },
+  {
+    "text": "has to be updated on the on the async",
+    "start": 971.279,
+    "duration": 5.041
+  },
+  {
+    "text": "physics thread. So it's it's looking at",
+    "start": 973.92,
+    "duration": 3.919
+  },
+  {
+    "text": "the the current physics state. It's",
+    "start": 976.32,
+    "duration": 4.0
+  },
+  {
+    "text": "setting the current uh physics state of",
+    "start": 977.839,
+    "duration": 4.321
+  },
+  {
+    "text": "of the constraint. So we have to tick it",
+    "start": 980.32,
+    "duration": 4.959
+  },
+  {
+    "text": "in sync. And so we do this uh by",
+    "start": 982.16,
+    "duration": 5.52
+  },
+  {
+    "text": "registering a callback on the async",
+    "start": 985.279,
+    "duration": 4.8
+  },
+  {
+    "text": "physics update. So the chaos mover ticks",
+    "start": 987.68,
+    "duration": 4.399
+  },
+  {
+    "text": "on the async thread when the physics",
+    "start": 990.079,
+    "duration": 3.68
+  },
+  {
+    "text": "ticks.",
+    "start": 992.079,
+    "duration": 4.241
+  },
+  {
+    "text": "So this has some consequences. One of",
+    "start": 993.759,
+    "duration": 4.0
+  },
+  {
+    "text": "the most important consequences is",
+    "start": 996.32,
+    "duration": 3.759
+  },
+  {
+    "text": "because we're running the the movement",
+    "start": 997.759,
+    "duration": 5.041
+  },
+  {
+    "text": "uh simulation logic on the async thread,",
+    "start": 1000.079,
+    "duration": 4.641
+  },
+  {
+    "text": "that means that we can't directly access",
+    "start": 1002.8,
+    "duration": 4.24
+  },
+  {
+    "text": "uh data that's on the game thread. Uh",
+    "start": 1004.72,
+    "duration": 4.16
+  },
+  {
+    "text": "because the game thread is is ticking at",
+    "start": 1007.04,
+    "duration": 3.68
+  },
+  {
+    "text": "the same time. So we don't want uh the",
+    "start": 1008.88,
+    "duration": 4.639
+  },
+  {
+    "text": "two threads to be uh to be clashing. So",
+    "start": 1010.72,
+    "duration": 5.28
+  },
+  {
+    "text": "what we have to do is uh so we when",
+    "start": 1013.519,
+    "duration": 4.32
+  },
+  {
+    "text": "physics is about to tick, we produce",
+    "start": 1016.0,
+    "duration": 4.72
+  },
+  {
+    "text": "input. So pad input uh that all happens",
+    "start": 1017.839,
+    "duration": 5.12
+  },
+  {
+    "text": "uh at the same time. But then also we",
+    "start": 1020.72,
+    "duration": 4.319
+  },
+  {
+    "text": "have to gather all of the data that we",
+    "start": 1022.959,
+    "duration": 4.321
+  },
+  {
+    "text": "need in order to run our simulation from",
+    "start": 1025.039,
+    "duration": 3.92
+  },
+  {
+    "text": "the game thread. And then we push that",
+    "start": 1027.28,
+    "duration": 4.48
+  },
+  {
+    "text": "up to the async physics thread. And then",
+    "start": 1028.959,
+    "duration": 5.84
+  },
+  {
+    "text": "we use that data to update the chaos",
+    "start": 1031.76,
+    "duration": 5.36
+  },
+  {
+    "text": "mover simulation, produce a target that",
+    "start": 1034.799,
+    "duration": 4.481
+  },
+  {
+    "text": "then goes to physics. And then when",
+    "start": 1037.12,
+    "duration": 3.76
+  },
+  {
+    "text": "physics is done, we'll pull the state",
+    "start": 1039.28,
+    "duration": 3.919
+  },
+  {
+    "text": "back down to the game thread and that",
+    "start": 1040.88,
+    "duration": 4.079
+  },
+  {
+    "text": "state will be interpolated. And then",
+    "start": 1043.199,
+    "duration": 4.64
+  },
+  {
+    "text": "finally, we'll get our resultant uh",
+    "start": 1044.959,
+    "duration": 6.281
+  },
+  {
+    "text": "mover state.",
+    "start": 1047.839,
+    "duration": 3.401
+  },
+  {
+    "text": "Uh so one of the uh one of the",
+    "start": 1052.4,
+    "duration": 5.36
+  },
+  {
+    "text": "implications of uh of running the the",
+    "start": 1055.2,
+    "duration": 5.839
+  },
+  {
+    "text": "physics tick and the uh in in async is",
+    "start": 1057.76,
+    "duration": 4.72
+  },
+  {
+    "text": "that there can be some slight input",
+    "start": 1061.039,
+    "duration": 3.041
+  },
+  {
+    "text": "latency. So I'll try and describe what's",
+    "start": 1062.48,
+    "duration": 2.88
+  },
+  {
+    "text": "going on. It's quite difficult to see in",
+    "start": 1064.08,
+    "duration": 3.04
+  },
+  {
+    "text": "this video. So we may have to kind of",
+    "start": 1065.36,
+    "duration": 4.16
+  },
+  {
+    "text": "watch this back and and pause it. Uh but",
+    "start": 1067.12,
+    "duration": 4.24
+  },
+  {
+    "text": "to describe what's going on. So the",
+    "start": 1069.52,
+    "duration": 4.32
+  },
+  {
+    "text": "character is split in two. On the left",
+    "start": 1071.36,
+    "duration": 4.16
+  },
+  {
+    "text": "there is a physics version of the",
+    "start": 1073.84,
+    "duration": 3.68
+  },
+  {
+    "text": "character and on the right there is a",
+    "start": 1075.52,
+    "duration": 3.84
+  },
+  {
+    "text": "kinematic version of the character. and",
+    "start": 1077.52,
+    "duration": 3.68
+  },
+  {
+    "text": "they're both set to jump at exactly the",
+    "start": 1079.36,
+    "duration": 3.84
+  },
+  {
+    "text": "same time. And I'm going to start this",
+    "start": 1081.2,
+    "duration": 5.04
+  },
+  {
+    "text": "playing. Uh, and what you'll hopefully",
+    "start": 1083.2,
+    "duration": 5.359
+  },
+  {
+    "text": "notice that the the video will slow down",
+    "start": 1086.24,
+    "duration": 4.4
+  },
+  {
+    "text": "in a sec. What you hopefully notice is",
+    "start": 1088.559,
+    "duration": 3.921
+  },
+  {
+    "text": "that uh when the charact the character",
+    "start": 1090.64,
+    "duration": 3.68
+  },
+  {
+    "text": "on the right starts jumping a little bit",
+    "start": 1092.48,
+    "duration": 3.439
+  },
+  {
+    "text": "a little bit sooner, it as I said, it's",
+    "start": 1094.32,
+    "duration": 3.04
+  },
+  {
+    "text": "very difficult to see. The character on",
+    "start": 1095.919,
+    "duration": 2.721
+  },
+  {
+    "text": "the right will start jumping a little",
+    "start": 1097.36,
+    "duration": 3.12
+  },
+  {
+    "text": "bit sooner than the character on the",
+    "start": 1098.64,
+    "duration": 4.56
+  },
+  {
+    "text": "left. And the reason for this is like",
+    "start": 1100.48,
+    "duration": 4.319
+  },
+  {
+    "text": "imagine you're on the game thread.",
+    "start": 1103.2,
+    "duration": 4.32
+  },
+  {
+    "text": "You're producing an input. Then you have",
+    "start": 1104.799,
+    "duration": 4.641
+  },
+  {
+    "text": "to wait for the next physics tick in",
+    "start": 1107.52,
+    "duration": 4.32
+  },
+  {
+    "text": "order to be able to consume that input.",
+    "start": 1109.44,
+    "duration": 4.4
+  },
+  {
+    "text": "And then physics will run as gameplay is",
+    "start": 1111.84,
+    "duration": 3.68
+  },
+  {
+    "text": "is potentially ticking and then we'll",
+    "start": 1113.84,
+    "duration": 3.92
+  },
+  {
+    "text": "get the result back from physics. Uh but",
+    "start": 1115.52,
+    "duration": 3.92
+  },
+  {
+    "text": "even then we have to wait for the",
+    "start": 1117.76,
+    "duration": 4.32
+  },
+  {
+    "text": "interpolated result to catch up before",
+    "start": 1119.44,
+    "duration": 4.96
+  },
+  {
+    "text": "we start to see the the jumping motion.",
+    "start": 1122.08,
+    "duration": 4.719
+  },
+  {
+    "text": "So the result of that is there's an",
+    "start": 1124.4,
+    "duration": 4.159
+  },
+  {
+    "text": "additional latency between when I press",
+    "start": 1126.799,
+    "duration": 3.921
+  },
+  {
+    "text": "the jump button and when I see the the",
+    "start": 1128.559,
+    "duration": 3.761
+  },
+  {
+    "text": "final result on the game thread because",
+    "start": 1130.72,
+    "duration": 2.88
+  },
+  {
+    "text": "the game thread is running slightly",
+    "start": 1132.32,
+    "duration": 2.88
+  },
+  {
+    "text": "behind.",
+    "start": 1133.6,
+    "duration": 4.8
+  },
+  {
+    "text": "Now for for most titles this uh this is",
+    "start": 1135.2,
+    "duration": 4.64
+  },
+  {
+    "text": "not going to matter. It's it's a very",
+    "start": 1138.4,
+    "duration": 4.08
+  },
+  {
+    "text": "small difference. Um and there are",
+    "start": 1139.84,
+    "duration": 5.12
+  },
+  {
+    "text": "things that you can do to hide this uh",
+    "start": 1142.48,
+    "duration": 4.8
+  },
+  {
+    "text": "this latency like through like animation",
+    "start": 1144.96,
+    "duration": 4.32
+  },
+  {
+    "text": "anticipation and things like this. Uh",
+    "start": 1147.28,
+    "duration": 3.84
+  },
+  {
+    "text": "but if your game is is very twitchy and",
+    "start": 1149.28,
+    "duration": 3.6
+  },
+  {
+    "text": "you require like a a very short input",
+    "start": 1151.12,
+    "duration": 5.28
+  },
+  {
+    "text": "latency then uh uh then uh this this may",
+    "start": 1152.88,
+    "duration": 5.6
+  },
+  {
+    "text": "be a problem for that type of game. Uh",
+    "start": 1156.4,
+    "duration": 3.84
+  },
+  {
+    "text": "we are working on solutions for this but",
+    "start": 1158.48,
+    "duration": 3.12
+  },
+  {
+    "text": "this is the the state of things at the",
+    "start": 1160.24,
+    "duration": 4.36
+  },
+  {
+    "text": "moment.",
+    "start": 1161.6,
+    "duration": 3.0
+  },
+  {
+    "text": "But if you put all of these things",
+    "start": 1167.039,
+    "duration": 3.76
+  },
+  {
+    "text": "together, so if you have chaos mover to",
+    "start": 1168.32,
+    "duration": 5.52
+  },
+  {
+    "text": "run physics- based uh movement, if you",
+    "start": 1170.799,
+    "duration": 5.201
+  },
+  {
+    "text": "enable async physics, so that we can",
+    "start": 1173.84,
+    "duration": 4.959
+  },
+  {
+    "text": "have uh multiplayer work with physics,",
+    "start": 1176.0,
+    "duration": 4.64
+  },
+  {
+    "text": "then you can start to get some really",
+    "start": 1178.799,
+    "duration": 3.921
+  },
+  {
+    "text": "interesting things with uh multiplayer",
+    "start": 1180.64,
+    "duration": 4.88
+  },
+  {
+    "text": "physics- based uh gameplay. And so you",
+    "start": 1182.72,
+    "duration": 5.6
+  },
+  {
+    "text": "can have uh players interacting directly",
+    "start": 1185.52,
+    "duration": 4.32
+  },
+  {
+    "text": "with each other. You can have players",
+    "start": 1188.32,
+    "duration": 4.08
+  },
+  {
+    "text": "interacting indirectly through uh moving",
+    "start": 1189.84,
+    "duration": 4.16
+  },
+  {
+    "text": "parts of of the physics world. And",
+    "start": 1192.4,
+    "duration": 4.48
+  },
+  {
+    "text": "everything works uh smoothly together.",
+    "start": 1194.0,
+    "duration": 4.4
+  },
+  {
+    "text": "Um at this point I should probably",
+    "start": 1196.88,
+    "duration": 3.679
+  },
+  {
+    "text": "apologize for this demo. Uh this was my",
+    "start": 1198.4,
+    "duration": 4.08
+  },
+  {
+    "text": "own creation. This is the extent of my",
+    "start": 1200.559,
+    "duration": 4.48
+  },
+  {
+    "text": "artistic ability in uh Unreal. But you",
+    "start": 1202.48,
+    "duration": 4.559
+  },
+  {
+    "text": "kind of uh but you get the idea. So uh",
+    "start": 1205.039,
+    "duration": 3.681
+  },
+  {
+    "text": "this is just a supposed to demonstrate.",
+    "start": 1207.039,
+    "duration": 3.041
+  },
+  {
+    "text": "Here's here's an idea of the kind of",
+    "start": 1208.72,
+    "duration": 3.68
+  },
+  {
+    "text": "thing that you can get if you uh if you",
+    "start": 1210.08,
+    "duration": 4.479
+  },
+  {
+    "text": "enable physics based motion and uh",
+    "start": 1212.4,
+    "duration": 3.68
+  },
+  {
+    "text": "network physics and everything's working",
+    "start": 1214.559,
+    "duration": 4.521
+  },
+  {
+    "text": "together.",
+    "start": 1216.08,
+    "duration": 3.0
+  },
+  {
+    "text": "Uh so Chaos Mover is very much",
+    "start": 1231.36,
+    "duration": 4.16
+  },
+  {
+    "text": "experimental right now. Uh but it is it",
+    "start": 1233.2,
+    "duration": 4.24
+  },
+  {
+    "text": "is available. So uh it will be available",
+    "start": 1235.52,
+    "duration": 4.88
+  },
+  {
+    "text": "in the in the 5.7 release. Uh so if you",
+    "start": 1237.44,
+    "duration": 5.52
+  },
+  {
+    "text": "want to try it out, you can. Uh in order",
+    "start": 1240.4,
+    "duration": 3.92
+  },
+  {
+    "text": "to try it out, you'll have to enable the",
+    "start": 1242.96,
+    "duration": 3.52
+  },
+  {
+    "text": "Chaos Mover plugin as well as the mover",
+    "start": 1244.32,
+    "duration": 4.32
+  },
+  {
+    "text": "plugin. And if you want to see some",
+    "start": 1246.48,
+    "duration": 4.559
+  },
+  {
+    "text": "examples of a of a character setup, you",
+    "start": 1248.64,
+    "duration": 4.72
+  },
+  {
+    "text": "can. We have some examples in the mover",
+    "start": 1251.039,
+    "duration": 4.561
+  },
+  {
+    "text": "examples plugin and we have a a chaos",
+    "start": 1253.36,
+    "duration": 3.76
+  },
+  {
+    "text": "physics character set up with some",
+    "start": 1255.6,
+    "duration": 3.04
+  },
+  {
+    "text": "example content so you can play around",
+    "start": 1257.12,
+    "duration": 3.28
+  },
+  {
+    "text": "with that.",
+    "start": 1258.64,
+    "duration": 4.56
+  },
+  {
+    "text": "Uh also if you're a UEFN user uh when",
+    "start": 1260.4,
+    "duration": 4.72
+  },
+  {
+    "text": "you enable physics on your on your",
+    "start": 1263.2,
+    "duration": 4.32
+  },
+  {
+    "text": "project settings uh you will actually be",
+    "start": 1265.12,
+    "duration": 4.88
+  },
+  {
+    "text": "spawning in a a physics based character.",
+    "start": 1267.52,
+    "duration": 3.84
+  },
+  {
+    "text": "So that's using all of the same",
+    "start": 1270.0,
+    "duration": 3.52
+  },
+  {
+    "text": "technology in the UFN physics character",
+    "start": 1271.36,
+    "duration": 5.72
+  },
+  {
+    "text": "as as this.",
+    "start": 1273.52,
+    "duration": 3.56
+  },
+  {
+    "text": "And with that, I'm going to pass it on",
+    "start": 1278.08,
+    "duration": 5.079
+  },
+  {
+    "text": "to Marcus to talk about network physics.",
+    "start": 1279.28,
+    "duration": 5.899
+  },
+  {
+    "text": "[applause]",
+    "start": 1283.159,
+    "duration": 2.02
+  },
+  {
+    "text": "Yes. So let's take a look at how network",
+    "start": 1290.72,
+    "duration": 6.0
+  },
+  {
+    "text": "physics comes together behind the",
+    "start": 1294.159,
+    "duration": 4.161
+  },
+  {
+    "text": "scenes.",
+    "start": 1296.72,
+    "duration": 4.4
+  },
+  {
+    "text": "uh we will talk about how we synchronize",
+    "start": 1298.32,
+    "duration": 4.32
+  },
+  {
+    "text": "time",
+    "start": 1301.12,
+    "duration": 5.36
+  },
+  {
+    "text": "and then the replication mode we use in",
+    "start": 1302.64,
+    "duration": 5.44
+  },
+  {
+    "text": "uh",
+    "start": 1306.48,
+    "duration": 4.72
+  },
+  {
+    "text": "what Tom showed which is re simulation",
+    "start": 1308.08,
+    "duration": 5.2
+  },
+  {
+    "text": "what it solves and then an issue that",
+    "start": 1311.2,
+    "duration": 4.0
+  },
+  {
+    "text": "comes from it and then how we approach",
+    "start": 1313.28,
+    "duration": 5.68
+  },
+  {
+    "text": "that issue and at the end uh we'll look",
+    "start": 1315.2,
+    "duration": 6.959
+  },
+  {
+    "text": "a little bit about sinking gameplay",
+    "start": 1318.96,
+    "duration": 7.92
+  },
+  {
+    "text": "logic uh that affects physics",
+    "start": 1322.159,
+    "duration": 4.721
+  },
+  {
+    "text": "To start off,",
+    "start": 1327.44,
+    "duration": 5.119
+  },
+  {
+    "text": "um, as Tom mentioned, we run a fixed",
+    "start": 1329.44,
+    "duration": 7.2
+  },
+  {
+    "text": "delta time on the, uh, physics thread.",
+    "start": 1332.559,
+    "duration": 6.081
+  },
+  {
+    "text": "That means we can link time to frame",
+    "start": 1336.64,
+    "duration": 4.8
+  },
+  {
+    "text": "numbers. So instead of, uh, using time,",
+    "start": 1338.64,
+    "duration": 7.12
+  },
+  {
+    "text": "we use, uh, the frame numbers instead.",
+    "start": 1341.44,
+    "duration": 6.88
+  },
+  {
+    "text": "And when the client has connected to a",
+    "start": 1345.76,
+    "duration": 4.24
+  },
+  {
+    "text": "server,",
+    "start": 1348.32,
+    "duration": 3.52
+  },
+  {
+    "text": "it will send an RPC to the server",
+    "start": 1350.0,
+    "duration": 4.88
+  },
+  {
+    "text": "saying, \"Hey, I'm at frame 20.\" Server",
+    "start": 1351.84,
+    "duration": 6.16
+  },
+  {
+    "text": "receives that server then sends back an",
+    "start": 1354.88,
+    "duration": 5.2
+  },
+  {
+    "text": "RPC to the client saying, \"Hey, when you",
+    "start": 1358.0,
+    "duration": 4.72
+  },
+  {
+    "text": "told me you were at frame 20, I was at",
+    "start": 1360.08,
+    "duration": 5.68
+  },
+  {
+    "text": "frame 100.\" Um, and the server can have",
+    "start": 1362.72,
+    "duration": 4.56
+  },
+  {
+    "text": "been running for 10 minutes or something",
+    "start": 1365.76,
+    "duration": 3.279
+  },
+  {
+    "text": "and then you join. So the server frame",
+    "start": 1367.28,
+    "duration": 5.68
+  },
+  {
+    "text": "number can be whatever at that point.",
+    "start": 1369.039,
+    "duration": 6.561
+  },
+  {
+    "text": "The client receives that back and then",
+    "start": 1372.96,
+    "duration": 5.599
+  },
+  {
+    "text": "the client calculates the frame offset",
+    "start": 1375.6,
+    "duration": 6.0
+  },
+  {
+    "text": "between client and server. In this case,",
+    "start": 1378.559,
+    "duration": 5.921
+  },
+  {
+    "text": "it takes uh 100 server frame minus",
+    "start": 1381.6,
+    "duration": 5.92
+  },
+  {
+    "text": "client frame 20 equals 80. And now the",
+    "start": 1384.48,
+    "duration": 5.92
+  },
+  {
+    "text": "client can translate between client",
+    "start": 1387.52,
+    "duration": 5.76
+  },
+  {
+    "text": "frame and server frame. So it knows it",
+    "start": 1390.4,
+    "duration": 5.12
+  },
+  {
+    "text": "can take its um the client can take its",
+    "start": 1393.28,
+    "duration": 5.44
+  },
+  {
+    "text": "current frame plus frame offset and know",
+    "start": 1395.52,
+    "duration": 6.159
+  },
+  {
+    "text": "that this is the corresponding",
+    "start": 1398.72,
+    "duration": 5.52
+  },
+  {
+    "text": "frame on the server",
+    "start": 1401.679,
+    "duration": 4.801
+  },
+  {
+    "text": "and you can get this tick offset from",
+    "start": 1404.24,
+    "duration": 4.24
+  },
+  {
+    "text": "the a player controller get network",
+    "start": 1406.48,
+    "duration": 5.28
+  },
+  {
+    "text": "physics tick offset. Currently",
+    "start": 1408.48,
+    "duration": 6.96
+  },
+  {
+    "text": "the um frame offset is always zero on",
+    "start": 1411.76,
+    "duration": 6.48
+  },
+  {
+    "text": "the server which is useful. We'll get",
+    "start": 1415.44,
+    "duration": 6.64
+  },
+  {
+    "text": "into that a little bit later. And we try",
+    "start": 1418.24,
+    "duration": 6.799
+  },
+  {
+    "text": "to keep this frame offset static when we",
+    "start": 1422.08,
+    "duration": 6.0
+  },
+  {
+    "text": "first after we first calculate it. Um",
+    "start": 1425.039,
+    "duration": 7.12
+  },
+  {
+    "text": "but if the um uh network conditions uh",
+    "start": 1428.08,
+    "duration": 5.839
+  },
+  {
+    "text": "starts to differ, it takes longer for",
+    "start": 1432.159,
+    "duration": 3.921
+  },
+  {
+    "text": "your messages to arrive to the server or",
+    "start": 1433.919,
+    "duration": 4.561
+  },
+  {
+    "text": "shorter then the server might tell this",
+    "start": 1436.08,
+    "duration": 5.28
+  },
+  {
+    "text": "uh client, hey, you need to um get in",
+    "start": 1438.48,
+    "duration": 5.36
+  },
+  {
+    "text": "sync again. And the client will do that",
+    "start": 1441.36,
+    "duration": 5.199
+  },
+  {
+    "text": "by scaling the time a little bit of the",
+    "start": 1443.84,
+    "duration": 4.4
+  },
+  {
+    "text": "simulation. So it might tick a little",
+    "start": 1446.559,
+    "duration": 3.761
+  },
+  {
+    "text": "bit faster or a little bit slower.",
+    "start": 1448.24,
+    "duration": 3.84
+  },
+  {
+    "text": "nothing you will see. It might be one",
+    "start": 1450.32,
+    "duration": 5.2
+  },
+  {
+    "text": "frame over the next 100 physics frames.",
+    "start": 1452.08,
+    "duration": 5.68
+  },
+  {
+    "text": "Uh so it's doing this dynamically all",
+    "start": 1455.52,
+    "duration": 5.92
+  },
+  {
+    "text": "the time to keep this frame offset uh in",
+    "start": 1457.76,
+    "duration": 5.2
+  },
+  {
+    "text": "sync.",
+    "start": 1461.44,
+    "duration": 3.2
+  },
+  {
+    "text": "But this means then what we um we have",
+    "start": 1462.96,
+    "duration": 3.28
+  },
+  {
+    "text": "corresponding frames between client and",
+    "start": 1464.64,
+    "duration": 4.399
+  },
+  {
+    "text": "server. If you look at the state of",
+    "start": 1466.24,
+    "duration": 5.2
+  },
+  {
+    "text": "client frame 20, it should be equal to",
+    "start": 1469.039,
+    "duration": 7.361
+  },
+  {
+    "text": "the state of server frame 100.",
+    "start": 1471.44,
+    "duration": 6.96
+  },
+  {
+    "text": "And that brings us into timelines",
+    "start": 1476.4,
+    "duration": 3.84
+  },
+  {
+    "text": "because then",
+    "start": 1478.4,
+    "duration": 4.399
+  },
+  {
+    "text": "uh we have corresponding timelines",
+    "start": 1480.24,
+    "duration": 4.96
+  },
+  {
+    "text": "between client and server. Uh and when",
+    "start": 1482.799,
+    "duration": 4.321
+  },
+  {
+    "text": "you press forward you start moving",
+    "start": 1485.2,
+    "duration": 5.599
+  },
+  {
+    "text": "forward. Uh you act then in your forward",
+    "start": 1487.12,
+    "duration": 6.96
+  },
+  {
+    "text": "predicted timeline",
+    "start": 1490.799,
+    "duration": 5.681
+  },
+  {
+    "text": "I should say you start um you press",
+    "start": 1494.08,
+    "duration": 4.16
+  },
+  {
+    "text": "forward start moving forward you send",
+    "start": 1496.48,
+    "duration": 3.6
+  },
+  {
+    "text": "that to the server and then the server",
+    "start": 1498.24,
+    "duration": 5.52
+  },
+  {
+    "text": "starts moving after you. uh but those",
+    "start": 1500.08,
+    "duration": 6.16
+  },
+  {
+    "text": "happen on the corresponding frames",
+    "start": 1503.76,
+    "duration": 5.44
+  },
+  {
+    "text": "between client and server. So those two",
+    "start": 1506.24,
+    "duration": 5.76
+  },
+  {
+    "text": "timelines are uh already corresponding.",
+    "start": 1509.2,
+    "duration": 5.599
+  },
+  {
+    "text": "And then we have another timeline which",
+    "start": 1512.0,
+    "duration": 4.4
+  },
+  {
+    "text": "is called interpolated timeline. And",
+    "start": 1514.799,
+    "duration": 2.961
+  },
+  {
+    "text": "instead of trying to explain this",
+    "start": 1516.4,
+    "duration": 4.0
+  },
+  {
+    "text": "further, I'll just show them to you. Um",
+    "start": 1517.76,
+    "duration": 6.32
+  },
+  {
+    "text": "this is chaos visual debugger. I have uh",
+    "start": 1520.4,
+    "duration": 7.2
+  },
+  {
+    "text": "recorded with two clients and the",
+    "start": 1524.08,
+    "duration": 6.64
+  },
+  {
+    "text": "server. Then this is one player. Uh so",
+    "start": 1527.6,
+    "duration": 5.36
+  },
+  {
+    "text": "it's the autonous proxy and then the",
+    "start": 1530.72,
+    "duration": 5.12
+  },
+  {
+    "text": "server and then the simulator proxy all",
+    "start": 1532.96,
+    "duration": 4.64
+  },
+  {
+    "text": "shown at the same time in KS visual",
+    "start": 1535.84,
+    "duration": 3.76
+  },
+  {
+    "text": "debugger. Currently it's only showing",
+    "start": 1537.6,
+    "duration": 4.959
+  },
+  {
+    "text": "the um server player in red. And then",
+    "start": 1539.6,
+    "duration": 7.28
+  },
+  {
+    "text": "I'll enable here uh on the right side",
+    "start": 1542.559,
+    "duration": 7.761
+  },
+  {
+    "text": "the two clients",
+    "start": 1546.88,
+    "duration": 7.56
+  },
+  {
+    "text": "and they show up in blue.",
+    "start": 1550.32,
+    "duration": 4.12
+  },
+  {
+    "text": "And then I will stop stepping the",
+    "start": 1554.96,
+    "duration": 4.64
+  },
+  {
+    "text": "simulation and the autonomous proxy will",
+    "start": 1556.88,
+    "duration": 5.279
+  },
+  {
+    "text": "start moving because it's producing the",
+    "start": 1559.6,
+    "duration": 4.64
+  },
+  {
+    "text": "inputs sending those to the server.",
+    "start": 1562.159,
+    "duration": 4.4
+  },
+  {
+    "text": "Server starts moving the server sends",
+    "start": 1564.24,
+    "duration": 4.64
+  },
+  {
+    "text": "the inputs to the SIM proxy and then the",
+    "start": 1566.559,
+    "duration": 6.281
+  },
+  {
+    "text": "SIM proxy starts moving.",
+    "start": 1568.88,
+    "duration": 3.96
+  },
+  {
+    "text": "And here you have them for predicted",
+    "start": 1573.279,
+    "duration": 5.121
+  },
+  {
+    "text": "timeline for the autonomous proxy",
+    "start": 1575.44,
+    "duration": 4.96
+  },
+  {
+    "text": "server timeline for the server",
+    "start": 1578.4,
+    "duration": 5.68
+  },
+  {
+    "text": "interpolated timeline for the SIM proxy.",
+    "start": 1580.4,
+    "duration": 7.84
+  },
+  {
+    "text": "And think about throwing a ball at",
+    "start": 1584.08,
+    "duration": 7.36
+  },
+  {
+    "text": "these. The ball will hit all three",
+    "start": 1588.24,
+    "duration": 6.559
+  },
+  {
+    "text": "different uh entities here. Autonomous",
+    "start": 1591.44,
+    "duration": 5.2
+  },
+  {
+    "text": "proxy servers in proxy at different",
+    "start": 1594.799,
+    "duration": 3.841
+  },
+  {
+    "text": "places or even miss the autonomous proxy",
+    "start": 1596.64,
+    "duration": 5.279
+  },
+  {
+    "text": "for example. Um it's very hard to have",
+    "start": 1598.64,
+    "duration": 6.32
+  },
+  {
+    "text": "physics interactions when your timelines",
+    "start": 1601.919,
+    "duration": 6.081
+  },
+  {
+    "text": "are split up like this. Uh but we",
+    "start": 1604.96,
+    "duration": 5.04
+  },
+  {
+    "text": "already know that we have uh",
+    "start": 1608.0,
+    "duration": 3.52
+  },
+  {
+    "text": "corresponding frames between client and",
+    "start": 1610.0,
+    "duration": 3.12
+  },
+  {
+    "text": "server",
+    "start": 1611.52,
+    "duration": 5.2
+  },
+  {
+    "text": "and you can enable that in CVD in case",
+    "start": 1613.12,
+    "duration": 5.6
+  },
+  {
+    "text": "visual debugger.",
+    "start": 1616.72,
+    "duration": 3.52
+  },
+  {
+    "text": "That's what I'm going to do here on the",
+    "start": 1618.72,
+    "duration": 4.64
+  },
+  {
+    "text": "timeline sync. You flip to network tick.",
+    "start": 1620.24,
+    "duration": 6.08
+  },
+  {
+    "text": "That will align your uh timelines client",
+    "start": 1623.36,
+    "duration": 4.799
+  },
+  {
+    "text": "server.",
+    "start": 1626.32,
+    "duration": 3.68
+  },
+  {
+    "text": "And you can see here that the autonomous",
+    "start": 1628.159,
+    "duration": 5.841
+  },
+  {
+    "text": "proxy and the server timeline",
+    "start": 1630.0,
+    "duration": 6.08
+  },
+  {
+    "text": "uh align. They start moving on the same",
+    "start": 1634.0,
+    "duration": 4.4
+  },
+  {
+    "text": "corresponding frame, but the simulated",
+    "start": 1636.08,
+    "duration": 5.12
+  },
+  {
+    "text": "proxy is still behind.",
+    "start": 1638.4,
+    "duration": 6.24
+  },
+  {
+    "text": "So we have aligned two of the timelines.",
+    "start": 1641.2,
+    "duration": 7.92
+  },
+  {
+    "text": "And that brings us over to reimulation.",
+    "start": 1644.64,
+    "duration": 6.48
+  },
+  {
+    "text": "A reimulation",
+    "start": 1649.12,
+    "duration": 4.32
+  },
+  {
+    "text": "uh consists of a rewind. We go back in",
+    "start": 1651.12,
+    "duration": 4.48
+  },
+  {
+    "text": "time, set physics to how it looked at",
+    "start": 1653.44,
+    "duration": 4.8
+  },
+  {
+    "text": "that point in time, correct it based on",
+    "start": 1655.6,
+    "duration": 5.28
+  },
+  {
+    "text": "data we see from the server, and then we",
+    "start": 1658.24,
+    "duration": 4.4
+  },
+  {
+    "text": "step through the simulation up until our",
+    "start": 1660.88,
+    "duration": 5.44
+  },
+  {
+    "text": "current timeline again.",
+    "start": 1662.64,
+    "duration": 7.76
+  },
+  {
+    "text": "And uh to explain this and another issue",
+    "start": 1666.32,
+    "duration": 6.16
+  },
+  {
+    "text": "coming up, we'll talk a little bit about",
+    "start": 1670.4,
+    "duration": 5.92
+  },
+  {
+    "text": "inputs um and input prediction.",
+    "start": 1672.48,
+    "duration": 6.0
+  },
+  {
+    "text": "So at the top we have the client",
+    "start": 1676.32,
+    "duration": 5.2
+  },
+  {
+    "text": "autonomous proxy your local player then",
+    "start": 1678.48,
+    "duration": 5.12
+  },
+  {
+    "text": "the server and then the client simulator",
+    "start": 1681.52,
+    "duration": 4.399
+  },
+  {
+    "text": "proxy my player on someone else's",
+    "start": 1683.6,
+    "duration": 4.799
+  },
+  {
+    "text": "computer. So the autonomous proxy at the",
+    "start": 1685.919,
+    "duration": 4.321
+  },
+  {
+    "text": "top produces its input. It has the",
+    "start": 1688.399,
+    "duration": 3.841
+  },
+  {
+    "text": "latest input 12 but it takes time to",
+    "start": 1690.24,
+    "duration": 3.919
+  },
+  {
+    "text": "send inputs to the server. So the server",
+    "start": 1692.24,
+    "duration": 3.679
+  },
+  {
+    "text": "at this point in time only received",
+    "start": 1694.159,
+    "duration": 4.161
+  },
+  {
+    "text": "input 9 and the server sends it to SIM",
+    "start": 1695.919,
+    "duration": 4.561
+  },
+  {
+    "text": "proxies and this that also takes time.",
+    "start": 1698.32,
+    "duration": 5.52
+  },
+  {
+    "text": "So the SIM proxy has only received input",
+    "start": 1700.48,
+    "duration": 5.439
+  },
+  {
+    "text": "six.",
+    "start": 1703.84,
+    "duration": 4.079
+  },
+  {
+    "text": "But we need to apply the inputs also. So",
+    "start": 1705.919,
+    "duration": 4.88
+  },
+  {
+    "text": "we apply the inputs when we get them in",
+    "start": 1707.919,
+    "duration": 6.161
+  },
+  {
+    "text": "the wrong so to speak timeline. The sim",
+    "start": 1710.799,
+    "duration": 5.841
+  },
+  {
+    "text": "proxy will apply the input six on frame",
+    "start": 1714.08,
+    "duration": 6.16
+  },
+  {
+    "text": "12 which is wrong. Uh but and eventually",
+    "start": 1716.64,
+    "duration": 6.159
+  },
+  {
+    "text": "that will lead to a desync and when a",
+    "start": 1720.24,
+    "duration": 6.24
+  },
+  {
+    "text": "desync happens we do a rewind. We apply",
+    "start": 1722.799,
+    "duration": 7.441
+  },
+  {
+    "text": "input number six on frame six where it",
+    "start": 1726.48,
+    "duration": 6.48
+  },
+  {
+    "text": "should have been applied. And then we",
+    "start": 1730.24,
+    "duration": 5.6
+  },
+  {
+    "text": "reimulate predicting inputs based on the",
+    "start": 1732.96,
+    "duration": 5.28
+  },
+  {
+    "text": "input we already received",
+    "start": 1735.84,
+    "duration": 5.68
+  },
+  {
+    "text": "and do that up until the current for",
+    "start": 1738.24,
+    "duration": 5.6
+  },
+  {
+    "text": "predicted time.",
+    "start": 1741.52,
+    "duration": 4.639
+  },
+  {
+    "text": "And if we do that",
+    "start": 1743.84,
+    "duration": 4.0
+  },
+  {
+    "text": "it",
+    "start": 1746.159,
+    "duration": 3.601
+  },
+  {
+    "text": "looks like this. Same thing we have it",
+    "start": 1747.84,
+    "duration": 4.24
+  },
+  {
+    "text": "set to network tick. I start stepping",
+    "start": 1749.76,
+    "duration": 4.96
+  },
+  {
+    "text": "this forward. Autonous Proxin server is",
+    "start": 1752.08,
+    "duration": 5.76
+  },
+  {
+    "text": "in sync. Sim proxy starts moving. It",
+    "start": 1754.72,
+    "duration": 5.04
+  },
+  {
+    "text": "detects, oh, I started moving on the",
+    "start": 1757.84,
+    "duration": 5.04
+  },
+  {
+    "text": "wrong frame and it's going to pop back,",
+    "start": 1759.76,
+    "duration": 5.12
+  },
+  {
+    "text": "do a re simulation, which you can see to",
+    "start": 1762.88,
+    "duration": 5.679
+  },
+  {
+    "text": "the bottom right. It's in resim.",
+    "start": 1764.88,
+    "duration": 5.44
+  },
+  {
+    "text": "Step through the simulation, predict",
+    "start": 1768.559,
+    "duration": 5.921
+  },
+  {
+    "text": "inputs, and then it goes out of reason",
+    "start": 1770.32,
+    "duration": 6.32
+  },
+  {
+    "text": "here. And then it starts applying inputs",
+    "start": 1774.48,
+    "duration": 4.559
+  },
+  {
+    "text": "that it receives in the still wrong",
+    "start": 1776.64,
+    "duration": 4.56
+  },
+  {
+    "text": "timeline, but if the inputs are the",
+    "start": 1779.039,
+    "duration": 5.841
+  },
+  {
+    "text": "same, it's going to stay in sync. And",
+    "start": 1781.2,
+    "duration": 7.44
+  },
+  {
+    "text": "now we can start um interacting with",
+    "start": 1784.88,
+    "duration": 8.64
+  },
+  {
+    "text": "physics. It played back again. I'll just",
+    "start": 1788.64,
+    "duration": 7.36
+  },
+  {
+    "text": "Now you have the autonomous proxy,",
+    "start": 1793.52,
+    "duration": 5.84
+  },
+  {
+    "text": "server, and sim proxy all aligned. And",
+    "start": 1796.0,
+    "duration": 5.36
+  },
+  {
+    "text": "you can throw a ball at these. It will",
+    "start": 1799.36,
+    "duration": 6.64
+  },
+  {
+    "text": "bounce off correct direction, etc.",
+    "start": 1801.36,
+    "duration": 4.64
+  },
+  {
+    "text": "We have an issue with this though and",
+    "start": 1809.84,
+    "duration": 4.559
+  },
+  {
+    "text": "some of you might have thought about it",
+    "start": 1812.08,
+    "duration": 5.839
+  },
+  {
+    "text": "already. We predict inputs.",
+    "start": 1814.399,
+    "duration": 8.561
+  },
+  {
+    "text": "Uh and that means that when we um stop",
+    "start": 1817.919,
+    "duration": 7.841
+  },
+  {
+    "text": "moving, you will have predicted that",
+    "start": 1822.96,
+    "duration": 5.439
+  },
+  {
+    "text": "you've moved for a certain number of uh",
+    "start": 1825.76,
+    "duration": 4.56
+  },
+  {
+    "text": "frames",
+    "start": 1828.399,
+    "duration": 5.28
+  },
+  {
+    "text": "and uh you have moved too far and we",
+    "start": 1830.32,
+    "duration": 5.76
+  },
+  {
+    "text": "need to do a rewind, stop the character,",
+    "start": 1833.679,
+    "duration": 5.6
+  },
+  {
+    "text": "reimulate when having been stopped. But",
+    "start": 1836.08,
+    "duration": 5.599
+  },
+  {
+    "text": "we render out the character in four",
+    "start": 1839.279,
+    "duration": 3.76
+  },
+  {
+    "text": "predicted timeline. So now we need to",
+    "start": 1841.679,
+    "duration": 6.761
+  },
+  {
+    "text": "slide back and that looks like this.",
+    "start": 1843.039,
+    "duration": 5.401
+  },
+  {
+    "text": "it doesn't look very very good",
+    "start": 1850.24,
+    "duration": 6.88
+  },
+  {
+    "text": "and that can be solved",
+    "start": 1854.48,
+    "duration": 5.28
+  },
+  {
+    "text": "or one approach to solving it is uh",
+    "start": 1857.12,
+    "duration": 5.76
+  },
+  {
+    "text": "introducing input decay. So the further",
+    "start": 1859.76,
+    "duration": 7.2
+  },
+  {
+    "text": "into a reimulation uh or the further in",
+    "start": 1862.88,
+    "duration": 7.2
+  },
+  {
+    "text": "to input prediction during a reimulation",
+    "start": 1866.96,
+    "duration": 6.88
+  },
+  {
+    "text": "we can decay the input more and more.",
+    "start": 1870.08,
+    "duration": 8.64
+  },
+  {
+    "text": "Um so for example if we uh want to decay",
+    "start": 1873.84,
+    "duration": 7.839
+  },
+  {
+    "text": "by 20%",
+    "start": 1878.72,
+    "duration": 4.64
+  },
+  {
+    "text": "I'll actually take that in two slides",
+    "start": 1881.679,
+    "duration": 6.24
+  },
+  {
+    "text": "sorry um the input decay curve first off",
+    "start": 1883.36,
+    "duration": 7.28
+  },
+  {
+    "text": "can be set via the necroysics settings",
+    "start": 1887.919,
+    "duration": 5.681
+  },
+  {
+    "text": "data asset",
+    "start": 1890.64,
+    "duration": 5.039
+  },
+  {
+    "text": "and it's the one at the bottom currently",
+    "start": 1893.6,
+    "duration": 4.88
+  },
+  {
+    "text": "or rather by default it's just three",
+    "start": 1895.679,
+    "duration": 5.761
+  },
+  {
+    "text": "three uh dots on the curve and that",
+    "start": 1898.48,
+    "duration": 7.12
+  },
+  {
+    "text": "works for um many parts, but you might",
+    "start": 1901.44,
+    "duration": 6.8
+  },
+  {
+    "text": "want to alter it if you have something",
+    "start": 1905.6,
+    "duration": 5.679
+  },
+  {
+    "text": "more specific to balance.",
+    "start": 1908.24,
+    "duration": 4.799
+  },
+  {
+    "text": "And the implementation of the input",
+    "start": 1911.279,
+    "duration": 3.601
+  },
+  {
+    "text": "decay for the character just looks like",
+    "start": 1913.039,
+    "duration": 6.801
+  },
+  {
+    "text": "this. uh it's a function on the input",
+    "start": 1914.88,
+    "duration": 6.88
+  },
+  {
+    "text": "uh that gets called during a resim when",
+    "start": 1919.84,
+    "duration": 4.8
+  },
+  {
+    "text": "we do prediction and then it passes in",
+    "start": 1921.76,
+    "duration": 5.2
+  },
+  {
+    "text": "the uh whatever value I have for the",
+    "start": 1924.64,
+    "duration": 7.2
+  },
+  {
+    "text": "curve on the uh um",
+    "start": 1926.96,
+    "duration": 8.959
+  },
+  {
+    "text": "linear point during the uh reimulation",
+    "start": 1931.84,
+    "duration": 6.079
+  },
+  {
+    "text": "and in this case it would if you want to",
+    "start": 1935.919,
+    "duration": 4.081
+  },
+  {
+    "text": "decay 20% it would just multiply your",
+    "start": 1937.919,
+    "duration": 5.281
+  },
+  {
+    "text": "move input vector by 0.8 eight to to",
+    "start": 1940.0,
+    "duration": 7.12
+  },
+  {
+    "text": "remove 20% of it.",
+    "start": 1943.2,
+    "duration": 6.719
+  },
+  {
+    "text": "And when we balance that correctly, it",
+    "start": 1947.12,
+    "duration": 7.159
+  },
+  {
+    "text": "can rather look something like this,",
+    "start": 1949.919,
+    "duration": 4.36
+  },
+  {
+    "text": "which is much better.",
+    "start": 1955.6,
+    "duration": 3.959
+  },
+  {
+    "text": "And now let's take a look at uh",
+    "start": 1959.919,
+    "duration": 8.0
+  },
+  {
+    "text": "syncing gameplay logic.",
+    "start": 1964.32,
+    "duration": 6.64
+  },
+  {
+    "text": "So um anything that",
+    "start": 1967.919,
+    "duration": 5.6
+  },
+  {
+    "text": "affects physics",
+    "start": 1970.96,
+    "duration": 5.36
+  },
+  {
+    "text": "should run in sync between client and",
+    "start": 1973.519,
+    "duration": 8.081
+  },
+  {
+    "text": "server and it should handle reimulations",
+    "start": 1976.32,
+    "duration": 8.88
+  },
+  {
+    "text": "and that also means uh physics runs on",
+    "start": 1981.6,
+    "duration": 7.04
+  },
+  {
+    "text": "the async physics thread. So you need to",
+    "start": 1985.2,
+    "duration": 8.319
+  },
+  {
+    "text": "write logic on the physics thread.",
+    "start": 1988.64,
+    "duration": 6.96
+  },
+  {
+    "text": "And I'll take two examples here. a",
+    "start": 1993.519,
+    "duration": 5.76
+  },
+  {
+    "text": "kinematic moving platform and then uh",
+    "start": 1995.6,
+    "duration": 5.6
+  },
+  {
+    "text": "something we did with the pickaxe and",
+    "start": 1999.279,
+    "duration": 6.681
+  },
+  {
+    "text": "weapons for the UFM physics character.",
+    "start": 2001.2,
+    "duration": 4.76
+  },
+  {
+    "text": "I'm not going to go through this but",
+    "start": 2006.799,
+    "duration": 4.641
+  },
+  {
+    "text": "this is uh logic to move a kinematic",
+    "start": 2008.64,
+    "duration": 6.32
+  },
+  {
+    "text": "platform on the physics thread.",
+    "start": 2011.44,
+    "duration": 6.719
+  },
+  {
+    "text": "Uh if you look at the very top this is",
+    "start": 2014.96,
+    "duration": 6.079
+  },
+  {
+    "text": "in on pre simulate internal. It's",
+    "start": 2018.159,
+    "duration": 5.441
+  },
+  {
+    "text": "through an ISIM callback object which",
+    "start": 2021.039,
+    "duration": 5.441
+  },
+  {
+    "text": "runs on the physics thread only",
+    "start": 2023.6,
+    "duration": 5.919
+  },
+  {
+    "text": "or it ticks on the physics thread.",
+    "start": 2026.48,
+    "duration": 6.559
+  },
+  {
+    "text": "And the key part here is um the first",
+    "start": 2029.519,
+    "duration": 5.841
+  },
+  {
+    "text": "line with colored",
+    "start": 2033.039,
+    "duration": 6.401
+  },
+  {
+    "text": "um functions you get current frame and",
+    "start": 2035.36,
+    "duration": 6.0
+  },
+  {
+    "text": "then you add your frame offset. So we",
+    "start": 2039.44,
+    "duration": 4.16
+  },
+  {
+    "text": "translate your current frame into the",
+    "start": 2041.36,
+    "duration": 3.76
+  },
+  {
+    "text": "server frame. Essentially I call it",
+    "start": 2043.6,
+    "duration": 3.76
+  },
+  {
+    "text": "corresponding frame here but it is on",
+    "start": 2045.12,
+    "duration": 4.08
+  },
+  {
+    "text": "the client it's the server frame. And if",
+    "start": 2047.36,
+    "duration": 3.759
+  },
+  {
+    "text": "you do this on the server, it's going to",
+    "start": 2049.2,
+    "duration": 3.919
+  },
+  {
+    "text": "get the current server's current frame",
+    "start": 2051.119,
+    "duration": 4.48
+  },
+  {
+    "text": "plus zero because frame offset is zero",
+    "start": 2053.119,
+    "duration": 4.321
+  },
+  {
+    "text": "on the server. So you still get the",
+    "start": 2055.599,
+    "duration": 5.441
+  },
+  {
+    "text": "server frame. So if you base this logic",
+    "start": 2057.44,
+    "duration": 5.84
+  },
+  {
+    "text": "um in the if statement, you have if the",
+    "start": 2061.04,
+    "duration": 4.4
+  },
+  {
+    "text": "corresponding frame is larger or equal",
+    "start": 2063.28,
+    "duration": 5.52
+  },
+  {
+    "text": "to start frame of the kinematic mover,",
+    "start": 2065.44,
+    "duration": 5.919
+  },
+  {
+    "text": "then it starts to start moving. And if",
+    "start": 2068.8,
+    "duration": 5.119
+  },
+  {
+    "text": "the start frame is the based on the",
+    "start": 2071.359,
+    "duration": 5.121
+  },
+  {
+    "text": "server frame, this logic will produce",
+    "start": 2073.919,
+    "duration": 4.16
+  },
+  {
+    "text": "the same input on the corresponding",
+    "start": 2076.48,
+    "duration": 3.76
+  },
+  {
+    "text": "frame on the client as it does on the",
+    "start": 2078.079,
+    "duration": 6.56
+  },
+  {
+    "text": "server. And I see callback objects which",
+    "start": 2080.24,
+    "duration": 9.679
+  },
+  {
+    "text": "is what's what the on preimulate",
+    "start": 2084.639,
+    "duration": 8.641
+  },
+  {
+    "text": "is integrated in will be called during a",
+    "start": 2089.919,
+    "duration": 6.24
+  },
+  {
+    "text": "reimulation. So this logic also runs",
+    "start": 2093.28,
+    "duration": 6.319
+  },
+  {
+    "text": "during reim and produces the correct uh",
+    "start": 2096.159,
+    "duration": 7.44
+  },
+  {
+    "text": "logic during re simulations.",
+    "start": 2099.599,
+    "duration": 7.361
+  },
+  {
+    "text": "You still need to uh network the start",
+    "start": 2103.599,
+    "duration": 5.681
+  },
+  {
+    "text": "frame, end frame, start position, end",
+    "start": 2106.96,
+    "duration": 4.32
+  },
+  {
+    "text": "position, etc. This logic doesn't handle",
+    "start": 2109.28,
+    "duration": 5.92
+  },
+  {
+    "text": "the networking of it, but it handles um",
+    "start": 2111.28,
+    "duration": 6.48
+  },
+  {
+    "text": "the running in sync client server and",
+    "start": 2115.2,
+    "duration": 5.44
+  },
+  {
+    "text": "during reason.",
+    "start": 2117.76,
+    "duration": 7.72
+  },
+  {
+    "text": "That's essentially what this says. Um,",
+    "start": 2120.64,
+    "duration": 4.84
+  },
+  {
+    "text": "and this is how it looks.",
+    "start": 2126.0,
+    "duration": 5.2
+  },
+  {
+    "text": "You have a kinematic platform in the",
+    "start": 2129.28,
+    "duration": 4.079
+  },
+  {
+    "text": "background there that starts moving when",
+    "start": 2131.2,
+    "duration": 3.84
+  },
+  {
+    "text": "I step forward here. And then the",
+    "start": 2133.359,
+    "duration": 3.441
+  },
+  {
+    "text": "character will start moving, which you",
+    "start": 2135.04,
+    "duration": 5.36
+  },
+  {
+    "text": "saw before will also trigger a resim.",
+    "start": 2136.8,
+    "duration": 5.279
+  },
+  {
+    "text": "And then if you look at the platform, it",
+    "start": 2140.4,
+    "duration": 5.84
+  },
+  {
+    "text": "snaps back and resims in sync along with",
+    "start": 2142.079,
+    "duration": 8.481
+  },
+  {
+    "text": "the pl with a character. Um I guess I",
+    "start": 2146.24,
+    "duration": 7.28
+  },
+  {
+    "text": "can mention also that when the resim",
+    "start": 2150.56,
+    "duration": 5.519
+  },
+  {
+    "text": "starts it looks like it's desyncing.",
+    "start": 2153.52,
+    "duration": 4.8
+  },
+  {
+    "text": "It's uh chaos visual debugger that shows",
+    "start": 2156.079,
+    "duration": 4.961
+  },
+  {
+    "text": "the different parts of a resim. So the",
+    "start": 2158.32,
+    "duration": 5.44
+  },
+  {
+    "text": "very very first resim step it shows the",
+    "start": 2161.04,
+    "duration": 6.24
+  },
+  {
+    "text": "rewind correction and that only happens",
+    "start": 2163.76,
+    "duration": 5.2
+  },
+  {
+    "text": "on the client. So it doesn't sync the",
+    "start": 2167.28,
+    "duration": 4.0
+  },
+  {
+    "text": "server part. So you see the red server",
+    "start": 2168.96,
+    "duration": 4.32
+  },
+  {
+    "text": "part before it steps into the first",
+    "start": 2171.28,
+    "duration": 5.28
+  },
+  {
+    "text": "reason uh step. So it looks like it",
+    "start": 2173.28,
+    "duration": 4.64
+  },
+  {
+    "text": "might desync there at the very",
+    "start": 2176.56,
+    "duration": 4.36
+  },
+  {
+    "text": "beginning.",
+    "start": 2177.92,
+    "duration": 3.0
+  },
+  {
+    "text": "The next one is um",
+    "start": 2185.44,
+    "duration": 6.48
+  },
+  {
+    "text": "scheduled physics commands.",
+    "start": 2188.96,
+    "duration": 4.639
+  },
+  {
+    "text": "And this logic is running on the game",
+    "start": 2191.92,
+    "duration": 4.96
+  },
+  {
+    "text": "thread. So the decision to do something",
+    "start": 2193.599,
+    "duration": 5.441
+  },
+  {
+    "text": "is done on the game thread. It's not",
+    "start": 2196.88,
+    "duration": 4.32
+  },
+  {
+    "text": "really recommended to run your game on",
+    "start": 2199.04,
+    "duration": 5.52
+  },
+  {
+    "text": "this, but it's a solution to make",
+    "start": 2201.2,
+    "duration": 5.6
+  },
+  {
+    "text": "decisions on the game thread uh that",
+    "start": 2204.56,
+    "duration": 6.48
+  },
+  {
+    "text": "affects physics and um work in re",
+    "start": 2206.8,
+    "duration": 5.76
+  },
+  {
+    "text": "simulation.",
+    "start": 2211.04,
+    "duration": 3.2
+  },
+  {
+    "text": "What happens here? I'm also not going to",
+    "start": 2212.56,
+    "duration": 3.76
+  },
+  {
+    "text": "go through the whole thing. What happens",
+    "start": 2214.24,
+    "duration": 5.52
+  },
+  {
+    "text": "is that we add a force to an object. Uh",
+    "start": 2216.32,
+    "duration": 6.72
+  },
+  {
+    "text": "we again get the corresponding frame",
+    "start": 2219.76,
+    "duration": 6.319
+  },
+  {
+    "text": "based on your current frame uh and the",
+    "start": 2223.04,
+    "duration": 5.2
+  },
+  {
+    "text": "frame offset.",
+    "start": 2226.079,
+    "duration": 5.76
+  },
+  {
+    "text": "And then we schedule a a lambda function",
+    "start": 2228.24,
+    "duration": 6.48
+  },
+  {
+    "text": "for the physics thread to run on a",
+    "start": 2231.839,
+    "duration": 4.641
+  },
+  {
+    "text": "scheduled",
+    "start": 2234.72,
+    "duration": 4.639
+  },
+  {
+    "text": "specific frame. And if that frame is the",
+    "start": 2236.48,
+    "duration": 5.359
+  },
+  {
+    "text": "server frame calculated back, the client",
+    "start": 2239.359,
+    "duration": 5.201
+  },
+  {
+    "text": "frame or a server frame depending on",
+    "start": 2241.839,
+    "duration": 6.721
+  },
+  {
+    "text": "where you're at, then the physics thread",
+    "start": 2244.56,
+    "duration": 6.08
+  },
+  {
+    "text": "will run that on the correct",
+    "start": 2248.56,
+    "duration": 4.24
+  },
+  {
+    "text": "corresponding frame, client and server,",
+    "start": 2250.64,
+    "duration": 4.56
+  },
+  {
+    "text": "and it will cache that lambda function",
+    "start": 2252.8,
+    "duration": 5.2
+  },
+  {
+    "text": "in rewind history, replay it during a",
+    "start": 2255.2,
+    "duration": 4.72
+  },
+  {
+    "text": "reason.",
+    "start": 2258.0,
+    "duration": 3.839
+  },
+  {
+    "text": "And the lambda function is just to add a",
+    "start": 2259.92,
+    "duration": 5.84
+  },
+  {
+    "text": "force to an object in this case.",
+    "start": 2261.839,
+    "duration": 7.201
+  },
+  {
+    "text": "Same thing here. uh you need to yourself",
+    "start": 2265.76,
+    "duration": 5.12
+  },
+  {
+    "text": "network the server frame in this case",
+    "start": 2269.04,
+    "duration": 3.68
+  },
+  {
+    "text": "and the force vector and maybe the",
+    "start": 2270.88,
+    "duration": 6.239
+  },
+  {
+    "text": "object that should receive the force",
+    "start": 2272.72,
+    "duration": 7.92
+  },
+  {
+    "text": "and this is how it looked without this",
+    "start": 2277.119,
+    "duration": 5.521
+  },
+  {
+    "text": "implemented. The pickaxe works on the",
+    "start": 2280.64,
+    "duration": 4.959
+  },
+  {
+    "text": "game thread and it tries to add a force",
+    "start": 2282.64,
+    "duration": 5.439
+  },
+  {
+    "text": "to the object on the game thread which",
+    "start": 2285.599,
+    "duration": 5.601
+  },
+  {
+    "text": "then gets overridden by by the",
+    "start": 2288.079,
+    "duration": 5.04
+  },
+  {
+    "text": "networking.",
+    "start": 2291.2,
+    "duration": 5.56
+  },
+  {
+    "text": "So it looks stuttery.",
+    "start": 2293.119,
+    "duration": 3.641
+  },
+  {
+    "text": "And this is with the solution,",
+    "start": 2299.119,
+    "duration": 5.48
+  },
+  {
+    "text": "much smoother",
+    "start": 2316.24,
+    "duration": 6.32
+  },
+  {
+    "text": "upcoming work for network physics. Uh we",
+    "start": 2319.52,
+    "duration": 4.24
+  },
+  {
+    "text": "have a lot of work to do with",
+    "start": 2322.56,
+    "duration": 4.799
+  },
+  {
+    "text": "optimizations uh CPU and memory",
+    "start": 2323.76,
+    "duration": 7.839
+  },
+  {
+    "text": "um and network bandwidth",
+    "start": 2327.359,
+    "duration": 7.201
+  },
+  {
+    "text": "and then new features. One large thing",
+    "start": 2331.599,
+    "duration": 5.281
+  },
+  {
+    "text": "we are working on is a physics",
+    "start": 2334.56,
+    "duration": 5.6
+  },
+  {
+    "text": "replication LOD system so to speak. We",
+    "start": 2336.88,
+    "duration": 7.12
+  },
+  {
+    "text": "have we don't only have reimulation as a",
+    "start": 2340.16,
+    "duration": 5.12
+  },
+  {
+    "text": "replication mode. We also have",
+    "start": 2344.0,
+    "duration": 2.96
+  },
+  {
+    "text": "predictive interpolation which is",
+    "start": 2345.28,
+    "duration": 4.16
+  },
+  {
+    "text": "running in Lego Fortnite for example,",
+    "start": 2346.96,
+    "duration": 5.2
+  },
+  {
+    "text": "but it runs in the interpolated timeline",
+    "start": 2349.44,
+    "duration": 5.04
+  },
+  {
+    "text": "and can predict a little bit around that",
+    "start": 2352.16,
+    "duration": 4.64
+  },
+  {
+    "text": "timeline. It's cheaper to run than re",
+    "start": 2354.48,
+    "duration": 4.16
+  },
+  {
+    "text": "simulation. So we want to run it on",
+    "start": 2356.8,
+    "duration": 4.799
+  },
+  {
+    "text": "things that are further away from us.",
+    "start": 2358.64,
+    "duration": 5.28
+  },
+  {
+    "text": "And um the issue there is when something",
+    "start": 2361.599,
+    "duration": 4.321
+  },
+  {
+    "text": "that is far away comes closer to you, we",
+    "start": 2363.92,
+    "duration": 4.8
+  },
+  {
+    "text": "need to bring it into your timeline",
+    "start": 2365.92,
+    "duration": 4.88
+  },
+  {
+    "text": "uh so that the for predicted timeline I",
+    "start": 2368.72,
+    "duration": 5.52
+  },
+  {
+    "text": "mean so that you can interact with it in",
+    "start": 2370.8,
+    "duration": 7.76
+  },
+  {
+    "text": "uh re simulation and we um the solution",
+    "start": 2374.24,
+    "duration": 7.599
+  },
+  {
+    "text": "for this is already in the engine still",
+    "start": 2378.56,
+    "duration": 5.76
+  },
+  {
+    "text": "experimental it has issues we're working",
+    "start": 2381.839,
+    "duration": 5.121
+  },
+  {
+    "text": "on uh solving those issues of the",
+    "start": 2384.32,
+    "duration": 6.759
+  },
+  {
+    "text": "transition Um",
+    "start": 2386.96,
+    "duration": 4.119
+  },
+  {
+    "text": "but that that's",
+    "start": 2391.119,
+    "duration": 4.72
+  },
+  {
+    "text": "coming up in the um next release or the",
+    "start": 2393.2,
+    "duration": 5.52
+  },
+  {
+    "text": "release after that something like that.",
+    "start": 2395.839,
+    "duration": 6.0
+  },
+  {
+    "text": "And then quality of life",
+    "start": 2398.72,
+    "duration": 5.76
+  },
+  {
+    "text": "mainly documentation",
+    "start": 2401.839,
+    "duration": 6.321
+  },
+  {
+    "text": "uh some API changes some um new uh",
+    "start": 2404.48,
+    "duration": 6.4
+  },
+  {
+    "text": "features easier to make things. Uh",
+    "start": 2408.16,
+    "duration": 4.64
+  },
+  {
+    "text": "currently the network physics set I",
+    "start": 2410.88,
+    "duration": 5.84
+  },
+  {
+    "text": "think no network physics component is um",
+    "start": 2412.8,
+    "duration": 6.799
+  },
+  {
+    "text": "designed for a stream of inputs and",
+    "start": 2416.72,
+    "duration": 6.08
+  },
+  {
+    "text": "states but we also see a need for just",
+    "start": 2419.599,
+    "duration": 5.681
+  },
+  {
+    "text": "eventbased things oneoff events for",
+    "start": 2422.8,
+    "duration": 4.96
+  },
+  {
+    "text": "example",
+    "start": 2425.28,
+    "duration": 5.92
+  },
+  {
+    "text": "um I can also say last week I put up a",
+    "start": 2427.76,
+    "duration": 5.92
+  },
+  {
+    "text": "tutorial on how to actually implement",
+    "start": 2431.2,
+    "duration": 5.52
+  },
+  {
+    "text": "network physics for a very simple custom",
+    "start": 2433.68,
+    "duration": 5.28
+  },
+  {
+    "text": "pawn just a ball rolling around by your",
+    "start": 2436.72,
+    "duration": 3.44
+  },
+  {
+    "text": "inputs.",
+    "start": 2438.96,
+    "duration": 3.92
+  },
+  {
+    "text": "on the uh Unreal Dev community. If you",
+    "start": 2440.16,
+    "duration": 4.64
+  },
+  {
+    "text": "search for network physics pawn",
+    "start": 2442.88,
+    "duration": 5.04
+  },
+  {
+    "text": "tutorial, you will find it and it goes",
+    "start": 2444.8,
+    "duration": 5.36
+  },
+  {
+    "text": "through the how to set up uh client",
+    "start": 2447.92,
+    "duration": 6.24
+  },
+  {
+    "text": "logic or rather sorry game thread logic",
+    "start": 2450.16,
+    "duration": 7.04
+  },
+  {
+    "text": "uh physics thread logic networking it",
+    "start": 2454.16,
+    "duration": 6.36
+  },
+  {
+    "text": "and everything.",
+    "start": 2457.2,
+    "duration": 3.32
+  },
+  {
+    "text": "And that's it. Thank you very much for",
+    "start": 2461.839,
+    "duration": 6.284
+  },
+  {
+    "text": "coming and listening. [applause]",
+    "start": 2464.24,
+    "duration": 3.883
+  }
+]

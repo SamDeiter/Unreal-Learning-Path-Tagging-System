@@ -1,0 +1,3837 @@
+[
+  {
+    "text": "Today I'm presenting a technical artist",
+    "start": 1.28,
+    "duration": 6.639
+  },
+  {
+    "text": "guide to profiling in Unreal Engine.",
+    "start": 3.6,
+    "duration": 6.24
+  },
+  {
+    "text": "So in this talk I'll present an",
+    "start": 7.919,
+    "duration": 3.68
+  },
+  {
+    "text": "accessible workflow for technical",
+    "start": 9.84,
+    "duration": 3.6
+  },
+  {
+    "text": "artists and other technically minded",
+    "start": 11.599,
+    "duration": 5.52
+  },
+  {
+    "text": "people to efficiently profile worst",
+    "start": 13.44,
+    "duration": 5.919
+  },
+  {
+    "text": "performing areas of the game with the",
+    "start": 17.119,
+    "duration": 4.32
+  },
+  {
+    "text": "goal of quickly determining the most",
+    "start": 19.359,
+    "duration": 4.481
+  },
+  {
+    "text": "effective optimizations to recommend to",
+    "start": 21.439,
+    "duration": 5.201
+  },
+  {
+    "text": "content teams. This is not intended to",
+    "start": 23.84,
+    "duration": 4.72
+  },
+  {
+    "text": "be a comprehensive overview of all",
+    "start": 26.64,
+    "duration": 4.0
+  },
+  {
+    "text": "available performance tools in Unreal",
+    "start": 28.56,
+    "duration": 4.4
+  },
+  {
+    "text": "Engine or an expert level talk and",
+    "start": 30.64,
+    "duration": 4.96
+  },
+  {
+    "text": "low-level optimization techniques. And",
+    "start": 32.96,
+    "duration": 5.759
+  },
+  {
+    "text": "some context is that um I've worked with",
+    "start": 35.6,
+    "duration": 5.6
+  },
+  {
+    "text": "a lot of technical artists but also uh",
+    "start": 38.719,
+    "duration": 4.801
+  },
+  {
+    "text": "environment artists who are technical uh",
+    "start": 41.2,
+    "duration": 6.08
+  },
+  {
+    "text": "QA even producers um who want to have a",
+    "start": 43.52,
+    "duration": 6.559
+  },
+  {
+    "text": "better understanding of how to optimize",
+    "start": 47.28,
+    "duration": 5.2
+  },
+  {
+    "text": "and how to find good optimizations but",
+    "start": 50.079,
+    "duration": 4.561
+  },
+  {
+    "text": "they don't know where to put an effort.",
+    "start": 52.48,
+    "duration": 4.239
+  },
+  {
+    "text": "They don't know what tool to use for the",
+    "start": 54.64,
+    "duration": 3.919
+  },
+  {
+    "text": "job. They don't know know what all the",
+    "start": 56.719,
+    "duration": 4.401
+  },
+  {
+    "text": "bars and colors mean if you open up a",
+    "start": 58.559,
+    "duration": 5.6
+  },
+  {
+    "text": "profile in insights, for example. Um,",
+    "start": 61.12,
+    "duration": 4.8
+  },
+  {
+    "text": "and they also don't have a good idea",
+    "start": 64.159,
+    "duration": 4.561
+  },
+  {
+    "text": "when to stop and pass the investigation",
+    "start": 65.92,
+    "duration": 5.6
+  },
+  {
+    "text": "off to a subject matter expert when the",
+    "start": 68.72,
+    "duration": 5.68
+  },
+  {
+    "text": "time is right.",
+    "start": 71.52,
+    "duration": 6.08
+  },
+  {
+    "text": "So, first of all, we'll figure out where",
+    "start": 74.4,
+    "duration": 5.6
+  },
+  {
+    "text": "we want to focus,",
+    "start": 77.6,
+    "duration": 4.559
+  },
+  {
+    "text": "where to start. There are a couple",
+    "start": 80.0,
+    "duration": 4.159
+  },
+  {
+    "text": "different approaches and we're going to",
+    "start": 82.159,
+    "duration": 4.32
+  },
+  {
+    "text": "start with some that aren't technically",
+    "start": 84.159,
+    "duration": 4.561
+  },
+  {
+    "text": "profiling, but they are important for",
+    "start": 86.479,
+    "duration": 5.761
+  },
+  {
+    "text": "maintaining optimized content.",
+    "start": 88.72,
+    "duration": 5.52
+  },
+  {
+    "text": "First of all, we'll want to proactively",
+    "start": 92.24,
+    "duration": 4.879
+  },
+  {
+    "text": "check all our art assets as they go into",
+    "start": 94.24,
+    "duration": 5.04
+  },
+  {
+    "text": "the editor with Unreal Engine's data",
+    "start": 97.119,
+    "duration": 5.04
+  },
+  {
+    "text": "validation plugin. Some examples of this",
+    "start": 99.28,
+    "duration": 5.04
+  },
+  {
+    "text": "are simple and complex collision,",
+    "start": 102.159,
+    "duration": 4.161
+  },
+  {
+    "text": "landscape grass distance calling,",
+    "start": 104.32,
+    "duration": 4.479
+  },
+  {
+    "text": "material count and layer count, mesh",
+    "start": 106.32,
+    "duration": 5.439
+  },
+  {
+    "text": "density and max poly count, and also map",
+    "start": 108.799,
+    "duration": 6.0
+  },
+  {
+    "text": "checks. On the implementation side, this",
+    "start": 111.759,
+    "duration": 4.881
+  },
+  {
+    "text": "is a little bit technical. So if you're",
+    "start": 114.799,
+    "duration": 3.761
+  },
+  {
+    "text": "a technical artist, you'll want to work",
+    "start": 116.64,
+    "duration": 4.0
+  },
+  {
+    "text": "with engineering on this. And once",
+    "start": 118.56,
+    "duration": 4.32
+  },
+  {
+    "text": "they've established a framework, Techart",
+    "start": 120.64,
+    "duration": 4.24
+  },
+  {
+    "text": "can definitely help write individual",
+    "start": 122.88,
+    "duration": 5.04
+  },
+  {
+    "text": "checks. I also recommend doing this in",
+    "start": 124.88,
+    "duration": 5.999
+  },
+  {
+    "text": "C++ for efficiency, especially if you",
+    "start": 127.92,
+    "duration": 5.039
+  },
+  {
+    "text": "have a lot of content. Um, but also to",
+    "start": 130.879,
+    "duration": 3.841
+  },
+  {
+    "text": "make sure that you're keeping iteration",
+    "start": 132.959,
+    "duration": 5.121
+  },
+  {
+    "text": "times down for your content creators.",
+    "start": 134.72,
+    "duration": 6.239
+  },
+  {
+    "text": "On the content creator side, it's really",
+    "start": 138.08,
+    "duration": 4.32
+  },
+  {
+    "text": "easy and there are a couple different",
+    "start": 140.959,
+    "duration": 4.0
+  },
+  {
+    "text": "options for using validation. So, first",
+    "start": 142.4,
+    "duration": 4.72
+  },
+  {
+    "text": "of all, you can manually run it through",
+    "start": 144.959,
+    "duration": 5.36
+  },
+  {
+    "text": "the content browser. Um, but we've also",
+    "start": 147.12,
+    "duration": 6.16
+  },
+  {
+    "text": "added a customization um, a proof force",
+    "start": 150.319,
+    "duration": 5.2
+  },
+  {
+    "text": "trigger um, that's used to require",
+    "start": 153.28,
+    "duration": 4.959
+  },
+  {
+    "text": "validation on submission via view",
+    "start": 155.519,
+    "duration": 4.561
+  },
+  {
+    "text": "changes. Um, and then this will also",
+    "start": 158.239,
+    "duration": 3.921
+  },
+  {
+    "text": "show up in the change list description",
+    "start": 160.08,
+    "duration": 4.72
+  },
+  {
+    "text": "so you can easily verify um, that all",
+    "start": 162.16,
+    "duration": 5.92
+  },
+  {
+    "text": "content is being validated. We're also",
+    "start": 164.8,
+    "duration": 5.92
+  },
+  {
+    "text": "running um, validation nightly via the",
+    "start": 168.08,
+    "duration": 5.6
+  },
+  {
+    "text": "build machine. Um, and then we'll get a",
+    "start": 170.72,
+    "duration": 5.84
+  },
+  {
+    "text": "long list of any uh, validation errors",
+    "start": 173.68,
+    "duration": 4.639
+  },
+  {
+    "text": "that have popped up and we can",
+    "start": 176.56,
+    "duration": 4.08
+  },
+  {
+    "text": "communicate that easily to our content",
+    "start": 178.319,
+    "duration": 5.361
+  },
+  {
+    "text": "creators via Slack. Um, or use whatever",
+    "start": 180.64,
+    "duration": 5.2
+  },
+  {
+    "text": "communication channels uh, you prefer",
+    "start": 183.68,
+    "duration": 5.16
+  },
+  {
+    "text": "using.",
+    "start": 185.84,
+    "duration": 3.0
+  },
+  {
+    "text": "Secondly, um, we can keep an eye on all",
+    "start": 189.599,
+    "duration": 5.441
+  },
+  {
+    "text": "assets currently used in the game. And",
+    "start": 193.04,
+    "duration": 3.6
+  },
+  {
+    "text": "there are a couple really good tools for",
+    "start": 195.04,
+    "duration": 3.919
+  },
+  {
+    "text": "doing this. Um the first one is tools",
+    "start": 196.64,
+    "duration": 5.599
+  },
+  {
+    "text": "audit asset asset asset audit um which",
+    "start": 198.959,
+    "duration": 5.761
+  },
+  {
+    "text": "you can see on the right hand side. Um",
+    "start": 202.239,
+    "duration": 4.881
+  },
+  {
+    "text": "and this is really helpful for gathering",
+    "start": 204.72,
+    "duration": 6.079
+  },
+  {
+    "text": "data on assets. Um usually we are",
+    "start": 207.12,
+    "duration": 5.52
+  },
+  {
+    "text": "looking at static meshes and it's a",
+    "start": 210.799,
+    "duration": 3.52
+  },
+  {
+    "text": "little tricky to actually get that",
+    "start": 212.64,
+    "duration": 3.28
+  },
+  {
+    "text": "information if you're not familiar with",
+    "start": 214.319,
+    "duration": 4.721
+  },
+  {
+    "text": "this tool. Um, once you have the asset",
+    "start": 215.92,
+    "duration": 5.92
+  },
+  {
+    "text": "audit open, you'll want to go to add",
+    "start": 219.04,
+    "duration": 5.44
+  },
+  {
+    "text": "asset class and then type in use static",
+    "start": 221.84,
+    "duration": 4.959
+  },
+  {
+    "text": "mesh and then you'll see static mesh pop",
+    "start": 224.48,
+    "duration": 4.399
+  },
+  {
+    "text": "up. You can select that and then on the",
+    "start": 226.799,
+    "duration": 4.08
+  },
+  {
+    "text": "left hand side you can filter down to",
+    "start": 228.879,
+    "duration": 5.44
+  },
+  {
+    "text": "just static meshes which will give you",
+    "start": 230.879,
+    "duration": 6.321
+  },
+  {
+    "text": "all this beautiful data. Um, there's a",
+    "start": 234.319,
+    "duration": 6.801
+  },
+  {
+    "text": "lot of data in here. Um, and I'll get to",
+    "start": 237.2,
+    "duration": 5.44
+  },
+  {
+    "text": "that in a sec how we want to process",
+    "start": 241.12,
+    "duration": 4.16
+  },
+  {
+    "text": "that. The other tool I want to mention",
+    "start": 242.64,
+    "duration": 5.599
+  },
+  {
+    "text": "really quick um is statistics. And",
+    "start": 245.28,
+    "duration": 5.92
+  },
+  {
+    "text": "statistics is used to gather data on",
+    "start": 248.239,
+    "duration": 6.08
+  },
+  {
+    "text": "objects uh while you're running PI. So",
+    "start": 251.2,
+    "duration": 5.999
+  },
+  {
+    "text": "here's an example of that. Um and one",
+    "start": 254.319,
+    "duration": 5.281
+  },
+  {
+    "text": "thing that's like really helpful in here",
+    "start": 257.199,
+    "duration": 5.28
+  },
+  {
+    "text": "is instance count. So we can take the",
+    "start": 259.6,
+    "duration": 6.159
+  },
+  {
+    "text": "other data that was uh from asset audit",
+    "start": 262.479,
+    "duration": 4.961
+  },
+  {
+    "text": "including polyc count, material count,",
+    "start": 265.759,
+    "duration": 4.16
+  },
+  {
+    "text": "dimensions, is nanite enabled, combine",
+    "start": 267.44,
+    "duration": 5.759
+  },
+  {
+    "text": "that with instances used in game um and",
+    "start": 269.919,
+    "duration": 6.72
+  },
+  {
+    "text": "then we can start um processing that",
+    "start": 273.199,
+    "duration": 6.401
+  },
+  {
+    "text": "data. Both these tools allow you to",
+    "start": 276.639,
+    "duration": 6.481
+  },
+  {
+    "text": "export CSV and then techart can write",
+    "start": 279.6,
+    "duration": 6.4
+  },
+  {
+    "text": "Python scripts to generate additional",
+    "start": 283.12,
+    "duration": 5.68
+  },
+  {
+    "text": "metrics uh based on exported data. They",
+    "start": 286.0,
+    "duration": 5.199
+  },
+  {
+    "text": "can filter data just to assets that are",
+    "start": 288.8,
+    "duration": 4.24
+  },
+  {
+    "text": "relevant to each of the content teams",
+    "start": 291.199,
+    "duration": 3.841
+  },
+  {
+    "text": "that they that they are working with.",
+    "start": 293.04,
+    "duration": 4.4
+  },
+  {
+    "text": "Um, and they can also apply conditional",
+    "start": 295.04,
+    "duration": 4.56
+  },
+  {
+    "text": "color coding to help content creators",
+    "start": 297.44,
+    "duration": 3.92
+  },
+  {
+    "text": "understand where to focus their",
+    "start": 299.6,
+    "duration": 4.72
+  },
+  {
+    "text": "optimization efforts. So over here we",
+    "start": 301.36,
+    "duration": 4.88
+  },
+  {
+    "text": "have an example of doing that, grabbing",
+    "start": 304.32,
+    "duration": 4.8
+  },
+  {
+    "text": "all that data, manipulating it, coming",
+    "start": 306.24,
+    "duration": 5.44
+  },
+  {
+    "text": "up with a new metric, um, and then",
+    "start": 309.12,
+    "duration": 4.48
+  },
+  {
+    "text": "displaying it in a way that's easily",
+    "start": 311.68,
+    "duration": 4.239
+  },
+  {
+    "text": "digestible for content creators so that",
+    "start": 313.6,
+    "duration": 4.72
+  },
+  {
+    "text": "they know exactly where to focus their",
+    "start": 315.919,
+    "duration": 5.401
+  },
+  {
+    "text": "efforts.",
+    "start": 318.32,
+    "duration": 3.0
+  },
+  {
+    "text": "Then lastly, in order to use the times",
+    "start": 322.56,
+    "duration": 4.96
+  },
+  {
+    "text": "the team's time most effectively, we",
+    "start": 325.28,
+    "duration": 3.919
+  },
+  {
+    "text": "want to make sure that we're focusing",
+    "start": 327.52,
+    "duration": 4.08
+  },
+  {
+    "text": "our profiling and optimization efforts",
+    "start": 329.199,
+    "duration": 4.081
+  },
+  {
+    "text": "on the content that will give us the",
+    "start": 331.6,
+    "duration": 3.76
+  },
+  {
+    "text": "biggest bang for the buck. And",
+    "start": 333.28,
+    "duration": 4.08
+  },
+  {
+    "text": "ultimately, our goal here is to make",
+    "start": 335.36,
+    "duration": 3.76
+  },
+  {
+    "text": "sure that the game is running at a",
+    "start": 337.36,
+    "duration": 4.88
+  },
+  {
+    "text": "reasonable frame rate. It's lovely if",
+    "start": 339.12,
+    "duration": 5.2
+  },
+  {
+    "text": "all of our content is well organized,",
+    "start": 342.24,
+    "duration": 3.679
+  },
+  {
+    "text": "but at the end of the day, what we",
+    "start": 344.32,
+    "duration": 4.48
+  },
+  {
+    "text": "really care about is the game itself.",
+    "start": 345.919,
+    "duration": 4.641
+  },
+  {
+    "text": "So,",
+    "start": 348.8,
+    "duration": 5.839
+  },
+  {
+    "text": "um, another call out is, um, there are a",
+    "start": 350.56,
+    "duration": 6.079
+  },
+  {
+    "text": "lot of really helpful visual debugging",
+    "start": 354.639,
+    "duration": 4.4
+  },
+  {
+    "text": "tools and I feel that artists,",
+    "start": 356.639,
+    "duration": 3.921
+  },
+  {
+    "text": "especially,",
+    "start": 359.039,
+    "duration": 3.6
+  },
+  {
+    "text": "um, being visual people, they tend to",
+    "start": 360.56,
+    "duration": 5.199
+  },
+  {
+    "text": "gravitate toward those debug modes. Um,",
+    "start": 362.639,
+    "duration": 7.84
+  },
+  {
+    "text": "but they don't always provide you",
+    "start": 365.759,
+    "duration": 6.56
+  },
+  {
+    "text": "information about bottlenecks, for",
+    "start": 370.479,
+    "duration": 4.72
+  },
+  {
+    "text": "example. So you can spend all day",
+    "start": 372.319,
+    "duration": 5.201
+  },
+  {
+    "text": "optimizing for a particular debug mode,",
+    "start": 375.199,
+    "duration": 3.681
+  },
+  {
+    "text": "but that might not even be the",
+    "start": 377.52,
+    "duration": 3.119
+  },
+  {
+    "text": "bottleneck and then you won't actually",
+    "start": 378.88,
+    "duration": 7.039
+  },
+  {
+    "text": "see any big change in frame rate. So um",
+    "start": 380.639,
+    "duration": 8.4
+  },
+  {
+    "text": "in order to help focus efforts, um the",
+    "start": 385.919,
+    "duration": 5.041
+  },
+  {
+    "text": "first thing that we want to look at is",
+    "start": 389.039,
+    "duration": 4.081
+  },
+  {
+    "text": "something like a performance map like",
+    "start": 390.96,
+    "duration": 4.079
+  },
+  {
+    "text": "the one over here um that we've",
+    "start": 393.12,
+    "duration": 4.72
+  },
+  {
+    "text": "developed internally. Um this was",
+    "start": 395.039,
+    "duration": 6.081
+  },
+  {
+    "text": "created by our engineering team. Um and",
+    "start": 397.84,
+    "duration": 5.68
+  },
+  {
+    "text": "every um so often our build machine",
+    "start": 401.12,
+    "duration": 4.799
+  },
+  {
+    "text": "automatically captures data based on",
+    "start": 403.52,
+    "duration": 5.76
+  },
+  {
+    "text": "user added POI markers. Um if you see",
+    "start": 405.919,
+    "duration": 5.601
+  },
+  {
+    "text": "the little red squares on the right hand",
+    "start": 409.28,
+    "duration": 4.72
+  },
+  {
+    "text": "side, those are our POI markers. Um",
+    "start": 411.52,
+    "duration": 4.16
+  },
+  {
+    "text": "there are some that have already been",
+    "start": 414.0,
+    "duration": 4.16
+  },
+  {
+    "text": "placed but any user can add additional",
+    "start": 415.68,
+    "duration": 5.359
+  },
+  {
+    "text": "POI markers for any location that they",
+    "start": 418.16,
+    "duration": 5.92
+  },
+  {
+    "text": "would like to have more data for.",
+    "start": 421.039,
+    "duration": 5.361
+  },
+  {
+    "text": "Frame data is also captured to help",
+    "start": 424.08,
+    "duration": 4.959
+  },
+  {
+    "text": "provide insight into bottlenecks. Um so",
+    "start": 426.4,
+    "duration": 5.12
+  },
+  {
+    "text": "if you look down on the lower half of",
+    "start": 429.039,
+    "duration": 4.16
+  },
+  {
+    "text": "the screen, you'll see information",
+    "start": 431.52,
+    "duration": 3.76
+  },
+  {
+    "text": "including game thread time, render",
+    "start": 433.199,
+    "duration": 5.761
+  },
+  {
+    "text": "thread time, GPU time. This is helpful",
+    "start": 435.28,
+    "duration": 6.319
+  },
+  {
+    "text": "um both to figure out what the biggest",
+    "start": 438.96,
+    "duration": 4.959
+  },
+  {
+    "text": "bottleneck might be in a certain area,",
+    "start": 441.599,
+    "duration": 4.32
+  },
+  {
+    "text": "but you can also compare different",
+    "start": 443.919,
+    "duration": 3.68
+  },
+  {
+    "text": "captures to see if there's been a",
+    "start": 445.919,
+    "duration": 3.921
+  },
+  {
+    "text": "regression, for example. So it's helpful",
+    "start": 447.599,
+    "duration": 5.521
+  },
+  {
+    "text": "for tracking data over time.",
+    "start": 449.84,
+    "duration": 6.799
+  },
+  {
+    "text": "The seat map is super easy to use. Um,",
+    "start": 453.12,
+    "duration": 6.88
+  },
+  {
+    "text": "it's very helpful. Um, and I highly",
+    "start": 456.639,
+    "duration": 6.4
+  },
+  {
+    "text": "suggest creating something like this um,",
+    "start": 460.0,
+    "duration": 7.199
+  },
+  {
+    "text": "in order to focus your team.",
+    "start": 463.039,
+    "duration": 6.801
+  },
+  {
+    "text": "So, next we'll talk about reproducible",
+    "start": 467.199,
+    "duration": 6.0
+  },
+  {
+    "text": "performance testing.",
+    "start": 469.84,
+    "duration": 5.12
+  },
+  {
+    "text": "We'll want to pinpoint a location for",
+    "start": 473.199,
+    "duration": 3.84
+  },
+  {
+    "text": "performance testing. Um, but we also",
+    "start": 474.96,
+    "duration": 4.48
+  },
+  {
+    "text": "want to ensure that we are profiling in",
+    "start": 477.039,
+    "duration": 5.121
+  },
+  {
+    "text": "a reproducible way. This is especially",
+    "start": 479.44,
+    "duration": 4.08
+  },
+  {
+    "text": "important when you're testing",
+    "start": 482.16,
+    "duration": 4.4
+  },
+  {
+    "text": "optimizations in addition to profiling.",
+    "start": 483.52,
+    "duration": 4.799
+  },
+  {
+    "text": "So, how do we set up for our",
+    "start": 486.56,
+    "duration": 4.759
+  },
+  {
+    "text": "investigations?",
+    "start": 488.319,
+    "duration": 3.0
+  },
+  {
+    "text": "First of all, we'll want to launch the",
+    "start": 491.599,
+    "duration": 4.801
+  },
+  {
+    "text": "game. You'll want to before you even",
+    "start": 493.36,
+    "duration": 5.44
+  },
+  {
+    "text": "launch the game, start Unreal Insights",
+    "start": 496.4,
+    "duration": 5.28
+  },
+  {
+    "text": "via the Unreal editor. It's best to do",
+    "start": 498.8,
+    "duration": 5.119
+  },
+  {
+    "text": "this beforehand because late connecting",
+    "start": 501.68,
+    "duration": 4.959
+  },
+  {
+    "text": "can potentially lead to data issues. So,",
+    "start": 503.919,
+    "duration": 5.28
+  },
+  {
+    "text": "just to be safe, we'll do that first.",
+    "start": 506.639,
+    "duration": 4.56
+  },
+  {
+    "text": "Next, we'll want to run a development",
+    "start": 509.199,
+    "duration": 3.921
+  },
+  {
+    "text": "build of the game. This is going to",
+    "start": 511.199,
+    "duration": 3.921
+  },
+  {
+    "text": "provide us the most information during",
+    "start": 513.12,
+    "duration": 4.08
+  },
+  {
+    "text": "profiling compared to a test build where",
+    "start": 515.12,
+    "duration": 3.919
+  },
+  {
+    "text": "a lot of that information is stripped",
+    "start": 517.2,
+    "duration": 5.839
+  },
+  {
+    "text": "out, but in general, we'll run um fast",
+    "start": 519.039,
+    "duration": 7.201
+  },
+  {
+    "text": "enough to be generally representative of",
+    "start": 523.039,
+    "duration": 7.041
+  },
+  {
+    "text": "um what we're trying to profile. Um we",
+    "start": 526.24,
+    "duration": 6.4
+  },
+  {
+    "text": "do want to be mindful though that it's",
+    "start": 530.08,
+    "duration": 5.04
+  },
+  {
+    "text": "not going to be exactly representative.",
+    "start": 532.64,
+    "duration": 4.639
+  },
+  {
+    "text": "So debug is sometimes going to impact",
+    "start": 535.12,
+    "duration": 3.92
+  },
+  {
+    "text": "performance and we should keep that in",
+    "start": 537.279,
+    "duration": 5.441
+  },
+  {
+    "text": "mind when we're looking at our profiles.",
+    "start": 539.04,
+    "duration": 6.88
+  },
+  {
+    "text": "Um also in UGS um you'll probably want",
+    "start": 542.72,
+    "duration": 4.48
+  },
+  {
+    "text": "to confirm that you're synced to a",
+    "start": 545.92,
+    "duration": 3.039
+  },
+  {
+    "text": "similar change list is the build to",
+    "start": 547.2,
+    "duration": 4.48
+  },
+  {
+    "text": "ensure that symbols match just in case",
+    "start": 548.959,
+    "duration": 5.841
+  },
+  {
+    "text": "that's necessary later. Once the game's",
+    "start": 551.68,
+    "duration": 5.68
+  },
+  {
+    "text": "running, use this uh trace.s stop",
+    "start": 554.8,
+    "duration": 4.96
+  },
+  {
+    "text": "command um to avoid generating a large",
+    "start": 557.36,
+    "duration": 4.72
+  },
+  {
+    "text": "trace file. Sometimes it'll take several",
+    "start": 559.76,
+    "duration": 4.56
+  },
+  {
+    "text": "minutes, 10 minutes, 20 minutes to find",
+    "start": 562.08,
+    "duration": 4.0
+  },
+  {
+    "text": "the spot that you're trying to profile.",
+    "start": 564.32,
+    "duration": 4.32
+  },
+  {
+    "text": "Um, we don't want to be generating",
+    "start": 566.08,
+    "duration": 5.12
+  },
+  {
+    "text": "gigabytes and gigabytes of data um while",
+    "start": 568.64,
+    "duration": 3.92
+  },
+  {
+    "text": "we're just trying to find the spot that",
+    "start": 571.2,
+    "duration": 4.0
+  },
+  {
+    "text": "we care about. It'll also make it um",
+    "start": 572.56,
+    "duration": 4.8
+  },
+  {
+    "text": "more difficult to find the spot that",
+    "start": 575.2,
+    "duration": 6.079
+  },
+  {
+    "text": "you're trying to profile later on.",
+    "start": 577.36,
+    "duration": 5.919
+  },
+  {
+    "text": "Then we'll proceed to the area",
+    "start": 581.279,
+    "duration": 3.841
+  },
+  {
+    "text": "identified on the heat map in the last",
+    "start": 583.279,
+    "duration": 4.961
+  },
+  {
+    "text": "step. Um, and one additional feature of",
+    "start": 585.12,
+    "duration": 5.279
+  },
+  {
+    "text": "the tool that we created is that once",
+    "start": 588.24,
+    "duration": 4.4
+  },
+  {
+    "text": "you when you select a region, um, it",
+    "start": 590.399,
+    "duration": 4.801
+  },
+  {
+    "text": "will create a bucket go command that we",
+    "start": 592.64,
+    "duration": 6.08
+  },
+  {
+    "text": "can paste into the, um, command prompt",
+    "start": 595.2,
+    "duration": 6.16
+  },
+  {
+    "text": "later, um, to get right to where we want",
+    "start": 598.72,
+    "duration": 5.799
+  },
+  {
+    "text": "to go.",
+    "start": 601.36,
+    "duration": 3.159
+  },
+  {
+    "text": "So once we've arrived in that location,",
+    "start": 606.0,
+    "duration": 4.72
+  },
+  {
+    "text": "we'll want to pinpoint exactly where we",
+    "start": 608.24,
+    "duration": 4.08
+  },
+  {
+    "text": "want to test. So that's not just",
+    "start": 610.72,
+    "duration": 3.52
+  },
+  {
+    "text": "position, it's also like camera",
+    "start": 612.32,
+    "duration": 5.6
+  },
+  {
+    "text": "orientation. So if I'm looking this way,",
+    "start": 614.24,
+    "duration": 5.599
+  },
+  {
+    "text": "performance might be fine, but if I",
+    "start": 617.92,
+    "duration": 4.0
+  },
+  {
+    "text": "rotate this way, it might get really",
+    "start": 619.839,
+    "duration": 4.641
+  },
+  {
+    "text": "bad. So we'll want to keep that in mind,",
+    "start": 621.92,
+    "duration": 4.96
+  },
+  {
+    "text": "too. Looking all around to figure out",
+    "start": 624.48,
+    "duration": 5.2
+  },
+  {
+    "text": "where that worst spot is that we want to",
+    "start": 626.88,
+    "duration": 4.56
+  },
+  {
+    "text": "dig into.",
+    "start": 629.68,
+    "duration": 3.839
+  },
+  {
+    "text": "Unreal provides several helpful stat",
+    "start": 631.44,
+    "duration": 3.839
+  },
+  {
+    "text": "commands to track performance at a high",
+    "start": 633.519,
+    "duration": 4.481
+  },
+  {
+    "text": "level. For example, stat FPS. that will",
+    "start": 635.279,
+    "duration": 5.441
+  },
+  {
+    "text": "bring up a small panel on the right hand",
+    "start": 638.0,
+    "duration": 5.519
+  },
+  {
+    "text": "side of the screen um that tracks",
+    "start": 640.72,
+    "duration": 5.679
+  },
+  {
+    "text": "information on what your frame rate is,",
+    "start": 643.519,
+    "duration": 6.401
+  },
+  {
+    "text": "but it's small and it can be difficult",
+    "start": 646.399,
+    "duration": 5.281
+  },
+  {
+    "text": "to track it, especially when you're",
+    "start": 649.92,
+    "duration": 3.919
+  },
+  {
+    "text": "running around the game, maybe fighting",
+    "start": 651.68,
+    "duration": 6.0
+  },
+  {
+    "text": "a boss. Um, and we wanted to create",
+    "start": 653.839,
+    "duration": 5.361
+  },
+  {
+    "text": "something that's a little bit easier to",
+    "start": 657.68,
+    "duration": 4.96
+  },
+  {
+    "text": "track. Um, which you can see below. Um,",
+    "start": 659.2,
+    "duration": 5.36
+  },
+  {
+    "text": "it's part of our in-game performance",
+    "start": 662.64,
+    "duration": 3.759
+  },
+  {
+    "text": "monitor that engineering built using",
+    "start": 664.56,
+    "duration": 4.32
+  },
+  {
+    "text": "IMU. Lives at the bottom of the screen.",
+    "start": 666.399,
+    "duration": 3.921
+  },
+  {
+    "text": "You can actually move it around a little",
+    "start": 668.88,
+    "duration": 4.32
+  },
+  {
+    "text": "bit, which is helpful. Um, and you can",
+    "start": 670.32,
+    "duration": 4.56
+  },
+  {
+    "text": "see it out of the corner of your eye",
+    "start": 673.2,
+    "duration": 3.84
+  },
+  {
+    "text": "when you're playing, which is super",
+    "start": 674.88,
+    "duration": 5.44
+  },
+  {
+    "text": "super helpful.",
+    "start": 677.04,
+    "duration": 7.12
+  },
+  {
+    "text": "So, I think I have an example here.",
+    "start": 680.32,
+    "duration": 6.0
+  },
+  {
+    "text": "So, as you can see, this is totally",
+    "start": 684.16,
+    "duration": 4.96
+  },
+  {
+    "text": "fine. But we look at this field of glass",
+    "start": 686.32,
+    "duration": 5.519
+  },
+  {
+    "text": "and h that looks a little suspicious. So",
+    "start": 689.12,
+    "duration": 5.52
+  },
+  {
+    "text": "I go back to verify and you know what? I",
+    "start": 691.839,
+    "duration": 4.801
+  },
+  {
+    "text": "think this is an area over here that I",
+    "start": 694.64,
+    "duration": 5.48
+  },
+  {
+    "text": "want to dig into.",
+    "start": 696.64,
+    "duration": 3.48
+  },
+  {
+    "text": "So once we've identified the specific",
+    "start": 700.64,
+    "duration": 4.56
+  },
+  {
+    "text": "spot we want to profile, we may want to",
+    "start": 703.04,
+    "duration": 4.96
+  },
+  {
+    "text": "prepare for an AB test if we plan on",
+    "start": 705.2,
+    "duration": 6.16
+  },
+  {
+    "text": "testing optimizations in the future. So",
+    "start": 708.0,
+    "duration": 6.16
+  },
+  {
+    "text": "by AB test what I mean is verifying",
+    "start": 711.36,
+    "duration": 4.96
+  },
+  {
+    "text": "optimizations by comparing performance",
+    "start": 714.16,
+    "duration": 4.56
+  },
+  {
+    "text": "with and without the optimization",
+    "start": 716.32,
+    "duration": 4.88
+  },
+  {
+    "text": "ensuring that the optimization is the",
+    "start": 718.72,
+    "duration": 5.52
+  },
+  {
+    "text": "only thing or close to it in the frame",
+    "start": 721.2,
+    "duration": 5.759
+  },
+  {
+    "text": "that has changed. So couple things that",
+    "start": 724.24,
+    "duration": 4.56
+  },
+  {
+    "text": "you'll want to do to prepare for that.",
+    "start": 726.959,
+    "duration": 4.241
+  },
+  {
+    "text": "Um run bugget command and save off the",
+    "start": 728.8,
+    "duration": 4.479
+  },
+  {
+    "text": "results. That'll get both your position",
+    "start": 731.2,
+    "duration": 4.0
+  },
+  {
+    "text": "and orientation.",
+    "start": 733.279,
+    "duration": 4.481
+  },
+  {
+    "text": "you'll want to consider controlling all",
+    "start": 735.2,
+    "duration": 4.48
+  },
+  {
+    "text": "game state conditions that can cause",
+    "start": 737.76,
+    "duration": 4.48
+  },
+  {
+    "text": "differences between captures. So, a lot",
+    "start": 739.68,
+    "duration": 4.48
+  },
+  {
+    "text": "of this is going to be movement related.",
+    "start": 742.24,
+    "duration": 4.88
+  },
+  {
+    "text": "Um, so if you're using a time of day uh",
+    "start": 744.16,
+    "duration": 5.2
+  },
+  {
+    "text": "system, you'll want to control that.",
+    "start": 747.12,
+    "duration": 4.56
+  },
+  {
+    "text": "Weather, wind, wetness, that will also",
+    "start": 749.36,
+    "duration": 4.32
+  },
+  {
+    "text": "want to be controlled. Any kind of",
+    "start": 751.68,
+    "duration": 4.159
+  },
+  {
+    "text": "ambient movement where things are",
+    "start": 753.68,
+    "duration": 4.159
+  },
+  {
+    "text": "swaying back and forth a little bit,",
+    "start": 755.839,
+    "duration": 5.041
+  },
+  {
+    "text": "that can have an impact. Any am animated",
+    "start": 757.839,
+    "duration": 5.281
+  },
+  {
+    "text": "geometry, so movement is the big theme",
+    "start": 760.88,
+    "duration": 4.48
+  },
+  {
+    "text": "here. Um, the biggest thing that's",
+    "start": 763.12,
+    "duration": 3.839
+  },
+  {
+    "text": "probably going to be moving around your",
+    "start": 765.36,
+    "duration": 4.479
+  },
+  {
+    "text": "screen is actually the character. So,",
+    "start": 766.959,
+    "duration": 5.361
+  },
+  {
+    "text": "you may also want to consider hiding the",
+    "start": 769.839,
+    "duration": 6.56
+  },
+  {
+    "text": "character. Um, we created a custom",
+    "start": 772.32,
+    "duration": 7.199
+  },
+  {
+    "text": "command, um, hide player in order to do",
+    "start": 776.399,
+    "duration": 5.521
+  },
+  {
+    "text": "this. Uh, this was implemented via the",
+    "start": 779.519,
+    "duration": 4.961
+  },
+  {
+    "text": "custom cheat manager. Um, and one thing",
+    "start": 781.92,
+    "duration": 4.64
+  },
+  {
+    "text": "to keep in mind if you decide to do this",
+    "start": 784.48,
+    "duration": 4.0
+  },
+  {
+    "text": "yourself is make sure that all the",
+    "start": 786.56,
+    "duration": 4.24
+  },
+  {
+    "text": "components are hidden too, which will",
+    "start": 788.48,
+    "duration": 4.0
+  },
+  {
+    "text": "require a little bit of piping data",
+    "start": 790.8,
+    "duration": 4.64
+  },
+  {
+    "text": "around. Um, this is all really helpful",
+    "start": 792.48,
+    "duration": 5.52
+  },
+  {
+    "text": "so that like you can literally flip",
+    "start": 795.44,
+    "duration": 5.36
+  },
+  {
+    "text": "between screens and see exactly what's",
+    "start": 798.0,
+    "duration": 4.72
+  },
+  {
+    "text": "changing. Um, not just from a",
+    "start": 800.8,
+    "duration": 3.839
+  },
+  {
+    "text": "performance standpoint, but also from a",
+    "start": 802.72,
+    "duration": 3.84
+  },
+  {
+    "text": "visual standpoint because sometimes when",
+    "start": 804.639,
+    "duration": 4.32
+  },
+  {
+    "text": "we optimize, there might be slight",
+    "start": 806.56,
+    "duration": 4.079
+  },
+  {
+    "text": "visual changes and we want to catch",
+    "start": 808.959,
+    "duration": 3.361
+  },
+  {
+    "text": "those and make sure that we're okay with",
+    "start": 810.639,
+    "duration": 5.041
+  },
+  {
+    "text": "them. On the flip side, also keep in",
+    "start": 812.32,
+    "duration": 5.28
+  },
+  {
+    "text": "mind that if you're doing this, you're",
+    "start": 815.68,
+    "duration": 4.399
+  },
+  {
+    "text": "removing things that could potentially",
+    "start": 817.6,
+    "duration": 5.84
+  },
+  {
+    "text": "be expensive. So",
+    "start": 820.079,
+    "duration": 6.0
+  },
+  {
+    "text": "double check, make sure that when you",
+    "start": 823.44,
+    "duration": 6.399
+  },
+  {
+    "text": "disable um these features that they're",
+    "start": 826.079,
+    "duration": 5.44
+  },
+  {
+    "text": "not the things that are like adding",
+    "start": 829.839,
+    "duration": 3.601
+  },
+  {
+    "text": "significant cost. In that case, you will",
+    "start": 831.519,
+    "duration": 4.801
+  },
+  {
+    "text": "want to keep them on and dive into the",
+    "start": 833.44,
+    "duration": 5.68
+  },
+  {
+    "text": "profiles with characters, motion, etc.",
+    "start": 836.32,
+    "duration": 5.8
+  },
+  {
+    "text": "enabled.",
+    "start": 839.12,
+    "duration": 3.0
+  },
+  {
+    "text": "A couple other uh helpful hotkeys and",
+    "start": 842.48,
+    "duration": 5.039
+  },
+  {
+    "text": "commands. So there's slow-mo zero, which",
+    "start": 845.199,
+    "duration": 4.32
+  },
+  {
+    "text": "pauses the game. really helpful when",
+    "start": 847.519,
+    "duration": 4.481
+  },
+  {
+    "text": "you're trying to pinpoint an exact frame",
+    "start": 849.519,
+    "duration": 5.841
+  },
+  {
+    "text": "during a cinematic um or similar. Um but",
+    "start": 852.0,
+    "duration": 5.279
+  },
+  {
+    "text": "you can also create custom key bindings",
+    "start": 855.36,
+    "duration": 5.52
+  },
+  {
+    "text": "by editing uh default input ini um which",
+    "start": 857.279,
+    "duration": 6.881
+  },
+  {
+    "text": "you can submit and uh the entire team",
+    "start": 860.88,
+    "duration": 5.92
+  },
+  {
+    "text": "will have access to that. Alternatively,",
+    "start": 864.16,
+    "duration": 5.039
+  },
+  {
+    "text": "you can edit your local app data user",
+    "start": 866.8,
+    "duration": 5.67
+  },
+  {
+    "text": "input ini um and add whatever",
+    "start": 869.199,
+    "duration": 4.481
+  },
+  {
+    "text": "[clears throat] commands you would like",
+    "start": 872.47,
+    "duration": 4.33
+  },
+  {
+    "text": "to use personally. a few examples um",
+    "start": 873.68,
+    "duration": 5.839
+  },
+  {
+    "text": "that we've added. Um if on the numpad",
+    "start": 876.8,
+    "duration": 5.279
+  },
+  {
+    "text": "you hit the period key that does slowmo",
+    "start": 879.519,
+    "duration": 6.241
+  },
+  {
+    "text": "one. Uh alt period does lomo.1",
+    "start": 882.079,
+    "duration": 7.281
+  },
+  {
+    "text": "and control period does slow-mo.01.",
+    "start": 885.76,
+    "duration": 5.6
+  },
+  {
+    "text": "So that way we can very carefully step",
+    "start": 889.36,
+    "duration": 4.159
+  },
+  {
+    "text": "through and find the exact frame that we",
+    "start": 891.36,
+    "duration": 4.08
+  },
+  {
+    "text": "want to profile.",
+    "start": 893.519,
+    "duration": 3.68
+  },
+  {
+    "text": "Another helpful tool is console",
+    "start": 895.44,
+    "duration": 3.839
+  },
+  {
+    "text": "variables editor for batching commands.",
+    "start": 897.199,
+    "duration": 3.601
+  },
+  {
+    "text": "I've already mentioned a few. There are",
+    "start": 899.279,
+    "duration": 2.881
+  },
+  {
+    "text": "a few more that I'm going to mention",
+    "start": 900.8,
+    "duration": 3.92
+  },
+  {
+    "text": "after this. Um, so that's absolutely",
+    "start": 902.16,
+    "duration": 5.359
+  },
+  {
+    "text": "worth investigating um in order to make",
+    "start": 904.72,
+    "duration": 5.44
+  },
+  {
+    "text": "your workflow more efficient.",
+    "start": 907.519,
+    "duration": 4.961
+  },
+  {
+    "text": "Um, okay. So, next we're going to",
+    "start": 910.16,
+    "duration": 5.44
+  },
+  {
+    "text": "determine bottlenecks.",
+    "start": 912.48,
+    "duration": 5.28
+  },
+  {
+    "text": "Now that we know where we want to focus,",
+    "start": 915.6,
+    "duration": 4.479
+  },
+  {
+    "text": "what tools do we want to use to gather",
+    "start": 917.76,
+    "duration": 4.8
+  },
+  {
+    "text": "more information?",
+    "start": 920.079,
+    "duration": 4.481
+  },
+  {
+    "text": "So, the first thing we'll want to do is",
+    "start": 922.56,
+    "duration": 4.88
+  },
+  {
+    "text": "check stat unit. Um, this will bring up",
+    "start": 924.56,
+    "duration": 4.56
+  },
+  {
+    "text": "a panel on the right hand side of the",
+    "start": 927.44,
+    "duration": 3.12
+  },
+  {
+    "text": "screen with a couple of different",
+    "start": 929.12,
+    "duration": 5.12
+  },
+  {
+    "text": "timings. There's game, frame, draw, GPU",
+    "start": 930.56,
+    "duration": 6.0
+  },
+  {
+    "text": "time. And what we'll want to do is",
+    "start": 934.24,
+    "duration": 4.48
+  },
+  {
+    "text": "compare these against each other to",
+    "start": 936.56,
+    "duration": 3.839
+  },
+  {
+    "text": "figure out where the bottleneck most",
+    "start": 938.72,
+    "duration": 3.6
+  },
+  {
+    "text": "likely is.",
+    "start": 940.399,
+    "duration": 4.721
+  },
+  {
+    "text": "First thing we want to check is if game",
+    "start": 942.32,
+    "duration": 6.959
+  },
+  {
+    "text": "is close to frame, this is likely a game",
+    "start": 945.12,
+    "duration": 6.639
+  },
+  {
+    "text": "thread bottleneck. Um, if we see this",
+    "start": 949.279,
+    "duration": 4.721
+  },
+  {
+    "text": "happening and the next step in that case",
+    "start": 951.759,
+    "duration": 5.041
+  },
+  {
+    "text": "would be to perform an Unreal insights",
+    "start": 954.0,
+    "duration": 6.56
+  },
+  {
+    "text": "trace. If draw is close to frame, this",
+    "start": 956.8,
+    "duration": 6.56
+  },
+  {
+    "text": "is likely a rendered thread bottleneck.",
+    "start": 960.56,
+    "duration": 6.24
+  },
+  {
+    "text": "And because it's also a CPU issue, we'll",
+    "start": 963.36,
+    "duration": 6.479
+  },
+  {
+    "text": "still want to perform a Unreal insight",
+    "start": 966.8,
+    "duration": 7.12
+  },
+  {
+    "text": "insights trace. However, if GPU time is",
+    "start": 969.839,
+    "duration": 6.8
+  },
+  {
+    "text": "close to frame, then it's probably a GPU",
+    "start": 973.92,
+    "duration": 6.08
+  },
+  {
+    "text": "bottleneck. And in that case, Unreal",
+    "start": 976.639,
+    "duration": 5.12
+  },
+  {
+    "text": "Insights might provide some basic",
+    "start": 980.0,
+    "duration": 3.92
+  },
+  {
+    "text": "information, but ultimately we'll",
+    "start": 981.759,
+    "duration": 4.801
+  },
+  {
+    "text": "probably end up in profile GPU or a",
+    "start": 983.92,
+    "duration": 5.76
+  },
+  {
+    "text": "dedicated GPU debugger in order to",
+    "start": 986.56,
+    "duration": 6.399
+  },
+  {
+    "text": "diagnose what the issue is.",
+    "start": 989.68,
+    "duration": 6.0
+  },
+  {
+    "text": "Because those numbers uh tend to jump",
+    "start": 992.959,
+    "duration": 4.641
+  },
+  {
+    "text": "around frame frame, sometimes it's a",
+    "start": 995.68,
+    "duration": 3.519
+  },
+  {
+    "text": "little bit difficult to do that",
+    "start": 997.6,
+    "duration": 5.28
+  },
+  {
+    "text": "comparison. Um, so it could help to",
+    "start": 999.199,
+    "duration": 5.601
+  },
+  {
+    "text": "visualize it in a graph, and there are a",
+    "start": 1002.88,
+    "duration": 4.16
+  },
+  {
+    "text": "couple options for that. Um, there's",
+    "start": 1004.8,
+    "duration": 4.56
+  },
+  {
+    "text": "actually a built-in command in Unreal,",
+    "start": 1007.04,
+    "duration": 4.719
+  },
+  {
+    "text": "uh, stat unit graph, which will create a",
+    "start": 1009.36,
+    "duration": 3.76
+  },
+  {
+    "text": "small graph in the corner of your",
+    "start": 1011.759,
+    "duration": 4.64
+  },
+  {
+    "text": "screen. Um, and it's colorcoded based",
+    "start": 1013.12,
+    "duration": 7.04
+  },
+  {
+    "text": "on, uh, the panel in the corner. We",
+    "start": 1016.399,
+    "duration": 6.641
+  },
+  {
+    "text": "created our um, own version of this,",
+    "start": 1020.16,
+    "duration": 5.36
+  },
+  {
+    "text": "which is part of the performance monitor",
+    "start": 1023.04,
+    "duration": 4.72
+  },
+  {
+    "text": "that I mentioned earlier. So we can see",
+    "start": 1025.52,
+    "duration": 4.799
+  },
+  {
+    "text": "that um see those stats over a longer",
+    "start": 1027.76,
+    "duration": 6.039
+  },
+  {
+    "text": "period of time.",
+    "start": 1030.319,
+    "duration": 3.48
+  },
+  {
+    "text": "Now that we know what tools we want to",
+    "start": 1034.319,
+    "duration": 4.561
+  },
+  {
+    "text": "use to profile our issues, we can do a",
+    "start": 1036.48,
+    "duration": 5.359
+  },
+  {
+    "text": "deep dive.",
+    "start": 1038.88,
+    "duration": 5.919
+  },
+  {
+    "text": "So what are common patterns we should",
+    "start": 1041.839,
+    "duration": 6.161
+  },
+  {
+    "text": "look for and when should we consider",
+    "start": 1044.799,
+    "duration": 5.281
+  },
+  {
+    "text": "passing the investigation to someone",
+    "start": 1048.0,
+    "duration": 4.799
+  },
+  {
+    "text": "else?",
+    "start": 1050.08,
+    "duration": 5.04
+  },
+  {
+    "text": "First, we'll start with CPU bottlenecks",
+    "start": 1052.799,
+    "duration": 5.441
+  },
+  {
+    "text": "in Unreal Insights. So, before we run",
+    "start": 1055.12,
+    "duration": 5.84
+  },
+  {
+    "text": "the trace, uh we'll want to prepare um",
+    "start": 1058.24,
+    "duration": 6.24
+  },
+  {
+    "text": "and run the command stats verbose named",
+    "start": 1060.96,
+    "duration": 8.079
+  },
+  {
+    "text": "events. This will start um oh, and then",
+    "start": 1064.48,
+    "duration": 6.24
+  },
+  {
+    "text": "we start the trace with the command",
+    "start": 1069.039,
+    "duration": 4.401
+  },
+  {
+    "text": "trace start. Optionally, you can use",
+    "start": 1070.72,
+    "duration": 5.68
+  },
+  {
+    "text": "these commands to identify spec specific",
+    "start": 1073.44,
+    "duration": 5.04
+  },
+  {
+    "text": "frames in your trace. Um there's trace",
+    "start": 1076.4,
+    "duration": 4.48
+  },
+  {
+    "text": "bookmark and trace screenshot. Um these",
+    "start": 1078.48,
+    "duration": 3.68
+  },
+  {
+    "text": "are really helpful because you might",
+    "start": 1080.88,
+    "duration": 4.0
+  },
+  {
+    "text": "have um tens or hundreds or even",
+    "start": 1082.16,
+    "duration": 5.84
+  },
+  {
+    "text": "thousands of frames in insights. Um if",
+    "start": 1084.88,
+    "duration": 5.039
+  },
+  {
+    "text": "you use these commands, it'll place a",
+    "start": 1088.0,
+    "duration": 6.64
+  },
+  {
+    "text": "little marker um in your um graph uh so",
+    "start": 1089.919,
+    "duration": 7.12
+  },
+  {
+    "text": "that you can find it far more easily. Um",
+    "start": 1094.64,
+    "duration": 4.64
+  },
+  {
+    "text": "so I definitely recommend using these.",
+    "start": 1097.039,
+    "duration": 5.201
+  },
+  {
+    "text": "Um you can create custom key bindings",
+    "start": 1099.28,
+    "duration": 5.04
+  },
+  {
+    "text": "which is really helpful. Um, and then",
+    "start": 1102.24,
+    "duration": 5.04
+  },
+  {
+    "text": "also in our performance monitor, um,",
+    "start": 1104.32,
+    "duration": 5.84
+  },
+  {
+    "text": "there's a, uh, frame number stat. So",
+    "start": 1107.28,
+    "duration": 4.399
+  },
+  {
+    "text": "that way if we're doing a video",
+    "start": 1110.16,
+    "duration": 4.32
+  },
+  {
+    "text": "recording, we can compare the video",
+    "start": 1111.679,
+    "duration": 6.0
+  },
+  {
+    "text": "itself, um, against our Unreal Insights",
+    "start": 1114.48,
+    "duration": 7.68
+  },
+  {
+    "text": "trace. Um, and having context um, is",
+    "start": 1117.679,
+    "duration": 6.481
+  },
+  {
+    "text": "really helpful. So, for example, if",
+    "start": 1122.16,
+    "duration": 3.92
+  },
+  {
+    "text": "you're seeing a lot of physics stuff",
+    "start": 1124.16,
+    "duration": 3.44
+  },
+  {
+    "text": "going on in the trace and then you look",
+    "start": 1126.08,
+    "duration": 3.2
+  },
+  {
+    "text": "at the frame and there's a big",
+    "start": 1127.6,
+    "duration": 4.48
+  },
+  {
+    "text": "explosion, you have a better much faster",
+    "start": 1129.28,
+    "duration": 4.399
+  },
+  {
+    "text": "understanding of what might be",
+    "start": 1132.08,
+    "duration": 3.36
+  },
+  {
+    "text": "contributing to your performance",
+    "start": 1133.679,
+    "duration": 4.721
+  },
+  {
+    "text": "problems.",
+    "start": 1135.44,
+    "duration": 5.44
+  },
+  {
+    "text": "Once you've captured enough data, we",
+    "start": 1138.4,
+    "duration": 4.639
+  },
+  {
+    "text": "usually run for a couple seconds at a",
+    "start": 1140.88,
+    "duration": 4.24
+  },
+  {
+    "text": "minimum. You stop the trace with the",
+    "start": 1143.039,
+    "duration": 4.64
+  },
+  {
+    "text": "command trace stop. And then we'll",
+    "start": 1145.12,
+    "duration": 5.76
+  },
+  {
+    "text": "switch to Unreal Insights. um select the",
+    "start": 1147.679,
+    "duration": 5.041
+  },
+  {
+    "text": "trace that we just captured and press",
+    "start": 1150.88,
+    "duration": 4.08
+  },
+  {
+    "text": "open trace. If for whatever reason you",
+    "start": 1152.72,
+    "duration": 4.0
+  },
+  {
+    "text": "don't see the trace there, uh just",
+    "start": 1154.96,
+    "duration": 3.52
+  },
+  {
+    "text": "confirm that the directory containing",
+    "start": 1156.72,
+    "duration": 3.76
+  },
+  {
+    "text": "the trace is included in the list of",
+    "start": 1158.48,
+    "duration": 4.72
+  },
+  {
+    "text": "directories to monitor. And once",
+    "start": 1160.48,
+    "duration": 4.8
+  },
+  {
+    "text": "insights is open, um you'll want to look",
+    "start": 1163.2,
+    "duration": 4.4
+  },
+  {
+    "text": "at the top panel called the frames panel",
+    "start": 1165.28,
+    "duration": 4.56
+  },
+  {
+    "text": "to start identifying low frame rate",
+    "start": 1167.6,
+    "duration": 5.28
+  },
+  {
+    "text": "areas. So you can you can see an example",
+    "start": 1169.84,
+    "duration": 6.4
+  },
+  {
+    "text": "over here. Um and there are two uh types",
+    "start": 1172.88,
+    "duration": 5.2
+  },
+  {
+    "text": "of low frame rate areas that we're",
+    "start": 1176.24,
+    "duration": 4.48
+  },
+  {
+    "text": "looking for. The first type is a hitch",
+    "start": 1178.08,
+    "duration": 4.08
+  },
+  {
+    "text": "um which you see on the left hand side",
+    "start": 1180.72,
+    "duration": 3.36
+  },
+  {
+    "text": "and it's that tiny little one-frame",
+    "start": 1182.16,
+    "duration": 5.36
+  },
+  {
+    "text": "spike. The other area to the right is a",
+    "start": 1184.08,
+    "duration": 7.12
+  },
+  {
+    "text": "consistently low frame rate area. When",
+    "start": 1187.52,
+    "duration": 5.84
+  },
+  {
+    "text": "tech artists or others are first getting",
+    "start": 1191.2,
+    "duration": 4.56
+  },
+  {
+    "text": "started looking at insights captures, I",
+    "start": 1193.36,
+    "duration": 4.559
+  },
+  {
+    "text": "typically remen recommend to look at the",
+    "start": 1195.76,
+    "duration": 5.6
+  },
+  {
+    "text": "consistent low FPS areas first. It's",
+    "start": 1197.919,
+    "duration": 5.441
+  },
+  {
+    "text": "usually a little bit easier to diagnose.",
+    "start": 1201.36,
+    "duration": 5.76
+  },
+  {
+    "text": "It's also usually more often content",
+    "start": 1203.36,
+    "duration": 7.52
+  },
+  {
+    "text": "related. Um, so it's um easier to find",
+    "start": 1207.12,
+    "duration": 6.4
+  },
+  {
+    "text": "actionable optimization recommendations",
+    "start": 1210.88,
+    "duration": 6.76
+  },
+  {
+    "text": "by looking in those areas.",
+    "start": 1213.52,
+    "duration": 4.12
+  },
+  {
+    "text": "Next, um, we will select a frame in that",
+    "start": 1218.24,
+    "duration": 6.319
+  },
+  {
+    "text": "frames panel that we'd like to dig into,",
+    "start": 1221.52,
+    "duration": 5.2
+  },
+  {
+    "text": "um, which you see",
+    "start": 1224.559,
+    "duration": 5.441
+  },
+  {
+    "text": "up top here, the little blue box. Um the",
+    "start": 1226.72,
+    "duration": 4.959
+  },
+  {
+    "text": "selected frame will also be highlighted",
+    "start": 1230.0,
+    "duration": 4.72
+  },
+  {
+    "text": "in the timings view panel below. Um",
+    "start": 1231.679,
+    "duration": 6.401
+  },
+  {
+    "text": "which you can see that blue uh large",
+    "start": 1234.72,
+    "duration": 7.199
+  },
+  {
+    "text": "blue highlighted area there. Um and it's",
+    "start": 1238.08,
+    "duration": 5.28
+  },
+  {
+    "text": "always a good idea to confirm the",
+    "start": 1241.919,
+    "duration": 3.201
+  },
+  {
+    "text": "bottleneck. Even though by comparing",
+    "start": 1243.36,
+    "duration": 3.679
+  },
+  {
+    "text": "those stats earlier we got a good sense",
+    "start": 1245.12,
+    "duration": 4.32
+  },
+  {
+    "text": "of where it probably is. Never hurts to",
+    "start": 1247.039,
+    "duration": 5.12
+  },
+  {
+    "text": "look at your trace and identify the",
+    "start": 1249.44,
+    "duration": 4.88
+  },
+  {
+    "text": "bottleneck. So, if you look at this one",
+    "start": 1252.159,
+    "duration": 5.041
+  },
+  {
+    "text": "here, we see that there's a large",
+    "start": 1254.32,
+    "duration": 5.28
+  },
+  {
+    "text": "section of the GPU track where nothing",
+    "start": 1257.2,
+    "duration": 4.8
+  },
+  {
+    "text": "is happening. Down below in the game",
+    "start": 1259.6,
+    "duration": 6.48
+  },
+  {
+    "text": "thread, there's a lot of stuff going on.",
+    "start": 1262.0,
+    "duration": 7.28
+  },
+  {
+    "text": "So this confirms our hypothesis that you",
+    "start": 1266.08,
+    "duration": 6.24
+  },
+  {
+    "text": "know what this is probably a CPU issue",
+    "start": 1269.28,
+    "duration": 6.48
+  },
+  {
+    "text": "specifically a game thread issue and the",
+    "start": 1272.32,
+    "duration": 6.0
+  },
+  {
+    "text": "GPU is stalling because it doesn't have",
+    "start": 1275.76,
+    "duration": 5.12
+  },
+  {
+    "text": "any work to do because the GP the CPU is",
+    "start": 1278.32,
+    "duration": 4.239
+  },
+  {
+    "text": "still figuring out what needs to be done",
+    "start": 1280.88,
+    "duration": 4.159
+  },
+  {
+    "text": "next.",
+    "start": 1282.559,
+    "duration": 4.321
+  },
+  {
+    "text": "Um",
+    "start": 1285.039,
+    "duration": 5.441
+  },
+  {
+    "text": "also um you'll or the next step of this",
+    "start": 1286.88,
+    "duration": 5.44
+  },
+  {
+    "text": "is that you'll want to figure out like",
+    "start": 1290.48,
+    "duration": 4.0
+  },
+  {
+    "text": "what the specific issue is. So, we know",
+    "start": 1292.32,
+    "duration": 5.2
+  },
+  {
+    "text": "it's CPU, we know it's game thread. Um,",
+    "start": 1294.48,
+    "duration": 4.96
+  },
+  {
+    "text": "but like what's specifically about the",
+    "start": 1297.52,
+    "duration": 4.48
+  },
+  {
+    "text": "game thread is the issue? If we look in",
+    "start": 1299.44,
+    "duration": 4.64
+  },
+  {
+    "text": "this example, we'll see that there's a",
+    "start": 1302.0,
+    "duration": 7.919
+  },
+  {
+    "text": "lot of physics stuff going on. Um, and",
+    "start": 1304.08,
+    "duration": 8.4
+  },
+  {
+    "text": "this looks like",
+    "start": 1309.919,
+    "duration": 5.921
+  },
+  {
+    "text": "a little suspicious. Probably I'm",
+    "start": 1312.48,
+    "duration": 6.72
+  },
+  {
+    "text": "guessing like 10 milliseconds of physics",
+    "start": 1315.84,
+    "duration": 5.92
+  },
+  {
+    "text": "work. Another thing you'll want to make",
+    "start": 1319.2,
+    "duration": 5.44
+  },
+  {
+    "text": "sure that you have is budgets both for",
+    "start": 1321.76,
+    "duration": 6.72
+  },
+  {
+    "text": "the CPU but also for the GPU.",
+    "start": 1324.64,
+    "duration": 7.039
+  },
+  {
+    "text": "And you'll look at this guesstimate that",
+    "start": 1328.48,
+    "duration": 4.88
+  },
+  {
+    "text": "there's about 10 milliseconds here.",
+    "start": 1331.679,
+    "duration": 4.321
+  },
+  {
+    "text": "You'll compare that against your CPU",
+    "start": 1333.36,
+    "duration": 5.36
+  },
+  {
+    "text": "budgets and physics might be 2 or 3",
+    "start": 1336.0,
+    "duration": 4.32
+  },
+  {
+    "text": "milliseconds and you're like wait a",
+    "start": 1338.72,
+    "duration": 5.52
+  },
+  {
+    "text": "minute that seems expensive. So that's",
+    "start": 1340.32,
+    "duration": 6.64
+  },
+  {
+    "text": "the point where you need to either drill",
+    "start": 1344.24,
+    "duration": 6.88
+  },
+  {
+    "text": "down into this. Um if we skip ahead,",
+    "start": 1346.96,
+    "duration": 6.0
+  },
+  {
+    "text": "you'll see that there's a lot of stuff",
+    "start": 1351.12,
+    "duration": 4.4
+  },
+  {
+    "text": "underneath. So those are probably",
+    "start": 1352.96,
+    "duration": 6.32
+  },
+  {
+    "text": "specific uh physics related actors that",
+    "start": 1355.52,
+    "duration": 6.72
+  },
+  {
+    "text": "we can zoom into. Um there might be a",
+    "start": 1359.28,
+    "duration": 7.279
+  },
+  {
+    "text": "theme like maybe uh like there's a rock",
+    "start": 1362.24,
+    "duration": 6.16
+  },
+  {
+    "text": "that's really expensive and it's",
+    "start": 1366.559,
+    "duration": 4.48
+  },
+  {
+    "text": "duplicated hundreds or thousands of",
+    "start": 1368.4,
+    "duration": 4.639
+  },
+  {
+    "text": "times. and we'll be able to see that",
+    "start": 1371.039,
+    "duration": 6.561
+  },
+  {
+    "text": "once we zoom in and catch that and maybe",
+    "start": 1373.039,
+    "duration": 7.441
+  },
+  {
+    "text": "there's a VFX tag attached to it and we",
+    "start": 1377.6,
+    "duration": 4.559
+  },
+  {
+    "text": "know that's the team that we probably",
+    "start": 1380.48,
+    "duration": 3.6
+  },
+  {
+    "text": "want to reach out to and let them know",
+    "start": 1382.159,
+    "duration": 4.161
+  },
+  {
+    "text": "like, hey, we found this thing. Could",
+    "start": 1384.08,
+    "duration": 4.8
+  },
+  {
+    "text": "you look into optimizing it?",
+    "start": 1386.32,
+    "duration": 6.16
+  },
+  {
+    "text": "There are other times where there isn't",
+    "start": 1388.88,
+    "duration": 7.039
+  },
+  {
+    "text": "obvious content that is connected to a",
+    "start": 1392.48,
+    "duration": 8.24
+  },
+  {
+    "text": "category um that's way over budget. And",
+    "start": 1395.919,
+    "duration": 7.12
+  },
+  {
+    "text": "in that case, it's usually a good time",
+    "start": 1400.72,
+    "duration": 4.56
+  },
+  {
+    "text": "to hand this investigation off to a",
+    "start": 1403.039,
+    "duration": 4.88
+  },
+  {
+    "text": "subject matter expert. So, for example,",
+    "start": 1405.28,
+    "duration": 4.96
+  },
+  {
+    "text": "a physics programmer who might be able",
+    "start": 1407.919,
+    "duration": 4.401
+  },
+  {
+    "text": "to dig into this more with all the",
+    "start": 1410.24,
+    "duration": 7.2
+  },
+  {
+    "text": "context of what is going on. I wouldn't",
+    "start": 1412.32,
+    "duration": 7.359
+  },
+  {
+    "text": "recommend for tech artists or others to",
+    "start": 1417.44,
+    "duration": 4.08
+  },
+  {
+    "text": "spend time trying to learn [laughter]",
+    "start": 1419.679,
+    "duration": 5.281
+  },
+  {
+    "text": "the entire physics system um when it's a",
+    "start": 1421.52,
+    "duration": 7.84
+  },
+  {
+    "text": "lot more efficient to just pass it off.",
+    "start": 1424.96,
+    "duration": 7.36
+  },
+  {
+    "text": "All right, so here's another example. Um",
+    "start": 1429.36,
+    "duration": 4.799
+  },
+  {
+    "text": "we're looking at the RHI thread and the",
+    "start": 1432.32,
+    "duration": 6.88
+  },
+  {
+    "text": "render thread here. Um, and if you look",
+    "start": 1434.159,
+    "duration": 9.281
+  },
+  {
+    "text": "at this one, there's a",
+    "start": 1439.2,
+    "duration": 5.76
+  },
+  {
+    "text": "36",
+    "start": 1443.44,
+    "duration": 3.76
+  },
+  {
+    "text": "millisecond deferred shading scene",
+    "start": 1444.96,
+    "duration": 4.719
+  },
+  {
+    "text": "renderer. Um, and then we look at that",
+    "start": 1447.2,
+    "duration": 6.479
+  },
+  {
+    "text": "and 28.6 milliseconds of that is some",
+    "start": 1449.679,
+    "duration": 7.36
+  },
+  {
+    "text": "force map scene. That's definitely over",
+    "start": 1453.679,
+    "duration": 5.681
+  },
+  {
+    "text": "budget, too. Um, this is still CPU",
+    "start": 1457.039,
+    "duration": 4.88
+  },
+  {
+    "text": "issue. Um, but this is a good example of",
+    "start": 1459.36,
+    "duration": 5.84
+  },
+  {
+    "text": "like hm like there's no real content",
+    "start": 1461.919,
+    "duration": 7.041
+  },
+  {
+    "text": "here um that we can make recommendations",
+    "start": 1465.2,
+    "duration": 7.28
+  },
+  {
+    "text": "to the content team. Um, so this is",
+    "start": 1468.96,
+    "duration": 4.88
+  },
+  {
+    "text": "probably something that we want to hand",
+    "start": 1472.48,
+    "duration": 3.679
+  },
+  {
+    "text": "off to an engineer and figure out okay",
+    "start": 1473.84,
+    "duration": 5.12
+  },
+  {
+    "text": "why is this thing taking basically a",
+    "start": 1476.159,
+    "duration": 4.561
+  },
+  {
+    "text": "frames worth of time in order to",
+    "start": 1478.96,
+    "duration": 4.76
+  },
+  {
+    "text": "process.",
+    "start": 1480.72,
+    "duration": 3.0
+  },
+  {
+    "text": "Moving along um to GP bottlenecks. Um we",
+    "start": 1485.12,
+    "duration": 7.6
+  },
+  {
+    "text": "can also see issues in Unreal insights.",
+    "start": 1489.36,
+    "duration": 6.799
+  },
+  {
+    "text": "Um capturing a trace and viewing here",
+    "start": 1492.72,
+    "duration": 6.079
+  },
+  {
+    "text": "will provide a highle um amount of",
+    "start": 1496.159,
+    "duration": 5.921
+  },
+  {
+    "text": "information or GPU work. So again we're",
+    "start": 1498.799,
+    "duration": 4.88
+  },
+  {
+    "text": "going to confirm our bottlenecks. We",
+    "start": 1502.08,
+    "duration": 3.76
+  },
+  {
+    "text": "look at the GPU thread looks pretty",
+    "start": 1503.679,
+    "duration": 4.641
+  },
+  {
+    "text": "busy. Uh then we look down at the game",
+    "start": 1505.84,
+    "duration": 6.0
+  },
+  {
+    "text": "thread and I see game thread wait for",
+    "start": 1508.32,
+    "duration": 6.8
+  },
+  {
+    "text": "task. game thread idle time and then CPU",
+    "start": 1511.84,
+    "duration": 5.839
+  },
+  {
+    "text": "a bunch of little CPU stalls. So, this",
+    "start": 1515.12,
+    "duration": 5.439
+  },
+  {
+    "text": "indicates to me that the issue is the",
+    "start": 1517.679,
+    "duration": 4.401
+  },
+  {
+    "text": "GPU.",
+    "start": 1520.559,
+    "duration": 4.72
+  },
+  {
+    "text": "But there isn't a ton of information in",
+    "start": 1522.08,
+    "duration": 6.0
+  },
+  {
+    "text": "here. Obviously, we can compare these",
+    "start": 1525.279,
+    "duration": 5.441
+  },
+  {
+    "text": "highle categories against our GPU",
+    "start": 1528.08,
+    "duration": 5.839
+  },
+  {
+    "text": "budgets to see generally speaking where",
+    "start": 1530.72,
+    "duration": 6.24
+  },
+  {
+    "text": "we might be over. So for example, nanite",
+    "start": 1533.919,
+    "duration": 5.36
+  },
+  {
+    "text": "fizz buffer seems a little high and",
+    "start": 1536.96,
+    "duration": 4.719
+  },
+  {
+    "text": "shadow depth seems a little high, but we",
+    "start": 1539.279,
+    "duration": 4.481
+  },
+  {
+    "text": "can't get any information about specific",
+    "start": 1541.679,
+    "duration": 4.081
+  },
+  {
+    "text": "assets that might be causing these",
+    "start": 1543.76,
+    "duration": 5.48
+  },
+  {
+    "text": "performance issues.",
+    "start": 1545.76,
+    "duration": 3.48
+  },
+  {
+    "text": "So we're going to dig a little deeper.",
+    "start": 1549.84,
+    "duration": 5.12
+  },
+  {
+    "text": "The first thing you'll want to do is run",
+    "start": 1553.12,
+    "duration": 3.28
+  },
+  {
+    "text": "the following commands to make sure that",
+    "start": 1554.96,
+    "duration": 3.44
+  },
+  {
+    "text": "there's enough detailed information in",
+    "start": 1556.4,
+    "duration": 4.399
+  },
+  {
+    "text": "the profile that you're about to do. The",
+    "start": 1558.4,
+    "duration": 5.279
+  },
+  {
+    "text": "first one is r.tow material draw events",
+    "start": 1560.799,
+    "duration": 4.721
+  },
+  {
+    "text": "one. That's for everything that's",
+    "start": 1563.679,
+    "duration": 5.281
+  },
+  {
+    "text": "nonnanite. And then also r.nanite mesh",
+    "start": 1565.52,
+    "duration": 5.279
+  },
+  {
+    "text": "show mesh draw events one. And that's",
+    "start": 1568.96,
+    "duration": 4.0
+  },
+  {
+    "text": "for everything that is nanite. You'll",
+    "start": 1570.799,
+    "duration": 5.12
+  },
+  {
+    "text": "also want to disable async compute and",
+    "start": 1572.96,
+    "duration": 6.319
+  },
+  {
+    "text": "then run the command profile GPU.",
+    "start": 1575.919,
+    "duration": 6.081
+  },
+  {
+    "text": "Um just a side note, if you're certain",
+    "start": 1579.279,
+    "duration": 5.201
+  },
+  {
+    "text": "that the GPU is the issue and it's not",
+    "start": 1582.0,
+    "duration": 5.52
+  },
+  {
+    "text": "CPU, it is okay to do this in the editor",
+    "start": 1584.48,
+    "duration": 5.52
+  },
+  {
+    "text": "pi. Um if that saves you time,",
+    "start": 1587.52,
+    "duration": 3.84
+  },
+  {
+    "text": "especially if you're iterating on",
+    "start": 1590.0,
+    "duration": 4.159
+  },
+  {
+    "text": "optimizations. Um, and also if you're",
+    "start": 1591.36,
+    "duration": 4.48
+  },
+  {
+    "text": "running from a build, the results of",
+    "start": 1594.159,
+    "duration": 4.321
+  },
+  {
+    "text": "this profile will dump into a log pro uh",
+    "start": 1595.84,
+    "duration": 4.959
+  },
+  {
+    "text": "log file in your project save folder,",
+    "start": 1598.48,
+    "duration": 4.559
+  },
+  {
+    "text": "which you can then open up in Unreal",
+    "start": 1600.799,
+    "duration": 4.321
+  },
+  {
+    "text": "Editor.",
+    "start": 1603.039,
+    "duration": 6.0
+  },
+  {
+    "text": "Um, and then also um if Unreal Insights",
+    "start": 1605.12,
+    "duration": 6.24
+  },
+  {
+    "text": "and Profile GPU aren't able to provide",
+    "start": 1609.039,
+    "duration": 4.88
+  },
+  {
+    "text": "enough information, um, I think that's",
+    "start": 1611.36,
+    "duration": 4.24
+  },
+  {
+    "text": "the point where again you want to pull",
+    "start": 1613.919,
+    "duration": 5.281
+  },
+  {
+    "text": "in an engineer, um, and dig even deeper",
+    "start": 1615.6,
+    "duration": 6.24
+  },
+  {
+    "text": "with a dedicated GPU profiler. for",
+    "start": 1619.2,
+    "duration": 6.0
+  },
+  {
+    "text": "example, pick if you're doing PC or Xbox",
+    "start": 1621.84,
+    "duration": 6.079
+  },
+  {
+    "text": "or Razer if you're doing PlayStation.",
+    "start": 1625.2,
+    "duration": 4.32
+  },
+  {
+    "text": "And then you can get even more",
+    "start": 1627.919,
+    "duration": 3.601
+  },
+  {
+    "text": "information, but that's a whole another",
+    "start": 1629.52,
+    "duration": 5.84
+  },
+  {
+    "text": "talk. It's very complex.",
+    "start": 1631.52,
+    "duration": 6.88
+  },
+  {
+    "text": "So, here's an example of profile GPU.",
+    "start": 1635.36,
+    "duration": 4.96
+  },
+  {
+    "text": "Um, and there are [clears throat] two",
+    "start": 1638.4,
+    "duration": 3.84
+  },
+  {
+    "text": "parts to this interface. The top part",
+    "start": 1640.32,
+    "duration": 4.32
+  },
+  {
+    "text": "has a bunch of colored bars and the",
+    "start": 1642.24,
+    "duration": 4.559
+  },
+  {
+    "text": "bottom part has more detailed text",
+    "start": 1644.64,
+    "duration": 4.96
+  },
+  {
+    "text": "information. The idea here is we just",
+    "start": 1646.799,
+    "duration": 5.841
+  },
+  {
+    "text": "want to follow the biggest color bars.",
+    "start": 1649.6,
+    "duration": 6.24
+  },
+  {
+    "text": "So in this example, I just start",
+    "start": 1652.64,
+    "duration": 5.519
+  },
+  {
+    "text": "expanding and I'm like looking for the",
+    "start": 1655.84,
+    "duration": 4.64
+  },
+  {
+    "text": "really big chunky bars. Expand it some",
+    "start": 1658.159,
+    "duration": 6.321
+  },
+  {
+    "text": "more. Keep expanding. Keep expanding.",
+    "start": 1660.48,
+    "duration": 5.6
+  },
+  {
+    "text": "And I'm just like drilling all the way",
+    "start": 1664.48,
+    "duration": 5.28
+  },
+  {
+    "text": "down until I can't expand anymore.",
+    "start": 1666.08,
+    "duration": 6.16
+  },
+  {
+    "text": "And then can't do anything more. So I go",
+    "start": 1669.76,
+    "duration": 4.0
+  },
+  {
+    "text": "down to this bottom panel. I keep",
+    "start": 1672.24,
+    "duration": 4.48
+  },
+  {
+    "text": "expanding one more time. And I find that",
+    "start": 1673.76,
+    "duration": 6.72
+  },
+  {
+    "text": "there is a material glass thickness",
+    "start": 1676.72,
+    "duration": 8.079
+  },
+  {
+    "text": "simple glass is usually expensive.",
+    "start": 1680.48,
+    "duration": 7.919
+  },
+  {
+    "text": "Maybe there's too much glass on screen",
+    "start": 1684.799,
+    "duration": 6.081
+  },
+  {
+    "text": "or too many features are enabled. But",
+    "start": 1688.399,
+    "duration": 5.201
+  },
+  {
+    "text": "that's where I'd really focus on my",
+    "start": 1690.88,
+    "duration": 5.72
+  },
+  {
+    "text": "investigations.",
+    "start": 1693.6,
+    "duration": 3.0
+  },
+  {
+    "text": "All right. So, moving along to gaining",
+    "start": 1699.039,
+    "duration": 6.0
+  },
+  {
+    "text": "traction on the optimizations that we've",
+    "start": 1702.399,
+    "duration": 6.0
+  },
+  {
+    "text": "identified in our profiling.",
+    "start": 1705.039,
+    "duration": 6.081
+  },
+  {
+    "text": "How do we help the responsible team get",
+    "start": 1708.399,
+    "duration": 4.961
+  },
+  {
+    "text": "traction? A lot of times as a tech",
+    "start": 1711.12,
+    "duration": 3.919
+  },
+  {
+    "text": "artist, you find the thing that's",
+    "start": 1713.36,
+    "duration": 4.0
+  },
+  {
+    "text": "expensive and you're like, \"Oh, like",
+    "start": 1715.039,
+    "duration": 4.561
+  },
+  {
+    "text": "it's right there.\" But then content",
+    "start": 1717.36,
+    "duration": 4.72
+  },
+  {
+    "text": "creators, engineers, they don't know",
+    "start": 1719.6,
+    "duration": 4.88
+  },
+  {
+    "text": "what to do with that information",
+    "start": 1722.08,
+    "duration": 5.4
+  },
+  {
+    "text": "immediately.",
+    "start": 1724.48,
+    "duration": 3.0
+  },
+  {
+    "text": "First of all, it's helpful to have a",
+    "start": 1728.48,
+    "duration": 4.4
+  },
+  {
+    "text": "central location for communicating about",
+    "start": 1730.48,
+    "duration": 5.199
+  },
+  {
+    "text": "and discussing and discussing findings.",
+    "start": 1732.88,
+    "duration": 4.799
+  },
+  {
+    "text": "Um, for example, a Slack channel is",
+    "start": 1735.679,
+    "duration": 4.161
+  },
+  {
+    "text": "really helpful here. Um, that's what we",
+    "start": 1737.679,
+    "duration": 4.72
+  },
+  {
+    "text": "use. Um, and for every performance issue",
+    "start": 1739.84,
+    "duration": 5.839
+  },
+  {
+    "text": "we find, we'll make a new post and then",
+    "start": 1742.399,
+    "duration": 5.201
+  },
+  {
+    "text": "start a discussion in the thread where",
+    "start": 1745.679,
+    "duration": 5.201
+  },
+  {
+    "text": "we figure out like, oh, like do we have",
+    "start": 1747.6,
+    "duration": 5.36
+  },
+  {
+    "text": "all the information? Can anyone else",
+    "start": 1750.88,
+    "duration": 4.72
+  },
+  {
+    "text": "provide context? who is this best suited",
+    "start": 1752.96,
+    "duration": 5.52
+  },
+  {
+    "text": "to send to? Um, and that's been really",
+    "start": 1755.6,
+    "duration": 6.0
+  },
+  {
+    "text": "really helpful. Once we get to the point",
+    "start": 1758.48,
+    "duration": 6.079
+  },
+  {
+    "text": "um that we are either starting that new",
+    "start": 1761.6,
+    "duration": 5.52
+  },
+  {
+    "text": "post or creating a Jira issue if we're",
+    "start": 1764.559,
+    "duration": 5.201
+  },
+  {
+    "text": "ready to assign the work out to someone,",
+    "start": 1767.12,
+    "duration": 4.64
+  },
+  {
+    "text": "there's a lot of information that we",
+    "start": 1769.76,
+    "duration": 3.76
+  },
+  {
+    "text": "want to include. So, we've created a",
+    "start": 1771.76,
+    "duration": 3.519
+  },
+  {
+    "text": "checklist to help people make sure that",
+    "start": 1773.52,
+    "duration": 4.56
+  },
+  {
+    "text": "all that info is there.",
+    "start": 1775.279,
+    "duration": 4.161
+  },
+  {
+    "text": "First off, you want to have a really",
+    "start": 1778.08,
+    "duration": 4.0
+  },
+  {
+    "text": "clear, concise issue summary. You'll",
+    "start": 1779.44,
+    "duration": 4.479
+  },
+  {
+    "text": "want to include a Jira link once the",
+    "start": 1782.08,
+    "duration": 4.719
+  },
+  {
+    "text": "Jira has been created. You'll want to do",
+    "start": 1783.919,
+    "duration": 6.24
+  },
+  {
+    "text": "a basic analysis of what the problem is.",
+    "start": 1786.799,
+    "duration": 5.921
+  },
+  {
+    "text": "So, as a tech artist, I wouldn't worry",
+    "start": 1790.159,
+    "duration": 5.361
+  },
+  {
+    "text": "too much if you don't know exactly why",
+    "start": 1792.72,
+    "duration": 5.199
+  },
+  {
+    "text": "the physics system is so expensive. Just",
+    "start": 1795.52,
+    "duration": 5.36
+  },
+  {
+    "text": "do the best you can. Um, so that way all",
+    "start": 1797.919,
+    "duration": 4.88
+  },
+  {
+    "text": "the work that you've done with the",
+    "start": 1800.88,
+    "duration": 4.24
+  },
+  {
+    "text": "analysis can be passed off to the next",
+    "start": 1802.799,
+    "duration": 4.48
+  },
+  {
+    "text": "person.",
+    "start": 1805.12,
+    "duration": 3.76
+  },
+  {
+    "text": "If you're developing on multiple",
+    "start": 1807.279,
+    "duration": 3.361
+  },
+  {
+    "text": "platforms, you'll want to include that",
+    "start": 1808.88,
+    "duration": 4.399
+  },
+  {
+    "text": "information. If you're developing on PC,",
+    "start": 1810.64,
+    "duration": 5.279
+  },
+  {
+    "text": "you'll want to also include which GPU",
+    "start": 1813.279,
+    "duration": 5.041
+  },
+  {
+    "text": "you're using. You'll want to include",
+    "start": 1815.919,
+    "duration": 5.281
+  },
+  {
+    "text": "clear reproduction steps. So, if a",
+    "start": 1818.32,
+    "duration": 5.68
+  },
+  {
+    "text": "profile, if if a programmer wants to try",
+    "start": 1821.2,
+    "duration": 4.479
+  },
+  {
+    "text": "recreating this later and attach a",
+    "start": 1824.0,
+    "duration": 4.72
+  },
+  {
+    "text": "debugger, they know exactly what to do.",
+    "start": 1825.679,
+    "duration": 5.761
+  },
+  {
+    "text": "Next, include the change list for the",
+    "start": 1828.72,
+    "duration": 4.8
+  },
+  {
+    "text": "instance of the game that the issue was",
+    "start": 1831.44,
+    "duration": 6.479
+  },
+  {
+    "text": "found on. If it's available, include the",
+    "start": 1833.52,
+    "duration": 7.519
+  },
+  {
+    "text": "trace frame number or the frame number",
+    "start": 1837.919,
+    "duration": 6.88
+  },
+  {
+    "text": "um of the build uh of the issue um in",
+    "start": 1841.039,
+    "duration": 5.441
+  },
+  {
+    "text": "the build.",
+    "start": 1844.799,
+    "duration": 5.201
+  },
+  {
+    "text": "Then as much media as you can provide",
+    "start": 1846.48,
+    "duration": 5.76
+  },
+  {
+    "text": "like the better really really helpful.",
+    "start": 1850.0,
+    "duration": 5.039
+  },
+  {
+    "text": "So screenshots, videos, anything you can",
+    "start": 1852.24,
+    "duration": 6.08
+  },
+  {
+    "text": "provide to help provide context.",
+    "start": 1855.039,
+    "duration": 6.0
+  },
+  {
+    "text": "Then provide a screenshot of the trace",
+    "start": 1858.32,
+    "duration": 4.8
+  },
+  {
+    "text": "with the area of concern highlighted,",
+    "start": 1861.039,
+    "duration": 4.0
+  },
+  {
+    "text": "similar to what I did earlier in this",
+    "start": 1863.12,
+    "duration": 5.12
+  },
+  {
+    "text": "presentation. And then finally, the",
+    "start": 1865.039,
+    "duration": 5.36
+  },
+  {
+    "text": "location of the trace file. If you put",
+    "start": 1868.24,
+    "duration": 3.919
+  },
+  {
+    "text": "it up in the network, that way someone",
+    "start": 1870.399,
+    "duration": 4.241
+  },
+  {
+    "text": "can easily grab it if they want to dig a",
+    "start": 1872.159,
+    "duration": 5.12
+  },
+  {
+    "text": "little deeper. To help guide this",
+    "start": 1874.64,
+    "duration": 5.44
+  },
+  {
+    "text": "process, um, I highly recommend working",
+    "start": 1877.279,
+    "duration": 5.041
+  },
+  {
+    "text": "with a producer to create a Jira",
+    "start": 1880.08,
+    "duration": 4.88
+  },
+  {
+    "text": "template with applicable fields",
+    "start": 1882.32,
+    "duration": 5.52
+  },
+  {
+    "text": "prefilled. Um, so that way you can even",
+    "start": 1884.96,
+    "duration": 5.04
+  },
+  {
+    "text": "just have a button where anyone who's",
+    "start": 1887.84,
+    "duration": 4.319
+  },
+  {
+    "text": "doing profiling can click that button",
+    "start": 1890.0,
+    "duration": 4.64
+  },
+  {
+    "text": "and then easily fill out with the",
+    "start": 1892.159,
+    "duration": 5.36
+  },
+  {
+    "text": "information above. I also suggest",
+    "start": 1894.64,
+    "duration": 5.039
+  },
+  {
+    "text": "creating a dashboard for tracking all",
+    "start": 1897.519,
+    "duration": 5.04
+  },
+  {
+    "text": "active performance issues which I have",
+    "start": 1899.679,
+    "duration": 6.0
+  },
+  {
+    "text": "an example of here. Um, this is really",
+    "start": 1902.559,
+    "duration": 5.12
+  },
+  {
+    "text": "helpful just to make sure that you're",
+    "start": 1905.679,
+    "duration": 4.561
+  },
+  {
+    "text": "continuing to uh drive these",
+    "start": 1907.679,
+    "duration": 6.0
+  },
+  {
+    "text": "optimizations forward. Uh we have ours",
+    "start": 1910.24,
+    "duration": 6.08
+  },
+  {
+    "text": "broken down by team so you can see what",
+    "start": 1913.679,
+    "duration": 3.921
+  },
+  {
+    "text": "environment art needs to do,",
+    "start": 1916.32,
+    "duration": 4.0
+  },
+  {
+    "text": "engineering, tech art, etc. Um we can",
+    "start": 1917.6,
+    "duration": 5.12
+  },
+  {
+    "text": "also see recently created issues and",
+    "start": 1920.32,
+    "duration": 4.64
+  },
+  {
+    "text": "then a burndown chart too to make sure",
+    "start": 1922.72,
+    "duration": 3.76
+  },
+  {
+    "text": "that we're like actually making the",
+    "start": 1924.96,
+    "duration": 3.439
+  },
+  {
+    "text": "progress that we want to see and hitting",
+    "start": 1926.48,
+    "duration": 6.039
+  },
+  {
+    "text": "all of our performance goals.",
+    "start": 1928.399,
+    "duration": 4.12
+  },
+  {
+    "text": "So uh starting to wrap things up now.",
+    "start": 1932.88,
+    "duration": 7.919
+  },
+  {
+    "text": "Um, I've included some documentation for",
+    "start": 1937.279,
+    "duration": 6.64
+  },
+  {
+    "text": "um, tools um, and other tech that I've",
+    "start": 1940.799,
+    "duration": 4.801
+  },
+  {
+    "text": "mentioned in my presentation. So,",
+    "start": 1943.919,
+    "duration": 4.081
+  },
+  {
+    "text": "definitely recommend uh, checking out",
+    "start": 1945.6,
+    "duration": 5.199
+  },
+  {
+    "text": "these links. Um, and then also once",
+    "start": 1948.0,
+    "duration": 4.64
+  },
+  {
+    "text": "you're at the point where you've figured",
+    "start": 1950.799,
+    "duration": 5.921
+  },
+  {
+    "text": "out, okay, it's um, shadow pass issue.",
+    "start": 1952.64,
+    "duration": 7.759
+  },
+  {
+    "text": "Um Matt Alay did a great talk last year",
+    "start": 1956.72,
+    "duration": 7.199
+  },
+  {
+    "text": "um where he uh drills into each of those",
+    "start": 1960.399,
+    "duration": 7.12
+  },
+  {
+    "text": "categories and displays tools that um",
+    "start": 1963.919,
+    "duration": 6.0
+  },
+  {
+    "text": "are really helpful helpful for gathering",
+    "start": 1967.519,
+    "duration": 4.961
+  },
+  {
+    "text": "more information um to provide to your",
+    "start": 1969.919,
+    "duration": 5.36
+  },
+  {
+    "text": "content teams.",
+    "start": 1972.48,
+    "duration": 4.319
+  },
+  {
+    "text": "So I just want to say thank you to",
+    "start": 1975.279,
+    "duration": 3.28
+  },
+  {
+    "text": "everyone at Crystal Dynamics and our",
+    "start": 1976.799,
+    "duration": 3.441
+  },
+  {
+    "text": "partners who contributed toward the",
+    "start": 1978.559,
+    "duration": 3.36
+  },
+  {
+    "text": "workflows and tech presented in this",
+    "start": 1980.24,
+    "duration": 5.2
+  },
+  {
+    "text": "talk. um engineering, tech, art,",
+    "start": 1981.919,
+    "duration": 7.041
+  },
+  {
+    "text": "production too. Um and also thank you to",
+    "start": 1985.44,
+    "duration": 6.16
+  },
+  {
+    "text": "Epic for organizing in Real Fest Orlando",
+    "start": 1988.96,
+    "duration": 4.719
+  },
+  {
+    "text": "2025.",
+    "start": 1991.6,
+    "duration": 5.572
+  },
+  {
+    "text": "Thank you. [applause]",
+    "start": 1993.679,
+    "duration": 3.493
+  }
+]

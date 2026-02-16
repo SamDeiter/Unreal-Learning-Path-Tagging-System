@@ -1,0 +1,7137 @@
+[
+  {
+    "text": "Hello everyone. I'm excited you to",
+    "start": 6.319,
+    "duration": 4.4
+  },
+  {
+    "text": "welcome to welcome you to today's talk",
+    "start": 8.16,
+    "duration": 4.8
+  },
+  {
+    "text": "um breaking and fixing Unreal an",
+    "start": 10.719,
+    "duration": 4.96
+  },
+  {
+    "text": "engineers guide to problem solving. Over",
+    "start": 12.96,
+    "duration": 4.159
+  },
+  {
+    "text": "the course of this session I want to",
+    "start": 15.679,
+    "duration": 2.801
+  },
+  {
+    "text": "take you through the real world",
+    "start": 17.119,
+    "duration": 3.441
+  },
+  {
+    "text": "engineering mindset that we use when",
+    "start": 18.48,
+    "duration": 4.32
+  },
+  {
+    "text": "working with Unreal Engine particularly",
+    "start": 20.56,
+    "duration": 5.28
+  },
+  {
+    "text": "when things go wrong.",
+    "start": 22.8,
+    "duration": 5.44
+  },
+  {
+    "text": "We'll look at how we identify problems,",
+    "start": 25.84,
+    "duration": 5.12
+  },
+  {
+    "text": "validate them with data, assess risk,",
+    "start": 28.24,
+    "duration": 4.24
+  },
+  {
+    "text": "and apply practical debugging",
+    "start": 30.96,
+    "duration": 3.759
+  },
+  {
+    "text": "strategies, all while balancing real",
+    "start": 32.48,
+    "duration": 4.48
+  },
+  {
+    "text": "production constraints like deadlines,",
+    "start": 34.719,
+    "duration": 4.641
+  },
+  {
+    "text": "platforms, and in our case, the impact",
+    "start": 36.96,
+    "duration": 5.36
+  },
+  {
+    "text": "on our client's projects. This is a talk",
+    "start": 39.36,
+    "duration": 4.719
+  },
+  {
+    "text": "for anybody who's ever stared down a",
+    "start": 42.32,
+    "duration": 4.239
+  },
+  {
+    "text": "cryptic crash log, a misbehaving shader,",
+    "start": 44.079,
+    "duration": 5.201
+  },
+  {
+    "text": "or a regression with no repro steps.",
+    "start": 46.559,
+    "duration": 4.641
+  },
+  {
+    "text": "It's not just about fixing things. It's",
+    "start": 49.28,
+    "duration": 3.68
+  },
+  {
+    "text": "about how we approach problems",
+    "start": 51.2,
+    "duration": 4.08
+  },
+  {
+    "text": "systematically. how we use profiling",
+    "start": 52.96,
+    "duration": 4.48
+  },
+  {
+    "text": "data to validate our assumptions and how",
+    "start": 55.28,
+    "duration": 4.16
+  },
+  {
+    "text": "we build up a culture of resilient,",
+    "start": 57.44,
+    "duration": 4.0
+  },
+  {
+    "text": "thoughtful engineering. So whether",
+    "start": 59.44,
+    "duration": 3.36
+  },
+  {
+    "text": "you're deep in the engine or just want",
+    "start": 61.44,
+    "duration": 2.56
+  },
+  {
+    "text": "to level up your problem solving",
+    "start": 62.8,
+    "duration": 4.96
+  },
+  {
+    "text": "workflow, welcome. Let's dive in.",
+    "start": 64.0,
+    "duration": 5.84
+  },
+  {
+    "text": "Before we get started, a quick intro. My",
+    "start": 67.76,
+    "duration": 3.92
+  },
+  {
+    "text": "name is Thomas. I'm a studio director",
+    "start": 69.84,
+    "duration": 3.2
+  },
+  {
+    "text": "and an Unreal software engineer at",
+    "start": 71.68,
+    "duration": 3.439
+  },
+  {
+    "text": "Prismatic Studios. We're an Unreal",
+    "start": 73.04,
+    "duration": 3.6
+  },
+  {
+    "text": "Engine technical consultancy and",
+    "start": 75.119,
+    "duration": 3.521
+  },
+  {
+    "text": "co-development studio based in Oakland,",
+    "start": 76.64,
+    "duration": 3.76
+  },
+  {
+    "text": "New Zealand. and we work with clients",
+    "start": 78.64,
+    "duration": 3.68
+  },
+  {
+    "text": "around the world to solve complex",
+    "start": 80.4,
+    "duration": 4.079
+  },
+  {
+    "text": "problems in Unreal. Our team has",
+    "start": 82.32,
+    "duration": 3.68
+  },
+  {
+    "text": "experience across a wide range of",
+    "start": 84.479,
+    "duration": 4.481
+  },
+  {
+    "text": "domains from games tools engineering to",
+    "start": 86.0,
+    "duration": 5.28
+  },
+  {
+    "text": "non-game applications like simulations",
+    "start": 88.96,
+    "duration": 4.159
+  },
+  {
+    "text": "and real-time animation or even virtual",
+    "start": 91.28,
+    "duration": 4.0
+  },
+  {
+    "text": "production. Uh we continued our Unreal",
+    "start": 93.119,
+    "duration": 3.921
+  },
+  {
+    "text": "Engine gold service partner status into",
+    "start": 95.28,
+    "duration": 4.0
+  },
+  {
+    "text": "2025 and we work really closely with",
+    "start": 97.04,
+    "duration": 4.719
+  },
+  {
+    "text": "Epic as a Epic Pro support, previously",
+    "start": 99.28,
+    "duration": 4.799
+  },
+  {
+    "text": "UDM. A lot of what I'll be talking about",
+    "start": 101.759,
+    "duration": 4.32
+  },
+  {
+    "text": "today comes directly from the trenches",
+    "start": 104.079,
+    "duration": 4.161
+  },
+  {
+    "text": "of that work. the kind of bugs that show",
+    "start": 106.079,
+    "duration": 4.0
+  },
+  {
+    "text": "up when the pressure before launch has",
+    "start": 108.24,
+    "duration": 4.159
+  },
+  {
+    "text": "boiled to a maximum and there is very",
+    "start": 110.079,
+    "duration": 4.641
+  },
+  {
+    "text": "little time to fix them.",
+    "start": 112.399,
+    "duration": 4.72
+  },
+  {
+    "text": "So when I say technical problem solving,",
+    "start": 114.72,
+    "duration": 4.24
+  },
+  {
+    "text": "I'm talking about more than just fixing",
+    "start": 117.119,
+    "duration": 4.561
+  },
+  {
+    "text": "bugs. It's the process of understanding,",
+    "start": 118.96,
+    "duration": 4.64
+  },
+  {
+    "text": "diagnosing, and resolving complex",
+    "start": 121.68,
+    "duration": 4.079
+  },
+  {
+    "text": "issues, especially when the symptoms are",
+    "start": 123.6,
+    "duration": 4.719
+  },
+  {
+    "text": "unclear or misleading. It's about using",
+    "start": 125.759,
+    "duration": 4.401
+  },
+  {
+    "text": "the right tools, asking the right",
+    "start": 128.319,
+    "duration": 4.64
+  },
+  {
+    "text": "questions, and staying methodical. In",
+    "start": 130.16,
+    "duration": 5.2
+  },
+  {
+    "text": "Unreal, that means knowing both what the",
+    "start": 132.959,
+    "duration": 4.801
+  },
+  {
+    "text": "engine is doing and why, and learning",
+    "start": 135.36,
+    "duration": 4.239
+  },
+  {
+    "text": "how to work with it instead of against",
+    "start": 137.76,
+    "duration": 4.32
+  },
+  {
+    "text": "it.",
+    "start": 139.599,
+    "duration": 4.241
+  },
+  {
+    "text": "Over time, I've come to believe that",
+    "start": 142.08,
+    "duration": 3.36
+  },
+  {
+    "text": "almost every technical issue we deal",
+    "start": 143.84,
+    "duration": 3.2
+  },
+  {
+    "text": "with in Unreal can be grouped in one of",
+    "start": 145.44,
+    "duration": 4.0
+  },
+  {
+    "text": "these four broad categories. Firstly, we",
+    "start": 147.04,
+    "duration": 3.839
+  },
+  {
+    "text": "have implementation and performance",
+    "start": 149.44,
+    "duration": 3.2
+  },
+  {
+    "text": "issues. These are just your classic bugs",
+    "start": 150.879,
+    "duration": 3.44
+  },
+  {
+    "text": "or inefficiencies and how systems are",
+    "start": 152.64,
+    "duration": 3.679
+  },
+  {
+    "text": "built. That includes both things that",
+    "start": 154.319,
+    "duration": 5.041
+  },
+  {
+    "text": "don't work and things that work poorly",
+    "start": 156.319,
+    "duration": 4.721
+  },
+  {
+    "text": "like frame drops, memory leaks,",
+    "start": 159.36,
+    "duration": 3.84
+  },
+  {
+    "text": "incorrect logic, etc. Uh then there's",
+    "start": 161.04,
+    "duration": 3.919
+  },
+  {
+    "text": "engines and system integration. This is",
+    "start": 163.2,
+    "duration": 3.36
+  },
+  {
+    "text": "where things break between different",
+    "start": 164.959,
+    "duration": 3.761
+  },
+  {
+    "text": "systems, version upgrades, platform",
+    "start": 166.56,
+    "duration": 4.88
+  },
+  {
+    "text": "specific edge cases, or issues caused by",
+    "start": 168.72,
+    "duration": 5.04
+  },
+  {
+    "text": "third party SDKs or plugins. These are",
+    "start": 171.44,
+    "duration": 4.4
+  },
+  {
+    "text": "tricky because they often involve Unreal",
+    "start": 173.76,
+    "duration": 4.32
+  },
+  {
+    "text": "internals or external factors outside of",
+    "start": 175.84,
+    "duration": 4.64
+  },
+  {
+    "text": "your own immediate codebase. Uh the",
+    "start": 178.08,
+    "duration": 4.159
+  },
+  {
+    "text": "third bucket is technical debt and",
+    "start": 180.48,
+    "duration": 3.6
+  },
+  {
+    "text": "architecture issues. These are the",
+    "start": 182.239,
+    "duration": 3.681
+  },
+  {
+    "text": "long-term pain points. Maybe you've",
+    "start": 184.08,
+    "duration": 3.439
+  },
+  {
+    "text": "built something that worked once, but",
+    "start": 185.92,
+    "duration": 4.08
+  },
+  {
+    "text": "now it's fragile, hard to debug, or",
+    "start": 187.519,
+    "duration": 4.881
+  },
+  {
+    "text": "impossible to extend. This kind of debt",
+    "start": 190.0,
+    "duration": 4.56
+  },
+  {
+    "text": "tends to accumulate slowly until it",
+    "start": 192.4,
+    "duration": 4.72
+  },
+  {
+    "text": "explodes under pressure. And finally,",
+    "start": 194.56,
+    "duration": 5.12
+  },
+  {
+    "text": "scope creep, which where the technical",
+    "start": 197.12,
+    "duration": 4.88
+  },
+  {
+    "text": "issues arise not from broken code most",
+    "start": 199.68,
+    "duration": 4.4
+  },
+  {
+    "text": "often, but from shifting requirements.",
+    "start": 202.0,
+    "duration": 3.519
+  },
+  {
+    "text": "The feature keeps growing, the",
+    "start": 204.08,
+    "duration": 3.28
+  },
+  {
+    "text": "complexity spirals, and suddenly you're",
+    "start": 205.519,
+    "duration": 3.201
+  },
+  {
+    "text": "firefighting on all fronts just trying",
+    "start": 207.36,
+    "duration": 2.879
+  },
+  {
+    "text": "to keep up with what the system now",
+    "start": 208.72,
+    "duration": 4.32
+  },
+  {
+    "text": "needs to do. So why does it matter which",
+    "start": 210.239,
+    "duration": 4.56
+  },
+  {
+    "text": "category your problem falls into?",
+    "start": 213.04,
+    "duration": 3.279
+  },
+  {
+    "text": "Because each type of problem usually",
+    "start": 214.799,
+    "duration": 3.36
+  },
+  {
+    "text": "involves a different group of people",
+    "start": 216.319,
+    "duration": 3.84
+  },
+  {
+    "text": "that have to help you solve it for",
+    "start": 218.159,
+    "duration": 3.681
+  },
+  {
+    "text": "implementation or performance issues or",
+    "start": 220.159,
+    "duration": 3.121
+  },
+  {
+    "text": "anything related to engine and systems",
+    "start": 221.84,
+    "duration": 3.039
+  },
+  {
+    "text": "integration. You're often working",
+    "start": 223.28,
+    "duration": 3.679
+  },
+  {
+    "text": "directly with other engineers. Uh",
+    "start": 224.879,
+    "duration": 3.601
+  },
+  {
+    "text": "reading through their code, checking",
+    "start": 226.959,
+    "duration": 3.441
+  },
+  {
+    "text": "logs, profiling, stepping through engine",
+    "start": 228.48,
+    "duration": 3.92
+  },
+  {
+    "text": "source, etc. But when it comes to",
+    "start": 230.4,
+    "duration": 4.399
+  },
+  {
+    "text": "technical debt or scope creep, solving",
+    "start": 232.4,
+    "duration": 3.52
+  },
+  {
+    "text": "the problem is only part of the",
+    "start": 234.799,
+    "duration": 2.881
+  },
+  {
+    "text": "challenge and the other part is",
+    "start": 235.92,
+    "duration": 3.519
+  },
+  {
+    "text": "convincing somebody else that it needs",
+    "start": 237.68,
+    "duration": 3.6
+  },
+  {
+    "text": "to be solved at all. These kinds of",
+    "start": 239.439,
+    "duration": 3.44
+  },
+  {
+    "text": "problems typically involve conversations",
+    "start": 241.28,
+    "duration": 3.92
+  },
+  {
+    "text": "with producers, leads, stakeholders,",
+    "start": 242.879,
+    "duration": 4.481
+  },
+  {
+    "text": "etc. because the solution may require",
+    "start": 245.2,
+    "duration": 4.56
+  },
+  {
+    "text": "time, refactoring or rethinking scope",
+    "start": 247.36,
+    "duration": 4.56
+  },
+  {
+    "text": "and that's not always viable um or",
+    "start": 249.76,
+    "duration": 3.92
+  },
+  {
+    "text": "visible, sorry, unless you can explain",
+    "start": 251.92,
+    "duration": 3.519
+  },
+  {
+    "text": "that long-term cost to them. So",
+    "start": 253.68,
+    "duration": 3.2
+  },
+  {
+    "text": "identifying the type of problem early",
+    "start": 255.439,
+    "duration": 2.961
+  },
+  {
+    "text": "helps set you on the right course, not",
+    "start": 256.88,
+    "duration": 3.359
+  },
+  {
+    "text": "only technically, but in terms of the",
+    "start": 258.4,
+    "duration": 3.359
+  },
+  {
+    "text": "team communication and buyin for",
+    "start": 260.239,
+    "duration": 4.4
+  },
+  {
+    "text": "resolving that problem. Inevitably, over",
+    "start": 261.759,
+    "duration": 4.081
+  },
+  {
+    "text": "the course of development, you're going",
+    "start": 264.639,
+    "duration": 3.521
+  },
+  {
+    "text": "to run into some, if not all, of the",
+    "start": 265.84,
+    "duration": 4.639
+  },
+  {
+    "text": "problem types on that last slide. And as",
+    "start": 268.16,
+    "duration": 3.92
+  },
+  {
+    "text": "engineers, problem solving is our bread",
+    "start": 270.479,
+    "duration": 3.681
+  },
+  {
+    "text": "and butter. But let's be honest,",
+    "start": 272.08,
+    "duration": 3.76
+  },
+  {
+    "text": "sometimes you hit a problem that just",
+    "start": 274.16,
+    "duration": 3.44
+  },
+  {
+    "text": "feels overwhelming. There's no clear",
+    "start": 275.84,
+    "duration": 3.68
+  },
+  {
+    "text": "repro. It's because of somebody else's",
+    "start": 277.6,
+    "duration": 4.96
+  },
+  {
+    "text": "code. Or worse, it only happens",
+    "start": 279.52,
+    "duration": 6.239
+  },
+  {
+    "text": "sometimes. The key is when overwhelmed,",
+    "start": 282.56,
+    "duration": 4.96
+  },
+  {
+    "text": "don't try to solve the entire problem",
+    "start": 285.759,
+    "duration": 3.601
+  },
+  {
+    "text": "all at once. We need to try and break it",
+    "start": 287.52,
+    "duration": 4.08
+  },
+  {
+    "text": "down. Get clarity on what we know and",
+    "start": 289.36,
+    "duration": 5.44
+  },
+  {
+    "text": "what we don't test. Narrow the scope of",
+    "start": 291.6,
+    "duration": 4.96
+  },
+  {
+    "text": "investigation and attempt to eliminate",
+    "start": 294.8,
+    "duration": 3.76
+  },
+  {
+    "text": "as many variables as possible. The rest",
+    "start": 296.56,
+    "duration": 3.52
+  },
+  {
+    "text": "of this talk is all about building that",
+    "start": 298.56,
+    "duration": 3.84
+  },
+  {
+    "text": "process. How we move from I have no idea",
+    "start": 300.08,
+    "duration": 4.48
+  },
+  {
+    "text": "what's going to okay, I know what's",
+    "start": 302.4,
+    "duration": 4.799
+  },
+  {
+    "text": "wrong and I know how to fix it.",
+    "start": 304.56,
+    "duration": 5.04
+  },
+  {
+    "text": "So the first step in any problem solving",
+    "start": 307.199,
+    "duration": 4.481
+  },
+  {
+    "text": "process is accurately identifying the",
+    "start": 309.6,
+    "duration": 4.319
+  },
+  {
+    "text": "problem itself. It sounds obvious, but",
+    "start": 311.68,
+    "duration": 4.4
+  },
+  {
+    "text": "in practice it's easy to misdiagnose an",
+    "start": 313.919,
+    "duration": 4.0
+  },
+  {
+    "text": "issue, especially in a complex system",
+    "start": 316.08,
+    "duration": 4.16
+  },
+  {
+    "text": "like Unreal. If we start fixing the",
+    "start": 317.919,
+    "duration": 4.481
+  },
+  {
+    "text": "wrong thing, we risk wasting time and",
+    "start": 320.24,
+    "duration": 4.48
+  },
+  {
+    "text": "introducing new bugs.",
+    "start": 322.4,
+    "duration": 4.0
+  },
+  {
+    "text": "So once you suspect a problem, your",
+    "start": 324.72,
+    "duration": 3.52
+  },
+  {
+    "text": "first job is to frame it properly. That",
+    "start": 326.4,
+    "duration": 4.4
+  },
+  {
+    "text": "means stepping back and asking clear",
+    "start": 328.24,
+    "duration": 4.16
+  },
+  {
+    "text": "structured questions to define its",
+    "start": 330.8,
+    "duration": 4.0
+  },
+  {
+    "text": "scope. Asking questions like can we",
+    "start": 332.4,
+    "duration": 4.32
+  },
+  {
+    "text": "reliably reproduce the issue internally?",
+    "start": 334.8,
+    "duration": 4.48
+  },
+  {
+    "text": "Is it a localorked or platform specific",
+    "start": 336.72,
+    "duration": 4.24
+  },
+  {
+    "text": "issue? Is it only happening in cooked",
+    "start": 339.28,
+    "duration": 3.44
+  },
+  {
+    "text": "builds? Is it console only? Does it",
+    "start": 340.96,
+    "duration": 3.12
+  },
+  {
+    "text": "depend on latency? These sorts of",
+    "start": 342.72,
+    "duration": 3.28
+  },
+  {
+    "text": "questions. And the question I often find",
+    "start": 344.08,
+    "duration": 3.76
+  },
+  {
+    "text": "the most useful, what changed recently",
+    "start": 346.0,
+    "duration": 4.639
+  },
+  {
+    "text": "in the system? New code, config changes,",
+    "start": 347.84,
+    "duration": 4.96
+  },
+  {
+    "text": "engine upgrades, etc. The answers of",
+    "start": 350.639,
+    "duration": 5.041
+  },
+  {
+    "text": "these will set you on the right path.",
+    "start": 352.8,
+    "duration": 4.8
+  },
+  {
+    "text": "So this example comes from a real case",
+    "start": 355.68,
+    "duration": 3.68
+  },
+  {
+    "text": "that we worked on assisting a studio",
+    "start": 357.6,
+    "duration": 3.84
+  },
+  {
+    "text": "trying to track down a shutdown crash in",
+    "start": 359.36,
+    "duration": 4.24
+  },
+  {
+    "text": "their shipped title. The issue happened",
+    "start": 361.44,
+    "duration": 3.92
+  },
+  {
+    "text": "during application shutdown,",
+    "start": 363.6,
+    "duration": 3.68
+  },
+  {
+    "text": "specifically on a background direct 3D",
+    "start": 365.36,
+    "duration": 3.52
+  },
+  {
+    "text": "thread. And while it didn't affect",
+    "start": 367.28,
+    "duration": 3.44
+  },
+  {
+    "text": "gameplay, it still impacted crash",
+    "start": 368.88,
+    "duration": 3.599
+  },
+  {
+    "text": "statistics and the overall perceived",
+    "start": 370.72,
+    "duration": 3.52
+  },
+  {
+    "text": "stability of the application. The",
+    "start": 372.479,
+    "duration": 3.121
+  },
+  {
+    "text": "biggest challenge was that the crash",
+    "start": 374.24,
+    "duration": 3.6
+  },
+  {
+    "text": "wasn't reproducible easily at all. The",
+    "start": 375.6,
+    "duration": 4.64
+  },
+  {
+    "text": "stack trace pointed to the FD3D12",
+    "start": 377.84,
+    "duration": 4.799
+  },
+  {
+    "text": "dynamic RHI system likely during",
+    "start": 380.24,
+    "duration": 4.56
+  },
+  {
+    "text": "resource cleanup. But the core stack was",
+    "start": 382.639,
+    "duration": 4.4
+  },
+  {
+    "text": "partially unsymbolicated which slowed",
+    "start": 384.8,
+    "duration": 4.08
+  },
+  {
+    "text": "analysis and combined with the fact that",
+    "start": 387.039,
+    "duration": 3.681
+  },
+  {
+    "text": "this seemed timing related, possibly a",
+    "start": 388.88,
+    "duration": 3.28
+  },
+  {
+    "text": "race condition between the game thread",
+    "start": 390.72,
+    "duration": 3.68
+  },
+  {
+    "text": "shut down and the background D3D thread,",
+    "start": 392.16,
+    "duration": 3.68
+  },
+  {
+    "text": "it was clear that we needed more data",
+    "start": 394.4,
+    "duration": 4.079
+  },
+  {
+    "text": "before we could move to a fix.",
+    "start": 395.84,
+    "duration": 4.24
+  },
+  {
+    "text": "So after looking through the provided",
+    "start": 398.479,
+    "duration": 3.601
+  },
+  {
+    "text": "dump file and the crash call stack, we",
+    "start": 400.08,
+    "duration": 3.28
+  },
+  {
+    "text": "worked closely with the engineer to",
+    "start": 402.08,
+    "duration": 3.04
+  },
+  {
+    "text": "gather more targeted information to",
+    "start": 403.36,
+    "duration": 3.6
+  },
+  {
+    "text": "isolate the problem. We asked key",
+    "start": 405.12,
+    "duration": 3.68
+  },
+  {
+    "text": "questions like when did this start and",
+    "start": 406.96,
+    "duration": 3.28
+  },
+  {
+    "text": "we found that the first occurrence began",
+    "start": 408.8,
+    "duration": 4.08
+  },
+  {
+    "text": "in November 2024 just after upgrading to",
+    "start": 410.24,
+    "duration": 5.04
+  },
+  {
+    "text": "Unreal Engine 5.3.4.",
+    "start": 412.88,
+    "duration": 4.4
+  },
+  {
+    "text": "We also explored frequency. The crash",
+    "start": 415.28,
+    "duration": 4.08
+  },
+  {
+    "text": "was intermittent ranging from 0 to two",
+    "start": 417.28,
+    "duration": 4.16
+  },
+  {
+    "text": "occurrences per day in most cases but",
+    "start": 419.36,
+    "duration": 4.399
+  },
+  {
+    "text": "spiked to 16 instances per day during an",
+    "start": 421.44,
+    "duration": 4.879
+  },
+  {
+    "text": "intense internal play test session. And",
+    "start": 423.759,
+    "duration": 4.241
+  },
+  {
+    "text": "importantly, we ruled out hardware",
+    "start": 426.319,
+    "duration": 3.44
+  },
+  {
+    "text": "specific causes. The crash happened",
+    "start": 428.0,
+    "duration": 4.479
+  },
+  {
+    "text": "across a wide set of configurations from",
+    "start": 429.759,
+    "duration": 6.401
+  },
+  {
+    "text": "RTX 2060s to 4080s and on both discrete",
+    "start": 432.479,
+    "duration": 7.041
+  },
+  {
+    "text": "and integrated GPUs. So finally, by",
+    "start": 436.16,
+    "duration": 5.039
+  },
+  {
+    "text": "mapping crash frequency against the",
+    "start": 439.52,
+    "duration": 3.519
+  },
+  {
+    "text": "upgrade timeline, we pinpointed that the",
+    "start": 441.199,
+    "duration": 4.321
+  },
+  {
+    "text": "behavior began shortly after the 5.3.4",
+    "start": 443.039,
+    "duration": 5.361
+  },
+  {
+    "text": "update but persisted through 5.3.5",
+    "start": 445.52,
+    "duration": 5.04
+  },
+  {
+    "text": "and narrowing the search to this recent",
+    "start": 448.4,
+    "duration": 4.88
+  },
+  {
+    "text": "engine changes in that window.",
+    "start": 450.56,
+    "duration": 4.479
+  },
+  {
+    "text": "So since we couldn't easily reproduce",
+    "start": 453.28,
+    "duration": 3.84
+  },
+  {
+    "text": "the issue, our goal became to work with",
+    "start": 455.039,
+    "duration": 3.761
+  },
+  {
+    "text": "their team to stress test and validate",
+    "start": 457.12,
+    "duration": 3.84
+  },
+  {
+    "text": "the shutdown path, we focused on three",
+    "start": 458.8,
+    "duration": 4.64
+  },
+  {
+    "text": "main areas. Memory safety, thread life",
+    "start": 460.96,
+    "duration": 5.12
+  },
+  {
+    "text": "cycle, and tooling. Firstly, we",
+    "start": 463.44,
+    "duration": 4.0
+  },
+  {
+    "text": "recommended a review of how the",
+    "start": 466.08,
+    "duration": 2.88
+  },
+  {
+    "text": "background threads, especially those",
+    "start": 467.44,
+    "duration": 2.96
+  },
+  {
+    "text": "related to rendering, were being shut",
+    "start": 468.96,
+    "duration": 3.359
+  },
+  {
+    "text": "down. We wanted to ensure that they were",
+    "start": 470.4,
+    "duration": 3.84
+  },
+  {
+    "text": "correctly joined or terminated before",
+    "start": 472.319,
+    "duration": 4.0
+  },
+  {
+    "text": "engines or heap memory were being torn",
+    "start": 474.24,
+    "duration": 3.44
+  },
+  {
+    "text": "down.",
+    "start": 476.319,
+    "duration": 3.361
+  },
+  {
+    "text": "The crash pointed towards an RTL free",
+    "start": 477.68,
+    "duration": 3.919
+  },
+  {
+    "text": "heap which often suggests memory misuse",
+    "start": 479.68,
+    "duration": 4.0
+  },
+  {
+    "text": "like double freeze or use after free. So",
+    "start": 481.599,
+    "duration": 3.521
+  },
+  {
+    "text": "we recommended they audit the memory",
+    "start": 483.68,
+    "duration": 3.199
+  },
+  {
+    "text": "allocation and destruction patterns in",
+    "start": 485.12,
+    "duration": 3.44
+  },
+  {
+    "text": "shutdown related systems particularly",
+    "start": 486.879,
+    "duration": 4.641
+  },
+  {
+    "text": "the D3D12 and the RHI. So to support",
+    "start": 488.56,
+    "duration": 4.639
+  },
+  {
+    "text": "this we recommended memory profiling",
+    "start": 491.52,
+    "duration": 3.92
+  },
+  {
+    "text": "tools enabling ASAN or address sanitizer",
+    "start": 493.199,
+    "duration": 4.241
+  },
+  {
+    "text": "and optionally M Alex stomp to catch",
+    "start": 495.44,
+    "duration": 4.0
+  },
+  {
+    "text": "otherwise invisible issues. Even though",
+    "start": 497.44,
+    "duration": 3.599
+  },
+  {
+    "text": "we couldn't reproduce the crash, we",
+    "start": 499.44,
+    "duration": 3.28
+  },
+  {
+    "text": "could still build validation into the",
+    "start": 501.039,
+    "duration": 4.0
+  },
+  {
+    "text": "shutdown routines to catch problems as",
+    "start": 502.72,
+    "duration": 4.64
+  },
+  {
+    "text": "they occurred. To ensure no background",
+    "start": 505.039,
+    "duration": 3.84
+  },
+  {
+    "text": "threads were still accessing resources",
+    "start": 507.36,
+    "duration": 2.959
+  },
+  {
+    "text": "after they were destroyed, we",
+    "start": 508.879,
+    "duration": 2.801
+  },
+  {
+    "text": "recommended that the team introduced",
+    "start": 510.319,
+    "duration": 3.6
+  },
+  {
+    "text": "thread guards or debug checks to catch",
+    "start": 511.68,
+    "duration": 4.56
+  },
+  {
+    "text": "any late or unsafe memory access.",
+    "start": 513.919,
+    "duration": 3.68
+  },
+  {
+    "text": "Through this additional debugging, the",
+    "start": 516.24,
+    "duration": 2.799
+  },
+  {
+    "text": "team were able to identify that there",
+    "start": 517.599,
+    "duration": 3.44
+  },
+  {
+    "text": "was indeed an attempt to read an invalid",
+    "start": 519.039,
+    "duration": 3.12
+  },
+  {
+    "text": "memory address during the shutdown",
+    "start": 521.039,
+    "duration": 2.8
+  },
+  {
+    "text": "sequence, and they managed to fix that",
+    "start": 522.159,
+    "duration": 3.68
+  },
+  {
+    "text": "bug.",
+    "start": 523.839,
+    "duration": 3.521
+  },
+  {
+    "text": "One of the most common mistakes that we",
+    "start": 525.839,
+    "duration": 3.361
+  },
+  {
+    "text": "see, especially with less experienced",
+    "start": 527.36,
+    "duration": 4.4
+  },
+  {
+    "text": "teams, is guessing developer. As",
+    "start": 529.2,
+    "duration": 4.079
+  },
+  {
+    "text": "developers, we can naturally jump to",
+    "start": 531.76,
+    "duration": 3.519
+  },
+  {
+    "text": "conclusions based on symptoms rather",
+    "start": 533.279,
+    "duration": 4.641
+  },
+  {
+    "text": "than evidence.",
+    "start": 535.279,
+    "duration": 4.321
+  },
+  {
+    "text": "I can't recommend enough that when",
+    "start": 537.92,
+    "duration": 4.72
+  },
+  {
+    "text": "facing difficult bugs to validate your",
+    "start": 539.6,
+    "duration": 5.359
+  },
+  {
+    "text": "own assumptions about the issue, to",
+    "start": 542.64,
+    "duration": 4.4
+  },
+  {
+    "text": "confirm root causes, and use profiling",
+    "start": 544.959,
+    "duration": 4.081
+  },
+  {
+    "text": "and debugging tools to get hard evidence",
+    "start": 547.04,
+    "duration": 3.52
+  },
+  {
+    "text": "so that you're not just fixing what",
+    "start": 549.04,
+    "duration": 3.44
+  },
+  {
+    "text": "looks wrong, but you're fixing what is",
+    "start": 550.56,
+    "duration": 4.399
+  },
+  {
+    "text": "wrong.",
+    "start": 552.48,
+    "duration": 4.72
+  },
+  {
+    "text": "On a recent multiplatform title, we were",
+    "start": 554.959,
+    "duration": 4.88
+  },
+  {
+    "text": "targeting 90, 60, and 30 FPS depending",
+    "start": 557.2,
+    "duration": 4.48
+  },
+  {
+    "text": "on the platform. That meant that we had",
+    "start": 559.839,
+    "duration": 3.521
+  },
+  {
+    "text": "to be really intentional about how we",
+    "start": 561.68,
+    "duration": 4.32
+  },
+  {
+    "text": "profiled. Using Unreal in uh Unreal's",
+    "start": 563.36,
+    "duration": 4.479
+  },
+  {
+    "text": "profiling tools and platform specific",
+    "start": 566.0,
+    "duration": 4.16
+  },
+  {
+    "text": "analyzers, we were able to identify",
+    "start": 567.839,
+    "duration": 4.56
+  },
+  {
+    "text": "exactly which systems were bottlenecking",
+    "start": 570.16,
+    "duration": 5.04
+  },
+  {
+    "text": "performance and more importantly why.",
+    "start": 572.399,
+    "duration": 4.481
+  },
+  {
+    "text": "That allowed us to focus our engineering",
+    "start": 575.2,
+    "duration": 3.84
+  },
+  {
+    "text": "effort where it actually mattered.",
+    "start": 576.88,
+    "duration": 4.0
+  },
+  {
+    "text": "Without that data, we might have spent",
+    "start": 579.04,
+    "duration": 3.68
+  },
+  {
+    "text": "days optimizing the wrong thing or",
+    "start": 580.88,
+    "duration": 4.24
+  },
+  {
+    "text": "missed critical issues entirely. The",
+    "start": 582.72,
+    "duration": 3.92
+  },
+  {
+    "text": "starting point for pretty much all",
+    "start": 585.12,
+    "duration": 3.44
+  },
+  {
+    "text": "profiling in in Unreal is Unreal",
+    "start": 586.64,
+    "duration": 3.84
+  },
+  {
+    "text": "Insights. Um, and Unreal Insights helps",
+    "start": 588.56,
+    "duration": 4.16
+  },
+  {
+    "text": "to identify bottlenecks, which is really",
+    "start": 590.48,
+    "duration": 4.16
+  },
+  {
+    "text": "useful when optimizing for performance.",
+    "start": 592.72,
+    "duration": 3.84
+  },
+  {
+    "text": "At a high level, Unreal Insights is a",
+    "start": 594.64,
+    "duration": 3.44
+  },
+  {
+    "text": "standalone profiling system that",
+    "start": 596.56,
+    "duration": 3.2
+  },
+  {
+    "text": "integrates with Unreal to collect,",
+    "start": 598.08,
+    "duration": 3.36
+  },
+  {
+    "text": "analyze, and visualize data emitted by",
+    "start": 599.76,
+    "duration": 3.04
+  },
+  {
+    "text": "the engine. I think there's actually a",
+    "start": 601.44,
+    "duration": 3.839
+  },
+  {
+    "text": "very in-depth talk on Unreal Insights",
+    "start": 602.8,
+    "duration": 4.719
+  },
+  {
+    "text": "potentially tomorrow, so check that out.",
+    "start": 605.279,
+    "duration": 3.921
+  },
+  {
+    "text": "Uh, in addition to providing robust",
+    "start": 607.519,
+    "duration": 2.961
+  },
+  {
+    "text": "coverage of the engine's existing",
+    "start": 609.2,
+    "duration": 3.12
+  },
+  {
+    "text": "systems, Unreal Insights makes it easy",
+    "start": 610.48,
+    "duration": 4.88
+  },
+  {
+    "text": "to add your own profiling data as well.",
+    "start": 612.32,
+    "duration": 5.12
+  },
+  {
+    "text": "So, we added more scoped trace events to",
+    "start": 615.36,
+    "duration": 4.159
+  },
+  {
+    "text": "drill down to expensive functions and",
+    "start": 617.44,
+    "duration": 4.32
+  },
+  {
+    "text": "understand their internals. Scoped trace",
+    "start": 619.519,
+    "duration": 3.921
+  },
+  {
+    "text": "events integrate cleanly into the trace",
+    "start": 621.76,
+    "duration": 4.16
+  },
+  {
+    "text": "system of Unreal Insights. With just a",
+    "start": 623.44,
+    "duration": 4.639
+  },
+  {
+    "text": "few macros, we were able to mark up both",
+    "start": 625.92,
+    "duration": 4.32
+  },
+  {
+    "text": "engine and gameplay code to get a much",
+    "start": 628.079,
+    "duration": 3.76
+  },
+  {
+    "text": "clearer picture of where that time was",
+    "start": 630.24,
+    "duration": 3.599
+  },
+  {
+    "text": "going.",
+    "start": 631.839,
+    "duration": 4.161
+  },
+  {
+    "text": "So to hit target frame rate, firstly we",
+    "start": 633.839,
+    "duration": 4.161
+  },
+  {
+    "text": "had to figure out what was slow. We",
+    "start": 636.0,
+    "duration": 4.0
+  },
+  {
+    "text": "needed to identify which areas of the",
+    "start": 638.0,
+    "duration": 3.68
+  },
+  {
+    "text": "game were causing performance issues.",
+    "start": 640.0,
+    "duration": 3.36
+  },
+  {
+    "text": "And the go-to tools for that are the",
+    "start": 641.68,
+    "duration": 4.24
+  },
+  {
+    "text": "console commands, stat unit or statps.",
+    "start": 643.36,
+    "duration": 4.32
+  },
+  {
+    "text": "From there, we profiled those sections",
+    "start": 645.92,
+    "duration": 3.68
+  },
+  {
+    "text": "more in depth to understand what was",
+    "start": 647.68,
+    "duration": 3.68
+  },
+  {
+    "text": "taking the most time and whether that",
+    "start": 649.6,
+    "duration": 3.84
+  },
+  {
+    "text": "time was justified. Remember that it's",
+    "start": 651.36,
+    "duration": 3.36
+  },
+  {
+    "text": "actually okay for a feature to be",
+    "start": 653.44,
+    "duration": 3.44
+  },
+  {
+    "text": "expensive as long as it's actually worth",
+    "start": 654.72,
+    "duration": 4.559
+  },
+  {
+    "text": "it. So using insights to develop a",
+    "start": 656.88,
+    "duration": 4.079
+  },
+  {
+    "text": "baseline control of various stages of",
+    "start": 659.279,
+    "duration": 3.68
+  },
+  {
+    "text": "the game, we were able to identify four",
+    "start": 660.959,
+    "duration": 4.641
+  },
+  {
+    "text": "bottlenecks. Budgeting calculations for",
+    "start": 662.959,
+    "duration": 4.241
+  },
+  {
+    "text": "prioritizing features that were taking",
+    "start": 665.6,
+    "duration": 4.64
+  },
+  {
+    "text": "measurable time, AI, specifically the AI",
+    "start": 667.2,
+    "duration": 4.879
+  },
+  {
+    "text": "controller, animation blueprint, control",
+    "start": 670.24,
+    "duration": 4.0
+  },
+  {
+    "text": "rig, character movement code, which",
+    "start": 672.079,
+    "duration": 4.32
+  },
+  {
+    "text": "consumed a significant chunk. Some",
+    "start": 674.24,
+    "duration": 3.92
+  },
+  {
+    "text": "functions we found were slower when the",
+    "start": 676.399,
+    "duration": 3.921
+  },
+  {
+    "text": "GPU was active, especially on platforms",
+    "start": 678.16,
+    "duration": 4.0
+  },
+  {
+    "text": "that shared memory between the CPU and",
+    "start": 680.32,
+    "duration": 4.16
+  },
+  {
+    "text": "GPU. And the physics tick alone was",
+    "start": 682.16,
+    "duration": 4.48
+  },
+  {
+    "text": "taking almost four milliseconds of the",
+    "start": 684.48,
+    "duration": 3.919
+  },
+  {
+    "text": "frame.",
+    "start": 686.64,
+    "duration": 3.36
+  },
+  {
+    "text": "The good news was that a lot of things",
+    "start": 688.399,
+    "duration": 3.041
+  },
+  {
+    "text": "had already been done right in this",
+    "start": 690.0,
+    "duration": 3.36
+  },
+  {
+    "text": "project. Tick settings were optimized.",
+    "start": 691.44,
+    "duration": 3.36
+  },
+  {
+    "text": "Actors that didn't need to tick weren't",
+    "start": 693.36,
+    "duration": 2.96
+  },
+  {
+    "text": "ticking. And when we looked at the",
+    "start": 694.8,
+    "duration": 3.2
+  },
+  {
+    "text": "profiling data, there was no single",
+    "start": 696.32,
+    "duration": 3.92
+  },
+  {
+    "text": "egregious offender. Nothing stood out as",
+    "start": 698.0,
+    "duration": 4.16
+  },
+  {
+    "text": "the fix this and you're done kind of",
+    "start": 700.24,
+    "duration": 3.839
+  },
+  {
+    "text": "win. But that also meant that our",
+    "start": 702.16,
+    "duration": 4.239
+  },
+  {
+    "text": "challenge was a bit harder. We needed to",
+    "start": 704.079,
+    "duration": 4.161
+  },
+  {
+    "text": "shave off small amounts of time from",
+    "start": 706.399,
+    "duration": 3.521
+  },
+  {
+    "text": "many different areas instead of getting",
+    "start": 708.24,
+    "duration": 4.08
+  },
+  {
+    "text": "a big payoff from a single optimization.",
+    "start": 709.92,
+    "duration": 4.32
+  },
+  {
+    "text": "To hit our 90 fps target, we still",
+    "start": 712.32,
+    "duration": 3.44
+  },
+  {
+    "text": "needed to recover just over 2",
+    "start": 714.24,
+    "duration": 3.44
+  },
+  {
+    "text": "milliseconds of frame time. And that's a",
+    "start": 715.76,
+    "duration": 3.68
+  },
+  {
+    "text": "lot when you're already running lean. So",
+    "start": 717.68,
+    "duration": 3.44
+  },
+  {
+    "text": "the question became where can we trim",
+    "start": 719.44,
+    "duration": 3.2
+  },
+  {
+    "text": "safely without compromising the",
+    "start": 721.12,
+    "duration": 4.0
+  },
+  {
+    "text": "experience.",
+    "start": 722.64,
+    "duration": 4.4
+  },
+  {
+    "text": "A common issue we identified in this",
+    "start": 725.12,
+    "duration": 3.6
+  },
+  {
+    "text": "project was that using blueprint nodes",
+    "start": 727.04,
+    "duration": 3.76
+  },
+  {
+    "text": "like get component by class often meant",
+    "start": 728.72,
+    "duration": 4.48
+  },
+  {
+    "text": "repeatedly copying data during a tick.",
+    "start": 730.8,
+    "duration": 4.479
+  },
+  {
+    "text": "On the surface, it's convenient node,",
+    "start": 733.2,
+    "duration": 3.759
+  },
+  {
+    "text": "but under the hood, it creates a new",
+    "start": 735.279,
+    "duration": 4.481
+  },
+  {
+    "text": "array and copies component pointers into",
+    "start": 736.959,
+    "duration": 5.68
+  },
+  {
+    "text": "it every time that it's called.",
+    "start": 739.76,
+    "duration": 5.68
+  },
+  {
+    "text": "So, the fix, we moved the logic to C++,",
+    "start": 742.639,
+    "duration": 4.721
+  },
+  {
+    "text": "retrieved the components once, and used",
+    "start": 745.44,
+    "duration": 4.24
+  },
+  {
+    "text": "a T inline component array on the stack",
+    "start": 747.36,
+    "duration": 4.96
+  },
+  {
+    "text": "to avoid heat allocations. We also began",
+    "start": 749.68,
+    "duration": 4.8
+  },
+  {
+    "text": "pre-reserving memory for arrays and used",
+    "start": 752.32,
+    "duration": 4.24
+  },
+  {
+    "text": "T inline allocators where possible.",
+    "start": 754.48,
+    "duration": 3.84
+  },
+  {
+    "text": "Again, keeping memory on the stack",
+    "start": 756.56,
+    "duration": 4.8
+  },
+  {
+    "text": "instead of the heap.",
+    "start": 758.32,
+    "duration": 4.319
+  },
+  {
+    "text": "We also found that we were making",
+    "start": 761.36,
+    "duration": 3.279
+  },
+  {
+    "text": "multiple calls to has matching gameplay",
+    "start": 762.639,
+    "duration": 4.561
+  },
+  {
+    "text": "tag which uses the I gameplay tag asset",
+    "start": 764.639,
+    "duration": 5.921
+  },
+  {
+    "text": "interface in blueprint. Each call copied",
+    "start": 767.2,
+    "duration": 6.079
+  },
+  {
+    "text": "the owned tags container or performed",
+    "start": 770.56,
+    "duration": 4.959
+  },
+  {
+    "text": "more complicated logic. So instead we",
+    "start": 773.279,
+    "duration": 4.881
+  },
+  {
+    "text": "retrieved the tags once cached them and",
+    "start": 775.519,
+    "duration": 4.641
+  },
+  {
+    "text": "then ran the queries against that cache",
+    "start": 778.16,
+    "duration": 3.6
+  },
+  {
+    "text": "which resulted in a significant speed",
+    "start": 780.16,
+    "duration": 3.84
+  },
+  {
+    "text": "up. Using Unreal Insights, we could",
+    "start": 781.76,
+    "duration": 4.24
+  },
+  {
+    "text": "pinpoint the cost of these functions,",
+    "start": 784.0,
+    "duration": 3.44
+  },
+  {
+    "text": "but you still have to look into the",
+    "start": 786.0,
+    "duration": 3.2
+  },
+  {
+    "text": "blueprint node itself to understand what",
+    "start": 787.44,
+    "duration": 4.32
+  },
+  {
+    "text": "that helper function is actually doing.",
+    "start": 789.2,
+    "duration": 4.16
+  },
+  {
+    "text": "It's worth noting here that just because",
+    "start": 791.76,
+    "duration": 3.36
+  },
+  {
+    "text": "you're in blueprint doesn't mean you can",
+    "start": 793.36,
+    "duration": 3.84
+  },
+  {
+    "text": "forget about how memory is accessed and",
+    "start": 795.12,
+    "duration": 4.32
+  },
+  {
+    "text": "used.",
+    "start": 797.2,
+    "duration": 4.0
+  },
+  {
+    "text": "So, with these changes, we reduced the",
+    "start": 799.44,
+    "duration": 4.56
+  },
+  {
+    "text": "cost of some functions by 80%. And every",
+    "start": 801.2,
+    "duration": 4.72
+  },
+  {
+    "text": "single of these small wins really adds",
+    "start": 804.0,
+    "duration": 3.2
+  },
+  {
+    "text": "up when you're trying to maximize your",
+    "start": 805.92,
+    "duration": 3.76
+  },
+  {
+    "text": "performance",
+    "start": 807.2,
+    "duration": 4.72
+  },
+  {
+    "text": "on some of our target platforms. Another",
+    "start": 809.68,
+    "duration": 3.68
+  },
+  {
+    "text": "major factor we discovered during",
+    "start": 811.92,
+    "duration": 4.0
+  },
+  {
+    "text": "optimization was memory contention. On",
+    "start": 813.36,
+    "duration": 4.24
+  },
+  {
+    "text": "these systems, there was significant",
+    "start": 815.92,
+    "duration": 3.68
+  },
+  {
+    "text": "cost to accessing memory that wasn't",
+    "start": 817.6,
+    "duration": 4.72
+  },
+  {
+    "text": "local to the CPU. For example, shared",
+    "start": 819.6,
+    "duration": 4.799
+  },
+  {
+    "text": "memory between the CPU and GPU",
+    "start": 822.32,
+    "duration": 4.639
+  },
+  {
+    "text": "introduced notable latency. This meant",
+    "start": 824.399,
+    "duration": 4.24
+  },
+  {
+    "text": "that even small memory related",
+    "start": 826.959,
+    "duration": 3.921
+  },
+  {
+    "text": "optimizations had really outsized",
+    "start": 828.639,
+    "duration": 4.88
+  },
+  {
+    "text": "effects on performance. In insights, we",
+    "start": 830.88,
+    "duration": 4.0
+  },
+  {
+    "text": "observed a key example which I've got up",
+    "start": 833.519,
+    "duration": 4.32
+  },
+  {
+    "text": "on screen. The same function, same code",
+    "start": 834.88,
+    "duration": 5.92
+  },
+  {
+    "text": "path, same workload was taking 10 times",
+    "start": 837.839,
+    "duration": 5.281
+  },
+  {
+    "text": "longer when the GPU thread was active on",
+    "start": 840.8,
+    "duration": 5.039
+  },
+  {
+    "text": "this hardware. It jumped from 10 nonds",
+    "start": 843.12,
+    "duration": 5.2
+  },
+  {
+    "text": "to 100 nonds purely due to contention",
+    "start": 845.839,
+    "duration": 4.721
+  },
+  {
+    "text": "over shared resources. Now, this is one",
+    "start": 848.32,
+    "duration": 4.079
+  },
+  {
+    "text": "of those optim optimizations that's easy",
+    "start": 850.56,
+    "duration": 3.44
+  },
+  {
+    "text": "to overlook, but when you're chasing 1",
+    "start": 852.399,
+    "duration": 3.601
+  },
+  {
+    "text": "to 2 milliseconds of frame time, every",
+    "start": 854.0,
+    "duration": 4.56
+  },
+  {
+    "text": "cache miss matters.",
+    "start": 856.0,
+    "duration": 4.88
+  },
+  {
+    "text": "So, to address this, we started caching",
+    "start": 858.56,
+    "duration": 4.56
+  },
+  {
+    "text": "frequently accessed values, strrus,",
+    "start": 860.88,
+    "duration": 4.88
+  },
+  {
+    "text": "component arrays, etc. We built strus to",
+    "start": 863.12,
+    "duration": 4.8
+  },
+  {
+    "text": "pass between functions keeping relevant",
+    "start": 865.76,
+    "duration": 4.319
+  },
+  {
+    "text": "data bundled instead of fetching from",
+    "start": 867.92,
+    "duration": 6.2
+  },
+  {
+    "text": "various classes each time.",
+    "start": 870.079,
+    "duration": 4.041
+  },
+  {
+    "text": "Even though many actors had been moved",
+    "start": 874.399,
+    "duration": 3.68
+  },
+  {
+    "text": "to the tick during the physics phase, we",
+    "start": 875.92,
+    "duration": 4.719
+  },
+  {
+    "text": "still had 1.6 milliseconds of idle time",
+    "start": 878.079,
+    "duration": 4.721
+  },
+  {
+    "text": "on the game thread waiting to start post",
+    "start": 880.639,
+    "duration": 4.88
+  },
+  {
+    "text": "physics work. So we explored two options",
+    "start": 882.8,
+    "duration": 4.8
+  },
+  {
+    "text": "here. We could either move more work",
+    "start": 885.519,
+    "duration": 3.76
+  },
+  {
+    "text": "into the during physics tick to fill",
+    "start": 887.6,
+    "duration": 3.679
+  },
+  {
+    "text": "that gap or reduce the duration of the",
+    "start": 889.279,
+    "duration": 4.481
+  },
+  {
+    "text": "physics tick itself",
+    "start": 891.279,
+    "duration": 4.24
+  },
+  {
+    "text": "using stat chaos and stat chaos",
+    "start": 893.76,
+    "duration": 3.6
+  },
+  {
+    "text": "counters. We found some unexpected",
+    "start": 895.519,
+    "duration": 4.081
+  },
+  {
+    "text": "results here. A level with more physics",
+    "start": 897.36,
+    "duration": 4.64
+  },
+  {
+    "text": "bodies had a 2.66",
+    "start": 899.6,
+    "duration": 4.4
+  },
+  {
+    "text": "physics tick millisecond physics tick",
+    "start": 902.0,
+    "duration": 4.32
+  },
+  {
+    "text": "and another with fewer bodies had a 4",
+    "start": 904.0,
+    "duration": 4.48
+  },
+  {
+    "text": "milliseconds physics tick. So digging",
+    "start": 906.32,
+    "duration": 4.319
+  },
+  {
+    "text": "deeper using Unreal's physics views, we",
+    "start": 908.48,
+    "duration": 4.64
+  },
+  {
+    "text": "found complex collisions, objects with",
+    "start": 910.639,
+    "duration": 4.721
+  },
+  {
+    "text": "large bounds, and static geometry move",
+    "start": 913.12,
+    "duration": 4.48
+  },
+  {
+    "text": "are marked as movable. You can quickly",
+    "start": 915.36,
+    "duration": 3.76
+  },
+  {
+    "text": "find large collision geometry in the",
+    "start": 917.6,
+    "duration": 2.96
+  },
+  {
+    "text": "content browser pretty easily by",
+    "start": 919.12,
+    "duration": 3.04
+  },
+  {
+    "text": "searching collision prims greater than",
+    "start": 920.56,
+    "duration": 2.88
+  },
+  {
+    "text": "equal to value. In this case, we did",
+    "start": 922.16,
+    "duration": 3.28
+  },
+  {
+    "text": "500. And you can run this console",
+    "start": 923.44,
+    "duration": 4.16
+  },
+  {
+    "text": "command collision.list objects with",
+    "start": 925.44,
+    "duration": 4.079
+  },
+  {
+    "text": "complex collision with collision",
+    "start": 927.6,
+    "duration": 4.56
+  },
+  {
+    "text": "complexity. Use complex is simple to",
+    "start": 929.519,
+    "duration": 5.281
+  },
+  {
+    "text": "find assets set to use high complexity",
+    "start": 932.16,
+    "duration": 4.799
+  },
+  {
+    "text": "collision data. And once we found these",
+    "start": 934.8,
+    "duration": 3.76
+  },
+  {
+    "text": "misconfigured assets, we could clean",
+    "start": 936.959,
+    "duration": 3.841
+  },
+  {
+    "text": "them up and the assets with unnecessary",
+    "start": 938.56,
+    "duration": 3.92
+  },
+  {
+    "text": "collision, we were able to reduce the",
+    "start": 940.8,
+    "duration": 3.12
+  },
+  {
+    "text": "physics tech time to get us within",
+    "start": 942.48,
+    "duration": 4.24
+  },
+  {
+    "text": "budget.",
+    "start": 943.92,
+    "duration": 4.64
+  },
+  {
+    "text": "Unreal insights helped us find and fix",
+    "start": 946.72,
+    "duration": 3.76
+  },
+  {
+    "text": "dozens of micro issues, none of which",
+    "start": 948.56,
+    "duration": 3.76
+  },
+  {
+    "text": "were obvious from the outside. By",
+    "start": 950.48,
+    "duration": 3.84
+  },
+  {
+    "text": "combining smart profiling, blueprint",
+    "start": 952.32,
+    "duration": 4.72
+  },
+  {
+    "text": "awareness, and C++ optimizations, and",
+    "start": 954.32,
+    "duration": 4.4
+  },
+  {
+    "text": "memory management, we called back the",
+    "start": 957.04,
+    "duration": 6.4
+  },
+  {
+    "text": "performance we needed 100 ns at a time.",
+    "start": 958.72,
+    "duration": 6.479
+  },
+  {
+    "text": "Another useful memory profiling tool",
+    "start": 963.44,
+    "duration": 3.839
+  },
+  {
+    "text": "that Unreal provides specifically for",
+    "start": 965.199,
+    "duration": 4.801
+  },
+  {
+    "text": "memory diagnosis is memor. At a high",
+    "start": 967.279,
+    "duration": 4.961
+  },
+  {
+    "text": "level, memor captures a snapshot of",
+    "start": 970.0,
+    "duration": 4.399
+  },
+  {
+    "text": "memory of memory usage in your project",
+    "start": 972.24,
+    "duration": 4.56
+  },
+  {
+    "text": "at runtime. It shows us what is in",
+    "start": 974.399,
+    "duration": 4.081
+  },
+  {
+    "text": "memory at the moment at that moment in",
+    "start": 976.8,
+    "duration": 4.56
+  },
+  {
+    "text": "time. Assets, engines, streaming levels,",
+    "start": 978.48,
+    "duration": 5.359
+  },
+  {
+    "text": "textures, meshes, audio, etc. All broken",
+    "start": 981.36,
+    "duration": 5.12
+  },
+  {
+    "text": "down by category and often by individual",
+    "start": 983.839,
+    "duration": 4.881
+  },
+  {
+    "text": "object type. You can trigger it just by",
+    "start": 986.48,
+    "duration": 4.0
+  },
+  {
+    "text": "typing memor into the console. that",
+    "start": 988.72,
+    "duration": 3.84
+  },
+  {
+    "text": "works in PI standalone or in a package",
+    "start": 990.48,
+    "duration": 3.44
+  },
+  {
+    "text": "build. But it's worth noting you",
+    "start": 992.56,
+    "duration": 2.959
+  },
+  {
+    "text": "probably want to use the dash full flag",
+    "start": 993.92,
+    "duration": 3.12
+  },
+  {
+    "text": "which gives you a much more detailed",
+    "start": 995.519,
+    "duration": 3.521
+  },
+  {
+    "text": "breakdown including things like asset",
+    "start": 997.04,
+    "duration": 4.56
+  },
+  {
+    "text": "streaming info. Um it's worth mentioning",
+    "start": 999.04,
+    "duration": 4.56
+  },
+  {
+    "text": "that this isn't a visual profiler like",
+    "start": 1001.6,
+    "duration": 3.76
+  },
+  {
+    "text": "Unreal Insights. And under the hood,",
+    "start": 1003.6,
+    "duration": 3.919
+  },
+  {
+    "text": "it's pretty much a tool that just runs a",
+    "start": 1005.36,
+    "duration": 3.839
+  },
+  {
+    "text": "bunch of console commands and then",
+    "start": 1007.519,
+    "duration": 3.361
+  },
+  {
+    "text": "groups their output together for you. So",
+    "start": 1009.199,
+    "duration": 4.401
+  },
+  {
+    "text": "it's more of a static report. Epic have",
+    "start": 1010.88,
+    "duration": 4.16
+  },
+  {
+    "text": "actually indicated that they're actively",
+    "start": 1013.6,
+    "duration": 3.359
+  },
+  {
+    "text": "working on additional memory reporting",
+    "start": 1015.04,
+    "duration": 4.56
+  },
+  {
+    "text": "um in Unreal Insights and some aspects",
+    "start": 1016.959,
+    "duration": 4.56
+  },
+  {
+    "text": "of memor I believe are no longer being",
+    "start": 1019.6,
+    "duration": 3.679
+  },
+  {
+    "text": "actively maintained but it's still a",
+    "start": 1021.519,
+    "duration": 4.001
+  },
+  {
+    "text": "really useful tool for comparing memory",
+    "start": 1023.279,
+    "duration": 4.241
+  },
+  {
+    "text": "usage between builds checking memory",
+    "start": 1025.52,
+    "duration": 3.919
+  },
+  {
+    "text": "budgets on different platforms or to",
+    "start": 1027.52,
+    "duration": 4.0
+  },
+  {
+    "text": "identify memory spikes or leaks after",
+    "start": 1029.439,
+    "duration": 4.24
+  },
+  {
+    "text": "specific level loads.",
+    "start": 1031.52,
+    "duration": 3.519
+  },
+  {
+    "text": "Um, a lot of the time you'll discover",
+    "start": 1033.679,
+    "duration": 3.76
+  },
+  {
+    "text": "that a single class, maybe a U texture",
+    "start": 1035.039,
+    "duration": 4.88
+  },
+  {
+    "text": "2D or U skeleal mesh is using way more",
+    "start": 1037.439,
+    "duration": 4.64
+  },
+  {
+    "text": "memory than expected and mem report",
+    "start": 1039.919,
+    "duration": 4.0
+  },
+  {
+    "text": "gives you the exact list of instances",
+    "start": 1042.079,
+    "duration": 4.081
+  },
+  {
+    "text": "that contribute to that. So if you're",
+    "start": 1043.919,
+    "duration": 3.92
+  },
+  {
+    "text": "dealing with memory pressure, unexpected",
+    "start": 1046.16,
+    "duration": 3.36
+  },
+  {
+    "text": "garbage collection hitches, or just",
+    "start": 1047.839,
+    "duration": 3.921
+  },
+  {
+    "text": "doing a memory optimization pass, memort",
+    "start": 1049.52,
+    "duration": 3.6
+  },
+  {
+    "text": "should definitely be considered as one",
+    "start": 1051.76,
+    "duration": 3.12
+  },
+  {
+    "text": "of the tools in your kit. I'll show you",
+    "start": 1053.12,
+    "duration": 2.96
+  },
+  {
+    "text": "a quick example of what this looked like",
+    "start": 1054.88,
+    "duration": 4.08
+  },
+  {
+    "text": "in action on a recent project worked on.",
+    "start": 1056.08,
+    "duration": 5.04
+  },
+  {
+    "text": "So, this is a real case where memor",
+    "start": 1058.96,
+    "duration": 4.48
+  },
+  {
+    "text": "helped us isolate a tricky memory crash",
+    "start": 1061.12,
+    "duration": 4.4
+  },
+  {
+    "text": "on a console game. We were running into",
+    "start": 1063.44,
+    "duration": 3.76
+  },
+  {
+    "text": "memory related crashes throughout a play",
+    "start": 1065.52,
+    "duration": 3.519
+  },
+  {
+    "text": "session and it was the classic behavior",
+    "start": 1067.2,
+    "duration": 3.76
+  },
+  {
+    "text": "of things would seem fine for a while",
+    "start": 1069.039,
+    "duration": 3.361
+  },
+  {
+    "text": "and then it would slowly build up and",
+    "start": 1070.96,
+    "duration": 2.8
+  },
+  {
+    "text": "then would fall over without a",
+    "start": 1072.4,
+    "duration": 3.36
+  },
+  {
+    "text": "particularly consistent repro. Nothing",
+    "start": 1073.76,
+    "duration": 3.44
+  },
+  {
+    "text": "was really actionable from the call",
+    "start": 1075.76,
+    "duration": 3.44
+  },
+  {
+    "text": "stack. So, we turned to mere report to",
+    "start": 1077.2,
+    "duration": 3.52
+  },
+  {
+    "text": "start building a picture of what was",
+    "start": 1079.2,
+    "duration": 3.28
+  },
+  {
+    "text": "actually happening. One of the key",
+    "start": 1080.72,
+    "duration": 3.28
+  },
+  {
+    "text": "things we wanted to look at here was the",
+    "start": 1082.48,
+    "duration": 4.0
+  },
+  {
+    "text": "allocation bins. essentially where and",
+    "start": 1084.0,
+    "duration": 4.16
+  },
+  {
+    "text": "how much memory the engine thought that",
+    "start": 1086.48,
+    "duration": 4.16
+  },
+  {
+    "text": "it was using at the time. Since console",
+    "start": 1088.16,
+    "duration": 3.68
+  },
+  {
+    "text": "memory can be really tight and",
+    "start": 1090.64,
+    "duration": 3.52
+  },
+  {
+    "text": "segmented, we enabled larger memory",
+    "start": 1091.84,
+    "duration": 4.0
+  },
+  {
+    "text": "modes in development to get a clearer",
+    "start": 1094.16,
+    "duration": 3.759
+  },
+  {
+    "text": "picture of how much we were using right",
+    "start": 1095.84,
+    "duration": 3.92
+  },
+  {
+    "text": "before the crash. And that let us",
+    "start": 1097.919,
+    "duration": 3.681
+  },
+  {
+    "text": "generate valid memory reports just",
+    "start": 1099.76,
+    "duration": 3.76
+  },
+  {
+    "text": "before things would have typically fell",
+    "start": 1101.6,
+    "duration": 3.84
+  },
+  {
+    "text": "over.",
+    "start": 1103.52,
+    "duration": 4.56
+  },
+  {
+    "text": "So we saw that memor was showing 14 to",
+    "start": 1105.44,
+    "duration": 4.8
+  },
+  {
+    "text": "15 GB of memory allocated which was",
+    "start": 1108.08,
+    "duration": 4.4
+  },
+  {
+    "text": "beyond the memory limit of that console.",
+    "start": 1110.24,
+    "duration": 3.52
+  },
+  {
+    "text": "So this was a clear case of",
+    "start": 1112.48,
+    "duration": 3.84
+  },
+  {
+    "text": "overallocation. From there, we traced it",
+    "start": 1113.76,
+    "duration": 4.4
+  },
+  {
+    "text": "back to an at the time experimental",
+    "start": 1116.32,
+    "duration": 3.84
+  },
+  {
+    "text": "engine feature, geometry caches, and",
+    "start": 1118.16,
+    "duration": 3.92
+  },
+  {
+    "text": "that was leaking memory aggressively in",
+    "start": 1120.16,
+    "duration": 3.759
+  },
+  {
+    "text": "our case, close to 500 megabytes per",
+    "start": 1122.08,
+    "duration": 4.56
+  },
+  {
+    "text": "instance. Uh, it became easier to track",
+    "start": 1123.919,
+    "duration": 4.721
+  },
+  {
+    "text": "down these issues once we knew that the",
+    "start": 1126.64,
+    "duration": 4.64
+  },
+  {
+    "text": "issue was due to large allocations.",
+    "start": 1128.64,
+    "duration": 4.399
+  },
+  {
+    "text": "Interestingly, while we were digging, we",
+    "start": 1131.28,
+    "duration": 2.96
+  },
+  {
+    "text": "actually found a memory leak in the",
+    "start": 1133.039,
+    "duration": 3.841
+  },
+  {
+    "text": "engine itself in the RHI pool allocator.",
+    "start": 1134.24,
+    "duration": 4.08
+  },
+  {
+    "text": "It turned out that this issue was still",
+    "start": 1136.88,
+    "duration": 3.84
+  },
+  {
+    "text": "present all the way until 56 preview. So",
+    "start": 1138.32,
+    "duration": 4.239
+  },
+  {
+    "text": "we reported to Epic and contributed a",
+    "start": 1140.72,
+    "duration": 3.92
+  },
+  {
+    "text": "fix and it actually made it 56 release.",
+    "start": 1142.559,
+    "duration": 3.841
+  },
+  {
+    "text": "So this wasn't just a project level win.",
+    "start": 1144.64,
+    "duration": 3.279
+  },
+  {
+    "text": "It was a case where the use of MM report",
+    "start": 1146.4,
+    "duration": 2.8
+  },
+  {
+    "text": "actually helped improve the engine for",
+    "start": 1147.919,
+    "duration": 3.921
+  },
+  {
+    "text": "everyone.",
+    "start": 1149.2,
+    "duration": 4.0
+  },
+  {
+    "text": "The next tool I wanted us to take a",
+    "start": 1151.84,
+    "duration": 3.04
+  },
+  {
+    "text": "quick look at is Pix, which is",
+    "start": 1153.2,
+    "duration": 3.359
+  },
+  {
+    "text": "Microsoft's performance tuning and",
+    "start": 1154.88,
+    "duration": 3.6
+  },
+  {
+    "text": "debugging suite for Windows and Xbox",
+    "start": 1156.559,
+    "duration": 5.041
+  },
+  {
+    "text": "game developers using DirectX12. Um, Pix",
+    "start": 1158.48,
+    "duration": 4.48
+  },
+  {
+    "text": "is incredibly useful for Unreal",
+    "start": 1161.6,
+    "duration": 3.439
+  },
+  {
+    "text": "developers shipping on Windows or Xbox",
+    "start": 1162.96,
+    "duration": 3.76
+  },
+  {
+    "text": "platforms, especially when you're",
+    "start": 1165.039,
+    "duration": 3.121
+  },
+  {
+    "text": "digging into low-level performance",
+    "start": 1166.72,
+    "duration": 3.36
+  },
+  {
+    "text": "bottlenecks or trying to understand how",
+    "start": 1168.16,
+    "duration": 3.84
+  },
+  {
+    "text": "the GPU and CPU workloads are",
+    "start": 1170.08,
+    "duration": 3.839
+  },
+  {
+    "text": "interacting under the hood. Even though",
+    "start": 1172.0,
+    "duration": 4.559
+  },
+  {
+    "text": "Unreal abstracts a lot of DirectX12, Pix",
+    "start": 1173.919,
+    "duration": 4.161
+  },
+  {
+    "text": "still gives you a powerful insight into",
+    "start": 1176.559,
+    "duration": 3.12
+  },
+  {
+    "text": "how your content is reaching the",
+    "start": 1178.08,
+    "duration": 3.839
+  },
+  {
+    "text": "hardware, making it essential for deep",
+    "start": 1179.679,
+    "duration": 4.081
+  },
+  {
+    "text": "performance tuning, especially for Xbox",
+    "start": 1181.919,
+    "duration": 4.88
+  },
+  {
+    "text": "and high-end PC. Microsoft Pix is vendor",
+    "start": 1183.76,
+    "duration": 5.12
+  },
+  {
+    "text": "agnostic which means that it works on",
+    "start": 1186.799,
+    "duration": 5.12
+  },
+  {
+    "text": "all GPUs that are using DirectX12 and as",
+    "start": 1188.88,
+    "duration": 5.44
+  },
+  {
+    "text": "of Unreal Engine 5.6 it's supported",
+    "start": 1191.919,
+    "duration": 3.921
+  },
+  {
+    "text": "directly via a capture button in the",
+    "start": 1194.32,
+    "duration": 3.12
+  },
+  {
+    "text": "editor which makes it really easy to",
+    "start": 1195.84,
+    "duration": 3.76
+  },
+  {
+    "text": "start a session. Um generally as a",
+    "start": 1197.44,
+    "duration": 4.479
+  },
+  {
+    "text": "studio we use Pix as a render debugger",
+    "start": 1199.6,
+    "duration": 3.92
+  },
+  {
+    "text": "though more often than not recently",
+    "start": 1201.919,
+    "duration": 3.76
+  },
+  {
+    "text": "we've used it to rule out GPU side",
+    "start": 1203.52,
+    "duration": 4.32
+  },
+  {
+    "text": "issues rather than just debug them. So",
+    "start": 1205.679,
+    "duration": 3.521
+  },
+  {
+    "text": "the case I'm going to show you is how we",
+    "start": 1207.84,
+    "duration": 3.12
+  },
+  {
+    "text": "used Pix to validate a potential Nanite",
+    "start": 1209.2,
+    "duration": 4.4
+  },
+  {
+    "text": "performance issue.",
+    "start": 1210.96,
+    "duration": 5.44
+  },
+  {
+    "text": "In typical raster graphics, DDX and DDY",
+    "start": 1213.6,
+    "duration": 5.12
+  },
+  {
+    "text": "instructions are handled by the GPU. But",
+    "start": 1216.4,
+    "duration": 4.8
+  },
+  {
+    "text": "in Nanite, this isn't the case. Nanite",
+    "start": 1218.72,
+    "duration": 4.4
+  },
+  {
+    "text": "relies on analytic derivatives wherever",
+    "start": 1221.2,
+    "duration": 4.32
+  },
+  {
+    "text": "possible. So in cases where analytic",
+    "start": 1223.12,
+    "duration": 4.16
+  },
+  {
+    "text": "derivatives are not available, Nanite",
+    "start": 1225.52,
+    "duration": 4.0
+  },
+  {
+    "text": "has to render in a 2x2 quad to compute",
+    "start": 1227.28,
+    "duration": 5.68
+  },
+  {
+    "text": "the change required between DDX and DDY.",
+    "start": 1229.52,
+    "duration": 6.0
+  },
+  {
+    "text": "Uh this impacts variable rate shading",
+    "start": 1232.96,
+    "duration": 4.16
+  },
+  {
+    "text": "and in the process of optimization on",
+    "start": 1235.52,
+    "duration": 3.12
+  },
+  {
+    "text": "this project we noticed that apart from",
+    "start": 1237.12,
+    "duration": 4.88
+  },
+  {
+    "text": "a very select few number of me meshes in",
+    "start": 1238.64,
+    "duration": 6.24
+  },
+  {
+    "text": "our scene every object in our scene was",
+    "start": 1242.0,
+    "duration": 4.72
+  },
+  {
+    "text": "red when we enabled Nanit's no",
+    "start": 1244.88,
+    "duration": 3.919
+  },
+  {
+    "text": "derivative ops advanced view mode. We",
+    "start": 1246.72,
+    "duration": 3.76
+  },
+  {
+    "text": "were close to frame rate target so it",
+    "start": 1248.799,
+    "duration": 3.601
+  },
+  {
+    "text": "wasn't a critical issue by any means but",
+    "start": 1250.48,
+    "duration": 3.679
+  },
+  {
+    "text": "it suggested that either the detection",
+    "start": 1252.4,
+    "duration": 4.0
+  },
+  {
+    "text": "system wasn't working on the engine side",
+    "start": 1254.159,
+    "duration": 3.921
+  },
+  {
+    "text": "but given that looks for derivative",
+    "start": 1256.4,
+    "duration": 3.519
+  },
+  {
+    "text": "operations directly in the shader bite",
+    "start": 1258.08,
+    "duration": 5.36
+  },
+  {
+    "text": "code that hardly seemed reasonable or we",
+    "start": 1259.919,
+    "duration": 5.361
+  },
+  {
+    "text": "had inadvertently caused Nanite to use",
+    "start": 1263.44,
+    "duration": 3.52
+  },
+  {
+    "text": "quad rendering for every draw in the",
+    "start": 1265.28,
+    "duration": 3.36
+  },
+  {
+    "text": "scene completely eliminating any",
+    "start": 1266.96,
+    "duration": 3.199
+  },
+  {
+    "text": "performance uplift by variable rate",
+    "start": 1268.64,
+    "duration": 3.6
+  },
+  {
+    "text": "shading. So at that point we wanted to",
+    "start": 1270.159,
+    "duration": 4.721
+  },
+  {
+    "text": "prove two things that we truly had",
+    "start": 1272.24,
+    "duration": 4.799
+  },
+  {
+    "text": "derivative operations and the derivative",
+    "start": 1274.88,
+    "duration": 4.08
+  },
+  {
+    "text": "operations were caused by our material",
+    "start": 1277.039,
+    "duration": 4.161
+  },
+  {
+    "text": "graphs.",
+    "start": 1278.96,
+    "duration": 3.76
+  },
+  {
+    "text": "Unreal Engine gives you excellent",
+    "start": 1281.2,
+    "duration": 3.44
+  },
+  {
+    "text": "visualization modes like in this case",
+    "start": 1282.72,
+    "duration": 4.079
+  },
+  {
+    "text": "the nanite advanced view modes that are",
+    "start": 1284.64,
+    "duration": 4.64
+  },
+  {
+    "text": "great for answering the what questions.",
+    "start": 1286.799,
+    "duration": 4.561
+  },
+  {
+    "text": "In this case we used the no derivative",
+    "start": 1289.28,
+    "duration": 4.0
+  },
+  {
+    "text": "ops view mode which highlights draws",
+    "start": 1291.36,
+    "duration": 3.679
+  },
+  {
+    "text": "that rely on derivative operations in",
+    "start": 1293.28,
+    "duration": 3.759
+  },
+  {
+    "text": "the material shader. This helped us",
+    "start": 1295.039,
+    "duration": 4.321
+  },
+  {
+    "text": "answer what was happening. Almost every",
+    "start": 1297.039,
+    "duration": 4.161
+  },
+  {
+    "text": "draw in our scene was using derivatives,",
+    "start": 1299.36,
+    "duration": 3.6
+  },
+  {
+    "text": "turning pretty much the entire viewport",
+    "start": 1301.2,
+    "duration": 4.32
+  },
+  {
+    "text": "red. But that only got us part of the",
+    "start": 1302.96,
+    "duration": 4.56
+  },
+  {
+    "text": "picture because visualization shows us",
+    "start": 1305.52,
+    "duration": 5.039
+  },
+  {
+    "text": "symptoms but not root causes. So to go",
+    "start": 1307.52,
+    "duration": 4.88
+  },
+  {
+    "text": "deeper and to understand why this was",
+    "start": 1310.559,
+    "duration": 3.521
+  },
+  {
+    "text": "happening and how derivative",
+    "start": 1312.4,
+    "duration": 2.8
+  },
+  {
+    "text": "instructions were actually being",
+    "start": 1314.08,
+    "duration": 3.92
+  },
+  {
+    "text": "introduced, we turned to Pix. With Pix,",
+    "start": 1315.2,
+    "duration": 4.4
+  },
+  {
+    "text": "we could inspect the shader bite code",
+    "start": 1318.0,
+    "duration": 4.0
+  },
+  {
+    "text": "ourselves itself, verify the presence of",
+    "start": 1319.6,
+    "duration": 4.079
+  },
+  {
+    "text": "derivative ops, and then trace them back",
+    "start": 1322.0,
+    "duration": 3.12
+  },
+  {
+    "text": "to the material graphs that were causing",
+    "start": 1323.679,
+    "duration": 3.761
+  },
+  {
+    "text": "them. In other words, Unreal told us",
+    "start": 1325.12,
+    "duration": 4.96
+  },
+  {
+    "text": "what was wrong, but Pix told us why. And",
+    "start": 1327.44,
+    "duration": 3.68
+  },
+  {
+    "text": "that's critical when you're trying to",
+    "start": 1330.08,
+    "duration": 4.4
+  },
+  {
+    "text": "optimize at this level of precision.",
+    "start": 1331.12,
+    "duration": 4.64
+  },
+  {
+    "text": "So, let's look again at what we see in",
+    "start": 1334.48,
+    "duration": 3.28
+  },
+  {
+    "text": "editor. On the right is the no",
+    "start": 1335.76,
+    "duration": 3.6
+  },
+  {
+    "text": "derivative ops view that is available",
+    "start": 1337.76,
+    "duration": 3.6
+  },
+  {
+    "text": "from the nanite visualization menu after",
+    "start": 1339.36,
+    "duration": 3.439
+  },
+  {
+    "text": "advanced visualizations has been",
+    "start": 1341.36,
+    "duration": 2.72
+  },
+  {
+    "text": "enabled, which you can do with that",
+    "start": 1342.799,
+    "duration": 3.841
+  },
+  {
+    "text": "console command. Um, we see that in the",
+    "start": 1344.08,
+    "duration": 4.079
+  },
+  {
+    "text": "node derivative ops view that we've",
+    "start": 1346.64,
+    "duration": 3.919
+  },
+  {
+    "text": "caused nanite to use quad rendering for",
+    "start": 1348.159,
+    "duration": 4.801
+  },
+  {
+    "text": "all of those measures that you read.",
+    "start": 1350.559,
+    "duration": 4.321
+  },
+  {
+    "text": "With Pix, we launched the package",
+    "start": 1352.96,
+    "duration": 3.36
+  },
+  {
+    "text": "development project and before we",
+    "start": 1354.88,
+    "duration": 3.44
+  },
+  {
+    "text": "capture a frame, we just want to set R.",
+    "start": 1356.32,
+    "duration": 4.16
+  },
+  {
+    "text": "RHI set GPU capture options to one,",
+    "start": 1358.32,
+    "duration": 3.52
+  },
+  {
+    "text": "which will then export the markers and",
+    "start": 1360.48,
+    "duration": 4.8
+  },
+  {
+    "text": "names we need to track those draws down.",
+    "start": 1361.84,
+    "duration": 5.28
+  },
+  {
+    "text": "So why is the leftmost object using",
+    "start": 1365.28,
+    "duration": 3.279
+  },
+  {
+    "text": "derivative operations, but the center",
+    "start": 1367.12,
+    "duration": 3.52
+  },
+  {
+    "text": "isn't? Well, the answer lies in how that",
+    "start": 1368.559,
+    "duration": 4.24
+  },
+  {
+    "text": "material is actually sampled. Nanite",
+    "start": 1370.64,
+    "duration": 4.159
+  },
+  {
+    "text": "wants to use texture 2D sample gradient",
+    "start": 1372.799,
+    "duration": 4.24
+  },
+  {
+    "text": "as it passes in derivatives explicitly,",
+    "start": 1374.799,
+    "duration": 4.161
+  },
+  {
+    "text": "while samplers like texture 2D sample",
+    "start": 1377.039,
+    "duration": 3.76
+  },
+  {
+    "text": "bias implicitly calculate their",
+    "start": 1378.96,
+    "duration": 3.76
+  },
+  {
+    "text": "derivatives. An illustration of this can",
+    "start": 1380.799,
+    "duration": 3.521
+  },
+  {
+    "text": "be seen in that pix pix capture up",
+    "start": 1382.72,
+    "duration": 3.199
+  },
+  {
+    "text": "there. And my apologies if it's hard to",
+    "start": 1384.32,
+    "duration": 3.359
+  },
+  {
+    "text": "make out, but doesn't really matter. The",
+    "start": 1385.919,
+    "duration": 3.601
+  },
+  {
+    "text": "gist of what it is is saying is that pix",
+    "start": 1387.679,
+    "duration": 4.561
+  },
+  {
+    "text": "has selected the draw for the m test",
+    "start": 1389.52,
+    "duration": 4.24
+  },
+  {
+    "text": "trip planer one material which is",
+    "start": 1392.24,
+    "duration": 4.24
+  },
+  {
+    "text": "assigned to that left mesh. Um, and I've",
+    "start": 1393.76,
+    "duration": 4.56
+  },
+  {
+    "text": "selected the world normal gbuffer output",
+    "start": 1396.48,
+    "duration": 4.319
+  },
+  {
+    "text": "to visualize that call. In this case, we",
+    "start": 1398.32,
+    "duration": 3.92
+  },
+  {
+    "text": "care about the shader bound to that",
+    "start": 1400.799,
+    "duration": 3.201
+  },
+  {
+    "text": "call. It's on the compute queue as the",
+    "start": 1402.24,
+    "duration": 3.919
+  },
+  {
+    "text": "nanite base pass is a compute shader",
+    "start": 1404.0,
+    "duration": 4.08
+  },
+  {
+    "text": "based.",
+    "start": 1406.159,
+    "duration": 3.841
+  },
+  {
+    "text": "So when we investigate the shader itself",
+    "start": 1408.08,
+    "duration": 3.68
+  },
+  {
+    "text": "further, we can see on screen that the",
+    "start": 1410.0,
+    "duration": 3.76
+  },
+  {
+    "text": "calculate pixel material inputs analytic",
+    "start": 1411.76,
+    "duration": 3.84
+  },
+  {
+    "text": "derivatives function for the material",
+    "start": 1413.76,
+    "duration": 3.76
+  },
+  {
+    "text": "using trip planer projection has a call",
+    "start": 1415.6,
+    "duration": 5.439
+  },
+  {
+    "text": "to texture 2D sample bias.",
+    "start": 1417.52,
+    "duration": 5.279
+  },
+  {
+    "text": "We can then compare that to the material",
+    "start": 1421.039,
+    "duration": 3.601
+  },
+  {
+    "text": "with analytic derivatives and we can see",
+    "start": 1422.799,
+    "duration": 4.401
+  },
+  {
+    "text": "that it uses texture 2D sample gradient.",
+    "start": 1424.64,
+    "duration": 4.159
+  },
+  {
+    "text": "This is why our middle object showed up",
+    "start": 1427.2,
+    "duration": 3.359
+  },
+  {
+    "text": "as blue in the nanite no derivatives",
+    "start": 1428.799,
+    "duration": 4.401
+  },
+  {
+    "text": "mode. uh as the GPU treats texture 2D",
+    "start": 1430.559,
+    "duration": 4.321
+  },
+  {
+    "text": "sample gradient as a gradient dependent",
+    "start": 1433.2,
+    "duration": 3.12
+  },
+  {
+    "text": "operation which takes explicit",
+    "start": 1434.88,
+    "duration": 3.039
+  },
+  {
+    "text": "derivatives rather than calculating a",
+    "start": 1436.32,
+    "duration": 3.44
+  },
+  {
+    "text": "bias.",
+    "start": 1437.919,
+    "duration": 3.76
+  },
+  {
+    "text": "So in this example before we tried to",
+    "start": 1439.76,
+    "duration": 3.84
+  },
+  {
+    "text": "remove derivative operations we wanted",
+    "start": 1441.679,
+    "duration": 4.321
+  },
+  {
+    "text": "to understand a few things. Firstly why",
+    "start": 1443.6,
+    "duration": 3.92
+  },
+  {
+    "text": "were they there? Are they serving any",
+    "start": 1446.0,
+    "duration": 4.24
+  },
+  {
+    "text": "visual pro uh purpose? But then how are",
+    "start": 1447.52,
+    "duration": 5.12
+  },
+  {
+    "text": "they getting into the shader? Lastly",
+    "start": 1450.24,
+    "duration": 4.799
+  },
+  {
+    "text": "what are our alternatives?",
+    "start": 1452.64,
+    "duration": 3.84
+  },
+  {
+    "text": "What we discovered was that the leftmost",
+    "start": 1455.039,
+    "duration": 3.681
+  },
+  {
+    "text": "object used texture 2D sample bias. The",
+    "start": 1456.48,
+    "duration": 3.92
+  },
+  {
+    "text": "middle object used a texture 2D sample",
+    "start": 1458.72,
+    "duration": 3.839
+  },
+  {
+    "text": "gradient with analytic derivatives. And",
+    "start": 1460.4,
+    "duration": 4.0
+  },
+  {
+    "text": "the rightmost object was using both",
+    "start": 1462.559,
+    "duration": 4.081
+  },
+  {
+    "text": "sample bias and sample gradient on two",
+    "start": 1464.4,
+    "duration": 3.68
+  },
+  {
+    "text": "of the materials causing it to appear",
+    "start": 1466.64,
+    "duration": 3.76
+  },
+  {
+    "text": "somewhat red. This was important as it",
+    "start": 1468.08,
+    "duration": 4.0
+  },
+  {
+    "text": "proved that it was due to our material",
+    "start": 1470.4,
+    "duration": 3.84
+  },
+  {
+    "text": "setup, not a false positive or an engine",
+    "start": 1472.08,
+    "duration": 4.64
+  },
+  {
+    "text": "bug. So this confirmed both the what and",
+    "start": 1474.24,
+    "duration": 4.0
+  },
+  {
+    "text": "the why and gave us confidence to",
+    "start": 1476.72,
+    "duration": 4.48
+  },
+  {
+    "text": "proceed with the optimization.",
+    "start": 1478.24,
+    "duration": 4.559
+  },
+  {
+    "text": "Okay, the last tool I want to quickly",
+    "start": 1481.2,
+    "duration": 4.24
+  },
+  {
+    "text": "touch on is Nvidia Insight. Uh, Inside",
+    "start": 1482.799,
+    "duration": 4.721
+  },
+  {
+    "text": "Aftermath is NVIDIA's GPU crash",
+    "start": 1485.44,
+    "duration": 4.0
+  },
+  {
+    "text": "debugging tool designed to help Windows",
+    "start": 1487.52,
+    "duration": 4.72
+  },
+  {
+    "text": "developers using GeForce GPUs track down",
+    "start": 1489.44,
+    "duration": 4.96
+  },
+  {
+    "text": "what the GPU was doing at the exact",
+    "start": 1492.24,
+    "duration": 4.4
+  },
+  {
+    "text": "moment a crash occurred. It's integrated",
+    "start": 1494.4,
+    "duration": 4.48
+  },
+  {
+    "text": "as a lightweight C++ library and is",
+    "start": 1496.64,
+    "duration": 3.919
+  },
+  {
+    "text": "supported by Unreal Engine, so you can",
+    "start": 1498.88,
+    "duration": 3.039
+  },
+  {
+    "text": "include it in your project with minimal",
+    "start": 1500.559,
+    "duration": 2.801
+  },
+  {
+    "text": "overhead, and it's actually even light",
+    "start": 1501.919,
+    "duration": 2.88
+  },
+  {
+    "text": "enough to ship with your final game",
+    "start": 1503.36,
+    "duration": 3.84
+  },
+  {
+    "text": "builds. What makes Aftermath powerful is",
+    "start": 1504.799,
+    "duration": 4.401
+  },
+  {
+    "text": "that it captures detailed crash dumps",
+    "start": 1507.2,
+    "duration": 4.32
+  },
+  {
+    "text": "from the GPU and supports inserting your",
+    "start": 1509.2,
+    "duration": 4.479
+  },
+  {
+    "text": "own markers into the rendering pipeline,",
+    "start": 1511.52,
+    "duration": 4.24
+  },
+  {
+    "text": "giving you clear breadcrumbs when you're",
+    "start": 1513.679,
+    "duration": 4.24
+  },
+  {
+    "text": "trying to chase down GPU hangs or TDRs,",
+    "start": 1515.76,
+    "duration": 4.72
+  },
+  {
+    "text": "which are notoriously painful to find.",
+    "start": 1517.919,
+    "duration": 4.64
+  },
+  {
+    "text": "While other profiling tools show how",
+    "start": 1520.48,
+    "duration": 3.439
+  },
+  {
+    "text": "your game performs when things are",
+    "start": 1522.559,
+    "duration": 3.041
+  },
+  {
+    "text": "running well, Aftermath, on the other",
+    "start": 1523.919,
+    "duration": 3.36
+  },
+  {
+    "text": "hand, is focused on postmortem",
+    "start": 1525.6,
+    "duration": 3.36
+  },
+  {
+    "text": "debugging, helping you diagnose black",
+    "start": 1527.279,
+    "duration": 4.0
+  },
+  {
+    "text": "screens, device removed errors, or GPU",
+    "start": 1528.96,
+    "duration": 3.68
+  },
+  {
+    "text": "crashes that are notoriously hard to",
+    "start": 1531.279,
+    "duration": 3.52
+  },
+  {
+    "text": "reproduce.",
+    "start": 1532.64,
+    "duration": 3.44
+  },
+  {
+    "text": "So, this is what you'll be presented",
+    "start": 1534.799,
+    "duration": 2.721
+  },
+  {
+    "text": "with when you open up Insights on your",
+    "start": 1536.08,
+    "duration": 4.079
+  },
+  {
+    "text": "PC. Uh, as a studio, we most often use",
+    "start": 1537.52,
+    "duration": 4.88
+  },
+  {
+    "text": "this tool to debug GPU crashes using the",
+    "start": 1540.159,
+    "duration": 4.64
+  },
+  {
+    "text": "GPU crash dump inspector. Again, I don't",
+    "start": 1542.4,
+    "duration": 3.68
+  },
+  {
+    "text": "expect you about to make it out on",
+    "start": 1544.799,
+    "duration": 3.201
+  },
+  {
+    "text": "screen. It's just a image. Um, which",
+    "start": 1546.08,
+    "duration": 3.599
+  },
+  {
+    "text": "helps us find the root cause of a random",
+    "start": 1548.0,
+    "duration": 4.799
+  },
+  {
+    "text": "GPU crash. So, when loading a crash dump",
+    "start": 1549.679,
+    "duration": 4.961
+  },
+  {
+    "text": "into Insight, a good first step is to",
+    "start": 1552.799,
+    "duration": 3.281
+  },
+  {
+    "text": "check the exception summary under the",
+    "start": 1554.64,
+    "duration": 3.519
+  },
+  {
+    "text": "dump info tab. And this section gives",
+    "start": 1556.08,
+    "duration": 4.079
+  },
+  {
+    "text": "you a highle view of what went wrong.",
+    "start": 1558.159,
+    "duration": 4.081
+  },
+  {
+    "text": "for example, whether the GPU was hung or",
+    "start": 1560.159,
+    "duration": 3.841
+  },
+  {
+    "text": "if there was a page fault or a shader",
+    "start": 1562.24,
+    "duration": 3.679
+  },
+  {
+    "text": "related crash. If it turns out to be a",
+    "start": 1564.0,
+    "duration": 3.679
+  },
+  {
+    "text": "memory fault, the next place to look is",
+    "start": 1565.919,
+    "duration": 5.281
+  },
+  {
+    "text": "kind of where I've highlighted um is the",
+    "start": 1567.679,
+    "duration": 5.441
+  },
+  {
+    "text": "page fault section under the crash info",
+    "start": 1571.2,
+    "duration": 3.839
+  },
+  {
+    "text": "tab. This will help you determine if the",
+    "start": 1573.12,
+    "duration": 3.12
+  },
+  {
+    "text": "crash was due to something like",
+    "start": 1575.039,
+    "duration": 2.801
+  },
+  {
+    "text": "accessing memory that was out of bounds",
+    "start": 1576.24,
+    "duration": 3.919
+  },
+  {
+    "text": "or already freed. You'll also see",
+    "start": 1577.84,
+    "duration": 4.079
+  },
+  {
+    "text": "information like the fault type and the",
+    "start": 1580.159,
+    "duration": 3.681
+  },
+  {
+    "text": "access type, for example, a failed",
+    "start": 1581.919,
+    "duration": 3.921
+  },
+  {
+    "text": "virtual address, translation on a read",
+    "start": 1583.84,
+    "duration": 3.92
+  },
+  {
+    "text": "operation. Um, there's also a resource",
+    "start": 1585.84,
+    "duration": 3.439
+  },
+  {
+    "text": "history that shows details about the",
+    "start": 1587.76,
+    "duration": 3.36
+  },
+  {
+    "text": "resource, including its size and whether",
+    "start": 1589.279,
+    "duration": 4.161
+  },
+  {
+    "text": "it was marked as destroyed. After that,",
+    "start": 1591.12,
+    "duration": 4.0
+  },
+  {
+    "text": "the GPU state section can tell you what",
+    "start": 1593.44,
+    "duration": 3.44
+  },
+  {
+    "text": "the GPU was actually doing at the time.",
+    "start": 1595.12,
+    "duration": 3.28
+  },
+  {
+    "text": "In some cases, this can give you a clue",
+    "start": 1596.88,
+    "duration": 2.799
+  },
+  {
+    "text": "as to what part of the pipeline was",
+    "start": 1598.4,
+    "duration": 3.759
+  },
+  {
+    "text": "active, such as texture sampling. If you",
+    "start": 1599.679,
+    "duration": 4.081
+  },
+  {
+    "text": "need to dig into the shader itself,",
+    "start": 1602.159,
+    "duration": 3.841
+  },
+  {
+    "text": "Aftermath identifies shaders based on",
+    "start": 1603.76,
+    "duration": 4.399
+  },
+  {
+    "text": "code hashes, not file names. So, you'll",
+    "start": 1606.0,
+    "duration": 3.52
+  },
+  {
+    "text": "need to configure search paths in your",
+    "start": 1608.159,
+    "duration": 3.841
+  },
+  {
+    "text": "shader binaries. In Unreal projects, the",
+    "start": 1609.52,
+    "duration": 4.48
+  },
+  {
+    "text": "shaded debug information is usually in",
+    "start": 1612.0,
+    "duration": 4.32
+  },
+  {
+    "text": "saved/shaded debug info under a folder",
+    "start": 1614.0,
+    "duration": 4.24
+  },
+  {
+    "text": "that matches that target. Um, this",
+    "start": 1616.32,
+    "duration": 4.08
+  },
+  {
+    "text": "contains HLSL files and other metadata",
+    "start": 1618.24,
+    "duration": 3.52
+  },
+  {
+    "text": "used to map crashes back to that",
+    "start": 1620.4,
+    "duration": 4.24
+  },
+  {
+    "text": "specific shader code. But when have we",
+    "start": 1621.76,
+    "duration": 4.72
+  },
+  {
+    "text": "actually used this in practice? Well, we",
+    "start": 1624.64,
+    "duration": 4.08
+  },
+  {
+    "text": "had reports of a seemingly random GPU",
+    "start": 1626.48,
+    "duration": 5.76
+  },
+  {
+    "text": "crash when using the editor, idling,",
+    "start": 1628.72,
+    "duration": 5.439
+  },
+  {
+    "text": "moving the camera, unloading world",
+    "start": 1632.24,
+    "duration": 4.799
+  },
+  {
+    "text": "partition, or performing editor undoing.",
+    "start": 1634.159,
+    "duration": 4.64
+  },
+  {
+    "text": "the provided call stack and the GPU",
+    "start": 1637.039,
+    "duration": 4.64
+  },
+  {
+    "text": "crash dump generated by NVIDIA aftermath",
+    "start": 1638.799,
+    "duration": 5.041
+  },
+  {
+    "text": "which can actually be enabled by adding",
+    "start": 1641.679,
+    "duration": 4.24
+  },
+  {
+    "text": "- GPU crash debugging the command line",
+    "start": 1643.84,
+    "duration": 4.16
+  },
+  {
+    "text": "or setting R.GPU crash debugging to one",
+    "start": 1645.919,
+    "duration": 4.0
+  },
+  {
+    "text": "in your project file. We could analyze",
+    "start": 1648.0,
+    "duration": 3.84
+  },
+  {
+    "text": "that dump that crash dump with NVIDIA",
+    "start": 1649.919,
+    "duration": 3.441
+  },
+  {
+    "text": "insight and allowed us to inspect the",
+    "start": 1651.84,
+    "duration": 3.92
+  },
+  {
+    "text": "GPU's memory registers and other data at",
+    "start": 1653.36,
+    "duration": 4.4
+  },
+  {
+    "text": "the time of that crash. Um, and this led",
+    "start": 1655.76,
+    "duration": 3.36
+  },
+  {
+    "text": "us to find that the cause of the crash",
+    "start": 1657.76,
+    "duration": 3.2
+  },
+  {
+    "text": "was that a fragment shader was trying to",
+    "start": 1659.12,
+    "duration": 3.2
+  },
+  {
+    "text": "access a resource that had already been",
+    "start": 1660.96,
+    "duration": 2.959
+  },
+  {
+    "text": "destroyed and thus resulted in a page",
+    "start": 1662.32,
+    "duration": 4.08
+  },
+  {
+    "text": "fold error.",
+    "start": 1663.919,
+    "duration": 4.321
+  },
+  {
+    "text": "So when you're facing an issue,",
+    "start": 1666.4,
+    "duration": 3.519
+  },
+  {
+    "text": "especially one that seems mysterious or",
+    "start": 1668.24,
+    "duration": 3.52
+  },
+  {
+    "text": "intermittent, your best bet is to strip",
+    "start": 1669.919,
+    "duration": 3.601
+  },
+  {
+    "text": "the problem down to just the systems",
+    "start": 1671.76,
+    "duration": 3.76
+  },
+  {
+    "text": "that you're testing. Remove as many",
+    "start": 1673.52,
+    "duration": 3.92
+  },
+  {
+    "text": "variables as possible. If you can",
+    "start": 1675.52,
+    "duration": 3.92
+  },
+  {
+    "text": "replicate the issue in a clean, minimal",
+    "start": 1677.44,
+    "duration": 4.8
+  },
+  {
+    "text": "test map or isolated module, you're far",
+    "start": 1679.44,
+    "duration": 4.56
+  },
+  {
+    "text": "more likely to understand what's really",
+    "start": 1682.24,
+    "duration": 4.319
+  },
+  {
+    "text": "going on. This also makes it easier for",
+    "start": 1684.0,
+    "duration": 4.96
+  },
+  {
+    "text": "others like your teammates or Epic",
+    "start": 1686.559,
+    "duration": 4.801
+  },
+  {
+    "text": "support to help. Another reason you'd",
+    "start": 1688.96,
+    "duration": 3.68
+  },
+  {
+    "text": "want to do this is that if it's not",
+    "start": 1691.36,
+    "duration": 3.36
+  },
+  {
+    "text": "reproducible or measurable, how do you",
+    "start": 1692.64,
+    "duration": 3.919
+  },
+  {
+    "text": "know that you've actually fixed it? A",
+    "start": 1694.72,
+    "duration": 4.0
+  },
+  {
+    "text": "fix that can't be verified isn't",
+    "start": 1696.559,
+    "duration": 4.161
+  },
+  {
+    "text": "entirely a fix. You need to be able to",
+    "start": 1698.72,
+    "duration": 3.6
+  },
+  {
+    "text": "confirm that the issue has actually been",
+    "start": 1700.72,
+    "duration": 3.52
+  },
+  {
+    "text": "resolved to feel confident in deploying",
+    "start": 1702.32,
+    "duration": 3.68
+  },
+  {
+    "text": "that update. This means having a",
+    "start": 1704.24,
+    "duration": 4.0
+  },
+  {
+    "text": "baseline, applying the change, and then",
+    "start": 1706.0,
+    "duration": 3.76
+  },
+  {
+    "text": "re-checking the data to ensure that the",
+    "start": 1708.24,
+    "duration": 4.48
+  },
+  {
+    "text": "issue was truly addressed.",
+    "start": 1709.76,
+    "duration": 4.799
+  },
+  {
+    "text": "So, we've identified the root cause of",
+    "start": 1712.72,
+    "duration": 3.199
+  },
+  {
+    "text": "the problem, and that's a huge step",
+    "start": 1714.559,
+    "duration": 3.36
+  },
+  {
+    "text": "forward. But now comes the next",
+    "start": 1715.919,
+    "duration": 5.681
+  },
+  {
+    "text": "challenge, which is actually fixing it.",
+    "start": 1717.919,
+    "duration": 5.12
+  },
+  {
+    "text": "Fixing a problem isn't just about",
+    "start": 1721.6,
+    "duration": 3.439
+  },
+  {
+    "text": "writing code. It's about understanding",
+    "start": 1723.039,
+    "duration": 4.88
+  },
+  {
+    "text": "the impact of your fix, making sure it",
+    "start": 1725.039,
+    "duration": 4.721
+  },
+  {
+    "text": "doesn't cause new issues or that it",
+    "start": 1727.919,
+    "duration": 3.12
+  },
+  {
+    "text": "integrates well with the rest of the",
+    "start": 1729.76,
+    "duration": 3.84
+  },
+  {
+    "text": "system. In this last section, we'll look",
+    "start": 1731.039,
+    "duration": 4.161
+  },
+  {
+    "text": "at strategies and best practices to",
+    "start": 1733.6,
+    "duration": 3.6
+  },
+  {
+    "text": "approach fixing problems effectively and",
+    "start": 1735.2,
+    "duration": 4.16
+  },
+  {
+    "text": "safely because identifying the issue is",
+    "start": 1737.2,
+    "duration": 3.68
+  },
+  {
+    "text": "only half the battle and delivering a",
+    "start": 1739.36,
+    "duration": 3.12
+  },
+  {
+    "text": "solid fix on the problem is ultimately",
+    "start": 1740.88,
+    "duration": 4.24
+  },
+  {
+    "text": "what matters.",
+    "start": 1742.48,
+    "duration": 4.319
+  },
+  {
+    "text": "When it comes to fixing issues, it's",
+    "start": 1745.12,
+    "duration": 3.439
+  },
+  {
+    "text": "important to understand that every fix",
+    "start": 1746.799,
+    "duration": 4.321
+  },
+  {
+    "text": "has a blast radius. In other words, the",
+    "start": 1748.559,
+    "duration": 4.48
+  },
+  {
+    "text": "potential impact or fallout from that",
+    "start": 1751.12,
+    "duration": 3.039
+  },
+  {
+    "text": "change that it could have on other",
+    "start": 1753.039,
+    "duration": 3.681
+  },
+  {
+    "text": "systems. Even the best intentioned fixes",
+    "start": 1754.159,
+    "duration": 4.481
+  },
+  {
+    "text": "can unintentionally break other parts of",
+    "start": 1756.72,
+    "duration": 4.8
+  },
+  {
+    "text": "the code base. So before making sweeping",
+    "start": 1758.64,
+    "duration": 4.88
+  },
+  {
+    "text": "changes to fix a bug, it's best you",
+    "start": 1761.52,
+    "duration": 3.68
+  },
+  {
+    "text": "assess the risk involved in actually",
+    "start": 1763.52,
+    "duration": 3.519
+  },
+  {
+    "text": "making that fix. There's a few key",
+    "start": 1765.2,
+    "duration": 4.56
+  },
+  {
+    "text": "factors to consider. The visibility,",
+    "start": 1767.039,
+    "duration": 4.801
+  },
+  {
+    "text": "which is, you know, is the issue or fix",
+    "start": 1769.76,
+    "duration": 3.6
+  },
+  {
+    "text": "something that users or clients are",
+    "start": 1771.84,
+    "duration": 3.199
+  },
+  {
+    "text": "going to directly see? The more visible",
+    "start": 1773.36,
+    "duration": 3.28
+  },
+  {
+    "text": "it is, the higher the risk if something",
+    "start": 1775.039,
+    "duration": 4.401
+  },
+  {
+    "text": "actually goes wrong. Complexity. How",
+    "start": 1776.64,
+    "duration": 4.639
+  },
+  {
+    "text": "intertwined is this code or system that",
+    "start": 1779.44,
+    "duration": 3.599
+  },
+  {
+    "text": "we're changing? If it's tightly coupled",
+    "start": 1781.279,
+    "duration": 3.76
+  },
+  {
+    "text": "with heaps of other systems, even a",
+    "start": 1783.039,
+    "duration": 3.681
+  },
+  {
+    "text": "small change could have big consequences",
+    "start": 1785.039,
+    "duration": 3.76
+  },
+  {
+    "text": "that you might not be aware of. Do we",
+    "start": 1786.72,
+    "duration": 4.0
+  },
+  {
+    "text": "fully understand how that system works?",
+    "start": 1788.799,
+    "duration": 3.841
+  },
+  {
+    "text": "And if not, the risk increases because",
+    "start": 1790.72,
+    "duration": 3.6
+  },
+  {
+    "text": "unexpected side effects become more",
+    "start": 1792.64,
+    "duration": 4.24
+  },
+  {
+    "text": "likely. And lastly, timing. I'll be",
+    "start": 1794.32,
+    "duration": 5.04
+  },
+  {
+    "text": "close to a milestone or a major release",
+    "start": 1796.88,
+    "duration": 4.48
+  },
+  {
+    "text": "because changes late in the cycle carry",
+    "start": 1799.36,
+    "duration": 3.679
+  },
+  {
+    "text": "more risk since there's less time for us",
+    "start": 1801.36,
+    "duration": 4.08
+  },
+  {
+    "text": "to test and fix those new issues.",
+    "start": 1803.039,
+    "duration": 4.24
+  },
+  {
+    "text": "Understanding these factors helps you",
+    "start": 1805.44,
+    "duration": 3.28
+  },
+  {
+    "text": "make smarter decisions about how to",
+    "start": 1807.279,
+    "duration": 3.361
+  },
+  {
+    "text": "approach fixes. Whether that means more",
+    "start": 1808.72,
+    "duration": 3.839
+  },
+  {
+    "text": "testing, incremental rollouts, or",
+    "start": 1810.64,
+    "duration": 5.68
+  },
+  {
+    "text": "involving more team members.",
+    "start": 1812.559,
+    "duration": 6.401
+  },
+  {
+    "text": "So, when selecting how to fix an issue,",
+    "start": 1816.32,
+    "duration": 4.64
+  },
+  {
+    "text": "it's crucial to align your strategy with",
+    "start": 1818.96,
+    "duration": 4.4
+  },
+  {
+    "text": "the level of risk involved. For low-risk",
+    "start": 1820.96,
+    "duration": 4.56
+  },
+  {
+    "text": "issues where the impact is minimal and",
+    "start": 1823.36,
+    "duration": 4.0
+  },
+  {
+    "text": "you have confidence in your fix, it's",
+    "start": 1825.52,
+    "duration": 3.6
+  },
+  {
+    "text": "usually fine to just proceed directly,",
+    "start": 1827.36,
+    "duration": 3.6
+  },
+  {
+    "text": "make the change, then test it thoroughly",
+    "start": 1829.12,
+    "duration": 3.36
+  },
+  {
+    "text": "yourself to confirm that the fixes",
+    "start": 1830.96,
+    "duration": 3.12
+  },
+  {
+    "text": "behavior is expected and doesn't cause",
+    "start": 1832.48,
+    "duration": 3.84
+  },
+  {
+    "text": "any side effects. But for medium risk",
+    "start": 1834.08,
+    "duration": 4.079
+  },
+  {
+    "text": "issues where the fix affects more",
+    "start": 1836.32,
+    "duration": 3.839
+  },
+  {
+    "text": "complex or visible systems, a more",
+    "start": 1838.159,
+    "duration": 4.321
+  },
+  {
+    "text": "cautious approach may be needed. Make",
+    "start": 1840.159,
+    "duration": 4.321
+  },
+  {
+    "text": "sure to perform thorough testing and",
+    "start": 1842.48,
+    "duration": 3.84
+  },
+  {
+    "text": "ideally have other team members review",
+    "start": 1844.48,
+    "duration": 3.679
+  },
+  {
+    "text": "your changes or involve your QA team",
+    "start": 1846.32,
+    "duration": 4.32
+  },
+  {
+    "text": "early. It's also important to document",
+    "start": 1848.159,
+    "duration": 4.64
+  },
+  {
+    "text": "what you've done as this helps track the",
+    "start": 1850.64,
+    "duration": 4.88
+  },
+  {
+    "text": "change later on. For high-risisk issues",
+    "start": 1852.799,
+    "duration": 4.801
+  },
+  {
+    "text": "where the blast radius could be large or",
+    "start": 1855.52,
+    "duration": 3.92
+  },
+  {
+    "text": "the system is critical, it's best to",
+    "start": 1857.6,
+    "duration": 3.92
+  },
+  {
+    "text": "apply mitigation strategies. It could be",
+    "start": 1859.44,
+    "duration": 3.76
+  },
+  {
+    "text": "worth escalating high-risisk fixes to",
+    "start": 1861.52,
+    "duration": 3.279
+  },
+  {
+    "text": "your team lead or senior engineers to",
+    "start": 1863.2,
+    "duration": 3.599
+  },
+  {
+    "text": "review as their experience could help",
+    "start": 1864.799,
+    "duration": 3.841
+  },
+  {
+    "text": "spot potential pitfalls in your solution",
+    "start": 1866.799,
+    "duration": 4.0
+  },
+  {
+    "text": "that you might have missed. I would also",
+    "start": 1868.64,
+    "duration": 3.84
+  },
+  {
+    "text": "consider maybe using feature flags or",
+    "start": 1870.799,
+    "duration": 3.841
+  },
+  {
+    "text": "configuration toggles to control the",
+    "start": 1872.48,
+    "duration": 4.4
+  },
+  {
+    "text": "roll out of that fix. It's it allows you",
+    "start": 1874.64,
+    "duration": 4.399
+  },
+  {
+    "text": "to enable or disable the change quickly",
+    "start": 1876.88,
+    "duration": 4.0
+  },
+  {
+    "text": "without a full release. Uh which is very",
+    "start": 1879.039,
+    "duration": 5.681
+  },
+  {
+    "text": "useful for managing risk in production.",
+    "start": 1880.88,
+    "duration": 5.519
+  },
+  {
+    "text": "As I mentioned, some changes are",
+    "start": 1884.72,
+    "duration": 4.319
+  },
+  {
+    "text": "relatively benign while others have very",
+    "start": 1886.399,
+    "duration": 5.361
+  },
+  {
+    "text": "visible user impacts.",
+    "start": 1889.039,
+    "duration": 5.921
+  },
+  {
+    "text": "Player save data falls firmly in that l",
+    "start": 1891.76,
+    "duration": 5.36
+  },
+  {
+    "text": "later category. Modifying save",
+    "start": 1894.96,
+    "duration": 4.4
+  },
+  {
+    "text": "structures post-release in most cases",
+    "start": 1897.12,
+    "duration": 4.559
+  },
+  {
+    "text": "carries significant risk because it can",
+    "start": 1899.36,
+    "duration": 4.64
+  },
+  {
+    "text": "significantly adversely affect user",
+    "start": 1901.679,
+    "duration": 5.36
+  },
+  {
+    "text": "experience. So in the example project in",
+    "start": 1904.0,
+    "duration": 5.12
+  },
+  {
+    "text": "this case we made three changes to a",
+    "start": 1907.039,
+    "duration": 4.801
+  },
+  {
+    "text": "save system after the game had already",
+    "start": 1909.12,
+    "duration": 5.439
+  },
+  {
+    "text": "gone live. Converting from string to a",
+    "start": 1911.84,
+    "duration": 4.24
+  },
+  {
+    "text": "custom binary serialization with",
+    "start": 1914.559,
+    "duration": 4.161
+  },
+  {
+    "text": "versioning adding LZ4 compression to",
+    "start": 1916.08,
+    "duration": 5.04
+  },
+  {
+    "text": "save files and adding a code path that",
+    "start": 1918.72,
+    "duration": 5.199
+  },
+  {
+    "text": "resaves all current user saves to enable",
+    "start": 1921.12,
+    "duration": 5.679
+  },
+  {
+    "text": "compression on those files. Of these",
+    "start": 1923.919,
+    "duration": 4.88
+  },
+  {
+    "text": "changes, few are as potentially",
+    "start": 1926.799,
+    "duration": 4.161
+  },
+  {
+    "text": "catastrophic as that third change as a",
+    "start": 1928.799,
+    "duration": 4.401
+  },
+  {
+    "text": "failure in that process for any reason",
+    "start": 1930.96,
+    "duration": 4.48
+  },
+  {
+    "text": "could result in the loss of any and all",
+    "start": 1933.2,
+    "duration": 4.479
+  },
+  {
+    "text": "user data.",
+    "start": 1935.44,
+    "duration": 4.959
+  },
+  {
+    "text": "So by default with the f object name and",
+    "start": 1937.679,
+    "duration": 4.561
+  },
+  {
+    "text": "string proxy archive, Unreal will",
+    "start": 1940.399,
+    "duration": 3.841
+  },
+  {
+    "text": "serialize the save game as a string-like",
+    "start": 1942.24,
+    "duration": 4.319
+  },
+  {
+    "text": "structure. This causes potential",
+    "start": 1944.24,
+    "duration": 4.24
+  },
+  {
+    "text": "significant disk space overhead and may",
+    "start": 1946.559,
+    "duration": 3.84
+  },
+  {
+    "text": "bloat your disc requirements. But the",
+    "start": 1948.48,
+    "duration": 3.84
+  },
+  {
+    "text": "trouble was that the day zero build had",
+    "start": 1950.399,
+    "duration": 3.361
+  },
+  {
+    "text": "gone gold with this method of",
+    "start": 1952.32,
+    "duration": 3.599
+  },
+  {
+    "text": "serialization already implemented. So we",
+    "start": 1953.76,
+    "duration": 3.759
+  },
+  {
+    "text": "could no longer guarantee that there was",
+    "start": 1955.919,
+    "duration": 3.521
+  },
+  {
+    "text": "no user saved data that would exist in",
+    "start": 1957.519,
+    "duration": 4.88
+  },
+  {
+    "text": "this old string light format. So",
+    "start": 1959.44,
+    "duration": 5.04
+  },
+  {
+    "text": "therefore we needed to have a way to",
+    "start": 1962.399,
+    "duration": 4.88
+  },
+  {
+    "text": "handle both formats in our save system.",
+    "start": 1964.48,
+    "duration": 4.48
+  },
+  {
+    "text": "Luckily the archive versioning system",
+    "start": 1967.279,
+    "duration": 3.041
+  },
+  {
+    "text": "provides us a really easy way to do",
+    "start": 1968.96,
+    "duration": 3.599
+  },
+  {
+    "text": "this. We reduced the overall save file",
+    "start": 1970.32,
+    "duration": 7.599
+  },
+  {
+    "text": "size by sorry by 16.25% to 83.75% of the",
+    "start": 1972.559,
+    "duration": 7.921
+  },
+  {
+    "text": "original size. uh with this and it could",
+    "start": 1977.919,
+    "duration": 4.24
+  },
+  {
+    "text": "have been more but there was a portion",
+    "start": 1980.48,
+    "duration": 3.28
+  },
+  {
+    "text": "of the save data that we opted not to",
+    "start": 1982.159,
+    "duration": 3.12
+  },
+  {
+    "text": "convert just due to the likelihood of",
+    "start": 1983.76,
+    "duration": 2.96
+  },
+  {
+    "text": "introducing potential issues later down",
+    "start": 1985.279,
+    "duration": 3.441
+  },
+  {
+    "text": "the line as that data was not serialized",
+    "start": 1986.72,
+    "duration": 4.48
+  },
+  {
+    "text": "on every load.",
+    "start": 1988.72,
+    "duration": 4.4
+  },
+  {
+    "text": "Overall, this first change went pretty",
+    "start": 1991.2,
+    "duration": 4.24
+  },
+  {
+    "text": "smoothly. We passed this to the QA team",
+    "start": 1993.12,
+    "duration": 3.919
+  },
+  {
+    "text": "a few weeks prior to launch and they",
+    "start": 1995.44,
+    "duration": 3.92
+  },
+  {
+    "text": "tested it rigorously. This change went",
+    "start": 1997.039,
+    "duration": 4.721
+  },
+  {
+    "text": "live early in the day zero patch, so the",
+    "start": 1999.36,
+    "duration": 3.76
+  },
+  {
+    "text": "majority of our saves would be this",
+    "start": 2001.76,
+    "duration": 3.519
+  },
+  {
+    "text": "version in all later upgrades. But as",
+    "start": 2003.12,
+    "duration": 3.679
+  },
+  {
+    "text": "mentioned, we could no longer actually",
+    "start": 2005.279,
+    "duration": 3.601
+  },
+  {
+    "text": "guarantee that. Since we could not",
+    "start": 2006.799,
+    "duration": 4.161
+  },
+  {
+    "text": "really fail saving due to this change,",
+    "start": 2008.88,
+    "duration": 3.279
+  },
+  {
+    "text": "there wasn't much we needed to do in",
+    "start": 2010.96,
+    "duration": 2.719
+  },
+  {
+    "text": "terms of fallbacks. We were just left",
+    "start": 2012.159,
+    "duration": 2.801
+  },
+  {
+    "text": "with the need to test these changes",
+    "start": 2013.679,
+    "duration": 4.24
+  },
+  {
+    "text": "heavily.",
+    "start": 2014.96,
+    "duration": 5.199
+  },
+  {
+    "text": "But post launch, it became clear that",
+    "start": 2017.919,
+    "duration": 4.321
+  },
+  {
+    "text": "the current save size was an issue on",
+    "start": 2020.159,
+    "duration": 3.841
+  },
+  {
+    "text": "some platforms that had limited cloud",
+    "start": 2022.24,
+    "duration": 4.159
+  },
+  {
+    "text": "backup space. As we didn't want to",
+    "start": 2024.0,
+    "duration": 4.32
+  },
+  {
+    "text": "convert the entire save to a custom",
+    "start": 2026.399,
+    "duration": 4.801
+  },
+  {
+    "text": "format, we opted to explore compression.",
+    "start": 2028.32,
+    "duration": 4.32
+  },
+  {
+    "text": "I can't go into platform specific",
+    "start": 2031.2,
+    "duration": 2.88
+  },
+  {
+    "text": "details in this talk, but it ended up",
+    "start": 2032.64,
+    "duration": 3.68
+  },
+  {
+    "text": "being a bigger issue than simply cloud",
+    "start": 2034.08,
+    "duration": 4.719
+  },
+  {
+    "text": "saves don't work. Um, but our go-to was",
+    "start": 2036.32,
+    "duration": 5.68
+  },
+  {
+    "text": "LZ4 for its fast compression speed and a",
+    "start": 2038.799,
+    "duration": 4.641
+  },
+  {
+    "text": "save hitching was actually now our",
+    "start": 2042.0,
+    "duration": 3.6
+  },
+  {
+    "text": "primary concern when implementing",
+    "start": 2043.44,
+    "duration": 4.959
+  },
+  {
+    "text": "compression. Um, unfortunately, the LZ4",
+    "start": 2045.6,
+    "duration": 4.799
+  },
+  {
+    "text": "compression natively in Unreal is",
+    "start": 2048.399,
+    "duration": 4.24
+  },
+  {
+    "text": "actually LZ4 HC at its maximum",
+    "start": 2050.399,
+    "duration": 4.24
+  },
+  {
+    "text": "compression setting, which caused us a",
+    "start": 2052.639,
+    "duration": 4.72
+  },
+  {
+    "text": "upwards of 3,000 millisecond hitch. Um,",
+    "start": 2054.639,
+    "duration": 4.72
+  },
+  {
+    "text": "but it did attain a really impressive 14",
+    "start": 2057.359,
+    "duration": 3.601
+  },
+  {
+    "text": "to1 compression ratio over the previous",
+    "start": 2059.359,
+    "duration": 3.921
+  },
+  {
+    "text": "version. Um, and on some platforms, this",
+    "start": 2060.96,
+    "duration": 3.439
+  },
+  {
+    "text": "actually might have been fine. If we",
+    "start": 2063.28,
+    "duration": 2.559
+  },
+  {
+    "text": "could if it could occur on a background",
+    "start": 2064.399,
+    "duration": 3.121
+  },
+  {
+    "text": "thread, but for some of our target",
+    "start": 2065.839,
+    "duration": 2.961
+  },
+  {
+    "text": "platforms that just didn't have enough",
+    "start": 2067.52,
+    "duration": 2.72
+  },
+  {
+    "text": "physical cores for us to send this work",
+    "start": 2068.8,
+    "duration": 3.52
+  },
+  {
+    "text": "to, it would lead to a 3second game",
+    "start": 2070.24,
+    "duration": 4.159
+  },
+  {
+    "text": "thread store. Um, which was obviously",
+    "start": 2072.32,
+    "duration": 4.24
+  },
+  {
+    "text": "unacceptable for us. So, we moved to a",
+    "start": 2074.399,
+    "duration": 4.881
+  },
+  {
+    "text": "more standard LZ4 compression. Um, LZ4's",
+    "start": 2076.56,
+    "duration": 3.76
+  },
+  {
+    "text": "files are actually already in the",
+    "start": 2079.28,
+    "duration": 3.2
+  },
+  {
+    "text": "engine, so getting access to the nonHC",
+    "start": 2080.32,
+    "duration": 3.92
+  },
+  {
+    "text": "version was pretty simple. Um, and the",
+    "start": 2082.48,
+    "duration": 4.0
+  },
+  {
+    "text": "trade-off we paid was dropping from a 14",
+    "start": 2084.24,
+    "duration": 5.52
+  },
+  {
+    "text": "to1 compression ratio to a 7.5 uh to1",
+    "start": 2086.48,
+    "duration": 5.28
+  },
+  {
+    "text": "compression ratio. So, it was about half",
+    "start": 2089.76,
+    "duration": 3.68
+  },
+  {
+    "text": "the compression, but it still ran in",
+    "start": 2091.76,
+    "duration": 3.2
+  },
+  {
+    "text": "under 50 milliseconds on the platform",
+    "start": 2093.44,
+    "duration": 2.88
+  },
+  {
+    "text": "that was struggling with the game thread",
+    "start": 2094.96,
+    "duration": 4.159
+  },
+  {
+    "text": "store. So, we took that as a win.",
+    "start": 2096.32,
+    "duration": 5.759
+  },
+  {
+    "text": "So, we now have vastly reduced the save",
+    "start": 2099.119,
+    "duration": 4.48
+  },
+  {
+    "text": "size while minimally impacting",
+    "start": 2102.079,
+    "duration": 4.881
+  },
+  {
+    "text": "performance, which is great. except",
+    "start": 2103.599,
+    "duration": 5.921
+  },
+  {
+    "text": "users are going to already have saves",
+    "start": 2106.96,
+    "duration": 5.36
+  },
+  {
+    "text": "made before this change and they should",
+    "start": 2109.52,
+    "duration": 5.839
+  },
+  {
+    "text": "upgrade seamlessly when they next save.",
+    "start": 2112.32,
+    "duration": 5.68
+  },
+  {
+    "text": "But remember our cloud save issue that's",
+    "start": 2115.359,
+    "duration": 4.081
+  },
+  {
+    "text": "going to be an issue until a user",
+    "start": 2118.0,
+    "duration": 4.4
+  },
+  {
+    "text": "manually replays every save that they've",
+    "start": 2119.44,
+    "duration": 4.72
+  },
+  {
+    "text": "made.",
+    "start": 2122.4,
+    "duration": 4.48
+  },
+  {
+    "text": "So that led us to our last change,",
+    "start": 2124.16,
+    "duration": 5.28
+  },
+  {
+    "text": "automatically res",
+    "start": 2126.88,
+    "duration": 6.4
+  },
+  {
+    "text": "on every boot after the patch landed.",
+    "start": 2129.44,
+    "duration": 5.52
+  },
+  {
+    "text": "This is by far the scariest of the",
+    "start": 2133.28,
+    "duration": 3.52
+  },
+  {
+    "text": "changes we've made as the blast radius",
+    "start": 2134.96,
+    "duration": 3.84
+  },
+  {
+    "text": "of all these changes was fairly large,",
+    "start": 2136.8,
+    "duration": 4.4
+  },
+  {
+    "text": "but this one is just plain gargantuan.",
+    "start": 2138.8,
+    "duration": 4.4
+  },
+  {
+    "text": "If we got this unintentionally wrong, we",
+    "start": 2141.2,
+    "duration": 4.32
+  },
+  {
+    "text": "would and failed to catch and testing",
+    "start": 2143.2,
+    "duration": 5.04
+  },
+  {
+    "text": "any issues. We could break every save",
+    "start": 2145.52,
+    "duration": 6.16
+  },
+  {
+    "text": "for every user on every platform. So for",
+    "start": 2148.24,
+    "duration": 5.04
+  },
+  {
+    "text": "that reason, we could not get that",
+    "start": 2151.68,
+    "duration": 3.679
+  },
+  {
+    "text": "wrong.",
+    "start": 2153.28,
+    "duration": 4.88
+  },
+  {
+    "text": "So how did we do this? Firstly, we",
+    "start": 2155.359,
+    "duration": 4.641
+  },
+  {
+    "text": "needed to make sure we identified what",
+    "start": 2158.16,
+    "duration": 3.84
+  },
+  {
+    "text": "and where we could end up with corrupt",
+    "start": 2160.0,
+    "duration": 4.56
+  },
+  {
+    "text": "data. These need to form the basis of",
+    "start": 2162.0,
+    "duration": 4.96
+  },
+  {
+    "text": "where testing time was directed.",
+    "start": 2164.56,
+    "duration": 4.48
+  },
+  {
+    "text": "Additionally, we added error injection",
+    "start": 2166.96,
+    "duration": 4.32
+  },
+  {
+    "text": "to simulate potential failure modes",
+    "start": 2169.04,
+    "duration": 4.64
+  },
+  {
+    "text": "during the resave and a method to force",
+    "start": 2171.28,
+    "duration": 4.88
+  },
+  {
+    "text": "resave on every boot during testing to",
+    "start": 2173.68,
+    "duration": 4.0
+  },
+  {
+    "text": "maximize the amount of time that these",
+    "start": 2176.16,
+    "duration": 3.84
+  },
+  {
+    "text": "code paths were being taken.",
+    "start": 2177.68,
+    "duration": 3.919
+  },
+  {
+    "text": "Secondly, we needed to make sure that",
+    "start": 2180.0,
+    "duration": 4.56
+  },
+  {
+    "text": "any error was as recoverable as possible",
+    "start": 2181.599,
+    "duration": 6.321
+  },
+  {
+    "text": "regardless of why an error has occurred.",
+    "start": 2184.56,
+    "duration": 4.96
+  },
+  {
+    "text": "This includes assuming that our",
+    "start": 2187.92,
+    "duration": 4.72
+  },
+  {
+    "text": "application may crash or lose power at",
+    "start": 2189.52,
+    "duration": 5.52
+  },
+  {
+    "text": "any point during the process. So to",
+    "start": 2192.64,
+    "duration": 4.32
+  },
+  {
+    "text": "simplify the second front somewhat, we",
+    "start": 2195.04,
+    "duration": 3.92
+  },
+  {
+    "text": "decided to handle upgrades by attempting",
+    "start": 2196.96,
+    "duration": 4.48
+  },
+  {
+    "text": "to load the original save, generating a",
+    "start": 2198.96,
+    "duration": 4.879
+  },
+  {
+    "text": "hash for that file, then deserializing",
+    "start": 2201.44,
+    "duration": 4.48
+  },
+  {
+    "text": "it, and serializing it again to a",
+    "start": 2203.839,
+    "duration": 4.481
+  },
+  {
+    "text": "temporary location. This temporary",
+    "start": 2205.92,
+    "duration": 4.48
+  },
+  {
+    "text": "generates a check sum when serialized.",
+    "start": 2208.32,
+    "duration": 3.84
+  },
+  {
+    "text": "So we could check that file for validity",
+    "start": 2210.4,
+    "duration": 4.24
+  },
+  {
+    "text": "as well. We then loaded the temporary",
+    "start": 2212.16,
+    "duration": 5.12
+  },
+  {
+    "text": "file, deserialized it, and compared it",
+    "start": 2214.64,
+    "duration": 4.64
+  },
+  {
+    "text": "against the original save deserialized.",
+    "start": 2217.28,
+    "duration": 3.6
+  },
+  {
+    "text": "And if they were valid, we would write",
+    "start": 2219.28,
+    "duration": 3.76
+  },
+  {
+    "text": "the deserialized temporary back to where",
+    "start": 2220.88,
+    "duration": 4.959
+  },
+  {
+    "text": "the original was. So again, we loaded",
+    "start": 2223.04,
+    "duration": 5.44
+  },
+  {
+    "text": "the original, deserialized it, compared",
+    "start": 2225.839,
+    "duration": 4.321
+  },
+  {
+    "text": "it against the temporary file, and if",
+    "start": 2228.48,
+    "duration": 3.44
+  },
+  {
+    "text": "they match, then we're good. We can go",
+    "start": 2230.16,
+    "duration": 4.24
+  },
+  {
+    "text": "clean up temporary data and rewrite the",
+    "start": 2231.92,
+    "duration": 4.96
+  },
+  {
+    "text": "original save. This pattern allowed for",
+    "start": 2234.4,
+    "duration": 4.48
+  },
+  {
+    "text": "us to recover from power loss, general",
+    "start": 2236.88,
+    "duration": 4.239
+  },
+  {
+    "text": "data corruption, and save serialization",
+    "start": 2238.88,
+    "duration": 5.12
+  },
+  {
+    "text": "logic issues. Admittedly, the latter",
+    "start": 2241.119,
+    "duration": 4.161
+  },
+  {
+    "text": "would have led the game to being",
+    "start": 2244.0,
+    "duration": 3.359
+  },
+  {
+    "text": "unbootable, but we would not lose any",
+    "start": 2245.28,
+    "duration": 4.72
+  },
+  {
+    "text": "save data.",
+    "start": 2247.359,
+    "duration": 4.24
+  },
+  {
+    "text": "Looking back at this, there were a few",
+    "start": 2250.0,
+    "duration": 3.68
+  },
+  {
+    "text": "key steps that we could have made to",
+    "start": 2251.599,
+    "duration": 3.361
+  },
+  {
+    "text": "make our safe system even more",
+    "start": 2253.68,
+    "duration": 3.679
+  },
+  {
+    "text": "resilient. Firstly, we could have used a",
+    "start": 2254.96,
+    "duration": 4.159
+  },
+  {
+    "text": "staggered roll out, even for internal",
+    "start": 2257.359,
+    "duration": 3.841
+  },
+  {
+    "text": "builds, to catch unexpected issues",
+    "start": 2259.119,
+    "duration": 4.801
+  },
+  {
+    "text": "before they hit all users on that patch.",
+    "start": 2261.2,
+    "duration": 4.32
+  },
+  {
+    "text": "and implementing a blast sorry and",
+    "start": 2263.92,
+    "duration": 3.36
+  },
+  {
+    "text": "limiting the blast radius to a select",
+    "start": 2265.52,
+    "duration": 3.839
+  },
+  {
+    "text": "group of users rather than all users at",
+    "start": 2267.28,
+    "duration": 4.559
+  },
+  {
+    "text": "once. We could have built potentially",
+    "start": 2269.359,
+    "duration": 4.401
+  },
+  {
+    "text": "more robust integration testing that",
+    "start": 2271.839,
+    "duration": 4.24
+  },
+  {
+    "text": "simulated the full save load path which",
+    "start": 2273.76,
+    "duration": 3.76
+  },
+  {
+    "text": "would have been useful to help us catch",
+    "start": 2276.079,
+    "duration": 4.321
+  },
+  {
+    "text": "catch breaking uh issues early.",
+    "start": 2277.52,
+    "duration": 4.559
+  },
+  {
+    "text": "Ultimately, you know, more time for",
+    "start": 2280.4,
+    "duration": 2.959
+  },
+  {
+    "text": "testing would have always also made a",
+    "start": 2282.079,
+    "duration": 2.881
+  },
+  {
+    "text": "big difference but game had already gone",
+    "start": 2283.359,
+    "duration": 4.161
+  },
+  {
+    "text": "live. So, not just for functional",
+    "start": 2284.96,
+    "duration": 4.48
+  },
+  {
+    "text": "testing, but specifically for platform",
+    "start": 2287.52,
+    "duration": 3.76
+  },
+  {
+    "text": "specific quirks and especially around",
+    "start": 2289.44,
+    "duration": 4.88
+  },
+  {
+    "text": "file IO.",
+    "start": 2291.28,
+    "duration": 4.319
+  },
+  {
+    "text": "I also just want to point out that",
+    "start": 2294.32,
+    "duration": 2.799
+  },
+  {
+    "text": "sometimes the smartest fix is not",
+    "start": 2295.599,
+    "duration": 2.881
+  },
+  {
+    "text": "another band-aid. It's a complete",
+    "start": 2297.119,
+    "duration": 3.521
+  },
+  {
+    "text": "rethink. And I apologize to whoever I",
+    "start": 2298.48,
+    "duration": 4.56
+  },
+  {
+    "text": "stole this off Google from. It's Yeah.",
+    "start": 2300.64,
+    "duration": 4.56
+  },
+  {
+    "text": "Um, if a system is unstable, overly",
+    "start": 2303.04,
+    "duration": 4.64
+  },
+  {
+    "text": "complex, or it breaks often, patching it",
+    "start": 2305.2,
+    "duration": 5.28
+  },
+  {
+    "text": "again might just delay the inevitable.",
+    "start": 2307.68,
+    "duration": 4.399
+  },
+  {
+    "text": "It's a sign that it may need to be",
+    "start": 2310.48,
+    "duration": 6.0
+  },
+  {
+    "text": "refactored or rewritten, not just fixed.",
+    "start": 2312.079,
+    "duration": 6.961
+  },
+  {
+    "text": "Quick fixes can feel productive, but",
+    "start": 2316.48,
+    "duration": 3.92
+  },
+  {
+    "text": "they have the potential to add to",
+    "start": 2319.04,
+    "duration": 3.52
+  },
+  {
+    "text": "long-term tech debt, especially if",
+    "start": 2320.4,
+    "duration": 4.8
+  },
+  {
+    "text": "they're not properly tested. Instead,",
+    "start": 2322.56,
+    "duration": 4.24
+  },
+  {
+    "text": "escalating the issue if a proper",
+    "start": 2325.2,
+    "duration": 3.44
+  },
+  {
+    "text": "solution isn't possible right now, and",
+    "start": 2326.8,
+    "duration": 3.279
+  },
+  {
+    "text": "being honest with the team about the",
+    "start": 2328.64,
+    "duration": 4.16
+  },
+  {
+    "text": "real state of the system can be better.",
+    "start": 2330.079,
+    "duration": 4.881
+  },
+  {
+    "text": "Not every project can afford a refactor.",
+    "start": 2332.8,
+    "duration": 3.68
+  },
+  {
+    "text": "But when the cost of maintaining a",
+    "start": 2334.96,
+    "duration": 3.119
+  },
+  {
+    "text": "system outweighs the cost of replacing",
+    "start": 2336.48,
+    "duration": 3.599
+  },
+  {
+    "text": "it, it's time to stop applying band-aids",
+    "start": 2338.079,
+    "duration": 4.321
+  },
+  {
+    "text": "and address the root cause. Even if you",
+    "start": 2340.079,
+    "duration": 4.241
+  },
+  {
+    "text": "can't or on a refactor, we always",
+    "start": 2342.4,
+    "duration": 4.16
+  },
+  {
+    "text": "encourage within our studio to fix it as",
+    "start": 2344.32,
+    "duration": 4.08
+  },
+  {
+    "text": "you touch it. And if you can't afford to",
+    "start": 2346.56,
+    "duration": 3.519
+  },
+  {
+    "text": "rewrite a full system, you might as well",
+    "start": 2348.4,
+    "duration": 2.8
+  },
+  {
+    "text": "just clean up something while you're",
+    "start": 2350.079,
+    "duration": 2.721
+  },
+  {
+    "text": "looking at it. Even if that clean up is",
+    "start": 2351.2,
+    "duration": 3.28
+  },
+  {
+    "text": "just better commenting parts of the",
+    "start": 2352.8,
+    "duration": 3.2
+  },
+  {
+    "text": "code, so the next person that looks at",
+    "start": 2354.48,
+    "duration": 5.359
+  },
+  {
+    "text": "it is looking at something a bit nicer.",
+    "start": 2356.0,
+    "duration": 5.44
+  },
+  {
+    "text": "When you're making changes to a codebase",
+    "start": 2359.839,
+    "duration": 3.841
+  },
+  {
+    "text": "or making commits to source control,",
+    "start": 2361.44,
+    "duration": 4.32
+  },
+  {
+    "text": "please document your changes. Remember,",
+    "start": 2363.68,
+    "duration": 3.919
+  },
+  {
+    "text": "it's not just for you. It's for the",
+    "start": 2365.76,
+    "duration": 4.079
+  },
+  {
+    "text": "entire team. Both now and for the",
+    "start": 2367.599,
+    "duration": 3.76
+  },
+  {
+    "text": "development team in a few years time",
+    "start": 2369.839,
+    "duration": 4.081
+  },
+  {
+    "text": "when the context is long gone. That",
+    "start": 2371.359,
+    "duration": 4.321
+  },
+  {
+    "text": "person might not know why that check was",
+    "start": 2373.92,
+    "duration": 3.84
+  },
+  {
+    "text": "added or what caused a bug in the first",
+    "start": 2375.68,
+    "duration": 4.399
+  },
+  {
+    "text": "place. So, help them out. Just like the",
+    "start": 2377.76,
+    "duration": 4.16
+  },
+  {
+    "text": "commit message I made up on screen, just",
+    "start": 2380.079,
+    "duration": 3.361
+  },
+  {
+    "text": "be deliberate about your change lists.",
+    "start": 2381.92,
+    "duration": 3.36
+  },
+  {
+    "text": "The second example has practically no",
+    "start": 2383.44,
+    "duration": 4.159
+  },
+  {
+    "text": "explanation, no traceability, and no way",
+    "start": 2385.28,
+    "duration": 3.76
+  },
+  {
+    "text": "to know if the crash was actually fixed",
+    "start": 2387.599,
+    "duration": 3.041
+  },
+  {
+    "text": "or if the level stuff was even meant to",
+    "start": 2389.04,
+    "duration": 4.0
+  },
+  {
+    "text": "be included. Just try to avoid vague",
+    "start": 2390.64,
+    "duration": 4.64
+  },
+  {
+    "text": "commits like fixed issue or minor",
+    "start": 2393.04,
+    "duration": 4.96
+  },
+  {
+    "text": "tweaks. Include the why, not just the",
+    "start": 2395.28,
+    "duration": 5.04
+  },
+  {
+    "text": "what future you and your teammates will",
+    "start": 2398.0,
+    "duration": 4.8
+  },
+  {
+    "text": "thank you.",
+    "start": 2400.32,
+    "duration": 3.92
+  },
+  {
+    "text": "Cool. Okay, so this is the last point",
+    "start": 2402.8,
+    "duration": 2.88
+  },
+  {
+    "text": "that I wanted to quickly touch on. Um,",
+    "start": 2404.24,
+    "duration": 3.04
+  },
+  {
+    "text": "and one that we come across pretty often",
+    "start": 2405.68,
+    "duration": 3.2
+  },
+  {
+    "text": "in projects that we help out with, which",
+    "start": 2407.28,
+    "duration": 3.44
+  },
+  {
+    "text": "is modifying the Unreal Engine source",
+    "start": 2408.88,
+    "duration": 4.239
+  },
+  {
+    "text": "code. Depending on the issues you face,",
+    "start": 2410.72,
+    "duration": 4.08
+  },
+  {
+    "text": "engine modifications can be the right",
+    "start": 2413.119,
+    "duration": 2.96
+  },
+  {
+    "text": "move, but they often come with",
+    "start": 2414.8,
+    "duration": 3.44
+  },
+  {
+    "text": "trade-offs. You just need to be mindful",
+    "start": 2416.079,
+    "duration": 4.241
+  },
+  {
+    "text": "that every new Unreal Engine version",
+    "start": 2418.24,
+    "duration": 4.16
+  },
+  {
+    "text": "introduces potential merge conflicts,",
+    "start": 2420.32,
+    "duration": 4.88
+  },
+  {
+    "text": "and that can mean hours or even days of",
+    "start": 2422.4,
+    "duration": 4.4
+  },
+  {
+    "text": "manual work to integrate upstream",
+    "start": 2425.2,
+    "duration": 3.12
+  },
+  {
+    "text": "changes.",
+    "start": 2426.8,
+    "duration": 3.52
+  },
+  {
+    "text": "It also creates friction for your whole",
+    "start": 2428.32,
+    "duration": 4.0
+  },
+  {
+    "text": "team, and onboarding new engineers can",
+    "start": 2430.32,
+    "duration": 5.279
+  },
+  {
+    "text": "become harder. But when is it justified?",
+    "start": 2432.32,
+    "duration": 5.2
+  },
+  {
+    "text": "A critical bug fix that isn't yet merged",
+    "start": 2435.599,
+    "duration": 4.161
+  },
+  {
+    "text": "upstream and is blocking you. A core",
+    "start": 2437.52,
+    "duration": 4.16
+  },
+  {
+    "text": "engine limitation that is in your way of",
+    "start": 2439.76,
+    "duration": 4.56
+  },
+  {
+    "text": "your game's essential feature. A proven",
+    "start": 2441.68,
+    "duration": 5.04
+  },
+  {
+    "text": "optimization, one that gives you real",
+    "start": 2444.32,
+    "duration": 4.799
+  },
+  {
+    "text": "validated performance gains. Or if",
+    "start": 2446.72,
+    "duration": 3.84
+  },
+  {
+    "text": "you're committing to a long-term engine",
+    "start": 2449.119,
+    "duration": 3.361
+  },
+  {
+    "text": "fork, like a console fork or an internal",
+    "start": 2450.56,
+    "duration": 4.0
+  },
+  {
+    "text": "tech platform where you'll own the",
+    "start": 2452.48,
+    "duration": 4.96
+  },
+  {
+    "text": "custom version over time. But even then,",
+    "start": 2454.56,
+    "duration": 4.799
+  },
+  {
+    "text": "I'd recommend following best practices.",
+    "start": 2457.44,
+    "duration": 3.28
+  },
+  {
+    "text": "Start with a plugin or an engine",
+    "start": 2459.359,
+    "duration": 3.841
+  },
+  {
+    "text": "subsystem if at all possible. Try to",
+    "start": 2460.72,
+    "duration": 4.48
+  },
+  {
+    "text": "only modify base engine files if it's",
+    "start": 2463.2,
+    "duration": 4.32
+  },
+  {
+    "text": "actually necessary. Try to isolate",
+    "start": 2465.2,
+    "duration": 4.32
+  },
+  {
+    "text": "changes into new files if possible or",
+    "start": 2467.52,
+    "duration": 4.559
+  },
+  {
+    "text": "dedicated classes. Try not to scatter",
+    "start": 2469.52,
+    "duration": 3.68
+  },
+  {
+    "text": "them just randomly throughout the",
+    "start": 2472.079,
+    "duration": 4.481
+  },
+  {
+    "text": "codebase. Um, document every change.",
+    "start": 2473.2,
+    "duration": 5.44
+  },
+  {
+    "text": "Keep a change log and include the reason",
+    "start": 2476.56,
+    "duration": 4.799
+  },
+  {
+    "text": "why you had to modify the engine uh in",
+    "start": 2478.64,
+    "duration": 5.84
+  },
+  {
+    "text": "the code comment. Um, and I recommend",
+    "start": 2481.359,
+    "duration": 5.841
+  },
+  {
+    "text": "maintaining a clean mirror branch of the",
+    "start": 2484.48,
+    "duration": 4.24
+  },
+  {
+    "text": "release Unreal version so that you can",
+    "start": 2487.2,
+    "duration": 3.119
+  },
+  {
+    "text": "compare diffs and it will help you with",
+    "start": 2488.72,
+    "duration": 3.28
+  },
+  {
+    "text": "merging.",
+    "start": 2490.319,
+    "duration": 3.52
+  },
+  {
+    "text": "And lastly, if you're working with",
+    "start": 2492.0,
+    "duration": 5.28
+  },
+  {
+    "text": "source, seriously consider Perforce. Git",
+    "start": 2493.839,
+    "duration": 5.28
+  },
+  {
+    "text": "can work, but pretty much all of",
+    "start": 2497.28,
+    "duration": 3.36
+  },
+  {
+    "text": "Unreal's source control tooling is with",
+    "start": 2499.119,
+    "duration": 3.521
+  },
+  {
+    "text": "Perforce in mind. So, and that makes",
+    "start": 2500.64,
+    "duration": 6.16
+  },
+  {
+    "text": "this workflow just way more manageable.",
+    "start": 2502.64,
+    "duration": 6.24
+  },
+  {
+    "text": "Cool. That's it. Thank you all so much",
+    "start": 2506.8,
+    "duration": 3.6
+  },
+  {
+    "text": "for joining me here today. Um, I hope",
+    "start": 2508.88,
+    "duration": 2.56
+  },
+  {
+    "text": "this session gives you a bit more",
+    "start": 2510.4,
+    "duration": 2.4
+  },
+  {
+    "text": "insight into the process that we take at",
+    "start": 2511.44,
+    "duration": 3.2
+  },
+  {
+    "text": "Prismatic when tackling tricky Unreal",
+    "start": 2512.8,
+    "duration": 3.92
+  },
+  {
+    "text": "challenges and maybe even give you a few",
+    "start": 2514.64,
+    "duration": 3.76
+  },
+  {
+    "text": "tools or techniques to take back to your",
+    "start": 2516.72,
+    "duration": 3.359
+  },
+  {
+    "text": "own team.",
+    "start": 2518.4,
+    "duration": 5.6
+  },
+  {
+    "text": ">> All right. Hi, I'm Jack. So, uh, game",
+    "start": 2520.079,
+    "duration": 6.481
+  },
+  {
+    "text": "programmer. Um, I want to ask like in",
+    "start": 2524.0,
+    "duration": 5.839
+  },
+  {
+    "text": "term of like I mean problem solving. I",
+    "start": 2526.56,
+    "duration": 5.84
+  },
+  {
+    "text": "mean also based on your like the problem",
+    "start": 2529.839,
+    "duration": 5.441
+  },
+  {
+    "text": "you face some of them require more time",
+    "start": 2532.4,
+    "duration": 4.959
+  },
+  {
+    "text": "like how do you like okay given that",
+    "start": 2535.28,
+    "duration": 4.48
+  },
+  {
+    "text": "your time is your restrictions how do",
+    "start": 2537.359,
+    "duration": 5.041
+  },
+  {
+    "text": "you tackle those problems",
+    "start": 2539.76,
+    "duration": 5.12
+  },
+  {
+    "text": ">> how do how do we time box a solution?",
+    "start": 2542.4,
+    "duration": 3.04
+  },
+  {
+    "text": ">> Yeah.",
+    "start": 2544.88,
+    "duration": 2.88
+  },
+  {
+    "text": ">> Um yeah that's a really good question in",
+    "start": 2545.44,
+    "duration": 5.76
+  },
+  {
+    "text": "terms of how our studio operates um we",
+    "start": 2547.76,
+    "duration": 6.8
+  },
+  {
+    "text": "look to time box an issue before we take",
+    "start": 2551.2,
+    "duration": 5.84
+  },
+  {
+    "text": "a card. So for example on Jira we would",
+    "start": 2554.56,
+    "duration": 4.16
+  },
+  {
+    "text": "look to allocate a time that we would be",
+    "start": 2557.04,
+    "duration": 3.84
+  },
+  {
+    "text": "willing to spend on looking to you know",
+    "start": 2558.72,
+    "duration": 3.84
+  },
+  {
+    "text": "try and fix an issue before we try to",
+    "start": 2560.88,
+    "duration": 3.439
+  },
+  {
+    "text": "elevate it to further members of our",
+    "start": 2562.56,
+    "duration": 5.6
+  },
+  {
+    "text": "team or to um maybe reach out to Epic in",
+    "start": 2564.319,
+    "duration": 7.441
+  },
+  {
+    "text": "in some in some cases. So what I would",
+    "start": 2568.16,
+    "duration": 5.76
+  },
+  {
+    "text": "really recommend um you know engineers",
+    "start": 2571.76,
+    "duration": 3.52
+  },
+  {
+    "text": "that are developing their skill sets to",
+    "start": 2573.92,
+    "duration": 4.159
+  },
+  {
+    "text": "do is start trying to time box yourself.",
+    "start": 2575.28,
+    "duration": 4.64
+  },
+  {
+    "text": "Maybe you can even put it on the card if",
+    "start": 2578.079,
+    "duration": 2.961
+  },
+  {
+    "text": "you've got, you know, project management",
+    "start": 2579.92,
+    "duration": 2.399
+  },
+  {
+    "text": "systems in your studio and things as",
+    "start": 2581.04,
+    "duration": 3.039
+  },
+  {
+    "text": "well. And try and keep yourself to those",
+    "start": 2582.319,
+    "duration": 3.601
+  },
+  {
+    "text": "times, eventually you'll get better and",
+    "start": 2584.079,
+    "duration": 3.841
+  },
+  {
+    "text": "better and better at refining how long",
+    "start": 2585.92,
+    "duration": 3.919
+  },
+  {
+    "text": "you think just based on your gut feel",
+    "start": 2587.92,
+    "duration": 4.399
+  },
+  {
+    "text": "you think problems might take",
+    "start": 2589.839,
+    "duration": 4.48
+  },
+  {
+    "text": ">> for two reasons. If you reach that",
+    "start": 2592.319,
+    "duration": 3.681
+  },
+  {
+    "text": "maximum, you know that you're kind of at",
+    "start": 2594.319,
+    "duration": 3.361
+  },
+  {
+    "text": "a stage where it's worth elevating to",
+    "start": 2596.0,
+    "duration": 3.28
+  },
+  {
+    "text": "somebody else. You know, you can kind of",
+    "start": 2597.68,
+    "duration": 3.52
+  },
+  {
+    "text": "back yourself that if it was a simple",
+    "start": 2599.28,
+    "duration": 3.12
+  },
+  {
+    "text": "thing, you probably would have solved it",
+    "start": 2601.2,
+    "duration": 2.48
+  },
+  {
+    "text": "in the um, you know, the amount of time",
+    "start": 2602.4,
+    "duration": 3.439
+  },
+  {
+    "text": "that you initially budgeted yourself. So",
+    "start": 2603.68,
+    "duration": 3.76
+  },
+  {
+    "text": "there's no kind of silver bullet, but",
+    "start": 2605.839,
+    "duration": 4.081
+  },
+  {
+    "text": "what I would recommend is don't spend",
+    "start": 2607.44,
+    "duration": 4.24
+  },
+  {
+    "text": "forever on a problem. Don't just keep",
+    "start": 2609.92,
+    "duration": 4.0
+  },
+  {
+    "text": "banging your head into it because that's",
+    "start": 2611.68,
+    "duration": 3.679
+  },
+  {
+    "text": "ultimately going to cause more damage,",
+    "start": 2613.92,
+    "duration": 3.6
+  },
+  {
+    "text": "especially to your um you know, your",
+    "start": 2615.359,
+    "duration": 3.841
+  },
+  {
+    "text": "production road map, especially if you",
+    "start": 2617.52,
+    "duration": 3.36
+  },
+  {
+    "text": "spend a lot of time on something. So I'd",
+    "start": 2619.2,
+    "duration": 4.399
+  },
+  {
+    "text": "recommend, yeah, when you take an issue,",
+    "start": 2620.88,
+    "duration": 4.64
+  },
+  {
+    "text": "try to conceptualize how difficult you",
+    "start": 2623.599,
+    "duration": 3.76
+  },
+  {
+    "text": "think the problem might be to fix. Time",
+    "start": 2625.52,
+    "duration": 3.2
+  },
+  {
+    "text": "box yourself. If you reach the end of",
+    "start": 2627.359,
+    "duration": 2.801
+  },
+  {
+    "text": "the time box, then I'd like to elevate",
+    "start": 2628.72,
+    "duration": 3.2
+  },
+  {
+    "text": "that to production staff or lead",
+    "start": 2630.16,
+    "duration": 3.36
+  },
+  {
+    "text": "engineers or senior engineers.",
+    "start": 2631.92,
+    "duration": 3.12
+  },
+  {
+    "text": ">> Okay. Thank you very much.",
+    "start": 2633.52,
+    "duration": 4.52
+  },
+  {
+    "text": ">> Norris,",
+    "start": 2635.04,
+    "duration": 3.0
+  },
+  {
+    "text": ">> hello. Thank you. Uh, I just want to ask",
+    "start": 2640.4,
+    "duration": 7.679
+  },
+  {
+    "text": "about uh how the compression of the",
+    "start": 2643.119,
+    "duration": 8.401
+  },
+  {
+    "text": "system safe game system implemented. Do",
+    "start": 2648.079,
+    "duration": 8.321
+  },
+  {
+    "text": "you uh modify the engine codes or this",
+    "start": 2651.52,
+    "duration": 8.48
+  },
+  {
+    "text": "uh your custom is it uh your custom safe",
+    "start": 2656.4,
+    "duration": 4.32
+  },
+  {
+    "text": "game system?",
+    "start": 2660.0,
+    "duration": 2.079
+  },
+  {
+    "text": ">> No, we actually didn't have to modify",
+    "start": 2660.72,
+    "duration": 3.52
+  },
+  {
+    "text": "the engine source. Uh, I believe for the",
+    "start": 2662.079,
+    "duration": 4.561
+  },
+  {
+    "text": "save system. Can you nod head or shake",
+    "start": 2664.24,
+    "duration": 5.119
+  },
+  {
+    "text": "head? Yeah. Yeah, we didn't have to. Um,",
+    "start": 2666.64,
+    "duration": 6.8
+  },
+  {
+    "text": "I think that again my my recommendation",
+    "start": 2669.359,
+    "duration": 6.321
+  },
+  {
+    "text": "for any team is to try to do it without",
+    "start": 2673.44,
+    "duration": 4.879
+  },
+  {
+    "text": "modifying source first. Um, we did and",
+    "start": 2675.68,
+    "duration": 4.639
+  },
+  {
+    "text": "we managed to get around it. When I say",
+    "start": 2678.319,
+    "duration": 3.441
+  },
+  {
+    "text": "it was already in the engine, what",
+    "start": 2680.319,
+    "duration": 2.8
+  },
+  {
+    "text": "likely that means is that we just",
+    "start": 2681.76,
+    "duration": 3.2
+  },
+  {
+    "text": "duplicated it into our own system or",
+    "start": 2683.119,
+    "duration": 5.441
+  },
+  {
+    "text": "plugin. Um, so and I'd always, you know,",
+    "start": 2684.96,
+    "duration": 5.119
+  },
+  {
+    "text": "I'd always recommend that to people. If",
+    "start": 2688.56,
+    "duration": 2.799
+  },
+  {
+    "text": "you're finding something that exists in",
+    "start": 2690.079,
+    "duration": 3.601
+  },
+  {
+    "text": "the engine and it's locked away, just",
+    "start": 2691.359,
+    "duration": 4.401
+  },
+  {
+    "text": "base your solution off it. Copy it into",
+    "start": 2693.68,
+    "duration": 4.0
+  },
+  {
+    "text": "your own plug-in, work away at it. Um,",
+    "start": 2695.76,
+    "duration": 3.28
+  },
+  {
+    "text": "leverage the engine systems that already",
+    "start": 2697.68,
+    "duration": 3.2
+  },
+  {
+    "text": "exist. And that's how we uh built around",
+    "start": 2699.04,
+    "duration": 2.88
+  },
+  {
+    "text": "our safe system.",
+    "start": 2700.88,
+    "duration": 3.68
+  },
+  {
+    "text": ">> Okay. Thank you. Because uh in our",
+    "start": 2701.92,
+    "duration": 5.919
+  },
+  {
+    "text": "project, we we have been hit with uh",
+    "start": 2704.56,
+    "duration": 6.64
+  },
+  {
+    "text": "about 2 gab of safe game system.",
+    "start": 2707.839,
+    "duration": 4.48
+  },
+  {
+    "text": ">> If you'd like to chat about it further,",
+    "start": 2711.2,
+    "duration": 2.08
+  },
+  {
+    "text": "I'm going to go to the dev lounge after",
+    "start": 2712.319,
+    "duration": 4.641
+  },
+  {
+    "text": "this so we can have a talk. Thank you.",
+    "start": 2713.28,
+    "duration": 7.039
+  },
+  {
+    "text": "Cool. Got a few minutes. Anyone else?",
+    "start": 2716.96,
+    "duration": 6.359
+  },
+  {
+    "text": "Yeah.",
+    "start": 2720.319,
+    "duration": 3.0
+  },
+  {
+    "text": ">> Hey, great talk. Really enjoyed it. Um",
+    "start": 2728.319,
+    "duration": 5.841
+  },
+  {
+    "text": "just wanted to well two questions. First",
+    "start": 2731.92,
+    "duration": 4.72
+  },
+  {
+    "text": "one was um you showed off some",
+    "start": 2734.16,
+    "duration": 5.199
+  },
+  {
+    "text": "interesting um profiling techniques and",
+    "start": 2736.64,
+    "duration": 4.479
+  },
+  {
+    "text": "performance techniques. Have you used",
+    "start": 2739.359,
+    "duration": 3.921
+  },
+  {
+    "text": "super luminal as well?",
+    "start": 2741.119,
+    "duration": 3.921
+  },
+  {
+    "text": ">> I personally haven't. That's not to say",
+    "start": 2743.28,
+    "duration": 3.68
+  },
+  {
+    "text": "that our team hasn't. Typically when",
+    "start": 2745.04,
+    "duration": 3.52
+  },
+  {
+    "text": "we're approach when well at least when I",
+    "start": 2746.96,
+    "duration": 3.04
+  },
+  {
+    "text": "myself I'm approaching new profiling",
+    "start": 2748.56,
+    "duration": 4.08
+  },
+  {
+    "text": "tools I always find that it's always a",
+    "start": 2750.0,
+    "duration": 4.319
+  },
+  {
+    "text": "little bit of a unique toolbox among the",
+    "start": 2752.64,
+    "duration": 3.12
+  },
+  {
+    "text": "engineers in your team about what other",
+    "start": 2754.319,
+    "duration": 3.52
+  },
+  {
+    "text": "people have used at other studios or at",
+    "start": 2755.76,
+    "duration": 4.72
+  },
+  {
+    "text": "other software companies as well. Um you",
+    "start": 2757.839,
+    "duration": 4.401
+  },
+  {
+    "text": "know for example the tools on screen",
+    "start": 2760.48,
+    "duration": 3.599
+  },
+  {
+    "text": "were things that I myself hadn't",
+    "start": 2762.24,
+    "duration": 3.76
+  },
+  {
+    "text": "actually been exposed to",
+    "start": 2764.079,
+    "duration": 4.081
+  },
+  {
+    "text": ">> a like until about a year or so ago when",
+    "start": 2766.0,
+    "duration": 3.92
+  },
+  {
+    "text": "other members of my team were showing",
+    "start": 2768.16,
+    "duration": 3.439
+  },
+  {
+    "text": "use cases of when they were bringing in",
+    "start": 2769.92,
+    "duration": 3.28
+  },
+  {
+    "text": "their experience these profiling tools.",
+    "start": 2771.599,
+    "duration": 3.52
+  },
+  {
+    "text": "So what I would really recommend is just",
+    "start": 2773.2,
+    "duration": 4.24
+  },
+  {
+    "text": "when you are exploring new tools or if",
+    "start": 2775.119,
+    "duration": 3.521
+  },
+  {
+    "text": "you have experience that you know that",
+    "start": 2777.44,
+    "duration": 2.72
+  },
+  {
+    "text": "other engineers in your team might not",
+    "start": 2778.64,
+    "duration": 3.12
+  },
+  {
+    "text": "have experience with it can just be",
+    "start": 2780.16,
+    "duration": 3.04
+  },
+  {
+    "text": "worth sharing that information and",
+    "start": 2781.76,
+    "duration": 3.839
+  },
+  {
+    "text": "explaining not just how to use the tool",
+    "start": 2783.2,
+    "duration": 4.8
+  },
+  {
+    "text": "but I find way more like interesting and",
+    "start": 2785.599,
+    "duration": 4.72
+  },
+  {
+    "text": "important is why have I picked this one",
+    "start": 2788.0,
+    "duration": 3.92
+  },
+  {
+    "text": "out of all the different examples why",
+    "start": 2790.319,
+    "duration": 3.52
+  },
+  {
+    "text": "have I picked this tool because that",
+    "start": 2791.92,
+    "duration": 3.76
+  },
+  {
+    "text": "gives people confidence to try that tool",
+    "start": 2793.839,
+    "duration": 4.721
+  },
+  {
+    "text": "themselves. Um, you know, it's one thing",
+    "start": 2795.68,
+    "duration": 4.88
+  },
+  {
+    "text": "to uh for me to show you how to print",
+    "start": 2798.56,
+    "duration": 4.88
+  },
+  {
+    "text": "out a memor, but I think that until you",
+    "start": 2800.56,
+    "duration": 4.16
+  },
+  {
+    "text": "have the opportunity to experience it",
+    "start": 2803.44,
+    "duration": 3.12
+  },
+  {
+    "text": "yourself, like if you're running into a",
+    "start": 2804.72,
+    "duration": 4.399
+  },
+  {
+    "text": "situation where a static memory output",
+    "start": 2806.56,
+    "duration": 4.16
+  },
+  {
+    "text": "would be really valuable for you, then",
+    "start": 2809.119,
+    "duration": 3.761
+  },
+  {
+    "text": "having that as like a a tool in your",
+    "start": 2810.72,
+    "duration": 3.52
+  },
+  {
+    "text": "your kind of kit to be able to be",
+    "start": 2812.88,
+    "duration": 3.52
+  },
+  {
+    "text": "comfortable bringing out um you know,",
+    "start": 2814.24,
+    "duration": 3.28
+  },
+  {
+    "text": "that's how we always try to encourage it",
+    "start": 2816.4,
+    "duration": 4.0
+  },
+  {
+    "text": "with our studio. On on that note",
+    "start": 2817.52,
+    "duration": 5.2
+  },
+  {
+    "text": "actually um in terms of encouraging it",
+    "start": 2820.4,
+    "duration": 4.719
+  },
+  {
+    "text": "at your studio do you have any sort of",
+    "start": 2822.72,
+    "duration": 4.32
+  },
+  {
+    "text": "cultural practices or anything like that",
+    "start": 2825.119,
+    "duration": 3.281
+  },
+  {
+    "text": "that you guys adopt?",
+    "start": 2827.04,
+    "duration": 3.2
+  },
+  {
+    "text": ">> Oh we just have very in-depth standups",
+    "start": 2828.4,
+    "duration": 4.959
+  },
+  {
+    "text": "sometimes. Um most of the time it's",
+    "start": 2830.24,
+    "duration": 4.72
+  },
+  {
+    "text": "pretty much that one of our engineers",
+    "start": 2833.359,
+    "duration": 3.201
+  },
+  {
+    "text": "will come be like hey look we're working",
+    "start": 2834.96,
+    "duration": 4.24
+  },
+  {
+    "text": "on this crazy complex thing. I had to",
+    "start": 2836.56,
+    "duration": 4.0
+  },
+  {
+    "text": "whip out something that I haven't used",
+    "start": 2839.2,
+    "duration": 4.08
+  },
+  {
+    "text": "in you know a year or two. Um and then",
+    "start": 2840.56,
+    "duration": 3.92
+  },
+  {
+    "text": "that's just interesting to the rest of",
+    "start": 2843.28,
+    "duration": 3.6
+  },
+  {
+    "text": "the team. And then sometimes by based on",
+    "start": 2844.48,
+    "duration": 3.92
+  },
+  {
+    "text": "that if there's enough interest in us",
+    "start": 2846.88,
+    "duration": 2.88
+  },
+  {
+    "text": "wanting to actually scale up on that",
+    "start": 2848.4,
+    "duration": 2.959
+  },
+  {
+    "text": "then we could definitely put some",
+    "start": 2849.76,
+    "duration": 4.48
+  },
+  {
+    "text": "support around that person to um you",
+    "start": 2851.359,
+    "duration": 5.041
+  },
+  {
+    "text": "know be able to showcase that tool to",
+    "start": 2854.24,
+    "duration": 4.24
+  },
+  {
+    "text": "the studio further. Um you know for this",
+    "start": 2856.4,
+    "duration": 4.64
+  },
+  {
+    "text": "talk for example not all of our team had",
+    "start": 2858.48,
+    "duration": 5.76
+  },
+  {
+    "text": "used pix or had used NVIDIA um insight",
+    "start": 2861.04,
+    "duration": 4.48
+  },
+  {
+    "text": "math and things like this. So this",
+    "start": 2864.24,
+    "duration": 2.96
+  },
+  {
+    "text": "became a really good opportunity for us",
+    "start": 2865.52,
+    "duration": 3.52
+  },
+  {
+    "text": "to explain the wider use of these tools",
+    "start": 2867.2,
+    "duration": 3.2
+  },
+  {
+    "text": "beyond just the specialists in our team",
+    "start": 2869.04,
+    "duration": 2.72
+  },
+  {
+    "text": "that felt comfortable using them.",
+    "start": 2870.4,
+    "duration": 2.8
+  },
+  {
+    "text": ">> I got some more but I'll I'll give",
+    "start": 2871.76,
+    "duration": 1.839
+  },
+  {
+    "text": "someone else.",
+    "start": 2873.2,
+    "duration": 1.6
+  },
+  {
+    "text": ">> We'll chat in the dev lounge. I'll be",
+    "start": 2873.599,
+    "duration": 2.961
+  },
+  {
+    "text": "after and there after this. Cool. I",
+    "start": 2874.8,
+    "duration": 5.48
+  },
+  {
+    "text": "probably got time for one more.",
+    "start": 2876.56,
+    "duration": 3.72
+  },
+  {
+    "text": ">> Hello. Good afternoon. Uh I would like",
+    "start": 2884.64,
+    "duration": 7.199
+  },
+  {
+    "text": "to ask uh do you have any tips regarding",
+    "start": 2888.0,
+    "duration": 7.28
+  },
+  {
+    "text": "checking the GPU crash on Xbox dev kit?",
+    "start": 2891.839,
+    "duration": 5.601
+  },
+  {
+    "text": "Because sometimes during uh play",
+    "start": 2895.28,
+    "duration": 3.92
+  },
+  {
+    "text": ">> do I have any pictures to share?",
+    "start": 2897.44,
+    "duration": 2.32
+  },
+  {
+    "text": ">> Tips tips.",
+    "start": 2899.2,
+    "duration": 2.639
+  },
+  {
+    "text": ">> Oh tips. Um, look, unfortunately I'm not",
+    "start": 2899.76,
+    "duration": 4.559
+  },
+  {
+    "text": "allowed to share that in this talk um",
+    "start": 2901.839,
+    "duration": 3.601
+  },
+  {
+    "text": "because I believe that would be covered",
+    "start": 2904.319,
+    "duration": 3.28
+  },
+  {
+    "text": "under a platform NDA. But if you would",
+    "start": 2905.44,
+    "duration": 3.84
+  },
+  {
+    "text": "like to reach out after the talk and we",
+    "start": 2907.599,
+    "duration": 3.201
+  },
+  {
+    "text": "can confirm that NDAs are in place on",
+    "start": 2909.28,
+    "duration": 2.799
+  },
+  {
+    "text": "both sides, I might be able to share a",
+    "start": 2910.8,
+    "duration": 2.48
+  },
+  {
+    "text": "bit more information about that.",
+    "start": 2912.079,
+    "duration": 2.881
+  },
+  {
+    "text": ">> Right. Okay. Thank you. But uh the",
+    "start": 2913.28,
+    "duration": 4.64
+  },
+  {
+    "text": "second question is uh can we run Nvidia",
+    "start": 2914.96,
+    "duration": 5.92
+  },
+  {
+    "text": "aftermath on non- Nvidia hardware?",
+    "start": 2917.92,
+    "duration": 4.159
+  },
+  {
+    "text": ">> Sorry, can you repeat the question?",
+    "start": 2920.88,
+    "duration": 5.199
+  },
+  {
+    "text": ">> Can we run Nvidia Aftermath on non-",
+    "start": 2922.079,
+    "duration": 6.961
+  },
+  {
+    "text": "Nvidia hardware?",
+    "start": 2926.079,
+    "duration": 6.48
+  },
+  {
+    "text": ">> That's a good question. Um, I will",
+    "start": 2929.04,
+    "duration": 5.039
+  },
+  {
+    "text": "double check that. If you want to come",
+    "start": 2932.559,
+    "duration": 2.641
+  },
+  {
+    "text": "to the dev lounge, we can chat about",
+    "start": 2934.079,
+    "duration": 1.76
+  },
+  {
+    "text": "that. Okay.",
+    "start": 2935.2,
+    "duration": 1.119
+  },
+  {
+    "text": ">> As well.",
+    "start": 2935.839,
+    "duration": 1.601
+  },
+  {
+    "text": ">> Okay. Thank you very much.",
+    "start": 2936.319,
+    "duration": 3.28
+  },
+  {
+    "text": ">> All right. Cool. Thank you so much. Um,",
+    "start": 2937.44,
+    "duration": 4.48
+  },
+  {
+    "text": "look, if anybody's Oh, okay. Last",
+    "start": 2939.599,
+    "duration": 3.841
+  },
+  {
+    "text": "slide's not there again anymore. But if",
+    "start": 2941.92,
+    "duration": 3.12
+  },
+  {
+    "text": "anybody ever has any problems that",
+    "start": 2943.44,
+    "duration": 3.36
+  },
+  {
+    "text": "they're running into, we we really want",
+    "start": 2945.04,
+    "duration": 3.279
+  },
+  {
+    "text": "to support, you know, the industry in",
+    "start": 2946.8,
+    "duration": 4.16
+  },
+  {
+    "text": "our region. So, our website's prismatic",
+    "start": 2948.319,
+    "duration": 4.481
+  },
+  {
+    "text": "studios.co.nz. Contact prismatic",
+    "start": 2950.96,
+    "duration": 3.76
+  },
+  {
+    "text": "studios.co.nz. Feel free to get in",
+    "start": 2952.8,
+    "duration": 4.24
+  },
+  {
+    "text": "touch. Um, we'd love to help. And also,",
+    "start": 2954.72,
+    "duration": 4.32
+  },
+  {
+    "text": "if anybody's looking for work in New",
+    "start": 2957.04,
+    "duration": 3.279
+  },
+  {
+    "text": "Zealand, potentially Australia, we're",
+    "start": 2959.04,
+    "duration": 2.88
+  },
+  {
+    "text": "going to be hiring pretty soon. So, keep",
+    "start": 2960.319,
+    "duration": 3.631
+  },
+  {
+    "text": "keep an eye out. Thank you.",
+    "start": 2961.92,
+    "duration": 5.95
+  },
+  {
+    "text": "[Applause]",
+    "start": 2963.95,
+    "duration": 3.92
+  }
+]

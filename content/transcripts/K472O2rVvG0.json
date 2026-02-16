@@ -1,0 +1,3127 @@
+[
+  {
+    "text": "Welcome to developing and launching a",
+    "start": 1.6,
+    "duration": 4.239
+  },
+  {
+    "text": "new replication system. I'm Pet",
+    "start": 3.919,
+    "duration": 4.881
+  },
+  {
+    "text": "Rangstrom. I work as a senior network",
+    "start": 5.839,
+    "duration": 6.241
+  },
+  {
+    "text": "programmer at Epic and I'm celebrating",
+    "start": 8.8,
+    "duration": 6.32
+  },
+  {
+    "text": "25 years in the industry this year. But",
+    "start": 12.08,
+    "duration": 4.88
+  },
+  {
+    "text": "more importantly,",
+    "start": 15.12,
+    "duration": 5.04
+  },
+  {
+    "text": "I'm one of the architects of Iris. So",
+    "start": 16.96,
+    "duration": 4.88
+  },
+  {
+    "text": "that's what we're going to talk about",
+    "start": 20.16,
+    "duration": 3.84
+  },
+  {
+    "text": "today.",
+    "start": 21.84,
+    "duration": 4.4
+  },
+  {
+    "text": "So a bit about the background, design",
+    "start": 24.0,
+    "duration": 5.519
+  },
+  {
+    "text": "and architecture, userfacing components,",
+    "start": 26.24,
+    "duration": 6.08
+  },
+  {
+    "text": "porting, Fortnite, debugging and",
+    "start": 29.519,
+    "duration": 5.361
+  },
+  {
+    "text": "optimization, and the future. That's the",
+    "start": 32.32,
+    "duration": 6.399
+  },
+  {
+    "text": "agenda for today. Um,",
+    "start": 34.88,
+    "duration": 6.16
+  },
+  {
+    "text": "I could talk about this for hours, but I",
+    "start": 38.719,
+    "duration": 6.121
+  },
+  {
+    "text": "only have 50 minutes.",
+    "start": 41.04,
+    "duration": 3.8
+  },
+  {
+    "text": "So back in 2018",
+    "start": 45.2,
+    "duration": 6.4
+  },
+  {
+    "text": "uh me and my co-architect Matias Hunland",
+    "start": 48.559,
+    "duration": 6.32
+  },
+  {
+    "text": "uh joined Epic having refactored the",
+    "start": 51.6,
+    "duration": 5.119
+  },
+  {
+    "text": "replication system in another game",
+    "start": 54.879,
+    "duration": 4.881
+  },
+  {
+    "text": "engine and we pitched a data oriented",
+    "start": 56.719,
+    "duration": 5.601
+  },
+  {
+    "text": "design approach to replication.",
+    "start": 59.76,
+    "duration": 5.28
+  },
+  {
+    "text": "At this time, Fortnite had become huge,",
+    "start": 62.32,
+    "duration": 6.08
+  },
+  {
+    "text": "still is, and replication graph uh had",
+    "start": 65.04,
+    "duration": 6.24
+  },
+  {
+    "text": "been developed to deal with the number",
+    "start": 68.4,
+    "duration": 5.68
+  },
+  {
+    "text": "of replicated actors and connections it",
+    "start": 71.28,
+    "duration": 5.28
+  },
+  {
+    "text": "required, but it was still struggling",
+    "start": 74.08,
+    "duration": 5.6
+  },
+  {
+    "text": "with uh high density action like in",
+    "start": 76.56,
+    "duration": 6.4
+  },
+  {
+    "text": "competitive games. Team Sweeney to",
+    "start": 79.68,
+    "duration": 5.68
+  },
+  {
+    "text": "started talking about uh creating a",
+    "start": 82.96,
+    "duration": 5.44
+  },
+  {
+    "text": "metaverse and we had quite a few",
+    "start": 85.36,
+    "duration": 5.6
+  },
+  {
+    "text": "developers on the team. So maybe two of",
+    "start": 88.4,
+    "duration": 5.44
+  },
+  {
+    "text": "them could invest a bit in the future",
+    "start": 90.96,
+    "duration": 6.88
+  },
+  {
+    "text": "and Iris was born.",
+    "start": 93.84,
+    "duration": 7.279
+  },
+  {
+    "text": "So design and architecture uh we had",
+    "start": 97.84,
+    "duration": 7.76
+  },
+  {
+    "text": "some key pillars uh when designing Iris",
+    "start": 101.119,
+    "duration": 6.32
+  },
+  {
+    "text": "uh we wanted a clear separation between",
+    "start": 105.6,
+    "duration": 4.4
+  },
+  {
+    "text": "the game and replication system and",
+    "start": 107.439,
+    "duration": 4.72
+  },
+  {
+    "text": "within the replication system you have",
+    "start": 110.0,
+    "duration": 5.2
+  },
+  {
+    "text": "no access to objects.",
+    "start": 112.159,
+    "duration": 7.041
+  },
+  {
+    "text": "uh of course it needed to perform well",
+    "start": 115.2,
+    "duration": 6.879
+  },
+  {
+    "text": "uh scale well with high object counts",
+    "start": 119.2,
+    "duration": 5.12
+  },
+  {
+    "text": "and connections",
+    "start": 122.079,
+    "duration": 4.4
+  },
+  {
+    "text": "and also with the data oriented design",
+    "start": 124.32,
+    "duration": 4.159
+  },
+  {
+    "text": "it lends well to multi- threading and",
+    "start": 126.479,
+    "duration": 4.801
+  },
+  {
+    "text": "vectorization",
+    "start": 128.479,
+    "duration": 5.041
+  },
+  {
+    "text": "it's important for us that it shouldn't",
+    "start": 131.28,
+    "duration": 5.44
+  },
+  {
+    "text": "be a massive undertaking for you to",
+    "start": 133.52,
+    "duration": 6.4
+  },
+  {
+    "text": "getting up and running in Iris and",
+    "start": 136.72,
+    "duration": 4.96
+  },
+  {
+    "text": "obviously we support property",
+    "start": 139.92,
+    "duration": 5.2
+  },
+  {
+    "text": "replication and RPCs out of the",
+    "start": 141.68,
+    "duration": 7.279
+  },
+  {
+    "text": "Uh and lastly, uh a foundation for the",
+    "start": 145.12,
+    "duration": 6.24
+  },
+  {
+    "text": "future. Because we have no actor or",
+    "start": 148.959,
+    "duration": 4.721
+  },
+  {
+    "text": "engine dependencies, we can replicate",
+    "start": 151.36,
+    "duration": 5.68
+  },
+  {
+    "text": "anything. Um as long as you can describe",
+    "start": 153.68,
+    "duration": 7.32
+  },
+  {
+    "text": "what you're trying to replicate.",
+    "start": 157.04,
+    "duration": 3.96
+  },
+  {
+    "text": "So what does it mean in practice?",
+    "start": 161.76,
+    "duration": 5.68
+  },
+  {
+    "text": "Yeah, on one side uh we have the",
+    "start": 165.36,
+    "duration": 3.84
+  },
+  {
+    "text": "replication system. On the other side we",
+    "start": 167.44,
+    "duration": 6.879
+  },
+  {
+    "text": "have uh game objects. uh but no access",
+    "start": 169.2,
+    "duration": 6.8
+  },
+  {
+    "text": "to objects in the replication system.",
+    "start": 174.319,
+    "duration": 3.841
+  },
+  {
+    "text": "You say how do we do it? Well, we have",
+    "start": 176.0,
+    "duration": 5.2
+  },
+  {
+    "text": "the replication bridge uh which you",
+    "start": 178.16,
+    "duration": 5.6
+  },
+  {
+    "text": "interact with when starting and stopping",
+    "start": 181.2,
+    "duration": 5.36
+  },
+  {
+    "text": "uh replication of an object. when you",
+    "start": 183.76,
+    "duration": 5.28
+  },
+  {
+    "text": "start replicating an object uh you",
+    "start": 186.56,
+    "duration": 6.16
+  },
+  {
+    "text": "you'll get a netref handle back and that",
+    "start": 189.04,
+    "duration": 5.68
+  },
+  {
+    "text": "you can use in the replication system",
+    "start": 192.72,
+    "duration": 5.76
+  },
+  {
+    "text": "API which is a facade style API",
+    "start": 194.72,
+    "duration": 6.159
+  },
+  {
+    "text": "forwarding calls to internal systems",
+    "start": 198.48,
+    "duration": 5.759
+  },
+  {
+    "text": "like filtering and prioritization.",
+    "start": 200.879,
+    "duration": 7.681
+  },
+  {
+    "text": "Uh on the receiving end um we can create",
+    "start": 204.239,
+    "duration": 7.521
+  },
+  {
+    "text": "and destroy game objects as well.",
+    "start": 208.56,
+    "duration": 5.36
+  },
+  {
+    "text": "When it comes to marshalling the game",
+    "start": 211.76,
+    "duration": 4.96
+  },
+  {
+    "text": "data to the replication system, we have",
+    "start": 213.92,
+    "duration": 5.92
+  },
+  {
+    "text": "something we call replication states",
+    "start": 216.72,
+    "duration": 5.599
+  },
+  {
+    "text": "and coupled with a replication fragment",
+    "start": 219.84,
+    "duration": 6.64
+  },
+  {
+    "text": "which is an instance per game object. Uh",
+    "start": 222.319,
+    "duration": 6.881
+  },
+  {
+    "text": "well it's slightly more complicated but",
+    "start": 226.48,
+    "duration": 6.399
+  },
+  {
+    "text": "we can think of it like that. Um we can",
+    "start": 229.2,
+    "duration": 7.84
+  },
+  {
+    "text": "uh use the property reflection to uh",
+    "start": 232.879,
+    "duration": 7.041
+  },
+  {
+    "text": "copy data to and from the source and",
+    "start": 237.04,
+    "duration": 6.64
+  },
+  {
+    "text": "target data as well as perform um",
+    "start": 239.92,
+    "duration": 8.239
+  },
+  {
+    "text": "relevant network callbacks like onreps.",
+    "start": 243.68,
+    "duration": 7.919
+  },
+  {
+    "text": "And the replication state has a memory",
+    "start": 248.159,
+    "duration": 7.121
+  },
+  {
+    "text": "buffer described by a replication state",
+    "start": 251.599,
+    "duration": 7.281
+  },
+  {
+    "text": "descriptor which contains offsets",
+    "start": 255.28,
+    "duration": 7.359
+  },
+  {
+    "text": "uh conditionals traits and how to",
+    "start": 258.88,
+    "duration": 6.319
+  },
+  {
+    "text": "serialize a member.",
+    "start": 262.639,
+    "duration": 5.201
+  },
+  {
+    "text": "And as you hear there's an extra copy of",
+    "start": 265.199,
+    "duration": 5.601
+  },
+  {
+    "text": "the source state data so that we can",
+    "start": 267.84,
+    "duration": 5.2
+  },
+  {
+    "text": "detect which properties have been dirted",
+    "start": 270.8,
+    "duration": 5.56
+  },
+  {
+    "text": "or updated.",
+    "start": 273.04,
+    "duration": 3.32
+  },
+  {
+    "text": "There's a lot that we can improve here.",
+    "start": 277.6,
+    "duration": 7.36
+  },
+  {
+    "text": "Um, if the game object side had a typed",
+    "start": 280.96,
+    "duration": 6.64
+  },
+  {
+    "text": "property replication fragment or typed",
+    "start": 284.96,
+    "duration": 4.959
+  },
+  {
+    "text": "replication fragment, uh, we could",
+    "start": 287.6,
+    "duration": 5.36
+  },
+  {
+    "text": "instead of performing onps and use the",
+    "start": 289.919,
+    "duration": 4.72
+  },
+  {
+    "text": "property reflection with virtual",
+    "start": 292.96,
+    "duration": 3.519
+  },
+  {
+    "text": "function calls, we could call a native",
+    "start": 294.639,
+    "duration": 4.481
+  },
+  {
+    "text": "apply when we receive data where you get",
+    "start": 296.479,
+    "duration": 5.921
+  },
+  {
+    "text": "all the state and you can perform your",
+    "start": 299.12,
+    "duration": 6.24
+  },
+  {
+    "text": "game logic in arbitrary order and do",
+    "start": 302.4,
+    "duration": 7.4
+  },
+  {
+    "text": "native member compares if necessary.",
+    "start": 305.36,
+    "duration": 4.44
+  },
+  {
+    "text": "looking how our net update looks. Uh",
+    "start": 310.72,
+    "duration": 8.0
+  },
+  {
+    "text": "there are five main steps um involved in",
+    "start": 313.759,
+    "duration": 7.521
+  },
+  {
+    "text": "the replication. It's filtering, poll",
+    "start": 318.72,
+    "duration": 5.52
+  },
+  {
+    "text": "and copy, quantization, prioritization,",
+    "start": 321.28,
+    "duration": 5.12
+  },
+  {
+    "text": "and serialization.",
+    "start": 324.24,
+    "duration": 5.28
+  },
+  {
+    "text": "And we look at how this looks in uh",
+    "start": 326.4,
+    "duration": 4.96
+  },
+  {
+    "text": "timing insights. It's a great tool. I",
+    "start": 329.52,
+    "duration": 4.48
+  },
+  {
+    "text": "hope you use it. uh we can see that",
+    "start": 331.36,
+    "duration": 5.44
+  },
+  {
+    "text": "we're performing all work at once for",
+    "start": 334.0,
+    "duration": 7.919
+  },
+  {
+    "text": "each of these steps. So the filtering",
+    "start": 336.8,
+    "duration": 8.64
+  },
+  {
+    "text": "uh produces a list of objects relevant",
+    "start": 341.919,
+    "duration": 7.601
+  },
+  {
+    "text": "to a connection and when we know uh all",
+    "start": 345.44,
+    "duration": 7.039
+  },
+  {
+    "text": "connections requirements uh we continue",
+    "start": 349.52,
+    "duration": 5.119
+  },
+  {
+    "text": "with the polen copy phase and we only",
+    "start": 352.479,
+    "duration": 6.401
+  },
+  {
+    "text": "need to check uh any objects uh that are",
+    "start": 354.639,
+    "duration": 8.12
+  },
+  {
+    "text": "relevant to any connection.",
+    "start": 358.88,
+    "duration": 3.879
+  },
+  {
+    "text": "The quantization",
+    "start": 362.88,
+    "duration": 5.439
+  },
+  {
+    "text": "is uh where we transform the source data",
+    "start": 364.8,
+    "duration": 7.44
+  },
+  {
+    "text": "into a plain old data format that is uh",
+    "start": 368.319,
+    "duration": 5.761
+  },
+  {
+    "text": "fast to serialize during the",
+    "start": 372.24,
+    "duration": 5.12
+  },
+  {
+    "text": "serialization phase. Uh there you can",
+    "start": 374.08,
+    "duration": 6.399
+  },
+  {
+    "text": "perform uh expensive transformations",
+    "start": 377.36,
+    "duration": 8.24
+  },
+  {
+    "text": "like um transforming fing to UTF8 for",
+    "start": 380.479,
+    "duration": 8.0
+  },
+  {
+    "text": "example. This is only done once per",
+    "start": 385.6,
+    "duration": 6.08
+  },
+  {
+    "text": "object. So anything you do there you",
+    "start": 388.479,
+    "duration": 5.121
+  },
+  {
+    "text": "don't have to do during serialization",
+    "start": 391.68,
+    "duration": 4.56
+  },
+  {
+    "text": "time",
+    "start": 393.6,
+    "duration": 8.0
+  },
+  {
+    "text": "and prioritization is uh responsible for",
+    "start": 396.24,
+    "duration": 8.079
+  },
+  {
+    "text": "uh producing a list of uh which objects",
+    "start": 401.6,
+    "duration": 6.159
+  },
+  {
+    "text": "are more important to replicate.",
+    "start": 404.319,
+    "duration": 6.72
+  },
+  {
+    "text": "And finally uh when we serialize",
+    "start": 407.759,
+    "duration": 7.921
+  },
+  {
+    "text": "everything uh it will use that list",
+    "start": 411.039,
+    "duration": 6.401
+  },
+  {
+    "text": "and we'll see what ends up in the",
+    "start": 415.68,
+    "duration": 4.239
+  },
+  {
+    "text": "packet. Usually there's too much that",
+    "start": 417.44,
+    "duration": 6.479
+  },
+  {
+    "text": "you want to replicate. So",
+    "start": 419.919,
+    "duration": 7.961
+  },
+  {
+    "text": "that's why we need a prioritization.",
+    "start": 423.919,
+    "duration": 3.961
+  },
+  {
+    "text": "So where do you come in? What do you",
+    "start": 428.96,
+    "duration": 5.2
+  },
+  {
+    "text": "implement in in this pipeline?",
+    "start": 431.12,
+    "duration": 5.919
+  },
+  {
+    "text": "Filtering of course. Um there are",
+    "start": 434.16,
+    "duration": 5.36
+  },
+  {
+    "text": "various reasons for",
+    "start": 437.039,
+    "duration": 5.6
+  },
+  {
+    "text": "doing it. Uh level streaming is a big",
+    "start": 439.52,
+    "duration": 6.079
+  },
+  {
+    "text": "one. If you can't instantiate the object",
+    "start": 442.639,
+    "duration": 5.68
+  },
+  {
+    "text": "on the receiving side, there's no point",
+    "start": 445.599,
+    "duration": 6.32
+  },
+  {
+    "text": "in sending it in the first place. And of",
+    "start": 448.319,
+    "duration": 6.081
+  },
+  {
+    "text": "often you want to replicate something",
+    "start": 451.919,
+    "duration": 5.201
+  },
+  {
+    "text": "just to one or more a few connections",
+    "start": 454.4,
+    "duration": 4.799
+  },
+  {
+    "text": "like the player controller is only",
+    "start": 457.12,
+    "duration": 5.359
+  },
+  {
+    "text": "replicated to its owning connection.",
+    "start": 459.199,
+    "duration": 6.641
+  },
+  {
+    "text": "And finally, as an optimization to save",
+    "start": 462.479,
+    "duration": 5.44
+  },
+  {
+    "text": "server and client performance and also",
+    "start": 465.84,
+    "duration": 6.079
+  },
+  {
+    "text": "client memory. Um and here's the where",
+    "start": 467.919,
+    "duration": 5.68
+  },
+  {
+    "text": "you can do for example spatial",
+    "start": 471.919,
+    "duration": 4.68
+  },
+  {
+    "text": "filtering.",
+    "start": 473.599,
+    "duration": 3.0
+  },
+  {
+    "text": "So we have two different kinds of",
+    "start": 477.36,
+    "duration": 6.64
+  },
+  {
+    "text": "filtering. Um one is static which cannot",
+    "start": 480.0,
+    "duration": 6.24
+  },
+  {
+    "text": "be overridden and one is dynamic",
+    "start": 484.0,
+    "duration": 4.96
+  },
+  {
+    "text": "implemented through net object filters",
+    "start": 486.24,
+    "duration": 5.84
+  },
+  {
+    "text": "and that's typically where you come in.",
+    "start": 488.96,
+    "duration": 4.88
+  },
+  {
+    "text": "And",
+    "start": 492.08,
+    "duration": 4.08
+  },
+  {
+    "text": "if you filter out something in a net",
+    "start": 493.84,
+    "duration": 4.479
+  },
+  {
+    "text": "object filter, it can be overridden by",
+    "start": 496.16,
+    "duration": 5.12
+  },
+  {
+    "text": "inclusion groups.",
+    "start": 498.319,
+    "duration": 5.921
+  },
+  {
+    "text": "And this is a useful um thing for",
+    "start": 501.28,
+    "duration": 6.319
+  },
+  {
+    "text": "example for uh spectator logic and",
+    "start": 504.24,
+    "duration": 5.76
+  },
+  {
+    "text": "things like that when you want something",
+    "start": 507.599,
+    "duration": 5.44
+  },
+  {
+    "text": "uh replicated to an extra connection or",
+    "start": 510.0,
+    "duration": 5.36
+  },
+  {
+    "text": "something.",
+    "start": 513.039,
+    "duration": 5.12
+  },
+  {
+    "text": "Uh exclusion groups uh you create a",
+    "start": 515.36,
+    "duration": 4.72
+  },
+  {
+    "text": "group through the replication system",
+    "start": 518.159,
+    "duration": 4.721
+  },
+  {
+    "text": "API. you add a few objects and which",
+    "start": 520.08,
+    "duration": 4.319
+  },
+  {
+    "text": "connections",
+    "start": 522.88,
+    "duration": 4.959
+  },
+  {
+    "text": "are allowed or disallowed to um have",
+    "start": 524.399,
+    "duration": 5.521
+  },
+  {
+    "text": "them replicated",
+    "start": 527.839,
+    "duration": 6.0
+  },
+  {
+    "text": "and we catch the um any modifications",
+    "start": 529.92,
+    "duration": 5.84
+  },
+  {
+    "text": "you do each frame. So if you're not",
+    "start": 533.839,
+    "duration": 5.281
+  },
+  {
+    "text": "doing anything a frame that saves time",
+    "start": 535.76,
+    "duration": 6.56
+  },
+  {
+    "text": "during the filtering phase",
+    "start": 539.12,
+    "duration": 5.44
+  },
+  {
+    "text": "and only owner filtering that's the",
+    "start": 542.32,
+    "duration": 6.24
+  },
+  {
+    "text": "regular uh be only relevant to owner",
+    "start": 544.56,
+    "duration": 7.2
+  },
+  {
+    "text": "thing you find find on the actor but if",
+    "start": 548.56,
+    "duration": 6.8
+  },
+  {
+    "text": "you're not using actors you can use this",
+    "start": 551.76,
+    "duration": 8.36
+  },
+  {
+    "text": "filter uh by code.",
+    "start": 555.36,
+    "duration": 4.76
+  },
+  {
+    "text": "So net object filters uh yep it's called",
+    "start": 560.56,
+    "duration": 6.88
+  },
+  {
+    "text": "every frame for every object assigned to",
+    "start": 564.16,
+    "duration": 5.44
+  },
+  {
+    "text": "that filter.",
+    "start": 567.44,
+    "duration": 5.6
+  },
+  {
+    "text": "So it can be expensive. Uh usually you",
+    "start": 569.6,
+    "duration": 6.32
+  },
+  {
+    "text": "want to try to implement things through",
+    "start": 573.04,
+    "duration": 7.56
+  },
+  {
+    "text": "exclusion and inclusion groups instead.",
+    "start": 575.92,
+    "duration": 4.68
+  },
+  {
+    "text": "And finally inclusion groups. It's",
+    "start": 581.12,
+    "duration": 4.159
+  },
+  {
+    "text": "almost the same API in the replication",
+    "start": 583.519,
+    "duration": 5.121
+  },
+  {
+    "text": "system but it can override the um net",
+    "start": 585.279,
+    "duration": 5.521
+  },
+  {
+    "text": "object filter",
+    "start": 588.64,
+    "duration": 4.639
+  },
+  {
+    "text": "uh if the net object filter disallowed",
+    "start": 590.8,
+    "duration": 4.32
+  },
+  {
+    "text": "replication.",
+    "start": 593.279,
+    "duration": 4.321
+  },
+  {
+    "text": "Hence inclusion group it cannot do",
+    "start": 595.12,
+    "duration": 5.12
+  },
+  {
+    "text": "anything other than enabling replication",
+    "start": 597.6,
+    "duration": 7.12
+  },
+  {
+    "text": "of an object to one or more connections.",
+    "start": 600.24,
+    "duration": 6.8
+  },
+  {
+    "text": "There's also dependent actors which",
+    "start": 604.72,
+    "duration": 4.32
+  },
+  {
+    "text": "isn't filtering but those can also",
+    "start": 607.04,
+    "duration": 6.919
+  },
+  {
+    "text": "override the net object filters.",
+    "start": 609.04,
+    "duration": 4.919
+  },
+  {
+    "text": "and prioritization.",
+    "start": 616.48,
+    "duration": 4.88
+  },
+  {
+    "text": "Um,",
+    "start": 619.279,
+    "duration": 5.841
+  },
+  {
+    "text": "we don't use the net update frequency uh",
+    "start": 621.36,
+    "duration": 7.76
+  },
+  {
+    "text": "to prioritize or",
+    "start": 625.12,
+    "duration": 6.719
+  },
+  {
+    "text": "throttle replication.",
+    "start": 629.12,
+    "duration": 7.279
+  },
+  {
+    "text": "Uh, instead we use prioritization. Um so",
+    "start": 631.839,
+    "duration": 6.961
+  },
+  {
+    "text": "the net update frequency that controls",
+    "start": 636.399,
+    "duration": 4.481
+  },
+  {
+    "text": "how often we pull your object and check",
+    "start": 638.8,
+    "duration": 5.039
+  },
+  {
+    "text": "for dirty um properties whereas",
+    "start": 640.88,
+    "duration": 5.44
+  },
+  {
+    "text": "prioritization",
+    "start": 643.839,
+    "duration": 6.081
+  },
+  {
+    "text": "will uh dictate when something is",
+    "start": 646.32,
+    "duration": 6.32
+  },
+  {
+    "text": "replicated or not.",
+    "start": 649.92,
+    "duration": 6.159
+  },
+  {
+    "text": "So priorities are accumulated until the",
+    "start": 652.64,
+    "duration": 6.0
+  },
+  {
+    "text": "object is replicated and then it's",
+    "start": 656.079,
+    "duration": 4.801
+  },
+  {
+    "text": "reset.",
+    "start": 658.64,
+    "duration": 5.04
+  },
+  {
+    "text": "uh and",
+    "start": 660.88,
+    "duration": 6.639
+  },
+  {
+    "text": "a priority of one means",
+    "start": 663.68,
+    "duration": 5.839
+  },
+  {
+    "text": "we're allowed to replicate it. So you",
+    "start": 667.519,
+    "duration": 4.081
+  },
+  {
+    "text": "can that's how you use it as a",
+    "start": 669.519,
+    "duration": 4.081
+  },
+  {
+    "text": "replication frequency frequency",
+    "start": 671.6,
+    "duration": 4.72
+  },
+  {
+    "text": "throttling by having a priority less",
+    "start": 673.6,
+    "duration": 7.44
+  },
+  {
+    "text": "than one and that's quite uh common for",
+    "start": 676.32,
+    "duration": 8.72
+  },
+  {
+    "text": "example for spatial prioritization",
+    "start": 681.04,
+    "duration": 6.0
+  },
+  {
+    "text": "uh and you implement that through a net",
+    "start": 685.04,
+    "duration": 4.56
+  },
+  {
+    "text": "object prioritizer. Of course, we have a",
+    "start": 687.04,
+    "duration": 5.84
+  },
+  {
+    "text": "few useful ones in the engine already uh",
+    "start": 689.6,
+    "duration": 6.32
+  },
+  {
+    "text": "but you can implement your own uh as",
+    "start": 692.88,
+    "duration": 6.04
+  },
+  {
+    "text": "well.",
+    "start": 695.92,
+    "duration": 3.0
+  },
+  {
+    "text": "And finally, serialization. That's",
+    "start": 701.279,
+    "duration": 5.841
+  },
+  {
+    "text": "slightly different from what you're used",
+    "start": 705.12,
+    "duration": 5.36
+  },
+  {
+    "text": "to. Uh for example, we don't support net",
+    "start": 707.12,
+    "duration": 6.48
+  },
+  {
+    "text": "serialize on strcts.",
+    "start": 710.48,
+    "duration": 5.68
+  },
+  {
+    "text": "uh you have to implement well not have",
+    "start": 713.6,
+    "duration": 4.88
+  },
+  {
+    "text": "to but often you need to implement a net",
+    "start": 716.16,
+    "duration": 6.0
+  },
+  {
+    "text": "serializer instead and that deals with a",
+    "start": 718.48,
+    "duration": 6.799
+  },
+  {
+    "text": "particular property type or strct but",
+    "start": 722.16,
+    "duration": 6.799
+  },
+  {
+    "text": "since we support all properties that um",
+    "start": 725.279,
+    "duration": 6.0
+  },
+  {
+    "text": "is supported by any other replication",
+    "start": 728.959,
+    "duration": 5.361
+  },
+  {
+    "text": "system in the engine you'll mostly deal",
+    "start": 731.279,
+    "duration": 6.24
+  },
+  {
+    "text": "with the strcts",
+    "start": 734.32,
+    "duration": 7.519
+  },
+  {
+    "text": "and as I mentioned before",
+    "start": 737.519,
+    "duration": 7.921
+  },
+  {
+    "text": "it is responsible for transforming",
+    "start": 741.839,
+    "duration": 7.68
+  },
+  {
+    "text": "source data into a native network format",
+    "start": 745.44,
+    "duration": 8.56
+  },
+  {
+    "text": "that is plain old data format that is uh",
+    "start": 749.519,
+    "duration": 8.641
+  },
+  {
+    "text": "effective to serialize to bitstream",
+    "start": 754.0,
+    "duration": 6.72
+  },
+  {
+    "text": "and you can also optionally implement uh",
+    "start": 758.16,
+    "duration": 6.88
+  },
+  {
+    "text": "delta compression um",
+    "start": 760.72,
+    "duration": 6.64
+  },
+  {
+    "text": "it's uh bit packing against the known",
+    "start": 765.04,
+    "duration": 5.32
+  },
+  {
+    "text": "baseline",
+    "start": 767.36,
+    "duration": 3.0
+  },
+  {
+    "text": "and can save a lot of bandwidth",
+    "start": 770.959,
+    "duration": 3.361
+  },
+  {
+    "text": "depending on what kind of types you have",
+    "start": 772.56,
+    "duration": 4.399
+  },
+  {
+    "text": "and we implement it for for a lot of",
+    "start": 774.32,
+    "duration": 7.36
+  },
+  {
+    "text": "primitive types um and",
+    "start": 776.959,
+    "duration": 9.961
+  },
+  {
+    "text": "f ve quantized f vectors and such.",
+    "start": 781.68,
+    "duration": 5.24
+  },
+  {
+    "text": "And here's the only code slide I'll show",
+    "start": 787.92,
+    "duration": 5.359
+  },
+  {
+    "text": "today. Uh the net serializer API. It may",
+    "start": 790.24,
+    "duration": 6.88
+  },
+  {
+    "text": "look a bit daunting. uh",
+    "start": 793.279,
+    "duration": 8.0
+  },
+  {
+    "text": "for a primitive type it it's not that",
+    "start": 797.12,
+    "duration": 6.399
+  },
+  {
+    "text": "much you would have to implement. Uh",
+    "start": 801.279,
+    "duration": 4.161
+  },
+  {
+    "text": "then it's just a type def of the source",
+    "start": 803.519,
+    "duration": 4.641
+  },
+  {
+    "text": "type and serialize and the serialize.",
+    "start": 805.44,
+    "duration": 6.399
+  },
+  {
+    "text": "But since you will be porting strcts to",
+    "start": 808.16,
+    "duration": 7.2
+  },
+  {
+    "text": "this uh you may implement",
+    "start": 811.839,
+    "duration": 6.0
+  },
+  {
+    "text": "may need to implement a few more of",
+    "start": 815.36,
+    "duration": 4.479
+  },
+  {
+    "text": "these functions.",
+    "start": 817.839,
+    "duration": 4.161
+  },
+  {
+    "text": "uh quantize de quantise that's",
+    "start": 819.839,
+    "duration": 4.161
+  },
+  {
+    "text": "transforming from the source state to",
+    "start": 822.0,
+    "duration": 4.8
+  },
+  {
+    "text": "the network format",
+    "start": 824.0,
+    "duration": 7.6
+  },
+  {
+    "text": "is equal to determine if either two um",
+    "start": 826.8,
+    "duration": 7.68
+  },
+  {
+    "text": "source instances are equal or two",
+    "start": 831.6,
+    "duration": 6.239
+  },
+  {
+    "text": "quantized instances are equal serialized",
+    "start": 834.48,
+    "duration": 5.44
+  },
+  {
+    "text": "delta des serialized delta that's for",
+    "start": 837.839,
+    "duration": 5.041
+  },
+  {
+    "text": "the delta compression and completely",
+    "start": 839.92,
+    "duration": 4.719
+  },
+  {
+    "text": "optional",
+    "start": 842.88,
+    "duration": 5.04
+  },
+  {
+    "text": "validate is something we don't call yet",
+    "start": 844.639,
+    "duration": 5.361
+  },
+  {
+    "text": "but you should still implement mented we",
+    "start": 847.92,
+    "duration": 6.159
+  },
+  {
+    "text": "may start using it for um RPCs to",
+    "start": 850.0,
+    "duration": 6.639
+  },
+  {
+    "text": "validate uh the parameters that they",
+    "start": 854.079,
+    "duration": 5.601
+  },
+  {
+    "text": "contain values that you expect. So for",
+    "start": 856.639,
+    "duration": 5.921
+  },
+  {
+    "text": "example, if you if you receive an",
+    "start": 859.68,
+    "duration": 6.64
+  },
+  {
+    "text": "invalid enum value, uh we would say that",
+    "start": 862.56,
+    "duration": 5.76
+  },
+  {
+    "text": "validation failed and we wouldn't call",
+    "start": 866.32,
+    "duration": 4.4
+  },
+  {
+    "text": "the RPC",
+    "start": 868.32,
+    "duration": 5.12
+  },
+  {
+    "text": "clone and free dynamic state that is in",
+    "start": 870.72,
+    "duration": 5.44
+  },
+  {
+    "text": "the case if you have uh dynamic memory",
+    "start": 873.44,
+    "duration": 7.759
+  },
+  {
+    "text": "allocations in your uh pod data. Um",
+    "start": 876.16,
+    "duration": 7.119
+  },
+  {
+    "text": "since we need to clone and free",
+    "start": 881.199,
+    "duration": 5.76
+  },
+  {
+    "text": "baselines, these are needed and collect",
+    "start": 883.279,
+    "duration": 6.081
+  },
+  {
+    "text": "net references. If if you have object",
+    "start": 886.959,
+    "duration": 4.081
+  },
+  {
+    "text": "pointers",
+    "start": 889.36,
+    "duration": 4.24
+  },
+  {
+    "text": "uh and such, we",
+    "start": 891.04,
+    "duration": 4.88
+  },
+  {
+    "text": "need to be able to call onreps when",
+    "start": 893.6,
+    "duration": 4.16
+  },
+  {
+    "text": "they're finally resolvable on the",
+    "start": 895.92,
+    "duration": 4.0
+  },
+  {
+    "text": "receiving end.",
+    "start": 897.76,
+    "duration": 5.6
+  },
+  {
+    "text": "And apply is if you need a bit of a",
+    "start": 899.92,
+    "duration": 6.4
+  },
+  {
+    "text": "custom u",
+    "start": 903.36,
+    "duration": 6.719
+  },
+  {
+    "text": "application from from the dequantized",
+    "start": 906.32,
+    "duration": 6.879
+  },
+  {
+    "text": "data to the target instance. We always",
+    "start": 910.079,
+    "duration": 6.641
+  },
+  {
+    "text": "dequantize to a temporary instance.",
+    "start": 913.199,
+    "duration": 5.041
+  },
+  {
+    "text": "So if you don't want to overwrite",
+    "start": 916.72,
+    "duration": 3.2
+  },
+  {
+    "text": "something",
+    "start": 918.24,
+    "duration": 4.64
+  },
+  {
+    "text": "uh that is a replicated property, you",
+    "start": 919.92,
+    "duration": 7.719
+  },
+  {
+    "text": "may want to implement apply.",
+    "start": 922.88,
+    "duration": 4.759
+  },
+  {
+    "text": "So let's",
+    "start": 929.68,
+    "duration": 4.959
+  },
+  {
+    "text": "go over to porting and uh the lessons we",
+    "start": 931.68,
+    "duration": 6.56
+  },
+  {
+    "text": "learned while uh porting Fortnite to",
+    "start": 934.639,
+    "duration": 5.281
+  },
+  {
+    "text": "Iris.",
+    "start": 938.24,
+    "duration": 4.56
+  },
+  {
+    "text": "So we started the Iris devel development",
+    "start": 939.92,
+    "duration": 6.4
+  },
+  {
+    "text": "in 2019.",
+    "start": 942.8,
+    "duration": 8.08
+  },
+  {
+    "text": "Um and the first things I did was",
+    "start": 946.32,
+    "duration": 7.439
+  },
+  {
+    "text": "implement after picking the name of",
+    "start": 950.88,
+    "duration": 6.399
+  },
+  {
+    "text": "course uh implementing it um a test",
+    "start": 953.759,
+    "duration": 5.601
+  },
+  {
+    "text": "framework so we could test everything",
+    "start": 957.279,
+    "duration": 5.761
+  },
+  {
+    "text": "because we predicted being uh having to",
+    "start": 959.36,
+    "duration": 6.32
+  },
+  {
+    "text": "switch replication systems",
+    "start": 963.04,
+    "duration": 4.88
+  },
+  {
+    "text": "um",
+    "start": 965.68,
+    "duration": 4.159
+  },
+  {
+    "text": "live",
+    "start": 967.92,
+    "duration": 4.96
+  },
+  {
+    "text": "and also rewrite or implement a new",
+    "start": 969.839,
+    "duration": 5.68
+  },
+  {
+    "text": "bitstream that was more efficient than",
+    "start": 972.88,
+    "duration": 5.92
+  },
+  {
+    "text": "the existing one.",
+    "start": 975.519,
+    "duration": 6.401
+  },
+  {
+    "text": "So me and Matias, we worked for for",
+    "start": 978.8,
+    "duration": 6.959
+  },
+  {
+    "text": "about a year in in the cave and uh it",
+    "start": 981.92,
+    "duration": 7.12
+  },
+  {
+    "text": "started to look promising. Uh so we went",
+    "start": 985.759,
+    "duration": 6.0
+  },
+  {
+    "text": "and uh started um trying to port",
+    "start": 989.04,
+    "duration": 4.96
+  },
+  {
+    "text": "Fortnite",
+    "start": 991.759,
+    "duration": 6.88
+  },
+  {
+    "text": "and we struggled for two years. Um it",
+    "start": 994.0,
+    "duration": 8.8
+  },
+  {
+    "text": "was hard for just two people to uh catch",
+    "start": 998.639,
+    "duration": 7.361
+  },
+  {
+    "text": "up with all the Fortnite development",
+    "start": 1002.8,
+    "duration": 6.08
+  },
+  {
+    "text": "and there were also some major uh",
+    "start": 1006.0,
+    "duration": 5.199
+  },
+  {
+    "text": "refactorings going on of systems that we",
+    "start": 1008.88,
+    "duration": 4.319
+  },
+  {
+    "text": "had you know already fixed and now we",
+    "start": 1011.199,
+    "duration": 4.161
+  },
+  {
+    "text": "had to reimplement",
+    "start": 1013.199,
+    "duration": 4.32
+  },
+  {
+    "text": "them.",
+    "start": 1015.36,
+    "duration": 4.719
+  },
+  {
+    "text": "But after",
+    "start": 1017.519,
+    "duration": 5.281
+  },
+  {
+    "text": "those two years, uh we felt okay, it's",
+    "start": 1020.079,
+    "duration": 6.801
+  },
+  {
+    "text": "not too buggy. Um maybe we can seriously",
+    "start": 1022.8,
+    "duration": 8.08
+  },
+  {
+    "text": "think about uh shipping it",
+    "start": 1026.88,
+    "duration": 7.6
+  },
+  {
+    "text": "uh for real. And that's when we moved to",
+    "start": 1030.88,
+    "duration": 7.199
+  },
+  {
+    "text": "uh u UE5 main branch, released Iris",
+    "start": 1034.48,
+    "duration": 7.599
+  },
+  {
+    "text": "experimental in 5.1.",
+    "start": 1038.079,
+    "duration": 5.521
+  },
+  {
+    "text": "Uh",
+    "start": 1042.079,
+    "duration": 5.201
+  },
+  {
+    "text": "we got some more devs to help out and",
+    "start": 1043.6,
+    "duration": 6.56
+  },
+  {
+    "text": "also QA.",
+    "start": 1047.28,
+    "duration": 4.399
+  },
+  {
+    "text": "Um",
+    "start": 1050.16,
+    "duration": 3.44
+  },
+  {
+    "text": "but it took almost two years but we",
+    "start": 1051.679,
+    "duration": 4.88
+  },
+  {
+    "text": "shipped uh Iris in Fortnite in April",
+    "start": 1053.6,
+    "duration": 5.52
+  },
+  {
+    "text": "last year. Uh we didn't announce it. We",
+    "start": 1056.559,
+    "duration": 7.161
+  },
+  {
+    "text": "just switched the button.",
+    "start": 1059.12,
+    "duration": 4.6
+  },
+  {
+    "text": "So",
+    "start": 1066.88,
+    "duration": 3.0
+  },
+  {
+    "text": "a lot of the work well not a lot of the",
+    "start": 1070.16,
+    "duration": 5.28
+  },
+  {
+    "text": "work some of the work was uh as I",
+    "start": 1072.559,
+    "duration": 5.681
+  },
+  {
+    "text": "mentioned we don't support net serialize",
+    "start": 1075.44,
+    "duration": 5.119
+  },
+  {
+    "text": "uh you'll get a warning if we encounter",
+    "start": 1078.24,
+    "duration": 4.319
+  },
+  {
+    "text": "struck with net serialize that is used",
+    "start": 1080.559,
+    "duration": 4.881
+  },
+  {
+    "text": "in replication and then you can take a",
+    "start": 1082.559,
+    "duration": 4.961
+  },
+  {
+    "text": "look if you need a custom serializer or",
+    "start": 1085.44,
+    "duration": 7.84
+  },
+  {
+    "text": "not. Um in Iris strcts are replicated",
+    "start": 1087.52,
+    "duration": 8.08
+  },
+  {
+    "text": "atomically",
+    "start": 1093.28,
+    "duration": 5.68
+  },
+  {
+    "text": "uh but they weren't previously. So one",
+    "start": 1095.6,
+    "duration": 4.72
+  },
+  {
+    "text": "of the reasons to implement net",
+    "start": 1098.96,
+    "duration": 4.4
+  },
+  {
+    "text": "serialize was to get that atomicity.",
+    "start": 1100.32,
+    "duration": 6.08
+  },
+  {
+    "text": "Um so you just need to mark up your",
+    "start": 1103.36,
+    "duration": 6.559
+  },
+  {
+    "text": "properties uh correctly. Uh so instructs",
+    "start": 1106.4,
+    "duration": 6.8
+  },
+  {
+    "text": "that means mark properties as as not",
+    "start": 1109.919,
+    "duration": 6.481
+  },
+  {
+    "text": "replicated if they're not replicated and",
+    "start": 1113.2,
+    "duration": 6.56
+  },
+  {
+    "text": "have them as you properties if your net",
+    "start": 1116.4,
+    "duration": 7.279
+  },
+  {
+    "text": "serialized method access a member.",
+    "start": 1119.76,
+    "duration": 6.919
+  },
+  {
+    "text": "Um",
+    "start": 1123.679,
+    "duration": 3.0
+  },
+  {
+    "text": "conditionals is quite common. Rep",
+    "start": 1128.32,
+    "duration": 6.64
+  },
+  {
+    "text": "movement is um an example where",
+    "start": 1130.4,
+    "duration": 6.96
+  },
+  {
+    "text": "whether you replicate physics or not,",
+    "start": 1134.96,
+    "duration": 5.36
+  },
+  {
+    "text": "you uh replicate angular velocity or",
+    "start": 1137.36,
+    "duration": 7.439
+  },
+  {
+    "text": "not. Uh and to mimic that you need to",
+    "start": 1140.32,
+    "duration": 6.8
+  },
+  {
+    "text": "implement an serializer",
+    "start": 1144.799,
+    "duration": 4.561
+  },
+  {
+    "text": "and there can be other bandwidth",
+    "start": 1147.12,
+    "duration": 6.559
+  },
+  {
+    "text": "optimizations like custom quantization.",
+    "start": 1149.36,
+    "duration": 6.4
+  },
+  {
+    "text": "uh we encountered cases where we",
+    "start": 1153.679,
+    "duration": 4.88
+  },
+  {
+    "text": "actually had higher precision in the",
+    "start": 1155.76,
+    "duration": 6.08
+  },
+  {
+    "text": "strct but that led to gameplay bugs. Uh",
+    "start": 1158.559,
+    "duration": 6.081
+  },
+  {
+    "text": "so for bit perfect compatibility reasons",
+    "start": 1161.84,
+    "duration": 4.48
+  },
+  {
+    "text": "you may need to implement the net",
+    "start": 1164.64,
+    "duration": 6.0
+  },
+  {
+    "text": "serializer in that case as well.",
+    "start": 1166.32,
+    "duration": 7.52
+  },
+  {
+    "text": "But I mentioned we want you to get up",
+    "start": 1170.64,
+    "duration": 5.2
+  },
+  {
+    "text": "and running as quickly as possible. So",
+    "start": 1173.84,
+    "duration": 5.44
+  },
+  {
+    "text": "there is a quick hack you can use",
+    "start": 1175.84,
+    "duration": 6.24
+  },
+  {
+    "text": "uh the macro uet implement named strct",
+    "start": 1179.28,
+    "duration": 5.04
+  },
+  {
+    "text": "last resort net serializer and registry",
+    "start": 1182.08,
+    "duration": 5.599
+  },
+  {
+    "text": "delegates. I hope that scares you off.",
+    "start": 1184.32,
+    "duration": 6.16
+  },
+  {
+    "text": "uh",
+    "start": 1187.679,
+    "duration": 5.281
+  },
+  {
+    "text": "use it as a last resort. But of course,",
+    "start": 1190.48,
+    "duration": 5.52
+  },
+  {
+    "text": "for debugging struct debug type structs,",
+    "start": 1192.96,
+    "duration": 6.4
+  },
+  {
+    "text": "uh you can leave it, but uh you're not",
+    "start": 1196.0,
+    "duration": 5.679
+  },
+  {
+    "text": "getting any of the benefits of Iris and",
+    "start": 1199.36,
+    "duration": 5.04
+  },
+  {
+    "text": "we shoehorn your uh serialization into",
+    "start": 1201.679,
+    "duration": 7.12
+  },
+  {
+    "text": "Iris. Uh you won't see in the network",
+    "start": 1204.4,
+    "duration": 6.399
+  },
+  {
+    "text": "insights or anything what you're",
+    "start": 1208.799,
+    "duration": 5.521
+  },
+  {
+    "text": "actually replicating in there.",
+    "start": 1210.799,
+    "duration": 5.281
+  },
+  {
+    "text": "So",
+    "start": 1214.32,
+    "duration": 5.32
+  },
+  {
+    "text": "but it's there",
+    "start": 1216.08,
+    "duration": 3.56
+  },
+  {
+    "text": "uh the Fortnite was uh using rep graph",
+    "start": 1220.32,
+    "duration": 10.32
+  },
+  {
+    "text": "and uh we have some",
+    "start": 1226.48,
+    "duration": 9.0
+  },
+  {
+    "text": "equivalents for the basic functionality.",
+    "start": 1230.64,
+    "duration": 4.84
+  },
+  {
+    "text": "So you basically only have to tag which",
+    "start": 1235.919,
+    "duration": 5.841
+  },
+  {
+    "text": "classes should use uh being relevant,",
+    "start": 1238.4,
+    "duration": 8.159
+  },
+  {
+    "text": "never relevant or use 2D uh spatial",
+    "start": 1241.76,
+    "duration": 7.76
+  },
+  {
+    "text": "filter.",
+    "start": 1246.559,
+    "duration": 4.961
+  },
+  {
+    "text": "Sometimes there was uh replication",
+    "start": 1249.52,
+    "duration": 6.08
+  },
+  {
+    "text": "throttling going on and as I mentioned",
+    "start": 1251.52,
+    "duration": 6.399
+  },
+  {
+    "text": "uh that's the job of the priority",
+    "start": 1255.6,
+    "duration": 3.84
+  },
+  {
+    "text": "system.",
+    "start": 1257.919,
+    "duration": 5.681
+  },
+  {
+    "text": "And so we implemented a few net object",
+    "start": 1259.44,
+    "duration": 9.52
+  },
+  {
+    "text": "prioritizers that were uh useful",
+    "start": 1263.6,
+    "duration": 8.24
+  },
+  {
+    "text": "for rep graph and all of those are in",
+    "start": 1268.96,
+    "duration": 7.16
+  },
+  {
+    "text": "iris or engine code",
+    "start": 1271.84,
+    "duration": 4.28
+  },
+  {
+    "text": "for always relevant for connection. Uh",
+    "start": 1277.12,
+    "duration": 4.48
+  },
+  {
+    "text": "you can make something not relevant",
+    "start": 1279.6,
+    "duration": 5.199
+  },
+  {
+    "text": "using the inile configurable",
+    "start": 1281.6,
+    "duration": 5.84
+  },
+  {
+    "text": "uh configuration",
+    "start": 1284.799,
+    "duration": 6.401
+  },
+  {
+    "text": "and add an inclusion group",
+    "start": 1287.44,
+    "duration": 6.8
+  },
+  {
+    "text": "for groups and spectators. There can be",
+    "start": 1291.2,
+    "duration": 5.839
+  },
+  {
+    "text": "a combination of dynamic filtering",
+    "start": 1294.24,
+    "duration": 5.52
+  },
+  {
+    "text": "inclusion groups and perhaps exclusion",
+    "start": 1297.039,
+    "duration": 5.721
+  },
+  {
+    "text": "groups.",
+    "start": 1299.76,
+    "duration": 3.0
+  },
+  {
+    "text": "Grabgraph also has a couple of features.",
+    "start": 1307.52,
+    "duration": 5.36
+  },
+  {
+    "text": "I'm not sure how much they're used, but",
+    "start": 1310.0,
+    "duration": 6.559
+  },
+  {
+    "text": "you can override cal distances",
+    "start": 1312.88,
+    "duration": 8.0
+  },
+  {
+    "text": "and the uh h add dependent actors and",
+    "start": 1316.559,
+    "duration": 6.48
+  },
+  {
+    "text": "that's something we support through",
+    "start": 1320.88,
+    "duration": 6.279
+  },
+  {
+    "text": "replication system util.",
+    "start": 1323.039,
+    "duration": 4.12
+  },
+  {
+    "text": "Now we encountered lots of bugs",
+    "start": 1328.88,
+    "duration": 6.96
+  },
+  {
+    "text": "uh during the porting and many of them",
+    "start": 1332.88,
+    "duration": 5.36
+  },
+  {
+    "text": "were related to different types of",
+    "start": 1335.84,
+    "duration": 5.199
+  },
+  {
+    "text": "ordering issues.",
+    "start": 1338.24,
+    "duration": 8.4
+  },
+  {
+    "text": "And one is RPCs relying on replicated",
+    "start": 1341.039,
+    "duration": 7.76
+  },
+  {
+    "text": "properties",
+    "start": 1346.64,
+    "duration": 6.0
+  },
+  {
+    "text": "uh that were not updated for one or",
+    "start": 1348.799,
+    "duration": 6.24
+  },
+  {
+    "text": "other reason.",
+    "start": 1352.64,
+    "duration": 4.32
+  },
+  {
+    "text": "Even if you update the property and send",
+    "start": 1355.039,
+    "duration": 4.401
+  },
+  {
+    "text": "an RPC in the same frame on the server",
+    "start": 1356.96,
+    "duration": 4.4
+  },
+  {
+    "text": "side, it doesn't mean they end up in the",
+    "start": 1359.44,
+    "duration": 4.08
+  },
+  {
+    "text": "same packet or will be received on the",
+    "start": 1361.36,
+    "duration": 4.88
+  },
+  {
+    "text": "same frame on the client side. And if",
+    "start": 1363.52,
+    "duration": 6.48
+  },
+  {
+    "text": "you have pointers to objects or anything",
+    "start": 1366.24,
+    "duration": 7.76
+  },
+  {
+    "text": "else, they may require uh a sync loading",
+    "start": 1370.0,
+    "duration": 5.6
+  },
+  {
+    "text": "or",
+    "start": 1374.0,
+    "duration": 4.24
+  },
+  {
+    "text": "an actor to be replicated. So you never",
+    "start": 1375.6,
+    "duration": 5.12
+  },
+  {
+    "text": "know when those are going to be updated",
+    "start": 1378.24,
+    "duration": 5.48
+  },
+  {
+    "text": "really.",
+    "start": 1380.72,
+    "duration": 3.0
+  },
+  {
+    "text": "Uh, another issue with properties",
+    "start": 1384.48,
+    "duration": 6.8
+  },
+  {
+    "text": "is that you can't really rely on onrep",
+    "start": 1387.76,
+    "duration": 6.64
+  },
+  {
+    "text": "order for the similar reasons as RPC",
+    "start": 1391.28,
+    "duration": 6.16
+  },
+  {
+    "text": "couldn't rely on properties. Uh, a sync",
+    "start": 1394.4,
+    "duration": 6.0
+  },
+  {
+    "text": "loading and objects that haven't been",
+    "start": 1397.44,
+    "duration": 5.96
+  },
+  {
+    "text": "replicated.",
+    "start": 1400.4,
+    "duration": 3.0
+  },
+  {
+    "text": "And finally, actor dependencies don't",
+    "start": 1404.96,
+    "duration": 6.56
+  },
+  {
+    "text": "rely on an actor being replicated before",
+    "start": 1408.24,
+    "duration": 5.919
+  },
+  {
+    "text": "or after another actor. Even with add",
+    "start": 1411.52,
+    "duration": 6.56
+  },
+  {
+    "text": "dependent actor all you know is uh it",
+    "start": 1414.159,
+    "duration": 7.201
+  },
+  {
+    "text": "will be replicated basically",
+    "start": 1418.08,
+    "duration": 6.32
+  },
+  {
+    "text": "and there's also a combination of all of",
+    "start": 1421.36,
+    "duration": 6.319
+  },
+  {
+    "text": "these three.",
+    "start": 1424.4,
+    "duration": 5.92
+  },
+  {
+    "text": "One thing you can do prior to porting is",
+    "start": 1427.679,
+    "duration": 5.441
+  },
+  {
+    "text": "run your game with packet simulation",
+    "start": 1430.32,
+    "duration": 5.2
+  },
+  {
+    "text": "uh with high latency and high packet",
+    "start": 1433.12,
+    "duration": 5.28
+  },
+  {
+    "text": "loss. Don't be shy of using 10 20%",
+    "start": 1435.52,
+    "duration": 5.36
+  },
+  {
+    "text": "packet loss when testing. I'm sure",
+    "start": 1438.4,
+    "duration": 6.159
+  },
+  {
+    "text": "you'll find a lot of bugs using those",
+    "start": 1440.88,
+    "duration": 5.44
+  },
+  {
+    "text": "tools. So, that's available in the",
+    "start": 1444.559,
+    "duration": 4.321
+  },
+  {
+    "text": "engine. I think it's on by default in",
+    "start": 1446.32,
+    "duration": 5.68
+  },
+  {
+    "text": "the editor actually, but I may be wrong",
+    "start": 1448.88,
+    "duration": 5.76
+  },
+  {
+    "text": "there. Use it in your play tests and",
+    "start": 1452.0,
+    "duration": 6.44
+  },
+  {
+    "text": "when you're testing yourself.",
+    "start": 1454.64,
+    "duration": 3.8
+  },
+  {
+    "text": "So, some of the pain points ordering",
+    "start": 1458.88,
+    "duration": 5.36
+  },
+  {
+    "text": "issues lots of pain",
+    "start": 1460.88,
+    "duration": 6.64
+  },
+  {
+    "text": "strcts with net serializ",
+    "start": 1464.24,
+    "duration": 5.2
+  },
+  {
+    "text": "had to go through each and every one of",
+    "start": 1467.52,
+    "duration": 3.039
+  },
+  {
+    "text": "them.",
+    "start": 1469.44,
+    "duration": 5.52
+  },
+  {
+    "text": "uh since we have actually implemented a",
+    "start": 1470.559,
+    "duration": 7.201
+  },
+  {
+    "text": "feature for example if you have a strct",
+    "start": 1474.96,
+    "duration": 6.0
+  },
+  {
+    "text": "with um",
+    "start": 1477.76,
+    "duration": 6.0
+  },
+  {
+    "text": "a base strct and a bunch of inherited",
+    "start": 1480.96,
+    "duration": 4.88
+  },
+  {
+    "text": "strcts you don't need to implement net",
+    "start": 1483.76,
+    "duration": 5.36
+  },
+  {
+    "text": "serialize if you if you're only adding",
+    "start": 1485.84,
+    "duration": 7.28
+  },
+  {
+    "text": "uh uh some replicated properties",
+    "start": 1489.12,
+    "duration": 6.96
+  },
+  {
+    "text": "and that's unlike net serialize where",
+    "start": 1493.12,
+    "duration": 4.559
+  },
+  {
+    "text": "you would have to make sure you call the",
+    "start": 1496.08,
+    "duration": 4.24
+  },
+  {
+    "text": "parent net serialize is you only need",
+    "start": 1497.679,
+    "duration": 5.12
+  },
+  {
+    "text": "the net serializer uh where it's",
+    "start": 1500.32,
+    "duration": 5.959
+  },
+  {
+    "text": "actually needed.",
+    "start": 1502.799,
+    "duration": 3.48
+  },
+  {
+    "text": "Blueprint debugging. Uh",
+    "start": 1507.84,
+    "duration": 6.24
+  },
+  {
+    "text": "yeah, it wasn't fun because we basically",
+    "start": 1511.039,
+    "duration": 4.88
+  },
+  {
+    "text": "didn't know the game and we didn't know",
+    "start": 1514.08,
+    "duration": 5.12
+  },
+  {
+    "text": "how the blueprints worked and it's",
+    "start": 1515.919,
+    "duration": 6.481
+  },
+  {
+    "text": "generally just um painful debugging",
+    "start": 1519.2,
+    "duration": 4.8
+  },
+  {
+    "text": "those.",
+    "start": 1522.4,
+    "duration": 4.639
+  },
+  {
+    "text": "Uh, and sometimes you would be required",
+    "start": 1524.0,
+    "duration": 5.919
+  },
+  {
+    "text": "to load up the whole level and you",
+    "start": 1527.039,
+    "duration": 5.76
+  },
+  {
+    "text": "didn't know which blueprint it was uh,",
+    "start": 1529.919,
+    "duration": 6.841
+  },
+  {
+    "text": "involved at all.",
+    "start": 1532.799,
+    "duration": 3.961
+  },
+  {
+    "text": "Iteration times, we had lots of problem",
+    "start": 1538.08,
+    "duration": 5.599
+  },
+  {
+    "text": "with that. Um, even if we had a green",
+    "start": 1540.96,
+    "duration": 6.0
+  },
+  {
+    "text": "build, it didn't mean that we could",
+    "start": 1543.679,
+    "duration": 6.161
+  },
+  {
+    "text": "find or test what we were uh, looking",
+    "start": 1546.96,
+    "duration": 6.0
+  },
+  {
+    "text": "for that particular day. Uh, with",
+    "start": 1549.84,
+    "duration": 6.24
+  },
+  {
+    "text": "Fortnite, the level changes all the time",
+    "start": 1552.96,
+    "duration": 5.44
+  },
+  {
+    "text": "and a new release comes out every two",
+    "start": 1556.08,
+    "duration": 5.12
+  },
+  {
+    "text": "weeks. Uh, and maybe we didn't have time",
+    "start": 1558.4,
+    "duration": 5.36
+  },
+  {
+    "text": "to look at that until two months later",
+    "start": 1561.2,
+    "duration": 5.04
+  },
+  {
+    "text": "and then you couldn't look at it because",
+    "start": 1563.76,
+    "duration": 4.64
+  },
+  {
+    "text": "it was gone and we didn't know what we",
+    "start": 1566.24,
+    "duration": 6.439
+  },
+  {
+    "text": "were looking for in the first place.",
+    "start": 1568.4,
+    "duration": 4.279
+  },
+  {
+    "text": "And on the up side of things, we fixed a",
+    "start": 1573.44,
+    "duration": 5.2
+  },
+  {
+    "text": "lot of bugs thanks to uh tools like the",
+    "start": 1575.36,
+    "duration": 6.0
+  },
+  {
+    "text": "package simulation.",
+    "start": 1578.64,
+    "duration": 4.56
+  },
+  {
+    "text": "Uh",
+    "start": 1581.36,
+    "duration": 4.88
+  },
+  {
+    "text": "we went through pretty much every aspect",
+    "start": 1583.2,
+    "duration": 6.16
+  },
+  {
+    "text": "of replication in the game. We could fix",
+    "start": 1586.24,
+    "duration": 6.08
+  },
+  {
+    "text": "suboptimal things.",
+    "start": 1589.36,
+    "duration": 4.88
+  },
+  {
+    "text": "We encountered some things that were",
+    "start": 1592.32,
+    "duration": 3.44
+  },
+  {
+    "text": "impossible",
+    "start": 1594.24,
+    "duration": 4.08
+  },
+  {
+    "text": "or very hard to implement.",
+    "start": 1595.76,
+    "duration": 7.44
+  },
+  {
+    "text": "Uh the no object access thing.",
+    "start": 1598.32,
+    "duration": 6.56
+  },
+  {
+    "text": "uh",
+    "start": 1603.2,
+    "duration": 4.719
+  },
+  {
+    "text": "could sometimes be a hurdle but could",
+    "start": 1604.88,
+    "duration": 4.96
+  },
+  {
+    "text": "also spawn a new feature like the new",
+    "start": 1607.919,
+    "duration": 5.36
+  },
+  {
+    "text": "lifetime condition dynamic which allows",
+    "start": 1609.84,
+    "duration": 5.6
+  },
+  {
+    "text": "you to change the lifetime condition of",
+    "start": 1613.279,
+    "duration": 4.961
+  },
+  {
+    "text": "a property at runtime",
+    "start": 1615.44,
+    "duration": 7.4
+  },
+  {
+    "text": "and that works for Iris and noniris",
+    "start": 1618.24,
+    "duration": 4.6
+  },
+  {
+    "text": "fixing things is a great way to learn uh",
+    "start": 1623.12,
+    "duration": 4.799
+  },
+  {
+    "text": "both us as uh network programmers",
+    "start": 1625.6,
+    "duration": 4.64
+  },
+  {
+    "text": "learning how game play certain gameplay",
+    "start": 1627.919,
+    "duration": 5.201
+  },
+  {
+    "text": "features work but also At the end of the",
+    "start": 1630.24,
+    "duration": 5.52
+  },
+  {
+    "text": "porting effort when uh other developers",
+    "start": 1633.12,
+    "duration": 4.96
+  },
+  {
+    "text": "started pitching in uh they learned",
+    "start": 1635.76,
+    "duration": 4.799
+  },
+  {
+    "text": "Iris.",
+    "start": 1638.08,
+    "duration": 5.76
+  },
+  {
+    "text": "So some of the lessons learned",
+    "start": 1640.559,
+    "duration": 6.161
+  },
+  {
+    "text": "work in the main development branch. We",
+    "start": 1643.84,
+    "duration": 8.16
+  },
+  {
+    "text": "work worked isolated for four years and",
+    "start": 1646.72,
+    "duration": 9.959
+  },
+  {
+    "text": "that was quite painful. Uh",
+    "start": 1652.0,
+    "duration": 4.679
+  },
+  {
+    "text": "and as I mentioned the code changed a",
+    "start": 1657.52,
+    "duration": 6.32
+  },
+  {
+    "text": "lot. So if you don't have your code",
+    "start": 1660.32,
+    "duration": 6.32
+  },
+  {
+    "text": "alongside uh in the main branch, people",
+    "start": 1663.84,
+    "duration": 6.88
+  },
+  {
+    "text": "can break your porting efforts.",
+    "start": 1666.64,
+    "duration": 7.12
+  },
+  {
+    "text": "Uh and you should also compile with your",
+    "start": 1670.72,
+    "duration": 6.4
+  },
+  {
+    "text": "code enabled. We had a define everywhere",
+    "start": 1673.76,
+    "duration": 6.799
+  },
+  {
+    "text": "uh to be able I mean not to impact the",
+    "start": 1677.12,
+    "duration": 6.08
+  },
+  {
+    "text": "Fortnite executable size until it was",
+    "start": 1680.559,
+    "duration": 4.881
+  },
+  {
+    "text": "ready to ship.",
+    "start": 1683.2,
+    "duration": 7.839
+  },
+  {
+    "text": "Uh that you don't need to do that.",
+    "start": 1685.44,
+    "duration": 8.719
+  },
+  {
+    "text": "Get QA involved early. Uh test with and",
+    "start": 1691.039,
+    "duration": 6.88
+  },
+  {
+    "text": "without Iris and test with and without",
+    "start": 1694.159,
+    "duration": 6.161
+  },
+  {
+    "text": "uh package simulation particularly with",
+    "start": 1697.919,
+    "duration": 5.88
+  },
+  {
+    "text": "package simulation",
+    "start": 1700.32,
+    "duration": 3.479
+  },
+  {
+    "text": "and collaborate with those who knows the",
+    "start": 1703.84,
+    "duration": 5.439
+  },
+  {
+    "text": "features that are going to be ported",
+    "start": 1706.08,
+    "duration": 7.24
+  },
+  {
+    "text": "that will save a lot of time.",
+    "start": 1709.279,
+    "duration": 4.041
+  },
+  {
+    "text": "So some debugging tips and tricks.",
+    "start": 1715.52,
+    "duration": 5.039
+  },
+  {
+    "text": "Network insights is a great tool to",
+    "start": 1718.159,
+    "duration": 5.52
+  },
+  {
+    "text": "inspect the packet contents. Uh on the",
+    "start": 1720.559,
+    "duration": 6.48
+  },
+  {
+    "text": "top view you have the packet size and",
+    "start": 1723.679,
+    "duration": 5.521
+  },
+  {
+    "text": "whether the packet was lost or not which",
+    "start": 1727.039,
+    "duration": 5.36
+  },
+  {
+    "text": "is a lost packet is indicated by a red",
+    "start": 1729.2,
+    "duration": 6.56
+  },
+  {
+    "text": "bar and on the bottom view you have the",
+    "start": 1732.399,
+    "duration": 6.721
+  },
+  {
+    "text": "bit perfect uh packet contents.",
+    "start": 1735.76,
+    "duration": 6.56
+  },
+  {
+    "text": "So make sure to use ue net trace macros",
+    "start": 1739.12,
+    "duration": 6.08
+  },
+  {
+    "text": "when you um implement net serializers",
+    "start": 1742.32,
+    "duration": 5.959
+  },
+  {
+    "text": "for example.",
+    "start": 1745.2,
+    "duration": 3.079
+  },
+  {
+    "text": "Uh for runtime debugging we have a few",
+    "start": 1750.0,
+    "duration": 4.72
+  },
+  {
+    "text": "functions you can call from the",
+    "start": 1753.279,
+    "duration": 3.841
+  },
+  {
+    "text": "immediate watch window. Uh for example",
+    "start": 1754.72,
+    "duration": 5.839
+  },
+  {
+    "text": "to print state and other things very",
+    "start": 1757.12,
+    "duration": 6.64
+  },
+  {
+    "text": "handy. Uh they're located in Iris",
+    "start": 1760.559,
+    "duration": 5.6
+  },
+  {
+    "text": "debugging.h H.",
+    "start": 1763.76,
+    "duration": 5.76
+  },
+  {
+    "text": "And we also have some console commands",
+    "start": 1766.159,
+    "duration": 6.321
+  },
+  {
+    "text": "to help you debug filtering issues and",
+    "start": 1769.52,
+    "duration": 5.12
+  },
+  {
+    "text": "call distance issues.",
+    "start": 1772.48,
+    "duration": 4.88
+  },
+  {
+    "text": "Uh they're located in object replication",
+    "start": 1774.64,
+    "duration": 5.039
+  },
+  {
+    "text": "bridge debugging.cpp",
+    "start": 1777.36,
+    "duration": 6.36
+  },
+  {
+    "text": "despite what it says there.",
+    "start": 1779.679,
+    "duration": 4.041
+  },
+  {
+    "text": "And some performance tips. While we try",
+    "start": 1784.64,
+    "duration": 6.639
+  },
+  {
+    "text": "strive to be as performant as possible,",
+    "start": 1788.24,
+    "duration": 6.559
+  },
+  {
+    "text": "we're also running your code.",
+    "start": 1791.279,
+    "duration": 8.721
+  },
+  {
+    "text": "Um, but one of the tips is um use push",
+    "start": 1794.799,
+    "duration": 8.24
+  },
+  {
+    "text": "model on your properties. That will save",
+    "start": 1800.0,
+    "duration": 6.399
+  },
+  {
+    "text": "um a lot of",
+    "start": 1803.039,
+    "duration": 5.681
+  },
+  {
+    "text": "time.",
+    "start": 1806.399,
+    "duration": 4.721
+  },
+  {
+    "text": "uh particularly during the polling",
+    "start": 1808.72,
+    "duration": 5.4
+  },
+  {
+    "text": "phase,",
+    "start": 1811.12,
+    "duration": 3.0
+  },
+  {
+    "text": "you're probably going to use uh",
+    "start": 1814.559,
+    "duration": 6.161
+  },
+  {
+    "text": "exclusion groups and other groups a lot",
+    "start": 1818.32,
+    "duration": 3.92
+  },
+  {
+    "text": "and strive to minimize your",
+    "start": 1820.72,
+    "duration": 4.24
+  },
+  {
+    "text": "modifications to it. So sometimes it can",
+    "start": 1822.24,
+    "duration": 5.28
+  },
+  {
+    "text": "be faster recreating a group if rather",
+    "start": 1824.96,
+    "duration": 7.719
+  },
+  {
+    "text": "than uh doing lots of modifications.",
+    "start": 1827.52,
+    "duration": 5.159
+  },
+  {
+    "text": "And since we work on batches of objects,",
+    "start": 1833.52,
+    "duration": 6.399
+  },
+  {
+    "text": "you can vectorize uh your code in uh net",
+    "start": 1836.559,
+    "duration": 7.641
+  },
+  {
+    "text": "object prioritizers and filters",
+    "start": 1839.919,
+    "duration": 4.281
+  },
+  {
+    "text": "and use timing insights and CCV stats to",
+    "start": 1844.48,
+    "duration": 5.919
+  },
+  {
+    "text": "track down perf problem and then uh if",
+    "start": 1847.2,
+    "duration": 6.8
+  },
+  {
+    "text": "you want to deep dig deeper then uh use",
+    "start": 1850.399,
+    "duration": 7.241
+  },
+  {
+    "text": "a sampling profiler.",
+    "start": 1854.0,
+    "duration": 3.64
+  },
+  {
+    "text": "So what about the future?",
+    "start": 1859.279,
+    "duration": 4.041
+  },
+  {
+    "text": "Well, Iris is still experimental and we",
+    "start": 1863.679,
+    "duration": 7.041
+  },
+  {
+    "text": "want to go beta. Uh so we will work on",
+    "start": 1866.399,
+    "duration": 6.801
+  },
+  {
+    "text": "hardening the API.",
+    "start": 1870.72,
+    "duration": 4.72
+  },
+  {
+    "text": "Uh we haven't implemented support for",
+    "start": 1873.2,
+    "duration": 4.64
+  },
+  {
+    "text": "seamless travel yet.",
+    "start": 1875.44,
+    "duration": 4.88
+  },
+  {
+    "text": "Uh we want to improve our unit test",
+    "start": 1877.84,
+    "duration": 4.16
+  },
+  {
+    "text": "framework so you can write your own",
+    "start": 1880.32,
+    "duration": 3.359
+  },
+  {
+    "text": "tests",
+    "start": 1882.0,
+    "duration": 5.36
+  },
+  {
+    "text": "and also implement replay recording and",
+    "start": 1883.679,
+    "duration": 6.48
+  },
+  {
+    "text": "playback. that's currently",
+    "start": 1887.36,
+    "duration": 4.319
+  },
+  {
+    "text": "using",
+    "start": 1890.159,
+    "duration": 4.561
+  },
+  {
+    "text": "old school replication.",
+    "start": 1891.679,
+    "duration": 6.88
+  },
+  {
+    "text": "So you need to keep both serialization",
+    "start": 1894.72,
+    "duration": 5.76
+  },
+  {
+    "text": "uh variants",
+    "start": 1898.559,
+    "duration": 4.801
+  },
+  {
+    "text": "uh up to date if you if you have",
+    "start": 1900.48,
+    "duration": 5.88
+  },
+  {
+    "text": "replays.",
+    "start": 1903.36,
+    "duration": 3.0
+  },
+  {
+    "text": "Thank you.",
+    "start": 1908.48,
+    "duration": 10.359
+  },
+  {
+    "text": "[Applause]",
+    "start": 1911.07,
+    "duration": 7.769
+  }
+]

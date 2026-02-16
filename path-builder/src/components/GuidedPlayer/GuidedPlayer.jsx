@@ -4,7 +4,7 @@
  * State, effects, and handlers live in useGuidedPlayer hook.
  * Stage-specific cards are extracted to sub-components.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import useGuidedPlayer, { STAGES } from "../../hooks/useGuidedPlayer";
 import docLinks from "../../data/doc_links.json";
@@ -314,6 +314,22 @@ function VideoStage({
   onVideoComplete,
   onExit,
 }) {
+  // Reset embed status whenever drive_id changes
+  const driveId = currentVideo?.drive_id;
+  const [embedStatus, setEmbedStatus] = useState({ id: null, failed: false });
+
+  // Probe Drive thumbnail to detect broken embeds (can't catch iframe 404 cross-origin)
+  useEffect(() => {
+    if (!driveId) return;
+    const img = new Image();
+    img.onload = () => setEmbedStatus({ id: driveId, failed: false });
+    img.onerror = () => setEmbedStatus({ id: driveId, failed: true });
+    img.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w64`;
+  }, [driveId]);
+
+  // Only show failure if the probe result is for the CURRENT drive_id
+  const embedFailed = embedStatus.id === driveId && embedStatus.failed;
+
   return (
     <div className="video-stage">
       <div className="video-header">
@@ -326,7 +342,7 @@ function VideoStage({
         {course.gemini_outcomes?.[0] && <p className="objective">{course.gemini_outcomes[0]}</p>}
       </div>
       <div className="video-container">
-        {currentVideo?.drive_id ? (
+        {currentVideo?.drive_id && !embedFailed ? (
           <iframe
             key={currentVideo.drive_id}
             src={`https://drive.google.com/file/d/${currentVideo.drive_id}/preview`}
@@ -334,6 +350,24 @@ function VideoStage({
             allow="autoplay"
             allowFullScreen
           />
+        ) : embedFailed ? (
+          <div className="video-embed-error">
+            <div className="embed-error-icon">📹</div>
+            <p className="embed-error-title">Video temporarily unavailable</p>
+            <p className="embed-error-detail">
+              This video file may have been moved or is being updated.
+            </p>
+            {currentVideo?.drive_id && (
+              <a
+                href={`https://drive.google.com/file/d/${currentVideo.drive_id}/view`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="embed-error-link"
+              >
+                🔗 Try opening in Google Drive
+              </a>
+            )}
+          </div>
         ) : (
           <div className="video-placeholder">
             <img src={getThumbnailUrl(currentVideo)} alt={course.title} />
@@ -341,7 +375,7 @@ function VideoStage({
           </div>
         )}
       </div>
-      {currentVideo?.drive_id && (
+      {currentVideo?.drive_id && !embedFailed && (
         <a
           href={`https://drive.google.com/file/d/${currentVideo.drive_id}/view`}
           target="_blank"
