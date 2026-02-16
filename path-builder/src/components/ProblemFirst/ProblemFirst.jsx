@@ -457,6 +457,8 @@ export default function ProblemFirst() {
                 }
               }
             }
+            // Sort docs by relevance so the best match appears first
+            blended.docs.sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
             setBlendedPath(blended);
             devLog(
               `[Blended] ${blended.docs.length} docs, ${blended.youtube.length} YT, coverage: ${(blended.coverageScore * 100).toFixed(0)}%`
