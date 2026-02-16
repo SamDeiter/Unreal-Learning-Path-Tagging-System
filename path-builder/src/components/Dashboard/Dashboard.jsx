@@ -11,6 +11,7 @@ function Dashboard() {
   const [sortField, setSortField] = useState("code");
   const [sortDirection, setSortDirection] = useState("asc");
   const [showMissingVideos, setShowMissingVideos] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState("all");
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -22,13 +23,30 @@ function Dashboard() {
     return { totalCourses, totalVideos, coursesWithVideos, aiEnriched };
   }, [courses]);
 
+  // Calculate source distribution
+  const sourceDistribution = useMemo(() => {
+    const youtube = courses.filter((c) => c.source === "youtube").length;
+    const docs = courses.filter((c) => c.source === "epic_docs").length;
+    const lms = courses.filter((c) => !c.source).length;
+    return { youtube, docs, lms };
+  }, [courses]);
+
+  // Filter courses by source
+  const filteredCourses = useMemo(() => {
+    if (sourceFilter === "all") return courses;
+    if (sourceFilter === "youtube") return courses.filter((c) => c.source === "youtube");
+    if (sourceFilter === "docs") return courses.filter((c) => c.source === "epic_docs");
+    if (sourceFilter === "lms") return courses.filter((c) => !c.source);
+    return courses;
+  }, [courses, sourceFilter]);
+
   // Calculate topic distribution (from courses) - excludes "Other" from chart
   const topicDistribution = useMemo(() => {
-    if (!courses || courses.length === 0) return [];
+    if (!filteredCourses || filteredCourses.length === 0) return [];
 
     // Group courses by topic (check both course.topic and course.tags?.topic)
     const topics = {};
-    courses.forEach((course) => {
+    filteredCourses.forEach((course) => {
       const topic = course.topic || course.tags?.topic || "Other";
       // Skip "Other" - fragments like Outro/WrapUp don't need to pollute analytics
       if (topic === "Other") return;
@@ -40,19 +58,19 @@ function Dashboard() {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 12);
-  }, [courses]);
+  }, [filteredCourses]);
 
   // Calculate level distribution
   const levelDistribution = useMemo(() => {
     const levels = { Beginner: 0, Intermediate: 0, Advanced: 0 };
-    courses.forEach((course) => {
+    filteredCourses.forEach((course) => {
       const level = course.tags?.level || "Intermediate";
       if (levels[level] !== undefined) {
         levels[level]++;
       }
     });
     return levels;
-  }, [courses]);
+  }, [filteredCourses]);
 
   // Get top 100 tags for Tag Cloud — use pre-computed counts from App.jsx
   const tagCloud = useMemo(() => {
@@ -123,7 +141,7 @@ function Dashboard() {
 
   // Sort courses for table
   const sortedCourses = useMemo(() => {
-    return [...courses].sort((a, b) => {
+    return [...filteredCourses].sort((a, b) => {
       let aVal, bVal;
 
       // Handle nested tag fields
@@ -148,7 +166,7 @@ function Dashboard() {
       }
       return aVal < bVal ? 1 : -1;
     });
-  }, [courses, sortField, sortDirection]);
+  }, [filteredCourses, sortField, sortDirection]);
 
   // Split courses by video availability
   const coursesWithVideos = sortedCourses.filter((c) => (c.video_count || 0) > 0);
@@ -213,19 +231,64 @@ function Dashboard() {
           <div className="stat-number">{stats.totalCourses}</div>
           <div className="stat-label">TOTAL COURSES</div>
         </div>
-        <div className="stat-card">
-          <div className="stat-number">{stats.totalVideos}</div>
-          <div className="stat-label">VIDEO FILES</div>
+        <div
+          className="stat-card source-yt"
+          onClick={() => setSourceFilter(sourceFilter === "youtube" ? "all" : "youtube")}
+          style={{
+            cursor: "pointer",
+            outline: sourceFilter === "youtube" ? "2px solid #f85149" : "none",
+          }}
+        >
+          <div className="stat-number">{sourceDistribution.youtube}</div>
+          <div className="stat-label">▶ YOUTUBE</div>
         </div>
-        <div className="stat-card">
-          <div className="stat-number">{stats.coursesWithVideos}</div>
-          <div className="stat-label">COURSES WITH VIDEOS</div>
+        <div
+          className="stat-card source-lms"
+          onClick={() => setSourceFilter(sourceFilter === "lms" ? "all" : "lms")}
+          style={{
+            cursor: "pointer",
+            outline: sourceFilter === "lms" ? "2px solid #3fb950" : "none",
+          }}
+        >
+          <div className="stat-number">{sourceDistribution.lms}</div>
+          <div className="stat-label">🎓 EPIC LMS</div>
+        </div>
+        <div
+          className="stat-card source-docs"
+          onClick={() => setSourceFilter(sourceFilter === "docs" ? "all" : "docs")}
+          style={{
+            cursor: "pointer",
+            outline: sourceFilter === "docs" ? "2px solid #58a6ff" : "none",
+          }}
+        >
+          <div className="stat-number">{sourceDistribution.docs}</div>
+          <div className="stat-label">📖 EPIC DOCS</div>
         </div>
         <div className="stat-card accent">
           <div className="stat-number">{stats.aiEnriched}</div>
           <div className="stat-label">AI-ENRICHED</div>
         </div>
       </div>
+
+      {/* Source Filter Bar */}
+      {sourceFilter !== "all" && (
+        <div className="source-filter-bar">
+          <span>
+            Filtering:{" "}
+            <strong>
+              {sourceFilter === "youtube"
+                ? "▶ YouTube"
+                : sourceFilter === "lms"
+                  ? "🎓 Epic LMS"
+                  : "📖 Epic Docs"}
+            </strong>{" "}
+            ({filteredCourses.length} courses)
+          </span>
+          <button className="clear-filter-btn" onClick={() => setSourceFilter("all")}>
+            ✕ Clear Filter
+          </button>
+        </div>
+      )}
 
       {/* Charts Row */}
       <div className="charts-row">
@@ -464,6 +527,7 @@ function Dashboard() {
                   VIDEOS {sortField === "video_count" && (sortDirection === "asc" ? "▲" : "▼")}
                 </th>
                 <th>AI</th>
+                <th>SOURCE</th>
               </tr>
             </thead>
             <tbody>
@@ -481,6 +545,15 @@ function Dashboard() {
                   <td className="videos-cell">{course.video_count}</td>
                   <td className="ai-cell">
                     {course.gemini_enriched ? <span className="ai-check">✓</span> : "—"}
+                  </td>
+                  <td>
+                    <span className={`source-badge source-${course.source || "lms"}`}>
+                      {course.source === "youtube"
+                        ? "▶ YT"
+                        : course.source === "epic_docs"
+                          ? "📖 Doc"
+                          : "🎓 LMS"}
+                    </span>
                   </td>
                 </tr>
               ))}
