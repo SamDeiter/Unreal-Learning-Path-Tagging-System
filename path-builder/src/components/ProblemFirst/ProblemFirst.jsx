@@ -397,29 +397,36 @@ export default function ProblemFirst() {
             ...(cartData.diagnosis?.matched_tag_ids || []),
             ...(inputData.detectedTagIds || []),
           ];
-          // Split dotted tag IDs into individual segments: "unreal_engine.blueprint.casting" → ["blueprint", "casting"]
+          // Split dotted tag IDs into individual segments for YouTube matching
           const tagSegments = rawTags.flatMap((t) =>
             t.split(/[._]/).filter((s) => s.length > 2 && s !== "unreal" && s !== "engine")
           );
-          // Also extract keywords from the user's query
+
+          // Doc topics: use ONLY user query words + augmentation (not tag segments,
+          // which inject noise like "rendering"/"meshDistanceField" and boost wrong docs)
           const queryWords = (inputData.query || "")
             .toLowerCase()
             .split(/\s+/)
-            .filter((w) => w.length > 3);
-          const uniqueTopics = [...new Set([...tagSegments, ...queryWords])].slice(0, 12);
+            .filter((w) => w.length > 2);
+          const docTopics = [...new Set(queryWords)];
 
           // Topic augmentation: add common related terms that users imply but don't type
-          const topicLower = uniqueTopics.map((t) => t.toLowerCase());
-          const hasWord = (w) => topicLower.some((t) => t.includes(w));
+          const hasWord = (w) => docTopics.some((t) => t.includes(w));
           if (hasWord("mesh") && !hasWord("skeletal")) {
-            // Generic "mesh" queries are almost always about static meshes
-            uniqueTopics.push("static mesh", "import");
+            docTopics.push("static mesh", "static meshes", "import", "importing");
           }
           if (hasWord("size") || hasWord("scale") || hasWord("wrong")) {
-            uniqueTopics.push("scale", "transform");
+            docTopics.push("scale", "transform");
           }
-          if (uniqueTopics.length > 0) {
-            const blended = await buildBlendedPath(uniqueTopics, driveVideos, {
+
+          // YouTube topics: combine both tag segments and query words
+          const uniqueTopics = [...new Set([...tagSegments, ...docTopics])].slice(0, 15);
+
+          devLog(`[DocTopics] ${docTopics.join(", ")}`);
+          devLog(`[AllTopics] ${uniqueTopics.join(", ")}`);
+
+          if (docTopics.length > 0) {
+            const blended = await buildBlendedPath(docTopics, driveVideos, {
               maxDocs: 5,
               maxYoutube: 3,
             });
