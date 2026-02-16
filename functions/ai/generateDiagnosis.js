@@ -1,6 +1,46 @@
 const functions = require("firebase-functions");
 const { checkRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
+const fs = require("fs");
+const path = require("path");
+
+// ---------------------------------------------------------------------------
+// Solution Atoms — loaded once at cold start (zero Firestore cost)
+// ---------------------------------------------------------------------------
+let SOLUTION_ATOMS = [];
+
+try {
+  const atomsDir = path.join(__dirname, "..", "data", "atoms");
+  if (fs.existsSync(atomsDir)) {
+    const files = fs.readdirSync(atomsDir).filter((f) => f.endsWith(".json"));
+    for (const file of files) {
+      const atom = JSON.parse(fs.readFileSync(path.join(atomsDir, file), "utf8"));
+      SOLUTION_ATOMS.push(atom);
+    }
+    console.log(`[generateDiagnosis] Loaded ${SOLUTION_ATOMS.length} solution atoms`);
+  }
+} catch (err) {
+  console.warn("[generateDiagnosis] Failed to load atoms:", err.message);
+}
+
+/**
+ * Match detectedTags against Solution Atoms.
+ * Returns all atoms where at least one tag matches.
+ */
+function matchAtoms(detectedTags) {
+  if (!detectedTags || detectedTags.length === 0) return [];
+
+  // Normalize detected tags to an array of tag_id strings
+  const tagIds = detectedTags.map((t) =>
+    typeof t === "string" ? t : t.tag_id || t.id || ""
+  ).filter(Boolean);
+
+  if (tagIds.length === 0) return [];
+
+  return SOLUTION_ATOMS.filter((atom) =>
+    atom.tags && atom.tags.some((atomTag) => tagIds.includes(atomTag))
+  );
+}
 
 /**
  * PROMPT 2 — DIAGNOSIS GENERATION
@@ -73,6 +113,26 @@ exports.generateDiagnosis = functions
         );
       }
 
+      // ---------------------------------------------------------------
+      // Solution Atom lookup — prioritize verified solutions
+      // ---------------------------------------------------------------
+      const matchedAtoms = matchAtoms(detectedTags);
+      let atomContext = "";
+      if (matchedAtoms.length > 0) {
+        atomContext = `\n\nVERIFIED SOLUTION ATOMS (use these as primary guidance):\n`;
+        for (const atom of matchedAtoms) {
+          atomContext += `\n--- ${atom.title} ---\n`;
+          atomContext += `Why: ${atom.why}\n`;
+          if (atom.verification?.items) {
+            atomContext += `Key Steps:\n${atom.verification.items.map((s, i) => `  ${i + 1}. ${s}`).join("\n")}\n`;
+          }
+          if (atom.evidence) {
+            atomContext += `Evidence: ${atom.evidence.join(", ")}\n`;
+          }
+        }
+        atomContext += `\nIMPORTANT: Incorporate these verified steps into your root_causes and signals. These are expert-validated solutions.\n`;
+      }
+
       const userPrompt = `Diagnose this UE5 problem:
 
 Intent:
@@ -82,7 +142,7 @@ Intent:
 - Systems involved: ${(intent.systems || []).join(", ") || "Unknown"}
 
 ${detectedTags?.length > 0 ? `Detected tags: ${detectedTags.map((t) => t.display_name || t).join(", ")}` : ""}
-
+${atomContext}
 Provide a comprehensive diagnosis focusing on WHY this happens, not just how to fix it.
 This diagnosis should teach the developer to recognize and solve similar problems in the future.`;
 
@@ -137,10 +197,27 @@ This diagnosis should teach the developer to recognize and solve similar problem
         throw new Error("Diagnosis must include at least one root cause");
       }
 
+      // ---------------------------------------------------------------
+      // Attach matched atoms to response (client can render "Do" steps)
+      // ---------------------------------------------------------------
+      if (matchedAtoms.length > 0) {
+        diagnosisData.solution_atoms = matchedAtoms.map((atom) => ({
+          atom_id: atom.atom_id,
+          title: atom.title,
+          why: atom.why,
+          key_steps: atom.verification?.items || [],
+          evidence: atom.evidence || [],
+          duration_minutes: atom.duration_minutes,
+          prerequisites: atom.prerequisites || [],
+          tags: atom.tags,
+        }));
+      }
+
       await logApiUsage(userId, {
         model: model,
         type: "diagnosis",
         intentId: intent.intent_id,
+        atomsMatched: matchedAtoms.length,
       });
 
       return {
