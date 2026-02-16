@@ -36,6 +36,8 @@ def fetch_youtube_transcripts(
     skipped = 0
     failed = 0
 
+    ytt_api = YouTubeTranscriptApi()
+
     for video_id in video_ids:
         output_file = transcript_dir / f"{video_id}.json"
 
@@ -53,47 +55,27 @@ def fetch_youtube_transcripts(
             continue
 
         try:
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            # v1.2+ API: use fetch() directly
+            transcript = ytt_api.fetch(video_id, languages=["en"])
 
-            # Prefer manually created English, fall back to auto-generated
-            transcript = None
-            try:
-                transcript = transcript_list.find_manually_created_transcript(
-                    ["en"]
-                )
-            except Exception:
-                try:
-                    transcript = transcript_list.find_generated_transcript(
-                        ["en"]
-                    )
-                except Exception:
-                    pass
-
-            if transcript is None:
-                print(f"  ⚠️  No English transcript for {video_id}")
-                failed += 1
-                continue
-
-            entries = transcript.fetch()
+            # transcript is a FetchedTranscript with snippet entries
+            entries = [
+                {
+                    "text": snippet.text,
+                    "start": snippet.start,
+                    "duration": snippet.duration,
+                }
+                for snippet in transcript
+            ]
 
             # Save raw transcript entries as JSON
             output_file.write_text(
-                json.dumps(
-                    [
-                        {
-                            "text": entry.get("text", ""),
-                            "start": entry.get("start", 0),
-                            "duration": entry.get("duration", 0),
-                        }
-                        for entry in entries
-                    ],
-                    indent=2,
-                ),
+                json.dumps(entries, indent=2),
                 encoding="utf-8",
             )
 
             # Build full text
-            full_text = " ".join(entry.get("text", "") for entry in entries)
+            full_text = " ".join(e["text"] for e in entries)
             results[video_id] = full_text
             fetched += 1
 
