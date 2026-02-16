@@ -443,7 +443,7 @@ function TagSources() {
               <code>transcript_tags</code> fields exist in your data.
             </div>
           ) : (
-            <div className={`tag-list ${showAllVideoTags ? "expanded" : ""}`}>
+            <div className={`tag-list ${videoTagLimit !== 15 ? "expanded" : ""}`}>
               {displayedVideoTags.map(([tag, count]) => (
                 <span key={tag} className="tag-chip video">
                   {tag} <span className="count">{count}</span>
