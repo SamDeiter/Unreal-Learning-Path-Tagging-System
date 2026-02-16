@@ -5,100 +5,26 @@ const admin = require("firebase-admin");
 const { checkRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
 const { getVideoCatalog } = require("../utils/lazyData");
+const { runStage } = require("../pipeline/llmStage");
+const { createTrace, isAdmin } = require("../pipeline/telemetry");
+const { normalizeQuery } = require("../pipeline/cache");
+const { PROMPT_VERSION } = require("../pipeline/promptVersions");
 
 // Hardcoded fallback videos (verified real @UnrealEngine IDs)
 const FALLBACK_VIDEOS = [
-  {
-    id: "-OyVWhP2ekk",
-    title: "Packaging Your Project in Unreal Engine",
-    tags: ["build", "packaging"],
-    duration: 319,
-    url: "https://www.youtube.com/watch?v=-OyVWhP2ekk",
-  },
-  {
-    id: "ARfQ58w31Vs",
-    title: "Package Your Project in Unreal Engine",
-    tags: ["build", "packaging"],
-    duration: 49,
-    url: "https://www.youtube.com/watch?v=ARfQ58w31Vs",
-  },
-  {
-    id: "Bpw8LIud3SM",
-    title: "Compiling Your Project in Unreal Engine",
-    tags: ["build", "compile"],
-    duration: 187,
-    url: "https://www.youtube.com/watch?v=Bpw8LIud3SM",
-  },
-  {
-    id: "VVpZW4pKafQ",
-    title: "Introduction to Player Blueprints",
-    tags: ["blueprint", "gameplay"],
-    duration: 346,
-    url: "https://www.youtube.com/watch?v=VVpZW4pKafQ",
-  },
-  {
-    id: "ZkP4VOOlNbM",
-    title: "Adding Blueprint Components",
-    tags: ["blueprint", "components"],
-    duration: 327,
-    url: "https://www.youtube.com/watch?v=ZkP4VOOlNbM",
-  },
-  {
-    id: "TiDo_J4VOFA",
-    title: "Enhanced Input Action Mapping",
-    tags: ["gameplay", "input"],
-    duration: 414,
-    url: "https://www.youtube.com/watch?v=TiDo_J4VOFA",
-  },
-  {
-    id: "U4x2AvWnFKw",
-    title: "Building a HUD with UMG",
-    tags: ["ui", "umg"],
-    duration: 57,
-    url: "https://www.youtube.com/watch?v=U4x2AvWnFKw",
-  },
-  {
-    id: "7GmEMMJ6v60",
-    title: "Introduction to Unreal Motion Graphics",
-    tags: ["ui", "umg"],
-    duration: 391,
-    url: "https://www.youtube.com/watch?v=7GmEMMJ6v60",
-  },
-  {
-    id: "H5jIMq98hRg",
-    title: "Landscape Basics: Getting Started",
-    tags: ["world", "landscape"],
-    duration: 1750,
-    url: "https://www.youtube.com/watch?v=H5jIMq98hRg",
-  },
-  {
-    id: "ArdM5qdGi6g",
-    title: "Landscape Basics: Landscape Materials",
-    tags: ["materials", "landscape"],
-    duration: 1318,
-    url: "https://www.youtube.com/watch?v=ArdM5qdGi6g",
-  },
-  {
-    id: "W9a6511ZBsc",
-    title: "Adding a Coin Material",
-    tags: ["materials", "beginner"],
-    duration: 291,
-    url: "https://www.youtube.com/watch?v=W9a6511ZBsc",
-  },
-  {
-    id: "u7QQztB7JWM",
-    title: "Installing Unreal Engine",
-    tags: ["onboarding", "installation"],
-    duration: 251,
-    url: "https://www.youtube.com/watch?v=u7QQztB7JWM",
-  },
-  {
-    id: "EsvfCEtATMk",
-    title: "Navigating the Viewport",
-    tags: ["onboarding", "editor"],
-    duration: 445,
-    url: "https://www.youtube.com/watch?v=EsvfCEtATMk",
-  },
+  { id: "-OyVWhP2ekk", title: "Packaging Your Project in Unreal Engine", tags: ["build", "packaging"], duration: 319, url: "https://www.youtube.com/watch?v=-OyVWhP2ekk" },
+  { id: "ARfQ58w31Vs", title: "Package Your Project in Unreal Engine", tags: ["build", "packaging"], duration: 49, url: "https://www.youtube.com/watch?v=ARfQ58w31Vs" },
+  { id: "Bpw8LIud3SM", title: "Compiling Your Project in Unreal Engine", tags: ["build", "compile"], duration: 187, url: "https://www.youtube.com/watch?v=Bpw8LIud3SM" },
+  { id: "VVpZW4pKafQ", title: "Introduction to Player Blueprints", tags: ["blueprint", "gameplay"], duration: 346, url: "https://www.youtube.com/watch?v=VVpZW4pKafQ" },
+  { id: "ZkP4VOOlNbM", title: "Adding Blueprint Components", tags: ["blueprint", "components"], duration: 327, url: "https://www.youtube.com/watch?v=ZkP4VOOlNbM" },
+  { id: "TiDo_J4VOFA", title: "Enhanced Input Action Mapping", tags: ["gameplay", "input"], duration: 414, url: "https://www.youtube.com/watch?v=TiDo_J4VOFA" },
+  { id: "U4x2AvWnFKw", title: "Building a HUD with UMG", tags: ["ui", "umg"], duration: 57, url: "https://www.youtube.com/watch?v=U4x2AvWnFKw" },
+  { id: "7GmEMMJ6v60", title: "Introduction to Unreal Motion Graphics", tags: ["ui", "umg"], duration: 391, url: "https://www.youtube.com/watch?v=7GmEMMJ6v60" },
+  { id: "H5jIMq98hRg", title: "Landscape Basics: Getting Started", tags: ["world", "landscape"], duration: 1750, url: "https://www.youtube.com/watch?v=H5jIMq98hRg" },
+  { id: "ArdM5qdGi6g", title: "Landscape Basics: Landscape Materials", tags: ["materials", "landscape"], duration: 1318, url: "https://www.youtube.com/watch?v=ArdM5qdGi6g" },
+  { id: "W9a6511ZBsc", title: "Adding a Coin Material", tags: ["materials", "beginner"], duration: 291, url: "https://www.youtube.com/watch?v=W9a6511ZBsc" },
+  { id: "u7QQztB7JWM", title: "Installing Unreal Engine", tags: ["onboarding", "installation"], duration: 251, url: "https://www.youtube.com/watch?v=u7QQztB7JWM" },
+  { id: "EsvfCEtATMk", title: "Navigating the Viewport", tags: ["onboarding", "editor"], duration: 445, url: "https://www.youtube.com/watch?v=EsvfCEtATMk" },
 ];
 
 /**
@@ -110,55 +36,40 @@ function loadVideoCatalog() {
 }
 
 /**
- * Build compact video context for Gemini prompt
- * Only include relevant videos based on query keywords
+ * Build compact video context for Gemini prompt.
+ * Only include relevant videos based on query keywords.
  */
 function buildVideoContext(query, maxVideos = 20) {
   const catalog = loadVideoCatalog();
-  if (!catalog || catalog.length === 0) {
-    console.log("[DEBUG] No videos in catalog, returning null");
-    return null;
-  }
+  if (!catalog || catalog.length === 0) return null;
 
   const queryLower = query.toLowerCase();
   const queryWords = queryLower.split(/\s+/);
 
-  // Score videos by relevance
   const scored = catalog.map((video) => {
     let score = 0;
     const titleLower = video.title.toLowerCase();
     const tagsStr = video.tags.join(" ").toLowerCase();
 
-    // Title matches
     for (const word of queryWords) {
       if (titleLower.includes(word)) score += 3;
       if (tagsStr.includes(word)) score += 2;
     }
-
-    // Tag matches
     for (const tag of video.tags) {
       if (queryLower.includes(tag.split(".")[0])) score += 1;
     }
-
     return { ...video, score };
   });
 
-  // Sort by score and take top N
   const relevant = scored
     .filter((v) => v.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, maxVideos);
 
-  if (relevant.length === 0) {
-    return null; // No relevant videos, use Google Search
-  }
+  if (relevant.length === 0) return null;
 
-  // Build compact context string
   return relevant
-    .map(
-      (v) =>
-        `[${v.id}] "${v.title}" (${Math.round(v.duration / 60)}min) - ${v.tags.join(", ")} - ${v.url}`
-    )
+    .map((v) => `[${v.id}] "${v.title}" (${Math.round(v.duration / 60)}min) - ${v.tags.join(", ")} - ${v.url}`)
     .join("\n");
 }
 
@@ -168,14 +79,8 @@ function buildVideoContext(query, maxVideos = 20) {
  * 1. First, try to match from curated video catalog (RAG)
  * 2. Fall back to Google Search grounding for new/missing content
  *
- * This function:
- * 1. Validates the user is authenticated
- * 2. Implements rate limiting per user
- * 3. Loads relevant videos from catalog
- * 4. Calls Gemini API with server-side key
- * 5. Returns generated learning path
+ * Now uses pipeline/llmStage for schema validation + repair retry + caching.
  */
-
 exports.generateLearningPath = functions
   .runWith({
     secrets: ["GEMINI_API_KEY"],
@@ -183,12 +88,9 @@ exports.generateLearningPath = functions
     memory: "512MB",
   })
   .https.onCall(async (data, context) => {
-    // 1. Authentication check (optional for now - allow anonymous)
     const userId = context.auth?.uid || "anonymous";
-
     const { query, tags = [] } = data;
 
-    // 2. Input validation
     if (!query || query.trim().length < 3) {
       throw new functions.https.HttpsError(
         "invalid-argument",
@@ -196,7 +98,6 @@ exports.generateLearningPath = functions
       );
     }
 
-    // 3. Rate limiting check
     const rateLimitCheck = await checkRateLimit(userId, "learningPath");
     if (!rateLimitCheck.allowed) {
       throw new functions.https.HttpsError(
@@ -206,29 +107,21 @@ exports.generateLearningPath = functions
     }
 
     try {
-      // 4. Get API key from Secrets
       let apiKey = process.env.GEMINI_API_KEY;
-
+      if (!apiKey) apiKey = functions.config().gemini?.api_key;
       if (!apiKey) {
-        apiKey = functions.config().gemini?.api_key;
-      }
-
-      if (!apiKey) {
-        console.error("[ERROR] GEMINI_API_KEY secret is not set.");
         throw new functions.https.HttpsError(
           "failed-precondition",
           "Server configuration error: API Key missing."
         );
       }
 
-      // 5. Build video context from curated catalog
+      const trace = createTrace(userId, "generateLearningPath");
+      const normalized = normalizeQuery(query);
+
       const videoContext = buildVideoContext(query);
       const hasCuratedVideos = videoContext !== null;
 
-      console.log(`[DEBUG] Query: "${query}", Curated videos found: ${hasCuratedVideos}`);
-
-      // 6. Build the prompt for learning path generation
-      // HYBRID APPROACH: Prioritize curated catalog, fall back to Google Search
       const systemPrompt = `You are an expert UE5 educator creating DIAGNOSTIC learning paths.
 Your goal is NOT just to fix symptoms, but to teach developers:
 1. WHY this problem occurs (root cause understanding)
@@ -248,8 +141,7 @@ CONTENT REQUIREMENTS (MANDATORY):
 VIDEO SELECTION PRIORITY:
 ${
   hasCuratedVideos
-    ? `
-**PRIORITY 1 - CURATED CATALOG (USE THESE FIRST):**
+    ? `**PRIORITY 1 - CURATED CATALOG (USE THESE FIRST):**
 Below is our curated video database. ALWAYS prefer these verified videos:
 ${videoContext}
 
@@ -291,150 +183,48 @@ Return JSON:
       "type": "understand",
       "title": "Why This Happens",
       "description": "The underlying concept explained in detail",
-      "action": "1. **Open your Blueprint** and locate the node causing the error\\n2. **Examine the connection** - look at what object is being passed in\\n3. **Check the target type** - ensure it matches what you're casting to\\n4. **Review the execution flow** - trace back to see where the reference comes from",
+      "action": "1. **Open your Blueprint**...",
       "takeaway": "Key insight they should remember",
       "content": [
-        {"type": "docs", "title": "Epic Docs: [concept]", "url": "https://dev.epicgames.com/...", "description": "Why this matters"},
-        {
-          "type": "video",
-          "title": "Focused Clip Title",
-          "url": "https://youtube.com/watch?v=VIDEO_ID&t=330",
-          "thumbnail_url": "https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg",
-          "description": "(5 min) Covers project packaging essentials",
-          "duration": "5 min",
-          "watch_points": [
-            {"time": "0:30", "label": "Asset Preparation", "keywords": ["content browser", "references"]},
-            {"time": "2:15", "label": "Project Settings", "keywords": ["build configuration", "target platform"]},
-            {"time": "4:00", "label": "Packaging Steps", "keywords": ["cook", "package", "output"]}
-          ]
-        }
+        {"type": "video", "title": "Focused Clip Title", "url": "https://youtube.com/watch?v=VIDEO_ID&t=330", "thumbnail_url": "https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg", "description": "(5 min) Covers essentials"}
       ]
-    },
-    {
-      "number": 2,
-      "type": "diagnose",
-      "title": "Find the Cause",
-      "description": "How to identify the specific issue",
-      "action": "1. **Enable Blueprint debugging** - Right-click the node and select 'Add Breakpoint'\\n2. **Print the object reference** - Add a Print String node to see what's being passed\\n3. **Check if object is valid** - Use an IsValid node before the Cast\\n4. **Test in PIE mode** - Play in editor and trigger the code path",
-      "takeaway": "How to diagnose this in future"
-    },
-    {
-      "number": 3,
-      "type": "resolve",
-      "title": "Fix It",
-      "description": "Practical solution with exact steps",
-      "action": "1. **Add an IsValid check** before the Cast node\\n2. **Use the Cast Failed exec pin** - Connect it to handle the failure case\\n3. **Store a reference properly** - Create a variable to cache the valid reference\\n4. **Test your fix** - Play the game and verify the error no longer occurs"
-    },
-    {
-      "number": 4,
-      "type": "prevent",
-      "title": "Prevent Future Issues",
-      "description": "Best practices to adopt",
-      "action": "1. **Always check IsValid** before using any object reference\\n2. **Use Cast with 'As' suffix** for cleaner code (Cast To PlayerController → GetControlledPawn as PlayerController)\\n3. **Handle both success and failure** - Never leave Cast Failed unconnected\\n4. **Document your assumptions** - Add comments about expected object types",
-      "takeaway": "How to never have this problem again"
     }
   ]
 }
 
 Use REAL Epic documentation URLs and real YouTube video IDs.`;
 
-      // 6. Call Gemini API
-      const model = "gemini-2.0-flash";
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-      const payload = {
-        contents: [{ parts: [{ text: userPrompt }] }],
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        tools: [
-          {
-            googleSearch: {}, // Enable grounding for real video URLs
-          },
-        ],
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 8192,
-        },
-      };
-
-      console.log("[DEBUG] Calling Gemini API...");
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const result = await runStage({
+        stage: "learning_path",
+        systemPrompt,
+        userPrompt,
+        apiKey,
+        trace,
+        cacheParams: { query: normalized, mode: "onboarding", tags: tags.slice(0, 5) },
+        maxTokens: 8192,
+        tools: [{ googleSearch: {} }], // Enable grounding for real video URLs
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(
-          `[ERROR] Gemini API failed: ${response.status} ${response.statusText}`,
-          errorText
+      trace.toLog();
+
+      if (!result.success) {
+        throw new functions.https.HttpsError(
+          "internal",
+          "Failed to generate valid learning path after repair retry."
         );
-        throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
       }
 
-      const responseData = await response.json();
-      const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+      const pathData = result.data;
 
-      // Extract usage metadata for stats
-      const usageMetadata = responseData.usageMetadata || {};
-      const inputTokens = usageMetadata.promptTokenCount || 0;
-      const outputTokens = usageMetadata.candidatesTokenCount || 0;
-      const totalTokens = usageMetadata.totalTokenCount || inputTokens + outputTokens;
-
-      // Calculate costs (Gemini 2.0 Flash pricing)
-      const inputCost = (inputTokens / 1000000) * 0.075;
-      const outputCost = (outputTokens / 1000000) * 0.3;
-      const groundingCost = 0.035; // $35/1K queries = $0.035/query
-      const totalCost = inputCost + outputCost + groundingCost;
-
-      // Estimate energy consumption
-      const energyKwh = (totalTokens / 1000) * 0.005;
-      const co2Grams = (totalTokens / 1000) * 0.4;
-
-      const usageStats = {
-        inputTokens,
-        outputTokens,
-        totalTokens,
-        inputCost: inputCost.toFixed(6),
-        outputCost: outputCost.toFixed(6),
-        groundingCost: groundingCost.toFixed(4),
-        totalCost: totalCost.toFixed(4),
-        energyKwh: energyKwh.toFixed(4),
-        co2Grams: co2Grams.toFixed(2),
-      };
-
-      console.log(`[DEBUG] Usage stats:`, usageStats);
-
-      if (!generatedText) {
-        console.error("[ERROR] No content in Gemini response:", JSON.stringify(responseData));
-        throw new Error("No content generated from Gemini");
-      }
-
-      // 7. Parse JSON from response
-      let pathData;
-      try {
-        // Extract JSON from markdown code blocks if present
-        const jsonMatch = generatedText.match(/```json\s*([\s\S]*?)\s*```/);
-        const jsonStr = jsonMatch ? jsonMatch[1] : generatedText;
-        pathData = JSON.parse(jsonStr);
-      } catch (parseError) {
-        console.error("[ERROR] Failed to parse Gemini JSON:", generatedText);
-        throw new Error("Failed to parse AI response as JSON");
-      }
-
-      // 8. Add metadata
+      // Add metadata
       pathData.path_id = query.toLowerCase().replace(/\s+/g, "_").substring(0, 50);
       pathData.query = query;
       pathData.tags = tags || [];
       pathData.generated_at = new Date().toISOString();
+      pathData.prompt_version = PROMPT_VERSION;
 
       // Ensure steps array exists (defensive check)
       if (!Array.isArray(pathData.steps)) {
-        console.error(
-          "[ERROR] AI did not return a steps array. Full response:",
-          JSON.stringify(pathData)
-        );
         pathData.steps = [];
       }
 
@@ -445,37 +235,38 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
         content: Array.isArray(step.content) ? step.content : [],
       }));
 
-      console.log(`[DEBUG] Returning path with ${pathData.steps.length} steps`);
-
-      // 9. Log usage
+      // Log usage
       await logApiUsage(userId, {
-        model: model,
+        model: "gemini-2.0-flash",
         type: "learningPath",
         query: query,
       });
 
-      // 10. Cache the path to Firestore for future use
+      // Cache the path to Firestore
       try {
         const db = admin.firestore();
-        await db
-          .collection("cached_paths")
-          .doc(pathData.path_id)
-          .set({
-            ...pathData,
-            cached_at: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        console.log("[DEBUG] Cached path to Firestore:", pathData.path_id);
+        await db.collection("cached_paths").doc(pathData.path_id).set({
+          ...pathData,
+          cached_at: admin.firestore.FieldValue.serverTimestamp(),
+        });
       } catch (cacheError) {
-        console.warn("[WARN] Failed to cache path:", cacheError.message);
+        console.warn(JSON.stringify({ severity: "WARNING", message: "path_cache_error", error: cacheError.message }));
       }
 
-      return {
+      const response = {
         success: true,
         path: pathData,
-        usage: usageStats,
+        prompt_version: PROMPT_VERSION,
       };
+
+      if (data.debug === true && isAdmin(context)) {
+        response._debug = trace.toDebugPayload();
+      }
+
+      return response;
     } catch (error) {
-      console.error("[ERROR] Error details:", JSON.stringify(error, null, 2));
+      console.error(JSON.stringify({ severity: "ERROR", message: "learning_path_error", error: error.message }));
+      if (error.code) throw error;
       throw new functions.https.HttpsError(
         "internal",
         `Failed to generate learning path: ${error.message}`

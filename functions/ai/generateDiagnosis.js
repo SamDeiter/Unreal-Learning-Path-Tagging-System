@@ -1,12 +1,13 @@
 const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 const { checkRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
-const fs = require("fs");
-const path = require("path");
+const { runStage } = require("../pipeline/llmStage");
+const { createTrace, isAdmin } = require("../pipeline/telemetry");
+const { normalizeQuery } = require("../pipeline/cache");
+const { PROMPT_VERSION, wrapEvidence } = require("../pipeline/promptVersions");
 
-// ---------------------------------------------------------------------------
-// Indirect Injection Guard — strip prompt-injection keywords from user input
-// ---------------------------------------------------------------------------
+// Import existing sanitize functions (injection guard from security hardening)
 const INJECTION_PATTERNS = [
   /ignore\s+(all\s+)?previous\s+(instructions|prompts?)/gi,
   /disregard\s+(all\s+)?above/gi,
@@ -27,91 +28,66 @@ function sanitizeContent(text) {
   }
   return cleaned;
 }
-// Solution Atoms — loaded once at cold start (zero Firestore cost)
-// ---------------------------------------------------------------------------
-const SOLUTION_ATOMS = [];
-
-try {
-  const atomsDir = path.join(__dirname, "..", "data", "atoms");
-  if (fs.existsSync(atomsDir)) {
-    const files = fs.readdirSync(atomsDir).filter((f) => f.endsWith(".json"));
-    for (const file of files) {
-      const atom = JSON.parse(fs.readFileSync(path.join(atomsDir, file), "utf8"));
-      SOLUTION_ATOMS.push(atom);
-    }
-    console.log(`[generateDiagnosis] Loaded ${SOLUTION_ATOMS.length} solution atoms`);
-  }
-} catch (err) {
-  console.warn("[generateDiagnosis] Failed to load atoms:", err.message);
-}
 
 /**
- * Match detectedTags against Solution Atoms.
- * Returns all atoms where at least one tag matches.
- */
-function matchAtoms(detectedTags) {
-  if (!detectedTags || detectedTags.length === 0) return [];
-
-  // Normalize detected tags to an array of tag_id strings
-  const tagIds = detectedTags.map((t) =>
-    typeof t === "string" ? t : t.tag_id || t.id || ""
-  ).filter(Boolean);
-
-  if (tagIds.length === 0) return [];
-
-  return SOLUTION_ATOMS.filter((atom) =>
-    atom.tags && atom.tags.some((atomTag) => tagIds.includes(atomTag))
-  );
-}
-
-/**
- * PROMPT 2 — DIAGNOSIS GENERATION
- * Diagnose WHY the problem occurs.
- * Focus on invariants, signals, and root causes.
+ * PROMPT 2 — DIAGNOSIS
+ * Expert-level diagnosis of UE5 problems with RAG grounding.
+ *
+ * Now uses pipeline/llmStage for schema validation + repair retry + caching.
  */
 
-const SYSTEM_PROMPT = `You are an expert UE5 debugger and educator.
+const SYSTEM_PROMPT = `You are a senior Unreal Engine 5 expert and diagnostician.
 
-Your job is to diagnose WHY a problem occurs, not just how to fix it.
-Focus on:
-1. Root causes - the fundamental reasons this happens
-2. Signals - what to look for that indicates this problem
-3. Variables that matter - what actually affects the outcome
-4. Variables that don't matter - common misconceptions to dismiss
-5. Generalization scope - where else this knowledge applies
+Your job is to diagnose UE5 problems with clinical precision, like a doctor diagnosing symptoms.
 
-Return ONLY valid JSON matching this exact schema:
+For each problem, you must:
+1. Summarize the problem clearly (problem_summary)
+2. Identify ROOT CAUSES — not symptoms, but WHY the problem occurs (root_causes)
+3. List diagnostic signals — what to look for to confirm this diagnosis (signals_to_watch_for)
+4. Identify variables that matter vs don't — help them focus (variables_that_matter / variables_that_do_not)
+5. Generalization scope — where else this pattern appears (generalization_scope)
+6. If transcript excerpts are provided, cite them by number
+
+CRITICAL: Your diagnosis should teach the developer WHY this happens, not just how to fix it.
+Be specific: mention exact UE5 settings, property names, node types, editor paths.
+
+Return ONLY valid JSON matching this schema:
 {
-  "diagnosis_id": "diag_<generate_uuid>",
-  "problem_summary": "One-sentence summary of the problem",
-  "root_causes": ["string - fundamental reason 1", "string - reason 2"],
-  "signals_to_watch_for": ["string - indicator 1", "string - indicator 2"],
-  "variables_that_matter": ["string - important variable 1"],
-  "variables_that_do_not": ["string - commonly blamed but not the cause"],
-  "generalization_scope": ["string - other scenarios where this applies"]
+  "diagnosis_id": "diag_<uuid>",
+  "problem_summary": "str",
+  "root_causes": ["str"],
+  "signals_to_watch_for": ["str"],
+  "variables_that_matter": ["str"],
+  "variables_that_do_not": ["str"],
+  "generalization_scope": ["str"],
+  "cited_sources": [{"ref": "int", "detail": "str"}]
+}`;
+
+/**
+ * Find matching atom tags from the tag graph for grounding
+ */
+function matchAtoms(detectedTags = [], atomGraph = null) {
+  if (!atomGraph || !Array.isArray(detectedTags) || detectedTags.length === 0) return [];
+  return detectedTags
+    .map((tagId) => atomGraph[tagId])
+    .filter(Boolean)
+    .slice(0, 5);
 }
-
-CRITICAL RULES:
-- root_causes must have at least 2 entries explaining WHY
-- signals_to_watch_for should help diagnose similar issues in future
-- generalization_scope teaches transferable debugging knowledge
-
-Return ONLY the JSON object. No markdown, no explanation.`;
 
 exports.generateDiagnosis = functions
   .runWith({
     secrets: ["GEMINI_API_KEY"],
-    timeoutSeconds: 60,
-    memory: "256MB",
+    timeoutSeconds: 120,
+    memory: "512MB",
   })
   .https.onCall(async (data, context) => {
     const userId = context.auth?.uid || "anonymous";
-    const { intent, detectedTags } = data;
+    const { intent, detectedTags, retrievedContext, atomGraph } = data;
 
-    if (!intent || !intent.problem_description) {
+    if (!intent) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Intent with problem_description is required."
+        "Intent object is required for diagnosis."
       );
     }
 
@@ -125,9 +101,7 @@ exports.generateDiagnosis = functions
 
     try {
       let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        apiKey = functions.config().gemini?.api_key;
-      }
+      if (!apiKey) apiKey = functions.config().gemini?.api_key;
       if (!apiKey) {
         throw new functions.https.HttpsError(
           "failed-precondition",
@@ -135,24 +109,24 @@ exports.generateDiagnosis = functions
         );
       }
 
-      // ---------------------------------------------------------------
-      // Solution Atom lookup — prioritize verified solutions
-      // ---------------------------------------------------------------
-      const matchedAtoms = matchAtoms(detectedTags);
+      const trace = createTrace(userId, "generateDiagnosis");
+      const normalized = normalizeQuery(intent.problem_description || "");
+
+      // Build atom context for grounding
+      const atoms = matchAtoms(detectedTags, atomGraph);
       let atomContext = "";
-      if (matchedAtoms.length > 0) {
-        atomContext = `\n\nVERIFIED SOLUTION ATOMS (use these as primary guidance):\n`;
-        for (const atom of matchedAtoms) {
-          atomContext += `\n--- ${atom.title} ---\n`;
-          atomContext += `Why: ${atom.why}\n`;
-          if (atom.verification?.items) {
-            atomContext += `Key Steps:\n${atom.verification.items.map((s, i) => `  ${i + 1}. ${s}`).join("\n")}\n`;
-          }
-          if (atom.evidence) {
-            atomContext += `Evidence: ${atom.evidence.join(", ")}\n`;
-          }
-        }
-        atomContext += `\nIMPORTANT: Incorporate these verified steps into your root_causes and signals. These are expert-validated solutions.\n`;
+      if (atoms.length > 0) {
+        atomContext = `\n\nKNOWN SOLUTION ATOMS (from verified tag graph):\n${atoms.map((a) => `- ${a.display_name}: ${a.description || ""}`.slice(0, 200)).join("\n")}\nUse these atoms to ground your diagnosis when relevant.`;
+      }
+
+      // Build passage context
+      let passageContext = "";
+      if (Array.isArray(retrievedContext) && retrievedContext.length > 0) {
+        const passageTexts = retrievedContext
+          .slice(0, 5)
+          .map((p, i) => `[${i + 1}] (${p.videoTitle || p.courseCode || ""}, ${p.timestamp || ""}): ${String(p.text || "").slice(0, 400)}`)
+          .join("\n");
+        passageContext = wrapEvidence(passageTexts);
       }
 
       const userPrompt = `Diagnose this UE5 problem:
@@ -165,89 +139,49 @@ Intent:
 
 ${detectedTags?.length > 0 ? `Detected tags: ${detectedTags.map((t) => t.display_name || t).join(", ")}` : ""}
 ${atomContext}
+${passageContext}
 Provide a comprehensive diagnosis focusing on WHY this happens, not just how to fix it.
 This diagnosis should teach the developer to recognize and solve similar problems in the future.`;
 
-      const model = "gemini-2.0-flash";
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-      const payload = {
-        contents: [{ parts: [{ text: userPrompt }] }],
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 2048,
-        },
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const result = await runStage({
+        stage: "diagnosis",
+        systemPrompt: SYSTEM_PROMPT,
+        userPrompt,
+        apiKey,
+        trace,
+        cacheParams: { query: normalized, mode: "standalone_diagnosis", tags: detectedTags?.slice(0, 5) },
+        maxTokens: 1536,
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[ERROR] Gemini API failed:`, errorText);
-        throw new Error(`Gemini API error: ${response.status}`);
-      }
+      trace.toLog();
 
-      const responseData = await response.json();
-      const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!generatedText) {
-        throw new Error("No content generated from Gemini");
-      }
-
-      let diagnosisData;
-      try {
-        const jsonMatch = generatedText.match(/```json\s*([\s\S]*?)\s*```/);
-        const jsonStr = jsonMatch ? jsonMatch[1] : generatedText;
-        diagnosisData = JSON.parse(jsonStr.trim());
-      } catch {
-        console.error("[ERROR] Failed to parse Diagnosis JSON:", generatedText);
-        throw new Error("Failed to parse AI response as JSON");
-      }
-
-      // Ensure required fields
-      if (!diagnosisData.diagnosis_id) {
-        diagnosisData.diagnosis_id = `diag_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      }
-
-      // Validate root_causes
-      if (!Array.isArray(diagnosisData.root_causes) || diagnosisData.root_causes.length < 1) {
-        throw new Error("Diagnosis must include at least one root cause");
-      }
-
-      // ---------------------------------------------------------------
-      // Attach matched atoms to response (client can render "Do" steps)
-      // ---------------------------------------------------------------
-      if (matchedAtoms.length > 0) {
-        diagnosisData.solution_atoms = matchedAtoms.map((atom) => ({
-          atom_id: atom.atom_id,
-          title: atom.title,
-          why: atom.why,
-          key_steps: atom.verification?.items || [],
-          evidence: atom.evidence || [],
-          duration_minutes: atom.duration_minutes,
-          prerequisites: atom.prerequisites || [],
-          tags: atom.tags,
-        }));
+      if (!result.success) {
+        throw new functions.https.HttpsError(
+          "internal",
+          "Failed to generate valid diagnosis after repair retry."
+        );
       }
 
       await logApiUsage(userId, {
-        model: model,
+        model: "gemini-2.0-flash",
         type: "diagnosis",
         intentId: intent.intent_id,
-        atomsMatched: matchedAtoms.length,
       });
 
-      return {
+      const response = {
         success: true,
-        diagnosis: diagnosisData,
+        diagnosis: result.data,
+        prompt_version: PROMPT_VERSION,
       };
+
+      if (data.debug === true && isAdmin(context)) {
+        response._debug = trace.toDebugPayload();
+      }
+
+      return response;
     } catch (error) {
-      console.error("[ERROR] generateDiagnosis:", error);
+      console.error(JSON.stringify({ severity: "ERROR", message: "diagnosis_error", error: error.message }));
+      if (error.code) throw error;
       throw new functions.https.HttpsError(
         "internal",
         `Failed to generate diagnosis: ${error.message}`

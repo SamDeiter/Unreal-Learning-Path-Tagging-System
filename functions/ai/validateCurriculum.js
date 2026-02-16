@@ -1,6 +1,9 @@
 const functions = require("firebase-functions");
 const { checkRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
+const { runStage } = require("../pipeline/llmStage");
+const { createTrace, isAdmin } = require("../pipeline/telemetry");
+const { PROMPT_VERSION } = require("../pipeline/promptVersions");
 
 /**
  * PROMPT 4 — CURRICULUM VALIDATION
@@ -8,6 +11,8 @@ const { logApiUsage } = require("../utils/apiUsage");
  * - Have no transferable objectives
  * - Are purely step-by-step
  * - Cannot generalize
+ *
+ * Now uses pipeline/llmStage for schema validation + repair retry.
  */
 
 const SYSTEM_PROMPT = `You are a quality assurance expert for educational content.
@@ -63,15 +68,15 @@ exports.validateCurriculum = functions
 
     try {
       let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        apiKey = functions.config().gemini?.api_key;
-      }
+      if (!apiKey) apiKey = functions.config().gemini?.api_key;
       if (!apiKey) {
         throw new functions.https.HttpsError(
           "failed-precondition",
           "Server configuration error: API Key missing."
         );
       }
+
+      const trace = createTrace(userId, "validateCurriculum");
 
       const userPrompt = `Validate this UE5 learning curriculum:
 
@@ -91,8 +96,7 @@ ${(objectives.transferable || []).map((o, i) => `${i + 1}. ${o}`).join("\n")}
 
 ${
   learningPath
-    ? `LEARNING PATH STEPS:
-${learningPath.steps?.map((s) => `- ${s.title}: ${s.description}`).join("\n") || "None"}`
+    ? `LEARNING PATH STEPS:\n${learningPath.steps?.map((s) => `- ${s.title}: ${s.description}`).join("\n") || "None"}`
     : ""
 }
 
@@ -101,59 +105,44 @@ Does this curriculum meet the anti-tutorial-hell requirements?
 - Are there transferable diagnostic skills?
 - Can the learner apply this to similar problems?`;
 
-      const model = "gemini-2.0-flash";
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-      const payload = {
-        contents: [{ parts: [{ text: userPrompt }] }],
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1024,
-        },
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const result = await runStage({
+        stage: "validation",
+        systemPrompt: SYSTEM_PROMPT,
+        userPrompt,
+        apiKey,
+        trace,
+        cacheParams: null, // Validation should always run fresh
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[ERROR] Gemini API failed:`, errorText);
-        throw new Error(`Gemini API error: ${response.status}`);
-      }
+      trace.toLog();
 
-      const responseData = await response.json();
-      const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!generatedText) {
-        throw new Error("No content generated from Gemini");
-      }
-
-      let validationData;
-      try {
-        const jsonMatch = generatedText.match(/```json\s*([\s\S]*?)\s*```/);
-        const jsonStr = jsonMatch ? jsonMatch[1] : generatedText;
-        validationData = JSON.parse(jsonStr.trim());
-      } catch (_parseError) {
-        console.error("[ERROR] Failed to parse Validation JSON:", generatedText);
-        throw new Error("Failed to parse AI response as JSON");
+      if (!result.success) {
+        throw new functions.https.HttpsError(
+          "internal",
+          "Failed to validate curriculum after repair retry."
+        );
       }
 
       await logApiUsage(userId, {
-        model: model,
+        model: "gemini-2.0-flash",
         type: "validation",
-        approved: validationData.approved,
+        approved: result.data.approved,
       });
 
-      return {
+      const response = {
         success: true,
-        validation: validationData,
+        validation: result.data,
+        prompt_version: PROMPT_VERSION,
       };
+
+      if (data.debug === true && isAdmin(context)) {
+        response._debug = trace.toDebugPayload();
+      }
+
+      return response;
     } catch (error) {
-      console.error("[ERROR] validateCurriculum:", error);
+      console.error(JSON.stringify({ severity: "ERROR", message: "validation_error", error: error.message }));
+      if (error.code) throw error;
       throw new functions.https.HttpsError(
         "internal",
         `Failed to validate curriculum: ${error.message}`

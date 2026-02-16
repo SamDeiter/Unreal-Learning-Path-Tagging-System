@@ -1,6 +1,10 @@
 const functions = require("firebase-functions");
 const { checkRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
+const { runStage } = require("../pipeline/llmStage");
+const { createTrace, isAdmin } = require("../pipeline/telemetry");
+const { normalizeQuery } = require("../pipeline/cache");
+const { PROMPT_VERSION } = require("../pipeline/promptVersions");
 
 /**
  * PROMPT 3 — LEARNING OBJECTIVE DECOMPOSITION
@@ -9,6 +13,8 @@ const { logApiUsage } = require("../utils/apiUsage");
  * 2) Teach transferable diagnostics
  *
  * At least ONE transferable objective is REQUIRED (ANTI-TUTORIAL-HELL)
+ *
+ * Now uses pipeline/llmStage for schema validation + repair retry + caching.
  */
 
 const SYSTEM_PROMPT = `You are an expert instructional designer for UE5 education.
@@ -78,15 +84,16 @@ exports.decomposeLearningObjectives = functions
 
     try {
       let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        apiKey = functions.config().gemini?.api_key;
-      }
+      if (!apiKey) apiKey = functions.config().gemini?.api_key;
       if (!apiKey) {
         throw new functions.https.HttpsError(
           "failed-precondition",
           "Server configuration error: API Key missing."
         );
       }
+
+      const trace = createTrace(userId, "decomposeLearningObjectives");
+      const normalized = normalizeQuery(intent.problem_description || "");
 
       const userPrompt = `Create learning objectives for this UE5 problem:
 
@@ -107,72 +114,45 @@ Create learning objectives that:
 
 REMEMBER: At least ONE transferable objective is REQUIRED!`;
 
-      const model = "gemini-2.0-flash";
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-      const payload = {
-        contents: [{ parts: [{ text: userPrompt }] }],
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 1024,
-        },
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const result = await runStage({
+        stage: "objectives",
+        systemPrompt: SYSTEM_PROMPT,
+        userPrompt,
+        apiKey,
+        trace,
+        cacheParams: { query: normalized, mode: "standalone_objectives" },
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[ERROR] Gemini API failed:`, errorText);
-        throw new Error(`Gemini API error: ${response.status}`);
-      }
+      trace.toLog();
 
-      const responseData = await response.json();
-      const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!generatedText) {
-        throw new Error("No content generated from Gemini");
-      }
-
-      let objectivesData;
-      try {
-        const jsonMatch = generatedText.match(/```json\s*([\s\S]*?)\s*```/);
-        const jsonStr = jsonMatch ? jsonMatch[1] : generatedText;
-        objectivesData = JSON.parse(jsonStr.trim());
-      } catch (_parseError) {
-        console.error("[ERROR] Failed to parse Objectives JSON:", generatedText);
-        throw new Error("Failed to parse AI response as JSON");
-      }
-
-      // CRITICAL: Validate transferable objectives (ANTI-TUTORIAL-HELL)
-      if (!Array.isArray(objectivesData.transferable) || objectivesData.transferable.length === 0) {
-        console.error("[ERROR] No transferable objectives generated");
+      if (!result.success) {
         throw new functions.https.HttpsError(
           "failed-precondition",
-          "ANTI-TUTORIAL-HELL: At least ONE transferable objective is REQUIRED. The AI failed to generate one."
+          "ANTI-TUTORIAL-HELL: Failed to generate valid objectives with transferable skills."
         );
       }
 
       await logApiUsage(userId, {
-        model: model,
+        model: "gemini-2.0-flash",
         type: "objectives",
         intentId: intent.intent_id,
         diagnosisId: diagnosis.diagnosis_id,
       });
 
-      return {
+      const response = {
         success: true,
-        objectives: objectivesData,
+        objectives: result.data,
+        prompt_version: PROMPT_VERSION,
       };
-    } catch (error) {
-      console.error("[ERROR] decomposeLearningObjectives:", error);
-      if (error.code) {
-        throw error; // Re-throw HttpsError
+
+      if (data.debug === true && isAdmin(context)) {
+        response._debug = trace.toDebugPayload();
       }
+
+      return response;
+    } catch (error) {
+      console.error(JSON.stringify({ severity: "ERROR", message: "objectives_error", error: error.message }));
+      if (error.code) throw error;
       throw new functions.https.HttpsError(
         "internal",
         `Failed to generate objectives: ${error.message}`

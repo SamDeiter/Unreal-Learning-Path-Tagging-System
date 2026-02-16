@@ -1,11 +1,17 @@
 const functions = require("firebase-functions");
 const { checkRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
+const { runStage } = require("../pipeline/llmStage");
+const { createTrace, isAdmin } = require("../pipeline/telemetry");
+const { normalizeQuery } = require("../pipeline/cache");
+const { PROMPT_VERSION } = require("../pipeline/promptVersions");
 
 /**
  * PROMPT 1 — INTENT EXTRACTION
  * Extract structured intent from a plain-English Unreal Engine problem.
  * Return ONLY valid JSON matching the Intent Object schema.
+ *
+ * Now uses pipeline/llmStage for schema validation + repair retry + caching.
  */
 
 const SYSTEM_PROMPT = `You are an expert UE5 educator parsing developer problems.
@@ -41,7 +47,6 @@ exports.extractIntent = functions
     const userId = context.auth?.uid || "anonymous";
     const { query, personaHint } = data;
 
-    // Input validation
     if (!query || query.trim().length < 10) {
       throw new functions.https.HttpsError(
         "invalid-argument",
@@ -49,7 +54,6 @@ exports.extractIntent = functions
       );
     }
 
-    // Rate limiting
     const rateLimitCheck = await checkRateLimit(userId, "intentExtraction");
     if (!rateLimitCheck.allowed) {
       throw new functions.https.HttpsError(
@@ -60,9 +64,7 @@ exports.extractIntent = functions
 
     try {
       let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        apiKey = functions.config().gemini?.api_key;
-      }
+      if (!apiKey) apiKey = functions.config().gemini?.api_key;
       if (!apiKey) {
         throw new functions.https.HttpsError(
           "failed-precondition",
@@ -70,73 +72,54 @@ exports.extractIntent = functions
         );
       }
 
-      const userPrompt = `Extract intent from this UE5 problem:
+      const trace = createTrace(userId, "extractIntent");
+      const normalized = normalizeQuery(query);
 
-"${query}"
+      const userPrompt = `Extract intent from this UE5 problem:\n\n"${query}"\n\n${personaHint ? `Context: The user appears to be a ${personaHint}` : ""}\n\nReturn the Intent Object JSON.`;
 
-${personaHint ? `Context: The user appears to be a ${personaHint}` : ""}
-
-Return the Intent Object JSON.`;
-
-      const model = "gemini-2.0-flash";
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-      const payload = {
-        contents: [{ parts: [{ text: userPrompt }] }],
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1024,
-        },
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const result = await runStage({
+        stage: "intent",
+        systemPrompt: SYSTEM_PROMPT,
+        userPrompt,
+        apiKey,
+        trace,
+        cacheParams: { query: normalized, mode: "standalone_intent" },
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[ERROR] Gemini API failed:`, errorText);
-        throw new Error(`Gemini API error: ${response.status}`);
+      trace.toLog();
+
+      if (!result.success) {
+        throw new functions.https.HttpsError(
+          "internal",
+          "Failed to extract valid intent after repair retry."
+        );
       }
 
-      const responseData = await response.json();
-      const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!generatedText) {
-        throw new Error("No content generated from Gemini");
-      }
-
-      // Parse JSON from response
-      let intentData;
-      try {
-        const jsonMatch = generatedText.match(/```json\s*([\s\S]*?)\s*```/);
-        const jsonStr = jsonMatch ? jsonMatch[1] : generatedText;
-        intentData = JSON.parse(jsonStr.trim());
-      } catch (_parseError) {
-        console.error("[ERROR] Failed to parse Intent JSON:", generatedText);
-        throw new Error("Failed to parse AI response as JSON");
-      }
-
-      // Ensure required fields
-      if (!intentData.intent_id) {
-        intentData.intent_id = `intent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      // Ensure intent_id exists
+      if (!result.data.intent_id) {
+        result.data.intent_id = `intent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       }
 
       await logApiUsage(userId, {
-        model: model,
+        model: "gemini-2.0-flash",
         type: "intentExtraction",
         query: query.substring(0, 50),
       });
 
-      return {
+      const response = {
         success: true,
-        intent: intentData,
+        intent: result.data,
+        prompt_version: PROMPT_VERSION,
       };
+
+      if (data.debug === true && isAdmin(context)) {
+        response._debug = trace.toDebugPayload();
+      }
+
+      return response;
     } catch (error) {
-      console.error("[ERROR] extractIntent:", error);
+      console.error(JSON.stringify({ severity: "ERROR", message: "extractIntent_error", error: error.message }));
+      if (error.code) throw error;
       throw new functions.https.HttpsError(
         "internal",
         `Failed to extract intent: ${error.message}`
