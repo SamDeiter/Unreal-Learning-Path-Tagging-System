@@ -144,8 +144,28 @@ async function getDocLinks() {
 const TIER_ORDER = { beginner: 0, intermediate: 1, advanced: 2 };
 
 /**
+ * Simple stemmer for fuzzy matching — strips common English suffixes.
+ * e.g. "meshes" → "mesh", "importing" → "import"
+ */
+function stemWord(word) {
+  return word
+    .replace(/ies$/i, "y")
+    .replace(/ves$/i, "f")
+    .replace(/(es|s|ing|ed|tion|ment)$/i, "")
+    .toLowerCase();
+}
+
+/** Check if any stemmed word in `a` matches any stemmed word in `b`. */
+function stemMatch(a, b) {
+  const aStems = a.split(/[\s_-]+/).filter(w => w.length > 2).map(stemWord);
+  const bStems = b.split(/[\s_-]+/).filter(w => w.length > 2).map(stemWord);
+  return aStems.some(as => bStems.some(bs => as === bs || as.includes(bs) || bs.includes(as)));
+}
+
+/**
  * Get doc links matching a set of topics/keywords.
- * Matches against subsystem, key name, and label.
+ * Matches against subsystem, key name, label, tags, URL slug, and description.
+ * Uses stemming so "mesh" matches "meshes", "import" matches "importing", etc.
  *
  * @param {string[]} topics - Topic keywords (e.g., ["lumen", "lighting"])
  * @param {Object} [options]
@@ -185,6 +205,11 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
       else if (docTags.some((t) => t.includes(topic) || topic.includes(t))) score += 2; // partial tag match
       else if (urlSlug.includes(topic)) score += 2;    // URL slug match
       else if (descLower.includes(topic)) score += 1;  // description match
+      // Stem-aware fallback: "mesh" ↔ "meshes", "import" ↔ "importing"
+      else if (stemMatch(topic, keyLower)) score += 3;
+      else if (docTags.some((t) => stemMatch(topic, t))) score += 2;
+      else if (stemMatch(topic, labelLower)) score += 2;
+      else if (stemMatch(topic, descLower)) score += 1;
     }
 
     if (score > 0) {

@@ -407,6 +407,17 @@ export default function ProblemFirst() {
             .split(/\s+/)
             .filter((w) => w.length > 3);
           const uniqueTopics = [...new Set([...tagSegments, ...queryWords])].slice(0, 12);
+
+          // Topic augmentation: add common related terms that users imply but don't type
+          const topicLower = uniqueTopics.map((t) => t.toLowerCase());
+          const hasWord = (w) => topicLower.some((t) => t.includes(w));
+          if (hasWord("mesh") && !hasWord("skeletal")) {
+            // Generic "mesh" queries are almost always about static meshes
+            uniqueTopics.push("static mesh", "import");
+          }
+          if (hasWord("size") || hasWord("scale") || hasWord("wrong")) {
+            uniqueTopics.push("scale", "transform");
+          }
           if (uniqueTopics.length > 0) {
             const blended = await buildBlendedPath(uniqueTopics, driveVideos, {
               maxDocs: 5,
