@@ -59,6 +59,80 @@ function TagSources() {
         }
         return [tag];
       };
+
+      // Quality filter: reject noise tags
+      const TAG_STOPWORDS = new Set([
+        "using",
+        "creating",
+        "button",
+        "notes",
+        "release",
+        "focus",
+        "orlando",
+        "fest",
+        "click",
+        "select",
+        "open",
+        "make",
+        "made",
+        "show",
+        "look",
+        "know",
+        "want",
+        "need",
+        "take",
+        "going",
+        "right",
+        "left",
+        "back",
+        "just",
+        "like",
+        "also",
+        "well",
+        "really",
+        "thing",
+        "things",
+        "way",
+        "actually",
+        "basically",
+        "different",
+        "example",
+        "here",
+        "inside",
+        "called",
+        "got",
+        "put",
+        "done",
+        "let",
+        "run",
+        "set",
+        "top",
+        "end",
+        "new",
+        "now",
+        "not",
+        "get",
+        "see",
+        "use",
+        "two",
+        "one",
+        "bit",
+        "lot",
+        "big",
+        "kind",
+        "sort",
+        "part",
+        "able",
+      ]);
+      const SPECIAL_CHARS = /[^a-zA-Z0-9_\- ]/;
+      const isValidTag = (tag) => {
+        if (!tag || tag.length < 3) return false;
+        if (SPECIAL_CHARS.test(tag)) return false;
+        if (TAG_STOPWORDS.has(tag.toLowerCase())) return false;
+        if (/^\d+$/.test(tag)) return false; // pure numbers
+        return true;
+      };
+
       const videoTags = [
         ...(course.canonical_tags || []).flatMap(splitTag),
         ...(course.transcript_tags || []).flatMap(splitTag),
@@ -82,9 +156,17 @@ function TagSources() {
           videoTags.push(val);
         }
       });
-      videoTags.forEach((tag) => {
+      videoTags.filter(isValidTag).forEach((tag) => {
         videoTagCounts[tag] = (videoTagCounts[tag] || 0) + 1;
       });
+    });
+
+    // Post-count: remove tags appearing in fewer than 3 courses (noise)
+    const MIN_FREQUENCY = 3;
+    Object.keys(videoTagCounts).forEach((tag) => {
+      if (videoTagCounts[tag] < MIN_FREQUENCY) {
+        delete videoTagCounts[tag];
+      }
     });
 
     return {
