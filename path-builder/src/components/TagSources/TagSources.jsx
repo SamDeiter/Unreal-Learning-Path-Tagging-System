@@ -19,9 +19,9 @@ function TagSources() {
   const analysis = useMemo(() => {
     let enriched = 0;
     let pending = 0;
-    const baseTagCounts = {};
-    const aiTagCounts = {};
-    const videoTagCounts = {};
+    const baseTagCounts = Object.create(null);
+    const aiTagCounts = Object.create(null);
+    const videoTagCounts = Object.create(null);
 
     courses.forEach((course) => {
       // Count enrichment status
@@ -42,8 +42,12 @@ function TagSources() {
 
       // Count AI tags (from enrichment pipeline)
       if (course.ai_tags) {
-        course.ai_tags.forEach((tag) => {
-          aiTagCounts[tag] = (aiTagCounts[tag] || 0) + 1;
+        const rawAI = Array.isArray(course.ai_tags)
+          ? course.ai_tags
+          : Object.values(course.ai_tags);
+        rawAI.forEach((tag) => {
+          const key = typeof tag === "string" ? tag : tag?.tag_id || tag?.name;
+          if (key) aiTagCounts[key] = (aiTagCounts[key] || 0) + 1;
         });
       }
 
