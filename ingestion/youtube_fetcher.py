@@ -205,32 +205,86 @@ class YouTubeFetcher:
         self,
         channel_key: str,
         max_results: int = 10,
+        min_duration_minutes: int = 2,
     ) -> list[VideoMetadata]:
-        """Fetch recent videos from a known UE5 channel.
+        """Fetch videos from a known UE5 channel using uploads playlist.
+
+        Uses the channel's uploads playlist (more reliable than search API)
+        with pagination to retrieve up to max_results videos.
+        Filters out YouTube Shorts and very short clips.
 
         Args:
             channel_key: Key from CHANNEL_IDS dictionary.
             max_results: Maximum videos to return.
+            min_duration_minutes: Skip videos shorter than this (filters Shorts).
 
         Returns:
-            List of VideoMetadata objects.
+            List of VideoMetadata objects with full details.
         """
         channel_id = self.CHANNEL_IDS.get(channel_key)
         if not channel_id:
             raise ValueError(f"Unknown channel: {channel_key}")
 
-        params = {
-            "part": "snippet",
-            "channelId": channel_id,
-            "maxResults": max_results,
-            "order": "date",
-            "type": "video",
-        }
+        # The uploads playlist ID is the channel ID with "UC" replaced by "UU"
+        uploads_playlist_id = "UU" + channel_id[2:]
+        print(f"   📋 Uploads playlist: {uploads_playlist_id}")
 
-        data = self._api_request("search", params)
-        video_ids = [item["id"]["videoId"] for item in data.get("items", [])]
+        all_video_ids = []
+        next_page_token = None
+        page_size = min(50, max_results)
 
-        return self.get_video_details(video_ids) if video_ids else []
+        while len(all_video_ids) < max_results:
+            params = {
+                "part": "snippet",
+                "playlistId": uploads_playlist_id,
+                "maxResults": page_size,
+            }
+            if next_page_token:
+                params["pageToken"] = next_page_token
+
+            data = self._api_request("playlistItems", params)
+            if not data:
+                break
+
+            items = data.get("items", [])
+            if not items:
+                break
+
+            for item in items:
+                vid_id = item.get("snippet", {}).get("resourceId", {}).get("videoId")
+                if vid_id:
+                    all_video_ids.append(vid_id)
+
+            next_page_token = data.get("nextPageToken")
+            total = data.get("pageInfo", {}).get("totalResults", 0)
+            print(f"   📄 Page fetched: {len(all_video_ids)} / ~{total} videos")
+
+            if not next_page_token:
+                break  # No more pages
+
+        # Trim to max_results
+        all_video_ids = all_video_ids[:max_results]
+        print(f"   🔍 Fetching details for {len(all_video_ids)} videos...")
+
+        # Get full details in batches of 50 (videos.list limit)
+        all_videos = []
+        for i in range(0, len(all_video_ids), 50):
+            batch = all_video_ids[i : i + 50]
+            details = self.get_video_details(batch)
+            all_videos.extend(details)
+
+        # Filter out Shorts and very short clips
+        if min_duration_minutes > 0:
+            before = len(all_videos)
+            all_videos = [
+                v for v in all_videos
+                if parse_iso8601_duration(v.duration) >= min_duration_minutes
+            ]
+            skipped = before - len(all_videos)
+            if skipped:
+                print(f"   ⏭️  Filtered {skipped} videos shorter than {min_duration_minutes} min")
+
+        return all_videos
 
 
 def parse_iso8601_duration(iso_str: str) -> int:

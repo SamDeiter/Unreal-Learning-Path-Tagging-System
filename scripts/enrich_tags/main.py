@@ -284,7 +284,7 @@ def run_youtube_discovery(content_dir: Path) -> int:
     print("\n   🔍 Fetching from Epic Games channel...")
     try:
         fetcher = YouTubeFetcher()
-        videos = fetcher.fetch_channel_videos("epic_games", max_results=50)
+        videos = fetcher.fetch_channel_videos("epic_games", max_results=500)
     except Exception as e:
         print(f"   ⚠️  YouTube fetch failed: {e}")
         print("   → Ensure YOUTUBE_API_KEY is set in .env")
