@@ -77,6 +77,9 @@ def save_enriched_library(
             course["ai_tags"] = result.get("ai_tags", [])
             course["canonical_tags"] = result.get("canonical_tags", [])
             course["has_cc"] = True  # Will be set by transcription
+            # Mark as enriched if we generated any tags
+            if result.get("ai_tags") or result.get("canonical_tags"):
+                course["gemini_enriched"] = True
 
     # Save enriched library
     output = {
