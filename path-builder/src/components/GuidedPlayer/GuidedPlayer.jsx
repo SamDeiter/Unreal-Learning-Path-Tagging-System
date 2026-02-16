@@ -36,11 +36,25 @@ function renderInlineMarkdown(text) {
     const patterns = [
       { re: /\*\*(.+?)\*\*/, wrap: (m) => <strong key={key++}>{m}</strong> },
       { re: /\*(.+?)\*/, wrap: (m) => <em key={key++}>{m}</em> },
-      { re: /`([^`]+)`/, wrap: (m) => <code key={key++} className="inline-code">{m}</code> },
-      { re: /\[([^\]]+)\]\(([^)]+)\)/, wrap: (m, url) => {
-        const safeUrl = /^https?:\/\//i.test(url) ? url : '#';
-        return <a key={key++} href={safeUrl} target="_blank" rel="noopener noreferrer">{m}</a>;
-      }},
+      {
+        re: /`([^`]+)`/,
+        wrap: (m) => (
+          <code key={key++} className="inline-code">
+            {m}
+          </code>
+        ),
+      },
+      {
+        re: /\[([^\]]+)\]\(([^)]+)\)/,
+        wrap: (m, url) => {
+          const safeUrl = /^https?:\/\//i.test(url) ? url : "#";
+          return (
+            <a key={key++} href={safeUrl} target="_blank" rel="noopener noreferrer">
+              {m}
+            </a>
+          );
+        },
+      },
     ];
 
     let earliest = null;
@@ -143,7 +157,6 @@ export default function GuidedPlayer(props) {
         />
       )}
 
-
       {/* Stage: Complete */}
       {gp.stage === STAGES.COMPLETE && (
         <CompletionCard
@@ -204,7 +217,16 @@ GuidedPlayer.defaultProps = {
 // ─── Inline sub-components (tightly coupled to this view) ───
 
 /** IntroCard — welcome screen with course preview */
-function IntroCard({ introContent, streak, courses, pathSummary, user, authLoading, onSignIn, onStart }) {
+function IntroCard({
+  introContent,
+  streak,
+  courses,
+  pathSummary,
+  user,
+  authLoading,
+  onSignIn,
+  onStart,
+}) {
   return (
     <div className="intro-card">
       <h2>{introContent.title}</h2>
@@ -221,7 +243,6 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
         <div className="streak-badge">🔥 {streak.count}-day learning streak!</div>
       )}
 
-
       <div className="course-preview">
         <h3>📚 What You&#39;ll Learn</h3>
         {pathSummary?.path_summary && !/unavailable/i.test(pathSummary.path_summary) && (
@@ -237,7 +258,9 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
               <div key={course.code || i} className="course-preview-item">
                 <span className="number">{i + 1}</span>
                 <div className="course-preview-details">
-                  <span className="title">{videoTitle?.replace(/\s+Part\s+[A-Z]$/i, "").trim()}</span>
+                  <span className="title">
+                    {videoTitle?.replace(/\s+Part\s+[A-Z]$/i, "").trim()}
+                  </span>
                   {objectives.length > 0 && (
                     <ul className="objective-list">
                       {objectives.slice(0, 2).map((obj, j) => (
@@ -259,12 +282,16 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
         ) : user ? (
           <div className="auth-signed-in">
             <span className="user-email">✓ Signed in as {user.email}</span>
-            <button className="start-btn" onClick={onStart}>▶ Start Learning</button>
+            <button className="start-btn" onClick={onStart}>
+              ▶ Start Learning
+            </button>
           </div>
         ) : (
           <div className="auth-prompt">
             <p className="signin-note">Sign in with Google to watch videos from Google Drive</p>
-            <button className="signin-btn" onClick={onSignIn}>🔐 Sign in with Google</button>
+            <button className="signin-btn" onClick={onSignIn}>
+              🔐 Sign in with Google
+            </button>
             <button className="start-btn secondary" onClick={onStart}>
               Skip sign-in (videos may not load)
             </button>
@@ -276,7 +303,17 @@ function IntroCard({ introContent, streak, courses, pathSummary, user, authLoadi
 }
 
 /** VideoStage — video player with transcript cards and controls */
-function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVideos, microLesson, courses, onVideoComplete, onExit }) {
+function VideoStage({
+  course,
+  currentVideos,
+  currentVideo,
+  videoIndex,
+  hasMoreVideos,
+  microLesson,
+  courses,
+  onVideoComplete,
+  onExit,
+}) {
   return (
     <div className="video-stage">
       <div className="video-header">
@@ -286,9 +323,7 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
             Video {videoIndex + 1} of {currentVideos.length}
           </span>
         )}
-        {course.gemini_outcomes?.[0] && (
-          <p className="objective">{course.gemini_outcomes[0]}</p>
-        )}
+        {course.gemini_outcomes?.[0] && <p className="objective">{course.gemini_outcomes[0]}</p>}
       </div>
       <div className="video-container">
         {currentVideo?.drive_id ? (
@@ -321,7 +356,9 @@ function VideoStage({ course, currentVideos, currentVideo, videoIndex, hasMoreVi
         <button className="complete-btn" onClick={onVideoComplete}>
           {hasMoreVideos ? "Mark Complete & Continue →" : "Complete & Try Exercise →"}
         </button>
-        <button className="exit-btn" onClick={onExit}>Exit Path</button>
+        <button className="exit-btn" onClick={onExit}>
+          Exit Path
+        </button>
       </div>
     </div>
   );
@@ -361,7 +398,9 @@ function AiGuidePanel({ microLesson, courses: _courses }) {
             <div className={`gp-ai-section ${expandedSection === "quick_fix" ? "expanded" : ""}`}>
               <button className="gp-ai-section-toggle" onClick={() => toggleSection("quick_fix")}>
                 <span>⚡ {quickFix.title || "Quick Fix"}</span>
-                <span className="gp-ai-section-chevron">{expandedSection === "quick_fix" ? "▾" : "▸"}</span>
+                <span className="gp-ai-section-chevron">
+                  {expandedSection === "quick_fix" ? "▾" : "▸"}
+                </span>
               </button>
               {expandedSection === "quick_fix" && quickFix.steps && (
                 <ol className="gp-ai-steps">
@@ -381,10 +420,14 @@ function AiGuidePanel({ microLesson, courses: _courses }) {
                 {whyItWorks.key_concept && (
                   <span className="gp-ai-concept-tag">{whyItWorks.key_concept}</span>
                 )}
-                <span className="gp-ai-section-chevron">{expandedSection === "why" ? "▾" : "▸"}</span>
+                <span className="gp-ai-section-chevron">
+                  {expandedSection === "why" ? "▾" : "▸"}
+                </span>
               </button>
               {expandedSection === "why" && (
-                <p className="gp-ai-explanation">{renderTextWithCitations(whyItWorks.explanation)}</p>
+                <p className="gp-ai-explanation">
+                  {renderTextWithCitations(whyItWorks.explanation)}
+                </p>
               )}
             </div>
           )}
@@ -395,7 +438,9 @@ function AiGuidePanel({ microLesson, courses: _courses }) {
               <button className="gp-ai-section-toggle" onClick={() => toggleSection("related")}>
                 <span>🔗 Related Situations</span>
                 <span className="gp-ai-count-tag">{relatedSituations.length}</span>
-                <span className="gp-ai-section-chevron">{expandedSection === "related" ? "▾" : "▸"}</span>
+                <span className="gp-ai-section-chevron">
+                  {expandedSection === "related" ? "▾" : "▸"}
+                </span>
               </button>
               {expandedSection === "related" && (
                 <div className="gp-ai-scenarios">
@@ -420,7 +465,7 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
   const [isRead, setIsRead] = useState(false);
   const typeIcon = course._resourceType === "doc" ? "📖" : "▶️";
   const typeLabel = course._resourceType === "doc" ? "Documentation" : "YouTube Video";
-  const sourceLabel = course._resourceType === "doc" ? "Epic Docs" : (course._channel || "YouTube");
+  const sourceLabel = course._resourceType === "doc" ? "Epic Docs" : course._channel || "YouTube";
   const isYouTube = course._resourceType !== "doc";
 
   // Extract YouTube video ID from URL for embedding
@@ -430,7 +475,9 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
       const url = new URL(course._url);
       if (url.hostname.includes("youtube.com")) return url.searchParams.get("v");
       if (url.hostname.includes("youtu.be")) return url.pathname.slice(1);
-    } catch { /* invalid URL */ }
+    } catch {
+      /* invalid URL */
+    }
     return null;
   })();
 
@@ -444,16 +491,18 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
   return (
     <div className="reading-step">
       <div className="reading-step-header">
-        <span className="reading-step-badge">{typeIcon} {typeLabel}</span>
-        <span className="reading-step-progress">Step {stepNumber} of {totalSteps}</span>
+        <span className="reading-step-badge">
+          {typeIcon} {typeLabel}
+        </span>
+        <span className="reading-step-progress">
+          Step {stepNumber} of {totalSteps}
+        </span>
       </div>
 
       <h2 className="reading-step-title">{course.title}</h2>
 
       <div className="reading-step-meta">
-        {course._tier && (
-          <span className={`tier-badge tier-${course._tier}`}>{course._tier}</span>
-        )}
+        {course._tier && <span className={`tier-badge tier-${course._tier}`}>{course._tier}</span>}
         {course._channelTrust && (
           <span className={`channel-trust-badge trust-${course._channelTrust}`}>
             {course._channelTrust === "official" ? "✓ Official" : "⭐ Expert"}
@@ -468,15 +517,15 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
       {course._topics && course._topics.length > 0 && (
         <div className="reading-step-topics">
           {course._topics.map((topic, i) => (
-            <span key={i} className="topic-chip">{topic.replace(/_/g, " ")}</span>
+            <span key={i} className="topic-chip">
+              {topic.replace(/_/g, " ")}
+            </span>
           ))}
         </div>
       )}
 
       {/* Description */}
-      {course._description && (
-        <p className="reading-step-description">{course._description}</p>
-      )}
+      {course._description && <p className="reading-step-description">{course._description}</p>}
 
       {/* Embedded YouTube Player */}
       {youtubeId && (
@@ -497,21 +546,49 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
           <h3 className="key-steps-heading">🎯 Key Takeaways</h3>
           <ol className="key-steps-list">
             {course._keySteps.map((step, i) => (
-              <li key={i} className="key-step-item">{renderInlineMarkdown(step)}</li>
+              <li key={i} className="key-step-item">
+                {renderInlineMarkdown(step)}
+              </li>
             ))}
           </ol>
         </div>
       ) : course._description ? (
-        /* If we have a description but no key steps, show description-based guidance */
+        /* If we have a description but no key steps, show context-aware guidance */
         <div className="key-steps-section key-steps-fallback">
           <h3 className="key-steps-heading">🎯 What to Focus On</h3>
           <ul className="key-steps-list">
-            <li className="key-step-item">Understand how <strong>{course.title}</strong> works in UE5</li>
-            {course._topics && course._topics.length > 0 && course._topics.slice(0, 2).map((topic, i) => (
-              <li key={i} className="key-step-item">Pay attention to <strong>{topic.replace(/_/g, " ")}</strong> concepts and workflows</li>
-            ))}
-            {course._subsystem && (
-              <li className="key-step-item">Note how <strong>{course._subsystem}</strong> integrates with the editor</li>
+            {course._sections && course._sections.length > 0 ? (
+              /* Use doc section headings for specific guidance */
+              <>
+                <li className="key-step-item">
+                  Read through the <strong>{course.title}</strong> page, focusing on these sections:
+                </li>
+                {course._sections.slice(0, 5).map((section, i) => (
+                  <li key={i} className="key-step-item">
+                    📖 Work through the <strong>{section}</strong> section
+                  </li>
+                ))}
+              </>
+            ) : (
+              /* No sections available — use topic/subsystem fallback */
+              <>
+                <li className="key-step-item">
+                  Understand how <strong>{course.title}</strong> works in UE5
+                </li>
+                {course._topics &&
+                  course._topics.length > 0 &&
+                  course._topics.slice(0, 2).map((topic, i) => (
+                    <li key={i} className="key-step-item">
+                      Pay attention to <strong>{topic.replace(/_/g, " ")}</strong> concepts and
+                      workflows
+                    </li>
+                  ))}
+                {course._subsystem && (
+                  <li className="key-step-item">
+                    Note how <strong>{course._subsystem}</strong> integrates with the editor
+                  </li>
+                )}
+              </>
             )}
             <li className="key-step-item">Try applying these techniques in your own UE5 project</li>
           </ul>
@@ -526,7 +603,9 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
             {course._chapters.map((ch, i) => (
               <a
                 key={i}
-                href={youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}&t=${ch.seconds}` : "#"}
+                href={
+                  youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}&t=${ch.seconds}` : "#"
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="chapter-item"

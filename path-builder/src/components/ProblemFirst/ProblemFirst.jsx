@@ -32,8 +32,6 @@ import "./ProblemFirst.css";
 
 import { devLog, devWarn } from "../../utils/logger";
 
-
-
 const STAGES = {
   INPUT: "input",
   LOADING: "loading",
@@ -48,7 +46,6 @@ export default function ProblemFirst() {
   const [error, setError] = useState(null);
   const [blendedPath, setBlendedPath] = useState(null);
   const [videoResults, setVideoResults] = useState([]);
-
 
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
   const tagData = useTagData();
@@ -70,10 +67,7 @@ export default function ProblemFirst() {
       setError(null);
 
       if (inputData.pastedImage) {
-        devLog(
-          "[ProblemFirst] Screenshot attached (base64 length):",
-          inputData.pastedImage.length
-        );
+        devLog("[ProblemFirst] Screenshot attached (base64 length):", inputData.pastedImage.length);
       }
       if (inputData.errorLog) {
         devLog("[ProblemFirst] Error log attached:", inputData.errorLog.slice(0, 200));
@@ -93,18 +87,29 @@ export default function ProblemFirst() {
               const cachedCart = cartSnap.data();
 
               // Check 24h TTL
-              const cachedAt = cachedCart.cached_at?.toDate?.() || new Date(cachedCart.created_at || 0);
+              const cachedAt =
+                cachedCart.cached_at?.toDate?.() || new Date(cachedCart.created_at || 0);
               const ageMs = Date.now() - cachedAt.getTime();
               const TTL_MS = 24 * 60 * 60 * 1000;
 
               if (ageMs < TTL_MS) {
-                devLog(`[Cache Hit] Cart is ${Math.round(ageMs / 60000)}min old — using cached result`);
+                devLog(
+                  `[Cache Hit] Cart is ${Math.round(ageMs / 60000)}min old — using cached result`
+                );
 
-                const cartData = { ...cachedCart, userQuery: inputData.query, retrievedPassages: [] };
+                const cartData = {
+                  ...cachedCart,
+                  userQuery: inputData.query,
+                  retrievedPassages: [],
+                };
 
                 // Re-run local matching (no Gemini calls)
                 const matchedCourses = await matchCoursesToCart(
-                  cartData, courses, inputData.selectedTagIds || [], inputData.errorLog || "", []
+                  cartData,
+                  courses,
+                  inputData.selectedTagIds || [],
+                  inputData.errorLog || "",
+                  []
                 );
                 cartData.matchedCourses = matchedCourses;
 
@@ -114,26 +119,37 @@ export default function ProblemFirst() {
                   ...(inputData.selectedTagIds || []),
                 ];
                 const pathResult = buildLearningPath(matchedCourses, matchedTagIds, {
-                  preferTroubleshooting: true, diversity: true,
+                  preferTroubleshooting: true,
+                  diversity: true,
                 });
 
                 const roleMap = {};
                 for (const item of pathResult.path) {
                   roleMap[item.course.code] = {
-                    role: item.role, reason: item.reason, estimatedMinutes: item.estimatedMinutes,
+                    role: item.role,
+                    reason: item.reason,
+                    estimatedMinutes: item.estimatedMinutes,
                   };
                 }
 
-                const videos = await flattenCoursesToVideos(matchedCourses, inputData.query, roleMap);
+                const videos = await flattenCoursesToVideos(
+                  matchedCourses,
+                  inputData.query,
+                  roleMap
+                );
 
                 if (videos.length > 0) {
                   setVideoResults(videos);
                   setDiagnosisData(cartData);
                   setStage(STAGES.DIAGNOSIS);
-                  devLog(`[Cache] Loaded ${videos.length} videos from cached cart — 0 Gemini calls`);
+                  devLog(
+                    `[Cache] Loaded ${videos.length} videos from cached cart — 0 Gemini calls`
+                  );
                   return;
                 }
-                devWarn("[Cache] Cached cart produced 0 videos — falling through to fresh diagnosis");
+                devWarn(
+                  "[Cache] Cached cart produced 0 videos — falling through to fresh diagnosis"
+                );
               } else {
                 devLog(`[Cache Expired] Cart is ${Math.round(ageMs / 3600000)}h old — refreshing`);
               }
@@ -220,13 +236,17 @@ export default function ProblemFirst() {
             retrievedContext: retrievedPassages.slice(0, 5), // Top 5 passages
           });
 
-          if (!result.data.success) throw new Error(result.data.message || "Failed to process query");
+          if (!result.data.success)
+            throw new Error(result.data.message || "Failed to process query");
 
           cartData = result.data.cart;
         } catch (geminiErr) {
           // Graceful fallback on 429 or other Gemini errors — use local-only matching
-          const is429 = geminiErr.message?.includes("429") || geminiErr.code === "resource-exhausted";
-          devWarn(`⚠️ Gemini ${is429 ? "rate limited (429)" : "error"}: ${geminiErr.message}. Falling back to local matching.`);
+          const is429 =
+            geminiErr.message?.includes("429") || geminiErr.code === "resource-exhausted";
+          devWarn(
+            `⚠️ Gemini ${is429 ? "rate limited (429)" : "error"}: ${geminiErr.message}. Falling back to local matching.`
+          );
           geminiSucceeded = false;
           cartData = {
             diagnosis: {
@@ -301,13 +321,20 @@ export default function ProblemFirst() {
             t.split(/[._]/).filter((s) => s.length > 2 && s !== "unreal" && s !== "engine")
           );
           // Also extract keywords from the user's query
-          const queryWords = (inputData.query || "").toLowerCase().split(/\s+/)
+          const queryWords = (inputData.query || "")
+            .toLowerCase()
+            .split(/\s+/)
             .filter((w) => w.length > 3);
           const uniqueTopics = [...new Set([...tagSegments, ...queryWords])].slice(0, 12);
           if (uniqueTopics.length > 0) {
-            const blended = await buildBlendedPath(uniqueTopics, videos, { maxDocs: 5, maxYoutube: 3 });
+            const blended = await buildBlendedPath(uniqueTopics, videos, {
+              maxDocs: 5,
+              maxYoutube: 3,
+            });
             setBlendedPath(blended);
-            devLog(`[Blended] ${blended.docs.length} docs, ${blended.youtube.length} YT, coverage: ${(blended.coverageScore * 100).toFixed(0)}%`);
+            devLog(
+              `[Blended] ${blended.docs.length} docs, ${blended.youtube.length} YT, coverage: ${(blended.coverageScore * 100).toFixed(0)}%`
+            );
           }
         } catch (blendedErr) {
           devWarn("⚠️ Blended path skipped:", blendedErr.message);
@@ -318,7 +345,9 @@ export default function ProblemFirst() {
         // Update history with cart_id so future clicks use cache
         if (inputData.updateCartIdForQuery && cartData.cart_id) {
           inputData.updateCartIdForQuery(inputData.query, cartData.cart_id);
-          devLog(`[Cache] Saved cart_id ${cartData.cart_id} to history for: "${inputData.query.substring(0, 40)}..."`);
+          devLog(
+            `[Cache] Saved cart_id ${cartData.cart_id} to history for: "${inputData.query.substring(0, 40)}..."`
+          );
         }
 
         await trackDiagnosisGenerated(cartData.diagnosis);
@@ -394,20 +423,26 @@ export default function ProblemFirst() {
                 <p className="tldr-query-text">{diagnosisData.userQuery}</p>
               </div>
               {diagnosisData._localFallback && (
-                <div className="tldr-fallback-notice" style={{
-                  background: 'rgba(255, 193, 7, 0.1)',
-                  border: '1px solid rgba(255, 193, 7, 0.3)',
-                  borderRadius: '8px',
-                  padding: '8px 14px',
-                  margin: '8px 0',
-                  fontSize: '0.85rem',
-                  color: 'var(--text-muted, #aaa)',
-                }}>
-                  ⚡ <strong>Fast results</strong> — AI diagnosis unavailable (rate limit). Videos matched by tag taxonomy.
+                <div
+                  className="tldr-fallback-notice"
+                  style={{
+                    background: "rgba(255, 193, 7, 0.1)",
+                    border: "1px solid rgba(255, 193, 7, 0.3)",
+                    borderRadius: "8px",
+                    padding: "8px 14px",
+                    margin: "8px 0",
+                    fontSize: "0.85rem",
+                    color: "var(--text-muted, #aaa)",
+                  }}
+                >
+                  ⚡ <strong>Fast results</strong> — AI diagnosis unavailable (rate limit). Videos
+                  matched by tag taxonomy.
                 </div>
               )}
               {diagnosisData.diagnosis?.problem_summary && (
-                <p className="tldr-bridge">Based on your question, we think these videos will help you:</p>
+                <p className="tldr-bridge">
+                  Based on your question, we think these videos will help you:
+                </p>
               )}
             </div>
 
@@ -422,10 +457,30 @@ export default function ProblemFirst() {
 
             {(() => {
               const ROLE_SECTIONS = [
-                { key: "prerequisite", icon: "🔗", label: "Prerequisite", desc: "Build the foundation first — these cover concepts you'll need before tackling the main topic." },
-                { key: "core",         icon: "⭐", label: "Core",         desc: "These directly address your question and are the most important videos to watch." },
-                { key: "troubleshooting", icon: "🔧", label: "Troubleshooting", desc: "Debugging helpers — watch these if you're hitting errors or unexpected behavior." },
-                { key: "supplemental", icon: "📚", label: "Supplemental", desc: "Go deeper — extra context and advanced techniques for when you're ready." },
+                {
+                  key: "prerequisite",
+                  icon: "🔗",
+                  label: "Prerequisite",
+                  desc: "Build the foundation first — these cover concepts you'll need before tackling the main topic.",
+                },
+                {
+                  key: "core",
+                  icon: "⭐",
+                  label: "Core",
+                  desc: "These directly address your question and are the most important videos to watch.",
+                },
+                {
+                  key: "troubleshooting",
+                  icon: "🔧",
+                  label: "Troubleshooting",
+                  desc: "Debugging helpers — watch these if you're hitting errors or unexpected behavior.",
+                },
+                {
+                  key: "supplemental",
+                  icon: "📚",
+                  label: "Supplemental",
+                  desc: "Go deeper — extra context and advanced techniques for when you're ready.",
+                },
               ];
 
               const grouped = {};
@@ -437,8 +492,7 @@ export default function ProblemFirst() {
                 (grouped[role] || grouped._other).push(video);
               }
 
-              return ROLE_SECTIONS
-                .filter((s) => grouped[s.key].length > 0)
+              return ROLE_SECTIONS.filter((s) => grouped[s.key].length > 0)
                 .map((section) => (
                   <div key={section.key} className="role-section">
                     <div className="role-section-header">
@@ -450,7 +504,11 @@ export default function ProblemFirst() {
                     </div>
                     <div className="video-results-grid">
                       {grouped[section.key].map((video) => (
-                        <div key={video.driveId} className="video-result-wrapper" id={`video-${video.driveId}`}>
+                        <div
+                          key={video.driveId}
+                          className="video-result-wrapper"
+                          id={`video-${video.driveId}`}
+                        >
                           <VideoResultCard
                             video={video}
                             isAdded={isInCart(video.driveId)}
@@ -467,12 +525,21 @@ export default function ProblemFirst() {
                     ? [
                         <div key="_other" className="role-section">
                           <div className="role-section-header">
-                            <h3 className="role-section-title">📎 Related <span className="role-section-count">{grouped._other.length}</span></h3>
-                            <p className="role-section-desc">Additional videos that may be relevant to your query.</p>
+                            <h3 className="role-section-title">
+                              📎 Related{" "}
+                              <span className="role-section-count">{grouped._other.length}</span>
+                            </h3>
+                            <p className="role-section-desc">
+                              Additional videos that may be relevant to your query.
+                            </p>
                           </div>
                           <div className="video-results-grid">
                             {grouped._other.map((video) => (
-                              <div key={video.driveId} className="video-result-wrapper" id={`video-${video.driveId}`}>
+                              <div
+                                key={video.driveId}
+                                className="video-result-wrapper"
+                                id={`video-${video.driveId}`}
+                              >
                                 <VideoResultCard
                                   video={video}
                                   isAdded={isInCart(video.driveId)}
@@ -504,7 +571,10 @@ export default function ProblemFirst() {
                     const docId = `doc_${doc.key || i}`;
                     const inCart = isInCart(docId);
                     return (
-                      <div key={doc.key || i} className={`doc-card ${inCart ? "doc-card-added" : ""}`}>
+                      <div
+                        key={doc.key || i}
+                        className={`doc-card ${inCart ? "doc-card-added" : ""}`}
+                      >
                         <a
                           href={doc.url}
                           target="_blank"
@@ -513,15 +583,34 @@ export default function ProblemFirst() {
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="doc-card-header">
-                            {doc.matchScore != null && (() => {
-                              const tier = doc.matchScore >= 90 ? "best" : doc.matchScore >= 60 ? "strong" : doc.matchScore >= 30 ? "good" : "related";
-                              const label = doc.matchScore >= 90 ? "Best Match" : doc.matchScore >= 60 ? "Strong" : doc.matchScore >= 30 ? "Good" : "Related";
-                              return (
-                                <span className={`doc-match-badge doc-match-${tier}`} title={`${doc.matchScore}% relevancy`}>
-                                  <span className="doc-match-dot" />{label}
-                                </span>
-                              );
-                            })()}
+                            {doc.matchScore != null &&
+                              (() => {
+                                const tier =
+                                  doc.matchScore >= 90
+                                    ? "best"
+                                    : doc.matchScore >= 60
+                                      ? "strong"
+                                      : doc.matchScore >= 30
+                                        ? "good"
+                                        : "related";
+                                const label =
+                                  doc.matchScore >= 90
+                                    ? "Best Match"
+                                    : doc.matchScore >= 60
+                                      ? "Strong"
+                                      : doc.matchScore >= 30
+                                        ? "Good"
+                                        : "Related";
+                                return (
+                                  <span
+                                    className={`doc-match-badge doc-match-${tier}`}
+                                    title={`${doc.matchScore}% relevancy`}
+                                  >
+                                    <span className="doc-match-dot" />
+                                    {label}
+                                  </span>
+                                );
+                              })()}
                             <span className={`tier-badge tier-${doc.tier || "intermediate"}`}>
                               {doc.tier || "intermediate"}
                             </span>
@@ -530,12 +619,12 @@ export default function ProblemFirst() {
                             )}
                           </div>
                           <h4 className="doc-card-title">{doc.label}</h4>
-                          {doc.description && (
-                            <p className="doc-card-desc">{doc.description}</p>
-                          )}
+                          {doc.description && <p className="doc-card-desc">{doc.description}</p>}
                           <div className="doc-card-footer">
                             <span className="doc-source-badge">📄 Epic Docs</span>
-                            <span className="doc-read-time">{doc.readTimeMinutes || 10} min read</span>
+                            <span className="doc-read-time">
+                              {doc.readTimeMinutes || 10} min read
+                            </span>
                           </div>
                         </a>
                         <button
@@ -551,6 +640,7 @@ export default function ProblemFirst() {
                                 description: doc.description || "",
                                 keySteps: doc.keySteps || [],
                                 seeAlso: doc.seeAlso || [],
+                                sections: doc.sections || [],
                                 url: doc.url,
                                 tier: doc.tier || "intermediate",
                                 subsystem: doc.subsystem,
@@ -583,7 +673,10 @@ export default function ProblemFirst() {
                     const ytId = yt.id || `yt_${yt.url}`;
                     const inCart = isInCart(ytId);
                     return (
-                      <div key={yt.id} className={`doc-card ${inCart ? "doc-card-added" : ""}`}>
+                      <div
+                        key={yt.id}
+                        className={`doc-card yt-card-with-thumb ${inCart ? "doc-card-added" : ""}`}
+                      >
                         <a
                           href={yt.url}
                           target="_blank"
@@ -591,6 +684,22 @@ export default function ProblemFirst() {
                           className="doc-card-link"
                           onClick={(e) => e.stopPropagation()}
                         >
+                          {(() => {
+                            const vidMatch = yt.url?.match(/[?&]v=([^&]+)/);
+                            const vidId = vidMatch ? vidMatch[1] : null;
+                            return vidId ? (
+                              <div className="yt-thumb-wrapper">
+                                <img
+                                  className="yt-thumb-img"
+                                  src={`https://img.youtube.com/vi/${vidId}/mqdefault.jpg`}
+                                  alt={yt.title}
+                                  loading="lazy"
+                                />
+                                <span className="yt-thumb-duration">{yt.durationMinutes} min</span>
+                                <span className="yt-thumb-play">▶</span>
+                              </div>
+                            ) : null;
+                          })()}
                           <div className="doc-card-header">
                             <span className={`tier-badge tier-${yt.tier || "intermediate"}`}>
                               {yt.tier || "intermediate"}
@@ -679,6 +788,7 @@ export default function ProblemFirst() {
                 _channelTrust: item.channelTrust,
                 _subsystem: item.subsystem,
                 _topics: item.topics || [],
+                _sections: item.sections || [],
                 _chapters: item.chapters || [],
                 _readTimeMinutes: item.readTimeMinutes || item.durationMinutes || 10,
                 videos: [],

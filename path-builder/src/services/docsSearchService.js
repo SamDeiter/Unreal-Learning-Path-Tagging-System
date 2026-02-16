@@ -197,6 +197,9 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
         subsystem: doc.subsystem,
         readTimeMinutes: doc.readTimeMinutes || 10,
         prerequisites: doc.prerequisites || [],
+        sections: doc.sections || [],
+        keySteps: doc.keySteps || [],
+        seeAlso: doc.seeAlso || [],
         _score: score,
         source: "epic_docs",
       });
