@@ -14,6 +14,7 @@ Requires:
     - pip install requests
 """
 
+import hashlib
 import json
 import os
 import sys
@@ -149,46 +150,76 @@ def main():
 
     print(f"🎬 Found {len(playable)} playable courses")
 
-    # Build text chunks
+    # Build text chunks + compute content hashes
     print("📝 Building text chunks...")
     chunks = []
     codes = []
     titles = []
+    content_hashes = []
     for c in playable:
         code = c.get("code", "")
         title = c.get("title", "")
         text = build_text_chunk(c, course_words)
+        content_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
         chunks.append(text)
         codes.append(code)
         titles.append(title)
+        content_hashes.append(content_hash)
         # Debug: show first chunk
         if len(chunks) == 1:
             print(f"  Sample chunk ({code}):")
             print(f"  {text[:200]}...")
 
-    # Generate embeddings in batches
-    print(f"🧠 Generating embeddings ({len(chunks)} courses, batch size {BATCH_SIZE})...")
-    all_embeddings = []
-    for i in range(0, len(chunks), BATCH_SIZE):
-        batch = chunks[i:i + BATCH_SIZE]
-        batch_codes = codes[i:i + BATCH_SIZE]
-        print(f"  Batch {i // BATCH_SIZE + 1}/{(len(chunks) + BATCH_SIZE - 1) // BATCH_SIZE}: {batch_codes}")
+    # Smart re-indexing: load existing embeddings and skip unchanged
+    existing_embeddings = {}
+    existing_hashes = {}
+    if os.path.exists(OUTPUT_PATH):
+        with open(OUTPUT_PATH, encoding="utf-8") as f:
+            prev = json.load(f)
+        for ccode, cdata in prev.get("courses", {}).items():
+            existing_embeddings[ccode] = cdata
+            if "content_hash" in cdata:
+                existing_hashes[ccode] = cdata["content_hash"]
 
-        embeddings = embed_batch(batch, api_key)
+    # Determine which courses need re-embedding
+    to_embed_indices = []
+    skipped = 0
+    for idx, (code, chash) in enumerate(zip(codes, content_hashes)):
+        if code in existing_hashes and existing_hashes[code] == chash:
+            skipped += 1
+        else:
+            to_embed_indices.append(idx)
+
+    print(f"  📊 {skipped} unchanged (skipped), {len(to_embed_indices)} need embedding")
+
+    # Generate embeddings in batches (only for changed courses)
+    print(f"🧠 Generating embeddings ({len(to_embed_indices)} courses, batch size {BATCH_SIZE})...")
+    new_embeddings = {}
+    for batch_start in range(0, len(to_embed_indices), BATCH_SIZE):
+        batch_indices = to_embed_indices[batch_start:batch_start + BATCH_SIZE]
+        batch_texts = [chunks[i] for i in batch_indices]
+        batch_codes = [codes[i] for i in batch_indices]
+        batch_num = batch_start // BATCH_SIZE + 1
+        total_batches = (len(to_embed_indices) + BATCH_SIZE - 1) // BATCH_SIZE
+        print(f"  Batch {batch_num}/{total_batches}: {batch_codes}")
+
+        embeddings = embed_batch(batch_texts, api_key)
         if embeddings is None:
             print("  ⚠️ Retrying after 2s...")
             time.sleep(2)
-            embeddings = embed_batch(batch, api_key)
+            embeddings = embed_batch(batch_texts, api_key)
             if embeddings is None:
                 print(f"  ❌ Failed to embed batch starting at {batch_codes[0]}, skipping")
-                all_embeddings.extend([None] * len(batch))
                 continue
 
-        all_embeddings.extend(embeddings)
-        if i + BATCH_SIZE < len(chunks):
+        for idx_in_batch, emb in enumerate(embeddings):
+            orig_idx = batch_indices[idx_in_batch]
+            new_embeddings[codes[orig_idx]] = emb
+
+        if batch_start + BATCH_SIZE < len(to_embed_indices):
             time.sleep(RATE_LIMIT_DELAY)
 
-    # Build output
+    # Build output: merge unchanged + newly embedded
     output = {
         "model": MODEL,
         "dimension": DIMENSION,
@@ -199,15 +230,21 @@ def main():
     }
 
     success_count = 0
-    for code, title, embedding in zip(codes, titles, all_embeddings, strict=False):
-        if embedding and len(embedding) == DIMENSION:
+    for idx, (code, title, chash) in enumerate(zip(codes, titles, content_hashes)):
+        # Use new embedding if available, otherwise reuse existing
+        if code in new_embeddings and new_embeddings[code] and len(new_embeddings[code]) == DIMENSION:
             output["courses"][code] = {
                 "title": title,
-                "embedding": [round(v, 6) for v in embedding],  # Save space
+                "embedding": [round(v, 6) for v in new_embeddings[code]],
+                "content_hash": chash,
             }
             success_count += 1
+        elif code in existing_embeddings and existing_embeddings[code].get("embedding"):
+            output["courses"][code] = existing_embeddings[code]
+            output["courses"][code]["content_hash"] = chash
+            success_count += 1
         else:
-            print(f"  ⚠️ Skipped {code}: invalid embedding")
+            print(f"  ⚠️ Skipped {code}: no valid embedding")
 
     output["total_courses"] = success_count
 
@@ -216,7 +253,9 @@ def main():
         json.dump(output, f)
 
     file_size_kb = os.path.getsize(OUTPUT_PATH) / 1024
-    print(f"\n✅ Done! Generated embeddings for {success_count}/{len(playable)} courses")
+    print(f"\n✅ Done! Embeddings for {success_count}/{len(playable)} courses")
+    print(f"  Skipped (unchanged): {skipped}")
+    print(f"  Re-embedded: {len(new_embeddings)}")
     print(f"📁 Saved to: {OUTPUT_PATH} ({file_size_kb:.0f} KB)")
 
 

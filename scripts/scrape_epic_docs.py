@@ -403,28 +403,41 @@ def main():
 
     print(f"\n  Total doc chunks to embed: {len(all_chunks)}")
 
-    # Step 4: Embed
+    # Step 4: Embed (with smart re-indexing via content hashing)
     api_key = get_api_key()
     print(f"  API key: {api_key[:8]}...{api_key[-4:]}")
 
     start_idx = 0
     existing = {}
+    existing_hashes = {}  # id -> content_hash from previous run
+    if OUTPUT_FILE.exists():
+        prev_output = json.load(open(OUTPUT_FILE))
+        existing = prev_output.get("docs", {})
+        # Build hash lookup from previous embeddings
+        for doc_id, doc_data in existing.items():
+            if "content_hash" in doc_data:
+                existing_hashes[doc_id] = doc_data["content_hash"]
+
     if args.resume and CHECKPOINT_FILE.exists():
         cp = json.load(open(CHECKPOINT_FILE))
         start_idx = cp["embeddings_done"]
-        if OUTPUT_FILE.exists():
-            existing = json.load(open(OUTPUT_FILE)).get("docs", {})
         print(f"  Resuming from {start_idx}")
 
     embeddings = dict(existing)
     total = len(all_chunks)
     errors = 0
+    skipped = 0
     start_time = time.time()
 
     print(f"\nEmbedding {total - start_idx} doc chunks...\n")
 
     for i in range(start_idx, total):
         chunk = all_chunks[i]
+        # Smart re-indexing: hash the chunk text
+        content_hash = hashlib.sha256(chunk["text"].encode("utf-8")).hexdigest()[:16]
+        if chunk["id"] in existing_hashes and existing_hashes[chunk["id"]] == content_hash:
+            skipped += 1
+            continue
         try:
             vector = embed_text(chunk["text"], api_key)
             embeddings[chunk["id"]] = {
@@ -435,6 +448,7 @@ def main():
                 "section": chunk["section"],
                 "text": chunk["text"][:300],
                 "token_estimate": chunk["token_estimate"],
+                "content_hash": content_hash,
             }
 
             done = i + 1
@@ -486,6 +500,8 @@ def main():
 
     print(f"\n{'='*50}")
     print(f"Done! Embedded {len(embeddings)} doc chunks in {elapsed:.0f}s")
+    print(f"  Skipped (unchanged): {skipped}")
+    print(f"  Re-embedded: {len(embeddings) - skipped}")
     print(f"Output: {OUTPUT_FILE} ({file_size_mb:.1f} MB)")
     print(f"Errors: {errors}")
 
