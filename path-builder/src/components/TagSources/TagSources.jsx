@@ -52,9 +52,17 @@ function TagSources() {
       }
 
       // Count video-extracted tags (canonical + extracted + topic)
+      // Normalize dotted canonical_tags (e.g. "rendering.material" → "Material")
+      const normalizeTag = (tag) => {
+        if (tag.includes(".")) {
+          const lastPart = tag.split(".").pop();
+          return lastPart.charAt(0).toUpperCase() + lastPart.slice(1);
+        }
+        return tag;
+      };
       const videoTags = [
-        ...(course.canonical_tags || []),
-        ...(course.transcript_tags || []),
+        ...(course.canonical_tags || []).map(normalizeTag),
+        ...(course.transcript_tags || []).map(normalizeTag),
         ...(course.extracted_tags || []),
       ];
       // Also include tags.topic (can be string or array)
