@@ -22,6 +22,7 @@ from .phase2_whisper import run_phase2
 from .phase3_normalize import run_phase3
 from .phase4_edges import run_phase4
 from .phase5_gemini import run_phase5
+from .youtube_transcripts import fetch_youtube_transcripts
 
 # Phase 8B: State management for pipeline checkpointing
 STATE_FILENAME = "pipeline_state.json"
@@ -232,6 +233,105 @@ def run_all(
     print("=" * 60)
 
 
+def run_youtube_discovery(content_dir: Path) -> int:
+    """Discover new UE5 videos from Epic Games YouTube channel.
+
+    Fetches videos, deduplicates against existing library, extracts
+    chapter timestamps, fetches transcripts, and saves new courses.
+
+    Args:
+        content_dir: Path to content/ directory.
+
+    Returns:
+        Number of new courses added.
+    """
+    import sys
+    sys.path.insert(0, str(content_dir.parent))
+
+    from ingestion.youtube_fetcher import YouTubeFetcher, convert_to_course_format
+    from ingestion.timestamp_extractor import TimestampExtractor
+
+    print("\n" + "=" * 60)
+    print("🎬 YOUTUBE DISCOVERY")
+    print("=" * 60)
+
+    # Load existing video library
+    library_path = content_dir / "video_library.json"
+    if library_path.exists():
+        with open(library_path, encoding="utf-8") as f:
+            library = json.load(f)
+    else:
+        library = {"courses": []}
+
+    # Build set of existing YouTube video IDs (code field)
+    existing_ids = {
+        c.get("code", "") for c in library.get("courses", [])
+    }
+    # Also check youtube_url for older entries
+    for c in library.get("courses", []):
+        url = c.get("youtube_url", "") or c.get("path", "")
+        if "youtube.com/watch?v=" in url:
+            vid = url.split("v=")[-1].split("&")[0]
+            existing_ids.add(vid)
+
+    print(f"   📚 Existing library: {len(library.get('courses', []))} courses")
+    print(f"   🔑 Known video IDs: {len(existing_ids)}")
+
+    # Fetch videos from Epic Games channel
+    print("\n   🔍 Fetching from Epic Games channel...")
+    try:
+        fetcher = YouTubeFetcher()
+        videos = fetcher.fetch_channel_videos("epic_games", max_results=50)
+    except Exception as e:
+        print(f"   ⚠️  YouTube fetch failed: {e}")
+        print("   → Ensure YOUTUBE_API_KEY is set in .env")
+        return 0
+
+    print(f"   📹 Found {len(videos)} videos from Epic Games")
+
+    # Filter duplicates
+    new_videos = [v for v in videos if v.video_id not in existing_ids]
+    print(f"   ✨ {len(new_videos)} new videos (skipped {len(videos) - len(new_videos)} duplicates)")
+
+    if not new_videos:
+        print("   ✅ No new videos to add.")
+        return 0
+
+    # Convert to course format and extract chapters
+    extractor = TimestampExtractor()
+    new_courses = []
+
+    for video in new_videos:
+        course = convert_to_course_format(video)
+
+        # Extract chapter segments from description
+        segments = extractor.extract_chapters_as_segments(
+            video.video_id, video.description
+        )
+        if segments:
+            course["segments"] = segments
+            print(f"   📑 {video.title[:50]}... ({len(segments)} chapters)")
+        else:
+            print(f"   📹 {video.title[:50]}... (no chapters)")
+
+        new_courses.append(course)
+
+    # Fetch transcripts
+    print("\n   📝 Fetching transcripts...")
+    new_ids = [v.video_id for v in new_videos]
+    fetch_youtube_transcripts(content_dir, new_ids)
+
+    # Append new courses to library
+    library.setdefault("courses", []).extend(new_courses)
+
+    # Save updated library
+    with open(library_path, "w", encoding="utf-8") as f:
+        json.dump(library, f, indent=2, ensure_ascii=False)
+
+    print(f"\n   ✅ Added {len(new_courses)} new YouTube courses to video_library.json")
+    return len(new_courses)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Tag Enrichment Pipeline")
     parser.add_argument("--all", action="store_true", help="Run all phases")
@@ -257,6 +357,11 @@ def main():
         action="store_true",
         help="Reset pipeline state and start from scratch",
     )
+    parser.add_argument(
+        "--fetch-youtube",
+        action="store_true",
+        help="Run YouTube discovery before the pipeline",
+    )
 
     args = parser.parse_args()
 
@@ -267,6 +372,10 @@ def main():
     if not content_dir.exists():
         print(f"❌ Content directory not found: {content_dir}")
         return
+
+    # Run YouTube discovery if requested
+    if args.fetch_youtube:
+        run_youtube_discovery(content_dir)
 
     if args.all:
         run_all(

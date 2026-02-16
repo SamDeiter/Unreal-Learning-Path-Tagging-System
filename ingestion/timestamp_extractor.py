@@ -131,6 +131,34 @@ class TimestampExtractor:
 
         return snippets
 
+    def extract_chapters_as_segments(
+        self,
+        video_id: str,
+        description: str,
+    ) -> list[dict]:
+        """Extract all chapters as segment dicts for course metadata.
+
+        Args:
+            video_id: YouTube video ID.
+            description: YouTube video description.
+
+        Returns:
+            List of segment dicts with title, start_seconds, timestamp_display, url.
+        """
+        timestamps = self.extract_timestamps(description)
+        segments = []
+        for ts, title in timestamps:
+            seconds = self.timestamp_to_seconds(ts)
+            segments.append(
+                {
+                    "title": title,
+                    "start_seconds": seconds,
+                    "timestamp_display": ts,
+                    "url": f"https://youtube.com/watch?v={video_id}&t={seconds}",
+                }
+            )
+        return segments
+
     def get_intro_snippet(
         self,
         video_id: str,

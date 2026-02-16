@@ -79,6 +79,47 @@ def load_existing_transcripts(transcript_dir: Path) -> dict[str, str]:
     return transcripts
 
 
+def load_youtube_transcripts(transcript_dir: Path) -> dict[str, str]:
+    """Load YouTube transcript JSON files.
+
+    YouTube transcripts are saved as {video_id}.json directly in the
+    transcripts directory (not in subdirectories like VTT files).
+
+    Args:
+        transcript_dir: Path to content/transcripts directory.
+
+    Returns:
+        Dictionary mapping video IDs to full transcript text.
+    """
+    import json
+
+    transcripts = {}
+
+    if not transcript_dir.exists():
+        return transcripts
+
+    # YouTube video IDs are 11 chars: alphanumeric, hyphens, underscores
+    yt_pattern = re.compile(r"^[A-Za-z0-9_-]{11}\.json$")
+
+    for json_file in sorted(transcript_dir.glob("*.json")):
+        if not yt_pattern.match(json_file.name):
+            continue
+
+        video_id = json_file.stem
+        try:
+            data = json.loads(json_file.read_text(encoding="utf-8"))
+            if isinstance(data, list):
+                full_text = " ".join(
+                    entry.get("text", "") for entry in data if isinstance(entry, dict)
+                )
+                if full_text.strip():
+                    transcripts[video_id] = full_text
+        except (json.JSONDecodeError, KeyError):
+            continue
+
+    return transcripts
+
+
 def run_phase0(content_dir: Path) -> dict[str, str]:
     """Execute Phase 0: Load existing transcripts.
 
@@ -94,6 +135,12 @@ def run_phase0(content_dir: Path) -> dict[str, str]:
     transcripts = load_existing_transcripts(transcript_dir)
 
     print(f"   ✅ Loaded {len(transcripts)} courses with existing transcripts")
+
+    # Also load YouTube transcript JSONs
+    yt_transcripts = load_youtube_transcripts(transcript_dir)
+    if yt_transcripts:
+        transcripts.update(yt_transcripts)
+        print(f"   🎬 Loaded {len(yt_transcripts)} YouTube transcripts")
 
     # Show sample
     if transcripts:

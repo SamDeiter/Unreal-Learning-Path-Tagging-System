@@ -224,6 +224,79 @@ class YouTubeFetcher:
         return self.get_video_details(video_ids) if video_ids else []
 
 
+def parse_iso8601_duration(iso_str: str) -> int:
+    """Convert ISO 8601 duration to minutes.
+
+    Args:
+        iso_str: Duration string like 'PT1H23M45S', 'PT5M', 'PT30S'.
+
+    Returns:
+        Duration in minutes (rounded up).
+    """
+    if not iso_str:
+        return 0
+    import re as _re
+
+    pattern = _re.compile(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?")
+    match = pattern.match(iso_str)
+    if not match:
+        return 0
+    hours = int(match.group(1) or 0)
+    minutes = int(match.group(2) or 0)
+    seconds = int(match.group(3) or 0)
+    total_minutes = hours * 60 + minutes + (1 if seconds > 0 else 0)
+    return max(total_minutes, 1)
+
+
+def convert_to_course_format(video: VideoMetadata) -> dict:
+    """Transform a VideoMetadata into a video_library.json course dict.
+
+    Args:
+        video: VideoMetadata object from the YouTube API.
+
+    Returns:
+        Course dictionary compatible with video_library.json.
+    """
+    duration_minutes = parse_iso8601_duration(video.duration) if video.duration else 10
+
+    return {
+        "code": video.video_id,
+        "title": video.title,
+        "folder_name": f"YT-{video.video_id}",
+        "path": f"https://www.youtube.com/watch?v={video.video_id}",
+        "source": "youtube",
+        "youtube_url": f"https://www.youtube.com/watch?v={video.video_id}",
+        "thumbnail_url": video.thumbnail_url or "",
+        "channel_title": video.channel_title,
+        "published_at": video.published_at,
+        "duration_minutes": duration_minutes,
+        "view_count": video.view_count or 0,
+        "versions": [],
+        "has_cc": False,
+        "has_scorm": False,
+        "videos": [
+            {
+                "name": video.title,
+                "path": f"https://www.youtube.com/watch?v={video.video_id}",
+                "version": "youtube",
+                "folder": "youtube",
+            }
+        ],
+        "video_count": 1,
+        "tags": {
+            "audience": "General",
+            "level": "Intermediate",
+            "product": "Unreal Engine",
+            "industry": "General",
+            "topic": "Foundation",
+            "_confidence": 1,
+        },
+        "needs_review": True,
+        "segments": [],
+        "ai_tags": video.tags or [],
+    }
+
+
 def main():
     """Test the YouTube fetcher."""
     print("🔍 Testing YouTube Fetcher...")
