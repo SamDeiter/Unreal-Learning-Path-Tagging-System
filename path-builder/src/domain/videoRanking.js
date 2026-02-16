@@ -26,6 +26,29 @@ const DISPLAY_NOISE = new Set([
 ]);
 
 /**
+ * Simple stemmer — strips common English suffixes for fuzzy matching.
+ * e.g. "meshes" → "mesh", "importing" → "import", "textures" → "textur"
+ */
+function stem(word) {
+  return word
+    .replace(/ies$/i, "y")
+    .replace(/ves$/i, "f")
+    .replace(/(s|es|ing|ed|tion|ment)$/i, "")
+    .toLowerCase();
+}
+
+/**
+ * Fuzzy word-overlap match: returns true if any query word stem
+ * matches any topic word stem.
+ */
+function fuzzyTopicMatch(queryWords, topicKey) {
+  const topicWords = topicKey.replace(/[-_]/g, " ").split(/\s+/).filter(w => w.length > 2);
+  const topicStems = topicWords.map(stem);
+  const queryStems = queryWords.map(stem);
+  return queryStems.some(qs => topicStems.some(ts => qs.includes(ts) || ts.includes(qs)));
+}
+
+/**
  * Flatten matched courses into individual video items for the shopping cart.
  * Videos are ranked by how well their transcript content answers the query.
  */
@@ -36,12 +59,13 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
     .split(/\s+/)
     .filter((w) => w.length > 2);
 
-  // Find doc links matching the query
+  // Find doc links matching the query (fuzzy word-overlap matching)
   const docLinks = await getDocLinks();
   const matchedDocLinks = [];
   const queryLower = (userQuery || "").toLowerCase();
+  const queryWordList = queryLower.split(/\s+/).filter(w => w.length > 2);
   for (const [topic, info] of Object.entries(docLinks)) {
-    if (queryLower.includes(topic)) {
+    if (queryLower.includes(topic) || fuzzyTopicMatch(queryWordList, topic)) {
       matchedDocLinks.push({ label: info.label, url: info.url });
     }
   }
@@ -156,12 +180,19 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
       const videoKey = await findVideoKeyForIndex(course.code, videoTitle, i);
       const segmentData = await getVideoSegmentScore(course.code, videoKey, queryWords);
 
-      // Score 3: Intro penalty
-      const isIntro = titleLower.includes("intro") || titleLower.includes("wrap up") || titleLower.includes("outro");
-      const introPenalty = isIntro ? -20 : 0;
+      // Score 3: Intro detection (expanded patterns)
+      const isIntro = titleLower.includes("intro") || titleLower.includes("wrap up") ||
+        titleLower.includes("outro") || titleLower.includes("overview") ||
+        titleLower.includes("getting started") || titleLower.includes("welcome") ||
+        titleLower.includes("course intro") || titleLower.includes("what you'll learn") ||
+        titleLower.includes("what we'll cover");
+      const introMultiplier = isIntro ? 0.3 : 1.0;
 
-      // Composite score with feedback adjustment
-      const rawScore = titleScore + segmentData.score + introPenalty + (course._relevanceScore || 0);
+      // Score 4: Segment content bonus — prefer videos with actual matching content
+      const segmentBonus = (!isIntro && segmentData.topSegments && segmentData.topSegments.length > 0) ? 15 : 0;
+
+      // Composite score with feedback adjustment (multiplicative intro penalty)
+      const rawScore = (titleScore + segmentData.score + segmentBonus + (course._relevanceScore || 0)) * introMultiplier;
       const totalScore = applyFeedbackMultiplier(v.drive_id, rawScore);
 
       // Build timestamp hint
@@ -227,9 +258,10 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
   // Sort by relevance — best answer first
   deduped.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-  // Per-course diversity: keep at most 1 video per course to avoid flooding
+  // Per-course diversity: keep at most 2 videos per course
+  // (allows content video to surface alongside intro, with intro ranked lower)
   const courseCount = new Map();
-  const MAX_PER_COURSE = 1;
+  const MAX_PER_COURSE = 2;
   const diverse = deduped.filter((v) => {
     const count = courseCount.get(v.courseCode) || 0;
     if (count >= MAX_PER_COURSE) return false;
