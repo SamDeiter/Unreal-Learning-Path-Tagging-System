@@ -63,6 +63,14 @@ function TagSources() {
         ...(course.canonical_tags || []).flatMap(splitTag),
         ...(course.transcript_tags || []).flatMap(splitTag),
         ...(course.extracted_tags || []),
+        ...(Array.isArray(course.ai_tags)
+          ? course.ai_tags
+          : course.ai_tags
+            ? Object.values(course.ai_tags)
+            : []
+        )
+          .map((t) => (typeof t === "string" ? t : t?.tag_id || t?.name || ""))
+          .filter(Boolean),
       ];
       // Also include all tags dict values (topic, industry, level, etc.)
       const tagsObj = course.tags || {};
