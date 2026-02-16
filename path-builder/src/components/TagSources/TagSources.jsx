@@ -12,7 +12,6 @@ function TagSources() {
   const { courses } = useTagData();
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [filter, setFilter] = useState("all"); // 'all' | 'enriched' | 'pending'
-  const [showAllVideoTags, setShowAllVideoTags] = useState(false);
   const [videoTagLimit, setVideoTagLimit] = useState(15); // 15, 100, or 'all'
   const [aiTagLimit, setAiTagLimit] = useState(15);
 
@@ -204,7 +203,7 @@ function TagSources() {
       .slice(0, limit);
   };
 
-  const topBaseTags = getTopTags(analysis.baseTagCounts);
+  const topBaseTags = getTopTags(analysis.baseTagCounts, Infinity);
 
   // Get all AI tags sorted by frequency
   const allAITags = useMemo(() => {
@@ -397,7 +396,7 @@ function TagSources() {
         </div>
 
         {/* Video Tags - Expandable */}
-        <div className={`ts-source-card ${showAllVideoTags ? "expanded" : ""}`}>
+        <div className="ts-source-card">
           <h3>
             <span className="source-badge video">VIDEO</span>
             Video Extracted
@@ -410,28 +409,19 @@ function TagSources() {
             <span>Show:</span>
             <button
               className={videoTagLimit === 15 ? "active" : ""}
-              onClick={() => {
-                setVideoTagLimit(15);
-                setShowAllVideoTags(false);
-              }}
+              onClick={() => setVideoTagLimit(15)}
             >
               Top 15
             </button>
             <button
               className={videoTagLimit === 100 ? "active" : ""}
-              onClick={() => {
-                setVideoTagLimit(100);
-                setShowAllVideoTags(true);
-              }}
+              onClick={() => setVideoTagLimit(100)}
             >
               Top 100
             </button>
             <button
               className={videoTagLimit === "all" ? "active" : ""}
-              onClick={() => {
-                setVideoTagLimit("all");
-                setShowAllVideoTags(true);
-              }}
+              onClick={() => setVideoTagLimit("all")}
             >
               All ({allVideoTags.length})
             </button>
