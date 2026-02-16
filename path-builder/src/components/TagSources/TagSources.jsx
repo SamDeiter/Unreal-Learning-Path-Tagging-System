@@ -23,6 +23,79 @@ function TagSources() {
     const aiTagCounts = Object.create(null);
     const videoTagCounts = Object.create(null);
 
+    // Quality filter: reject noise tags
+    const TAG_STOPWORDS = new Set([
+      "using",
+      "creating",
+      "button",
+      "notes",
+      "release",
+      "focus",
+      "orlando",
+      "fest",
+      "click",
+      "select",
+      "open",
+      "make",
+      "made",
+      "show",
+      "look",
+      "know",
+      "want",
+      "need",
+      "take",
+      "going",
+      "right",
+      "left",
+      "back",
+      "just",
+      "like",
+      "also",
+      "well",
+      "really",
+      "thing",
+      "things",
+      "way",
+      "actually",
+      "basically",
+      "different",
+      "example",
+      "here",
+      "inside",
+      "called",
+      "got",
+      "put",
+      "done",
+      "let",
+      "run",
+      "set",
+      "top",
+      "end",
+      "new",
+      "now",
+      "not",
+      "get",
+      "see",
+      "use",
+      "two",
+      "one",
+      "bit",
+      "lot",
+      "big",
+      "kind",
+      "sort",
+      "part",
+      "able",
+    ]);
+    const SPECIAL_CHARS = /[^a-zA-Z0-9_\- ]/;
+    const isValidTag = (tag) => {
+      if (!tag || tag.length < 3) return false;
+      if (SPECIAL_CHARS.test(tag)) return false;
+      if (TAG_STOPWORDS.has(tag.toLowerCase())) return false;
+      if (/^\d+$/.test(tag)) return false;
+      return true;
+    };
+
     courses.forEach((course) => {
       // Count enrichment status
       if (course.gemini_enriched) {
@@ -47,7 +120,7 @@ function TagSources() {
           : Object.values(course.ai_tags);
         rawAI.forEach((tag) => {
           const key = typeof tag === "string" ? tag : tag?.tag_id || tag?.name;
-          if (key) aiTagCounts[key] = (aiTagCounts[key] || 0) + 1;
+          if (key && isValidTag(key)) aiTagCounts[key] = (aiTagCounts[key] || 0) + 1;
         });
       }
 
@@ -58,79 +131,6 @@ function TagSources() {
           return tag.split(".").map((w) => w.charAt(0).toUpperCase() + w.slice(1));
         }
         return [tag];
-      };
-
-      // Quality filter: reject noise tags
-      const TAG_STOPWORDS = new Set([
-        "using",
-        "creating",
-        "button",
-        "notes",
-        "release",
-        "focus",
-        "orlando",
-        "fest",
-        "click",
-        "select",
-        "open",
-        "make",
-        "made",
-        "show",
-        "look",
-        "know",
-        "want",
-        "need",
-        "take",
-        "going",
-        "right",
-        "left",
-        "back",
-        "just",
-        "like",
-        "also",
-        "well",
-        "really",
-        "thing",
-        "things",
-        "way",
-        "actually",
-        "basically",
-        "different",
-        "example",
-        "here",
-        "inside",
-        "called",
-        "got",
-        "put",
-        "done",
-        "let",
-        "run",
-        "set",
-        "top",
-        "end",
-        "new",
-        "now",
-        "not",
-        "get",
-        "see",
-        "use",
-        "two",
-        "one",
-        "bit",
-        "lot",
-        "big",
-        "kind",
-        "sort",
-        "part",
-        "able",
-      ]);
-      const SPECIAL_CHARS = /[^a-zA-Z0-9_\- ]/;
-      const isValidTag = (tag) => {
-        if (!tag || tag.length < 3) return false;
-        if (SPECIAL_CHARS.test(tag)) return false;
-        if (TAG_STOPWORDS.has(tag.toLowerCase())) return false;
-        if (/^\d+$/.test(tag)) return false; // pure numbers
-        return true;
       };
 
       const videoTags = [
@@ -163,10 +163,12 @@ function TagSources() {
 
     // Post-count: remove tags appearing in fewer than 3 courses (noise)
     const MIN_FREQUENCY = 3;
-    Object.keys(videoTagCounts).forEach((tag) => {
-      if (videoTagCounts[tag] < MIN_FREQUENCY) {
-        delete videoTagCounts[tag];
-      }
+    [videoTagCounts, aiTagCounts].forEach((counts) => {
+      Object.keys(counts).forEach((tag) => {
+        if (counts[tag] < MIN_FREQUENCY) {
+          delete counts[tag];
+        }
+      });
     });
 
     return {
