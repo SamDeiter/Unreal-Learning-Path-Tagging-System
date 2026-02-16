@@ -51,20 +51,17 @@ function TagSources() {
         });
       }
 
-      // Count video-extracted tags (canonical + extracted + topic)
-      // Normalize dotted canonical_tags (e.g. "rendering.material" → "Rendering Material")
-      const normalizeTag = (tag) => {
+      // Split dotted canonical_tags into individual tags
+      // e.g. "rendering.material" → ["Rendering", "Material"]
+      const splitTag = (tag) => {
         if (tag.includes(".")) {
-          return tag
-            .split(".")
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(" ");
+          return tag.split(".").map((w) => w.charAt(0).toUpperCase() + w.slice(1));
         }
-        return tag;
+        return [tag];
       };
       const videoTags = [
-        ...(course.canonical_tags || []).map(normalizeTag),
-        ...(course.transcript_tags || []).map(normalizeTag),
+        ...(course.canonical_tags || []).flatMap(splitTag),
+        ...(course.transcript_tags || []).flatMap(splitTag),
         ...(course.extracted_tags || []),
       ];
       // Also include tags.topic (can be string or array)
