@@ -91,11 +91,14 @@ function TagSources() {
     const SPECIAL_CHARS = /[^a-zA-Z0-9_\- ]/;
     const isValidTag = (tag) => {
       if (!tag || tag.length < 3) return false;
+      if (tag.length > 18) return false; // reject compound junk
       if (SPECIAL_CHARS.test(tag)) return false;
       if (TAG_STOPWORDS.has(tag.toLowerCase())) return false;
       if (/^\d+$/.test(tag)) return false;
       return true;
     };
+
+    const MAX_AI_TAGS_PER_COURSE = 15;
 
     courses.forEach((course) => {
       // Count enrichment status
@@ -119,7 +122,7 @@ function TagSources() {
         const rawAI = Array.isArray(course.ai_tags)
           ? course.ai_tags
           : Object.values(course.ai_tags);
-        rawAI.forEach((tag) => {
+        rawAI.slice(0, MAX_AI_TAGS_PER_COURSE).forEach((tag) => {
           const key = typeof tag === "string" ? tag : tag?.tag_id || tag?.name;
           if (key && isValidTag(key)) aiTagCounts[key] = (aiTagCounts[key] || 0) + 1;
         });
@@ -144,6 +147,7 @@ function TagSources() {
             ? Object.values(course.ai_tags)
             : []
         )
+          .slice(0, MAX_AI_TAGS_PER_COURSE)
           .map((t) => (typeof t === "string" ? t : t?.tag_id || t?.name || ""))
           .filter(Boolean),
       ];
