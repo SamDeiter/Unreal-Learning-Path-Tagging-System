@@ -6,8 +6,10 @@
  * - normalized query
  * - pipeline mode
  * - prompt_version
+ * - case_fingerprint, engine_version, platform, locale, model
  *
  * Cache entries are only reused if they pass Zod schema validation.
+ * Invalid entries are **deleted** on read to prevent stale data buildup.
  */
 
 const crypto = require("crypto");
@@ -19,13 +21,13 @@ const CACHE_COLLECTION = "pipeline_cache";
 
 // TTL in milliseconds
 const TTL = {
-  intent: 7 * 24 * 60 * 60 * 1000,           // 7 days
-  diagnosis: 7 * 24 * 60 * 60 * 1000,         // 7 days
-  objectives: 7 * 24 * 60 * 60 * 1000,        // 7 days
-  validation: 7 * 24 * 60 * 60 * 1000,        // 7 days
-  path_summary_data: 30 * 24 * 60 * 60 * 1000, // 30 days
-  micro_lesson: 7 * 24 * 60 * 60 * 1000,      // 7 days
-  learning_path: 30 * 24 * 60 * 60 * 1000,    // 30 days
+  intent: 14 * 24 * 60 * 60 * 1000,            // 14 days
+  diagnosis: 14 * 24 * 60 * 60 * 1000,          // 14 days
+  objectives: 14 * 24 * 60 * 60 * 1000,         // 14 days
+  validation: 14 * 24 * 60 * 60 * 1000,         // 14 days
+  path_summary_data: 30 * 24 * 60 * 60 * 1000,  // 30 days
+  micro_lesson: 14 * 24 * 60 * 60 * 1000,       // 14 days
+  learning_path: 30 * 24 * 60 * 60 * 1000,      // 30 days
 };
 
 /**
@@ -35,10 +37,23 @@ const TTL = {
  * @returns {string} Cache document ID
  */
 function buildCacheKey(stage, keyParams) {
+  // Normalize key params — include all differentiating fields
   const payload = JSON.stringify({
     stage,
     prompt_version: PROMPT_VERSION,
-    ...keyParams,
+    query: keyParams.query || "",
+    mode: keyParams.mode || "",
+    case_fingerprint: keyParams.case_fingerprint || "",
+    engine_version: keyParams.engine_version || "",
+    platform: keyParams.platform || "",
+    locale: keyParams.locale || "en",
+    model: keyParams.model || "gemini-2.0-flash",
+    // Spread any extra fields (tags, has_passages, etc.)
+    ...Object.fromEntries(
+      Object.entries(keyParams).filter(
+        ([k]) => !["query", "mode", "case_fingerprint", "engine_version", "platform", "locale", "model"].includes(k)
+      )
+    ),
   });
   return crypto.createHash("sha256").update(payload).digest("hex").slice(0, 32);
 }
@@ -81,13 +96,19 @@ async function getCached(stage, keyParams) {
         console.warn(
           JSON.stringify({
             severity: "WARNING",
-            message: "cache_validation_failed",
+            message: "cache_validation_failed_deleting",
             stage,
             cache_id: cacheId,
             errors: result.error.issues.map((i) => i.message),
           })
         );
-        return null; // Stale schema version or corrupted
+        // Delete invalid entry to prevent stale data buildup
+        try {
+          await db.collection(CACHE_COLLECTION).doc(cacheId).delete();
+        } catch (delErr) {
+          console.warn(JSON.stringify({ severity: "WARNING", message: "cache_delete_error", error: delErr.message }));
+        }
+        return null;
       }
       return result.data;
     }

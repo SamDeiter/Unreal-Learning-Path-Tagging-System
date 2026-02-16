@@ -28,6 +28,7 @@ import {
   trackLearningPathGenerated,
 } from "../../services/analyticsService";
 import { useTagData } from "../../context/TagDataContext";
+import { CaseReportForm, ClarifyStep, AnswerView } from "../FixProblem";
 import "./ProblemFirst.css";
 
 import { devLog, devWarn } from "../../utils/logger";
@@ -35,6 +36,8 @@ import { devLog, devWarn } from "../../utils/logger";
 const STAGES = {
   INPUT: "input",
   LOADING: "loading",
+  CLARIFYING: "clarifying",
+  ANSWERED: "answered",
   DIAGNOSIS: "diagnosis",
   GUIDED: "guided",
   ERROR: "error",
@@ -46,6 +49,11 @@ export default function ProblemFirst() {
   const [error, setError] = useState(null);
   const [blendedPath, setBlendedPath] = useState(null);
   const [videoResults, setVideoResults] = useState([]);
+  const [answerData, setAnswerData] = useState(null);
+  const [clarifyData, setClarifyData] = useState(null);
+  const [caseReport, setCaseReport] = useState(null);
+  const [isRerunning, setIsRerunning] = useState(false);
+  const [lastInputData, setLastInputData] = useState(null);
 
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
   const tagData = useTagData();
@@ -61,10 +69,16 @@ export default function ProblemFirst() {
   }, []);
 
   const handleSubmit = useCallback(
-    async (inputData) => {
+    async (inputData, overrideCaseReport) => {
       clearCart();
       setStage(STAGES.LOADING);
       setError(null);
+      setAnswerData(null);
+      setClarifyData(null);
+      setLastInputData(inputData);
+
+      // Use override caseReport (from clarification or feedback rerun) or current state
+      const activeCaseReport = overrideCaseReport || caseReport;
 
       if (inputData.pastedImage) {
         devLog("[ProblemFirst] Screenshot attached (base64 length):", inputData.pastedImage.length);
@@ -243,17 +257,69 @@ export default function ProblemFirst() {
             mode: "problem-first",
             detectedTagIds: inputData.detectedTagIds,
             personaHint: inputData.personaHint,
-            retrievedContext: retrievedPassages.slice(0, 5), // Top 5 passages
+            retrievedContext: retrievedPassages.slice(0, 5),
+            caseReport: activeCaseReport || undefined,
           });
+
+          // Handle off-topic rejection
+          if (!result.data.success && result.data.error === "off_topic") {
+            setError(
+              result.data.message ||
+                "This doesn't appear to be a UE5 question. Please describe a specific Unreal Engine 5 issue."
+            );
+            setStage(STAGES.ERROR);
+            return;
+          }
+
+          // Handle NEEDS_CLARIFICATION response
+          if (result.data.responseType === "NEEDS_CLARIFICATION") {
+            setClarifyData({
+              question: result.data.question,
+              options: result.data.options || [],
+              whyAsking: result.data.whyAsking || "",
+              query: result.data.query,
+              caseReport: result.data.caseReport,
+            });
+            setStage(STAGES.CLARIFYING);
+            return;
+          }
 
           if (!result.data.success)
             throw new Error(result.data.message || "Failed to process query");
+
+          // Store answer-first data for ANSWERED stage
+          if (result.data.responseType === "ANSWER") {
+            setAnswerData({
+              mostLikelyCause: result.data.mostLikelyCause,
+              confidence: result.data.confidence,
+              fastChecks: result.data.fastChecks || [],
+              fixSteps: result.data.fixSteps || [],
+              ifStillBrokenBranches: result.data.ifStillBrokenBranches || [],
+              whyThisResult: result.data.whyThisResult || [],
+              evidence: result.data.evidence || [],
+              learnPath: result.data.learnPath,
+            });
+          }
 
           cartData = result.data.cart;
         } catch (geminiErr) {
           // Graceful fallback on 429 or other Gemini errors — use local-only matching
           const is429 =
             geminiErr.message?.includes("429") || geminiErr.code === "resource-exhausted";
+          const isOffTopic =
+            geminiErr.message?.includes("off_topic") || geminiErr.message?.includes("not a UE5");
+
+          if (isOffTopic) {
+            setError(
+              "This doesn't appear to be a UE5 question. Try describing a specific Unreal Engine 5 issue, for example:\n" +
+                '• "Lumen reflections flickering"\n' +
+                '• "Blueprint compile error"\n' +
+                '• "Niagara particles not spawning"'
+            );
+            setStage(STAGES.ERROR);
+            return;
+          }
+
           devWarn(
             `⚠️ Gemini ${is429 ? "rate limited (429)" : "error"}: ${geminiErr.message}. Falling back to local matching.`
           );
@@ -382,7 +448,8 @@ export default function ProblemFirst() {
           devWarn("⚠️ Blended path skipped:", blendedErr.message);
         }
 
-        setStage(STAGES.DIAGNOSIS);
+        // If we have answer-first data, show ANSWERED stage first; otherwise go straight to DIAGNOSIS (backward compat)
+        setStage(answerData ? STAGES.ANSWERED : STAGES.DIAGNOSIS);
 
         // Update history with cart_id so future clicks use cache
         if (inputData.updateCartIdForQuery && cartData.cart_id) {
@@ -404,7 +471,7 @@ export default function ProblemFirst() {
         setStage(STAGES.ERROR);
       }
     },
-    [courses, getDetectedPersona, clearCart]
+    [courses, getDetectedPersona, clearCart, caseReport, answerData]
   );
 
   const handleAskAgain = useCallback(() => setStage(STAGES.INPUT), []);
@@ -413,9 +480,59 @@ export default function ProblemFirst() {
     setStage(STAGES.INPUT);
     setDiagnosisData(null);
     setVideoResults([]);
-
     setError(null);
     setBlendedPath(null);
+    setAnswerData(null);
+    setClarifyData(null);
+    setCaseReport(null);
+    setIsRerunning(false);
+  }, []);
+
+  // Handle clarification answer — re-submit with extra context
+  const handleClarifyAnswer = useCallback(
+    (answer) => {
+      if (!lastInputData) return;
+      const augmentedInput = {
+        ...lastInputData,
+        query: `${lastInputData.query} (${answer})`,
+      };
+      handleSubmit(augmentedInput, caseReport);
+    },
+    [lastInputData, caseReport, handleSubmit]
+  );
+
+  // Handle clarification skip — force best-effort answer
+  const handleClarifySkip = useCallback(() => {
+    if (!lastInputData) return;
+    handleSubmit(lastInputData, caseReport);
+  }, [lastInputData, caseReport, handleSubmit]);
+
+  // Handle feedback from AnswerView
+  const handleFeedback = useCallback(
+    (feedback) => {
+      if (feedback.solved) {
+        devLog("[Feedback] User confirmed solution worked");
+        return;
+      }
+      // Re-run with exclusions
+      if (!lastInputData) return;
+      setIsRerunning(true);
+      const updatedCase = {
+        ...(caseReport || {}),
+        exclusions: [
+          ...((caseReport || {}).exclusions || []),
+          feedback.reason || "Previous solution did not work",
+        ],
+      };
+      setCaseReport(updatedCase);
+      handleSubmit(lastInputData, updatedCase);
+    },
+    [lastInputData, caseReport, handleSubmit]
+  );
+
+  // Navigate from ANSWERED to DIAGNOSIS (video browsing)
+  const handleBackToVideos = useCallback(() => {
+    setStage(STAGES.DIAGNOSIS);
   }, []);
 
   const handleVideoToggle = useCallback(
@@ -434,14 +551,38 @@ export default function ProblemFirst() {
     <div className="problem-first-page">
       <header className="page-header">
         <h1>🔧 Fix a Problem</h1>
-        <p>Describe your issue. We&apos;ll find the right videos to help you solve it.</p>
+        <p>Describe your issue. We&apos;ll diagnose it and show you how to fix it.</p>
       </header>
 
       {(stage === STAGES.INPUT || stage === STAGES.LOADING) && (
-        <ProblemInput
-          onSubmit={handleSubmit}
-          detectedPersona={getDetectedPersona()}
-          isLoading={stage === STAGES.LOADING}
+        <>
+          <ProblemInput
+            onSubmit={handleSubmit}
+            detectedPersona={getDetectedPersona()}
+            isLoading={stage === STAGES.LOADING}
+          />
+          <CaseReportForm onUpdate={setCaseReport} disabled={stage === STAGES.LOADING} />
+        </>
+      )}
+
+      {stage === STAGES.CLARIFYING && clarifyData && (
+        <ClarifyStep
+          question={clarifyData.question}
+          options={clarifyData.options}
+          whyAsking={clarifyData.whyAsking}
+          onAnswer={handleClarifyAnswer}
+          onSkip={handleClarifySkip}
+          isLoading={false}
+        />
+      )}
+
+      {stage === STAGES.ANSWERED && answerData && (
+        <AnswerView
+          answer={answerData}
+          onFeedback={handleFeedback}
+          onBackToVideos={handleBackToVideos}
+          onStartOver={handleReset}
+          isRerunning={isRerunning}
         />
       )}
 
@@ -477,8 +618,8 @@ export default function ProblemFirst() {
                     color: "var(--text-muted, #aaa)",
                   }}
                 >
-                  ⚡ <strong>Fast results</strong> — AI diagnosis unavailable (rate limit). Videos
-                  matched by tag taxonomy.
+                  ⚡ <strong>Fast results</strong> — AI diagnosis temporarily unavailable. Videos
+                  matched by tag taxonomy. Try again in a moment for AI-powered results.
                 </div>
               )}
               {diagnosisData.diagnosis?.problem_summary && (
