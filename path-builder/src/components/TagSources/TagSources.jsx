@@ -14,6 +14,7 @@ function TagSources() {
   const [filter, setFilter] = useState("all"); // 'all' | 'enriched' | 'pending'
   const [showAllVideoTags, setShowAllVideoTags] = useState(false);
   const [videoTagLimit, setVideoTagLimit] = useState(15); // 15, 100, or 'all'
+  const [aiTagLimit, setAiTagLimit] = useState(15);
 
   // Analyze tag sources across all courses
   const analysis = useMemo(() => {
@@ -200,7 +201,13 @@ function TagSources() {
   };
 
   const topBaseTags = getTopTags(analysis.baseTagCounts);
-  const topAITags = getTopTags(analysis.aiTagCounts);
+
+  // Get all AI tags sorted by frequency
+  const allAITags = useMemo(() => {
+    return Object.entries(analysis.aiTagCounts).sort((a, b) => b[1] - a[1]);
+  }, [analysis.aiTagCounts]);
+
+  const displayedAITags = aiTagLimit === "all" ? allAITags : allAITags.slice(0, aiTagLimit);
 
   // Get all video tags sorted by frequency
   const allVideoTags = useMemo(() => {
@@ -452,8 +459,29 @@ function TagSources() {
             </span>
           </h3>
           <p className="ts-source-desc">System tags identified by AI content analysis</p>
-          <div className="tag-list">
-            {topAITags.map(([tag, count]) => (
+
+          {/* Tag limit controls */}
+          <div className="tag-limit-controls">
+            <span>Show:</span>
+            <button className={aiTagLimit === 15 ? "active" : ""} onClick={() => setAiTagLimit(15)}>
+              Top 15
+            </button>
+            <button
+              className={aiTagLimit === 100 ? "active" : ""}
+              onClick={() => setAiTagLimit(100)}
+            >
+              Top 100
+            </button>
+            <button
+              className={aiTagLimit === "all" ? "active" : ""}
+              onClick={() => setAiTagLimit("all")}
+            >
+              All ({allAITags.length})
+            </button>
+          </div>
+
+          <div className={`tag-list ${aiTagLimit !== 15 ? "expanded" : ""}`}>
+            {displayedAITags.map(([tag, count]) => (
               <span key={tag} className="tag-chip ai">
                 {tag} <span className="count">{count}</span>
               </span>
