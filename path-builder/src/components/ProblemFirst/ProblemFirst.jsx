@@ -292,9 +292,14 @@ export default function ProblemFirst() {
         }
 
         // Flatten to videos (extracted to domain/videoRanking.js)
-        const videos = await flattenCoursesToVideos(matchedCourses, inputData.query, roleMap);
+        const allItems = await flattenCoursesToVideos(matchedCourses, inputData.query, roleMap);
 
-        if (videos.length === 0) {
+        // Separate Drive videos from doc/YouTube items
+        // Doc/YT items flow into the blended path sections below; only Drive videos go into "Videos for You"
+        const driveVideos = allItems.filter((v) => !v.type || v.type === "video");
+        const nonVideoItems = allItems.filter((v) => v.type === "doc" || v.type === "youtube");
+
+        if (allItems.length === 0) {
           setError(
             "We couldn't find UE5 content matching your query. " +
               "Try describing a specific Unreal Engine problem, for example:\n" +
@@ -307,7 +312,7 @@ export default function ProblemFirst() {
           return;
         }
 
-        setVideoResults(videos);
+        setVideoResults(driveVideos);
         setDiagnosisData(cartData);
 
         // Build blended path (docs + YouTube gap-fillers)
@@ -327,10 +332,37 @@ export default function ProblemFirst() {
             .filter((w) => w.length > 3);
           const uniqueTopics = [...new Set([...tagSegments, ...queryWords])].slice(0, 12);
           if (uniqueTopics.length > 0) {
-            const blended = await buildBlendedPath(uniqueTopics, videos, {
+            const blended = await buildBlendedPath(uniqueTopics, driveVideos, {
               maxDocs: 5,
               maxYoutube: 3,
             });
+            // Merge any non-video items from matching into the blended path
+            if (nonVideoItems.length > 0) {
+              for (const nv of nonVideoItems) {
+                if (nv.type === "doc" && !blended.docs.some((d) => d.url === nv._externalUrl)) {
+                  blended.docs.push({
+                    label: nv.title,
+                    url: nv._externalUrl || nv.url,
+                    description: nv.description || "",
+                    readTimeMinutes: nv.readTimeMinutes || 10,
+                    tier: "intermediate",
+                  });
+                }
+                if (
+                  nv.type === "youtube" &&
+                  !blended.youtube.some((y) => y.url === nv._externalUrl)
+                ) {
+                  blended.youtube.push({
+                    title: nv.title,
+                    url: nv._externalUrl || nv.url,
+                    channelName: nv.channel || "YouTube",
+                    channelTrust: nv.channelTrust || null,
+                    durationMinutes: nv.durationMinutes || 10,
+                    tier: "intermediate",
+                  });
+                }
+              }
+            }
             setBlendedPath(blended);
             devLog(
               `[Blended] ${blended.docs.length} docs, ${blended.youtube.length} YT, coverage: ${(blended.coverageScore * 100).toFixed(0)}%`
@@ -775,7 +807,7 @@ export default function ProblemFirst() {
             // Doc or YouTube → reading step pseudo-course
             if (itemType === "doc" || itemType === "youtube") {
               return {
-                code: item.itemId || `${itemType}_${item.url}`,
+                code: item.itemId || item.driveId || `${itemType}_${item.url}`,
                 title: item.title,
                 _readingStep: true,
                 _resourceType: itemType,
