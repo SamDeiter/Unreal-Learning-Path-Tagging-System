@@ -191,8 +191,16 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
       // Score 4: Segment content bonus — prefer videos with actual matching content
       const segmentBonus = (!isIntro && segmentData.topSegments && segmentData.topSegments.length > 0) ? 15 : 0;
 
-      // Composite score with feedback adjustment (multiplicative intro penalty)
-      const rawScore = (titleScore + segmentData.score + segmentBonus + (course._relevanceScore || 0)) * introMultiplier;
+      // Score 5: Duration quality — very short videos are likely intros/overviews
+      const durationSec = v.duration_seconds || v.durationSeconds || 0;
+      const durationMin = durationSec / 60;
+      const durationMultiplier = durationMin < 2 ? 0.4   // < 2 min: likely an intro snippet
+        : durationMin < 5 ? 0.7   // 2-5 min: short, possibly overview
+        : durationMin > 20 ? 1.1  // > 20 min: deep content, slight boost
+        : 1.0;                     // 5-20 min: normal content
+
+      // Composite score with feedback adjustment (multiplicative penalties)
+      const rawScore = (titleScore + segmentData.score + segmentBonus + (course._relevanceScore || 0)) * introMultiplier * durationMultiplier;
       const totalScore = applyFeedbackMultiplier(v.drive_id, rawScore);
 
       // Build timestamp hint
