@@ -286,6 +286,123 @@ class YouTubeFetcher:
 
         return all_videos
 
+    def fetch_channel_playlists(
+        self,
+        channel_key: str,
+        max_playlists: int = 50,
+        min_duration_minutes: int = 2,
+    ) -> list[dict]:
+        """Fetch playlists (courses tab) from a YouTube channel.
+
+        Retrieves all playlists, then fetches videos within each playlist.
+        This captures the structured course content from the /courses tab.
+
+        Args:
+            channel_key: Key from CHANNEL_IDS dictionary.
+            max_playlists: Maximum playlists to fetch.
+            min_duration_minutes: Skip videos shorter than this.
+
+        Returns:
+            List of dicts, each with 'playlist' metadata and 'videos' list.
+        """
+        channel_id = self.CHANNEL_IDS.get(channel_key)
+        if not channel_id:
+            raise ValueError(f"Unknown channel: {channel_key}")
+
+        print(f"   📋 Fetching playlists for channel: {channel_key}")
+
+        # Step 1: List all playlists for the channel
+        playlists = []
+        next_page_token = None
+
+        while len(playlists) < max_playlists:
+            params = {
+                "part": "snippet,contentDetails",
+                "channelId": channel_id,
+                "maxResults": 50,
+            }
+            if next_page_token:
+                params["pageToken"] = next_page_token
+
+            data = self._api_request("playlists", params)
+            if not data:
+                break
+
+            for item in data.get("items", []):
+                playlists.append({
+                    "playlist_id": item["id"],
+                    "title": item["snippet"]["title"],
+                    "description": item["snippet"].get("description", ""),
+                    "video_count": item["contentDetails"]["itemCount"],
+                    "published_at": item["snippet"]["publishedAt"],
+                    "thumbnail_url": (
+                        item["snippet"].get("thumbnails", {})
+                        .get("high", {})
+                        .get("url", "")
+                    ),
+                })
+
+            next_page_token = data.get("nextPageToken")
+            if not next_page_token:
+                break
+
+        print(f"   📚 Found {len(playlists)} playlists")
+
+        # Step 2: For each playlist, fetch the videos
+        results = []
+        for pl in playlists:
+            print(f"   📂 {pl['title']} ({pl['video_count']} videos)")
+
+            video_ids = []
+            next_page_token = None
+
+            while True:
+                params = {
+                    "part": "snippet",
+                    "playlistId": pl["playlist_id"],
+                    "maxResults": 50,
+                }
+                if next_page_token:
+                    params["pageToken"] = next_page_token
+
+                data = self._api_request("playlistItems", params)
+                if not data:
+                    break
+
+                for item in data.get("items", []):
+                    vid_id = (
+                        item.get("snippet", {})
+                        .get("resourceId", {})
+                        .get("videoId")
+                    )
+                    if vid_id:
+                        video_ids.append(vid_id)
+
+                next_page_token = data.get("nextPageToken")
+                if not next_page_token:
+                    break
+
+            # Get full video details
+            videos = []
+            for i in range(0, len(video_ids), 50):
+                batch = video_ids[i : i + 50]
+                details = self.get_video_details(batch)
+                videos.extend(details)
+
+            # Filter short videos
+            if min_duration_minutes > 0:
+                videos = [
+                    v for v in videos
+                    if parse_iso8601_duration(v.duration) >= min_duration_minutes
+                ]
+
+            results.append({
+                "playlist": pl,
+                "videos": videos,
+            })
+
+        return results
+
 
 def parse_iso8601_duration(iso_str: str) -> int:
     """Convert ISO 8601 duration to minutes.

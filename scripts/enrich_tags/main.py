@@ -97,11 +97,105 @@ def save_enriched_library(
     print(f"💾 Saved: {edges_path}")
 
 
+def run_external_discovery(content_dir: Path) -> int:
+    """Phase 0.5: Run all external content discovery.
+
+    Calls YouTube discovery (uploads + playlists/courses tab)
+    and Epic Docs ingestion in sequence.  External entries are
+    written to video_library.json so Phases 1-5 treat them
+    identically to local courses.
+
+    Args:
+        content_dir: Path to content/ directory.
+
+    Returns:
+        Total number of new courses added.
+    """
+    print("\n" + "=" * 60)
+    print("🌐 PHASE 0.5: EXTERNAL DISCOVERY")
+    print("=" * 60)
+
+    total_new = 0
+
+    # --- YouTube uploads ---
+    print("\n📹 Step 1/3: YouTube uploads...")
+    try:
+        yt_new = run_youtube_discovery(content_dir)
+        total_new += yt_new
+    except Exception as e:
+        print(f"   ⚠️  YouTube uploads discovery failed: {e}")
+
+    # --- YouTube playlists (courses tab) ---
+    print("\n📚 Step 2/3: YouTube playlists (courses tab)...")
+    try:
+        total_new += _ingest_playlists(content_dir)
+    except Exception as e:
+        print(f"   ⚠️  YouTube playlists discovery failed: {e}")
+
+    # --- Epic Docs ---
+    print("\n📄 Step 3/3: Epic Docs ingestion...")
+    try:
+        docs_new = run_docs_ingestion(content_dir)
+        total_new += docs_new
+    except Exception as e:
+        print(f"   ⚠️  Epic Docs ingestion failed: {e}")
+
+    print(f"\n✅ External discovery complete: {total_new} new entries")
+    return total_new
+
+
+def _ingest_playlists(content_dir: Path) -> int:
+    """Fetch YouTube playlists and merge new videos into the library."""
+    import sys
+    sys.path.insert(0, str(content_dir.parent))
+
+    from ingestion.youtube_fetcher import YouTubeFetcher, convert_to_course_format
+
+    # Load existing library
+    library_path = content_dir / "video_library.json"
+    if library_path.exists():
+        with open(library_path, encoding="utf-8") as f:
+            library = json.load(f)
+    else:
+        library = {"courses": []}
+
+    existing_ids = {c.get("code", "") for c in library.get("courses", [])}
+
+    fetcher = YouTubeFetcher()
+    playlists = fetcher.fetch_channel_playlists("epic_games")
+
+    new_count = 0
+    for pl_data in playlists:
+        pl = pl_data["playlist"]
+        videos = pl_data["videos"]
+
+        for video in videos:
+            if video.video_id in existing_ids:
+                continue
+
+            course = convert_to_course_format(video)
+            course["playlist_id"] = pl["playlist_id"]
+            course["playlist_title"] = pl["title"]
+            library.setdefault("courses", []).append(course)
+            existing_ids.add(video.video_id)
+            new_count += 1
+
+    if new_count > 0:
+        with open(library_path, "w", encoding="utf-8") as f:
+            json.dump(library, f, indent=2, ensure_ascii=False)
+        print(f"   ✅ Added {new_count} new videos from playlists")
+    else:
+        print("   ✅ No new playlist videos to add")
+
+    return new_count
+
+
 def run_all(
     content_dir: Path,
     model_name: str = "medium",
     dry_run: bool = False,
     reset: bool = False,
+    discover: bool = False,
 ):
     """Run all phases of the enrichment pipeline with checkpointing."""
     print("=" * 60)
@@ -142,6 +236,19 @@ def run_all(
     else:
         print("\n⏭️ Skipping Phase 0 (already completed)")
         transcripts = run_phase0(content_dir)  # Still need data in memory
+
+    # Phase 0.5: External Discovery (YouTube + Docs)
+    if discover and state.get("last_completed_phase", -1) < 0.5:
+        print("\n" + "-" * 40)
+        new_external = run_external_discovery(content_dir)
+        if new_external > 0:
+            courses = load_video_library(content_dir)  # Reload with new entries
+            print(f"   📂 Reloaded {len(courses)} courses (including new external)")
+        state["last_completed_phase"] = 0.5
+        save_state(content_dir, state)
+        print("✅ Phase 0.5 checkpoint saved")
+    elif discover:
+        print("\n⏭️ Skipping Phase 0.5 (already completed)")
 
     # Phase 1: Filename keywords
     if state["last_completed_phase"] < 1:
@@ -519,6 +626,11 @@ def main():
         action="store_true",
         help="Ingest Epic docs as virtual courses before the pipeline",
     )
+    parser.add_argument(
+        "--discover",
+        action="store_true",
+        help="Run Phase 0.5: full external discovery (YouTube + playlists + docs)",
+    )
 
     args = parser.parse_args()
 
@@ -538,12 +650,17 @@ def main():
     if args.fetch_youtube:
         run_youtube_discovery(content_dir)
 
+    # Run external discovery if requested standalone
+    if args.discover and not args.all:
+        run_external_discovery(content_dir)
+
     if args.all:
         run_all(
             content_dir,
             model_name=args.model,
             dry_run=args.dry_run,
             reset=args.reset,
+            discover=args.discover,
         )
     elif args.phase is not None:
         # Run individual phase
