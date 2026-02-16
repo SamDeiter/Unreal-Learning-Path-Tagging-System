@@ -335,6 +335,155 @@ def run_youtube_discovery(content_dir: Path) -> int:
     return len(new_courses)
 
 
+# ---------------------------------------------------------------------------
+# Topic inference from doc slug
+# ---------------------------------------------------------------------------
+SLUG_TOPIC_MAP = {
+    "rendering": "Rendering",
+    "lumen": "Rendering",
+    "nanite": "Rendering",
+    "niagara": "Rendering",
+    "material": "Materials",
+    "landscape": "Environment",
+    "foliage": "Environment",
+    "blueprint": "Blueprints",
+    "scripting": "Blueprints",
+    "c-plus-plus": "C++ Programming",
+    "cpp": "C++ Programming",
+    "programming": "C++ Programming",
+    "animation": "Animation",
+    "sequencer": "Animation",
+    "physics": "Physics",
+    "chaos": "Physics",
+    "networking": "Multiplayer",
+    "multiplayer": "Multiplayer",
+    "replication": "Multiplayer",
+    "audio": "Audio",
+    "metasound": "Audio",
+    "ui": "UI/UMG",
+    "umg": "UI/UMG",
+    "slate": "UI/UMG",
+    "packaging": "Build & Deploy",
+    "cooking": "Build & Deploy",
+    "build": "Build & Deploy",
+    "world-partition": "Level Design",
+    "level": "Level Design",
+    "pcg": "Level Design",
+    "virtual-production": "Virtual Production",
+    "gameplay": "Gameplay",
+    "ai": "AI/Behavior Trees",
+    "behavior-tree": "AI/Behavior Trees",
+    "mass-entity": "AI/Behavior Trees",
+    "performance": "Performance",
+    "profiling": "Performance",
+    "optimization": "Performance",
+}
+
+
+def infer_topic_from_slug(slug: str) -> str:
+    """Infer a topic category from a doc slug."""
+    slug_lower = slug.lower()
+    for keyword, topic in SLUG_TOPIC_MAP.items():
+        if keyword in slug_lower:
+            return topic
+    return "General"
+
+
+def run_docs_ingestion(content_dir: Path) -> int:
+    """Ingest Epic docs chunks as virtual courses into video_library.json.
+
+    Loads scraped_docs.json (from prior scrape_epic_docs.py run),
+    converts each doc chunk into a virtual course with source='epic_docs',
+    deduplicates against existing library, and appends new entries.
+
+    Args:
+        content_dir: Path to content/ directory.
+
+    Returns:
+        Number of new doc courses added.
+    """
+    print("\n" + "=" * 60)
+    print("📖 EPIC DOCS INGESTION")
+    print("=" * 60)
+
+    scraped_path = content_dir / "scraped_docs.json"
+
+    if not scraped_path.exists():
+        print("   ⚠️  No scraped_docs.json found.")
+        print("   → Run: python scripts/scrape_epic_docs.py --scrape-only")
+        return 0
+
+    # Load scraped docs
+    with open(scraped_path, encoding="utf-8") as f:
+        docs = json.load(f)
+
+    total_chunks = sum(d.get("chunk_count", 0) for d in docs)
+    print(f"   📚 Loaded {len(docs)} docs with {total_chunks} chunks")
+
+    # Load existing library
+    library_path = content_dir / "video_library.json"
+    if library_path.exists():
+        with open(library_path, encoding="utf-8") as f:
+            library = json.load(f)
+    else:
+        library = {"courses": []}
+
+    existing_codes = {c.get("code", "") for c in library.get("courses", [])}
+    print(f"   📋 Existing library: {len(library.get('courses', []))} courses")
+
+    # Convert doc chunks to virtual courses
+    new_courses = []
+    for doc in docs:
+        slug = doc.get("slug", "")
+        doc_url = doc.get("url", "")
+        doc_title = doc.get("title", slug)
+        topic = infer_topic_from_slug(slug)
+
+        for idx, chunk in enumerate(doc.get("chunks", [])):
+            code = f"doc_{slug}_{idx:03d}"
+
+            if code in existing_codes:
+                continue  # Already in library
+
+            section = chunk.get("section", slug)
+            text = chunk.get("text", "")
+
+            course = {
+                "code": code,
+                "title": f"{doc_title} — {section}" if section != slug else doc_title,
+                "source": "epic_docs",
+                "url": doc_url,
+                "description": text[:500],
+                "duration_minutes": max(1, chunk.get("token_estimate", 200) // 200),
+                "tags": {
+                    "topic": topic,
+                },
+                "doc_meta": {
+                    "slug": slug,
+                    "section": section,
+                    "chunk_index": idx,
+                    "token_estimate": chunk.get("token_estimate", 0),
+                },
+            }
+            new_courses.append(course)
+
+    print(f"   ✨ {len(new_courses)} new doc courses "
+          f"(skipped {total_chunks - len(new_courses)} duplicates)")
+
+    if not new_courses:
+        print("   ✅ No new docs to add.")
+        return 0
+
+    # Append to library
+    library.setdefault("courses", []).extend(new_courses)
+
+    with open(library_path, "w", encoding="utf-8") as f:
+        json.dump(library, f, indent=2, ensure_ascii=False)
+
+    print(f"   ✅ Added {len(new_courses)} doc courses to video_library.json")
+    return len(new_courses)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Tag Enrichment Pipeline")
     parser.add_argument("--all", action="store_true", help="Run all phases")
@@ -365,6 +514,11 @@ def main():
         action="store_true",
         help="Run YouTube discovery before the pipeline",
     )
+    parser.add_argument(
+        "--docs",
+        action="store_true",
+        help="Ingest Epic docs as virtual courses before the pipeline",
+    )
 
     args = parser.parse_args()
 
@@ -375,6 +529,10 @@ def main():
     if not content_dir.exists():
         print(f"❌ Content directory not found: {content_dir}")
         return
+
+    # Run docs ingestion if requested
+    if args.docs:
+        run_docs_ingestion(content_dir)
 
     # Run YouTube discovery if requested
     if args.fetch_youtube:
