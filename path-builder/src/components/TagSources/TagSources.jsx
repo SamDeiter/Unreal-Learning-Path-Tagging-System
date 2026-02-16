@@ -40,19 +40,15 @@ function TagSources() {
         });
       }
 
-      // Count AI tags (Gemini system tags)
-      if (course.gemini_system_tags) {
-        course.gemini_system_tags.forEach((tag) => {
+      // Count AI tags (from enrichment pipeline)
+      if (course.ai_tags) {
+        course.ai_tags.forEach((tag) => {
           aiTagCounts[tag] = (aiTagCounts[tag] || 0) + 1;
         });
       }
 
-      // Count video-extracted tags (transcript + ai_tags + extracted_tags)
-      const videoTags = [
-        ...(course.transcript_tags || []),
-        ...(course.ai_tags || []),
-        ...(course.extracted_tags || []),
-      ];
+      // Count video-extracted tags (transcript + extracted_tags)
+      const videoTags = [...(course.transcript_tags || []), ...(course.extracted_tags || [])];
       videoTags.forEach((tag) => {
         videoTagCounts[tag] = (videoTagCounts[tag] || 0) + 1;
       });
@@ -420,11 +416,11 @@ function TagSources() {
                   )}
 
                   {/* AI Tags */}
-                  {course.gemini_system_tags?.length > 0 && (
+                  {course.ai_tags?.length > 0 && (
                     <div className="tag-group">
                       <span className="tag-group-label ai">AI</span>
                       <div className="tag-group-items">
-                        {course.gemini_system_tags.map((tag) => (
+                        {course.ai_tags.map((tag) => (
                           <span key={tag} className="mini-tag ai">
                             {tag}
                           </span>
