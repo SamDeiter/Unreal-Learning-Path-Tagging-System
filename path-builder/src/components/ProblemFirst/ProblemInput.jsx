@@ -9,7 +9,7 @@
  */
 import { useState, useMemo, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
-import { Search, User, Image, Terminal, XCircle } from "lucide-react";
+import { Search, User, Image, Terminal, XCircle, Tags } from "lucide-react";
 import tagGraphService from "../../services/TagGraphService";
 
 import "./ProblemFirst.css";
