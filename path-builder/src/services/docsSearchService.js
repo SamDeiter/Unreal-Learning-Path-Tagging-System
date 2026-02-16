@@ -195,22 +195,29 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
     const docTags = (doc.tags || []).map((t) => t.toLowerCase());
     const descLower = (doc.description || "").toLowerCase();
 
+    // Track which distinct topics matched this doc
+    let matchedTopicCount = 0;
     for (const topic of topicSet) {
-      if (keyLower === topic) score += 10;             // exact key match
-      else if (keyLower.includes(topic)) score += 5;   // partial key match
-      else if (topic.includes(keyLower)) score += 4;   // reverse: topic word contains the key
-      else if (doc.subsystem === topic) score += 4;    // subsystem match
-      else if (docTags.includes(topic)) score += 4;    // UDN tag exact match
-      else if (labelLower.includes(topic)) score += 3; // label match
-      else if (docTags.some((t) => t.includes(topic) || topic.includes(t))) score += 2; // partial tag match
-      else if (urlSlug.includes(topic)) score += 2;    // URL slug match
-      else if (descLower.includes(topic)) score += 1;  // description match
+      let matched = false;
+      if (keyLower === topic) { score += 10; matched = true; }
+      else if (keyLower.includes(topic)) { score += 5; matched = true; }
+      else if (topic.includes(keyLower)) { score += 4; matched = true; }
+      else if (doc.subsystem === topic) { score += 4; matched = true; }
+      else if (docTags.includes(topic)) { score += 4; matched = true; }
+      else if (labelLower.includes(topic)) { score += 3; matched = true; }
+      else if (docTags.some((t) => t.includes(topic) || topic.includes(t))) { score += 2; matched = true; }
+      else if (urlSlug.includes(topic)) { score += 2; matched = true; }
+      else if (descLower.includes(topic)) { score += 1; matched = true; }
       // Stem-aware fallback: "mesh" ↔ "meshes", "import" ↔ "importing"
-      else if (stemMatch(topic, keyLower)) score += 3;
-      else if (docTags.some((t) => stemMatch(topic, t))) score += 2;
-      else if (stemMatch(topic, labelLower)) score += 2;
-      else if (stemMatch(topic, descLower)) score += 1;
+      else if (stemMatch(topic, keyLower)) { score += 3; matched = true; }
+      else if (docTags.some((t) => stemMatch(topic, t))) { score += 2; matched = true; }
+      else if (stemMatch(topic, labelLower)) { score += 2; matched = true; }
+      else if (stemMatch(topic, descLower)) { score += 1; matched = true; }
+      if (matched) matchedTopicCount++;
     }
+
+    // Multi-topic diversity bonus: docs matching multiple query concepts are far more relevant
+    if (matchedTopicCount >= 2) score += matchedTopicCount * 5;
 
     if (score > 0) {
       results.push({
@@ -237,9 +244,21 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
     return (TIER_ORDER[a.tier] ?? 1) - (TIER_ORDER[b.tier] ?? 1);
   });
 
+  // Deduplicate near-identical docs (e.g. "Mesh Distance Fields" + "Mesh Distance Fields Properties")
+  const deduped = [];
+  for (const doc of results) {
+    const docWords = new Set(doc.key.split(/[-_]+/).filter(w => w.length > 2));
+    const isDupe = deduped.some(existing => {
+      const existWords = new Set(existing.key.split(/[-_]+/).filter(w => w.length > 2));
+      const overlap = [...docWords].filter(w => existWords.has(w)).length;
+      return overlap / Math.min(docWords.size, existWords.size) > 0.6;
+    });
+    if (!isDupe) deduped.push(doc);
+  }
+
   // Normalize scores to 0–100 range for UI match badges
-  const maxScore = results.length > 0 ? results[0]._score : 1;
-  return results.slice(0, limit).map(({ _score, ...rest }) => ({
+  const maxScore = deduped.length > 0 ? deduped[0]._score : 1;
+  return deduped.slice(0, limit).map(({ _score, ...rest }) => ({
     ...rest,
     matchScore: Math.round((_score / Math.max(maxScore, 1)) * 100),
   }));
