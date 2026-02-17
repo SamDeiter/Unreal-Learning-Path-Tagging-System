@@ -1003,68 +1003,77 @@ export default function ProblemFirst() {
         </div>
       )}
 
-      {stage === STAGES.GUIDED && (
-        <GuidedPlayer
-          courses={cart.map((item) => {
-            const itemType = item.type || "video";
+      {stage === STAGES.GUIDED &&
+        (() => {
+          // Track which doc item gets the micro-lesson override (only the first one)
+          let docIndex = 0;
+          const microLessonSteps = diagnosisData?.microLesson?.quick_fix?.steps;
+          return (
+            <GuidedPlayer
+              courses={cart.map((item) => {
+                const itemType = item.type || "video";
 
-            // When micro-lesson has query-grounded steps, prefer those over generic pre-baked takeaways
-            const microLessonSteps = diagnosisData?.microLesson?.quick_fix?.steps;
+                // Doc or YouTube → reading step pseudo-course
+                if (itemType === "doc" || itemType === "youtube") {
+                  const isFirstDoc = docIndex === 0;
+                  docIndex++;
+                  return {
+                    code: item.itemId || item.driveId || `${itemType}_${item.url}`,
+                    title: item.title,
+                    _readingStep: true,
+                    _resourceType: itemType,
+                    _description: item.description || "",
+                    _keySteps:
+                      isFirstDoc && microLessonSteps?.length > 0
+                        ? microLessonSteps
+                        : item.keyTakeaways || item.keySteps || [],
+                    _seeAlso: item.seeAlso || [],
+                    _url: item.url,
+                    _tier: item.tier,
+                    _channel: item.channel || item.channelName,
+                    _channelTrust: item.channelTrust,
+                    _subsystem: item.subsystem,
+                    _topics: item.topics || [],
+                    _sections: item.sections || [],
+                    _chapters: item.chapters || [],
+                    _readTimeMinutes: item.readTimeMinutes || item.durationMinutes || 10,
+                    videos: [],
+                  };
+                }
 
-            // Doc or YouTube → reading step pseudo-course
-            if (itemType === "doc" || itemType === "youtube") {
-              return {
-                code: item.itemId || item.driveId || `${itemType}_${item.url}`,
-                title: item.title,
-                _readingStep: true,
-                _resourceType: itemType,
-                _description: item.description || "",
-                _keySteps:
-                  microLessonSteps?.length > 0
-                    ? microLessonSteps
-                    : item.keyTakeaways || item.keySteps || [],
-                _seeAlso: item.seeAlso || [],
-                _url: item.url,
-                _tier: item.tier,
-                _channel: item.channel || item.channelName,
-                _channelTrust: item.channelTrust,
-                _subsystem: item.subsystem,
-                _topics: item.topics || [],
-                _sections: item.sections || [],
-                _chapters: item.chapters || [],
-                _readTimeMinutes: item.readTimeMinutes || item.durationMinutes || 10,
-                videos: [],
-              };
-            }
-
-            // Video → normal course mapping (existing logic)
-            const fullCourse = courses.find((c) => c.code === item.courseCode);
-            if (fullCourse) {
-              return {
-                ...fullCourse,
-                videos: [
-                  { drive_id: item.driveId, title: item.title, duration_seconds: item.duration },
-                ],
-              };
-            }
-            return {
-              code: item.courseCode,
-              title: item.courseName,
-              videos: [
-                { drive_id: item.driveId, title: item.title, duration_seconds: item.duration },
-              ],
-            };
-          })}
-          diagnosis={diagnosisData?.diagnosis}
-          problemSummary={diagnosisData?.diagnosis?.problem_summary}
-          pathSummary={diagnosisData?.pathSummary}
-          microLesson={diagnosisData?.microLesson}
-          onComplete={() => {
-            // Path complete — stay on the guided player, don't auto-redirect
-          }}
-          onExit={() => setStage(STAGES.DIAGNOSIS)}
-        />
-      )}
+                // Video → normal course mapping (existing logic)
+                const fullCourse = courses.find((c) => c.code === item.courseCode);
+                if (fullCourse) {
+                  return {
+                    ...fullCourse,
+                    videos: [
+                      {
+                        drive_id: item.driveId,
+                        title: item.title,
+                        duration_seconds: item.duration,
+                      },
+                    ],
+                  };
+                }
+                return {
+                  code: item.courseCode,
+                  title: item.courseName,
+                  videos: [
+                    { drive_id: item.driveId, title: item.title, duration_seconds: item.duration },
+                  ],
+                };
+              })}
+              diagnosis={diagnosisData?.diagnosis}
+              problemSummary={diagnosisData?.diagnosis?.problem_summary}
+              pathSummary={diagnosisData?.pathSummary}
+              microLesson={diagnosisData?.microLesson}
+              onComplete={() => {
+                // Path complete — stay on the guided player, don't auto-redirect
+              }}
+              onExit={() => setStage(STAGES.DIAGNOSIS)}
+            />
+          );
+        })()}
     </div>
   );
 }
