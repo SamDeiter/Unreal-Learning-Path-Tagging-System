@@ -629,15 +629,15 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
           <div className="see-also-links">
             {course._seeAlso.map((ref, i) => {
               const refDoc = docLinks[ref.docKey];
-              const refUrl = refDoc ? refDoc.url : "#";
+              if (!refDoc) return null; // Skip broken links
               return (
                 <a
                   key={i}
-                  href={refUrl}
+                  href={refDoc.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="see-also-link"
-                  title={refDoc ? refDoc.description : ref.label}
+                  title={refDoc.description || ref.label}
                 >
                   → {ref.label}
                 </a>
