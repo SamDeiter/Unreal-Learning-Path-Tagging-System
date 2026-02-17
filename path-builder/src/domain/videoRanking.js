@@ -199,8 +199,17 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
         : durationMin > 20 ? 1.1  // > 20 min: deep content, slight boost
         : 1.0;                     // 5-20 min: normal content
 
+      // Score 6: Content relevance gate — if this specific video has NO direct query evidence
+      // (no title matches, no transcript segments), the course-level relevance is heavily discounted.
+      // This prevents courses like "Tool Creation" (matched because of 'mesh' tag) from surfacing
+      // irrelevant videos that happen to be in the same course.
+      const hasDirectEvidence = titleMatches > 0 || (segmentData.topSegments && segmentData.topSegments.length > 0);
+      const courseRelevanceContribution = hasDirectEvidence
+        ? (course._relevanceScore || 0)
+        : (course._relevanceScore || 0) * 0.2;
+
       // Composite score with feedback adjustment (multiplicative penalties)
-      const rawScore = (titleScore + segmentData.score + segmentBonus + (course._relevanceScore || 0)) * introMultiplier * durationMultiplier;
+      const rawScore = (titleScore + segmentData.score + segmentBonus + courseRelevanceContribution) * introMultiplier * durationMultiplier;
       const totalScore = applyFeedbackMultiplier(v.drive_id, rawScore);
 
       // Build timestamp hint
