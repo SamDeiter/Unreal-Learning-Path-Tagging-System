@@ -237,22 +237,45 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
               ? 1.1 // > 20 min: deep content, slight boost
               : 1.0; // 5-20 min: normal content
 
-      // Score 6: Content relevance gate — if this specific video has NO direct query evidence
-      // (no title matches, no transcript segments), the course-level relevance is heavily discounted.
-      // This prevents courses like "Tool Creation" (matched because of 'mesh' tag) from surfacing
-      // irrelevant videos that happen to be in the same course.
-      const hasDirectEvidence =
-        titleMatches > 0 || (segmentData.topSegments && segmentData.topSegments.length > 0);
-      const courseRelevanceContribution = hasDirectEvidence
-        ? course._relevanceScore || 0
-        : (course._relevanceScore || 0) * 0.2;
+      // Score 6: Content relevance gate — how strongly does THIS video evidence the query?
+      // Count unique query words matched across top transcript segments
+      const segmentMatchedWords = new Set();
+      for (const seg of segmentData.topSegments || []) {
+        for (const kw of seg.matchedKeywords || []) segmentMatchedWords.add(kw);
+      }
+      const segmentWordCount = segmentMatchedWords.size;
+
+      // Sliding scale: course relevance is gated by how many query words the video actually matches.
+      // 0 matched words = 0.15x (near-zero, just tag overlap), 1 word = 0.3x, 2+ = full.
+      const evidenceMultiplier =
+        titleMatches >= 2
+          ? 1.0 // title matches 2+ query words → strong evidence
+          : titleMatches === 1 && segmentWordCount >= 1
+            ? 1.0 // title + transcript → strong
+            : segmentWordCount >= 2
+              ? 0.8 // transcript matches 2+ words → decent evidence
+              : segmentWordCount === 1
+                ? 0.3 // single incidental mention → weak
+                : titleMatches === 1
+                  ? 0.5 // only 1 title word, no transcript → moderate
+                  : 0.15; // no direct evidence at all
+
+      const courseRelevanceContribution = (course._relevanceScore || 0) * evidenceMultiplier;
 
       // Composite score with feedback adjustment (multiplicative penalties)
       const rawScore =
         (titleScore + segmentData.score + segmentBonus + courseRelevanceContribution) *
         introMultiplier *
         durationMultiplier;
-      const totalScore = applyFeedbackMultiplier(v.drive_id, rawScore);
+
+      // Title match gate: if video has NO title matches AND weak segment score,
+      // cap the total score to prevent irrelevant videos from surfacing via course tags alone.
+      const MAX_NO_TITLE_SCORE = 40;
+      const cappedScore =
+        titleMatches === 0 && segmentData.score < 30
+          ? Math.min(rawScore, MAX_NO_TITLE_SCORE)
+          : rawScore;
+      const totalScore = applyFeedbackMultiplier(v.drive_id, cappedScore);
 
       // Build timestamp hint — only use segments within the video's actual duration
       let watchHint = "▶ Watch full video";
