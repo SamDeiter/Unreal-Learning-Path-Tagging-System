@@ -167,6 +167,7 @@ export default function GuidedPlayer(props) {
           wordCount={gp.wordCount}
           onFinish={gp.handleFinish}
           onBackToPath={gp.handleBackToPath}
+          problemSummary={props.problemSummary}
         />
       )}
 

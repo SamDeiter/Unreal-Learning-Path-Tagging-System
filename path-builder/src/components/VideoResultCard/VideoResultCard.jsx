@@ -20,7 +20,9 @@ function isUE4Course(code) {
   if (!versions || versions.length === 0) return false;
   return versions.every((v) => {
     const normalized = String(v).replace(/^V/i, "");
-    return normalized.startsWith("4") && !normalized.startsWith("4.") ? /^4\d{1,2}$/.test(normalized) : normalized.startsWith("4.");
+    return normalized.startsWith("4") && !normalized.startsWith("4.")
+      ? /^4\d{1,2}$/.test(normalized)
+      : normalized.startsWith("4.");
   });
 }
 
@@ -37,12 +39,7 @@ function formatDuration(seconds) {
 /**
  * Individual video result card — compact display.
  */
-export default function VideoResultCard({
-  video,
-  isAdded,
-  onToggle,
-  userQuery,
-}) {
+export default function VideoResultCard({ video, isAdded, onToggle, userQuery }) {
   const {
     title: rawTitle,
     duration,
@@ -53,11 +50,26 @@ export default function VideoResultCard({
     reason,
     matchPercent,
     matchReason,
+    watchHint,
   } = video;
 
   // Compute match tier for badge
-  const matchTier = matchPercent >= 100 ? "best" : matchPercent >= 70 ? "strong" : matchPercent >= 40 ? "good" : "related";
-  const matchLabel = matchPercent >= 100 ? "Best Match" : matchPercent >= 70 ? "Strong Match" : matchPercent >= 40 ? "Good Match" : "Related";
+  const matchTier =
+    matchPercent >= 100
+      ? "best"
+      : matchPercent >= 70
+        ? "strong"
+        : matchPercent >= 40
+          ? "good"
+          : "related";
+  const matchLabel =
+    matchPercent >= 100
+      ? "Best Match"
+      : matchPercent >= 70
+        ? "Strong Match"
+        : matchPercent >= 40
+          ? "Good Match"
+          : "Related";
 
   // Strip "Part A/B/C" and "PT1/PT2" suffixes from display title
   const title = rawTitle?.replace(/\s+(?:Part\s+[A-Z]|PT\s*\d+)$/i, "").trim() || rawTitle;
@@ -93,12 +105,8 @@ export default function VideoResultCard({
     setFeedbackState("down");
   };
 
-
-
   // Fallback thumbnail
   const thumbnailUrl = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w320` : null;
-
-
 
   return (
     <div
@@ -131,7 +139,10 @@ export default function VideoResultCard({
         {/* Badge row — all badges on one line */}
         <div className="vrc-badge-row">
           {matchPercent != null && (
-            <span className={`vrc-match-badge vrc-match-${matchTier}`} title={`${matchPercent}% match`}>
+            <span
+              className={`vrc-match-badge vrc-match-${matchTier}`}
+              title={`${matchPercent}% match`}
+            >
               <span className="vrc-match-dot" />
               {matchLabel}
             </span>
@@ -145,7 +156,9 @@ export default function VideoResultCard({
                   e.stopPropagation();
                   if (role === "prerequisite") setPrereqTip((v) => !v);
                 }}
-                title={role === "prerequisite" ? "Click to see why this is a prerequisite" : undefined}
+                title={
+                  role === "prerequisite" ? "Click to see why this is a prerequisite" : undefined
+                }
               >
                 {role === "prerequisite" && "🔗 Prerequisite"}
                 {role === "troubleshooting" && "🔧 Troubleshooting"}
@@ -169,7 +182,9 @@ export default function VideoResultCard({
                       </ul>
                     </>
                   ) : (
-                    <p>Watch this first — it covers foundational concepts needed before advancing.</p>
+                    <p>
+                      Watch this first — it covers foundational concepts needed before advancing.
+                    </p>
                   )}
                   {reason && <p className="vrc-tip-reason">{reason}</p>}
                 </div>
@@ -177,7 +192,10 @@ export default function VideoResultCard({
             </div>
           )}
           {courseCode && isUE4Course(courseCode) && (
-            <span className="vrc-ue4-badge" title="This content was created for Unreal Engine 4 — some details may differ in UE5">
+            <span
+              className="vrc-ue4-badge"
+              title="This content was created for Unreal Engine 4 — some details may differ in UE5"
+            >
               ⚠️ UE4
             </span>
           )}
@@ -185,6 +203,9 @@ export default function VideoResultCard({
 
         <div className="vrc-info">
           <h4 className="vrc-title">{title}</h4>
+          {watchHint && watchHint !== "▶ Watch full video" && (
+            <p className="vrc-timestamp-hint">{watchHint}</p>
+          )}
           {matchReason && <p className="vrc-match-reason">{matchReason}</p>}
         </div>
 
@@ -228,7 +249,6 @@ export default function VideoResultCard({
             )}
           </button>
         </div>
-
       </div>
     </div>
   );
