@@ -348,7 +348,14 @@ ${wrapEvidence(passages.map((p, i) => `[${i + 1}] (Course: ${p.courseCode}, Vide
       stage: "intent", // Re-use intent schema loosely for answer data
       systemPrompt:
         UE5_GUARDRAIL +
-        `You are a UE5 troubleshooting expert. Given a diagnosed problem, produce an answer-first response with concrete fix steps.
+        `You are a UE5 troubleshooting expert. Given a diagnosed problem and optional transcript excerpts from real training videos, produce an answer-first response with concrete fix steps.
+
+RULES:
+- When transcript excerpts are provided, USE THEM to ground your fix steps in real UE5 workflows
+- Cite specific settings, CVars, menu paths, and property values mentioned in the excerpts
+- Do NOT give generic advice when specific evidence is available
+- Order fix steps from most likely to least likely to resolve the issue
+
 JSON:{
   "intent_id":"answer","user_role":"expert","goal":"fix",
   "problem_description":"str",
@@ -361,7 +368,7 @@ JSON:{
   "ifStillBrokenBranches": [{"condition":"str","action":"str"}],
   "whyThisResult": ["str (explain reasoning chain, max 3)"]
 }`,
-      userPrompt: `Problem: ${(intent.problem_description || "").slice(0, 300)}\nRoot causes: ${(diagnosis.root_causes || []).slice(0, 3).join("; ")}\nSignals: ${(diagnosis.signals_to_watch_for || []).slice(0, 3).join("; ")}${exclusionNote}`,
+      userPrompt: `Problem: ${(intent.problem_description || "").slice(0, 300)}\nRoot causes: ${(diagnosis.root_causes || []).slice(0, 3).join("; ")}\nSignals: ${(diagnosis.signals_to_watch_for || []).slice(0, 3).join("; ")}${exclusionNote}${contextBlock}`,
       apiKey,
       trace,
       cacheParams: { query: normalized, mode: "problem-first", stage_type: "answer_data" },
