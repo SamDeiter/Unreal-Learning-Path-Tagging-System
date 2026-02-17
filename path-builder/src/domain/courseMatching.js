@@ -169,6 +169,7 @@ export async function matchCoursesToCart(
           ...(course.canonical_tags || []),
           ...(course.gemini_system_tags || []),
           ...(course.extracted_tags || []),
+          ...(course.ai_tags || []),
         ]
           .map((t) => (typeof t === "string" ? t.toLowerCase() : ""))
           .join(" ");
@@ -255,32 +256,34 @@ export async function matchCoursesToCart(
     }
   }
 
-  // Pass 2.5: Semantic search (Tier 2 fallback)
+  // Pass 2.5: Semantic search (always merged — boost if Tier 1 confident, full weight if not)
   const tier1TopScore = merged.length > 0 ? merged[0]._relevanceScore : 0;
   const tier1Confident = tier1TopScore >= TIER1_CONFIDENCE_THRESHOLD;
 
-  if (semanticResults.length > 0 && !tier1Confident) {
-    devLog(`🔀 Tier 2: Semantic fallback (Tier 1 top score: ${tier1TopScore})`);
+  if (semanticResults.length > 0) {
+    // When Tier 1 is confident, semantic gets a reduced weight (boost existing matches).
+    // When Tier 1 is NOT confident, semantic gets full weight (primary signal).
+    const newWeight = tier1Confident ? 60 : 100;
+    const boostWeight = tier1Confident ? 20 : 40;
+    devLog(`🔀 Semantic merge (Tier 1 score: ${tier1TopScore}, confident: ${tier1Confident}, weight: ${newWeight})`);
     for (const sr of semanticResults) {
       if (!seen.has(sr.code)) {
         const course = allCourses.find((c) => c.code === sr.code);
         if (course && isPlayable(course)) {
           merged.push({
             ...course,
-            _relevanceScore: sr.similarity * 100,
+            _relevanceScore: sr.similarity * newWeight,
             _matchedKeywords: ["semantic-match"],
             _semanticMatch: true,
-            _tier: 2,
+            _tier: tier1Confident ? 2 : 1,
           });
           seen.add(sr.code);
         }
       } else {
         const existing = merged.find((m) => m.code === sr.code);
-        if (existing) existing._relevanceScore += sr.similarity * 40;
+        if (existing) existing._relevanceScore += sr.similarity * boostWeight;
       }
     }
-  } else if (semanticResults.length > 0) {
-    devLog(`✅ Tier 1: Deterministic match confident (top score: ${tier1TopScore}), skipping semantic`);
   }
 
   merged.sort((a, b) => b._relevanceScore - a._relevanceScore);
