@@ -20,9 +20,30 @@ async function getDocLinks() {
  * Display noise words — filtered from matchedKeywords before UI display.
  */
 const DISPLAY_NOISE = new Set([
-  "help", "helpful", "helps", "use", "used", "using", "make", "made",
-  "get", "getting", "look", "going", "come", "know", "thing", "work",
-  "working", "want", "need", "show", "start", "take", "right", "well",
+  "help",
+  "helpful",
+  "helps",
+  "use",
+  "used",
+  "using",
+  "make",
+  "made",
+  "get",
+  "getting",
+  "look",
+  "going",
+  "come",
+  "know",
+  "thing",
+  "work",
+  "working",
+  "want",
+  "need",
+  "show",
+  "start",
+  "take",
+  "right",
+  "well",
 ]);
 
 /**
@@ -42,10 +63,13 @@ function stem(word) {
  * matches any topic word stem.
  */
 function fuzzyTopicMatch(queryWords, topicKey) {
-  const topicWords = topicKey.replace(/[-_]/g, " ").split(/\s+/).filter(w => w.length > 2);
+  const topicWords = topicKey
+    .replace(/[-_]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 2);
   const topicStems = topicWords.map(stem);
   const queryStems = queryWords.map(stem);
-  return queryStems.some(qs => topicStems.some(ts => qs.includes(ts) || ts.includes(qs)));
+  return queryStems.some((qs) => topicStems.some((ts) => qs.includes(ts) || ts.includes(qs)));
 }
 
 /**
@@ -63,7 +87,7 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
   const docLinks = await getDocLinks();
   const matchedDocLinks = [];
   const queryLower = (userQuery || "").toLowerCase();
-  const queryWordList = queryLower.split(/\s+/).filter(w => w.length > 2);
+  const queryWordList = queryLower.split(/\s+/).filter((w) => w.length > 2);
   for (const [topic, info] of Object.entries(docLinks)) {
     if (queryLower.includes(topic) || fuzzyTopicMatch(queryWordList, topic)) {
       matchedDocLinks.push({ label: info.label, url: info.url });
@@ -72,7 +96,7 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
 
   for (const course of matchedCourses) {
     // --- YouTube courses: single video item from youtube_url ---
-    if (course.source === 'youtube' && course.youtube_url) {
+    if (course.source === "youtube" && course.youtube_url) {
       const pathInfo = roleMap[course.code] || {};
       const matchedTags = (() => {
         const clean = (course._matchedKeywords || [])
@@ -103,22 +127,22 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
         role: pathInfo.role || null,
         reason: pathInfo.reason || null,
         estimatedMinutes: pathInfo.estimatedMinutes || null,
-        _source: 'youtube',
+        _source: "youtube",
         _externalUrl: course.youtube_url,
-        type: 'youtube',
+        type: "youtube",
         url: course.youtube_url,
         channel: course.channel_name || course.channel || null,
         channelTrust: course.channel_trust || null,
         topics: course.topics || [],
-        description: course.description || '',
+        description: course.description || "",
         durationMinutes: course.duration_seconds ? Math.round(course.duration_seconds / 60) : 10,
       });
       continue;
     }
 
     // --- Epic Docs courses: produce a doc card ---
-    if (course.source === 'epic_docs') {
-      const docUrl = course.url || course.youtube_url || '#';
+    if (course.source === "epic_docs") {
+      const docUrl = course.url || course.youtube_url || "#";
       const pathInfo = roleMap[course.code] || {};
       const matchedTags = (() => {
         const clean = (course._matchedKeywords || [])
@@ -143,18 +167,18 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
         startSeconds: 0,
         topSegments: [],
         watchHint: `📖 Read Epic Docs`,
-        docLinks: [{ label: course.title || 'Epic Docs', url: docUrl }, ...matchedDocLinks],
+        docLinks: [{ label: course.title || "Epic Docs", url: docUrl }, ...matchedDocLinks],
         _curatedMatch: course._curatedMatch || false,
         _curatedExplanation: course._curatedExplanation || null,
         role: pathInfo.role || null,
         reason: pathInfo.reason || null,
         estimatedMinutes: pathInfo.estimatedMinutes || null,
-        _source: 'epic_docs',
+        _source: "epic_docs",
         _externalUrl: docUrl,
-        type: 'doc',
+        type: "doc",
         url: docUrl,
         topics: course.topics || [],
-        description: course.description || '',
+        description: course.description || "",
         readTimeMinutes: 10,
       });
       continue;
@@ -181,53 +205,74 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
       const segmentData = await getVideoSegmentScore(course.code, videoKey, queryWords);
 
       // Score 3: Intro detection — aggressively penalise non-content videos
-      const isIntro = titleLower.includes("intro") || titleLower.includes("introduction") ||
-        titleLower.includes("wrap up") || titleLower.includes("outro") ||
-        titleLower.includes("overview") || titleLower.includes("getting started") ||
-        titleLower.includes("welcome") || titleLower.includes("course intro") ||
-        titleLower.includes("what you'll learn") || titleLower.includes("what we'll cover") ||
-        titleLower.includes("summary") || titleLower.includes("objectives") ||
+      const isIntro =
+        titleLower.includes("intro") ||
+        titleLower.includes("introduction") ||
+        titleLower.includes("wrap up") ||
+        titleLower.includes("outro") ||
+        titleLower.includes("overview") ||
+        titleLower.includes("getting started") ||
+        titleLower.includes("welcome") ||
+        titleLower.includes("course intro") ||
+        titleLower.includes("what you'll learn") ||
+        titleLower.includes("what we'll cover") ||
+        titleLower.includes("summary") ||
+        titleLower.includes("objectives") ||
         (/\bpart\s*a\b/i.test(videoTitle) && i === 0);
       const introMultiplier = isIntro ? 0.15 : 1.0;
 
       // Score 4: Segment content bonus — prefer videos with actual matching content
-      const segmentBonus = (!isIntro && segmentData.topSegments && segmentData.topSegments.length > 0) ? 15 : 0;
+      const segmentBonus =
+        !isIntro && segmentData.topSegments && segmentData.topSegments.length > 0 ? 15 : 0;
 
       // Score 5: Duration quality — very short videos are likely intros/overviews
       const durationSec = v.duration_seconds || v.durationSeconds || 0;
       const durationMin = durationSec / 60;
-      const durationMultiplier = durationMin < 2 ? 0.4   // < 2 min: likely an intro snippet
-        : durationMin < 5 ? 0.7   // 2-5 min: short, possibly overview
-        : durationMin > 20 ? 1.1  // > 20 min: deep content, slight boost
-        : 1.0;                     // 5-20 min: normal content
+      const durationMultiplier =
+        durationMin < 2
+          ? 0.4 // < 2 min: likely an intro snippet
+          : durationMin < 5
+            ? 0.7 // 2-5 min: short, possibly overview
+            : durationMin > 20
+              ? 1.1 // > 20 min: deep content, slight boost
+              : 1.0; // 5-20 min: normal content
 
       // Score 6: Content relevance gate — if this specific video has NO direct query evidence
       // (no title matches, no transcript segments), the course-level relevance is heavily discounted.
       // This prevents courses like "Tool Creation" (matched because of 'mesh' tag) from surfacing
       // irrelevant videos that happen to be in the same course.
-      const hasDirectEvidence = titleMatches > 0 || (segmentData.topSegments && segmentData.topSegments.length > 0);
+      const hasDirectEvidence =
+        titleMatches > 0 || (segmentData.topSegments && segmentData.topSegments.length > 0);
       const courseRelevanceContribution = hasDirectEvidence
-        ? (course._relevanceScore || 0)
+        ? course._relevanceScore || 0
         : (course._relevanceScore || 0) * 0.2;
 
       // Composite score with feedback adjustment (multiplicative penalties)
-      const rawScore = (titleScore + segmentData.score + segmentBonus + courseRelevanceContribution) * introMultiplier * durationMultiplier;
+      const rawScore =
+        (titleScore + segmentData.score + segmentBonus + courseRelevanceContribution) *
+        introMultiplier *
+        durationMultiplier;
       const totalScore = applyFeedbackMultiplier(v.drive_id, rawScore);
 
       // Build timestamp hint — only use segments within the video's actual duration
       let watchHint = "▶ Watch full video";
-      const validSegments = (segmentData.topSegments || [])
-        .filter((s) => !durationSec || s.startSeconds <= durationSec);
-      const jumpSegment = validSegments[0] ||
-        (segmentData.bestSegment && (!durationSec || segmentData.bestSegment.startSeconds <= durationSec)
-          ? segmentData.bestSegment : null);
+      const validSegments = (segmentData.topSegments || []).filter(
+        (s) => !durationSec || s.startSeconds <= durationSec
+      );
+      const jumpSegment =
+        validSegments[0] ||
+        (segmentData.bestSegment &&
+        (!durationSec || segmentData.bestSegment.startSeconds <= durationSec)
+          ? segmentData.bestSegment
+          : null);
       if (jumpSegment) {
         const ts = jumpSegment.timestamp || "0:00";
         const preview = jumpSegment.previewText;
         const truncPreview = preview.length > 60 ? preview.substring(0, 57) + "..." : preview;
-        watchHint = jumpSegment.startSeconds < 5
-          ? `📍 Start of video — "${truncPreview}"`
-          : `📍 Jump to ${ts} — "${truncPreview}"`;
+        watchHint =
+          jumpSegment.startSeconds < 5
+            ? `📍 Start of video — "${truncPreview}"`
+            : `📍 Jump to ${ts} — "${truncPreview}"`;
       }
 
       // PathBuilder role/reason
@@ -244,8 +289,9 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
       })();
 
       // Filter startSeconds to be within video duration
-      const safeStartSeconds = (segmentData.bestSegment?.startSeconds || 0);
-      const clampedStartSeconds = durationSec && safeStartSeconds > durationSec ? 0 : safeStartSeconds;
+      const safeStartSeconds = segmentData.bestSegment?.startSeconds || 0;
+      const clampedStartSeconds =
+        durationSec && safeStartSeconds > durationSec ? 0 : safeStartSeconds;
 
       videos.push({
         driveId: v.drive_id,
@@ -258,7 +304,7 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
         relevanceScore: totalScore,
         titleRelevance: titleMatches,
         isIntro,
-        timestampHint: clampedStartSeconds > 0 ? (segmentData.bestSegment?.timestamp || null) : null,
+        timestampHint: clampedStartSeconds > 0 ? segmentData.bestSegment?.timestamp || null : null,
         startSeconds: clampedStartSeconds,
         topSegments: segmentData.topSegments || [],
         watchHint,
@@ -296,12 +342,23 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
     return true;
   });
 
+  // Intro displacement: if a course has BOTH intro and content videos, drop the intro.
+  // This prevents intros from outranking content videos across the entire result set.
+  const courseHasContent = new Set();
+  for (const v of diverse) {
+    if (!v.isIntro) courseHasContent.add(v.courseCode);
+  }
+  const displaced = diverse.filter((v) => {
+    if (v.isIntro && courseHasContent.has(v.courseCode)) return false;
+    return true;
+  });
+
   // Filter out low-relevance videos
-  if (diverse.length > 3) {
-    const scores = diverse.map((v) => v.relevanceScore);
+  if (displaced.length > 3) {
+    const scores = displaced.map((v) => v.relevanceScore);
     const median = scores[Math.floor(scores.length / 2)];
     const threshold = Math.max(median * 0.5, 10);
-    const filtered = diverse.filter((v) => v.relevanceScore >= threshold);
+    const filtered = displaced.filter((v) => v.relevanceScore >= threshold);
     if (filtered.length >= 3) {
       const results = filtered.slice(0, 6);
       addMatchMetadata(results, queryWords);
@@ -309,7 +366,7 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
     }
   }
 
-  const results = diverse.slice(0, 6);
+  const results = displaced.slice(0, 6);
   addMatchMetadata(results, queryWords);
   return results;
 }
@@ -364,7 +421,12 @@ export async function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
   if (!courseData?.videos) return null;
 
   const normalize = (s) =>
-    (s || "").toLowerCase().replace(/\.mp4$/i, "").replace(/_/g, " ").replace(/\s+/g, " ").trim();
+    (s || "")
+      .toLowerCase()
+      .replace(/\.mp4$/i, "")
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
 
   // Split title into individual words for matching (avoid substring false positives)
   const titleNorm = normalize(videoTitle);
@@ -388,7 +450,10 @@ export async function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
     let wordHits = 0;
     for (const w of titleWords) {
       // Use word boundary matching — 'fitting' should match 'fitting' not 'geofittingpresets'
-      const wordRegex = new RegExp(`(^|\\s|_)${w.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}(\\s|_|$)`, "i");
+      const wordRegex = new RegExp(
+        `(^|\\s|_)${w.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}(\\s|_|$)`,
+        "i"
+      );
       if (wordRegex.test(combined)) wordHits++;
     }
 
@@ -404,8 +469,10 @@ export async function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
     const vidTitle = normalize(courseData.videos[key].title || "");
     const keyNorm = normalize(key);
     if (
-      titleNorm.includes(vidTitle) || vidTitle.includes(titleNorm) ||
-      titleNorm.includes(keyNorm) || keyNorm.includes(titleNorm)
+      titleNorm.includes(vidTitle) ||
+      vidTitle.includes(titleNorm) ||
+      titleNorm.includes(keyNorm) ||
+      keyNorm.includes(titleNorm)
     ) {
       return key;
     }
