@@ -260,6 +260,7 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
   const maxScore = deduped.length > 0 ? deduped[0]._score : 1;
   return deduped.slice(0, limit).map(({ _score, ...rest }) => ({
     ...rest,
+    _rawScore: _score,
     matchScore: Math.round((_score / Math.max(maxScore, 1)) * 100),
   }));
 }
@@ -282,8 +283,9 @@ export async function getDocReadingPath(topics, { limit = 8 } = {}) {
   const matches = await getDocsForTopic(topics, { limit: limit * 2 });
   if (!matches.length) return [];
 
-  // Build a map of matchScore by key for later lookup
+  // Build maps of matchScore and rawScore by key for later lookup
   const scoreMap = new Map(matches.map((m) => [m.key, m.matchScore ?? 0]));
+  const rawScoreMap = new Map(matches.map((m) => [m.key, m._rawScore ?? 0]));
 
   // Collect all prerequisite keys
   const needed = new Set();
@@ -312,6 +314,7 @@ export async function getDocReadingPath(topics, { limit = 8 } = {}) {
       subsystem: doc.subsystem,
       readTimeMinutes: doc.readTimeMinutes || 10,
       matchScore: scoreMap.get(key) ?? 0,
+      _rawScore: rawScoreMap.get(key) ?? 0,
       source: "epic_docs",
     });
   }
@@ -321,9 +324,8 @@ export async function getDocReadingPath(topics, { limit = 8 } = {}) {
     addWithPrereqs(match.key);
   }
 
-  // Sort by relevance score (highest first) — prerequisite order is less important
-  // than showing the most relevant docs to the user
-  ordered.sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
+  // Sort by raw relevance score (highest first) for reliable differentiation
+  ordered.sort((a, b) => (b._rawScore ?? 0) - (a._rawScore ?? 0));
 
   return ordered.slice(0, limit);
 }

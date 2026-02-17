@@ -488,8 +488,10 @@ export default function ProblemFirst() {
                 }
               }
             }
-            // Sort docs by relevance so the best match appears first
-            blended.docs.sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
+            // Sort docs by raw relevance so the best match appears first
+            blended.docs.sort(
+              (a, b) => (b._rawScore ?? b.matchScore ?? 0) - (a._rawScore ?? a.matchScore ?? 0)
+            );
             setBlendedPath(blended);
             devLog(
               `[Blended] ${blended.docs.length} docs, ${blended.youtube.length} YT, coverage: ${(blended.coverageScore * 100).toFixed(0)}%`
