@@ -1008,6 +1008,9 @@ export default function ProblemFirst() {
           courses={cart.map((item) => {
             const itemType = item.type || "video";
 
+            // When micro-lesson has query-grounded steps, prefer those over generic pre-baked takeaways
+            const microLessonSteps = diagnosisData?.microLesson?.quick_fix?.steps;
+
             // Doc or YouTube → reading step pseudo-course
             if (itemType === "doc" || itemType === "youtube") {
               return {
@@ -1016,7 +1019,10 @@ export default function ProblemFirst() {
                 _readingStep: true,
                 _resourceType: itemType,
                 _description: item.description || "",
-                _keySteps: item.keyTakeaways || item.keySteps || [],
+                _keySteps:
+                  microLessonSteps?.length > 0
+                    ? microLessonSteps
+                    : item.keyTakeaways || item.keySteps || [],
                 _seeAlso: item.seeAlso || [],
                 _url: item.url,
                 _tier: item.tier,
