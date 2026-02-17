@@ -180,13 +180,15 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
       const videoKey = await findVideoKeyForIndex(course.code, videoTitle, i);
       const segmentData = await getVideoSegmentScore(course.code, videoKey, queryWords);
 
-      // Score 3: Intro detection (expanded patterns)
-      const isIntro = titleLower.includes("intro") || titleLower.includes("wrap up") ||
-        titleLower.includes("outro") || titleLower.includes("overview") ||
-        titleLower.includes("getting started") || titleLower.includes("welcome") ||
-        titleLower.includes("course intro") || titleLower.includes("what you'll learn") ||
-        titleLower.includes("what we'll cover");
-      const introMultiplier = isIntro ? 0.3 : 1.0;
+      // Score 3: Intro detection — aggressively penalise non-content videos
+      const isIntro = titleLower.includes("intro") || titleLower.includes("introduction") ||
+        titleLower.includes("wrap up") || titleLower.includes("outro") ||
+        titleLower.includes("overview") || titleLower.includes("getting started") ||
+        titleLower.includes("welcome") || titleLower.includes("course intro") ||
+        titleLower.includes("what you'll learn") || titleLower.includes("what we'll cover") ||
+        titleLower.includes("summary") || titleLower.includes("objectives") ||
+        (/\bpart\s*a\b/i.test(videoTitle) && i === 0);
+      const introMultiplier = isIntro ? 0.15 : 1.0;
 
       // Score 4: Segment content bonus — prefer videos with actual matching content
       const segmentBonus = (!isIntro && segmentData.topSegments && segmentData.topSegments.length > 0) ? 15 : 0;
@@ -212,9 +214,13 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
       const rawScore = (titleScore + segmentData.score + segmentBonus + courseRelevanceContribution) * introMultiplier * durationMultiplier;
       const totalScore = applyFeedbackMultiplier(v.drive_id, rawScore);
 
-      // Build timestamp hint
+      // Build timestamp hint — only use segments within the video's actual duration
       let watchHint = "▶ Watch full video";
-      const jumpSegment = (segmentData.topSegments || [])[0] || segmentData.bestSegment || null;
+      const validSegments = (segmentData.topSegments || [])
+        .filter((s) => !durationSec || s.startSeconds <= durationSec);
+      const jumpSegment = validSegments[0] ||
+        (segmentData.bestSegment && (!durationSec || segmentData.bestSegment.startSeconds <= durationSec)
+          ? segmentData.bestSegment : null);
       if (jumpSegment) {
         const ts = jumpSegment.timestamp || "0:00";
         const preview = jumpSegment.previewText;
@@ -237,6 +243,10 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
           : [course.topic || course.tags?.topic || "UE5"].flat().slice(0, 3);
       })();
 
+      // Filter startSeconds to be within video duration
+      const safeStartSeconds = (segmentData.bestSegment?.startSeconds || 0);
+      const clampedStartSeconds = durationSec && safeStartSeconds > durationSec ? 0 : safeStartSeconds;
+
       videos.push({
         driveId: v.drive_id,
         title: cleanTitle,
@@ -248,8 +258,8 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
         relevanceScore: totalScore,
         titleRelevance: titleMatches,
         isIntro,
-        timestampHint: segmentData.bestSegment?.timestamp || null,
-        startSeconds: segmentData.bestSegment?.startSeconds || 0,
+        timestampHint: clampedStartSeconds > 0 ? (segmentData.bestSegment?.timestamp || null) : null,
+        startSeconds: clampedStartSeconds,
         topSegments: segmentData.topSegments || [],
         watchHint,
         docLinks: matchedDocLinks,
@@ -354,10 +364,42 @@ export async function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
   if (!courseData?.videos) return null;
 
   const normalize = (s) =>
-    (s || "").toLowerCase().replace(/\.mp4$/i, "").replace(/_/g, " ").trim();
+    (s || "").toLowerCase().replace(/\.mp4$/i, "").replace(/_/g, " ").replace(/\s+/g, " ").trim();
+
+  // Split title into individual words for matching (avoid substring false positives)
   const titleNorm = normalize(videoTitle);
+  const titleWords = titleNorm.split(" ").filter((w) => w.length > 2);
   const keys = Object.keys(courseData.videos);
 
+  // Pass 1: Exact title match
+  for (const key of keys) {
+    const vidTitle = normalize(courseData.videos[key].title || "");
+    if (vidTitle === titleNorm) return key;
+  }
+
+  // Pass 2: All significant words present in key/title (avoids 'fitting' matching 'geofittingpresets')
+  let bestMatch = null;
+  let bestScore = 0;
+  for (const key of keys) {
+    const vidTitle = normalize(courseData.videos[key].title || "");
+    const keyNorm = normalize(key);
+    const combined = vidTitle + " " + keyNorm;
+
+    let wordHits = 0;
+    for (const w of titleWords) {
+      // Use word boundary matching — 'fitting' should match 'fitting' not 'geofittingpresets'
+      const wordRegex = new RegExp(`(^|\\s|_)${w.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}(\\s|_|$)`, "i");
+      if (wordRegex.test(combined)) wordHits++;
+    }
+
+    if (wordHits > 0 && wordHits > bestScore) {
+      bestScore = wordHits;
+      bestMatch = key;
+    }
+  }
+  if (bestMatch && bestScore >= Math.max(1, titleWords.length * 0.5)) return bestMatch;
+
+  // Pass 3: Original substring fallback (catches edge cases)
   for (const key of keys) {
     const vidTitle = normalize(courseData.videos[key].title || "");
     const keyNorm = normalize(key);
@@ -368,6 +410,7 @@ export async function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
       return key;
     }
   }
+
   if (videoIndex < keys.length) return keys[videoIndex];
   return keys[0] || null;
 }
