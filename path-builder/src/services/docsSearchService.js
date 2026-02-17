@@ -199,19 +199,23 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
     let matchedTopicCount = 0;
     for (const topic of topicSet) {
       let matched = false;
-      if (keyLower === topic) { score += 10; matched = true; }
-      else if (keyLower.includes(topic)) { score += 5; matched = true; }
-      else if (topic.includes(keyLower)) { score += 4; matched = true; }
-      else if (doc.subsystem === topic) { score += 4; matched = true; }
-      else if (docTags.includes(topic)) { score += 4; matched = true; }
-      else if (labelLower.includes(topic)) { score += 3; matched = true; }
-      else if (docTags.some((t) => t.includes(topic) || topic.includes(t))) { score += 2; matched = true; }
+      // Priority 1: Key matches (what the doc IS about)
+      if (keyLower === topic) { score += 15; matched = true; }
+      else if (keyLower.includes(topic)) { score += 8; matched = true; }
+      else if (topic.includes(keyLower)) { score += 6; matched = true; }
+      // Priority 2: Label/subsystem matches (the doc's title)
+      else if (doc.subsystem === topic) { score += 5; matched = true; }
+      else if (labelLower.includes(topic)) { score += 6; matched = true; }
+      // Priority 3: Tag matches (often noisy/inherited — lower weight)
+      else if (docTags.includes(topic)) { score += 2; matched = true; }
+      else if (docTags.some((t) => t.includes(topic) || topic.includes(t))) { score += 1; matched = true; }
+      // Priority 4: URL slug and description matches
       else if (urlSlug.includes(topic)) { score += 2; matched = true; }
       else if (descLower.includes(topic)) { score += 1; matched = true; }
       // Stem-aware fallback: "mesh" ↔ "meshes", "import" ↔ "importing"
-      else if (stemMatch(topic, keyLower)) { score += 3; matched = true; }
-      else if (docTags.some((t) => stemMatch(topic, t))) { score += 2; matched = true; }
-      else if (stemMatch(topic, labelLower)) { score += 2; matched = true; }
+      else if (stemMatch(topic, keyLower)) { score += 4; matched = true; }
+      else if (stemMatch(topic, labelLower)) { score += 3; matched = true; }
+      else if (docTags.some((t) => stemMatch(topic, t))) { score += 1; matched = true; }
       else if (stemMatch(topic, descLower)) { score += 1; matched = true; }
       if (matched) matchedTopicCount++;
     }
