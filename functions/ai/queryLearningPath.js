@@ -59,9 +59,10 @@ function detectMode(data) {
  * @param {object} caseReport - Optional structured case report
  * @param {Array} passages - Retrieved RAG passages
  * @param {Array} conversationHistory - Previous Q&A turns from multi-turn
+ * @param {string} query - The raw user query (for vagueness detection)
  * @returns {{ score: number, reasons: string[] }}
  */
-function computeConfidence(intent, caseReport, passages, conversationHistory) {
+function computeConfidence(intent, caseReport, passages, conversationHistory, query) {
   let score = 0;
   const reasons = [];
 
@@ -94,10 +95,10 @@ function computeConfidence(intent, caseReport, passages, conversationHistory) {
     }
   }
 
-  // High-quality RAG passages (aligned with retrieval threshold of 0.35)
+  // High-quality RAG passages (capped at 25 to prevent RAG alone from skipping clarification)
   const goodPassages = (passages || []).filter((p) => (p.similarity || 0) > 0.4);
   if (goodPassages.length >= 2) {
-    score += 30;
+    score += 25;
     reasons.push("strong_rag_matches");
   } else if (goodPassages.length === 1) {
     score += 15;
@@ -121,7 +122,22 @@ function computeConfidence(intent, caseReport, passages, conversationHistory) {
     reasons.push(`multi_turn_rounds_${completedRounds}`);
   }
 
-  return { score, reasons };
+  // ── Vagueness penalties ──────────────────────────────────────────
+  const queryLen = (query || "").length;
+  if (queryLen < 30) {
+    score -= 15;
+    reasons.push("short_query_penalty");
+  }
+  if (!caseReport && (!intent.systems || intent.systems.length < 2)) {
+    // No structured context AND not a multi-system query → likely vague
+    const hasErrors = caseReport?.errorStrings?.length > 0;
+    if (!hasErrors) {
+      score -= 10;
+      reasons.push("no_structured_context_penalty");
+    }
+  }
+
+  return { score: Math.max(score, 0), reasons };
 }
 
 /**
@@ -230,9 +246,9 @@ JSON:{"intent_id":"intent_<uuid>","user_role":"str","goal":"str","problem_descri
   const intent = intentResult.data;
 
   // ── Step 1.5: Confidence Check (multi-turn aware) ───────────────
-  const confidence = computeConfidence(intent, safeCase, passages, conversationHistory);
+  const confidence = computeConfidence(intent, safeCase, passages, conversationHistory, query);
 
-  if (confidence.score < 40 && clarifyRound < MAX_CLARIFY_ROUNDS) {
+  if (confidence.score < 50 && clarifyRound < MAX_CLARIFY_ROUNDS) {
     // Low confidence + haven't hit max rounds → ask a clarifying question
     // Build conversation context for Gemini so it doesn't repeat questions
     let historyContext = "";
