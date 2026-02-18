@@ -492,17 +492,25 @@ export default function Personas() {
                   <div className="course-info">
                     <h3 title={(course.title || course.name || "").replace(/_/g, " ")}>
                       {(() => {
-                        let cleanTitle = (course.title || course.name || "").replace(/_/g, " ");
-                        // Remove redundant prefixes like "Blueprint Blueprint" or "Animation Animation"
-                        cleanTitle = cleanTitle.replace(
-                          /^(Blueprint|Animation|Lighting|Materials?|Landscape)\s+\1\s*/i,
-                          "$1 "
-                        );
-                        // Also remove category prefix if followed by same word
-                        cleanTitle = cleanTitle.replace(/^(\w+)\s+\1\s+/i, "$1 ");
-                        return cleanTitle.length > 40
-                          ? `${cleanTitle.substring(0, 40)}...`
-                          : cleanTitle;
+                        let t = (course.title || course.name || "").replace(/_/g, " ");
+                        // Strip leading category if it reappears later:
+                        // "Control Rig Introduction to Control Rig" → "Introduction to Control Rig"
+                        // "Landscape Quickstart Landscape" → "Landscape Quickstart"
+                        const words = t.split(/\s+/);
+                        const firstWord = words[0];
+                        // Check if 1-2 leading words form a category that appears again later
+                        const twoWord = words.length > 2 ? `${words[0]} ${words[1]}` : "";
+                        if (twoWord && t.indexOf(twoWord, twoWord.length) > 0) {
+                          t = t.substring(twoWord.length).trim();
+                        } else if (
+                          words.length > 2 &&
+                          t.toLowerCase().indexOf(firstWord.toLowerCase(), firstWord.length) > 0
+                        ) {
+                          t = t.substring(firstWord.length).trim();
+                        }
+                        // Also collapse "Blueprint Blueprint" → "Blueprint"
+                        t = t.replace(/^(\w+)\s+\1\b/i, "$1");
+                        return t.length > 45 ? `${t.substring(0, 45)}...` : t;
                       })()}
                     </h3>
                     <div className="course-meta">
