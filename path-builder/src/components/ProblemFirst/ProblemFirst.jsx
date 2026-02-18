@@ -135,6 +135,7 @@ export default function ProblemFirst() {
                 const pathResult = buildLearningPath(matchedCourses, matchedTagIds, {
                   preferTroubleshooting: true,
                   diversity: true,
+                  timeBudgetMinutes: 300,
                 });
 
                 const roleMap = {};
@@ -365,6 +366,7 @@ export default function ProblemFirst() {
         const pathResult = buildLearningPath(matchedCourses, matchedTagIds, {
           preferTroubleshooting: true,
           diversity: true,
+          timeBudgetMinutes: 300,
         });
 
         const roleMap = {};
@@ -1080,7 +1082,7 @@ export default function ProblemFirst() {
                 }
 
                 // Sort videos within each course by original index, then attach
-                return orderedKeys.map((key) => {
+                const result = orderedKeys.map((key) => {
                   const group = courseGroups.get(key);
                   if (group.videos?.length > 0) {
                     group.videos.sort((a, b) => a._videoIndex - b._videoIndex);
@@ -1088,6 +1090,12 @@ export default function ProblemFirst() {
                   }
                   return group.course;
                 });
+
+                // Pin intro courses (100.01, 100.02) first — foundational content
+                const INTRO_CODES = new Set(["100.01", "100.02"]);
+                const intro = result.filter((c) => INTRO_CODES.has(c.code));
+                const rest = result.filter((c) => !INTRO_CODES.has(c.code));
+                return [...intro, ...rest];
               })()}
               diagnosis={diagnosisData?.diagnosis}
               problemSummary={diagnosisData?.diagnosis?.problem_summary}
