@@ -196,6 +196,15 @@ export default function ProblemFirst() {
           problemSummary={diagnosisData?.diagnosis?.problem_summary}
           pathSummary={diagnosisData?.pathSummary}
           microLesson={diagnosisData?.microLesson}
+          fixRecipe={
+            answerData
+              ? {
+                  mostLikelyCause: answerData.mostLikelyCause,
+                  fixSteps: answerData.fixSteps || [],
+                  fastChecks: answerData.fastChecks || [],
+                }
+              : null
+          }
           onComplete={() => {
             // Path complete — stay on the guided player, don't auto-redirect
           }}

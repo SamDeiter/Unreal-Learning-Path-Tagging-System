@@ -169,6 +169,8 @@ export default function GuidedPlayer(props) {
           onFinish={gp.handleFinish}
           onBackToPath={gp.handleBackToPath}
           problemSummary={props.problemSummary}
+          fixRecipe={props.fixRecipe}
+          microLesson={props.microLesson}
         />
       )}
 
@@ -199,6 +201,11 @@ GuidedPlayer.propTypes = {
   diagnosis: PropTypes.object,
   problemSummary: PropTypes.string,
   microLesson: PropTypes.object,
+  fixRecipe: PropTypes.shape({
+    mostLikelyCause: PropTypes.string,
+    fixSteps: PropTypes.array,
+    fastChecks: PropTypes.array,
+  }),
   pathSummary: PropTypes.shape({
     path_summary: PropTypes.string,
     topics_covered: PropTypes.arrayOf(PropTypes.string),
@@ -211,6 +218,7 @@ GuidedPlayer.defaultProps = {
   diagnosis: null,
   problemSummary: "",
   microLesson: null,
+  fixRecipe: null,
   pathSummary: null,
   onComplete: () => {},
   onExit: () => {},
