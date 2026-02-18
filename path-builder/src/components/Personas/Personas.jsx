@@ -130,19 +130,27 @@ export default function Personas() {
   const generatePath = () => {
     if (!detectedPersona || !courses) return;
 
-    // Filter beginner-friendly courses
-    const beginnerCourses = courses.filter(
-      (c) => c.level === "Beginner" || c.level === "beginner" || !c.level
-    );
+    // Filter beginner-friendly courses (level lives inside tags object)
+    const beginnerCourses = courses
+      .filter((c) => {
+        const level = (c.tags?.level || "").toLowerCase();
+        return level === "beginner" || level === "" || level === "general";
+      })
+      // Playability filter: must have at least one video with a drive_id
+      .filter((c) => c.videos?.length > 0 && c.videos[0]?.drive_id);
 
     // Score courses by persona relevance
     const scoredCourses = beginnerCourses.map((course) => {
       let score = 0;
-      // Handle tags that might be array, object, or undefined
-      const rawTags = Array.isArray(course.tags) ? course.tags : [];
-      const courseTags = rawTags.map((t) =>
-        typeof t === "string" ? t.toLowerCase() : (t?.name || t?.displayName || "").toLowerCase()
-      );
+      // Use ai_tags + canonical_tags (actual arrays) instead of tags object
+      const rawTags = [
+        ...(Array.isArray(course.ai_tags) ? course.ai_tags : []),
+        ...(Array.isArray(course.canonical_tags) ? course.canonical_tags : []),
+      ];
+      // Also include metadata fields from tags object
+      if (course.tags?.topic) rawTags.push(course.tags.topic);
+      if (course.tags?.industry) rawTags.push(course.tags.industry);
+      const courseTags = rawTags.map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
       const courseTitle = (course.title || course.name || "").toLowerCase();
       const combinedText = `${courseTitle} ${courseTags.join(" ")}`;
 
@@ -189,34 +197,39 @@ export default function Personas() {
         }
       }
 
-      // Exclude Film/TV/Virtual Production content for game dev personas
-      if (detectedPersona.id === "game_dev_gary") {
-        if (
-          combinedText.includes("virtual production") ||
-          combinedText.includes("film") ||
-          combinedText.includes("cinematics") ||
-          combinedText.includes("movie")
-        ) {
-          score -= 15;
-        }
+      // === Industry-Aware Filtering ===
+      // Courses tagged for a specific non-matching industry get heavy penalty
+      const courseIndustry = (course.tags?.industry || "general").toLowerCase();
+      const personaIndustryMap = {
+        game_dev_gary: "games",
+        animator_alex: "general", // animators use general content
+        vfx_victor: "general",
+        archviz_ava: "architecture",
+        auto_adam: "automotive",
+        sim_sam: "simulation",
+      };
+      const personaIndustry = personaIndustryMap[detectedPersona.id] || "general";
+
+      if (courseIndustry !== "general" && courseIndustry !== personaIndustry) {
+        // Non-matching industry-specific content: hard penalty
+        score -= 50;
+      }
+      // Bonus for matching industry
+      if (courseIndustry === personaIndustry && courseIndustry !== "general") {
+        score += 15;
       }
 
-      // Exclude game-specific content for film/animation personas
-      if (detectedPersona.id === "animator_alex" || detectedPersona.id === "vfx_victor") {
-        if (
-          combinedText.includes("gameplay") ||
-          combinedText.includes("multiplayer") ||
-          combinedText.includes("game mode")
-        ) {
-          score -= 10;
-        }
+      // Penalize executive/management content for hands-on learner personas
+      if (
+        courseTitle.includes("executive") ||
+        courseTitle.includes("leadership") ||
+        courseTitle.includes("management overview")
+      ) {
+        score -= 30;
       }
 
       // Penalize advanced topics for beginners
       const advancedTopics = [
-        "mobile app",
-        "deployment",
-        "packaging",
         "multiplayer",
         "networking",
         "dedicated server",
@@ -225,17 +238,19 @@ export default function Personas() {
         "c++ programming",
         "source control",
         "version control",
-        "testing", // testing comes after fundamentals
+        "packaging",
+        "deployment",
       ];
       for (const topic of advancedTopics) {
-        if (combinedText.includes(topic)) {
-          score -= 15;
-        }
+        if (combinedText.includes(topic)) score -= 15;
       }
 
       // STRONGLY boost foundation courses - intro should be FIRST
+      // Boost 100.xx series courses (foundation/intro series)
+      if (course.code?.startsWith("100")) score += 40;
       // Tiered approach: intro > quickstart/first project > getting started > fundamental
       if (courseTitle.includes("introduction")) score += 50; // Intro courses at very top
+      if (courseTitle.includes("intro") && !courseTitle.includes("introduction")) score += 40;
       if (courseTitle.includes("quickstart") || courseTitle.includes("your first")) score += 35;
       if (courseTitle.includes("getting started")) score += 30;
       if (courseTitle.includes("fundamental") && score >= 0) score += 10;
@@ -243,14 +258,27 @@ export default function Personas() {
       return { ...course, relevanceScore: score };
     });
 
-    // Sort by relevance and pick top courses
-    const sortedCourses = scoredCourses
-      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+    // Sort by relevance and deduplicate (multiple industry versions of same course exist)
+    const sortedCourses = scoredCourses.sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+    // Deduplicate by normalized title (strip industry suffix + punctuation)
+    const seenTitles = new Set();
+    const dedupedCourses = sortedCourses
+      .filter((course) => {
+        const normalizedTitle = (course.title || course.name || "")
+          .toLowerCase()
+          .replace(/\s+for\s+(games|automotive|aec|architecture|simulation|film).*$/i, "") // strip "for [Industry]" suffix
+          .replace(/[^a-z0-9]/g, "") // strip punctuation/spaces
+          .replace(/\d+$/g, ""); // strip trailing version numbers
+        if (seenTitles.has(normalizedTitle)) return false;
+        seenTitles.add(normalizedTitle);
+        return true;
+      })
       .slice(0, 8);
 
     // Add milestones
     let totalMinutes = 0;
-    const pathWithMilestones = sortedCourses.map((course, idx) => {
+    const pathWithMilestones = dedupedCourses.map((course, idx) => {
       const duration = course.duration || 45; // default 45 min
       totalMinutes += duration;
 
@@ -439,15 +467,15 @@ export default function Personas() {
                       )}
                     </div>
                     {/* Skills/tags learned */}
-                    {Array.isArray(course.tags) && course.tags.length > 0 && (
+                    {Array.isArray(course.ai_tags) && course.ai_tags.length > 0 && (
                       <div className="course-skills">
-                        {course.tags.slice(0, 3).map((tag, tagIdx) => (
+                        {course.ai_tags.slice(0, 3).map((tag, tagIdx) => (
                           <span key={tagIdx} className="skill-tag">
-                            {typeof tag === "string" ? tag : tag?.name || tag?.displayName || ""}
+                            {tag}
                           </span>
                         ))}
-                        {course.tags.length > 3 && (
-                          <span className="skill-more">+{course.tags.length - 3} more</span>
+                        {course.ai_tags.length > 3 && (
+                          <span className="skill-more">+{course.ai_tags.length - 3} more</span>
                         )}
                       </div>
                     )}
