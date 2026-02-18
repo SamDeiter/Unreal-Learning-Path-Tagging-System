@@ -157,15 +157,12 @@ export default function Personas() {
       const combinedText = `${courseTitle} ${courseTags.join(" ")}`;
 
       // Check persona keywords - POSITIVE score
-      let matchCount = 0;
       for (const keyword of detectedPersona.keywords) {
         if (courseTitle.includes(keyword.toLowerCase())) {
           score += 5;
-          matchCount++;
         }
         if (courseTags.some((tag) => tag.includes(keyword.toLowerCase()))) {
           score += 3;
-          matchCount++;
         }
       }
 
@@ -264,35 +261,42 @@ export default function Personas() {
       if (courseTitle.includes("getting started")) score += 30;
       if (courseTitle.includes("fundamental") && score >= 0) score += 10;
 
-      // Generate persona-aware relevance blurb
-      let whyUseful = "Builds essential UE5 skills for your learning path.";
-      const personaLabel = detectedPersona.name || "learner";
-      if (course.code?.startsWith("100") && courseTitle.includes("introduction")) {
-        whyUseful = `Start here — this foundational course covers the UE5 editor basics every ${personaLabel} needs.`;
-      } else if (courseTitle.includes("quickstart") || courseTitle.includes("your first")) {
-        whyUseful = "Hands-on practice — build your first project in UE5 step by step.";
-      } else if (courseTitle.includes("intro")) {
-        whyUseful = `An accessible introduction to get you comfortable with this area of UE5.`;
-      } else if (courseTitle.includes("metahuman")) {
-        whyUseful =
-          "Learn to create photorealistic digital humans — great for characters and cinematics.";
-      } else if (courseTitle.includes("blueprint")) {
-        whyUseful = "Master UE5's visual scripting system — no C++ required to build game logic.";
-      } else if (courseTitle.includes("material") || courseTitle.includes("shader")) {
-        whyUseful = "Learn how to create and customize materials for stunning visual quality.";
-      } else if (courseTitle.includes("lighting") || courseTitle.includes("lumen")) {
-        whyUseful = "Understand lighting systems to make your scenes look professional.";
-      } else if (courseTitle.includes("animation") || courseTitle.includes("sequencer")) {
-        whyUseful = "Bring your projects to life with animation and cinematic tools.";
-      } else if (matchCount > 3) {
-        whyUseful = `Covers ${matchCount} skills relevant to your ${personaLabel} learning goals.`;
-      }
-      const videoCount = course.videos?.length || 0;
-      if (videoCount > 15) {
-        whyUseful += ` Comprehensive deep-dive with ${videoCount} video lessons.`;
-      }
+      // Extract learning outcomes from video filenames
+      // Video names like "100.01_04_ProjectStructure_55.mp4" → "Project Structure"
+      const SKIP_TOPICS = new Set([
+        "intro",
+        "introduction",
+        "outro",
+        "summary",
+        "review",
+        "overview",
+        "welcome",
+      ]);
+      const learningTopics = (course.videos || [])
+        .map((v) => {
+          const name = (v.name || "").replace(/\.[^.]+$/, ""); // strip extension
+          // Extract the descriptive part (e.g., "ProjectBrowser" from "100.01_09_ProjectBrowser_55")
+          const parts = name
+            .split("_")
+            .filter((p) => p.length > 3 && !/^[\d.]+$/.test(p) && !/^\d{1,3}$/.test(p));
+          // The descriptive part is usually the longest non-numeric segment
+          const topic = parts.reduce((best, p) => (p.length > best.length ? p : best), "");
+          // Convert camelCase/PascalCase to spaced words
+          return topic
+            .replace(/([a-z])([A-Z])/g, "$1 $2")
+            .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
+        })
+        .filter((t) => t.length > 3 && !SKIP_TOPICS.has(t.toLowerCase()))
+        // Deduplicate
+        .filter((t, i, arr) => arr.indexOf(t) === i)
+        .slice(0, 5);
 
-      return { ...course, relevanceScore: score, whyUseful };
+      const learningOutcome =
+        learningTopics.length > 0
+          ? `You'll learn: ${learningTopics.join(", ")}`
+          : (course.ai_tags || []).slice(0, 4).join(", ");
+
+      return { ...course, relevanceScore: score, learningOutcome };
     });
 
     // Sort by relevance and deduplicate (multiple industry versions of same course exist)
@@ -437,12 +441,14 @@ export default function Personas() {
           )}
         </>
       ) : watchingCourse ? (
-        /* GuidedPlayer for the selected course */
-        <GuidedPlayer
-          courses={[watchingCourse]}
-          onComplete={() => setWatchingCourse(null)}
-          onExit={() => setWatchingCourse(null)}
-        />
+        /* GuidedPlayer — break out of the 900px container */
+        <div className="guided-player-breakout">
+          <GuidedPlayer
+            courses={[watchingCourse]}
+            onComplete={() => setWatchingCourse(null)}
+            onExit={() => setWatchingCourse(null)}
+          />
+        </div>
       ) : (
         <>
           {/* Generated Path Results */}
@@ -513,20 +519,9 @@ export default function Personas() {
                         </span>
                       )}
                     </div>
-                    {/* Why this course is useful */}
-                    {course.whyUseful && <p className="course-why">{course.whyUseful}</p>}
-                    {/* Skills/tags learned */}
-                    {Array.isArray(course.ai_tags) && course.ai_tags.length > 0 && (
-                      <div className="course-skills">
-                        {course.ai_tags.slice(0, 3).map((tag, tagIdx) => (
-                          <span key={tagIdx} className="skill-tag">
-                            {tag}
-                          </span>
-                        ))}
-                        {course.ai_tags.length > 3 && (
-                          <span className="skill-more">+{course.ai_tags.length - 3} more</span>
-                        )}
-                      </div>
+                    {/* What you'll learn */}
+                    {course.learningOutcome && (
+                      <p className="course-why">{course.learningOutcome}</p>
                     )}
                     {/* Watch button */}
                     {course.videos?.length > 0 && course.videos[0]?.drive_id && (
