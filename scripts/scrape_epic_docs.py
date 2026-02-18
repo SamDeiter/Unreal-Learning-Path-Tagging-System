@@ -3,7 +3,7 @@ Scrapes Epic Games UE5 documentation using curated URL slugs from
 UE5QuestionGenerator/src/utils/urlValidatorData.js.
 
 Converts HTML → plain text, chunks into ~500-token blocks, then
-embeds via Gemini gemini-embedding-001.
+embeds via Gemini text-embedding-004.
 
 Output: path-builder/src/data/docs_embeddings.json
 
@@ -34,7 +34,7 @@ CHECKPOINT_FILE = Path("content/docs_embedding_checkpoint.json")
 
 BASE_URL = "https://dev.epicgames.com/documentation/en-us/unreal-engine"
 
-MODEL = "gemini-embedding-001"
+MODEL = "text-embedding-004"
 DIMENSION = 768
 TASK_TYPE = "RETRIEVAL_DOCUMENT"
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embedContent"

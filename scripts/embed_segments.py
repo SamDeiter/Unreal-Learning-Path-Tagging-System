@@ -1,6 +1,6 @@
 """embed_segments.py — Phase 1A of RAG upgrade
 Reads segment_index.json, merges adjacent segments into ~300-500 token chunks,
-then embeds each chunk via Gemini gemini-embedding-001.
+then embeds each chunk via Gemini text-embedding-004.
 
 Output: path-builder/src/data/segment_embeddings.json
 
@@ -26,7 +26,7 @@ SEGMENT_INDEX = Path("path-builder/src/data/segment_index.json")
 OUTPUT_FILE = Path("path-builder/src/data/segment_embeddings.json")
 CHECKPOINT_FILE = Path("content/embedding_checkpoint.json")
 
-MODEL = "gemini-embedding-001"          # same as embedQuery Cloud Function
+MODEL = "text-embedding-004"          # same as embedQuery Cloud Function
 DIMENSION = 768
 TASK_TYPE = "RETRIEVAL_DOCUMENT"        # documents use RETRIEVAL_DOCUMENT
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embedContent"

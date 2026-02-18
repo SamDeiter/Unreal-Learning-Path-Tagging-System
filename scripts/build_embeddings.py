@@ -28,7 +28,7 @@ ENRICHED_PATH = os.path.join(DATA_DIR, "video_library_enriched.json")
 SEARCH_INDEX_PATH = os.path.join(DATA_DIR, "search_index.json")
 OUTPUT_PATH = os.path.join(DATA_DIR, "course_embeddings.json")
 
-MODEL = "gemini-embedding-001"
+MODEL = "text-embedding-004"
 DIMENSION = 768
 TASK_TYPE = "SEMANTIC_SIMILARITY"
 MAX_TRANSCRIPT_WORDS = 500  # Limit transcript text to keep within token budget
