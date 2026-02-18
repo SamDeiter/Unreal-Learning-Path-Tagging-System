@@ -234,18 +234,69 @@ export default function Personas() {
         score -= 30;
       }
 
-      // Penalize film/broadcast production courses for non-film personas
-      const isFilmPersona = personaIndustry === "animation" || personaIndustry === "film";
-      if (
-        !isFilmPersona &&
-        (courseTitle.includes("legacy production") ||
-          courseTitle.includes("virtual production") ||
-          courseTitle.includes("broadcast") ||
-          courseTitle.includes("live action") ||
-          courseTitle.includes("compositing") ||
-          courseTitle.includes("stage operator"))
-      ) {
-        score -= 60;
+      // ── Industry-specific course penalties ──────────────────────────
+      // Courses whose TITLE signals a niche industry should be heavily
+      // penalized when the user's persona doesn't match that industry.
+      const industryFilters = [
+        {
+          // Film / Broadcast / Virtual Production
+          match: [
+            "legacy production",
+            "virtual production",
+            "broadcast",
+            "live action",
+            "compositing",
+            "stage operator",
+            "icvfx",
+            "ndisplay",
+            "cinematography",
+            "film production",
+            "in-camera",
+            "on-set",
+          ],
+          allowPersonas: ["animation", "film", "media"],
+        },
+        {
+          // Automotive
+          match: [
+            "for automotive",
+            "automotive",
+            "vehicle design",
+            "configurator",
+            "car paint",
+            "vred",
+          ],
+          allowPersonas: ["automotive"],
+        },
+        {
+          // Architecture / AEC
+          match: [
+            "archviz",
+            "architectural",
+            "twinmotion",
+            "for architecture",
+            "for design",
+            "aeco",
+          ],
+          allowPersonas: ["architecture", "design"],
+        },
+        {
+          // Simulation / Digital Twins
+          match: ["digital twin", "crowd simulation"],
+          allowPersonas: ["simulation", "enterprise"],
+        },
+        {
+          // Manufacturing
+          match: ["manufacturing", "factory", "assembly line"],
+          allowPersonas: ["manufacturing", "enterprise"],
+        },
+      ];
+      for (const filter of industryFilters) {
+        const titleHit = filter.match.some((kw) => courseTitle.includes(kw));
+        if (titleHit && !filter.allowPersonas.includes(personaIndustry)) {
+          score -= 60;
+          break; // one penalty is enough
+        }
       }
 
       // Penalize advanced topics for beginners
