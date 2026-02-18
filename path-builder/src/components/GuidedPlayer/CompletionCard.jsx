@@ -197,9 +197,16 @@ export default function CompletionCard({
           <ul>
             {relatedSituations.map((situation, i) => (
               <li key={i}>
-                {typeof situation === "string"
-                  ? situation
-                  : situation.description || situation.text || situation}
+                {typeof situation === "string" ? (
+                  situation
+                ) : situation.scenario ? (
+                  <>
+                    <strong>{situation.scenario}</strong>
+                    {situation.connection ? ` — ${situation.connection}` : ""}
+                  </>
+                ) : (
+                  situation.description || situation.text || JSON.stringify(situation)
+                )}
               </li>
             ))}
           </ul>
