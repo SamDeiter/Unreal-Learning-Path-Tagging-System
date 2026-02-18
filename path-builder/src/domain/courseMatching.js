@@ -57,7 +57,8 @@ export async function matchCoursesToCart(
   allCourses,
   selectedTagIds = [],
   errorLog = "",
-  semanticResults = []
+  semanticResults = [],
+  boostMap = null
 ) {
   if (!allCourses || allCourses.length === 0) return [];
 
@@ -289,7 +290,7 @@ export async function matchCoursesToCart(
   merged.sort((a, b) => b._relevanceScore - a._relevanceScore);
   const boosted = applyTagBoost(merged);
   if (boosted.length >= 3) {
-    return applyVersionFilter(boosted.slice(0, 5), userQuery);
+    return applyFeedbackBoost(applyVersionFilter(boosted.slice(0, 5), userQuery), boostMap);
   }
 
   // Pass 3: Broaden with diagnosis terms
@@ -304,7 +305,7 @@ export async function matchCoursesToCart(
   merged.sort((a, b) => b._relevanceScore - a._relevanceScore);
   const boostedBroad = applyTagBoost(merged);
   if (boostedBroad.length >= 3) {
-    return applyVersionFilter(boostedBroad.slice(0, 5), userQuery);
+    return applyFeedbackBoost(applyVersionFilter(boostedBroad.slice(0, 5), userQuery), boostMap);
   }
 
   // Fallback: tag graph scoring
@@ -316,7 +317,24 @@ export async function matchCoursesToCart(
     .filter((c) => c._relevanceScore > 0 && isPlayable(c))
     .sort((a, b) => b._relevanceScore - a._relevanceScore)
     .slice(0, 5);
-  return applyVersionFilter(applyTagBoost(fallbackResults), userQuery);
+  return applyFeedbackBoost(applyVersionFilter(applyTagBoost(fallbackResults), userQuery), boostMap);
+}
+
+/**
+ * Apply user feedback boost/penalty from historical watch/skip signals.
+ * @param {Array} courses - Scored courses
+ * @param {Map<string,number>|null} boostMap - courseCode → multiplier (>1 boost, <1 penalty)
+ */
+function applyFeedbackBoost(courses, boostMap) {
+  if (!boostMap || boostMap.size === 0) return courses;
+  return courses
+    .map((course) => {
+      const multiplier = boostMap.get(course.code);
+      if (!multiplier) return course;
+      devLog(`📊 Feedback boost: ${course.code} × ${multiplier.toFixed(2)}`);
+      return { ...course, _relevanceScore: course._relevanceScore * multiplier };
+    })
+    .sort((a, b) => b._relevanceScore - a._relevanceScore);
 }
 
 /**

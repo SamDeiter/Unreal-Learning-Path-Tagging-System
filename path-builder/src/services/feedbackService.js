@@ -12,7 +12,9 @@
  * }
  */
 
-import { devWarn } from "../utils/logger";
+import { devLog, devWarn } from "../utils/logger";
+import { getFirestore, doc, setDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
+import { getFirebaseApp } from "./firebaseConfig";
 
 const STORAGE_KEY = "feedback_v1";
 const DEMOTION_MULTIPLIER = 0.3; // Downvoted videos get 30% of their score
@@ -133,7 +135,6 @@ export function recordFormFeedback(type, description, fileNames = []) {
     const raw = localStorage.getItem(FORM_KEY);
     const submissions = raw ? JSON.parse(raw) : [];
     submissions.push(entry);
-    // Keep last 50 submissions to avoid unbounded growth
     if (submissions.length > 50) submissions.splice(0, submissions.length - 50);
     localStorage.setItem(FORM_KEY, JSON.stringify(submissions));
   } catch (e) {
@@ -143,6 +144,76 @@ export function recordFormFeedback(type, description, fileNames = []) {
   return { id: entry.id, timestamp: entry.timestamp };
 }
 
+// ── Firestore-backed watch/skip signals (GuidedPlayer engagement tracking) ──
+
+/**
+ * Log a watch/skip feedback signal to Firestore.
+ * Fire-and-forget — never blocks the player.
+ *
+ * @param {string} userId - Authenticated user ID
+ * @param {string} courseCode - Course code (e.g., "102.03")
+ * @param {string} videoKey - Video key within the course
+ * @param {"watched"|"skipped"} signal - Feedback signal type
+ * @param {string} [query] - The user's original search query (for context)
+ */
+export async function logVideoFeedback(userId, courseCode, videoKey, signal, query = "") {
+  if (!userId || userId === "anonymous") return;
+  try {
+    const db = getFirestore(getFirebaseApp());
+    const feedbackId = `${courseCode}_${videoKey}_${Date.now()}`;
+    const feedbackRef = doc(db, "userFeedback", userId, "videoSignals", feedbackId);
+    await setDoc(feedbackRef, {
+      courseCode,
+      videoKey,
+      signal,
+      query: String(query).slice(0, 200),
+      timestamp: serverTimestamp(),
+    });
+    devLog(`[Feedback] ${signal} signal for ${courseCode}/${videoKey}`);
+  } catch (err) {
+    devWarn("[Feedback] Failed to log signal:", err.message);
+  }
+}
+
+/**
+ * Build a boost/penalty map from the user's historical feedback.
+ * @param {string} userId - Authenticated user ID
+ * @returns {Promise<Map<string, number>>} courseCode → multiplier (>1 = boost, <1 = penalty)
+ */
+export async function getBoostMap(userId) {
+  const boostMap = new Map();
+  if (!userId || userId === "anonymous") return boostMap;
+  try {
+    const db = getFirestore(getFirebaseApp());
+    const signalsRef = collection(db, "userFeedback", userId, "videoSignals");
+    const snapshot = await getDocs(signalsRef);
+    if (snapshot.empty) return boostMap;
+
+    const courseStats = new Map();
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data();
+      const code = data.courseCode;
+      if (!code) continue;
+      if (!courseStats.has(code)) courseStats.set(code, { watched: 0, skipped: 0 });
+      const stats = courseStats.get(code);
+      if (data.signal === "watched") stats.watched++;
+      else if (data.signal === "skipped") stats.skipped++;
+    }
+
+    for (const [code, stats] of courseStats) {
+      const total = stats.watched + stats.skipped;
+      if (total < 2) continue; // Need ≥2 signals to be meaningful
+      const watchRatio = stats.watched / total;
+      boostMap.set(code, 0.7 + watchRatio * 0.5); // 0.7x–1.2x
+    }
+    devLog(`[Feedback] Boost map: ${boostMap.size} courses with signals`);
+    return boostMap;
+  } catch (err) {
+    devWarn("[Feedback] Failed to build boost map:", err.message);
+    return boostMap;
+  }
+}
+
 export default {
   recordUpvote,
   recordDownvote,
@@ -150,4 +221,6 @@ export default {
   applyFeedbackMultiplier,
   getFeedbackStats,
   recordFormFeedback,
+  logVideoFeedback,
+  getBoostMap,
 };

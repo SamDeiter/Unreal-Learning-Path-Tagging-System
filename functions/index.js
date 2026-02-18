@@ -25,6 +25,8 @@ Object.assign(exports, require("./ai/validateCurriculum"));
 Object.assign(exports, require("./ai/queryLearningPath"));
 
 // ============================================================================
-// Semantic Search - Query Embedding
+// Semantic Search - Query Embedding + Expansion + Re-ranking
 // ============================================================================
 Object.assign(exports, require("./ai/embedQuery"));
+Object.assign(exports, require("./ai/expandQuery"));
+Object.assign(exports, require("./ai/rerankPassages"));

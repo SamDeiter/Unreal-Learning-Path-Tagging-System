@@ -10,7 +10,7 @@
  * @param {Function} params.onComplete - Called when the full path is completed
  * @param {Function} params.onExit - Called when the user exits the path
  */
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import {
   generatePathIntro,
   generateBridgeText,
@@ -20,6 +20,7 @@ import { generateChallenge } from "../services/challengeService";
 import { signInWithGoogle, onAuthChange } from "../services/googleAuthService";
 import { recordPathCompletion, getStreakInfo } from "../services/learningProgressService";
 import quizData from "../data/quiz_questions.json";
+import { logVideoFeedback } from "../services/feedbackService";
 
 // Player stages — exported so components can reference them
 export const STAGES = {
@@ -44,6 +45,9 @@ export default function useGuidedPlayer({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [videoIndex, setVideoIndex] = useState(0);
   const [reflectionText, setReflectionText] = useState("");
+
+  // Track video start time for skip detection (set when learning actually starts)
+  const vidStartRef = useRef(0);
 
   // ── Auth state ──
   const [user, setUser] = useState(null);
@@ -114,10 +118,17 @@ export default function useGuidedPlayer({
 
   // ── Handlers (stage transitions) ──
   const handleStartLearning = useCallback(() => {
+    vidStartRef.current = Date.now();
     setStage(STAGES.PLAYING);
   }, []);
 
   const handleVideoComplete = useCallback(() => {
+    // Log "watched" signal (fire-and-forget)
+    if (currentCourse && currentVideo && user?.uid) {
+      logVideoFeedback(user.uid, currentCourse.code, currentVideo.key || currentVideo.title, "watched");
+    }
+    vidStartRef.current = Date.now();
+
     // Reading steps skip quiz/challenge — go directly to next course or complete
     if (currentCourse?._readingStep) {
       if (nextCourse) {
@@ -141,7 +152,7 @@ export default function useGuidedPlayer({
         setStage(STAGES.CHALLENGE);
       }
     }
-  }, [hasMoreVideos, currentCourse, nextCourse, onComplete]);
+  }, [hasMoreVideos, currentCourse, currentVideo, nextCourse, onComplete, user]);
 
   const handlePreviousVideo = useCallback(() => {
     if (videoIndex > 0) {
@@ -155,6 +166,13 @@ export default function useGuidedPlayer({
   }, [videoIndex, currentIndex, courses]);
 
   const handleNextVideo = useCallback(() => {
+    // Log "skipped" if user clicks Next within 30s of starting
+    const elapsed = Date.now() - vidStartRef.current;
+    if (elapsed < 30000 && currentCourse && currentVideo && user?.uid) {
+      logVideoFeedback(user.uid, currentCourse.code, currentVideo.key || currentVideo.title, "skipped");
+    }
+    vidStartRef.current = Date.now();
+
     if (hasMoreVideos) {
       setVideoIndex((prev) => prev + 1);
     } else if (nextCourse) {
@@ -162,7 +180,7 @@ export default function useGuidedPlayer({
       setCurrentIndex((prev) => prev + 1);
       setVideoIndex(0);
     }
-  }, [hasMoreVideos, nextCourse]);
+  }, [hasMoreVideos, nextCourse, currentCourse, currentVideo, user]);
 
   const handleBackToPath = useCallback(() => {
     // Reset to first course, first video, PLAYING stage

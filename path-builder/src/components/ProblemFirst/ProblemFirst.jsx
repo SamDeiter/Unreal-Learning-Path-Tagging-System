@@ -9,6 +9,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { getFirebaseApp } from "../../services/firebaseConfig";
 import ProblemInput from "./ProblemInput";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
@@ -29,6 +30,7 @@ import {
 } from "../../services/analyticsService";
 import { useTagData } from "../../context/TagDataContext";
 import { CaseReportForm, ClarifyStep, AnswerView } from "../FixProblem";
+import { getBoostMap } from "../../services/feedbackService";
 import "./ProblemFirst.css";
 
 import { devLog, devWarn } from "../../utils/logger";
@@ -123,7 +125,8 @@ export default function ProblemFirst() {
                   courses,
                   inputData.selectedTagIds || [],
                   inputData.errorLog || "",
-                  []
+                  [],
+                  null // boostMap — skip for cache hits
                 );
                 cartData.matchedCourses = matchedCourses;
 
@@ -186,17 +189,37 @@ export default function ProblemFirst() {
         const app = getFirebaseApp();
         const functions = getFunctions(app, "us-central1");
 
-        // Step 1: Get query embedding (used for both course + segment search)
+        // Step 1: Get query embedding + expanded queries (parallel)
         let queryEmbedding = null;
         let semanticResults = [];
         let retrievedPassages = [];
+        let expandedQueries = [];
         try {
-          const embedQuery = httpsCallable(functions, "embedQuery");
-          const embedResult = await embedQuery({ query: inputData.query });
-          if (embedResult.data?.success && embedResult.data?.embedding) {
-            queryEmbedding = embedResult.data.embedding;
+          const embedQueryFn = httpsCallable(functions, "embedQuery");
+          const expandQueryFn = httpsCallable(functions, "expandQuery");
 
-            // Run all three searches in parallel (no dependencies between them)
+          // Run embedding + expansion in parallel (no dependency between them)
+          const [embedResult, expandResult] = await Promise.allSettled([
+            embedQueryFn({ query: inputData.query }),
+            expandQueryFn({ query: inputData.query }),
+          ]);
+
+          // Collect expanded queries (graceful — empty array if it fails)
+          if (expandResult.status === "fulfilled" && expandResult.value.data?.expansions) {
+            expandedQueries = expandResult.value.data.expansions;
+            devLog(
+              `[QueryExpansion] ${expandedQueries.length} variants: ${expandedQueries.join(" | ")}`
+            );
+          }
+
+          if (
+            embedResult.status === "fulfilled" &&
+            embedResult.value.data?.success &&
+            embedResult.value.data?.embedding
+          ) {
+            queryEmbedding = embedResult.value.data.embedding;
+
+            // Run primary searches in parallel (same as before)
             const [courseResult, segResult, docResult] = await Promise.allSettled([
               findSimilarCourses(queryEmbedding, 8, 0.35),
               searchSegmentsHybrid(inputData.query, queryEmbedding, [], 8),
@@ -242,6 +265,32 @@ export default function ProblemFirst() {
               devWarn("⚠️ Docs search failed:", docResult.reason?.message);
             }
 
+            // ── Query Expansion: search expanded variants for additional coverage ──
+            if (expandedQueries.length > 0) {
+              const expansionSearches = expandedQueries.map((eq) =>
+                searchSegmentsHybrid(eq, null, [], 4).catch(() => [])
+              );
+              const expansionResults = await Promise.allSettled(expansionSearches);
+              let expansionCount = 0;
+              for (const er of expansionResults) {
+                if (er.status === "fulfilled" && er.value.length > 0) {
+                  const expPassages = er.value.map((s) => ({
+                    text: s.previewText,
+                    courseCode: s.courseCode,
+                    videoTitle: s.videoTitle,
+                    timestamp: s.timestamp,
+                    similarity: (s.similarity || 0) * 0.9, // Slight penalty vs primary query
+                    source: "transcript",
+                  }));
+                  retrievedPassages.push(...expPassages);
+                  expansionCount += expPassages.length;
+                }
+              }
+              if (expansionCount > 0) {
+                devLog(`[QueryExpansion] +${expansionCount} passages from expanded queries`);
+              }
+            }
+
             // ── Phase 1: rank all passages by similarity, deduplicate, then slice ──
             retrievedPassages.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
             const seen = new Set();
@@ -251,11 +300,34 @@ export default function ProblemFirst() {
               seen.add(key);
               return true;
             });
-            devLog(`[RAG] Total: ${retrievedPassages.length} passages after rank+dedup (parallel)`);
+            devLog(
+              `[RAG] Total: ${retrievedPassages.length} passages after rank+dedup (with expansions)`
+            );
           }
         } catch (semanticErr) {
           devWarn("⚠️ Semantic search skipped:", semanticErr.message);
         }
+
+        // Step 1.5: Cross-encoder re-ranking (Gemini scores each passage for relevance)
+        if (retrievedPassages.length > 2) {
+          try {
+            const rerankFn = httpsCallable(functions, "rerankPassages");
+            const rerankResult = await rerankFn({
+              query: inputData.query,
+              passages: retrievedPassages.slice(0, 20),
+            });
+            if (rerankResult.data?.success && rerankResult.data?.reranked) {
+              retrievedPassages = rerankResult.data.reranked;
+              if (!rerankResult.data.fallback) {
+                devLog(`[Rerank] Passages re-ranked by Gemini cross-encoder`);
+              }
+            }
+          } catch (rerankErr) {
+            devWarn("⚠️ Re-ranking skipped:", rerankErr.message);
+          }
+        }
+        // Slice to top 8 after re-ranking
+        retrievedPassages = retrievedPassages.slice(0, 8);
 
         // Step 2: Call Cloud Function with retrieved context
         let cartData;
@@ -347,13 +419,18 @@ export default function ProblemFirst() {
         cartData.retrievedPassages = retrievedPassages; // Store for UI display
         cartData._localFallback = !geminiSucceeded; // Flag for UI to show fallback notice
 
+        // Fetch user's feedback boost map (fire-and-forget-safe)
+        const currentUser = getAuth(getFirebaseApp()).currentUser;
+        const boostMap = currentUser ? await getBoostMap(currentUser.uid) : null;
+
         // Match courses (extracted to domain/courseMatching.js)
         const matchedCourses = await matchCoursesToCart(
           cartData,
           courses,
           inputData.selectedTagIds || [],
           inputData.errorLog || "",
-          semanticResults
+          semanticResults,
+          boostMap
         );
         cartData.matchedCourses = matchedCourses;
 

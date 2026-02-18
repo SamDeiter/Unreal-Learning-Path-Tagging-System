@@ -342,7 +342,56 @@ export async function searchSegmentsSemantic(queryEmbedding, topK = 10, threshol
   }
 
   results.sort((a, b) => b.similarity - a.similarity);
-  return results.slice(0, topK);
+  const top = results.slice(0, topK);
+
+  // ── Chunk overlap: bleed 1 sentence from adjacent segments ──
+  // Build a lookup of segments grouped by courseCode:videoKey for neighbor access
+  if (top.length > 0) {
+    const videoSegments = new Map(); // key = courseCode:videoKey, value = sorted [{ id, text, startSeconds }]
+    for (const [id, seg] of embeddings) {
+      const vk = `${seg.courseCode}:${seg.videoKey}`;
+      if (!videoSegments.has(vk)) videoSegments.set(vk, []);
+      videoSegments.get(vk).push({ id, text: seg.text, startSeconds: seg.startSeconds });
+    }
+    // Sort each video's segments by start time
+    for (const segs of videoSegments.values()) {
+      segs.sort((a, b) => a.startSeconds - b.startSeconds);
+    }
+
+    for (const result of top) {
+      const vk = `${result.courseCode}:${result.videoKey}`;
+      const segs = videoSegments.get(vk);
+      if (!segs) continue;
+      const idx = segs.findIndex((s) => s.id === result.id);
+      if (idx === -1) continue;
+
+      // Grab trailing sentence from previous segment
+      let contextBefore = "";
+      if (idx > 0) {
+        const prevText = segs[idx - 1].text || "";
+        const sentences = prevText.split(/[.!?]+\s*/);
+        contextBefore = sentences[sentences.length - 1]?.trim() || "";
+      }
+      // Grab leading sentence from next segment
+      let contextAfter = "";
+      if (idx < segs.length - 1) {
+        const nextText = segs[idx + 1].text || "";
+        const sentences = nextText.split(/[.!?]+\s*/);
+        contextAfter = sentences[0]?.trim() || "";
+      }
+
+      // Enrich previewText with context bleed
+      if (contextBefore || contextAfter) {
+        const parts = [];
+        if (contextBefore) parts.push("..." + contextBefore);
+        parts.push(result.previewText);
+        if (contextAfter) parts.push(contextAfter + "...");
+        result.previewText = parts.join(" ");
+      }
+    }
+  }
+
+  return top;
 }
 
 /**
