@@ -43,6 +43,9 @@ const STOP_WORDS = new Set([
   "the","and","for","are","but","not","you","all","can","has","her","was",
   "one","our","out","its","how","why","with","from","they","been","have",
   "this","that","what","when","your","into",
+  // Vague/subjective complaint words — not useful as doc search topics
+  "wrong","looks","seems","weird","bad","broken","issue","problem",
+  "help","work","working","doesn","isn","getting","keep","keeps",
 ]);
 
 // ──────────── Hook ────────────
@@ -97,7 +100,7 @@ export default function useProblemFirst() {
         if (hasWord("mesh") && !hasWord("skeletal")) {
           docTopics.push("static mesh", "static meshes", "import", "importing");
         }
-        if (hasWord("size") || hasWord("scale") || hasWord("wrong")) {
+        if (hasWord("size") || hasWord("scale")) {
           docTopics.push("scale", "transform");
         }
 

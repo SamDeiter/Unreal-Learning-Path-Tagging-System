@@ -233,7 +233,9 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
     // Multi-topic diversity bonus: docs matching multiple query concepts are far more relevant
     if (matchedTopicCount >= 2) score += matchedTopicCount * 5;
 
-    if (score > 0) {
+    // Require minimum score of 3 — filters single-keyword description/tag matches (score 1-2)
+    // that produce irrelevant results for vague queries
+    if (score >= 3) {
       results.push({
         key,
         label: doc.label,
