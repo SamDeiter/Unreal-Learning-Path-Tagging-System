@@ -275,6 +275,58 @@ JSON:{"question":"str","options":["str"],"whyAsking":"str (explain what this inf
     // If clarification generation failed, fall through to best-effort answer
   }
 
+  // ── Step 1.75: Agentic RAG Escalation ──────────────────────────
+  // When confidence is still low after max clarify rounds AND passages
+  // are insufficient, ask the client to run targeted searches.
+  // Limited to 1 escalation round per query (data.agenticRound tracks this).
+  const agenticRound = typeof data.agenticRound === "number" ? data.agenticRound : 0;
+  const goodPassages = (passages || []).filter((p) => (p.similarity || 0) > 0.4);
+
+  if (confidence.score < 50 && agenticRound < 1 && goodPassages.length < 2) {
+    // Ask Gemini what to search for next
+    try {
+      const searchQueryResult = await runStage({
+        stage: "intent",
+        systemPrompt:
+          UE5_GUARDRAIL +
+          `You are a UE5 search strategist. Given a vague problem and weak search results, generate 2-3 specific search queries that would find the most relevant UE5 documentation or video transcript passages to diagnose this problem.
+
+RULES:
+- Each query should target a DIFFERENT aspect of the problem
+- Use specific UE5 terminology (node names, setting names, menu paths)
+- Queries should be 3-8 words, optimized for semantic search
+- Think about what transcript or documentation would contain the answer
+
+JSON:{"intent_id":"search_strategy","user_role":"search","goal":"search","problem_description":"search queries","systems":[],"constraints":[],"searchQueries":["str"],"searchReason":"str (why these searches will help)"}`,
+        userPrompt: `Problem: "${query}"${intent.systems?.length ? `\nSystems: ${intent.systems.join(", ")}` : ""}${conversationHistory.length > 0 ? `\nConversation context: ${conversationHistory.map((t) => t.content).join(" → ")}` : ""}\nCurrent passages found: ${passages.length} (${goodPassages.length} good quality)`,
+        apiKey,
+        trace,
+        cacheParams: null,
+      });
+
+      if (searchQueryResult.success && searchQueryResult.data?.searchQueries?.length > 0) {
+        trace.toLog();
+        return {
+          success: true,
+          mode: "problem-first",
+          responseType: "NEEDS_MORE_CONTEXT",
+          prompt_version: PROMPT_VERSION,
+          searchQueries: searchQueryResult.data.searchQueries.slice(0, 3),
+          searchReason: searchQueryResult.data.searchReason || "",
+          query,
+          caseReport: safeCase,
+          intent,
+          confidence: { score: confidence.score, reasons: confidence.reasons },
+          conversationHistory,
+          agenticRound: agenticRound + 1,
+        };
+      }
+    } catch (agenticErr) {
+      console.warn(JSON.stringify({ severity: "WARNING", message: "agentic_search_failed", error: agenticErr.message }));
+      // Fall through to best-effort diagnosis
+    }
+  }
+
   // ── Step 2: Diagnosis (RAG-enhanced with passages) ─────────────
   let contextBlock = "";
   if (passages.length > 0) {

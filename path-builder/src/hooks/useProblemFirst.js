@@ -403,7 +403,7 @@ export default function useProblemFirst() {
         let geminiSucceeded = true;
         try {
           const queryLearningPath = httpsCallable(functions, "queryLearningPath");
-          const result = await queryLearningPath({
+          let result = await queryLearningPath({
             query: inputData.query,
             mode: "problem-first",
             detectedTagIds: inputData.detectedTagIds,
@@ -440,6 +440,80 @@ export default function useProblemFirst() {
             });
             setStage(STAGES.CLARIFYING);
             return;
+          }
+
+          // ── Agentic RAG: AI requested more context ──
+          if (result.data.responseType === "NEEDS_MORE_CONTEXT") {
+            devLog(
+              `[AgenticRAG] Cloud function requested ${result.data.searchQueries?.length} targeted searches: ${result.data.searchQueries?.join(" | ")}`
+            );
+            try {
+              // Run AI-suggested searches in parallel
+              const agenticSearches = (result.data.searchQueries || []).flatMap((sq) => [
+                searchSegmentsHybrid(sq, null, [], 4).catch(() => []),
+                searchDocsSemantic(null, 3, 0.3, sq).catch(() => []),
+              ]);
+              const agenticResults = await Promise.allSettled(agenticSearches);
+
+              // Collect new passages from agentic searches
+              const newPassages = [];
+              for (const ar of agenticResults) {
+                if (ar.status !== "fulfilled" || !Array.isArray(ar.value)) continue;
+                for (const item of ar.value) {
+                  if (item.previewText || item.text) {
+                    newPassages.push({
+                      text: item.previewText || item.text || "",
+                      courseCode: item.courseCode || "",
+                      videoTitle: item.videoTitle || item.title || "",
+                      timestamp: item.timestamp || "",
+                      similarity: (item.similarity || 0) * 0.85, // slight discount for agentic
+                      source: item.url ? "epic_docs" : "transcript",
+                      url: item.url || "",
+                      title: item.title || "",
+                      section: item.section || "",
+                    });
+                  }
+                }
+              }
+
+              devLog(`[AgenticRAG] Found ${newPassages.length} additional passages`);
+
+              // Merge with existing passages, dedup, re-rank
+              const merged = [...retrievedPassages, ...newPassages];
+              const seen = new Set();
+              const deduped = merged.filter((p) => {
+                const key = (p.text || "").trim().toLowerCase().slice(0, 120);
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+              });
+              deduped.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
+              const enrichedPassages = deduped.slice(0, 12);
+
+              // Re-submit with enriched passages and agenticRound counter
+              devLog(`[AgenticRAG] Re-submitting with ${enrichedPassages.length} enriched passages`);
+              const retryResult = await queryLearningPath({
+                query: inputData.query,
+                mode: "problem-first",
+                detectedTagIds: inputData.detectedTagIds,
+                personaHint: inputData.personaHint,
+                retrievedContext: enrichedPassages,
+                caseReport: activeCaseReport || undefined,
+                conversationHistory: inputData._conversationHistory || conversationHistory,
+                agenticRound: result.data.agenticRound || 1, // prevent infinite loop
+              });
+
+              // Process the retry result (should be ANSWER or fallback)
+              if (retryResult.data?.responseType === "ANSWER") {
+                result = retryResult; // Replace result so the code below handles it
+                // Update retrievedPassages for blended path building
+                retrievedPassages = enrichedPassages;
+              } else {
+                devWarn("[AgenticRAG] Retry didn't produce ANSWER, using original result");
+              }
+            } catch (agenticErr) {
+              devWarn("[AgenticRAG] Escalation failed, proceeding with best-effort:", agenticErr.message);
+            }
           }
 
           if (!result.data.success)
