@@ -57,14 +57,18 @@ export default function ProblemFirst() {
       </header>
 
       {(stage === STAGES.INPUT || stage === STAGES.LOADING) && (
-        <>
-          <ProblemInput
-            onSubmit={handleSubmit}
-            detectedPersona={getDetectedPersona()}
-            isLoading={stage === STAGES.LOADING}
-          />
-          <CaseReportForm onUpdate={setCaseReport} disabled={stage === STAGES.LOADING} />
-        </>
+        <div className="pf-input-layout">
+          <div className="pf-input-main">
+            <ProblemInput
+              onSubmit={handleSubmit}
+              detectedPersona={getDetectedPersona()}
+              isLoading={stage === STAGES.LOADING}
+            />
+          </div>
+          <aside className="pf-input-sidebar">
+            <CaseReportForm onUpdate={setCaseReport} disabled={stage === STAGES.LOADING} />
+          </aside>
+        </div>
       )}
 
       {stage === STAGES.CLARIFYING && clarifyData && (
