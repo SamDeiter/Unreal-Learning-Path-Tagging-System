@@ -207,12 +207,12 @@ export default function Personas() {
       // Courses tagged for a specific non-matching industry get heavy penalty
       const courseIndustry = (course.tags?.industry || "general").toLowerCase();
       const personaIndustryMap = {
-        game_dev_gary: "games",
-        animator_alex: "general", // animators use general content
-        vfx_victor: "general",
-        archviz_ava: "architecture",
-        auto_adam: "automotive",
-        sim_sam: "simulation",
+        gamedev_gary: "games",
+        animator_alex: "animation", // animation/film persona
+        vfx_victor: "vfx", // VFX/compositing persona
+        architect_amy: "architecture",
+        automotive_andy: "automotive",
+        simulation_sam: "simulation",
       };
       const personaIndustry = personaIndustryMap[detectedPersona.id] || "general";
 
@@ -254,7 +254,7 @@ export default function Personas() {
             "in-camera",
             "on-set",
           ],
-          allowPersonas: ["animation", "film", "media"],
+          allowPersonas: ["animation", "vfx", "film", "media"],
         },
         {
           // Automotive
