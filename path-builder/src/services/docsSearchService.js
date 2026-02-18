@@ -68,8 +68,18 @@ async function getDocsEmbeddings() {
 
   _decodedVectors = new Map();
   for (const [id, doc] of Object.entries(docs)) {
+    // Phase 4: Support both base64 float16 and native array embeddings
+    let vector;
+    if (typeof doc.embedding === "string") {
+      vector = decodeFloat16Vector(doc.embedding);
+    } else if (Array.isArray(doc.embedding)) {
+      vector = new Float32Array(doc.embedding);
+    } else {
+      devWarn(`[DocsSearch] Skipping doc ${id}: unknown embedding format (${typeof doc.embedding})`);
+      continue;
+    }
     _decodedVectors.set(id, {
-      vector: decodeFloat16Vector(doc.embedding),
+      vector,
       slug: doc.slug,
       url: doc.url,
       title: doc.title,

@@ -18,7 +18,7 @@ import { useVideoCart } from "../../hooks/useVideoCart";
 import { matchCoursesToCart } from "../../domain/courseMatching";
 import { flattenCoursesToVideos } from "../../domain/videoRanking";
 import { findSimilarCourses } from "../../services/semanticSearchService";
-import { searchSegmentsSemantic } from "../../services/segmentSearchService";
+import { searchSegmentsHybrid } from "../../services/segmentSearchService";
 import { searchDocsSemantic } from "../../services/docsSearchService";
 import { buildLearningPath } from "../../services/PathBuilder";
 import { buildBlendedPath } from "../../services/coverageAnalyzer";
@@ -198,7 +198,7 @@ export default function ProblemFirst() {
             // Run all three searches in parallel (no dependencies between them)
             const [courseResult, segResult, docResult] = await Promise.allSettled([
               findSimilarCourses(queryEmbedding, 8, 0.35),
-              searchSegmentsSemantic(queryEmbedding, 6, 0.35),
+              searchSegmentsHybrid(inputData.query, queryEmbedding, [], 8),
               searchDocsSemantic(queryEmbedding, 6, 0.35),
             ]);
 
@@ -241,7 +241,16 @@ export default function ProblemFirst() {
               devWarn("⚠️ Docs search failed:", docResult.reason?.message);
             }
 
-            devLog(`[RAG] Total: ${retrievedPassages.length} passages retrieved (parallel)`);
+            // ── Phase 1: rank all passages by similarity, deduplicate, then slice ──
+            retrievedPassages.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
+            const seen = new Set();
+            retrievedPassages = retrievedPassages.filter((p) => {
+              const key = (p.text || "").trim().toLowerCase().slice(0, 120);
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
+            devLog(`[RAG] Total: ${retrievedPassages.length} passages after rank+dedup (parallel)`);
           }
         } catch (semanticErr) {
           devWarn("⚠️ Semantic search skipped:", semanticErr.message);
@@ -257,7 +266,7 @@ export default function ProblemFirst() {
             mode: "problem-first",
             detectedTagIds: inputData.detectedTagIds,
             personaHint: inputData.personaHint,
-            retrievedContext: retrievedPassages.slice(0, 5),
+            retrievedContext: retrievedPassages.slice(0, 8),
             caseReport: activeCaseReport || undefined,
           });
 

@@ -123,8 +123,13 @@ exports.generateDiagnosis = functions
       let passageContext = "";
       if (Array.isArray(retrievedContext) && retrievedContext.length > 0) {
         const passageTexts = retrievedContext
-          .slice(0, 5)
-          .map((p, i) => `[${i + 1}] (${p.videoTitle || p.courseCode || ""}, ${p.timestamp || ""}): ${String(p.text || "").slice(0, 400)}`)
+          .slice(0, 8)
+          .map((p, i) => {
+            if (p.source === "epic_docs" && p.title) {
+              return `[${i + 1}] (Doc: "${p.title}", Section: "${p.section || ""}"): ${String(p.text || "").slice(0, 400)}`;
+            }
+            return `[${i + 1}] (${p.videoTitle || p.courseCode || ""}, ${p.timestamp || ""}): ${String(p.text || "").slice(0, 400)}`;
+          })
           .join("\n");
         passageContext = wrapEvidence(passageTexts);
       }

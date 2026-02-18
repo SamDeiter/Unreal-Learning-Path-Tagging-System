@@ -93,14 +93,23 @@ function computeConfidence(intent, caseReport, passages) {
     }
   }
 
-  // High-quality RAG passages
-  const goodPassages = (passages || []).filter((p) => (p.similarity || 0) > 0.5);
+  // High-quality RAG passages (aligned with retrieval threshold of 0.35)
+  const goodPassages = (passages || []).filter((p) => (p.similarity || 0) > 0.4);
   if (goodPassages.length >= 2) {
     score += 30;
     reasons.push("strong_rag_matches");
   } else if (goodPassages.length === 1) {
     score += 15;
     reasons.push("partial_rag_match");
+  }
+
+  // Partial credit for decent passages (0.35–0.40 similarity)
+  const decentPassages = (passages || []).filter(
+    (p) => (p.similarity || 0) >= 0.35 && (p.similarity || 0) <= 0.4
+  );
+  if (decentPassages.length >= 2) {
+    score += 10;
+    reasons.push("decent_rag_matches");
   }
 
   return { score, reasons };
@@ -139,15 +148,19 @@ async function handleProblemFirst(data, context, apiKey) {
       }
     : null;
 
-  // Sanitize retrieved context (max 5 passages, truncate text)
+  // Sanitize retrieved context (max 8 passages, truncate text)
   const passages = Array.isArray(retrievedContext)
-    ? retrievedContext.slice(0, 5).map((p) => ({
+    ? retrievedContext.slice(0, 8).map((p) => ({
         text: String(p.text || "").slice(0, 400),
         courseCode: String(p.courseCode || ""),
         videoTitle: String(p.videoTitle || ""),
         timestamp: String(p.timestamp || ""),
         source: String(p.source || "transcript"),
         similarity: typeof p.similarity === "number" ? p.similarity : 0,
+        // Preserve doc metadata
+        url: String(p.url || "").slice(0, 300),
+        title: String(p.title || "").slice(0, 200),
+        section: String(p.section || "").slice(0, 200),
       }))
     : [];
 
@@ -235,7 +248,12 @@ JSON:{"question":"str","options":["str"],"whyAsking":"str (explain what this inf
   let contextBlock = "";
   if (passages.length > 0) {
     const passageTexts = passages
-      .map((p, i) => `[${i + 1}] (${p.videoTitle || p.courseCode}, ${p.timestamp}): ${p.text}`)
+      .map((p, i) => {
+        if (p.source === "epic_docs" && p.title) {
+          return `[${i + 1}] (Doc: "${p.title}", Section: "${p.section || ""}"):\n${p.text}`;
+        }
+        return `[${i + 1}] (${p.videoTitle || p.courseCode}, ${p.timestamp}): ${p.text}`;
+      })
       .join("\n");
     contextBlock = wrapEvidence(passageTexts);
   }
@@ -468,6 +486,9 @@ JSON:{
       courseCode: p.courseCode,
       videoTitle: p.videoTitle,
       timestamp: p.timestamp,
+      url: p.url || "",
+      title: p.title || "",
+      section: p.section || "",
     })),
     learnPath: {
       pathSummary: pathSummary.path_summary,
