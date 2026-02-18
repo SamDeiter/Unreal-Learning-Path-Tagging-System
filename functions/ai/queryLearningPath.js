@@ -634,177 +634,201 @@ JSON:{
   return response;
 }
 
-// ─── Onboarding Architect Prompt ────────────────────────────────────
-const ONBOARDING_ARCHITECT_PROMPT =
+// ─── Onboarding Planner Prompt ──────────────────────────────────────
+const ONBOARDING_PLANNER_PROMPT =
   UE5_GUARDRAIL +
-  `You are an Onboarding Architect for Unreal Engine 5 learners.
-Given a user's description of what they want to do, map them to ONE track:
-- "visuals_first" — They want cinematic visuals, film, lighting, Quixel Megascans, cameras, materials
-- "logic_first" — They want gameplay, Blueprints, C++, character movement, AI, game mechanics
-- "world_first" — They want environments, landscapes, foliage, level design, World Partition, Nanite meshes
-
-Also extract their goal and role.
+  `You are a UE5 Curriculum Architect. Analyze the user's persona and generate 3 targeted search queries to find the perfect "First Hour" tutorials for them.
+- If they are a Unity Dev, search for comparison/migration topics.
+- If they are an Artist, search for rendering/materials.
+- If they are a Beginner, search for interface/basics.
+- If they mention a specific UE5 version, include it in search queries.
 
 Return ONLY valid JSON:
 {
-  "track": "visuals_first|logic_first|world_first",
-  "goal": "What the user wants to achieve",
-  "user_role": "Best-guess role (filmmaker, game dev, environment artist, student, etc.)"
+  "searchQueries": ["search query 1", "search query 2", "search query 3"],
+  "archetype": "string describing the user archetype (e.g. unity_migrator, 3d_artist, complete_beginner, filmmaker, game_dev)"
 }`;
 
-const QUICK_WIN_PROMPT =
+const ONBOARDING_ASSEMBLER_PROMPT =
   UE5_GUARDRAIL +
-  `You are a UE5 expert creating a "First Hour" tutorial plan.
-Given a user's goal, role, and track, create a 3-step quickstart plan that gives them a SATISFYING RESULT in their first session.
+  `You are a UE5 Instructor. Build a 3-step "Quick Start" curriculum using ONLY the provided context passages.
 
-Rules:
-- Do NOT teach theory. Teach specific steps to get a visible result.
-- Each step should take 15-20 minutes
-- Step 1 = basic setup, Step 2 = the core skill, Step 3 = a "wow" result
-- Include search_terms that would find relevant beginner UE5 content
+RULES:
+- Each step must be grounded in a specific video/transcript from the context.
+- You must include the "videoId" and "timestamp" for every step if available.
+- Do not invent steps if you don't have the content — use what is provided.
+- Each step should take 15-20 minutes.
+- Step 1 = basic setup, Step 2 = the core skill, Step 3 = a "wow" result.
 
 Return ONLY valid JSON:
 {
-  "track": "visuals_first|logic_first|world_first",
-  "steps": [
-    { "title": "Step title", "description": "What they'll do and achieve", "estimated_minutes": 15 }
-  ],
-  "search_terms": ["term1", "term2", "term3"],
-  "first_result": "What they'll have built after completing all 3 steps"
+  "title": "Path Title (e.g. Your First Hour: Cinematic Lighting)",
+  "description": "One-sentence summary of what they'll achieve",
+  "modules": [
+    {
+      "title": "Step title",
+      "description": "What they'll do and achieve in this step",
+      "videoId": "ID of the source video (or empty string if unknown)",
+      "timestamp": 0,
+      "citation": "Brief quote or reference from the source material"
+    }
+  ]
 }`;
 
-// Default fallback: Getting Started playlist
-const FALLBACK_QUICK_WIN = {
-  track: "visuals_first",
-  steps: [
-    { title: "Create Your First Project", description: "Open UE5, select a template, and explore the default level.", estimated_minutes: 10 },
-    { title: "Build a Simple Scene", description: "Place meshes from the Starter Content, add a directional light, and position a camera.", estimated_minutes: 15 },
-    { title: "Take a High-Quality Screenshot", description: "Switch to Cinematic viewport, enable Lumen, and capture your first beauty shot.", estimated_minutes: 15 },
+/**
+ * fetchOnboardingContext — Retriever stage (mocked).
+ * In production, this would query the vector DB (e.g., Pinecone/Firestore Vector Search).
+ * For now, returns empty array. Connect to your actual search logic here.
+ *
+ * @param {string[]} queries - Search queries from the Planner
+ * @param {object} _data - Original request data (may contain retrievedContext)
+ * @returns {Array} Retrieved passages
+ */
+async function fetchOnboardingContext(queries, _data) {
+  // If the client already provided retrievedContext, use it
+  if (Array.isArray(_data.retrievedContext) && _data.retrievedContext.length > 0) {
+    return _data.retrievedContext.slice(0, 8).map((p) => ({
+      text: String(p.text || "").slice(0, 2500),
+      courseCode: String(p.courseCode || ""),
+      videoTitle: String(p.videoTitle || ""),
+      timestamp: String(p.timestamp || ""),
+      source: String(p.source || "transcript"),
+      videoId: String(p.videoId || ""),
+    }));
+  }
+
+  // TODO: Connect to your actual Vector Search logic
+  // Example: const results = await vectorSearch(queries);
+  console.log(JSON.stringify({
+    severity: "INFO",
+    message: "onboarding_retriever_stub",
+    queries,
+    note: "Vector search not yet connected — returning empty context",
+  }));
+
+  return [];
+}
+
+// Default fallback curriculum
+const FALLBACK_CURRICULUM = {
+  title: "Getting Started with Unreal Engine 5",
+  description: "A general introduction to UE5 for new learners.",
+  modules: [
+    { title: "Create Your First Project", description: "Open UE5, select a template, and explore the default level.", videoId: "", timestamp: 0, citation: "Getting Started playlist" },
+    { title: "Build a Simple Scene", description: "Place meshes, add a directional light, and position a camera.", videoId: "", timestamp: 0, citation: "Getting Started playlist" },
+    { title: "Take a High-Quality Screenshot", description: "Switch to Cinematic viewport, enable Lumen, and capture a beauty shot.", videoId: "", timestamp: 0, citation: "Getting Started playlist" },
   ],
-  search_terms: ["getting started", "first project", "beginner", "UE5 basics"],
-  first_result: "A beautiful screenshot of a scene you built from scratch.",
 };
 
 /**
- * Onboarding Flow — First Hour Quick-Win Generator
- * 1. Extract intent (goal + role) from persona description
- * 2. Generate a tailored 3-step First Hour plan
- * 3. Return structured quick-win + search terms for content retrieval
+ * Onboarding Flow — 3-Stage RAG Pipeline
+ * 1. Planner:   Extract searchQueries + archetype from persona
+ * 2. Retriever: Fetch relevant passages from knowledge base (mocked)
+ * 3. Assembler: Build grounded curriculum citing specific videos/timestamps
  */
 async function handleOnboarding(data, context, apiKey) {
-  const { persona, query } = data;
+  const { persona } = data;
   const userId = context.auth?.uid || "anonymous";
-  const trace = createTrace(userId, "onboarding");
-  const userInput = query || persona || "";
+  const trace = createTrace(userId, "onboarding_gen");
 
-  // If no meaningful input, return the fallback immediately
-  if (!userInput || userInput.trim().length < 5) {
+  if (!persona || String(persona).trim().length < 5) {
     return {
       success: true,
       mode: "onboarding",
       prompt_version: PROMPT_VERSION,
-      quickWin: FALLBACK_QUICK_WIN,
+      archetype: "unknown",
+      curriculum: FALLBACK_CURRICULUM,
       fallback: true,
-      message: "Here's a general getting-started plan. Tell us more about your goals for a personalized path!",
+      message: "Tell us more about your goals for a personalized path!",
     };
   }
 
   try {
-    // ── Stage 1: Extract track + goal + role from persona ──────────
-    const intentResult = await runStage({
-      stage: "onboard_intent",
-      systemPrompt: ONBOARDING_ARCHITECT_PROMPT,
-      userPrompt: `User says: "${String(userInput).slice(0, 500)}"\n\nClassify their track, goal, and role.`,
+    // ── STAGE 1: PLANNER ── Extract search queries + archetype ─────
+    const plannerResult = await runStage({
+      stage: "onboarding_planner",
+      systemPrompt: ONBOARDING_PLANNER_PROMPT,
+      userPrompt: `User Persona: "${String(persona).slice(0, 500)}"`,
       apiKey,
       trace,
+      cacheParams: { persona: String(persona).slice(0, 200), mode: "onboarding_planner" },
     });
 
-    let track = "visuals_first";
-    let goal = userInput;
-    let userRole = "learner";
-
-    if (intentResult.success && intentResult.data) {
-      track = intentResult.data.track || track;
-      goal = intentResult.data.goal || goal;
-      userRole = intentResult.data.user_role || userRole;
+    if (!plannerResult.success) {
+      console.warn(JSON.stringify({ severity: "WARNING", message: "onboarding_planner_failed", error: plannerResult.error }));
+      return {
+        success: true,
+        mode: "onboarding",
+        prompt_version: PROMPT_VERSION,
+        archetype: "unknown",
+        curriculum: FALLBACK_CURRICULUM,
+        fallback: true,
+        message: "Couldn't personalize your path right now — here's a general starting point.",
+      };
     }
 
-    // ── Stage 2: Generate the 3-step Quick-Win plan ────────────────
-    // Detect UE5 version from user input for search prioritization
-    const versionMatch = userInput.match(/\b(5\.\d+)\b/);
-    const engineVersion = versionMatch ? versionMatch[1] : "5.4";
+    const { searchQueries, archetype } = plannerResult.data;
 
-    const quickWinResult = await runStage({
-      stage: "generate_quick_win",
-      systemPrompt: QUICK_WIN_PROMPT,
-      userPrompt: `Track: ${track}\nGoal: ${goal}\nRole: ${userRole}\nEngine Version: UE${engineVersion}\n\nCreate the 3-step First Hour plan.`,
-      apiKey,
-      trace,
-    });
+    // ── STAGE 2: RETRIEVER ── Fetch relevant passages ──────────────
+    const passages = await fetchOnboardingContext(searchQueries || [], data);
 
-    let quickWin;
-    if (quickWinResult.success && quickWinResult.data) {
-      quickWin = quickWinResult.data;
-      // Ensure search_terms includes version-specific terms
-      if (Array.isArray(quickWin.search_terms)) {
-        quickWin.search_terms = quickWin.search_terms
-          .map((t) => String(t).slice(0, 100))
-          .slice(0, 6);
-        // Prioritize version-specific content
-        if (engineVersion && !quickWin.search_terms.some((t) => t.includes(engineVersion))) {
-          quickWin.search_terms.push(`UE ${engineVersion}`);
-        }
-      } else {
-        quickWin.search_terms = ["UE5 beginner", "getting started", track.replace("_first", "")];
-      }
-      // Sanitize steps
-      if (Array.isArray(quickWin.steps)) {
-        quickWin.steps = quickWin.steps.slice(0, 3).map((s) => ({
-          title: String(s.title || "Step").slice(0, 100),
-          description: String(s.description || "").slice(0, 300),
-          estimated_minutes: Number(s.estimated_minutes) || 15,
-        }));
-      }
+    // Build context block for the Assembler
+    let contextBlock = "";
+    if (passages.length > 0) {
+      contextBlock = passages
+        .map((p, i) => `[${i + 1}] Video: "${p.videoTitle}" (Course: ${p.courseCode}, ID: ${p.videoId || "unknown"}, Timestamp: ${p.timestamp || "0:00"})\n${p.text}`)
+        .join("\n\n");
     } else {
-      // LLM failed — use fallback
-      quickWin = { ...FALLBACK_QUICK_WIN };
+      contextBlock = "No specific video content was retrieved. Create a general curriculum based on the archetype.";
     }
+
+    // ── STAGE 3: ASSEMBLER ── Build grounded curriculum ────────────
+    const assemblerResult = await runStage({
+      stage: "onboarding_path",
+      systemPrompt: ONBOARDING_ASSEMBLER_PROMPT,
+      userPrompt: `Create a path for a ${archetype}.\n\nUser says: "${String(persona).slice(0, 300)}"\n\nAvailable Content:\n${contextBlock}`,
+      apiKey,
+      trace,
+      cacheParams: { persona: String(persona).slice(0, 200), mode: "onboarding_assembler" },
+    });
 
     // ── Finalize ──────────────────────────────────────────────────
     trace.toLog();
 
     logApiUsage(userId, {
       model: "gemini-2.0-flash",
-      type: "onboarding_quick_win",
-      track,
-      userRole,
+      type: "onboarding_rag",
+      archetype,
+      passageCount: passages.length,
     });
+
+    const curriculum = assemblerResult.success && assemblerResult.data
+      ? assemblerResult.data
+      : FALLBACK_CURRICULUM;
 
     return {
       success: true,
       mode: "onboarding",
       prompt_version: PROMPT_VERSION,
-      quickWin: {
-        ...quickWin,
-        track,
-        goal,
-        userRole,
-        engineVersion,
-      },
-      persona,
-      message: `Your personalized First Hour plan is ready — track: ${track}`,
+      archetype,
+      curriculum,
+      debug_queries: searchQueries,
+      fallback: !assemblerResult.success,
+      message: assemblerResult.success
+        ? `Your personalized First Hour path is ready — archetype: ${archetype}`
+        : "Generated a general path — retrieval had limited results.",
     };
   } catch (err) {
     console.error(JSON.stringify({ severity: "ERROR", message: "onboarding_error", error: err.message }));
-    // Graceful fallback — never let onboarding crash
     return {
       success: true,
       mode: "onboarding",
       prompt_version: PROMPT_VERSION,
-      quickWin: FALLBACK_QUICK_WIN,
+      archetype: "unknown",
+      curriculum: FALLBACK_CURRICULUM,
       fallback: true,
       persona,
-      message: "Here's a getting-started plan. We couldn't personalize it right now — try again shortly.",
+      message: "Here's a getting-started path. We couldn't personalize it right now — try again shortly.",
     };
   }
 }

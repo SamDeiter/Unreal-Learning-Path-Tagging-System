@@ -103,6 +103,35 @@ const LearningPathSchema = z
   })
   .passthrough();
 
+// ─── Onboarding Planner ─────────────────────────────────────────────────────
+
+const OnboardingPlannerSchema = z
+  .object({
+    searchQueries: z.array(z.string().min(1)).min(1),
+    archetype: z.string().min(1),
+  })
+  .passthrough();
+
+// ─── Onboarding Path (Assembler output) ─────────────────────────────────────
+
+const OnboardingModuleSchema = z
+  .object({
+    title: z.string().min(1),
+    description: z.string().min(1),
+    videoId: z.string().default(""),
+    timestamp: z.number().default(0),
+    citation: z.string().default(""),
+  })
+  .passthrough();
+
+const OnboardingPathSchema = z
+  .object({
+    title: z.string().min(1),
+    description: z.string().min(1),
+    modules: z.array(OnboardingModuleSchema).min(1),
+  })
+  .passthrough();
+
 // ─── Schema Registry (lookup by stage name) ─────────────────────────────────
 
 const SCHEMAS = {
@@ -113,6 +142,8 @@ const SCHEMAS = {
   path_summary_data: PathSummarySchema,
   micro_lesson: MicroLessonSchema,
   learning_path: LearningPathSchema,
+  onboarding_planner: OnboardingPlannerSchema,
+  onboarding_path: OnboardingPathSchema,
 };
 
 module.exports = {
@@ -124,5 +155,8 @@ module.exports = {
   MicroLessonSchema,
   LearningPathSchema,
   LearningPathStepSchema,
+  OnboardingPlannerSchema,
+  OnboardingPathSchema,
+  OnboardingModuleSchema,
   SCHEMAS,
 };
