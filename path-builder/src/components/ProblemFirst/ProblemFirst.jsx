@@ -8,10 +8,11 @@
  *   domain/videoRanking.js  — video flattening + persona weighting
  *   domain/buildGuidedCourses.js — cart → GuidedPlayer course array
  */
-import React from "react";
+import React, { useState, useCallback } from "react";
 import ProblemInput from "./ProblemInput";
 import CaseReportForm from "../FixProblem/CaseReportForm";
 import ClarifyStep from "../FixProblem/ClarifyStep";
+import DiagnosisLoader from "../FixProblem/DiagnosisLoader";
 import AnswerView from "../FixProblem/AnswerView";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import CartPanel from "../CartPanel/CartPanel";
@@ -49,6 +50,18 @@ export default function ProblemFirst() {
     getDetectedPersona,
   } = useProblemFirst();
 
+  // Track the submitted query so DiagnosisLoader can echo it
+  const [submittedQuery, setSubmittedQuery] = useState("");
+  const wrappedSubmit = useCallback(
+    (...args) => {
+      // ProblemInput passes the query text as first arg
+      if (typeof args[0] === "string") setSubmittedQuery(args[0]);
+      else if (args[0]?.query) setSubmittedQuery(args[0].query);
+      return handleSubmit(...args);
+    },
+    [handleSubmit]
+  );
+
   return (
     <div className="problem-first-page">
       <header className="page-header">
@@ -56,20 +69,22 @@ export default function ProblemFirst() {
         <p>Describe your issue. We&apos;ll diagnose it and show you how to fix it.</p>
       </header>
 
-      {(stage === STAGES.INPUT || stage === STAGES.LOADING) && (
+      {stage === STAGES.INPUT && (
         <div className="pf-input-layout">
           <div className="pf-input-main">
             <ProblemInput
-              onSubmit={handleSubmit}
+              onSubmit={wrappedSubmit}
               detectedPersona={getDetectedPersona()}
-              isLoading={stage === STAGES.LOADING}
+              isLoading={false}
             />
           </div>
           <aside className="pf-input-sidebar">
-            <CaseReportForm onUpdate={setCaseReport} disabled={stage === STAGES.LOADING} />
+            <CaseReportForm onUpdate={setCaseReport} disabled={false} />
           </aside>
         </div>
       )}
+
+      {stage === STAGES.LOADING && <DiagnosisLoader query={submittedQuery} />}
 
       {stage === STAGES.CLARIFYING && clarifyData && (
         <ClarifyStep

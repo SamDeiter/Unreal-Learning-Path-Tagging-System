@@ -6,6 +6,7 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import EvidencePanel from "./EvidencePanel";
 import FeedbackPanel from "./FeedbackPanel";
+import highlightTerms from "../../utils/highlightTerms";
 import "./FixProblem.css";
 
 export default function AnswerView({
@@ -41,7 +42,7 @@ export default function AnswerView({
         </span>
       </div>
 
-      <p className="answer-cause">{answer.mostLikelyCause}</p>
+      <p className="answer-cause">{highlightTerms(answer.mostLikelyCause)}</p>
 
       {/* ─── Fast Checks ─── */}
       {answer.fastChecks?.length > 0 && (
@@ -53,7 +54,7 @@ export default function AnswerView({
             {answer.fastChecks.map((check, i) => (
               <li key={i}>
                 <span className="check-number">{i + 1}</span>
-                <span>{check}</span>
+                <span>{highlightTerms(check)}</span>
               </li>
             ))}
           </ul>
@@ -68,7 +69,7 @@ export default function AnswerView({
           </h3>
           <ol>
             {answer.fixSteps.map((step, i) => (
-              <li key={i}>{step}</li>
+              <li key={i}>{highlightTerms(step)}</li>
             ))}
           </ol>
         </div>
@@ -83,8 +84,8 @@ export default function AnswerView({
           <div className="branch-list">
             {answer.ifStillBrokenBranches.map((branch, i) => (
               <div key={i} className="branch-item">
-                <span className="branch-condition">If {branch.condition}:</span>
-                <span className="branch-action">{branch.action}</span>
+                <span className="branch-condition">If {highlightTerms(branch.condition)}:</span>
+                <span className="branch-action">{highlightTerms(branch.action)}</span>
               </div>
             ))}
           </div>
@@ -142,7 +143,7 @@ export default function AnswerView({
           </h3>
           <ul className="reasoning-list">
             {answer.whyThisResult.map((reason, i) => (
-              <li key={i}>{reason}</li>
+              <li key={i}>{highlightTerms(reason)}</li>
             ))}
           </ul>
         </div>
