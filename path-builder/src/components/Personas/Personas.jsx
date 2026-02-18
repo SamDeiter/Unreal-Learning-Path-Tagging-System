@@ -234,6 +234,20 @@ export default function Personas() {
         score -= 30;
       }
 
+      // Penalize film/broadcast production courses for non-film personas
+      const isFilmPersona = personaIndustry === "animation" || personaIndustry === "film";
+      if (
+        !isFilmPersona &&
+        (courseTitle.includes("legacy production") ||
+          courseTitle.includes("virtual production") ||
+          courseTitle.includes("broadcast") ||
+          courseTitle.includes("live action") ||
+          courseTitle.includes("compositing") ||
+          courseTitle.includes("stage operator"))
+      ) {
+        score -= 60;
+      }
+
       // Penalize advanced topics for beginners
       const advancedTopics = [
         "multiplayer",
