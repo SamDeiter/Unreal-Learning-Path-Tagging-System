@@ -187,7 +187,7 @@ async function handleProblemFirst(data, context, apiKey) {
   // Sanitize retrieved context (max 8 passages, truncate text)
   const passages = Array.isArray(retrievedContext)
     ? retrievedContext.slice(0, 8).map((p) => ({
-        text: String(p.text || "").slice(0, 400),
+        text: String(p.text || "").slice(0, 2500),
         courseCode: String(p.courseCode || ""),
         videoTitle: String(p.videoTitle || ""),
         timestamp: String(p.timestamp || ""),
@@ -481,14 +481,15 @@ ${wrapEvidence(passages.map((p, i) => `[${i + 1}] (Course: ${p.courseCode}, Vide
     runStage({
       stage: "intent", // Re-use intent schema loosely for answer data
       systemPrompt:
-        UE5_GUARDRAIL +
-        `You are a UE5 troubleshooting expert. Given a diagnosed problem and optional transcript excerpts from real training videos, produce an answer-first response with concrete fix steps.
+        `CRITICAL: You MUST ONLY respond about Unreal Engine 5 topics.
+You are a technical writer generating a custom, grounded solution for a UE5 developer.
 
-RULES:
-- When transcript excerpts are provided, USE THEM to ground your fix steps in real UE5 workflows
-- Cite specific settings, CVars, menu paths, and property values mentioned in the excerpts
-- Do NOT give generic advice when specific evidence is available
-- Order fix steps from most likely to least likely to resolve the issue
+STRICT GROUNDING RULES:
+1. Answer the user's question using ONLY the context provided in the 'Context Block'. Do not use outside knowledge unless it strictly bridges a gap in the context.
+2. CITATIONS ARE MANDATORY. Every distinct claim must end with a reference like [1] or [Source: Video Title].
+3. If the Context Block contains C++ code, format it in markdown code blocks.
+4. If the Context Block describes a Blueprint, describe it visually: "Right-click -> [Node Name] -> Connect [Pin A] to [Pin B]".
+5. If the provided context does NOT contain the answer, return "NO_DATA_AVAILABLE" in the 'confidence' field and explain why in 'whyThisResult'.
 
 JSON:{
   "intent_id":"answer","user_role":"expert","goal":"fix",
@@ -496,11 +497,11 @@ JSON:{
   "systems":[],
   "constraints":[],
   "mostLikelyCause": "str (one sentence, the most likely root cause)",
-  "confidence": "high|med|low",
+  "confidence": "high|med|low|NO_DATA_AVAILABLE",
   "fastChecks": ["str (quick things to verify before doing full fix, max 3)"],
-  "fixSteps": ["str (ordered fix steps, be specific with UE5 settings/menus)"],
+  "fixSteps": ["str (ordered fix steps, be specific with UE5 settings/menus, cite sources)"],
   "ifStillBrokenBranches": [{"condition":"str","action":"str"}],
-  "whyThisResult": ["str (explain reasoning chain, max 3)"]
+  "whyThisResult": ["str (explain reasoning chain with citations, max 3)"]
 }`,
       userPrompt: `Problem: ${(intent.problem_description || "").slice(0, 300)}\nRoot causes: ${(diagnosis.root_causes || []).slice(0, 3).join("; ")}\nSignals: ${(diagnosis.signals_to_watch_for || []).slice(0, 3).join("; ")}${exclusionNote}${contextBlock}`,
       apiKey,
