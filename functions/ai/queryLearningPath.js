@@ -634,19 +634,179 @@ JSON:{
   return response;
 }
 
+// ─── Onboarding Architect Prompt ────────────────────────────────────
+const ONBOARDING_ARCHITECT_PROMPT =
+  UE5_GUARDRAIL +
+  `You are an Onboarding Architect for Unreal Engine 5 learners.
+Given a user's description of what they want to do, map them to ONE track:
+- "visuals_first" — They want cinematic visuals, film, lighting, Quixel Megascans, cameras, materials
+- "logic_first" — They want gameplay, Blueprints, C++, character movement, AI, game mechanics
+- "world_first" — They want environments, landscapes, foliage, level design, World Partition, Nanite meshes
+
+Also extract their goal and role.
+
+Return ONLY valid JSON:
+{
+  "track": "visuals_first|logic_first|world_first",
+  "goal": "What the user wants to achieve",
+  "user_role": "Best-guess role (filmmaker, game dev, environment artist, student, etc.)"
+}`;
+
+const QUICK_WIN_PROMPT =
+  UE5_GUARDRAIL +
+  `You are a UE5 expert creating a "First Hour" tutorial plan.
+Given a user's goal, role, and track, create a 3-step quickstart plan that gives them a SATISFYING RESULT in their first session.
+
+Rules:
+- Do NOT teach theory. Teach specific steps to get a visible result.
+- Each step should take 15-20 minutes
+- Step 1 = basic setup, Step 2 = the core skill, Step 3 = a "wow" result
+- Include search_terms that would find relevant beginner UE5 content
+
+Return ONLY valid JSON:
+{
+  "track": "visuals_first|logic_first|world_first",
+  "steps": [
+    { "title": "Step title", "description": "What they'll do and achieve", "estimated_minutes": 15 }
+  ],
+  "search_terms": ["term1", "term2", "term3"],
+  "first_result": "What they'll have built after completing all 3 steps"
+}`;
+
+// Default fallback: Getting Started playlist
+const FALLBACK_QUICK_WIN = {
+  track: "visuals_first",
+  steps: [
+    { title: "Create Your First Project", description: "Open UE5, select a template, and explore the default level.", estimated_minutes: 10 },
+    { title: "Build a Simple Scene", description: "Place meshes from the Starter Content, add a directional light, and position a camera.", estimated_minutes: 15 },
+    { title: "Take a High-Quality Screenshot", description: "Switch to Cinematic viewport, enable Lumen, and capture your first beauty shot.", estimated_minutes: 15 },
+  ],
+  search_terms: ["getting started", "first project", "beginner", "UE5 basics"],
+  first_result: "A beautiful screenshot of a scene you built from scratch.",
+};
+
 /**
- * Onboarding Flow:
- * Delegates to existing generateLearningPath or custom logic
+ * Onboarding Flow — First Hour Quick-Win Generator
+ * 1. Extract intent (goal + role) from persona description
+ * 2. Generate a tailored 3-step First Hour plan
+ * 3. Return structured quick-win + search terms for content retrieval
  */
-async function handleOnboarding(data, _context) {
-  const { persona } = data;
-  return {
-    success: true,
-    mode: "onboarding",
-    prompt_version: PROMPT_VERSION,
-    persona,
-    message: "Use the Onboarding tab to generate your personalized 10-hour path",
-  };
+async function handleOnboarding(data, context, apiKey) {
+  const { persona, query } = data;
+  const userId = context.auth?.uid || "anonymous";
+  const trace = createTrace(userId, "onboarding");
+  const userInput = query || persona || "";
+
+  // If no meaningful input, return the fallback immediately
+  if (!userInput || userInput.trim().length < 5) {
+    return {
+      success: true,
+      mode: "onboarding",
+      prompt_version: PROMPT_VERSION,
+      quickWin: FALLBACK_QUICK_WIN,
+      fallback: true,
+      message: "Here's a general getting-started plan. Tell us more about your goals for a personalized path!",
+    };
+  }
+
+  try {
+    // ── Stage 1: Extract track + goal + role from persona ──────────
+    const intentResult = await runStage({
+      stage: "onboard_intent",
+      systemPrompt: ONBOARDING_ARCHITECT_PROMPT,
+      userPrompt: `User says: "${String(userInput).slice(0, 500)}"\n\nClassify their track, goal, and role.`,
+      apiKey,
+      trace,
+    });
+
+    let track = "visuals_first";
+    let goal = userInput;
+    let userRole = "learner";
+
+    if (intentResult.success && intentResult.data) {
+      track = intentResult.data.track || track;
+      goal = intentResult.data.goal || goal;
+      userRole = intentResult.data.user_role || userRole;
+    }
+
+    // ── Stage 2: Generate the 3-step Quick-Win plan ────────────────
+    // Detect UE5 version from user input for search prioritization
+    const versionMatch = userInput.match(/\b(5\.\d+)\b/);
+    const engineVersion = versionMatch ? versionMatch[1] : "5.4";
+
+    const quickWinResult = await runStage({
+      stage: "generate_quick_win",
+      systemPrompt: QUICK_WIN_PROMPT,
+      userPrompt: `Track: ${track}\nGoal: ${goal}\nRole: ${userRole}\nEngine Version: UE${engineVersion}\n\nCreate the 3-step First Hour plan.`,
+      apiKey,
+      trace,
+    });
+
+    let quickWin;
+    if (quickWinResult.success && quickWinResult.data) {
+      quickWin = quickWinResult.data;
+      // Ensure search_terms includes version-specific terms
+      if (Array.isArray(quickWin.search_terms)) {
+        quickWin.search_terms = quickWin.search_terms
+          .map((t) => String(t).slice(0, 100))
+          .slice(0, 6);
+        // Prioritize version-specific content
+        if (engineVersion && !quickWin.search_terms.some((t) => t.includes(engineVersion))) {
+          quickWin.search_terms.push(`UE ${engineVersion}`);
+        }
+      } else {
+        quickWin.search_terms = ["UE5 beginner", "getting started", track.replace("_first", "")];
+      }
+      // Sanitize steps
+      if (Array.isArray(quickWin.steps)) {
+        quickWin.steps = quickWin.steps.slice(0, 3).map((s) => ({
+          title: String(s.title || "Step").slice(0, 100),
+          description: String(s.description || "").slice(0, 300),
+          estimated_minutes: Number(s.estimated_minutes) || 15,
+        }));
+      }
+    } else {
+      // LLM failed — use fallback
+      quickWin = { ...FALLBACK_QUICK_WIN };
+    }
+
+    // ── Finalize ──────────────────────────────────────────────────
+    trace.toLog();
+
+    logApiUsage(userId, {
+      model: "gemini-2.0-flash",
+      type: "onboarding_quick_win",
+      track,
+      userRole,
+    });
+
+    return {
+      success: true,
+      mode: "onboarding",
+      prompt_version: PROMPT_VERSION,
+      quickWin: {
+        ...quickWin,
+        track,
+        goal,
+        userRole,
+        engineVersion,
+      },
+      persona,
+      message: `Your personalized First Hour plan is ready — track: ${track}`,
+    };
+  } catch (err) {
+    console.error(JSON.stringify({ severity: "ERROR", message: "onboarding_error", error: err.message }));
+    // Graceful fallback — never let onboarding crash
+    return {
+      success: true,
+      mode: "onboarding",
+      prompt_version: PROMPT_VERSION,
+      quickWin: FALLBACK_QUICK_WIN,
+      fallback: true,
+      persona,
+      message: "Here's a getting-started plan. We couldn't personalize it right now — try again shortly.",
+    };
+  }
 }
 
 // ============ Main Export ============
@@ -687,7 +847,7 @@ exports.queryLearningPath = functions
       if (mode === "problem-first") {
         return await handleProblemFirst(data, context, apiKey);
       } else if (mode === "onboarding") {
-        return await handleOnboarding(data, context);
+        return await handleOnboarding(data, context, apiKey);
       } else {
         throw new functions.https.HttpsError(
           "invalid-argument",
