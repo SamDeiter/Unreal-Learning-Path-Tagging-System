@@ -39,6 +39,7 @@ const InstructorMap = lazy(() => import("./components/Visualizations/InstructorM
 const TagHeatmap = lazy(() => import("./components/Visualizations/TagHeatmap"));
 const SkillRadar = lazy(() => import("./components/Visualizations/SkillRadar"));
 const SkillGapAnalysis = lazy(() => import("./components/Visualizations/SkillGapAnalysis"));
+const ConfidenceAnalytics = lazy(() => import("./components/Visualizations/ConfidenceAnalytics"));
 const InviteManager = lazy(() => import("./components/InviteManager/InviteManager"));
 
 function App() {
@@ -346,6 +347,15 @@ function App() {
                     <div className="analytics-grid">
                       {/* Insights & Recommendations */}
                       <InsightsPanel onNavigate={handleInsightNavigate} />
+
+                      {/* Confidence Routing Analytics */}
+                      <CollapsibleSection
+                        title="Confidence Routing"
+                        icon="🧠"
+                        defaultExpanded={true}
+                      >
+                        <ConfidenceAnalytics />
+                      </CollapsibleSection>
 
                       {/* Skill Coverage vs Industry Demand */}
                       <CollapsibleSection
