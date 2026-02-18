@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { getAllPersonas, getPainPointMessaging } from "../../services/PersonaService";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import { useTagData } from "../../context/TagDataContext";
+import { buildLearningOutcome } from "../../utils/videoTopicExtractor";
 import {
   Rocket,
   Clapperboard,
@@ -326,40 +327,8 @@ export default function Personas() {
       if (courseTitle.includes("getting started")) score += 30;
       if (courseTitle.includes("fundamental") && score >= 0) score += 10;
 
-      // Extract learning outcomes from video filenames
-      // Video names like "100.01_04_ProjectStructure_55.mp4" → "Project Structure"
-      const SKIP_TOPICS = new Set([
-        "intro",
-        "introduction",
-        "outro",
-        "summary",
-        "review",
-        "overview",
-        "welcome",
-      ]);
-      const learningTopics = (course.videos || [])
-        .map((v) => {
-          const name = (v.name || "").replace(/\.[^.]+$/, ""); // strip extension
-          // Extract the descriptive part (e.g., "ProjectBrowser" from "100.01_09_ProjectBrowser_55")
-          const parts = name
-            .split("_")
-            .filter((p) => p.length > 3 && !/^[\d.]+$/.test(p) && !/^\d{1,3}$/.test(p));
-          // The descriptive part is usually the longest non-numeric segment
-          const topic = parts.reduce((best, p) => (p.length > best.length ? p : best), "");
-          // Convert camelCase/PascalCase to spaced words
-          return topic
-            .replace(/([a-z])([A-Z])/g, "$1 $2")
-            .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
-        })
-        .filter((t) => t.length > 3 && !SKIP_TOPICS.has(t.toLowerCase()))
-        // Deduplicate
-        .filter((t, i, arr) => arr.indexOf(t) === i)
-        .slice(0, 5);
-
-      const learningOutcome =
-        learningTopics.length > 0
-          ? `You'll learn: ${learningTopics.join(", ")}`
-          : (course.ai_tags || []).slice(0, 4).join(", ");
+      // Extract learning outcomes from video filenames (shared utility)
+      const learningOutcome = buildLearningOutcome(course.videos, course.ai_tags);
 
       return { ...course, relevanceScore: score, learningOutcome };
     });
@@ -510,6 +479,11 @@ export default function Personas() {
         <div className="guided-player-breakout">
           <GuidedPlayer
             courses={[watchingCourse]}
+            problemSummary={`New to UE5 — ${QUESTIONS[0].options.find((o) => o.value === answers.industry)?.label || "General"}, ${QUESTIONS[1].options.find((o) => o.value === answers.experience)?.label || ""}, wants to ${QUESTIONS[2].options.find((o) => o.value === answers.goal)?.label || "explore"}`}
+            pathSummary={{
+              path_summary: `A personalized learning path for ${generatedPath.persona.name}. This path covers foundational UE5 skills tailored to your background, starting with the essentials and building toward hands-on projects.`,
+              topics_covered: generatedPath.courses.map((c) => c.title || c.name),
+            }}
             onComplete={() => setWatchingCourse(null)}
             onExit={() => setWatchingCourse(null)}
           />

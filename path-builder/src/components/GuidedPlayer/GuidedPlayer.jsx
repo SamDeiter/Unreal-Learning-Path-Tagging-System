@@ -16,6 +16,7 @@ import CourseSidebar from "./CourseSidebar";
 import QuizCard from "./QuizCard";
 import TranscriptCards from "./TranscriptCards";
 import learningObjectives from "../../data/learning_objectives.json";
+import { extractLearningTopics } from "../../utils/videoTopicExtractor";
 import "./GuidedPlayer.css";
 
 /**
@@ -251,10 +252,32 @@ function IntroCard({
             <p className="path-summary-text">{pathSummary.path_summary}</p>
           </div>
         )}
+        {/* Topics covered chips */}
+        {pathSummary?.topics_covered?.length > 0 && (
+          <div className="path-topics-chips">
+            {pathSummary.topics_covered.slice(0, 6).map((topic, i) => (
+              <span key={i} className="topic-chip">
+                {(topic || "").replace(/_/g, " ")}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="course-list">
           {courses.slice(0, 5).map((course, i) => {
-            const objectives = learningObjectives[course.code] || [];
+            const staticObjectives = learningObjectives[course.code] || [];
             const videoTitle = course.videos?.[0]?.title || course.title || course.name;
+            // Auto-generate topics from video filenames when no static objectives
+            const autoTopics =
+              staticObjectives.length === 0 ? extractLearningTopics(course.videos, 4) : [];
+            // Use learningOutcome if set by Personas
+            const outcomeText = course.learningOutcome || "";
+            // Video stats
+            const videoCount = course.videos?.length || 0;
+            const totalSecs = (course.videos || []).reduce(
+              (s, v) => s + (v.duration_seconds || 0),
+              0
+            );
+            const durationMin = Math.round(totalSecs / 60);
             return (
               <div key={course.code || i} className="course-preview-item">
                 <span className="number">{i + 1}</span>
@@ -262,12 +285,35 @@ function IntroCard({
                   <span className="title">
                     {videoTitle?.replace(/\s+Part\s+[A-Z]$/i, "").trim()}
                   </span>
-                  {objectives.length > 0 && (
+                  {/* Course metadata: video count + duration */}
+                  {(videoCount > 0 || durationMin > 0) && (
+                    <span className="course-meta-line">
+                      {videoCount > 0 && `${videoCount} video${videoCount > 1 ? "s" : ""}`}
+                      {videoCount > 0 && durationMin > 0 && " · "}
+                      {durationMin > 0 && `${durationMin} min`}
+                    </span>
+                  )}
+                  {/* Static objectives from JSON */}
+                  {staticObjectives.length > 0 && (
                     <ul className="objective-list">
-                      {objectives.slice(0, 2).map((obj, j) => (
+                      {staticObjectives.slice(0, 2).map((obj, j) => (
                         <li key={j}>{obj}</li>
                       ))}
                     </ul>
+                  )}
+                  {/* Auto-generated topic chips from video filenames */}
+                  {autoTopics.length > 0 && (
+                    <div className="auto-topics">
+                      {autoTopics.map((topic, j) => (
+                        <span key={j} className="topic-chip small">
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* Learning outcome sentence from Personas */}
+                  {outcomeText && staticObjectives.length === 0 && autoTopics.length === 0 && (
+                    <p className="course-outcome">{outcomeText}</p>
                   )}
                 </div>
               </div>

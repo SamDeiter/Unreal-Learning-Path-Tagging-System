@@ -34,6 +34,7 @@ export function generatePathIntro({ problemSummary, courses, diagnosis }) {
     courseCount: courses.length,
     totalDuration,
     rootCauses: diagnosis?.root_causes || [],
+    courses,
   });
 
   return {
@@ -165,16 +166,15 @@ function calculateTotalDuration(courses) {
 function calculateCourseDuration(course) {
   if (!course) return 0;
 
-  // Try duration_seconds directly
-  if (course.duration_seconds) return course.duration_seconds;
-
-  // Try duration_minutes
-  if (course.duration_minutes) return course.duration_minutes * 60;
-
-  // Sum video durations
+  // Prefer summing individual video durations (most accurate)
   if (course.videos?.length) {
-    return course.videos.reduce((sum, v) => sum + (v.duration_seconds || 0), 0);
+    const videoSum = course.videos.reduce((sum, v) => sum + (v.duration_seconds || 0), 0);
+    if (videoSum > 0) return videoSum;
   }
+
+  // Fallback to course-level fields
+  if (course.duration_seconds) return course.duration_seconds;
+  if (course.duration_minutes) return course.duration_minutes * 60;
 
   return 0;
 }
@@ -210,7 +210,7 @@ function summarizeProblem(problemSummary) {
 /**
  * Build the intro text paragraph
  */
-function buildIntroText({ instructors, courseCount, totalDuration, rootCauses }) {
+function buildIntroText({ instructors, courseCount, totalDuration, rootCauses, courses }) {
   const parts = [];
 
   // Opening based on problem
@@ -220,6 +220,12 @@ function buildIntroText({ instructors, courseCount, totalDuration, rootCauses })
       `We've identified ${rootCauses.length} root cause${rootCauses.length > 1 ? "s" : ""} for your issue:`
     );
   }
+
+  // Count total videos across all courses
+  const totalVideos = (courses || []).reduce(
+    (sum, c) => sum + (c.videos?.length || 0),
+    0,
+  );
 
   // Instructor mention
   if (instructors.length === 1) {
@@ -231,7 +237,9 @@ function buildIntroText({ instructors, courseCount, totalDuration, rootCauses })
     const lastInstructor = names.pop();
     parts.push(`You'll learn from ${names.join(", ")} and ${lastInstructor}.`);
   } else {
-    parts.push(`You have ${courseCount} lesson${courseCount > 1 ? "s" : ""} to complete.`);
+    // No instructors found — provide a richer description
+    const videoInfo = totalVideos > 0 ? ` covering ${totalVideos} video${totalVideos > 1 ? "s" : ""}` : "";
+    parts.push(`You have ${courseCount} lesson${courseCount > 1 ? "s" : ""} to complete${videoInfo}.`);
   }
 
   // Duration
