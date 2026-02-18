@@ -252,15 +252,13 @@ function IntroCard({
             <p className="path-summary-text">{pathSummary.path_summary}</p>
           </div>
         )}
-        {/* Topics covered chips */}
+        {/* Courses in this path */}
         {pathSummary?.topics_covered?.length > 0 && (
-          <div className="path-topics-chips">
+          <ul className="path-topics-list">
             {pathSummary.topics_covered.slice(0, 6).map((topic, i) => (
-              <span key={i} className="topic-chip">
-                {(topic || "").replace(/_/g, " ")}
-              </span>
+              <li key={i}>{(topic || "").replace(/_/g, " ")}</li>
             ))}
-          </div>
+          </ul>
         )}
         <div className="course-list">
           {courses.slice(0, 5).map((course, i) => {
@@ -301,15 +299,13 @@ function IntroCard({
                       ))}
                     </ul>
                   )}
-                  {/* Auto-generated topic chips from video filenames */}
+                  {/* Auto-generated topics from video filenames */}
                   {autoTopics.length > 0 && (
-                    <div className="auto-topics">
+                    <ul className="auto-topics-list">
                       {autoTopics.map((topic, j) => (
-                        <span key={j} className="topic-chip small">
-                          {topic}
-                        </span>
+                        <li key={j}>{topic}</li>
                       ))}
-                    </div>
+                    </ul>
                   )}
                   {/* Learning outcome sentence from Personas */}
                   {outcomeText && staticObjectives.length === 0 && autoTopics.length === 0 && (
