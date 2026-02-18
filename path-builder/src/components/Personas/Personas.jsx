@@ -3,6 +3,7 @@ import { getAllPersonas, getPainPointMessaging } from "../../services/PersonaSer
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import { useTagData } from "../../context/TagDataContext";
 import { buildLearningOutcome } from "../../utils/videoTopicExtractor";
+import useOnboardingRAG from "../../hooks/useOnboardingRAG";
 import {
   Rocket,
   Clapperboard,
@@ -24,6 +25,7 @@ import {
   ArrowRight,
   Check,
   Sparkles,
+  Loader,
 } from "lucide-react";
 import "./Personas.css";
 
@@ -115,6 +117,12 @@ export default function Personas() {
   });
   const [generatedPath, setGeneratedPath] = useState(null);
 
+  // RAG pipeline hook
+  const { generateRAGPath, resetRAG, ragState, ragError, RAG_STATES } = useOnboardingRAG();
+  const isRAGLoading = [RAG_STATES.PLANNING, RAG_STATES.SEARCHING, RAG_STATES.ASSEMBLING].includes(
+    ragState
+  );
+
   const allPersonas = useMemo(() => getAllPersonas(), []);
 
   // Get detected persona based on answers
@@ -129,7 +137,51 @@ export default function Personas() {
     return allPersonas.find((p) => p.id === industryOption.persona);
   }, [answers.industry, allPersonas]);
 
-  // Generate the 10-hour path
+  // Build a persona string from the quiz answers for the RAG pipeline
+  const buildPersonaString = () => {
+    const industryLabel =
+      QUESTIONS[0].options.find((o) => o.value === answers.industry)?.label || answers.industry;
+    const experienceLabel =
+      QUESTIONS[1].options.find((o) => o.value === answers.experience)?.label || answers.experience;
+    const goalLabel =
+      QUESTIONS[2].options.find((o) => o.value === answers.goal)?.label || answers.goal;
+    return `Industry: ${industryLabel}. Experience: ${experienceLabel}. Goal: ${goalLabel}.`;
+  };
+
+  // Trigger the RAG pipeline, fall back to local scoring if it fails
+  const handleGeneratePath = async () => {
+    // Try RAG pipeline first
+    const personaStr = buildPersonaString();
+    const ragResult = await generateRAGPath(personaStr);
+
+    if (ragResult?.curriculum) {
+      // RAG succeeded — build path from curriculum modules
+      setGeneratedPath({
+        persona: detectedPersona,
+        courses: (ragResult.curriculum.modules || []).map((mod, idx) => ({
+          title: mod.title,
+          description: mod.description,
+          videoId: mod.videoId || "",
+          timestamp: mod.timestamp || 0,
+          citation: mod.citation || "",
+          order: idx + 1,
+          cumulativeTime: (idx + 1) * 20, // Estimate ~20 min per module
+          quickWin: idx < 2,
+          milestone: null,
+        })),
+        totalTime: (ragResult.curriculum.modules || []).length * 20,
+        messaging: getPainPointMessaging(detectedPersona),
+        isRAG: true,
+        archetype: ragResult.archetype || "unknown",
+      });
+      return;
+    }
+
+    // Fallback: use local scoring
+    generatePath();
+  };
+
+  // Generate the 10-hour path (local fallback)
   const generatePath = () => {
     if (!detectedPersona || !courses) return;
 
@@ -395,6 +447,7 @@ export default function Personas() {
     setStep(0);
     setAnswers({ industry: null, experience: null, goal: null });
     setGeneratedPath(null);
+    resetRAG();
   };
 
   // Check if all questions answered
@@ -411,7 +464,37 @@ export default function Personas() {
         </p>
       </header>
 
-      {!generatedPath ? (
+      {isRAGLoading ? (
+        /* RAG Pipeline Loading State */
+        <section className="quiz-section rag-loading">
+          <div className="rag-loader">
+            <Loader size={40} className="spin-icon" />
+            <h2>
+              {ragState === RAG_STATES.PLANNING && "Analyzing your profile..."}
+              {ragState === RAG_STATES.SEARCHING && "Searching course library..."}
+              {ragState === RAG_STATES.ASSEMBLING && "Building your curriculum..."}
+            </h2>
+            <p className="rag-loader-sub">
+              {ragState === RAG_STATES.PLANNING && "Our AI is understanding your learning goals"}
+              {ragState === RAG_STATES.SEARCHING && "Finding the most relevant video segments"}
+              {ragState === RAG_STATES.ASSEMBLING && "Crafting a personalized learning path"}
+            </p>
+            <div className="rag-progress-bar">
+              <div
+                className="rag-progress-fill"
+                style={{
+                  width:
+                    ragState === RAG_STATES.PLANNING
+                      ? "33%"
+                      : ragState === RAG_STATES.SEARCHING
+                        ? "66%"
+                        : "90%",
+                }}
+              />
+            </div>
+          </div>
+        </section>
+      ) : !generatedPath ? (
         <>
           {/* Progress indicator */}
           <div className="quiz-progress">
@@ -424,6 +507,13 @@ export default function Personas() {
               </div>
             ))}
           </div>
+
+          {/* RAG error banner */}
+          {ragError && (
+            <div className="rag-error-banner">
+              ⚠️ AI personalization unavailable — using local recommendations instead.
+            </div>
+          )}
 
           {/* Current question */}
           <section className="quiz-section">
@@ -454,7 +544,11 @@ export default function Personas() {
                 </button>
               )}
               {allAnswered && (
-                <button className="quiz-generate" onClick={generatePath}>
+                <button
+                  className="quiz-generate"
+                  onClick={handleGeneratePath}
+                  disabled={isRAGLoading}
+                >
                   Generate My Path <ArrowRight size={16} />
                 </button>
               )}

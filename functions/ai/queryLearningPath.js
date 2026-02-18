@@ -721,13 +721,17 @@ const FALLBACK_CURRICULUM = {
 };
 
 /**
- * Onboarding Flow — 3-Stage RAG Pipeline
- * 1. Planner:   Extract searchQueries + archetype from persona
- * 2. Retriever: Fetch relevant passages from knowledge base (mocked)
- * 3. Assembler: Build grounded curriculum citing specific videos/timestamps
+ * Onboarding Flow — 3-Stage RAG Pipeline (Client-Side Hybrid)
+ *
+ * Supports three modes via data.onboardingStep:
+ *   "plan"     → Planner only: returns searchQueries + archetype
+ *   "assemble" → Assembler only: builds curriculum from client-provided passages
+ *   (default)  → Full pipeline (backward compatible)
+ *
+ * The client orchestrates:  CF plan → local search → CF assemble
  */
 async function handleOnboarding(data, context, apiKey) {
-  const { persona } = data;
+  const { persona, onboardingStep } = data;
   const userId = context.auth?.uid || "anonymous";
   const trace = createTrace(userId, "onboarding_gen");
 
@@ -744,7 +748,91 @@ async function handleOnboarding(data, context, apiKey) {
   }
 
   try {
-    // ── STAGE 1: PLANNER ── Extract search queries + archetype ─────
+    // ────────────────────────────────────────────────────────────────
+    // STEP "plan" — Planner only (returns queries + archetype)
+    // ────────────────────────────────────────────────────────────────
+    if (onboardingStep === "plan") {
+      const plannerResult = await runStage({
+        stage: "onboarding_planner",
+        systemPrompt: ONBOARDING_PLANNER_PROMPT,
+        userPrompt: `User Persona: "${String(persona).slice(0, 500)}"`,
+        apiKey,
+        trace,
+        cacheParams: { persona: String(persona).slice(0, 200), mode: "onboarding_planner" },
+      });
+
+      trace.toLog();
+
+      if (!plannerResult.success) {
+        console.warn(JSON.stringify({ severity: "WARNING", message: "onboarding_planner_failed", error: plannerResult.error }));
+        return { success: false, mode: "onboarding", step: "plan", error: "Planner failed" };
+      }
+
+      return {
+        success: true,
+        mode: "onboarding",
+        step: "plan",
+        prompt_version: PROMPT_VERSION,
+        searchQueries: plannerResult.data.searchQueries || [],
+        archetype: plannerResult.data.archetype || "unknown",
+      };
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    // STEP "assemble" — Assembler only (takes client-provided passages)
+    // ────────────────────────────────────────────────────────────────
+    if (onboardingStep === "assemble") {
+      const { passages = [], archetype = "unknown" } = data;
+
+      // Build context block from client-provided passages
+      let contextBlock = "";
+      if (passages.length > 0) {
+        contextBlock = passages
+          .map((p, i) => `[${i + 1}] Video: "${p.videoTitle || p.courseTitle || "Unknown"}" (Course: ${p.courseCode || "unknown"}, ID: ${p.videoId || "unknown"}, Timestamp: ${p.timestamp || "0:00"})\n${p.text || p.preview || ""}`)
+          .join("\n\n");
+      } else {
+        contextBlock = "No specific video content was retrieved. Create a general curriculum based on the archetype.";
+      }
+
+      const assemblerResult = await runStage({
+        stage: "onboarding_path",
+        systemPrompt: ONBOARDING_ASSEMBLER_PROMPT,
+        userPrompt: `Create a path for a ${archetype}.\n\nUser says: "${String(persona).slice(0, 300)}"\n\nAvailable Content:\n${contextBlock}`,
+        apiKey,
+        trace,
+        cacheParams: { persona: String(persona).slice(0, 200), mode: "onboarding_assembler" },
+      });
+
+      trace.toLog();
+
+      logApiUsage(userId, {
+        model: "gemini-2.0-flash",
+        type: "onboarding_rag",
+        archetype,
+        passageCount: passages.length,
+      });
+
+      const curriculum = assemblerResult.success && assemblerResult.data
+        ? assemblerResult.data
+        : FALLBACK_CURRICULUM;
+
+      return {
+        success: true,
+        mode: "onboarding",
+        step: "assemble",
+        prompt_version: PROMPT_VERSION,
+        archetype,
+        curriculum,
+        fallback: !assemblerResult.success,
+        message: assemblerResult.success
+          ? `Your personalized First Hour path is ready — archetype: ${archetype}`
+          : "Generated a general path — retrieval had limited results.",
+      };
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    // DEFAULT — Full pipeline (backward compatible)
+    // ────────────────────────────────────────────────────────────────
     const plannerResult = await runStage({
       stage: "onboarding_planner",
       systemPrompt: ONBOARDING_PLANNER_PROMPT,
@@ -769,10 +857,8 @@ async function handleOnboarding(data, context, apiKey) {
 
     const { searchQueries, archetype } = plannerResult.data;
 
-    // ── STAGE 2: RETRIEVER ── Fetch relevant passages ──────────────
     const passages = await fetchOnboardingContext(searchQueries || [], data);
 
-    // Build context block for the Assembler
     let contextBlock = "";
     if (passages.length > 0) {
       contextBlock = passages
@@ -782,7 +868,6 @@ async function handleOnboarding(data, context, apiKey) {
       contextBlock = "No specific video content was retrieved. Create a general curriculum based on the archetype.";
     }
 
-    // ── STAGE 3: ASSEMBLER ── Build grounded curriculum ────────────
     const assemblerResult = await runStage({
       stage: "onboarding_path",
       systemPrompt: ONBOARDING_ASSEMBLER_PROMPT,
@@ -792,7 +877,6 @@ async function handleOnboarding(data, context, apiKey) {
       cacheParams: { persona: String(persona).slice(0, 200), mode: "onboarding_assembler" },
     });
 
-    // ── Finalize ──────────────────────────────────────────────────
     trace.toLog();
 
     logApiUsage(userId, {
