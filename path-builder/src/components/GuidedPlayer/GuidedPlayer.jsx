@@ -359,6 +359,24 @@ function VideoStage({
 }) {
   const driveId = currentVideo?.drive_id;
 
+  // Extract topic from current video filename (e.g. "100.01_09_ProjectBrowser_55.mp4" → "Project Browser")
+  const videoName = (currentVideo?.name || "").replace(/\.[^.]+$/, "");
+  const videoTopic = videoName
+    .split("_")
+    .filter((p) => p.length > 3 && !/^[\d.]+$/.test(p) && !/^\d{1,3}$/.test(p))
+    .reduce((best, p) => (p.length > best.length ? p : best), "")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
+
+  // Gather key learning points for this video
+  const focusPoints = [];
+  if (course.gemini_outcomes) {
+    focusPoints.push(...course.gemini_outcomes.slice(0, 3));
+  }
+  if (course.learningOutcome && focusPoints.length < 3) {
+    focusPoints.push(course.learningOutcome);
+  }
+
   return (
     <div className="video-stage">
       <div className="video-header">
@@ -368,7 +386,24 @@ function VideoStage({
             Video {videoIndex + 1} of {currentVideos.length}
           </span>
         )}
-        {course.gemini_outcomes?.[0] && <p className="objective">{course.gemini_outcomes[0]}</p>}
+      </div>
+      {/* Focus callout — what to pay attention to */}
+      <div className="video-focus-callout">
+        {videoTopic && videoTopic.length > 3 && (
+          <div className="focus-topic">
+            <span className="focus-icon">🎯</span>
+            <span className="focus-label">
+              Focus on: <strong>{videoTopic}</strong>
+            </span>
+          </div>
+        )}
+        {focusPoints.length > 0 && (
+          <ul className="focus-points">
+            {focusPoints.map((point, i) => (
+              <li key={i}>{point}</li>
+            ))}
+          </ul>
+        )}
       </div>
       <div className="video-container">
         {driveId ? (
