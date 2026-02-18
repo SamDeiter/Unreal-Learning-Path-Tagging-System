@@ -70,11 +70,19 @@ export default function ClarifyStep({
             <span className="clarify-option-text">{option}</span>
           </button>
         ))}
+        <button
+          className="clarify-option-btn clarify-option-idk"
+          onClick={() => onAnswer("I'm not sure — show me foundational content on this topic")}
+          disabled={isLoading}
+        >
+          <span className="clarify-option-letter">🤷</span>
+          <span className="clarify-option-text">I&apos;m not sure</span>
+        </button>
       </div>
 
       {whyAsking && (
         <p className="clarify-why">
-          <span className="clarify-why-label">Why we're asking:</span> {whyAsking}
+          <span className="clarify-why-label">Why we&apos;re asking:</span> {whyAsking}
         </p>
       )}
 

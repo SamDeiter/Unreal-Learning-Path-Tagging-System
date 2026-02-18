@@ -449,6 +449,50 @@ function VideoStage({
           return pts;
         })();
 
+  // ── Per-step AI Guide context ───────────────────────────────────
+  // Merge the path-level microLesson with step-specific focus derived
+  // from the current video's topic and RAG transcript segments so the
+  // AI Guide panel shows contextual content per step, not the same
+  // static content everywhere.
+  const stepMicroLesson = useMemo(() => {
+    if (!microLesson) return null;
+
+    // Gather step-specific learning points
+    const stepPoints = [...focusPoints];
+    const stepTopic = videoTopic && videoTopic.length > 3 ? videoTopic : course.title;
+
+    // Filter quick_fix steps to ones relevant to THIS video's topic
+    const topicLower = (stepTopic || "").toLowerCase();
+    const courseTags = [
+      ...(course.canonical_tags || []),
+      ...(course.ai_tags || []),
+      ...(course.gemini_system_tags || []),
+    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+
+    const filteredSteps = (microLesson.quick_fix?.steps || []).filter((step) => {
+      const stepLower = step.toLowerCase();
+      // Keep step if it mentions the video topic or any course tag
+      return (
+        stepLower.includes(topicLower) ||
+        courseTags.some((tag) => tag.length > 3 && stepLower.includes(tag))
+      );
+    });
+
+    // Use filtered steps if we got any, otherwise show all (fallback)
+    const quickFixSteps =
+      filteredSteps.length > 0 ? filteredSteps : microLesson.quick_fix?.steps || [];
+
+    return {
+      ...microLesson,
+      step_focus: {
+        topic: stepTopic,
+        points: stepPoints,
+        isFiltered: filteredSteps.length > 0,
+      },
+      quick_fix: microLesson.quick_fix ? { ...microLesson.quick_fix, steps: quickFixSteps } : null,
+    };
+  }, [microLesson, focusPoints, videoTopic, course]);
+
   return (
     <div className="video-stage">
       <div className="video-header">
@@ -511,7 +555,7 @@ function VideoStage({
           🔗 Video not loading? Open in Google Drive
         </a>
       )}
-      {microLesson && <AiGuidePanel microLesson={microLesson} courses={courses} />}
+      {stepMicroLesson && <AiGuidePanel microLesson={stepMicroLesson} courses={courses} />}
       <div className="video-controls">
         <button className="complete-btn" onClick={onVideoComplete}>
           {hasMoreVideos ? "Mark Complete & Continue →" : "Complete & Try Exercise →"}
@@ -532,6 +576,7 @@ function AiGuidePanel({ microLesson, courses: _courses }) {
   const quickFix = microLesson?.quick_fix;
   const whyItWorks = microLesson?.why_it_works;
   const relatedSituations = microLesson?.related_situations;
+  const stepFocus = microLesson?.step_focus;
 
   const toggleSection = (section) => {
     setExpandedSection((prev) => (prev === section ? null : section));
@@ -547,17 +592,41 @@ function AiGuidePanel({ microLesson, courses: _courses }) {
     <div className={`gp-ai-lesson ${lessonOpen ? "open" : "collapsed"}`}>
       <button className="gp-ai-lesson-toggle" onClick={() => setLessonOpen((v) => !v)}>
         <span className="gp-ai-badge">✨ AI Guide</span>
-        <span className="gp-ai-subtitle">What to look for</span>
+        <span className="gp-ai-subtitle">
+          {stepFocus?.topic ? `Focus: ${stepFocus.topic}` : "What to look for"}
+        </span>
         <span className="gp-ai-chevron">{lessonOpen ? "▾" : "▸"}</span>
       </button>
 
       {lessonOpen && (
         <div className="gp-ai-body">
+          {/* Step Focus — per-video learning points */}
+          {stepFocus?.points?.length > 0 && (
+            <div className={`gp-ai-section ${expandedSection === "step_focus" ? "expanded" : ""}`}>
+              <button className="gp-ai-section-toggle" onClick={() => toggleSection("step_focus")}>
+                <span>🎯 Focus for This Video</span>
+                <span className="gp-ai-section-chevron">
+                  {expandedSection === "step_focus" ? "▾" : "▸"}
+                </span>
+              </button>
+              {expandedSection === "step_focus" && (
+                <ul className="gp-ai-steps">
+                  {stepFocus.points.map((point, i) => (
+                    <li key={i}>{renderTextWithCitations(point)}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
           {/* Quick Fix Steps */}
           {quickFix && (
             <div className={`gp-ai-section ${expandedSection === "quick_fix" ? "expanded" : ""}`}>
               <button className="gp-ai-section-toggle" onClick={() => toggleSection("quick_fix")}>
                 <span>⚡ {quickFix.title || "Quick Fix"}</span>
+                {stepFocus?.isFiltered && (
+                  <span className="gp-ai-filtered-tag">filtered for this step</span>
+                )}
                 <span className="gp-ai-section-chevron">
                   {expandedSection === "quick_fix" ? "▾" : "▸"}
                 </span>
