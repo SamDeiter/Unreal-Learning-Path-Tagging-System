@@ -4,7 +4,7 @@
  * State, effects, and handlers live in useGuidedPlayer hook.
  * Stage-specific cards are extracted to sub-components.
  */
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import useGuidedPlayer, { STAGES } from "../../hooks/useGuidedPlayer";
 import docLinks from "../../data/doc_links.json";
@@ -345,6 +345,15 @@ function IntroCard({
   );
 }
 
+/** Normalize a video key for fuzzy matching (shared with TranscriptCards) */
+function normalizeVideoKey(s) {
+  return (s || "")
+    .replace(/\.mp4$/i, "")
+    .replace(/^[\d._]+/, "")
+    .replace(/[\s_]+/g, "")
+    .toLowerCase();
+}
+
 /** VideoStage — video player with transcript cards and controls */
 function VideoStage({
   course,
@@ -359,7 +368,19 @@ function VideoStage({
 }) {
   const driveId = currentVideo?.drive_id;
 
-  // Extract topic from current video filename (e.g. "100.01_09_ProjectBrowser_55.mp4" → "Project Browser")
+  // ── RAG-powered focus points from transcript_segments.json ──
+  const [transcriptSegments, setTranscriptSegments] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    import("../../data/transcript_segments.json").then((mod) => {
+      if (!cancelled) setTranscriptSegments(mod.default || mod);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Extract topic from current video filename as a fallback label
   const videoName = (currentVideo?.name || "").replace(/\.[^.]+$/, "");
   const videoTopic = videoName
     .split("_")
@@ -368,14 +389,57 @@ function VideoStage({
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
 
-  // Gather key learning points for this video
-  const focusPoints = [];
-  if (course.gemini_outcomes) {
-    focusPoints.push(...course.gemini_outcomes.slice(0, 3));
-  }
-  if (course.learningOutcome && focusPoints.length < 3) {
-    focusPoints.push(course.learningOutcome);
-  }
+  // Match transcript segments for the current video using courseCode + videoName
+  const ragFocusPoints = useMemo(() => {
+    if (!transcriptSegments || !course?.code) return [];
+    const courseTranscripts = transcriptSegments[course.code];
+    if (!courseTranscripts) return [];
+
+    const normalizedTitle = normalizeVideoKey(currentVideo?.name || currentVideo?.title || "");
+
+    // Exact match, then partial match (same logic as TranscriptCards)
+    let segments = null;
+    for (const [key, segs] of Object.entries(courseTranscripts)) {
+      if (normalizeVideoKey(key) === normalizedTitle) {
+        segments = segs;
+        break;
+      }
+    }
+    if (!segments) {
+      for (const [key, segs] of Object.entries(courseTranscripts)) {
+        const nk = normalizeVideoKey(key);
+        if (nk.includes(normalizedTitle) || normalizedTitle.includes(nk)) {
+          segments = segs;
+          break;
+        }
+      }
+    }
+    if (!segments || segments.length === 0) return [];
+
+    // Dedupe summaries and return the first 4 unique ones
+    const seen = new Set();
+    const points = [];
+    for (const seg of segments) {
+      const summary = (seg.summary || "").trim();
+      if (summary && !seen.has(summary.toLowerCase())) {
+        seen.add(summary.toLowerCase());
+        points.push(summary);
+        if (points.length >= 4) break;
+      }
+    }
+    return points;
+  }, [transcriptSegments, course?.code, currentVideo?.name, currentVideo?.title]);
+
+  // Fallback: use gemini_outcomes + learningOutcome if no RAG data
+  const focusPoints =
+    ragFocusPoints.length > 0
+      ? ragFocusPoints
+      : (() => {
+          const pts = [];
+          if (course.gemini_outcomes) pts.push(...course.gemini_outcomes.slice(0, 3));
+          if (course.learningOutcome && pts.length < 3) pts.push(course.learningOutcome);
+          return pts;
+        })();
 
   return (
     <div className="video-stage">
@@ -387,7 +451,7 @@ function VideoStage({
           </span>
         )}
       </div>
-      {/* Focus callout — what to pay attention to */}
+      {/* Focus callout — what to pay attention to (RAG-powered) */}
       <div className="video-focus-callout">
         {videoTopic && videoTopic.length > 3 && (
           <div className="focus-topic">
@@ -398,11 +462,18 @@ function VideoStage({
           </div>
         )}
         {focusPoints.length > 0 && (
-          <ul className="focus-points">
-            {focusPoints.map((point, i) => (
-              <li key={i}>{point}</li>
-            ))}
-          </ul>
+          <>
+            <p className="focus-subheading">
+              {ragFocusPoints.length > 0
+                ? "📖 What you'll learn in this video:"
+                : "📌 Key points to watch for:"}
+            </p>
+            <ul className="focus-points">
+              {focusPoints.map((point, i) => (
+                <li key={i}>{point}</li>
+              ))}
+            </ul>
+          </>
         )}
       </div>
       <div className="video-container">
