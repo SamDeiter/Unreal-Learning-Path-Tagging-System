@@ -271,6 +271,15 @@ JSON:{"question":"str","options":["str"],"whyAsking":"str (explain what this inf
     });
 
     if (clarifyResult.success && clarifyResult.data?.question) {
+      // Analytics: log clarification routing decision (fire-and-forget)
+      logApiUsage(userId, {
+        type: "confidence_routing",
+        outcome: "clarify",
+        score: confidence.score,
+        reasons: confidence.reasons,
+        round: clarifyRound + 1,
+        queryLength: (query || "").length,
+      });
       trace.toLog();
       return {
         success: true,
@@ -321,6 +330,14 @@ JSON:{"intent_id":"search_strategy","user_role":"search","goal":"search","proble
       });
 
       if (searchQueryResult.success && searchQueryResult.data?.searchQueries?.length > 0) {
+        // Analytics: log agentic RAG routing decision (fire-and-forget)
+        logApiUsage(userId, {
+          type: "confidence_routing",
+          outcome: "agentic_rag",
+          score: confidence.score,
+          reasons: confidence.reasons,
+          queryLength: (query || "").length,
+        });
         trace.toLog();
         return {
           success: true,
@@ -531,6 +548,15 @@ JSON:{
   if (answerData) {
     usageLogs.push(logApiUsage(userId, { model: "gemini-2.0-flash", type: "answer_data", estimatedTokens: 300 }));
   }
+  // Analytics: log direct answer routing decision
+  usageLogs.push(logApiUsage(userId, {
+    type: "confidence_routing",
+    outcome: "direct_answer",
+    score: confidence.score,
+    reasons: confidence.reasons,
+    clarifyRoundsCompleted: clarifyRound,
+    queryLength: (query || "").length,
+  }));
   await Promise.all(usageLogs);
 
   if (!validationData.approved) {
