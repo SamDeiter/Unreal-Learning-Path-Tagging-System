@@ -58,9 +58,10 @@ function detectMode(data) {
  * @param {object} intent - Extracted intent
  * @param {object} caseReport - Optional structured case report
  * @param {Array} passages - Retrieved RAG passages
+ * @param {Array} conversationHistory - Previous Q&A turns from multi-turn
  * @returns {{ score: number, reasons: string[] }}
  */
-function computeConfidence(intent, caseReport, passages) {
+function computeConfidence(intent, caseReport, passages, conversationHistory) {
   let score = 0;
   const reasons = [];
 
@@ -112,6 +113,14 @@ function computeConfidence(intent, caseReport, passages) {
     reasons.push("decent_rag_matches");
   }
 
+  // Multi-turn: each completed Q&A round adds confidence
+  const history = Array.isArray(conversationHistory) ? conversationHistory : [];
+  const completedRounds = history.filter((t) => t.role === "user").length;
+  if (completedRounds > 0) {
+    score += Math.min(completedRounds * 15, 45); // 15 pts per round, max 45
+    reasons.push(`multi_turn_rounds_${completedRounds}`);
+  }
+
   return { score, reasons };
 }
 
@@ -119,10 +128,21 @@ function computeConfidence(intent, caseReport, passages) {
  * Problem-First Flow:
  * Intent → Confidence Check → (Clarification OR Full Pipeline) → Cart
  */
+const MAX_CLARIFY_ROUNDS = 3;
+
 async function handleProblemFirst(data, context, apiKey) {
-  const { query: rawQuery, personaHint, detectedTagIds, retrievedContext, caseReport } = data;
+  const { query: rawQuery, personaHint, detectedTagIds, retrievedContext, caseReport, conversationHistory: rawHistory } = data;
   const userId = context.auth?.uid || "anonymous";
   const trace = createTrace(userId, "problem-first");
+
+  // Sanitize conversation history (max 6 entries = 3 Q&A rounds)
+  const conversationHistory = Array.isArray(rawHistory)
+    ? rawHistory.slice(0, MAX_CLARIFY_ROUNDS * 2).map((t) => ({
+        role: String(t.role || "user").slice(0, 10),
+        content: String(t.content || "").slice(0, 500),
+      }))
+    : [];
+  const clarifyRound = conversationHistory.filter((t) => t.role === "user").length;
 
   // Security: sanitize and validate input
   const validation = sanitizeAndValidate(rawQuery);
@@ -209,21 +229,29 @@ JSON:{"intent_id":"intent_<uuid>","user_role":"str","goal":"str","problem_descri
   }
   const intent = intentResult.data;
 
-  // ── Step 1.5: Confidence Check ──────────────────────────────────
-  const confidence = computeConfidence(intent, safeCase, passages);
+  // ── Step 1.5: Confidence Check (multi-turn aware) ───────────────
+  const confidence = computeConfidence(intent, safeCase, passages, conversationHistory);
 
-  if (confidence.score < 40) {
-    // Low confidence → ask exactly ONE clarifying question
+  if (confidence.score < 40 && clarifyRound < MAX_CLARIFY_ROUNDS) {
+    // Low confidence + haven't hit max rounds → ask a clarifying question
+    // Build conversation context for Gemini so it doesn't repeat questions
+    let historyContext = "";
+    if (conversationHistory.length > 0) {
+      historyContext = "\n\nPREVIOUS CONVERSATION (do NOT repeat these questions):\n" +
+        conversationHistory.map((t) => `${t.role === "assistant" ? "You asked" : "User answered"}: ${t.content}`).join("\n");
+    }
+
     const clarifyResult = await runStage({
-      stage: "intent", // Re-use intent stage schema loosely; we extract question from response
+      stage: "intent",
       systemPrompt:
         UE5_GUARDRAIL +
-        `You are a UE5 expert triaging a vague problem report. You need ONE specific piece of information to diagnose the issue accurately. Ask exactly ONE question with 3-4 multiple-choice options.
+        `You are a UE5 expert triaging a problem report. You need ONE specific piece of information to diagnose the issue accurately. Ask exactly ONE question with 3-4 multiple-choice options.
+${conversationHistory.length > 0 ? "IMPORTANT: The user has already answered previous questions. Ask about something DIFFERENT that will help narrow down the diagnosis further. Do NOT repeat any previous questions." : ""}
 JSON:{"question":"str","options":["str"],"whyAsking":"str (explain what this info helps diagnose)","intent_id":"clarify","user_role":"student","goal":"clarification","problem_description":"needs more info","systems":[],"constraints":[]}`,
-      userPrompt: `Problem: "${query}"${safeCase?.errorStrings?.length ? `\nErrors: ${safeCase.errorStrings.join("; ")}` : ""}${intent.systems?.length ? `\nDetected systems: ${intent.systems.join(", ")}` : ""}`,
+      userPrompt: `Problem: "${query}"${safeCase?.errorStrings?.length ? `\nErrors: ${safeCase.errorStrings.join("; ")}` : ""}${intent.systems?.length ? `\nDetected systems: ${intent.systems.join(", ")}` : ""}${historyContext}`,
       apiKey,
       trace,
-      cacheParams: null, // Don't cache clarification requests
+      cacheParams: null,
     });
 
     if (clarifyResult.success && clarifyResult.data?.question) {
@@ -239,6 +267,9 @@ JSON:{"question":"str","options":["str"],"whyAsking":"str (explain what this inf
         query,
         caseReport: safeCase,
         confidence: { score: confidence.score, reasons: confidence.reasons },
+        clarifyRound: clarifyRound + 1,
+        maxClarifyRounds: MAX_CLARIFY_ROUNDS,
+        conversationHistory,
       };
     }
     // If clarification generation failed, fall through to best-effort answer

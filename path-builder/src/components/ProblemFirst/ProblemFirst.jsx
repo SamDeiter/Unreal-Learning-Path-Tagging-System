@@ -75,6 +75,9 @@ export default function ProblemFirst() {
           onAnswer={handleClarifyAnswer}
           onSkip={handleClarifySkip}
           isLoading={false}
+          clarifyRound={clarifyData.clarifyRound || 1}
+          maxClarifyRounds={clarifyData.maxClarifyRounds || 3}
+          conversationHistory={clarifyData.conversationHistory || []}
         />
       )}
 

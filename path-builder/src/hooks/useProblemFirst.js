@@ -58,6 +58,7 @@ export default function useProblemFirst() {
   const [caseReport, setCaseReport] = useState(null);
   const [isRerunning, setIsRerunning] = useState(false);
   const [lastInputData, setLastInputData] = useState(null);
+  const [conversationHistory, setConversationHistory] = useState([]);
 
   // ── Derived ──
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
@@ -409,6 +410,7 @@ export default function useProblemFirst() {
             personaHint: inputData.personaHint,
             retrievedContext: retrievedPassages.slice(0, 8),
             caseReport: activeCaseReport || undefined,
+            conversationHistory: inputData._conversationHistory || conversationHistory,
           });
 
           if (!result.data.success && result.data.error === "off_topic") {
@@ -421,12 +423,20 @@ export default function useProblemFirst() {
           }
 
           if (result.data.responseType === "NEEDS_CLARIFICATION") {
+            // Store the assistant's question in conversation history
+            setConversationHistory((prev) => [
+              ...prev,
+              { role: "assistant", content: result.data.question },
+            ]);
             setClarifyData({
               question: result.data.question,
               options: result.data.options || [],
               whyAsking: result.data.whyAsking || "",
               query: result.data.query,
               caseReport: result.data.caseReport,
+              clarifyRound: result.data.clarifyRound || 1,
+              maxClarifyRounds: result.data.maxClarifyRounds || 3,
+              conversationHistory: result.data.conversationHistory || [],
             });
             setStage(STAGES.CLARIFYING);
             return;
@@ -566,7 +576,7 @@ export default function useProblemFirst() {
         setStage(STAGES.ERROR);
       }
     },
-    [courses, getDetectedPersona, clearCart, caseReport, answerData, _buildBlendedPathForDiagnosis]
+    [courses, getDetectedPersona, clearCart, caseReport, answerData, _buildBlendedPathForDiagnosis, conversationHistory]
   );
 
   // ──────────── UI Handlers ────────────
@@ -582,24 +592,43 @@ export default function useProblemFirst() {
     setClarifyData(null);
     setCaseReport(null);
     setIsRerunning(false);
+    setConversationHistory([]);
   }, []);
 
   const handleClarifyAnswer = useCallback(
     (answer) => {
       if (!lastInputData) return;
+      // Push user's answer into conversation history
+      const updatedHistory = [
+        ...conversationHistory,
+        { role: "user", content: answer },
+      ];
+      setConversationHistory(updatedHistory);
+
+      // Re-submit with full conversation history (not string-append)
       const augmentedInput = {
         ...lastInputData,
-        query: `${lastInputData.query} (${answer})`,
+        _conversationHistory: updatedHistory,
       };
       handleSubmit(augmentedInput, caseReport);
     },
-    [lastInputData, caseReport, handleSubmit]
+    [lastInputData, caseReport, handleSubmit, conversationHistory]
   );
 
   const handleClarifySkip = useCallback(() => {
     if (!lastInputData) return;
-    handleSubmit(lastInputData, caseReport);
-  }, [lastInputData, caseReport, handleSubmit]);
+    // Skip clarification — force best-effort by sending max-round history
+    const skipHistory = [
+      ...conversationHistory,
+      { role: "user", content: "(skipped — proceed with best effort)" },
+    ];
+    setConversationHistory(skipHistory);
+    const augmentedInput = {
+      ...lastInputData,
+      _conversationHistory: skipHistory,
+    };
+    handleSubmit(augmentedInput, caseReport);
+  }, [lastInputData, caseReport, handleSubmit, conversationHistory]);
 
   const handleFeedback = useCallback(
     (feedback) => {
