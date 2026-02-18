@@ -1014,64 +1014,81 @@ export default function ProblemFirst() {
 
       {stage === STAGES.GUIDED &&
         (() => {
-          // Track which doc item gets the micro-lesson override (only the first one)
-          let docIndex = 0;
+          // Track micro-lesson steps for the first doc item
           const microLessonSteps = diagnosisData?.microLesson?.quick_fix?.steps;
           return (
             <GuidedPlayer
-              courses={cart.map((item) => {
-                const itemType = item.type || "video";
+              courses={(() => {
+                // Group same-course cart items so videos play in original order
+                const courseGroups = new Map(); // courseCode → { course, videos[] }
+                const orderedKeys = []; // preserve first-seen order
 
-                // Doc or YouTube → reading step pseudo-course
-                if (itemType === "doc" || itemType === "youtube") {
-                  const isFirstDoc = docIndex === 0;
-                  docIndex++;
-                  return {
-                    code: item.itemId || item.driveId || `${itemType}_${item.url}`,
-                    title: item.title,
-                    _readingStep: true,
-                    _resourceType: itemType,
-                    _description: item.description || "",
-                    _keySteps:
-                      isFirstDoc && microLessonSteps?.length > 0
-                        ? microLessonSteps
-                        : item.keyTakeaways || item.keySteps || [],
-                    _seeAlso: item.seeAlso || [],
-                    _url: item.url,
-                    _tier: item.tier,
-                    _channel: item.channel || item.channelName,
-                    _channelTrust: item.channelTrust,
-                    _subsystem: item.subsystem,
-                    _topics: item.topics || [],
-                    _sections: item.sections || [],
-                    _chapters: item.chapters || [],
-                    _readTimeMinutes: item.readTimeMinutes || item.durationMinutes || 10,
-                    videos: [],
-                  };
-                }
+                for (const item of cart) {
+                  const itemType = item.type || "video";
 
-                // Video → normal course mapping (existing logic)
-                const fullCourse = courses.find((c) => c.code === item.courseCode);
-                if (fullCourse) {
-                  return {
-                    ...fullCourse,
-                    videos: [
-                      {
-                        drive_id: item.driveId,
+                  // Doc or YouTube → reading step pseudo-course (standalone)
+                  if (itemType === "doc" || itemType === "youtube") {
+                    const isFirstDoc =
+                      orderedKeys.filter((k) => k.startsWith("_doc_")).length === 0;
+                    const key = `_doc_${item.itemId || item.url || item.driveId}`;
+                    orderedKeys.push(key);
+                    courseGroups.set(key, {
+                      course: {
+                        code: item.itemId || item.driveId || `${itemType}_${item.url}`,
                         title: item.title,
-                        duration_seconds: item.duration,
+                        _readingStep: true,
+                        _resourceType: itemType,
+                        _description: item.description || "",
+                        _keySteps:
+                          isFirstDoc && microLessonSteps?.length > 0
+                            ? microLessonSteps
+                            : item.keyTakeaways || item.keySteps || [],
+                        _seeAlso: item.seeAlso || [],
+                        _url: item.url,
+                        _tier: item.tier,
+                        _channel: item.channel || item.channelName,
+                        _channelTrust: item.channelTrust,
+                        _subsystem: item.subsystem,
+                        _topics: item.topics || [],
+                        _sections: item.sections || [],
+                        _chapters: item.chapters || [],
+                        _readTimeMinutes: item.readTimeMinutes || item.durationMinutes || 10,
+                        videos: [],
                       },
-                    ],
-                  };
+                    });
+                    continue;
+                  }
+
+                  // Video → group by courseCode
+                  const cKey = item.courseCode;
+                  if (!courseGroups.has(cKey)) {
+                    const fullCourse = courses.find((c) => c.code === cKey);
+                    orderedKeys.push(cKey);
+                    courseGroups.set(cKey, {
+                      course: fullCourse
+                        ? { ...fullCourse, videos: [] }
+                        : { code: cKey, title: item.courseName, videos: [] },
+                      videos: [],
+                    });
+                  }
+                  courseGroups.get(cKey).videos.push({
+                    drive_id: item.driveId,
+                    title: item.title,
+                    duration_seconds: item.duration,
+                    _videoIndex: item.videoIndex ?? 999,
+                  });
                 }
-                return {
-                  code: item.courseCode,
-                  title: item.courseName,
-                  videos: [
-                    { drive_id: item.driveId, title: item.title, duration_seconds: item.duration },
-                  ],
-                };
-              })}
+
+                // Sort videos within each course by original index, then attach
+                return orderedKeys.map((key) => {
+                  const group = courseGroups.get(key);
+                  if (group.videos?.length > 0) {
+                    group.videos.sort((a, b) => a._videoIndex - b._videoIndex);
+                    group.course.videos = group.videos;
+                  }
+                  return group.course;
+                });
+              })()}
               diagnosis={diagnosisData?.diagnosis}
               problemSummary={diagnosisData?.diagnosis?.problem_summary}
               pathSummary={diagnosisData?.pathSummary}
