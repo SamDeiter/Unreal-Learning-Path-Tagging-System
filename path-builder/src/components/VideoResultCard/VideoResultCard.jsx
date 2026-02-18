@@ -49,7 +49,6 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
     role,
     reason,
     matchPercent,
-    matchReason,
     watchHint,
   } = video;
 
@@ -206,7 +205,7 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
           {watchHint && watchHint !== "▶ Watch full video" && (
             <p className="vrc-timestamp-hint">{watchHint}</p>
           )}
-          {matchReason && <p className="vrc-match-reason">{matchReason}</p>}
+          {/* matchReason removed — debug metadata not for end users */}
         </div>
 
         {/* Actions row: feedback + add/remove */}

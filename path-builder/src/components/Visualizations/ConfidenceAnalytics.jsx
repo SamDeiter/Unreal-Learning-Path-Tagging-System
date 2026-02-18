@@ -20,6 +20,19 @@ import {
 } from "firebase/firestore";
 import "./ConfidenceAnalytics.css";
 
+/** Inline tooltip component — hover to reveal explanation */
+function Tip({ text, children }) {
+  return (
+    <span className="ca-tip-wrap">
+      {children}
+      <span className="ca-tip-icon" title={text}>
+        ⓘ
+      </span>
+      <span className="ca-tip-popup">{text}</span>
+    </span>
+  );
+}
+
 function ConfidenceAnalytics() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,7 +98,12 @@ function ConfidenceAnalytics() {
   return (
     <div className="ca-container">
       <div className="ca-header">
-        <h3>🧠 Confidence Routing Analytics</h3>
+        <h3>
+          🧠 Confidence Routing Analytics
+          <span className="ca-header-subtitle">
+            How the AI decides whether to clarify or answer directly
+          </span>
+        </h3>
         <div className="ca-controls">
           <select
             value={entryLimit}
@@ -114,43 +132,63 @@ function ConfidenceAnalytics() {
         </div>
       ) : (
         <>
-          {/* Summary Cards */}
-          <div className="ca-cards">
+          {/* Summary Cards — Row 1: Counts */}
+          <div className="ca-cards ca-cards-top">
             <div className="ca-card">
-              <span className="ca-card-value">{total}</span>
+              <Tip text="Total number of diagnostic queries processed by the AI system in this time period.">
+                <span className="ca-card-value">{total}</span>
+              </Tip>
               <span className="ca-card-label">Total Queries</span>
             </div>
             <div className="ca-card ca-card-clarify">
-              <span className="ca-card-value">{pct(clarifyCount)}%</span>
+              <Tip text="Percentage of queries where the AI asked a follow-up clarification question before answering. Higher means users are asking vague questions.">
+                <span className="ca-card-value">{pct(clarifyCount)}%</span>
+              </Tip>
               <span className="ca-card-label">Clarified ({clarifyCount})</span>
             </div>
             <div className="ca-card ca-card-direct">
-              <span className="ca-card-value">{pct(directCount)}%</span>
+              <Tip text="Percentage of queries where the AI had enough context to answer directly without asking follow-up questions. Higher is better — means users are providing clear, detailed queries.">
+                <span className="ca-card-value">{pct(directCount)}%</span>
+              </Tip>
               <span className="ca-card-label">Direct ({directCount})</span>
             </div>
+          </div>
+
+          {/* Summary Cards — Row 2: Deeper Metrics */}
+          <div className="ca-cards ca-cards-bottom">
             <div className="ca-card ca-card-agentic">
-              <span className="ca-card-value">{pct(agenticCount)}%</span>
+              <Tip text="Percentage of queries routed to the Agentic RAG pipeline — an advanced multi-step search that automatically expands and retries when initial results are insufficient.">
+                <span className="ca-card-value">{pct(agenticCount)}%</span>
+              </Tip>
               <span className="ca-card-label">Agentic RAG ({agenticCount})</span>
             </div>
             <div className="ca-card">
-              <span className="ca-card-value">{avgScore}</span>
+              <Tip text="Average confidence score across all queries (0–100+). Score determines routing: <50 = Clarify, 50–74 = Agentic RAG, 75+ = Direct Answer. Factors: query specificity, error strings, RAG passage quality, engine version, multi-turn history.">
+                <span className="ca-card-value">{avgScore}</span>
+              </Tip>
               <span className="ca-card-label">Avg Score</span>
             </div>
             <div className="ca-card">
-              <span className="ca-card-value">{avgQueryLen}</span>
+              <Tip text="Average character length of user queries. Longer queries tend to get higher confidence scores and better answers. Short queries (<30 chars) receive a -15 point penalty.">
+                <span className="ca-card-value">{avgQueryLen}</span>
+              </Tip>
               <span className="ca-card-label">Avg Query Length</span>
             </div>
           </div>
 
           {/* Outcome Distribution Bar */}
           <div className="ca-distribution">
-            <h4>Outcome Distribution</h4>
+            <h4>
+              <Tip text="Visual breakdown of how queries were routed. Clarify (amber) = asked follow-up questions. Direct (green) = answered immediately. Agentic (purple) = used advanced multi-step search pipeline.">
+                Outcome Distribution
+              </Tip>
+            </h4>
             <div className="ca-bar">
               {clarifyCount > 0 && (
                 <div
                   className="ca-bar-segment ca-seg-clarify"
                   style={{ width: `${pct(clarifyCount)}%` }}
-                  title={`Clarify: ${clarifyCount}`}
+                  title={`Clarify: ${clarifyCount} queries (${pct(clarifyCount)}%)`}
                 >
                   {pct(clarifyCount)}%
                 </div>
@@ -159,7 +197,7 @@ function ConfidenceAnalytics() {
                 <div
                   className="ca-bar-segment ca-seg-direct"
                   style={{ width: `${pct(directCount)}%` }}
-                  title={`Direct: ${directCount}`}
+                  title={`Direct Answer: ${directCount} queries (${pct(directCount)}%)`}
                 >
                   {pct(directCount)}%
                 </div>
@@ -168,7 +206,7 @@ function ConfidenceAnalytics() {
                 <div
                   className="ca-bar-segment ca-seg-agentic"
                   style={{ width: `${pct(agenticCount)}%` }}
-                  title={`Agentic: ${agenticCount}`}
+                  title={`Agentic RAG: ${agenticCount} queries (${pct(agenticCount)}%)`}
                 >
                   {pct(agenticCount)}%
                 </div>
@@ -190,10 +228,14 @@ function ConfidenceAnalytics() {
           {/* Top Scoring Reasons */}
           {topReasons.length > 0 && (
             <div className="ca-reasons">
-              <h4>Top Scoring Reasons</h4>
+              <h4>
+                <Tip text="Most frequent signals that influenced the confidence score. Each query can have multiple reasons. These help you understand WHY the AI chose to clarify vs answer directly.">
+                  Top Scoring Reasons
+                </Tip>
+              </h4>
               <div className="ca-reason-tags">
                 {topReasons.map(([reason, count]) => (
-                  <span key={reason} className="ca-reason-tag">
+                  <span key={reason} className="ca-reason-tag" title={getReasonExplanation(reason)}>
                     {reason.replace(/_/g, " ")} <strong>({count})</strong>
                   </span>
                 ))}
@@ -203,16 +245,30 @@ function ConfidenceAnalytics() {
 
           {/* Recent Entries Table */}
           <div className="ca-table-wrap">
-            <h4>Recent Routing Decisions</h4>
+            <h4>
+              <Tip text="Individual routing decisions in reverse chronological order. Each row shows one user query: when it happened, how it was routed, the confidence score, query length, which clarification round it was, and what signals influenced the decision.">
+                Recent Routing Decisions
+              </Tip>
+            </h4>
             <table className="ca-table">
               <thead>
                 <tr>
-                  <th>Time</th>
-                  <th>Outcome</th>
-                  <th>Score</th>
-                  <th>Query Len</th>
-                  <th>Round</th>
-                  <th>Reasons</th>
+                  <th title="When the query was submitted">Time</th>
+                  <th title="How the AI routed this query: Clarify (asked follow-up), Direct (answered immediately), or Agentic (multi-step search)">
+                    Outcome
+                  </th>
+                  <th title="Confidence score (0–100+). Higher = more confident. Thresholds: <50 Clarify, 50–74 Agentic, 75+ Direct">
+                    Score
+                  </th>
+                  <th title="Character length of the user's query. Longer queries provide more context for better answers">
+                    Query Len
+                  </th>
+                  <th title="Which clarification round this was. Round 0 = first query, Round 1+ = after follow-up questions">
+                    Round
+                  </th>
+                  <th title="Signals that influenced the confidence score for this specific query">
+                    Reasons
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -242,7 +298,7 @@ function ConfidenceAnalytics() {
                     <td>{e.round ?? e.clarifyRoundsCompleted ?? "—"}</td>
                     <td className="ca-reasons-cell">
                       {(e.reasons || []).map((r, i) => (
-                        <span key={i} className="ca-mini-tag">
+                        <span key={i} className="ca-mini-tag" title={getReasonExplanation(r)}>
                           {r.replace(/_/g, " ")}
                         </span>
                       ))}
@@ -256,6 +312,36 @@ function ConfidenceAnalytics() {
       )}
     </div>
   );
+}
+
+/** Maps reason codes to human-readable explanations for tooltips */
+function getReasonExplanation(reason) {
+  const explanations = {
+    multiple_systems_identified:
+      "The AI detected 2+ UE5 subsystems in the query (e.g., Lumen + Nanite). +30 points — highly specific.",
+    single_system_identified: "The AI detected exactly 1 UE5 subsystem. +15 points.",
+    engine_version_provided:
+      "The user specified their UE5 version (e.g., 5.3). +15 points — helps target version-specific answers.",
+    error_strings_provided:
+      "The user included error messages or log output. +25 points — very specific, high confidence.",
+    platform_provided: "The user specified their platform (Windows, Mac, etc.). +5 points.",
+    change_context_provided:
+      "The user described what they changed recently. +10 points — helps narrow root cause.",
+    strong_rag_matches:
+      "2+ high-quality transcript passages matched (>0.4 similarity). +25 points.",
+    partial_rag_match: "1 high-quality transcript passage matched. +15 points.",
+    decent_rag_matches:
+      "2+ moderate transcript passages matched (0.35–0.40 similarity). +10 points.",
+    short_query_penalty:
+      "Query was under 30 characters. -15 points — too vague for a direct answer.",
+    no_structured_context_penalty: "No case report or multi-system info provided. -10 points.",
+  };
+  // Handle multi_turn_rounds_N pattern
+  if (reason.startsWith("multi_turn_rounds_")) {
+    const n = reason.split("_").pop();
+    return `${n} clarification round(s) completed. +${Math.min(n * 15, 45)} points — each round adds context.`;
+  }
+  return explanations[reason] || reason.replace(/_/g, " ");
 }
 
 export default ConfidenceAnalytics;
