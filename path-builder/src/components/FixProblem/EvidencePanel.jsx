@@ -25,7 +25,10 @@ export default function EvidencePanel({ evidence }) {
                 {item.source === "transcript" ? "🎬 Transcript" : "📄 Docs"}
               </span>
 
-              {item.source === "epic_docs" && item.url ? (
+              {item.source === "transcript" ? (
+                /* Transcripts: just show the timestamp */
+                item.timestamp && <span className="evidence-timestamp">@ {item.timestamp}</span>
+              ) : item.source === "epic_docs" && item.url ? (
                 <a
                   href={item.url}
                   target="_blank"
@@ -49,17 +52,22 @@ export default function EvidencePanel({ evidence }) {
                 </>
               )}
             </div>
-            {/* If it's a doc, remove the massive breadcrumbs at the start, just show the actual text */}
-            <p className="evidence-text">
-              {item.text
-                ?.replace(/Unreal Engine \d\.\d/g, "")
-                .replace(/Epic Developer Community/g, "")
-                .replace(/\|/g, "")
-                .trim()
-                .substring(0, 300)}
-              {item.text?.length > 300 ? "..." : ""}
-            </p>
-            {item.courseCode && <span className="evidence-course">Course: {item.courseCode}</span>}
+
+            {item.source === "transcript" ? (
+              /* Transcripts: just the raw quote */
+              <p className="evidence-text">{item.text}</p>
+            ) : (
+              /* Docs: strip breadcrumbs, truncate */
+              <p className="evidence-text">
+                {item.text
+                  ?.replace(/Unreal Engine \d\.\d/g, "")
+                  .replace(/Epic Developer Community/g, "")
+                  .replace(/\|/g, "")
+                  .trim()
+                  .substring(0, 300)}
+                {item.text?.length > 300 ? "..." : ""}
+              </p>
+            )}
           </div>
         ))}
       </div>
