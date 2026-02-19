@@ -156,33 +156,126 @@ export default function Personas() {
     const ragResult = await generateRAGPath(personaStr);
 
     if (ragResult?.curriculum) {
+      // Build passage lookup: videoTitle → passage data (from search results)
+      const passages = ragResult.passages || [];
+      const passageLookup = {};
+      passages.forEach((p) => {
+        if (p.videoTitle) passageLookup[p.videoTitle.toLowerCase()] = p;
+        if (p.videoId) passageLookup[p.videoId.toLowerCase()] = p;
+      });
+
+      // Helper: find a course by matching a videoTitle string
+      const findCourseByVideoTitle = (videoTitle) => {
+        if (!videoTitle || !courses) return null;
+        const titleLower = videoTitle.toLowerCase().replace(/[^a-z0-9\s]/g, "");
+        return courses.find((c) => {
+          const cTitle = (c.title || c.name || "").toLowerCase().replace(/[^a-z0-9\s]/g, "");
+          return (
+            (cTitle.includes(titleLower) || titleLower.includes(cTitle)) &&
+            c.videos?.length > 0 &&
+            c.videos[0]?.drive_id
+          );
+        });
+      };
+
+      // Helper: word-overlap scoring (for loose matches)
+      const wordOverlapScore = (a, b) => {
+        const stopWords = new Set([
+          "the",
+          "a",
+          "an",
+          "in",
+          "to",
+          "for",
+          "of",
+          "and",
+          "with",
+          "on",
+          "your",
+        ]);
+        const wordsA = a
+          .toLowerCase()
+          .replace(/[^a-z0-9\s]/g, "")
+          .split(/\s+/)
+          .filter((w) => !stopWords.has(w) && w.length > 2);
+        const wordsB = b
+          .toLowerCase()
+          .replace(/[^a-z0-9\s]/g, "")
+          .split(/\s+/)
+          .filter((w) => !stopWords.has(w) && w.length > 2);
+        if (wordsA.length === 0 || wordsB.length === 0) return 0;
+        const setB = new Set(wordsB);
+        const overlap = wordsA.filter((w) => setB.has(w)).length;
+        return overlap / Math.max(wordsA.length, wordsB.length);
+      };
+
       // RAG succeeded — enrich modules with real course data for playback
+      const usedCourseIds = new Set(); // Avoid re-using the same course
       const enrichedModules = (ragResult.curriculum.modules || []).map((mod, idx) => {
-        // Try to match this module to a real course by videoId or title
         let matched = null;
 
-        // 1) Match by videoId if the module has one
+        // 1) Direct videoId match against course library
         if (mod.videoId && courses) {
-          matched = courses.find((c) =>
-            c.videos?.some((v) => v.drive_id && (v.title === mod.videoId || v.name === mod.videoId))
+          matched = courses.find(
+            (c) =>
+              !usedCourseIds.has(c.title) &&
+              c.videos?.some(
+                (v) =>
+                  v.drive_id &&
+                  (v.title === mod.videoId || v.name === mod.videoId || v.drive_id === mod.videoId)
+              )
           );
         }
 
-        // 2) Fallback: fuzzy match by module title against course titles
-        if (!matched && courses) {
-          const modTitleLower = (mod.title || "").toLowerCase().replace(/[^a-z0-9\s]/g, "");
-          matched = courses.find((c) => {
-            const cTitle = (c.title || c.name || "").toLowerCase().replace(/[^a-z0-9\s]/g, "");
-            // Check if module title is contained in course title or vice versa
-            return (
-              (cTitle.includes(modTitleLower) || modTitleLower.includes(cTitle)) &&
-              c.videos?.length > 0 &&
-              c.videos[0]?.drive_id
-            );
-          });
+        // 2) Match via passage videoTitle → find course with that video title
+        if (!matched) {
+          // Check if module's videoId or citation references a passage
+          const passageKey = (mod.videoId || "").toLowerCase();
+          const passage = passageLookup[passageKey];
+          if (passage?.videoTitle) {
+            matched = findCourseByVideoTitle(passage.videoTitle);
+            if (matched && usedCourseIds.has(matched.title)) matched = null;
+          }
         }
 
-        // 3) Build enriched course object
+        // 3) Word-overlap: score all passage videoTitles against module title
+        if (!matched && courses) {
+          let bestScore = 0;
+          let bestCourse = null;
+          for (const p of passages) {
+            if (!p.videoTitle) continue;
+            const course = findCourseByVideoTitle(p.videoTitle);
+            if (!course || usedCourseIds.has(course.title)) continue;
+            const score = wordOverlapScore(mod.title + " " + (mod.description || ""), p.videoTitle);
+            if (score > bestScore && score >= 0.15) {
+              bestScore = score;
+              bestCourse = course;
+            }
+          }
+          matched = bestCourse;
+        }
+
+        // 4) Last resort: word-overlap directly against course library
+        if (!matched && courses) {
+          let bestScore = 0;
+          let bestCourse = null;
+          const modText = (mod.title + " " + (mod.description || "")).toLowerCase();
+          for (const c of courses) {
+            if (usedCourseIds.has(c.title)) continue;
+            if (!c.videos?.length || !c.videos[0]?.drive_id) continue;
+            const cTitle = c.title || c.name || "";
+            const score = wordOverlapScore(modText, cTitle);
+            if (score > bestScore && score >= 0.2) {
+              bestScore = score;
+              bestCourse = c;
+            }
+          }
+          matched = bestCourse;
+        }
+
+        if (matched) usedCourseIds.add(matched.title);
+
+        // Build enriched course object
         const duration = matched?.duration || 45;
         const learningOutcome = matched
           ? buildLearningOutcome(matched.videos, matched.ai_tags)

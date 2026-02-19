@@ -121,9 +121,9 @@ export default function useOnboardingRAG() {
         pipelineDurationMs: Date.now() - startTime,
       });
 
-      setRagResult(assembleData);
+      setRagResult({ ...assembleData, passages: allPassages });
       setRagState(DONE);
-      return assembleData;
+      return { ...assembleData, passages: allPassages };
     } catch (err) {
       devWarn("[OnboardingRAG] Pipeline error:", err.message);
 
