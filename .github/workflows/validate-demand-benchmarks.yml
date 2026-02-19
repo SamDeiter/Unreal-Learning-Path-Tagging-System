@@ -1,0 +1,62 @@
+name: Validate Demand Benchmarks
+
+on:
+  push:
+    paths:
+      - "path-builder/src/data/demand_benchmarks.json"
+  pull_request:
+    paths:
+      - "path-builder/src/data/demand_benchmarks.json"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate demand_benchmarks.json schema
+        run: |
+          python3 -c "
+          import json, sys
+
+          with open('path-builder/src/data/demand_benchmarks.json') as f:
+              data = json.load(f)
+
+          errors = []
+
+          # Required top-level fields
+          for field in ['version', 'updated_at', 'source', 'benchmarks']:
+              if field not in data:
+                  errors.append(f'Missing required field: {field}')
+
+          # Benchmarks must be a dict with string keys and numeric values 0-100
+          benchmarks = data.get('benchmarks', {})
+          if not isinstance(benchmarks, dict):
+              errors.append('benchmarks must be an object')
+          else:
+              if len(benchmarks) < 5:
+                  errors.append(f'Expected at least 5 benchmark categories, got {len(benchmarks)}')
+              for key, val in benchmarks.items():
+                  if not isinstance(val, (int, float)):
+                      errors.append(f'benchmarks[\"{key}\"] must be a number, got {type(val).__name__}')
+                  elif not (0 <= val <= 100):
+                      errors.append(f'benchmarks[\"{key}\"] = {val} is out of range [0, 100]')
+
+          # Expected categories (warn if missing)
+          expected = ['Blueprints', 'Niagara', 'Materials', 'Animation', 'Lighting', 'UI/UMG', 'Landscape', 'Audio']
+          for cat in expected:
+              if cat not in benchmarks:
+                  print(f'⚠️  Expected category \"{cat}\" is missing from benchmarks')
+
+          if errors:
+              print('❌ Validation failed:')
+              for e in errors:
+                  print(f'  - {e}')
+              sys.exit(1)
+          else:
+              print('✅ demand_benchmarks.json is valid')
+              print(f'   Version: {data[\"version\"]}')
+              print(f'   Updated: {data[\"updated_at\"]}')
+              print(f'   Categories: {len(benchmarks)}')
+          "

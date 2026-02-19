@@ -1,18 +1,20 @@
 import { useMemo } from "react";
 import { useTagData } from "../../context/TagDataContext";
+import demandData from "../../data/demand_benchmarks.json";
 import "./SkillGapAnalysis.css";
 
-// Industry demand benchmarks from UE5_SKILL_DEMAND_RESEARCH.md
-const INDUSTRY_DEMAND = {
-  Blueprints: 90,
-  "Niagara/VFX": 85,
-  Materials: 80,
-  Animation: 75,
-  Lighting: 70,
-  "UI/UMG": 65,
-  Landscape: 55,
-  Audio: 40,
-};
+// Industry demand benchmarks — sourced from demand_benchmarks.json
+const INDUSTRY_DEMAND = demandData.benchmarks;
+const DEMAND_VERSION = demandData.version;
+const DEMAND_SOURCE = demandData.source;
+
+// Lookup helper: handles aliases like "Niagara/VFX" → "Niagara"
+function getDemand(categoryName) {
+  if (INDUSTRY_DEMAND[categoryName] !== undefined) return INDUSTRY_DEMAND[categoryName];
+  // Try base name (strip /suffix)
+  const base = categoryName.split("/")[0];
+  return INDUSTRY_DEMAND[base] ?? 50;
+}
 
 /**
  * Skill Gap Analysis
@@ -70,7 +72,7 @@ function SkillGapAnalysis() {
         });
 
         const coverage = Math.min(100, (matchingCourses.length / courses.length) * 200);
-        const demand = INDUSTRY_DEMAND[cat.name] || 50;
+        const demand = getDemand(cat.name);
         const gap = demand - coverage;
 
         return {
@@ -195,7 +197,9 @@ function SkillGapAnalysis() {
       {/* Data provenance footer */}
       <div className="gap-provenance">
         <span>📋 {courses.length} courses scanned via tag keywords</span>
-        <span>📊 Demand: UE5 Skill Research (Q1 2024 — update pending)</span>
+        <span>
+          📊 Demand: {DEMAND_SOURCE} ({DEMAND_VERSION})
+        </span>
         <span>
           🕐 Computed:{" "}
           {computedAt.toLocaleString("en-US", {

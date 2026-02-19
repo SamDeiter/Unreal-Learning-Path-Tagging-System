@@ -1,18 +1,12 @@
 import { useMemo, useState } from "react";
 import { useTagData } from "../../context/TagDataContext";
+import demandData from "../../data/demand_benchmarks.json";
 import "./SkillRadar.css";
 
-// Industry demand benchmarks from UE5_SKILL_DEMAND_RESEARCH.md
-const INDUSTRY_DEMAND = {
-  Blueprints: 90,
-  Niagara: 85,
-  Materials: 80,
-  Animation: 75,
-  Lighting: 70,
-  "UI/UMG": 65,
-  Landscape: 55,
-  Audio: 40,
-};
+// Industry demand benchmarks — sourced from demand_benchmarks.json
+const INDUSTRY_DEMAND = demandData.benchmarks;
+const DEMAND_VERSION = demandData.version;
+const DEMAND_SOURCE = demandData.source;
 
 /**
  * Skill Coverage Radar
@@ -294,7 +288,9 @@ function SkillRadar() {
       {/* Data provenance footer */}
       <div className="radar-provenance">
         <span>📋 {skillAnalysis.totalCourses} courses scanned via tag keywords</span>
-        <span>📊 Demand: UE5 Skill Research (Q1 2024 — update pending)</span>
+        <span>
+          📊 Demand: {DEMAND_SOURCE} ({DEMAND_VERSION})
+        </span>
         <span>
           🕐 Computed:{" "}
           {skillAnalysis.computedAt.toLocaleString("en-US", {
