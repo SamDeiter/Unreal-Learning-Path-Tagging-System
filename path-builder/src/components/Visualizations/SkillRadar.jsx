@@ -181,7 +181,7 @@ function SkillRadar() {
       </div>
 
       <div className="radar-chart">
-        <svg viewBox="0 0 300 300" className="radar-svg">
+        <svg viewBox="-30 -10 360 320" className="radar-svg">
           {/* Grid circles */}
           {[25, 50, 75, 100].map((pct) => (
             <circle
