@@ -141,11 +141,13 @@ export default function AnswerView({
       {answer.whyThisResult?.length > 0 && (
         <div className="answer-section answer-reasoning">
           <h3>
-            <span className="section-icon">💡</span> Why This Result
+            <span className="section-icon">💡</span> How the AI reached this conclusion
           </h3>
           <ul className="reasoning-list">
             {answer.whyThisResult.map((reason, i) => (
-              <li key={i}>{highlightTerms(reason)}</li>
+              <li key={i}>
+                <span>{highlightTerms(reason)}</span>
+              </li>
             ))}
           </ul>
         </div>

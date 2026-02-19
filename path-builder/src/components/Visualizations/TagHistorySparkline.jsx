@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import tagHistoryData from "../../data/tag_history.json";
 import "./TagHistorySparkline.css";
 
@@ -17,7 +17,7 @@ function TagHistorySparkline() {
   const [hoveredTag, setHoveredTag] = useState(null);
   const [tooltipData, setTooltipData] = useState(null);
 
-  const { tagNames, tagSeries, dates, totalSeries } = useMemo(() => {
+  const getDerivedData = () => {
     const snapshots = tagHistoryData.snapshots || [];
     if (snapshots.length === 0) return { tagNames: [], tagSeries: {}, dates: [], totalSeries: [] };
 
@@ -40,7 +40,9 @@ function TagHistorySparkline() {
     }
 
     return { tagNames, tagSeries, dates, totalSeries };
-  }, []);
+  };
+
+  const { tagNames, tagSeries, dates, totalSeries } = getDerivedData();
 
   if (tagNames.length === 0 || dates.length < 2) {
     return (
