@@ -40,6 +40,7 @@ const TagHeatmap = lazy(() => import("./components/Visualizations/TagHeatmap"));
 const SkillRadar = lazy(() => import("./components/Visualizations/SkillRadar"));
 const SkillGapAnalysis = lazy(() => import("./components/Visualizations/SkillGapAnalysis"));
 const ConfidenceAnalytics = lazy(() => import("./components/Visualizations/ConfidenceAnalytics"));
+const TagHistorySparkline = lazy(() => import("./components/Visualizations/TagHistorySparkline"));
 const InviteManager = lazy(() => import("./components/InviteManager/InviteManager"));
 
 function App() {
@@ -377,6 +378,7 @@ function App() {
                       {/* Library Analysis Section */}
                       <CollapsibleSection title="Library Analysis" icon="📚">
                         <TagTrends />
+                        <TagHistorySparkline />
                         <TagHeatmap />
                         <TagTimeline />
                         <InstructorMap />

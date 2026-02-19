@@ -97,7 +97,7 @@ STATIC_DOC_MAPPINGS: dict[str, list[DocResource]] = {
 # ---------------------------------------------------------------------------
 def _cosine_similarity(a: list[float], b: list[float]) -> float:
     """Compute cosine similarity between two vectors."""
-    dot = sum(x * y for x, y in zip(a, b))
+    dot = sum(x * y for x, y in zip(a, b, strict=False))
     mag_a = math.sqrt(sum(x * x for x in a))
     mag_b = math.sqrt(sum(x * x for x in b))
     if mag_a == 0 or mag_b == 0:
@@ -156,7 +156,8 @@ class EpicDocsFetcher:
         # Auto-discover embeddings file
         if embeddings_path is None:
             candidates = [
-                Path(__file__).parent.parent / "path-builder" / "src" / "data" / "docs_embeddings.json",
+                Path(__file__).parent.parent
+                / "path-builder" / "src" / "data" / "docs_embeddings.json",
                 Path(__file__).parent / "docs_embeddings.json",
             ]
             for p in candidates:
