@@ -96,6 +96,10 @@ function TagHistorySparkline() {
           {formatDate(firstDate)} → {formatDate(latestDate)} ({dates.length} snapshots)
         </span>
       </div>
+      <p className="sparkline-subtitle">
+        How many courses cover each skill area — tracked over time to spot growing or stagnant
+        topics.
+      </p>
 
       {/* Total courses sparkline */}
       <div className="sparkline-total-row">
