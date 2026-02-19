@@ -313,16 +313,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
         )}
       </div>
 
-      {/* Persona Context */}
-      {detectedPersona && (
-        <div className="persona-context">
-          <span className="label">
-            <User size={14} className="icon-inline" /> Context:
-          </span>
-          <span className="persona-chip">{detectedPersona.name}</span>
-          <span className="hint">Recommendations will be tailored for you</span>
-        </div>
-      )}
+      {/* Persona context removed from UI — still sent as personaHint in payload */}
 
       {/* Submit */}
       <div className="problem-input-actions">
