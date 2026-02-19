@@ -4,6 +4,7 @@ import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import { useTagData } from "../../context/TagDataContext";
 import { buildLearningOutcome } from "../../utils/videoTopicExtractor";
 import useOnboardingRAG from "../../hooks/useOnboardingRAG";
+import { logOnboardingRAG } from "../../services/onboardingTelemetry";
 import {
   Rocket,
   Clapperboard,
@@ -209,6 +210,17 @@ export default function Personas() {
         cumulative += mod.duration;
         mod.cumulativeTime = cumulative;
       }
+
+      // Log enrichment telemetry
+      const modulesEnriched = enrichedModules.filter(
+        (m) => m.videos?.length > 0 && m.videos[0]?.drive_id
+      ).length;
+      logOnboardingRAG({
+        outcome: "enrichment",
+        modulesEnriched,
+        modulesTotal: enrichedModules.length,
+        archetype: ragResult.archetype || "unknown",
+      });
 
       setGeneratedPath({
         persona: detectedPersona,

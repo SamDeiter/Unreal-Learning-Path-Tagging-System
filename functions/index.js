@@ -30,3 +30,8 @@ Object.assign(exports, require("./ai/queryLearningPath"));
 Object.assign(exports, require("./ai/embedQuery"));
 Object.assign(exports, require("./ai/expandQuery"));
 Object.assign(exports, require("./ai/rerankPassages"));
+
+// ============================================================================
+// Telemetry
+// ============================================================================
+Object.assign(exports, require("./ai/logTelemetry"));

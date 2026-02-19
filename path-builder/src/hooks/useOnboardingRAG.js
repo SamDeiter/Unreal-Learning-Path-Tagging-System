@@ -9,6 +9,7 @@ import { useState, useCallback } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "../services/firebaseConfig";
 import { searchSegmentsHybrid } from "../services/segmentSearchService";
+import { logOnboardingRAG } from "../services/onboardingTelemetry";
 import { devLog, devWarn } from "../utils/logger";
 
 // States: idle → planning → searching → assembling → done | error
@@ -39,6 +40,7 @@ export default function useOnboardingRAG() {
     const app = getFirebaseApp();
     const functions = getFunctions(app);
     const queryLearningPath = httpsCallable(functions, "queryLearningPath");
+    const startTime = Date.now();
 
     try {
       // ── STEP 1: PLANNER ── Get search queries + archetype from CF ──
@@ -109,11 +111,29 @@ export default function useOnboardingRAG() {
 
       devLog("[OnboardingRAG] Curriculum ready:", assembleData.curriculum?.title);
 
+      // Log telemetry — success
+      logOnboardingRAG({
+        outcome: "rag_success",
+        archetype,
+        passagesFound: allPassages.length,
+        modulesReturned: (assembleData.curriculum?.modules || []).length,
+        searchQueries: searchQueries.length,
+        pipelineDurationMs: Date.now() - startTime,
+      });
+
       setRagResult(assembleData);
       setRagState(DONE);
       return assembleData;
     } catch (err) {
       devWarn("[OnboardingRAG] Pipeline error:", err.message);
+
+      // Log telemetry — fallback
+      logOnboardingRAG({
+        outcome: "rag_fallback",
+        errorMessage: err.message || "Unknown error",
+        pipelineDurationMs: Date.now() - startTime,
+      });
+
       setRagError(err.message || "Something went wrong");
       setRagState(ERROR);
       return null;
