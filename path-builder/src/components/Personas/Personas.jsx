@@ -6,6 +6,8 @@ import {
 } from "../../services/PersonaService";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import CartPanel from "../CartPanel/CartPanel";
+import VideoResultCard from "../VideoResultCard/VideoResultCard";
+import "../ProblemFirst/ProblemFirst.css";
 import { useTagData } from "../../context/TagDataContext";
 import { useVideoCart } from "../../hooks/useVideoCart";
 import { buildBlendedPath } from "../../services/coverageAnalyzer";
@@ -1205,88 +1207,52 @@ export default function Personas() {
             {/* Shopping layout — matches Fix a Problem page */}
             <div className="shopping-layout">
               <div className="results-column">
-                {/* Course cards — selectable */}
-                <div className="path-courses">
-                  {generatedPath.courses.map((course, idx) => {
-                    const courseId = course.code || `course_${idx}`;
-                    const added = isInCart(courseId);
-                    return (
-                      <div
-                        key={courseId}
-                        className={`path-course ${course.quickWin ? "quick-win" : ""} ${added ? "course-selected" : ""}`}
-                      >
-                        {course.milestone && (
-                          <div className="milestone-marker">
-                            <Trophy size={12} className="icon-inline-small" /> {course.milestone}{" "}
-                            Milestone!
-                          </div>
-                        )}
-                        <div className="course-order">{course.order}</div>
-                        <div className="course-info">
-                          <h3 title={(course.title || course.name || "").replace(/_/g, " ")}>
-                            {(() => {
-                              let t = (course.title || course.name || "").replace(/_/g, " ");
-                              const words = t.split(/\s+/);
-                              const firstWord = words[0];
-                              const twoWord = words.length > 2 ? `${words[0]} ${words[1]}` : "";
-                              if (twoWord && t.indexOf(twoWord, twoWord.length) > 0) {
-                                t = t.substring(twoWord.length).trim();
-                              } else if (
-                                words.length > 2 &&
-                                t.toLowerCase().indexOf(firstWord.toLowerCase(), firstWord.length) >
-                                  0
-                              ) {
-                                t = t.substring(firstWord.length).trim();
+                {/* Results title — matches ProblemFirst */}
+                <h2 className="results-title">
+                  🎬 Your Recommended Courses (
+                  {generatedPath.courses.filter((c) => c.videos?.[0]?.drive_id).length})
+                </h2>
+
+                {/* Video cards grid — same as Fix a Problem */}
+                <div className="video-results-grid">
+                  {generatedPath.courses
+                    .filter((course) => course.videos?.[0]?.drive_id)
+                    .map((course, _idx) => {
+                      const driveId = course.videos[0].drive_id;
+                      const videoObj = {
+                        title: (course.title || course.name || "").replace(/_/g, " "),
+                        duration: (course.duration || 45) * 60,
+                        driveId,
+                        courseCode: course.code,
+                        role: course.quickWin ? "core" : "supplemental",
+                        reason: course.learningOutcome || "",
+                        matchPercent: course.matchScore || 75,
+                        matchedTags: course.matchedTags || [],
+                      };
+                      return (
+                        <div key={driveId} className="video-result-wrapper">
+                          <VideoResultCard
+                            video={videoObj}
+                            isAdded={isInCart(driveId)}
+                            onToggle={(video) => {
+                              if (isInCart(video.driveId)) {
+                                removeFromCart(video.driveId);
+                              } else {
+                                addToCart({
+                                  ...course,
+                                  driveId: video.driveId,
+                                  itemId: video.driveId,
+                                  title: video.title,
+                                  duration: video.duration,
+                                  type: "video",
+                                });
                               }
-                              t = t.replace(/^(\w+)\s+\1\b/i, "$1");
-                              return t.length > 45 ? `${t.substring(0, 45)}...` : t;
-                            })()}
-                          </h3>
-                          <div className="course-meta">
-                            <span>
-                              <Clock size={12} /> {course.duration || 45} min
-                            </span>
-                            <span>
-                              <BarChart size={12} />{" "}
-                              {Math.round((course.cumulativeTime / 60) * 10) / 10}
-                              hr total
-                            </span>
-                            {course.quickWin && (
-                              <span className="quick-win-badge">
-                                <Zap size={10} /> Quick Win
-                              </span>
-                            )}
-                          </div>
-                          {/* What you'll learn */}
-                          {course.learningOutcome && (
-                            <p className="course-why">{course.learningOutcome}</p>
-                          )}
-                          {/* Add to cart / Remove from cart */}
-                          <div className="course-cart-actions">
-                            {course.videos?.length > 0 && course.videos[0]?.drive_id && (
-                              <button
-                                className={`course-add-btn ${added ? "course-added" : ""}`}
-                                onClick={() => {
-                                  if (added) {
-                                    removeFromCart(courseId);
-                                  } else {
-                                    addToCart({
-                                      ...course,
-                                      driveId: course.videos[0].drive_id,
-                                      itemId: courseId,
-                                      type: "video",
-                                    });
-                                  }
-                                }}
-                              >
-                                {added ? "✓ Added" : "➕ Add to Path"}
-                              </button>
-                            )}
-                          </div>
+                            }}
+                            userQuery={answers.interests || ""}
+                          />
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
 
                 {/* Docs + YouTube — in results column, below courses */}
