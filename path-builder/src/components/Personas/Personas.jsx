@@ -1202,9 +1202,9 @@ export default function Personas() {
               ))}
             </div>
 
-            {/* Shopping cart layout: courses + cart sidebar */}
-            <div className="onboarding-shopping-layout">
-              <div className="onboarding-courses-column">
+            {/* Shopping layout — matches Fix a Problem page */}
+            <div className="shopping-layout">
+              <div className="results-column">
                 {/* Course cards — selectable */}
                 <div className="path-courses">
                   {generatedPath.courses.map((course, idx) => {
@@ -1288,75 +1288,38 @@ export default function Personas() {
                     );
                   })}
                 </div>
+
+                {/* Docs + YouTube — in results column, below courses */}
+                {blendedPath?.docs?.length > 0 && (
+                  <OnboardingDocsSection
+                    docs={blendedPath.docs}
+                    isInCart={isInCart}
+                    addToCart={addToCart}
+                    removeFromCart={removeFromCart}
+                  />
+                )}
+                {blendedPath?.youtube?.length > 0 && (
+                  <OnboardingYouTubeSection
+                    youtube={blendedPath.youtube}
+                    isInCart={isInCart}
+                    addToCart={addToCart}
+                    removeFromCart={removeFromCart}
+                  />
+                )}
               </div>
 
-              {/* Cart sidebar */}
-              <div className="onboarding-cart-column">
-                <div className="onboarding-cart-panel">
-                  <h3>🎒 Your Learning Path</h3>
-                  <p className="cart-subtitle">
-                    {cart.length === 0
-                      ? "Add courses to build your path"
-                      : `${cart.length} course${cart.length !== 1 ? "s" : ""} selected`}
-                  </p>
-                  {cart.length > 0 && (
-                    <>
-                      <ul className="cart-items-list">
-                        {cart.map((item, i) => (
-                          <li key={item.itemId || i} className="cart-item">
-                            <span className="cart-item-order">{i + 1}</span>
-                            <span className="cart-item-title">
-                              {(item.title || item.name || "").replace(/_/g, " ").slice(0, 35)}
-                              {(item.title || item.name || "").length > 35 ? "..." : ""}
-                            </span>
-                            <button
-                              className="cart-item-remove"
-                              onClick={() => removeFromCart(item.itemId || item.code)}
-                              title="Remove"
-                            >
-                              ✕
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                      <button
-                        className="watch-path-btn"
-                        onClick={() => {
-                          // Use the first cart item as the watchingCourse
-                          if (cart.length > 0) {
-                            setWatchingCourse(cart[0]);
-                          }
-                        }}
-                      >
-                        <Play size={16} /> Watch My Path ({cart.length} course
-                        {cart.length !== 1 ? "s" : ""})
-                      </button>
-                      <button className="clear-cart-btn" onClick={clearCart}>
-                        Clear All
-                      </button>
-                    </>
-                  )}
-                </div>
+              {/* Cart sidebar — sticky right, matches Fix a Problem */}
+              <div className="cart-column">
+                <CartPanel
+                  cart={cart}
+                  onRemove={removeFromCart}
+                  onClear={clearCart}
+                  onWatchPath={() => {
+                    if (cart.length > 0) setWatchingCourse(cart[0]);
+                  }}
+                />
               </div>
             </div>
-
-            {/* Docs + YouTube — full-width below the courses+cart grid */}
-            {blendedPath?.docs?.length > 0 && (
-              <OnboardingDocsSection
-                docs={blendedPath.docs}
-                isInCart={isInCart}
-                addToCart={addToCart}
-                removeFromCart={removeFromCart}
-              />
-            )}
-            {blendedPath?.youtube?.length > 0 && (
-              <OnboardingYouTubeSection
-                youtube={blendedPath.youtube}
-                isInCart={isInCart}
-                addToCart={addToCart}
-                removeFromCart={removeFromCart}
-              />
-            )}
 
             <div className="path-summary">
               <p>
