@@ -360,21 +360,61 @@ export default function Personas() {
         (c) => c.enriched && c.videos?.length > 0 && c.videos[0]?.drive_id
       );
 
+      // ── Industry filter for RAG courses (same logic as local scorer) ──
+      const personaIndustryMapRAG = {
+        indie_isaac: "games",
+        logic_liam: "games",
+        animator_alex: "animation",
+        rigger_regina: "animation",
+        designer_cpg: "visualization",
+        architect_amy: "architecture",
+        simulation_sam: "simulation",
+        vfx_victor: "vfx",
+        automotive_andy: "automotive",
+      };
+      const pIndustry = personaIndustryMapRAG[detectedPersona?.id] || "general";
+      const industryFilteredCourses = playableCourses.filter((c) => {
+        const cIndustry = (c.tags?.industry || "general").toLowerCase();
+        const cTitle = (c.title || c.name || "").toLowerCase();
+        // Reject if tagged for a different industry
+        if (cIndustry !== "general" && cIndustry !== pIndustry) return false;
+        // Reject if title contains industry-specific keywords for wrong persona
+        const titleFilters = [
+          {
+            match: ["automotive", "vehicle design", "configurator", "car paint", "vred"],
+            allow: ["automotive"],
+          },
+          {
+            match: ["archviz", "architectural", "twinmotion", "for architecture", "aeco"],
+            allow: ["architecture", "visualization"],
+          },
+          {
+            match: ["legacy production", "virtual production", "broadcast", "icvfx", "ndisplay"],
+            allow: ["animation", "vfx", "film", "media"],
+          },
+        ];
+        for (const f of titleFilters) {
+          if (f.match.some((kw) => cTitle.includes(kw)) && !f.allow.includes(pIndustry))
+            return false;
+        }
+        return true;
+      });
+
       // Log enrichment telemetry
       logOnboardingRAG({
         outcome: "enrichment",
         totalModules: enrichedModules.length,
-        enrichedCount: playableCourses.length,
+        enrichedCount: industryFilteredCourses.length,
         enrichmentRate:
           enrichedModules.length > 0
-            ? Math.round((playableCourses.length / enrichedModules.length) * 100)
+            ? Math.round((industryFilteredCourses.length / enrichedModules.length) * 100)
             : 0,
       });
 
-      if (playableCourses.length > 0) {
+      if (industryFilteredCourses.length > 0) {
         // Add milestones + outcomes
         let totalMinutes = 0;
-        const pathWithMilestones = playableCourses.slice(0, 8).map((course, idx) => {
+        const pathWithMilestones = industryFilteredCourses.slice(0, 8).map((course, idx) => {
           const duration = course.duration || 45;
           totalMinutes += duration;
           const learningOutcome = buildLearningOutcome(course.videos, course.ai_tags);
@@ -483,7 +523,7 @@ export default function Personas() {
       const personaIndustry = personaIndustryMap[detectedPersona.id] || "general";
 
       if (courseIndustry !== "general" && courseIndustry !== personaIndustry) {
-        score -= 50;
+        score -= 200;
       }
       if (courseIndustry === personaIndustry && courseIndustry !== "general") {
         score += 15;
@@ -542,7 +582,7 @@ export default function Personas() {
       for (const filter of industryFilters) {
         const titleHit = filter.match.some((kw) => courseTitle.includes(kw));
         if (titleHit && !filter.allowPersonas.includes(personaIndustry)) {
-          score -= 60;
+          score -= 200;
           break;
         }
       }
