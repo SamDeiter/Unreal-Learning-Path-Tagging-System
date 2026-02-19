@@ -32,13 +32,29 @@ function SkillRadar() {
       { name: "Lighting", keywords: ["light", "lumen", "raytracing", "gi", "shadow"] },
       { name: "Animation", keywords: ["animation", "skeletal", "rigging", "anim", "pose"] },
       { name: "Niagara", keywords: ["niagara", "particle", "vfx", "effects", "cascade"] },
-      { name: "Landscape", keywords: ["landscape", "terrain", "foliage", "world"] },
+      {
+        name: "Landscape",
+        keywords: [
+          "landscape",
+          "terrain",
+          "foliage",
+          "world partition",
+          "world composition",
+          "open world",
+          "landmass",
+        ],
+      },
       { name: "Audio", keywords: ["audio", "sound", "music", "acoustic"] },
       { name: "UI/UMG", keywords: ["ui", "umg", "widget", "hud", "interface"] },
     ];
 
-    // Count courses per category
+    // Count courses per category with per-keyword breakdown
     const coverage = skillCategories.map((cat) => {
+      const keywordHits = {};
+      cat.keywords.forEach((kw) => {
+        keywordHits[kw] = 0;
+      });
+
       const matchingCourses = courses.filter((course) => {
         const allTags = [
           ...(course.gemini_system_tags || []),
@@ -47,7 +63,12 @@ function SkillRadar() {
           ...Object.keys(course.tags || {}),
         ].map((t) => t.toLowerCase());
 
-        return cat.keywords.some((kw) => allTags.some((tag) => tag.includes(kw)));
+        const matched = cat.keywords.some((kw) => {
+          const hit = allTags.some((tag) => tag.includes(kw));
+          if (hit) keywordHits[kw]++;
+          return hit;
+        });
+        return matched;
       });
 
       return {
@@ -55,6 +76,7 @@ function SkillRadar() {
         courseCount: matchingCourses.length,
         coverage: Math.min(100, (matchingCourses.length / courses.length) * 200), // Scale for visibility
         demand: INDUSTRY_DEMAND[cat.name] || 50, // Industry demand benchmark
+        keywordHits,
       };
     });
 
@@ -71,7 +93,14 @@ function SkillRadar() {
       }))
       .sort((a, b) => b.gap - a.gap);
 
-    return { coverage, topSkills, bottomSkills, gaps };
+    return {
+      coverage,
+      topSkills,
+      bottomSkills,
+      gaps,
+      computedAt: new Date(),
+      totalCourses: courses.length,
+    };
   }, [courses]);
 
   // Calculate SVG points for radar (including demand points)
@@ -119,9 +148,28 @@ function SkillRadar() {
                 <li>🔵 Blue = Industry demand benchmarks</li>
                 <li>Gap = Where demand exceeds coverage</li>
               </ul>
-              <strong>Data source:</strong>
+              <strong>Coverage source:</strong>
               <ul>
-                <li>Epic roadmap + job market research</li>
+                <li>
+                  Keyword matching against <code>gemini_system_tags</code>, <code>ai_tags</code>,{" "}
+                  <code>transcript_tags</code>, and <code>tags</code> on all{" "}
+                  {skillAnalysis.totalCourses} courses
+                </li>
+                <li>Formula: (matched / total) × 200, capped at 100%</li>
+              </ul>
+              <strong>Demand source:</strong>
+              <ul>
+                <li>Hardcoded benchmarks from UE5 Skill Demand Research (Jan 2024)</li>
+                <li>Based on Epic roadmap priorities + job market analysis</li>
+                <li>
+                  Values: Blueprints 90%, Niagara 85%, Materials 80%, Animation 75%, Lighting 70%,
+                  UI/UMG 65%, Landscape 55%, Audio 40%
+                </li>
+              </ul>
+              <strong>Why it changes:</strong>
+              <ul>
+                <li>Coverage recalculates when courses are added/removed or tags change</li>
+                <li>Demand values are static and do not change</li>
               </ul>
             </span>
           </span>
@@ -241,6 +289,21 @@ function SkillRadar() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Data provenance footer */}
+      <div className="radar-provenance">
+        <span>📋 {skillAnalysis.totalCourses} courses scanned via tag keywords</span>
+        <span>📊 Demand: UE5 Skill Research (Q1 2024 — update pending)</span>
+        <span>
+          🕐 Computed:{" "}
+          {skillAnalysis.computedAt.toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
       </div>
     </div>
   );

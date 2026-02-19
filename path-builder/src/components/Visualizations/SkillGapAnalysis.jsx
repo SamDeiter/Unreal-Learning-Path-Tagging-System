@@ -31,12 +31,28 @@ function SkillGapAnalysis() {
       { name: "Animation", keywords: ["animation", "skeletal", "rigging", "anim", "pose"] },
       { name: "Lighting", keywords: ["light", "lumen", "raytracing", "gi", "shadow"] },
       { name: "UI/UMG", keywords: ["ui", "umg", "widget", "hud", "interface"] },
-      { name: "Landscape", keywords: ["landscape", "terrain", "foliage", "world"] },
+      {
+        name: "Landscape",
+        keywords: [
+          "landscape",
+          "terrain",
+          "foliage",
+          "world partition",
+          "world composition",
+          "open world",
+          "landmass",
+        ],
+      },
       { name: "Audio", keywords: ["audio", "sound", "music", "acoustic", "metasound"] },
     ];
 
     return skillCategories
       .map((cat) => {
+        const keywordHits = {};
+        cat.keywords.forEach((kw) => {
+          keywordHits[kw] = 0;
+        });
+
         const matchingCourses = courses.filter((course) => {
           const allTags = [
             ...(course.gemini_system_tags || []),
@@ -45,7 +61,12 @@ function SkillGapAnalysis() {
             ...Object.keys(course.tags || {}),
           ].map((t) => t.toLowerCase());
 
-          return cat.keywords.some((kw) => allTags.some((tag) => tag.includes(kw)));
+          const matched = cat.keywords.some((kw) => {
+            const hit = allTags.some((tag) => tag.includes(kw));
+            if (hit) keywordHits[kw]++;
+            return hit;
+          });
+          return matched;
         });
 
         const coverage = Math.min(100, (matchingCourses.length / courses.length) * 200);
@@ -59,10 +80,13 @@ function SkillGapAnalysis() {
           demand,
           gap: Math.round(gap),
           status: gap > 15 ? "behind" : gap > 0 ? "close" : "ahead",
+          keywordHits,
         };
       })
       .sort((a, b) => b.gap - a.gap); // Sort by gap (biggest gaps first)
   }, [courses]);
+
+  const computedAt = useMemo(() => new Date(), [gapAnalysis]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Summary stats
   const summary = useMemo(() => {
@@ -82,13 +106,27 @@ function SkillGapAnalysis() {
             <span className="tooltip-content">
               <strong>What this shows:</strong>
               <ul>
-                <li>🟢 Green = Your coverage exceeds demand</li>
+                <li>🟢 Green bar = Your coverage exceeds demand</li>
                 <li>🟡 Yellow = Close to industry demand</li>
-                <li>🔴 Red = Gap where demand exceeds coverage</li>
+                <li>🔴 Red gap = Demand exceeds coverage</li>
               </ul>
-              <strong>Data source:</strong>
+              <strong>Coverage source:</strong>
               <ul>
-                <li>Epic roadmap + job market research (2024)</li>
+                <li>
+                  Keyword matching against <code>gemini_system_tags</code>, <code>ai_tags</code>,{" "}
+                  <code>transcript_tags</code>, and <code>tags</code> on all {courses.length}{" "}
+                  courses
+                </li>
+                <li>Hover each skill row to see per-keyword match counts</li>
+              </ul>
+              <strong>Demand source:</strong>
+              <ul>
+                <li>Hardcoded benchmarks from UE5 Skill Demand Research (Jan 2024)</li>
+                <li>Based on Epic roadmap priorities + job market analysis</li>
+              </ul>
+              <strong>Why it changes:</strong>
+              <ul>
+                <li>Coverage recalculates when courses are added/removed or tags change</li>
               </ul>
             </span>
           </span>
@@ -104,7 +142,13 @@ function SkillGapAnalysis() {
 
       <div className="gap-chart">
         {gapAnalysis.map((skill) => (
-          <div key={skill.category} className={`gap-row ${skill.status}`}>
+          <div
+            key={skill.category}
+            className={`gap-row ${skill.status}`}
+            title={`Keyword matches: ${Object.entries(skill.keywordHits)
+              .map(([kw, count]) => `${kw}: ${count}`)
+              .join(", ")}`}
+          >
             <div className="skill-label">
               <span className="skill-name">{skill.category}</span>
               <span className="skill-count">{skill.courseCount} courses</span>
@@ -145,6 +189,21 @@ function SkillGapAnalysis() {
         </span>
         <span className="legend-item">
           <span className="legend-marker"></span> Industry Demand
+        </span>
+      </div>
+
+      {/* Data provenance footer */}
+      <div className="gap-provenance">
+        <span>📋 {courses.length} courses scanned via tag keywords</span>
+        <span>📊 Demand: UE5 Skill Research (Q1 2024 — update pending)</span>
+        <span>
+          🕐 Computed:{" "}
+          {computedAt.toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
         </span>
       </div>
     </div>
