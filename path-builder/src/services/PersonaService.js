@@ -1,6 +1,6 @@
 /**
  * PersonaService - Detects user persona from learning goals and selected tags
- * Supports multiple industries: Animation, Architecture, Games, Industrial, VFX, Automotive
+ * Supports multiple industries: Games, Film/Animation, Character TD, Retail/CPG, Architecture, Industrial, VFX, Automotive
  */
 
 import personasData from "../data/personas.json";
@@ -69,6 +69,14 @@ export function getAllPersonas() {
 }
 
 /**
+ * Get only the 5 onboarding-primary personas (shown in the onboarding quiz)
+ * @returns {Object[]}
+ */
+export function getOnboardingPersonas() {
+  return personasData.personas.filter((p) => p.onboardingPrimary);
+}
+
+/**
  * Get a specific persona by ID
  * @param {string} personaId - The persona ID
  * @returns {Object|null} - The persona or null if not found
@@ -78,52 +86,138 @@ export function getPersonaById(personaId) {
 }
 
 /**
- * Get pain point messaging for a persona
+ * Get pain point / onboarding messaging for a persona.
+ * Prefers the JSON-driven `onboardingMessaging` field; falls back to hardcoded map.
  * @param {Object} persona - The persona object
- * @returns {string[]} - Array of messaging strings addressing pain points
+ * @returns {string[]} - Array of messaging strings
  */
 export function getPainPointMessaging(persona) {
   if (!persona) return [];
 
-  const messaging = {
-    animator_alex: [
-      "✨ No more waiting for renders - see results in real-time!",
-      "🎬 Your Maya/Blender skills transfer directly",
-      "🎭 Focus on the art, not the tech",
-    ],
-    architect_amy: [
-      "🏛️ Photorealistic quality in real-time",
-      "📐 Walk clients through designs interactively",
-      "🎨 Materials that match your specifications",
-    ],
+  // Prefer JSON-driven field
+  if (Array.isArray(persona.onboardingMessaging) && persona.onboardingMessaging.length > 0) {
+    return persona.onboardingMessaging;
+  }
+
+  // Legacy fallback (will rarely trigger now that all entries have onboardingMessaging)
+  const legacyMessaging = {
     gamedev_gary: [
       "🎮 Industry-standard for AAA and indie games",
       "⚡ Blueprint visual scripting - no C++ required to start",
       "🌐 Deploy to PC, console, and mobile",
     ],
-    simulation_sam: [
-      "🔧 Connect real-world data to digital twins",
-      "📊 Enterprise-grade accuracy and compliance",
-      "🎯 Training simulations that save lives",
-    ],
-    vfx_victor: [
-      "✨ Real-time preview of complex effects",
-      "🎬 Integrates with your existing pipeline",
-      "🔥 Niagara gives you Houdini-level control",
-    ],
-    automotive_andy: [
-      "🚗 Material accuracy to physical specifications",
-      "💡 Studio lighting setups made easy",
-      "⚙️ Real-time configurators for showrooms",
-    ],
   };
 
-  return messaging[persona.id] || [];
+  return legacyMessaging[persona.id] || [];
 }
+
+// ─────────── Persona-Specific Scoring Rules ───────────
+// Used by generatePath() in Personas.jsx to rank courses per persona.
+// boostKeywords:   +5 title match, +3 tag match
+// penaltyKeywords: -10 per match
+// requiredTopics:  ensure at least 1 course covers each (swap in if missing)
+export const personaScoringRules = {
+  indie_isaac: {
+    boostKeywords: [
+      "blueprint", "gameplay", "prototype", "interaction", "UI", "UMG",
+      "save game", "inventory", "input", "level design", "your first",
+      "getting started", "project", "widget", "player controller",
+    ],
+    penaltyKeywords: [
+      "deep C++", "networking", "multiplayer", "dedicated server",
+      "mass production", "automotive", "archviz",
+    ],
+    requiredTopics: ["viewport", "blueprint", "lighting", "packaging"],
+  },
+  logic_liam: {
+    boostKeywords: [
+      "C++", "architecture", "systems", "framework", "subsystem",
+      "profiling", "optimization", "GAS", "gameplay ability",
+      "replication", "networking", "debugging", "performance",
+      "memory", "API", "programming",
+    ],
+    penaltyKeywords: [
+      "marketing", "brand", "product viz", "archviz",
+      "automotive", "configurator",
+    ],
+    requiredTopics: ["blueprint", "C++", "profiling"],
+  },
+  animator_alex: {
+    boostKeywords: [
+      "animation", "sequencer", "cinematic", "character", "mocap",
+      "keyframe", "motion", "camera", "performance", "acting",
+      "lighting", "storytelling", "retarget",
+    ],
+    penaltyKeywords: [
+      "networking", "multiplayer", "dedicated server", "automotive",
+      "archviz", "digital twin", "manufacturing",
+    ],
+    requiredTopics: ["animation", "sequencer", "lighting"],
+  },
+  rigger_regina: {
+    boostKeywords: [
+      "control rig", "IK", "FK", "constraint", "deformation",
+      "skinning", "retarget", "skeleton", "bone", "joint",
+      "weight", "character", "rig", "animation",
+    ],
+    penaltyKeywords: [
+      "networking", "multiplayer", "automotive", "archviz",
+      "marketing", "brand", "digital twin",
+    ],
+    requiredTopics: ["animation", "control rig", "character"],
+  },
+  designer_cpg: {
+    boostKeywords: [
+      "lighting", "materials", "lookdev", "product viz", "motion design",
+      "camera", "presentation", "rendering", "photorealistic",
+      "studio", "environment", "scene", "visualization",
+    ],
+    penaltyKeywords: [
+      "deep C++", "networking", "multiplayer", "dedicated server",
+      "GAS", "gameplay ability", "digital twin",
+    ],
+    requiredTopics: ["lighting", "materials", "camera"],
+  },
+  // Legacy personas get basic rules for consistency
+  architect_amy: {
+    boostKeywords: [
+      "archviz", "architectural", "interior", "building", "walkthrough",
+      "visualization", "real estate", "photorealistic", "twinmotion",
+    ],
+    penaltyKeywords: ["multiplayer", "gameplay", "automotive", "manufacturing"],
+    requiredTopics: ["lighting", "materials"],
+  },
+  simulation_sam: {
+    boostKeywords: [
+      "simulation", "digital twin", "training", "enterprise", "industrial",
+      "defense", "manufacturing", "factory",
+    ],
+    penaltyKeywords: ["archviz", "automotive", "gameplay", "indie"],
+    requiredTopics: ["blueprint", "simulation"],
+  },
+  vfx_victor: {
+    boostKeywords: [
+      "vfx", "effects", "compositing", "particles", "niagara",
+      "explosion", "destruction", "smoke", "fire", "post-process",
+    ],
+    penaltyKeywords: ["archviz", "automotive", "manufacturing", "digital twin"],
+    requiredTopics: ["niagara", "effects"],
+  },
+  automotive_andy: {
+    boostKeywords: [
+      "automotive", "vehicle", "car", "configurator", "showroom",
+      "paint", "headlight", "wheel", "dashboard", "lighting studio",
+    ],
+    penaltyKeywords: ["archviz", "gameplay", "digital twin", "multiplayer"],
+    requiredTopics: ["materials", "lighting"],
+  },
+};
 
 export default {
   detectPersona,
   getAllPersonas,
+  getOnboardingPersonas,
   getPersonaById,
   getPainPointMessaging,
+  personaScoringRules,
 };
