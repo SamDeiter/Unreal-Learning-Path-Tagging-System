@@ -147,8 +147,8 @@ export default function useExploreFirst() {
 
         const uniqueTopics = [...new Set([...tagSegments, ...docTopics])].slice(0, 15);
 
-        if (docTopics.length > 0) {
-          const blended = await buildBlendedPath(docTopics, driveVideos, {
+        if (uniqueTopics.length > 0) {
+          const blended = await buildBlendedPath(uniqueTopics, driveVideos, {
             maxDocs: 5,
             maxYoutube: 3,
           });

@@ -5,6 +5,32 @@
  * without requiring the full Cloud Functions environment.
  */
 
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+
+// Jest-compatible helpers for node:test
+const expect = (val) => ({
+  toBe: (expected) => assert.strictEqual(val, expected),
+  toContain: (item) => {
+    if (typeof val === 'string') assert.ok(val.includes(item), `Expected to contain '${item}'`);
+    else assert.ok(val.includes(item));
+  },
+  not: {
+    toContain: (item) => {
+      if (typeof val === 'string') assert.ok(!val.includes(item), `Expected NOT to contain '${item}'`);
+      else assert.ok(!val.includes(item));
+    },
+    toMatch: (re) => assert.ok(!re.test(val), `Expected NOT to match ${re}`),
+  },
+  toMatch: (re) => assert.ok(re.test(val)),
+  toBeLessThan: (n) => assert.ok(val < n, `Expected ${val} < ${n}`),
+  toBeLessThanOrEqual: (n) => assert.ok(val <= n, `Expected ${val} <= ${n}`),
+  toBeGreaterThan: (n) => assert.ok(val > n, `Expected ${val} > ${n}`),
+  toBeGreaterThanOrEqual: (n) => assert.ok(val >= n, `Expected ${val} >= ${n}`),
+});
+const test = it;
+
+
 const INJECTION_PATTERNS = [
   /ignore\s+(all\s+)?previous\s+(instructions|prompts?)/gi,
   /disregard\s+(all\s+)?above/gi,

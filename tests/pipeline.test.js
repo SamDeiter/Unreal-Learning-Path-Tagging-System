@@ -11,6 +11,34 @@
  * 7. Evidence wrapper works correctly
  */
 
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+
+// Jest-compatible helpers for node:test
+const expect = (val) => ({
+  toBe: (expected) => assert.strictEqual(val, expected),
+  toEqual: (expected) => assert.deepStrictEqual(val, expected),
+  toBeDefined: () => assert.notStrictEqual(val, undefined),
+  toBeUndefined: () => assert.strictEqual(val, undefined),
+  toHaveLength: (n) => assert.strictEqual(val.length, n),
+  toContain: (item) => {
+    if (typeof val === 'string') assert.ok(val.includes(item), `Expected to contain '${item}'`);
+    else assert.ok(val.includes(item));
+  },
+  toBeGreaterThan: (n) => assert.ok(val > n, `Expected ${val} > ${n}`),
+  toBeGreaterThanOrEqual: (n) => assert.ok(val >= n, `Expected ${val} >= ${n}`),
+  not: {
+    toBe: (expected) => assert.notStrictEqual(val, expected),
+    toContain: (item) => {
+      if (typeof val === 'string') assert.ok(!val.includes(item), `Expected NOT to contain '${item}'`);
+      else assert.ok(!val.includes(item));
+    },
+    toThrow: () => { try { val(); } catch { assert.fail('Expected not to throw'); } },
+  },
+  toThrow: () => { try { val(); assert.fail('Expected to throw'); } catch (e) { if (e.code === 'ERR_ASSERTION') throw e; } },
+});
+const test = it;
+
 // ─── 1. Schema Tests ────────────────────────────────────────────────────────
 
 const {
@@ -18,11 +46,11 @@ const {
   DiagnosisSchema,
   ObjectivesSchema,
   ValidationSchema,
-  PathSummarySchema,
-  MicroLessonSchema,
+  PathSummarySchema, // eslint-disable-line no-unused-vars
+  MicroLessonSchema, // eslint-disable-line no-unused-vars
   LearningPathSchema,
   SCHEMAS,
-} = require("../functions/pipeline/schemas");
+} = await import("../functions/pipeline/schemas.js");
 
 describe("Pipeline Schemas", () => {
   describe("IntentSchema", () => {
@@ -162,7 +190,7 @@ describe("Pipeline Schemas", () => {
 
 // ─── 2. LLM Stage — extractJson + buildRepairPrompt ─────────────────────────
 
-const { extractJson, buildRepairPrompt } = require("../functions/pipeline/llmStage");
+const { extractJson, buildRepairPrompt } = await import("../functions/pipeline/llmStage.js");
 
 describe("extractJson", () => {
   test("extracts JSON from markdown code block", () => {
@@ -206,7 +234,7 @@ const {
   isAllowedUrl,
   stripHtml,
   sanitizeOutput,
-} = require("../functions/pipeline/promptVersions");
+} = await import("../functions/pipeline/promptVersions.js");
 
 describe("PROMPT_VERSION", () => {
   test("is a non-empty string", () => {
@@ -300,7 +328,7 @@ describe("sanitizeOutput", () => {
 
 // ─── 4. Telemetry ───────────────────────────────────────────────────────────
 
-const { createTrace, isAdmin } = require("../functions/pipeline/telemetry");
+const { createTrace, isAdmin } = await import("../functions/pipeline/telemetry.js");
 
 describe("createTrace", () => {
   test("generates unique request_id", () => {
@@ -382,7 +410,7 @@ describe("isAdmin", () => {
 
 // ─── 5. Cache Key Generation ────────────────────────────────────────────────
 
-const { buildCacheKey, normalizeQuery } = require("../functions/pipeline/cache");
+const { buildCacheKey, normalizeQuery } = await import("../functions/pipeline/cache.js");
 
 describe("buildCacheKey", () => {
   test("produces consistent keys for same input", () => {

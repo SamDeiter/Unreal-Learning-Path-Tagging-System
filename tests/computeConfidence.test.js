@@ -5,6 +5,32 @@
  * test the pure scoring logic without the full Cloud Functions env.
  */
 
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+
+// Jest-compatible helpers for node:test
+const expect = (val) => ({
+  toBe: (expected) => assert.strictEqual(val, expected),
+  toContain: (item) => {
+    if (typeof val === 'string') assert.ok(val.includes(item), `Expected '${val}' to contain '${item}'`);
+    else assert.ok(val.includes(item));
+  },
+  not: {
+    toContain: (item) => {
+      if (typeof val === 'string') assert.ok(!val.includes(item), `Expected '${val}' NOT to contain '${item}'`);
+      else assert.ok(!val.includes(item));
+    },
+    toMatch: (re) => assert.ok(!re.test(val), `Expected '${val}' NOT to match ${re}`),
+  },
+  toMatch: (re) => assert.ok(re.test(val)),
+  toBeLessThan: (n) => assert.ok(val < n, `Expected ${val} < ${n}`),
+  toBeLessThanOrEqual: (n) => assert.ok(val <= n, `Expected ${val} <= ${n}`),
+  toBeGreaterThan: (n) => assert.ok(val > n, `Expected ${val} > ${n}`),
+  toBeGreaterThanOrEqual: (n) => assert.ok(val >= n, `Expected ${val} >= ${n}`),
+});
+const test = it;
+
+
 // ── Exact copy of computeConfidence from queryLearningPath.js ──────────
 function computeConfidence(intent, caseReport, passages, conversationHistory, query) {
   let score = 0;
