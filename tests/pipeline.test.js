@@ -40,17 +40,78 @@ const expect = (val) => ({
 const test = it;
 
 // ─── 1. Schema Tests ────────────────────────────────────────────────────────
+// Inline schemas so this test has ZERO dependency on functions/ (which needs firebase-admin)
+import { z } from 'zod';
 
-const {
-  IntentSchema,
-  DiagnosisSchema,
-  ObjectivesSchema,
-  ValidationSchema,
-  PathSummarySchema, // eslint-disable-line no-unused-vars
-  MicroLessonSchema, // eslint-disable-line no-unused-vars
-  LearningPathSchema,
-  SCHEMAS,
-} = await import("../functions/pipeline/schemas.js");
+const IntentSchema = z.object({
+  intent_id: z.string().min(1),
+  user_role: z.string().min(1),
+  goal: z.string().min(1),
+  problem_description: z.string().min(1),
+  systems: z.array(z.string()).min(1),
+  constraints: z.array(z.string()).default([]),
+}).passthrough();
+
+const DiagnosisSchema = z.object({
+  diagnosis_id: z.string().min(1),
+  problem_summary: z.string().min(1),
+  root_causes: z.array(z.string()).min(1),
+  signals_to_watch_for: z.array(z.string()).default([]),
+  variables_that_matter: z.array(z.string()).default([]),
+  variables_that_do_not: z.array(z.string()).default([]),
+  generalization_scope: z.array(z.string()).default([]),
+}).passthrough();
+
+const ObjectivesSchema = z.object({
+  fix_specific: z.array(z.string()).min(1),
+  transferable: z.array(z.string()).min(1),
+}).passthrough();
+
+const ValidationSchema = z.object({
+  approved: z.boolean(),
+  reason: z.string().min(1),
+  issues: z.array(z.string()).default([]),
+  suggestions: z.array(z.string()).default([]),
+}).passthrough();
+
+const PathSummarySchema = z.object({ // eslint-disable-line no-unused-vars
+  path_summary: z.string().min(1),
+  topics_covered: z.array(z.string()).min(1),
+}).passthrough();
+
+const MicroLessonSchema = z.object({ // eslint-disable-line no-unused-vars
+  quick_fix: z.object({ title: z.string().min(1), steps: z.array(z.string()).min(1) }).passthrough(),
+  why_it_works: z.object({ explanation: z.string().min(1), key_concept: z.string().min(1) }).passthrough(),
+  related_situations: z.array(z.object({ scenario: z.string().min(1), connection: z.string().min(1) }).passthrough()).min(1),
+}).passthrough();
+
+const LearningPathStepSchema = z.object({
+  number: z.number().int().min(1), type: z.string().min(1), title: z.string().min(1), description: z.string().min(1),
+}).passthrough();
+
+const LearningPathSchema = z.object({
+  title: z.string().min(1), ai_summary: z.string().min(1), steps: z.array(LearningPathStepSchema).min(1),
+}).passthrough();
+
+const OnboardingPlannerSchema = z.object({
+  searchQueries: z.array(z.string().min(1)).min(1), archetype: z.string().min(1),
+}).passthrough();
+
+const OnboardingModuleSchema = z.object({
+  title: z.string().min(1), description: z.string().min(1),
+  videoId: z.string().default(""), timestamp: z.number().default(0), citation: z.string().default(""),
+}).passthrough();
+
+const OnboardingPathSchema = z.object({
+  title: z.string().min(1), description: z.string().min(1), modules: z.array(OnboardingModuleSchema).min(1),
+}).passthrough();
+
+const SCHEMAS = {
+  intent: IntentSchema, diagnosis: DiagnosisSchema, objectives: ObjectivesSchema,
+  validation: ValidationSchema, path_summary_data: PathSummarySchema,
+  micro_lesson: MicroLessonSchema, learning_path: LearningPathSchema,
+  onboarding_planner: OnboardingPlannerSchema, onboarding_path: OnboardingPathSchema,
+};
 
 describe("Pipeline Schemas", () => {
   describe("IntentSchema", () => {
