@@ -99,11 +99,13 @@ export default function AnswerView({
           open={learnPathOpen}
           onToggle={(e) => setLearnPathOpen(e.target.open)}
         >
-          <summary>
+          <summary className="learn-path-summary-header">
+            <span className="learn-path-chevron">{learnPathOpen ? "▼" : "▶"}</span>
             <span className="section-icon">📚</span> Learn More
             <span className="learn-path-badge">
               {answer.learnPath.topicsCovered?.length || 0} topics
             </span>
+            <span className="learn-path-hint">{learnPathOpen ? "" : "— click to expand"}</span>
           </summary>
           <div className="learn-path-content">
             <p className="learn-path-summary">{answer.learnPath.pathSummary}</p>
