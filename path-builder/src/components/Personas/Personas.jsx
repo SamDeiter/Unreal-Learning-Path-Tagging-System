@@ -5,7 +5,10 @@ import {
   personaScoringRules,
 } from "../../services/PersonaService";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
+import CartPanel from "../CartPanel/CartPanel";
 import { useTagData } from "../../context/TagDataContext";
+import { useVideoCart } from "../../hooks/useVideoCart";
+import { buildBlendedPath } from "../../services/coverageAnalyzer";
 import { buildLearningOutcome } from "../../utils/videoTopicExtractor";
 import useOnboardingRAG from "../../hooks/useOnboardingRAG";
 import { logOnboardingRAG } from "../../services/onboardingTelemetry";
@@ -36,6 +39,160 @@ import {
   Diamond,
 } from "lucide-react";
 import "./Personas.css";
+
+// ─────────── Inline doc + YouTube section components ───────────
+function OnboardingDocsSection({ docs, isInCart, addToCart, removeFromCart }) {
+  if (!docs?.length) return null;
+  return (
+    <div className="blended-section">
+      <div className="blended-section-header">
+        <h2 className="blended-section-title">📚 Recommended Reading</h2>
+        <p className="blended-section-desc">
+          Official Unreal Engine documentation related to your learning path.
+        </p>
+      </div>
+      <div className="doc-cards-grid">
+        {docs.map((d, i) => {
+          const docId = `doc_${d.key || i}`;
+          const inCart = isInCart(docId);
+          return (
+            <div key={d.key || i} className={`doc-card ${inCart ? "doc-card-added" : ""}`}>
+              <a
+                href={d.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="doc-card-link"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="doc-card-header">
+                  <span className={`tier-badge tier-${d.tier || "intermediate"}`}>
+                    {d.tier || "intermediate"}
+                  </span>
+                  {d.subsystem && <span className="subsystem-tag">{d.subsystem}</span>}
+                </div>
+                <h4 className="doc-card-title">{d.label}</h4>
+                {d.description && <p className="doc-card-desc">{d.description}</p>}
+                <div className="doc-card-footer">
+                  <span className="doc-source-badge">📄 Epic Docs</span>
+                  <span className="doc-read-time">{d.readTimeMinutes || 10} min read</span>
+                </div>
+              </a>
+              <button
+                className={`doc-add-btn ${inCart ? "doc-added" : ""}`}
+                onClick={() => {
+                  if (inCart) {
+                    removeFromCart(docId);
+                  } else {
+                    addToCart({
+                      type: "doc",
+                      itemId: docId,
+                      title: d.label,
+                      description: d.description || "",
+                      keySteps: d.keySteps || [],
+                      seeAlso: d.seeAlso || [],
+                      sections: d.sections || [],
+                      url: d.url,
+                      tier: d.tier || "intermediate",
+                      subsystem: d.subsystem,
+                      readTimeMinutes: d.readTimeMinutes || 10,
+                    });
+                  }
+                }}
+                title={inCart ? "Remove from path" : "Add to learning path"}
+              >
+                {inCart ? "✓ Added" : "➕ Add"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function OnboardingYouTubeSection({ youtube, isInCart, addToCart, removeFromCart }) {
+  if (!youtube?.length) return null;
+  return (
+    <div className="blended-section">
+      <div className="blended-section-header">
+        <h2 className="blended-section-title">📺 Official Epic YouTube</h2>
+        <p className="blended-section-desc">Official Unreal Engine tutorials from Epic Games.</p>
+      </div>
+      <div className="doc-cards-grid">
+        {youtube.map((yt) => {
+          const ytId = yt.id || `yt_${yt.url}`;
+          const inCart = isInCart(ytId);
+          const vidMatch = yt.url?.match(/[?&]v=([^&]+)/);
+          const vidId = vidMatch ? vidMatch[1] : null;
+          return (
+            <div
+              key={yt.id}
+              className={`doc-card yt-card-with-thumb ${inCart ? "doc-card-added" : ""}`}
+            >
+              <a
+                href={yt.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="doc-card-link"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {vidId && (
+                  <div className="yt-thumb-wrapper">
+                    <img
+                      className="yt-thumb-img"
+                      src={`https://img.youtube.com/vi/${vidId}/mqdefault.jpg`}
+                      alt={yt.title}
+                      loading="lazy"
+                    />
+                    <span className="yt-thumb-duration">{yt.durationMinutes} min</span>
+                    <span className="yt-thumb-play">▶</span>
+                  </div>
+                )}
+                <div className="doc-card-header">
+                  <span className={`tier-badge tier-${yt.tier || "intermediate"}`}>
+                    {yt.tier || "intermediate"}
+                  </span>
+                  <span className="external-badge">Official • YouTube</span>
+                </div>
+                <h4 className="doc-card-title">{yt.title}</h4>
+                <div className="doc-card-footer">
+                  <span className="doc-source-badge">📺 {yt.channelName}</span>
+                  <span className="doc-read-time">{yt.durationMinutes} min</span>
+                </div>
+              </a>
+              <button
+                className={`doc-add-btn ${inCart ? "doc-added" : ""}`}
+                onClick={() => {
+                  if (inCart) {
+                    removeFromCart(ytId);
+                  } else {
+                    addToCart({
+                      type: "youtube",
+                      itemId: ytId,
+                      title: yt.title,
+                      description: yt.description || "",
+                      keyTakeaways: yt.keyTakeaways || [],
+                      chapters: yt.chapters || [],
+                      topics: yt.topics || [],
+                      url: yt.url,
+                      channelName: yt.channelName,
+                      channelTrust: yt.channelTrust,
+                      tier: yt.tier || "intermediate",
+                      durationMinutes: yt.durationMinutes || 15,
+                    });
+                  }
+                }}
+                title={inCart ? "Remove from path" : "Add to learning path"}
+              >
+                {inCart ? "✓ Added" : "➕ Add"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 // ─────────── 4-Step Question Flow ───────────
 const QUESTIONS = [
@@ -137,6 +294,7 @@ export default function Personas() {
     goal: null,
   });
   const [generatedPath, setGeneratedPath] = useState(null);
+  const [blendedPath, setBlendedPath] = useState(null);
 
   // RAG pipeline hook
   const { generateRAGPath, resetRAG, ragState, ragError, RAG_STATES } = useOnboardingRAG();
@@ -442,16 +600,34 @@ export default function Personas() {
           messaging: getPainPointMessaging(detectedPersona),
           source: "rag",
         });
+
+        // Fetch docs + YouTube for the generated path
+        try {
+          const pathTopics = pathWithMilestones
+            .flatMap((c) =>
+              (c.ai_tags?.topics || []).concat(
+                (c.title || c.name || "").split(/[\s_]+/).filter((w) => w.length > 3)
+              )
+            )
+            .filter((v, i, a) => a.indexOf(v) === i)
+            .slice(0, 8);
+          if (pathTopics.length > 0) {
+            const blended = await buildBlendedPath(pathTopics, [], { maxDocs: 5, maxYoutube: 3 });
+            setBlendedPath(blended);
+          }
+        } catch (e) {
+          console.warn("[Personas] Blended path fetch failed:", e.message);
+        }
         return;
       }
     }
 
     // RAG failed or no playable courses — fall back to local scoring
-    generatePath();
+    await generatePath();
   };
 
   // ─────────── Generate the 10-hour path (local fallback) ───────────
-  const generatePath = () => {
+  const generatePath = async () => {
     if (!detectedPersona || !courses) return;
 
     const rules = personaScoringRules[detectedPersona.id] || {
@@ -729,10 +905,29 @@ export default function Personas() {
       messaging: getPainPointMessaging(detectedPersona),
       source: "local",
     });
+
+    // Fetch docs + YouTube for the local-generated path
+    try {
+      const pathTopics = pathWithMilestones
+        .flatMap((c) =>
+          (c.ai_tags?.topics || []).concat(
+            (c.title || c.name || "").split(/[\s_]+/).filter((w) => w.length > 3)
+          )
+        )
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .slice(0, 8);
+      if (pathTopics.length > 0) {
+        const blended = await buildBlendedPath(pathTopics, [], { maxDocs: 5, maxYoutube: 3 });
+        setBlendedPath(blended);
+      }
+    } catch (e) {
+      console.warn("[Personas] Blended path fetch failed:", e.message);
+    }
   };
 
   // Track which course (if any) is being watched in GuidedPlayer
   const [watchingCourse, setWatchingCourse] = useState(null);
+  const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
 
   const handleAnswer = (questionId, value) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
@@ -753,7 +948,9 @@ export default function Personas() {
     setStep(0);
     setAnswers({ startPrompt: "", role: null, experience: null, goal: null });
     setGeneratedPath(null);
+    setBlendedPath(null);
     setWatchingCourse(null);
+    clearCart();
     resetRAG();
     localStorage.removeItem("detected_persona");
   };
@@ -937,7 +1134,17 @@ export default function Personas() {
         /* GuidedPlayer — break out of the 900px container */
         <div className="guided-player-breakout">
           <GuidedPlayer
-            courses={[watchingCourse]}
+            courses={
+              cart.length > 0
+                ? cart.map((c) => {
+                    // Find full course data from generatedPath
+                    const full = generatedPath?.courses?.find(
+                      (gc) => gc.code === c.code || gc.title === c.title
+                    );
+                    return full || c;
+                  })
+                : [watchingCourse]
+            }
             problemSummary={`New to UE5 — ${detectedPersona?.name || "General"}, ${QUESTIONS[2].options.find((o) => o.value === answers.experience)?.label || ""}, wants to ${QUESTIONS[3].options.find((o) => o.value === answers.goal)?.label || "explore"}`}
             pathSummary={{
               path_summary: `A personalized learning path for ${generatedPath.persona.name}. This path covers foundational UE5 skills tailored to your background, starting with the essentials and building toward hands-on projects.`,
@@ -949,15 +1156,17 @@ export default function Personas() {
         </div>
       ) : (
         <>
-          {/* Generated Path Results */}
+          {/* Generated Path Results — Shopping Cart View */}
           <section className="generated-path">
             <div className="path-header">
               <span className="path-icon">
                 <Rocket size={40} />
               </span>
               <div>
-                <h2>Your Personalized 10-Hour Path</h2>
-                <p>Optimized for {generatedPath.persona.name}</p>
+                <h2>Your Personalized Learning Path</h2>
+                <p>
+                  Optimized for {generatedPath.persona.name} — pick the courses you want to watch
+                </p>
               </div>
               <div className="path-actions">
                 <button className="switch-persona-btn" onClick={switchPersona}>
@@ -993,69 +1202,160 @@ export default function Personas() {
               ))}
             </div>
 
-            {/* Course list with milestones */}
-            <div className="path-courses">
-              {generatedPath.courses.map((course, idx) => (
-                <div
-                  key={course.code || idx}
-                  className={`path-course ${course.quickWin ? "quick-win" : ""}`}
-                >
-                  {course.milestone && (
-                    <div className="milestone-marker">
-                      <Trophy size={12} className="icon-inline-small" /> {course.milestone}{" "}
-                      Milestone!
-                    </div>
-                  )}
-                  <div className="course-order">{course.order}</div>
-                  <div className="course-info">
-                    <h3 title={(course.title || course.name || "").replace(/_/g, " ")}>
-                      {(() => {
-                        let t = (course.title || course.name || "").replace(/_/g, " ");
-                        const words = t.split(/\s+/);
-                        const firstWord = words[0];
-                        const twoWord = words.length > 2 ? `${words[0]} ${words[1]}` : "";
-                        if (twoWord && t.indexOf(twoWord, twoWord.length) > 0) {
-                          t = t.substring(twoWord.length).trim();
-                        } else if (
-                          words.length > 2 &&
-                          t.toLowerCase().indexOf(firstWord.toLowerCase(), firstWord.length) > 0
-                        ) {
-                          t = t.substring(firstWord.length).trim();
-                        }
-                        t = t.replace(/^(\w+)\s+\1\b/i, "$1");
-                        return t.length > 45 ? `${t.substring(0, 45)}...` : t;
-                      })()}
-                    </h3>
-                    <div className="course-meta">
-                      <span>
-                        <Clock size={12} /> {course.duration || 45} min
-                      </span>
-                      <span>
-                        <BarChart size={12} /> {Math.round((course.cumulativeTime / 60) * 10) / 10}
-                        hr total
-                      </span>
-                      {course.quickWin && (
-                        <span className="quick-win-badge">
-                          <Zap size={10} /> Quick Win
-                        </span>
-                      )}
-                    </div>
-                    {/* What you'll learn */}
-                    {course.learningOutcome && (
-                      <p className="course-why">{course.learningOutcome}</p>
-                    )}
-                    {/* Watch button */}
-                    {course.videos?.length > 0 && course.videos[0]?.drive_id && (
-                      <button
-                        className="course-watch-btn"
-                        onClick={() => setWatchingCourse(course)}
+            {/* Shopping cart layout: courses + cart sidebar */}
+            <div className="onboarding-shopping-layout">
+              <div className="onboarding-courses-column">
+                {/* Course cards — selectable */}
+                <div className="path-courses">
+                  {generatedPath.courses.map((course, idx) => {
+                    const courseId = course.code || `course_${idx}`;
+                    const added = isInCart(courseId);
+                    return (
+                      <div
+                        key={courseId}
+                        className={`path-course ${course.quickWin ? "quick-win" : ""} ${added ? "course-selected" : ""}`}
                       >
-                        <Play size={14} /> Watch Course
-                      </button>
-                    )}
-                  </div>
+                        {course.milestone && (
+                          <div className="milestone-marker">
+                            <Trophy size={12} className="icon-inline-small" /> {course.milestone}{" "}
+                            Milestone!
+                          </div>
+                        )}
+                        <div className="course-order">{course.order}</div>
+                        <div className="course-info">
+                          <h3 title={(course.title || course.name || "").replace(/_/g, " ")}>
+                            {(() => {
+                              let t = (course.title || course.name || "").replace(/_/g, " ");
+                              const words = t.split(/\s+/);
+                              const firstWord = words[0];
+                              const twoWord = words.length > 2 ? `${words[0]} ${words[1]}` : "";
+                              if (twoWord && t.indexOf(twoWord, twoWord.length) > 0) {
+                                t = t.substring(twoWord.length).trim();
+                              } else if (
+                                words.length > 2 &&
+                                t.toLowerCase().indexOf(firstWord.toLowerCase(), firstWord.length) >
+                                  0
+                              ) {
+                                t = t.substring(firstWord.length).trim();
+                              }
+                              t = t.replace(/^(\w+)\s+\1\b/i, "$1");
+                              return t.length > 45 ? `${t.substring(0, 45)}...` : t;
+                            })()}
+                          </h3>
+                          <div className="course-meta">
+                            <span>
+                              <Clock size={12} /> {course.duration || 45} min
+                            </span>
+                            <span>
+                              <BarChart size={12} />{" "}
+                              {Math.round((course.cumulativeTime / 60) * 10) / 10}
+                              hr total
+                            </span>
+                            {course.quickWin && (
+                              <span className="quick-win-badge">
+                                <Zap size={10} /> Quick Win
+                              </span>
+                            )}
+                          </div>
+                          {/* What you'll learn */}
+                          {course.learningOutcome && (
+                            <p className="course-why">{course.learningOutcome}</p>
+                          )}
+                          {/* Add to cart / Remove from cart */}
+                          <div className="course-cart-actions">
+                            {course.videos?.length > 0 && course.videos[0]?.drive_id && (
+                              <button
+                                className={`course-add-btn ${added ? "course-added" : ""}`}
+                                onClick={() => {
+                                  if (added) {
+                                    removeFromCart(courseId);
+                                  } else {
+                                    addToCart({
+                                      ...course,
+                                      driveId: course.videos[0].drive_id,
+                                      itemId: courseId,
+                                      type: "video",
+                                    });
+                                  }
+                                }}
+                              >
+                                {added ? "✓ Added" : "➕ Add to Path"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
+              </div>
+
+              {/* Docs + YouTube gap-fillers */}
+              {blendedPath?.docs?.length > 0 && (
+                <OnboardingDocsSection
+                  docs={blendedPath.docs}
+                  isInCart={isInCart}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
+                />
+              )}
+              {blendedPath?.youtube?.length > 0 && (
+                <OnboardingYouTubeSection
+                  youtube={blendedPath.youtube}
+                  isInCart={isInCart}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
+                />
+              )}
+
+              {/* Cart sidebar */}
+              <div className="onboarding-cart-column">
+                <div className="onboarding-cart-panel">
+                  <h3>🎒 Your Learning Path</h3>
+                  <p className="cart-subtitle">
+                    {cart.length === 0
+                      ? "Add courses to build your path"
+                      : `${cart.length} course${cart.length !== 1 ? "s" : ""} selected`}
+                  </p>
+                  {cart.length > 0 && (
+                    <>
+                      <ul className="cart-items-list">
+                        {cart.map((item, i) => (
+                          <li key={item.itemId || i} className="cart-item">
+                            <span className="cart-item-order">{i + 1}</span>
+                            <span className="cart-item-title">
+                              {(item.title || item.name || "").replace(/_/g, " ").slice(0, 35)}
+                              {(item.title || item.name || "").length > 35 ? "..." : ""}
+                            </span>
+                            <button
+                              className="cart-item-remove"
+                              onClick={() => removeFromCart(item.itemId || item.code)}
+                              title="Remove"
+                            >
+                              ✕
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                      <button
+                        className="watch-path-btn"
+                        onClick={() => {
+                          // Use the first cart item as the watchingCourse
+                          if (cart.length > 0) {
+                            setWatchingCourse(cart[0]);
+                          }
+                        }}
+                      >
+                        <Play size={16} /> Watch My Path ({cart.length} course
+                        {cart.length !== 1 ? "s" : ""})
+                      </button>
+                      <button className="clear-cart-btn" onClick={clearCart}>
+                        Clear All
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="path-summary">
