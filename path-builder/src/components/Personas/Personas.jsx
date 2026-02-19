@@ -1290,24 +1290,6 @@ export default function Personas() {
                 </div>
               </div>
 
-              {/* Docs + YouTube gap-fillers */}
-              {blendedPath?.docs?.length > 0 && (
-                <OnboardingDocsSection
-                  docs={blendedPath.docs}
-                  isInCart={isInCart}
-                  addToCart={addToCart}
-                  removeFromCart={removeFromCart}
-                />
-              )}
-              {blendedPath?.youtube?.length > 0 && (
-                <OnboardingYouTubeSection
-                  youtube={blendedPath.youtube}
-                  isInCart={isInCart}
-                  addToCart={addToCart}
-                  removeFromCart={removeFromCart}
-                />
-              )}
-
               {/* Cart sidebar */}
               <div className="onboarding-cart-column">
                 <div className="onboarding-cart-panel">
@@ -1357,6 +1339,24 @@ export default function Personas() {
                 </div>
               </div>
             </div>
+
+            {/* Docs + YouTube — full-width below the courses+cart grid */}
+            {blendedPath?.docs?.length > 0 && (
+              <OnboardingDocsSection
+                docs={blendedPath.docs}
+                isInCart={isInCart}
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+              />
+            )}
+            {blendedPath?.youtube?.length > 0 && (
+              <OnboardingYouTubeSection
+                youtube={blendedPath.youtube}
+                isInCart={isInCart}
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+              />
+            )}
 
             <div className="path-summary">
               <p>
