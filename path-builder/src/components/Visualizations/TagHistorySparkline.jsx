@@ -2,6 +2,12 @@ import { useMemo, useState } from "react";
 import tagHistoryData from "../../data/tag_history.json";
 import "./TagHistorySparkline.css";
 
+// Format ISO date to friendly label: "Dec 1, 2025"
+function formatDate(iso) {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 /**
  * Tag History Sparkline
  * Mini SVG sparkline showing tag count trends from tag_history.json snapshots.
@@ -87,7 +93,7 @@ function TagHistorySparkline() {
       <div className="sparkline-header">
         <h3 className="sparkline-title">📈 Tag Growth Trends</h3>
         <span className="sparkline-date-range">
-          {firstDate} → {latestDate} ({dates.length} snapshots)
+          {formatDate(firstDate)} → {formatDate(latestDate)} ({dates.length} snapshots)
         </span>
       </div>
 
@@ -151,7 +157,7 @@ function TagHistorySparkline() {
           <div className="sparkline-tooltip-series">
             {tooltipData.dates.map((d, i) => (
               <span key={d}>
-                {d}: <strong>{tooltipData.series[i]}</strong>
+                {formatDate(d)}: <strong>{tooltipData.series[i]}</strong>
               </span>
             ))}
           </div>
