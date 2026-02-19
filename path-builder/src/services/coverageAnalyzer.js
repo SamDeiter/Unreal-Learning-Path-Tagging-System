@@ -104,20 +104,30 @@ export async function buildBlendedPath(topics, videoResults = [], { maxDocs = 5,
     return { docs: [], youtube: [], totalTimeMinutes: 0, coverageScore: 0 };
   }
 
-  // Get prerequisite-ordered reading path
-  const docs = await getDocReadingPath(topics, { limit: maxDocs });
+  // Fetch docs and YouTube independently — one failing shouldn't block the other
+  let docs = [];
+  try {
+    docs = await getDocReadingPath(topics, { limit: maxDocs });
+  } catch (e) {
+    console.warn("[Blended] Search failed for docs:", e.message);
+  }
 
-  // Get YouTube gap-fillers via both topic strings and formal tag_ids
-  const ytByTopic = await getResourcesForTopics(topics, { limit: maxYoutube });
-  const ytByTag = await getResourcesForTagIds(topics, { limit: maxYoutube });
-  // Merge and deduplicate by id
-  const seenIds = new Set(ytByTopic.map((r) => r.id));
-  const youtube = [...ytByTopic];
-  for (const r of ytByTag) {
-    if (!seenIds.has(r.id)) {
-      youtube.push(r);
-      seenIds.add(r.id);
+  let youtube = [];
+  try {
+    // Get YouTube gap-fillers via both topic strings and formal tag_ids
+    const ytByTopic = await getResourcesForTopics(topics, { limit: maxYoutube });
+    const ytByTag = await getResourcesForTagIds(topics, { limit: maxYoutube });
+    // Merge and deduplicate by id
+    const seenIds = new Set(ytByTopic.map((r) => r.id));
+    youtube = [...ytByTopic];
+    for (const r of ytByTag) {
+      if (!seenIds.has(r.id)) {
+        youtube.push(r);
+        seenIds.add(r.id);
+      }
     }
+  } catch (e) {
+    console.warn("[Blended] Search failed for youtube:", e.message);
   }
 
   // Calculate total estimated time
@@ -125,8 +135,13 @@ export async function buildBlendedPath(topics, videoResults = [], { maxDocs = 5,
   const docTime = docs.reduce((sum, d) => sum + (d.readTimeMinutes || 10), 0);
   const ytTime = youtube.reduce((sum, y) => sum + (y.durationMinutes || 15), 0);
 
-  // Coverage analysis
-  const coverage = await analyzeCoverage(topics, videoResults);
+  // Coverage analysis (also wrapped — non-critical)
+  let coverage = { coverageScore: 0, gaps: [] };
+  try {
+    coverage = await analyzeCoverage(topics, videoResults);
+  } catch (e) {
+    console.warn("[Blended] Coverage analysis failed:", e.message);
+  }
 
   return {
     docs,

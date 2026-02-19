@@ -196,6 +196,158 @@ function OnboardingYouTubeSection({ youtube, isInCart, addToCart, removeFromCart
   );
 }
 
+// ─────────── Role-based video grouping (matches Fix a Problem page) ───────────
+const ONBOARDING_ROLE_SECTIONS = [
+  {
+    key: "prerequisite",
+    icon: "🔗",
+    label: "Prerequisite",
+    desc: "Build the foundation first — these cover concepts you'll need before tackling the main topic.",
+  },
+  {
+    key: "core",
+    icon: "⭐",
+    label: "Core",
+    desc: "These directly address your learning goals and are the most important courses to watch.",
+  },
+  {
+    key: "supplemental",
+    icon: "📚",
+    label: "Supplemental",
+    desc: "Go deeper — extra context and advanced techniques for when you're ready.",
+  },
+];
+
+function OnboardingVideosByRole({ courses, isInCart, addToCart, removeFromCart, userQuery }) {
+  // Build video result objects from courses — never filter out, just assign roles
+  const videoResults = courses.map((course) => {
+    const title = (course.title || course.name || "").replace(/_/g, " ");
+    const titleLower = title.toLowerCase();
+    const driveId =
+      course.videos?.[0]?.drive_id || course.driveId || course.code || `course-${course.order}`;
+    const isFoundation =
+      course.code?.startsWith("100") ||
+      titleLower.includes("quickstart") ||
+      titleLower.includes("introduction") ||
+      titleLower.includes("intro ") ||
+      titleLower.includes("getting started") ||
+      titleLower.includes("your first");
+    const role = isFoundation ? "prerequisite" : course.quickWin ? "core" : "supplemental";
+
+    return {
+      course,
+      video: {
+        title,
+        duration: (course.duration || 45) * 60,
+        driveId,
+        courseCode: course.code,
+        role,
+        reason: course.learningOutcome || "",
+        matchPercent: course.matchScore || 75,
+        matchedTags: course.matchedTags || [],
+      },
+    };
+  });
+
+  // Group by role — with _other catch-all (matching Fix a Problem pattern)
+  const grouped = {};
+  for (const section of ONBOARDING_ROLE_SECTIONS) grouped[section.key] = [];
+  grouped._other = [];
+  for (const item of videoResults) {
+    const role = item.video.role || "_other";
+    (grouped[role] || grouped._other).push(item);
+  }
+
+  const totalCount = videoResults.length;
+
+  return (
+    <>
+      <h2 className="results-title">🎬 Videos for You ({totalCount})</h2>
+      {ONBOARDING_ROLE_SECTIONS.filter((s) => grouped[s.key].length > 0).map((section) => (
+        <div key={section.key} className="role-section">
+          <div className="role-section-header">
+            <h3 className="role-section-title">
+              {section.icon} {section.label}
+              <span className="role-section-count">{grouped[section.key].length}</span>
+            </h3>
+            <p className="role-section-desc">{section.desc}</p>
+          </div>
+          <div className="video-results-grid">
+            {grouped[section.key].map(({ course, video }) => (
+              <div
+                key={video.driveId}
+                className="video-result-wrapper"
+                id={`video-${video.driveId}`}
+              >
+                <VideoResultCard
+                  video={video}
+                  isAdded={isInCart(video.driveId)}
+                  onToggle={(v) => {
+                    if (isInCart(v.driveId)) {
+                      removeFromCart(v.driveId);
+                    } else {
+                      addToCart({
+                        ...course,
+                        driveId: v.driveId,
+                        itemId: v.driveId,
+                        title: v.title,
+                        duration: v.duration,
+                        type: "video",
+                      });
+                    }
+                  }}
+                  userQuery={userQuery}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+      {grouped._other.length > 0 && (
+        <div className="role-section">
+          <div className="role-section-header">
+            <h3 className="role-section-title">
+              📎 Related <span className="role-section-count">{grouped._other.length}</span>
+            </h3>
+            <p className="role-section-desc">
+              Additional videos that may be relevant to your learning goals.
+            </p>
+          </div>
+          <div className="video-results-grid">
+            {grouped._other.map(({ course, video }) => (
+              <div
+                key={video.driveId}
+                className="video-result-wrapper"
+                id={`video-${video.driveId}`}
+              >
+                <VideoResultCard
+                  video={video}
+                  isAdded={isInCart(video.driveId)}
+                  onToggle={(v) => {
+                    if (isInCart(v.driveId)) {
+                      removeFromCart(v.driveId);
+                    } else {
+                      addToCart({
+                        ...course,
+                        driveId: v.driveId,
+                        itemId: v.driveId,
+                        title: v.title,
+                        duration: v.duration,
+                        type: "video",
+                      });
+                    }
+                  }}
+                  userQuery={userQuery}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 // ─────────── 4-Step Question Flow ───────────
 const QUESTIONS = [
   {
@@ -571,7 +723,7 @@ export default function Personas() {
             : 0,
       });
 
-      if (industryFilteredCourses.length > 0) {
+      if (industryFilteredCourses.length >= 3) {
         // Add milestones + outcomes
         let totalMinutes = 0;
         const pathWithMilestones = industryFilteredCourses.slice(0, 8).map((course, idx) => {
@@ -606,13 +758,31 @@ export default function Personas() {
         // Fetch docs + YouTube for the generated path
         try {
           const pathTopics = pathWithMilestones
-            .flatMap((c) =>
-              (c.ai_tags?.topics || []).concat(
-                (c.title || c.name || "").split(/[\s_]+/).filter((w) => w.length > 3)
-              )
+            .flatMap((c) => [
+              ...(c.ai_tags?.topics || []),
+              ...(c.tag_ids || []).flatMap((t) => t.split(".")),
+              ...(c.tags?.subsystem ? [c.tags.subsystem] : []),
+              ...(c.tags?.feature ? [c.tags.feature] : []),
+              ...Object.values(c.tags || {}).filter((v) => typeof v === "string" && v.length > 2),
+              ...(c.title || c.name || "").split(/[\s_-]+/).filter((w) => w.length > 3),
+            ])
+            .map((t) => t.toLowerCase())
+            .filter(
+              (v, i, a) =>
+                a.indexOf(v) === i &&
+                ![
+                  "introduction",
+                  "unreal",
+                  "engine",
+                  "workshop",
+                  "first",
+                  "project",
+                  "games",
+                  "your",
+                  "quickstart",
+                ].includes(v)
             )
-            .filter((v, i, a) => a.indexOf(v) === i)
-            .slice(0, 8);
+            .slice(0, 15);
           if (pathTopics.length > 0) {
             const blended = await buildBlendedPath(pathTopics, [], { maxDocs: 5, maxYoutube: 3 });
             setBlendedPath(blended);
@@ -835,6 +1005,11 @@ export default function Personas() {
       });
     }
 
+    // Only keep playable courses (must have at least one video with drive_id)
+    dedupedCourses = dedupedCourses.filter(
+      (c) => c.videos?.length > 0 && c.videos.some((v) => v.drive_id)
+    );
+
     // Take top 8
     dedupedCourses = dedupedCourses.slice(0, 8);
 
@@ -911,13 +1086,31 @@ export default function Personas() {
     // Fetch docs + YouTube for the local-generated path
     try {
       const pathTopics = pathWithMilestones
-        .flatMap((c) =>
-          (c.ai_tags?.topics || []).concat(
-            (c.title || c.name || "").split(/[\s_]+/).filter((w) => w.length > 3)
-          )
+        .flatMap((c) => [
+          ...(c.ai_tags?.topics || []),
+          ...(c.tag_ids || []).flatMap((t) => t.split(".")),
+          ...(c.tags?.subsystem ? [c.tags.subsystem] : []),
+          ...(c.tags?.feature ? [c.tags.feature] : []),
+          ...Object.values(c.tags || {}).filter((v) => typeof v === "string" && v.length > 2),
+          ...(c.title || c.name || "").split(/[\s_-]+/).filter((w) => w.length > 3),
+        ])
+        .map((t) => t.toLowerCase())
+        .filter(
+          (v, i, a) =>
+            a.indexOf(v) === i &&
+            ![
+              "introduction",
+              "unreal",
+              "engine",
+              "workshop",
+              "first",
+              "project",
+              "games",
+              "your",
+              "quickstart",
+            ].includes(v)
         )
-        .filter((v, i, a) => a.indexOf(v) === i)
-        .slice(0, 8);
+        .slice(0, 15);
       if (pathTopics.length > 0) {
         const blended = await buildBlendedPath(pathTopics, [], { maxDocs: 5, maxYoutube: 3 });
         setBlendedPath(blended);
@@ -1136,17 +1329,31 @@ export default function Personas() {
         /* GuidedPlayer — break out of the 900px container */
         <div className="guided-player-breakout">
           <GuidedPlayer
-            courses={
-              cart.length > 0
-                ? cart.map((c) => {
-                    // Find full course data from generatedPath
-                    const full = generatedPath?.courses?.find(
-                      (gc) => gc.code === c.code || gc.title === c.title
-                    );
-                    return full || c;
-                  })
-                : [watchingCourse]
-            }
+            courses={(() => {
+              // Sort videos within each course by part number (same fix as Fix a Problem)
+              const sortVideos = (course) => {
+                if (!course?.videos?.length) return course;
+                const sorted = [...course.videos].sort((a, b) => {
+                  const getNum = (v) => {
+                    const m = (v.title || v.name || "").match(/part\s*(\d+)/i);
+                    return m ? parseInt(m[1], 10) : 999;
+                  };
+                  return getNum(a) - getNum(b);
+                });
+                return { ...course, videos: sorted };
+              };
+
+              const raw =
+                cart.length > 0
+                  ? cart.map((c) => {
+                      const full = generatedPath?.courses?.find(
+                        (gc) => gc.code === c.code || gc.title === c.title
+                      );
+                      return full || c;
+                    })
+                  : [watchingCourse];
+              return raw.map(sortVideos);
+            })()}
             problemSummary={`New to UE5 — ${detectedPersona?.name || "General"}, ${QUESTIONS[2].options.find((o) => o.value === answers.experience)?.label || ""}, wants to ${QUESTIONS[3].options.find((o) => o.value === answers.goal)?.label || "explore"}`}
             pathSummary={{
               path_summary: `A personalized learning path for ${generatedPath.persona.name}. This path covers foundational UE5 skills tailored to your background, starting with the essentials and building toward hands-on projects.`,
@@ -1158,142 +1365,100 @@ export default function Personas() {
         </div>
       ) : (
         <>
-          {/* Generated Path Results — Shopping Cart View */}
-          <section className="generated-path">
-            <div className="path-header">
-              <span className="path-icon">
-                <Rocket size={40} />
-              </span>
-              <div>
-                <h2>Your Personalized Learning Path</h2>
-                <p>
-                  Optimized for {generatedPath.persona.name} — pick the courses you want to watch
-                </p>
+          {/* Shopping layout — cart at top right, content on left */}
+          <div className="shopping-layout">
+            <div className="results-column">
+              {/* Path header — no card wrapper, just content */}
+              <div className="path-header">
+                <span className="path-icon">
+                  <Rocket size={40} />
+                </span>
+                <div>
+                  <h2>Your Personalized Learning Path</h2>
+                  <p>
+                    Optimized for {generatedPath.persona.name} — pick the courses you want to watch
+                  </p>
+                </div>
+                <div className="path-actions">
+                  <button className="switch-persona-btn" onClick={switchPersona}>
+                    <RefreshCw size={14} /> Switch Persona
+                  </button>
+                  <button className="reset-btn" onClick={resetQuiz}>
+                    <RefreshCw size={16} /> Start Over
+                  </button>
+                </div>
               </div>
-              <div className="path-actions">
-                <button className="switch-persona-btn" onClick={switchPersona}>
-                  <RefreshCw size={14} /> Switch Persona
-                </button>
-                <button className="reset-btn" onClick={resetQuiz}>
-                  <RefreshCw size={16} /> Start Over
-                </button>
-              </div>
-            </div>
 
-            {/* Persona description + messaging */}
-            {detectedPersona && (
-              <div className="persona-result-card">
-                <div className="persona-result-header">
-                  {detectedPersona.emoji && (
-                    <span className="persona-emoji">{detectedPersona.emoji}</span>
-                  )}
-                  <div>
-                    <h3>{detectedPersona.name}</h3>
-                    <p>{detectedPersona.description}</p>
+              {/* Persona card — own visual card */}
+              {detectedPersona && (
+                <div className="persona-result-card">
+                  <div className="persona-result-header">
+                    {detectedPersona.emoji && (
+                      <span className="persona-emoji">{detectedPersona.emoji}</span>
+                    )}
+                    <div>
+                      <h3>{detectedPersona.name}</h3>
+                      <p>{detectedPersona.description}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Pain point messaging */}
-            <div className="motivation-messages">
-              {generatedPath.messaging.map((msg, i) => (
-                <div key={i} className="motivation-card">
-                  {msg}
-                </div>
-              ))}
-            </div>
-
-            {/* Shopping layout — matches Fix a Problem page */}
-            <div className="shopping-layout">
-              <div className="results-column">
-                {/* Results title — matches ProblemFirst */}
-                <h2 className="results-title">
-                  🎬 Your Recommended Courses (
-                  {generatedPath.courses.filter((c) => c.videos?.[0]?.drive_id).length})
-                </h2>
-
-                {/* Video cards grid — same as Fix a Problem */}
-                <div className="video-results-grid">
-                  {generatedPath.courses
-                    .filter((course) => course.videos?.[0]?.drive_id)
-                    .map((course, _idx) => {
-                      const driveId = course.videos[0].drive_id;
-                      const videoObj = {
-                        title: (course.title || course.name || "").replace(/_/g, " "),
-                        duration: (course.duration || 45) * 60,
-                        driveId,
-                        courseCode: course.code,
-                        role: course.quickWin ? "core" : "supplemental",
-                        reason: course.learningOutcome || "",
-                        matchPercent: course.matchScore || 75,
-                        matchedTags: course.matchedTags || [],
-                      };
-                      return (
-                        <div key={driveId} className="video-result-wrapper">
-                          <VideoResultCard
-                            video={videoObj}
-                            isAdded={isInCart(driveId)}
-                            onToggle={(video) => {
-                              if (isInCart(video.driveId)) {
-                                removeFromCart(video.driveId);
-                              } else {
-                                addToCart({
-                                  ...course,
-                                  driveId: video.driveId,
-                                  itemId: video.driveId,
-                                  title: video.title,
-                                  duration: video.duration,
-                                  type: "video",
-                                });
-                              }
-                            }}
-                            userQuery={answers.interests || ""}
-                          />
-                        </div>
-                      );
-                    })}
-                </div>
-
-                {/* Docs + YouTube — in results column, below courses */}
-                {blendedPath?.docs?.length > 0 && (
-                  <OnboardingDocsSection
-                    docs={blendedPath.docs}
-                    isInCart={isInCart}
-                    addToCart={addToCart}
-                    removeFromCart={removeFromCart}
-                  />
-                )}
-                {blendedPath?.youtube?.length > 0 && (
-                  <OnboardingYouTubeSection
-                    youtube={blendedPath.youtube}
-                    isInCart={isInCart}
-                    addToCart={addToCart}
-                    removeFromCart={removeFromCart}
-                  />
-                )}
+              {/* Motivation chips */}
+              <div className="motivation-messages">
+                {generatedPath.messaging.map((msg, i) => (
+                  <div key={i} className="motivation-card">
+                    {msg}
+                  </div>
+                ))}
               </div>
 
-              {/* Cart sidebar — sticky right, matches Fix a Problem */}
-              <div className="cart-column">
-                <CartPanel
-                  cart={cart}
-                  onRemove={removeFromCart}
-                  onClear={clearCart}
-                  onWatchPath={() => {
-                    if (cart.length > 0) setWatchingCourse(cart[0]);
-                  }}
+              {/* Video sections grouped by role */}
+              <OnboardingVideosByRole
+                courses={generatedPath.courses}
+                isInCart={isInCart}
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+                userQuery={answers.startPrompt || ""}
+              />
+
+              {blendedPath?.docs?.length > 0 && (
+                <OnboardingDocsSection
+                  docs={blendedPath.docs}
+                  isInCart={isInCart}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
                 />
+              )}
+              {blendedPath?.youtube?.length > 0 && (
+                <OnboardingYouTubeSection
+                  youtube={blendedPath.youtube}
+                  isInCart={isInCart}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
+                />
+              )}
+
+              <div className="path-summary">
+                <p>
+                  Total time:{" "}
+                  <strong>{Math.round((generatedPath.totalTime / 60) * 10) / 10} hours</strong>
+                </p>
               </div>
             </div>
 
-            <div className="path-summary">
-              <p>
-                Total time:{" "}
-                <strong>{Math.round((generatedPath.totalTime / 60) * 10) / 10} hours</strong>
-              </p>
+            {/* Cart sidebar — separate column, starts at top right */}
+            <div className="cart-column">
+              <CartPanel
+                cart={cart}
+                onRemove={removeFromCart}
+                onClear={clearCart}
+                onWatchPath={() => {
+                  if (cart.length > 0) setWatchingCourse(cart[0]);
+                }}
+              />
             </div>
-          </section>
+          </div>
         </>
       )}
     </div>
