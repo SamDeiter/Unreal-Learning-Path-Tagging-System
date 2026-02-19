@@ -155,21 +155,65 @@ export default function Personas() {
     const ragResult = await generateRAGPath(personaStr);
 
     if (ragResult?.curriculum) {
-      // RAG succeeded — build path from curriculum modules
-      setGeneratedPath({
-        persona: detectedPersona,
-        courses: (ragResult.curriculum.modules || []).map((mod, idx) => ({
-          title: mod.title,
-          description: mod.description,
+      // RAG succeeded — enrich modules with real course data for playback
+      const enrichedModules = (ragResult.curriculum.modules || []).map((mod, idx) => {
+        // Try to match this module to a real course by videoId or title
+        let matched = null;
+
+        // 1) Match by videoId if the module has one
+        if (mod.videoId && courses) {
+          matched = courses.find((c) =>
+            c.videos?.some((v) => v.drive_id && (v.title === mod.videoId || v.name === mod.videoId))
+          );
+        }
+
+        // 2) Fallback: fuzzy match by module title against course titles
+        if (!matched && courses) {
+          const modTitleLower = (mod.title || "").toLowerCase().replace(/[^a-z0-9\s]/g, "");
+          matched = courses.find((c) => {
+            const cTitle = (c.title || c.name || "").toLowerCase().replace(/[^a-z0-9\s]/g, "");
+            // Check if module title is contained in course title or vice versa
+            return (
+              (cTitle.includes(modTitleLower) || modTitleLower.includes(cTitle)) &&
+              c.videos?.length > 0 &&
+              c.videos[0]?.drive_id
+            );
+          });
+        }
+
+        // 3) Build enriched course object
+        const duration = matched?.duration || 45;
+        const learningOutcome = matched
+          ? buildLearningOutcome(matched.videos, matched.ai_tags)
+          : mod.description || "";
+
+        return {
+          ...(matched || {}), // Spread real course data (includes videos array!)
+          title: mod.title || matched?.title || "Untitled",
+          description: mod.description || "",
           videoId: mod.videoId || "",
           timestamp: mod.timestamp || 0,
           citation: mod.citation || "",
           order: idx + 1,
-          cumulativeTime: (idx + 1) * 20, // Estimate ~20 min per module
+          duration,
+          cumulativeTime: 0, // Computed below
           quickWin: idx < 2,
           milestone: null,
-        })),
-        totalTime: (ragResult.curriculum.modules || []).length * 20,
+          learningOutcome,
+        };
+      });
+
+      // Compute cumulative time
+      let cumulative = 0;
+      for (const mod of enrichedModules) {
+        cumulative += mod.duration;
+        mod.cumulativeTime = cumulative;
+      }
+
+      setGeneratedPath({
+        persona: detectedPersona,
+        courses: enrichedModules,
+        totalTime: cumulative,
         messaging: getPainPointMessaging(detectedPersona),
         isRAG: true,
         archetype: ragResult.archetype || "unknown",

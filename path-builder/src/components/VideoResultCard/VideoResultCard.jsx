@@ -49,7 +49,6 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
     role,
     reason,
     matchPercent,
-    watchHint,
   } = video;
 
   // Compute match tier for badge
@@ -202,10 +201,6 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
 
         <div className="vrc-info">
           <h4 className="vrc-title">{title}</h4>
-          {watchHint && watchHint !== "▶ Watch full video" && (
-            <p className="vrc-timestamp-hint">{watchHint}</p>
-          )}
-          {/* matchReason removed — debug metadata not for end users */}
         </div>
 
         {/* Actions row: feedback + add/remove */}
