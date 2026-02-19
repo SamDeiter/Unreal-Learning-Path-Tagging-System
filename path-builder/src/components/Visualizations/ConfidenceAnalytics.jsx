@@ -243,13 +243,14 @@ function ConfidenceAnalytics() {
             </div>
           )}
 
-          {/* Recent Entries Table */}
-          <div className="ca-table-wrap">
-            <h4>
+          {/* Recent Entries Table — collapsible, starts collapsed */}
+          <details className="ca-table-wrap ca-collapsible">
+            <summary className="ca-collapsible-header">
               <Tip text="Individual routing decisions in reverse chronological order. Each row shows one user query: when it happened, how it was routed, the confidence score, query length, which clarification round it was, and what signals influenced the decision.">
                 Recent Routing Decisions
               </Tip>
-            </h4>
+              <span className="ca-entry-count">({entries.length} entries)</span>
+            </summary>
             <table className="ca-table">
               <thead>
                 <tr>
@@ -307,7 +308,7 @@ function ConfidenceAnalytics() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </details>
         </>
       )}
     </div>
@@ -576,13 +577,14 @@ function OnboardingRAGAnalytics() {
             </div>
           )}
 
-          {/* Recent Events Table */}
-          <div className="ca-table-wrap">
-            <h4>
+          {/* Recent Events Table — collapsible, starts collapsed */}
+          <details className="ca-table-wrap ca-collapsible">
+            <summary className="ca-collapsible-header">
               <Tip text="Recent onboarding RAG pipeline events in reverse chronological order.">
                 Recent Onboarding Events
               </Tip>
-            </h4>
+              <span className="ca-entry-count">({pipelineEvents.length} entries)</span>
+            </summary>
             <table className="ca-table">
               <thead>
                 <tr>
@@ -624,7 +626,7 @@ function OnboardingRAGAnalytics() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </details>
         </>
       )}
     </div>

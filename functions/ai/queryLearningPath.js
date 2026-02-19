@@ -186,8 +186,8 @@ async function handleProblemFirst(data, context, apiKey) {
 
   // Sanitize retrieved context (max 8 passages, truncate text)
   const passages = Array.isArray(retrievedContext)
-    ? retrievedContext.slice(0, 8).map((p) => ({
-        text: String(p.text || "").slice(0, 2500),
+    ? retrievedContext.slice(0, 10).map((p) => ({
+        text: String(p.text || "").slice(0, 3000),
         courseCode: String(p.courseCode || ""),
         videoTitle: String(p.videoTitle || ""),
         timestamp: String(p.timestamp || ""),
@@ -687,8 +687,8 @@ Return ONLY valid JSON:
 async function fetchOnboardingContext(queries, _data) {
   // If the client already provided retrievedContext, use it
   if (Array.isArray(_data.retrievedContext) && _data.retrievedContext.length > 0) {
-    return _data.retrievedContext.slice(0, 8).map((p) => ({
-      text: String(p.text || "").slice(0, 2500),
+    return _data.retrievedContext.slice(0, 10).map((p) => ({
+      text: String(p.text || "").slice(0, 3000),
       courseCode: String(p.courseCode || ""),
       videoTitle: String(p.videoTitle || ""),
       timestamp: String(p.timestamp || ""),

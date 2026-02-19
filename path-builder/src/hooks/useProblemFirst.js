@@ -399,11 +399,12 @@ export default function useProblemFirst() {
             devWarn("⚠️ Re-ranking skipped:", rerankErr.message);
           }
         }
-        retrievedPassages = retrievedPassages.slice(0, 8);
+        retrievedPassages = retrievedPassages.slice(0, 10);
 
         // Step 2: Call queryLearningPath Cloud Function
         let cartData;
         let geminiSucceeded = true;
+        let gotAnswerData = false;
         try {
           const queryLearningPath = httpsCallable(functions, "queryLearningPath");
           let result = await queryLearningPath({
@@ -411,7 +412,7 @@ export default function useProblemFirst() {
             mode: "problem-first",
             detectedTagIds: inputData.detectedTagIds,
             personaHint: inputData.personaHint,
-            retrievedContext: retrievedPassages.slice(0, 8),
+            retrievedContext: retrievedPassages.slice(0, 10),
             caseReport: activeCaseReport || undefined,
             conversationHistory: inputData._conversationHistory || conversationHistory,
           });
@@ -522,7 +523,10 @@ export default function useProblemFirst() {
           if (!result.data.success)
             throw new Error(result.data.message || "Failed to process query");
 
-          if (result.data.responseType === "ANSWER") {
+          // Always extract answer data when Cloud Function returns ANSWER
+          const hasAnswerData = result.data.responseType === "ANSWER" && result.data.mostLikelyCause;
+          if (hasAnswerData) {
+            gotAnswerData = true;
             setAnswerData({
               mostLikelyCause: result.data.mostLikelyCause,
               confidence: result.data.confidence,
@@ -630,8 +634,10 @@ export default function useProblemFirst() {
         // Build blended path (docs + YouTube gap-fillers)
         await _buildBlendedPathForDiagnosis(inputData, cartData, driveVideos, nonVideoItems);
 
-        // If we have answer-first data, show ANSWERED stage first
-        setStage(answerData ? STAGES.ANSWERED : STAGES.DIAGNOSIS);
+        // Show step-by-step fix instructions (ANSWERED) as the primary experience.
+        // Previously this used stale `answerData` closure (always null on first submit).
+        // Now we check if the Cloud Function actually returned answer data this run.
+        setStage(gotAnswerData ? STAGES.ANSWERED : STAGES.DIAGNOSIS);
 
         // Update history with cart_id
         if (inputData.updateCartIdForQuery && cartData.cart_id) {
@@ -653,7 +659,7 @@ export default function useProblemFirst() {
         setStage(STAGES.ERROR);
       }
     },
-    [courses, getDetectedPersona, clearCart, caseReport, answerData, _buildBlendedPathForDiagnosis, conversationHistory]
+    [courses, getDetectedPersona, clearCart, caseReport, _buildBlendedPathForDiagnosis, conversationHistory]
   );
 
   // ──────────── UI Handlers ────────────

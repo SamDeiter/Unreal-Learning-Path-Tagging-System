@@ -155,7 +155,7 @@ export default function AnswerView({
       {/* ─── Actions ─── */}
       <div className="answer-actions">
         <button className="answer-action-btn primary" onClick={onBackToVideos}>
-          🎬 Browse Related Videos
+          📚 Browse Related Resources
         </button>
         <button className="answer-action-btn secondary" onClick={onStartOver}>
           ← Ask Another Question
