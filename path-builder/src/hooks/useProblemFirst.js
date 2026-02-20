@@ -1,8 +1,9 @@
 /**
  * useProblemFirst — Controller hook for the Problem-First page.
  *
- * Extracts all state management, the `handleSubmit` orchestration pipeline,
- * and UI callback handlers from ProblemFirst.jsx so the view can stay lean.
+ * Uses shared services (searchPipeline, blendedPathBuilder, courseToVideos)
+ * for the core RAG pipeline. Keeps problem-specific logic: Firestore cache,
+ * clarification flow, agentic RAG, and feedback/re-run handlers.
  *
  * @returns {Object} All state + handlers the view needs
  */
@@ -13,11 +14,9 @@ import { getAuth } from "firebase/auth";
 import { getFirebaseApp } from "../services/firebaseConfig";
 import { matchCoursesToCart } from "../domain/courseMatching";
 import { flattenCoursesToVideos } from "../domain/videoRanking";
-import { findSimilarCourses } from "../services/semanticSearchService";
+import { buildLearningPath } from "../services/PathBuilder";
 import { searchSegmentsHybrid } from "../services/segmentSearchService";
 import { searchDocsSemantic } from "../services/docsSearchService";
-import { buildLearningPath } from "../services/PathBuilder";
-import { buildBlendedPath } from "../services/coverageAnalyzer";
 import {
   trackQuerySubmitted,
   trackDiagnosisGenerated,
@@ -28,6 +27,10 @@ import { useTagData } from "../context/TagDataContext";
 import { useVideoCart } from "./useVideoCart";
 import { devLog, devWarn } from "../utils/logger";
 
+// Shared services (Phase 2 refactor)
+import { runSearchPipeline } from "../services/searchPipeline";
+import { buildBlendedPathFromDiagnosis } from "../services/blendedPathBuilder";
+import { matchAndFlattenToVideos } from "../services/courseToVideos";
 import { PROBLEM_STOPWORDS as STOP_WORDS } from "../domain/constants";
 
 // ──────────── Constants ────────────
@@ -40,7 +43,6 @@ export const STAGES = {
   GUIDED: "guided",
   ERROR: "error",
 };
-
 
 // ──────────── Hook ────────────
 export default function useProblemFirst() {
@@ -70,79 +72,6 @@ export default function useProblemFirst() {
       return null;
     }
   }, []);
-
-  // ──────────── Build blended path (docs + YouTube gap-fillers) ────────────
-  const _buildBlendedPathForDiagnosis = useCallback(
-    async (inputData, cartData, driveVideos, nonVideoItems) => {
-      try {
-        const rawTags = [
-          ...(cartData.diagnosis?.matched_tag_ids || []),
-          ...(inputData.detectedTagIds || []),
-        ];
-        const tagSegments = rawTags.flatMap((t) =>
-          t.split(/[._]/).filter((s) => s.length > 2 && s !== "unreal" && s !== "engine")
-        );
-
-        const queryWords = (inputData.query || "")
-          .toLowerCase()
-          .split(/\s+/)
-          .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
-        const docTopics = [...new Set(queryWords)];
-
-        // Topic augmentation
-        const hasWord = (w) => docTopics.some((t) => t.includes(w));
-        if (hasWord("mesh") && !hasWord("skeletal")) {
-          docTopics.push("static mesh", "static meshes", "import", "importing");
-        }
-        if (hasWord("size") || hasWord("scale")) {
-          docTopics.push("scale", "transform");
-        }
-
-        const uniqueTopics = [...new Set([...tagSegments, ...docTopics])].slice(0, 15);
-        devLog(`[DocTopics] ${docTopics.join(", ")}`);
-        devLog(`[AllTopics] ${uniqueTopics.join(", ")}`);
-
-        if (docTopics.length > 0) {
-          const blended = await buildBlendedPath(docTopics, driveVideos, {
-            maxDocs: 5,
-            maxYoutube: 3,
-          });
-          // Merge non-video items
-          for (const nv of nonVideoItems) {
-            if (nv.type === "doc" && !blended.docs.some((d) => d.url === nv._externalUrl)) {
-              blended.docs.push({
-                label: nv.title,
-                url: nv._externalUrl || nv.url,
-                description: nv.description || "",
-                readTimeMinutes: nv.readTimeMinutes || 10,
-                tier: "intermediate",
-              });
-            }
-            if (nv.type === "youtube" && !blended.youtube.some((y) => y.url === nv._externalUrl)) {
-              blended.youtube.push({
-                title: nv.title,
-                url: nv._externalUrl || nv.url,
-                channelName: nv.channel || "YouTube",
-                channelTrust: nv.channelTrust || null,
-                durationMinutes: nv.durationMinutes || 10,
-                tier: "intermediate",
-              });
-            }
-          }
-          blended.docs.sort(
-            (a, b) => (b._rawScore ?? b.matchScore ?? 0) - (a._rawScore ?? a.matchScore ?? 0)
-          );
-          setBlendedPath(blended);
-          devLog(
-            `[Blended] ${blended.docs.length} docs, ${blended.youtube.length} YT, coverage: ${(blended.coverageScore * 100).toFixed(0)}%`
-          );
-        }
-      } catch (blendedErr) {
-        devWarn("⚠️ Blended path skipped:", blendedErr.message);
-      }
-    },
-    []
-  );
 
   // ──────────── Main submit handler ────────────
   const handleSubmit = useCallback(
@@ -252,150 +181,23 @@ export default function useProblemFirst() {
           }
         }
 
-        // ─── Fresh diagnosis: full Gemini pipeline ───
+        // ─── Fresh diagnosis: full pipeline ───
         await trackQuerySubmitted(
           inputData.query,
           inputData.detectedTagIds,
           getDetectedPersona()?.id
         );
 
+        // ── Step 1: Shared search pipeline ──
+        let { semanticResults, retrievedPassages } = await runSearchPipeline(
+          inputData.query,
+          { maxPassages: 10 }
+        );
+
+        // ── Step 2: Call queryLearningPath Cloud Function ──
         const app = getFirebaseApp();
         const functions = getFunctions(app, "us-central1");
 
-        // Step 1: Get query embedding + expanded queries (parallel)
-        let queryEmbedding = null;
-        let semanticResults = [];
-        let retrievedPassages = [];
-        let expandedQueries = [];
-        try {
-          const embedQueryFn = httpsCallable(functions, "embedQuery");
-          const expandQueryFn = httpsCallable(functions, "expandQuery");
-
-          const [embedResult, expandResult] = await Promise.allSettled([
-            embedQueryFn({ query: inputData.query }),
-            expandQueryFn({ query: inputData.query }),
-          ]);
-
-          if (expandResult.status === "fulfilled" && expandResult.value.data?.expansions) {
-            expandedQueries = expandResult.value.data.expansions;
-            devLog(
-              `[QueryExpansion] ${expandedQueries.length} variants: ${expandedQueries.join(" | ")}`
-            );
-          }
-
-          if (
-            embedResult.status === "fulfilled" &&
-            embedResult.value.data?.success &&
-            embedResult.value.data?.embedding
-          ) {
-            queryEmbedding = embedResult.value.data.embedding;
-
-            const [courseResult, segResult, docResult] = await Promise.allSettled([
-              findSimilarCourses(queryEmbedding, 8, 0.35),
-              searchSegmentsHybrid(inputData.query, queryEmbedding, [], 8),
-              searchDocsSemantic(queryEmbedding, 6, 0.35),
-            ]);
-
-            if (courseResult.status === "fulfilled") {
-              semanticResults = courseResult.value;
-            } else {
-              devWarn("⚠️ Course semantic search failed:", courseResult.reason?.message);
-            }
-
-            if (segResult.status === "fulfilled") {
-              const segPassages = segResult.value.map((s) => ({
-                text: s.previewText,
-                courseCode: s.courseCode,
-                videoTitle: s.videoTitle,
-                timestamp: s.timestamp,
-                similarity: s.similarity,
-                source: "transcript",
-              }));
-              retrievedPassages.push(...segPassages);
-              devLog(`[RAG] ${segPassages.length} transcript passages`);
-            } else {
-              devWarn("⚠️ Segment search failed:", segResult.reason?.message);
-            }
-
-            if (docResult.status === "fulfilled") {
-              const docPassages = docResult.value.map((d) => ({
-                text: d.previewText,
-                url: d.url,
-                title: d.title,
-                section: d.section,
-                similarity: d.similarity,
-                source: "epic_docs",
-              }));
-              retrievedPassages.push(...docPassages);
-              devLog(`[RAG] ${docPassages.length} doc passages`);
-            } else {
-              devWarn("⚠️ Docs search failed:", docResult.reason?.message);
-            }
-
-            // Query Expansion: search expanded variants
-            if (expandedQueries.length > 0) {
-              const expansionSearches = expandedQueries.map((eq) =>
-                searchSegmentsHybrid(eq, null, [], 4).catch(() => [])
-              );
-              const expansionResults = await Promise.allSettled(expansionSearches);
-              let expansionCount = 0;
-              for (const er of expansionResults) {
-                if (er.status === "fulfilled" && er.value.length > 0) {
-                  const expPassages = er.value.map((s) => ({
-                    text: s.previewText,
-                    courseCode: s.courseCode,
-                    videoTitle: s.videoTitle,
-                    timestamp: s.timestamp,
-                    similarity: (s.similarity || 0) * 0.9,
-                    source: "transcript",
-                  }));
-                  retrievedPassages.push(...expPassages);
-                  expansionCount += expPassages.length;
-                }
-              }
-              if (expansionCount > 0) {
-                devLog(`[QueryExpansion] +${expansionCount} passages from expanded queries`);
-              }
-            }
-
-            // Rank + dedup
-            retrievedPassages.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
-            const seen = new Set();
-            retrievedPassages = retrievedPassages.filter((p) => {
-              const key = (p.text || "").trim().toLowerCase().slice(0, 120);
-              if (seen.has(key)) return false;
-              seen.add(key);
-              return true;
-            });
-            devLog(
-              `[RAG] Total: ${retrievedPassages.length} passages after rank+dedup (with expansions)`
-            );
-          }
-        } catch (semanticErr) {
-          devWarn("⚠️ Semantic search skipped:", semanticErr.message);
-        }
-
-        // Step 1.5: Cross-encoder re-ranking
-        if (retrievedPassages.length > 2) {
-          try {
-            const rerankFn = httpsCallable(functions, "rerankPassages");
-            const rerankResult = await rerankFn({
-              query: inputData.query,
-              passages: retrievedPassages.slice(0, 20),
-            });
-            if (rerankResult.data?.success && rerankResult.data?.reranked) {
-              retrievedPassages = rerankResult.data.reranked;
-              if (!rerankResult.data.fallback) {
-                devLog(`[Rerank] Passages re-ranked by Gemini cross-encoder`);
-              }
-            }
-          } catch (rerankErr) {
-            devWarn("⚠️ Re-ranking skipped:", rerankErr.message);
-          }
-        }
-        retrievedPassages = retrievedPassages.slice(0, 10);
-
-        // Step 2: Call queryLearningPath Cloud Function
         let cartData;
         let geminiSucceeded = true;
         let gotAnswerData = false;
@@ -421,7 +223,6 @@ export default function useProblemFirst() {
           }
 
           if (result.data.responseType === "NEEDS_CLARIFICATION") {
-            // Store the assistant's question in conversation history
             setConversationHistory((prev) => [
               ...prev,
               { role: "assistant", content: result.data.question },
@@ -446,14 +247,12 @@ export default function useProblemFirst() {
               `[AgenticRAG] Cloud function requested ${result.data.searchQueries?.length} targeted searches: ${result.data.searchQueries?.join(" | ")}`
             );
             try {
-              // Run AI-suggested searches in parallel
               const agenticSearches = (result.data.searchQueries || []).flatMap((sq) => [
                 searchSegmentsHybrid(sq, null, [], 4).catch(() => []),
                 searchDocsSemantic(null, 3, 0.3, sq).catch(() => []),
               ]);
               const agenticResults = await Promise.allSettled(agenticSearches);
 
-              // Collect new passages from agentic searches
               const newPassages = [];
               for (const ar of agenticResults) {
                 if (ar.status !== "fulfilled" || !Array.isArray(ar.value)) continue;
@@ -464,7 +263,7 @@ export default function useProblemFirst() {
                       courseCode: item.courseCode || "",
                       videoTitle: item.videoTitle || item.title || "",
                       timestamp: item.timestamp || "",
-                      similarity: (item.similarity || 0) * 0.85, // slight discount for agentic
+                      similarity: (item.similarity || 0) * 0.85,
                       source: item.url ? "epic_docs" : "transcript",
                       url: item.url || "",
                       title: item.title || "",
@@ -476,7 +275,6 @@ export default function useProblemFirst() {
 
               devLog(`[AgenticRAG] Found ${newPassages.length} additional passages`);
 
-              // Merge with existing passages, dedup, re-rank
               const merged = [...retrievedPassages, ...newPassages];
               const seen = new Set();
               const deduped = merged.filter((p) => {
@@ -488,7 +286,6 @@ export default function useProblemFirst() {
               deduped.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
               const enrichedPassages = deduped.slice(0, 12);
 
-              // Re-submit with enriched passages and agenticRound counter
               devLog(`[AgenticRAG] Re-submitting with ${enrichedPassages.length} enriched passages`);
               const retryResult = await queryLearningPath({
                 query: inputData.query,
@@ -498,13 +295,11 @@ export default function useProblemFirst() {
                 retrievedContext: enrichedPassages,
                 caseReport: activeCaseReport || undefined,
                 conversationHistory: inputData._conversationHistory || conversationHistory,
-                agenticRound: result.data.agenticRound || 1, // prevent infinite loop
+                agenticRound: result.data.agenticRound || 1,
               });
 
-              // Process the retry result (should be ANSWER or fallback)
               if (retryResult.data?.responseType === "ANSWER") {
-                result = retryResult; // Replace result so the code below handles it
-                // Update retrievedPassages for blended path building
+                result = retryResult;
                 retrievedPassages = enrichedPassages;
               } else {
                 devWarn("[AgenticRAG] Retry didn't produce ANSWER, using original result");
@@ -517,7 +312,6 @@ export default function useProblemFirst() {
           if (!result.data.success)
             throw new Error(result.data.message || "Failed to process query");
 
-          // Always extract answer data when Cloud Function returns ANSWER
           const hasAnswerData = result.data.responseType === "ANSWER" && result.data.mostLikelyCause;
           if (hasAnswerData) {
             gotAnswerData = true;
@@ -568,46 +362,12 @@ export default function useProblemFirst() {
         cartData.retrievedPassages = retrievedPassages;
         cartData._localFallback = !geminiSucceeded;
 
-        // Fetch user's feedback boost map
-        const currentUser = getAuth(getFirebaseApp()).currentUser;
-        const boostMap = currentUser ? await getBoostMap(currentUser.uid) : null;
-
-        // Match courses
-        const matchedCourses = await matchCoursesToCart(
-          cartData,
-          courses,
-          inputData.selectedTagIds || [],
-          inputData.errorLog || "",
-          semanticResults,
-          boostMap
-        );
-        cartData.matchedCourses = matchedCourses;
-
-        // Build learning path
-        const matchedTagIds = [
-          ...(cartData.diagnosis?.matched_tag_ids || []),
-          ...(inputData.detectedTagIds || []),
-          ...(inputData.selectedTagIds || []),
-        ];
-        const pathResult = buildLearningPath(matchedCourses, matchedTagIds, {
-          preferTroubleshooting: true,
-          diversity: true,
-          timeBudgetMinutes: 300,
-        });
-
-        const roleMap = {};
-        for (const item of pathResult.path) {
-          roleMap[item.course.code] = {
-            role: item.role,
-            reason: item.reason,
-            estimatedMinutes: item.estimatedMinutes,
-          };
-        }
-
-        // Flatten to videos
-        const allItems = await flattenCoursesToVideos(matchedCourses, inputData.query, roleMap);
-        const driveVideos = allItems.filter((v) => !v.type || v.type === "video");
-        const nonVideoItems = allItems.filter((v) => v.type === "doc" || v.type === "youtube");
+        // ── Step 3: Shared course → video pipeline ──
+        const { matchedCourses, driveVideos, nonVideoItems, allItems } =
+          await matchAndFlattenToVideos(cartData, courses, inputData, semanticResults, {
+            preferTroubleshooting: true,
+            errorLog: inputData.errorLog || "",
+          });
 
         if (allItems.length === 0) {
           setError(
@@ -625,12 +385,12 @@ export default function useProblemFirst() {
         setVideoResults(driveVideos);
         setDiagnosisData(cartData);
 
-        // Build blended path (docs + YouTube gap-fillers)
-        await _buildBlendedPathForDiagnosis(inputData, cartData, driveVideos, nonVideoItems);
+        // ── Step 4: Shared blended path builder ──
+        const blended = await buildBlendedPathFromDiagnosis(
+          inputData, cartData, driveVideos, nonVideoItems, STOP_WORDS
+        );
+        if (blended) setBlendedPath(blended);
 
-        // Show step-by-step fix instructions (ANSWERED) as the primary experience.
-        // Previously this used stale `answerData` closure (always null on first submit).
-        // Now we check if the Cloud Function actually returned answer data this run.
         setStage(gotAnswerData ? STAGES.ANSWERED : STAGES.DIAGNOSIS);
 
         // Update history with cart_id
@@ -653,7 +413,7 @@ export default function useProblemFirst() {
         setStage(STAGES.ERROR);
       }
     },
-    [courses, getDetectedPersona, clearCart, caseReport, _buildBlendedPathForDiagnosis, conversationHistory]
+    [courses, getDetectedPersona, clearCart, caseReport, conversationHistory]
   );
 
   // ──────────── UI Handlers ────────────
@@ -675,14 +435,11 @@ export default function useProblemFirst() {
   const handleClarifyAnswer = useCallback(
     (answer) => {
       if (!lastInputData) return;
-      // Push user's answer into conversation history
       const updatedHistory = [
         ...conversationHistory,
         { role: "user", content: answer },
       ];
       setConversationHistory(updatedHistory);
-
-      // Re-submit with full conversation history (not string-append)
       const augmentedInput = {
         ...lastInputData,
         _conversationHistory: updatedHistory,
@@ -694,7 +451,6 @@ export default function useProblemFirst() {
 
   const handleClarifySkip = useCallback(() => {
     if (!lastInputData) return;
-    // Skip clarification — force best-effort by sending max-round history
     const skipHistory = [
       ...conversationHistory,
       { role: "user", content: "(skipped — proceed with best effort)" },
