@@ -19,6 +19,13 @@ import re
 import time
 from pathlib import Path
 
+# Load .env file (matches the existing JS scripts' dotenv pattern)
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+except ImportError:
+    pass  # dotenv not installed, rely on shell environment
+
 # ---------------------------------------------------------------------------
 #  Paths
 # ---------------------------------------------------------------------------
