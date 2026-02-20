@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conceptual Augmentation Viewer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --surface: #0f172a;
+      --card: #1e293b;
+      --border: rgba(255,255,255,0.06);
+      --accent: #3b82f6;
+      --purple: #a78bfa;
+      --cyan: #22d3ee;
+      --green: #10b981;
+      --orange: #f97316;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --text: #e2e8f0;
+      --dim: #94a3b8;
+      --muted: #64748b;
+      --radius: 10px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',-apple-system,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    /* ---- TOP BAR ---- */
+    .topbar {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px 24px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      position:sticky; top:0; z-index:50;
+    }
+    .topbar .brand { color:var(--accent); font-weight:700; font-size:16px; }
+    .topbar .sub { color:var(--muted); font-size:11px; margin-top:2px; }
+    .topbar .score-badge {
+      display:flex; align-items:center; gap:12px;
+    }
+    .topbar .score-num {
+      font-family:'JetBrains Mono',monospace;
+      font-size:18px; font-weight:700;
+    }
+    .topbar .verdict {
+      padding:4px 10px; border-radius:20px;
+      font-size:10px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+    }
+    .verdict-NEEDS_AUGMENTATION { background:rgba(239,68,68,0.15); color:var(--red); }
+    .verdict-ADEQUATE { background:rgba(245,158,11,0.15); color:var(--yellow); }
+    .verdict-STRONG { background:rgba(16,185,129,0.15); color:var(--green); }
+    .topbar .grade {
+      width:36px; height:36px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; font-size:16px;
+    }
+    .grade-F, .grade-D { background:rgba(239,68,68,0.15); color:var(--red); border:2px solid var(--red); }
+    .grade-C { background:rgba(245,158,11,0.15); color:var(--yellow); border:2px solid var(--yellow); }
+    .grade-B { background:rgba(59,130,246,0.15); color:var(--accent); border:2px solid var(--accent); }
+    .grade-A { background:rgba(16,185,129,0.15); color:var(--green); border:2px solid var(--green); }
+
+    /* ---- MAIN LAYOUT ---- */
+    .main {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:0;
+      height:calc(100vh - 56px);
+    }
+
+    /* ---- LEFT PANEL ---- */
+    .left-panel {
+      border-right:1px solid var(--border);
+      overflow-y:auto;
+      padding:20px;
+    }
+    .video-title {
+      font-size:22px; font-weight:700; margin-bottom:16px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .video-title .rtx { font-size:10px; color:var(--muted); font-weight:500; }
+    .video-embed {
+      width:100%; aspect-ratio:16/9;
+      border-radius:var(--radius);
+      overflow:hidden;
+      margin-bottom:20px;
+      background:#000;
+    }
+    .video-embed iframe { width:100%; height:100%; border:0; }
+
+    /* Ratio bar */
+    .ratio-section { margin-bottom:24px; }
+    .ratio-label {
+      font-size:11px; font-weight:600; color:var(--dim);
+      text-transform:uppercase; letter-spacing:0.5px;
+      margin-bottom:8px;
+    }
+    .ratio-bar {
+      height:8px; border-radius:4px; overflow:hidden;
+      display:flex; margin-bottom:6px;
+    }
+    .ratio-proc { background:var(--orange); }
+    .ratio-conc { background:var(--cyan); }
+    .ratio-labels {
+      display:flex; justify-content:space-between;
+      font-size:11px;
+    }
+    .ratio-labels .proc { color:var(--orange); }
+    .ratio-labels .conc { color:var(--cyan); }
+
+    /* Transcript */
+    .transcript-section { margin-top:8px; }
+    .transcript-line {
+      font-size:12px; line-height:1.6;
+      padding:3px 8px;
+      display:flex; gap:8px;
+      border-radius:4px;
+    }
+    .transcript-line:hover { background:rgba(255,255,255,0.03); }
+    .transcript-line .ts {
+      font-family:'JetBrains Mono',monospace;
+      color:var(--muted); font-size:11px;
+      flex-shrink:0; width:36px;
+    }
+    .transcript-line .txt { color:var(--dim); }
+    .transcript-line.highlight {
+      background:rgba(59,130,246,0.08);
+      border-left:2px solid var(--accent);
+    }
+    .transcript-line.highlight .txt { color:var(--text); }
+
+    /* ---- RIGHT PANEL ---- */
+    .right-panel {
+      overflow-y:auto;
+      padding:20px;
+    }
+
+    /* Collapsible sections */
+    .section {
+      margin-bottom:12px;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+    }
+    .section-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 16px;
+      background:var(--surface);
+      cursor:pointer;
+      user-select:none;
+      transition:background 0.15s;
+    }
+    .section-header:hover { background:rgba(255,255,255,0.03); }
+    .section-header .title {
+      font-size:13px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .section-header .count {
+      font-size:11px; padding:2px 8px;
+      border-radius:10px; font-weight:600;
+      background:rgba(255,255,255,0.06);
+    }
+    .section-header .arrow {
+      font-size:12px; color:var(--muted);
+      transition:transform 0.2s;
+    }
+    .section.open .section-header .arrow { transform:rotate(90deg); }
+    .section-body { display:none; padding:12px 16px; }
+    .section.open .section-body { display:block; }
+
+    /* Theory break cards */
+    .aug-card {
+      background:rgba(255,255,255,0.02);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:14px 16px;
+      margin-bottom:10px;
+    }
+    .aug-card .timestamp {
+      font-family:'JetBrains Mono',monospace;
+      font-size:11px; color:var(--accent);
+      padding:2px 8px; border-radius:4px;
+      background:rgba(59,130,246,0.1);
+      display:inline-block; margin-bottom:8px;
+    }
+    .aug-card h4 { font-size:14px; font-weight:600; margin-bottom:6px; }
+    .aug-card p { font-size:13px; color:var(--dim); line-height:1.6; }
+    .aug-card .diagram {
+      margin-top:8px; padding:8px 12px;
+      background:rgba(59,130,246,0.06);
+      border-radius:6px; font-size:12px; color:var(--accent);
+      display:flex; align-items:flex-start; gap:6px;
+    }
+    .aug-card .warning-tag {
+      display:inline-flex; align-items:center; gap:4px;
+      margin-top:8px; padding:3px 10px;
+      border-radius:20px; font-size:11px; font-weight:600;
+    }
+    .warning-tag.critical { background:rgba(239,68,68,0.15); color:var(--red); }
+    .warning-tag.high { background:rgba(249,115,22,0.15); color:var(--orange); }
+    .warning-tag.medium { background:rgba(245,158,11,0.15); color:var(--yellow); }
+    .warning-tag.low { background:rgba(59,130,246,0.1); color:var(--accent); }
+    .antipattern-tag {
+      display:inline-flex; align-items:center; gap:4px;
+      margin-top:8px; padding:3px 10px;
+      border-radius:20px; font-size:11px; font-weight:600;
+      background:rgba(239,68,68,0.12); color:var(--red);
+    }
+
+    /* Prereq chips */
+    .prereq-chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .prereq-chip {
+      padding:4px 12px; border-radius:20px;
+      font-size:12px; background:rgba(255,255,255,0.05);
+      border:1px solid var(--border); color:var(--dim);
+    }
+
+    /* Eval matrix */
+    .eval-row {
+      display:flex; align-items:center; gap:12px;
+      padding:6px 0;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    .eval-row:last-child { border-bottom:none; }
+    .eval-row .crit-name { font-size:12px; color:var(--dim); flex:1; }
+    .eval-row .bar-wrap {
+      width:120px; height:6px;
+      background:rgba(255,255,255,0.06);
+      border-radius:3px; overflow:hidden;
+    }
+    .eval-row .bar-fill { height:100%; border-radius:3px; transition:width 0.3s; }
+    .eval-row .score-val {
+      font-family:'JetBrains Mono',monospace;
+      font-size:12px; font-weight:600;
+      width:20px; text-align:right;
+    }
+    .bar-1 { background:var(--red); }
+    .bar-2 { background:var(--orange); }
+    .bar-3 { background:var(--yellow); }
+    .bar-4 { background:var(--accent); }
+    .bar-5 { background:var(--green); }
+
+    /* Loading */
+    .loading {
+      display:flex; align-items:center; justify-content:center;
+      height:100vh; flex-direction:column; gap:16px;
+    }
+    .loading .spinner {
+      width:36px; height:36px;
+      border:3px solid rgba(255,255,255,0.1);
+      border-top-color:var(--accent);
+      border-radius:50%;
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading p { color:var(--muted); font-size:14px; }
+
+    /* Video selector */
+    .video-nav {
+      display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;
+    }
+    .nav-link {
+      padding:4px 12px; border-radius:20px;
+      font-size:11px; font-weight:500;
+      background:rgba(255,255,255,0.04);
+      border:1px solid var(--border);
+      color:var(--dim); text-decoration:none;
+      transition:all 0.15s;
+    }
+    .nav-link:hover { background:rgba(59,130,246,0.1); color:var(--accent); border-color:var(--accent); }
+    .nav-link.active { background:var(--accent); color:white; border-color:var(--accent); }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Loading augmentation data…</p>
+  </div>
+</div>
+
+<script>
+function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+function getParam() {
+  return new URLSearchParams(window.location.search).get('video') || '100_01/18_BlueprintEditor';
+}
+
+function scoreColor(v) {
+  if (v <= 1) return 'bar-1';
+  if (v <= 2) return 'bar-2';
+  if (v <= 3) return 'bar-3';
+  if (v <= 4) return 'bar-4';
+  return 'bar-5';
+}
+
+const CRITERIA_LABELS = {
+  concept_clarification: 'Concept Clarification',
+  misconception_addressing: 'Misconception Addressing',
+  narrative_logic: 'Narrative Logic',
+  content_first_language: 'Content-First Language',
+  dynamic_visualizations: 'Dynamic Visualizations',
+  explicit_signaling: 'Explicit Signaling',
+  strict_segmentation: 'Strict Segmentation',
+  extraneous_load_reduction: 'Extraneous Load Reduction',
+  worked_example_fading: 'Worked Example Fading',
+  self_explanation_prompting: 'Self-Explanation Prompting',
+  affective_tone: 'Affective Tone'
+};
+
+async function init() {
+  const videoKey = getParam();
+  const parts = videoKey.split('/');
+  const course = parts[0];
+  const video = parts[1];
+
+  const [augRes, lookupRes] = await Promise.all([
+    fetch(`augmentation_data/${course}/${video}.json`),
+    fetch('video_lookup.json')
+  ]);
+
+  if (!augRes.ok) {
+    document.getElementById('app').innerHTML =
+      `<div class="loading"><p style="color:var(--red)">Could not load: augmentation_data/${course}/${video}.json</p></div>`;
+    return;
+  }
+
+  const data = await augRes.json();
+  const lookup = lookupRes.ok ? await lookupRes.json() : {};
+  const videoInfo = lookup[videoKey] || {};
+
+  const title = video.replace(/^\d+_/, '').replace(/([A-Z])/g, ' $1').trim();
+  const courseLabel = course.replace('_', '.');
+  document.title = `${courseLabel} — ${title} | Evaluator`;
+
+  const score = data.evaluation_matrix_score || {};
+  const cs = data.conceptual_score || {};
+  const driveUrl = videoInfo.drive_id ? `https://drive.google.com/file/d/${videoInfo.drive_id}/preview` : '';
+
+  // ---- Build highlight timestamps ----
+  const highlightTs = new Set();
+  (data.why_annotations || []).forEach(w => highlightTs.add(w.timestamp));
+  (data.theory_breaks || []).forEach(t => highlightTs.add(t.insert_after_timestamp));
+
+  // ---- Render ----
+  document.getElementById('app').innerHTML = `
+    <div class="topbar">
+      <div>
+        <div class="brand">Conceptual Augmentation Viewer</div>
+        <div class="sub">Pillar 5 Prototype — AI-Retrofit Pipeline</div>
+      </div>
+      <div class="score-badge">
+        <span class="score-num">${score.total || '?'}/55</span>
+        <span class="verdict verdict-${cs.verdict || ''}">${cs.verdict || 'N/A'}</span>
+        <span class="grade grade-${score.grade || 'F'}">${score.grade || '?'}</span>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="left-panel">
+        <div class="video-title">${courseLabel} — ${esc(title)}</div>
+        
+
+        <div class="ratio-section">
+          <div class="ratio-label">Procedural vs Conceptual Ratio</div>
+          <div class="ratio-bar">
+            <div class="ratio-proc" style="width:${cs.procedural_pct || 80}%"></div>
+            <div class="ratio-conc" style="width:${cs.conceptual_pct || 20}%"></div>
+          </div>
+          <div class="ratio-labels">
+            <span class="proc">● Procedural ${cs.procedural_pct || 0}%</span>
+            <span class="conc">Conceptual ${cs.conceptual_pct || 0}% ●</span>
+          </div>
+        </div>
+
+        <div class="transcript-section" id="transcriptSection">
+          <div style="color:var(--muted);font-size:12px;font-style:italic;">Transcript not available in evaluator mode — see the guided viewer for timed overlays.</div>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        ${renderSection('🧠', 'THEORY BREAKS', data.theory_breaks, renderTheoryBreaks)}
+        ${renderSection('💡', 'WHY ANNOTATIONS', data.why_annotations, renderWhyAnnotations)}
+        ${renderSection('❓', 'SELF-EXPLANATION PROMPTS', data.self_explanation_prompts, renderSelfExplanation)}
+        ${renderSection('⚠️', 'ARCHITECTURAL WARNINGS', data.architectural_warnings, renderWarnings)}
+        ${renderSection('📘', 'MISSING PREREQUISITES', data.missing_prerequisites, renderPrereqs)}
+        ${renderSection('📊', 'EVALUATION MATRIX', Object.keys(CRITERIA_LABELS), renderEvalMatrix, score)}
+      </div>
+    </div>
+  `;
+
+  // Open first two sections by default
+  document.querySelectorAll('.section').forEach((s, i) => {
+    if (i < 2) s.classList.add('open');
+    s.querySelector('.section-header').addEventListener('click', () => s.classList.toggle('open'));
+  });
+}
+
+function renderSection(icon, title, items, renderer, extra) {
+  const count = items ? items.length : 0;
+  return `
+    <div class="section">
+      <div class="section-header">
+        <span class="title">${icon} ${title} <span class="count">${count}</span></span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="section-body">${renderer(items, extra)}</div>
+    </div>
+  `;
+}
+
+function renderTheoryBreaks(breaks) {
+  if (!breaks || !breaks.length) return '<p style="color:var(--muted);font-size:13px;">None</p>';
+  return breaks.map(tb => `
+    <div class="aug-card">
+      <span class="timestamp">🕐 ${esc(tb.insert_after_timestamp)}</span>
+      <h4>${esc(tb.title)}</h4>
+      <p>${esc(tb.concept)}</p>
+      ${tb.diagram_suggestion ? `<div class="diagram">📐 ${esc(tb.diagram_suggestion)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderWhyAnnotations(annotations) {
+  if (!annotations || !annotations.length) return '<p style="color:var(--muted);font-size:13px;">None</p>';
+  return annotations.map(wa => `
+    <div class="aug-card">
+      <span class="timestamp">🕐 ${esc(wa.timestamp)}</span>
+      <h4>"${esc(wa.procedural_step)}"</h4>
+      <p>${esc(wa.why)}</p>
+      ${wa.antipattern_warning ? `<span class="antipattern-tag">⚠ ${esc(wa.antipattern_warning)}</span>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderSelfExplanation(prompts) {
+  if (!prompts || !prompts.length) return '<p style="color:var(--muted);font-size:13px;">None</p>';
+  return prompts.map(p => `
+    <div class="aug-card">
+      <span class="timestamp">🕐 ${esc(p.insert_after_timestamp)}</span>
+      <h4>${esc(p.prompt)}</h4>
+      <p>${esc(p.expected_insight)}</p>
+    </div>
+  `).join('');
+}
+
+function renderWarnings(warnings) {
+  if (!warnings || !warnings.length) return '<p style="color:var(--muted);font-size:13px;">None</p>';
+  return warnings.map(w => `
+    <div class="aug-card">
+      <span class="timestamp">🕐 ${esc(w.timestamp)}</span>
+      <p>${esc(w.warning)}</p>
+      <span class="warning-tag ${(w.severity||'').toLowerCase()}">${esc(w.severity)}</span>
+      <p style="margin-top:8px;color:var(--green);font-size:12px;">✅ Fix: ${esc(w.fix)}</p>
+    </div>
+  `).join('');
+}
+
+function renderPrereqs(prereqs) {
+  if (!prereqs || !prereqs.length) return '<p style="color:var(--muted);font-size:13px;">None</p>';
+  return `<div class="prereq-chips">${prereqs.map(p => `<span class="prereq-chip">${esc(p)}</span>`).join('')}</div>`;
+}
+
+function renderEvalMatrix(keys, score) {
+  if (!score) return '<p style="color:var(--muted);font-size:13px;">No data</p>';
+  return Object.entries(CRITERIA_LABELS).map(([key, label]) => {
+    const val = score[key] || 0;
+    return `
+      <div class="eval-row">
+        <span class="crit-name">${label}</span>
+        <div class="bar-wrap"><div class="bar-fill ${scoreColor(val)}" style="width:${val * 20}%"></div></div>
+        <span class="score-val" style="color:var(--${val<=2?'red':val<=3?'yellow':'green'})">${val}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+init();
+</script>
+</body>
+</html>
