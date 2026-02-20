@@ -17,7 +17,7 @@ MAX_RETRIES = 3
 RETRY_DELAY = 60  # seconds
 
 def fetch_trends():
-    pytrends = TrendReq(hl='en-US', tz=360, retries=2, backoff_factor=0.5)
+    pytrends = TrendReq(hl='en-US', tz=360, retries=0, backoff_factor=0)
 
     insights = []
 
