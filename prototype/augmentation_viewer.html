@@ -388,6 +388,237 @@
     .type-theory { color: var(--purple); }
     .type-why { color: var(--accent); }
     .type-think { color: var(--cyan); }
+
+    /* ---- QUIZ OVERLAY ---- */
+    .quiz-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .quiz-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .quiz-container {
+      width: 90%;
+      max-width: 640px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .quiz-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .quiz-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .quiz-header .quiz-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .quiz-progress {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .quiz-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transition: all 0.2s;
+    }
+
+    .quiz-dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+    .quiz-dot.correct { background: var(--green); }
+    .quiz-dot.wrong { background: var(--orange); }
+
+    .quiz-question {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .quiz-question .q-number {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .quiz-question .q-text {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .quiz-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+
+    .quiz-option:hover:not(.disabled) {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: var(--accent);
+    }
+
+    .quiz-option.selected {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--accent);
+    }
+
+    .quiz-option.correct-answer {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .quiz-option.wrong-answer {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .quiz-option.disabled { cursor: default; opacity: 0.6; }
+    .quiz-option.disabled:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1); }
+
+    .quiz-feedback {
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .quiz-feedback.show { display: block; }
+
+    .quiz-feedback.correct {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--green);
+    }
+
+    .quiz-feedback.wrong {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      color: var(--text-dim);
+    }
+
+    .quiz-nav {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .quiz-next-btn {
+      display: none;
+      padding: 10px 28px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quiz-next-btn.show { display: inline-flex; }
+    .quiz-next-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3); }
+
+    /* Results */
+    .quiz-results {
+      text-align: center;
+    }
+
+    .quiz-results .score-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 32px;
+      font-weight: 800;
+      border: 3px solid;
+    }
+
+    .quiz-results .score-circle.great { border-color: var(--green); color: var(--green); background: rgba(16, 185, 129, 0.1); }
+    .quiz-results .score-circle.okay { border-color: var(--yellow); color: var(--yellow); background: rgba(245, 158, 11, 0.1); }
+    .quiz-results .score-circle.needs-work { border-color: var(--orange); color: var(--orange); background: rgba(249, 115, 22, 0.1); }
+
+    .quiz-results .score-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .quiz-results .results-msg { font-size: 14px; color: var(--text-dim); margin-bottom: 20px; }
+
+    .quiz-review-item {
+      text-align: left;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .quiz-review-item .review-q { color: var(--text); font-weight: 500; margin-bottom: 4px; }
+    .quiz-review-item .review-a { color: var(--green); }
+
+    .quiz-restart-btn {
+      margin-top: 20px;
+      padding: 10px 28px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quiz-restart-btn:hover { background: rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
@@ -436,6 +667,11 @@
         <button class="ctrl-btn" onclick="resetGuide()">↺ Restart</button>
       </div>
     </div>
+  </div>
+
+  <!-- Quiz overlay -->
+  <div class="quiz-overlay" id="quizOverlay">
+    <div class="quiz-container" id="quizContainer"></div>
   </div>
 </div>
 
@@ -590,6 +826,7 @@ function tick() {
   if (elapsed > TOTAL_DURATION) {
     clearInterval(intervalId);
     hideCard();
+    showQuiz();
   }
 }
 
@@ -700,6 +937,190 @@ function toggleReveal(btn) {
   const isOpen = answer.classList.contains('show');
   answer.classList.toggle('show');
   btn.textContent = isOpen ? 'Show Answer ▸' : 'Hide Answer ◂';
+}
+
+// ---- QUIZ ----
+const QUIZ = [
+  {
+    question: "What is the relationship between Blueprints and C++ in Unreal Engine?",
+    options: [
+      "Blueprints completely replace C++ — you never need it",
+      "Blueprints compile to bytecode/C++ — they're an abstraction layer for rapid prototyping",
+      "Blueprints are slower but cannot be converted to C++",
+      "C++ and Blueprints are completely separate systems"
+    ],
+    correct: 1,
+    explanation: "Blueprints are compiled into optimized bytecode or native C++. They let you prototype fast, but performance-critical code should be moved to C++ once proven."
+  },
+  {
+    question: "What's wrong with Hard-Reference Casting between Blueprints?",
+    options: [
+      "It doesn't work at all in UE5",
+      "It creates tight coupling — both Blueprints must be loaded into memory and changes can break each other",
+      "It only works in the Construction Script",
+      "It makes Blueprints run faster but uses more memory"
+    ],
+    correct: 1,
+    explanation: "Hard-Reference Casting creates tight coupling. Use Blueprint Interfaces or Event Dispatchers instead for loose, scalable communication."
+  },
+  {
+    question: "When does the Construction Script execute?",
+    options: [
+      "Only when you press Play",
+      "Every frame during gameplay",
+      "In the editor — when you place, move, or modify the actor",
+      "Only when the game is packaged"
+    ],
+    correct: 2,
+    explanation: "The Construction Script runs in the editor at design time. The Event Graph runs at runtime. Confusing them is one of the most common Blueprint mistakes."
+  },
+  {
+    question: "What happens if you put complex game logic in the Construction Script?",
+    options: [
+      "It runs faster because the editor is optimized",
+      "It executes every time the actor is moved or the level loads in the editor, causing bugs and slowdowns",
+      "Nothing — the editor ignores Construction Script logic",
+      "It automatically moves to the Event Graph at compile time"
+    ],
+    correct: 1,
+    explanation: "Construction Scripts fire on every editor action. Heavy logic there causes sluggish editors and bugs that can't be reproduced during Play mode."
+  },
+  {
+    question: "What is the Actor-Component model?",
+    options: [
+      "Actors contain all functionality in a single monolithic class",
+      "Components are visual-only — they can't have logic",
+      "Actors are empty containers filled with Components, each providing a specific capability",
+      "Components replace Actors in UE5"
+    ],
+    correct: 2,
+    explanation: "The Actor-Component model is about composition: an Actor is a container, and Components (mesh, light, collision, audio) each do one job. You build complexity by combining simple, reusable pieces."
+  }
+];
+
+let quizIdx = 0;
+let quizScore = 0;
+let quizAnswered = false;
+let quizResults = [];
+
+function showQuiz() {
+  document.getElementById('quizOverlay').classList.add('visible');
+  document.getElementById('timelineBar').classList.remove('visible');
+  document.getElementById('prereqsBar').classList.remove('visible');
+  quizIdx = 0;
+  quizScore = 0;
+  quizResults = [];
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUIZ[quizIdx];
+  const container = document.getElementById('quizContainer');
+  quizAnswered = false;
+
+  const dots = QUIZ.map((_, i) => {
+    let cls = 'quiz-dot';
+    if (i === quizIdx) cls += ' active';
+    if (i < quizIdx && quizResults[i]) cls += ' correct';
+    if (i < quizIdx && !quizResults[i]) cls += ' wrong';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="quiz-header">
+      <h2>📝 Knowledge Check</h2>
+      <div class="quiz-sub">Test what you learned from the Blueprint Editor guide</div>
+    </div>
+    <div class="quiz-progress">${dots}</div>
+    <div class="quiz-question">
+      <div class="q-number">Question ${quizIdx + 1} of ${QUIZ.length}</div>
+      <div class="q-text">${q.question}</div>
+      ${q.options.map((opt, i) => `
+        <button class="quiz-option" onclick="answerQuiz(${i})" id="opt-${i}">${opt}</button>
+      `).join('')}
+      <div class="quiz-feedback" id="quizFeedback"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="quiz-next-btn" id="quizNextBtn" onclick="nextQuestion()">
+        ${quizIdx < QUIZ.length - 1 ? 'Next Question →' : 'See Results'}
+      </button>
+    </div>
+  `;
+}
+
+function answerQuiz(choice) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const q = QUIZ[quizIdx];
+  const isCorrect = choice === q.correct;
+  if (isCorrect) quizScore++;
+  quizResults.push(isCorrect);
+
+  // Style options
+  q.options.forEach((_, i) => {
+    const btn = document.getElementById(`opt-${i}`);
+    btn.classList.add('disabled');
+    if (i === q.correct) btn.classList.add('correct-answer');
+    if (i === choice && !isCorrect) btn.classList.add('wrong-answer');
+    if (i === choice && isCorrect) btn.classList.add('correct-answer');
+  });
+
+  // Show feedback
+  const fb = document.getElementById('quizFeedback');
+  fb.className = `quiz-feedback show ${isCorrect ? 'correct' : 'wrong'}`;
+  fb.innerHTML = isCorrect
+    ? `✅ <strong>Correct!</strong> ${q.explanation}`
+    : `❌ <strong>Not quite.</strong> ${q.explanation}`;
+
+  document.getElementById('quizNextBtn').classList.add('show');
+}
+
+function nextQuestion() {
+  quizIdx++;
+  if (quizIdx < QUIZ.length) {
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  const pct = Math.round((quizScore / QUIZ.length) * 100);
+  let grade, msg, cls;
+  if (pct >= 80) { grade = 'A'; msg = 'Excellent! You have a strong understanding of these Blueprint concepts.'; cls = 'great'; }
+  else if (pct >= 60) { grade = 'B'; msg = 'Good foundation! Review the concepts you missed below.'; cls = 'okay'; }
+  else { grade = 'C'; msg = 'Consider rewatching with the guided annotations to reinforce these concepts.'; cls = 'needs-work'; }
+
+  const wrongItems = QUIZ.map((q, i) => {
+    if (quizResults[i]) return '';
+    return `
+      <div class="quiz-review-item">
+        <div class="review-q">❌ ${q.question}</div>
+        <div class="review-a">✅ ${q.options[q.correct]}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('quizContainer').innerHTML = `
+    <div class="quiz-results">
+      <div class="quiz-header">
+        <h2>📝 Results</h2>
+      </div>
+      <div class="score-circle ${cls}">
+        ${quizScore}/${QUIZ.length}
+        <div class="score-label">${pct}%</div>
+      </div>
+      <div class="results-msg">${msg}</div>
+      ${wrongItems ? '<div style="margin-bottom:8px;font-size:12px;color:var(--text-muted);text-align:left;">Review these concepts:</div>' + wrongItems : ''}
+      <button class="quiz-restart-btn" onclick="restartAll()">↺ Watch Again with Guide</button>
+    </div>
+  `;
+}
+
+function restartAll() {
+  document.getElementById('quizOverlay').classList.remove('visible');
+  document.getElementById('startOverlay').classList.remove('hidden');
 }
 
 initMarkers();
