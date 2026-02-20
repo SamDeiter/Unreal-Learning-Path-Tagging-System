@@ -32,6 +32,7 @@ const AdminFeedback = lazy(() => import("./components/AdminFeedback/AdminFeedbac
 const InsightsPanel = lazy(() => import("./components/Visualizations/InsightsPanel"));
 const CollapsibleSection = lazy(() => import("./components/Visualizations/CollapsibleSection"));
 const FeedbackButton = lazy(() => import("./components/Feedback/FeedbackButton"));
+const PersonaQuiz = lazy(() => import("./components/PersonaQuiz/PersonaQuiz"));
 
 // Analytics visualizations — import directly (not via barrel) for proper code-splitting
 const JourneyHeatmap = lazy(() => import("./components/Visualizations/JourneyHeatmap"));
@@ -47,11 +48,12 @@ const TagHistorySparkline = lazy(() => import("./components/Visualizations/TagHi
 const InviteManager = lazy(() => import("./components/InviteManager/InviteManager"));
 
 function App() {
-  const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'builder' | 'tags'
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [preSelectedSkill, setPreSelectedSkill] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userIsAdmin, setUserIsAdmin] = useState(false);
   const [newFeedbackCount, setNewFeedbackCount] = useState(0);
+  const [showQuiz, setShowQuiz] = useState(() => !localStorage.getItem("ue5_persona_id"));
 
   // Check if current user is admin for showing invite tab
   useEffect(() => {
@@ -303,6 +305,15 @@ function App() {
                     <button className="header-signout-btn" onClick={() => signOutUser()}>
                       Sign Out
                     </button>
+                    <button
+                      className="retake-quiz-btn"
+                      onClick={() => {
+                        localStorage.removeItem("ue5_persona_id");
+                        setShowQuiz(true);
+                      }}
+                    >
+                      🔄 Retake Quiz
+                    </button>
                   </div>
                 )}
               </div>
@@ -446,6 +457,13 @@ function App() {
             </main>
 
             <FeedbackButton user={currentUser} />
+
+            {/* Persona Quiz Overlay */}
+            {showQuiz && (
+              <Suspense fallback={<LoadingSpinner />}>
+                <PersonaQuiz onComplete={() => setShowQuiz(false)} />
+              </Suspense>
+            )}
           </div>
         </TagDataProvider>
       </PathProvider>

@@ -6,7 +6,7 @@
  * - addCourse/removeCourse/reorderCourses: Path manipulation
  * - pathStats: Computed stats (total time, level range, etc.)
  */
-import { createContext, useContext, useReducer, useMemo } from "react";
+import { createContext, useContext, useReducer, useMemo, useState } from "react";
 
 const PathContext = createContext(null);
 
@@ -99,6 +99,20 @@ const initialState = {
 export function PathProvider({ children }) {
   const [state, dispatch] = useReducer(pathReducer, initialState);
 
+  // Persona state — persisted in localStorage
+  const [activePersonaId, setActivePersonaIdState] = useState(
+    () => localStorage.getItem("ue5_persona_id") || null
+  );
+
+  const setActivePersonaId = (id) => {
+    setActivePersonaIdState(id);
+    if (id) {
+      localStorage.setItem("ue5_persona_id", id);
+    } else {
+      localStorage.removeItem("ue5_persona_id");
+    }
+  };
+
   // Computed path statistics
   const pathStats = useMemo(() => {
     const courses = state.courses;
@@ -184,31 +198,31 @@ export function PathProvider({ children }) {
   };
 
   // --- localStorage Persistence ---
-  const STORAGE_KEY = 'ue5-saved-paths';
+  const STORAGE_KEY = "ue5-saved-paths";
 
   const getSavedPaths = () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       return saved ? JSON.parse(saved) : [];
     } catch (e) {
-      console.error('Error loading saved paths:', e);
+      console.error("Error loading saved paths:", e);
       return [];
     }
   };
 
   const savePath = (name) => {
     if (state.courses.length === 0) return false;
-    
+
     const savedPaths = getSavedPaths();
     const newPath = {
       id: `path-${Date.now()}`,
-      name: name || state.learningIntent.primaryGoal || 'Untitled Path',
+      name: name || state.learningIntent.primaryGoal || "Untitled Path",
       courses: state.courses,
       learningIntent: state.learningIntent,
       savedAt: new Date().toISOString(),
-      courseCount: state.courses.length
+      courseCount: state.courses.length,
     };
-    
+
     savedPaths.unshift(newPath); // Add to front
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedPaths.slice(0, 20))); // Keep 20 max
     return true;
@@ -216,7 +230,7 @@ export function PathProvider({ children }) {
 
   const loadSavedPath = (pathId) => {
     const savedPaths = getSavedPaths();
-    const found = savedPaths.find(p => p.id === pathId);
+    const found = savedPaths.find((p) => p.id === pathId);
     if (found) {
       dispatch({ type: ACTIONS.LOAD_PATH, payload: found.courses });
       dispatch({ type: ACTIONS.SET_LEARNING_INTENT, payload: found.learningIntent });
@@ -226,7 +240,7 @@ export function PathProvider({ children }) {
   };
 
   const deleteSavedPath = (pathId) => {
-    const savedPaths = getSavedPaths().filter(p => p.id !== pathId);
+    const savedPaths = getSavedPaths().filter((p) => p.id !== pathId);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedPaths));
   };
 
@@ -246,6 +260,9 @@ export function PathProvider({ children }) {
     getSavedPaths,
     loadSavedPath,
     deleteSavedPath,
+    // Persona
+    activePersonaId,
+    setActivePersonaId,
   };
 
   return <PathContext.Provider value={value}>{children}</PathContext.Provider>;
