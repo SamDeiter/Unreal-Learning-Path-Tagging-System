@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Augmentation Dashboard | UE5 Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0a0e17; --surface:#0f172a; --card:#1e293b;
+      --border:rgba(255,255,255,0.06);
+      --accent:#3b82f6; --purple:#a78bfa; --cyan:#22d3ee;
+      --green:#10b981; --orange:#f97316; --yellow:#f59e0b; --red:#ef4444;
+      --text:#e2e8f0; --dim:#94a3b8; --muted:#64748b;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+    .header{padding:24px 32px;border-bottom:1px solid var(--border);background:var(--surface);}
+    .header h1{font-size:22px;font-weight:700;color:var(--accent);}
+    .header .sub{font-size:12px;color:var(--muted);margin-top:4px;}
+
+    .content{padding:24px 32px;max-width:1400px;margin:0 auto;}
+
+    /* Aggregate stats */
+    .agg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px;}
+    .agg-card{
+      background:var(--surface);border:1px solid var(--border);border-radius:10px;
+      padding:16px;text-align:center;
+    }
+    .agg-card .val{font-size:28px;font-weight:800;font-family:'JetBrains Mono',monospace;}
+    .agg-card .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;}
+    .agg-card .sub-val{font-size:11px;color:var(--dim);margin-top:2px;}
+
+    /* Grade distribution */
+    .grade-dist{display:flex;gap:8px;margin-bottom:24px;}
+    .grade-bar{
+      flex:1;background:var(--surface);border:1px solid var(--border);
+      border-radius:8px;padding:12px;text-align:center;
+    }
+    .grade-bar .letter{font-size:22px;font-weight:800;margin-bottom:4px;}
+    .grade-bar .cnt{font-size:16px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+    .grade-bar .pct{font-size:10px;color:var(--muted);margin-top:2px;}
+    .grade-A .letter{color:var(--green);} .grade-B .letter{color:var(--accent);}
+    .grade-C .letter{color:var(--yellow);} .grade-D .letter{color:var(--orange);}
+    .grade-F .letter{color:var(--red);}
+
+    /* Filters */
+    .filters{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+    .filter-btn{
+      padding:5px 14px;border-radius:20px;border:1px solid var(--border);
+      background:rgba(255,255,255,0.03);color:var(--dim);font-size:11px;font-weight:500;
+      cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;
+    }
+    .filter-btn:hover{background:rgba(255,255,255,0.06);color:var(--text);}
+    .filter-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
+    .search-box{
+      flex:1;min-width:200px;padding:7px 14px;border-radius:8px;
+      border:1px solid var(--border);background:rgba(255,255,255,0.03);
+      color:var(--text);font-size:13px;font-family:'Inter',sans-serif;
+      outline:none;transition:border-color 0.15s;
+    }
+    .search-box:focus{border-color:var(--accent);}
+    .search-box::placeholder{color:var(--muted);}
+    .result-count{font-size:11px;color:var(--muted);}
+
+    /* Video table */
+    .video-table{width:100%;border-collapse:collapse;}
+    .video-table th{
+      text-align:left;padding:8px 12px;font-size:10px;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;
+      border-bottom:1px solid var(--border);
+      cursor:pointer;-webkit-user-select:none;user-select:none;
+      white-space:nowrap;
+    }
+    .video-table th:hover{color:var(--text);}
+    .video-table th .sort-arrow{font-size:9px;margin-left:4px;opacity:0.5;}
+    .video-table th.sorted .sort-arrow{opacity:1;color:var(--accent);}
+    .video-table td{
+      padding:10px 12px;border-bottom:1px solid var(--border);
+      font-size:13px;vertical-align:middle;
+    }
+    .video-table tr:hover td{background:rgba(255,255,255,0.02);}
+    .video-table .grade-cell{
+      font-weight:800;font-size:14px;text-align:center;width:40px;
+    }
+    .video-table .score-cell{
+      font-family:'JetBrains Mono',monospace;font-size:12px;text-align:center;width:60px;
+    }
+    .video-table .title-cell{font-weight:500;}
+    .video-table .title-cell .course{font-size:11px;color:var(--muted);margin-right:6px;}
+    .video-table .count-cell{
+      font-family:'JetBrains Mono',monospace;font-size:12px;
+      text-align:center;width:50px;color:var(--dim);
+    }
+    .video-table .actions-cell{width:100px;text-align:right;}
+    .action-link{
+      padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;
+      text-decoration:none;border:1px solid var(--border);
+      color:var(--dim);transition:all 0.15s;margin-left:4px;
+    }
+    .action-link:hover{background:rgba(59,130,246,0.1);color:var(--accent);border-color:var(--accent);}
+    .action-link.eval{color:var(--purple);}
+    .action-link.view{color:var(--accent);}
+
+    /* Mini bar for ratio */
+    .mini-ratio{display:flex;width:60px;height:4px;border-radius:2px;overflow:hidden;}
+    .mini-ratio .p{background:var(--orange);} .mini-ratio .c{background:var(--cyan);}
+
+    .verdict-tag{
+      padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;
+      text-transform:uppercase;letter-spacing:0.3px;white-space:nowrap;
+    }
+    .verdict-NEEDS_AUGMENTATION{background:rgba(239,68,68,0.1);color:var(--red);}
+    .verdict-ADEQUATE{background:rgba(245,158,11,0.1);color:var(--yellow);}
+    .verdict-STRONG{background:rgba(16,185,129,0.1);color:var(--green);}
+
+    .grade-color-A{color:var(--green);} .grade-color-B{color:var(--accent);}
+    .grade-color-C{color:var(--yellow);} .grade-color-D{color:var(--orange);}
+    .grade-color-F{color:var(--red);} .grade-color-\\?{color:var(--muted);}
+
+    .loading{display:flex;align-items:center;justify-content:center;height:60vh;flex-direction:column;gap:16px;}
+    .spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 Augmentation Dashboard</h1>
+  <div class="sub">Conceptual quality overview for all processed UE5 videos — Pillar 5 AI-Retrofit Pipeline</div>
+</div>
+
+<div class="content" id="app">
+  <div class="loading"><div class="spinner"></div><p style="color:var(--muted)">Loading summary…</p></div>
+</div>
+
+<script>
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+
+let allVideos=[];
+let currentSort={col:'score',dir:'asc'};
+let currentFilter='all';
+
+async function init(){
+  const res=await fetch('augmentation_summary.json');
+  if(!res.ok){document.getElementById('app').innerHTML='<div class="loading"><p style="color:var(--red)">Could not load augmentation_summary.json — run: python scripts/build_augmentation_summary.py</p></div>';return;}
+  const data=await res.json();
+  allVideos=data.videos;
+  render(data);
+}
+
+function render(data){
+  const o=data.overall;
+  const n=data.total_videos;
+
+  document.getElementById('app').innerHTML=`
+    <div class="agg-grid">
+      <div class="agg-card"><div class="val" style="color:var(--accent)">${n}</div><div class="lbl">Videos Analyzed</div></div>
+      <div class="agg-card"><div class="val" style="color:var(--yellow)">${o.avg_score}</div><div class="lbl">Avg Score</div><div class="sub-val">out of 55</div></div>
+      <div class="agg-card"><div class="val" style="color:var(--orange)">${o.avg_procedural_pct}%</div><div class="lbl">Avg Procedural</div></div>
+      <div class="agg-card"><div class="val" style="color:var(--cyan)">${o.avg_conceptual_pct}%</div><div class="lbl">Avg Conceptual</div></div>
+      <div class="agg-card"><div class="val" style="color:var(--purple)">${o.total_theory_breaks}</div><div class="lbl">Theory Breaks</div><div class="sub-val">generated across all videos</div></div>
+      <div class="agg-card"><div class="val" style="color:var(--red)">${o.total_warnings}</div><div class="lbl">Arch. Warnings</div><div class="sub-val">flagged risks</div></div>
+    </div>
+
+    <div class="grade-dist">
+      ${['A','B','C','D','F'].map(g=>{
+        const cnt=o.grade_distribution[g]||0;
+        const pct=n?Math.round(cnt/n*100):0;
+        return `<div class="grade-bar grade-${g}"><div class="letter">${g}</div><div class="cnt">${cnt}</div><div class="pct">${pct}% of videos</div></div>`;
+      }).join('')}
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('NEEDS_AUGMENTATION',this)">Needs Augmentation</button>
+      <button class="filter-btn" onclick="setFilter('ADEQUATE',this)">Adequate</button>
+      <button class="filter-btn" onclick="setFilter('STRONG',this)">Strong</button>
+      <input class="search-box" placeholder="🔍  Search videos…" oninput="applyFilters()" id="searchBox">
+      <span class="result-count" id="resultCount"></span>
+    </div>
+
+    <table class="video-table">
+      <thead>
+        <tr>
+          <th onclick="sortBy('grade')">Grade <span class="sort-arrow">▼</span></th>
+          <th onclick="sortBy('score')">Score <span class="sort-arrow">▼</span></th>
+          <th onclick="sortBy('title')">Video <span class="sort-arrow">▼</span></th>
+          <th onclick="sortBy('verdict')">Verdict <span class="sort-arrow">▼</span></th>
+          <th>Ratio</th>
+          <th onclick="sortBy('theory_breaks')" title="Theory Breaks">🧠 <span class="sort-arrow">▼</span></th>
+          <th onclick="sortBy('why_annotations')" title="Why Annotations">💡 <span class="sort-arrow">▼</span></th>
+          <th onclick="sortBy('warnings')" title="Warnings">⚠️ <span class="sort-arrow">▼</span></th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="videoRows"></tbody>
+    </table>
+  `;
+
+  applyFilters();
+}
+
+function renderRows(videos){
+  const tbody=document.getElementById('videoRows');
+  document.getElementById('resultCount').textContent=`${videos.length} video${videos.length!==1?'s':''}`;
+
+  tbody.innerHTML=videos.map(v=>`
+    <tr>
+      <td class="grade-cell grade-color-${v.grade}">${v.grade}</td>
+      <td class="score-cell">${v.score}/55</td>
+      <td class="title-cell"><span class="course">${esc(v.course)}</span>${esc(v.title)}</td>
+      <td><span class="verdict-tag verdict-${v.verdict}">${(v.verdict||'?').replace(/_/g,' ')}</span></td>
+      <td><div class="mini-ratio"><div class="p" style="width:${v.procedural_pct}%"></div><div class="c" style="width:${v.conceptual_pct}%"></div></div></td>
+      <td class="count-cell">${v.theory_breaks}</td>
+      <td class="count-cell">${v.why_annotations}</td>
+      <td class="count-cell">${v.warnings}</td>
+      <td class="actions-cell">
+        <a class="action-link eval" href="augmentation_evaluator.html?video=${v.key}" target="_blank">Evaluate</a>
+        <a class="action-link view" href="augmentation_viewer.html?video=${v.key}" target="_blank">Guide</a>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function setFilter(verdict,btn){
+  currentFilter=verdict;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters(){
+  const q=(document.getElementById('searchBox')?.value||'').toLowerCase();
+  let filtered=allVideos;
+  if(currentFilter!=='all') filtered=filtered.filter(v=>v.verdict===currentFilter);
+  if(q) filtered=filtered.filter(v=>v.title.toLowerCase().includes(q)||v.course.toLowerCase().includes(q));
+  sortVideos(filtered);
+  renderRows(filtered);
+}
+
+function sortBy(col){
+  if(currentSort.col===col) currentSort.dir=currentSort.dir==='asc'?'desc':'asc';
+  else{currentSort.col=col;currentSort.dir=col==='score'?'asc':'desc';}
+  applyFilters();
+}
+
+function sortVideos(arr){
+  const{col,dir}=currentSort;
+  const mul=dir==='asc'?1:-1;
+  arr.sort((a,b)=>{
+    let va=a[col],vb=b[col];
+    if(typeof va==='string') return mul*va.localeCompare(vb);
+    return mul*(va-vb);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
