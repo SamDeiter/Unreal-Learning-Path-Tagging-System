@@ -340,6 +340,7 @@ async function init() {
   const title = video.replace(/^\d+_/, '').replace(/([A-Z])/g, ' $1').trim();
   const courseLabel = course.replace('_', '.');
   document.title = `${courseLabel} — ${title} | Evaluator`;
+  document.getElementById('viewerLink').href = `augmentation_viewer.html?video=${videoKey}`;
 
   const score = data.evaluation_matrix_score || {};
   const cs = data.conceptual_score || {};
@@ -358,6 +359,7 @@ async function init() {
         <div class="sub">Pillar 5 Prototype — AI-Retrofit Pipeline</div>
       </div>
       <div class="score-badge">
+        <a id="viewerLink" href="#" target="_blank" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(59,130,246,0.3);background:rgba(59,130,246,0.1);color:var(--accent);font-size:11px;font-weight:600;text-decoration:none;font-family:'Inter',sans-serif;transition:all 0.15s;">▶ Guided View</a>
         <span class="score-num">${score.total || '?'}/55</span>
         <span class="verdict verdict-${cs.verdict || ''}">${cs.verdict || 'N/A'}</span>
         <span class="grade grade-${score.grade || 'F'}">${score.grade || '?'}</span>
