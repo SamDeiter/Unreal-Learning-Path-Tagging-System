@@ -1,0 +1,105 @@
+{
+  "course_code": "100.01",
+  "conceptual_score": {
+    "procedural_pct": 80,
+    "conceptual_pct": 20,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:37",
+      "title": "Actor-Component Model",
+      "concept": "Blueprints leverage the Actor-Component model. Actors are the fundamental building blocks, and Components provide specific functionalities (e.g., Static Mesh, Point Light). Understanding this composition is crucial for efficient Blueprint design.",
+      "diagram_suggestion": "A diagram showing an Actor as a box containing various Component boxes (Static Mesh, Point Light, etc.) with arrows indicating data flow."
+    },
+    {
+      "insert_after_timestamp": "1:42",
+      "title": "Execution Contexts: Event Graph vs. Construction Script",
+      "concept": "The Event Graph executes during gameplay, driven by events. The Construction Script executes in the editor, allowing for procedural generation and setup. Confusing these contexts leads to unexpected behavior.",
+      "diagram_suggestion": "A flowchart contrasting the execution timeline of the Event Graph (runtime) and Construction Script (editor-time)."
+    },
+    {
+      "insert_after_timestamp": "3:14",
+      "title": "Blueprint Compilation & Native Code Generation",
+      "concept": "Blueprints are visually scripted, but Unreal Engine compiles them into optimized bytecode or native C++ code. This compilation step is essential for performance. Uncompiled Blueprints can cause hitches.",
+      "diagram_suggestion": "A diagram illustrating the Blueprint compilation pipeline: Blueprint -> Bytecode/C++ -> Executable."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:07",
+      "procedural_step": "Create C++ code without writing C++",
+      "why": "Blueprints abstract C++ complexity, enabling rapid prototyping and iteration. However, understanding the underlying C++ concepts is crucial for optimization and advanced features. Over-reliance on Blueprints without understanding the engine's core can lead to performance bottlenecks.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:37",
+      "procedural_step": "Blueprints can call other Blueprints",
+      "why": "Blueprint Communication is a core concept. Direct Blueprint Communication (Hard-Reference Casting) creates tight coupling, hindering modularity and increasing compile times. Interface-based communication promotes loose coupling and reusability.",
+      "antipattern_warning": "Hard-Reference Casting"
+    },
+    {
+      "timestamp": "1:46",
+      "procedural_step": "Event Graph is functional when we press play",
+      "why": "The Event Graph is the primary execution context for gameplay logic. Events trigger functions and control flow. Understanding the event-driven architecture is crucial for creating responsive and interactive experiences. Misunderstanding the event lifecycle can lead to logic errors and performance issues.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:55",
+      "procedural_step": "Construction Script works inside the editor",
+      "why": "The Construction Script allows for procedural generation and setup within the editor. This enables artists and designers to create complex and dynamic environments without requiring runtime calculations. Overuse of the Construction Script for runtime logic can lead to performance issues.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:21",
+      "prompt": "Why is a flowchart metaphor useful for game logic?",
+      "expected_insight": "The flowchart metaphor visually represents the flow of execution, making it easier to understand complex logic and debug issues. It also highlights the importance of branching and conditional execution."
+    },
+    {
+      "insert_after_timestamp": "1:15",
+      "prompt": "How do Blueprint variables relate to exposed parameters in the editor?",
+      "expected_insight": "Variables marked as 'Instance Editable' are exposed as parameters in the editor, allowing designers to easily adjust properties without modifying the Blueprint itself. This promotes iteration and customization."
+    },
+    {
+      "insert_after_timestamp": "2:13",
+      "prompt": "What are the performance implications of complex Construction Scripts?",
+      "expected_insight": "Complex Construction Scripts can significantly increase editor load times and reduce performance, especially in large levels. Optimizing Construction Scripts is crucial for maintaining a smooth workflow."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "0:37",
+      "warning": "Calling Blueprints directly (Hard-Reference Casting) creates tight coupling and hinders modularity.",
+      "severity": "MEDIUM",
+      "fix": "Use Blueprint Interfaces or Event Dispatchers for communication between Blueprints to promote loose coupling and reusability."
+    },
+    {
+      "timestamp": "1:55",
+      "warning": "Overuse of the Construction Script for runtime logic can lead to performance issues and increased editor load times.",
+      "severity": "MEDIUM",
+      "fix": "Move runtime logic to the Event Graph and reserve the Construction Script for editor-time setup and procedural generation."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of variables and data types",
+    "Familiarity with event-driven programming concepts",
+    "Knowledge of the Actor-Component model in Unreal Engine"
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 23,
+    "grade": "D"
+  }
+}

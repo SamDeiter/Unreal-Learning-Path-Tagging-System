@@ -214,6 +214,7 @@ Analyze this transcript and produce a Conceptual Augmentation Report as JSON wit
 - "self_explanation_prompts": array of {{"insert_after_timestamp": "M:SS", "prompt": str, "expected_insight": str}}
 - "architectural_warnings": array of {{"timestamp": "M:SS", "warning": str, "severity": "LOW|MEDIUM|HIGH|CRITICAL", "fix": str}}
 - "missing_prerequisites": array of strings
+- "quiz_questions": array of {{"question": str, "options": [str,str,str,str], "correct_index": 0-3, "explanation": str}}
 - "evaluation_matrix_score": {{"concept_clarification": 1-5, "misconception_addressing": 1-5, "narrative_logic": 1-5, "content_first_language": 1-5, "dynamic_visualizations": 1-5, "explicit_signaling": 1-5, "strict_segmentation": 1-5, "extraneous_load_reduction": 1-5, "worked_example_fading": 1-5, "self_explanation_prompting": 1-5, "affective_tone": 1-5, "total": 11-55, "grade": "F|D|C|B|A"}}
 
 RULES:
@@ -221,7 +222,11 @@ RULES:
 - why_annotations must explain ENGINE-LEVEL consequences
 - self_explanation_prompts must create a curiosity gap
 - architectural_warnings must cite memory/perf/scalability impact
-- Grade thresholds: F(11-21), D(22-32), C(33-38), B(39-44), A(45-55)"""
+- Grade thresholds: F(11-21), D(22-32), C(33-38), B(39-44), A(45-55)
+- Generate exactly 5 quiz_questions per video
+- Quiz questions must test CONCEPTS (why/how the engine works), not RECALL (what button was clicked)
+- Each question must have exactly 4 options; vary the correct_index across questions
+- Quiz explanations should reference the conceptual lesson"""
 
 
 # ---------------------------------------------------------------------------
@@ -232,9 +237,18 @@ def process_video(
     vtt_file: Path,
     metadata: dict,
     course_code: str,
+    skip_existing: bool = False,
 ) -> dict | None:
     """Process a single VTT file through the augmentation pipeline."""
     video_key = extract_video_key(vtt_file.name)
+
+    # Check if output already exists
+    out_dir = OUTPUT_DIR / course_code.replace(".", "_")
+    out_file = out_dir / f"{video_key}.json"
+    if skip_existing and out_file.exists():
+        print(f"  Skipping (already exists): {video_key}")
+        return None
+
     print(f"  Processing: {video_key}")
 
     # Parse transcript
@@ -261,16 +275,14 @@ def process_video(
         return None
 
     # Save result
-    out_dir = OUTPUT_DIR / course_code.replace(".", "_")
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_file = out_dir / f"{video_key}.json"
     out_file.write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"    ✓ Saved: {out_file.relative_to(REPO_ROOT)}")
 
     return result
 
 
-def process_course(course_code: str, metadata: dict, video_filter: str = None):
+def process_course(course_code: str, metadata: dict, video_filter: str = None, skip_existing: bool = False):
     """Process all VTTs in a course directory."""
     dir_name = course_code.replace(".", "_")
     course_dir = TRANSCRIPTS_DIR / dir_name
@@ -293,7 +305,7 @@ def process_course(course_code: str, metadata: dict, video_filter: str = None):
         if video_filter and video_filter not in video_key:
             continue
 
-        process_video(course_dir, vtt_file, metadata, course_code)
+        result = process_video(course_dir, vtt_file, metadata, course_code, skip_existing)
         time.sleep(DELAY_BETWEEN_CALLS)
 
 
@@ -320,6 +332,11 @@ def main():
         default=0,
         help="Limit number of courses to process (with --all)",
     )
+    parser.add_argument(
+        "--skip-existing",
+        action="store_true",
+        help="Skip videos that already have augmentation output",
+    )
     args = parser.parse_args()
 
     if not args.course and not args.all:
@@ -336,7 +353,7 @@ def main():
 
     if args.course:
         print(f"\nProcessing course: {args.course}")
-        process_course(args.course, metadata, args.video)
+        process_course(args.course, metadata, args.video, args.skip_existing)
     elif args.all:
         course_dirs = sorted(
             d for d in TRANSCRIPTS_DIR.iterdir() if d.is_dir()
@@ -347,7 +364,7 @@ def main():
         for course_dir in course_dirs:
             course_code = course_dir.name.replace("_", ".")
             print(f"\n--- {course_code} ---")
-            process_course(course_code, metadata)
+            process_course(course_code, metadata, skip_existing=args.skip_existing)
 
     print("\n" + "=" * 60)
     print("DONE")

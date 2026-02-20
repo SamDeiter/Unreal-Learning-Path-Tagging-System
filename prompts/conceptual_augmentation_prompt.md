@@ -73,6 +73,14 @@ Analyze this transcript and produce a **Conceptual Augmentation Report** in the 
   "missing_prerequisites": [
     "<concept the video assumes the learner knows but never explains>"
   ],
+  "quiz_questions": [
+    {
+      "question": "<conceptual question testing understanding, not recall>",
+      "options": ["<option A>", "<option B>", "<option C>", "<option D>"],
+      "correct_index": 0,
+      "explanation": "<1-2 sentences explaining why the correct answer is right>"
+    }
+  ],
   "evaluation_matrix_score": {
     "concept_clarification": <1-5>,
     "misconception_addressing": <1-5>,
@@ -97,6 +105,11 @@ RULES:
 - architectural_warnings must reference specific memory, performance, or scalability consequences
 - evaluation_matrix_score uses the Conceptual Augmentation Evaluation Matrix from the Strategic Framework
 - Grade thresholds: F(11-21), D(22-32), C(33-38), B(39-44), A(45-55)
+- Generate exactly 5 quiz_questions per video
+- Quiz questions must test CONCEPTS (why/how the engine works), not RECALL (what button the instructor clicked)
+- Each question must have exactly 4 options with one correct answer
+- Vary the correct_index across questions (don't always put the answer in the same position)
+- Explanations should reference the conceptual lesson, not just restate the answer
 ```
 
 ## Evaluation Matrix Reference

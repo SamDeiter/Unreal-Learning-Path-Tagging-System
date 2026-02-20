@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blueprint Editor — Augmented Guide | UE5 Learning</title>
+  <title>Augmented Guide | UE5 Learning</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -32,6 +32,30 @@
       overflow: hidden;
     }
 
+    /* ---- LOADING STATE ---- */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      transition: opacity 0.4s ease;
+    }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-overlay .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-overlay p { color: var(--text-muted); font-size: 14px; }
+
     /* ---- FULL-SCREEN VIDEO ---- */
     .video-stage {
       position: relative;
@@ -56,8 +80,8 @@
       align-items: center;
       justify-content: center;
       z-index: 100;
-      backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
       transition: opacity 0.4s ease;
     }
 
@@ -170,8 +194,8 @@
       border: 1px solid var(--card-border);
       border-radius: var(--radius);
       padding: 20px 24px;
-      backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
     }
 
@@ -398,8 +422,8 @@
       align-items: center;
       justify-content: center;
       z-index: 200;
-      backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
@@ -410,9 +434,22 @@
       pointer-events: auto;
     }
 
-    .quiz-container {
+    .quiz-wrapper {
+      position: relative;
       width: 90%;
       max-width: 640px;
+    }
+
+    .quiz-close-btn {
+      position: absolute;
+      top: -16px;
+      right: -16px;
+      width: 32px;
+      height: 32px;
+      z-index: 210;
+    }
+
+    .quiz-container {
       max-height: 85vh;
       overflow-y: auto;
     }
@@ -457,8 +494,8 @@
       border: 1px solid var(--card-border);
       border-radius: var(--radius);
       padding: 24px;
-      backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
     }
 
     .quiz-question .q-number {
@@ -499,11 +536,6 @@
       border-color: var(--accent);
     }
 
-    .quiz-option.selected {
-      background: rgba(59, 130, 246, 0.15);
-      border-color: var(--accent);
-    }
-
     .quiz-option.correct-answer {
       background: rgba(16, 185, 129, 0.15);
       border-color: var(--green);
@@ -517,7 +549,6 @@
     }
 
     .quiz-option.disabled { cursor: default; opacity: 0.6; }
-    .quiz-option.disabled:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1); }
 
     .quiz-feedback {
       margin-top: 14px;
@@ -566,21 +597,15 @@
     .quiz-next-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3); }
 
     /* Results */
-    .quiz-results {
-      text-align: center;
-    }
+    .quiz-results { text-align: center; }
 
     .quiz-results .score-circle {
-      width: 100px;
-      height: 100px;
+      width: 100px; height: 100px;
       border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       margin: 0 auto 16px;
-      font-size: 32px;
-      font-weight: 800;
+      font-size: 32px; font-weight: 800;
       border: 3px solid;
     }
 
@@ -592,60 +617,47 @@
     .quiz-results .results-msg { font-size: 14px; color: var(--text-dim); margin-bottom: 20px; }
 
     .quiz-review-item {
-      text-align: left;
-      padding: 14px 16px;
+      text-align: left; padding: 14px 16px;
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px;
-      margin-bottom: 8px;
-      font-size: 13px;
+      border-radius: 10px; margin-bottom: 8px; font-size: 13px;
     }
 
     .quiz-review-item .review-q { color: var(--text); font-weight: 500; margin-bottom: 4px; }
     .quiz-review-item .review-a { color: var(--green); }
 
     .quiz-restart-btn {
-      margin-top: 20px;
-      padding: 10px 28px;
+      margin-top: 20px; padding: 10px 28px;
       border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 50px;
-      background: rgba(255,255,255,0.05);
-      color: var(--text);
-      font-size: 14px;
-      font-weight: 500;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
+      border-radius: 50px; background: rgba(255,255,255,0.05);
+      color: var(--text); font-size: 14px; font-weight: 500;
+      font-family: 'Inter', sans-serif; cursor: pointer;
       transition: all 0.15s;
     }
-
     .quiz-restart-btn:hover { background: rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
 
+<!-- Loading screen -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <p>Loading augmented guide…</p>
+</div>
+
 <div class="video-stage">
-  <iframe
-    src="https://drive.google.com/file/d/1Z5DakBvLP41LiH4H4atpIbb45Aoxt6Z7/preview"
-    allow="autoplay; encrypted-media"
-    allowfullscreen
-    title="Blueprint Editor Video">
-  </iframe>
+  <iframe id="videoFrame" allow="autoplay; encrypted-media" allowfullscreen title="Video"></iframe>
 
   <!-- Start overlay -->
   <div class="start-overlay" id="startOverlay">
-    <h1>Blueprint Editor</h1>
+    <h1 id="videoTitle">Loading…</h1>
     <p class="sub">This video has been augmented with conceptual annotations. Press play on the video, then start the guide — cards will appear at key moments with the concepts the video doesn't cover.</p>
     <button class="start-btn" onclick="startGuide()">▶ Start Guided Mode</button>
     <div class="start-hint">Press play on the video first, then click this button</div>
   </div>
 
   <!-- Prereqs -->
-  <div class="prereqs-bar" id="prereqsBar">
-    <span class="label">📘 Before you start:</span>
-    <span class="chip">Variables & Data Types</span>
-    <span class="chip">Event-Driven Programming</span>
-    <span class="chip">Actor-Component Model</span>
-  </div>
+  <div class="prereqs-bar" id="prereqsBar"></div>
 
   <!-- Concept overlay -->
   <div class="concept-overlay" id="conceptOverlay">
@@ -661,7 +673,7 @@
       <div class="timeline-markers" id="timelineMarkers"></div>
     </div>
     <div class="timeline-info">
-      <span class="timer" id="timerDisplay">0:00 / 3:40</span>
+      <span class="timer" id="timerDisplay">0:00 / 0:00</span>
       <div class="controls">
         <button class="ctrl-btn" id="pauseBtn" onclick="togglePause()">⏸ Pause Guide</button>
         <button class="ctrl-btn" onclick="resetGuide()">↺ Restart</button>
@@ -671,118 +683,185 @@
 
   <!-- Quiz overlay -->
   <div class="quiz-overlay" id="quizOverlay">
-    <div style="position:relative;width:90%;max-width:640px;">
-      <button class="dismiss-btn" style="position:absolute;top:-16px;right:-16px;width:32px;height:32px;z-index:210;" onclick="document.getElementById('quizOverlay').classList.remove('visible')">✕</button>
+    <div class="quiz-wrapper">
+      <button class="dismiss-btn quiz-close-btn" onclick="document.getElementById('quizOverlay').classList.remove('visible')">✕</button>
       <div class="quiz-container" id="quizContainer"></div>
     </div>
   </div>
 </div>
 
 <script>
-const TOTAL_DURATION = 220; // 3:40 in seconds
+// ---- DYNAMIC DATA LOADING ----
 
-// All overlay events sorted by time
-const EVENTS = [
-  {
-    time: 7,
-    type: 'why',
-    html: `
-      <div class="card-type type-why">💡 WHY IT MATTERS</div>
-      <h3>Why Blueprints Abstract C++</h3>
-      <p>Blueprints let you prototype at 10x speed by hiding C++ syntax. But there's a tradeoff: complex Blueprint graphs run slower than equivalent C++. The best practice is to <strong>prototype in Blueprint, then move performance-critical logic to C++</strong> once your design is proven.</p>
-    `
-  },
-  {
-    time: 21,
-    type: 'think',
-    html: `
-      <div class="card-type type-think">🤔 THINK ABOUT IT</div>
-      <div class="think-q">Why is a flowchart metaphor useful for game logic?</div>
-      <button class="reveal-btn" onclick="toggleReveal(this)">Show Answer ▸</button>
-      <div class="reveal-answer">Game logic is inherently about flow — "if the player presses jump, then check if grounded, then apply force." A visual flowchart makes branching and conditional paths obvious at a glance, and debuggable by non-programmers.</div>
-    `
-  },
-  {
-    time: 37,
-    type: 'theory',
-    html: `
-      <div class="card-type type-theory">🧠 KEY CONCEPT</div>
-      <h3>Actor-Component Model</h3>
-      <p>Blueprints use the Actor-Component pattern. Think of an Actor as an empty container — you fill it with Components (a mesh for visuals, lights, collision, audio). Each component does one job. You build complexity by composing simple, reusable pieces.</p>
-      <div class="tip warn">
-        <span class="icon">⚠️</span>
-        <span><strong>Avoid Hard-Reference Casting</strong> — directly referencing another Blueprint creates tight coupling. Use Blueprint Interfaces or Event Dispatchers instead for communication.</span>
-      </div>
-      <div class="tip good">
-        <span class="icon">✅</span>
-        <span>Use Interfaces for loose coupling — Blueprints can talk without knowing each other's type.</span>
-      </div>
-    `
-  },
-  {
-    time: 75,
-    type: 'think',
-    html: `
-      <div class="card-type type-think">🤔 THINK ABOUT IT</div>
-      <div class="think-q">How do Blueprint variables relate to exposed parameters in the editor?</div>
-      <button class="reveal-btn" onclick="toggleReveal(this)">Show Answer ▸</button>
-      <div class="reveal-answer">Variables marked as "Instance Editable" become exposed parameters in the Details panel. Designers can tweak them per-instance without opening the Blueprint — enabling rapid iteration without touching logic.</div>
-    `
-  },
-  {
-    time: 102,
-    type: 'theory',
-    html: `
-      <div class="card-type type-theory">🧠 KEY CONCEPT</div>
-      <h3>Event Graph vs. Construction Script</h3>
-      <p>These are two completely different execution contexts — the most common beginner mistake is confusing them:</p>
-      <div class="tip warn">
-        <span class="icon">📋</span>
-        <span><strong>Construction Script</strong> = runs in the editor when you place or move the actor. For setup, defaults, and previews.</span>
-      </div>
-      <div class="tip good">
-        <span class="icon">📋</span>
-        <span><strong>Event Graph</strong> = runs at runtime when you press Play. For game logic, input handling, and player interaction.</span>
-      </div>
-    `
-  },
-  {
-    time: 115,
-    type: 'why',
-    html: `
-      <div class="card-type type-why">💡 WHY IT MATTERS</div>
-      <h3>Construction Script Performance</h3>
-      <p>Heavy Construction Scripts fire every time you move an actor in the editor. If yours does complex calculations or spawns dozens of meshes, your editor becomes sluggish.</p>
-      <div class="tip good">
-        <span class="icon">✅</span>
-        <span>Keep Construction Scripts fast and simple. Move runtime logic to the Event Graph. Reserve the Construction Script for static setup only.</span>
-      </div>
-    `
-  },
-  {
-    time: 133,
-    type: 'think',
-    html: `
-      <div class="card-type type-think">🤔 THINK ABOUT IT</div>
-      <div class="think-q">What could go wrong if you put game logic in the Construction Script?</div>
-      <button class="reveal-btn" onclick="toggleReveal(this)">Show Answer ▸</button>
-      <div class="reveal-answer">It would execute every time the actor is moved, duplicated, or the level loads in the editor — causing unintended side effects, spawning extra objects, and creating bugs that can't be reproduced during Play mode.</div>
-    `
-  },
-  {
-    time: 194,
-    type: 'theory',
-    html: `
-      <div class="card-type type-theory">🧠 KEY CONCEPT</div>
-      <h3>Blueprint Compilation</h3>
-      <p>That "Compile" button isn't decorative. UE5 compiles your Blueprint nodes into optimized bytecode (or native C++ via nativization). Uncompiled Blueprints show warnings and can cause runtime hitches. Always compile after changes.</p>
-      <div class="tip warn">
-        <span class="icon">⚠️</span>
-        <span>If you see the yellow "Needs Compile" icon — don't ignore it. Uncompiled changes won't take effect and can cause unpredictable behavior.</span>
-      </div>
-    `
+let TOTAL_DURATION = 220;
+let EVENTS = [];
+let QUIZ = [];
+let VIDEO_TITLE = 'Augmented Guide';
+
+// Parse URL param: ?video=100_01/18_BlueprintEditor
+function getVideoParam() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('video');
+}
+
+// Convert "M:SS" or "MM:SS" timestamp string to seconds
+function tsToSeconds(ts) {
+  if (!ts) return 0;
+  const parts = ts.split(':').map(Number);
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  return 0;
+}
+
+// Escape HTML to prevent XSS from JSON data
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+// Transform raw augmentation JSON into EVENTS array
+function buildEvents(data) {
+  const events = [];
+
+  // Theory breaks → type: theory
+  if (data.theory_breaks) {
+    for (const tb of data.theory_breaks) {
+      let html = `<div class="card-type type-theory">� KEY CONCEPT</div>`;
+      html += `<h3>${esc(tb.title)}</h3>`;
+      html += `<p>${esc(tb.concept)}</p>`;
+      events.push({
+        time: tsToSeconds(tb.insert_after_timestamp),
+        type: 'theory',
+        html
+      });
+    }
   }
-];
+
+  // Why annotations → type: why
+  if (data.why_annotations) {
+    for (const wa of data.why_annotations) {
+      let html = `<div class="card-type type-why">💡 WHY IT MATTERS</div>`;
+      html += `<h3>${esc(wa.procedural_step)}</h3>`;
+      html += `<p>${esc(wa.why)}</p>`;
+      if (wa.antipattern_warning) {
+        html += `<div class="tip warn"><span class="icon">⚠️</span><span><strong>Warning:</strong> ${esc(wa.antipattern_warning)}</span></div>`;
+      }
+      events.push({
+        time: tsToSeconds(wa.timestamp),
+        type: 'why',
+        html
+      });
+    }
+  }
+
+  // Self-explanation prompts → type: think
+  if (data.self_explanation_prompts) {
+    for (const sep of data.self_explanation_prompts) {
+      let html = `<div class="card-type type-think">🤔 THINK ABOUT IT</div>`;
+      html += `<div class="think-q">${esc(sep.prompt)}</div>`;
+      html += `<button class="reveal-btn" onclick="toggleReveal(this)">Show Answer ▸</button>`;
+      html += `<div class="reveal-answer">${esc(sep.expected_insight)}</div>`;
+      events.push({
+        time: tsToSeconds(sep.insert_after_timestamp),
+        type: 'think',
+        html
+      });
+    }
+  }
+
+  // Sort by time
+  events.sort((a, b) => a.time - b.time);
+
+  // Deduplicate same-second events (keep first)
+  const seen = new Set();
+  return events.filter(ev => {
+    if (seen.has(ev.time)) return false;
+    seen.add(ev.time);
+    return true;
+  });
+}
+
+// Transform quiz_questions from JSON into QUIZ array
+function buildQuiz(data) {
+  if (!data.quiz_questions || !data.quiz_questions.length) return [];
+  return data.quiz_questions.map(q => ({
+    question: q.question,
+    options: q.options,
+    correct: q.correct_index,
+    explanation: q.explanation
+  }));
+}
+
+// Main loader
+async function loadData() {
+  const videoParam = getVideoParam();
+
+  if (!videoParam) {
+    // Fallback: try to load the pilot Blueprint Editor data
+    try {
+      await loadFromJSON('100_01/18_BlueprintEditor');
+    } catch (e) {
+      console.warn('No ?video= param and no fallback data. Using empty state.');
+    }
+  } else {
+    await loadFromJSON(videoParam);
+  }
+
+  finishLoading();
+}
+
+async function loadFromJSON(videoKey) {
+  // Load augmentation data
+  const parts = videoKey.split('/');
+  const course = parts[0];
+  const video = parts[1];
+  const augUrl = `augmentation_data/${course}/${video}.json`;
+
+  const [augRes, lookupRes] = await Promise.all([
+    fetch(augUrl),
+    fetch('video_lookup.json')
+  ]);
+
+  if (!augRes.ok) throw new Error(`Could not load augmentation data: ${augUrl}`);
+
+  const augData = await augRes.json();
+  const lookupData = lookupRes.ok ? await lookupRes.json() : {};
+
+  // Set video
+  const videoInfo = lookupData[videoKey];
+  if (videoInfo) {
+    document.getElementById('videoFrame').src =
+      `https://drive.google.com/file/d/${videoInfo.drive_id}/preview`;
+    TOTAL_DURATION = videoInfo.duration || 220;
+  }
+
+  // Build title from video key
+  VIDEO_TITLE = video.replace(/^\d+_/, '').replace(/([A-Z])/g, ' $1').trim();
+  document.getElementById('videoTitle').textContent = VIDEO_TITLE;
+  document.title = `${VIDEO_TITLE} — Augmented Guide | UE5 Learning`;
+
+  // Build events
+  EVENTS = buildEvents(augData);
+
+  // Build quiz
+  QUIZ = buildQuiz(augData);
+
+  // Build prereqs
+  const prereqsBar = document.getElementById('prereqsBar');
+  prereqsBar.innerHTML = '';
+  if (augData.missing_prerequisites && augData.missing_prerequisites.length) {
+    prereqsBar.innerHTML = `<span class="label">📘 Before you start:</span>` +
+      augData.missing_prerequisites.map(p => `<span class="chip">${esc(p)}</span>`).join('');
+  }
+}
+
+function finishLoading() {
+  initMarkers();
+  document.getElementById('timerDisplay').textContent = `0:00 / ${formatTime(TOTAL_DURATION)}`;
+  document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
 
 // ---- STATE ----
 let elapsed = 0;
@@ -795,6 +874,7 @@ const CARD_DISPLAY_SECS = 15;
 // ---- INIT ----
 function initMarkers() {
   const container = document.getElementById('timelineMarkers');
+  container.innerHTML = '';
   EVENTS.forEach((ev, i) => {
     const pct = (ev.time / TOTAL_DURATION) * 100;
     const marker = document.createElement('div');
@@ -849,7 +929,6 @@ function resetGuide() {
   hideCard();
   document.getElementById('pauseBtn').textContent = '⏸ Pause Guide';
   document.getElementById('pauseBtn').classList.remove('active');
-  // Clear active markers
   document.querySelectorAll('.timeline-marker').forEach(m => m.classList.remove('active'));
   tick();
   intervalId = setInterval(tick, 1000);
@@ -857,7 +936,7 @@ function resetGuide() {
 
 function jumpTo(time) {
   elapsed = time;
-  currentEventIdx = -1; // reset so checkEvents re-evaluates
+  currentEventIdx = -1;
   cardDismissed = false;
   checkEvents();
   updateTimeline();
@@ -888,7 +967,6 @@ function showCard(ev, idx) {
   const dismissHtml = '<button class="dismiss-btn" onclick="dismissCard()">✕</button>';
   card.innerHTML = dismissHtml + ev.html;
 
-  // Remove colored border from previous type
   card.className = 'concept-card';
   if (ev.type === 'think') card.classList.add('think');
 
@@ -896,7 +974,6 @@ function showCard(ev, idx) {
   currentEventIdx = idx;
   cardDismissed = false;
 
-  // Highlight marker
   document.querySelectorAll('.timeline-marker').forEach(m => m.classList.remove('active'));
   const marker = document.getElementById(`marker-${idx}`);
   if (marker) marker.classList.add('active');
@@ -943,70 +1020,13 @@ function toggleReveal(btn) {
 }
 
 // ---- QUIZ ----
-const QUIZ = [
-  {
-    question: "What is the relationship between Blueprints and C++ in Unreal Engine?",
-    options: [
-      "Blueprints completely replace C++ — you never need it",
-      "Blueprints compile to bytecode/C++ — they're an abstraction layer for rapid prototyping",
-      "Blueprints are slower but cannot be converted to C++",
-      "C++ and Blueprints are completely separate systems"
-    ],
-    correct: 1,
-    explanation: "Blueprints are compiled into optimized bytecode or native C++. They let you prototype fast, but performance-critical code should be moved to C++ once proven."
-  },
-  {
-    question: "What's wrong with Hard-Reference Casting between Blueprints?",
-    options: [
-      "It doesn't work at all in UE5",
-      "It creates tight coupling — both Blueprints must be loaded into memory and changes can break each other",
-      "It only works in the Construction Script",
-      "It makes Blueprints run faster but uses more memory"
-    ],
-    correct: 1,
-    explanation: "Hard-Reference Casting creates tight coupling. Use Blueprint Interfaces or Event Dispatchers instead for loose, scalable communication."
-  },
-  {
-    question: "When does the Construction Script execute?",
-    options: [
-      "Only when you press Play",
-      "Every frame during gameplay",
-      "In the editor — when you place, move, or modify the actor",
-      "Only when the game is packaged"
-    ],
-    correct: 2,
-    explanation: "The Construction Script runs in the editor at design time. The Event Graph runs at runtime. Confusing them is one of the most common Blueprint mistakes."
-  },
-  {
-    question: "What happens if you put complex game logic in the Construction Script?",
-    options: [
-      "It runs faster because the editor is optimized",
-      "It executes every time the actor is moved or the level loads in the editor, causing bugs and slowdowns",
-      "Nothing — the editor ignores Construction Script logic",
-      "It automatically moves to the Event Graph at compile time"
-    ],
-    correct: 1,
-    explanation: "Construction Scripts fire on every editor action. Heavy logic there causes sluggish editors and bugs that can't be reproduced during Play mode."
-  },
-  {
-    question: "What is the Actor-Component model?",
-    options: [
-      "Actors contain all functionality in a single monolithic class",
-      "Components are visual-only — they can't have logic",
-      "Actors are empty containers filled with Components, each providing a specific capability",
-      "Components replace Actors in UE5"
-    ],
-    correct: 2,
-    explanation: "The Actor-Component model is about composition: an Actor is a container, and Components (mesh, light, collision, audio) each do one job. You build complexity by combining simple, reusable pieces."
-  }
-];
-
 let quizIdx = 0;
 let quizScore = 0;
 let quizAnswered = false;
 let quizResults = [];
 
 function showQuiz() {
+  if (!QUIZ.length) return; // No quiz available
   document.getElementById('quizOverlay').classList.add('visible');
   document.getElementById('timelineBar').classList.remove('visible');
   document.getElementById('prereqsBar').classList.remove('visible');
@@ -1032,14 +1052,14 @@ function renderQuestion() {
   container.innerHTML = `
     <div class="quiz-header">
       <h2>📝 Knowledge Check</h2>
-      <div class="quiz-sub">Test what you learned from the Blueprint Editor guide</div>
+      <div class="quiz-sub">Test what you learned from ${esc(VIDEO_TITLE)}</div>
     </div>
     <div class="quiz-progress">${dots}</div>
     <div class="quiz-question">
       <div class="q-number">Question ${quizIdx + 1} of ${QUIZ.length}</div>
-      <div class="q-text">${q.question}</div>
+      <div class="q-text">${esc(q.question)}</div>
       ${q.options.map((opt, i) => `
-        <button class="quiz-option" onclick="answerQuiz(${i})" id="opt-${i}">${opt}</button>
+        <button class="quiz-option" onclick="answerQuiz(${i})" id="opt-${i}">${esc(opt)}</button>
       `).join('')}
       <div class="quiz-feedback" id="quizFeedback"></div>
     </div>
@@ -1060,21 +1080,18 @@ function answerQuiz(choice) {
   if (isCorrect) quizScore++;
   quizResults.push(isCorrect);
 
-  // Style options
   q.options.forEach((_, i) => {
     const btn = document.getElementById(`opt-${i}`);
     btn.classList.add('disabled');
     if (i === q.correct) btn.classList.add('correct-answer');
     if (i === choice && !isCorrect) btn.classList.add('wrong-answer');
-    if (i === choice && isCorrect) btn.classList.add('correct-answer');
   });
 
-  // Show feedback
   const fb = document.getElementById('quizFeedback');
   fb.className = `quiz-feedback show ${isCorrect ? 'correct' : 'wrong'}`;
   fb.innerHTML = isCorrect
-    ? `✅ <strong>Correct!</strong> ${q.explanation}`
-    : `❌ <strong>Not quite.</strong> ${q.explanation}`;
+    ? `✅ <strong>Correct!</strong> ${esc(q.explanation)}`
+    : `❌ <strong>Not quite.</strong> ${esc(q.explanation)}`;
 
   document.getElementById('quizNextBtn').classList.add('show');
 }
@@ -1090,26 +1107,24 @@ function nextQuestion() {
 
 function showResults() {
   const pct = Math.round((quizScore / QUIZ.length) * 100);
-  let grade, msg, cls;
-  if (pct >= 80) { grade = 'A'; msg = 'Excellent! You have a strong understanding of these Blueprint concepts.'; cls = 'great'; }
-  else if (pct >= 60) { grade = 'B'; msg = 'Good foundation! Review the concepts you missed below.'; cls = 'okay'; }
-  else { grade = 'C'; msg = 'Consider rewatching with the guided annotations to reinforce these concepts.'; cls = 'needs-work'; }
+  let msg, cls;
+  if (pct >= 80) { msg = 'Excellent! You have a strong understanding of these concepts.'; cls = 'great'; }
+  else if (pct >= 60) { msg = 'Good foundation! Review the concepts you missed below.'; cls = 'okay'; }
+  else { msg = 'Consider rewatching with the guided annotations to reinforce these concepts.'; cls = 'needs-work'; }
 
   const wrongItems = QUIZ.map((q, i) => {
     if (quizResults[i]) return '';
     return `
       <div class="quiz-review-item">
-        <div class="review-q">❌ ${q.question}</div>
-        <div class="review-a">✅ ${q.options[q.correct]}</div>
+        <div class="review-q">❌ ${esc(q.question)}</div>
+        <div class="review-a">✅ ${esc(q.options[q.correct])}</div>
       </div>
     `;
   }).join('');
 
   document.getElementById('quizContainer').innerHTML = `
     <div class="quiz-results">
-      <div class="quiz-header">
-        <h2>📝 Results</h2>
-      </div>
+      <div class="quiz-header"><h2>📝 Results</h2></div>
       <div class="score-circle ${cls}">
         ${quizScore}/${QUIZ.length}
         <div class="score-label">${pct}%</div>
@@ -1126,7 +1141,8 @@ function restartAll() {
   document.getElementById('startOverlay').classList.remove('hidden');
 }
 
-initMarkers();
+// ---- BOOT ----
+loadData();
 </script>
 </body>
 </html>
