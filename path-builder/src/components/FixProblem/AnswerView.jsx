@@ -2,7 +2,7 @@
  * AnswerView - Fix-first answer layout
  * Displays: Most likely cause → Fast checks → Fix steps → If still broken → Learn path → Evidence
  */
-import { useState } from "react";
+
 import PropTypes from "prop-types";
 import EvidencePanel from "./EvidencePanel";
 import FeedbackPanel from "./FeedbackPanel";
@@ -16,8 +16,6 @@ export default function AnswerView({
   onStartOver,
   isRerunning,
 }) {
-  const [learnPathOpen, setLearnPathOpen] = useState(false);
-
   if (!answer) return null;
 
   const confidenceColor =
@@ -92,49 +90,18 @@ export default function AnswerView({
         </div>
       )}
 
-      {/* ─── Learn Path (accordion) ─── */}
-      {answer.learnPath && (
-        <details
-          className="answer-section answer-learn-path"
-          open={learnPathOpen}
-          onToggle={(e) => setLearnPathOpen(e.target.open)}
-        >
-          <summary className="learn-path-summary-header">
-            <span className="learn-path-chevron">{learnPathOpen ? "▼" : "▶"}</span>
-            <span className="section-icon">📚</span> Learn More
-            <span className="learn-path-badge">
-              {answer.learnPath.topicsCovered?.length || 0} topics
-            </span>
-            <span className="learn-path-hint">{learnPathOpen ? "" : "— click to expand"}</span>
-          </summary>
-          <div className="learn-path-content">
-            <p className="learn-path-summary">{answer.learnPath.pathSummary}</p>
-            {answer.learnPath.objectives && (
-              <div className="learn-path-objectives">
-                {answer.learnPath.objectives.fixSpecific?.length > 0 && (
-                  <div>
-                    <h4>🎯 Fix-Specific</h4>
-                    <ul>
-                      {answer.learnPath.objectives.fixSpecific.map((obj, i) => (
-                        <li key={i}>{obj}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {answer.learnPath.objectives.transferable?.length > 0 && (
-                  <div>
-                    <h4>🔄 Transferable Skills</h4>
-                    <ul>
-                      {answer.learnPath.objectives.transferable.map((obj, i) => (
-                        <li key={i}>{obj}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </details>
+      {/* ─── Skills You'll Build (transferable only) ─── */}
+      {answer.learnPath?.objectives?.transferable?.length > 0 && (
+        <div className="answer-section answer-skills">
+          <h3>
+            <span className="section-icon">🔄</span> Skills You&apos;ll Build
+          </h3>
+          <ul className="skills-list">
+            {answer.learnPath.objectives.transferable.map((skill, i) => (
+              <li key={i}>{highlightTerms(skill)}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* ─── Why This Result ─── */}
@@ -185,10 +152,7 @@ AnswerView.propTypes = {
       })
     ),
     learnPath: PropTypes.shape({
-      pathSummary: PropTypes.string,
-      topicsCovered: PropTypes.arrayOf(PropTypes.string),
       objectives: PropTypes.shape({
-        fixSpecific: PropTypes.arrayOf(PropTypes.string),
         transferable: PropTypes.arrayOf(PropTypes.string),
       }),
     }),
