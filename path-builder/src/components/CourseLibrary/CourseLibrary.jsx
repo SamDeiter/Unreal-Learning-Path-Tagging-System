@@ -133,20 +133,28 @@ function CourseLibrary({ courses }) {
             </button>
           </div>
           <div className="suggested-list">
-            {availableSuggestions.slice(0, 5).map((course, index) => (
-              <div
-                key={`suggested-${course.code}-${index}`}
-                className="suggested-card"
-                onClick={(e) => handleAddCourse(e, course)}
-                title={`Match score: ${course.matchScore}\n${course.title}`}
-              >
-                <span className="suggested-code">{course.code}</span>
-                <span className="suggested-name">{course.title}</span>
-                <span className="suggested-add">
-                  <Plus size={14} />
-                </span>
-              </div>
-            ))}
+            {availableSuggestions.slice(0, 5).map((course, index) => {
+              const badge = activePersonaId ? getRelevanceBadge(course, activePersonaId) : null;
+              return (
+                <div
+                  key={`suggested-${course.code}-${index}`}
+                  className="suggested-card"
+                  onClick={(e) => handleAddCourse(e, course)}
+                  title={`Match score: ${course.matchScore}\n${course.title}`}
+                >
+                  <span className="suggested-code">{course.code}</span>
+                  <span className="suggested-name">{course.title}</span>
+                  {badge?.label && (
+                    <span className={`tag tag-persona tag-persona-${badge.type}`}>
+                      {badge.label}
+                    </span>
+                  )}
+                  <span className="suggested-add">
+                    <Plus size={14} />
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

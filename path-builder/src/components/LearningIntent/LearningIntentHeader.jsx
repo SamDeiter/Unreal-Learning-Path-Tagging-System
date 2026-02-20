@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import { Check, AlertCircle } from "lucide-react";
 import { usePath } from "../../context/PathContext";
+import { detectPersona } from "../../services/PersonaService";
 import "./LearningIntentHeader.css";
 
 function LearningIntentHeader() {
@@ -10,6 +12,24 @@ function LearningIntentHeader() {
   };
 
   const isComplete = learningIntent.primaryGoal && learningIntent.skillLevel;
+
+  // Detect persona from goal text
+  const detectedPersona = useMemo(() => {
+    if (!learningIntent.primaryGoal) return null;
+    return detectPersona(learningIntent.primaryGoal);
+  }, [learningIntent.primaryGoal]);
+
+  const personaEmojis = {
+    indie_isaac: "🎮",
+    logic_liam: "⚙️",
+    animator_alex: "🎬",
+    rigger_regina: "🦴",
+    designer_cpg: "🎨",
+    architect_amy: "🏛️",
+    simulation_sam: "🏭",
+    vfx_victor: "💥",
+    automotive_andy: "🚗",
+  };
 
   return (
     <div className="learning-intent-header">
@@ -23,6 +43,14 @@ function LearningIntentHeader() {
           onChange={(e) => handleChange("primaryGoal", e.target.value)}
           title="What do you want to achieve? E.g., 'Learn Niagara VFX', 'Master landscape tools'"
         />
+        {detectedPersona && (
+          <span
+            className="persona-detected-badge"
+            title={`Detected persona: ${detectedPersona.name} (confidence: ${Math.round(detectedPersona.confidence * 100)}%)`}
+          >
+            {personaEmojis[detectedPersona.id] || "👤"} {detectedPersona.name}
+          </span>
+        )}
       </div>
 
       <div className="intent-group">

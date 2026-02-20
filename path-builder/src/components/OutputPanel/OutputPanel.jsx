@@ -284,7 +284,9 @@ ${docLinks.length > 0 ? docLinks.map((doc) => `- [${doc.title}](${doc.url})`).jo
                     <h4 className="gen-section-title">{section.title}</h4>
                     <ul className="gen-list">
                       {section.items.map((item, iIdx) => {
-                        const ctx = contextBlocks.find((cb) => cb.courseCode === item.courseCode);
+                        const ctx = contextBlocks.find(
+                          (cb) => cb.courseCode === item.relatedCourse
+                        );
                         return (
                           <li key={item.id || `item-${sIdx}-${iIdx}`} className="gen-item outline">
                             {item.text}

@@ -26,6 +26,7 @@ const Personas = lazy(() => import("./components/Personas/Personas"));
 const ProblemFirst = lazy(() =>
   import("./components/ProblemFirst").then((m) => ({ default: m.ProblemFirst }))
 );
+const AdminFeedback = lazy(() => import("./components/AdminFeedback/AdminFeedback"));
 const InsightsPanel = lazy(() => import("./components/Visualizations/InsightsPanel"));
 const CollapsibleSection = lazy(() => import("./components/Visualizations/CollapsibleSection"));
 const FeedbackButton = lazy(() => import("./components/Feedback/FeedbackButton"));
@@ -254,6 +255,14 @@ function App() {
                       🎟️ Invites
                     </button>
                   )}
+                  {userIsAdmin && (
+                    <button
+                      className={`nav-tab ${activeTab === "admin-feedback" ? "active" : ""}`}
+                      onClick={() => setActiveTab("admin-feedback")}
+                    >
+                      📋 Feedback
+                    </button>
+                  )}
                 </nav>
               </div>
               <div className="header-right">
@@ -405,6 +414,11 @@ function App() {
                 {activeTab === "invites" && userIsAdmin && (
                   <div className="dashboard-layout">
                     <InviteManager />
+                  </div>
+                )}
+                {activeTab === "admin-feedback" && userIsAdmin && (
+                  <div className="dashboard-layout">
+                    <AdminFeedback />
                   </div>
                 )}
               </Suspense>
