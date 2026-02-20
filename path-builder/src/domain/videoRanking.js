@@ -150,6 +150,14 @@ export async function flattenCoursesToVideos(matchedCourses, userQuery, roleMap 
     const courseVideos = course.videos || [];
     if (courseVideos.length === 0) continue;
 
+    // Sort videos by filename numeric prefix to ensure correct videoIndex
+    // (data may arrive in arbitrary disk-scan order)
+    courseVideos.sort((a, b) => {
+      const numA = parseInt((a.name || "").match(/_(\d+)[_.]/)?.[1] || "999", 10);
+      const numB = parseInt((b.name || "").match(/_(\d+)[_.]/)?.[1] || "999", 10);
+      return numA - numB;
+    });
+
     for (let i = 0; i < courseVideos.length; i++) {
       const v = courseVideos[i];
       if (!v.drive_id) continue;
