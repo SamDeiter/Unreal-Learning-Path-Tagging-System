@@ -40,8 +40,3 @@ Object.assign(exports, require("./ai/logTelemetry"));
 // Scheduled Tasks
 // ============================================================================
 Object.assign(exports, require("./scheduled/cleanupCache"));
-
-// ============================================================================
-// Firestore Triggers
-// ============================================================================
-Object.assign(exports, require("./triggers/notifyFeedback"));

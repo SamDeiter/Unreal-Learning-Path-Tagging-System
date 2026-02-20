@@ -6,6 +6,8 @@ import AuthGate from "./components/AuthGate/AuthGate";
 import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
 import { onAuthChange, signOutUser } from "./services/googleAuthService";
 import { isAdmin } from "./services/accessControl";
+import { getFirestore, collection, query, where, onSnapshot } from "firebase/firestore";
+import { getFirebaseApp } from "./services/firebaseConfig";
 import "./App.css";
 
 // Import course data
@@ -49,6 +51,7 @@ function App() {
   const [preSelectedSkill, setPreSelectedSkill] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userIsAdmin, setUserIsAdmin] = useState(false);
+  const [newFeedbackCount, setNewFeedbackCount] = useState(0);
 
   // Check if current user is admin for showing invite tab
   useEffect(() => {
@@ -58,6 +61,21 @@ function App() {
     });
     return unsub;
   }, []);
+
+  // Real-time listener for "new" feedback count (admin only)
+  useEffect(() => {
+    if (!userIsAdmin) return;
+    const db = getFirestore(getFirebaseApp());
+    const q = query(collection(db, "feedback"), where("status", "==", "new"));
+    const unsub = onSnapshot(
+      q,
+      (snap) => setNewFeedbackCount(snap.size),
+      (err) => {
+        console.warn("[App] feedback listener error:", err.message);
+      }
+    );
+    return unsub;
+  }, [userIsAdmin]);
 
   // Handle navigation from insights panel
   const handleInsightNavigate = (tab, skillName) => {
@@ -261,6 +279,9 @@ function App() {
                       onClick={() => setActiveTab("admin-feedback")}
                     >
                       📋 Feedback
+                      {newFeedbackCount > 0 && (
+                        <span className="feedback-badge">{newFeedbackCount}</span>
+                      )}
                     </button>
                   )}
                 </nav>
