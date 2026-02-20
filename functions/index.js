@@ -35,3 +35,8 @@ Object.assign(exports, require("./ai/rerankPassages"));
 // Telemetry
 // ============================================================================
 Object.assign(exports, require("./ai/logTelemetry"));
+
+// ============================================================================
+// Scheduled Tasks
+// ============================================================================
+Object.assign(exports, require("./scheduled/cleanupCache"));
