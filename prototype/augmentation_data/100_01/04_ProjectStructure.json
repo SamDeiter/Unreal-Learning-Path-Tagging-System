@@ -1,0 +1,155 @@
+{
+  "course_code": "100.01",
+  "conceptual_score": {
+    "procedural_pct": 70,
+    "conceptual_pct": 30,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:49",
+      "title": "Asset Management System",
+      "concept": "Unreal Engine 5 utilizes an asset management system that tracks dependencies between assets. This system allows for efficient loading, unloading, and garbage collection of assets.",
+      "diagram_suggestion": "Diagram showing the asset registry, asset packages (.uasset), and how they relate to in-memory UObjects."
+    },
+    {
+      "insert_after_timestamp": "4:44",
+      "title": "Content Browser Organization",
+      "concept": "The Content Browser reflects the directory structure within the Content folder, but also provides filtering and search capabilities based on asset type and metadata. Understanding the Content Browser is crucial for efficient project management.",
+      "diagram_suggestion": "Screenshot of the Content Browser with annotations highlighting the different filtering and search options."
+    },
+    {
+      "insert_after_timestamp": "7:55",
+      "title": "Actor Replication and Networking",
+      "concept": "One File Per Actor, in conjunction with World Partition, is designed to improve collaboration in networked environments. Each actor's data can be replicated independently, reducing bandwidth and improving performance.",
+      "diagram_suggestion": "Diagram illustrating how actor data is serialized and replicated across a network in a World Partitioned level."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:44",
+      "procedural_step": "Importing assets into the Content folder.",
+      "why": "Assets are stored as .uasset files to leverage Unreal Engine's asset management system, which handles dependencies, streaming, and garbage collection efficiently. This ensures optimal memory usage and performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:44",
+      "procedural_step": "Avoiding deletion of the Plugins folder.",
+      "why": "Deleting the Plugins folder can break project functionality because plugins often contain essential code, assets, or editor extensions required for the project to function correctly. Missing plugins can lead to compile errors or runtime crashes.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:18",
+      "procedural_step": "Understanding the Derived Data Cache (DDC).",
+      "why": "The DDC stores pre-compiled shaders and other derived data to accelerate loading times. While it can be deleted, doing so forces the engine to recompile everything, significantly increasing initial load times. This impacts iteration speed and user experience.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:17",
+      "procedural_step": "Never manipulating files outside of the Unreal Editor.",
+      "why": "Modifying .uasset files directly in the file system bypasses the Unreal Engine's asset management system. This can corrupt the asset registry, break dependencies, and lead to unpredictable behavior or data loss. Always use the editor's tools for renaming, moving, or deleting assets.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:01",
+      "procedural_step": "Using One File Per Actor with World Partition.",
+      "why": "One File Per Actor, when combined with World Partition, enables parallel loading and unloading of level data. This dramatically reduces loading times and memory footprint, especially in large open-world environments. It also facilitates collaborative workflows by minimizing conflicts.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:50",
+      "prompt": "Why does Unreal Engine use its own .uasset format instead of directly using the original imported file formats?",
+      "expected_insight": "The .uasset format allows Unreal to optimize the data for runtime performance, manage dependencies, and integrate seamlessly with the engine's asset management system."
+    },
+    {
+      "insert_after_timestamp": "5:32",
+      "prompt": "Why would deleting the Build folder free up space, and what are the implications of doing so?",
+      "expected_insight": "The Build folder contains intermediate files from previous builds, which can accumulate and consume significant disk space. Deleting it forces a rebuild, potentially increasing compilation time."
+    },
+    {
+      "insert_after_timestamp": "7:42",
+      "prompt": "How does 'One File Per Actor' solve the collaboration bottleneck of the traditional UMAP file?",
+      "expected_insight": "By splitting the level data into individual files for each actor, multiple developers can work on the same level simultaneously without conflicting check-in/check-out requirements."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of file systems and directory structures.",
+    "Familiarity with version control systems (e.g., Git, Perforce).",
+    "General knowledge of game development workflows."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally discouraged to directly manipulate .uasset files outside of the Unreal Editor?",
+      "options": [
+        "It can corrupt the asset registry and break dependencies.",
+        "It's slower than using the Content Browser.",
+        "It's only possible with C++ code.",
+        "The editor automatically overwrites external changes."
+      ],
+      "correct_index": 0,
+      "explanation": "Direct manipulation bypasses the engine's asset management, leading to potential corruption and dependency issues."
+    },
+    {
+      "question": "What is the primary benefit of the 'One File Per Actor' system in Unreal Engine 5?",
+      "options": [
+        "Reduced project file size.",
+        "Improved collaboration and reduced conflicts.",
+        "Faster shader compilation.",
+        "Simplified asset management."
+      ],
+      "correct_index": 1,
+      "explanation": "One File Per Actor allows multiple developers to work on the same level simultaneously, minimizing check-in/check-out conflicts."
+    },
+    {
+      "question": "What is the purpose of the Derived Data Cache (DDC) in Unreal Engine 5?",
+      "options": [
+        "To store crash logs and debugging information.",
+        "To store pre-compiled shaders and other derived data for faster loading.",
+        "To store user preferences and editor settings.",
+        "To store backups of the project files."
+      ],
+      "correct_index": 1,
+      "explanation": "The DDC stores pre-compiled data, such as shaders, to accelerate loading times and improve editor responsiveness."
+    },
+    {
+      "question": "Which folder in an Unreal Engine 5 project should you generally avoid deleting unless necessary?",
+      "options": [
+        "The Saved folder.",
+        "The Build folder.",
+        "The Content folder.",
+        "The Intermediates folder."
+      ],
+      "correct_index": 2,
+      "explanation": "The Content folder contains all the project's assets; deleting it would erase all the work done in the project."
+    },
+    {
+      "question": "What is the function of the .uproject file in an Unreal Engine 5 project?",
+      "options": [
+        "It stores the level geometry.",
+        "It associates the project with the Unreal Engine executable and its content.",
+        "It contains the project's configuration settings.",
+        "It stores the project's build data."
+      ],
+      "correct_index": 1,
+      "explanation": "The .uproject file tells the Unreal Engine which engine version to use and where to find the project's content."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

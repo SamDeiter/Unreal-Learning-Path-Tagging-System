@@ -1,0 +1,165 @@
+{
+  "course_code": "100.01",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:06",
+      "title": "Static Mesh Rendering Pipeline",
+      "concept": "The Static Mesh Editor provides control over various stages of the rendering pipeline for individual assets. Understanding how these stages interact (e.g., Nanite -> Material -> Lighting) is crucial for optimization.",
+      "diagram_suggestion": "A flowchart illustrating the static mesh rendering pipeline, highlighting Nanite tessellation, material application, lighting calculations (Lumen), and post-processing."
+    },
+    {
+      "insert_after_timestamp": "0:18",
+      "title": "Collision and Physics Interactions",
+      "concept": "Collision settings within the Static Mesh Editor directly influence how the mesh interacts with the physics engine (Chaos). Incorrect collision can lead to performance issues or unexpected gameplay behavior.",
+      "diagram_suggestion": "A visual representation of different collision primitives (box, sphere, capsule, convex hull) and their impact on physics simulation cost."
+    },
+    {
+      "insert_after_timestamp": "0:32",
+      "title": "UV Mapping and Texturing",
+      "concept": "UV channels define how textures are mapped onto the mesh. Understanding UV layout and potential overlaps is essential for avoiding visual artifacts and optimizing texture memory usage.",
+      "diagram_suggestion": "Examples of good and bad UV layouts, demonstrating the impact on texture quality and potential for tiling/stretching artifacts."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:12",
+      "procedural_step": "Enable Nanite",
+      "why": "Enabling Nanite allows for highly detailed meshes with minimal performance impact at runtime by dynamically tessellating the mesh based on viewing distance. This reduces the need for multiple LODs, saving memory and artist time.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:15",
+      "procedural_step": "Adjust LOD settings",
+      "why": "Level of Detail (LOD) settings control which version of the mesh is rendered based on distance from the camera. Proper LOD setup is crucial for maintaining performance, especially in scenes with many static meshes. Incorrect LOD setup can lead to noticeable popping or unnecessary rendering of high-poly meshes at a distance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:18",
+      "procedural_step": "Adjust collision settings",
+      "why": "Collision settings define how the mesh interacts with the physics engine and other objects in the scene. Accurate and efficient collision is essential for gameplay and physics simulations. Overly complex collision can significantly impact performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:21",
+      "procedural_step": "Add sockets",
+      "why": "Sockets are named attachment points on the mesh that can be used to attach other actors or components. They are essential for creating modular assets and dynamic gameplay elements. Incorrect socket placement can lead to visual glitches or incorrect attachment behavior.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:12",
+      "procedural_step": "Adjust the pivot",
+      "why": "The pivot point defines the origin of the mesh's local coordinate system. Correct pivot placement is crucial for accurate transformations (rotation, scaling, translation) and can affect how the mesh behaves in animations or physics simulations. An incorrect pivot can lead to unexpected behavior when rotating or positioning the mesh.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:06",
+      "prompt": "Why is it beneficial to edit static mesh properties within the Static Mesh Editor rather than directly in the level?",
+      "expected_insight": "Changes made in the Static Mesh Editor are applied to all instances of the mesh in the project, ensuring consistency and preventing redundant modifications. This promotes asset reuse and reduces the risk of errors."
+    },
+    {
+      "insert_after_timestamp": "0:24",
+      "prompt": "How might disabling certain rendering properties of a static mesh improve performance in a complex scene?",
+      "expected_insight": "Disabling unnecessary rendering features (e.g., shadows, reflections) can reduce the GPU load, especially for static meshes that are far from the camera or contribute minimally to the visual quality of the scene."
+    },
+    {
+      "insert_after_timestamp": "0:39",
+      "prompt": "What are the potential drawbacks of re-importing a static mesh with new settings?",
+      "expected_insight": "Re-importing can break existing references to the mesh in the level or in Blueprints, requiring manual adjustments to restore the connections. It's important to carefully consider the impact of re-importing on the project."
+    },
+    {
+      "insert_after_timestamp": "1:06",
+      "prompt": "How does the number of UV channels affect the complexity of the material applied to the mesh?",
+      "expected_insight": "More UV channels allow for more complex material setups, such as using different textures for different parts of the mesh. However, each additional UV channel increases the memory footprint and rendering cost of the material."
+    },
+    {
+      "insert_after_timestamp": "1:29",
+      "prompt": "Why is it important to save changes made in the Static Mesh Editor?",
+      "expected_insight": "Failing to save changes will result in the loss of any modifications made to the mesh's properties, requiring the user to redo the work. Saving ensures that the changes are persistent across sessions and are applied to all instances of the mesh."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of 3D modeling terminology (vertices, triangles, UVs)",
+    "Familiarity with the Unreal Engine Editor interface",
+    "Knowledge of material creation and application"
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary benefit of enabling Nanite for a static mesh?",
+      "options": [
+        "Automatic generation of LODs for performance optimization.",
+        "Simplified collision setup.",
+        "Improved UV mapping capabilities.",
+        "Real-time ray tracing support."
+      ],
+      "correct_index": 0,
+      "explanation": "Nanite dynamically tessellates the mesh at runtime, eliminating the need for manual LOD creation and optimizing performance."
+    },
+    {
+      "question": "How do collision settings in the Static Mesh Editor affect the game?",
+      "options": [
+        "They determine the visual appearance of the mesh.",
+        "They control how the mesh interacts with the physics engine and other objects.",
+        "They define the lighting properties of the mesh.",
+        "They manage the texture resolution of the mesh."
+      ],
+      "correct_index": 1,
+      "explanation": "Collision settings define the physical boundaries of the mesh and how it interacts with the game world."
+    },
+    {
+      "question": "Why might you want to disable certain rendering properties of a static mesh?",
+      "options": [
+        "To reduce the file size of the asset.",
+        "To improve performance by reducing GPU load.",
+        "To simplify the material applied to the mesh.",
+        "To prevent the mesh from casting shadows."
+      ],
+      "correct_index": 1,
+      "explanation": "Disabling unnecessary rendering features can reduce the GPU load, especially for less important meshes."
+    },
+    {
+      "question": "What is the purpose of sockets on a static mesh?",
+      "options": [
+        "To define the pivot point of the mesh.",
+        "To control the level of detail (LOD) settings.",
+        "To provide attachment points for other actors or components.",
+        "To manage the collision properties of the mesh."
+      ],
+      "correct_index": 2,
+      "explanation": "Sockets allow you to attach other actors or components to specific locations on the mesh, enabling modularity and dynamic gameplay."
+    },
+    {
+      "question": "How does the pivot point of a static mesh affect its behavior in the scene?",
+      "options": [
+        "It determines the origin for transformations (rotation, scaling, translation).",
+        "It controls the collision properties of the mesh.",
+        "It defines the lighting properties of the mesh.",
+        "It manages the texture resolution of the mesh."
+      ],
+      "correct_index": 0,
+      "explanation": "The pivot point serves as the origin for all transformations applied to the mesh. Incorrect pivot placement can lead to unexpected behavior."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 3,
+    "affective_tone": 3,
+    "total": 24,
+    "grade": "D"
+  }
+}
