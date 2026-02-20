@@ -410,7 +410,7 @@ function App() {
               </Suspense>
             </main>
 
-            <FeedbackButton />
+            <FeedbackButton user={currentUser} />
           </div>
         </TagDataProvider>
       </PathProvider>

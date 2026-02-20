@@ -7,6 +7,7 @@ const { runStage } = require("../pipeline/llmStage");
 const { createTrace, isAdmin } = require("../pipeline/telemetry");
 const { normalizeQuery } = require("../pipeline/cache");
 const { PROMPT_VERSION, wrapEvidence } = require("../pipeline/promptVersions");
+const { findCachedDiagnosis, cacheDiagnosis } = require("../utils/diagnosisCacheUtils");
 
 /**
  * UNIFIED /query ENDPOINT
@@ -168,6 +169,60 @@ async function handleProblemFirst(data, context, apiKey) {
   }
   const query = validation.clean;
   const normalized = normalizeQuery(query);
+
+  // ── Step 0: Diagnosis Cache Check ─────────────────────────────
+  // Embed the query and check for a cached diagnosis before calling Gemini.
+  // Only check cache on first round (no conversation history) for simplicity.
+  if (conversationHistory.length === 0) {
+    try {
+      const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
+      const embeddingApiKey = apiKey;
+      const embUrl = `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${embeddingApiKey}`;
+      const embPayload = {
+        model: "models/text-embedding-004",
+        content: { parts: [{ text: query }] },
+        taskType: "RETRIEVAL_QUERY",
+        outputDimensionality: 768,
+      };
+      const embResponse = await fetch(embUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(embPayload),
+      });
+      if (embResponse.ok) {
+        const embResult = await embResponse.json();
+        const queryEmbedding = embResult?.embedding?.values;
+        if (queryEmbedding && queryEmbedding.length === 768) {
+          // Store embedding on data for later cache write
+          data._queryEmbedding = queryEmbedding;
+
+          const cacheResult = await findCachedDiagnosis(queryEmbedding);
+          if (cacheResult.hit && cacheResult.result) {
+            console.log(JSON.stringify({
+              severity: "INFO",
+              message: "diagnosis_cache_hit_returning",
+              similarity: cacheResult.similarity,
+              docId: cacheResult.docId,
+            }));
+            // Return cached result with cache indicator
+            return {
+              ...cacheResult.result,
+              _cached: true,
+              _cacheSimilarity: cacheResult.similarity,
+              _cacheDocId: cacheResult.docId,
+            };
+          }
+        }
+      }
+    } catch (cacheCheckErr) {
+      // Cache check is best-effort — never block the pipeline
+      console.warn(JSON.stringify({
+        severity: "WARNING",
+        message: "diagnosis_cache_check_error",
+        error: cacheCheckErr.message,
+      }));
+    }
+  }
 
   // Sanitize caseReport if provided
   const safeCase = caseReport
@@ -629,6 +684,11 @@ JSON:{
   // Debug trace for admin callers
   if (data.debug === true && isAdmin(context)) {
     response._debug = trace.toDebugPayload();
+  }
+
+  // ── Cache the diagnosis for future reuse ──────────────────────
+  if (data._queryEmbedding && response.success) {
+    cacheDiagnosis(data._queryEmbedding, query, response).catch(() => {});
   }
 
   return response;

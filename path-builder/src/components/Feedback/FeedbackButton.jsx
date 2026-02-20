@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { MessageSquare } from "lucide-react";
 import FeedbackModal from "./FeedbackModal";
 import "./FeedbackButton.css";
@@ -7,7 +8,7 @@ import "./FeedbackButton.css";
  * FeedbackButton - A floating action button that opens the FeedbackModal.
  * Positioning can be customized via CSS.
  */
-export default function FeedbackButton() {
+export default function FeedbackButton({ user }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -22,7 +23,14 @@ export default function FeedbackButton() {
         <span className="feedback-label">Feedback</span>
       </button>
 
-      <FeedbackModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <FeedbackModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} user={user} />
     </>
   );
 }
+
+FeedbackButton.propTypes = {
+  user: PropTypes.shape({
+    uid: PropTypes.string,
+    email: PropTypes.string,
+  }),
+};

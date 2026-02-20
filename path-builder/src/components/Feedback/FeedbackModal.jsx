@@ -11,13 +11,15 @@ import { devLog } from "../../utils/logger";
  * - Types: Bug, Feature, General
  * - Text description
  * - File attachments (screenshots, logs)
+ * - Firestore persistence (authenticated) or localStorage fallback
  */
-export default function FeedbackModal({ isOpen, onClose }) {
+export default function FeedbackModal({ isOpen, onClose, user }) {
   const [type, setType] = useState("bug"); // bug | feature | general
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [persistedTo, setPersistedTo] = useState(null);
   const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
@@ -37,14 +39,29 @@ export default function FeedbackModal({ isOpen, onClose }) {
     setIsSubmitting(true);
 
     try {
-      const { recordFormFeedback } = await import(
-        "../../services/feedbackService"
-      );
-      const fileNames = files.map((f) => f.name);
-      const result = recordFormFeedback(type, description, fileNames);
-      devLog("📝 Feedback saved:", result);
+      if (user && user.uid && user.uid !== "anonymous") {
+        // Authenticated — submit to Firestore with file uploads
+        const { submitFeedbackToFirestore } = await import("../../services/feedbackService");
+        const result = await submitFeedbackToFirestore(
+          type,
+          description,
+          files,
+          user.uid,
+          user.email || ""
+        );
+        devLog("📝 Feedback submitted:", result);
+        setPersistedTo(result.persisted);
+      } else {
+        // Unauthenticated — localStorage fallback
+        const { recordFormFeedback } = await import("../../services/feedbackService");
+        const fileNames = files.map((f) => f.name);
+        const result = recordFormFeedback(type, description, fileNames);
+        devLog("📝 Feedback saved locally:", result);
+        setPersistedTo("local");
+      }
     } catch {
       devLog("📝 Feedback submission (offline):", { type, description });
+      setPersistedTo("local");
     }
 
     setSuccess(true);
@@ -56,8 +73,9 @@ export default function FeedbackModal({ isOpen, onClose }) {
       setDescription("");
       setFiles([]);
       setType("bug");
+      setPersistedTo(null);
       onClose();
-    }, 2000);
+    }, 2500);
   };
 
   return (
@@ -72,6 +90,11 @@ export default function FeedbackModal({ isOpen, onClose }) {
             <CheckCircle size={48} className="success-icon" />
             <h3>Thank You!</h3>
             <p>Your feedback helps us improve the learning path.</p>
+            {persistedTo === "firestore" && (
+              <p style={{ fontSize: "0.8rem", opacity: 0.7, marginTop: "0.5rem" }}>
+                ✅ Saved to our database
+              </p>
+            )}
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
@@ -162,7 +185,7 @@ export default function FeedbackModal({ isOpen, onClose }) {
 
             <div className="feedback-actions">
               <button type="submit" className="feedback-submit" disabled={isSubmitting}>
-                {isSubmitting ? "Sending..." : "Submit Feedback"}
+                {isSubmitting ? "Uploading..." : "Submit Feedback"}
               </button>
             </div>
           </form>
@@ -175,4 +198,8 @@ export default function FeedbackModal({ isOpen, onClose }) {
 FeedbackModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  user: PropTypes.shape({
+    uid: PropTypes.string,
+    email: PropTypes.string,
+  }),
 };

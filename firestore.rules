@@ -83,6 +83,23 @@ service cloud.firestore {
                             && resource.data.userId == request.auth.uid;
     }
 
+    // Cached diagnoses — public read (cache reuse), Cloud Functions write via Admin SDK
+    match /cached_diagnoses/{docId} {
+      allow read: if true;
+      allow write: if false; // Cloud Functions only (Admin SDK bypasses rules)
+    }
+
+    // Feedback submissions — authenticated users can create, admin reads/manages
+    match /feedback/{docId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['type', 'description', 'timestamp'])
+        && request.resource.data.type in ['bug', 'feature', 'general', 'content', 'other']
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 2000
+        && request.resource.data.keys().size() <= 10;
+      allow read, update, delete: if isAdmin();
+    }
+
     // API Usage analytics — admin can read (Cloud Functions write via Admin SDK)
     match /apiUsage/{docId} {
       allow read: if isAdmin();

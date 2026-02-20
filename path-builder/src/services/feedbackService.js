@@ -13,7 +13,8 @@
  */
 
 import { devLog, devWarn } from "../utils/logger";
-import { getFirestore, doc, setDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
+import { getFirestore, doc, setDoc, addDoc, collection, getDocs, query as fsQuery, orderBy, limit, serverTimestamp } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getFirebaseApp } from "./firebaseConfig";
 
 const STORAGE_KEY = "feedback_v1";
@@ -213,6 +214,83 @@ export async function getBoostMap(userId) {
     return boostMap;
   }
 }
+// ── Firestore-backed form feedback submission ──────────────────────────────────
+
+/**
+ * Submit feedback to Firestore with optional file uploads to Firebase Storage.
+ * Falls back to localStorage via recordFormFeedback() if Firestore write fails.
+ *
+ * @param {string} type - Feedback type (bug, feature, general, content, other)
+ * @param {string} description - User's description
+ * @param {File[]} [files] - Optional File objects to upload
+ * @param {string} [userId] - Authenticated user ID
+ * @param {string} [userEmail] - User email for admin triage
+ * @returns {Promise<{ id: string, timestamp: string, persisted: "firestore"|"local" }>}
+ */
+export async function submitFeedbackToFirestore(type, description, files = [], userId = "anonymous", userEmail = "") {
+  const timestamp = new Date().toISOString();
+  const feedbackId = `fb_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+  try {
+    const app = getFirebaseApp();
+    const db = getFirestore(app);
+
+    // Upload attachments to Firebase Storage
+    const attachmentUrls = [];
+    if (files.length > 0) {
+      const storage = getStorage(app);
+      for (const file of files.slice(0, 5)) { // Max 5 attachments
+        try {
+          const storageRef = ref(storage, `feedback/${feedbackId}/${file.name}`);
+          await uploadBytes(storageRef, file);
+          const downloadUrl = await getDownloadURL(storageRef);
+          attachmentUrls.push({ name: file.name, size: file.size, url: downloadUrl });
+        } catch (uploadErr) {
+          devWarn(`[Feedback] Failed to upload ${file.name}:`, uploadErr.message);
+        }
+      }
+    }
+
+    // Write to Firestore
+    const feedbackDoc = {
+      type,
+      description: String(description).slice(0, 2000),
+      attachments: attachmentUrls,
+      userId,
+      userEmail,
+      status: "new",
+      timestamp: serverTimestamp(),
+      createdAt: timestamp,
+    };
+
+    const docRef = await addDoc(collection(db, "feedback"), feedbackDoc);
+    devLog(`[Feedback] Submitted to Firestore: ${docRef.id}`);
+
+    return { id: docRef.id, timestamp, persisted: "firestore" };
+  } catch (err) {
+    devWarn("[Feedback] Firestore write failed, falling back to localStorage:", err.message);
+    // Fallback to localStorage
+    const localResult = recordFormFeedback(type, description, files.map((f) => f.name));
+    return { ...localResult, persisted: "local" };
+  }
+}
+
+/**
+ * Get all feedback submissions (admin only).
+ * @returns {Promise<Array>} Feedback submissions sorted by newest first
+ */
+export async function getAdminFeedbackList() {
+  try {
+    const db = getFirestore(getFirebaseApp());
+    const feedbackRef = collection(db, "feedback");
+    const q = fsQuery(feedbackRef, orderBy("timestamp", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    devWarn("[Feedback] Failed to fetch admin feedback:", err.message);
+    return [];
+  }
+}
 
 export default {
   recordUpvote,
@@ -221,6 +299,8 @@ export default {
   applyFeedbackMultiplier,
   getFeedbackStats,
   recordFormFeedback,
+  submitFeedbackToFirestore,
+  getAdminFeedbackList,
   logVideoFeedback,
   getBoostMap,
 };
