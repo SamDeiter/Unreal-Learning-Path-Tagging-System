@@ -3,315 +3,238 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blueprint Editor — Conceptual Guide | UE5 Learning</title>
+  <title>Blueprint Editor — Augmented Guide | UE5 Learning</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #0a0e17;
-      --bg-secondary: #111827;
-      --bg-card: #1a2234;
-      --bg-card-hover: #1e2a3f;
-      --border: #2a3a52;
+      --bg: #0a0e17;
+      --card-bg: rgba(15, 23, 42, 0.92);
+      --card-border: rgba(59, 130, 246, 0.25);
       --accent: #3b82f6;
-      --accent-glow: rgba(59, 130, 246, 0.12);
-      --text-primary: #e2e8f0;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --green: #10b981;
-      --green-bg: rgba(16, 185, 129, 0.08);
-      --yellow: #f59e0b;
-      --yellow-bg: rgba(245, 158, 11, 0.08);
-      --orange: #f97316;
-      --orange-bg: rgba(249, 115, 22, 0.08);
-      --red: #ef4444;
       --purple: #a78bfa;
-      --purple-bg: rgba(167, 139, 250, 0.08);
       --cyan: #22d3ee;
-      --cyan-bg: rgba(34, 211, 238, 0.08);
-      --radius: 12px;
-      --radius-sm: 8px;
+      --green: #10b981;
+      --orange: #f97316;
+      --yellow: #f59e0b;
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --text-muted: #64748b;
+      --radius: 14px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-
-    /* ---- LAYOUT ---- */
-    .page {
-      display: grid;
-      grid-template-columns: 1fr 520px;
+      background: var(--bg);
+      color: var(--text);
       height: 100vh;
+      overflow: hidden;
     }
 
-    /* LEFT — Video */
-    .video-side {
-      display: flex;
-      flex-direction: column;
-      background: #000;
+    /* ---- FULL-SCREEN VIDEO ---- */
+    .video-stage {
       position: relative;
+      width: 100%;
+      height: 100vh;
+      background: #000;
     }
 
-    .video-wrapper {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .video-wrapper iframe {
+    .video-stage iframe {
       width: 100%;
       height: 100%;
       border: 0;
     }
 
-    .video-info {
-      background: var(--bg-secondary);
-      border-top: 1px solid var(--border);
-      padding: 16px 24px;
+    /* ---- START OVERLAY ---- */
+    .start-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: opacity 0.4s ease;
     }
 
-    .video-info h1 {
-      font-size: 18px;
+    .start-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .start-overlay h1 {
+      font-size: 28px;
       font-weight: 700;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
-    .video-info .course-tag {
+    .start-overlay .sub {
+      font-size: 15px;
+      color: var(--text-dim);
+      margin-bottom: 28px;
+      text-align: center;
+      max-width: 480px;
+      line-height: 1.5;
+    }
+
+    .start-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 36px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 24px rgba(59, 130, 246, 0.3);
+    }
+
+    .start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.5);
+    }
+
+    .start-hint {
+      margin-top: 14px;
       font-size: 12px;
-      color: var(--accent);
-      font-weight: 500;
+      color: var(--text-muted);
     }
 
+    /* ---- PREREQS BAR (top) ---- */
     .prereqs-bar {
-      background: var(--bg-card);
-      border-top: 1px solid var(--border);
-      padding: 12px 24px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 20px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
       display: flex;
       align-items: center;
       gap: 8px;
+      z-index: 20;
       flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity 0.3s;
     }
 
-    .prereqs-bar .prereq-label {
+    .prereqs-bar.visible { opacity: 1; }
+
+    .prereqs-bar .label {
       font-size: 11px;
       font-weight: 600;
       color: var(--yellow);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      white-space: nowrap;
     }
 
-    .prereqs-bar .prereq-chip {
+    .prereqs-bar .chip {
       font-size: 11px;
       padding: 3px 10px;
       border-radius: 20px;
-      background: var(--yellow-bg);
-      color: var(--text-secondary);
-      border: 1px solid rgba(245, 158, 11, 0.15);
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--text-dim);
+      border: 1px solid rgba(245, 158, 11, 0.2);
     }
 
-    /* RIGHT — Conceptual Guide */
-    .guide-side {
-      border-left: 1px solid var(--border);
-      overflow-y: auto;
-      background: var(--bg-primary);
+    /* ---- CONCEPT OVERLAY CARD ---- */
+    .concept-overlay {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      width: 90%;
+      max-width: 720px;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .guide-header {
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(59, 130, 246, 0.06) 0%, transparent 100%);
+    .concept-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
     }
 
-    .guide-header h2 {
-      font-size: 15px;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 4px;
-    }
-
-    .guide-header p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    /* Guide Content */
-    .guide-content {
-      padding: 20px 24px;
-    }
-
-    /* Section dividers */
-    .section-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 28px 0 16px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--text-muted);
-    }
-
-    .section-divider:first-child { margin-top: 0; }
-    .section-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* Theory Break Cards */
-    .theory-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+    .concept-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: var(--radius);
-      padding: 18px 20px;
-      margin-bottom: 14px;
-      border-left: 3px solid var(--purple);
-      transition: all 0.2s ease;
+      padding: 20px 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
     }
 
-    .theory-card:hover {
-      background: var(--bg-card-hover);
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-    }
-
-    .theory-card .card-icon {
-      font-size: 12px;
-      color: var(--purple);
-      font-weight: 600;
+    .concept-card .card-type {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: 6px;
     }
 
-    .theory-card h3 {
-      font-size: 15px;
+    .concept-card h3 {
+      font-size: 16px;
       font-weight: 600;
       margin-bottom: 8px;
     }
 
-    .theory-card p {
+    .concept-card p {
       font-size: 13px;
-      color: var(--text-secondary);
+      color: var(--text-dim);
       line-height: 1.6;
     }
 
-    .diagram-hint {
+    .concept-card .tip {
       margin-top: 10px;
       padding: 10px 14px;
-      background: var(--purple-bg);
-      border: 1px solid rgba(167, 139, 250, 0.15);
-      border-radius: var(--radius-sm);
+      border-radius: 8px;
       font-size: 12px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .diagram-hint .icon { color: var(--purple); flex-shrink: 0; margin-top: 1px; }
-
-    /* Why Cards */
-    .why-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 20px;
-      margin-bottom: 14px;
-      border-left: 3px solid var(--accent);
-    }
-
-    .why-card:hover {
-      background: var(--bg-card-hover);
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-    }
-
-    .why-card .what-they-said {
-      font-size: 13px;
-      color: var(--text-muted);
-      font-style: italic;
-      margin-bottom: 8px;
-      padding-left: 12px;
-      border-left: 2px solid var(--border);
-    }
-
-    .why-card .what-they-said::before { content: '"'; }
-    .why-card .what-they-said::after { content: '"'; }
-
-    .why-card .why-explain {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-
-    .tip-box {
-      margin-top: 10px;
-      padding: 10px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 12px;
+      color: var(--text-dim);
       line-height: 1.5;
       display: flex;
       align-items: flex-start;
       gap: 8px;
     }
 
-    .tip-box .icon { flex-shrink: 0; margin-top: 1px; }
-
-    .tip-box.warning {
-      background: var(--orange-bg);
+    .concept-card .tip.warn {
+      background: rgba(249, 115, 22, 0.1);
       border: 1px solid rgba(249, 115, 22, 0.15);
-      color: var(--text-secondary);
     }
 
-    .tip-box.warning .icon { color: var(--orange); }
-
-    .tip-box.best-practice {
-      background: var(--green-bg);
+    .concept-card .tip.good {
+      background: rgba(16, 185, 129, 0.1);
       border: 1px solid rgba(16, 185, 129, 0.15);
-      color: var(--text-secondary);
     }
 
-    .tip-box.best-practice .icon { color: var(--green); }
+    .concept-card .tip .icon { flex-shrink: 0; }
 
-    /* Self-Explanation prompts */
-    .think-card {
-      background: var(--cyan-bg);
-      border: 1px solid rgba(34, 211, 238, 0.15);
-      border-radius: var(--radius);
-      padding: 18px 20px;
-      margin-bottom: 14px;
+    /* Think prompt variant */
+    .concept-card.think {
+      border-color: rgba(34, 211, 238, 0.25);
     }
 
-    .think-card .think-label {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--cyan);
-      margin-bottom: 6px;
-    }
-
-    .think-card .think-question {
-      font-size: 14px;
+    .concept-card .think-q {
+      font-size: 15px;
       font-weight: 500;
-      color: var(--text-primary);
+      color: var(--text);
       margin-bottom: 10px;
     }
 
-    .think-card .reveal-btn {
+    .concept-card .reveal-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -323,192 +246,453 @@
       border-radius: 20px;
       padding: 5px 14px;
       cursor: pointer;
+      font-family: 'Inter', sans-serif;
       transition: all 0.15s ease;
-      -webkit-user-select: none;
-      user-select: none;
     }
 
-    .think-card .reveal-btn:hover {
-      background: rgba(34, 211, 238, 0.2);
-    }
+    .concept-card .reveal-btn:hover { background: rgba(34, 211, 238, 0.2); }
 
-    .think-card .reveal-answer {
+    .concept-card .reveal-answer {
       display: none;
       margin-top: 10px;
-      padding: 12px 14px;
-      background: rgba(34, 211, 238, 0.05);
-      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      background: rgba(34, 211, 238, 0.06);
+      border-radius: 8px;
       font-size: 13px;
-      color: var(--text-secondary);
+      color: var(--text-dim);
       line-height: 1.6;
       border-left: 2px solid var(--cyan);
     }
 
-    .think-card .reveal-answer.show { display: block; }
+    .concept-card .reveal-answer.show { display: block; }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-    @media (max-width: 1024px) {
-      .page { grid-template-columns: 1fr; height: auto; }
-      .video-side { height: 50vh; min-height: 300px; }
-      .guide-side { border-left: 0; border-top: 1px solid var(--border); }
+    /* Dismiss button */
+    .dismiss-btn {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
     }
+
+    .dismiss-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--text);
+    }
+
+    /* ---- TIMELINE BAR ---- */
+    .timeline-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 720px;
+      z-index: 40;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .timeline-bar.visible { opacity: 1; }
+
+    .timeline-track {
+      position: relative;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .timeline-progress {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--purple));
+      border-radius: 3px;
+      transition: width 0.3s linear;
+    }
+
+    .timeline-markers {
+      position: absolute;
+      inset: 0;
+    }
+
+    .timeline-marker {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 2;
+    }
+
+    .timeline-marker:hover {
+      transform: translate(-50%, -50%) scale(1.4);
+    }
+
+    .timeline-marker.theory { background: var(--purple); }
+    .timeline-marker.why { background: var(--accent); }
+    .timeline-marker.think { background: var(--cyan); }
+    .timeline-marker.active { box-shadow: 0 0 10px currentColor; transform: translate(-50%, -50%) scale(1.3); }
+
+    .timeline-info {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .timeline-info .timer {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .ctrl-btn {
+      padding: 4px 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .ctrl-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .ctrl-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* Color type labels */
+    .type-theory { color: var(--purple); }
+    .type-why { color: var(--accent); }
+    .type-think { color: var(--cyan); }
   </style>
 </head>
 <body>
 
-<div class="page">
-  <!-- LEFT — Video -->
-  <div class="video-side">
-    <div class="video-wrapper">
-      <iframe
-        src="https://drive.google.com/file/d/1Z5DakBvLP41LiH4H4atpIbb45Aoxt6Z7/preview"
-        allow="autoplay; encrypted-media"
-        allowfullscreen
-        title="Blueprint Editor Video">
-      </iframe>
-    </div>
-    <div class="video-info">
-      <div class="course-tag">100.01 — Introduction to Unreal Engine</div>
-      <h1>The Blueprint Editor</h1>
-    </div>
-    <div class="prereqs-bar">
-      <span class="prereq-label">📘 Before you start:</span>
-      <span class="prereq-chip">Variables & Data Types</span>
-      <span class="prereq-chip">Event-Driven Programming</span>
-      <span class="prereq-chip">Actor-Component Model</span>
+<div class="video-stage">
+  <iframe
+    src="https://drive.google.com/file/d/1Z5DakBvLP41LiH4H4atpIbb45Aoxt6Z7/preview"
+    allow="autoplay; encrypted-media"
+    allowfullscreen
+    title="Blueprint Editor Video">
+  </iframe>
+
+  <!-- Start overlay -->
+  <div class="start-overlay" id="startOverlay">
+    <h1>Blueprint Editor</h1>
+    <p class="sub">This video has been augmented with conceptual annotations. Press play on the video, then start the guide — cards will appear at key moments with the concepts the video doesn't cover.</p>
+    <button class="start-btn" onclick="startGuide()">▶ Start Guided Mode</button>
+    <div class="start-hint">Press play on the video first, then click this button</div>
+  </div>
+
+  <!-- Prereqs -->
+  <div class="prereqs-bar" id="prereqsBar">
+    <span class="label">📘 Before you start:</span>
+    <span class="chip">Variables & Data Types</span>
+    <span class="chip">Event-Driven Programming</span>
+    <span class="chip">Actor-Component Model</span>
+  </div>
+
+  <!-- Concept overlay -->
+  <div class="concept-overlay" id="conceptOverlay">
+    <div class="concept-card" id="conceptCard">
+      <button class="dismiss-btn" onclick="dismissCard()">✕</button>
     </div>
   </div>
 
-  <!-- RIGHT — Conceptual Guide -->
-  <div class="guide-side">
-    <div class="guide-header">
-      <h2>📖 Conceptual Deep-Dive</h2>
-      <p>The video shows you <strong>how</strong>. This guide explains <strong>why</strong> — the architecture, mental models, and pitfalls that tutorials skip.</p>
+  <!-- Timeline -->
+  <div class="timeline-bar" id="timelineBar">
+    <div class="timeline-track" onclick="seekTimeline(event)">
+      <div class="timeline-progress" id="timelineProgress"></div>
+      <div class="timeline-markers" id="timelineMarkers"></div>
     </div>
-
-    <div class="guide-content" id="guideContent"></div>
+    <div class="timeline-info">
+      <span class="timer" id="timerDisplay">0:00 / 3:40</span>
+      <div class="controls">
+        <button class="ctrl-btn" id="pauseBtn" onclick="togglePause()">⏸ Pause Guide</button>
+        <button class="ctrl-btn" onclick="resetGuide()">↺ Restart</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-const DATA = {
-  theory_breaks: [
-    {
-      title: "Actor-Component Model",
-      concept: "Blueprints leverage the Actor-Component model. Actors are the fundamental building blocks of your game world, and Components provide them with specific capabilities (a mesh to render, a light to emit, collision to detect). Understanding this composition pattern is key — you build complex objects by snapping together simple, reusable components rather than writing monolithic classes.",
-      diagram: "Think of an Actor as an empty container. You fill it with Components — a Static Mesh for visuals, a Point Light for glow, collision for physics. Each component does one job."
-    },
-    {
-      title: "Event Graph vs. Construction Script",
-      concept: "The Blueprint Editor gives you two very different execution contexts, and confusing them is one of the most common beginner mistakes. The Event Graph runs during gameplay — it's where your game logic lives. The Construction Script runs inside the editor, before you ever hit Play. It's for setup: procedural placement, preview-time configuration, and dynamic defaults.",
-      diagram: "Construction Script = what happens when you drag the Blueprint into your level. Event Graph = what happens when the player interacts with it."
-    },
-    {
-      title: "Blueprint Compilation",
-      concept: "Blueprints may look like a visual flowchart, but Unreal Engine compiles them into optimized bytecode (or even native C++ via nativization). This is why you see the 'Compile' button — it's not decorative. Uncompiled Blueprints will show warnings and can cause hitches at runtime. Always compile after changes.",
-      diagram: "Your Blueprint nodes → UE5 compiler → Bytecode → Runs on CPU. The visual graph is just the authoring surface."
-    }
-  ],
-  why_annotations: [
-    {
-      quote: "Create C++ code without writing C++",
-      why: "Blueprints abstract away C++ syntax, letting you prototype at 10x speed. But there's a tradeoff: complex Blueprint graphs run slower than equivalent C++ code. The best practice is to prototype in Blueprint, then move performance-critical logic to C++ once your design is proven."
-    },
-    {
-      quote: "Blueprints can call other Blueprints",
-      why: "Blueprint communication is powerful but easy to get wrong. When you directly reference another Blueprint (called 'hard-reference casting'), you create tight coupling — changing one Blueprint can break another, and both must be loaded into memory even if only one is used.",
-      warning: "Avoid Hard-Reference Casting between Blueprints",
-      bestPractice: "Use Blueprint Interfaces or Event Dispatchers instead. They let Blueprints talk to each other without knowing each other's exact type — loose coupling that scales."
-    },
-    {
-      quote: "Event Graph is functional when we press play",
-      why: "The Event Graph uses an event-driven architecture. Nothing runs continuously by default — execution only happens in response to events (BeginPlay, Tick, Input Actions, Overlaps). This keeps your game efficient: code only runs when something actually happens."
-    },
-    {
-      quote: "Construction Script works inside the editor",
-      why: "The Construction Script is your editor-time powerhouse — it can procedurally generate content, set up dynamic defaults, and give you live previews. But be careful: heavy Construction Scripts run every time you move an actor, which can make your editor sluggish.",
-      warning: "Heavy Construction Scripts slow down your editor",
-      bestPractice: "Keep Construction Scripts fast. Move runtime logic to the Event Graph, and use the Construction Script only for setup and preview."
-    }
-  ],
-  think_prompts: [
-    {
-      question: "Why would a flowchart metaphor be useful for game logic?",
-      insight: "Game logic is inherently about flow — 'if the player presses jump, then check if grounded, then apply force.' A flowchart makes this visible, debuggable, and modifiable by non-programmers. It also makes branching and conditional paths obvious at a glance."
-    },
-    {
-      question: "When would you choose C++ over Blueprints?",
-      insight: "C++ is better for things that run every frame (Tick-heavy logic), low-level systems (networking, serialization), and anything where Blueprint graph complexity becomes unreadable. Many studios use C++ for the base classes and Blueprints for gameplay-specific behavior on top."
-    },
-    {
-      question: "What could go wrong if you put runtime logic in the Construction Script?",
-      insight: "Construction Scripts run in the editor, not just at runtime. If you put game logic there, it will execute every time the actor is moved, duplicated, or the level is loaded in the editor — causing side effects, performance drops, and confusing bugs that don't reproduce in Play mode."
-    }
-  ]
-};
+const TOTAL_DURATION = 220; // 3:40 in seconds
 
-function render() {
-  const el = document.getElementById('guideContent');
-  let html = '';
-
-  // Key Concepts
-  html += '<div class="section-divider">🧠 Key Concepts</div>';
-  DATA.theory_breaks.forEach(tb => {
-    html += `
-      <div class="theory-card">
-        <div class="card-icon">CONCEPT</div>
-        <h3>${tb.title}</h3>
-        <p>${tb.concept}</p>
-        <div class="diagram-hint">
-          <span class="icon">💡</span>
-          <span>${tb.diagram}</span>
-        </div>
+// All overlay events sorted by time
+const EVENTS = [
+  {
+    time: 7,
+    type: 'why',
+    html: `
+      <div class="card-type type-why">💡 WHY IT MATTERS</div>
+      <h3>Why Blueprints Abstract C++</h3>
+      <p>Blueprints let you prototype at 10x speed by hiding C++ syntax. But there's a tradeoff: complex Blueprint graphs run slower than equivalent C++. The best practice is to <strong>prototype in Blueprint, then move performance-critical logic to C++</strong> once your design is proven.</p>
+    `
+  },
+  {
+    time: 21,
+    type: 'think',
+    html: `
+      <div class="card-type type-think">🤔 THINK ABOUT IT</div>
+      <div class="think-q">Why is a flowchart metaphor useful for game logic?</div>
+      <button class="reveal-btn" onclick="toggleReveal(this)">Show Answer ▸</button>
+      <div class="reveal-answer">Game logic is inherently about flow — "if the player presses jump, then check if grounded, then apply force." A visual flowchart makes branching and conditional paths obvious at a glance, and debuggable by non-programmers.</div>
+    `
+  },
+  {
+    time: 37,
+    type: 'theory',
+    html: `
+      <div class="card-type type-theory">🧠 KEY CONCEPT</div>
+      <h3>Actor-Component Model</h3>
+      <p>Blueprints use the Actor-Component pattern. Think of an Actor as an empty container — you fill it with Components (a mesh for visuals, lights, collision, audio). Each component does one job. You build complexity by composing simple, reusable pieces.</p>
+      <div class="tip warn">
+        <span class="icon">⚠️</span>
+        <span><strong>Avoid Hard-Reference Casting</strong> — directly referencing another Blueprint creates tight coupling. Use Blueprint Interfaces or Event Dispatchers instead for communication.</span>
       </div>
-    `;
-  });
-
-  // Why It Matters
-  html += '<div class="section-divider">💡 Why It Matters</div>';
-  DATA.why_annotations.forEach(wa => {
-    html += `
-      <div class="why-card">
-        <div class="what-they-said">${wa.quote}</div>
-        <div class="why-explain">${wa.why}</div>
-        ${wa.warning ? `
-          <div class="tip-box warning">
-            <span class="icon">⚠️</span>
-            <span><strong>${wa.warning}</strong></span>
-          </div>
-        ` : ''}
-        ${wa.bestPractice ? `
-          <div class="tip-box best-practice">
-            <span class="icon">✅</span>
-            <span>${wa.bestPractice}</span>
-          </div>
-        ` : ''}
+      <div class="tip good">
+        <span class="icon">✅</span>
+        <span>Use Interfaces for loose coupling — Blueprints can talk without knowing each other's type.</span>
       </div>
-    `;
-  });
-
-  // Think About It
-  html += '<div class="section-divider">🤔 Test Your Understanding</div>';
-  DATA.think_prompts.forEach((p, i) => {
-    html += `
-      <div class="think-card">
-        <div class="think-label">Think About It</div>
-        <div class="think-question">${p.question}</div>
-        <div class="reveal-btn" onclick="toggleReveal(this)">Show Answer ▸</div>
-        <div class="reveal-answer" id="answer-${i}">${p.insight}</div>
+    `
+  },
+  {
+    time: 75,
+    type: 'think',
+    html: `
+      <div class="card-type type-think">🤔 THINK ABOUT IT</div>
+      <div class="think-q">How do Blueprint variables relate to exposed parameters in the editor?</div>
+      <button class="reveal-btn" onclick="toggleReveal(this)">Show Answer ▸</button>
+      <div class="reveal-answer">Variables marked as "Instance Editable" become exposed parameters in the Details panel. Designers can tweak them per-instance without opening the Blueprint — enabling rapid iteration without touching logic.</div>
+    `
+  },
+  {
+    time: 102,
+    type: 'theory',
+    html: `
+      <div class="card-type type-theory">🧠 KEY CONCEPT</div>
+      <h3>Event Graph vs. Construction Script</h3>
+      <p>These are two completely different execution contexts — the most common beginner mistake is confusing them:</p>
+      <div class="tip warn">
+        <span class="icon">📋</span>
+        <span><strong>Construction Script</strong> = runs in the editor when you place or move the actor. For setup, defaults, and previews.</span>
       </div>
-    `;
-  });
+      <div class="tip good">
+        <span class="icon">📋</span>
+        <span><strong>Event Graph</strong> = runs at runtime when you press Play. For game logic, input handling, and player interaction.</span>
+      </div>
+    `
+  },
+  {
+    time: 115,
+    type: 'why',
+    html: `
+      <div class="card-type type-why">💡 WHY IT MATTERS</div>
+      <h3>Construction Script Performance</h3>
+      <p>Heavy Construction Scripts fire every time you move an actor in the editor. If yours does complex calculations or spawns dozens of meshes, your editor becomes sluggish.</p>
+      <div class="tip good">
+        <span class="icon">✅</span>
+        <span>Keep Construction Scripts fast and simple. Move runtime logic to the Event Graph. Reserve the Construction Script for static setup only.</span>
+      </div>
+    `
+  },
+  {
+    time: 133,
+    type: 'think',
+    html: `
+      <div class="card-type type-think">🤔 THINK ABOUT IT</div>
+      <div class="think-q">What could go wrong if you put game logic in the Construction Script?</div>
+      <button class="reveal-btn" onclick="toggleReveal(this)">Show Answer ▸</button>
+      <div class="reveal-answer">It would execute every time the actor is moved, duplicated, or the level loads in the editor — causing unintended side effects, spawning extra objects, and creating bugs that can't be reproduced during Play mode.</div>
+    `
+  },
+  {
+    time: 194,
+    type: 'theory',
+    html: `
+      <div class="card-type type-theory">🧠 KEY CONCEPT</div>
+      <h3>Blueprint Compilation</h3>
+      <p>That "Compile" button isn't decorative. UE5 compiles your Blueprint nodes into optimized bytecode (or native C++ via nativization). Uncompiled Blueprints show warnings and can cause runtime hitches. Always compile after changes.</p>
+      <div class="tip warn">
+        <span class="icon">⚠️</span>
+        <span>If you see the yellow "Needs Compile" icon — don't ignore it. Uncompiled changes won't take effect and can cause unpredictable behavior.</span>
+      </div>
+    `
+  }
+];
 
-  el.innerHTML = html;
+// ---- STATE ----
+let elapsed = 0;
+let paused = false;
+let intervalId = null;
+let currentEventIdx = -1;
+let cardDismissed = false;
+const CARD_DISPLAY_SECS = 15;
+
+// ---- INIT ----
+function initMarkers() {
+  const container = document.getElementById('timelineMarkers');
+  EVENTS.forEach((ev, i) => {
+    const pct = (ev.time / TOTAL_DURATION) * 100;
+    const marker = document.createElement('div');
+    marker.className = `timeline-marker ${ev.type}`;
+    marker.style.left = pct + '%';
+    marker.title = `${ev.type} @ ${formatTime(ev.time)}`;
+    marker.onclick = (e) => { e.stopPropagation(); jumpTo(ev.time); };
+    marker.id = `marker-${i}`;
+    container.appendChild(marker);
+  });
+}
+
+// ---- GUIDE CONTROL ----
+function startGuide() {
+  document.getElementById('startOverlay').classList.add('hidden');
+  document.getElementById('prereqsBar').classList.add('visible');
+  document.getElementById('timelineBar').classList.add('visible');
+  elapsed = 0;
+  paused = false;
+  currentEventIdx = -1;
+  tick();
+  intervalId = setInterval(tick, 1000);
+}
+
+function tick() {
+  if (paused) return;
+
+  updateTimeline();
+  checkEvents();
+
+  elapsed++;
+  if (elapsed > TOTAL_DURATION) {
+    clearInterval(intervalId);
+    hideCard();
+  }
+}
+
+function togglePause() {
+  paused = !paused;
+  const btn = document.getElementById('pauseBtn');
+  btn.textContent = paused ? '▶ Resume' : '⏸ Pause Guide';
+  btn.classList.toggle('active', paused);
+}
+
+function resetGuide() {
+  clearInterval(intervalId);
+  elapsed = 0;
+  paused = false;
+  currentEventIdx = -1;
+  cardDismissed = false;
+  hideCard();
+  document.getElementById('pauseBtn').textContent = '⏸ Pause Guide';
+  document.getElementById('pauseBtn').classList.remove('active');
+  // Clear active markers
+  document.querySelectorAll('.timeline-marker').forEach(m => m.classList.remove('active'));
+  tick();
+  intervalId = setInterval(tick, 1000);
+}
+
+function jumpTo(time) {
+  elapsed = time;
+  currentEventIdx = -1; // reset so checkEvents re-evaluates
+  cardDismissed = false;
+  checkEvents();
+  updateTimeline();
+}
+
+// ---- EVENTS ----
+function checkEvents() {
+  for (let i = 0; i < EVENTS.length; i++) {
+    const ev = EVENTS[i];
+    if (elapsed === ev.time) {
+      showCard(ev, i);
+      return;
+    }
+  }
+
+  // Auto-hide after CARD_DISPLAY_SECS
+  if (currentEventIdx >= 0 && !cardDismissed) {
+    const ev = EVENTS[currentEventIdx];
+    if (elapsed > ev.time + CARD_DISPLAY_SECS) {
+      hideCard();
+    }
+  }
+}
+
+function showCard(ev, idx) {
+  const overlay = document.getElementById('conceptOverlay');
+  const card = document.getElementById('conceptCard');
+  const dismissHtml = '<button class="dismiss-btn" onclick="dismissCard()">✕</button>';
+  card.innerHTML = dismissHtml + ev.html;
+
+  // Remove colored border from previous type
+  card.className = 'concept-card';
+  if (ev.type === 'think') card.classList.add('think');
+
+  overlay.classList.add('visible');
+  currentEventIdx = idx;
+  cardDismissed = false;
+
+  // Highlight marker
+  document.querySelectorAll('.timeline-marker').forEach(m => m.classList.remove('active'));
+  const marker = document.getElementById(`marker-${idx}`);
+  if (marker) marker.classList.add('active');
+}
+
+function hideCard() {
+  document.getElementById('conceptOverlay').classList.remove('visible');
+  document.querySelectorAll('.timeline-marker').forEach(m => m.classList.remove('active'));
+}
+
+function dismissCard() {
+  hideCard();
+  cardDismissed = true;
+}
+
+// ---- TIMELINE ----
+function updateTimeline() {
+  const pct = Math.min((elapsed / TOTAL_DURATION) * 100, 100);
+  document.getElementById('timelineProgress').style.width = pct + '%';
+  document.getElementById('timerDisplay').textContent = `${formatTime(elapsed)} / ${formatTime(TOTAL_DURATION)}`;
+}
+
+function seekTimeline(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  elapsed = Math.floor(pct * TOTAL_DURATION);
+  currentEventIdx = -1;
+  cardDismissed = false;
+  checkEvents();
+  updateTimeline();
+}
+
+function formatTime(s) {
+  const mins = Math.floor(s / 60);
+  const secs = s % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function toggleReveal(btn) {
@@ -518,7 +702,7 @@ function toggleReveal(btn) {
   btn.textContent = isOpen ? 'Show Answer ▸' : 'Hide Answer ◂';
 }
 
-render();
+initMarkers();
 </script>
 </body>
 </html>
