@@ -182,7 +182,7 @@ function PersonaQuiz({ onComplete }) {
               Start My Path →
             </button>
             <button className="quiz-retake-btn" onClick={handleRetake}>
-              Retake Quiz
+              Change My Role
             </button>
           </div>
         </div>

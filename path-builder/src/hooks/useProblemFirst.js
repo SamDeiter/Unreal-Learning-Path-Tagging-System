@@ -10,7 +10,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+
 import { getFirebaseApp } from "../services/firebaseConfig";
 import { matchCoursesToCart } from "../domain/courseMatching";
 import { flattenCoursesToVideos } from "../domain/videoRanking";
@@ -22,7 +22,7 @@ import {
   trackDiagnosisGenerated,
   trackLearningPathGenerated,
 } from "../services/analyticsService";
-import { getBoostMap } from "../services/feedbackService";
+
 import { useTagData } from "../context/TagDataContext";
 import { useVideoCart } from "./useVideoCart";
 import { devLog, devWarn } from "../utils/logger";

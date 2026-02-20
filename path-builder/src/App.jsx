@@ -312,7 +312,7 @@ function App() {
                         setShowQuiz(true);
                       }}
                     >
-                      🔄 Retake Quiz
+                      🔄 Change My Role
                     </button>
                   </div>
                 )}

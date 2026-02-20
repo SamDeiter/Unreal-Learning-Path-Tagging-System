@@ -56,7 +56,7 @@ describe("normalizeQuery", () => {
 
   it("collapses extra whitespace", () => {
     const { normalized } = normalizeQuery("  blueprint   with   spaces  ");
-    expect(normalized).not.toMatch(/  /); // No double spaces
+    expect(normalized).not.toMatch(/ {2}/); // No double spaces
     expect(normalized).toBe(normalized.trim());
   });
 });
