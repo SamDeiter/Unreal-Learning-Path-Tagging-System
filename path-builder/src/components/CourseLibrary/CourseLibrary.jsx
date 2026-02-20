@@ -15,6 +15,8 @@ import { usePath } from "../../context/PathContext";
 import { filterCourses } from "../../utils/dataProcessing";
 import { matchCoursesToGoal } from "../../utils/courseMatchingUtils";
 import { Search, Sparkles, Clock, Clapperboard, Layers, Plus, X, Check } from "lucide-react";
+import { getRelevanceBadge } from "../../services/ContentGapService";
+import { detectPersona } from "../../services/PersonaService";
 import "./CourseLibrary.css";
 
 // ... (highlightText helper remains same)
@@ -48,6 +50,14 @@ function CourseLibrary({ courses }) {
     if (!goal) return [];
     return matchCoursesToGoal(goal, courses, 8);
   }, [learningIntent, courses]);
+
+  // Detect active persona from learning goal
+  const activePersonaId = useMemo(() => {
+    const goal = learningIntent?.primaryGoal;
+    if (!goal) return null;
+    const result = detectPersona(goal);
+    return result?.id || null;
+  }, [learningIntent]);
 
   // Filter out already-in-path courses from suggestions
   const availableSuggestions = useMemo(() => {
@@ -236,6 +246,21 @@ function CourseLibrary({ courses }) {
                   </span>
                 )}
                 {course.tags?.topic && <span className="tag tag-topic">{course.tags.topic}</span>}
+                {activePersonaId &&
+                  (() => {
+                    const badge = getRelevanceBadge(course, activePersonaId);
+                    if (badge.label) {
+                      return (
+                        <span
+                          className={`tag tag-persona tag-persona-${badge.type}`}
+                          title={`Persona relevance: ${badge.score > 0 ? "+" : ""}${badge.score}`}
+                        >
+                          {badge.label}
+                        </span>
+                      );
+                    }
+                    return null;
+                  })()}
               </div>
               <div className="card-meta">
                 {course.duration && (
