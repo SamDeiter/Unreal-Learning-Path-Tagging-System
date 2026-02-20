@@ -1,0 +1,1152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conceptual Augmentation Viewer — Pillar 5 Prototype</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-primary: #0a0e17;
+        --bg-secondary: #111827;
+        --bg-card: #1a2234;
+        --bg-card-hover: #1e2a3f;
+        --border: #2a3a52;
+        --accent: #3b82f6;
+        --accent-glow: rgba(59, 130, 246, 0.15);
+        --accent-dim: #1d4ed8;
+        --text-primary: #e2e8f0;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --green: #10b981;
+        --green-bg: rgba(16, 185, 129, 0.1);
+        --yellow: #f59e0b;
+        --yellow-bg: rgba(245, 158, 11, 0.1);
+        --orange: #f97316;
+        --orange-bg: rgba(249, 115, 22, 0.1);
+        --red: #ef4444;
+        --red-bg: rgba(239, 68, 68, 0.1);
+        --purple: #a78bfa;
+        --purple-bg: rgba(167, 139, 250, 0.1);
+        --cyan: #22d3ee;
+        --cyan-bg: rgba(34, 211, 238, 0.1);
+        --radius: 12px;
+        --radius-sm: 8px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      /* Header */
+      .header {
+        background: linear-gradient(180deg, rgba(59, 130, 246, 0.08) 0%, transparent 100%);
+        border-bottom: 1px solid var(--border);
+        padding: 20px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header-left h1 {
+        font-size: 20px;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.3px;
+      }
+
+      .header-left .subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .grade-badge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .grade-letter {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: 800;
+        border: 2px solid;
+      }
+
+      .grade-D {
+        background: var(--orange-bg);
+        border-color: var(--orange);
+        color: var(--orange);
+      }
+      .grade-F {
+        background: var(--red-bg);
+        border-color: var(--red);
+        color: var(--red);
+      }
+      .grade-C {
+        background: var(--yellow-bg);
+        border-color: var(--yellow);
+        color: var(--yellow);
+      }
+      .grade-B {
+        background: var(--green-bg);
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .grade-A {
+        background: var(--cyan-bg);
+        border-color: var(--cyan);
+        color: var(--cyan);
+      }
+
+      .grade-info .grade-score {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      .grade-info .grade-verdict {
+        font-size: 12px;
+        color: var(--orange);
+        font-weight: 500;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      /* Main Layout */
+      .main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        height: calc(100vh - 85px);
+      }
+
+      /* Left Panel — Video + Transcript */
+      .video-panel {
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .video-container {
+        background: #000;
+        aspect-ratio: 16/9;
+        flex-shrink: 0;
+      }
+
+      .video-container iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+
+      .video-meta {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-secondary);
+      }
+
+      .video-meta h2 {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .video-meta .meta-row {
+        display: flex;
+        gap: 16px;
+        margin-top: 6px;
+      }
+
+      .meta-tag {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        background: var(--bg-card);
+        color: var(--text-secondary);
+        font-weight: 500;
+        border: 1px solid var(--border);
+      }
+
+      .ratio-bar-container {
+        padding: 12px 20px;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .ratio-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 6px;
+      }
+
+      .ratio-bar {
+        height: 8px;
+        border-radius: 4px;
+        background: var(--bg-card);
+        overflow: hidden;
+        display: flex;
+      }
+
+      .ratio-procedural {
+        background: linear-gradient(90deg, var(--orange), var(--red));
+        transition: width 0.6s ease;
+      }
+
+      .ratio-conceptual {
+        background: linear-gradient(90deg, var(--green), var(--cyan));
+        transition: width 0.6s ease;
+      }
+
+      .ratio-legend {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+
+      .ratio-legend span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .dot-proc {
+        background: var(--orange);
+      }
+      .dot-conc {
+        background: var(--green);
+      }
+
+      /* Transcript */
+      .transcript-panel {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 20px;
+      }
+
+      .transcript-panel h3 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 12px;
+      }
+
+      .transcript-line {
+        padding: 6px 10px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .transcript-line:hover {
+        background: var(--bg-card);
+        color: var(--text-primary);
+      }
+
+      .transcript-line .ts {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        margin-right: 8px;
+        opacity: 0.7;
+      }
+
+      .transcript-line.has-annotation {
+        border-left: 2px solid var(--accent);
+        background: var(--accent-glow);
+      }
+
+      .transcript-line.has-warning {
+        border-left: 2px solid var(--orange);
+        background: var(--orange-bg);
+      }
+
+      /* Right Panel — Augmentation Data */
+      .augmentation-panel {
+        overflow-y: auto;
+        padding: 0;
+      }
+
+      .aug-section {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .aug-section-header {
+        padding: 14px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        user-select: none;
+      }
+
+      .aug-section-header:hover {
+        background: rgba(59, 130, 246, 0.05);
+      }
+
+      .aug-section-header h3 {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .aug-section-header .count {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .aug-section-header .chevron {
+        font-size: 12px;
+        color: var(--text-muted);
+        transition: transform 0.2s ease;
+      }
+
+      .aug-section.open .chevron {
+        transform: rotate(90deg);
+      }
+      .aug-section-body {
+        display: none;
+        padding: 0 20px 16px;
+      }
+      .aug-section.open .aug-section-body {
+        display: block;
+      }
+
+      /* Cards */
+      .aug-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        transition: all 0.2s ease;
+      }
+
+      .aug-card:hover {
+        background: var(--bg-card-hover);
+        border-color: var(--accent);
+        box-shadow: 0 0 20px var(--accent-glow);
+      }
+
+      .aug-card .card-ts {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .aug-card .card-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .aug-card .card-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+
+      .aug-card .card-diagram {
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: var(--purple-bg);
+        border: 1px solid rgba(167, 139, 250, 0.2);
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        color: var(--purple);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* Why Annotation */
+      .why-card .procedural-step {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-style: italic;
+        margin-bottom: 6px;
+      }
+
+      .why-card .why-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      /* Antipattern badge */
+      .antipattern-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 8px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        background: var(--red-bg);
+        color: var(--red);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+      }
+
+      /* Prompt card */
+      .prompt-card .prompt-question {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--cyan);
+        margin-bottom: 6px;
+      }
+
+      .prompt-card .prompt-insight {
+        font-size: 13px;
+        color: var(--text-secondary);
+        padding: 8px 12px;
+        background: var(--cyan-bg);
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(34, 211, 238, 0.15);
+      }
+
+      .prompt-card .prompt-insight-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+      }
+
+      /* Warning card */
+      .warning-card .severity {
+        display: inline-flex;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        font-family: "JetBrains Mono", monospace;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+
+      .severity-LOW {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .severity-MEDIUM {
+        background: var(--yellow-bg);
+        color: var(--yellow);
+      }
+      .severity-HIGH {
+        background: var(--orange-bg);
+        color: var(--orange);
+      }
+      .severity-CRITICAL {
+        background: var(--red-bg);
+        color: var(--red);
+      }
+
+      .warning-card .fix {
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: var(--green-bg);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        color: var(--green);
+      }
+
+      .warning-card .fix-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+        color: var(--text-muted);
+      }
+
+      /* Evaluation Matrix */
+      .eval-grid {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 6px 12px;
+        align-items: center;
+      }
+
+      .eval-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .eval-bar-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .eval-bar {
+        width: 80px;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--bg-primary);
+        overflow: hidden;
+      }
+
+      .eval-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.6s ease;
+      }
+
+      .eval-score {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        font-weight: 600;
+        width: 20px;
+        text-align: right;
+      }
+
+      /* Prerequisites */
+      .prereq-item {
+        padding: 8px 12px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .prereq-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--yellow-bg);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        flex-shrink: 0;
+      }
+
+      /* Section colors */
+      .aug-section[data-type="theory"] .aug-section-header h3 {
+        color: var(--purple);
+      }
+      .aug-section[data-type="theory"] .count {
+        background: var(--purple-bg);
+        color: var(--purple);
+      }
+
+      .aug-section[data-type="why"] .aug-section-header h3 {
+        color: var(--accent);
+      }
+      .aug-section[data-type="why"] .count {
+        background: var(--accent-glow);
+        color: var(--accent);
+      }
+
+      .aug-section[data-type="prompts"] .aug-section-header h3 {
+        color: var(--cyan);
+      }
+      .aug-section[data-type="prompts"] .count {
+        background: var(--cyan-bg);
+        color: var(--cyan);
+      }
+
+      .aug-section[data-type="warnings"] .aug-section-header h3 {
+        color: var(--orange);
+      }
+      .aug-section[data-type="warnings"] .count {
+        background: var(--orange-bg);
+        color: var(--orange);
+      }
+
+      .aug-section[data-type="prereqs"] .aug-section-header h3 {
+        color: var(--yellow);
+      }
+      .aug-section[data-type="prereqs"] .count {
+        background: var(--yellow-bg);
+        color: var(--yellow);
+      }
+
+      .aug-section[data-type="eval"] .aug-section-header h3 {
+        color: var(--green);
+      }
+      .aug-section[data-type="eval"] .count {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
+      }
+
+      @media (max-width: 1024px) {
+        .main {
+          grid-template-columns: 1fr;
+          height: auto;
+        }
+        .video-panel {
+          border-right: 0;
+          border-bottom: 1px solid var(--border);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-left">
+        <h1>Conceptual Augmentation Viewer</h1>
+        <div class="subtitle">Pillar 5 Prototype — AI-Retrofit Pipeline</div>
+      </div>
+      <div class="grade-badge" id="gradeBadge"></div>
+    </header>
+
+    <main class="main">
+      <!-- LEFT: Video + Transcript -->
+      <div class="video-panel">
+        <div class="video-container">
+          <iframe
+            src="https://drive.google.com/file/d/1Z5DakBvLP41LiH4H4atpIbb45Aoxt6Z7/preview"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+          >
+          </iframe>
+        </div>
+
+        <div class="video-meta">
+          <h2 id="videoTitle">100.01 — Blueprint Editor</h2>
+          <div class="meta-row" id="metaTags"></div>
+        </div>
+
+        <div class="ratio-bar-container">
+          <div class="ratio-label">Procedural vs Conceptual Ratio</div>
+          <div class="ratio-bar">
+            <div class="ratio-procedural" id="procBar" style="width: 80%"></div>
+            <div class="ratio-conceptual" id="concBar" style="width: 20%"></div>
+          </div>
+          <div class="ratio-legend">
+            <span
+              ><span class="dot dot-proc"></span> Procedural <strong id="procPct">80%</strong></span
+            >
+            <span
+              ><span class="dot dot-conc"></span> Conceptual <strong id="concPct">20%</strong></span
+            >
+          </div>
+        </div>
+
+        <div class="transcript-panel">
+          <h3>Timestamped Transcript</h3>
+          <div id="transcriptLines"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Augmentation Data -->
+      <div class="augmentation-panel" id="augPanel"></div>
+    </main>
+
+    <script>
+      const AUGMENTATION_DATA = {
+        course_code: "100.01",
+        conceptual_score: {
+          procedural_pct: 80,
+          conceptual_pct: 20,
+          verdict: "NEEDS_AUGMENTATION",
+        },
+        theory_breaks: [
+          {
+            insert_after_timestamp: "0:37",
+            title: "Actor-Component Model",
+            concept:
+              "Blueprints leverage the Actor-Component model. Actors are the fundamental building blocks, and Components provide specific functionalities (e.g., Static Mesh, Point Light). Understanding this composition is crucial for efficient Blueprint design.",
+            diagram_suggestion:
+              "A diagram showing an Actor as a box containing various Component boxes (Static Mesh, Point Light, etc.) with arrows indicating data flow.",
+          },
+          {
+            insert_after_timestamp: "1:42",
+            title: "Execution Contexts: Event Graph vs. Construction Script",
+            concept:
+              "The Event Graph executes during gameplay, driven by events. The Construction Script executes in the editor, allowing for procedural generation and setup. Confusing these contexts leads to unexpected behavior.",
+            diagram_suggestion:
+              "A flowchart contrasting the execution timeline of the Event Graph (runtime) and Construction Script (editor-time).",
+          },
+          {
+            insert_after_timestamp: "3:14",
+            title: "Blueprint Compilation & Native Code Generation",
+            concept:
+              "Blueprints are visually scripted, but Unreal Engine compiles them into optimized bytecode or native C++ code. This compilation step is essential for performance. Uncompiled Blueprints can cause hitches.",
+            diagram_suggestion:
+              "A diagram illustrating the Blueprint compilation pipeline: Blueprint -> Bytecode/C++ -> Executable.",
+          },
+        ],
+        why_annotations: [
+          {
+            timestamp: "0:07",
+            procedural_step: "Create C++ code without writing C++",
+            why: "Blueprints abstract C++ complexity, enabling rapid prototyping and iteration. However, understanding the underlying C++ concepts is crucial for optimization and advanced features.",
+            antipattern_warning: null,
+          },
+          {
+            timestamp: "0:37",
+            procedural_step: "Blueprints can call other Blueprints",
+            why: "Blueprint Communication is a core concept. Direct Blueprint Communication (Hard-Reference Casting) creates tight coupling, hindering modularity and increasing compile times.",
+            antipattern_warning: "Hard-Reference Casting",
+          },
+          {
+            timestamp: "1:46",
+            procedural_step: "Event Graph is functional when we press play",
+            why: "The Event Graph is the primary execution context for gameplay logic. Events trigger functions and control flow. Understanding the event-driven architecture is crucial for creating responsive experiences.",
+            antipattern_warning: null,
+          },
+          {
+            timestamp: "1:55",
+            procedural_step: "Construction Script works inside the editor",
+            why: "The Construction Script allows for procedural generation and setup within the editor. Overuse of the Construction Script for runtime logic can lead to performance issues.",
+            antipattern_warning: null,
+          },
+        ],
+        self_explanation_prompts: [
+          {
+            insert_after_timestamp: "0:21",
+            prompt: "Why is a flowchart metaphor useful for game logic?",
+            expected_insight:
+              "The flowchart metaphor visually represents the flow of execution, making it easier to understand complex logic and debug issues.",
+          },
+          {
+            insert_after_timestamp: "1:15",
+            prompt: "How do Blueprint variables relate to exposed parameters in the editor?",
+            expected_insight:
+              "Variables marked as 'Instance Editable' are exposed as parameters in the editor, allowing designers to easily adjust properties without modifying the Blueprint itself.",
+          },
+          {
+            insert_after_timestamp: "2:13",
+            prompt: "What are the performance implications of complex Construction Scripts?",
+            expected_insight:
+              "Complex Construction Scripts can significantly increase editor load times and reduce performance, especially in large levels.",
+          },
+        ],
+        architectural_warnings: [
+          {
+            timestamp: "0:37",
+            warning:
+              "Calling Blueprints directly (Hard-Reference Casting) creates tight coupling and hinders modularity.",
+            severity: "MEDIUM",
+            fix: "Use Blueprint Interfaces or Event Dispatchers for communication between Blueprints to promote loose coupling and reusability.",
+          },
+          {
+            timestamp: "1:55",
+            warning:
+              "Overuse of the Construction Script for runtime logic can lead to performance issues and increased editor load times.",
+            severity: "MEDIUM",
+            fix: "Move runtime logic to the Event Graph and reserve the Construction Script for editor-time setup and procedural generation.",
+          },
+        ],
+        missing_prerequisites: [
+          "Basic understanding of variables and data types",
+          "Familiarity with event-driven programming concepts",
+          "Knowledge of the Actor-Component model in Unreal Engine",
+        ],
+        evaluation_matrix_score: {
+          concept_clarification: 2,
+          misconception_addressing: 1,
+          narrative_logic: 2,
+          content_first_language: 3,
+          dynamic_visualizations: 1,
+          explicit_signaling: 2,
+          strict_segmentation: 3,
+          extraneous_load_reduction: 3,
+          worked_example_fading: 1,
+          self_explanation_prompting: 2,
+          affective_tone: 3,
+          total: 23,
+          grade: "D",
+        },
+      };
+
+      const TRANSCRIPT = [
+        {
+          ts: "0:00",
+          text: "Unreal Engine 5's Blueprint Editor is one of its most powerful tools as this allows",
+        },
+        {
+          ts: "0:07",
+          text: "you to create C++ code without actually having to write or know that much about C++ code.",
+          hasAnnotation: true,
+        },
+        {
+          ts: "0:15",
+          text: "This is achieved by laying down various nodes and then connecting them in a flowchart-like",
+        },
+        { ts: "0:21", text: "manner in order to construct game logic or interactivity." },
+        {
+          ts: "0:30",
+          text: "Blueprints can be simple assets that just contain a mesh or a light, or they can be",
+        },
+        {
+          ts: "0:37",
+          text: "very complex and even have the ability to call other blueprints within blueprints.",
+          hasAnnotation: true,
+          hasWarning: true,
+        },
+        {
+          ts: "0:46",
+          text: "Let's pop over to the editor now and just take a look at these briefly to get a better",
+        },
+        { ts: "0:50", text: "understanding of what we're working with here." },
+        {
+          ts: "0:52",
+          text: "I'm going to hit Control Space on my keyboard and then I'm going to make sure that I have",
+        },
+        { ts: "0:56", text: "my Blueprint classes here." },
+        {
+          ts: "0:59",
+          text: "These are all the various blueprints that are in this particular project.",
+        },
+        {
+          ts: "1:03",
+          text: "For example, I can pull out this Blueprint ceiling light here and let me just pull this",
+        },
+        { ts: "1:08", text: "up and we can see here that this is a light." },
+        {
+          ts: "1:11",
+          text: "If I come over here, you can see I have a brightness and I have a color property here",
+        },
+        { ts: "1:15", text: "that I can adjust and I have a source radius." },
+        {
+          ts: "1:19",
+          text: "Now, I'm going to select this and I'm going to hit Control E on my keyboard and that's",
+        },
+        { ts: "1:23", text: "going to open up the Blueprint Editor." },
+        { ts: "1:26", text: "This is our Blueprint Editor." },
+        { ts: "1:28", text: "The Blueprint Editor has three main parts." },
+        { ts: "1:30", text: "There's a viewport which represents our visual part." },
+        {
+          ts: "1:33",
+          text: "If our Blueprint needs to have some type of visual component, our viewport is where we",
+        },
+        {
+          ts: "1:37",
+          text: "position it and make sure that everything is the way we want it to look.",
+        },
+        { ts: "1:42", text: "Then we have the Event Graph and the Construction Script." },
+        {
+          ts: "1:46",
+          text: "The Event Graph is functional when we press play.",
+          hasAnnotation: true,
+        },
+        {
+          ts: "1:49",
+          text: "When I press the play button right here, things that happen inside of the Event Graph will",
+        },
+        { ts: "1:54", text: "fire off." },
+        {
+          ts: "1:55",
+          text: "The Construction Script, on the other hand, this works when I'm inside of the Editor.",
+          hasAnnotation: true,
+          hasWarning: true,
+        },
+        {
+          ts: "2:00",
+          text: "The Construction Script, when I go ahead and set something like the brightness here, notice",
+        },
+        { ts: "2:05", text: "that the Construction Script is firing off." },
+        {
+          ts: "2:08",
+          text: "That's again because we're telling that Construction Script to change the brightness and we do that",
+        },
+        { ts: "2:13", text: "inside of our Event Graph." },
+        {
+          ts: "2:17",
+          text: "As I come through here, we're going to have a bunch of different things that I can do.",
+        },
+        { ts: "2:24", text: "Here's another Blueprint for Echo." },
+        { ts: "2:42", text: "Here is our Echo." },
+        {
+          ts: "2:48",
+          text: "If I was to hit Ctrl E on this, we're going to notice a much more complicated Blueprint",
+        },
+        { ts: "3:01", text: "Here's her Construction Script. It's setting up her hair." },
+        { ts: "3:04", text: "It looks like here's the Event Graph." },
+        { ts: "3:06", text: "It looks like it's doing some stuff with the hair." },
+        { ts: "3:08", text: "Here's our viewport." },
+        {
+          ts: "3:13",
+          text: "Then over here, we have our components, which contain different things.",
+        },
+        {
+          ts: "3:17",
+          text: "Again, the Blueprint Editor is a super, super powerful tool that allows anybody,",
+        },
+        {
+          ts: "3:23",
+          text: "whether they be a level designer, a technical artist, regular artist, or even just a regular designer,",
+        },
+        {
+          ts: "3:31",
+          text: "the ability to block out code or experiment in ways that just haven't been possible before.",
+        },
+      ];
+
+      // --- Render ---
+      function init() {
+        renderGrade();
+        renderRatio();
+        renderTranscript();
+        renderAugPanel();
+      }
+
+      function renderGrade() {
+        const s = AUGMENTATION_DATA.evaluation_matrix_score;
+        document.getElementById("gradeBadge").innerHTML = `
+    <div class="grade-info">
+      <div class="grade-score">${s.total}/55</div>
+      <div class="grade-verdict">${AUGMENTATION_DATA.conceptual_score.verdict}</div>
+    </div>
+    <div class="grade-letter grade-${s.grade}">${s.grade}</div>
+  `;
+      }
+
+      function renderRatio() {
+        const cs = AUGMENTATION_DATA.conceptual_score;
+        document.getElementById("procBar").style.width = cs.procedural_pct + "%";
+        document.getElementById("concBar").style.width = cs.conceptual_pct + "%";
+        document.getElementById("procPct").textContent = cs.procedural_pct + "%";
+        document.getElementById("concPct").textContent = cs.conceptual_pct + "%";
+      }
+
+      function renderTranscript() {
+        const el = document.getElementById("transcriptLines");
+        el.innerHTML = TRANSCRIPT.map((line) => {
+          let cls = "transcript-line";
+          if (line.hasWarning) cls += " has-warning";
+          else if (line.hasAnnotation) cls += " has-annotation";
+          return `<div class="${cls}"><span class="ts">${line.ts}</span>${line.text}</div>`;
+        }).join("");
+      }
+
+      function renderAugPanel() {
+        const panel = document.getElementById("augPanel");
+        const d = AUGMENTATION_DATA;
+
+        panel.innerHTML = `
+    ${renderSection(
+      "theory",
+      "🧠 Theory Breaks",
+      d.theory_breaks.length,
+      d.theory_breaks
+        .map(
+          (tb) => `
+      <div class="aug-card">
+        <div class="card-ts">⏱ ${tb.insert_after_timestamp}</div>
+        <div class="card-title">${tb.title}</div>
+        <div class="card-text">${tb.concept}</div>
+        <div class="card-diagram">📐 ${tb.diagram_suggestion}</div>
+      </div>
+    `
+        )
+        .join("")
+    )}
+
+    ${renderSection(
+      "why",
+      "💡 Why Annotations",
+      d.why_annotations.length,
+      d.why_annotations
+        .map(
+          (wa) => `
+      <div class="aug-card why-card">
+        <div class="card-ts">⏱ ${wa.timestamp}</div>
+        <div class="procedural-step">"${wa.procedural_step}"</div>
+        <div class="why-text">${wa.why}</div>
+        ${wa.antipattern_warning ? `<div class="antipattern-badge">⚠️ ${wa.antipattern_warning}</div>` : ""}
+      </div>
+    `
+        )
+        .join("")
+    )}
+
+    ${renderSection(
+      "prompts",
+      "❓ Self-Explanation Prompts",
+      d.self_explanation_prompts.length,
+      d.self_explanation_prompts
+        .map(
+          (p) => `
+      <div class="aug-card prompt-card">
+        <div class="card-ts">⏱ ${p.insert_after_timestamp}</div>
+        <div class="prompt-question">${p.prompt}</div>
+        <div class="prompt-insight-label">Expected Insight</div>
+        <div class="prompt-insight">${p.expected_insight}</div>
+      </div>
+    `
+        )
+        .join("")
+    )}
+
+    ${renderSection(
+      "warnings",
+      "⚠️ Architectural Warnings",
+      d.architectural_warnings.length,
+      d.architectural_warnings
+        .map(
+          (w) => `
+      <div class="aug-card warning-card">
+        <div class="card-ts">⏱ ${w.timestamp}</div>
+        <span class="severity severity-${w.severity}">${w.severity}</span>
+        <div class="card-text">${w.warning}</div>
+        <div class="fix">
+          <div class="fix-label">✅ Correct Approach</div>
+          ${w.fix}
+        </div>
+      </div>
+    `
+        )
+        .join("")
+    )}
+
+    ${renderSection(
+      "prereqs",
+      "📋 Missing Prerequisites",
+      d.missing_prerequisites.length,
+      d.missing_prerequisites
+        .map(
+          (p) => `
+      <div class="prereq-item">
+        <span class="prereq-icon">!</span>
+        ${p}
+      </div>
+    `
+        )
+        .join("")
+    )}
+
+    ${renderSection("eval", "📊 Evaluation Matrix", d.evaluation_matrix_score.total + "/55", renderEvalMatrix())}
+  `;
+
+        // Open first two sections by default
+        const sections = panel.querySelectorAll(".aug-section");
+        if (sections[0]) sections[0].classList.add("open");
+        if (sections[1]) sections[1].classList.add("open");
+
+        // Toggle
+        panel.querySelectorAll(".aug-section-header").forEach((h) => {
+          h.addEventListener("click", () => h.parentElement.classList.toggle("open"));
+        });
+      }
+
+      function renderSection(type, title, count, body) {
+        return `
+    <div class="aug-section" data-type="${type}">
+      <div class="aug-section-header">
+        <h3>${title} <span class="count">${count}</span></h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="aug-section-body">${body}</div>
+    </div>
+  `;
+      }
+
+      function renderEvalMatrix() {
+        const e = AUGMENTATION_DATA.evaluation_matrix_score;
+        const items = [
+          ["Concept Clarification", e.concept_clarification],
+          ["Misconception Addressing", e.misconception_addressing],
+          ["Narrative Logic", e.narrative_logic],
+          ["Content-First Language", e.content_first_language],
+          ["Dynamic Visualizations", e.dynamic_visualizations],
+          ["Explicit Signaling", e.explicit_signaling],
+          ["Strict Segmentation", e.strict_segmentation],
+          ["Extraneous Load Reduction", e.extraneous_load_reduction],
+          ["Worked Example Fading", e.worked_example_fading],
+          ["Self-Explanation Prompting", e.self_explanation_prompting],
+          ["Affective Tone", e.affective_tone],
+        ];
+
+        function getColor(score) {
+          if (score <= 1) return "var(--red)";
+          if (score <= 2) return "var(--orange)";
+          if (score <= 3) return "var(--yellow)";
+          if (score <= 4) return "var(--green)";
+          return "var(--cyan)";
+        }
+
+        return `<div class="eval-grid">${items
+          .map(
+            ([label, score]) => `
+    <div class="eval-label">${label}</div>
+    <div class="eval-bar-wrap">
+      <div class="eval-bar">
+        <div class="eval-fill" style="width:${score * 20}%;background:${getColor(score)}"></div>
+      </div>
+      <div class="eval-score" style="color:${getColor(score)}">${score}</div>
+    </div>
+  `
+          )
+          .join("")}</div>`;
+      }
+
+      init();
+    </script>
+  </body>
+</html>
