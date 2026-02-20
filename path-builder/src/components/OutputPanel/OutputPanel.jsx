@@ -3,7 +3,15 @@ import { usePath } from "../../context/PathContext";
 import { generateStructure, generateObjectives, generateGoals } from "../../utils/generationEngine";
 import { getOfficialDocs } from "../../utils/suggestionEngine";
 import { generateLearningBlueprint, isUserAuthenticated } from "../../services/geminiService";
-import { exportToJSON, exportToCSV, generateSCORMManifest, generateXAPITemplate, downloadFile } from "../../utils/pathExporter";
+import {
+  exportToJSON,
+  exportToCSV,
+  generateSCORMManifest,
+  generateXAPITemplate,
+  downloadFile,
+} from "../../utils/pathExporter";
+import { getPersonaWelcome, getPathContextBlocks } from "../../services/PersonalizedMessaging";
+import { detectPersona } from "../../services/PersonaService";
 import "./OutputPanel.css";
 
 function OutputPanel() {
@@ -15,6 +23,21 @@ function OutputPanel() {
 
   // Get official docs for selected courses
   const docLinks = useMemo(() => getOfficialDocs(courses), [courses]);
+
+  // Detect active persona from learning goal
+  const activePersonaId = useMemo(() => {
+    const goal = learningIntent?.primaryGoal;
+    if (!goal) return null;
+    const result = detectPersona(goal);
+    return result?.id || null;
+  }, [learningIntent]);
+
+  // Persona welcome + context blocks
+  const personaWelcome = useMemo(() => getPersonaWelcome(activePersonaId), [activePersonaId]);
+  const contextBlocks = useMemo(
+    () => getPathContextBlocks(activePersonaId, courses),
+    [activePersonaId, courses]
+  );
 
   // Generate fallback content (memoized)
   const fallbackOutputs = useMemo(() => {
@@ -161,32 +184,40 @@ ${docLinks.length > 0 ? docLinks.map((doc) => `- [${doc.title}](${doc.url})`).jo
             </button>
             {showExportMenu && (
               <div className="export-dropdown-menu">
-                <button onClick={() => {
-                  const json = exportToJSON(learningIntent, courses);
-                  downloadFile(json, `${json.id}.json`, 'application/json');
-                  setShowExportMenu(false);
-                }}>
+                <button
+                  onClick={() => {
+                    const json = exportToJSON(learningIntent, courses);
+                    downloadFile(json, `${json.id}.json`, "application/json");
+                    setShowExportMenu(false);
+                  }}
+                >
                   📋 JSON (LMS Import)
                 </button>
-                <button onClick={() => {
-                  const csv = exportToCSV(learningIntent, courses);
-                  downloadFile(csv, `learning-path-${Date.now()}.csv`, 'text/csv');
-                  setShowExportMenu(false);
-                }}>
+                <button
+                  onClick={() => {
+                    const csv = exportToCSV(learningIntent, courses);
+                    downloadFile(csv, `learning-path-${Date.now()}.csv`, "text/csv");
+                    setShowExportMenu(false);
+                  }}
+                >
                   📊 CSV (Spreadsheet)
                 </button>
-                <button onClick={() => {
-                  const manifest = generateSCORMManifest(learningIntent, courses);
-                  downloadFile(manifest, 'imsmanifest.xml', 'application/xml');
-                  setShowExportMenu(false);
-                }}>
+                <button
+                  onClick={() => {
+                    const manifest = generateSCORMManifest(learningIntent, courses);
+                    downloadFile(manifest, "imsmanifest.xml", "application/xml");
+                    setShowExportMenu(false);
+                  }}
+                >
                   📦 SCORM Manifest
                 </button>
-                <button onClick={() => {
-                  const xapi = generateXAPITemplate(learningIntent, courses, 0);
-                  downloadFile(xapi, `xapi-template-${Date.now()}.json`, 'application/json');
-                  setShowExportMenu(false);
-                }}>
+                <button
+                  onClick={() => {
+                    const xapi = generateXAPITemplate(learningIntent, courses, 0);
+                    downloadFile(xapi, `xapi-template-${Date.now()}.json`, "application/json");
+                    setShowExportMenu(false);
+                  }}
+                >
                   🔗 xAPI Template
                 </button>
               </div>
@@ -236,15 +267,35 @@ ${docLinks.length > 0 ? docLinks.map((doc) => `- [${doc.title}](${doc.url})`).jo
           <>
             {activeTab === "outline" && (
               <div className="gen-view">
+                {activePersonaId && personaWelcome.greeting && (
+                  <div className="persona-welcome">
+                    <strong>{personaWelcome.greeting}</strong>
+                    {personaWelcome.painPoints.length > 0 && (
+                      <ul className="persona-pain-points">
+                        {personaWelcome.painPoints.slice(0, 3).map((pp, i) => (
+                          <li key={i}>{pp}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
                 {outputs.outline.map((section, sIdx) => (
                   <div key={section.id || `section-${sIdx}`} className="gen-section">
                     <h4 className="gen-section-title">{section.title}</h4>
                     <ul className="gen-list">
-                      {section.items.map((item, iIdx) => (
-                        <li key={item.id || `item-${sIdx}-${iIdx}`} className="gen-item outline">
-                          {item.text}
-                        </li>
-                      ))}
+                      {section.items.map((item, iIdx) => {
+                        const ctx = contextBlocks.find((cb) => cb.courseCode === item.courseCode);
+                        return (
+                          <li key={item.id || `item-${sIdx}-${iIdx}`} className="gen-item outline">
+                            {item.text}
+                            {ctx && ctx.hasContext && (
+                              <div className="persona-context">
+                                💡 <em>{ctx.message}</em>
+                              </div>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 ))}
