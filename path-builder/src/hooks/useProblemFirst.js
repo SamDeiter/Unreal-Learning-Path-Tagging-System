@@ -28,6 +28,8 @@ import { useTagData } from "../context/TagDataContext";
 import { useVideoCart } from "./useVideoCart";
 import { devLog, devWarn } from "../utils/logger";
 
+import { PROBLEM_STOPWORDS as STOP_WORDS } from "../domain/constants";
+
 // ──────────── Constants ────────────
 export const STAGES = {
   INPUT: "input",
@@ -39,14 +41,6 @@ export const STAGES = {
   ERROR: "error",
 };
 
-const STOP_WORDS = new Set([
-  "the","and","for","are","but","not","you","all","can","has","her","was",
-  "one","our","out","its","how","why","with","from","they","been","have",
-  "this","that","what","when","your","into",
-  // Vague/subjective complaint words — not useful as doc search topics
-  "wrong","looks","seems","weird","bad","broken","issue","problem",
-  "help","work","working","doesn","isn","getting","keep","keeps",
-]);
 
 // ──────────── Hook ────────────
 export default function useProblemFirst() {

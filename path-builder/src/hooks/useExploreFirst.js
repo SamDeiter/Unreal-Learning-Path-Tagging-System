@@ -32,6 +32,8 @@ import { personaScoringRules } from "../services/PersonaService";
 import { getPersonaById } from "../services/PersonaService";
 import personaData from "../data/personas.json";
 
+import { EXPLORE_STOPWORDS as STOP_WORDS } from "../domain/constants";
+
 // ──────────── Constants ────────────
 export const STAGES = {
   INPUT: "input",
@@ -41,12 +43,6 @@ export const STAGES = {
   ERROR: "error",
 };
 
-const STOP_WORDS = new Set([
-  "the","and","for","are","but","not","you","all","can","has","her","was",
-  "one","our","out","its","how","why","with","from","they","been","have",
-  "this","that","what","when","your","into","want","learn","using","make",
-  "need","like","about","would","could","should","really","unreal","engine",
-]);
 
 // ──────────── Silent Persona Detection ────────────
 function detectPersonaFromQuery(query) {

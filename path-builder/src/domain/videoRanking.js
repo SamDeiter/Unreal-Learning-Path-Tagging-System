@@ -5,6 +5,8 @@
 import { applyFeedbackMultiplier } from "../services/feedbackService";
 import { cleanVideoTitle } from "../utils/cleanVideoTitle";
 import { getSegmentIndex } from "../services/segmentSearchService";
+import { stem } from "../utils/stemmer";
+import { DISPLAY_NOISE } from "./constants";
 
 // Lazy-loaded doc_links (0.1MB)
 let _docLinks = null;
@@ -16,47 +18,7 @@ async function getDocLinks() {
   return _docLinks;
 }
 
-/**
- * Display noise words — filtered from matchedKeywords before UI display.
- */
-const DISPLAY_NOISE = new Set([
-  "help",
-  "helpful",
-  "helps",
-  "use",
-  "used",
-  "using",
-  "make",
-  "made",
-  "get",
-  "getting",
-  "look",
-  "going",
-  "come",
-  "know",
-  "thing",
-  "work",
-  "working",
-  "want",
-  "need",
-  "show",
-  "start",
-  "take",
-  "right",
-  "well",
-]);
-
-/**
- * Simple stemmer — strips common English suffixes for fuzzy matching.
- * e.g. "meshes" → "mesh", "importing" → "import", "textures" → "textur"
- */
-function stem(word) {
-  return word
-    .replace(/ies$/i, "y")
-    .replace(/ves$/i, "f")
-    .replace(/(s|es|ing|ed|tion|ment)$/i, "")
-    .toLowerCase();
-}
+// DISPLAY_NOISE and stem are now imported from shared modules above
 
 /**
  * Fuzzy word-overlap match: returns true if any query word stem

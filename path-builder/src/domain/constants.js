@@ -1,6 +1,7 @@
 /**
  * Shared constants for search and matching logic.
- * Single source of truth — imported by courseMatching.js and segmentSearchService.js.
+ * Single source of truth — imported by courseMatching.js, segmentSearchService.js,
+ * useProblemFirst.js, useExploreFirst.js, and videoRanking.js.
  */
 
 /**
@@ -27,4 +28,40 @@ export const SEARCH_STOPWORDS = new Set([
   "what", "when", "where", "which", "while", "work", "working",
   // UE5-specific generic words (too broad to be useful alone)
   "unreal", "engine", "introduction", "quick",
+]);
+
+/**
+ * Problem-mode stop words — complaint/vague words that are not useful as doc search topics.
+ * Used by useProblemFirst to filter queries before doc matching.
+ */
+export const PROBLEM_STOPWORDS = new Set([
+  ...SEARCH_STOPWORDS,
+  "wrong", "looks", "seems", "weird", "bad", "broken", "issue", "problem",
+  "help", "work", "working", "doesn", "isn", "getting", "keep", "keeps",
+  "but", "all", "her", "one", "our", "out", "its", "why",
+]);
+
+/**
+ * Explore-mode stop words — learning-oriented filler that adds no signal.
+ * Used by useExploreFirst to filter queries before doc matching.
+ */
+export const EXPLORE_STOPWORDS = new Set([
+  ...SEARCH_STOPWORDS,
+  "learn", "learning", "tutorial", "teach", "course",
+  "but", "all", "her", "one", "our", "out", "its", "why",
+]);
+
+/**
+ * Display noise words — filtered from matchedKeywords before UI display.
+ * Used by videoRanking.js to clean up tags shown on video cards.
+ */
+export const DISPLAY_NOISE = new Set([
+  "help", "helpful", "helps",
+  "use", "used", "using",
+  "make", "made",
+  "get", "getting",
+  "look", "going", "come", "know", "thing",
+  "work", "working",
+  "want", "need",
+  "show", "start", "take", "right", "well",
 ]);

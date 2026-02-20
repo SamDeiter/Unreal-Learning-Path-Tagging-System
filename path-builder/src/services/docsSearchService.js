@@ -9,40 +9,12 @@ import { cosineSimilarity } from "./semanticSearchService";
 
 import { devLog, devWarn } from "../utils/logger";
 
+import { decodeFloat16Vector } from "../utils/float16";
+import { stemMatch } from "../utils/stemmer";
+
 // Lazy-loaded (4.8MB quantized)
 let _docsEmbeddings = null;
 let _decodedVectors = null;
-
-/**
- * Decode a base64-encoded float16 vector to Float32Array.
- */
-function decodeFloat16Vector(b64, dim = 768) {
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  const view = new DataView(bytes.buffer);
-  const result = new Float32Array(dim);
-  for (let i = 0; i < dim; i++) {
-    const half = view.getUint16(i * 2, true);
-    result[i] = float16ToFloat32(half);
-  }
-  return result;
-}
-
-function float16ToFloat32(half) {
-  const sign = (half >> 15) & 0x1;
-  const exponent = (half >> 10) & 0x1f;
-  const mantissa = half & 0x3ff;
-
-  if (exponent === 0) {
-    return (sign ? -1 : 1) * Math.pow(2, -14) * (mantissa / 1024);
-  } else if (exponent === 31) {
-    return mantissa ? NaN : sign ? -Infinity : Infinity;
-  }
-  return (sign ? -1 : 1) * Math.pow(2, exponent - 15) * (1 + mantissa / 1024);
-}
 
 /**
  * Lazily load and decode doc embeddings.
@@ -153,24 +125,7 @@ async function getDocLinks() {
 /** Tier sort order: beginner → intermediate → advanced */
 const TIER_ORDER = { beginner: 0, intermediate: 1, advanced: 2 };
 
-/**
- * Simple stemmer for fuzzy matching — strips common English suffixes.
- * e.g. "meshes" → "mesh", "importing" → "import"
- */
-function stemWord(word) {
-  return word
-    .replace(/ies$/i, "y")
-    .replace(/ves$/i, "f")
-    .replace(/(es|s|ing|ed|tion|ment)$/i, "")
-    .toLowerCase();
-}
-
-/** Check if any stemmed word in `a` matches any stemmed word in `b`. */
-function stemMatch(a, b) {
-  const aStems = a.split(/[\s_-]+/).filter(w => w.length > 2).map(stemWord);
-  const bStems = b.split(/[\s_-]+/).filter(w => w.length > 2).map(stemWord);
-  return aStems.some(as => bStems.some(bs => as === bs || as.includes(bs) || bs.includes(as)));
-}
+// stemWord and stemMatch are now imported from ../utils/stemmer at top of file
 
 /**
  * Get doc links matching a set of topics/keywords.
