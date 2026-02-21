@@ -1,0 +1,160 @@
+{
+  "course_code": "105.04",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:30",
+      "title": "Render Pipeline Overview",
+      "concept": "The legacy output method bypasses much of the Unreal Engine's rendering pipeline, resulting in lower quality. MRQ leverages the full capabilities of the deferred rendering system, including post-processing effects, temporal anti-aliasing, and more accurate lighting calculations.",
+      "diagram_suggestion": "A diagram comparing the simplified legacy render path to the full Unreal Engine deferred rendering pipeline used by Movie Render Queue."
+    },
+    {
+      "insert_after_timestamp": "1:51",
+      "title": "Anti-Aliasing Techniques",
+      "concept": "The High Resolution Screenshot tool uses basic spatial anti-aliasing, which is less effective than the temporal anti-aliasing (TAA) available in the Movie Render Queue. TAA accumulates samples over multiple frames to produce a smoother image, especially important for animated content.",
+      "diagram_suggestion": "A visual comparison of spatial anti-aliasing vs. temporal anti-aliasing, highlighting the frame accumulation process of TAA."
+    },
+    {
+      "insert_after_timestamp": "2:48",
+      "title": "Codec Selection & Compression",
+      "concept": "The legacy Movie Screen Capture tool offers limited codec options, impacting the final video quality and file size. Modern codecs in MRQ offer superior compression algorithms, allowing for smaller file sizes with minimal quality loss. Understanding codec differences is crucial for efficient cinematic workflows.",
+      "diagram_suggestion": "A table comparing different video codecs (e.g., H.264, H.265, ProRes) in terms of compression efficiency, quality, and compatibility."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:12",
+      "procedural_step": "Output results to disk.",
+      "why": "Archiving animation sequences as video files allows for distribution, review, and integration into other media formats. Rendering is the final step in the cinematic creation pipeline, transforming the scene data into a viewable product.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:30",
+      "procedural_step": "Use a legacy output.",
+      "why": "The legacy output is faster because it skips many of the rendering features that make MRQ higher quality. This speed comes at the cost of visual fidelity and control over rendering parameters.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:50",
+      "procedural_step": "Use the Viewport menu to access the High Resolution Screenshot option.",
+      "why": "This method directly captures the viewport buffer, scaling it up. It's a simple way to get a higher resolution image, but it's limited by the viewport's rendering settings and lacks advanced rendering features.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:00",
+      "procedural_step": "Non-renderable icons are saved as part of the image.",
+      "why": "Because the High Resolution Screenshot tool captures the viewport directly, any UI elements or editor icons present in the viewport will be included in the final image. This is because they are part of the final buffer being rendered to the screen.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:06",
+      "procedural_step": "Change compression quality.",
+      "why": "Compression reduces file size by removing redundant data. Higher compression reduces file size but can introduce artifacts. The legacy tool offers limited codec choices, restricting the balance between file size and quality.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:19",
+      "prompt": "Why would you choose the Movie Render Queue over the legacy output method, even for a simple scene?",
+      "expected_insight": "MRQ provides access to advanced rendering features like temporal anti-aliasing and accurate lighting, resulting in higher quality output even for simple scenes. It also offers greater control over rendering parameters."
+    },
+    {
+      "insert_after_timestamp": "1:15",
+      "prompt": "How does the 'Screenshot Multiplier' affect memory usage and rendering time?",
+      "expected_insight": "Increasing the multiplier increases the resolution, which requires more memory and processing power. This can lead to longer rendering times and potential crashes if the system runs out of memory."
+    },
+    {
+      "insert_after_timestamp": "2:34",
+      "prompt": "What are the limitations of using the 'Movie Screen Capture' legacy option for final renders?",
+      "expected_insight": "The legacy option lacks advanced rendering features, offers limited codec choices, and can result in lower quality output compared to MRQ. It's suitable for quick previews but not for final production renders."
+    },
+    {
+      "insert_after_timestamp": "3:53",
+      "prompt": "Why is codec selection important for video output, and what factors should influence your choice?",
+      "expected_insight": "Codecs determine the compression algorithm used, affecting file size and quality. Factors to consider include target platform, desired quality level, and compatibility with playback devices."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine editor interface.",
+    "Familiarity with level creation and asset importing.",
+    "Basic knowledge of animation principles."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary advantage of using Movie Render Queue (MRQ) over the legacy Movie Screen Capture?",
+      "options": [
+        "MRQ offers superior rendering quality and more control over rendering parameters.",
+        "MRQ is faster and requires less processing power.",
+        "MRQ is simpler to use and requires less technical knowledge.",
+        "MRQ is the only option for rendering cinematics in Unreal Engine 5."
+      ],
+      "correct_index": 0,
+      "explanation": "MRQ leverages the full Unreal Engine rendering pipeline, offering advanced features like temporal anti-aliasing and accurate lighting, resulting in higher quality output."
+    },
+    {
+      "question": "How does the 'Screenshot Multiplier' in the High Resolution Screenshot tool affect the final image resolution?",
+      "options": [
+        "It multiplies the Windows desktop resolution.",
+        "It multiplies the viewport resolution.",
+        "It multiplies the game resolution.",
+        "It multiplies the texture resolution."
+      ],
+      "correct_index": 1,
+      "explanation": "The multiplier scales the current viewport resolution, not the desktop or any other setting. This is a quick way to increase resolution but is limited by viewport settings."
+    },
+    {
+      "question": "Why might you need to hide UI elements (using the 'G' key) before taking a High Resolution Screenshot?",
+      "options": [
+        "To prevent the UI from being rendered into the final image.",
+        "To improve rendering performance.",
+        "To reduce the file size of the screenshot.",
+        "To prevent the UI from interfering with the camera."
+      ],
+      "correct_index": 0,
+      "explanation": "The High Resolution Screenshot tool captures the entire viewport, including any UI elements. Hiding the UI ensures a clean, cinematic image."
+    },
+    {
+      "question": "What is the main drawback of using the legacy Movie Screen Capture for final cinematic renders?",
+      "options": [
+        "Limited codec options and lower rendering quality compared to MRQ.",
+        "Incompatibility with modern video editing software.",
+        "Excessive file sizes and long rendering times.",
+        "Lack of support for audio tracks."
+      ],
+      "correct_index": 0,
+      "explanation": "The legacy tool lacks the advanced rendering features and codec choices available in MRQ, resulting in lower quality output and less efficient compression."
+    },
+    {
+      "question": "How does compression quality affect the output of the legacy Movie Screen Capture?",
+      "options": [
+        "Higher compression quality results in a bigger AVI file.",
+        "Higher compression quality results in a smaller AVI file with fewer artifacts.",
+        "Higher compression quality results in a smaller AVI file with more artifacts.",
+        "Compression quality only affects rendering time, not file size or image quality."
+      ],
+      "correct_index": 0,
+      "explanation": "Higher compression quality means less compression, resulting in a larger file size but potentially fewer compression artifacts. The legacy tool offers limited control over compression algorithms."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

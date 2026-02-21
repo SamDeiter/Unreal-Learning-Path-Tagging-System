@@ -1,0 +1,137 @@
+{
+  "course_code": "100.03",
+  "conceptual_score": {
+    "procedural_pct": 90,
+    "conceptual_pct": 10,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:27",
+      "title": "Understanding the Build Pipeline",
+      "concept": "The Unreal Engine build pipeline transforms project assets and code into a distributable package. This involves compiling C++ code, cooking assets (converting them into a platform-specific format), and packaging everything into an executable.",
+      "diagram_suggestion": "Flowchart illustrating the build pipeline: Source Code/Assets -> Compilation/Cooking -> Packaging -> Executable."
+    },
+    {
+      "insert_after_timestamp": "0:35",
+      "title": "SDKs and .NET in Unreal Engine",
+      "concept": "Software Development Kits (SDKs) provide platform-specific tools and libraries necessary for compiling and running Unreal Engine projects on different operating systems. .NET is a framework that can be used for extending the engine's capabilities or integrating with external systems.",
+      "diagram_suggestion": "Diagram showing Unreal Engine interacting with Windows SDK and .NET framework."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:22",
+      "procedural_step": "Install Visual Studio Community",
+      "why": "Visual Studio provides the C++ compiler and Windows SDK required by Unreal Engine to build native executables. Without it, the engine cannot translate your Blueprint or C++ code into machine-executable instructions for Windows.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:55",
+      "procedural_step": "Package project for Windows",
+      "why": "Packaging creates a standalone executable and associated data files that can be distributed and run on Windows systems. The engine 'cooks' the content, optimizing it for the target platform, which improves loading times and reduces memory footprint.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:42",
+      "procedural_step": "Select folder for packaging",
+      "why": "The selected folder is where the packaged game files will be placed. Ensure sufficient disk space is available, as packaged builds can be significantly larger than the editor project due to duplicated and cooked assets.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:13",
+      "prompt": "Why is it necessary to package a project before distributing it, instead of just sharing the .uproject file?",
+      "expected_insight": "The .uproject file only contains project settings and references to assets. Packaging 'cooks' the assets into a platform-specific format and bundles them with the engine runtime, creating a standalone, distributable game."
+    },
+    {
+      "insert_after_timestamp": "0:36",
+      "prompt": "What specific components of the Windows SDK are essential for Unreal Engine packaging, and why are they needed?",
+      "expected_insight": "The Windows SDK provides the C++ compiler, linker, and platform-specific libraries required to build native Windows executables from Unreal Engine projects. It allows the engine to translate high-level code into machine code."
+    },
+    {
+      "insert_after_timestamp": "1:09",
+      "prompt": "Why does the packaging time vary so drastically depending on project size, and what optimization strategies can minimize it?",
+      "expected_insight": "Packaging time depends on the number and complexity of assets that need to be 'cooked' and optimized. Strategies include using level streaming, optimizing textures, and minimizing unnecessary dependencies."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine editor interface.",
+    "Familiarity with creating and saving levels.",
+    "Knowledge of adding basic assets to a level."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary purpose of 'cooking' content during the packaging process in Unreal Engine?",
+      "options": [
+        "To convert assets into a platform-specific format for optimized performance.",
+        "To encrypt the game's code and assets to prevent unauthorized access.",
+        "To reduce the overall size of the project files for easier distribution.",
+        "To automatically generate documentation for the project's Blueprints and C++ code."
+      ],
+      "correct_index": 0,
+      "explanation": "Cooking converts assets into a format optimized for the target platform, improving loading times and reducing memory usage."
+    },
+    {
+      "question": "Why is Visual Studio Community often required for packaging Unreal Engine projects for Windows?",
+      "options": [
+        "It provides a user-friendly interface for managing project assets.",
+        "It contains the C++ compiler and Windows SDK necessary for building native executables.",
+        "It automatically optimizes the game's code for maximum performance.",
+        "It allows for real-time collaboration with other developers on the project."
+      ],
+      "correct_index": 1,
+      "explanation": "Visual Studio provides the essential tools (compiler, SDK) for creating Windows executables from Unreal Engine projects."
+    },
+    {
+      "question": "Which of the following best describes the role of an SDK in the context of Unreal Engine development?",
+      "options": [
+        "A collection of pre-made assets that can be easily imported into a project.",
+        "A set of tools and libraries that enable the engine to run on a specific platform.",
+        "A visual scripting language used to create gameplay logic.",
+        "A cloud-based service for storing and sharing project files."
+      ],
+      "correct_index": 1,
+      "explanation": "SDKs provide the necessary platform-specific components for compiling and running Unreal Engine projects."
+    },
+    {
+      "question": "What is the significance of the 'Platforms' menu in the Unreal Engine editor?",
+      "options": [
+        "It allows you to switch between different editing modes.",
+        "It provides access to online documentation and tutorials.",
+        "It enables you to configure the project's settings for different target platforms.",
+        "It displays a list of available plugins and extensions."
+      ],
+      "correct_index": 2,
+      "explanation": "The 'Platforms' menu is where you configure and initiate the packaging process for various target platforms, such as Windows, Android, or iOS."
+    },
+    {
+      "question": "What is the relationship between the .uproject file and the packaged game executable?",
+      "options": [
+        "The .uproject file is the packaged game executable.",
+        "The packaged game executable contains the .uproject file.",
+        "The .uproject file is used to generate the packaged game executable.",
+        "They are unrelated files with different purposes."
+      ],
+      "correct_index": 2,
+      "explanation": "The .uproject file contains project settings and references, which are used during the packaging process to create the standalone game executable."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 24,
+    "grade": "D"
+  }
+}

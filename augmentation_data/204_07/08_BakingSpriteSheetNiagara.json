@@ -1,0 +1,165 @@
+{
+  "course_code": "204.07",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:17",
+      "title": "Material Blend Modes and Rendering Order",
+      "concept": "The 'Translucent' blend mode affects how the material interacts with the depth buffer and other translucent objects. Translucent materials are rendered in a separate pass, sorted by depth, which can introduce overdraw and performance costs if not managed carefully.",
+      "diagram_suggestion": "A diagram illustrating the rendering pipeline, highlighting the separate pass for translucent objects and the depth sorting process."
+    },
+    {
+      "insert_after_timestamp": "4:13",
+      "title": "SubUV Animation and Texture Sampling",
+      "concept": "The SubUV animation node efficiently samples different regions of a single texture to create animation. Understanding how the UV coordinates are calculated and mapped to the texture is crucial for creating seamless animations and avoiding texture bleeding.",
+      "diagram_suggestion": "A visual representation of how the SubUV node divides the texture into a grid and how the UV coordinates are incremented to access each sub-image."
+    },
+    {
+      "insert_after_timestamp": "7:25",
+      "title": "Niagara Scalability and Lifecycle Management",
+      "concept": "Setting the lifecycle mode to 'System' ensures that the Niagara system's lifecycle is tied to the owning actor or level, preventing orphaned particles and memory leaks. Scalability settings allow the system to adapt its complexity based on hardware performance.",
+      "diagram_suggestion": "A flowchart illustrating the different lifecycle modes (e.g., 'Self', 'System') and their implications for particle management and performance."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:41",
+      "procedural_step": "Creating a Divide node in the material editor.",
+      "why": "The Divide node is used to isolate the alpha channel from the RGB channels of the sprite sheet. This is essential for creating transparency, allowing the sprite to blend correctly with the background. Without isolating the alpha, the entire sprite would appear opaque.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:13",
+      "procedural_step": "Setting the material blend mode to Translucent.",
+      "why": "Setting the blend mode to 'Translucent' enables alpha blending, allowing the material to have transparent areas. This is crucial for displaying the sprite sheet correctly, as it allows the background to show through the transparent parts of the sprite. Failing to do so will result in a solid, opaque sprite.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:16",
+      "procedural_step": "Using a Scalar parameter to control emissive amount.",
+      "why": "Using a scalar parameter provides a controllable way to adjust the intensity of the emissive glow. This allows for artistic control over the effect and enables artists to fine-tune the glow to match the scene's lighting conditions. Without this control, the glow might be too intense or too subtle.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:13",
+      "procedural_step": "Adding a SubUV animation node in Niagara.",
+      "why": "The SubUV animation node is essential for playing back the animation sequence stored within the sprite sheet. It iterates through the individual frames of the animation, creating the illusion of movement. Without this node, only a single frame of the sprite sheet would be displayed.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:41",
+      "procedural_step": "Setting the sprite size mode to uniform and adjusting the size.",
+      "why": "Setting the sprite size ensures that the particles are rendered at the correct scale in the scene. A uniform size maintains consistent proportions across all particles. Incorrect sizing can lead to visual artifacts and inconsistencies in the effect.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:26",
+      "prompt": "Why is the alpha channel crucial for creating the desired visual effect with the sprite sheet?",
+      "expected_insight": "The alpha channel defines the transparency of each pixel, allowing the sprite to blend seamlessly with the background and create the illusion of complex shapes. Without it, the sprite would appear as a solid rectangle."
+    },
+    {
+      "insert_after_timestamp": "2:47",
+      "prompt": "How does the number of rows and columns in the sprite sheet affect the configuration of the Niagara system?",
+      "expected_insight": "The number of rows and columns determines the number of frames in the animation and the sub-image size in the Niagara system. These values must match the sprite sheet's dimensions to ensure correct animation playback."
+    },
+    {
+      "insert_after_timestamp": "4:25",
+      "prompt": "Why is it important to set the end frame of the SubUV animation to one less than the total number of frames?",
+      "expected_insight": "The end frame is exclusive, meaning the animation will play up to, but not including, that frame. Setting it to one less than the total ensures that all frames are played in the correct sequence."
+    },
+    {
+      "insert_after_timestamp": "5:56",
+      "prompt": "What are the trade-offs between using a sprite sheet animation and a pre-rendered EXR sequence for visual effects?",
+      "expected_insight": "Sprite sheets are more performant for simple animations but have lower resolution. EXR sequences offer higher resolution and more complex effects but are more resource-intensive."
+    },
+    {
+      "insert_after_timestamp": "7:40",
+      "prompt": "How does the 'System' lifecycle mode in Niagara contribute to the stability and performance of the game?",
+      "expected_insight": "The 'System' lifecycle mode ensures that the Niagara system is properly cleaned up when it's no longer needed, preventing memory leaks and improving overall game stability."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine 5 material editor.",
+    "Familiarity with Niagara particle system interface and core modules.",
+    "Knowledge of texture properties and alpha channels."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is the alpha channel important when using sprite sheets for visual effects?",
+      "options": [
+        "It defines the transparency of each pixel, allowing for blending.",
+        "It controls the color of the sprite.",
+        "It determines the size of the sprite.",
+        "It sets the animation speed of the sprite."
+      ],
+      "correct_index": 0,
+      "explanation": "The alpha channel defines the transparency of each pixel, allowing the sprite to blend seamlessly with the background. This is crucial for creating the illusion of complex shapes."
+    },
+    {
+      "question": "What is the primary function of the SubUV animation module in Niagara?",
+      "options": [
+        "To control the size of the particles.",
+        "To iterate through the individual frames of a sprite sheet.",
+        "To set the initial velocity of the particles.",
+        "To apply a color gradient to the particles."
+      ],
+      "correct_index": 1,
+      "explanation": "The SubUV animation module iterates through the individual frames of a sprite sheet, creating the illusion of movement. It samples different regions of a single texture to create animation."
+    },
+    {
+      "question": "Why is it important to set the Niagara system's lifecycle mode to 'System'?",
+      "options": [
+        "To ensure the system is properly cleaned up when no longer needed.",
+        "To improve the visual quality of the particles.",
+        "To increase the simulation speed of the system.",
+        "To allow the system to run independently of the game world."
+      ],
+      "correct_index": 0,
+      "explanation": "Setting the lifecycle mode to 'System' ensures that the Niagara system is properly cleaned up when it's no longer needed, preventing memory leaks and improving overall game stability."
+    },
+    {
+      "question": "What is the purpose of the Divide node when creating a material for a sprite sheet?",
+      "options": [
+        "To combine the RGB and alpha channels.",
+        "To isolate the alpha channel from the RGB channels.",
+        "To adjust the brightness of the material.",
+        "To create a metallic effect."
+      ],
+      "correct_index": 1,
+      "explanation": "The Divide node is used to isolate the alpha channel from the RGB channels of the sprite sheet. This is essential for creating transparency, allowing the sprite to blend correctly with the background."
+    },
+    {
+      "question": "How does the number of rows and columns in a sprite sheet directly influence the setup of the Niagara system?",
+      "options": [
+        "It determines the number of particles spawned.",
+        "It defines the sub-image size in the sprite renderer.",
+        "It controls the overall color of the effect.",
+        "It sets the simulation speed of the system."
+      ],
+      "correct_index": 1,
+      "explanation": "The number of rows and columns determines the number of frames in the animation and the sub-image size in the Niagara system. These values must match the sprite sheet's dimensions to ensure correct animation playback."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

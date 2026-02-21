@@ -1,0 +1,165 @@
+{
+  "course_code": "110.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:51",
+      "title": "Niagara Data Interface Abstraction",
+      "concept": "Niagara leverages Data Interfaces (DIs) to abstract data access. Understanding how DIs connect to engine systems (e.g., collision, skeletal mesh) is crucial for advanced effects. The transcript mentions 'data channels' but doesn't explain their relationship to DIs.",
+      "diagram_suggestion": "A diagram showing Niagara modules feeding into Data Interfaces, which then connect to various engine subsystems (physics, skeletal mesh, audio)."
+    },
+    {
+      "insert_after_timestamp": "3:09",
+      "title": "Niagara Event Handlers",
+      "concept": "The timeline explanation is misleading. Niagara's power comes from Event Handlers, which trigger emitters based on game events (collisions, gameplay cues). The transcript doesn't explain this event-driven paradigm.",
+      "diagram_suggestion": "A flow diagram illustrating how game events trigger Niagara Event Handlers, which then activate or modify emitters."
+    },
+    {
+      "insert_after_timestamp": "5:52",
+      "title": "Niagara Memory Management",
+      "concept": "The explanation of lightweight emitters touches on performance but misses the core concept: memory allocation. Niagara uses particle pools and memory arenas. Lightweight emitters optimize memory usage by pre-allocating smaller pools.",
+      "diagram_suggestion": "A visual representation of memory pools and arenas, showing how lightweight emitters reduce memory footprint."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:26",
+      "procedural_step": "Niagara system is a collection of emitters",
+      "why": "Because this modularity allows for complex effects to be built from reusable components, promoting efficiency and consistency across projects. Changes to an emitter propagate to all systems using it.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:02",
+      "procedural_step": "Niagara is like material instances for VFX",
+      "why": "Because it allows for parameter overrides on base emitters, creating variations without duplicating the entire effect graph. This reduces asset size and simplifies maintenance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:36",
+      "procedural_step": "Details panel is context-sensitive",
+      "why": "Because it allows you to modify the properties of the selected module, stage, or emitter, providing granular control over the effect's behavior. Changes here directly affect the simulation.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:36",
+      "procedural_step": "Particle Spawn and Update control what we see",
+      "why": "Because these stages define the visual properties of each particle (color, size, velocity) and how they change over time. Incorrect settings can lead to visual artifacts or performance issues.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:52",
+      "procedural_step": "Lightweight emitters reduce concurrent cost per tick",
+      "why": "Because they minimize the number of calculations performed per particle, improving performance on lower-end hardware or in scenes with many effects. However, they sacrifice visual fidelity.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:51",
+      "prompt": "How does Niagara's modularity compare to traditional particle systems in terms of reusability and performance?",
+      "expected_insight": "Niagara's modularity allows for greater reusability through emitter inheritance and parameter overrides, potentially improving performance by avoiding redundant calculations."
+    },
+    {
+      "insert_after_timestamp": "2:20",
+      "prompt": "Why is it important to understand the scalability settings in Niagara?",
+      "expected_insight": "Scalability settings allow you to adjust the complexity of the effect based on the hardware, ensuring consistent performance across different platforms. Disabling expensive features on low-end devices prevents frame rate drops."
+    },
+    {
+      "insert_after_timestamp": "3:58",
+      "prompt": "How does the 'stack' metaphor in Niagara help manage complexity?",
+      "expected_insight": "The stack provides a hierarchical view of the effect, allowing you to isolate and modify individual stages (emitter spawn, particle update) without affecting the entire system. This simplifies debugging and optimization."
+    },
+    {
+      "insert_after_timestamp": "4:58",
+      "prompt": "What are the trade-offs between using pre-built modules and creating custom modules in Niagara?",
+      "expected_insight": "Pre-built modules offer convenience and optimization, while custom modules provide greater flexibility and control. Over-reliance on custom modules can lead to performance issues and increased development time."
+    },
+    {
+      "insert_after_timestamp": "6:28",
+      "prompt": "When would you choose a lightweight emitter over a standard emitter, and what are the potential drawbacks?",
+      "expected_insight": "Lightweight emitters are suitable for simple effects where performance is critical. The drawbacks include reduced visual fidelity and limited customization options."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine editor interface",
+    "Familiarity with material editor concepts (instances, parameters)",
+    "Knowledge of particle systems in general (spawn, update, rendering)"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is inheritance a core concept in Niagara?",
+      "options": [
+        "It allows emitters to be reused and customized without duplication.",
+        "It simplifies the user interface.",
+        "It reduces the number of modules required.",
+        "It makes the system easier to debug."
+      ],
+      "correct_index": 0,
+      "explanation": "Inheritance allows for efficient reuse of emitter logic and customization through parameter overrides, reducing redundancy and promoting consistency."
+    },
+    {
+      "question": "What is the primary purpose of Niagara's scalability settings?",
+      "options": [
+        "To adjust the visual quality of the effect based on hardware capabilities.",
+        "To control the number of particles emitted.",
+        "To optimize the effect for specific platforms.",
+        "To reduce the memory footprint of the effect."
+      ],
+      "correct_index": 0,
+      "explanation": "Scalability settings allow you to adapt the effect's complexity to different hardware configurations, ensuring consistent performance across a range of devices."
+    },
+    {
+      "question": "How do Niagara Event Handlers contribute to creating dynamic effects?",
+      "options": [
+        "They trigger emitters based on game events, such as collisions or gameplay cues.",
+        "They control the timing of particle updates.",
+        "They manage the memory allocation for particles.",
+        "They define the visual properties of particles."
+      ],
+      "correct_index": 0,
+      "explanation": "Event Handlers enable effects to react to in-game events, creating a more interactive and responsive visual experience."
+    },
+    {
+      "question": "What is the main advantage of using lightweight emitters in Niagara?",
+      "options": [
+        "Reduced memory usage and improved performance for simple effects.",
+        "Increased visual fidelity and detail.",
+        "Greater customization options compared to standard emitters.",
+        "Simplified debugging and troubleshooting."
+      ],
+      "correct_index": 0,
+      "explanation": "Lightweight emitters minimize the computational overhead, making them suitable for effects where performance is paramount."
+    },
+    {
+      "question": "What role do Data Interfaces (DIs) play in Niagara?",
+      "options": [
+        "They abstract data access to engine systems like collision and skeletal mesh.",
+        "They control the visual properties of particles.",
+        "They manage the memory allocation for emitters.",
+        "They define the behavior of event handlers."
+      ],
+      "correct_index": 0,
+      "explanation": "Data Interfaces provide a standardized way for Niagara to interact with various engine subsystems, enabling complex effects that respond to the game world."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 24,
+    "grade": "D"
+  }
+}

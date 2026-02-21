@@ -1,0 +1,172 @@
+{
+  "course_code": "205.04",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:49",
+      "title": "Live Link Plugin Architecture",
+      "concept": "The Live Link plugin suite acts as a bridge between external data sources (like the ARKit Face app) and Unreal Engine. Understanding the modularity of these plugins allows for targeted troubleshooting and customization. Each plugin handles a specific aspect of data transmission and interpretation.",
+      "diagram_suggestion": "A block diagram showing the Live Link Engine Plugin, Live Link Editor Plugin, and ARKit plugins as interconnected modules, with data flow arrows indicating the direction of information."
+    },
+    {
+      "insert_after_timestamp": "2:22",
+      "title": "UDP Messaging Subsystem",
+      "concept": "Unreal Engine uses UDP (User Datagram Protocol) messaging for Live Link because it prioritizes speed and low latency over guaranteed delivery. This is crucial for real-time performance capture, where dropped frames are preferable to delayed data. The Unicast Endpoint specifies the exact network address the engine is listening on.",
+      "diagram_suggestion": "A diagram illustrating the difference between TCP and UDP protocols, highlighting UDP's speed and lack of guaranteed delivery, with a focus on its suitability for real-time data streaming."
+    },
+    {
+      "insert_after_timestamp": "3:44",
+      "title": "Live Link Source Subject",
+      "concept": "The Live Link source subject represents the specific data stream being ingested into Unreal Engine. Selecting the correct source ensures that the engine is interpreting the incoming data (in this case, facial tracking data from the iOS device) correctly. The green light indicates a successful connection and data stream.",
+      "diagram_suggestion": "A flowchart showing the data pipeline from the iOS device, through the Live Link app, over the network, and into the Unreal Engine Live Link window, highlighting the 'Source Subject' as the entry point for the data."
+    },
+    {
+      "insert_after_timestamp": "4:22",
+      "title": "MetaHuman Identity Binding",
+      "concept": "Binding the Live Link face subject to a MetaHuman involves mapping the incoming facial animation data to the MetaHuman's control rig. This process leverages the MetaHuman's pre-built facial rig and blend shapes to translate the captured performance onto the character. Incorrect binding will result in inaccurate or distorted animation.",
+      "diagram_suggestion": "A visual representation of the MetaHuman's facial control rig, highlighting the blend shapes and their relationship to the incoming Live Link data stream. Show how the data is mapped to drive the rig."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:15",
+      "procedural_step": "Using UE 4.25 or later for automatic plugin activation.",
+      "why": "Later versions of Unreal Engine streamline plugin management, reducing manual configuration and potential errors. This ensures that all necessary dependencies for Live Link are automatically handled by the engine's module system.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:22",
+      "procedural_step": "Looking up the computer Unicast endpoint in Project Settings.",
+      "why": "The Unicast endpoint specifies the network address where the Unreal Engine instance is listening for incoming Live Link data. Without the correct endpoint, the iOS device will be unable to establish a connection, and no facial performance data will be received by the engine. This is fundamental for network communication.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:44",
+      "procedural_step": "Selecting the iOS device as the Live Link source subject.",
+      "why": "This step tells Unreal Engine which incoming data stream to interpret as the facial performance data. Incorrect selection will result in the engine attempting to apply irrelevant data to the MetaHuman's face, leading to unpredictable and incorrect animation. This is a critical step in data routing.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:29",
+      "procedural_step": "Checking 'Live Link face head for rotation'.",
+      "why": "Enabling head rotation ensures that the MetaHuman's head movements accurately reflect the performer's head movements captured by the iOS device. Disabling this will result in a static head, even if the facial expressions are being animated correctly, breaking immersion.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:08",
+      "procedural_step": "Adding UDP messaging for stability.",
+      "why": "Explicitly enabling UDP messaging in the project settings reinforces the communication protocol used by Live Link. This can help resolve connectivity issues by ensuring that the engine is configured to properly handle the incoming data stream, especially in environments with complex network configurations.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:45",
+      "prompt": "Why is it important to verify that the plugins are loaded *before* continuing, rather than just assuming they are?",
+      "expected_insight": "If the plugins aren't loaded, the Live Link functionality will be unavailable, and subsequent steps will fail silently. Verifying plugin status prevents wasted time troubleshooting downstream issues caused by missing dependencies."
+    },
+    {
+      "insert_after_timestamp": "2:52",
+      "prompt": "What happens if the IPv4 address entered into the Live Link Face app is incorrect?",
+      "expected_insight": "The iOS device will be unable to establish a connection with the Unreal Engine instance. The Live Link window in Unreal will not detect the device as a source, and no facial performance data will be received."
+    },
+    {
+      "insert_after_timestamp": "4:02",
+      "prompt": "Why is a 'green light' in the Live Link window so important?",
+      "expected_insight": "The green light indicates that a stable connection has been established between the iOS device and Unreal Engine, and that data is being transmitted successfully. Without the green light, no facial performance data will be received, rendering the subsequent steps useless."
+    },
+    {
+      "insert_after_timestamp": "5:39",
+      "prompt": "Why is it important to read the documentation on facial recordings *before* starting the process?",
+      "expected_insight": "The documentation provides crucial context on best practices, potential pitfalls, and troubleshooting steps specific to facial performance capture in Unreal Engine. This proactive approach can save time and effort by preventing common errors."
+    },
+    {
+      "insert_after_timestamp": "7:27",
+      "prompt": "Why does the debugging section recommend disabling the firewall?",
+      "expected_insight": "Firewalls can block the UDP packets used by Live Link, preventing the iOS device from communicating with Unreal Engine. Disabling the firewall (or creating specific exceptions) ensures that the data stream is not being interrupted."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine Editor interface",
+    "Familiarity with Project Settings",
+    "Basic networking concepts (IP addresses, UDP)",
+    "Knowledge of MetaHuman characters and their animation systems"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why does Live Link primarily use UDP for data transmission instead of TCP?",
+      "options": [
+        "UDP prioritizes speed and low latency, crucial for real-time performance capture.",
+        "UDP guarantees reliable delivery of all data packets.",
+        "UDP is easier to configure than TCP in Unreal Engine.",
+        "UDP provides better security for sensitive facial animation data."
+      ],
+      "correct_index": 0,
+      "explanation": "UDP prioritizes speed, which is essential for real-time applications like Live Link where dropped frames are preferable to delays. TCP guarantees delivery but introduces latency."
+    },
+    {
+      "question": "What is the primary function of the Live Link source subject?",
+      "options": [
+        "To specify which incoming data stream Unreal Engine should interpret as facial performance data.",
+        "To automatically generate blend shapes for the MetaHuman character.",
+        "To encrypt the data transmitted between the iOS device and Unreal Engine.",
+        "To control the recording settings in the Take Recorder."
+      ],
+      "correct_index": 0,
+      "explanation": "The source subject tells Unreal Engine which data stream to use for the facial animation. Incorrect selection will result in the engine misinterpreting the data."
+    },
+    {
+      "question": "Why is it important to ensure that the iOS device and the computer running Unreal Engine are on the same subnet?",
+      "options": [
+        "To ensure that the devices can communicate with each other on the local network.",
+        "To improve the security of the Live Link connection.",
+        "To reduce the CPU load on the computer running Unreal Engine.",
+        "To enable automatic updates for the Live Link Face app."
+      ],
+      "correct_index": 0,
+      "explanation": "Being on the same subnet allows the devices to communicate directly without needing to go through a router, simplifying the network path and reducing potential connectivity issues."
+    },
+    {
+      "question": "What is the purpose of the Unicast Endpoint setting in the Unreal Engine project settings?",
+      "options": [
+        "It specifies the network address where Unreal Engine is listening for incoming Live Link data.",
+        "It defines the resolution of the video stream from the iOS device.",
+        "It controls the frame rate of the captured facial animation.",
+        "It sets the encryption key for the Live Link connection."
+      ],
+      "correct_index": 0,
+      "explanation": "The Unicast Endpoint tells the Live Link Face app where to send the facial performance data within the local network. It's the engine's 'listening post'."
+    },
+    {
+      "question": "Why might a firewall interfere with the Live Link connection?",
+      "options": [
+        "Firewalls can block the UDP packets used by Live Link, preventing communication between devices.",
+        "Firewalls automatically encrypt the Live Link data, causing compatibility issues.",
+        "Firewalls limit the bandwidth available for Live Link, reducing performance.",
+        "Firewalls prevent the Live Link Face app from accessing the device's camera."
+      ],
+      "correct_index": 0,
+      "explanation": "Firewalls are designed to block unauthorized network traffic. If not configured correctly, they can block the UDP packets used by Live Link, preventing the iOS device from connecting to Unreal Engine."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 3,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

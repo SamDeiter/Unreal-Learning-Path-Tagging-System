@@ -1,0 +1,155 @@
+{
+  "course_code": "202.03",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:27",
+      "title": "Construction Script Lifecycle",
+      "concept": "Construction Scripts execute in the editor and at runtime to initialize Actor properties. Understanding their execution order relative to BeginPlay is crucial for predictable behavior, especially when dealing with procedural generation or data-driven content.",
+      "diagram_suggestion": "Flowchart illustrating the execution order of Construction Script, BeginPlay, and other relevant Actor lifecycle events."
+    },
+    {
+      "insert_after_timestamp": "0:47",
+      "title": "Editor Utility Widgets and Asset Management",
+      "concept": "Editor Utility Widgets provide a powerful interface for extending the Unreal Editor. They operate within the editor context, allowing for direct manipulation of assets and levels. Understanding the difference between editor-only and runtime code is critical to avoid packaging errors.",
+      "diagram_suggestion": "Diagram showing the separation between the Unreal Editor environment and the packaged game environment, highlighting the role of Editor Utility Widgets."
+    },
+    {
+      "insert_after_timestamp": "1:14",
+      "title": "Actor Action Utilities and Context Menus",
+      "concept": "Actor Action Utilities extend the right-click context menu within the Unreal Editor. They provide a convenient way to perform actions on selected Actors directly within the level viewport. Understanding the event routing and data context within these utilities is essential for creating robust editor extensions.",
+      "diagram_suggestion": "Diagram illustrating the event flow from a right-click on an Actor in the level viewport to the execution of an Actor Action Utility."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:27",
+      "procedural_step": "Using Construction Script for mesh scattering",
+      "why": "Construction Scripts execute every time an actor is moved or modified in the editor, which can lead to performance bottlenecks if the scattering logic is complex. Consider using a custom editor tool for more complex scattering operations to avoid impacting editor responsiveness.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:39",
+      "procedural_step": "Exposing a function to bake out meshes",
+      "why": "Baking out meshes creates static instances, reducing runtime overhead. However, this process is irreversible. Consider providing options for non-destructive workflows, such as saving the scattering parameters for later modification.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:47",
+      "procedural_step": "Using an editor utility widget to spawn meshes",
+      "why": "Editor Utility Widgets run in the editor context and do not exist in the packaged game. This separation prevents shipping editor-only code, but requires careful consideration when designing data flow between editor tools and runtime game logic.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:59",
+      "procedural_step": "Creating a function for code reuse",
+      "why": "Functions promote modularity and reduce code duplication. However, excessive function calls can introduce overhead. Profile your code to identify potential performance bottlenecks related to function call depth.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:14",
+      "procedural_step": "Using an actor action utility",
+      "why": "Actor Action Utilities provide a convenient way to interact with actors directly in the editor viewport. However, they are editor-only and cannot be used at runtime. Ensure that any critical game logic is implemented separately from these utilities.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:39",
+      "prompt": "Why is it important to 'bake out' the scattered meshes instead of leaving them as dynamically generated instances at runtime?",
+      "expected_insight": "Baking converts the procedural instances into static meshes, reducing the runtime computational cost of generating them every frame. This improves performance, especially with a large number of scattered meshes."
+    },
+    {
+      "insert_after_timestamp": "0:59",
+      "prompt": "What are the limitations of using Editor Utility Widgets for tasks that might also be needed at runtime?",
+      "expected_insight": "Editor Utility Widgets only function within the Unreal Editor. Code within them cannot be directly used in the packaged game. Therefore, any runtime functionality needs to be implemented separately, potentially requiring duplication or a shared library approach."
+    },
+    {
+      "insert_after_timestamp": "1:14",
+      "prompt": "How does the context in which an Actor Action Utility executes differ from the context of a regular Blueprint function within an Actor?",
+      "expected_insight": "Actor Action Utilities execute within the Unreal Editor's context, providing access to editor-specific functionalities and data. Regular Blueprint functions within an Actor execute within the game's runtime context, with access to game-specific data and systems. This distinction is crucial for understanding the limitations and capabilities of each approach."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Understanding of Actor Lifecycle (BeginPlay, Tick)",
+    "Basic knowledge of Unreal Editor UI",
+    "Familiarity with Blueprint Function Libraries"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally better to 'bake' procedurally generated content into static meshes for a final game build?",
+      "options": [
+        "To reduce runtime computational cost.",
+        "To make the content easier to edit later.",
+        "To increase the size of the packaged game.",
+        "To allow the content to be dynamically updated at runtime."
+      ],
+      "correct_index": 0,
+      "explanation": "Baking converts procedural instances into static meshes, reducing the runtime computational cost of generating them every frame. This improves performance."
+    },
+    {
+      "question": "What is the primary limitation of using Editor Utility Widgets for game development tasks?",
+      "options": [
+        "They can only be used in C++.",
+        "They only function within the Unreal Editor.",
+        "They are not compatible with source control.",
+        "They require a separate license."
+      ],
+      "correct_index": 1,
+      "explanation": "Editor Utility Widgets only function within the Unreal Editor. Code within them cannot be directly used in the packaged game."
+    },
+    {
+      "question": "In what context does an Actor Action Utility execute?",
+      "options": [
+        "The game's runtime context.",
+        "The Unreal Editor's context.",
+        "A separate process outside of Unreal Engine.",
+        "The construction script of the Actor."
+      ],
+      "correct_index": 1,
+      "explanation": "Actor Action Utilities execute within the Unreal Editor's context, providing access to editor-specific functionalities and data."
+    },
+    {
+      "question": "What is the main benefit of using functions in Blueprint?",
+      "options": [
+        "They automatically optimize performance.",
+        "They promote modularity and reduce code duplication.",
+        "They allow direct access to hardware resources.",
+        "They enable real-time ray tracing."
+      ],
+      "correct_index": 1,
+      "explanation": "Functions promote modularity and reduce code duplication, making code easier to maintain and understand."
+    },
+    {
+      "question": "When does the Construction Script of an Actor execute?",
+      "options": [
+        "Only when the game is running.",
+        "Only when the Actor is first created.",
+        "In the editor and at runtime whenever properties are modified.",
+        "Only when the BeginPlay event is called."
+      ],
+      "correct_index": 2,
+      "explanation": "Construction Scripts execute in the editor and at runtime to initialize Actor properties. They run every time an actor is moved or modified in the editor."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 23,
+    "grade": "D"
+  }
+}

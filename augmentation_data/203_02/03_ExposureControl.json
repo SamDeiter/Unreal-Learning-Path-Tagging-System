@@ -1,0 +1,190 @@
+{
+  "course_code": "203.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:53",
+      "title": "Lumen Global Illumination and Noise",
+      "concept": "Lumen's global illumination is a screen-space technology, meaning its accuracy depends on the information visible on screen. Rough materials amplify noise because they scatter light in many directions, making it harder for Lumen to accurately reconstruct the indirect lighting.",
+      "diagram_suggestion": "A diagram illustrating how Lumen traces rays from the camera, and how the density of those rays affects the quality of the indirect lighting, especially on rough surfaces."
+    },
+    {
+      "insert_after_timestamp": "2:26",
+      "title": "Static Lighting Influence on Lumen",
+      "concept": "Allow Static Lighting option forces the engine to consider precomputed lighting data, even when using Lumen. This can lead to conflicts and inaccuracies in the final lighting, as Lumen is designed to be a fully dynamic global illumination solution.",
+      "diagram_suggestion": "A flowchart showing the rendering pipeline with and without 'Allow Static Lighting' enabled, highlighting the data flow and potential conflicts."
+    },
+    {
+      "insert_after_timestamp": "3:29",
+      "title": "Color Calibrator and Exposure",
+      "concept": "The Color Calibrator asset provides a known set of luminance values, allowing you to accurately set the exposure in your scene. Exposure is the process of mapping scene luminance values to the display's brightness range. Incorrect exposure leads to either a washed-out or overly dark image.",
+      "diagram_suggestion": "A graph showing the relationship between scene luminance, exposure value (EV), and display brightness, with the Color Calibrator's values marked on the graph."
+    },
+    {
+      "insert_after_timestamp": "13:54",
+      "title": "Material Properties and Lumen Interaction",
+      "concept": "Certain material properties, such as high roughness or complex scattering functions (like those in frosted glass), can exacerbate noise in Lumen. This is because Lumen relies on screen-space data and struggles with materials that heavily diffuse or occlude light.",
+      "diagram_suggestion": "A side-by-side comparison of Lumen's performance with different material properties (roughness, scattering), illustrating the impact on noise levels."
+    },
+    {
+      "insert_after_timestamp": "15:57",
+      "title": "Console Variables and Engine Customization",
+      "concept": "Console variables (CVARs) allow you to fine-tune the behavior of the Unreal Engine, including Lumen. They provide access to parameters that are not exposed in the editor UI, enabling advanced customization and debugging.",
+      "diagram_suggestion": "A diagram showing the hierarchy of engine settings, from the editor UI to configuration files and CVARs, illustrating the level of control each provides."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:57",
+      "procedural_step": "Adjust material roughness",
+      "why": "Increasing roughness reduces specular highlights, distributing light more evenly and minimizing the appearance of noise in Lumen's global illumination. This is because Lumen has more data points to sample from a diffuse surface.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:42",
+      "procedural_step": "Turn off static lighting options",
+      "why": "Disabling static lighting prevents the engine from using precomputed lightmaps, ensuring that Lumen is the sole provider of global illumination. This avoids conflicts and improves the accuracy of Lumen's dynamic lighting.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:38",
+      "procedural_step": "Adjust scalability settings",
+      "why": "Scalability settings control the quality of various engine features, including Lumen. Lowering these settings reduces GPU load, making the scene run faster on less powerful hardware, but at the cost of visual fidelity.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:36",
+      "procedural_step": "Turn off bloom in project settings",
+      "why": "Bloom can exaggerate lighting inaccuracies and noise, especially when calibrating exposure. Disabling it ensures a more accurate representation of the scene's luminance values, allowing for precise exposure adjustments.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:56",
+      "procedural_step": "Turn off vignetting in post-process volume",
+      "why": "Vignetting darkens the edges of the screen, artificially altering the perceived exposure. Removing it provides a consistent luminance across the entire image, crucial for accurate exposure calibration.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "9:35",
+      "procedural_step": "Adjust light strength based on pixel inspector",
+      "why": "The pixel inspector provides a precise luminance reading for a specific pixel. Adjusting light intensity based on this reading ensures that the scene's exposure is calibrated to a known standard (18% gray), resulting in consistent and predictable lighting.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "11:09",
+      "procedural_step": "Use auto exposure with a locked range",
+      "why": "Auto exposure automatically adjusts the scene's brightness based on the average luminance. Locking the minimum and maximum brightness values prevents the exposure from drifting too far, maintaining a consistent look across different lighting conditions.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:14",
+      "prompt": "Why is determinism so important when working with Lumen, especially regarding shots, materials, and angles?",
+      "expected_insight": "Lumen is screen-space, so camera angle affects the data it has available. Material properties directly influence light scattering and thus the accuracy of Lumen's calculations. Deterministic setups allow for predictable and repeatable results."
+    },
+    {
+      "insert_after_timestamp": "4:44",
+      "prompt": "Why might someone choose to turn off bloom and AO by setting them to zero instead of completely disabling them?",
+      "expected_insight": "Setting to zero allows for easy re-enablement and tweaking later in the process without having to remember the default values or search for the settings again. It's a form of non-destructive editing."
+    },
+    {
+      "insert_after_timestamp": "8:10",
+      "prompt": "Why is luminance before tone mapping the critical value to observe when calibrating exposure?",
+      "expected_insight": "Luminance before tone mapping represents the raw light intensity in the scene before any post-processing effects are applied. This provides the most accurate baseline for setting the exposure."
+    },
+    {
+      "insert_after_timestamp": "11:39",
+      "prompt": "Why is it beneficial to control the exposure manually after initially calibrating with the color calibrator?",
+      "expected_insight": "Manual control allows for artistic adjustments to the scene's mood and atmosphere, while still maintaining a consistent and predictable baseline exposure. It separates technical calibration from creative expression."
+    },
+    {
+      "insert_after_timestamp": "14:14",
+      "prompt": "Why do blurred or frosted glass materials often exhibit more noise with Lumen than other materials?",
+      "expected_insight": "These materials scatter light in complex ways, making it difficult for Lumen's screen-space tracing to accurately capture the indirect lighting. The blurring effect amplifies any inaccuracies in the lighting calculations."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Understanding of the rendering pipeline in Unreal Engine 5",
+    "Familiarity with material properties and their effect on lighting",
+    "Basic knowledge of post-processing effects and their impact on the final image",
+    "Experience with navigating the Unreal Engine 5 editor and project settings"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally recommended to disable 'Allow Static Lighting' when using Lumen?",
+      "options": [
+        "To prevent conflicts between precomputed lightmaps and Lumen's dynamic global illumination.",
+        "To improve the performance of static mesh rendering.",
+        "To reduce the size of the packaged game.",
+        "To enable ray tracing features."
+      ],
+      "correct_index": 0,
+      "explanation": "Disabling static lighting ensures that Lumen is the sole provider of global illumination, avoiding conflicts and improving accuracy."
+    },
+    {
+      "question": "Which of the following best describes why rough materials tend to exhibit more noise in Lumen?",
+      "options": [
+        "Rough surfaces scatter light in many directions, making it harder for Lumen to accurately reconstruct indirect lighting.",
+        "Rough surfaces have lower polygon counts, leading to rendering artifacts.",
+        "Rough surfaces do not support ray tracing.",
+        "Rough surfaces are not compatible with Lumen's screen-space tracing."
+      ],
+      "correct_index": 0,
+      "explanation": "Rough materials scatter light, making it difficult for Lumen to accurately reconstruct indirect lighting from screen-space data."
+    },
+    {
+      "question": "What is the primary purpose of using a color calibrator asset when setting up exposure in Unreal Engine 5?",
+      "options": [
+        "To provide a known set of luminance values for accurate exposure calibration.",
+        "To automatically adjust the exposure based on the scene's content.",
+        "To optimize the scene's performance by reducing overdraw.",
+        "To create a visually appealing color palette for the scene."
+      ],
+      "correct_index": 0,
+      "explanation": "The color calibrator provides a reference point for setting the exposure, ensuring that the scene's luminance values are accurately mapped to the display's brightness range."
+    },
+    {
+      "question": "Why is it important to disable post-processing effects like bloom and vignetting when initially calibrating exposure?",
+      "options": [
+        "These effects can artificially alter the perceived exposure, leading to inaccurate calibration.",
+        "These effects consume too much GPU resources during the calibration process.",
+        "These effects are not compatible with the pixel inspector tool.",
+        "These effects are automatically disabled when using the color calibrator."
+      ],
+      "correct_index": 0,
+      "explanation": "Post-processing effects can distort the perceived luminance, making it difficult to accurately calibrate the exposure to a known standard."
+    },
+    {
+      "question": "What is the main advantage of using auto exposure with a locked minimum and maximum brightness range?",
+      "options": [
+        "It allows the exposure to automatically adjust within a defined range, maintaining a consistent look across different lighting conditions.",
+        "It completely eliminates the need for manual exposure adjustments.",
+        "It significantly improves the performance of Lumen's global illumination.",
+        "It enables advanced color grading features in the post-process volume."
+      ],
+      "correct_index": 0,
+      "explanation": "Locking the range prevents the exposure from drifting too far, maintaining a consistent look while still allowing for automatic adjustments based on the scene's luminance."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

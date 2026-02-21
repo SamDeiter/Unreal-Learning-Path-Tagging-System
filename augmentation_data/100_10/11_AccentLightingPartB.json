@@ -1,0 +1,143 @@
+{
+  "course_code": "100.10",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:31",
+      "title": "Inverse Square Law & AttenuationRadius",
+      "concept": "The AttenuationRadius property of a Point Light directly influences the light's falloff based on the inverse square law. Understanding this relationship is crucial for controlling light intensity and preventing unrealistic lighting scenarios. The engine calculates light contribution based on distance and this radius.",
+      "diagram_suggestion": "A diagram illustrating the inverse square law, showing how light intensity decreases with distance from the light source, with AttenuationRadius visualized as a sphere of influence."
+    },
+    {
+      "insert_after_timestamp": "4:33",
+      "title": "Specular Lighting Model",
+      "concept": "The Specular Scale property modifies the contribution of the specular component in the BRDF (Bidirectional Reflectance Distribution Function) lighting model. Lowering this value reduces the intensity of specular highlights, creating a more diffuse appearance. This directly affects how surfaces reflect light based on material properties and light direction.",
+      "diagram_suggestion": "A diagram showing the components of the BRDF (Diffuse, Specular, Ambient), and how Specular Scale affects the specular lobe."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:21",
+      "procedural_step": "Don't use too many lights",
+      "why": "Each light adds to the rendering cost. Overlapping lights increase shader complexity, impacting performance, especially with Lumen's global illumination calculations. Too many high intensity lights can also cause overexposure and visual artifacts.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:49",
+      "procedural_step": "Setting attenuation radius low",
+      "why": "A smaller AttenuationRadius limits the light's influence, reducing the number of pixels the engine needs to shade for that light. This improves performance, especially on complex scenes with many lights. It also allows for localized highlights without washing out the entire scene.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:00",
+      "procedural_step": "Switching light to Movable",
+      "why": "Movable lights are dynamically lit every frame, allowing for real-time changes. However, they are more expensive than static or stationary lights. Choosing Movable is necessary for dynamic lighting effects, but it increases the rendering cost per frame.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:34",
+      "procedural_step": "Dropping specular scale",
+      "why": "Reducing the specular scale decreases the intensity of specular highlights. This affects the material's BRDF, making it appear more diffuse. This can improve visual clarity by reducing distracting highlights and focusing attention on the object's form.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:28",
+      "prompt": "Why is the attenuation radius crucial for both visual aesthetics AND performance?",
+      "expected_insight": "A smaller radius limits the light's reach, reducing the number of pixels the engine needs to calculate, thus improving performance. It also allows for more controlled and localized highlights."
+    },
+    {
+      "insert_after_timestamp": "2:22",
+      "prompt": "How does the intensity of a light source interact with the attenuation radius to affect the overall scene lighting?",
+      "expected_insight": "Intensity determines the raw power of the light, while the attenuation radius defines how far that power extends. A high intensity with a small radius creates a focused, bright spot, while a lower intensity with a larger radius creates a softer, more diffused light."
+    },
+    {
+      "insert_after_timestamp": "4:03",
+      "prompt": "Why does reducing the specular scale create a more 'diffuse' look, and what are the trade-offs?",
+      "expected_insight": "Specular highlights are reflections of the light source. Reducing the specular scale diminishes these reflections, making the surface appear less shiny and more matte. The tradeoff is a less realistic material appearance, but potentially better focus on the object's shape."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Understanding of the PBR (Physically Based Rendering) material model.",
+    "Basic knowledge of light types in Unreal Engine (Static, Stationary, Movable).",
+    "Familiarity with the Unreal Engine Editor interface."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary performance benefit of using a smaller AttenuationRadius on a Point Light?",
+      "options": [
+        "Reduces the number of pixels that need to be shaded by the light.",
+        "Increases the intensity of the light.",
+        "Improves shadow quality.",
+        "Reduces the memory footprint of the light."
+      ],
+      "correct_index": 0,
+      "explanation": "A smaller AttenuationRadius limits the light's influence, reducing the number of pixels the engine needs to shade, thus improving performance."
+    },
+    {
+      "question": "How does the 'Specular Scale' property affect the appearance of a material?",
+      "options": [
+        "It controls the roughness of the surface.",
+        "It modifies the intensity of reflected highlights.",
+        "It changes the base color of the material.",
+        "It adjusts the normal map intensity."
+      ],
+      "correct_index": 1,
+      "explanation": "The Specular Scale property directly controls the intensity of specular highlights, influencing how shiny or matte a surface appears."
+    },
+    {
+      "question": "Why are 'Movable' lights more computationally expensive than 'Static' lights?",
+      "options": [
+        "Movable lights are precomputed during build time.",
+        "Movable lights require real-time lighting calculations every frame.",
+        "Static lights cast dynamic shadows.",
+        "Static lights do not contribute to global illumination."
+      ],
+      "correct_index": 1,
+      "explanation": "Movable lights require the engine to calculate their lighting contribution every frame, leading to higher computational cost compared to static lights whose lighting is precomputed."
+    },
+    {
+      "question": "In the context of automotive visualization, what is the main purpose of 'kicker lights'?",
+      "options": [
+        "To provide general ambient lighting.",
+        "To highlight specific features and draw attention to them.",
+        "To simulate sunlight.",
+        "To reduce rendering costs."
+      ],
+      "correct_index": 1,
+      "explanation": "Kicker lights are strategically placed to accent specific details and draw the viewer's eye to them, enhancing the visual appeal of the vehicle."
+    },
+    {
+      "question": "How does Lumen Global Illumination interact with the intensity of point lights in a scene?",
+      "options": [
+        "Lumen ignores point light intensity.",
+        "Lumen uses point light intensity to calculate indirect lighting and reflections.",
+        "Point light intensity only affects direct lighting, not global illumination.",
+        "Lumen only uses directional lights for global illumination."
+      ],
+      "correct_index": 1,
+      "explanation": "Lumen uses the intensity and color of point lights to calculate indirect lighting and reflections, contributing to the overall global illumination of the scene."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

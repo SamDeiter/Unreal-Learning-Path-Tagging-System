@@ -1,0 +1,165 @@
+{
+  "course_code": "100.14",
+  "conceptual_score": {
+    "procedural_pct": 90,
+    "conceptual_pct": 10,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:35",
+      "title": "Blueprint Compilation Process",
+      "concept": "Explain the multi-stage compilation pipeline of Blueprints: parsing, bytecode generation, native compilation (if enabled), and dependency resolution. Detail how changes propagate through the dependency graph.",
+      "diagram_suggestion": "Flowchart visualizing the Blueprint compilation pipeline stages and dependency relationships."
+    },
+    {
+      "insert_after_timestamp": "0:39",
+      "title": "Sequencer Architecture",
+      "concept": "Describe the Sequencer's object model: Tracks, Sections, and Keys. Explain how Sequencer evaluates animation data and overrides at runtime, including the concept of 'Take Recorder' and its integration with source control.",
+      "diagram_suggestion": "UML diagram showing the relationships between Sequencer's core classes (MovieScene, MovieSceneTrack, MovieSceneSection, MovieSceneBinding)."
+    },
+    {
+      "insert_after_timestamp": "2:02",
+      "title": "Material Instance Architecture",
+      "concept": "Explain the relationship between Material and Material Instance. Detail how parameters are overridden in Material Instances and the performance implications of dynamic material instances vs. static switches.",
+      "diagram_suggestion": "Diagram illustrating the inheritance relationship between Material and MaterialInstanceConstant, highlighting parameter overrides."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:17",
+      "procedural_step": "Clicking the Play button",
+      "why": "Triggers the game initialization sequence, loading the current level into memory and spawning actors. Understanding the startup process is crucial for optimizing load times and managing dependencies.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:35",
+      "procedural_step": "Compiling Blueprints",
+      "why": "Transforms the visual script into executable bytecode. Failed compilation can stem from circular dependencies or type mismatches, highlighting the importance of modular design and data validation.",
+      "antipattern_warning": "Hard-Reference Casting: Over-reliance on casting can create brittle dependencies that break during compilation. Use interfaces instead."
+    },
+    {
+      "timestamp": "1:06",
+      "procedural_step": "Using the World Outliner",
+      "why": "Provides a hierarchical view of all Actors in the current level. Understanding the scene graph is essential for efficient object selection, manipulation, and debugging.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:45",
+      "procedural_step": "Using the Details Panel",
+      "why": "Exposes the properties of the selected Actor, allowing modification of its state. Changes here directly affect the Actor's behavior and rendering, impacting performance and gameplay.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:22",
+      "procedural_step": "Changing camera speed",
+      "why": "Modifies the rate at which the editor camera moves through the scene. Incorrect speed settings can hinder navigation and make it difficult to precisely position objects.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:53",
+      "prompt": "Why is understanding the target platform crucial before packaging?",
+      "expected_insight": "Different platforms have different hardware capabilities and API requirements. Packaging for the wrong platform can lead to performance issues, crashes, or rejection from the platform's store."
+    },
+    {
+      "insert_after_timestamp": "1:32",
+      "prompt": "How does the World Outliner's hierarchical structure reflect the scene's composition?",
+      "expected_insight": "The hierarchy represents parent-child relationships between Actors. Transforming a parent Actor affects all its children, allowing for complex object groupings and coordinated movement."
+    },
+    {
+      "insert_after_timestamp": "2:08",
+      "prompt": "Why are properties in the Details panel organized into categories?",
+      "expected_insight": "Categorization improves organization and discoverability. Common categories include Transform, Static Mesh, Material, and Rendering, each controlling specific aspects of the Actor."
+    },
+    {
+      "insert_after_timestamp": "2:37",
+      "prompt": "How does camera speed affect your ability to precisely position objects in the scene?",
+      "expected_insight": "A camera speed that is too high makes it difficult to make fine adjustments, while a speed that is too low makes it time-consuming to navigate large environments."
+    },
+    {
+      "insert_after_timestamp": "3:19",
+      "prompt": "Why are there multiple ways to navigate the viewport?",
+      "expected_insight": "Different users have different preferences and workflows. Providing multiple navigation methods caters to a wider range of users and allows for more efficient scene manipulation."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic 3D navigation concepts (translation, rotation, scaling)",
+    "Familiarity with scene graph concepts",
+    "Understanding of object-oriented programming principles"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to understand the Blueprint compilation process?",
+      "options": [
+        "To optimize performance and prevent errors.",
+        "To change the color of the Blueprint nodes.",
+        "To make the Blueprint code more readable.",
+        "To reduce the size of the Blueprint file."
+      ],
+      "correct_index": 0,
+      "explanation": "Understanding the compilation process helps identify performance bottlenecks and prevent errors arising from dependency issues or type mismatches."
+    },
+    {
+      "question": "What is the primary function of the World Outliner?",
+      "options": [
+        "To display a hierarchical list of all Actors in the scene.",
+        "To edit the properties of selected Actors.",
+        "To create new Actors in the scene.",
+        "To manage the project's assets."
+      ],
+      "correct_index": 0,
+      "explanation": "The World Outliner provides a hierarchical view of all Actors in the scene, facilitating object selection, manipulation, and debugging."
+    },
+    {
+      "question": "How do Material Instances improve workflow and performance?",
+      "options": [
+        "They allow for parameter overrides without recompiling the base Material.",
+        "They automatically optimize the Material's shader code.",
+        "They reduce the memory footprint of the Material.",
+        "They enable real-time ray tracing."
+      ],
+      "correct_index": 0,
+      "explanation": "Material Instances allow for dynamic modification of material properties without requiring recompilation, improving iteration speed and reducing shader complexity."
+    },
+    {
+      "question": "Why is camera speed a critical setting for viewport navigation?",
+      "options": [
+        "It affects the precision and efficiency of object placement and scene exploration.",
+        "It determines the rendering quality of the viewport.",
+        "It controls the frame rate of the editor.",
+        "It impacts the size of the saved project file."
+      ],
+      "correct_index": 0,
+      "explanation": "Appropriate camera speed is essential for precise object placement and efficient navigation of the scene. Incorrect settings can hinder productivity."
+    },
+    {
+      "question": "What is the significance of the Details panel in Unreal Engine 5?",
+      "options": [
+        "It allows modification of an Actor's properties, affecting its behavior and rendering.",
+        "It displays the source code of the selected Blueprint.",
+        "It provides access to the project's configuration settings.",
+        "It manages the level's lighting and post-processing effects."
+      ],
+      "correct_index": 0,
+      "explanation": "The Details panel exposes the properties of the selected Actor, enabling modification of its state and influencing its behavior and rendering."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 4,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 26,
+    "grade": "D"
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "course_code": "105.04",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:50",
+      "title": "Sequencer Architecture",
+      "concept": "Sequencer's architecture is based on tracks and sections. Tracks hold animatable properties, while sections define the time range and interpolation for those properties. Understanding this hierarchy is crucial for advanced cinematic control.",
+      "diagram_suggestion": "Diagram showing the Sequencer hierarchy: Level Sequence -> Tracks -> Sections -> Keyframes, emphasizing the data flow and relationships."
+    },
+    {
+      "insert_after_timestamp": "4:50",
+      "title": "Curve Editor Deep Dive",
+      "concept": "The Curve Editor provides granular control over animation interpolation. It allows manipulation of tangents, which directly affect the acceleration and deceleration of animated properties. Mastering the Curve Editor unlocks sophisticated animation techniques.",
+      "diagram_suggestion": "Screenshot of the Curve Editor with annotations explaining tangent types (linear, auto, user) and their impact on the animation curve."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:31",
+      "procedural_step": "Using 'Create Camera Here'",
+      "why": "This leverages the Editor's viewport camera, streamlining camera placement. However, be aware that this method might not always result in the most precise positioning compared to manually adjusting transform values.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:41",
+      "procedural_step": "Dragging camera into Sequencer",
+      "why": "This creates a camera track within Sequencer, enabling animation of the camera's properties. Sequencer manages the timing and interpolation of these properties, allowing for complex camera movements.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:18",
+      "procedural_step": "Camera Cuts Track",
+      "why": "The Camera Cuts track dictates which camera's view is active at a given time. This is fundamental for creating a sequence of shots, as the engine switches rendering focus based on the active camera in this track. Without it, you cannot switch between different camera angles during playback.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:00",
+      "procedural_step": "Creating Transform Keyframe",
+      "why": "This records the camera's location, rotation, and scale at a specific time. The engine interpolates between these keyframes to create the camera's movement. Inefficient keyframing can lead to jerky or unnatural motion.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:05",
+      "procedural_step": "Setting interpolation to Linear",
+      "why": "Linear interpolation creates constant-speed motion between keyframes. While simple, it can appear unnatural for organic movements. Consider using Bezier or other interpolation types for smoother results.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:56",
+      "prompt": "Why is consistent naming and folder organization important in a complex cinematic project?",
+      "expected_insight": "Consistent naming conventions and folder structures improve project maintainability, collaboration, and searchability, especially as the number of assets increases."
+    },
+    {
+      "insert_after_timestamp": "3:31",
+      "prompt": "How does the placement of keyframes affect the perceived speed and smoothness of the camera animation?",
+      "expected_insight": "Keyframe proximity dictates animation speed; closer keyframes result in faster motion. The interpolation between keyframes determines smoothness; linear interpolation creates constant speed, while Bezier interpolation allows for acceleration and deceleration."
+    },
+    {
+      "insert_after_timestamp": "4:34",
+      "prompt": "What are the trade-offs between using default ease-in/ease-out and linear interpolation for camera movements?",
+      "expected_insight": "Ease-in/ease-out provides a more natural feel but requires fine-tuning. Linear interpolation is simpler but can appear robotic. The choice depends on the desired aesthetic and the complexity of the shot."
+    },
+    {
+      "insert_after_timestamp": "5:13",
+      "prompt": "How does the Curve Editor provide more control over animation than the basic interpolation settings in Sequencer?",
+      "expected_insight": "The Curve Editor allows for precise manipulation of tangents, enabling custom acceleration and deceleration profiles. This level of control is not possible with Sequencer's basic interpolation options."
+    },
+    {
+      "insert_after_timestamp": "6:23",
+      "prompt": "Why is it important to analyze camera compositions in fullscreen mode?",
+      "expected_insight": "Fullscreen mode provides an unobstructed view of the shot, allowing for better evaluation of framing, composition, and overall visual impact."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine Editor interface.",
+    "Familiarity with transform properties (location, rotation, scale).",
+    "Knowledge of level creation and asset import."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary function of the Camera Cuts track in Sequencer?",
+      "options": [
+        "To define which camera's view is rendered at a specific time.",
+        "To adjust the aperture and focal length of the camera.",
+        "To control the overall exposure of the scene.",
+        "To add post-processing effects to the camera's output."
+      ],
+      "correct_index": 0,
+      "explanation": "The Camera Cuts track determines which camera is active at any given point in the sequence, enabling seamless transitions between different viewpoints."
+    },
+    {
+      "question": "How does linear interpolation affect the motion between two keyframes?",
+      "options": [
+        "It creates a constant speed between the keyframes.",
+        "It creates an acceleration and deceleration effect.",
+        "It creates a smooth, curved path between the keyframes.",
+        "It creates a random, unpredictable motion."
+      ],
+      "correct_index": 0,
+      "explanation": "Linear interpolation results in a constant speed, which can sometimes appear unnatural compared to eased interpolation."
+    },
+    {
+      "question": "What is the purpose of the Curve Editor in Sequencer?",
+      "options": [
+        "To provide granular control over animation interpolation and timing.",
+        "To adjust the camera's field of view.",
+        "To add audio tracks to the sequence.",
+        "To manage the overall project settings."
+      ],
+      "correct_index": 0,
+      "explanation": "The Curve Editor allows for precise manipulation of animation curves, enabling fine-tuning of acceleration, deceleration, and overall timing."
+    },
+    {
+      "question": "Why is it important to organize cameras into folders within the Outliner?",
+      "options": [
+        "To improve project maintainability and organization, especially in complex scenes.",
+        "To reduce the memory footprint of the level.",
+        "To improve rendering performance.",
+        "To automatically generate camera animations."
+      ],
+      "correct_index": 0,
+      "explanation": "Organizing cameras into folders enhances project clarity and simplifies asset management, especially as the number of cameras increases."
+    },
+    {
+      "question": "What is the significance of tangents in the Curve Editor?",
+      "options": [
+        "They control the acceleration and deceleration of animated properties.",
+        "They determine the color of the animation curve.",
+        "They define the overall length of the animation.",
+        "They control the camera's field of view."
+      ],
+      "correct_index": 0,
+      "explanation": "Tangents directly influence the shape of the animation curve, dictating how quickly or slowly a property changes over time."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 23,
+    "grade": "D"
+  }
+}

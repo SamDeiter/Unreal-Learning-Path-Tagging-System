@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conceptual Augmentation Viewer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --surface: #0f172a;
+      --card: #1e293b;
+      --border: rgba(255,255,255,0.06);
+      --accent: #3b82f6;
+      --purple: #a78bfa;
+      --cyan: #22d3ee;
+      --green: #10b981;
+      --orange: #f97316;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --text: #e2e8f0;
+      --dim: #94a3b8;
+      --muted: #64748b;
+      --radius: 10px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',-apple-system,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    /* ---- TOP BAR ---- */
+    .topbar {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px 24px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      position:sticky; top:0; z-index:50;
+    }
+    .topbar .brand { color:var(--accent); font-weight:700; font-size:16px; }
+    .topbar .sub { color:var(--muted); font-size:11px; margin-top:2px; }
+    .topbar-right {
+      display:flex; align-items:center; gap:12px;
+    }
+    .nav-pill {
+      padding:6px 14px; border-radius:20px;
+      border:1px solid rgba(59,130,246,0.3);
+      background:rgba(59,130,246,0.1);
+      color:var(--accent); font-size:11px; font-weight:600;
+      text-decoration:none; transition:all 0.15s;
+    }
+    .nav-pill:hover { background:rgba(59,130,246,0.2); }
+
+    /* ---- MAIN LAYOUT ---- */
+    .main {
+      display:grid;
+      grid-template-columns:380px 1fr;
+      gap:0;
+      height:calc(100vh - 56px);
+    }
+
+    /* ---- LEFT PANEL — DASHBOARD ---- */
+    .left-panel {
+      border-right:1px solid var(--border);
+      overflow-y:auto;
+      padding:20px;
+    }
+    .video-title {
+      font-size:20px; font-weight:700; margin-bottom:4px;
+    }
+    .course-code {
+      font-size:12px; color:var(--muted); margin-bottom:20px;
+    }
+
+    /* Overall grade card */
+    .grade-card {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:20px;
+      text-align:center;
+      margin-bottom:16px;
+    }
+    .grade-ring {
+      width:100px; height:100px;
+      border-radius:50%;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      margin:0 auto 12px;
+      border:4px solid;
+    }
+    .grade-ring .letter { font-size:36px; font-weight:800; }
+    .grade-ring .fraction { font-size:12px; font-weight:500; opacity:0.7; }
+    .grade-F .grade-ring, .grade-D .grade-ring { border-color:var(--red); color:var(--red); background:rgba(239,68,68,0.08); }
+    .grade-C .grade-ring { border-color:var(--yellow); color:var(--yellow); background:rgba(245,158,11,0.08); }
+    .grade-B .grade-ring { border-color:var(--accent); color:var(--accent); background:rgba(59,130,246,0.08); }
+    .grade-A .grade-ring { border-color:var(--green); color:var(--green); background:rgba(16,185,129,0.08); }
+
+    .verdict-pill {
+      display:inline-block;
+      padding:4px 12px; border-radius:20px;
+      font-size:11px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      margin-bottom:8px;
+    }
+    .verdict-NEEDS_AUGMENTATION { background:rgba(239,68,68,0.12); color:var(--red); }
+    .verdict-ADEQUATE { background:rgba(245,158,11,0.12); color:var(--yellow); }
+    .verdict-STRONG { background:rgba(16,185,129,0.12); color:var(--green); }
+    .grade-meaning {
+      font-size:12px; color:var(--dim); line-height:1.5; max-width:280px; margin:0 auto;
+    }
+
+    /* Ratio bar */
+    .stat-section {
+      margin-bottom:16px;
+    }
+    .stat-label {
+      font-size:11px; font-weight:600; color:var(--dim);
+      text-transform:uppercase; letter-spacing:0.5px;
+      margin-bottom:8px;
+    }
+    .ratio-bar {
+      height:10px; border-radius:5px; overflow:hidden;
+      display:flex; margin-bottom:6px;
+    }
+    .ratio-proc { background:var(--orange); }
+    .ratio-conc { background:var(--cyan); }
+    .ratio-labels {
+      display:flex; justify-content:space-between;
+      font-size:11px;
+    }
+    .ratio-labels .proc { color:var(--orange); }
+    .ratio-labels .conc { color:var(--cyan); }
+    .ratio-explain {
+      font-size:11px; color:var(--muted); margin-top:6px; line-height:1.4;
+    }
+
+    /* Quick stats grid */
+    .stats-grid {
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:8px; margin-bottom:16px;
+    }
+    .stat-card {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:12px;
+      text-align:center;
+    }
+    .stat-card .num {
+      font-size:24px; font-weight:700;
+      font-family:'JetBrains Mono',monospace;
+    }
+    .stat-card .label {
+      font-size:10px; color:var(--muted);
+      text-transform:uppercase; letter-spacing:0.5px;
+      margin-top:2px;
+    }
+
+    /* Evaluation matrix (left panel) */
+    .eval-section { margin-top:8px; }
+    .eval-category {
+      font-size:10px; font-weight:700; color:var(--muted);
+      text-transform:uppercase; letter-spacing:0.8px;
+      margin-top:14px; margin-bottom:6px;
+      padding-bottom:4px;
+      border-bottom:1px solid var(--border);
+    }
+    .eval-row {
+      display:flex; align-items:center; gap:8px;
+      padding:5px 0;
+    }
+    .eval-row .crit-name {
+      font-size:11px; color:var(--dim); flex:1;
+    }
+    .eval-row .crit-name .explain {
+      display:block;
+      font-size:9px; color:var(--muted); margin-top:1px;
+      font-weight:400;
+    }
+    .eval-row .bar-wrap {
+      width:80px; height:5px;
+      background:rgba(255,255,255,0.06);
+      border-radius:3px; overflow:hidden;
+    }
+    .eval-row .bar-fill { height:100%; border-radius:3px; }
+    .eval-row .score-val {
+      font-family:'JetBrains Mono',monospace;
+      font-size:11px; font-weight:600;
+      width:16px; text-align:right;
+    }
+    .bar-1 { background:var(--red); }
+    .bar-2 { background:var(--orange); }
+    .bar-3 { background:var(--yellow); }
+    .bar-4 { background:var(--accent); }
+    .bar-5 { background:var(--green); }
+
+    /* ---- RIGHT PANEL ---- */
+    .right-panel {
+      overflow-y:auto;
+      padding:20px;
+    }
+
+    /* Collapsible sections */
+    .section {
+      margin-bottom:10px;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+    }
+    .section-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 16px;
+      background:var(--surface);
+      cursor:pointer;
+      -webkit-user-select:none;
+      user-select:none;
+      transition:background 0.15s;
+    }
+    .section-header:hover { background:rgba(255,255,255,0.03); }
+    .section-header .title {
+      font-size:13px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .section-header .count {
+      font-size:11px; padding:2px 8px;
+      border-radius:10px; font-weight:600;
+      background:rgba(255,255,255,0.06);
+    }
+    .section-header .desc {
+      font-size:11px; color:var(--muted); font-weight:400;
+      margin-left:8px;
+    }
+    .section-header .arrow {
+      font-size:12px; color:var(--muted);
+      transition:transform 0.2s;
+    }
+    .section.open .section-header .arrow { transform:rotate(90deg); }
+    .section-body { display:none; padding:12px 16px; }
+    .section.open .section-body { display:block; }
+
+    /* Augmentation cards */
+    .aug-card {
+      background:rgba(255,255,255,0.02);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:14px 16px;
+      margin-bottom:10px;
+    }
+    .aug-card:last-child { margin-bottom:0; }
+    .aug-card .timestamp {
+      font-family:'JetBrains Mono',monospace;
+      font-size:11px; color:var(--accent);
+      padding:2px 8px; border-radius:4px;
+      background:rgba(59,130,246,0.1);
+      display:inline-block; margin-bottom:8px;
+    }
+    .aug-card h4 { font-size:14px; font-weight:600; margin-bottom:6px; }
+    .aug-card p { font-size:13px; color:var(--dim); line-height:1.6; }
+    .aug-card .diagram {
+      margin-top:8px; padding:8px 12px;
+      background:rgba(59,130,246,0.06);
+      border-radius:6px; font-size:12px; color:var(--accent);
+      display:flex; align-items:flex-start; gap:6px;
+    }
+    .warning-tag {
+      display:inline-flex; align-items:center; gap:4px;
+      margin-top:8px; padding:3px 10px;
+      border-radius:20px; font-size:11px; font-weight:600;
+    }
+    .warning-tag.critical { background:rgba(239,68,68,0.15); color:var(--red); }
+    .warning-tag.high { background:rgba(249,115,22,0.15); color:var(--orange); }
+    .warning-tag.medium { background:rgba(245,158,11,0.15); color:var(--yellow); }
+    .warning-tag.low { background:rgba(59,130,246,0.1); color:var(--accent); }
+    .antipattern-tag {
+      display:inline-flex; align-items:center; gap:4px;
+      margin-top:8px; padding:3px 10px;
+      border-radius:20px; font-size:11px; font-weight:600;
+      background:rgba(239,68,68,0.12); color:var(--red);
+    }
+
+    /* Prereq chips */
+    .prereq-chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .prereq-chip {
+      padding:5px 14px; border-radius:20px;
+      font-size:12px; background:rgba(255,255,255,0.05);
+      border:1px solid var(--border); color:var(--dim);
+    }
+
+    /* Loading */
+    .loading {
+      display:flex; align-items:center; justify-content:center;
+      height:100vh; flex-direction:column; gap:16px;
+    }
+    .loading .spinner {
+      width:36px; height:36px;
+      border:3px solid rgba(255,255,255,0.1);
+      border-top-color:var(--accent);
+      border-radius:50%;
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading p { color:var(--muted); font-size:14px; }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Loading augmentation data…</p>
+  </div>
+</div>
+
+<script>
+function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+function getParam() {
+  return new URLSearchParams(window.location.search).get('video') || '100_01/18_BlueprintEditor';
+}
+
+function scoreColor(v) {
+  if (v <= 1) return 'bar-1';
+  if (v <= 2) return 'bar-2';
+  if (v <= 3) return 'bar-3';
+  if (v <= 4) return 'bar-4';
+  return 'bar-5';
+}
+
+function scoreText(v) {
+  if (v <= 1) return 'var(--red)';
+  if (v <= 2) return 'var(--orange)';
+  if (v <= 3) return 'var(--yellow)';
+  if (v <= 4) return 'var(--accent)';
+  return 'var(--green)';
+}
+
+// Human-readable descriptions for each evaluation criterion
+const CRITERIA = {
+  concept_clarification:      { label:'Concept Clarification',      desc:'Does the video explain WHY before showing HOW?',       cat:'Content' },
+  misconception_addressing:   { label:'Misconception Addressing',   desc:'Are common mistakes flagged with correct alternatives?', cat:'Content' },
+  narrative_logic:            { label:'Narrative Logic',             desc:'Does the content follow a clear problem → solution arc?',cat:'Content' },
+  content_first_language:     { label:'Content-First Language',     desc:'Are analogies used before introducing jargon?',          cat:'Content' },
+  dynamic_visualizations:     { label:'Dynamic Visualizations',     desc:'Are diagrams or visual aids used for abstract concepts?', cat:'Cognitive Load' },
+  explicit_signaling:         { label:'Explicit Signaling',         desc:'Does the UI guide attention to relevant elements?',      cat:'Cognitive Load' },
+  strict_segmentation:        { label:'Strict Segmentation',        desc:'Are video segments ≤ 6 min with one learning objective?', cat:'Cognitive Load' },
+  extraneous_load_reduction:  { label:'Extraneous Load Reduction',  desc:'Is the presentation clean and free of noise/tangents?',  cat:'Cognitive Load' },
+  worked_example_fading:      { label:'Worked Example Fading',      desc:'Does difficulty ramp up gradually (guided → independent)?', cat:'Active Learning' },
+  self_explanation_prompting:  { label:'Self-Explanation Prompting', desc:'Are learners asked to think before seeing the answer?',   cat:'Active Learning' },
+  affective_tone:             { label:'Affective Tone',             desc:'Is the tone encouraging, not intimidating?',             cat:'Active Learning' }
+};
+
+const GRADE_MEANINGS = {
+  F: 'This video is almost entirely procedural with no conceptual support. Learners may follow along but won\'t understand WHY.',
+  D: 'Minimal conceptual framing — learners can copy steps but will struggle to apply knowledge to new situations.',
+  C: 'Some conceptual content exists but gaps remain. Augmentation would significantly improve learning outcomes.',
+  B: 'Good conceptual coverage with minor gaps. A small amount of augmentation would bring this to excellent.',
+  A: 'Excellent! This video already explains the WHY behind procedures. Minimal augmentation needed.'
+};
+
+async function init() {
+  const videoKey = getParam();
+  const [course, video] = videoKey.split('/');
+
+  const [augRes, lookupRes] = await Promise.all([
+    fetch(`augmentation_data/${course}/${video}.json`),
+    fetch('video_lookup.json')
+  ]);
+
+  if (!augRes.ok) {
+    document.getElementById('app').innerHTML =
+      `<div class="loading"><p style="color:var(--red)">Could not load: augmentation_data/${course}/${video}.json</p></div>`;
+    return;
+  }
+
+  const data = await augRes.json();
+  const lookup = lookupRes.ok ? await lookupRes.json() : {};
+
+  const title = video.replace(/^\d+_/, '').replace(/([A-Z])/g, ' $1').trim();
+  const courseLabel = course.replace('_', '.');
+  document.title = `${courseLabel} — ${title} | Evaluator`;
+
+  const score = data.evaluation_matrix_score || {};
+  const cs = data.conceptual_score || {};
+  const grade = score.grade || '?';
+
+  // Count items
+  const nTheory = (data.theory_breaks || []).length;
+  const nWhy = (data.why_annotations || []).length;
+  const nPrompts = (data.self_explanation_prompts || []).length;
+  const nWarnings = (data.architectural_warnings || []).length;
+  const nPrereqs = (data.missing_prerequisites || []).length;
+
+  document.getElementById('app').innerHTML = `
+    <div class="topbar">
+      <div>
+        <div class="brand">Conceptual Augmentation Viewer</div>
+        <div class="sub">Pillar 5 Prototype — AI-Retrofit Pipeline</div>
+      </div>
+      <div class="topbar-right">
+        <a href="augmentation_index.html" class="nav-pill" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.12);color:var(--dim);">← Dashboard</a>
+        <a id="viewerLink" href="augmentation_viewer.html?video=${videoKey}" target="_blank" class="nav-pill">▶ Guided View</a>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="left-panel">
+        <div class="video-title">${esc(title)}</div>
+        <div class="course-code">${courseLabel} ·  Video ${video.match(/^\d+/) ? video.match(/^\d+/)[0] : ''}</div>
+
+        <!-- Grade Card -->
+        <div class="grade-card grade-${grade}">
+          <div class="grade-ring">
+            <div class="letter">${grade}</div>
+            <div class="fraction">${score.total || '?'} / 55</div>
+          </div>
+          <span class="verdict-pill verdict-${cs.verdict || ''}">${(cs.verdict || 'N/A').replace(/_/g, ' ')}</span>
+          <div class="grade-meaning">${GRADE_MEANINGS[grade] || ''}</div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="num" style="color:var(--purple)">${nTheory}</div>
+            <div class="label">Theory Breaks</div>
+          </div>
+          <div class="stat-card">
+            <div class="num" style="color:var(--accent)">${nWhy}</div>
+            <div class="label">Why Annotations</div>
+          </div>
+          <div class="stat-card">
+            <div class="num" style="color:var(--cyan)">${nPrompts}</div>
+            <div class="label">Think Prompts</div>
+          </div>
+          <div class="stat-card">
+            <div class="num" style="color:var(--orange)">${nWarnings}</div>
+            <div class="label">Warnings</div>
+          </div>
+        </div>
+
+        <!-- Ratio -->
+        <div class="stat-section">
+          <div class="stat-label">Procedural vs Conceptual Ratio</div>
+          <div class="ratio-bar">
+            <div class="ratio-proc" style="width:${cs.procedural_pct || 80}%"></div>
+            <div class="ratio-conc" style="width:${cs.conceptual_pct || 20}%"></div>
+          </div>
+          <div class="ratio-labels">
+            <span class="proc">● Procedural ${cs.procedural_pct || 0}%</span>
+            <span class="conc">Conceptual ${cs.conceptual_pct || 0}% ●</span>
+          </div>
+          <div class="ratio-explain">How much of the video explains concepts vs. just showing steps. Higher conceptual % = better learning outcomes.</div>
+        </div>
+
+        <!-- Evaluation Matrix -->
+        <div class="eval-section">
+          <div class="stat-label">Evaluation Matrix — All Criteria</div>
+          ${renderEvalMatrix(score)}
+        </div>
+      </div>
+
+      <div class="right-panel">
+        ${renderSection('🧠', 'THEORY BREAKS', nTheory, 'Conceptual explanations the AI suggests inserting at key timestamps', data.theory_breaks, renderTheoryBreaks)}
+        ${renderSection('💡', 'WHY ANNOTATIONS', nWhy, 'Explanations of WHY each procedural step matters architecturally', data.why_annotations, renderWhyAnnotations)}
+        ${renderSection('🤔', 'SELF-EXPLANATION PROMPTS', nPrompts, 'Questions that make learners think before the answer is shown', data.self_explanation_prompts, renderSelfExplanation)}
+        ${renderSection('⚠️', 'ARCHITECTURAL WARNINGS', nWarnings, 'Risky patterns the video demonstrates without warning', data.architectural_warnings, renderWarnings)}
+        ${renderSection('📘', 'MISSING PREREQUISITES', nPrereqs, 'Concepts the video assumes you know but never explains', data.missing_prerequisites, renderPrereqs)}
+      </div>
+    </div>
+  `;
+
+  // Open first two sections
+  document.querySelectorAll('.section').forEach((s, i) => {
+    if (i < 2) s.classList.add('open');
+    s.querySelector('.section-header').addEventListener('click', () => s.classList.toggle('open'));
+  });
+}
+
+function renderSection(icon, title, count, description, items, renderer) {
+  return `
+    <div class="section">
+      <div class="section-header">
+        <span class="title">${icon} ${title} <span class="count">${count}</span><span class="desc">— ${description}</span></span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="section-body">${renderer(items)}</div>
+    </div>
+  `;
+}
+
+function renderTheoryBreaks(breaks) {
+  if (!breaks || !breaks.length) return '<p style="color:var(--muted);font-size:13px;">None detected</p>';
+  return breaks.map(tb => `
+    <div class="aug-card">
+      <span class="timestamp">🕐 ${esc(tb.insert_after_timestamp)}</span>
+      <h4>${esc(tb.title)}</h4>
+      <p>${esc(tb.concept)}</p>
+      ${tb.diagram_suggestion ? `<div class="diagram">📐 ${esc(tb.diagram_suggestion)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderWhyAnnotations(annotations) {
+  if (!annotations || !annotations.length) return '<p style="color:var(--muted);font-size:13px;">None detected</p>';
+  return annotations.map(wa => `
+    <div class="aug-card">
+      <span class="timestamp">🕐 ${esc(wa.timestamp)}</span>
+      <h4>"${esc(wa.procedural_step)}"</h4>
+      <p>${esc(wa.why)}</p>
+      ${wa.antipattern_warning ? `<span class="antipattern-tag">⚠ ${esc(wa.antipattern_warning)}</span>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderSelfExplanation(prompts) {
+  if (!prompts || !prompts.length) return '<p style="color:var(--muted);font-size:13px;">None detected</p>';
+  return prompts.map(p => `
+    <div class="aug-card">
+      <span class="timestamp">🕐 ${esc(p.insert_after_timestamp)}</span>
+      <h4>${esc(p.prompt)}</h4>
+      <p>${esc(p.expected_insight)}</p>
+    </div>
+  `).join('');
+}
+
+function renderWarnings(warnings) {
+  if (!warnings || !warnings.length) return '<p style="color:var(--muted);font-size:13px;">None detected</p>';
+  return warnings.map(w => `
+    <div class="aug-card">
+      <span class="timestamp">🕐 ${esc(w.timestamp)}</span>
+      <p>${esc(w.warning)}</p>
+      <span class="warning-tag ${(w.severity||'').toLowerCase()}">${esc(w.severity)}</span>
+      <p style="margin-top:8px;color:var(--green);font-size:12px;">✅ Fix: ${esc(w.fix)}</p>
+    </div>
+  `).join('');
+}
+
+function renderPrereqs(prereqs) {
+  if (!prereqs || !prereqs.length) return '<p style="color:var(--muted);font-size:13px;">None detected</p>';
+  return `<div class="prereq-chips">${prereqs.map(p => `<span class="prereq-chip">${esc(p)}</span>`).join('')}</div>`;
+}
+
+function renderEvalMatrix(score) {
+  let html = '';
+  let lastCat = '';
+  for (const [key, info] of Object.entries(CRITERIA)) {
+    if (info.cat !== lastCat) {
+      lastCat = info.cat;
+      html += `<div class="eval-category">${info.cat}</div>`;
+    }
+    const val = score[key] || 0;
+    html += `
+      <div class="eval-row">
+        <span class="crit-name">${info.label}<span class="explain">${info.desc}</span></span>
+        <div class="bar-wrap"><div class="bar-fill ${scoreColor(val)}" style="width:${val * 20}%"></div></div>
+        <span class="score-val" style="color:${scoreText(val)}">${val}</span>
+      </div>
+    `;
+  }
+  return html;
+}
+
+init();
+</script>
+</body>
+</html>
