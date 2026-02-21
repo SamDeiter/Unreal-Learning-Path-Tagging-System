@@ -421,12 +421,13 @@ function render(data){
           const avg=Math.round(c.totalScore/c.videos.length);
           const avgGrade=avg>=45?'A':avg>=39?'B':avg>=33?'C':avg>=22?'D':'F';
           const ct=data.course_titles&&data.course_titles[code]?data.course_titles[code]:'';
-          const shortTitle=ct.length>40?ct.substring(0,37)+'…':ct;
-          return `<div class="course-card" onclick="scrollToTable('${code}')">
+          const shortTitle=ct.length>45?ct.substring(0,42)+'…':ct;
+          return `<div class="course-card" onclick="toggleCourse('${code}',this,event)">
             <div class="top"><span class="code">${esc(code)}</span><span class="avg-grade grade-${avgGrade}">${avgGrade} · ${avg}/55</span></div>
             ${shortTitle?`<div style="font-size:11px;color:var(--dim);margin:4px 0 2px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(ct)}">${esc(shortTitle)}</div>`:''}
             <div class="stats"><span>🎬 ${c.videos.length}</span><span>🧠 ${c.videos.reduce((s,v)=>s+v.theory_breaks,0)}</span><span>⚠️ ${c.videos.reduce((s,v)=>s+v.warnings,0)}</span></div>
             <div class="mini-grades">${c.grades.map(g=>`<div class="mini-grade-dot mg-${g}"></div>`).join('')}</div>
+            <div class="course-detail" id="cd-${code.replace(/\./g,'_')}" style="display:none;"></div>
           </div>`;
         }).join('')}
       </div>
@@ -514,21 +515,51 @@ function renderDetailCard(row, data, key){
   const cs=data.conceptual_score||{};
   const title=key.split('/')[1].replace(/^\d+_/,'').replace(/([A-Z])/g,' $1').trim();
 
+  // Action priority
+  const total=sc.total||0;
+  const prio=total<25?{label:'HIGH PRIORITY',color:'var(--red)',bg:'rgba(239,68,68,0.12)'}:total<33?{label:'MEDIUM',color:'var(--orange)',bg:'rgba(249,115,22,0.12)'}:{label:'LOW',color:'var(--green)',bg:'rgba(16,185,129,0.12)'};
+  const summary=`${cs.procedural_pct||0}% procedural · ${tb.length} theory gaps · ${wa.length} why annotations · ${aw.length} warnings`;
+
+  // Build criteria bars
+  const critBars=Object.entries(CRITERIA_LABELS).map(([k,label])=>{
+    const v=sc[k]||0;const pct=(v/5)*100;
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+      <div style="width:150px;font-size:10px;color:var(--dim);text-align:right;flex-shrink:0;">${label}</div>
+      <div style="flex:1;height:6px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:${barColor(v)};border-radius:3px;"></div>
+      </div>
+      <div style="width:16px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:${barColor(v)};text-align:right;">${v}</div>
+    </div>`;
+  }).join('');
+
   row.querySelector('.detail-card').innerHTML=`
     <div class="detail-header">
-      <h3>${esc(title)} <span style="font-size:13px;font-weight:500;color:var(--muted)">— ${sc.grade||'?'} · ${sc.total||'?'}/55</span></h3>
+      <h3>${esc(title)} <span style="font-size:13px;font-weight:500;color:var(--muted)">— ${sc.grade||'?'} · ${total}/55</span></h3>
       <div class="links">
+        <span style="padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;background:${prio.bg};color:${prio.color};">${prio.label}</span>
         <a class="detail-link" href="augmentation_evaluator.html?video=${key}" target="_blank">📊 Full Evaluator</a>
         <a class="detail-link" href="augmentation_viewer.html?video=${key}" target="_blank">▶ Guided View</a>
       </div>
     </div>
 
-    <div class="detail-stats">
-      <div class="detail-stat" data-tip="How much of this video is 'click here, drag there' instruction without conceptual explanation." data-tip-dir="down"><div class="dv" style="color:var(--orange)">${cs.procedural_pct||0}%</div><div class="dl">Procedural</div></div>
-      <div class="detail-stat" data-tip="How much of this video explains WHY things work, not just HOW to do them. Target: ≥40%." data-tip-dir="down"><div class="dv" style="color:var(--cyan)">${cs.conceptual_pct||0}%</div><div class="dl">Conceptual</div></div>
-      <div class="detail-stat" data-tip="Conceptual pause points where a brief theory explanation should be inserted to help learners understand the underlying system." data-tip-dir="down"><div class="dv" style="color:var(--purple)">${tb.length}</div><div class="dl">Theory Breaks</div></div>
-      <div class="detail-stat" data-tip="Annotations explaining the engine-level consequences of each procedural step — covering performance, memory, and scalability impact." data-tip-dir="down"><div class="dv" style="color:var(--accent)">${wa.length}</div><div class="dl">Why Annotations</div></div>
-      <div class="detail-stat" data-tip="Risky patterns this video demonstrates without warning. Each warning includes the severity level and a recommended fix." data-tip-dir="down"><div class="dv" style="color:var(--orange)">${aw.length}</div><div class="dl">Warnings</div></div>
+    <div style="padding:6px 10px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--border);margin-bottom:12px;font-size:11px;color:var(--dim);">
+      ${summary}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Evaluation Criteria</div>
+        ${critBars}
+      </div>
+      <div>
+        <div class="detail-stats">
+          <div class="detail-stat" data-tip="Procedural content percentage"><div class="dv" style="color:var(--orange)">${cs.procedural_pct||0}%</div><div class="dl">Procedural</div></div>
+          <div class="detail-stat" data-tip="Conceptual content percentage"><div class="dv" style="color:var(--cyan)">${cs.conceptual_pct||0}%</div><div class="dl">Conceptual</div></div>
+          <div class="detail-stat"><div class="dv" style="color:var(--purple)">${tb.length}</div><div class="dl">Theory Breaks</div></div>
+          <div class="detail-stat"><div class="dv" style="color:var(--accent)">${wa.length}</div><div class="dl">Why Annotations</div></div>
+          <div class="detail-stat"><div class="dv" style="color:var(--orange)">${aw.length}</div><div class="dl">Warnings</div></div>
+        </div>
+      </div>
     </div>
 
     <div class="detail-columns">
@@ -545,7 +576,110 @@ function renderDetailCard(row, data, key){
   `;
 }
 
-function scrollToTable(code){
+function toggleCourse(code, el, event){
+  event.stopPropagation();
+  const id='cd-'+code.replace(/\./g,'_');
+  const detail=document.getElementById(id);
+  if(!detail)return;
+
+  // Toggle visibility
+  if(detail.style.display!=='none'){
+    detail.style.display='none';
+    el.style.gridColumn='';
+    return;
+  }
+
+  // Expand card to full width
+  el.style.gridColumn='1 / -1';
+
+  // Get course videos
+  const vids=allVideos.filter(v=>v.course===code).sort((a,b)=>a.score-b.score);
+  const avg=Math.round(vids.reduce((s,v)=>s+v.score,0)/vids.length);
+  const avgProc=Math.round(vids.reduce((s,v)=>s+v.procedural_pct,0)/vids.length);
+  const avgConc=Math.round(vids.reduce((s,v)=>s+v.conceptual_pct,0)/vids.length);
+  const totTB=vids.reduce((s,v)=>s+v.theory_breaks,0);
+  const totWhy=vids.reduce((s,v)=>s+v.why_annotations,0);
+  const totWarn=vids.reduce((s,v)=>s+v.warnings,0);
+  const totPrompts=vids.reduce((s,v)=>s+v.prompts,0);
+
+  // Per-criteria averages for this course
+  const critAvgs={};
+  for(const k of Object.keys(CRITERIA_LABELS)){
+    critAvgs[k]=vids.reduce((s,v)=>s+(v.criteria?v.criteria[k]||0:0),0)/vids.length;
+  }
+  const weakest=Object.entries(critAvgs).sort((a,b)=>a[1]-b[1]).slice(0,3);
+  const strongest=Object.entries(critAvgs).sort((a,b)=>b[1]-a[1]).slice(0,2);
+
+  // Grade distribution for this course
+  const gd={A:0,B:0,C:0,D:0,F:0};
+  vids.forEach(v=>{if(gd[v.grade]!==undefined)gd[v.grade]++;});
+
+  // Action priority
+  const priority=avg<25?'🔴 Critical':'🟡 Needs Work';
+  const actionText=`${vids.length} videos · Avg ${avg}/55 · ${avgProc}% procedural · ${totTB} theory gaps · ${totWarn} warnings`;
+
+  detail.innerHTML=`
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:14px;">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Grade Distribution</div>
+          <div style="display:flex;gap:8px;align-items:flex-end;">
+            ${['A','B','C','D','F'].map(g=>{
+              const cnt=gd[g]||0;const mx=Math.max(...Object.values(gd),1);
+              const h=Math.max(cnt/mx*28,2);
+              const colors={A:'var(--green)',B:'var(--accent)',C:'var(--yellow)',D:'var(--orange)',F:'var(--red)'};
+              return `<div style="text-align:center;flex:1;"><div style="height:${h}px;background:${colors[g]};border-radius:3px;margin-bottom:3px;"></div><div style="font-size:9px;font-weight:700;color:${colors[g]};">${g}</div><div style="font-size:9px;color:var(--muted);">${cnt}</div></div>`;
+            }).join('')}
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Augmentation Load</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--purple);font-family:'JetBrains Mono',monospace;">${totTB}</div><div style="font-size:9px;color:var(--muted);">Theory Breaks</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace;">${totWhy}</div><div style="font-size:9px;color:var(--muted);">Why Annotations</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--cyan);font-family:'JetBrains Mono',monospace;">${totPrompts}</div><div style="font-size:9px;color:var(--muted);">Think Prompts</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--orange);font-family:'JetBrains Mono',monospace;">${totWarn}</div><div style="font-size:9px;color:var(--muted);">Warnings</div></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Weakest Criteria</div>
+          ${weakest.map(([k,v])=>{
+            const pct=(v/5)*100;
+            return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+              <div style="flex:1;font-size:10px;color:var(--dim);text-align:right;">${CRITERIA_LABELS[k]||k}</div>
+              <div style="width:60px;height:5px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:${barColor(v)};border-radius:3px;"></div></div>
+              <div style="width:24px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:${barColor(v)};">${v.toFixed(1)}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div style="padding:8px 12px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--border);margin-bottom:12px;font-size:11px;color:var(--dim);">
+        ${priority} ${actionText}
+      </div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Videos (sorted by score)</div>
+      <div style="max-height:200px;overflow-y:auto;">
+        ${vids.map(v=>{
+          const prio=v.score<25?'🔴':v.score<30?'🟡':'🟢';
+          return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:11px;">
+            <span style="width:16px;text-align:center;">${prio}</span>
+            <span class="g-cell grade-${v.grade}" style="width:20px;text-align:center;font-size:11px;font-weight:800;">${v.grade}</span>
+            <span style="width:32px;font-family:'JetBrains Mono',monospace;color:var(--dim);">${v.score}/55</span>
+            <span style="flex:1;color:var(--text);cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,0.1);" onclick="event.stopPropagation();scrollToTable('${v.course}','${v.key}')">${esc(v.title)}</span>
+            <span style="font-size:10px;color:var(--muted);">${v.procedural_pct}%P</span>
+            <a href="augmentation_evaluator.html?video=${v.key}" target="_blank" onclick="event.stopPropagation();" style="font-size:10px;color:var(--accent);text-decoration:none;">📊</a>
+            <a href="augmentation_viewer.html?video=${v.key}" target="_blank" onclick="event.stopPropagation();" style="font-size:10px;color:var(--green);text-decoration:none;">▶</a>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="text-align:center;margin-top:8px;">
+        <span style="font-size:10px;color:var(--accent);cursor:pointer;text-decoration:underline;" onclick="event.stopPropagation();scrollToTable('${code}')">View all ${vids.length} videos in table →</span>
+      </div>
+    </div>
+  `;
+  detail.style.display='block';
+}
+
+function scrollToTable(code, highlightKey){
   courseFilterVal=code;
   currentFilter='all';
   document.querySelectorAll('.pill').forEach(b=>{b.classList.toggle('active',b.dataset.v==='all');});

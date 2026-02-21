@@ -106,6 +106,9 @@ def main():
                 skipped += 1
                 continue
 
+            # Extract per-criteria scores for dashboard
+            criteria_scores = {k: score.get(k, 0) for k in CRITERIA_KEYS}
+
             videos.append({
                 "key": video_key,
                 "course": course_code_dotted,
@@ -122,6 +125,7 @@ def main():
                 "warnings": n_warnings,
                 "prereqs": n_prereqs,
                 "quiz_questions": n_quiz,
+                "criteria": criteria_scores,
             })
 
             # Accumulate totals
