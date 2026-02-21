@@ -1,0 +1,126 @@
+{
+  "course_code": "100.09",
+  "conceptual_score": {
+    "procedural_pct": 95,
+    "conceptual_pct": 5,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:11",
+      "title": "Material Instancing and Performance",
+      "concept": "Explain the relationship between master materials, material instances, and draw calls. Discuss how material instancing reduces GPU overhead by sharing shader instructions.",
+      "diagram_suggestion": "A diagram showing a master material feeding into multiple material instances, highlighting the shared shader code and unique parameter overrides."
+    },
+    {
+      "insert_after_timestamp": "0:21",
+      "title": "Lighting Channels and Selective Illumination",
+      "concept": "Introduce the concept of lighting channels and how they allow selective illumination of objects in the scene. Explain how this can be used to optimize lighting performance and create special effects.",
+      "diagram_suggestion": "A scene demonstrating different objects illuminated by different lighting channels, showcasing the selective illumination effect."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:11",
+      "procedural_step": "Creating new materials",
+      "why": "Creating a new material compiles a unique shader permutation. Excessive unique materials increase shader complexity, impacting GPU performance and memory usage. Material Instances should be preferred for parameter variations.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:21",
+      "procedural_step": "Manipulating scenes with different parameters and properties",
+      "why": "Adjusting lighting parameters directly affects global illumination calculations. Incorrect settings can lead to excessive light bounces, increasing rendering time and potentially causing Lumen ghosting artifacts.",
+      "antipattern_warning": "Lumen Ghosting"
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:16",
+      "prompt": "Why is it more efficient to use Material Instances instead of creating entirely new Materials for slight variations?",
+      "expected_insight": "Material Instances reuse the base material's shader code, reducing shader complexity and draw calls, leading to improved performance."
+    },
+    {
+      "insert_after_timestamp": "0:25",
+      "prompt": "How does the number of light sources in a scene affect the performance of Lumen global illumination?",
+      "expected_insight": "Each light source contributes to the global illumination calculation, increasing the computational cost. Too many lights can lead to performance bottlenecks and Lumen ghosting."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of shader programming concepts",
+    "Familiarity with the Unreal Engine 5 rendering pipeline",
+    "Knowledge of linear algebra and vector math"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why are Material Instances preferred over creating new Materials for minor visual changes?",
+      "options": [
+        "They reduce shader complexity and draw calls.",
+        "They allow for more complex shader graphs.",
+        "They are easier to create in the editor.",
+        "They automatically optimize lighting."
+      ],
+      "correct_index": 0,
+      "explanation": "Material Instances reuse the base material's shader code, reducing shader complexity and draw calls, leading to improved performance."
+    },
+    {
+      "question": "What is the primary performance impact of having too many unique Materials in a scene?",
+      "options": [
+        "Increased CPU usage",
+        "Increased draw calls and shader complexity",
+        "Reduced audio quality",
+        "Slower AI calculations"
+      ],
+      "correct_index": 1,
+      "explanation": "Each unique material requires its own shader permutation, increasing draw calls and shader complexity, which impacts GPU performance."
+    },
+    {
+      "question": "How do lighting channels contribute to optimization?",
+      "options": [
+        "By allowing selective illumination of objects.",
+        "By automatically increasing light intensity.",
+        "By simplifying the material editor interface.",
+        "By reducing the number of polygons in the scene."
+      ],
+      "correct_index": 0,
+      "explanation": "Lighting channels allow selective illumination of objects, optimizing lighting performance and creating special effects by controlling which lights affect which objects."
+    },
+    {
+      "question": "What is a potential consequence of excessively tweaking lighting parameters without understanding their impact?",
+      "options": [
+        "Lumen ghosting artifacts",
+        "Improved texture resolution",
+        "Faster AI pathfinding",
+        "Reduced memory usage"
+      ],
+      "correct_index": 0,
+      "explanation": "Incorrect lighting parameter settings can lead to excessive light bounces, increasing rendering time and potentially causing Lumen ghosting artifacts."
+    },
+    {
+      "question": "What is the relationship between the number of light sources and Lumen's global illumination calculations?",
+      "options": [
+        "More light sources increase computational cost.",
+        "More light sources decrease computational cost.",
+        "The number of light sources has no impact on Lumen.",
+        "Lumen automatically optimizes the number of light sources."
+      ],
+      "correct_index": 0,
+      "explanation": "Each light source contributes to the global illumination calculation, increasing the computational cost. Too many lights can lead to performance bottlenecks."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 1,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 2,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 1,
+    "strict_segmentation": 2,
+    "extraneous_load_reduction": 2,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 18,
+    "grade": "F"
+  }
+}

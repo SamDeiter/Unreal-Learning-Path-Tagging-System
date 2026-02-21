@@ -1,0 +1,185 @@
+{
+  "course_code": "227.07",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "7:40",
+      "title": "Actor Iteration Efficiency",
+      "concept": "Using 'Get All Actors of Class' iterates through the entire level. For performance, especially in large levels, consider using a more targeted approach like child actors or a dedicated manager class to track relevant actors.",
+      "diagram_suggestion": "Flowchart comparing 'Get All Actors of Class' vs. iterating through a pre-populated array of actors managed by a custom Actor Component."
+    },
+    {
+      "insert_after_timestamp": "14:15",
+      "title": "Visibility Propagation",
+      "concept": "Changing the visibility of a parent SceneComponent affects child components due to the scene graph hierarchy. This is a useful optimization, but understand that it tightly couples the visibility of those components. Consider using separate visibility controls if independent control is needed.",
+      "diagram_suggestion": "Scene graph visualization showing parent-child relationships and how visibility changes propagate down the hierarchy."
+    },
+    {
+      "insert_after_timestamp": "17:44",
+      "title": "Brush Resource Management",
+      "concept": "Creating a brush from a texture dynamically at runtime is less efficient than using pre-made UMG styles or texture objects. The 'Make Brush from Texture' node creates a new resource each time it's called, increasing memory usage and potentially causing hitches. Consider pre-loading these brushes.",
+      "diagram_suggestion": "Comparison of memory usage between dynamic brush creation and using pre-loaded UMG styles."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "3:53",
+      "procedural_step": "Dragging a button onto the horizontal box.",
+      "why": "The Horizontal Box widget automatically manages the layout of its children. Understanding layout widgets is crucial for responsive UI design that adapts to different screen sizes and resolutions. Without it, manual positioning becomes necessary, which is brittle and doesn't scale.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:37",
+      "procedural_step": "Using 'Get All Actors of Class'.",
+      "why": "This function searches the entire level for actors of the specified class. While convenient for prototyping, it's inefficient for production due to its O(N) complexity where N is the number of actors in the level. This can cause performance bottlenecks, especially in large scenes. Consider using a more targeted approach.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:22",
+      "procedural_step": "Promoting the actor to a variable.",
+      "why": "Storing a reference to the DisplayVehicle actor allows the UMG widget to directly interact with it. However, this creates a hard dependency. If the DisplayVehicle is destroyed or unloaded, the UMG will hold a dangling pointer, potentially leading to crashes. Consider using a soft reference or an interface to decouple the UMG from the specific actor class.",
+      "antipattern_warning": "Hard-Reference Casting: Direct actor references create tight coupling, hindering modularity and increasing the risk of crashes due to dangling pointers. Use interfaces or soft references for better decoupling."
+    },
+    {
+      "timestamp": "14:11",
+      "procedural_step": "Setting visibility on the Light Holder scene component.",
+      "why": "Modifying the visibility of the parent scene component directly affects the visibility of its child components (the lights). This is because the scene graph propagates visibility changes down the hierarchy. This is more efficient than setting visibility on each light individually, but it also means the lights' visibility is now coupled.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "16:17",
+      "procedural_step": "Returning 'Handled' from the mouse button down event.",
+      "why": "Returning 'Handled' prevents the event from propagating further up the widget hierarchy. If you don't handle the event, other widgets higher up in the hierarchy might also respond to the click, leading to unexpected behavior. This is crucial for controlling input flow in complex UIs.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "8:40",
+      "prompt": "Why is it beneficial to append 'Ref' to actor reference variable names? What problems does this naming convention solve?",
+      "expected_insight": "Appending 'Ref' clarifies the variable's purpose, preventing accidental value copying instead of object referencing. It improves code readability and reduces debugging time."
+    },
+    {
+      "insert_after_timestamp": "11:25",
+      "prompt": "Why is a 'NOT Boolean' node used here? What problem is it solving in the context of toggling a light?",
+      "expected_insight": "The 'NOT Boolean' node inverts the current state of the light (on/off). This allows a single button press to switch the light's state, creating a toggle effect."
+    },
+    {
+      "insert_after_timestamp": "14:52",
+      "prompt": "Why is it more efficient to control the visibility of the 'Light Holder' component rather than each individual light? What are the trade-offs?",
+      "expected_insight": "Controlling the parent component's visibility leverages the scene graph hierarchy for efficient propagation. The trade-off is that all child lights are now coupled to the parent's visibility, limiting individual control."
+    },
+    {
+      "insert_after_timestamp": "17:26",
+      "prompt": "Why is it important to use 'Make Brush from Texture' instead of directly assigning the texture to the image brush? What does the brush provide?",
+      "expected_insight": "'Make Brush from Texture' creates a visual element (brush) that can be styled and customized beyond just the texture itself. It allows control over tiling, margins, and other visual properties."
+    },
+    {
+      "insert_after_timestamp": "20:48",
+      "prompt": "The video mentions the lights weren't turning on and off initially. What common UMG property is often missed that prevents events from propagating correctly?",
+      "expected_insight": "The 'IsFocusable' property on the widget or one of its parents might be disabled, preventing it from receiving input events. Another common issue is the 'Visibility' property being set to 'Hidden' or 'Collapsed'."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "7:37",
+      "warning": "'Get All Actors of Class' is used. This can be extremely slow in large levels, especially if called frequently. It violates scalability principles.",
+      "severity": "HIGH",
+      "fix": "Use a dedicated manager class or component to track relevant actors. Consider using child actors or a spatial query system for more efficient actor retrieval."
+    },
+    {
+      "timestamp": "8:22",
+      "warning": "Directly referencing the 'DisplayVehicle' actor in the UMG creates a hard dependency. This reduces modularity and increases the risk of crashes if the actor is destroyed or unloaded.",
+      "severity": "MEDIUM",
+      "fix": "Use a soft object reference or an interface to decouple the UMG from the specific actor class. This allows for more flexible and robust code."
+    },
+    {
+      "timestamp": "17:44",
+      "warning": "Using 'Make Brush from Texture' dynamically at runtime is inefficient. It creates a new resource each time it's called, increasing memory usage and potentially causing hitches.",
+      "severity": "MEDIUM",
+      "fix": "Pre-load the brushes or use a UMG style to define them. This reduces runtime overhead and improves performance."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine 5 editor interface.",
+    "Familiarity with creating and manipulating actors in the level.",
+    "Knowledge of basic UMG widget creation and layout.",
+    "Understanding of Blueprints and variable types."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally better to use soft references instead of hard references when referencing actors in UMG widgets?",
+      "options": [
+        "Soft references prevent memory leaks if the actor is destroyed.",
+        "Hard references are slower to access than soft references.",
+        "Soft references automatically update if the actor is renamed.",
+        "Hard references cannot be used in UMG widgets."
+      ],
+      "correct_index": 0,
+      "explanation": "Soft references prevent the UMG from holding a dangling pointer to a destroyed actor, preventing crashes and memory leaks. Hard references maintain a strong link, which can lead to issues when the referenced actor is no longer valid."
+    },
+    {
+      "question": "What is the primary benefit of using a Canvas Panel in UMG?",
+      "options": [
+        "It automatically arranges child widgets in a grid.",
+        "It allows for absolute positioning of child widgets.",
+        "It optimizes rendering performance by batching draw calls.",
+        "It enables data binding between widgets and variables."
+      ],
+      "correct_index": 1,
+      "explanation": "Canvas Panels allow for absolute positioning of child widgets, giving precise control over their placement. While other panels offer automatic layout, Canvas Panels are ideal for situations requiring specific positioning."
+    },
+    {
+      "question": "In the context of UMG, what does 'Event Handled' signify when returned from an input event?",
+      "options": [
+        "The event has been processed and should not propagate further.",
+        "The event should be passed to the next widget in the hierarchy.",
+        "The event was invalid and should be discarded.",
+        "The event should be processed by the game mode."
+      ],
+      "correct_index": 0,
+      "explanation": "Returning 'Event Handled' signals that the event has been fully processed by the current widget and should not be propagated to other widgets in the hierarchy. This prevents unintended side effects from multiple widgets responding to the same input."
+    },
+    {
+      "question": "What is the main advantage of using a Scene Component as a parent for multiple lights when toggling their visibility in Unreal Engine 5?",
+      "options": [
+        "It reduces the number of draw calls, improving rendering performance.",
+        "It allows for individual control over each light's properties.",
+        "It simplifies the Blueprint logic for toggling visibility.",
+        "It automatically optimizes the lights' shadows."
+      ],
+      "correct_index": 2,
+      "explanation": "Using a parent Scene Component simplifies the Blueprint logic because you can toggle the visibility of the parent, which propagates to all child lights. This is more efficient than toggling each light individually."
+    },
+    {
+      "question": "Why is it generally recommended to use power-of-two dimensions (e.g., 128x128, 256x256) for UI textures in Unreal Engine 5?",
+      "options": [
+        "Power-of-two textures are easier to compress and process by the GPU.",
+        "Non-power-of-two textures cause rendering artifacts.",
+        "Power-of-two textures are required for all UMG widgets.",
+        "Non-power-of-two textures cannot be mipmapped."
+      ],
+      "correct_index": 0,
+      "explanation": "Power-of-two textures are more efficiently handled by the GPU due to their alignment with memory architecture. This leads to better compression, faster processing, and improved overall performance, especially on lower-end hardware."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "course_code": "106.02",
+  "conceptual_score": {
+    "procedural_pct": 80,
+    "conceptual_pct": 20,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:52",
+      "title": "Datasmith Runtime Actor Lifecycle",
+      "concept": "The Datasmith Runtime loads assets into memory at runtime, bypassing the typical content storage mechanisms. Understanding the implications for garbage collection and memory management is crucial.",
+      "diagram_suggestion": "A lifecycle diagram illustrating the creation, loading, usage, and destruction of Datasmith Runtime actors and their associated assets, emphasizing the role of the garbage collector."
+    },
+    {
+      "insert_after_timestamp": "1:55",
+      "title": "Asynchronous Asset Loading",
+      "concept": "Datasmith Runtime leverages asynchronous asset loading. Understanding how to monitor the loading process and handle potential errors is important for robust applications.",
+      "diagram_suggestion": "A flowchart depicting the asynchronous loading process, including callbacks for completion and error handling, highlighting the use of delegates."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:30",
+      "procedural_step": "Bring data from Unreal back to DCC tools",
+      "why": "Round-tripping workflows allow iterative design, where changes in Unreal can propagate back to the source DCC for refinement. This avoids data silos and promotes collaboration.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:59",
+      "procedural_step": "Load Datasmith files into memory without storing in project",
+      "why": "Loading directly into memory allows for dynamic content updates and reduces the project's disk footprint. This is useful for configurators or applications with large datasets that don't need to be persistently stored.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:27",
+      "procedural_step": "Get a reference to Datasmith Runtime actor",
+      "why": "Referencing the Datasmith Runtime actor in the Level Blueprint allows you to programmatically control the loading and unloading of Datasmith assets at runtime. This enables dynamic scene composition based on user input or other runtime conditions.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:11",
+      "procedural_step": "Asset is not present after stopping play",
+      "why": "Assets loaded via Datasmith Runtime exist only in memory during gameplay. This ephemeral nature is useful for temporary content but requires careful management if persistence is needed.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:35",
+      "prompt": "Why would reducing the need to go back to DCC tools be beneficial in a large project?",
+      "expected_insight": "Reducing DCC roundtrips speeds up iteration, reduces data translation errors, and allows artists to focus on Unreal-specific features."
+    },
+    {
+      "insert_after_timestamp": "1:03",
+      "prompt": "What are the potential drawbacks of loading assets directly into memory at runtime, compared to importing them into the project?",
+      "expected_insight": "Runtime loading can impact performance due to on-demand asset processing, and requires careful memory management to avoid crashes. Imported assets are pre-optimized."
+    },
+    {
+      "insert_after_timestamp": "1:42",
+      "prompt": "How could you use Datasmith Runtime to create a dynamic product configurator?",
+      "expected_insight": "You could load different Datasmith files representing different product configurations based on user selections, allowing users to visualize customized products in real-time."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "1:27",
+      "warning": "Directly referencing the Datasmith Runtime actor in the Level Blueprint creates a hard dependency. This can make the level less reusable and harder to maintain.",
+      "severity": "MEDIUM",
+      "fix": "Use a Blueprint Interface or Event Dispatcher to communicate with the Datasmith Runtime actor, decoupling the level blueprint from the specific implementation."
+    }
+  ],
+  "missing_prerequisites": [
+    "Understanding of Unreal Engine's Asset Management system",
+    "Basic knowledge of Blueprint scripting",
+    "Familiarity with Datasmith import process"
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary benefit of using Datasmith Runtime for loading assets?",
+      "options": [
+        "Reduces project size by loading assets directly into memory at runtime.",
+        "Automatically optimizes assets for Nanite.",
+        "Guarantees compatibility with all DCC software.",
+        "Simplifies the process of creating complex animations."
+      ],
+      "correct_index": 0,
+      "explanation": "Datasmith Runtime allows loading assets directly into memory, reducing the project's disk footprint and enabling dynamic content updates."
+    },
+    {
+      "question": "What happens to assets loaded using Datasmith Runtime when the game is stopped?",
+      "options": [
+        "They are automatically saved to the project's Content Browser.",
+        "They remain in memory until the editor is closed.",
+        "They are unloaded from memory and disappear from the scene.",
+        "They are converted into static meshes."
+      ],
+      "correct_index": 2,
+      "explanation": "Assets loaded via Datasmith Runtime are ephemeral; they exist only in memory during gameplay and are unloaded when the game stops."
+    },
+    {
+      "question": "In what scenario would Datasmith Runtime be most beneficial?",
+      "options": [
+        "Creating a simple mobile game with pre-baked lighting.",
+        "Developing a large open-world game with persistent assets.",
+        "Building an interactive product configurator where users can dynamically load different models.",
+        "Designing a cinematic sequence with complex visual effects."
+      ],
+      "correct_index": 2,
+      "explanation": "Datasmith Runtime is ideal for applications requiring dynamic content loading, such as product configurators or architectural visualization tools."
+    },
+    {
+      "question": "What is a key consideration when using Datasmith Runtime regarding memory management?",
+      "options": [
+        "Datasmith Runtime automatically optimizes memory usage.",
+        "Assets loaded via Datasmith Runtime do not contribute to the project's overall memory footprint.",
+        "It's crucial to manage the lifecycle of loaded assets to prevent memory leaks.",
+        "Datasmith Runtime requires significantly less memory than importing assets directly."
+      ],
+      "correct_index": 3,
+      "explanation": "Careful memory management is essential when using Datasmith Runtime to avoid memory leaks and ensure stable performance."
+    },
+    {
+      "question": "What is the primary advantage of 'round-tripping' workflows with Datasmith?",
+      "options": [
+        "It allows for seamless integration with all DCC software.",
+        "It enables iterative design by allowing changes in Unreal to propagate back to the source DCC.",
+        "It automatically generates LODs for all imported assets.",
+        "It reduces the need for manual UV unwrapping."
+      ],
+      "correct_index": 1,
+      "explanation": "Round-tripping facilitates iterative design by allowing changes made in Unreal to be reflected back in the original DCC software, promoting collaboration and reducing data silos."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 4,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 26,
+    "grade": "D"
+  }
+}

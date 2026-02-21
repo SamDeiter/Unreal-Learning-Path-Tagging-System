@@ -1,0 +1,177 @@
+{
+  "course_code": "105.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:27",
+      "title": "Camera Actor Class Hierarchy",
+      "concept": "The distinction between `CameraActor` and `CineCameraActor` lies in their intended use and feature set. `CameraActor` is a basic camera, while `CineCameraActor` extends it with advanced cinematic controls. Understanding the parent-child relationship is crucial for inheritance and overriding properties.",
+      "diagram_suggestion": "UML diagram showing the inheritance hierarchy: Actor -> CameraActor -> CineCameraActor, highlighting key properties and methods in each class."
+    },
+    {
+      "insert_after_timestamp": "1:53",
+      "title": "Sequencer Camera Binding",
+      "concept": "The Camera Cuts track in Sequencer manages camera bindings. This is achieved by assigning a unique ID to each camera and referencing that ID within the track. Understanding how Sequencer resolves these bindings is essential for multi-camera setups.",
+      "diagram_suggestion": "Diagram illustrating the Sequencer timeline with a Camera Cuts track, showing how camera actors are bound to specific cuts using their unique IDs."
+    },
+    {
+      "insert_after_timestamp": "2:32",
+      "title": "Scene Capture Components",
+      "concept": "Scene Capture Components (2D and Cinematic) render the scene from a specific viewpoint to a render target. The Cinematic version extends the base component with CineCameraActor features, enabling post-processing and lens distortion. Understanding render targets and their usage is key.",
+      "diagram_suggestion": "Data flow diagram showing the Scene Capture Component rendering the scene to a render target, which is then used as a texture in a material or UI element."
+    },
+    {
+      "insert_after_timestamp": "4:46",
+      "title": "Film Back and Aspect Ratio",
+      "concept": "The film back setting directly influences the aspect ratio and field of view of the camera. Changing the sensor size alters the perceived perspective and depth of field. Understanding the relationship between sensor size, focal length, and field of view is crucial for achieving desired cinematic looks.",
+      "diagram_suggestion": "Diagram illustrating how different film back sizes affect the field of view and aspect ratio, with examples of common film back presets."
+    },
+    {
+      "insert_after_timestamp": "5:55",
+      "title": "Depth of Field and Aperture",
+      "concept": "Depth of field is controlled by the aperture (f-stop), focal length, and distance to the subject. A lower f-stop creates a shallower depth of field, blurring the background. Understanding the interplay of these factors is essential for creating cinematic focus effects.",
+      "diagram_suggestion": "Diagram illustrating the relationship between aperture, focal length, and depth of field, showing how different settings affect the area of focus."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:11",
+      "procedural_step": "Use CineCameraActor for cinematic creation.",
+      "why": "CineCameraActor provides granular control over camera properties (film back, lens, post-processing) directly influencing the final rendered image. This allows for precise artistic control over the cinematic look, which is crucial for film production.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:53",
+      "procedural_step": "Camera Cuts track is automatically generated.",
+      "why": "The Camera Cuts track ensures seamless transitions between different camera perspectives in Sequencer. Without it, cuts would be abrupt and lack cinematic polish, hindering storytelling.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:14",
+      "procedural_step": "Use Scene Capture Component 2D to capture a live snapshot.",
+      "why": "This component allows you to render the scene from a camera's perspective to a texture in real-time. This is useful for creating in-game monitors, security camera feeds, or other dynamic visual effects. The render target texture can then be used in materials or UI elements.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:41",
+      "procedural_step": "Select a different film back setting.",
+      "why": "Changing the film back alters the sensor dimensions, directly affecting the field of view and depth of field. This allows you to emulate different camera systems and achieve specific cinematic looks. A larger sensor generally results in a shallower depth of field.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:05",
+      "procedural_step": "Lower the aperture number for shallower depth of field.",
+      "why": "A lower aperture (e.g., f/1.4) creates a shallower depth of field because it allows more light to enter the lens, requiring less focus precision. This isolates the subject and blurs the background, drawing the viewer's attention. Conversely, a higher aperture (e.g., f/22) increases the depth of field, keeping more of the scene in focus.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:32",
+      "prompt": "Why would using a Game Camera Actor for cinematic shots be limiting?",
+      "expected_insight": "The Game Camera Actor lacks the fine-grained controls over lens settings, film back, and post-processing that are essential for achieving a specific cinematic look. Relying on post-process volumes alone can become unwieldy."
+    },
+    {
+      "insert_after_timestamp": "1:41",
+      "prompt": "How does post-processing on the CineCameraActor differ from using global post-process volumes?",
+      "expected_insight": "Applying post-processing directly to the camera allows for camera-specific effects, such as unique color grading or film grain. This provides more control and avoids unintended global effects."
+    },
+    {
+      "insert_after_timestamp": "2:21",
+      "prompt": "What are the performance implications of using Scene Capture Components, and how can they be mitigated?",
+      "expected_insight": "Scene Capture Components can be performance-intensive due to the real-time rendering. Mitigations include reducing the render target resolution, optimizing the captured scene, and using render targets only when necessary."
+    },
+    {
+      "insert_after_timestamp": "5:33",
+      "prompt": "How does changing the focal length affect the perspective and composition of a shot?",
+      "expected_insight": "A shorter focal length widens the field of view, exaggerating perspective and making objects appear further apart. A longer focal length compresses the perspective, making objects appear closer together and flattening the image."
+    },
+    {
+      "insert_after_timestamp": "7:17",
+      "prompt": "Why is it important to understand the pivot point of the actor being tracked with Look At Tracking?",
+      "expected_insight": "Look At Tracking locks onto the pivot point. If the pivot point is not centered or is located in an unexpected place, the camera will not track the actor as intended, resulting in undesirable camera movement."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine Editor interface.",
+    "Familiarity with Sequencer UI and timeline.",
+    "Knowledge of basic cinematography principles (focal length, aperture, depth of field)."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is the CineCameraActor preferred for cinematic sequences over the standard CameraActor?",
+      "options": [
+        "It offers more granular control over film back, lens settings, and post-processing.",
+        "It is more performant than the standard CameraActor.",
+        "It is easier to implement in Blueprint.",
+        "It is the only camera type that works with Sequencer."
+      ],
+      "correct_index": 0,
+      "explanation": "The CineCameraActor provides extensive control over cinematic parameters, enabling precise artistic direction."
+    },
+    {
+      "question": "What is the primary function of the Camera Cuts track in Sequencer?",
+      "options": [
+        "To bind specific cameras to edited cuts within the timeline.",
+        "To control the movement of the camera in the scene.",
+        "To apply post-processing effects to the camera.",
+        "To adjust the focus settings of the camera."
+      ],
+      "correct_index": 0,
+      "explanation": "The Camera Cuts track manages camera assignments for each cut, ensuring smooth transitions between different viewpoints."
+    },
+    {
+      "question": "How does a lower aperture value (e.g., f/1.4) affect the depth of field?",
+      "options": [
+        "It creates a shallower depth of field, blurring the background.",
+        "It creates a deeper depth of field, keeping more of the scene in focus.",
+        "It has no effect on the depth of field.",
+        "It increases the brightness of the image."
+      ],
+      "correct_index": 0,
+      "explanation": "A lower aperture value results in a shallower depth of field, isolating the subject and blurring the background."
+    },
+    {
+      "question": "What is the purpose of the Scene Capture Component 2D?",
+      "options": [
+        "To capture a live snapshot of the scene from a camera and feed it to a render target texture.",
+        "To create realistic camera shake effects.",
+        "To simulate the physical properties of a real-world camera.",
+        "To automatically adjust the camera settings based on the environment."
+      ],
+      "correct_index": 0,
+      "explanation": "The Scene Capture Component renders the scene from a camera's perspective to a texture in real-time, enabling dynamic visual effects."
+    },
+    {
+      "question": "How does changing the film back setting affect the camera's properties?",
+      "options": [
+        "It alters the dimensions of the camera sensor, affecting the field of view and depth of field.",
+        "It changes the color grading of the image.",
+        "It adjusts the focus distance of the camera.",
+        "It has no effect on the camera's properties."
+      ],
+      "correct_index": 0,
+      "explanation": "The film back setting directly influences the sensor size, which in turn affects the field of view and depth of field."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 27,
+    "grade": "D"
+  }
+}

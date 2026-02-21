@@ -1,0 +1,150 @@
+{
+  "course_code": "113.01",
+  "conceptual_score": {
+    "procedural_pct": 80,
+    "conceptual_pct": 20,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:30",
+      "title": "Actor Component Hierarchy",
+      "concept": "Understanding the Actor-Component relationship is fundamental. Actors are containers; Components provide functionality (static mesh, skeletal mesh, etc.). Parenting the Metahuman Blueprint to an Actor centralizes transform control and avoids accidental individual component manipulation.",
+      "diagram_suggestion": "A diagram showing an Actor as the root, with the Metahuman Blueprint as a child. The Metahuman Blueprint expands to show its Skeletal Mesh Component, Control Rig, and other relevant components."
+    },
+    {
+      "insert_after_timestamp": "3:27",
+      "title": "Engine Versioning and Feature Sets",
+      "concept": "Unreal Engine versions introduce significant changes to core systems like the Rendering pipeline (Lumen, Nanite), Animation (Control Rig), and Physics. Metahumans leverage these systems, so engine version dictates available features and compatibility.",
+      "diagram_suggestion": "A timeline showing Unreal Engine versions (e.g., 5.0, 5.1, 5.2, 5.3, 5.4, 5.5), highlighting key feature additions relevant to Metahumans (e.g., improved Control Rig, enhanced Lumen support)."
+    },
+    {
+      "insert_after_timestamp": "3:59",
+      "title": "Mesh to Metahuman Workflow",
+      "concept": "The Mesh to Metahuman process leverages a statistical model trained on a vast dataset of human faces. It projects your input mesh onto this statistical space, finding the closest match and generating a compatible Metahuman DNA asset. This DNA asset drives the blend shapes and rig controls.",
+      "diagram_suggestion": "A diagram illustrating the Mesh to Metahuman pipeline: Input Mesh -> Statistical Model Projection -> Metahuman DNA Asset -> Final Metahuman."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:30",
+      "procedural_step": "Use an Actor to move the Metahuman.",
+      "why": "Actors provide a single transform to manipulate, preventing accidental selection of individual Metahuman components. This ensures consistent positioning and avoids unintended modifications to the Metahuman's internal structure.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:15",
+      "procedural_step": "Parent Metahuman to Actor.",
+      "why": "Parenting ensures the Metahuman's relative transform is maintained. Without parenting, the Metahuman's animation may fight against the level's transform, causing it to revert to its default pose during movement.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:27",
+      "procedural_step": "Use 'Replace Actors With'.",
+      "why": "This function swaps the selected actor with another, preserving connections and references in the level. Manually deleting and re-adding can break existing setups (e.g., Sequencer tracks, Blueprint references).",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:47",
+      "procedural_step": "Metahumans can only be upgraded.",
+      "why": "Upgrading is possible because new versions often add features or refine existing skeletal structures. Downgrading is not supported due to potential incompatibilities with older skeletal joint systems or blueprint setups.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:09",
+      "prompt": "Why is it important to zero out the position of both the Actor and the Metahuman before parenting?",
+      "expected_insight": "Zeroing out the transforms establishes a clear relative position. If the Metahuman has a non-zero local transform *before* parenting, moving the Actor will result in an offset equal to the Metahuman's pre-existing local transform. This can lead to unexpected placement issues."
+    },
+    {
+      "insert_after_timestamp": "2:37",
+      "prompt": "What are the potential consequences of *not* using the 'Replace Actors With' function and instead manually deleting and re-adding a Metahuman?",
+      "expected_insight": "Manually replacing the actor can break references in Sequencer, Blueprints, and other systems. 'Replace Actors With' attempts to preserve these connections, minimizing disruption to existing workflows."
+    },
+    {
+      "insert_after_timestamp": "4:45",
+      "prompt": "Why does using a conformed mesh (same topology) in the Mesh to Metahuman workflow result in better fitting geometry, especially in joints?",
+      "expected_insight": "Consistent topology ensures that the statistical model used by Mesh to Metahuman can accurately map the input mesh's vertices to the Metahuman's skeletal structure. This leads to more precise deformation and reduces artifacts in joint areas."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine's Actor-Component model.",
+    "Familiarity with the Unreal Engine Outliner and Details panel.",
+    "Basic knowledge of skeletal animation and blend shapes.",
+    "Understanding of coordinate systems and transforms in Unreal Engine."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally better to move a Metahuman in the level by manipulating a parent Actor, rather than directly manipulating the Metahuman Blueprint?",
+      "options": [
+        "It prevents accidental selection of individual Metahuman components and ensures consistent transform control.",
+        "It improves rendering performance by reducing the number of draw calls.",
+        "It allows for easier animation retargeting.",
+        "It automatically optimizes the Metahuman's LOD settings."
+      ],
+      "correct_index": 0,
+      "explanation": "Parenting to an Actor centralizes transform control, preventing accidental component selection and unintended modifications. This ensures consistent positioning and avoids issues with animation."
+    },
+    {
+      "question": "What is the primary reason Metahumans can be upgraded to newer engine versions but generally cannot be downgraded?",
+      "options": [
+        "Newer versions introduce skeletal joint system and blueprint setup changes that are not backwards compatible.",
+        "Downgrading would require re-importing all Metahuman assets.",
+        "Epic Games does not provide support for downgrading Metahumans.",
+        "The Metahuman plugin is not compatible with older engine versions."
+      ],
+      "correct_index": 0,
+      "explanation": "Newer engine versions often introduce significant changes to the skeletal structure and blueprint setups of Metahumans, making them incompatible with older versions."
+    },
+    {
+      "question": "When replacing a Metahuman in a level, why is it recommended to use the 'Replace Actors With' function instead of manually deleting and re-adding?",
+      "options": [
+        "It preserves existing connections and references in the level, such as those in Sequencer or Blueprints.",
+        "It automatically optimizes the new Metahuman's material settings.",
+        "It reduces the file size of the level.",
+        "It simplifies the process of re-importing the Metahuman's animation data."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'Replace Actors With' function attempts to maintain existing connections and references, minimizing disruption to existing workflows. Manually replacing the actor can break these connections."
+    },
+    {
+      "question": "What is the key advantage of using a conformed mesh (same topology as a Metahuman) in the Mesh to Metahuman workflow?",
+      "options": [
+        "It results in better fitting geometry, especially in joint areas, due to accurate vertex mapping.",
+        "It significantly reduces the processing time required to generate the Metahuman.",
+        "It allows for more detailed customization of the Metahuman's facial features.",
+        "It eliminates the need for manual adjustments to the Metahuman's skin weights."
+      ],
+      "correct_index": 0,
+      "explanation": "Consistent topology allows the Mesh to Metahuman system to accurately map the input mesh's vertices to the Metahuman's skeletal structure, leading to more precise deformation and fewer artifacts."
+    },
+    {
+      "question": "What is the primary purpose of the Metahuman End User License Agreement (EULA)?",
+      "options": [
+        "It explains a user's rights and obligations related to the use of Metahuman technology.",
+        "It provides a detailed technical specification of the Metahuman asset format.",
+        "It outlines the steps required to upgrade Metahumans to newer engine versions.",
+        "It guarantees the performance of Metahumans in all Unreal Engine projects."
+      ],
+      "correct_index": 0,
+      "explanation": "The EULA is a legal document that defines the terms and conditions under which users can use Metahuman technology, including their rights and obligations."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 26,
+    "grade": "D"
+  }
+}

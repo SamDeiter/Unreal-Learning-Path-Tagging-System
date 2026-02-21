@@ -1,0 +1,159 @@
+{
+  "course_code": "113.01",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:19",
+      "title": "Influence of Lighting on Feature Tracking",
+      "concept": "The Metahuman Identity Solver relies on image analysis. Lighting changes the pixel data, thus altering the solver's interpretation of facial features. This is because the solver uses edge detection and feature extraction algorithms that are sensitive to contrast and shadow.",
+      "diagram_suggestion": "A diagram showing how different lighting angles affect the detected edges and feature points on a face, impacting the accuracy of the solver."
+    },
+    {
+      "insert_after_timestamp": "4:44",
+      "title": "Albedo Texture and Feature Detection",
+      "concept": "The albedo texture provides crucial color and intensity information that aids the tracking markers in identifying and shaping facial features. Without it, the solver relies solely on geometry, which can be less precise, especially in areas with subtle curves like eyebrows.",
+      "diagram_suggestion": "A side-by-side comparison of feature detection with and without albedo texture, highlighting the improved accuracy with texture information."
+    },
+    {
+      "insert_after_timestamp": "6:57",
+      "title": "2D vs. 3D Solve",
+      "concept": "The initial tracking marker placement is performed on a 2D image. The Metahuman Identity Solver then projects these 2D positions onto the 3D geometry of the Metahuman template. This projection introduces potential inaccuracies, especially if the 2D marker placement is not precise.",
+      "diagram_suggestion": "A diagram illustrating the projection of 2D tracking markers onto a 3D Metahuman face, showing potential distortions and inaccuracies."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:22",
+      "procedural_step": "Change the field of view to 20 degrees",
+      "why": "A narrower field of view reduces perspective distortion, providing a more orthographic projection of the face. This minimizes warping of facial features, leading to more accurate tracking marker placement and a better solve.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:01",
+      "procedural_step": "Use unlit mode for Skinz Albedo textures",
+      "why": "Skinz Albedo textures already contain baked-in lighting information. Using lit mode would add additional, potentially conflicting, lighting, distorting the intended appearance and negatively impacting the accuracy of the tracking marker placement.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:29",
+      "procedural_step": "Albedo texture assists tracking markers",
+      "why": "The albedo texture provides color and intensity variations that the tracking algorithm uses to identify edges and features. Without it, the algorithm would rely solely on the mesh geometry, which may lack sufficient detail for accurate tracking.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:59",
+      "procedural_step": "Move a few tracking markers and rerun the identity solve",
+      "why": "The Metahuman Identity Solver is an iterative algorithm. Small adjustments to the tracking markers can significantly impact the final solve, as the solver attempts to minimize the error between the tracked features and the Metahuman template.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:36",
+      "prompt": "Why is careful framing of the face so important before promoting a neutral pose frame?",
+      "expected_insight": "The framing directly impacts the initial 2D representation of the face, which the solver uses as a reference. Poor framing can lead to inaccurate feature detection and a suboptimal solve."
+    },
+    {
+      "insert_after_timestamp": "2:57",
+      "prompt": "How might different lighting scenarios affect the placement of tracking markers, and why does this matter?",
+      "expected_insight": "Lighting affects the visibility of facial features and the contrast between them. This can cause the tracking algorithm to misinterpret edges and shapes, leading to inaccurate marker placement and a less accurate solve."
+    },
+    {
+      "insert_after_timestamp": "4:56",
+      "prompt": "Why is it sometimes necessary to manually adjust tracking markers, even when the automatic tracking seems reasonable?",
+      "expected_insight": "The automatic tracking is based on algorithms that can be fooled by variations in facial structure, lighting, or texture. Manual adjustments allow for fine-tuning the marker placement to better represent the actual facial features."
+    },
+    {
+      "insert_after_timestamp": "7:39",
+      "prompt": "Why is it important to compare the solved mesh with the template mesh, and what are you looking for in this comparison?",
+      "expected_insight": "Comparing the meshes allows you to identify areas where the solver has not accurately matched the facial features. You're looking for discrepancies in shape, position, and overall likeness."
+    },
+    {
+      "insert_after_timestamp": "8:56",
+      "prompt": "Why does moving the tracking markers even a little bit sometimes fix errors?",
+      "expected_insight": "The solver is an iterative system. Even small changes to the input can cause the solver to converge on a different, and potentially more accurate, solution. It's like nudging a complex system towards a more stable state."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Understanding of basic 3D graphics principles (lighting, cameras, textures)",
+    "Familiarity with the Unreal Engine 5 interface",
+    "Basic knowledge of facial anatomy"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to adjust the field of view of the viewport camera when preparing a mesh for MetaHuman Identity?",
+      "options": [
+        "To reduce perspective distortion and improve tracking accuracy.",
+        "To make the mesh appear larger in the viewport.",
+        "To increase the rendering performance of the viewport.",
+        "To change the aspect ratio of the image."
+      ],
+      "correct_index": 0,
+      "explanation": "A narrower field of view minimizes perspective distortion, providing a more orthographic projection of the face, which leads to more accurate tracking marker placement."
+    },
+    {
+      "question": "What is the primary reason for using 'Unlit' mode when working with meshes that have Skinz Albedo textures?",
+      "options": [
+        "To disable all lighting calculations in the scene.",
+        "To prevent double lighting and preserve the baked-in lighting information.",
+        "To improve the performance of the viewport.",
+        "To make the mesh appear brighter."
+      ],
+      "correct_index": 1,
+      "explanation": "Skinz Albedo textures already contain lighting information. Using 'Lit' mode would add additional, potentially conflicting, lighting, distorting the intended appearance."
+    },
+    {
+      "question": "How does the albedo texture of a scanned mesh assist the MetaHuman Identity tracking process?",
+      "options": [
+        "It provides color and intensity variations that help identify edges and features.",
+        "It adds specular highlights to the mesh.",
+        "It defines the overall shape of the mesh.",
+        "It controls the roughness of the surface."
+      ],
+      "correct_index": 0,
+      "explanation": "The albedo texture provides crucial color and intensity information that aids the tracking markers in identifying and shaping facial features."
+    },
+    {
+      "question": "What is the purpose of promoting a 'neutral pose frame' in the MetaHuman Identity workflow?",
+      "options": [
+        "To establish a consistent reference point for tracking facial features.",
+        "To create a new animation sequence.",
+        "To optimize the mesh for rendering.",
+        "To automatically generate facial expressions."
+      ],
+      "correct_index": 0,
+      "explanation": "The neutral pose frame provides a baseline for the solver to understand the base shape of the face before any expressions are applied. This is a consistent reference point for tracking."
+    },
+    {
+      "question": "Why might you need to manually adjust the position of tracking markers after the initial automatic tracking?",
+      "options": [
+        "To fine-tune the marker placement and improve the accuracy of the solve.",
+        "To change the color of the markers.",
+        "To optimize the performance of the tracking algorithm.",
+        "To create new tracking markers."
+      ],
+      "correct_index": 0,
+      "explanation": "The automatic tracking is based on algorithms that can be fooled by variations in facial structure, lighting, or texture. Manual adjustments allow for fine-tuning the marker placement to better represent the actual facial features."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "course_code": "107.04",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:24",
+      "title": "Skeletal Mesh Component Hierarchy",
+      "concept": "Sockets exist within the Skeletal Mesh Component's transform hierarchy. Understanding how transforms propagate from the root to bones and then to sockets is crucial for predictable attachment behavior.",
+      "diagram_suggestion": "A diagram illustrating the Skeletal Mesh Component, its skeleton, bones as transforms, and sockets as child transforms of bones, showing transform inheritance."
+    },
+    {
+      "insert_after_timestamp": "2:42",
+      "title": "Animation Blueprint Integration",
+      "concept": "Sockets are most powerfully used when their transforms are accessed and manipulated within Animation Blueprints. This allows for dynamic attachment and animation-driven effects.",
+      "diagram_suggestion": "A flowchart showing how Animation Blueprints read socket transforms, use them to drive component placement, and update those placements every frame."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:13",
+      "procedural_step": "Sockets are points attached to bones.",
+      "why": "Sockets provide a stable, named transform relative to a bone. This allows you to attach components without hardcoding world positions, which would break if the animation changes. The engine uses the relative transform of the socket to the bone to calculate the final world transform of the attached component.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:21",
+      "procedural_step": "Attach meshes to bones using sockets.",
+      "why": "Attaching to sockets ensures the attached mesh inherits the bone's animation. Without sockets, you'd have to manually update the attached mesh's transform every frame, leading to performance issues and potential inaccuracies. The engine handles the transform propagation efficiently.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:32",
+      "procedural_step": "Offset the socket from the bone.",
+      "why": "Offsetting the socket allows precise placement of attached components. The engine stores this offset as a relative transform, ensuring the attached component maintains its position even when the bone is animated. Without this offset, components would be rigidly attached to the bone's origin.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:47",
+      "procedural_step": "Copy the socket name for use in Blueprints.",
+      "why": "Using the exact socket name is crucial for Blueprint functions like 'AttachToComponent'. A mismatch will cause the attachment to fail silently, leading to debugging headaches. The engine uses the socket name to find the correct transform in the skeletal mesh component's hierarchy.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:41",
+      "prompt": "Why is using a socket preferable to directly setting the world position of an attached component?",
+      "expected_insight": "Sockets maintain a relative transform to the bone, ensuring the attached component follows the animation. Directly setting the world position would break the attachment during animation."
+    },
+    {
+      "insert_after_timestamp": "1:55",
+      "prompt": "Imagine you want to attach a particle effect to a character's hand. How would using a socket simplify this task compared to manually tracking the hand's position?",
+      "expected_insight": "A socket attached to the hand bone automatically updates its position with the animation. Manually tracking would require complex calculations and constant updates in the Blueprint."
+    },
+    {
+      "insert_after_timestamp": "3:28",
+      "prompt": "What happens if two sockets have the same name within a single skeletal mesh?",
+      "expected_insight": "The engine will likely only attach to the first socket found with that name, leading to unpredictable behavior. Socket names must be unique within a skeletal mesh."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "2:47",
+      "warning": "Misspelled socket names in Blueprints can lead to silent failures when attaching components. This is a form of hard-reference casting, where a string is used to identify an object. This can be difficult to debug.",
+      "severity": "MEDIUM",
+      "fix": "Use a variable of type 'Socket' and populate it directly from the Skeletal Mesh asset in the editor to avoid string-based lookups."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Skeletal Meshes and Skeletons in Unreal Engine 5",
+    "Familiarity with the Content Browser and Editor Interface",
+    "Knowledge of Blueprint scripting basics (variables, functions, component interaction)"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why are sockets preferred over directly manipulating component world positions for attaching objects to animated Skeletal Meshes?",
+      "options": [
+        "Sockets maintain a relative transform to the bone, ensuring the attached component follows the animation.",
+        "Sockets are faster to calculate than world positions.",
+        "World positions cannot be used with animated meshes.",
+        "Sockets automatically optimize the rendering of attached components."
+      ],
+      "correct_index": 0,
+      "explanation": "Sockets maintain a relative transform, ensuring the attached component follows the animation. Directly manipulating world positions would break the attachment during animation."
+    },
+    {
+      "question": "What happens if you use an incorrect socket name in the 'AttachToComponent' Blueprint node?",
+      "options": [
+        "The engine will crash.",
+        "The attachment will fail silently, and the component will not be attached.",
+        "The engine will automatically correct the socket name.",
+        "A warning message will always appear in the editor."
+      ],
+      "correct_index": 1,
+      "explanation": "The attachment will fail silently. Double-check your socket names to avoid this issue."
+    },
+    {
+      "question": "How does the engine determine the final world transform of a component attached to a socket?",
+      "options": [
+        "By adding the socket's world position to the component's local position.",
+        "By inheriting the bone's transform and applying the socket's relative transform.",
+        "By using a complex physics simulation.",
+        "By randomly assigning a transform."
+      ],
+      "correct_index": 1,
+      "explanation": "The engine inherits the bone's transform and applies the socket's relative transform to calculate the final world transform."
+    },
+    {
+      "question": "What is the primary benefit of using sockets for attaching components in Unreal Engine 5?",
+      "options": [
+        "Simplified animation workflow and dynamic attachment capabilities.",
+        "Reduced memory usage.",
+        "Automatic LOD (Level of Detail) generation.",
+        "Improved lighting performance."
+      ],
+      "correct_index": 0,
+      "explanation": "Sockets simplify the animation workflow by providing a stable attachment point that follows the bone's animation, enabling dynamic attachment capabilities."
+    },
+    {
+      "question": "In the context of skeletal meshes, what is the relationship between bones and sockets?",
+      "options": [
+        "Sockets are child transforms of bones, inheriting their movement and rotation.",
+        "Bones are child transforms of sockets, defining the socket's position.",
+        "Sockets and bones are independent and unrelated.",
+        "Sockets replace bones in certain animation scenarios."
+      ],
+      "correct_index": 0,
+      "explanation": "Sockets are child transforms of bones, inheriting their movement and rotation. This ensures that anything attached to the socket will move with the bone."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 1,
+    "affective_tone": 3,
+    "total": 23,
+    "grade": "D"
+  }
+}

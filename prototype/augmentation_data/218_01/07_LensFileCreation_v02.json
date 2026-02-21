@@ -1,0 +1,173 @@
+{
+  "course_code": "218.01",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:15",
+      "title": "Camera Intrinsics and Distortion Models",
+      "concept": "Unreal Engine 5 uses camera intrinsics (focal length, principal point) and distortion models (e.g., Brown-Conrady, ST Map) to accurately project 3D world coordinates onto the 2D image plane. Understanding these models is crucial for correct rendering and compositing, especially in virtual production.",
+      "diagram_suggestion": "A diagram illustrating the pinhole camera model, lens distortion, and how these parameters are used in the camera projection matrix within Unreal Engine 5."
+    },
+    {
+      "insert_after_timestamp": "2:55",
+      "title": "ST Map Distortion",
+      "concept": "ST Maps provide a flexible way to correct lens distortion by remapping the UV coordinates of the rendered image. This is particularly useful for complex lens distortions that are not well-represented by standard radial or tangential distortion models. Understanding how ST Maps are applied in the material editor is essential for advanced lens correction.",
+      "diagram_suggestion": "A visual representation of how an ST Map is applied to UV coordinates in a material, showing how it warps the image to correct distortion."
+    },
+    {
+      "insert_after_timestamp": "4:39",
+      "title": "Spherical Lens Model Limitations",
+      "concept": "Unreal Engine 5's current support for only spherical lens models imposes limitations on accurately representing anamorphic or highly complex lens distortions. Understanding the limitations of the spherical model and when to use ST Maps or other techniques is crucial for achieving accurate results.",
+      "diagram_suggestion": "A comparison of spherical and anamorphic lens distortion patterns, highlighting the differences and the limitations of the spherical model."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:10",
+      "procedural_step": "Lens file stores distortion parameters",
+      "why": "Storing lens distortion parameters allows Unreal Engine to accurately simulate the real-world camera's optical characteristics, ensuring that virtual elements are correctly aligned with the physical environment in ICVFX setups. This is critical for believable compositing and avoiding visual discrepancies.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:22",
+      "procedural_step": "Choose camera to calibrate",
+      "why": "Selecting the correct camera in the engine ensures that the lens distortion and other parameters are applied to the appropriate viewpoint. Mismatched cameras will lead to incorrect perspective and alignment issues, breaking the illusion of seamless integration between virtual and real elements.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:20",
+      "procedural_step": "Modify sensor dimensions",
+      "why": "Accurate sensor dimensions are crucial for calculating the correct field of view and perspective. Incorrect sensor dimensions will result in a misrepresentation of the scene's scale and depth, leading to visual inconsistencies and a loss of realism.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:37",
+      "procedural_step": "Tracking fizz data via Live Link",
+      "why": "Tracking FIZ (Focus, Iris, Zoom) data via Live Link allows Unreal Engine to dynamically adjust the virtual camera's parameters to match the real-world camera's settings. This ensures that changes in focus, aperture, and zoom are accurately reflected in the virtual environment, maintaining a consistent and realistic look.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:16",
+      "procedural_step": "Choose lens file in camera calibration settings",
+      "why": "Assigning the lens file to the camera actor in Unreal Engine activates the lens distortion correction and other calibration parameters. Without this connection, the virtual camera will not accurately replicate the real-world camera's behavior, leading to visual artifacts and alignment problems.",
+      "antipattern_warning": "Hard-Reference Casting: Directly referencing assets can lead to packaging and dependency issues. Use soft references and asset management techniques for better scalability."
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:45",
+      "prompt": "Why is it important to name the lens file with specific details like the lens model and focal length?",
+      "expected_insight": "Clear naming conventions ensure that the correct lens profile is applied to the corresponding camera, preventing errors and streamlining the calibration workflow. It also aids in asset management and collaboration."
+    },
+    {
+      "insert_after_timestamp": "1:30",
+      "prompt": "How would mismatched camera settings between the real-world camera and the virtual camera in Unreal Engine affect the final composite?",
+      "expected_insight": "Mismatched settings would lead to perspective errors, incorrect field of view, and misaligned virtual elements, resulting in a jarring and unrealistic composite. The virtual and real worlds would not appear to be seamlessly integrated."
+    },
+    {
+      "insert_after_timestamp": "2:38",
+      "prompt": "Why is it important to verify the image dimensions in the lens file settings?",
+      "expected_insight": "The image dimensions define the resolution of the incoming video feed. Incorrect dimensions will cause scaling and aspect ratio issues, leading to distortion and misalignment of virtual elements."
+    },
+    {
+      "insert_after_timestamp": "3:56",
+      "prompt": "What are the potential consequences of not setting the subject representation for the Live Link camera controller?",
+      "expected_insight": "Without a subject representation, the Live Link connection will fail to transmit FIZ data to the virtual camera, preventing it from accurately tracking the real-world camera's movements and settings. This will result in a static virtual camera and a broken ICVFX setup."
+    },
+    {
+      "insert_after_timestamp": "4:47",
+      "prompt": "Why is it crucial to match the physical camera sensor size to the virtual camera's sensor size in Unreal Engine?",
+      "expected_insight": "Matching sensor sizes ensures that the field of view and depth of field are accurately replicated in the virtual environment. Discrepancies will lead to visual inconsistencies and a loss of realism, making the composite appear unnatural."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:41",
+      "warning": "Directly referencing the Live Link camera controller in the level can create a hard dependency, making it difficult to reuse the camera setup in different projects or levels. This can hinder scalability and maintainability.",
+      "severity": "MEDIUM",
+      "fix": "Use a Level Sequence or a Blueprint-based system to dynamically spawn and configure the camera rig at runtime, avoiding hard references and promoting modularity."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of camera intrinsics and lens distortion models.",
+    "Familiarity with Live Link and its role in virtual production.",
+    "Knowledge of Unreal Engine's content browser and asset management.",
+    "Experience with creating and manipulating actors in the Unreal Engine editor."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to calibrate lens distortion in ICVFX?",
+      "options": [
+        "To accurately align virtual elements with the real-world environment.",
+        "To improve the rendering performance of the Unreal Engine.",
+        "To simplify the process of creating 3D models.",
+        "To reduce the file size of the Unreal Engine project."
+      ],
+      "correct_index": 0,
+      "explanation": "Calibrating lens distortion ensures that the virtual camera accurately replicates the real-world camera's optical characteristics, allowing for seamless integration of virtual and real elements."
+    },
+    {
+      "question": "What is the primary function of a lens file in Unreal Engine for ICVFX?",
+      "options": [
+        "Stores lens distortion parameters, camera intrinsics, and nodal point offset data.",
+        "Controls the movement of the virtual camera in the scene.",
+        "Defines the lighting and shading properties of virtual objects.",
+        "Manages the audio playback in the virtual environment."
+      ],
+      "correct_index": 0,
+      "explanation": "The lens file stores the necessary data to simulate the real-world camera's lens characteristics, enabling accurate perspective and alignment in the virtual environment."
+    },
+    {
+      "question": "How does Live Link contribute to the ICVFX workflow when calibrating a camera?",
+      "options": [
+        "It transmits FIZ data from the real-world camera to the virtual camera in real-time.",
+        "It automatically generates 3D models from the captured video footage.",
+        "It optimizes the rendering settings for the virtual environment.",
+        "It manages the color grading and post-processing effects."
+      ],
+      "correct_index": 0,
+      "explanation": "Live Link enables the virtual camera to dynamically track the real-world camera's focus, iris, and zoom settings, ensuring a consistent and realistic look."
+    },
+    {
+      "question": "What happens if the sensor dimensions in the lens file do not match the physical camera's sensor dimensions?",
+      "options": [
+        "The field of view and perspective will be misrepresented, leading to visual inconsistencies.",
+        "The rendering performance will be significantly reduced.",
+        "The virtual camera will be unable to track the real-world camera's movements.",
+        "The lighting and shading of virtual objects will be incorrect."
+      ],
+      "correct_index": 0,
+      "explanation": "Incorrect sensor dimensions will result in a misrepresentation of the scene's scale and depth, leading to visual inconsistencies and a loss of realism."
+    },
+    {
+      "question": "Why is it important to select the correct lens file for the camera actor in Unreal Engine?",
+      "options": [
+        "To activate the lens distortion correction and other calibration parameters.",
+        "To control the movement speed of the virtual camera.",
+        "To adjust the brightness and contrast of the virtual scene.",
+        "To manage the audio levels in the virtual environment."
+      ],
+      "correct_index": 0,
+      "explanation": "Assigning the lens file to the camera actor enables the lens distortion correction and other calibration parameters, ensuring that the virtual camera accurately replicates the real-world camera's behavior."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 3,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

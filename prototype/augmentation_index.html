@@ -244,6 +244,53 @@
       color:var(--dim); margin:2px;
     }
 
+    /* ---- TOOLTIPS ---- */
+    [data-tip] {
+      position:relative; cursor:help;
+    }
+    [data-tip]::after {
+      content:attr(data-tip);
+      position:absolute; bottom:calc(100% + 8px); left:50%;
+      transform:translateX(-50%); padding:10px 14px;
+      background:#1a2744; border:1px solid rgba(255,255,255,0.12);
+      border-radius:8px; font-size:12px; font-weight:400;
+      color:var(--dim); line-height:1.5; white-space:normal;
+      width:max-content; max-width:280px;
+      pointer-events:none; opacity:0;
+      transition:opacity 0.15s; z-index:100;
+      box-shadow:0 8px 24px rgba(0,0,0,0.4);
+      font-family:'Inter',sans-serif; text-transform:none;
+      letter-spacing:normal;
+    }
+    [data-tip]:hover::after { opacity:1; }
+    /* Tooltip arrow */
+    [data-tip]::before {
+      content:''; position:absolute;
+      bottom:calc(100% + 3px); left:50%;
+      transform:translateX(-50%);
+      border:5px solid transparent;
+      border-top-color:#1a2744;
+      opacity:0; transition:opacity 0.15s;
+      z-index:101;
+    }
+    [data-tip]:hover::before { opacity:1; }
+    /* For elements near the bottom, put tooltip below */
+    [data-tip-dir="down"]::after {
+      bottom:auto; top:calc(100% + 8px);
+    }
+    [data-tip-dir="down"]::before {
+      bottom:auto; top:calc(100% + 3px);
+      border-top-color:transparent;
+      border-bottom-color:#1a2744;
+    }
+    .tip-icon {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:14px; height:14px; border-radius:50%;
+      background:rgba(255,255,255,0.06); color:var(--muted);
+      font-size:9px; font-weight:700; margin-left:4px;
+      flex-shrink:0;
+    }
+
     .loading { display:flex; align-items:center; justify-content:center; height:60vh; flex-direction:column; gap:16px; }
     .spinner { width:36px; height:36px; border:3px solid rgba(255,255,255,0.1); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
     @keyframes spin { to{transform:rotate(360deg);} }
@@ -284,38 +331,42 @@ function render(data){
       <h1>Augmentation Dashboard</h1>
       <p class="subtitle">AI-generated conceptual analysis of <strong>${n} Unreal Engine tutorial videos</strong>. Each video is evaluated against 11 pedagogical criteria to identify where conceptual depth is missing.</p>
       <div class="hero-stats">
-        <div class="hero-stat"><div class="icon" style="background:rgba(59,130,246,0.1)">🎬</div><div><div class="val" style="color:var(--accent)">${n}</div><div class="lbl">Videos Analyzed</div></div></div>
-        <div class="hero-stat"><div class="icon" style="background:rgba(245,158,11,0.1)">📊</div><div><div class="val" style="color:var(--yellow)">${o.avg_score}<span style="font-size:12px;color:var(--muted)">/55</span></div><div class="lbl">Average Score</div></div></div>
-        <div class="hero-stat"><div class="icon" style="background:rgba(239,68,68,0.1)">⚠️</div><div><div class="val" style="color:var(--red)">${o.verdict_distribution.NEEDS_AUGMENTATION||0}</div><div class="lbl">Need Augmentation</div></div></div>
-        <div class="hero-stat"><div class="icon" style="background:rgba(16,185,129,0.1)">✅</div><div><div class="val" style="color:var(--green)">${(o.verdict_distribution.ADEQUATE||0)+(o.verdict_distribution.STRONG||0)}</div><div class="lbl">Adequate or Strong</div></div></div>
+        <div class="hero-stat" data-tip="Total UE5 tutorial videos that have been analyzed by the AI augmentation pipeline." data-tip-dir="down"><div class="icon" style="background:rgba(59,130,246,0.1)">🎬</div><div><div class="val" style="color:var(--accent)">${n}</div><div class="lbl">Videos Analyzed</div></div></div>
+        <div class="hero-stat" data-tip="Mean score across all 11 evaluation criteria (each rated 1-5). Scores below 33 indicate significant conceptual gaps. Target: 40+/55." data-tip-dir="down"><div class="icon" style="background:rgba(245,158,11,0.1)">📊</div><div><div class="val" style="color:var(--yellow)">${o.avg_score}<span style="font-size:12px;color:var(--muted)">/55</span></div><div class="lbl">Average Score</div></div></div>
+        <div class="hero-stat" data-tip="Videos scoring below 33/55 that are mostly procedural with little or no conceptual explanation. These benefit most from augmentation." data-tip-dir="down"><div class="icon" style="background:rgba(239,68,68,0.1)">⚠️</div><div><div class="val" style="color:var(--red)">${o.verdict_distribution.NEEDS_AUGMENTATION||0}</div><div class="lbl">Need Augmentation</div></div></div>
+        <div class="hero-stat" data-tip="Videos scoring 33+ that already include meaningful conceptual content. These may need minor enhancements rather than full augmentation." data-tip-dir="down"><div class="icon" style="background:rgba(16,185,129,0.1)">✅</div><div><div class="val" style="color:var(--green)">${(o.verdict_distribution.ADEQUATE||0)+(o.verdict_distribution.STRONG||0)}</div><div class="lbl">Adequate or Strong</div></div></div>
       </div>
     </div></div>
 
     <div class="content">
-      <div class="section-heading">Grade Distribution</div>
+      <div class="section-heading">Grade Distribution <span class="tip-icon" data-tip="Grades are based on the 11-criteria Evaluation Matrix. A (45-55): Excellent conceptual depth. B (39-44): Good with minor gaps. C (33-38): Some conceptual content. D (22-32): Mostly procedural. F (11-21): Almost entirely step-by-step.">?</span></div>
       <div class="grade-row">
-        ${['A','B','C','D','F'].map(g=>{const cnt=o.grade_distribution[g]||0;const pct=n?Math.round(cnt/n*100):0;const barH=Math.max(cnt/maxGrade*50,3);return `<div class="grade-card gc-${g}"><div class="bar-bg" style="height:${barH}px"></div><div class="letter">${g}</div><div class="cnt">${cnt}</div><div class="pct">${pct}%</div></div>`;}).join('')}
+        ${['A','B','C','D','F'].map(g=>{
+          const tips={A:'Excellent! Explains WHY before HOW. Minimal augmentation needed.',B:'Good conceptual coverage. Small augmentations would make it outstanding.',C:'Some conceptual content exists but significant gaps remain.',D:'Mostly procedural. Learners can follow steps but won\'t understand underlying principles.',F:'Almost entirely step-by-step with no conceptual framing. Highest priority for augmentation.'};
+          const cnt=o.grade_distribution[g]||0;const pct=n?Math.round(cnt/n*100):0;const barH=Math.max(cnt/maxGrade*50,3);
+          return `<div class="grade-card gc-${g}" data-tip="${tips[g]}" data-tip-dir="down"><div class="bar-bg" style="height:${barH}px"></div><div class="letter">${g}</div><div class="cnt">${cnt}</div><div class="pct">${pct}%</div></div>`;
+        }).join('')}
       </div>
 
       <div class="section-heading">Content Insights</div>
       <div class="insights-grid">
         <div class="insight-card">
-          <div class="heading">📐 Avg Ratio</div>
-          <div style="display:flex;gap:16px;"><div><div class="big" style="color:var(--orange)">${o.avg_procedural_pct}%</div><div class="note">Procedural</div></div><div><div class="big" style="color:var(--cyan)">${o.avg_conceptual_pct}%</div><div class="note">Conceptual</div></div></div>
+          <div class="heading">📐 Avg Ratio <span class="tip-icon" data-tip="Procedural = 'click here, drag there' instruction. Conceptual = explaining WHY something works. Research shows ≥40% conceptual content leads to better transfer and retention.">?</span></div>
+          <div style="display:flex;gap:16px;"><div data-tip="Percentage of content that is step-by-step instruction without explanation. High procedural % means learners can copy but not adapt." data-tip-dir="down"><div class="big" style="color:var(--orange)">${o.avg_procedural_pct}%</div><div class="note">Procedural</div></div><div data-tip="Percentage of content that explains underlying concepts, architecture, or reasoning. Higher = better learning outcomes." data-tip-dir="down"><div class="big" style="color:var(--cyan)">${o.avg_conceptual_pct}%</div><div class="note">Conceptual</div></div></div>
           <div class="insight-bar"><div style="width:${o.avg_procedural_pct}%;background:var(--orange);border-radius:3px 0 0 3px;"></div><div style="width:${o.avg_conceptual_pct}%;background:var(--cyan);border-radius:0 3px 3px 0;"></div></div>
           <div class="note" style="margin-top:6px;">Target: ≥40% conceptual</div>
         </div>
         <div class="insight-card">
-          <div class="heading">🧠 Augmentations</div>
+          <div class="heading">🧠 Augmentations <span class="tip-icon" data-tip="AI-generated content overlays suggested for insertion into existing videos. These address the R&D pillars: inverting the procedural/conceptual ratio, managing cognitive load, and promoting active learning.">?</span></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-            <div><div class="big" style="color:var(--purple)">${o.total_theory_breaks}</div><div class="note">Theory Breaks</div></div>
-            <div><div class="big" style="color:var(--accent)">${o.total_why_annotations}</div><div class="note">Why Annotations</div></div>
-            <div><div class="big" style="color:var(--cyan)">${o.total_prompts}</div><div class="note">Think Prompts</div></div>
-            <div><div class="big" style="color:var(--orange)">${o.total_warnings}</div><div class="note">Warnings</div></div>
+            <div data-tip="Conceptual pause points where the AI suggests inserting a brief explanation of the underlying UE5 subsystem before continuing. Addresses Pillar 1 (Invert Ratio)." data-tip-dir="down"><div class="big" style="color:var(--purple)">${o.total_theory_breaks}</div><div class="note">Theory Breaks</div></div>
+            <div data-tip="Annotations that explain WHY a procedural step matters architecturally — covering engine-level consequences like memory, performance, or scalability." data-tip-dir="down"><div class="big" style="color:var(--accent)">${o.total_why_annotations}</div><div class="note">Why Annotations</div></div>
+            <div data-tip="Questions inserted after key moments that ask the learner to predict or reason before seeing the answer. Promotes deeper encoding per Pillar 2." data-tip-dir="down"><div class="big" style="color:var(--cyan)">${o.total_prompts}</div><div class="note">Think Prompts</div></div>
+            <div data-tip="Risky patterns the video demonstrates without warning — like hard-reference casting, physics constraint stretching, or NavMesh issues. Maps to Pillar 4 antipatterns." data-tip-dir="down"><div class="big" style="color:var(--orange)">${o.total_warnings}</div><div class="note">Warnings</div></div>
           </div>
         </div>
         <div class="insight-card">
-          <div class="heading">📘 Knowledge Gaps</div>
+          <div class="heading">📘 Knowledge Gaps <span class="tip-icon" data-tip="Prerequisites the video assumes the learner already understands but never explains. These are opportunities for supplementary content or prerequisite links.">?</span></div>
           <div><div class="big" style="color:var(--rose)">${o.total_prereqs}</div><div class="note">Missing prerequisites detected — concepts videos assume but never explain.</div></div>
         </div>
       </div>
@@ -346,14 +397,14 @@ function render(data){
 
       <table class="video-table">
         <thead><tr>
-          <th onclick="sortBy('grade')">Grade</th>
-          <th onclick="sortBy('score')">Score</th>
+          <th onclick="sortBy('grade')" data-tip="Letter grade based on total evaluation score across 11 criteria. A=45-55, B=39-44, C=33-38, D=22-32, F=11-21." data-tip-dir="down">Grade</th>
+          <th onclick="sortBy('score')" data-tip="Sum of all 11 evaluation criteria, each rated 1-5. Maximum possible: 55 points." data-tip-dir="down">Score</th>
           <th onclick="sortBy('title')">Video</th>
-          <th onclick="sortBy('verdict')">Verdict</th>
-          <th>Ratio</th>
-          <th onclick="sortBy('theory_breaks')" title="Theory Breaks">🧠</th>
-          <th onclick="sortBy('why_annotations')" title="Why Annotations">💡</th>
-          <th onclick="sortBy('warnings')" title="Warnings">⚠️</th>
+          <th onclick="sortBy('verdict')" data-tip="Overall assessment: NEEDS AUGMENTATION (score < 33), ADEQUATE (33-44), or STRONG (45+)." data-tip-dir="down">Verdict</th>
+          <th data-tip="Orange = procedural (step-by-step). Cyan = conceptual (explains why). Wider cyan = better." data-tip-dir="down">Ratio</th>
+          <th onclick="sortBy('theory_breaks')" data-tip="Theory Breaks: Conceptual pause points the AI suggests inserting. Higher count = more gaps identified." data-tip-dir="down">🧠</th>
+          <th onclick="sortBy('why_annotations')" data-tip="Why Annotations: Explanations of WHY each procedural step matters architecturally." data-tip-dir="down">💡</th>
+          <th onclick="sortBy('warnings')" data-tip="Architectural Warnings: Risky patterns shown without warning (e.g., hard-reference casting, NavMesh issues)." data-tip-dir="down">⚠️</th>
         </tr></thead>
         <tbody id="videoRows"></tbody>
       </table>
@@ -426,11 +477,11 @@ function renderDetailCard(row, data, key){
     </div>
 
     <div class="detail-stats">
-      <div class="detail-stat"><div class="dv" style="color:var(--orange)">${cs.procedural_pct||0}%</div><div class="dl">Procedural</div></div>
-      <div class="detail-stat"><div class="dv" style="color:var(--cyan)">${cs.conceptual_pct||0}%</div><div class="dl">Conceptual</div></div>
-      <div class="detail-stat"><div class="dv" style="color:var(--purple)">${tb.length}</div><div class="dl">Theory Breaks</div></div>
-      <div class="detail-stat"><div class="dv" style="color:var(--accent)">${wa.length}</div><div class="dl">Why Annotations</div></div>
-      <div class="detail-stat"><div class="dv" style="color:var(--orange)">${aw.length}</div><div class="dl">Warnings</div></div>
+      <div class="detail-stat" data-tip="How much of this video is 'click here, drag there' instruction without conceptual explanation." data-tip-dir="down"><div class="dv" style="color:var(--orange)">${cs.procedural_pct||0}%</div><div class="dl">Procedural</div></div>
+      <div class="detail-stat" data-tip="How much of this video explains WHY things work, not just HOW to do them. Target: ≥40%." data-tip-dir="down"><div class="dv" style="color:var(--cyan)">${cs.conceptual_pct||0}%</div><div class="dl">Conceptual</div></div>
+      <div class="detail-stat" data-tip="Conceptual pause points where a brief theory explanation should be inserted to help learners understand the underlying system." data-tip-dir="down"><div class="dv" style="color:var(--purple)">${tb.length}</div><div class="dl">Theory Breaks</div></div>
+      <div class="detail-stat" data-tip="Annotations explaining the engine-level consequences of each procedural step — covering performance, memory, and scalability impact." data-tip-dir="down"><div class="dv" style="color:var(--accent)">${wa.length}</div><div class="dl">Why Annotations</div></div>
+      <div class="detail-stat" data-tip="Risky patterns this video demonstrates without warning. Each warning includes the severity level and a recommended fix." data-tip-dir="down"><div class="dv" style="color:var(--orange)">${aw.length}</div><div class="dl">Warnings</div></div>
     </div>
 
     <div class="detail-columns">

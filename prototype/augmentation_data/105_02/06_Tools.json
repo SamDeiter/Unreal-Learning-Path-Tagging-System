@@ -1,0 +1,166 @@
+{
+  "course_code": "105.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:21",
+      "title": "Camera Actor Class Hierarchy",
+      "concept": "Explain the inheritance relationship between Actor, CameraActor, and CinematicCameraActor. How does this hierarchy influence the properties and functionalities available in each class?",
+      "diagram_suggestion": "UML diagram illustrating the inheritance hierarchy of CameraActor and its subclasses, highlighting key properties and methods inherited at each level."
+    },
+    {
+      "insert_after_timestamp": "1:58",
+      "title": "Sequencer Binding and Object Lifecycle",
+      "concept": "Clarify how Sequencer binds to objects in the level (possessable vs. spawnable) and the implications for object lifecycle management. How does Sequencer handle object destruction and garbage collection?",
+      "diagram_suggestion": "Flowchart illustrating the object binding process in Sequencer, differentiating between possessable and spawnable objects and their respective lifecycles."
+    },
+    {
+      "insert_after_timestamp": "2:52",
+      "title": "LiveLink Plugin Architecture",
+      "concept": "Explain the architecture of the LiveLink plugin and how it facilitates real-time data streaming from external sources (e.g., motion capture systems) into Unreal Engine. Detail the role of the VCam Actor in this process.",
+      "diagram_suggestion": "Block diagram illustrating the data flow within the LiveLink plugin, showing the interaction between external data sources, the LiveLink server, and the Unreal Engine client."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:11",
+      "procedural_step": "Using Cine Camera Actor for cinematic creation",
+      "why": "The Cine Camera Actor provides advanced controls (film back, lens settings, post-processing) crucial for achieving cinematic realism and artistic expression. These controls directly influence the final rendered image quality and aesthetic.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:53",
+      "procedural_step": "Camera Cuts track binds cameras to cuts",
+      "why": "The Camera Cuts track ensures seamless transitions between different camera perspectives within a sequence. Without it, the engine would not know which camera's viewpoint to render at any given time, resulting in a broken or undefined cinematic experience.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:13",
+      "procedural_step": "Scene Capture Component 2D captures live snapshot",
+      "why": "The Scene Capture Component 2D allows for dynamic rendering of the scene to a texture, enabling effects like reflections, surveillance monitors, or augmented reality overlays. This component provides a mechanism for feeding real-time visual data into materials and other systems.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:58",
+      "procedural_step": "Depth of field depends on film back, focal length, aperture",
+      "why": "These camera settings directly control the simulated optical properties of the lens and sensor. Altering these parameters affects the degree of blur in the background and foreground, influencing the viewer's focus and creating a sense of depth.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:19",
+      "procedural_step": "Look at tracking locks onto pivot point",
+      "why": "Look At tracking automates camera orientation, ensuring the camera remains focused on a specific subject, even as the subject moves. This simplifies complex camera movements and maintains visual continuity.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:32",
+      "prompt": "Why is the Game Camera Actor unsuitable for cinematic sequences?",
+      "expected_insight": "The Game Camera Actor lacks the fine-grained control over film back, lens, and post-processing effects needed for cinematic quality. It prioritizes performance and simplicity over visual fidelity."
+    },
+    {
+      "insert_after_timestamp": "1:21",
+      "prompt": "How does the diaphragm blade count affect the bokeh of an out-of-focus area?",
+      "expected_insight": "The diaphragm blade count influences the shape and appearance of the bokeh. More blades create rounder, smoother bokeh, while fewer blades result in more polygonal shapes."
+    },
+    {
+      "insert_after_timestamp": "2:38",
+      "prompt": "Why would you choose Cine Capture Component 2D over Scene Capture Component 2D?",
+      "expected_insight": "Cine Capture Component 2D offers cinematic camera features like post-processing and lens distortion, enabling more sophisticated visual effects compared to the basic Scene Capture Component 2D."
+    },
+    {
+      "insert_after_timestamp": "4:42",
+      "prompt": "How does changing the camera sensor size affect the resulting image?",
+      "expected_insight": "Altering the sensor size changes the field of view and depth of field. A larger sensor generally results in a shallower depth of field and a wider field of view for the same focal length."
+    },
+    {
+      "insert_after_timestamp": "6:08",
+      "prompt": "Why does a lower aperture number result in a shallower depth of field?",
+      "expected_insight": "A lower aperture number (e.g., f/1.4) corresponds to a wider lens opening, allowing more light to enter the camera. This reduces the depth of field, creating a more pronounced separation between the subject and the background."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine 5 editor interface.",
+    "Familiarity with level creation and asset placement.",
+    "Knowledge of basic animation principles and keyframing.",
+    "Understanding of post-processing effects and color grading concepts."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is the Cinematic Camera Actor preferred for film production over the Game Camera Actor?",
+      "options": [
+        "It offers more precise control over film back, lens settings, and post-processing.",
+        "It is more performant for real-time rendering.",
+        "It is easier to integrate with Blueprint scripting.",
+        "It is the default camera type in Unreal Engine 5."
+      ],
+      "correct_index": 0,
+      "explanation": "The Cinematic Camera Actor provides the fine-grained control needed for achieving cinematic realism, influencing the final rendered image quality and aesthetic."
+    },
+    {
+      "question": "What is the primary function of the Camera Cuts track in Sequencer?",
+      "options": [
+        "Binding specific cameras to edited cuts within the timeline.",
+        "Adjusting the post-processing settings of the camera.",
+        "Controlling the animation of the camera.",
+        "Managing the focus settings of the camera."
+      ],
+      "correct_index": 0,
+      "explanation": "The Camera Cuts track ensures seamless transitions between different camera perspectives within a sequence, telling the engine which camera's viewpoint to render."
+    },
+    {
+      "question": "How does the Scene Capture Component 2D contribute to dynamic visual effects?",
+      "options": [
+        "It captures a live snapshot of the scene and feeds it to a render target texture.",
+        "It automatically adjusts the camera's exposure settings.",
+        "It applies real-time color grading to the scene.",
+        "It generates depth-of-field effects."
+      ],
+      "correct_index": 0,
+      "explanation": "The Scene Capture Component 2D enables effects like reflections, surveillance monitors, or augmented reality overlays by rendering the scene to a texture."
+    },
+    {
+      "question": "What is the effect of using a lower aperture number (e.g., f/1.4) on the depth of field?",
+      "options": [
+        "It results in a shallower depth of field, blurring the background.",
+        "It increases the depth of field, making everything sharper.",
+        "It has no effect on the depth of field.",
+        "It only affects the brightness of the image."
+      ],
+      "correct_index": 0,
+      "explanation": "A lower aperture number corresponds to a wider lens opening, reducing the depth of field and creating a more pronounced separation between the subject and the background."
+    },
+    {
+      "question": "What is the purpose of 'Look At' tracking in the Cine Camera Actor?",
+      "options": [
+        "To automatically orient the camera towards a specified actor's pivot point.",
+        "To adjust the camera's focus distance based on the distance to an actor.",
+        "To apply post-processing effects to a specific actor.",
+        "To control the animation of an actor based on the camera's position."
+      ],
+      "correct_index": 0,
+      "explanation": "Look At tracking automates camera orientation, ensuring the camera remains focused on a specific subject, even as the subject moves, simplifying complex camera movements."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

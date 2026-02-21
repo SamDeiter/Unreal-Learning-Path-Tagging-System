@@ -1,0 +1,149 @@
+{
+  "course_code": "103.02",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:24",
+      "title": "Light Component Properties Deep Dive",
+      "concept": "Explain the underlying math behind light attenuation (Inverse Square Law), including the relationship between source radius, attenuation radius, and light intensity. Discuss how different light types (Point, Spot, Directional) implement these principles.",
+      "diagram_suggestion": "Interactive graph visualizing light intensity falloff based on distance and attenuation settings."
+    },
+    {
+      "insert_after_timestamp": "0:39",
+      "title": "Lumen Global Illumination Architecture",
+      "concept": "Detail the two-pass nature of Lumen: the Surface Cache and the Ray Tracing pass. Explain how Lumen handles reflections and how Screen Space Global Illumination (SSGI) contributes. Discuss the limitations of Lumen, such as light leaking and performance considerations on lower-end hardware.",
+      "diagram_suggestion": "Block diagram illustrating the data flow within the Lumen system, highlighting the Surface Cache and Ray Tracing components."
+    },
+    {
+      "insert_after_timestamp": "0:58",
+      "title": "Reflection System Internals",
+      "concept": "Explain how reflection probes work in conjunction with Lumen. Detail the difference between screen space reflections and ray-traced reflections. Discuss the performance implications of high reflection quality settings.",
+      "diagram_suggestion": "Visual comparison of screen space reflections vs. ray-traced reflections, highlighting artifacts and performance differences."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:20",
+      "procedural_step": "Covering lighting terminology and types",
+      "why": "Understanding lighting terminology is crucial because it directly impacts how you manipulate light properties within the Unreal Engine editor. Incorrect terminology can lead to misinterpreting the effect of parameters like 'Source Radius' or 'Attenuation Radius', resulting in unintended visual outcomes and wasted iteration time.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:33",
+      "procedural_step": "Control exposure",
+      "why": "Controlling exposure is essential because it simulates the human eye's adaptation to different lighting conditions. Incorrect exposure settings can lead to scenes that are either washed out or too dark, obscuring details and negatively impacting the perceived realism of the environment. This is controlled via the Camera settings and PostProcessVolume.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:39",
+      "procedural_step": "Taking a look at Lumen",
+      "why": "Lumen's dynamic global illumination system is the default in Unreal Engine 5 because it provides realistic lighting without the need for extensive pre-computation (light baking). However, understanding its limitations (e.g., light leaking, performance cost) is crucial for optimizing scenes and avoiding visual artifacts. Disabling Lumen can drastically improve performance on lower-end hardware, but at the cost of visual fidelity.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:58",
+      "procedural_step": "Lumen's reflection system",
+      "why": "Lumen's reflection system contributes significantly to the realism of scenes by simulating how light bounces off surfaces. Understanding the difference between Screen Space Reflections (SSR) and Ray Traced Reflections is crucial because SSR is cheaper but less accurate, while Ray Traced Reflections are more accurate but more expensive. Choosing the right reflection method is a trade-off between visual quality and performance.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:29",
+      "prompt": "Why is understanding light attenuation crucial for architectural visualization in Unreal Engine?",
+      "expected_insight": "Accurate light attenuation is essential for realistically simulating how light diminishes over distance, which is critical for creating believable interior and exterior scenes. Incorrect attenuation can lead to flat, unrealistic lighting."
+    },
+    {
+      "insert_after_timestamp": "0:43",
+      "prompt": "How does Lumen's dynamic global illumination differ from traditional light baking techniques, and what are the trade-offs?",
+      "expected_insight": "Lumen eliminates the need for pre-computed lighting, allowing for dynamic lighting changes and faster iteration. However, it comes with a performance cost and potential artifacts that need to be managed."
+    },
+    {
+      "insert_after_timestamp": "1:02",
+      "prompt": "In what scenarios would you prioritize screen space reflections over ray-traced reflections, and why?",
+      "expected_insight": "Screen space reflections are suitable for less critical reflections and when performance is a primary concern. Ray-traced reflections are preferred for high-quality reflections in visually prominent areas."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine editor interface.",
+    "Familiarity with creating and manipulating actors in the scene.",
+    "Basic knowledge of material creation and application."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Which light type in Unreal Engine 5 is most suitable for simulating sunlight?",
+      "options": [
+        "Directional Light",
+        "Point Light",
+        "Spot Light",
+        "Rect Light"
+      ],
+      "correct_index": 0,
+      "explanation": "Directional lights simulate light from a distant source, like the sun, by providing parallel light rays."
+    },
+    {
+      "question": "What is the primary function of the 'Attenuation Radius' parameter in a Point Light?",
+      "options": [
+        "Controls the intensity of the light.",
+        "Defines the distance at which the light's intensity starts to decrease.",
+        "Determines the color of the light.",
+        "Specifies the shadow casting behavior."
+      ],
+      "correct_index": 1,
+      "explanation": "The Attenuation Radius defines the distance over which the light's intensity falls off, simulating realistic light decay."
+    },
+    {
+      "question": "Which of the following best describes Lumen's global illumination system?",
+      "options": [
+        "A static lighting system that requires pre-computation.",
+        "A dynamic lighting system that updates in real-time.",
+        "A simplified lighting system for mobile platforms.",
+        "A legacy lighting system replaced by ray tracing."
+      ],
+      "correct_index": 1,
+      "explanation": "Lumen is a dynamic global illumination system that allows for real-time lighting updates without baking."
+    },
+    {
+      "question": "What is the main difference between Screen Space Reflections (SSR) and Ray Traced Reflections in Lumen?",
+      "options": [
+        "SSR is more accurate but more expensive.",
+        "Ray Traced Reflections are calculated only on the CPU.",
+        "SSR only reflects objects visible on the screen, while Ray Traced Reflections can reflect objects off-screen.",
+        "Ray Traced Reflections are faster to compute."
+      ],
+      "correct_index": 2,
+      "explanation": "SSR is limited to what's visible on the screen, while Ray Traced Reflections can accurately reflect objects even if they are not directly visible."
+    },
+    {
+      "question": "Why is exposure control important in Unreal Engine 5?",
+      "options": [
+        "To optimize the game's performance.",
+        "To simulate the human eye's adaptation to different lighting conditions.",
+        "To reduce the file size of the project.",
+        "To simplify the lighting setup process."
+      ],
+      "correct_index": 1,
+      "explanation": "Exposure control simulates how the human eye adjusts to varying light levels, ensuring a visually comfortable and realistic experience."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 4,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 26,
+    "grade": "D"
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "course_code": "227.06",
+  "conceptual_score": {
+    "procedural_pct": 90,
+    "conceptual_pct": 10,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:11",
+      "title": "Material Instance Parameters and HLSL Shaders",
+      "concept": "Material Instances allow dynamic modification of material properties without recompiling the base material. This is achieved by overriding parameters defined in the base material's HLSL shader code. Understanding the shader code is crucial for optimizing material performance and customization.",
+      "diagram_suggestion": "Diagram showing the relationship between a base material, its HLSL shader, and multiple material instances, highlighting the overridable parameters."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:11",
+      "procedural_step": "Changing material parameters",
+      "why": "Modifying material parameters at runtime allows for dynamic visual effects and UI customization without incurring the performance cost of recompiling materials. This leverages the Material Instance system to efficiently update shader constants on the GPU.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:17",
+      "procedural_step": "Using blueprint inputs to drive material parameters",
+      "why": "Connecting blueprint variables to material parameters enables interactive UI elements. Changes in the blueprint are propagated to the material instance, updating the rendered appearance. This is more efficient than recreating materials from scratch.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:17",
+      "prompt": "Why is it more performant to modify a Material Instance Constant via Blueprint than to create a new Material each frame?",
+      "expected_insight": "Material Instances pre-compile the shader, only updating parameter values. Creating a new material requires shader compilation, which is a very expensive operation."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine Material Editor",
+    "Familiarity with Blueprint scripting",
+    "Knowledge of HLSL shader language (recommended)"
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary benefit of using Material Instances over directly modifying base materials at runtime?",
+      "options": [
+        "Reduced shader compilation overhead.",
+        "Increased code readability.",
+        "Simplified blueprint logic.",
+        "Enhanced artistic control."
+      ],
+      "correct_index": 0,
+      "explanation": "Material Instances avoid recompiling the shader, leading to significant performance gains, especially when modifying materials frequently."
+    },
+    {
+      "question": "How do Material Parameter Collections improve workflow in large projects?",
+      "options": [
+        "Centralized management of material parameters.",
+        "Automatic material instance creation.",
+        "Simplified shader debugging.",
+        "Enhanced rendering performance."
+      ],
+      "correct_index": 0,
+      "explanation": "Material Parameter Collections provide a single point of control for parameters used across multiple materials, simplifying adjustments and ensuring consistency."
+    },
+    {
+      "question": "What is the role of HLSL (High-Level Shading Language) in the context of Unreal Engine materials?",
+      "options": [
+        "Defining the visual appearance and behavior of materials.",
+        "Managing asset dependencies.",
+        "Optimizing blueprint execution.",
+        "Creating user interfaces."
+      ],
+      "correct_index": 0,
+      "explanation": "HLSL is used to write the shader code that determines how a material interacts with light and other properties to produce its final appearance."
+    },
+    {
+      "question": "What happens when a parameter in a Material Instance Constant is changed?",
+      "options": [
+        "The base material is recompiled.",
+        "Only the specific shader instructions related to that parameter are updated.",
+        "A new material is created.",
+        "The entire scene is re-rendered."
+      ],
+      "correct_index": 1,
+      "explanation": "Only the shader instructions associated with the modified parameter are updated, making it a very efficient process."
+    },
+    {
+      "question": "Why should you avoid complex calculations directly within a material's shader code?",
+      "options": [
+        "They can negatively impact rendering performance.",
+        "They are difficult to debug.",
+        "They are not supported by the engine.",
+        "They increase project file size."
+      ],
+      "correct_index": 0,
+      "explanation": "Complex calculations in shader code can become a bottleneck, especially on lower-end hardware. Offload calculations to Blueprints or C++ where possible."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 1,
+    "strict_segmentation": 2,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 21,
+    "grade": "F"
+  }
+}

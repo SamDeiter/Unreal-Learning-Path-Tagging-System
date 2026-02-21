@@ -1,0 +1,190 @@
+{
+  "course_code": "100.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:08",
+      "title": "Widget Composition vs. Inheritance",
+      "concept": "UMG leverages composition over inheritance for UI element construction. Understanding the implications of this design choice on widget reusability and customization is crucial.",
+      "diagram_suggestion": "A diagram illustrating the difference between a deep inheritance hierarchy and a flat composition-based structure, highlighting the flexibility of the latter in UMG."
+    },
+    {
+      "insert_after_timestamp": "0:29",
+      "title": "Slate Framework Foundation",
+      "concept": "UMG is built on top of the Slate framework, Unreal Engine's native UI system. Slate uses immediate-mode rendering, which impacts performance considerations when designing complex UIs.",
+      "diagram_suggestion": "A simplified diagram showing the relationship between Slate and UMG, emphasizing the immediate-mode rendering pipeline and its implications for UI performance."
+    },
+    {
+      "insert_after_timestamp": "1:58",
+      "title": "Source Control Integration for UMG Assets",
+      "concept": "UMG assets, like Blueprints, are text-based and diffable, facilitating collaboration and version control. Understanding how to resolve merge conflicts in UMG assets is essential for team-based projects.",
+      "diagram_suggestion": "A visual representation of a merge conflict scenario in a UMG asset, demonstrating how to identify and resolve conflicting changes."
+    },
+    {
+      "insert_after_timestamp": "2:53",
+      "title": "Widget Lifecycle and Garbage Collection",
+      "concept": "UMG widgets are UObjects and subject to Unreal Engine's garbage collection. Understanding the widget lifecycle (creation, initialization, visibility, destruction) is critical to prevent memory leaks and ensure proper resource management.",
+      "diagram_suggestion": "A state diagram illustrating the lifecycle of a UMG widget, highlighting key events and their impact on memory management."
+    },
+    {
+      "insert_after_timestamp": "5:31",
+      "title": "Data Binding and Event Dispatching",
+      "concept": "UMG supports data binding and event dispatching, enabling dynamic UI updates and communication between widgets and game logic. Understanding these mechanisms is crucial for creating responsive and interactive UIs.",
+      "diagram_suggestion": "A diagram illustrating the flow of data and events between UMG widgets and game objects, highlighting the role of data binding and event dispatchers."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:16",
+      "procedural_step": "UMG contains a designer and a graph",
+      "why": "Separating design (visual layout) from logic (behavior) promotes modularity. Changes to the UI's appearance don't require recompiling the game logic, and vice versa, improving iteration speed.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:48",
+      "procedural_step": "Diff allows us to compare two different Widget Blueprints",
+      "why": "Diffing UMG assets is crucial for collaborative workflows. Because UMG assets are stored as text, source control systems can track changes and highlight conflicts, preventing data loss and streamlining team development.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:27",
+      "procedural_step": "Widget Reflector is a great tool for diagnosing live widgets.",
+      "why": "The Widget Reflector provides runtime introspection of UMG widgets. This is essential for debugging complex UI interactions, identifying performance bottlenecks, and verifying data bindings in a live game environment.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:23",
+      "procedural_step": "Add a Canvas panel.",
+      "why": "The Canvas Panel provides absolute positioning of child widgets. While flexible, overuse can lead to UI scaling issues across different screen resolutions. Consider using other panels like Vertical/Horizontal Boxes for responsive layouts.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:42",
+      "procedural_step": "On clicked, now I can pull off of this and do something like print and I could do a print string.",
+      "why": "Event-driven programming allows UI interactions to trigger game logic. However, directly embedding gameplay code within UMG graphs can lead to tight coupling and reduced maintainability. Use event dispatchers to decouple UI events from game logic.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:57",
+      "prompt": "Why is 'UserWidget' the most common parent class for UMG?",
+      "expected_insight": "UserWidget provides the base functionality for all UMG widgets, including rendering, input handling, and lifecycle management. It's the foundation upon which all custom UI elements are built."
+    },
+    {
+      "insert_after_timestamp": "3:19",
+      "prompt": "Why is the Palette more frequently used than the Library?",
+      "expected_insight": "The Palette contains core, pre-built widgets (buttons, text boxes, etc.) essential for constructing most UIs. The Library is for custom or less frequently used widgets."
+    },
+    {
+      "insert_after_timestamp": "4:45",
+      "prompt": "Why are events in the Details panel context-sensitive?",
+      "expected_insight": "Each widget type exposes different events relevant to its functionality. A button has 'OnClicked', while a slider has 'OnValueChanged'. This context sensitivity reduces cognitive load by only showing relevant options."
+    },
+    {
+      "insert_after_timestamp": "5:24",
+      "prompt": "Why does clicking an event in the Details panel automatically switch to the Graph view?",
+      "expected_insight": "This behavior streamlines the workflow by directly linking UI elements to their corresponding event handlers in the Blueprint graph, facilitating rapid prototyping and development."
+    },
+    {
+      "insert_after_timestamp": "6:18",
+      "prompt": "Why is manually adding the widget to the viewport required?",
+      "expected_insight": "UMG widgets are not automatically displayed. They need to be explicitly added to the viewport to control their visibility and layering within the game world, providing flexibility in UI management."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:23",
+      "warning": "Over-reliance on Canvas Panels for UI layout can lead to scaling issues across different screen resolutions.",
+      "severity": "MEDIUM",
+      "fix": "Use a combination of size boxes, anchors, and other layout panels (Horizontal Box, Vertical Box, Grid Panel) to create responsive UIs that adapt to different screen sizes."
+    },
+    {
+      "timestamp": "5:42",
+      "warning": "Embedding complex game logic directly within UMG event graphs can lead to tight coupling and reduced maintainability.",
+      "severity": "HIGH",
+      "fix": "Use Event Dispatchers to decouple UI events from game logic. Define custom events in your game objects and bind them to UI events in the UMG graph. This promotes modularity and reusability."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic Blueprint scripting knowledge",
+    "Understanding of Unreal Engine's object model (UObjects)",
+    "Familiarity with the Content Browser and Editor interface"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally better to use layout panels (like Horizontal Box or Vertical Box) instead of relying solely on Canvas Panels for UMG design?",
+      "options": [
+        "Layout panels automatically handle UI scaling across different screen resolutions, while Canvas Panels require manual adjustments.",
+        "Canvas Panels are deprecated and no longer supported in Unreal Engine 5.",
+        "Layout panels offer better performance than Canvas Panels.",
+        "Canvas Panels cannot contain interactive elements like buttons or sliders."
+      ],
+      "correct_index": 0,
+      "explanation": "Layout panels provide automatic scaling and arrangement of UI elements, ensuring a consistent look across various screen sizes. Canvas Panels require manual positioning, which can lead to scaling issues."
+    },
+    {
+      "question": "What is the primary benefit of using Event Dispatchers when handling UI interactions in UMG?",
+      "options": [
+        "To decouple UI events from game logic, promoting modularity and reusability.",
+        "To improve the performance of UI animations.",
+        "To automatically save UI changes to disk.",
+        "To create complex UI layouts with minimal effort."
+      ],
+      "correct_index": 0,
+      "explanation": "Event Dispatchers allow UI events to trigger actions in other parts of the game without creating direct dependencies, making the code more maintainable and reusable."
+    },
+    {
+      "question": "UMG is built upon which underlying framework within Unreal Engine 5?",
+      "options": [
+        "Slate",
+        "Paper2D",
+        "Niagara",
+        "Chaos"
+      ],
+      "correct_index": 0,
+      "explanation": "UMG is built on top of the Slate framework, Unreal Engine's native UI system. Slate handles the low-level rendering and input processing for UMG widgets."
+    },
+    {
+      "question": "What is the purpose of the Widget Reflector tool in Unreal Engine 5?",
+      "options": [
+        "To diagnose and debug live UMG widgets during gameplay.",
+        "To automatically generate UMG widgets from code.",
+        "To optimize the performance of UMG widgets.",
+        "To convert UMG widgets to different file formats."
+      ],
+      "correct_index": 0,
+      "explanation": "The Widget Reflector allows developers to inspect the properties and state of UMG widgets at runtime, aiding in debugging and troubleshooting UI issues."
+    },
+    {
+      "question": "Why is understanding the widget lifecycle important when working with UMG?",
+      "options": [
+        "To prevent memory leaks and ensure proper resource management.",
+        "To improve the performance of UI animations.",
+        "To simplify the creation of complex UI layouts.",
+        "To enable hot-reloading of UI changes during development."
+      ],
+      "correct_index": 0,
+      "explanation": "Understanding the widget lifecycle (creation, initialization, visibility, destruction) is critical to prevent memory leaks and ensure proper resource management, as UMG widgets are UObjects subject to garbage collection."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 4,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 26,
+    "grade": "D"
+  }
+}

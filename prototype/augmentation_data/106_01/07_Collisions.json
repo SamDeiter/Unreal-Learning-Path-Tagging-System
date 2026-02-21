@@ -1,0 +1,172 @@
+{
+  "course_code": "106.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:08",
+      "title": "Collision Channels and Object Types",
+      "concept": "Unreal Engine uses Collision Channels and Object Types to determine how different objects interact. Understanding these settings is crucial for controlling which objects block, overlap, or ignore each other.",
+      "diagram_suggestion": "A diagram illustrating the relationship between Collision Channels, Object Types, and Collision Presets, showing how they influence collision behavior."
+    },
+    {
+      "insert_after_timestamp": "0:48",
+      "title": "Physics Asset Editor",
+      "concept": "The Physics Asset Editor allows for detailed control over collision shapes for Skeletal Meshes. It enables the creation of complex collision setups beyond simple convex hulls.",
+      "diagram_suggestion": "Screenshot of the Physics Asset Editor, highlighting the various tools for creating and adjusting collision primitives."
+    },
+    {
+      "insert_after_timestamp": "3:53",
+      "title": "Collision Complexity Settings",
+      "concept": "The 'Collision Complexity' setting determines how the engine calculates collisions. 'Use Complex Collision as Simple' is computationally expensive but provides accurate collisions. Understanding the trade-offs is essential for performance optimization.",
+      "diagram_suggestion": "A comparison chart showing the performance impact and accuracy of different Collision Complexity settings (Project Default, Use Simple Collision, Use Complex Collision as Simple)."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:11",
+      "procedural_step": "Generating missing collisions",
+      "why": "Generating collisions allows the engine's physics system to calculate interactions between objects, preventing characters from passing through walls and enabling gameplay mechanics that rely on physical interactions. Without collisions, there would be no world interaction.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:38",
+      "procedural_step": "Keeping collisions as simple as possible",
+      "why": "Simpler collision geometry reduces the computational cost of collision detection. Complex collisions require more calculations per frame, impacting performance, especially with many objects or on lower-end hardware. This is crucial for maintaining a smooth frame rate.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:05",
+      "procedural_step": "Using UCX naming convention",
+      "why": "The 'UCX_' prefix tells Unreal Engine to import the mesh as a collision primitive. Without this prefix, the engine will treat the mesh as regular geometry, ignoring its collision properties. This is how the engine distinguishes collision meshes from visual meshes.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:50",
+      "procedural_step": "Using complex collision as simple",
+      "why": "Using 'complex collision as simple' forces the engine to use the high-resolution mesh for collision, resulting in very precise but extremely expensive collision checks. This can lead to significant performance drops, especially with complex meshes, because every triangle must be tested for intersection.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:58",
+      "procedural_step": "Saving the new colliders",
+      "why": "Saving the new colliders updates the collision data for the static mesh. The engine will now use these capsules for collision detection, influencing how characters and other objects interact with the column. This allows for custom collision behavior tailored to specific gameplay needs.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:27",
+      "prompt": "Why would you choose manual collision setup over automatically generated collisions?",
+      "expected_insight": "Manual setup allows for optimization by excluding unnecessary collision areas, improving performance. It also allows for more precise control over collision behavior."
+    },
+    {
+      "insert_after_timestamp": "2:14",
+      "prompt": "How does the complexity of collision geometry affect performance, and what strategies can you use to mitigate performance issues?",
+      "expected_insight": "More complex collision geometry requires more processing power. Strategies include using simpler shapes, reducing the number of collision primitives, and using collision channels to filter interactions."
+    },
+    {
+      "insert_after_timestamp": "3:25",
+      "prompt": "What are the advantages and disadvantages of importing collision data from a DCC tool versus generating it within Unreal Engine?",
+      "expected_insight": "DCC tools offer greater control over collision shape and optimization, while Unreal Engine's auto-generation is faster but may be less precise or efficient."
+    },
+    {
+      "insert_after_timestamp": "4:27",
+      "prompt": "Why is it generally a bad idea to use 'Use Complex Collision As Simple'?",
+      "expected_insight": "It bypasses the simplified collision system, forcing the engine to perform collision checks against every triangle of the visible mesh. This is extremely expensive and should only be used in very specific, performance-insensitive cases."
+    },
+    {
+      "insert_after_timestamp": "5:31",
+      "prompt": "How do collision channels and object types affect the way different objects interact with each other in the game world?",
+      "expected_insight": "Collision channels and object types define which objects can collide with each other, allowing for fine-grained control over interactions and preventing unnecessary collision checks."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:50",
+      "warning": "Using 'Use Complex Collision As Simple' can lead to significant performance bottlenecks, especially with detailed meshes. This forces the engine to perform collision checks against the high-resolution mesh, bypassing the simplified collision system.",
+      "severity": "HIGH",
+      "fix": "Use simpler collision primitives or automatically generated convex hulls instead. Optimize the mesh geometry if necessary."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of 3D modeling concepts",
+    "Familiarity with the Unreal Engine editor interface",
+    "Knowledge of Static Meshes and Actors"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally recommended to use simple collision geometry?",
+      "options": [
+        "To reduce the computational cost of collision detection.",
+        "To make the game look more visually appealing.",
+        "To increase the accuracy of collision events.",
+        "To simplify the level design process."
+      ],
+      "correct_index": 0,
+      "explanation": "Simpler collision geometry reduces the computational cost of collision detection, improving performance."
+    },
+    {
+      "question": "What is the purpose of the 'UCX_' prefix when importing collision meshes?",
+      "options": [
+        "It identifies the mesh as a lightmap.",
+        "It tells Unreal Engine to import the mesh as a collision primitive.",
+        "It optimizes the mesh for Nanite.",
+        "It applies a specific material to the mesh."
+      ],
+      "correct_index": 1,
+      "explanation": "The 'UCX_' prefix signals to Unreal Engine that the mesh should be imported as a collision primitive."
+    },
+    {
+      "question": "What is the primary drawback of using 'Use Complex Collision As Simple'?",
+      "options": [
+        "It significantly increases the computational cost of collision detection.",
+        "It reduces the accuracy of collision events.",
+        "It prevents the use of custom collision meshes.",
+        "It disables physics simulations."
+      ],
+      "correct_index": 0,
+      "explanation": "Using 'Use Complex Collision As Simple' forces the engine to perform collision checks against the high-resolution mesh, leading to a significant performance hit."
+    },
+    {
+      "question": "Which of the following is NOT a benefit of manually creating collision geometry?",
+      "options": [
+        "Improved performance compared to complex auto-generated collision.",
+        "Greater control over the shape and accuracy of collisions.",
+        "Reduced development time compared to auto-generation.",
+        "Ability to exclude unnecessary collision areas."
+      ],
+      "correct_index": 2,
+      "explanation": "Manually creating collision geometry generally takes more development time than auto-generation."
+    },
+    {
+      "question": "How do collision channels affect collision behavior?",
+      "options": [
+        "They determine which objects can collide with each other.",
+        "They control the visual appearance of collision meshes.",
+        "They optimize the physics simulation.",
+        "They define the level of detail for collision geometry."
+      ],
+      "correct_index": 0,
+      "explanation": "Collision channels define which objects can collide with each other, allowing for fine-grained control over interactions."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 27,
+    "grade": "D"
+  }
+}

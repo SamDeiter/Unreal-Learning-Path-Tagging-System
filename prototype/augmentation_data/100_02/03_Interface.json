@@ -1,0 +1,164 @@
+{
+  "course_code": "100.02",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "3:05",
+      "title": "Actor Component Composition",
+      "concept": "Actors are composed of Actor Components, each handling specific functionality (e.g., Static Mesh Component for visuals, Point Light Component for lighting). Understanding this composition is crucial for extending Actor behavior without monolithic classes.",
+      "diagram_suggestion": "A diagram showing an Actor as a box containing various Component boxes (StaticMeshComponent, PointLightComponent, etc.), with arrows indicating data flow and interaction."
+    },
+    {
+      "insert_after_timestamp": "4:40",
+      "title": "Details Panel & Reflection System",
+      "concept": "The Details panel leverages Unreal Engine's reflection system to expose Actor and Component properties for editing. This metadata-driven approach allows for dynamic UI generation and property manipulation at runtime.",
+      "diagram_suggestion": "A diagram illustrating the reflection system: a C++ class with UPROPERTY macros -> reflection data -> Details panel UI. Emphasize the automatic binding."
+    },
+    {
+      "insert_after_timestamp": "11:59",
+      "title": "Material Shading Models",
+      "concept": "The 'Lit' and 'Unlit' viewport modes demonstrate different material shading models. 'Lit' uses complex calculations involving lights and surface properties, while 'Unlit' only displays the base color, offering significant performance advantages in specific scenarios (e.g., UI elements).",
+      "diagram_suggestion": "A side-by-side comparison of the material graph for a 'Lit' material (complex, many nodes) versus an 'Unlit' material (simple, base color only). Highlight the performance implications."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "1:02",
+      "procedural_step": "Switching windows on/off",
+      "why": "UE5's modular editor design allows users to customize their workspace. Hiding/showing panels affects only the editor's layout, not the underlying project data or runtime performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:37",
+      "procedural_step": "Saving the level",
+      "why": "Saving a level serializes the current state of all Actors and their Components within that level to disk. This includes transforms, properties, and references to other assets. Failing to save can lead to lost progress and unexpected behavior.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:56",
+      "procedural_step": "Placing actors in the level",
+      "why": "Actors are the fundamental building blocks of a UE5 level. They encapsulate data and behavior. Placing an Actor instantiates a new object of that class in the world, consuming memory and potentially impacting performance depending on its complexity.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:44",
+      "procedural_step": "Details panel is contextual",
+      "why": "The Details panel dynamically displays properties based on the selected Actor or Component due to UE5's reflection system. This allows for a unified interface to modify diverse object types, but can become slow if many objects are selected simultaneously.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "11:49",
+      "procedural_step": "View mode settings",
+      "why": "Viewport view modes affect how the scene is rendered in the editor. 'Lit' mode uses the full rendering pipeline, while 'Unlit' and 'Wireframe' modes bypass certain stages for debugging or performance analysis. These modes do not affect the final packaged game.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "3:31",
+      "prompt": "Why does the 'Play' button launch the game within the editor, and what are the advantages/disadvantages of this approach compared to a standalone build?",
+      "expected_insight": "Playing in editor allows for rapid iteration and debugging, but may not accurately reflect the performance of a packaged game due to editor overhead. It also allows for live editing and inspection of variables."
+    },
+    {
+      "insert_after_timestamp": "6:05",
+      "prompt": "How does the viewport camera differ from a Camera Actor placed in the level, and why is it important to distinguish between them?",
+      "expected_insight": "The viewport camera is an editor-only tool for navigation, while a Camera Actor is a game object that defines the player's viewpoint during gameplay. Confusing them can lead to errors in level design and cinematic creation."
+    },
+    {
+      "insert_after_timestamp": "8:28",
+      "prompt": "Why is orbiting around an actor useful for level design, and how does it relate to the concept of 'composition' in scene creation?",
+      "expected_insight": "Orbiting allows for detailed inspection of an actor from all angles, which is crucial for ensuring proper placement and alignment within the scene's overall composition. It helps in understanding how different elements interact visually."
+    },
+    {
+      "insert_after_timestamp": "9:59",
+      "prompt": "Why are viewport bookmarks useful, and how could you use them to improve your workflow when working on a large open-world level?",
+      "expected_insight": "Bookmarks allow for quick navigation between key locations, saving time and reducing frustration. In open-world levels, they can be used to mark important landmarks, points of interest, or areas requiring further attention."
+    },
+    {
+      "insert_after_timestamp": "11:18",
+      "prompt": "Why does switching to orthographic view change the way the scene is rendered, and what are the benefits of using orthographic views for specific tasks?",
+      "expected_insight": "Orthographic views remove perspective, making it easier to align objects and measure distances accurately. They are particularly useful for UI design, architectural layouts, and debugging spatial relationships."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic 3D navigation concepts (translation, rotation, scaling)",
+    "Familiarity with common UI paradigms (menus, toolbars, panels)"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is understanding the Actor-Component model crucial in Unreal Engine 5?",
+      "options": [
+        "It allows for modular and reusable code.",
+        "It simplifies the process of creating complex animations.",
+        "It reduces the need for external plugins.",
+        "It automatically optimizes game performance."
+      ],
+      "correct_index": 0,
+      "explanation": "The Actor-Component model promotes modularity and reusability by allowing you to combine different components to create complex behaviors. This avoids monolithic classes and makes code easier to maintain and extend."
+    },
+    {
+      "question": "What is the primary function of the Details panel in the Unreal Engine 5 editor?",
+      "options": [
+        "To display the project's file structure.",
+        "To modify the properties of selected Actors and Components.",
+        "To manage the level's lighting settings.",
+        "To compile the game's source code."
+      ],
+      "correct_index": 1,
+      "explanation": "The Details panel allows you to view and modify the properties of selected Actors and Components, providing a contextual interface for adjusting their behavior and appearance. This is powered by UE5's reflection system."
+    },
+    {
+      "question": "How does the 'Unlit' viewport shading mode differ from the 'Lit' mode in terms of rendering?",
+      "options": [
+        "It calculates global illumination effects.",
+        "It only displays the base color of materials.",
+        "It simulates realistic shadows and reflections.",
+        "It uses ray tracing for enhanced visual fidelity."
+      ],
+      "correct_index": 1,
+      "explanation": "The 'Unlit' mode bypasses complex lighting calculations and only displays the base color (albedo) of materials, making it useful for debugging and optimizing performance, especially for UI elements."
+    },
+    {
+      "question": "What is the main advantage of using viewport bookmarks in Unreal Engine 5?",
+      "options": [
+        "They automatically save the level's geometry.",
+        "They allow for quick navigation between different locations in the level.",
+        "They optimize the game's rendering performance.",
+        "They create backups of the project's assets."
+      ],
+      "correct_index": 1,
+      "explanation": "Viewport bookmarks provide a convenient way to quickly jump between frequently visited locations in the level, saving time and improving workflow, especially in large or complex environments."
+    },
+    {
+      "question": "Why is it important to understand the difference between the viewport camera and a Camera Actor in Unreal Engine 5?",
+      "options": [
+        "The viewport camera controls the final rendered output of the game.",
+        "The viewport camera is only used for debugging purposes.",
+        "The Camera Actor defines the player's viewpoint during gameplay, while the viewport camera is an editor tool.",
+        "There is no functional difference between them."
+      ],
+      "correct_index": 2,
+      "explanation": "The Camera Actor determines what the player sees during gameplay, while the viewport camera is an editor-only tool for navigating and inspecting the level. Confusing them can lead to errors in level design and cinematic creation."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 23,
+    "grade": "D"
+  }
+}

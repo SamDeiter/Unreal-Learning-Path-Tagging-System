@@ -1,0 +1,165 @@
+{
+  "course_code": "203.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:36",
+      "title": "Understanding Global Illumination Methods",
+      "concept": "Differentiate between Screen Space Global Illumination (SSGI), Lumen Global Illumination, and Ray Traced Global Illumination in terms of their underlying algorithms, performance characteristics, and suitability for different types of scenes (e.g., indoor vs. outdoor, static vs. dynamic lighting).",
+      "diagram_suggestion": "A comparison table outlining the pros and cons of each GI method, including performance cost, accuracy, and supported features (e.g., reflections, refractions)."
+    },
+    {
+      "insert_after_timestamp": "2:56",
+      "title": "Ray Tracing Pipeline Integration",
+      "concept": "Explain how SSGI interacts with the ray tracing pipeline when both are enabled. Clarify the order of operations (e.g., which calculations are performed in screen space vs. ray traced) and how this affects the final image quality and performance.",
+      "diagram_suggestion": "A flowchart illustrating the data flow between SSGI and the ray tracing pipeline, highlighting which components contribute to the final global illumination effect."
+    },
+    {
+      "insert_after_timestamp": "4:40",
+      "title": "NDC Overscan and Camera Properties",
+      "concept": "Elaborate on the concept of NDC (Normalized Device Coordinates) overscan and how it can be used to mitigate screen-space clipping artifacts. Explain how to adjust camera properties (e.g., field of view, near/far clipping planes) to optimize SSGI results.",
+      "diagram_suggestion": "A visual representation of the NDC space, showing how overscan extends the rendering area beyond the screen boundaries to capture more global illumination data."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:34",
+      "procedural_step": "Set baked lighting before SSGI",
+      "why": "SSGI in this context is designed to *complement* baked lighting, not replace it. Baking first establishes a baseline of static lighting, allowing SSGI to then add dynamic, screen-dependent GI effects on top. Changing baked lighting later invalidates the SSGI contribution.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:55",
+      "procedural_step": "Override GI method in Post Process Volume",
+      "why": "Post Process Volumes provide localized control over rendering features. Overriding the project-level GI setting allows for artistic control within specific areas of the level, enabling effects like localized lighting enhancements or stylistic variations. This is crucial for performance optimization in specific areas of the scene.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:34",
+      "procedural_step": "Switch from Ray Tracing GI to SSGI",
+      "why": "Switching to SSGI from ray tracing GI can significantly reduce rendering cost, especially in scenes with complex geometry or numerous light sources. While ray tracing offers higher accuracy, SSGI provides a faster approximation, trading visual fidelity for improved performance. This is a crucial optimization technique for maintaining frame rates on lower-end hardware.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:19",
+      "procedural_step": "Camera movement causes clipping",
+      "why": "SSGI's screen-space nature means it only considers information visible to the camera. As the camera moves, previously occluded surfaces become visible, and their contribution to global illumination is suddenly included. This can cause noticeable popping or flickering artifacts if not managed carefully. This is an inherent limitation of screen-space techniques.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:35",
+      "procedural_step": "Baked data needed with SSGI",
+      "why": "SSGI was designed to augment, not replace, traditional baked lighting workflows. Baked lighting provides a foundation of static global illumination, while SSGI adds dynamic, view-dependent effects. Relying solely on SSGI without baked data can result in a flat, unconvincing lighting appearance.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:43",
+      "prompt": "Why might you choose to override the project's default global illumination settings within a Post Process Volume?",
+      "expected_insight": "To create localized lighting effects, optimize performance in specific areas, or achieve stylistic variations without affecting the entire scene."
+    },
+    {
+      "insert_after_timestamp": "3:21",
+      "prompt": "Imagine you're targeting both high-end PCs and mobile devices. How would you strategically combine Lumen, ray tracing, and SSGI to achieve the best balance of visual quality and performance on each platform?",
+      "expected_insight": "Use Lumen and ray tracing on high-end PCs for maximum fidelity, and switch to SSGI on mobile devices to maintain acceptable frame rates, potentially with lower resolution or simplified materials."
+    },
+    {
+      "insert_after_timestamp": "4:50",
+      "prompt": "Why does SSGI exhibit clipping artifacts, and what strategies can you employ to minimize their impact on the final image?",
+      "expected_insight": "Clipping occurs because SSGI only considers visible surfaces. Strategies include using overscan, adjusting camera properties, and carefully designing scenes to minimize situations where surfaces abruptly enter or exit the camera's view."
+    },
+    {
+      "insert_after_timestamp": "6:14",
+      "prompt": "Under what circumstances might you choose to use screen space reflections in conjunction with SSGI, even though they are less accurate than ray-traced reflections?",
+      "expected_insight": "When performance is a critical concern, or when ray-traced reflections introduce too much noise or visual artifacts. SSGI and SSR can provide a faster, albeit less accurate, alternative."
+    },
+    {
+      "insert_after_timestamp": "7:01",
+      "prompt": "What are the potential drawbacks of 'stacking' multiple lighting and reflection techniques (e.g., Lumen GI, SSGI, ray-traced reflections) in a single scene?",
+      "expected_insight": "Increased rendering cost, potential for visual inconsistencies or artifacts, and greater complexity in managing the overall lighting appearance. Careful planning and optimization are essential to avoid these issues."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of rendering pipelines.",
+    "Familiarity with Unreal Engine's material editor.",
+    "Knowledge of light baking techniques."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally recommended to set up baked lighting *before* enabling Screen Space Global Illumination (SSGI) in a scene?",
+      "options": [
+        "SSGI is designed to complement baked lighting, providing dynamic GI on top of a static base.",
+        "Baked lighting automatically disables SSGI, so it must be configured first.",
+        "SSGI calculations overwrite baked lighting data, leading to incorrect results.",
+        "The Unreal Engine editor requires baked lighting to be present before SSGI can be enabled."
+      ],
+      "correct_index": 0,
+      "explanation": "SSGI enhances pre-existing baked lighting, adding dynamic, screen-dependent effects. It's not a replacement for baked lighting, but rather an augmentation."
+    },
+    {
+      "question": "What is the primary limitation of Screen Space Global Illumination (SSGI) that can lead to visual artifacts?",
+      "options": [
+        "SSGI only considers surfaces visible to the camera, leading to clipping as the camera moves.",
+        "SSGI is incompatible with dynamic lighting, causing flickering in lit areas.",
+        "SSGI requires ray tracing to function correctly, resulting in performance bottlenecks.",
+        "SSGI only works with static meshes, causing animated objects to appear unlit."
+      ],
+      "correct_index": 0,
+      "explanation": "SSGI's screen-space nature means it only processes visible information, leading to clipping artifacts when surfaces enter or exit the camera's view."
+    },
+    {
+      "question": "In what scenario would you *most likely* choose to use Screen Space Global Illumination (SSGI) instead of Lumen Global Illumination?",
+      "options": [
+        "When targeting lower-end hardware where performance is a critical concern.",
+        "When creating a scene with highly detailed, ray-traced reflections.",
+        "When simulating realistic indirect lighting in a fully dynamic environment.",
+        "When baking lighting for a static scene with no moving objects."
+      ],
+      "correct_index": 0,
+      "explanation": "SSGI offers a faster, albeit less accurate, approximation of global illumination compared to Lumen, making it suitable for performance-constrained environments."
+    },
+    {
+      "question": "How does the use of a Post Process Volume affect the Screen Space Global Illumination (SSGI) settings in a scene?",
+      "options": [
+        "It allows for localized overrides of the project's default SSGI settings.",
+        "It completely disables SSGI for the entire level.",
+        "It automatically optimizes SSGI performance based on the scene's complexity.",
+        "It forces SSGI to use ray tracing, regardless of the project settings."
+      ],
+      "correct_index": 0,
+      "explanation": "Post Process Volumes enable localized control over rendering features, including SSGI, allowing for artistic control and performance optimization in specific areas."
+    },
+    {
+      "question": "Why is it important to understand the limitations of each lighting and reflection technique (e.g., Lumen, SSGI, ray tracing) when combining them in a scene?",
+      "options": [
+        "To avoid visual inconsistencies, performance bottlenecks, and increased complexity.",
+        "To ensure that all techniques are compatible with each other.",
+        "To maximize the visual fidelity of the scene without any performance impact.",
+        "To simplify the lighting setup and reduce the number of light sources needed."
+      ],
+      "correct_index": 0,
+      "explanation": "Combining multiple techniques without understanding their limitations can lead to unexpected artifacts, performance issues, and a more complex lighting setup."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

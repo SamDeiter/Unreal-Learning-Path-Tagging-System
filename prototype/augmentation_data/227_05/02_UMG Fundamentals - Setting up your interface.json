@@ -1,0 +1,172 @@
+{
+  "course_code": "227.05",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:23",
+      "title": "Understanding Data Persistence: GameMode vs. GameInstance vs. SaveGame",
+      "concept": "The GameMode, GameInstance, and SaveGame objects serve distinct purposes in managing data persistence. GameMode is transient, existing only for the current level. GameInstance persists across level transitions within a game session. SaveGame allows for persistent storage between game sessions. Understanding their lifecycles is crucial for data management.",
+      "diagram_suggestion": "Lifecycle diagram illustrating the creation, persistence, and destruction of GameMode, GameInstance, and SaveGame objects."
+    },
+    {
+      "insert_after_timestamp": "2:59",
+      "title": "Pawn vs. Controller: Input Handling and Possession",
+      "concept": "The Controller possesses a Pawn to control its actions. The Controller handles player input and translates it into actions for the Pawn. In an HMI context, the Controller might directly manipulate scene elements without a Pawn, but understanding the separation of concerns is vital for more complex interactions.",
+      "diagram_suggestion": "Diagram showing the relationship between PlayerController, Pawn, and Input system, highlighting the flow of input events."
+    },
+    {
+      "insert_after_timestamp": "5:43",
+      "title": "UMG Event Binding and Game State Management",
+      "concept": "UMG widgets can trigger events that modify the game state. These events are typically bound to player input (e.g., button clicks). The triggered events can then call functions within the GameMode, PlayerController, or other relevant actors to enact changes in the game world. Understanding the event-driven architecture of UMG is key to creating interactive UIs.",
+      "diagram_suggestion": "Flowchart illustrating the event binding process in UMG, from widget interaction to game state modification."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:58",
+      "procedural_step": "GameMode is a singleton.",
+      "why": "Because the GameMode is a singleton, any class can access it, facilitating global game state management. However, over-reliance on the GameMode for all data can lead to a monolithic design, hindering modularity and testability.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:18",
+      "procedural_step": "GameMode only exists as long as the level is open.",
+      "why": "This ephemeral nature makes GameMode suitable for session-specific data, preventing unintended persistence of temporary variables. Storing persistent data in GameMode will lead to data loss upon level transition.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:01",
+      "procedural_step": "Controller is something we can possess.",
+      "why": "Possession grants the Controller authority over a Pawn or Actor, enabling input processing and action execution. Without possession, the Controller is merely an observer, unable to directly influence the game world.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:11",
+      "procedural_step": "Pawn is a CDO Singleton, but the HMI is like any visible pawn.",
+      "why": "The Class Default Object (CDO) serves as a template for creating instances of a class. Understanding the CDO is important for setting default values and behaviors. Modifying the CDO directly can have unintended consequences on all instances of the class.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:36",
+      "procedural_step": "Bind events to the input of clicking buttons.",
+      "why": "Event binding allows UMG widgets to trigger game logic in response to user interaction. Improper event handling can lead to unresponsive UIs or unintended side effects. Ensure events are properly unbound when no longer needed to prevent memory leaks.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:58",
+      "prompt": "Why would storing the car color in the GameMode be a bad idea if you want the color to persist between sessions?",
+      "expected_insight": "The GameMode is destroyed when the level is unloaded, so any data stored within it is lost. Persistent data should be stored in the GameInstance or a SaveGame object."
+    },
+    {
+      "insert_after_timestamp": "2:23",
+      "prompt": "If the Controller is our camera manager, what implications does this have for input handling in this HMI?",
+      "expected_insight": "The Controller will directly receive and process input events, allowing us to control the camera and interact with the HMI elements. This eliminates the need for a Pawn to handle input."
+    },
+    {
+      "insert_after_timestamp": "3:38",
+      "prompt": "Why is the Pawn class set to 'none' in this HMI example?",
+      "expected_insight": "Because the Controller is directly managing the camera and interacting with the UI, a Pawn is not required to represent the player in the world. This simplifies the setup and reduces unnecessary overhead."
+    },
+    {
+      "insert_after_timestamp": "4:42",
+      "prompt": "What happens if the Default Map in Project Settings is not set correctly?",
+      "expected_insight": "The game will load the wrong map (or no map) on startup, leading to a broken experience. Setting the correct Default Map ensures the game loads the intended level when launched."
+    },
+    {
+      "insert_after_timestamp": "5:13",
+      "prompt": "How does using widgets as templates improve the maintainability of the HMI?",
+      "expected_insight": "Using widgets as templates allows for code reuse and simplifies updates. Changes made to the template widget will automatically propagate to all instances, reducing the risk of inconsistencies."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "0:58",
+      "warning": "Over-reliance on the GameMode as a singleton can lead to a monolithic design.",
+      "severity": "MEDIUM",
+      "fix": "Decouple systems by using interfaces and event dispatchers to communicate between actors instead of directly accessing the GameMode for everything."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine's Actor-Component model.",
+    "Familiarity with the Unreal Editor interface and basic navigation.",
+    "Knowledge of Blueprint scripting fundamentals (variables, functions, events)."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Which object's lifecycle is tied to the duration of a single level?",
+      "options": [
+        "GameMode",
+        "GameInstance",
+        "SaveGame",
+        "PlayerController"
+      ],
+      "correct_index": 0,
+      "explanation": "The GameMode is created when a level is loaded and destroyed when the level is unloaded, making it suitable for session-specific data."
+    },
+    {
+      "question": "What is the primary responsibility of the PlayerController?",
+      "options": [
+        "Rendering the scene",
+        "Handling player input and controlling a Pawn",
+        "Storing persistent game data",
+        "Managing audio playback"
+      ],
+      "correct_index": 1,
+      "explanation": "The PlayerController processes player input and uses it to control the actions of a Pawn or directly interact with the game world."
+    },
+    {
+      "question": "Why is it generally bad practice to store persistent data, like player preferences, in the GameMode?",
+      "options": [
+        "The GameMode is not designed for data storage.",
+        "The GameMode is destroyed when the level changes, leading to data loss.",
+        "The GameMode can only store a limited amount of data.",
+        "The GameMode is inaccessible from other classes."
+      ],
+      "correct_index": 1,
+      "explanation": "The GameMode's lifecycle is tied to the current level, so any data stored within it will be lost when the level is unloaded. Use GameInstance or SaveGame for persistent data."
+    },
+    {
+      "question": "In the context of UMG, what is the purpose of event binding?",
+      "options": [
+        "To visually link widgets together.",
+        "To connect widget interactions to game logic.",
+        "To optimize widget rendering performance.",
+        "To automatically generate widget animations."
+      ],
+      "correct_index": 1,
+      "explanation": "Event binding allows UMG widgets to trigger functions and events in response to user interactions, enabling dynamic and interactive UIs."
+    },
+    {
+      "question": "What is the significance of the Class Default Object (CDO)?",
+      "options": [
+        "It's the first instance of a class created at runtime.",
+        "It serves as a template for creating instances of a class, defining default values and behaviors.",
+        "It's a singleton object accessible from anywhere in the game.",
+        "It's a deprecated feature replaced by data assets."
+      ],
+      "correct_index": 1,
+      "explanation": "The CDO acts as a template, defining the default properties and behaviors for all instances of a class. Modifying the CDO affects all instances created from it."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}
