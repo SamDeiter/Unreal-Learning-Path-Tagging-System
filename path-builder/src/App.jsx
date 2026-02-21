@@ -267,6 +267,12 @@ function App() {
                   >
                     📊 Analytics
                   </button>
+                  <button
+                    className={`nav-tab ${activeTab === "augmentation" ? "active" : ""}`}
+                    onClick={() => setActiveTab("augmentation")}
+                  >
+                    🔬 Augmentation
+                  </button>
                   {userIsAdmin && (
                     <button
                       className={`nav-tab ${activeTab === "invites" ? "active" : ""}`}
@@ -441,6 +447,15 @@ function App() {
                         </div>
                       </CollapsibleSection>
                     </div>
+                  </div>
+                )}
+                {activeTab === "augmentation" && (
+                  <div className="augmentation-layout">
+                    <iframe
+                      className="augmentation-frame"
+                      src={`${import.meta.env.BASE_URL}augmentation_index.html`}
+                      title="Augmentation Dashboard"
+                    />
                   </div>
                 )}
                 {activeTab === "invites" && userIsAdmin && (

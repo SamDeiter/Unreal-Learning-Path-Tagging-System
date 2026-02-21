@@ -1,0 +1,184 @@
+{
+  "course_code": "210.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:06",
+      "title": "Niagara Module Architecture",
+      "concept": "Niagara systems are constructed from modular components, each handling a specific aspect of the effect (e.g., spawning, updating, rendering). Understanding the data flow between these modules is crucial for advanced customization and optimization.",
+      "diagram_suggestion": "A flowchart illustrating the typical data flow in a Niagara system, from emitter spawn to particle update and rendering, highlighting key modules and their roles."
+    },
+    {
+      "insert_after_timestamp": "4:50",
+      "title": "Niagara Grid System",
+      "concept": "Niagara Fluids simulations rely on a grid-based solver. The 'World Grid Extents' parameter defines the spatial boundaries of this grid. Understanding the relationship between grid resolution, extent, and simulation performance is essential for achieving desired visual fidelity without performance bottlenecks.",
+      "diagram_suggestion": "A visual representation of the Niagara grid overlaid on the scene, illustrating how 'World Grid Extents' defines the simulation area and how grid resolution affects detail."
+    },
+    {
+      "insert_after_timestamp": "5:15",
+      "title": "Depth Map Collisions",
+      "concept": "Niagara's depth map collision system uses the scene's depth buffer to enable particle interactions with static and skeletal meshes. The accuracy and performance of these collisions are directly affected by the depth buffer resolution and the complexity of the scene geometry.",
+      "diagram_suggestion": "A diagram showing how the depth buffer is generated and used by Niagara to determine collision points, highlighting potential limitations and artifacts."
+    },
+    {
+      "insert_after_timestamp": "8:31",
+      "title": "Particle-Driven Fluid Simulation",
+      "concept": "The 2D fire effect combines particle systems with fluid simulation. The particles drive the overall motion, while the fluid simulation adds detail and realism. This approach allows for decoupling of motion control and visual complexity, enabling efficient and artistic control.",
+      "diagram_suggestion": "A layered diagram showing the particle system driving the overall motion, with the fluid simulation layered on top to add detail, illustrating the decoupling of motion and visual complexity."
+    },
+    {
+      "insert_after_timestamp": "10:26",
+      "title": "Admitter Summary Customization",
+      "concept": "The Admitter Summary provides a simplified interface for commonly adjusted parameters. Understanding how to customize this summary allows for efficient workflow and tailored control over specific effect properties.",
+      "diagram_suggestion": "A screenshot of the Niagara editor showing how to expand the Admitter stack and customize the Admitter Summary, highlighting the benefits of this feature for workflow efficiency."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "3:11",
+      "procedural_step": "Increasing number of cells max axis",
+      "why": "Increasing the number of cells increases the computational cost of the simulation. This directly impacts performance, especially with complex effects or high particle counts. Insufficient memory can lead to crashes.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:44",
+      "procedural_step": "Setting World Grid Extents",
+      "why": "The World Grid Extents defines the simulation domain. Setting it too small will clip the effect, while setting it too large increases computational cost unnecessarily. This impacts memory usage and simulation speed.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:06",
+      "procedural_step": "Enabling Use Depth Map Collisions",
+      "why": "Enabling depth map collisions forces Niagara to sample the scene's depth buffer every frame. This can introduce a performance bottleneck, especially in scenes with high geometric complexity or high depth buffer resolution. Consider alternative collision methods for performance-critical scenarios.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:23",
+      "procedural_step": "Skinning fluid simulation to particle locations",
+      "why": "This approach decouples the fluid simulation from the particle motion, allowing for more artistic control over the overall effect. However, it can introduce visual artifacts if the particle motion and fluid simulation are not properly synchronized. This can lead to performance issues if the particle count is too high.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "12:10",
+      "procedural_step": "Using Collider tag",
+      "why": "Relying on actor tags for collision detection can become a maintenance issue in large projects. It introduces a hidden dependency between the Niagara system and the actors in the scene. Consider using collision components or more explicit collision channels for better maintainability and performance.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:19",
+      "prompt": "Why does Niagara use an 'Admitter Summary' instead of exposing all parameters directly?",
+      "expected_insight": "The Admitter Summary reduces cognitive load by presenting only the most relevant parameters, making it easier to quickly prototype and iterate on effects. Exposing all parameters would overwhelm the user and hinder the creative process."
+    },
+    {
+      "insert_after_timestamp": "3:51",
+      "prompt": "How does adjusting the Particle Spawn parameters affect the overall look and behavior of the 2D liquid?",
+      "expected_insight": "Adjusting the Lifetime, Spawn Radius, and Offset controls the initial conditions of the particles, which in turn influences the behavior of the fluid simulation. A shorter lifetime will result in a more localized effect, while a larger spawn radius will create a wider distribution of particles."
+    },
+    {
+      "insert_after_timestamp": "6:21",
+      "prompt": "Why is it important to keep the scene clean when working with Niagara liquids?",
+      "expected_insight": "Niagara liquid simulations can be computationally expensive. Keeping the scene clean minimizes the number of objects that need to be processed, improving performance and preventing potential bottlenecks."
+    },
+    {
+      "insert_after_timestamp": "9:35",
+      "prompt": "How does the Admitter Summary contribute to the artistic control of the fire effect?",
+      "expected_insight": "The Admitter Summary provides a curated set of parameters that directly influence the visual appearance of the fire, allowing artists to quickly adjust the effect to match their desired aesthetic. This simplifies the process of creating visually appealing and believable fire effects."
+    },
+    {
+      "insert_after_timestamp": "11:58",
+      "prompt": "Why are subtle changes in parameter values more likely to produce realistic fire effects?",
+      "expected_insight": "Fire is a complex natural phenomenon. Subtle changes in parameters allow for fine-tuning the simulation to mimic the nuances of real-world fire behavior. Large, unrealistic values can lead to unnatural and visually unappealing results."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "12:10",
+      "warning": "Using Actor Tags for collision detection introduces a hidden dependency and can lead to maintainability issues and potential performance bottlenecks due to tag lookups.",
+      "severity": "MEDIUM",
+      "fix": "Use collision components or dedicated collision channels for explicit and efficient collision handling."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of particle systems",
+    "Familiarity with the Unreal Engine editor interface",
+    "Knowledge of material creation and application"
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary benefit of using the Admitter Summary in Niagara?",
+      "options": [
+        "Reduces cognitive load by presenting only the most relevant parameters.",
+        "Automatically optimizes the simulation for maximum performance.",
+        "Allows for direct access to the underlying compute shaders.",
+        "Enables real-time debugging of the Niagara system."
+      ],
+      "correct_index": 0,
+      "explanation": "The Admitter Summary simplifies the interface by exposing only the most commonly used parameters, reducing cognitive overload and improving workflow efficiency."
+    },
+    {
+      "question": "How does the 'World Grid Extents' parameter affect a Niagara Fluids simulation?",
+      "options": [
+        "It defines the spatial boundaries of the simulation grid.",
+        "It controls the number of particles spawned in the system.",
+        "It determines the overall color of the fluid.",
+        "It sets the maximum simulation time."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'World Grid Extents' defines the spatial boundaries within which the fluid simulation occurs. Setting it appropriately is crucial for both visual fidelity and performance."
+    },
+    {
+      "question": "What is the potential performance impact of enabling 'Use Depth Map Collisions' in Niagara?",
+      "options": [
+        "It can introduce a performance bottleneck due to depth buffer sampling.",
+        "It significantly improves simulation performance by optimizing collision calculations.",
+        "It has no impact on performance.",
+        "It only affects performance on low-end hardware."
+      ],
+      "correct_index": 0,
+      "explanation": "Enabling depth map collisions requires Niagara to sample the scene's depth buffer every frame, which can be computationally expensive, especially in complex scenes."
+    },
+    {
+      "question": "In the context of the 2D fire effect, what is the primary role of the particle system?",
+      "options": [
+        "To drive the overall motion of the fire.",
+        "To generate the color and texture of the fire.",
+        "To simulate the fluid dynamics of the fire.",
+        "To handle collision detection with the environment."
+      ],
+      "correct_index": 0,
+      "explanation": "The particle system drives the overall motion of the fire, while the fluid simulation adds detail and realism. This decoupling allows for more artistic control."
+    },
+    {
+      "question": "Why is it generally recommended to make subtle adjustments to parameters when creating realistic fire effects in Niagara?",
+      "options": [
+        "Subtle changes allow for fine-tuning the simulation to mimic real-world fire behavior.",
+        "Large changes always result in visual artifacts.",
+        "The engine is optimized for small parameter adjustments.",
+        "It reduces the risk of crashing the editor."
+      ],
+      "correct_index": 0,
+      "explanation": "Fire is a complex natural phenomenon, and subtle changes in parameters allow for fine-tuning the simulation to mimic the nuances of real-world fire behavior. Large, unrealistic values can lead to unnatural results."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

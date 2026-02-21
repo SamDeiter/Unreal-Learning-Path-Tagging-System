@@ -1,0 +1,179 @@
+{
+  "course_code": "102.03",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:15",
+      "title": "Level Streaming in Unreal Engine 5",
+      "concept": "Level streaming is a technique used to load and unload portions of a level dynamically during gameplay. This is crucial for managing memory and improving performance, especially in large open-world environments. UE5 offers various streaming methods, including blueprint-driven, distance-based, and always-loaded, each with its own use case and impact on performance.",
+      "diagram_suggestion": "A diagram illustrating the different level streaming methods (Blueprint, Distance, Always Loaded) and their impact on memory usage and load times."
+    },
+    {
+      "insert_after_timestamp": "3:59",
+      "title": "Precomputed Lighting Scenarios",
+      "concept": "Unreal Engine 5's lighting system allows for precomputed lighting scenarios, where lighting is baked into lightmaps and stored within streamed levels. This enables efficient switching between different lighting setups (e.g., day, night) without incurring real-time lighting costs. The 'Toggle Lighting Scenario' option optimizes lightmap storage and retrieval.",
+      "diagram_suggestion": "A visual representation of how lightmaps are stored within streamed levels and how the 'Toggle Lighting Scenario' option affects lightmap management."
+    },
+    {
+      "insert_after_timestamp": "7:37",
+      "title": "Level Blueprints and Persistent Levels",
+      "concept": "In Unreal Engine 5, each level has its own level blueprint, allowing for level-specific logic and behavior. The persistent level is always loaded and serves as the main container for the game world. While level blueprints can exist in streamed levels, critical game logic is typically placed in the persistent level's blueprint to ensure its availability.",
+      "diagram_suggestion": "A diagram illustrating the relationship between persistent levels, streamed levels, and their respective level blueprints, highlighting the flow of execution and data."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:59",
+      "procedural_step": "Ticking 'Unbound' on a Post Process Volume",
+      "why": "Setting a post-process volume to 'Unbound' applies its effects to the entire scene. This is useful for global adjustments, but be mindful of performance, as it affects every rendered pixel. Overuse can lead to significant frame rate drops, especially with expensive post-process effects.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:39",
+      "procedural_step": "Using Ctrl+M to move an actor to a different level",
+      "why": "Moving actors between levels directly affects how the engine manages their visibility and lifecycle. Actors in unloaded levels are not processed, saving performance. Incorrectly assigned actors can lead to unexpected behavior or crashes if dependencies are not properly handled.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:18",
+      "procedural_step": "Changing the streaming method to 'Always Loaded'",
+      "why": "Setting a level to 'Always Loaded' forces it to reside in memory at all times. This provides immediate access but increases memory footprint. Use this sparingly for critical levels or those with frequently accessed assets. Overuse negates the benefits of level streaming and can lead to memory exhaustion.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:04",
+      "procedural_step": "Toggling the 'Toggle Lighting Scenario' option",
+      "why": "Enabling 'Toggle Lighting Scenario' optimizes lightmap storage by associating lightmaps with specific streamed levels. This prevents redundant lightmap data and reduces the overall package size. Without this, lightmaps would be baked into the assets themselves, leading to larger asset sizes and increased memory usage.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:56",
+      "procedural_step": "Using 'Load Stream Level by Name' and 'Unload Stream Level by Name'",
+      "why": "These functions directly control the loading and unloading of levels at runtime. Incorrect level names or dependencies can lead to crashes or unexpected behavior. Ensure that level names are accurate and that dependencies are properly managed to avoid errors.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "13:27",
+      "procedural_step": "Unloading levels before loading new ones",
+      "why": "Unloading unused levels is crucial for memory management. Failing to unload levels can lead to memory leaks and performance degradation, especially in long-running sessions. Ensure that levels are unloaded when they are no longer needed to maintain optimal performance.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "2:54",
+      "prompt": "Why does changing the level visibility in the editor not directly translate to runtime behavior?",
+      "expected_insight": "The editor's visibility settings control what is displayed in the editor viewport, while level streaming determines what is loaded and visible at runtime. The streaming method dictates how levels are loaded and unloaded based on game logic or player proximity."
+    },
+    {
+      "insert_after_timestamp": "6:59",
+      "prompt": "What are the trade-offs between using 'Always Loaded' and blueprint-driven level streaming?",
+      "expected_insight": "'Always Loaded' provides immediate access but consumes more memory, while blueprint-driven streaming allows for dynamic loading and unloading based on game logic, optimizing memory usage but potentially introducing load times."
+    },
+    {
+      "insert_after_timestamp": "9:01",
+      "prompt": "Why is it important to use the 'by name' versions of the load/unload stream level functions?",
+      "expected_insight": "The 'by name' versions offer flexibility and decoupling. They allow you to load/unload levels without needing direct object references, making the system more modular and easier to maintain. This is especially useful when dealing with dynamically generated or modified levels."
+    },
+    {
+      "insert_after_timestamp": "11:11",
+      "prompt": "How does the multi-gate node contribute to the level streaming logic?",
+      "expected_insight": "The multi-gate node allows for sequential execution of level loading and unloading operations. It ensures that only one set of levels is loaded at a time, preventing conflicts and optimizing memory usage. The loop functionality enables cycling through different lighting scenarios or level configurations."
+    },
+    {
+      "insert_after_timestamp": "13:43",
+      "prompt": "What are the potential consequences of not unloading previously loaded levels?",
+      "expected_insight": "Failing to unload levels can lead to memory leaks, performance degradation, and eventually, crashes. Each loaded level consumes memory and resources, and without proper unloading, the game's performance will degrade over time, especially in long-running sessions."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "9:45",
+      "warning": "Manually typing level names in blueprints is prone to errors and can break the game if there are any typos. This creates a fragile dependency on string literals.",
+      "severity": "MEDIUM",
+      "fix": "Use asset references instead of string literals for level names. This ensures that the level names are always correct and that the blueprint will automatically update if the level is renamed."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine 5 editor interface",
+    "Familiarity with Blueprint scripting",
+    "Knowledge of level design principles",
+    "Understanding of lighting concepts in Unreal Engine 5"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is level streaming important in large open-world games?",
+      "options": [
+        "To reduce initial load times and memory usage by loading only necessary parts of the level.",
+        "To make the game look better.",
+        "To add more characters to the game.",
+        "To make the game easier to develop."
+      ],
+      "correct_index": 0,
+      "explanation": "Level streaming allows for dynamic loading and unloading of level sections, reducing memory footprint and improving performance, especially in large environments."
+    },
+    {
+      "question": "What is the primary benefit of using precomputed lighting scenarios in Unreal Engine 5?",
+      "options": [
+        "It allows for efficient switching between different lighting setups without real-time lighting costs.",
+        "It makes the lighting look more realistic.",
+        "It reduces the number of lights needed in the scene.",
+        "It makes the game run faster."
+      ],
+      "correct_index": 0,
+      "explanation": "Precomputed lighting scenarios enable efficient switching between different lighting setups (e.g., day, night) by baking lighting into lightmaps and storing them within streamed levels."
+    },
+    {
+      "question": "What is the role of the persistent level in level streaming?",
+      "options": [
+        "It serves as the main container for the game world and is always loaded.",
+        "It is only loaded when the player is near it.",
+        "It contains all the lighting information.",
+        "It is used for debugging purposes."
+      ],
+      "correct_index": 0,
+      "explanation": "The persistent level is always loaded and serves as the main container for the game world, housing critical game logic and assets."
+    },
+    {
+      "question": "What happens if you forget to unload a streamed level after it's no longer needed?",
+      "options": [
+        "The game's memory usage will increase, potentially leading to performance issues or crashes.",
+        "The game will automatically unload the level.",
+        "The level will remain visible even when it's not supposed to be.",
+        "Nothing, it doesn't matter."
+      ],
+      "correct_index": 0,
+      "explanation": "Failing to unload levels can lead to memory leaks and performance degradation, especially in long-running sessions, as each loaded level consumes memory and resources."
+    },
+    {
+      "question": "Why is it recommended to use asset references instead of string literals for level names in blueprints?",
+      "options": [
+        "To ensure that the level names are always correct and that the blueprint automatically updates if the level is renamed.",
+        "To make the blueprint easier to read.",
+        "To make the game run faster.",
+        "It doesn't matter."
+      ],
+      "correct_index": 0,
+      "explanation": "Asset references ensure that level names are always correct and that the blueprint automatically updates if the level is renamed, preventing errors caused by typos or manual updates."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

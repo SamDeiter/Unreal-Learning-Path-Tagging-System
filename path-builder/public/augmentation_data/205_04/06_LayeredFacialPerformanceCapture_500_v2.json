@@ -1,0 +1,198 @@
+{
+  "course_code": "205.04",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:39",
+      "title": "Animation Blueprint Architecture",
+      "concept": "The animation blueprint is a specialized graph that drives skeletal mesh deformation. Understanding its execution order (pre-update, update, post-update) is crucial for performance and predictable behavior when layering animations.",
+      "diagram_suggestion": "A diagram illustrating the different phases of the Animation Blueprint's execution pipeline, highlighting where the weighted moving average and layered switch are being inserted and their impact on the final pose."
+    },
+    {
+      "insert_after_timestamp": "1:39",
+      "title": "Layered Blend per Bone Deep Dive",
+      "concept": "Layered Blend per Bone allows selective animation blending based on bone hierarchies. Understanding its cost (dependent on bone count and blend mode) is critical for optimizing facial animation performance, especially on mobile platforms.",
+      "diagram_suggestion": "A visual representation of the bone hierarchy and how the Layered Blend per Bone node selectively blends animations based on the specified bones. Show the performance impact as bone count increases."
+    },
+    {
+      "insert_after_timestamp": "3:09",
+      "title": "Construction Script vs. Event Graph",
+      "concept": "The Construction Script executes only in the editor, while the Event Graph executes during gameplay. Understanding this distinction is crucial for setting up initial states versus dynamic behaviors. Overuse of the Construction Script can lead to editor slowdown.",
+      "diagram_suggestion": "A flowchart comparing the execution contexts of the Construction Script and the Event Graph, highlighting their respective use cases and performance implications."
+    },
+    {
+      "insert_after_timestamp": "6:44",
+      "title": "Function Execution Context",
+      "concept": "Functions in Blueprints can be 'pure' (no side effects) or 'impure' (side effects). Understanding this distinction is crucial for predicting behavior and avoiding unexpected consequences when modifying component state within a function.",
+      "diagram_suggestion": "A table contrasting pure and impure functions in Blueprints, emphasizing their impact on determinism and potential side effects within the ARKit setup function."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:35",
+      "procedural_step": "Add weighted moving average with alpha node.",
+      "why": "This reduces jitter in the Live Link data, preventing high-frequency noise from propagating through the animation graph and causing visual artifacts. Without it, the animation will appear unstable.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:27",
+      "procedural_step": "Set up switch to switch between Live Link face data and body animation.",
+      "why": "This provides artistic control to decouple facial performance from body animation, allowing for independent adjustments and refinements. Without it, the facial animation is directly tied to the body, limiting flexibility.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:03",
+      "procedural_step": "Create an update to the editor switch.",
+      "why": "This allows previewing facial performance changes directly in the editor viewport without requiring a full simulation, significantly speeding up iteration. Without it, changes would only be visible during simulation, increasing iteration time.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:44",
+      "procedural_step": "Copy ARKit setup from Event Graph to Construction Script.",
+      "why": "This ensures the ARKit setup is initialized correctly when the MetaHuman is first placed in the level, guaranteeing proper facial tracking from the start. Without it, the face rig may not initialize correctly until gameplay begins.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:24",
+      "procedural_step": "Create 'as face anim BP' pin searching for the set update and editor.",
+      "why": "This allows the editor update flag to propagate to the animation blueprint, enabling real-time preview of animation changes within the editor viewport. Without it, the editor would not reflect changes made to the animation blueprint until the game is simulated.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:11",
+      "prompt": "Why is a weighted moving average used for denoising, rather than a simple average?",
+      "expected_insight": "A weighted moving average gives more importance to recent data, making it more responsive to changes while still smoothing out noise. A simple average would lag behind the actual performance."
+    },
+    {
+      "insert_after_timestamp": "2:53",
+      "prompt": "Why is it important to duplicate the Layered Blend per Bone node instead of reusing the existing one?",
+      "expected_insight": "Duplicating the node allows for independent control over the blending of the face pose, preventing unintended side effects on the original body pose blending setup. Reusing it would create a dependency and make it harder to isolate facial animation control."
+    },
+    {
+      "insert_after_timestamp": "4:26",
+      "prompt": "What are the potential drawbacks of running ARKit setup code in both the Event Graph and the Construction Script?",
+      "expected_insight": "Running the setup in both places could lead to redundant initialization and potential conflicts if the setup logic changes. It's important to ensure the Construction Script setup doesn't interfere with the Event Graph's runtime behavior."
+    },
+    {
+      "insert_after_timestamp": "5:57",
+      "prompt": "Why is the ARKit setup connected to the output of the 'Create Dynamic Material Instance' node?",
+      "expected_insight": "This ensures that the material instance is created before the ARKit setup is executed, preventing potential errors if the setup relies on the material instance being available. The order of operations is critical for avoiding runtime issues."
+    },
+    {
+      "insert_after_timestamp": "6:55",
+      "prompt": "Why is it beneficial to uncheck the MetaHuman BP actor recorded properties and only check the face recorded properties?",
+      "expected_insight": "This reduces the amount of data being recorded, improving performance and reducing file size. Only recording the necessary properties optimizes the capture process and simplifies post-processing."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "0:07",
+      "warning": "Directly modifying the MetaHuman's animation blueprint can lead to maintainability issues and conflicts with future MetaHuman updates. Consider creating a separate animation layer or component for custom modifications.",
+      "severity": "MEDIUM",
+      "fix": "Create a child Animation Blueprint or use Animation Layers to avoid directly modifying the base MetaHuman blueprint."
+    },
+    {
+      "timestamp": "1:46",
+      "warning": "Duplicating complex node networks like 'Layer Blend Per Bone' without careful consideration can lead to increased blueprint complexity and potential performance issues. Profile the animation blueprint to ensure performance remains acceptable.",
+      "severity": "MEDIUM",
+      "fix": "Refactor the animation blueprint to use functions or macros to encapsulate reusable logic, reducing duplication and improving maintainability."
+    },
+    {
+      "timestamp": "4:30",
+      "warning": "Copying and pasting code between the Event Graph and Construction Script can lead to inconsistencies and maintenance headaches. Ensure the logic is identical and consider using a function to encapsulate the shared code.",
+      "severity": "MEDIUM",
+      "fix": "Create a function to encapsulate the shared ARKit setup logic and call it from both the Event Graph and Construction Script."
+    },
+    {
+      "timestamp": "6:14",
+      "warning": "Casting to a specific blueprint class (e.g., 'Cast to FaceAnimBP') creates a hard dependency. If the class name changes, the cast will break. This is an instance of Hard-Reference Casting.",
+      "severity": "HIGH",
+      "fix": "Use an interface instead of casting to allow for more flexible and decoupled communication between blueprints. Implement the interface on the target blueprint and use 'Call Function by Interface' to invoke the desired functionality."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Animation Blueprints and their role in controlling skeletal mesh animation.",
+    "Familiarity with the MetaHuman framework and its animation structure.",
+    "Knowledge of Live Link and its integration with Unreal Engine for real-time data streaming.",
+    "Understanding of the Construction Script and Event Graph execution contexts.",
+    "Basic Blueprint scripting knowledge, including variable creation, function calls, and control flow."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally better to use a weighted moving average instead of a simple average for smoothing Live Link facial data?",
+      "options": [
+        "It gives more weight to recent data, making it more responsive.",
+        "It is computationally cheaper than a simple average.",
+        "It completely eliminates all noise from the signal.",
+        "It is easier to implement in Blueprint."
+      ],
+      "correct_index": 0,
+      "explanation": "A weighted moving average prioritizes recent data, allowing for responsiveness while still smoothing out noise. A simple average would introduce more lag."
+    },
+    {
+      "question": "What is the primary reason for using the Construction Script to initialize the ARKit setup in addition to the Event Graph?",
+      "options": [
+        "To ensure the ARKit setup is initialized when the MetaHuman is first placed in the level.",
+        "To improve runtime performance by offloading initialization tasks.",
+        "To simplify the Event Graph by moving initialization logic to the Construction Script.",
+        "To prevent the ARKit setup from being executed multiple times."
+      ],
+      "correct_index": 0,
+      "explanation": "The Construction Script runs in the editor, ensuring the ARKit setup is initialized when the MetaHuman is first added to the level, enabling immediate facial tracking."
+    },
+    {
+      "question": "What potential problem can arise from directly modifying the core MetaHuman Animation Blueprint?",
+      "options": [
+        "Conflicts with future MetaHuman updates and maintainability issues.",
+        "Improved runtime performance due to direct access to core functionality.",
+        "Reduced blueprint complexity by avoiding the need for custom components.",
+        "Enhanced compatibility with other animation systems."
+      ],
+      "correct_index": 0,
+      "explanation": "Direct modifications can lead to conflicts with future updates and make it harder to maintain the animation blueprint. Using animation layers or child blueprints is a better approach."
+    },
+    {
+      "question": "What is the main purpose of the 'Update in Editor' boolean variable in the animation blueprint?",
+      "options": [
+        "To allow previewing facial performance changes directly in the editor viewport.",
+        "To optimize runtime performance by disabling updates when not in use.",
+        "To control the frequency of animation updates during gameplay.",
+        "To enable or disable Live Link data streaming."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'Update in Editor' variable allows you to preview changes to the facial animation in the editor without having to simulate the scene, speeding up iteration."
+    },
+    {
+      "question": "Why is it important to understand the difference between pure and impure functions when working with animation blueprints?",
+      "options": [
+        "Impure functions can have side effects that affect the animation state, leading to unpredictable behavior.",
+        "Pure functions are always faster than impure functions.",
+        "Pure functions cannot access component variables.",
+        "Impure functions are not allowed in animation blueprints."
+      ],
+      "correct_index": 0,
+      "explanation": "Impure functions can modify the state of the animation blueprint, potentially leading to unexpected results if not handled carefully. Pure functions guarantee no side effects."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 24,
+    "grade": "D"
+  }
+}

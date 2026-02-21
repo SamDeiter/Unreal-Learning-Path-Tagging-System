@@ -1,0 +1,178 @@
+{
+  "course_code": "101.02",
+  "conceptual_score": {
+    "procedural_pct": 70,
+    "conceptual_pct": 30,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:28",
+      "title": "Material Instance Parameter Binding",
+      "concept": "Material Instances allow runtime modification of material properties without recompiling the base material. Understanding how parameters are bound and updated is crucial for performance.",
+      "diagram_suggestion": "A flowchart illustrating the data flow from a parameter change in the editor or blueprint, through the material instance, to the shader uniform."
+    },
+    {
+      "insert_after_timestamp": "1:55",
+      "title": "Roughness and Microfacet Theory",
+      "concept": "Roughness values simulate the distribution of microfacets on a surface. This distribution directly impacts the way light is reflected, influencing perceived glossiness and specular highlights.",
+      "diagram_suggestion": "A visual representation of microfacet distributions for different roughness values, showing how light rays are scattered."
+    },
+    {
+      "insert_after_timestamp": "3:03",
+      "title": "Specular Model Selection",
+      "concept": "UE5 offers different specular models (e.g., GGX, Beckmann). The choice of model affects the shape and intensity of specular highlights, influencing the perceived material properties.",
+      "diagram_suggestion": "Side-by-side comparisons of specular highlights rendered with different specular models, highlighting the visual differences."
+    },
+    {
+      "insert_after_timestamp": "4:52",
+      "title": "Texture Streaming Pool",
+      "concept": "UE5 uses a texture streaming pool to manage texture memory. Understanding how textures are prioritized and streamed in/out is critical for optimizing performance, especially on lower-end hardware.",
+      "diagram_suggestion": "A diagram illustrating the texture streaming pool, showing how textures are loaded, prioritized, and unloaded based on their visibility and importance."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:54",
+      "procedural_step": "Base color is a flat color without specularity or shading.",
+      "why": "This isolates the diffuse reflectance, allowing the lighting model to accurately calculate specular and ambient contributions based on other material properties. This separation is fundamental to PBR.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:01",
+      "procedural_step": "Roughness defines the look of a material.",
+      "why": "Roughness controls the microfacet distribution, directly influencing the size and intensity of specular highlights. Incorrect roughness values break the illusion of realistic materials.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:35",
+      "procedural_step": "Metallic is either 1 or 0.",
+      "why": "Metallic values determine whether a surface behaves as a conductor or an insulator. Intermediate values can lead to physically implausible rendering and energy conservation issues.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:31",
+      "procedural_step": "PNG is best for optimization due to its lightweight file size and transparency.",
+      "why": "PNG's lossless compression and alpha channel support make it suitable for textures requiring sharp details and transparency without introducing compression artifacts, balancing quality and performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:15",
+      "procedural_step": "Textures can affect streaming and memory management.",
+      "why": "Large textures consume significant memory and bandwidth. Inefficient texture management can lead to frame rate drops, especially on lower-end hardware, due to excessive texture thrashing.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:45",
+      "prompt": "Why does the Metallic value influence specular reflection?",
+      "expected_insight": "Metallic surfaces exhibit a colored specular reflection, tinted by the base color, while non-metallic surfaces have a neutral (white) specular reflection. The engine uses the metallic value to switch between these behaviors."
+    },
+    {
+      "insert_after_timestamp": "2:26",
+      "prompt": "How does roughness interact with the specular highlight?",
+      "expected_insight": "Higher roughness values scatter reflected light more widely, resulting in a larger, dimmer specular highlight. Lower roughness values concentrate the reflected light, creating a smaller, brighter highlight."
+    },
+    {
+      "insert_after_timestamp": "3:59",
+      "prompt": "Why are power-of-two textures important for performance?",
+      "expected_insight": "Power-of-two textures allow for efficient mipmap generation and GPU memory access. Non-power-of-two textures can lead to increased memory usage and slower rendering due to the need for padding or resizing."
+    },
+    {
+      "insert_after_timestamp": "5:12",
+      "prompt": "How do mipmaps improve rendering performance?",
+      "expected_insight": "Mipmaps provide pre-filtered, lower-resolution versions of textures. The engine automatically selects the appropriate mipmap level based on the object's distance from the camera, reducing aliasing and improving performance by minimizing texture sampling costs."
+    },
+    {
+      "insert_after_timestamp": "6:27",
+      "prompt": "Why might you import a texture at a higher resolution and then downscale it?",
+      "expected_insight": "Downscaling within the engine allows for better control over the filtering process and can sometimes produce higher-quality results than downscaling in an external image editor. It also allows for consistent asset management within the Unreal Engine project."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "4:15",
+      "warning": "Unoptimized textures can lead to excessive memory consumption and texture streaming bottlenecks, impacting performance and scalability.",
+      "severity": "MEDIUM",
+      "fix": "Implement a robust texture budgeting system, utilize appropriate compression formats, and carefully manage mipmap settings to minimize memory footprint and improve streaming efficiency."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of linear algebra (vectors)",
+    "Familiarity with the concept of color spaces (sRGB vs. linear)",
+    "Knowledge of image file formats and compression techniques"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to avoid pure black or pure white in Albedo maps?",
+      "options": [
+        "They don't accurately represent real-world materials and can cause lighting artifacts.",
+        "They increase the file size of the texture.",
+        "They are not supported by the Unreal Engine material editor.",
+        "They make the material appear too shiny."
+      ],
+      "correct_index": 0,
+      "explanation": "Pure black or white Albedo values are rare in nature and can lead to unrealistic lighting. The engine expects values within a certain range to calculate light interaction correctly."
+    },
+    {
+      "question": "What is the primary function of the Roughness map in a PBR material?",
+      "options": [
+        "To define the base color of the material.",
+        "To control the intensity of specular reflections.",
+        "To simulate the distribution of microfacets on a surface, affecting how light is scattered.",
+        "To determine whether the material is metallic or non-metallic."
+      ],
+      "correct_index": 2,
+      "explanation": "The Roughness map simulates surface imperfections at a microscopic level, influencing the size and intensity of specular highlights. It's a key component of realistic material appearance."
+    },
+    {
+      "question": "How does the Metallic value influence the specular reflection?",
+      "options": [
+        "It determines the size of the specular highlight.",
+        "It controls the roughness of the specular reflection.",
+        "It determines whether the specular reflection is colored or neutral.",
+        "It disables specular reflections entirely."
+      ],
+      "correct_index": 2,
+      "explanation": "Metallic surfaces exhibit a colored specular reflection, tinted by the base color, while non-metallic surfaces have a neutral (white) specular reflection. The engine uses the metallic value to switch between these behaviors."
+    },
+    {
+      "question": "Why are power-of-two dimensions recommended for textures in Unreal Engine?",
+      "options": [
+        "They are easier to edit in image editing software.",
+        "They allow for more efficient mipmap generation and GPU memory access.",
+        "They result in smaller file sizes.",
+        "They are required by the Unreal Engine rendering pipeline."
+      ],
+      "correct_index": 1,
+      "explanation": "Power-of-two textures enable efficient mipmap generation and memory access, improving rendering performance. Non-power-of-two textures can lead to increased memory usage and slower rendering."
+    },
+    {
+      "question": "What is the purpose of mipmaps?",
+      "options": [
+        "To increase the resolution of textures.",
+        "To reduce aliasing and improve performance by providing pre-filtered, lower-resolution versions of textures.",
+        "To add special effects to textures.",
+        "To compress textures for smaller file sizes."
+      ],
+      "correct_index": 1,
+      "explanation": "Mipmaps are pre-filtered, lower-resolution versions of textures used to reduce aliasing and improve performance by minimizing texture sampling costs, especially for objects far from the camera."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

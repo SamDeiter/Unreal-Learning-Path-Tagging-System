@@ -1,0 +1,156 @@
+{
+  "course_code": "106.01",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:00",
+      "title": "Lightmap Unwrapping Theory",
+      "concept": "Lightmaps require unique UV unwrapping to avoid light bleeding and ensure accurate baked lighting. Overlapping UVs cause multiple surfaces to share the same light data, leading to incorrect illumination.",
+      "diagram_suggestion": "A visual comparison of overlapping vs. non-overlapping UVs, demonstrating how light rays are incorrectly applied in the overlapping case."
+    },
+    {
+      "insert_after_timestamp": "0:34",
+      "title": "Lightmass Importance Volume",
+      "concept": "The Lightmass Importance Volume tells the engine where to focus its light baking calculations. Without it, the engine might not allocate enough samples to the relevant areas, resulting in poor lighting quality.",
+      "diagram_suggestion": "A screenshot showing a Lightmass Importance Volume encompassing a scene, with an explanation of how it affects light sample density."
+    },
+    {
+      "insert_after_timestamp": "3:55",
+      "title": "Post-Process Volume and Lumen Override",
+      "concept": "Post-Process Volumes control rendering features. Lumen, when enabled globally, overrides baked lighting. Disabling Lumen within a Post-Process Volume allows baked lighting to be visible.",
+      "diagram_suggestion": "A diagram illustrating the rendering pipeline, showing how the Post-Process Volume modifies the scene before final output, and how Lumen interacts with baked lighting."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:09",
+      "procedural_step": "Baking lighting for optimization",
+      "why": "Baking lighting pre-calculates lighting data and stores it in lightmaps, reducing runtime calculations and improving performance, especially on platforms with limited processing power. This trades memory (for storing the lightmaps) for computational cost.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:38",
+      "procedural_step": "Lightmap UVs must be unique",
+      "why": "Unique lightmap UVs ensure that each surface receives distinct lighting information. Overlapping UVs would cause surfaces to share the same light data, leading to incorrect shadows and illumination. This is because the lightmap stores a single color value per texel in UV space.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:13",
+      "procedural_step": "Changing Lightmap Coordinate Index",
+      "why": "The Lightmap Coordinate Index tells the engine which UV channel to use for lightmap data. If the generated lightmap UVs are on a different channel than the default, the engine will use the wrong UVs, resulting in incorrect lighting. This is a common source of light baking errors.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:59",
+      "procedural_step": "Disabling Lumen in Post-Process Volume",
+      "why": "Lumen is a dynamic global illumination system. When enabled, it overrides baked lighting. Disabling Lumen within a Post-Process Volume allows the baked lighting to be visible. This is important for performance on lower-end hardware or when specific artistic control over lighting is needed.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:34",
+      "prompt": "Why is it important to consider the target platform's capabilities when deciding between dynamic lighting (like Lumen) and baked lighting?",
+      "expected_insight": "Lower-end platforms may not have the processing power for Lumen, making baked lighting a more performant option. Baked lighting trades memory for performance."
+    },
+    {
+      "insert_after_timestamp": "1:13",
+      "prompt": "Imagine you have a complex mesh with intricate details. How would you approach creating lightmap UVs to minimize artifacts and ensure accurate lighting?",
+      "expected_insight": "Prioritize non-overlapping UVs, consider using a higher lightmap resolution, and pay attention to seams to avoid light bleeding."
+    },
+    {
+      "insert_after_timestamp": "3:35",
+      "prompt": "Why does the Lightmap Coordinate Index matter, and what problems can arise if it's set incorrectly?",
+      "expected_insight": "It tells the engine which UV channel to use for lightmaps. Incorrectly setting it will cause the engine to use the wrong UVs, leading to lighting errors."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "1:43",
+      "warning": "Overlapping Lightmap UVs cause light bleeding and incorrect illumination. This can lead to visual artifacts and an unprofessional look.",
+      "severity": "HIGH",
+      "fix": "Ensure that lightmap UVs are unique and non-overlapping. Use the 'Generate Lightmap UVs' option in the Static Mesh Editor or create them in a DCC tool."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of UV unwrapping",
+    "Familiarity with the Unreal Engine editor interface",
+    "Knowledge of static vs. dynamic lighting"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why are unique, non-overlapping UVs crucial for lightmaps?",
+      "options": [
+        "To prevent light bleeding and ensure accurate baked lighting.",
+        "To optimize texture memory usage.",
+        "To improve shadow quality.",
+        "To reduce compile times."
+      ],
+      "correct_index": 0,
+      "explanation": "Overlapping UVs cause multiple surfaces to share the same light data, leading to incorrect illumination. Unique UVs ensure each surface receives distinct lighting information."
+    },
+    {
+      "question": "What is the primary function of the Lightmass Importance Volume?",
+      "options": [
+        "To define the area where light baking calculations are focused.",
+        "To control the intensity of indirect lighting.",
+        "To enable real-time global illumination.",
+        "To optimize shadow rendering performance."
+      ],
+      "correct_index": 0,
+      "explanation": "The Lightmass Importance Volume tells the engine where to focus its light baking calculations, ensuring sufficient samples are allocated to relevant areas."
+    },
+    {
+      "question": "How does disabling Lumen within a Post-Process Volume affect baked lighting?",
+      "options": [
+        "It allows baked lighting to be visible, preventing Lumen from overriding it.",
+        "It improves the performance of Lumen.",
+        "It disables all lighting in the scene.",
+        "It increases the resolution of lightmaps."
+      ],
+      "correct_index": 0,
+      "explanation": "Lumen, when enabled globally, overrides baked lighting. Disabling Lumen within a Post-Process Volume allows baked lighting to be visible."
+    },
+    {
+      "question": "What does the Lightmap Coordinate Index setting control?",
+      "options": [
+        "The UV channel used for lightmap data.",
+        "The resolution of the lightmap.",
+        "The intensity of baked lighting.",
+        "The compression method for lightmaps."
+      ],
+      "correct_index": 0,
+      "explanation": "The Lightmap Coordinate Index tells the engine which UV channel to use for lightmap data. Setting it incorrectly will cause lighting errors."
+    },
+    {
+      "question": "What is the trade-off when using baked lighting instead of dynamic lighting solutions like Lumen?",
+      "options": [
+        "Memory usage increases, but runtime computational cost decreases.",
+        "Runtime computational cost increases, but memory usage decreases.",
+        "Both memory usage and runtime computational cost increase.",
+        "Both memory usage and runtime computational cost decrease."
+      ],
+      "correct_index": 0,
+      "explanation": "Baking lighting pre-calculates lighting data and stores it in lightmaps, increasing memory usage but reducing runtime calculations."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 27,
+    "grade": "D"
+  }
+}

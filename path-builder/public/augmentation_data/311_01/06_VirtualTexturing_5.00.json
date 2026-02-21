@@ -1,0 +1,165 @@
+{
+  "course_code": "311.01",
+  "conceptual_score": {
+    "procedural_pct": 80,
+    "conceptual_pct": 20,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:31",
+      "title": "Runtime Virtual Texturing Architecture",
+      "concept": "Runtime Virtual Texturing (RVT) in Unreal Engine 5 leverages a sparse texture representation streamed at runtime. This differs from traditional MIP-mapping by only loading the necessary texture tiles based on screen-space coverage, significantly reducing memory footprint and enabling the use of extremely high-resolution textures, especially on Landscapes. RVT uses a feedback loop where the rendered scene informs which tiles to load next, optimizing streaming.",
+      "diagram_suggestion": "Diagram showing the RVT pipeline: high-resolution source texture -> virtual texture representation -> tile selection based on view frustum and screen-space error -> asynchronous streaming -> rendering. Highlight the feedback loop from the renderer to the streaming system."
+    },
+    {
+      "insert_after_timestamp": "1:09",
+      "title": "Streaming Virtual Texturing vs. Traditional MIP Streaming",
+      "concept": "Streaming Virtual Texturing (SVT) offers an alternative to traditional MIP-based texture streaming. While MIP streaming relies on pre-computed, scaled-down versions of textures, SVT streams texture tiles on demand. This is particularly beneficial for textures exceeding available memory, UDIMs, or lightmaps. SVT reduces memory overhead by only loading the necessary portions of the texture, improving performance in memory-constrained scenarios.",
+      "diagram_suggestion": "Comparative diagram illustrating MIP streaming (pre-computed pyramid of textures) vs. SVT (on-demand tile loading). Show memory usage differences for a large texture."
+    },
+    {
+      "insert_after_timestamp": "3:58",
+      "title": "Runtime Virtual Texture Volume",
+      "concept": "The Runtime Virtual Texture Volume defines the spatial extent within which the RVT system operates. It acts as a container and manager for the virtual texture, mapping world-space coordinates to UV coordinates within the virtual texture. Proper sizing and placement of the volume are crucial for correct RVT application. The volume's bounds determine which objects contribute to and sample from the virtual texture.",
+      "diagram_suggestion": "Diagram showing a Runtime Virtual Texture Volume encompassing a landscape. Illustrate the mapping of world-space coordinates of the landscape surface to UV coordinates within the virtual texture."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:23",
+      "procedural_step": "Runtime virtual texturing provides an efficient way to render complex procedure generated or layered material.",
+      "why": "RVT avoids pre-baking large textures, saving disk space and memory. It allows dynamic material changes at runtime without needing to re-import or re-stream entire textures, improving iteration speed and enabling dynamic effects.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:04",
+      "procedural_step": "The streaming virtual textures is an alternate way to stream textures from disk compared to existing MIP-based texture streaming.",
+      "why": "SVT reduces the initial memory footprint because it only loads the necessary texture tiles, not the entire texture and all its MIP levels. This is crucial for large open worlds with limited GPU memory.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:32",
+      "procedural_step": "Add the runtime virtual texture volume to the level and then with the runtime virtual texture volume selected, go to the transformation from bound section and set the source actor to the landscape that is placed in the level.",
+      "why": "The RVT Volume defines the area where the virtual texture effect is applied. Failing to properly size and position it will result in the effect being clipped or misaligned, leading to visual artifacts and incorrect material blending.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:41",
+      "procedural_step": "If your landscape has black parts in it after the virtual texture, just try rebuilding the landscape material, saving everything and then it should function correctly for you.",
+      "why": "Black artifacts often indicate that the RVT system hasn't properly initialized or updated the virtual texture tiles. Rebuilding the material forces a re-evaluation of the material graph and ensures the RVT system is correctly triggered, resolving the rendering issue.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:59",
+      "procedural_step": "If your landscape spline mesh is selected, press the plus icon to add the new static mesh to the array.",
+      "why": "Adding a static mesh to the landscape spline mesh array allows the spline to procedurally generate geometry along its path. This is useful for creating roads, walls, or other features that follow the terrain's contours. The RVT applied to the landscape will then blend with the spline mesh material.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:47",
+      "prompt": "Why is RVT particularly well-suited for landscapes compared to traditional texturing methods?",
+      "expected_insight": "Landscapes often require extremely large textures. RVT avoids loading the entire texture into memory, only streaming the visible portions, leading to significant memory savings and improved performance."
+    },
+    {
+      "insert_after_timestamp": "2:00",
+      "prompt": "Why are we using a 'Virtual Texture Feature Switch' node in the material graph?",
+      "expected_insight": "The feature switch allows us to toggle the RVT effect on and off. This is useful for comparing the performance and visual quality with and without RVT, and for debugging purposes."
+    },
+    {
+      "insert_after_timestamp": "3:26",
+      "prompt": "What happens if the Runtime Virtual Texture Volume doesn't fully encompass the landscape?",
+      "expected_insight": "The RVT effect will only be applied within the volume's bounds. Areas outside the volume will not benefit from RVT, leading to visual inconsistencies and seams."
+    },
+    {
+      "insert_after_timestamp": "5:10",
+      "prompt": "Why must the virtual texture size be a power of two?",
+      "expected_insight": "Power-of-two texture sizes are a hardware requirement for efficient texture sampling and MIP-mapping on most GPUs. Non-power-of-two textures can lead to performance penalties and visual artifacts."
+    },
+    {
+      "insert_after_timestamp": "6:53",
+      "prompt": "How does applying RVT to landscape splines enhance the visual integration of these features with the landscape?",
+      "expected_insight": "RVT allows the spline's material to seamlessly blend with the landscape material, creating a more natural and cohesive appearance. This is achieved by sharing the same virtual texture, ensuring consistent texturing and lighting."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Understanding of Material Attributes and Material Functions",
+    "Familiarity with Landscape creation and editing tools",
+    "Basic knowledge of texture streaming concepts"
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary benefit of using Runtime Virtual Texturing (RVT) for landscapes in Unreal Engine 5?",
+      "options": [
+        "Reduced memory footprint by streaming only visible texture tiles.",
+        "Increased texture resolution without any performance impact.",
+        "Simplified material creation process.",
+        "Automatic generation of landscape geometry."
+      ],
+      "correct_index": 0,
+      "explanation": "RVT's key advantage is its ability to handle extremely large textures by only loading the necessary tiles, conserving memory and improving performance, as discussed in the RVT Architecture theory break."
+    },
+    {
+      "question": "How does Streaming Virtual Texturing (SVT) differ from traditional MIP-based texture streaming?",
+      "options": [
+        "SVT streams texture tiles on demand, while MIP streaming uses pre-computed scaled versions.",
+        "SVT only works with static meshes, while MIP streaming works with skeletal meshes.",
+        "SVT requires more memory than MIP streaming.",
+        "SVT is only applicable to lightmaps."
+      ],
+      "correct_index": 0,
+      "explanation": "SVT streams texture tiles based on demand, reducing memory overhead compared to MIP streaming's pre-computed pyramid, as explained in the SVT vs MIP theory break."
+    },
+    {
+      "question": "What role does the Runtime Virtual Texture Volume play in the RVT system?",
+      "options": [
+        "It defines the spatial extent where the RVT effect is applied.",
+        "It stores the high-resolution source textures.",
+        "It automatically optimizes the material graph.",
+        "It generates the landscape geometry."
+      ],
+      "correct_index": 0,
+      "explanation": "The RVT Volume determines the area in the world where the virtual texture is active, mapping world coordinates to UVs, as detailed in the RVT Volume theory break."
+    },
+    {
+      "question": "Why is it important to rebuild the landscape material if black artifacts appear after applying RVT?",
+      "options": [
+        "Rebuilding forces a re-evaluation of the material graph and ensures the RVT system is correctly triggered.",
+        "Rebuilding automatically increases the texture resolution.",
+        "Rebuilding resets the landscape to its default state.",
+        "Rebuilding optimizes the landscape geometry."
+      ],
+      "correct_index": 0,
+      "explanation": "Rebuilding the material ensures the RVT system initializes correctly, resolving rendering issues caused by uninitialized virtual texture tiles, as mentioned in the 'why' annotations."
+    },
+    {
+      "question": "What is the significance of using power-of-two texture sizes for virtual textures?",
+      "options": [
+        "Power-of-two sizes are a hardware requirement for efficient texture sampling on most GPUs.",
+        "Power-of-two sizes automatically increase the texture resolution.",
+        "Power-of-two sizes reduce the memory footprint of the texture.",
+        "Power-of-two sizes are only required for static meshes."
+      ],
+      "correct_index": 0,
+      "explanation": "Power-of-two texture sizes are a hardware requirement for efficient texture sampling and MIP-mapping on most GPUs, as highlighted in the self-explanation prompts."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 3,
+    "affective_tone": 3,
+    "total": 28,
+    "grade": "D"
+  }
+}

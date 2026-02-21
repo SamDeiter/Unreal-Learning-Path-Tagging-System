@@ -1,0 +1,165 @@
+{
+  "course_code": "101.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:10",
+      "title": "Normal Map Blending Theory",
+      "concept": "Explain the mathematical basis of normal map blending, including the tangent space transformation and how the BlendAngleCorrectedNormals node avoids distortion by considering the angles between the normals.",
+      "diagram_suggestion": "A visual representation of tangent space, showing how normals are transformed into this space before blending, and then transformed back to object space."
+    },
+    {
+      "insert_after_timestamp": "2:47",
+      "title": "LOD and Material Complexity",
+      "concept": "Discuss how stacking multiple normal maps can impact performance, especially on lower-end hardware. Introduce Level of Detail (LOD) techniques for materials to simplify the material graph based on distance from the camera.",
+      "diagram_suggestion": "A diagram showing different LOD levels for a material, with the number of normal maps decreasing as the distance increases."
+    },
+    {
+      "insert_after_timestamp": "5:53",
+      "title": "Ambient Occlusion and Cavity Maps",
+      "concept": "Explain the difference between ambient occlusion (AO) and cavity maps, and how they contribute to the perception of depth and detail. Discuss the physical basis of AO and how it simulates indirect lighting.",
+      "diagram_suggestion": "A side-by-side comparison of AO and cavity maps, highlighting the areas each emphasizes and how they combine to enhance detail."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "1:17",
+      "procedural_step": "Using BlendAngleCorrectedNormals node.",
+      "why": "This node prevents distortion when layering normal maps because it blends normals in tangent space, preserving the overall surface direction. Without it, naive blending can lead to incorrect lighting calculations and visual artifacts.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:47",
+      "procedural_step": "Multiplying normal maps.",
+      "why": "Multiplying normal maps can darken the overall normal, effectively reducing the bumpiness. This is because normal maps are centered around (0.5, 0.5, 1.0), and multiplying values less than 1 will darken the result. This can flatten the details.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:50",
+      "procedural_step": "Using a scalar parameter to control wave normal amount.",
+      "why": "Scalar parameters allow artists to adjust material properties at runtime without recompiling the shader. This is crucial for iteration and creating material instances with different looks. Changes propagate to all instances using the base material.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:45",
+      "procedural_step": "Multiplying AO and Cavity maps.",
+      "why": "Multiplying AO and cavity maps enhances the contrast of surface details. AO darkens recessed areas based on occlusion, while cavity maps highlight crevices. Multiplying them emphasizes both effects, creating a stronger sense of depth. However, overdoing it can lead to unrealistic darkening.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:24",
+      "procedural_step": "Adding metallic to a stone material.",
+      "why": "Adding metallic properties to a non-metallic surface like stone will cause it to reflect light in a way that is physically incorrect. This can lead to an unnatural, 'tin-foil' appearance because the engine will use metal-specific shading models.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:34",
+      "prompt": "Why is it beneficial to adjust material parameters within a material instance rather than directly in the base material?",
+      "expected_insight": "Material instances allow for non-destructive editing and efficient variation of material properties without recompiling the base shader, saving time and resources."
+    },
+    {
+      "insert_after_timestamp": "2:08",
+      "prompt": "How does the order of operations (e.g., which normal map is the 'base' in BlendAngleCorrectedNormals) affect the final appearance of the material?",
+      "expected_insight": "The base normal provides the overall surface direction, while subsequent normals add details. Changing the order can drastically alter the perceived surface structure."
+    },
+    {
+      "insert_after_timestamp": "4:12",
+      "prompt": "What are the trade-offs between 'macro' and 'micro' control when adjusting material parameters, and when might you choose one over the other?",
+      "expected_insight": "Macro control offers broad adjustments, while micro control allows for fine-tuning specific details. Macro is faster for overall changes, while micro is better for isolating and refining individual effects."
+    },
+    {
+      "insert_after_timestamp": "5:09",
+      "prompt": "Why might combining AO and cavity maps through multiplication be more effective than using either map alone?",
+      "expected_insight": "AO provides general shading based on occlusion, while cavity maps highlight fine details. Multiplication combines these effects for a more comprehensive and visually appealing result."
+    },
+    {
+      "insert_after_timestamp": "7:12",
+      "prompt": "Under what circumstances would adding a metallic property to a non-metallic material be a useful artistic choice, and what are the potential drawbacks?",
+      "expected_insight": "It can create stylized or exaggerated effects, but it can also lead to an unrealistic appearance if not carefully controlled, as the engine will apply metallic shading models."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Understanding of UV mapping and texture coordinates.",
+    "Basic knowledge of linear algebra (vectors, normals, tangent space).",
+    "Familiarity with the Unreal Engine material editor interface."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to blend normal maps in tangent space rather than object space?",
+      "options": [
+        "To avoid distortion and ensure correct lighting calculations.",
+        "To improve performance by reducing the number of calculations.",
+        "To simplify the material graph and make it easier to understand.",
+        "To ensure compatibility with older graphics cards."
+      ],
+      "correct_index": 0,
+      "explanation": "Blending in tangent space accounts for the surface orientation, preventing normals from canceling each other out and ensuring correct lighting."
+    },
+    {
+      "question": "What is the primary benefit of using material instances in Unreal Engine 5?",
+      "options": [
+        "They allow for non-destructive editing of material properties.",
+        "They automatically optimize material performance.",
+        "They enable real-time ray tracing.",
+        "They simplify the process of creating complex material graphs."
+      ],
+      "correct_index": 0,
+      "explanation": "Material instances inherit from a parent material, allowing you to change parameters without recompiling the base shader, saving time and resources."
+    },
+    {
+      "question": "How does multiplying an Ambient Occlusion (AO) map with a Cavity map affect the final material appearance?",
+      "options": [
+        "It enhances the contrast and depth of surface details.",
+        "It reduces the overall roughness of the material.",
+        "It increases the specular highlights on the surface.",
+        "It makes the material more transparent."
+      ],
+      "correct_index": 0,
+      "explanation": "Multiplying AO and Cavity maps emphasizes both the broad shading from occlusion and the fine details of crevices, creating a stronger sense of depth."
+    },
+    {
+      "question": "What is the potential downside of stacking too many normal maps in a material?",
+      "options": [
+        "Reduced performance due to increased shader complexity.",
+        "Inaccurate lighting calculations.",
+        "UV coordinate distortion.",
+        "Incompatibility with certain rendering features."
+      ],
+      "correct_index": 0,
+      "explanation": "Each normal map adds to the computational cost of the shader, potentially impacting frame rates, especially on lower-end hardware. Consider LODs to mitigate this."
+    },
+    {
+      "question": "Why might adding a metallic property to a material like stone result in an unrealistic appearance?",
+      "options": [
+        "Because stone does not naturally reflect light like a metal.",
+        "Because the engine cannot properly render metallic materials.",
+        "Because it will cause the material to become completely black.",
+        "Because it will disable all other material properties."
+      ],
+      "correct_index": 0,
+      "explanation": "Stone is a dielectric material, not a conductor. Applying metallic properties will cause it to reflect light in a way that is physically incorrect, leading to an unnatural look."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

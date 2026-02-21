@@ -1,0 +1,172 @@
+{
+  "course_code": "100.10",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:08",
+      "title": "Lumen Global Illumination",
+      "concept": "Lumen's ability to provide global illumination and reflections dynamically impacts the entire lighting workflow. Understanding how Lumen handles indirect lighting is crucial for stage lighting design.",
+      "diagram_suggestion": "A diagram illustrating the Lumen global illumination pipeline, showing how light bounces and interacts with surfaces in the scene."
+    },
+    {
+      "insert_after_timestamp": "0:45",
+      "title": "Exposure Compensation and HDR",
+      "concept": "Exposure compensation interacts directly with the High Dynamic Range (HDR) rendering pipeline in Unreal Engine 5. Understanding the relationship between exposure settings and the range of light values is critical for realistic lighting.",
+      "diagram_suggestion": "A visual representation of the HDR range and how exposure compensation shifts the visible range within that HDR spectrum."
+    },
+    {
+      "insert_after_timestamp": "2:07",
+      "title": "Movable Lights and Dynamic Shadows",
+      "concept": "Using movable lights leverages Unreal Engine 5's dynamic shadow capabilities. Understanding the performance implications of dynamic shadows, especially with multiple lights, is essential for optimization.",
+      "diagram_suggestion": "A comparison of static, stationary, and movable lights, highlighting the performance cost associated with dynamic shadows and global illumination updates."
+    },
+    {
+      "insert_after_timestamp": "3:37",
+      "title": "IES Profiles",
+      "concept": "IES profiles define the distribution of light from a light source. Utilizing IES profiles allows for accurate representation of real-world lighting fixtures within Unreal Engine 5.",
+      "diagram_suggestion": "A visual representation of different IES profiles and their corresponding light distribution patterns."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:21",
+      "procedural_step": "Avoid adding too many lights at once.",
+      "why": "Adding too many lights simultaneously increases the computational cost of Lumen's global illumination calculations, potentially leading to performance bottlenecks and visual artifacts due to conflicting light contributions. It also makes debugging lighting issues exponentially harder.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:45",
+      "procedural_step": "Disable auto exposure.",
+      "why": "Disabling auto exposure provides a controlled environment for lighting design. Auto exposure constantly adjusts the scene's brightness, making it difficult to accurately gauge the impact of individual light sources and create a consistent visual style. It prevents you from seeing the 'true' light values.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:49",
+      "procedural_step": "Use real-world light values (candelas/lumens).",
+      "why": "Using real-world light values ensures that the lighting in the scene is physically plausible. This approach simplifies the process of achieving realistic results and facilitates collaboration with other team members who may be familiar with these units. It also allows for easier matching of real-world lighting scenarios.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:07",
+      "procedural_step": "Set lights to Movable.",
+      "why": "Movable lights are required to take full advantage of Lumen's dynamic global illumination and reflections. Static lights require precomputed lighting, which is not suitable for dynamic scenes. Stationary lights can provide some dynamic shadowing but still rely on baked lighting for static elements, limiting flexibility.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:04",
+      "procedural_step": "Use tools to stay within value.",
+      "why": "Staying within value prevents clipping and ensures that the scene's dynamic range is properly utilized. Clipping occurs when light values exceed the maximum representable value, resulting in a loss of detail and an unrealistic appearance. Overbright values also negatively impact Lumen's ability to calculate accurate global illumination.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:38",
+      "prompt": "Why does isolating light sources simplify the lighting process, especially when using Lumen?",
+      "expected_insight": "Isolating light sources allows for precise control over individual light contributions, making it easier to diagnose and correct lighting issues. With Lumen, each light interacts with the scene globally, so isolating them helps to understand their specific impact on global illumination."
+    },
+    {
+      "insert_after_timestamp": "1:10",
+      "prompt": "How does disabling auto-exposure help in achieving a consistent and predictable lighting setup?",
+      "expected_insight": "Disabling auto-exposure prevents the engine from automatically adjusting the scene's brightness, allowing the artist to have direct control over the exposure and ensure that the lighting appears as intended across different viewing conditions."
+    },
+    {
+      "insert_after_timestamp": "1:59",
+      "prompt": "Why is it important to use real-world light values when aiming for realistic automotive visualization?",
+      "expected_insight": "Using real-world light values grounds the lighting design in physical reality, making it easier to achieve accurate and believable results. It also facilitates communication and collaboration with other team members who may be familiar with these units."
+    },
+    {
+      "insert_after_timestamp": "3:20",
+      "prompt": "How does the post-processing volume contribute to neutralizing the scene's lighting before adding new lights?",
+      "expected_insight": "The post-processing volume allows for adjustments to the scene's overall appearance, such as disabling bloom and setting a specific exposure compensation value. This ensures a consistent starting point for lighting design and prevents unwanted visual artifacts."
+    },
+    {
+      "insert_after_timestamp": "4:22",
+      "prompt": "What are the trade-offs when increasing the intensity scale of the skylight, especially when it's the only light source in the scene?",
+      "expected_insight": "Increasing the intensity scale of the skylight can brighten the scene, but it can also lead to a washed-out appearance and a loss of detail. It's important to balance the intensity with other lighting elements to achieve a realistic and visually appealing result."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Understanding of the High Dynamic Range (HDR) rendering pipeline.",
+    "Familiarity with the concept of exposure and its impact on scene brightness.",
+    "Basic knowledge of light types in Unreal Engine 5 (e.g., directional light, skylight, point light).",
+    "Understanding of post-processing effects and their role in visual quality."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally recommended to light a scene in Unreal Engine 5 using an isolated approach, adding and adjusting lights one at a time?",
+      "options": [
+        "To simplify the process of balancing light contributions and avoid performance issues.",
+        "Because Unreal Engine 5 can only handle a limited number of lights simultaneously.",
+        "To make it easier to animate the lights in the scene.",
+        "Because it's the only way to achieve realistic lighting effects."
+      ],
+      "correct_index": 0,
+      "explanation": "Isolating light sources simplifies balancing and debugging, especially with Lumen's global illumination. Too many lights at once create a complex, hard-to-manage system."
+    },
+    {
+      "question": "What is the primary benefit of disabling auto exposure when lighting a scene in Unreal Engine 5?",
+      "options": [
+        "It allows for more consistent and predictable lighting results.",
+        "It improves the performance of Lumen's global illumination calculations.",
+        "It reduces the memory footprint of the scene.",
+        "It makes it easier to create stylized lighting effects."
+      ],
+      "correct_index": 0,
+      "explanation": "Disabling auto exposure gives the artist direct control over the scene's brightness, ensuring that the lighting appears as intended regardless of viewing conditions. It prevents the engine from automatically adjusting the exposure, which can lead to inconsistent results."
+    },
+    {
+      "question": "Why is it important to use real-world light values (e.g., candelas, lumens) when aiming for realistic lighting in Unreal Engine 5?",
+      "options": [
+        "It ensures that the lighting is physically plausible and easier to match real-world scenarios.",
+        "It improves the performance of the rendering engine.",
+        "It simplifies the process of creating stylized lighting effects.",
+        "It reduces the memory footprint of the scene."
+      ],
+      "correct_index": 0,
+      "explanation": "Using real-world light values grounds the lighting design in physical reality, making it easier to achieve accurate and believable results. It also facilitates communication and collaboration with other team members."
+    },
+    {
+      "question": "What is the significance of setting lights to 'Movable' when using Lumen in Unreal Engine 5?",
+      "options": [
+        "It allows the lights to fully interact with Lumen's dynamic global illumination and reflections.",
+        "It improves the performance of the rendering engine.",
+        "It simplifies the process of creating stylized lighting effects.",
+        "It reduces the memory footprint of the scene."
+      ],
+      "correct_index": 0,
+      "explanation": "Movable lights are required to take full advantage of Lumen's dynamic global illumination and reflections. Static lights rely on precomputed lighting, which is not suitable for dynamic scenes."
+    },
+    {
+      "question": "What is the purpose of a post-processing volume in the context of lighting a scene in Unreal Engine 5?",
+      "options": [
+        "To apply global adjustments to the scene's appearance, such as disabling bloom and setting exposure compensation.",
+        "To improve the performance of the rendering engine.",
+        "To simplify the process of creating stylized lighting effects.",
+        "To reduce the memory footprint of the scene."
+      ],
+      "correct_index": 0,
+      "explanation": "A post-processing volume allows for adjustments to the scene's overall appearance, ensuring a consistent starting point for lighting design and preventing unwanted visual artifacts."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 24,
+    "grade": "D"
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "course_code": "203.04",
+  "conceptual_score": {
+    "procedural_pct": 70,
+    "conceptual_pct": 30,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:09",
+      "title": "Bidirectional Path Tracing",
+      "concept": "Path tracing in UE5 is primarily unidirectional (camera to light). Bidirectional path tracing, which traces paths from both the camera and light sources, can more efficiently resolve complex light paths like caustics. Understanding the limitations of unidirectional tracing clarifies why caustics are approximated.",
+      "diagram_suggestion": "A diagram comparing unidirectional and bidirectional path tracing, highlighting the paths traced in each and how bidirectional tracing handles caustics more effectively."
+    },
+    {
+      "insert_after_timestamp": "0:37",
+      "title": "Monte Carlo Integration in Path Tracing",
+      "concept": "Path tracing relies on Monte Carlo integration to estimate the light transport. This involves randomly sampling paths and averaging their contributions. The number of samples directly impacts the accuracy and noise level. Caustics require a very high number of samples due to their complex and concentrated nature, explaining the need for approximations.",
+      "diagram_suggestion": "A visualization of Monte Carlo integration, showing how increasing the number of samples reduces noise and improves accuracy, particularly in areas with high variance like caustics."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:14",
+      "procedural_step": "True caustics are physically accurate, but very noisy and slow to converge",
+      "why": "Because accurately simulating the complex interactions of light reflecting and refracting through surfaces requires an extremely high number of samples per pixel. Insufficient samples manifest as visual noise, and the computational cost scales exponentially with scene complexity.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:33",
+      "procedural_step": "Unreal's Path Tracer automatically enables an approximation that simplifies the caustic calculations",
+      "why": "To maintain interactive frame rates and reduce render times, the engine sacrifices physical accuracy for performance. This approximation reduces the intrinsic computational load, allowing for faster convergence at the cost of some realism.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:56",
+      "procedural_step": "Using the denoiser lets you preview what true refractive caustics would look like",
+      "why": "The denoiser attempts to extrapolate the final converged image from a limited number of samples. While it offers a preview, it's crucial to understand that denoising inherently introduces bias and may not perfectly represent the physically accurate result.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:06",
+      "prompt": "Why are caustics so computationally expensive to render?",
+      "expected_insight": "Caustics are formed by focused light, requiring a very high density of light rays to be traced accurately. The variance in light intensity is high, necessitating many samples to converge to a noise-free solution."
+    },
+    {
+      "insert_after_timestamp": "0:39",
+      "prompt": "What are the trade-offs between using approximate caustics and true refractive caustics in Unreal Engine?",
+      "expected_insight": "Approximate caustics offer faster rendering times and reduced noise but sacrifice physical accuracy. True refractive caustics are more accurate but require significantly more computational resources and time to converge."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Understanding of Monte Carlo integration",
+    "Familiarity with global illumination algorithms",
+    "Knowledge of rendering equations"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why does Unreal Engine's Path Tracer use an approximation for caustics by default?",
+      "options": [
+        "To reduce render times and noise.",
+        "To improve the visual fidelity of the scene.",
+        "To simplify material creation.",
+        "To enable real-time rendering."
+      ],
+      "correct_index": 0,
+      "explanation": "Approximating caustics is a performance optimization. Accurately rendering them is computationally expensive."
+    },
+    {
+      "question": "What is the primary difference between 'refractive' and 'approximate' caustics in the Path Tracer?",
+      "options": [
+        "Refractive caustics are physically accurate but slow, while approximate caustics are faster but less accurate.",
+        "Refractive caustics are only visible on refractive materials, while approximate caustics are visible on all materials.",
+        "Refractive caustics require a denoiser, while approximate caustics do not.",
+        "Refractive caustics are enabled by default, while approximate caustics must be manually enabled."
+      ],
+      "correct_index": 0,
+      "explanation": "Refractive caustics aim for physical accuracy, requiring more computation. Approximate caustics prioritize speed."
+    },
+    {
+      "question": "How does increasing the number of samples affect the rendering of true caustics?",
+      "options": [
+        "It reduces noise and improves accuracy.",
+        "It increases noise and reduces accuracy.",
+        "It has no effect on noise or accuracy.",
+        "It only affects the rendering of approximate caustics."
+      ],
+      "correct_index": 0,
+      "explanation": "Path tracing relies on Monte Carlo integration; more samples reduce variance and improve the estimate."
+    },
+    {
+      "question": "What is the main purpose of the denoiser when rendering caustics?",
+      "options": [
+        "To reduce noise and preview the appearance of fully converged caustics.",
+        "To increase the brightness of caustics.",
+        "To simplify the caustic calculations.",
+        "To disable approximate caustics."
+      ],
+      "correct_index": 0,
+      "explanation": "The denoiser attempts to remove noise from a low sample count render, approximating a fully converged result."
+    },
+    {
+      "question": "Why are caustics more difficult to render than other types of lighting?",
+      "options": [
+        "They require a very high density of light rays to be traced accurately due to their focused nature.",
+        "They are not affected by global illumination.",
+        "They only occur on perfectly smooth surfaces.",
+        "They are calculated using a different rendering algorithm."
+      ],
+      "correct_index": 0,
+      "explanation": "The focused nature of caustics means that only a small subset of light rays contribute significantly, requiring many samples to find those rays."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 4,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 27,
+    "grade": "D"
+  }
+}
