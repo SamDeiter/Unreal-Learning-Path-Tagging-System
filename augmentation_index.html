@@ -1,393 +1,944 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Augmentation Dashboard | UE5 Learning</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:#06090f; --surface:#0c1220; --card:#131c2e;
-      --border:rgba(255,255,255,0.06);
-      --accent:#3b82f6; --purple:#a78bfa; --cyan:#22d3ee;
-      --green:#10b981; --emerald:#34d399; --orange:#f97316;
-      --yellow:#f59e0b; --red:#ef4444; --rose:#fb7185;
-      --text:#e2e8f0; --dim:#94a3b8; --muted:#64748b;
-      --max-w:1200px;
-    }
-    *{margin:0;padding:0;box-sizing:border-box;}
-    html{scroll-behavior:smooth;}
-    body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Augmentation Dashboard | UE5 Learning</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #06090f;
+        --surface: #0c1220;
+        --card: #131c2e;
+        --border: rgba(255, 255, 255, 0.06);
+        --accent: #3b82f6;
+        --purple: #a78bfa;
+        --cyan: #22d3ee;
+        --green: #10b981;
+        --emerald: #34d399;
+        --orange: #f97316;
+        --yellow: #f59e0b;
+        --red: #ef4444;
+        --rose: #fb7185;
+        --text: #e2e8f0;
+        --dim: #94a3b8;
+        --muted: #64748b;
+        --max-w: 1200px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
 
-    /* ---- HERO ---- */
-    .hero {
-      position:relative; padding:48px 32px 40px;
-      border-bottom:1px solid var(--border);
-    }
-    .hero::before {
-      content:'';position:absolute;inset:0;
-      overflow:hidden;
-      background:radial-gradient(ellipse 70% 50% at 20% 40%,rgba(59,130,246,0.07),transparent),
-                 radial-gradient(ellipse 50% 40% at 80% 30%,rgba(167,139,250,0.05),transparent);
-      pointer-events:none;
-    }
-    .hero-inner { position:relative; max-width:var(--max-w); margin:0 auto; }
-    .hero-badge {
-      display:inline-flex; align-items:center; gap:6px;
-      padding:4px 14px; border-radius:20px;
-      background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2);
-      font-size:11px; font-weight:600; color:var(--accent); margin-bottom:14px;
-    }
-    .hero-badge .dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-    .hero h1 {
-      font-size:36px; font-weight:900; line-height:1.1;
-      background:linear-gradient(135deg,var(--text) 60%,var(--accent));
-      -webkit-background-clip:text; background-clip:text;
-      -webkit-text-fill-color:transparent; margin-bottom:8px;
-    }
-    .hero .subtitle { font-size:14px; color:var(--dim); max-width:560px; line-height:1.5; margin-bottom:28px; }
-    .hero .subtitle strong { color:var(--text); }
+      /* ---- HERO ---- */
+      .hero {
+        position: relative;
+        padding: 48px 32px 40px;
+        border-bottom: 1px solid var(--border);
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background:
+          radial-gradient(ellipse 70% 50% at 20% 40%, rgba(59, 130, 246, 0.07), transparent),
+          radial-gradient(ellipse 50% 40% at 80% 30%, rgba(167, 139, 250, 0.05), transparent);
+        pointer-events: none;
+      }
+      .hero-inner {
+        position: relative;
+        max-width: var(--max-w);
+        margin: 0 auto;
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 14px;
+        border-radius: 20px;
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent);
+        margin-bottom: 14px;
+      }
+      .hero-badge .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+      .hero h1 {
+        font-size: 36px;
+        font-weight: 900;
+        line-height: 1.1;
+        background: linear-gradient(135deg, var(--text) 60%, var(--accent));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+      }
+      .hero .subtitle {
+        font-size: 14px;
+        color: var(--dim);
+        max-width: 560px;
+        line-height: 1.5;
+        margin-bottom: 28px;
+      }
+      .hero .subtitle strong {
+        color: var(--text);
+      }
 
-    /* Stat cards */
-    .hero-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-    .hero-stat {
-      display:flex; align-items:center; gap:12px;
-      background:var(--card); border:1px solid var(--border); border-radius:12px;
-      padding:14px 18px; transition:transform 0.15s, border-color 0.15s;
-      position:relative;
-    }
-    .hero-stat:hover { transform:translateY(-2px); border-color:rgba(255,255,255,0.1); z-index:20; }
-    .hero-stat .icon {
-      width:40px; height:40px; border-radius:10px;
-      display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;
-    }
-    .hero-stat .val { font-size:22px; font-weight:800; font-family:'JetBrains Mono',monospace; }
-    .hero-stat .lbl { font-size:10px; color:var(--muted); margin-top:2px; }
+      /* Stat cards */
+      .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      .hero-stat {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 18px;
+        transition:
+          transform 0.15s,
+          border-color 0.15s;
+        position: relative;
+      }
+      .hero-stat:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.1);
+        z-index: 20;
+      }
+      .hero-stat .icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+      .hero-stat .val {
+        font-size: 22px;
+        font-weight: 800;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .hero-stat .lbl {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
 
-    /* ---- CONTENT ---- */
-    .content { max-width:var(--max-w); margin:0 auto; padding:0 32px 60px; }
-    .section-heading {
-      font-size:11px; font-weight:700; color:var(--muted);
-      text-transform:uppercase; letter-spacing:1px; margin:32px 0 12px;
-    }
+      /* ---- CONTENT ---- */
+      .content {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 32px 60px;
+      }
+      .section-heading {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 32px 0 12px;
+      }
 
-    /* Grade distribution */
-    .grade-row { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:24px; }
-    .grade-card {
-      background:var(--card); border:1px solid var(--border); border-radius:10px;
-      padding:16px; text-align:center; position:relative;
-      transition:transform 0.15s;
-    }
-    .grade-card:hover { transform:translateY(-2px); z-index:20; }
-    .grade-card .bar-bg { position:absolute; bottom:0; left:0; right:0; }
-    .grade-card .letter { font-size:24px; font-weight:900; position:relative; }
-    .grade-card .cnt { font-size:18px; font-weight:700; font-family:'JetBrains Mono',monospace; position:relative; margin-top:2px; }
-    .grade-card .pct { font-size:10px; color:var(--muted); position:relative; margin-top:2px; }
-    .gc-A .letter{color:var(--green);} .gc-A .bar-bg{background:rgba(16,185,129,0.06);}
-    .gc-B .letter{color:var(--accent);} .gc-B .bar-bg{background:rgba(59,130,246,0.06);}
-    .gc-C .letter{color:var(--yellow);} .gc-C .bar-bg{background:rgba(245,158,11,0.06);}
-    .gc-D .letter{color:var(--orange);} .gc-D .bar-bg{background:rgba(249,115,22,0.06);}
-    .gc-F .letter{color:var(--red);} .gc-F .bar-bg{background:rgba(239,68,68,0.06);}
+      /* Grade distribution */
+      .grade-row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-bottom: 24px;
+      }
+      .grade-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        text-align: center;
+        position: relative;
+        transition: transform 0.15s;
+      }
+      .grade-card:hover {
+        transform: translateY(-2px);
+        z-index: 20;
+      }
+      .grade-card .bar-bg {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+      .grade-card .letter {
+        font-size: 24px;
+        font-weight: 900;
+        position: relative;
+      }
+      .grade-card .cnt {
+        font-size: 18px;
+        font-weight: 700;
+        font-family: "JetBrains Mono", monospace;
+        position: relative;
+        margin-top: 2px;
+      }
+      .grade-card .pct {
+        font-size: 10px;
+        color: var(--muted);
+        position: relative;
+        margin-top: 2px;
+      }
+      .gc-A .letter {
+        color: var(--green);
+      }
+      .gc-A .bar-bg {
+        background: rgba(16, 185, 129, 0.06);
+      }
+      .gc-B .letter {
+        color: var(--accent);
+      }
+      .gc-B .bar-bg {
+        background: rgba(59, 130, 246, 0.06);
+      }
+      .gc-C .letter {
+        color: var(--yellow);
+      }
+      .gc-C .bar-bg {
+        background: rgba(245, 158, 11, 0.06);
+      }
+      .gc-D .letter {
+        color: var(--orange);
+      }
+      .gc-D .bar-bg {
+        background: rgba(249, 115, 22, 0.06);
+      }
+      .gc-F .letter {
+        color: var(--red);
+      }
+      .gc-F .bar-bg {
+        background: rgba(239, 68, 68, 0.06);
+      }
 
-    /* Insights */
-    .insights-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }
-    .insight-card {
-      background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px;
-      position:relative;
-    }
-    .insight-card:hover { z-index:20; }
-    .insight-card .heading {
-      font-size:11px; font-weight:700; color:var(--dim);
-      text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;
-      display:flex; align-items:center; gap:6px;
-    }
-    .insight-card .big { font-size:24px; font-weight:800; font-family:'JetBrains Mono',monospace; }
-    .insight-card .note { font-size:11px; color:var(--muted); margin-top:4px; line-height:1.4; }
-    .insight-bar { height:5px; border-radius:3px; margin-top:8px; overflow:hidden; display:flex; }
-    .insight-bar div { height:100%; }
+      /* Insights */
+      .insights-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+      .insight-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+        position: relative;
+      }
+      .insight-card:hover {
+        z-index: 20;
+      }
+      .insight-card .heading {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--dim);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .insight-card .big {
+        font-size: 24px;
+        font-weight: 800;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .insight-card .note {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 4px;
+        line-height: 1.4;
+      }
+      .insight-bar {
+        height: 5px;
+        border-radius: 3px;
+        margin-top: 8px;
+        overflow: hidden;
+        display: flex;
+      }
+      .insight-bar div {
+        height: 100%;
+      }
 
-    /* Course cards */
-    .courses-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; margin-bottom:28px; }
-    .course-card {
-      background:var(--card); border:1px solid var(--border); border-radius:10px;
-      padding:14px 16px; cursor:pointer; transition:transform 0.15s, border-color 0.15s;
-    }
-    .course-card:hover { transform:translateY(-2px); border-color:rgba(255,255,255,0.12); }
-    .course-card .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-    .course-card .code {
-      font-size:10px; font-weight:700; color:var(--accent);
-      text-transform:uppercase; letter-spacing:0.5px;
-      padding:2px 8px; border-radius:6px; background:rgba(59,130,246,0.1);
-    }
-    .course-card .avg-grade { font-size:13px; font-weight:800; }
-    .course-card .stats { display:flex; gap:12px; font-size:10px; color:var(--dim); }
-    .course-card .mini-grades { display:flex; gap:2px; margin-top:8px; }
-    .mini-grade-dot { width:7px; height:7px; border-radius:2px; }
-    .mg-A{background:var(--green);} .mg-B{background:var(--accent);}
-    .mg-C{background:var(--yellow);} .mg-D{background:var(--orange);}
-    .mg-F{background:var(--red);}
+      /* Course cards */
+      .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 10px;
+        margin-bottom: 28px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      .course-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        cursor: pointer;
+        transition:
+          transform 0.15s,
+          border-color 0.15s;
+      }
+      .course-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+      .course-card .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      .course-card .code {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background: rgba(59, 130, 246, 0.1);
+      }
+      .course-card .avg-grade {
+        font-size: 13px;
+        font-weight: 800;
+      }
+      .course-card .stats {
+        display: flex;
+        gap: 12px;
+        font-size: 10px;
+        color: var(--dim);
+      }
+      .course-card .mini-grades {
+        display: flex;
+        gap: 2px;
+        margin-top: 8px;
+      }
+      .mini-grade-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 2px;
+      }
+      .mg-A {
+        background: var(--green);
+      }
+      .mg-B {
+        background: var(--accent);
+      }
+      .mg-C {
+        background: var(--yellow);
+      }
+      .mg-D {
+        background: var(--orange);
+      }
+      .mg-F {
+        background: var(--red);
+      }
 
-    /* Filters */
-    .filters-bar {
-      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
-      margin-bottom:12px; position:sticky; top:0; z-index:10;
-      background:var(--bg); padding:12px 0;
-    }
-    .pill {
-      padding:5px 14px; border-radius:20px; border:1px solid var(--border);
-      background:rgba(255,255,255,0.02); color:var(--dim);
-      font-size:11px; font-weight:600; cursor:pointer;
-      font-family:'Inter',sans-serif; transition:all 0.15s;
-    }
-    .pill:hover { background:rgba(255,255,255,0.05); color:var(--text); }
-    .pill.active { background:var(--accent); color:white; border-color:var(--accent); }
-    .search-input {
-      flex:1; min-width:200px; padding:7px 14px; border-radius:8px;
-      border:1px solid var(--border); background:rgba(255,255,255,0.03);
-      color:var(--text); font-size:12px; font-family:'Inter',sans-serif;
-      outline:none; transition:border-color 0.2s;
-    }
-    .search-input:focus { border-color:var(--accent); }
-    .search-input::placeholder { color:var(--muted); }
-    .result-count { font-size:11px; color:var(--muted); white-space:nowrap; }
+      /* Filters */
+      .filters-bar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--bg);
+        padding: 12px 0;
+      }
+      .pill {
+        padding: 5px 14px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.02);
+        color: var(--dim);
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: "Inter", sans-serif;
+        transition: all 0.15s;
+      }
+      .pill:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+      }
+      .pill.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+      }
+      .search-input {
+        flex: 1;
+        min-width: 200px;
+        padding: 7px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text);
+        font-size: 12px;
+        font-family: "Inter", sans-serif;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .search-input:focus {
+        border-color: var(--accent);
+      }
+      .search-input::placeholder {
+        color: var(--muted);
+      }
+      .result-count {
+        font-size: 11px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
 
-    /* Video table */
-    .video-table { width:100%; border-collapse:collapse; }
-    .video-table th {
-      text-align:left; padding:8px 10px;
-      font-size:10px; font-weight:700; color:var(--muted);
-      text-transform:uppercase; letter-spacing:0.5px;
-      border-bottom:2px solid var(--border);
-      cursor:pointer; -webkit-user-select:none; user-select:none; white-space:nowrap;
-      position:relative;
-    }
-    .video-table th:hover { color:var(--text); z-index:20; }
-    .video-table td {
-      padding:10px; border-bottom:1px solid rgba(255,255,255,0.03);
-      font-size:12px; vertical-align:middle;
-    }
-    .video-table tbody tr.video-row { cursor:pointer; transition:background 0.1s; }
-    .video-table tbody tr.video-row:hover td { background:rgba(255,255,255,0.02); }
-    .video-table tbody tr.video-row.expanded td { background:rgba(59,130,246,0.03); border-bottom-color:transparent; }
-    .g-cell { font-weight:900; font-size:14px; text-align:center; width:40px; }
-    .s-cell { font-family:'JetBrains Mono',monospace; font-size:11px; text-align:center; width:56px; }
-    .t-cell .crse { font-size:10px; color:var(--muted); margin-right:4px; font-weight:600; }
-    .t-cell { font-weight:500; }
-    .c-cell { font-family:'JetBrains Mono',monospace; font-size:11px; text-align:center; width:36px; color:var(--dim); }
+      /* Video table */
+      .video-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .video-table th {
+        text-align: left;
+        padding: 8px 10px;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--border);
+        cursor: pointer;
+        -webkit-user-select: none;
+        user-select: none;
+        white-space: nowrap;
+        position: relative;
+      }
+      .video-table th:hover {
+        color: var(--text);
+        z-index: 20;
+      }
+      .video-table td {
+        padding: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        font-size: 12px;
+        vertical-align: middle;
+      }
+      .video-table tbody tr.video-row {
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+      .video-table tbody tr.video-row:hover td {
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .video-table tbody tr.video-row.expanded td {
+        background: rgba(59, 130, 246, 0.03);
+        border-bottom-color: transparent;
+      }
+      .g-cell {
+        font-weight: 900;
+        font-size: 14px;
+        text-align: center;
+        width: 40px;
+      }
+      .s-cell {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        text-align: center;
+        width: 56px;
+      }
+      .t-cell .crse {
+        font-size: 10px;
+        color: var(--muted);
+        margin-right: 4px;
+        font-weight: 600;
+      }
+      .t-cell {
+        font-weight: 500;
+      }
+      .c-cell {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        text-align: center;
+        width: 36px;
+        color: var(--dim);
+      }
 
-    .vtag {
-      padding:2px 7px; border-radius:8px; font-size:9px; font-weight:700;
-      text-transform:uppercase; letter-spacing:0.3px; white-space:nowrap;
-    }
-    .vtag-NEEDS_AUGMENTATION { background:rgba(239,68,68,0.08); color:var(--rose); }
-    .vtag-ADEQUATE { background:rgba(245,158,11,0.08); color:var(--yellow); }
-    .vtag-STRONG { background:rgba(16,185,129,0.08); color:var(--emerald); }
-    .ratio-mini { display:flex; width:50px; height:4px; border-radius:2px; overflow:hidden; }
-    .ratio-mini .rp { background:var(--orange); } .ratio-mini .rc { background:var(--cyan); }
+      .vtag {
+        padding: 2px 7px;
+        border-radius: 8px;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+      }
+      .vtag-NEEDS_AUGMENTATION {
+        background: rgba(239, 68, 68, 0.08);
+        color: var(--rose);
+      }
+      .vtag-ADEQUATE {
+        background: rgba(245, 158, 11, 0.08);
+        color: var(--yellow);
+      }
+      .vtag-STRONG {
+        background: rgba(16, 185, 129, 0.08);
+        color: var(--emerald);
+      }
+      .ratio-mini {
+        display: flex;
+        width: 50px;
+        height: 4px;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .ratio-mini .rp {
+        background: var(--orange);
+      }
+      .ratio-mini .rc {
+        background: var(--cyan);
+      }
 
-    .grade-A{color:var(--green);} .grade-B{color:var(--accent);}
-    .grade-C{color:var(--yellow);} .grade-D{color:var(--orange);}
-    .grade-F{color:var(--red);}
+      .grade-A {
+        color: var(--green);
+      }
+      .grade-B {
+        color: var(--accent);
+      }
+      .grade-C {
+        color: var(--yellow);
+      }
+      .grade-D {
+        color: var(--orange);
+      }
+      .grade-F {
+        color: var(--red);
+      }
 
-    /* ---- DETAIL CARD (expandable) ---- */
-    .detail-row td { padding:0 !important; border-bottom:1px solid var(--border) !important; }
-    .detail-card {
-      background:var(--surface); border-top:1px solid var(--border);
-      padding:20px 24px; animation:slideDown 0.2s ease;
-    }
-    @keyframes slideDown { from{opacity:0;max-height:0;} to{opacity:1;max-height:2000px;} }
-    .detail-header {
-      display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;
-    }
-    .detail-header h3 { font-size:16px; font-weight:700; }
-    .detail-header .links { display:flex; gap:8px; }
-    .detail-link {
-      padding:5px 14px; border-radius:20px; font-size:11px; font-weight:600;
-      text-decoration:none; border:1px solid var(--border); color:var(--dim); transition:all 0.15s;
-    }
-    .detail-link:hover { background:rgba(59,130,246,0.1); color:var(--accent); border-color:rgba(59,130,246,0.3); }
+      /* ---- DETAIL CARD (expandable) ---- */
+      .detail-row td {
+        padding: 0 !important;
+        border-bottom: 1px solid var(--border) !important;
+      }
+      .detail-card {
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        padding: 20px 24px;
+        animation: slideDown 0.2s ease;
+      }
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          max-height: 0;
+        }
+        to {
+          opacity: 1;
+          max-height: 2000px;
+        }
+      }
+      .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .detail-header h3 {
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .detail-header .links {
+        display: flex;
+        gap: 8px;
+      }
+      .detail-link {
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        border: 1px solid var(--border);
+        color: var(--dim);
+        transition: all 0.15s;
+      }
+      .detail-link:hover {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--accent);
+        border-color: rgba(59, 130, 246, 0.3);
+      }
 
-    .detail-stats {
-      display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:16px;
-    }
-    .detail-stat {
-      background:var(--card); border:1px solid var(--border); border-radius:8px;
-      padding:10px; text-align:center;
-    }
-    .detail-stat .dv { font-size:18px; font-weight:800; font-family:'JetBrains Mono',monospace; }
-    .detail-stat .dl { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; }
+      .detail-stats {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .detail-stat {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+      }
+      .detail-stat .dv {
+        font-size: 18px;
+        font-weight: 800;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .detail-stat .dl {
+        font-size: 9px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+      }
 
-    .detail-columns { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .detail-section { margin-bottom:12px; }
-    .detail-section-title {
-      font-size:11px; font-weight:700; color:var(--dim);
-      text-transform:uppercase; letter-spacing:0.5px;
-      margin-bottom:8px; display:flex; align-items:center; gap:6px;
-    }
-    .detail-item {
-      background:var(--card); border:1px solid var(--border); border-radius:8px;
-      padding:10px 12px; margin-bottom:6px; font-size:12px;
-    }
-    .detail-item .ts {
-      font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent);
-      padding:1px 6px; border-radius:3px; background:rgba(59,130,246,0.1);
-      display:inline-block; margin-bottom:4px;
-    }
-    .detail-item h5 { font-size:12px; font-weight:600; margin-bottom:3px; }
-    .detail-item p { font-size:11px; color:var(--dim); line-height:1.5; }
-    .detail-item .sev {
-      display:inline-block; padding:1px 6px; border-radius:8px;
-      font-size:9px; font-weight:700; text-transform:uppercase; margin-top:4px;
-    }
-    .sev-CRITICAL,.sev-HIGH{background:rgba(239,68,68,0.1);color:var(--red);}
-    .sev-MEDIUM{background:rgba(245,158,11,0.1);color:var(--yellow);}
-    .sev-LOW{background:rgba(59,130,246,0.08);color:var(--accent);}
-    .prereq-chip {
-      display:inline-block; padding:3px 10px; border-radius:16px;
-      font-size:11px; background:rgba(255,255,255,0.04); border:1px solid var(--border);
-      color:var(--dim); margin:2px;
-    }
+      .detail-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .detail-section {
+        margin-bottom: 12px;
+      }
+      .detail-section-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--dim);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .detail-item {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+      .detail-item .ts {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--accent);
+        padding: 1px 6px;
+        border-radius: 3px;
+        background: rgba(59, 130, 246, 0.1);
+        display: inline-block;
+        margin-bottom: 4px;
+      }
+      .detail-item h5 {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+      .detail-item p {
+        font-size: 11px;
+        color: var(--dim);
+        line-height: 1.5;
+      }
+      .detail-item .sev {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 8px;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-top: 4px;
+      }
+      .sev-CRITICAL,
+      .sev-HIGH {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--red);
+      }
+      .sev-MEDIUM {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--yellow);
+      }
+      .sev-LOW {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--accent);
+      }
+      .prereq-chip {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 16px;
+        font-size: 11px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        color: var(--dim);
+        margin: 2px;
+      }
 
-    /* ---- TOOLTIPS ---- */
-    [data-tip] {
-      position:relative; cursor:help;
-    }
-    [data-tip]:hover { z-index:999; }
-    [data-tip]::after {
-      content:attr(data-tip);
-      position:absolute; bottom:calc(100% + 8px); left:50%;
-      transform:translateX(-50%); padding:10px 14px;
-      background:#1a2744; border:1px solid rgba(255,255,255,0.12);
-      border-radius:8px; font-size:12px; font-weight:400;
-      color:var(--dim); line-height:1.5; white-space:normal;
-      width:max-content; max-width:280px;
-      pointer-events:none; opacity:0;
-      transition:opacity 0.15s; z-index:9999;
-      box-shadow:0 8px 24px rgba(0,0,0,0.4);
-      font-family:'Inter',sans-serif; text-transform:none;
-      letter-spacing:normal;
-    }
-    [data-tip]:hover::after { opacity:1; }
-    /* Tooltip arrow */
-    [data-tip]::before {
-      content:''; position:absolute;
-      bottom:calc(100% + 3px); left:50%;
-      transform:translateX(-50%);
-      border:5px solid transparent;
-      border-top-color:#1a2744;
-      opacity:0; transition:opacity 0.15s;
-      z-index:9999;
-    }
-    [data-tip]:hover::before { opacity:1; }
-    /* For elements near the bottom, put tooltip below */
-    [data-tip-dir="down"]::after {
-      bottom:auto; top:calc(100% + 8px);
-    }
-    [data-tip-dir="down"]::before {
-      bottom:auto; top:calc(100% + 3px);
-      border-top-color:transparent;
-      border-bottom-color:#1a2744;
-    }
-    .tip-icon {
-      display:inline-flex; align-items:center; justify-content:center;
-      width:14px; height:14px; border-radius:50%;
-      background:rgba(255,255,255,0.06); color:var(--muted);
-      font-size:9px; font-weight:700; margin-left:4px;
-      flex-shrink:0;
-    }
+      /* ---- TOOLTIPS ---- */
+      [data-tip] {
+        position: relative;
+        cursor: help;
+      }
+      [data-tip]:hover {
+        z-index: 999;
+      }
+      [data-tip]::after {
+        content: attr(data-tip);
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 14px;
+        background: #1a2744;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--dim);
+        line-height: 1.5;
+        white-space: normal;
+        width: max-content;
+        max-width: 280px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 9999;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        font-family: "Inter", sans-serif;
+        text-transform: none;
+        letter-spacing: normal;
+      }
+      [data-tip]:hover::after {
+        opacity: 1;
+      }
+      /* Tooltip arrow */
+      [data-tip]::before {
+        content: "";
+        position: absolute;
+        bottom: calc(100% + 3px);
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: #1a2744;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 9999;
+      }
+      [data-tip]:hover::before {
+        opacity: 1;
+      }
+      /* For elements near the bottom, put tooltip below */
+      [data-tip-dir="down"]::after {
+        bottom: auto;
+        top: calc(100% + 8px);
+      }
+      [data-tip-dir="down"]::before {
+        bottom: auto;
+        top: calc(100% + 3px);
+        border-top-color: transparent;
+        border-bottom-color: #1a2744;
+      }
+      .tip-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 700;
+        margin-left: 4px;
+        flex-shrink: 0;
+      }
 
-    .loading { display:flex; align-items:center; justify-content:center; height:60vh; flex-direction:column; gap:16px; }
-    .spinner { width:36px; height:36px; border:3px solid rgba(255,255,255,0.1); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
-    @keyframes spin { to{transform:rotate(360deg);} }
-  </style>
-</head>
-<body>
+      .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 60vh;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .spinner {
+        width: 36px;
+        height: 36px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p style="color: var(--muted)">Loading dashboard…</p>
+      </div>
+    </div>
 
-<div id="app">
-  <div class="loading"><div class="spinner"></div><p style="color:var(--muted)">Loading dashboard…</p></div>
-</div>
+    <script>
+      function esc(s) {
+        const d = document.createElement("div");
+        d.textContent = s || "";
+        return d.innerHTML;
+      }
+      let allVideos = [],
+        currentFilter = "all",
+        currentSort = { col: "score", dir: "asc" },
+        expandedKey = null;
 
-<script>
-function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
-let allVideos=[], currentFilter='all', currentSort={col:'score',dir:'asc'}, expandedKey=null;
+      async function init() {
+        const res = await fetch("augmentation_summary.json");
+        if (!res.ok) {
+          document.getElementById("app").innerHTML =
+            '<div class="loading"><p style="color:var(--red)">Run: python scripts/build_augmentation_summary.py</p></div>';
+          return;
+        }
+        const data = await res.json();
+        allVideos = data.videos;
+        render(data);
+      }
 
-async function init(){
-  const res=await fetch('augmentation_summary.json');
-  if(!res.ok){document.getElementById('app').innerHTML='<div class="loading"><p style="color:var(--red)">Run: python scripts/build_augmentation_summary.py</p></div>';return;}
-  const data=await res.json();
-  allVideos=data.videos;
-  render(data);
-}
-
-const CRITERIA_LABELS={
-  concept_clarification:'Concept Clarification',
-  misconception_addressing:'Misconception Addressing',
-  narrative_logic:'Narrative Logic',
-  content_first_language:'Content-First Language',
-  dynamic_visualizations:'Dynamic Visualizations',
-  explicit_signaling:'Explicit Signaling',
-  strict_segmentation:'Strict Segmentation',
-  extraneous_load_reduction:'Extraneous Load Reduction',
-  worked_example_fading:'Worked Example Fading',
-  self_explanation_prompting:'Self-Explanation Prompting',
-  affective_tone:'Affective Tone'
-};
-function barColor(v){return v<=1.5?'var(--red)':v<=2.5?'var(--orange)':v<=3.5?'var(--yellow)':v<=4?'var(--accent)':'var(--green)';}
-function renderCriteriaBreakdown(o){
-  const ca=o.criteria_averages;
-  if(!ca)return '';
-  const sorted=Object.entries(ca).sort((a,b)=>a[1]-b[1]);
-  return `
+      const CRITERIA_LABELS = {
+        concept_clarification: "Concept Clarification",
+        misconception_addressing: "Misconception Addressing",
+        narrative_logic: "Narrative Logic",
+        content_first_language: "Content-First Language",
+        dynamic_visualizations: "Dynamic Visualizations",
+        explicit_signaling: "Explicit Signaling",
+        strict_segmentation: "Strict Segmentation",
+        extraneous_load_reduction: "Extraneous Load Reduction",
+        worked_example_fading: "Worked Example Fading",
+        self_explanation_prompting: "Self-Explanation Prompting",
+        affective_tone: "Affective Tone",
+      };
+      function barColor(v) {
+        return v <= 1.5
+          ? "var(--red)"
+          : v <= 2.5
+            ? "var(--orange)"
+            : v <= 3.5
+              ? "var(--yellow)"
+              : v <= 4
+                ? "var(--accent)"
+                : "var(--green)";
+      }
+      function renderCriteriaBreakdown(o) {
+        const ca = o.criteria_averages;
+        if (!ca) return "";
+        const sorted = Object.entries(ca).sort((a, b) => a[1] - b[1]);
+        return `
     <div class="section-heading">Evaluation Criteria Breakdown <span class="tip-icon" data-tip="Average score per evaluation criterion across all videos. Sorted weakest-first to highlight improvement priorities. Each criterion is rated 1-5.">?</span></div>
     <div class="insight-card" style="padding:16px 20px;">
-      ${sorted.map(([k,v])=>{
-        const pct=(v/5)*100;
-        const label=CRITERIA_LABELS[k]||k.replace(/_/g,' ');
-        return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      ${sorted
+        .map(([k, v]) => {
+          const pct = (v / 5) * 100;
+          const label = CRITERIA_LABELS[k] || k.replace(/_/g, " ");
+          return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
           <div style="width:180px;font-size:11px;color:var(--dim);text-align:right;flex-shrink:0;">${label}</div>
           <div style="flex:1;height:8px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;">
             <div style="width:${pct}%;height:100%;background:${barColor(v)};border-radius:4px;transition:width 0.5s;"></div>
           </div>
           <div style="width:32px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:${barColor(v)};text-align:right;">${v}</div>
         </div>`;
-      }).join('')}
+        })
+        .join("")}
     </div>
   `;
-}
+      }
 
-function render(data){
-  const o=data.overall, n=data.total_videos;
-  const maxGrade=Math.max(...Object.values(o.grade_distribution),1);
-  const courseMap={};
-  data.videos.forEach(v=>{
-    if(!courseMap[v.course])courseMap[v.course]={videos:[],totalScore:0,grades:[]};
-    courseMap[v.course].videos.push(v);
-    courseMap[v.course].totalScore+=v.score;
-    courseMap[v.course].grades.push(v.grade);
-  });
+      function render(data) {
+        const o = data.overall,
+          n = data.total_videos;
+        const maxGrade = Math.max(...Object.values(o.grade_distribution), 1);
+        const courseMap = {};
+        data.videos.forEach((v) => {
+          if (!courseMap[v.course]) courseMap[v.course] = { videos: [], totalScore: 0, grades: [] };
+          courseMap[v.course].videos.push(v);
+          courseMap[v.course].totalScore += v.score;
+          courseMap[v.course].grades.push(v.grade);
+        });
 
-  document.getElementById('app').innerHTML=`
+        document.getElementById("app").innerHTML = `
     <div class="hero"><div class="hero-inner">
-      <div class="hero-badge"><span class="dot"></span> Pipeline Active — ${n} instructional videos (${data.skipped_filler||0} filler filtered)</div>
+      <div class="hero-badge"><span class="dot"></span> Pipeline Active — ${n} instructional videos (${data.skipped_filler || 0} filler filtered)</div>
       <h1>Augmentation Dashboard</h1>
       <p class="subtitle">AI-generated conceptual analysis of <strong>${n} Unreal Engine tutorial videos</strong>. Each video is evaluated against 11 pedagogical criteria to identify where conceptual depth is missing.</p>
       <div class="hero-stats">
         <div class="hero-stat" data-tip="Total UE5 tutorial videos that have been analyzed by the AI augmentation pipeline."><div class="icon" style="background:rgba(59,130,246,0.1)">🎬</div><div><div class="val" style="color:var(--accent)">${n}</div><div class="lbl">Videos Analyzed</div></div></div>
         <div class="hero-stat" data-tip="Mean score across all 11 evaluation criteria (each rated 1-5). Scores below 33 indicate significant conceptual gaps. Target: 40+/55."><div class="icon" style="background:rgba(245,158,11,0.1)">📊</div><div><div class="val" style="color:var(--yellow)">${o.avg_score}<span style="font-size:12px;color:var(--muted)">/55</span></div><div class="lbl">Average Score</div></div></div>
-        <div class="hero-stat" data-tip="Videos scoring below 33/55 that are mostly procedural with little or no conceptual explanation. These benefit most from augmentation."><div class="icon" style="background:rgba(239,68,68,0.1)">⚠️</div><div><div class="val" style="color:var(--red)">${o.verdict_distribution.NEEDS_AUGMENTATION||0}</div><div class="lbl">Need Augmentation</div></div></div>
-        <div class="hero-stat" data-tip="Videos scoring 33+ that already include meaningful conceptual content. These may need minor enhancements rather than full augmentation."><div class="icon" style="background:rgba(16,185,129,0.1)">✅</div><div><div class="val" style="color:var(--green)">${(o.verdict_distribution.ADEQUATE||0)+(o.verdict_distribution.STRONG||0)}</div><div class="lbl">Adequate or Strong</div></div></div>
+        <div class="hero-stat" data-tip="Videos scoring below 33/55 that are mostly procedural with little or no conceptual explanation. These benefit most from augmentation."><div class="icon" style="background:rgba(239,68,68,0.1)">⚠️</div><div><div class="val" style="color:var(--red)">${o.verdict_distribution.NEEDS_AUGMENTATION || 0}</div><div class="lbl">Need Augmentation</div></div></div>
+        <div class="hero-stat" data-tip="Videos scoring 33+ that already include meaningful conceptual content. These may need minor enhancements rather than full augmentation."><div class="icon" style="background:rgba(16,185,129,0.1)">✅</div><div><div class="val" style="color:var(--green)">${(o.verdict_distribution.ADEQUATE || 0) + (o.verdict_distribution.STRONG || 0)}</div><div class="lbl">Adequate or Strong</div></div></div>
       </div>
     </div></div>
 
     <div class="content">
       <div class="section-heading">Grade Distribution <span class="tip-icon" data-tip="Grades are based on the 11-criteria Evaluation Matrix. A (45-55): Excellent conceptual depth. B (39-44): Good with minor gaps. C (33-38): Some conceptual content. D (22-32): Mostly procedural. F (11-21): Almost entirely step-by-step.">?</span></div>
       <div class="grade-row">
-        ${['A','B','C','D','F'].map(g=>{
-          const tips={A:'Excellent! Explains WHY before HOW. Minimal augmentation needed.',B:'Good conceptual coverage. Small augmentations would make it outstanding.',C:'Some conceptual content exists but significant gaps remain.',D:'Mostly procedural. Learners can follow steps but won\'t understand underlying principles.',F:'Almost entirely step-by-step with no conceptual framing. Highest priority for augmentation.'};
-          const cnt=o.grade_distribution[g]||0;const pct=n?Math.round(cnt/n*100):0;const barH=Math.max(cnt/maxGrade*50,3);
-          return `<div class="grade-card gc-${g}" data-tip="${tips[g]}" data-tip-dir="down"><div class="bar-bg" style="height:${barH}px"></div><div class="letter">${g}</div><div class="cnt">${cnt}</div><div class="pct">${pct}%</div></div>`;
-        }).join('')}
+        ${["A", "B", "C", "D", "F"]
+          .map((g) => {
+            const tips = {
+              A: "Excellent! Explains WHY before HOW. Minimal augmentation needed.",
+              B: "Good conceptual coverage. Small augmentations would make it outstanding.",
+              C: "Some conceptual content exists but significant gaps remain.",
+              D: "Mostly procedural. Learners can follow steps but won't understand underlying principles.",
+              F: "Almost entirely step-by-step with no conceptual framing. Highest priority for augmentation.",
+            };
+            const cnt = o.grade_distribution[g] || 0;
+            const pct = n ? Math.round((cnt / n) * 100) : 0;
+            const barH = Math.max((cnt / maxGrade) * 50, 3);
+            return `<div class="grade-card gc-${g}" data-tip="${tips[g]}" data-tip-dir="down"><div class="bar-bg" style="height:${barH}px"></div><div class="letter">${g}</div><div class="cnt">${cnt}</div><div class="pct">${pct}%</div></div>`;
+          })
+          .join("")}
       </div>
 
       <div class="section-heading">Content Insights</div>
@@ -415,21 +966,26 @@ function render(data){
 
       ${renderCriteriaBreakdown(o)}
 
-      <div class="section-heading" style="cursor:pointer;user-select:none;" onclick="document.getElementById('coursesGrid').style.display=document.getElementById('coursesGrid').style.display==='none'?'grid':'none';this.querySelector('.caret').textContent=document.getElementById('coursesGrid').style.display==='none'?'▶':'▼'">Courses (${Object.keys(courseMap).length}) <span class="caret">▼</span></div>
-      <div class="courses-grid" id="coursesGrid">
-        ${Object.entries(courseMap).sort((a,b)=>a[0].localeCompare(b[0])).map(([code,c])=>{
-          const avg=Math.round(c.totalScore/c.videos.length);
-          const avgGrade=avg>=45?'A':avg>=39?'B':avg>=33?'C':avg>=22?'D':'F';
-          const ct=data.course_titles&&data.course_titles[code]?data.course_titles[code]:'';
-          const shortTitle=ct.length>45?ct.substring(0,42)+'…':ct;
-          return `<div class="course-card" onclick="toggleCourse('${code}',this,event)">
+      <div class="section-heading" style="cursor:pointer;user-select:none;" onclick="document.getElementById('coursesGrid').style.display=document.getElementById('coursesGrid').style.display==='none'?'grid':'none';this.querySelector('.caret').textContent=document.getElementById('coursesGrid').style.display==='none'?'▶':'▼'">Courses (${Object.keys(courseMap).length}) <span class="caret">▶</span></div>
+      <div class="courses-grid" id="coursesGrid" style="display:none;">
+        ${Object.entries(courseMap)
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(([code, c]) => {
+            const avg = Math.round(c.totalScore / c.videos.length);
+            const avgGrade =
+              avg >= 45 ? "A" : avg >= 39 ? "B" : avg >= 33 ? "C" : avg >= 22 ? "D" : "F";
+            const ct =
+              data.course_titles && data.course_titles[code] ? data.course_titles[code] : "";
+            const shortTitle = ct.length > 45 ? ct.substring(0, 42) + "…" : ct;
+            return `<div class="course-card" onclick="toggleCourse('${code}',this,event)">
             <div class="top"><span class="code">${esc(code)}</span><span class="avg-grade grade-${avgGrade}">${avgGrade} · ${avg}/55</span></div>
-            ${shortTitle?`<div style="font-size:11px;color:var(--dim);margin:4px 0 2px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(ct)}">${esc(shortTitle)}</div>`:''}
-            <div class="stats"><span>🎬 ${c.videos.length}</span><span>🧠 ${c.videos.reduce((s,v)=>s+v.theory_breaks,0)}</span><span>⚠️ ${c.videos.reduce((s,v)=>s+v.warnings,0)}</span></div>
-            <div class="mini-grades">${c.grades.map(g=>`<div class="mini-grade-dot mg-${g}"></div>`).join('')}</div>
-            <div class="course-detail" id="cd-${code.replace(/\./g,'_')}" style="display:none;"></div>
+            ${shortTitle ? `<div style="font-size:11px;color:var(--dim);margin:4px 0 2px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(ct)}">${esc(shortTitle)}</div>` : ""}
+            <div class="stats"><span>🎬 ${c.videos.length}</span><span>🧠 ${c.videos.reduce((s, v) => s + v.theory_breaks, 0)}</span><span>⚠️ ${c.videos.reduce((s, v) => s + v.warnings, 0)}</span></div>
+            <div class="mini-grades">${c.grades.map((g) => `<div class="mini-grade-dot mg-${g}"></div>`).join("")}</div>
+            <div class="course-detail" id="cd-${code.replace(/\./g, "_")}" style="display:none;"></div>
           </div>`;
-        }).join('')}
+          })
+          .join("")}
       </div>
 
       <div id="tableSection"></div>
@@ -458,83 +1014,106 @@ function render(data){
       </table>
     </div>
   `;
-  applyFilters();
-}
+        applyFilters();
+      }
 
-let courseFilterVal='';
-function renderRows(videos){
-  const tbody=document.getElementById('videoRows');
-  document.getElementById('resultCount').textContent=`${videos.length} video${videos.length!==1?'s':''}`;
-  expandedKey=null;
-  tbody.innerHTML=videos.map(v=>`
+      let courseFilterVal = "";
+      function renderRows(videos) {
+        const tbody = document.getElementById("videoRows");
+        document.getElementById("resultCount").textContent =
+          `${videos.length} video${videos.length !== 1 ? "s" : ""}`;
+        expandedKey = null;
+        tbody.innerHTML = videos
+          .map(
+            (v) => `
     <tr class="video-row" data-key="${v.key}" onclick="toggleDetail('${v.key}',this)">
       <td class="g-cell grade-${v.grade}">${v.grade}</td>
       <td class="s-cell">${v.score}/55</td>
       <td class="t-cell"><span class="crse">${esc(v.course)}</span>${esc(v.title)}</td>
-      <td><span class="vtag vtag-${v.verdict}">${(v.verdict||'?').replace(/_/g,' ')}</span></td>
+      <td><span class="vtag vtag-${v.verdict}">${(v.verdict || "?").replace(/_/g, " ")}</span></td>
       <td><div class="ratio-mini"><div class="rp" style="width:${v.procedural_pct}%"></div><div class="rc" style="width:${v.conceptual_pct}%"></div></div></td>
       <td class="c-cell">${v.theory_breaks}</td>
       <td class="c-cell">${v.why_annotations}</td>
       <td class="c-cell">${v.warnings}</td>
     </tr>
-  `).join('');
-}
+  `
+          )
+          .join("");
+      }
 
-async function toggleDetail(key, rowEl){
-  // Close any existing
-  document.querySelectorAll('.detail-row').forEach(r=>r.remove());
-  document.querySelectorAll('.video-row.expanded').forEach(r=>r.classList.remove('expanded'));
+      async function toggleDetail(key, rowEl) {
+        // Close any existing
+        document.querySelectorAll(".detail-row").forEach((r) => r.remove());
+        document
+          .querySelectorAll(".video-row.expanded")
+          .forEach((r) => r.classList.remove("expanded"));
 
-  if(expandedKey===key){ expandedKey=null; return; }
-  expandedKey=key;
-  rowEl.classList.add('expanded');
+        if (expandedKey === key) {
+          expandedKey = null;
+          return;
+        }
+        expandedKey = key;
+        rowEl.classList.add("expanded");
 
-  const [course,video]=key.split('/');
-  const detailRow=document.createElement('tr');
-  detailRow.className='detail-row';
-  detailRow.innerHTML=`<td colspan="8"><div class="detail-card"><p style="color:var(--muted)">Loading…</p></div></td>`;
-  rowEl.after(detailRow);
+        const [course, video] = key.split("/");
+        const detailRow = document.createElement("tr");
+        detailRow.className = "detail-row";
+        detailRow.innerHTML = `<td colspan="8"><div class="detail-card"><p style="color:var(--muted)">Loading…</p></div></td>`;
+        rowEl.after(detailRow);
 
-  try{
-    const res=await fetch(`augmentation_data/${course}/${video}.json`);
-    if(!res.ok) throw new Error('Not found');
-    const data=await res.json();
-    renderDetailCard(detailRow, data, key);
-  }catch(e){
-    detailRow.querySelector('.detail-card').innerHTML=`<p style="color:var(--red)">Could not load detail data. Re-sync augmentation_data/.</p>`;
-  }
-}
+        try {
+          const res = await fetch(`augmentation_data/${course}/${video}.json`);
+          if (!res.ok) throw new Error("Not found");
+          const data = await res.json();
+          renderDetailCard(detailRow, data, key);
+        } catch (e) {
+          detailRow.querySelector(".detail-card").innerHTML =
+            `<p style="color:var(--red)">Could not load detail data. Re-sync augmentation_data/.</p>`;
+        }
+      }
 
-function renderDetailCard(row, data, key){
-  const tb=data.theory_breaks||[];
-  const wa=data.why_annotations||[];
-  const se=data.self_explanation_prompts||[];
-  const aw=data.architectural_warnings||[];
-  const mp=data.missing_prerequisites||[];
-  const sc=data.evaluation_matrix_score||{};
-  const cs=data.conceptual_score||{};
-  const title=key.split('/')[1].replace(/^\d+_/,'').replace(/([A-Z])/g,' $1').trim();
+      function renderDetailCard(row, data, key) {
+        const tb = data.theory_breaks || [];
+        const wa = data.why_annotations || [];
+        const se = data.self_explanation_prompts || [];
+        const aw = data.architectural_warnings || [];
+        const mp = data.missing_prerequisites || [];
+        const sc = data.evaluation_matrix_score || {};
+        const cs = data.conceptual_score || {};
+        const title = key
+          .split("/")[1]
+          .replace(/^\d+_/, "")
+          .replace(/([A-Z])/g, " $1")
+          .trim();
 
-  // Action priority
-  const total=sc.total||0;
-  const prio=total<25?{label:'HIGH PRIORITY',color:'var(--red)',bg:'rgba(239,68,68,0.12)'}:total<33?{label:'MEDIUM',color:'var(--orange)',bg:'rgba(249,115,22,0.12)'}:{label:'LOW',color:'var(--green)',bg:'rgba(16,185,129,0.12)'};
-  const summary=`${cs.procedural_pct||0}% procedural · ${tb.length} theory gaps · ${wa.length} why annotations · ${aw.length} warnings`;
+        // Action priority
+        const total = sc.total || 0;
+        const prio =
+          total < 25
+            ? { label: "HIGH PRIORITY", color: "var(--red)", bg: "rgba(239,68,68,0.12)" }
+            : total < 33
+              ? { label: "MEDIUM", color: "var(--orange)", bg: "rgba(249,115,22,0.12)" }
+              : { label: "LOW", color: "var(--green)", bg: "rgba(16,185,129,0.12)" };
+        const summary = `${cs.procedural_pct || 0}% procedural · ${tb.length} theory gaps · ${wa.length} why annotations · ${aw.length} warnings`;
 
-  // Build criteria bars
-  const critBars=Object.entries(CRITERIA_LABELS).map(([k,label])=>{
-    const v=sc[k]||0;const pct=(v/5)*100;
-    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+        // Build criteria bars
+        const critBars = Object.entries(CRITERIA_LABELS)
+          .map(([k, label]) => {
+            const v = sc[k] || 0;
+            const pct = (v / 5) * 100;
+            return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
       <div style="width:150px;font-size:10px;color:var(--dim);text-align:right;flex-shrink:0;">${label}</div>
       <div style="flex:1;height:6px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;">
         <div style="width:${pct}%;height:100%;background:${barColor(v)};border-radius:3px;"></div>
       </div>
       <div style="width:16px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:${barColor(v)};text-align:right;">${v}</div>
     </div>`;
-  }).join('');
+          })
+          .join("");
 
-  row.querySelector('.detail-card').innerHTML=`
+        row.querySelector(".detail-card").innerHTML = `
     <div class="detail-header">
-      <h3>${esc(title)} <span style="font-size:13px;font-weight:500;color:var(--muted)">— ${sc.grade||'?'} · ${total}/55</span></h3>
+      <h3>${esc(title)} <span style="font-size:13px;font-weight:500;color:var(--muted)">— ${sc.grade || "?"} · ${total}/55</span></h3>
       <div class="links">
         <span style="padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;background:${prio.bg};color:${prio.color};">${prio.label}</span>
         <a class="detail-link" href="augmentation_evaluator.html?video=${key}" target="_blank">📊 Full Evaluator</a>
@@ -553,8 +1132,8 @@ function renderDetailCard(row, data, key){
       </div>
       <div>
         <div class="detail-stats">
-          <div class="detail-stat" data-tip="Procedural content percentage"><div class="dv" style="color:var(--orange)">${cs.procedural_pct||0}%</div><div class="dl">Procedural</div></div>
-          <div class="detail-stat" data-tip="Conceptual content percentage"><div class="dv" style="color:var(--cyan)">${cs.conceptual_pct||0}%</div><div class="dl">Conceptual</div></div>
+          <div class="detail-stat" data-tip="Procedural content percentage"><div class="dv" style="color:var(--orange)">${cs.procedural_pct || 0}%</div><div class="dl">Procedural</div></div>
+          <div class="detail-stat" data-tip="Conceptual content percentage"><div class="dv" style="color:var(--cyan)">${cs.conceptual_pct || 0}%</div><div class="dl">Conceptual</div></div>
           <div class="detail-stat"><div class="dv" style="color:var(--purple)">${tb.length}</div><div class="dl">Theory Breaks</div></div>
           <div class="detail-stat"><div class="dv" style="color:var(--accent)">${wa.length}</div><div class="dl">Why Annotations</div></div>
           <div class="detail-stat"><div class="dv" style="color:var(--orange)">${aw.length}</div><div class="dl">Warnings</div></div>
@@ -564,72 +1143,88 @@ function renderDetailCard(row, data, key){
 
     <div class="detail-columns">
       <div>
-        ${tb.length?`<div class="detail-section"><div class="detail-section-title">🧠 Theory Breaks</div>${tb.map(t=>`<div class="detail-item"><span class="ts">${esc(t.insert_after_timestamp)}</span><h5>${esc(t.title)}</h5><p>${esc(t.concept)}</p></div>`).join('')}</div>`:''}
-        ${se.length?`<div class="detail-section"><div class="detail-section-title">🤔 Self-Explanation Prompts</div>${se.map(s=>`<div class="detail-item"><span class="ts">${esc(s.insert_after_timestamp)}</span><h5>${esc(s.prompt)}</h5><p>${esc(s.expected_insight)}</p></div>`).join('')}</div>`:''}
+        ${tb.length ? `<div class="detail-section"><div class="detail-section-title">🧠 Theory Breaks</div>${tb.map((t) => `<div class="detail-item"><span class="ts">${esc(t.insert_after_timestamp)}</span><h5>${esc(t.title)}</h5><p>${esc(t.concept)}</p></div>`).join("")}</div>` : ""}
+        ${se.length ? `<div class="detail-section"><div class="detail-section-title">🤔 Self-Explanation Prompts</div>${se.map((s) => `<div class="detail-item"><span class="ts">${esc(s.insert_after_timestamp)}</span><h5>${esc(s.prompt)}</h5><p>${esc(s.expected_insight)}</p></div>`).join("")}</div>` : ""}
       </div>
       <div>
-        ${wa.length?`<div class="detail-section"><div class="detail-section-title">💡 Why Annotations</div>${wa.map(w=>`<div class="detail-item"><span class="ts">${esc(w.timestamp)}</span><h5>"${esc(w.procedural_step)}"</h5><p>${esc(w.why)}</p></div>`).join('')}</div>`:''}
-        ${aw.length?`<div class="detail-section"><div class="detail-section-title">⚠️ Architectural Warnings</div>${aw.map(w=>`<div class="detail-item"><span class="ts">${esc(w.timestamp)}</span><p>${esc(w.warning)}</p><span class="sev sev-${w.severity}">${esc(w.severity)}</span></div>`).join('')}</div>`:''}
-        ${mp.length?`<div class="detail-section"><div class="detail-section-title">📘 Missing Prerequisites</div><div>${mp.map(p=>`<span class="prereq-chip">${esc(p)}</span>`).join('')}</div></div>`:''}
+        ${wa.length ? `<div class="detail-section"><div class="detail-section-title">💡 Why Annotations</div>${wa.map((w) => `<div class="detail-item"><span class="ts">${esc(w.timestamp)}</span><h5>"${esc(w.procedural_step)}"</h5><p>${esc(w.why)}</p></div>`).join("")}</div>` : ""}
+        ${aw.length ? `<div class="detail-section"><div class="detail-section-title">⚠️ Architectural Warnings</div>${aw.map((w) => `<div class="detail-item"><span class="ts">${esc(w.timestamp)}</span><p>${esc(w.warning)}</p><span class="sev sev-${w.severity}">${esc(w.severity)}</span></div>`).join("")}</div>` : ""}
+        ${mp.length ? `<div class="detail-section"><div class="detail-section-title">📘 Missing Prerequisites</div><div>${mp.map((p) => `<span class="prereq-chip">${esc(p)}</span>`).join("")}</div></div>` : ""}
       </div>
     </div>
   `;
-}
+      }
 
-function toggleCourse(code, el, event){
-  event.stopPropagation();
-  const id='cd-'+code.replace(/\./g,'_');
-  const detail=document.getElementById(id);
-  if(!detail)return;
+      function toggleCourse(code, el, event) {
+        event.stopPropagation();
+        const id = "cd-" + code.replace(/\./g, "_");
+        const detail = document.getElementById(id);
+        if (!detail) return;
 
-  // Toggle visibility
-  if(detail.style.display!=='none'){
-    detail.style.display='none';
-    el.style.gridColumn='';
-    return;
-  }
+        // Toggle visibility
+        if (detail.style.display !== "none") {
+          detail.style.display = "none";
+          el.style.gridColumn = "";
+          return;
+        }
 
-  // Expand card to full width
-  el.style.gridColumn='1 / -1';
+        // Expand card to full width
+        el.style.gridColumn = "1 / -1";
 
-  // Get course videos
-  const vids=allVideos.filter(v=>v.course===code).sort((a,b)=>a.score-b.score);
-  const avg=Math.round(vids.reduce((s,v)=>s+v.score,0)/vids.length);
-  const avgProc=Math.round(vids.reduce((s,v)=>s+v.procedural_pct,0)/vids.length);
-  const avgConc=Math.round(vids.reduce((s,v)=>s+v.conceptual_pct,0)/vids.length);
-  const totTB=vids.reduce((s,v)=>s+v.theory_breaks,0);
-  const totWhy=vids.reduce((s,v)=>s+v.why_annotations,0);
-  const totWarn=vids.reduce((s,v)=>s+v.warnings,0);
-  const totPrompts=vids.reduce((s,v)=>s+v.prompts,0);
+        // Get course videos
+        const vids = allVideos.filter((v) => v.course === code).sort((a, b) => a.score - b.score);
+        const avg = Math.round(vids.reduce((s, v) => s + v.score, 0) / vids.length);
+        const avgProc = Math.round(vids.reduce((s, v) => s + v.procedural_pct, 0) / vids.length);
+        const avgConc = Math.round(vids.reduce((s, v) => s + v.conceptual_pct, 0) / vids.length);
+        const totTB = vids.reduce((s, v) => s + v.theory_breaks, 0);
+        const totWhy = vids.reduce((s, v) => s + v.why_annotations, 0);
+        const totWarn = vids.reduce((s, v) => s + v.warnings, 0);
+        const totPrompts = vids.reduce((s, v) => s + v.prompts, 0);
 
-  // Per-criteria averages for this course
-  const critAvgs={};
-  for(const k of Object.keys(CRITERIA_LABELS)){
-    critAvgs[k]=vids.reduce((s,v)=>s+(v.criteria?v.criteria[k]||0:0),0)/vids.length;
-  }
-  const weakest=Object.entries(critAvgs).sort((a,b)=>a[1]-b[1]).slice(0,3);
-  const strongest=Object.entries(critAvgs).sort((a,b)=>b[1]-a[1]).slice(0,2);
+        // Per-criteria averages for this course
+        const critAvgs = {};
+        for (const k of Object.keys(CRITERIA_LABELS)) {
+          critAvgs[k] =
+            vids.reduce((s, v) => s + (v.criteria ? v.criteria[k] || 0 : 0), 0) / vids.length;
+        }
+        const weakest = Object.entries(critAvgs)
+          .sort((a, b) => a[1] - b[1])
+          .slice(0, 3);
+        const strongest = Object.entries(critAvgs)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 2);
 
-  // Grade distribution for this course
-  const gd={A:0,B:0,C:0,D:0,F:0};
-  vids.forEach(v=>{if(gd[v.grade]!==undefined)gd[v.grade]++;});
+        // Grade distribution for this course
+        const gd = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+        vids.forEach((v) => {
+          if (gd[v.grade] !== undefined) gd[v.grade]++;
+        });
 
-  // Action priority
-  const priority=avg<25?'🔴 Critical':'🟡 Needs Work';
-  const actionText=`${vids.length} videos · Avg ${avg}/55 · ${avgProc}% procedural · ${totTB} theory gaps · ${totWarn} warnings`;
+        // Action priority
+        const priority = avg < 25 ? "🔴 Critical" : "🟡 Needs Work";
+        const actionText = `${vids.length} videos · Avg ${avg}/55 · ${avgProc}% procedural · ${totTB} theory gaps · ${totWarn} warnings`;
 
-  detail.innerHTML=`
+        detail.innerHTML = `
     <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:14px;">
         <div>
           <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Grade Distribution</div>
           <div style="display:flex;gap:8px;align-items:flex-end;">
-            ${['A','B','C','D','F'].map(g=>{
-              const cnt=gd[g]||0;const mx=Math.max(...Object.values(gd),1);
-              const h=Math.max(cnt/mx*28,2);
-              const colors={A:'var(--green)',B:'var(--accent)',C:'var(--yellow)',D:'var(--orange)',F:'var(--red)'};
-              return `<div style="text-align:center;flex:1;"><div style="height:${h}px;background:${colors[g]};border-radius:3px;margin-bottom:3px;"></div><div style="font-size:9px;font-weight:700;color:${colors[g]};">${g}</div><div style="font-size:9px;color:var(--muted);">${cnt}</div></div>`;
-            }).join('')}
+            ${["A", "B", "C", "D", "F"]
+              .map((g) => {
+                const cnt = gd[g] || 0;
+                const mx = Math.max(...Object.values(gd), 1);
+                const h = Math.max((cnt / mx) * 28, 2);
+                const colors = {
+                  A: "var(--green)",
+                  B: "var(--accent)",
+                  C: "var(--yellow)",
+                  D: "var(--orange)",
+                  F: "var(--red)",
+                };
+                return `<div style="text-align:center;flex:1;"><div style="height:${h}px;background:${colors[g]};border-radius:3px;margin-bottom:3px;"></div><div style="font-size:9px;font-weight:700;color:${colors[g]};">${g}</div><div style="font-size:9px;color:var(--muted);">${cnt}</div></div>`;
+              })
+              .join("")}
           </div>
         </div>
         <div>
@@ -643,14 +1238,16 @@ function toggleCourse(code, el, event){
         </div>
         <div>
           <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Weakest Criteria</div>
-          ${weakest.map(([k,v])=>{
-            const pct=(v/5)*100;
-            return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
-              <div style="flex:1;font-size:10px;color:var(--dim);text-align:right;">${CRITERIA_LABELS[k]||k}</div>
+          ${weakest
+            .map(([k, v]) => {
+              const pct = (v / 5) * 100;
+              return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+              <div style="flex:1;font-size:10px;color:var(--dim);text-align:right;">${CRITERIA_LABELS[k] || k}</div>
               <div style="width:60px;height:5px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:${barColor(v)};border-radius:3px;"></div></div>
               <div style="width:24px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:${barColor(v)};">${v.toFixed(1)}</div>
             </div>`;
-          }).join('')}
+            })
+            .join("")}
         </div>
       </div>
       <div style="padding:8px 12px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--border);margin-bottom:12px;font-size:11px;color:var(--dim);">
@@ -658,9 +1255,10 @@ function toggleCourse(code, el, event){
       </div>
       <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Videos (sorted by score)</div>
       <div style="max-height:200px;overflow-y:auto;">
-        ${vids.map(v=>{
-          const prio=v.score<25?'🔴':v.score<30?'🟡':'🟢';
-          return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:11px;">
+        ${vids
+          .map((v) => {
+            const prio = v.score < 25 ? "🔴" : v.score < 30 ? "🟡" : "🟢";
+            return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:11px;">
             <span style="width:16px;text-align:center;">${prio}</span>
             <span class="g-cell grade-${v.grade}" style="width:20px;text-align:center;font-size:11px;font-weight:800;">${v.grade}</span>
             <span style="width:32px;font-family:'JetBrains Mono',monospace;color:var(--dim);">${v.score}/55</span>
@@ -669,54 +1267,69 @@ function toggleCourse(code, el, event){
             <a href="augmentation_evaluator.html?video=${v.key}" target="_blank" onclick="event.stopPropagation();" style="font-size:10px;color:var(--accent);text-decoration:none;">📊</a>
             <a href="augmentation_viewer.html?video=${v.key}" target="_blank" onclick="event.stopPropagation();" style="font-size:10px;color:var(--green);text-decoration:none;">▶</a>
           </div>`;
-        }).join('')}
+          })
+          .join("")}
       </div>
       <div style="text-align:center;margin-top:8px;">
         <span style="font-size:10px;color:var(--accent);cursor:pointer;text-decoration:underline;" onclick="event.stopPropagation();scrollToTable('${code}')">View all ${vids.length} videos in table →</span>
       </div>
     </div>
   `;
-  detail.style.display='block';
-}
+        detail.style.display = "block";
+      }
 
-function scrollToTable(code, highlightKey){
-  courseFilterVal=code;
-  currentFilter='all';
-  document.querySelectorAll('.pill').forEach(b=>{b.classList.toggle('active',b.dataset.v==='all');});
-  document.getElementById('searchBox').value=code;
-  applyFilters();
-  document.getElementById('tableSection').scrollIntoView({behavior:'smooth'});
-}
+      function scrollToTable(code, highlightKey) {
+        courseFilterVal = code;
+        currentFilter = "all";
+        document.querySelectorAll(".pill").forEach((b) => {
+          b.classList.toggle("active", b.dataset.v === "all");
+        });
+        document.getElementById("searchBox").value = code;
+        applyFilters();
+        document.getElementById("tableSection").scrollIntoView({ behavior: "smooth" });
+      }
 
-function setFilter(verdict,btn){
-  currentFilter=verdict; courseFilterVal='';
-  document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  applyFilters();
-}
+      function setFilter(verdict, btn) {
+        currentFilter = verdict;
+        courseFilterVal = "";
+        document.querySelectorAll(".pill").forEach((b) => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        applyFilters();
+      }
 
-function applyFilters(){
-  const q=(document.getElementById('searchBox')?.value||'').toLowerCase();
-  let filtered=allVideos;
-  if(currentFilter!=='all') filtered=filtered.filter(v=>v.verdict===currentFilter);
-  if(q) filtered=filtered.filter(v=>v.title.toLowerCase().includes(q)||v.course.toLowerCase().includes(q));
-  sortVideos(filtered);
-  renderRows(filtered);
-}
+      function applyFilters() {
+        const q = (document.getElementById("searchBox")?.value || "").toLowerCase();
+        let filtered = allVideos;
+        if (currentFilter !== "all") filtered = filtered.filter((v) => v.verdict === currentFilter);
+        if (q)
+          filtered = filtered.filter(
+            (v) => v.title.toLowerCase().includes(q) || v.course.toLowerCase().includes(q)
+          );
+        sortVideos(filtered);
+        renderRows(filtered);
+      }
 
-function sortBy(col){
-  if(currentSort.col===col) currentSort.dir=currentSort.dir==='asc'?'desc':'asc';
-  else{currentSort.col=col;currentSort.dir=col==='score'?'asc':'desc';}
-  applyFilters();
-}
+      function sortBy(col) {
+        if (currentSort.col === col) currentSort.dir = currentSort.dir === "asc" ? "desc" : "asc";
+        else {
+          currentSort.col = col;
+          currentSort.dir = col === "score" ? "asc" : "desc";
+        }
+        applyFilters();
+      }
 
-function sortVideos(arr){
-  const{col,dir}=currentSort;
-  const mul=dir==='asc'?1:-1;
-  arr.sort((a,b)=>{let va=a[col],vb=b[col];if(typeof va==='string')return mul*va.localeCompare(vb);return mul*(va-vb);});
-}
+      function sortVideos(arr) {
+        const { col, dir } = currentSort;
+        const mul = dir === "asc" ? 1 : -1;
+        arr.sort((a, b) => {
+          let va = a[col],
+            vb = b[col];
+          if (typeof va === "string") return mul * va.localeCompare(vb);
+          return mul * (va - vb);
+        });
+      }
 
-init();
-</script>
-</body>
+      init();
+    </script>
+  </body>
 </html>
