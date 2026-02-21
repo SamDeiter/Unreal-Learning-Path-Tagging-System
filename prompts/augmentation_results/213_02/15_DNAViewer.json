@@ -1,0 +1,144 @@
+{
+  "course_code": "213.02",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "3:59",
+      "title": "Understanding RigLogic Execution Flow",
+      "concept": "RigLogic in Unreal Engine 5 is a runtime system that evaluates a graph of nodes to deform a mesh. Understanding the order of execution and dependencies within this graph is crucial for performance and predictable behavior.",
+      "diagram_suggestion": "A flowchart illustrating the RigLogic execution pipeline, showing input data, node evaluation order, and output deformation. Highlight the impact of complex logic on performance."
+    },
+    {
+      "insert_after_timestamp": "4:47",
+      "title": "MetaHuman LODs and Performance",
+      "concept": "Level of Detail (LOD) management is critical for optimizing performance in Unreal Engine 5.  Each LOD represents a different level of mesh complexity.  Switching between LODs dynamically based on distance from the camera reduces rendering cost.",
+      "diagram_suggestion": "A visual representation of different LOD levels for a MetaHuman head, showing the reduction in polygon count and the corresponding performance gains at different distances."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "2:31",
+      "procedural_step": "Selecting all LODs and their contents.",
+      "why": "Selecting all LODs ensures that the complete character is assembled, allowing for proper scaling and detail at various distances from the camera. Failing to include all LODs can lead to visual popping as the camera moves.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:53",
+      "procedural_step": "Enabling RigLogic.",
+      "why": "Enabling RigLogic connects the control rig to the MetaHuman's skeletal mesh, driving facial expressions and body movements. Without RigLogic, the controls will not deform the mesh correctly, resulting in a static character.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:52",
+      "procedural_step": "Assigning the GUI path.",
+      "why": "Assigning the GUI path loads the faceboard controls, which are essential for manipulating the MetaHuman's facial expressions. Without the GUI, you cannot directly control the blend shapes and other parameters that drive facial animation.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:37",
+      "procedural_step": "Enabling RigLogic after assigning paths.",
+      "why": "RigLogic requires the correct GUI and assembly scripts to function. Assigning these paths first ensures that RigLogic can properly connect the controls to the MetaHuman's animation system. Failing to do so can result in broken or incomplete animation.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "2:15",
+      "prompt": "Why might you choose to assemble only specific LODs instead of all of them? What are the trade-offs?",
+      "expected_insight": "Assembling only specific LODs can improve performance during development or for specific use cases where high detail is not required. However, it can lead to visual inconsistencies if LODs are not managed correctly at runtime."
+    },
+    {
+      "insert_after_timestamp": "3:59",
+      "prompt": "How does RigLogic's execution order affect the final deformation of the MetaHuman's face?",
+      "expected_insight": "RigLogic evaluates a graph of nodes, and the order of execution determines how blend shapes and other parameters are combined. Incorrect execution order can lead to unexpected or undesirable facial expressions."
+    },
+    {
+      "insert_after_timestamp": "4:47",
+      "prompt": "What are the performance implications of using high-resolution LODs for MetaHumans, especially in complex scenes?",
+      "expected_insight": "High-resolution LODs require more processing power to render, which can impact frame rates, especially in scenes with many characters or complex lighting. Careful LOD management is crucial for maintaining performance."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of Maya interface and scripting.",
+    "Familiarity with Unreal Engine 5's Level of Detail (LOD) system.",
+    "Knowledge of skeletal meshes and blend shapes.",
+    "Understanding of control rigs and animation blueprints."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to select the correct GUI path when setting up RigLogic for a MetaHuman?",
+      "options": [
+        "It loads the faceboard controls necessary for manipulating facial expressions.",
+        "It optimizes the skeletal mesh for better performance.",
+        "It automatically generates LODs for the MetaHuman.",
+        "It enables physics simulations for the character's hair."
+      ],
+      "correct_index": 0,
+      "explanation": "The GUI path loads the faceboard controls, which are essential for manipulating the MetaHuman's facial expressions. Without the GUI, you cannot directly control the blend shapes and other parameters that drive facial animation."
+    },
+    {
+      "question": "What is the primary benefit of using Level of Detail (LOD) meshes in Unreal Engine 5?",
+      "options": [
+        "Reducing the memory footprint of textures.",
+        "Optimizing rendering performance by reducing polygon count at a distance.",
+        "Simplifying the animation blueprint.",
+        "Improving the accuracy of physics simulations."
+      ],
+      "correct_index": 1,
+      "explanation": "LODs optimize rendering performance by reducing the polygon count of meshes as they get further away from the camera, thus decreasing the rendering workload."
+    },
+    {
+      "question": "What happens if RigLogic is enabled without assigning the correct GUI and assembly script paths?",
+      "options": [
+        "The MetaHuman will not be visible in the scene.",
+        "The controls will not deform the mesh correctly, resulting in a static character.",
+        "The project will crash due to a memory error.",
+        "The character will be stuck in the T-pose."
+      ],
+      "correct_index": 1,
+      "explanation": "RigLogic requires the correct GUI and assembly scripts to function. Without them, the controls will not properly connect to the MetaHuman's animation system, resulting in a static character."
+    },
+    {
+      "question": "Which of the following statements best describes the function of RigLogic in Unreal Engine 5?",
+      "options": [
+        "It bakes animation sequences into the skeletal mesh.",
+        "It connects the control rig to the MetaHuman's skeletal mesh, driving facial expressions and body movements.",
+        "It automatically generates UV maps for the character's textures.",
+        "It handles collision detection for the character."
+      ],
+      "correct_index": 1,
+      "explanation": "RigLogic connects the control rig to the MetaHuman's skeletal mesh, driving facial expressions and body movements. It's the core system for bringing the character to life."
+    },
+    {
+      "question": "Why is it important to consider the order of execution within the RigLogic graph?",
+      "options": [
+        "To ensure that blend shapes and other parameters are combined correctly for accurate facial expressions.",
+        "To reduce the size of the animation blueprint.",
+        "To improve the accuracy of physics simulations.",
+        "To optimize the loading time of the MetaHuman asset."
+      ],
+      "correct_index": 0,
+      "explanation": "The order of execution determines how blend shapes and other parameters are combined. Incorrect execution order can lead to unexpected or undesirable facial expressions."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

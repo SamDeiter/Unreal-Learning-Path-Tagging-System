@@ -1,0 +1,177 @@
+{
+  "course_code": "218.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:12",
+      "title": "Understanding Timecode Provider Architecture",
+      "concept": "Explain the architecture of the Timecode Provider in Unreal Engine 5. How does it interact with different hardware sources (AJA, LTC)? How does the engine resolve conflicts between different timecode sources?",
+      "diagram_suggestion": "A block diagram showing the flow of timecode data from hardware sources (AJA card, LTC input) through the Timecode Provider to various engine subsystems (sequencer, animation, rendering)."
+    },
+    {
+      "insert_after_timestamp": "1:51",
+      "title": "Deep Dive into Global Frame Offset",
+      "concept": "Elaborate on the purpose of the Global Frame Offset. Why is it necessary? What are the potential consequences of an incorrect offset value in terms of rendering artifacts or synchronization issues?",
+      "diagram_suggestion": "A timeline visualization showing the effect of the Global Frame Offset on the alignment of different data streams (video, motion capture, audio)."
+    },
+    {
+      "insert_after_timestamp": "3:14",
+      "title": "Media Profile and Time Data Monitor Interdependence",
+      "concept": "Explain the relationship between the Media Profile and the Time Data Monitor. How does the Media Profile configure the engine's media pipeline, and how does the Time Data Monitor provide feedback on the synchronization of that pipeline?",
+      "diagram_suggestion": "A data flow diagram illustrating how the Media Profile settings (timecode provider, frame rate) influence the data displayed in the Time Data Monitor."
+    },
+    {
+      "insert_after_timestamp": "4:11",
+      "title": "Buffer Visualizer Deep Dive",
+      "concept": "Explain the statistical meaning of the buffer visualizer's elements (average, standard deviation). How can these metrics be used to diagnose and correct synchronization problems?",
+      "diagram_suggestion": "A graph illustrating the distribution of time samples within the buffer, with annotations explaining the meaning of the average, standard deviation, and evaluation time."
+    },
+    {
+      "insert_after_timestamp": "5:17",
+      "title": "Synchronization Strategies and Trade-offs",
+      "concept": "Discuss different strategies for synchronizing CG elements with video and tracking data. What are the trade-offs between latency, accuracy, and stability? How do these trade-offs affect the final visual quality?",
+      "diagram_suggestion": "A table comparing different synchronization strategies (e.g., timecode-based, genlock-based) in terms of their latency, accuracy, and stability."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:07",
+      "procedural_step": "Time data monitor is used to monitor sync and timecode.",
+      "why": "Because accurate timecode is crucial for synchronizing multiple devices in a virtual production environment, ensuring that all elements (video, audio, tracking data) are aligned in time. Failure to do so results in visual artifacts and a loss of immersion.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:27",
+      "procedural_step": "Switching to timecode evaluation.",
+      "why": "Because timecode evaluation ensures that the engine uses the incoming timecode signal as the primary reference for synchronization. This is more robust than relying on platform time, which can be subject to drift or inconsistencies.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:14",
+      "procedural_step": "Setting global frame offset to three.",
+      "why": "Because a slight offset can compensate for systematic delays in the data pipeline, such as processing time within the AJA card or network latency. This ensures that the engine evaluates the correct frame of video at the corresponding timecode.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:31",
+      "procedural_step": "Changing tracking system buffer size from 10 to 50.",
+      "why": "Because a larger buffer provides more tolerance for variations in the timing of incoming data. This prevents the engine from dropping samples or interpolating between them, which can lead to jitter or inaccuracies in the rendered output.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:17",
+      "procedural_step": "Setting media profile as startup media profile in project settings.",
+      "why": "Because the media profile defines the engine's media pipeline, including the timecode provider, frame rate, and output devices. Setting it as the startup profile ensures that these settings are loaded correctly when the project is opened, preventing synchronization issues.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:31",
+      "prompt": "Why would you choose 'Platform Time' over 'Timecode' as your evaluation type? What scenarios would benefit from using the engine's internal clock instead of an external timecode source?",
+      "expected_insight": "Platform time might be preferable in situations where an external timecode source is unreliable or unavailable, or when synchronizing with systems that are tightly coupled to the engine's internal clock."
+    },
+    {
+      "insert_after_timestamp": "1:11",
+      "prompt": "The timing diagram shows a buffer and sample count. How does the size of the buffer affect the system's ability to handle variations in the incoming data stream?",
+      "expected_insight": "A larger buffer allows the system to absorb more jitter and variations in the timing of incoming data, reducing the risk of dropped samples and improving synchronization accuracy."
+    },
+    {
+      "insert_after_timestamp": "2:42",
+      "prompt": "Why is it important to have green source indicators? What are the potential consequences of running a virtual production with yellow or red indicators?",
+      "expected_insight": "Green indicators confirm that the engine is receiving data from all required sources. Yellow or red indicators indicate a problem with the data stream, which can lead to synchronization errors and visual artifacts."
+    },
+    {
+      "insert_after_timestamp": "3:58",
+      "prompt": "Why is it important to save the media profile settings into the .ini file? What happens if these settings are not persisted correctly?",
+      "expected_insight": "Saving the settings to the .ini file ensures that they are loaded correctly each time the project is opened. Failure to do so can result in the engine reverting to default settings, leading to synchronization issues and other problems."
+    },
+    {
+      "insert_after_timestamp": "5:30",
+      "prompt": "The white rectangle in the buffer visualizer represents the standard deviation of the time samples. How does this relate to the stability and accuracy of the synchronization?",
+      "expected_insight": "A larger white rectangle indicates greater variation in the time samples, which suggests that the synchronization is less stable and accurate. This may require increasing the buffer size or adjusting the timing offsets."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of virtual production workflows",
+    "Familiarity with Unreal Engine 5's media framework",
+    "Knowledge of timecode standards and synchronization techniques"
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary purpose of the Time Data Monitor in Unreal Engine 5?",
+      "options": [
+        "To monitor and synchronize the timecode of different devices.",
+        "To create and edit media profiles.",
+        "To render high-resolution video output.",
+        "To manage project settings."
+      ],
+      "correct_index": 0,
+      "explanation": "The Time Data Monitor is used to monitor the sync and timecode of different devices, ensuring that all elements in the virtual production environment are aligned in time."
+    },
+    {
+      "question": "Which evaluation type uses the engine's internal clock when evaluating the timecode source?",
+      "options": [
+        "Timecode",
+        "Platform Time",
+        "No Synchronization",
+        "Custom Time"
+      ],
+      "correct_index": 1,
+      "explanation": "Platform Time uses the engine's internal clock for evaluation, which can be useful when an external timecode source is unreliable or unavailable."
+    },
+    {
+      "question": "What does a green source indicator in the Time Data Monitor signify?",
+      "options": [
+        "The input is connected and receiving data.",
+        "The input is connected but no data is available.",
+        "There is no connection to the input.",
+        "The input is muted."
+      ],
+      "correct_index": 0,
+      "explanation": "A green indicator confirms that the engine is receiving data from the corresponding source, indicating a healthy connection."
+    },
+    {
+      "question": "Why might you need to adjust the Global Frame Offset in the Timecode Provider?",
+      "options": [
+        "To compensate for systematic delays in the data pipeline.",
+        "To change the frame rate of the project.",
+        "To disable timecode synchronization.",
+        "To adjust the resolution of the video output."
+      ],
+      "correct_index": 0,
+      "explanation": "The Global Frame Offset can compensate for delays in the data pipeline, ensuring that the engine evaluates the correct frame of video at the corresponding timecode."
+    },
+    {
+      "question": "What does a larger white rectangle in the Buffer Visualizer indicate?",
+      "options": [
+        "More variation or jitter in the sample buffer.",
+        "A stable and accurate synchronization.",
+        "A small buffer size.",
+        "A perfect timecode signal."
+      ],
+      "correct_index": 0,
+      "explanation": "A larger white rectangle, representing the standard deviation, indicates greater variation in the time samples, suggesting that the synchronization is less stable and accurate."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 24,
+    "grade": "D"
+  }
+}

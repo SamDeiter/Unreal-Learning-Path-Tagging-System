@@ -1,0 +1,185 @@
+{
+  "course_code": "203.02",
+  "conceptual_score": {
+    "procedural_pct": 70,
+    "conceptual_pct": 30,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:17",
+      "title": "Lightmap UV Unwrapping",
+      "concept": "Explain the process of lightmap UV unwrapping and how it differs from standard texture UVs. Detail how overlapping UVs in lightmaps lead to lighting artifacts and how to avoid them.",
+      "diagram_suggestion": "A visual comparison of standard UVs vs. lightmap UVs, highlighting the importance of padding and non-overlapping faces in lightmap UVs."
+    },
+    {
+      "insert_after_timestamp": "4:47",
+      "title": "Lightmass Importance Volume",
+      "concept": "Elaborate on the Lightmass Importance Volume's role in prioritizing lighting calculations. Explain how it affects the distribution of indirect lighting samples and the performance implications of its size and placement.",
+      "diagram_suggestion": "A scene visualization showing the Lightmass Importance Volume and its effect on the density of indirect lighting samples, contrasting the high-detail area within the volume with the lower-detail area outside."
+    },
+    {
+      "insert_after_timestamp": "7:31",
+      "title": "Lightmap Texture Application",
+      "concept": "Describe how lightmaps are applied to surfaces in the engine. Explain the shader operations involved in combining the base color texture with the lightmap texture to produce the final lit appearance.",
+      "diagram_suggestion": "A shader graph illustrating the multiplication of the base color texture with the lightmap texture, highlighting the role of the lightmap in modulating the surface's brightness and color."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:35",
+      "procedural_step": "Lightmass has virtually zero runtime cost.",
+      "why": "Baked lighting precomputes lighting data, storing it in textures. This eliminates real-time lighting calculations, reducing the GPU load during gameplay, but increases build times.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:11",
+      "procedural_step": "Lightmass bakes shadows into a texture map.",
+      "why": "Baking shadows into lightmaps means shadow quality is fixed at build time. Dynamic changes to lights or objects won't affect these baked shadows, unlike dynamic shadow techniques like VSMs.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:43",
+      "procedural_step": "Nanite is primarily designed for Lumen.",
+      "why": "Nanite's virtualized geometry is optimized for real-time rendering with Lumen. Lightmass struggles with the extreme geometric detail, leading to excessive bake times or crashes unless GPU lightmass is enabled.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:47",
+      "procedural_step": "Use a Lightmass Importance Volume.",
+      "why": "The Lightmass Importance Volume focuses lightmap detail. Without it, GI calculations are distributed evenly, wasting resources on areas the player may not see, increasing build times without visual benefit.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:39",
+      "procedural_step": "Lightmap UVs are important for baking.",
+      "why": "Lightmap UVs provide a unique, non-overlapping parameterization for lightmaps. Overlapping UVs cause multiple surfaces to share the same lightmap space, resulting in incorrect and overlapping shadows.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:26",
+      "prompt": "Why might a developer choose lightmass baking over Lumen, even though Lumen is generally preferred in UE5?",
+      "expected_insight": "Lightmass offers predictable performance on lower-end hardware and can eliminate the noise sometimes present in Lumen's real-time GI. It's a trade-off between visual fidelity and performance consistency."
+    },
+    {
+      "insert_after_timestamp": "3:27",
+      "prompt": "Why is a deterministic approach important when working with Unreal Engine 5?",
+      "expected_insight": "Unreal Engine 5 is a real-time engine, so performance is critical. Deterministic settings allow developers to predict how changes will affect performance and visual quality, preventing unexpected slowdowns."
+    },
+    {
+      "insert_after_timestamp": "4:36",
+      "prompt": "How does disabling compressed lightmaps improve shadow quality, and what are the trade-offs?",
+      "expected_insight": "Disabling compression reduces artifacts in lightmaps, leading to smoother shadows. However, it increases memory usage and file size, potentially impacting load times and performance."
+    },
+    {
+      "insert_after_timestamp": "6:10",
+      "prompt": "Why are stationary lights limited to four overlapping objects?",
+      "expected_insight": "Stationary lights blend baked and dynamic lighting. The overlap limit is due to the cost of calculating dynamic shadows for moving objects. Exceeding the limit disables dynamic shadows for the exceeding objects to maintain performance.",
+      "antipattern_warning": null
+    },
+    {
+      "insert_after_timestamp": "7:41",
+      "prompt": "What are the limitations of relying entirely on textures for displaying lighting information?",
+      "expected_insight": "Baked lighting is static. Changes to light positions or object properties require a re-bake. This limits interactivity and dynamic lighting effects, making it unsuitable for scenes with frequent lighting changes."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "1:43",
+      "warning": "Using Nanite meshes with Unreal Lightmass baking can lead to extremely long bake times or crashes due to the high geometric complexity.",
+      "severity": "HIGH",
+      "fix": "Disable Nanite for static meshes before baking with Lightmass, or use GPU Lightmass. Alternatively, use Lumen with Nanite for dynamic global illumination."
+    },
+    {
+      "timestamp": "4:43",
+      "warning": "Omitting a Lightmass Importance Volume results in inefficient global illumination calculations across the entire scene, leading to longer bake times and potentially lower quality in the areas of interest.",
+      "severity": "MEDIUM",
+      "fix": "Always enclose the playable area or area of visual focus within a Lightmass Importance Volume to prioritize lighting calculations."
+    },
+    {
+      "timestamp": "5:39",
+      "warning": "Overlapping UVs in lightmap UV channels will cause incorrect and overlapping shadows, resulting in visual artifacts.",
+      "severity": "HIGH",
+      "fix": "Ensure lightmap UVs are properly unwrapped with adequate padding and no overlapping faces. Use the 'Generate Lightmap UVs' option in the static mesh editor with appropriate settings."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of UV unwrapping.",
+    "Familiarity with the Unreal Engine editor interface.",
+    "Knowledge of static vs. dynamic lighting concepts."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally recommended to use Lumen with Nanite meshes instead of Lightmass?",
+      "options": [
+        "Lumen is designed to handle the high geometric detail of Nanite meshes efficiently, while Lightmass struggles.",
+        "Lightmass is incompatible with Nanite meshes.",
+        "Nanite meshes are automatically converted to static meshes when using Lumen.",
+        "Lumen provides more accurate baked lighting than Lightmass."
+      ],
+      "correct_index": 0,
+      "explanation": "Lumen's real-time global illumination is optimized for Nanite's virtualized geometry. Lightmass, an offline baking solution, faces performance challenges with Nanite's complexity."
+    },
+    {
+      "question": "What is the primary function of a Lightmass Importance Volume?",
+      "options": [
+        "To define the area where lightmaps will be generated.",
+        "To prioritize lighting calculations within a specific region, improving detail and performance.",
+        "To control the intensity of indirect lighting in the scene.",
+        "To automatically generate lightmap UVs for static meshes."
+      ],
+      "correct_index": 1,
+      "explanation": "The Lightmass Importance Volume focuses lightmap detail. Without it, GI calculations are distributed evenly, wasting resources on areas the player may not see, increasing build times without visual benefit."
+    },
+    {
+      "question": "Why are non-overlapping UVs crucial for lightmap generation?",
+      "options": [
+        "Overlapping UVs cause multiple surfaces to share the same lightmap space, resulting in incorrect and overlapping shadows.",
+        "Overlapping UVs increase the resolution of the lightmap.",
+        "Overlapping UVs reduce the file size of the lightmap texture.",
+        "Overlapping UVs are required for proper texture tiling."
+      ],
+      "correct_index": 0,
+      "explanation": "Lightmap UVs provide a unique, non-overlapping parameterization for lightmaps. Overlapping UVs cause multiple surfaces to share the same lightmap space, resulting in incorrect and overlapping shadows."
+    },
+    {
+      "question": "What is the main trade-off when choosing between baked lighting (Lightmass) and dynamic lighting (Lumen)?",
+      "options": [
+        "Baked lighting offers better performance but is static, while dynamic lighting is more flexible but can be more performance-intensive.",
+        "Baked lighting is easier to set up, while dynamic lighting requires advanced technical skills.",
+        "Baked lighting produces more realistic results, while dynamic lighting is faster to render.",
+        "Baked lighting is only suitable for outdoor environments, while dynamic lighting is better for indoor scenes."
+      ],
+      "correct_index": 0,
+      "explanation": "Baked lighting precomputes lighting data, storing it in textures. This eliminates real-time lighting calculations, reducing the GPU load during gameplay, but increases build times."
+    },
+    {
+      "question": "What is the consequence of disabling compressed lightmaps?",
+      "options": [
+        "Improved shadow quality but increased memory usage and file size.",
+        "Reduced shadow quality but decreased memory usage and file size.",
+        "Faster lightmap baking times but lower visual fidelity.",
+        "Slower lightmap baking times but higher visual fidelity."
+      ],
+      "correct_index": 0,
+      "explanation": "Disabling compression reduces artifacts in lightmaps, leading to smoother shadows. However, it increases memory usage and file size, potentially impacting load times and performance."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

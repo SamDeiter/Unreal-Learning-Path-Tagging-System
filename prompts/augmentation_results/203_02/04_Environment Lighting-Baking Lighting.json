@@ -1,0 +1,221 @@
+{
+  "course_code": "203.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:33",
+      "title": "Lightmass Portals Deep Dive",
+      "concept": "Lightmass Portals optimize global illumination calculations by prioritizing light transport through openings. They reduce light leak and improve the accuracy of indirect lighting in enclosed spaces by concentrating ray tracing efforts.",
+      "diagram_suggestion": "A diagram showing rays originating from a light source, passing through a Lightmass Portal, and illuminating an interior space with improved GI."
+    },
+    {
+      "insert_after_timestamp": "2:09",
+      "title": "Lightmass Importance Volume: The Core of GI",
+      "concept": "The Lightmass Importance Volume defines the area where global illumination is calculated with higher precision. Areas outside the volume receive lower-quality lighting, optimizing bake times and memory usage. It's crucial for managing computational cost in large scenes.",
+      "diagram_suggestion": "A visual representation of a scene with a Lightmass Importance Volume highlighting the area of high-quality GI calculation versus the lower quality outside."
+    },
+    {
+      "insert_after_timestamp": "4:51",
+      "title": "Lightmaps: Static Lighting Textures",
+      "concept": "Lightmaps are pre-computed textures storing baked lighting information. They are applied to static objects to simulate realistic lighting without runtime cost. Resolution is key; insufficient resolution leads to artifacts, while excessive resolution wastes memory.",
+      "diagram_suggestion": "A comparison of a low-resolution lightmap versus a high-resolution lightmap on the same object, demonstrating the impact on visual quality."
+    },
+    {
+      "insert_after_timestamp": "7:57",
+      "title": "Atmospheric Lighting System",
+      "concept": "The Atmospheric Lighting system simulates realistic sky and sunlight. Directional lights can be configured to affect the atmosphere, influencing cloud shadows, atmospheric scattering, and overall scene ambiance. Careful control is needed to avoid overblown or unrealistic lighting.",
+      "diagram_suggestion": "A diagram showcasing the interaction between a directional light, the atmosphere, and the resulting cloud shadows and scattering effects."
+    },
+    {
+      "insert_after_timestamp": "14:00",
+      "title": "IES Profiles: Shaping Light with Data",
+      "concept": "IES profiles are data files that define the distribution of light emitted from a real-world light fixture. By using IES profiles, you can accurately simulate the complex light patterns of various light sources, adding realism to your scenes.",
+      "diagram_suggestion": "A visual representation of an IES profile and its corresponding light distribution pattern, demonstrating how the data shapes the light's appearance."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:16",
+      "procedural_step": "Setting scalability options",
+      "why": "Scalability settings impact rendering features and performance. Choosing 'cinematic' enables the highest quality settings, but increases GPU load. Understanding the target hardware is critical for optimization.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:39",
+      "procedural_step": "Adjusting reflection capture resolution",
+      "why": "Higher reflection capture resolution improves the accuracy of reflections, especially in rough materials. Insufficient resolution leads to blurry or inaccurate reflections, breaking immersion. Ray tracing relies heavily on accurate reflection data.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:24",
+      "procedural_step": "Using Lightmass Portals",
+      "why": "Lightmass Portals guide the light baking process, focusing computational effort on areas where light enters a room. Without them, indirect lighting calculations become less accurate, leading to light leaks and unrealistic shadows.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:15",
+      "procedural_step": "Using Lightmass Importance Volume for GPU bakes",
+      "why": "The Lightmass Importance Volume prioritizes areas for baking, reducing bake times. Without it, the engine attempts to bake lighting for the entire scene at the same quality, drastically increasing bake times and memory usage.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:24",
+      "procedural_step": "Overriding lightmap resolution",
+      "why": "Overriding lightmap resolution increases the texture space allocated for baked lighting on specific objects. This is crucial for hero assets to avoid blocky shadows. However, mismatched resolutions between adjacent objects can cause visible seams.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:00",
+      "procedural_step": "Enabling area shadows",
+      "why": "Area shadows simulate the penumbra effect of real-world lights, creating softer, more realistic shadows. Disabling them results in hard, unrealistic shadows that detract from visual fidelity. This impacts the perceived scale and realism of the scene.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "9:08",
+      "procedural_step": "Using light channels",
+      "why": "Light channels isolate the influence of specific lights on specific objects. This allows for targeted lighting effects and prevents unwanted light bleeding. Without channels, lights affect all objects indiscriminately, leading to uncontrolled lighting.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "10:44",
+      "procedural_step": "Adjusting source radius",
+      "why": "Adjusting the source radius of a light affects the softness of shadows and highlights. A larger radius creates softer shadows, while a smaller radius creates sharper shadows. This parameter influences the perceived size and distance of the light source.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "15:09",
+      "procedural_step": "Using ambient occlusion in baking",
+      "why": "Ambient occlusion simulates the darkening of surfaces in crevices and corners, adding depth and realism to baked lighting. While screen space ambient occlusion is not compatible with static lighting, baked AO provides a similar effect.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:47",
+      "prompt": "Why does high reflection capture quality benefit ray tracing?",
+      "expected_insight": "Ray tracing relies on accurate scene data for realistic reflections. High-quality reflection captures provide that data, leading to more accurate and visually appealing ray-traced reflections."
+    },
+    {
+      "insert_after_timestamp": "2:44",
+      "prompt": "Why is a Lightmass Importance Volume especially important when working with terrain?",
+      "expected_insight": "Terrain is often a large, complex surface. Baking lighting on the entire terrain at high quality would be computationally expensive. The Lightmass Importance Volume allows you to focus baking efforts on the areas that are most visible or important, optimizing performance."
+    },
+    {
+      "insert_after_timestamp": "3:57",
+      "prompt": "Why does Lumen only support movable lights?",
+      "expected_insight": "Lumen is a dynamic global illumination system. Static and stationary lights rely on pre-computed lighting data, which is incompatible with Lumen's real-time calculations. Movable lights allow Lumen to dynamically update lighting based on scene changes."
+    },
+    {
+      "insert_after_timestamp": "7:39",
+      "prompt": "Why does Unreal Engine prioritize one directional light when using Lumen with multiple directional lights?",
+      "expected_insight": "Using multiple directional lights with Lumen can lead to conflicting lighting information and performance issues. Prioritizing one light ensures consistent atmospheric lighting and avoids unnecessary computational overhead."
+    },
+    {
+      "insert_after_timestamp": "14:55",
+      "prompt": "Why is ambient occlusion not recommended for static lighting with Lumen?",
+      "expected_insight": "Lumen already provides dynamic global illumination, including ambient occlusion effects. Adding pre-computed ambient occlusion on top of Lumen's dynamic AO can lead to over-darkening and an unnatural look. It's redundant and can negatively impact visual quality."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:45",
+      "warning": "Using more than four stationary lights can lead to rendering artifacts and performance issues due to overlapping bounce calculations. This limitation stems from the complexity of calculating indirect lighting from multiple overlapping stationary lights.",
+      "severity": "MEDIUM",
+      "fix": "Reduce the number of overlapping stationary lights or switch to movable lights with Lumen for dynamic global illumination."
+    },
+    {
+      "timestamp": "5:48",
+      "warning": "Mismatched lightmap resolutions between intersecting objects can cause visible seams and artifacts in baked lighting. This occurs because the lighting information is sampled at different densities, leading to discontinuities at the intersection.",
+      "severity": "MEDIUM",
+      "fix": "Ensure that intersecting objects have similar lightmap resolutions or use a lightmap UV unwrap that minimizes seams."
+    },
+    {
+      "timestamp": "10:44",
+      "warning": "Increasing the source radius for baked lighting can lead to pixelation artifacts if the lightmap resolution is insufficient. The soft shadows require more texture space to represent accurately, and low resolution results in blocky shadows.",
+      "severity": "LOW",
+      "fix": "Increase the lightmap resolution of the affected objects or reduce the source radius to minimize pixelation."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine 5 interface and navigation",
+    "Familiarity with static, stationary, and movable light types",
+    "Knowledge of global illumination concepts",
+    "Understanding of lightmapping and baking processes"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to use a Lightmass Importance Volume when baking lighting in Unreal Engine 5?",
+      "options": [
+        "To prioritize lighting calculations in specific areas, optimizing bake times.",
+        "To automatically generate lightmaps for all objects in the scene.",
+        "To disable global illumination and use direct lighting only.",
+        "To prevent light from leaking through walls and ceilings."
+      ],
+      "correct_index": 0,
+      "explanation": "The Lightmass Importance Volume defines the area where global illumination is calculated with higher precision, optimizing bake times and memory usage."
+    },
+    {
+      "question": "What is the primary function of Lightmass Portals in Unreal Engine 5?",
+      "options": [
+        "To optimize light transport through openings, improving the accuracy of indirect lighting.",
+        "To create realistic reflections on metallic surfaces.",
+        "To simulate volumetric fog and atmospheric effects.",
+        "To control the intensity and color of directional lights."
+      ],
+      "correct_index": 0,
+      "explanation": "Lightmass Portals optimize global illumination calculations by prioritizing light transport through openings, reducing light leak and improving the accuracy of indirect lighting."
+    },
+    {
+      "question": "How does the 'Source Radius' setting affect shadows in Unreal Engine 5?",
+      "options": [
+        "It controls the softness of shadows, with larger values creating softer shadows.",
+        "It determines the color of shadows, with different values producing different hues.",
+        "It adjusts the intensity of shadows, with higher values creating darker shadows.",
+        "It defines the shape of shadows, with different values producing different patterns."
+      ],
+      "correct_index": 0,
+      "explanation": "Adjusting the source radius of a light affects the softness of shadows and highlights. A larger radius creates softer shadows, while a smaller radius creates sharper shadows."
+    },
+    {
+      "question": "What is the purpose of IES profiles in Unreal Engine 5 lighting?",
+      "options": [
+        "To define the distribution of light emitted from a real-world light fixture, adding realism to the scene.",
+        "To automatically adjust the intensity of lights based on the time of day.",
+        "To create animated lighting effects, such as flickering lights.",
+        "To optimize the performance of lights by reducing their computational cost."
+      ],
+      "correct_index": 0,
+      "explanation": "IES profiles are data files that define the distribution of light emitted from a real-world light fixture. By using IES profiles, you can accurately simulate the complex light patterns of various light sources, adding realism to your scenes."
+    },
+    {
+      "question": "Why is it generally not recommended to use screen space ambient occlusion (SSAO) in conjunction with static lighting when using Lumen?",
+      "options": [
+        "Lumen already provides dynamic global illumination, including ambient occlusion effects, making SSAO redundant and potentially causing over-darkening.",
+        "SSAO is only compatible with dynamic lighting and cannot be used with static lighting.",
+        "SSAO significantly increases the computational cost of rendering, reducing performance.",
+        "SSAO interferes with the lightmapping process, causing artifacts and inaccuracies."
+      ],
+      "correct_index": 0,
+      "explanation": "Lumen already provides dynamic global illumination, including ambient occlusion effects. Adding pre-computed ambient occlusion on top of Lumen's dynamic AO can lead to over-darkening and an unnatural look."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 27,
+    "grade": "D"
+  }
+}

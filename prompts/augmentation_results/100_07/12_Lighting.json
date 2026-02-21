@@ -1,0 +1,190 @@
+{
+  "course_code": "100.07",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:33",
+      "title": "Light Transport Theory",
+      "concept": "Unreal Engine's lighting system simulates light transport using a combination of direct lighting, global illumination (GI), and reflections. Understanding the underlying algorithms (e.g., path tracing, ray tracing, screen space reflections) helps optimize scene lighting for performance and visual fidelity.",
+      "diagram_suggestion": "A diagram illustrating the different light paths (direct, reflected, refracted) and their contribution to the final rendered image, highlighting the role of global illumination."
+    },
+    {
+      "insert_after_timestamp": "1:19",
+      "title": "Physically Based Rendering (PBR) Deep Dive",
+      "concept": "PBR materials in Unreal Engine define how light interacts with surfaces based on real-world physics. Parameters like Base Color, Metallic, Roughness, and Normal influence the reflection and refraction of light, impacting the overall look and feel of the scene. Understanding the math behind these parameters allows for creating more realistic and predictable materials.",
+      "diagram_suggestion": "A diagram showing the microfacet theory behind PBR, illustrating how roughness affects the specular highlight and overall light scattering."
+    },
+    {
+      "insert_after_timestamp": "1:38",
+      "title": "Shadow Mapping Techniques",
+      "concept": "Shadows in Unreal Engine are generated using shadow mapping techniques. Understanding the limitations of shadow maps (e.g., aliasing, perspective aliasing) and the various techniques to mitigate them (e.g., PCF, cascaded shadow maps) is crucial for achieving high-quality shadows.",
+      "diagram_suggestion": "A diagram illustrating the shadow mapping process, including the depth buffer, shadow acne, and various filtering techniques."
+    },
+    {
+      "insert_after_timestamp": "2:33",
+      "title": "Dynamic Lighting Performance Considerations",
+      "concept": "Dynamic lighting in Unreal Engine is computationally expensive. Each dynamic light adds to the rendering cost, especially with shadows. Understanding the performance implications of different light types and shadow settings is crucial for optimizing performance, especially on lower-end hardware.",
+      "diagram_suggestion": "A graph showing the performance impact of different light types (e.g., point light, spotlight, directional light) and shadow settings (e.g., shadow resolution, shadow distance)."
+    },
+    {
+      "insert_after_timestamp": "3:11",
+      "title": "Lumen Global Illumination",
+      "concept": "Lumen is Unreal Engine's real-time global illumination and reflections system. It uses a combination of screen space and ray tracing techniques to simulate indirect lighting and reflections. Understanding Lumen's architecture and its limitations is crucial for achieving realistic lighting in dynamic environments.",
+      "diagram_suggestion": "A diagram illustrating the Lumen pipeline, including the Surface Cache, Software Ray Tracing, and Hardware Ray Tracing components."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:37",
+      "procedural_step": "Indirect lighting is reflected by nearby surfaces.",
+      "why": "Indirect lighting contributes to global illumination, which simulates how light bounces around the scene. Without it, scenes appear flat and unrealistic because the Ambient Occlusion is not calculated correctly.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:10",
+      "procedural_step": "Metallic and roughness affect bounce lighting.",
+      "why": "These PBR parameters determine how much light is reflected specularly (like a mirror) or diffusely (scattered). Incorrect values break the energy conservation law, leading to unrealistic lighting and material appearance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:40",
+      "procedural_step": "Toggle lights between static and dynamic.",
+      "why": "Static lights are precomputed, reducing runtime cost but limiting flexibility. Dynamic lights are calculated every frame, offering flexibility but increasing rendering overhead. Choosing the right mobility setting impacts performance and visual fidelity.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:43",
+      "procedural_step": "Avoid too many overlapping real-time dynamic lights.",
+      "why": "Each dynamic light requires the engine to perform lighting calculations for every pixel it affects, leading to a multiplicative increase in rendering time. Overlapping lights exacerbate this issue, potentially causing significant performance drops.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:23",
+      "procedural_step": "Sun Sky automates sun position.",
+      "why": "The Sun Sky actor procedurally generates a physically accurate sky and sun based on geographical location and time of day. This ensures consistent and realistic lighting conditions throughout the scene, simplifying the setup process and improving visual quality.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:53",
+      "prompt": "Why does Unreal Engine prioritize indirect lighting calculations, and what are the trade-offs?",
+      "expected_insight": "Indirect lighting significantly contributes to realism, but it's computationally expensive. Unreal Engine uses various techniques (e.g., Lumen, ray tracing, lightmass) to balance visual quality and performance."
+    },
+    {
+      "insert_after_timestamp": "1:24",
+      "prompt": "How do material properties influence the behavior of light in Unreal Engine, and what happens when these properties are physically incorrect?",
+      "expected_insight": "Material properties like metallic, roughness, and normal influence how light is reflected and refracted. Incorrect values can lead to unrealistic lighting and material appearance, breaking the illusion of realism."
+    },
+    {
+      "insert_after_timestamp": "2:21",
+      "prompt": "What are the performance implications of using baked lighting versus dynamic lighting in Unreal Engine, and how do you decide which approach is best for a given project?",
+      "expected_insight": "Baked lighting is precomputed, reducing runtime cost but limiting flexibility. Dynamic lighting is calculated every frame, offering flexibility but increasing rendering overhead. The choice depends on the project's performance requirements and the level of dynamism needed."
+    },
+    {
+      "insert_after_timestamp": "3:00",
+      "prompt": "Why is stationary lighting a common choice for archviz projects, and what are its limitations?",
+      "expected_insight": "Stationary lighting offers a balance between static and dynamic lighting. It allows for baked lighting with dynamic actors, providing good performance and some flexibility. However, it has limitations in terms of fully dynamic global illumination."
+    },
+    {
+      "insert_after_timestamp": "4:49",
+      "prompt": "How does the post-process volume affect the final rendered image, and what are some common post-processing effects used in Unreal Engine?",
+      "expected_insight": "The post-process volume allows for adjusting various rendering aspects, such as color grading, bloom, and depth of field. These effects can significantly enhance the visual quality of the scene."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "2:43",
+      "warning": "Overlapping dynamic lights can lead to significant performance drops due to increased rendering overhead.",
+      "severity": "HIGH",
+      "fix": "Optimize light placement and reduce the number of overlapping dynamic lights. Consider using static or stationary lights where appropriate."
+    },
+    {
+      "timestamp": "5:32",
+      "warning": "Using Lightmass Importance Volume incorrectly can lead to increased bake times without significant quality improvements.",
+      "severity": "MEDIUM",
+      "fix": "Ensure the Lightmass Importance Volume accurately encompasses the areas with the most visual detail. Avoid unnecessary large volumes."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of 3D graphics concepts (e.g., vertices, polygons, textures)",
+    "Familiarity with the Unreal Engine editor interface",
+    "Knowledge of material creation and PBR principles"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is indirect lighting crucial for achieving realistic visuals in Unreal Engine?",
+      "options": [
+        "It simulates how light bounces around the scene, contributing to global illumination.",
+        "It directly illuminates surfaces without any interference.",
+        "It pre-computes lighting for static objects to improve performance.",
+        "It only affects the specular highlights on materials."
+      ],
+      "correct_index": 0,
+      "explanation": "Indirect lighting simulates the way light bounces off surfaces, contributing to global illumination and creating a more realistic and immersive environment."
+    },
+    {
+      "question": "Which PBR parameter primarily controls the perceived smoothness of a material's surface in Unreal Engine?",
+      "options": [
+        "Base Color",
+        "Metallic",
+        "Roughness",
+        "Normal"
+      ],
+      "correct_index": 2,
+      "explanation": "Roughness determines how much light is scattered by a surface. Lower roughness values result in smoother, more reflective surfaces, while higher values create rougher, more diffuse surfaces."
+    },
+    {
+      "question": "What is the primary advantage of using baked lighting in Unreal Engine?",
+      "options": [
+        "It allows for fully dynamic lighting and shadows.",
+        "It reduces runtime rendering costs by pre-computing lighting.",
+        "It automatically adjusts to changes in the scene at runtime.",
+        "It requires advanced GPU hardware for ray tracing."
+      ],
+      "correct_index": 1,
+      "explanation": "Baked lighting pre-calculates lighting information, which reduces the computational load during runtime, leading to improved performance, especially on lower-end hardware."
+    },
+    {
+      "question": "What is the main purpose of the Sun Sky actor in Unreal Engine?",
+      "options": [
+        "To manually control the position and intensity of the sun.",
+        "To automatically generate a physically accurate sky and sun based on geographical location and time of day.",
+        "To create volumetric clouds and atmospheric effects.",
+        "To add post-processing effects to the scene."
+      ],
+      "correct_index": 1,
+      "explanation": "The Sun Sky actor procedurally generates a physically accurate sky and sun based on geographical location and time of day, simplifying the setup process and improving visual quality."
+    },
+    {
+      "question": "How does a post-process volume affect the rendering of a scene in Unreal Engine?",
+      "options": [
+        "It pre-computes lighting for static objects.",
+        "It allows for adjusting various rendering aspects, such as color grading and bloom.",
+        "It automatically optimizes the scene for performance.",
+        "It creates realistic shadows and reflections."
+      ],
+      "correct_index": 1,
+      "explanation": "The post-process volume allows for adjusting various rendering aspects, such as color grading, bloom, and depth of field, which can significantly enhance the visual quality of the scene."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 27,
+    "grade": "D"
+  }
+}

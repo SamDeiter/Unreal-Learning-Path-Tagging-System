@@ -1,0 +1,180 @@
+{
+  "course_code": "313.01",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:16",
+      "title": "Tangent Space and Normal Mapping",
+      "concept": "The recomputation of tangents directly affects how light interacts with the surface normals defined in the normal map. Incorrect tangents can lead to shading artifacts because the TBN (Tangent, Bitangent, Normal) matrix is used to transform light vectors into tangent space.",
+      "diagram_suggestion": "A diagram illustrating the TBN matrix and how it transforms light vectors, showing the effect of incorrect tangents on the final shading result."
+    },
+    {
+      "insert_after_timestamp": "2:43",
+      "title": "Material Instances and Parent Materials",
+      "concept": "Material conflicts during re-import often arise from inconsistencies between the material instances applied to the mesh and their parent materials. Understanding the inheritance and override mechanisms of material instances is crucial for managing material variations.",
+      "diagram_suggestion": "A diagram showing the relationship between a parent material and its instances, highlighting which properties are inherited and which can be overridden."
+    },
+    {
+      "insert_after_timestamp": "3:39",
+      "title": "Skeletal Mesh LODs and Bone Scaling",
+      "concept": "Level of Detail (LOD) meshes must maintain consistent bone scaling and translation to avoid visual discontinuities during LOD transitions. The AtomicSDNA calibration script addresses this by ensuring that bone transforms are correctly propagated across all LODs.",
+      "diagram_suggestion": "A visual representation of different LODs of a skeletal mesh, emphasizing the importance of consistent bone scaling and translation for seamless transitions."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "1:16",
+      "procedural_step": "Recompute tangents for the green channel.",
+      "why": "Recomputing tangents corrects the orientation of the surface normals used in lighting calculations. Incorrect tangents cause shading artifacts because the normal map's data is misinterpreted, leading to incorrect light direction calculations and a 'flat' or distorted appearance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:04",
+      "procedural_step": "Paste the interchange feature flags command.",
+      "why": "Disabling the interchange feature flag can bypass issues in the FBX importer related to asset handling. This is a workaround because the default importer settings might be incompatible with the specific FBX file structure, causing the import process to hang.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:49",
+      "procedural_step": "Select reset to FBX to resolve the conflict.",
+      "why": "Resetting to FBX ensures that the material assignments in the Unreal Engine match the material assignments defined in the FBX file. This prevents mismatches that can lead to incorrect material application and visual errors on the mesh.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:23",
+      "procedural_step": "Additional assets will not be scaled and translated with the head geometry asset.",
+      "why": "Failing to scale and translate lower LOD assets results in visual discontinuities when the engine switches between LODs. This is because the lower LODs will no longer align correctly with the higher-resolution LOD0, causing noticeable 'popping' or misaligned features.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:46",
+      "procedural_step": "Use the DNA file that is generated from the AtomicSDNA calibration workflow with the custom body workflow.",
+      "why": "Using the AtomicSDNA-calibrated DNA file ensures that the skeletal proportions and bone transforms are consistent between the head and body. This prevents scaling and alignment issues that can arise when combining separately calibrated head and body assets, leading to animation artifacts and unnatural poses.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:37",
+      "prompt": "Why does recomputing tangents only for the green channel sometimes fix shader issues? What assumptions are being made about the normal map?",
+      "expected_insight": "The green channel often encodes the 'up' direction in tangent space. Recomputing it can correct misaligned normals, assuming the red and blue channels are relatively accurate. This highlights the importance of understanding normal map encoding conventions."
+    },
+    {
+      "insert_after_timestamp": "2:11",
+      "prompt": "Why would disabling a feature flag in the FBX importer resolve import hangs? What underlying processes might be affected?",
+      "expected_insight": "Feature flags often control optional import processes. Disabling one might bypass a problematic or inefficient routine, such as complex material conversion or mesh optimization, suggesting a potential bug or performance bottleneck in the importer."
+    },
+    {
+      "insert_after_timestamp": "2:57",
+      "prompt": "Why does exporting an FBX from a newer MetaHuman version cause unmatched skeleton joint conflicts? What changes might occur in the skeleton structure?",
+      "expected_insight": "Newer MetaHuman versions may introduce new or renamed joints in the skeleton. Exporting from a newer version and importing into an older project will result in joint mismatches because the older skeleton definition lacks the new joints."
+    },
+    {
+      "insert_after_timestamp": "3:33",
+      "prompt": "If only LOD0 is used, why is it acceptable that lower LOD additional assets are not updated? What are the performance implications of only using LOD0?",
+      "expected_insight": "If only LOD0 is used, the lower LODs are never rendered, so their inaccuracies are irrelevant. However, using only LOD0 sacrifices performance because the engine always renders the highest-resolution mesh, even when the character is far away."
+    },
+    {
+      "insert_after_timestamp": "4:07",
+      "prompt": "Why is neck vertex position authoring important when using custom bodies? What visual artifacts might occur if the neck is not properly aligned?",
+      "expected_insight": "Accurate neck vertex positions ensure a seamless transition between the head and body meshes. Misaligned neck vertices can cause visible seams, stretching, or clipping artifacts, especially during animation."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "1:45",
+      "warning": "Relying on specific engine versions for FBX import behavior can lead to instability and maintenance issues. The FBX importer is subject to change, potentially breaking workflows that depend on undocumented features or bug fixes.",
+      "severity": "MEDIUM",
+      "fix": "Implement robust error handling and version checking to gracefully handle changes in the FBX importer. Consider using a standardized import pipeline that abstracts away the underlying engine-specific details."
+    },
+    {
+      "timestamp": "2:57",
+      "warning": "Using different MetaHuman versions with incompatible skeleton structures can lead to animation retargeting problems and runtime errors. Mismatched joint hierarchies can cause incorrect bone transformations and visual artifacts.",
+      "severity": "HIGH",
+      "fix": "Maintain strict version control over MetaHuman assets and ensure that all assets within a project are compatible with the target engine version. Use the built-in retargeting tools to adapt animations to different skeleton structures."
+    }
+  ],
+  "missing_prerequisites": [
+    "Understanding of tangent space and normal mapping",
+    "Familiarity with material instances and parent materials",
+    "Knowledge of skeletal mesh LODs and their impact on performance",
+    "Experience with FBX import settings and feature flags",
+    "Basic understanding of DNA calibration and its role in MetaHuman creation"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to recompute tangents for a skeletal mesh?",
+      "options": [
+        "To ensure correct lighting and shading by aligning surface normals.",
+        "To reduce the polygon count of the mesh.",
+        "To optimize the mesh for physics simulations.",
+        "To simplify the UV mapping process."
+      ],
+      "correct_index": 0,
+      "explanation": "Recomputing tangents ensures that the surface normals used in lighting calculations are correctly oriented, leading to accurate shading and visual appearance."
+    },
+    {
+      "question": "What is the primary reason for using Level of Detail (LOD) meshes?",
+      "options": [
+        "To improve visual fidelity at close range.",
+        "To reduce the memory footprint of the asset.",
+        "To optimize rendering performance by reducing polygon count at a distance.",
+        "To simplify the animation process."
+      ],
+      "correct_index": 2,
+      "explanation": "LOD meshes optimize rendering performance by using lower-polygon versions of the mesh when the object is far away, reducing the computational load on the GPU."
+    },
+    {
+      "question": "What problem does the AtomicSDNA calibration script solve in the context of MetaHumans?",
+      "options": [
+        "Ensuring consistent bone scaling and translation across different LODs.",
+        "Automatically generating facial animations.",
+        "Simplifying the material creation process.",
+        "Reducing the file size of the MetaHuman asset."
+      ],
+      "correct_index": 0,
+      "explanation": "The AtomicSDNA calibration script ensures that bone scaling and translation are consistent across all LODs, preventing visual discontinuities during LOD transitions."
+    },
+    {
+      "question": "Why might a material conflict occur when re-importing a head-LOD-FBX file?",
+      "options": [
+        "The head geometry assets were named incorrectly.",
+        "The FBX file is corrupted.",
+        "The engine version is incompatible with the FBX file.",
+        "The UV mapping is incorrect."
+      ],
+      "correct_index": 0,
+      "explanation": "Material conflicts often arise from inconsistencies in how head geometry assets are named, leading to mismatches between the material assignments in the FBX file and the Unreal Engine project."
+    },
+    {
+      "question": "What is the consequence of using mismatched skeleton joints between different MetaHuman versions?",
+      "options": [
+        "Incorrect bone transformations and visual artifacts during animation.",
+        "Reduced rendering performance.",
+        "Increased memory usage.",
+        "Simplified animation retargeting."
+      ],
+      "correct_index": 0,
+      "explanation": "Mismatched skeleton joints can cause incorrect bone transformations and visual artifacts because the animation data is being applied to a different skeleton structure."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 24,
+    "grade": "D"
+  }
+}

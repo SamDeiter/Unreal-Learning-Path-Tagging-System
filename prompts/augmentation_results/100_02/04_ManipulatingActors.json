@@ -1,0 +1,171 @@
+{
+  "course_code": "100.02",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:55",
+      "title": "Understanding Editor Modes",
+      "concept": "The Unreal Editor operates in distinct modes (Selection, Translate, Rotate, Scale) that govern how you interact with actors. Each mode filters input and exposes specific functionalities. Understanding these modes is crucial for efficient level design.",
+      "diagram_suggestion": "A state diagram showing the transitions between Selection, Translate, Rotate, and Scale modes, triggered by keyboard shortcuts (Q, W, E, R) or UI buttons. Highlight the input filtering and widget activation specific to each mode."
+    },
+    {
+      "insert_after_timestamp": "5:40",
+      "title": "Transform Snapping and Grid Systems",
+      "concept": "Unreal Engine's transform snapping system constrains actor movement, rotation, and scaling to discrete increments. This is tied to the editor grid and is essential for maintaining architectural alignment and preventing visual artifacts. The grid size and snapping increments are configurable.",
+      "diagram_suggestion": "A visual representation of the editor grid, overlaid with an actor. Show how snapping forces the actor's position to align with grid lines. Illustrate the relationship between grid size, snapping increment, and actor placement precision."
+    },
+    {
+      "insert_after_timestamp": "7:24",
+      "title": "Collision and Physics Simulation",
+      "concept": "The 'End' key utilizes the engine's collision detection and basic physics simulation to drop an actor onto the nearest surface. This relies on pre-computed collision meshes and a simplified physics solver. Understanding collision channels and object responses is crucial for predictable behavior.",
+      "diagram_suggestion": "A simplified diagram showing the collision detection process: a raycast from the actor downwards, intersecting with the collision mesh of the landscape. Highlight the role of collision channels in determining which objects interact."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "1:34",
+      "procedural_step": "Selecting the Translate tool",
+      "why": "The Translate tool modifies the actor's 'Relative Location' property within its Transform component. This directly affects the actor's position within its parent's coordinate space. Changes propagate to child actors.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:54",
+      "procedural_step": "Changing Rotation values",
+      "why": "Modifying the 'Relative Rotation' property alters the actor's orientation, defined as a quaternion. This affects how the actor's local coordinate axes are aligned with the world axes, influencing child actor orientations and physics interactions.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:00",
+      "procedural_step": "Changing Scale values",
+      "why": "Adjusting the 'Relative Scale 3D' property modifies the actor's size along each axis. Non-uniform scaling can introduce visual artifacts and impact physics simulations, especially with complex collision meshes.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:20",
+      "procedural_step": "Snapping Translations",
+      "why": "Enabling translation snapping quantizes the actor's 'Relative Location' to a grid. This ensures alignment with other actors and level geometry, preventing visual seams and simplifying level design. However, excessive snapping can limit artistic freedom.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:14",
+      "procedural_step": "Using the 'End' key to drop an actor",
+      "why": "The 'End' key triggers a simplified physics simulation that moves the actor downwards until it collides with another object. This relies on the actor's collision component and the physics engine's collision detection system. Incorrect collision setups can lead to unexpected behavior.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:03",
+      "procedural_step": "Duplicating actors with Alt+Drag",
+      "why": "Alt-dragging creates a new actor instance with the same properties as the original. This is a fast way to populate the level, but be mindful of the increased memory footprint and potential performance impact with a large number of duplicated, complex actors.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:05",
+      "prompt": "Why is it important to understand the different editor modes (Selection, Translation, Rotation, Scale) beyond just knowing the hotkeys?",
+      "expected_insight": "Understanding the underlying functionality of each mode allows for more precise control and avoids accidental modifications. Each mode filters user input and exposes specific properties, preventing unintended consequences."
+    },
+    {
+      "insert_after_timestamp": "3:30",
+      "prompt": "How might inconsistent scaling across different axes impact the visual quality and performance of a game?",
+      "expected_insight": "Non-uniform scaling can stretch textures, distort collision meshes, and lead to unexpected physics behavior. It can also create visual inconsistencies and increase the complexity of rendering calculations."
+    },
+    {
+      "insert_after_timestamp": "5:04",
+      "prompt": "What are the trade-offs between using large vs. small snapping increments when designing a level?",
+      "expected_insight": "Large increments allow for faster placement and alignment of objects, but can limit precision. Small increments provide greater control but can slow down the design process. The optimal increment depends on the level's style and the desired level of detail."
+    },
+    {
+      "insert_after_timestamp": "6:40",
+      "prompt": "Imagine you're building a complex structure with many interconnected parts. How could you use snapping effectively to ensure structural integrity and visual consistency?",
+      "expected_insight": "By using consistent snapping increments and aligning objects to a common grid, you can ensure that the structure is properly aligned and that there are no visual gaps or misalignments. This also simplifies the process of making changes and maintaining the structure over time."
+    },
+    {
+      "insert_after_timestamp": "8:12",
+      "prompt": "What are the potential performance implications of duplicating actors excessively using Alt+Drag, and how can you mitigate these issues?",
+      "expected_insight": "Duplicating actors increases the memory footprint and rendering workload. To mitigate this, consider using instanced static meshes, level streaming, or object pooling to reduce the number of unique actors in the scene."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of coordinate systems (world space, local space)",
+    "Familiarity with the Unreal Editor interface (panels, toolbars)",
+    "Knowledge of actor components and their properties"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is understanding the different editor modes (Selection, Translation, Rotation, Scale) crucial for efficient level design in Unreal Engine 5?",
+      "options": [
+        "Each mode filters input and exposes specific functionalities, preventing unintended consequences.",
+        "It allows you to move objects faster.",
+        "It makes the editor look more organized.",
+        "It is not important, you can use the same mode for everything."
+      ],
+      "correct_index": 0,
+      "explanation": "Each editor mode filters input and exposes specific functionalities, preventing unintended consequences and allowing for precise control."
+    },
+    {
+      "question": "What is the primary purpose of transform snapping in Unreal Engine 5?",
+      "options": [
+        "To constrain actor movement to discrete increments, ensuring alignment and preventing visual artifacts.",
+        "To make objects move faster.",
+        "To add visual effects to object movement.",
+        "To make objects invisible."
+      ],
+      "correct_index": 0,
+      "explanation": "Transform snapping constrains actor movement, rotation, and scaling to discrete increments, ensuring alignment with other actors and level geometry."
+    },
+    {
+      "question": "How does the 'End' key function in Unreal Engine 5, and what underlying systems does it utilize?",
+      "options": [
+        "It triggers a simplified physics simulation that moves the actor downwards until it collides with another object, relying on collision detection.",
+        "It deletes the selected object.",
+        "It moves the object to the center of the screen.",
+        "It creates a new object."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'End' key triggers a simplified physics simulation that moves the actor downwards until it collides with another object, relying on the actor's collision component and the physics engine's collision detection system."
+    },
+    {
+      "question": "What is the potential impact of excessive actor duplication using Alt+Drag on a game's performance in Unreal Engine 5?",
+      "options": [
+        "It increases the memory footprint and rendering workload, potentially leading to performance issues.",
+        "It makes the game run faster.",
+        "It has no impact on performance.",
+        "It reduces the file size of the game."
+      ],
+      "correct_index": 0,
+      "explanation": "Duplicating actors increases the memory footprint and rendering workload. To mitigate this, consider using instanced static meshes, level streaming, or object pooling."
+    },
+    {
+      "question": "Why is it important to consider the coordinate system (world space, local space) when manipulating actors in Unreal Engine 5?",
+      "options": [
+        "Understanding the coordinate system allows for precise control over actor placement and orientation, ensuring correct relationships between objects.",
+        "It is not important.",
+        "It only affects the way the editor looks.",
+        "It only affects the speed of the game."
+      ],
+      "correct_index": 0,
+      "explanation": "Understanding the coordinate system allows for precise control over actor placement and orientation, ensuring correct relationships between objects and predictable behavior."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 23,
+    "grade": "D"
+  }
+}

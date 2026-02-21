@@ -1,0 +1,137 @@
+{
+  "course_code": "100.03",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:43",
+      "title": "Actor Spawning and the World Partition System",
+      "concept": "Levels are containers for Actors, but large open worlds rely on World Partition to stream Actors in and out based on player proximity. Understanding World Partition is crucial for performance in large-scale games.",
+      "diagram_suggestion": "Diagram showing how World Partition divides a large world into cells, and how Actors are streamed in/out based on the player's location. Highlight the HLOD system and its role in reducing draw calls."
+    },
+    {
+      "insert_after_timestamp": "1:19",
+      "title": "Level Streaming and Garbage Collection",
+      "concept": "Unloaded levels are subject to garbage collection. Understanding the rules of object lifetime and referencing is critical to prevent unexpected behavior and memory leaks when streaming levels.",
+      "diagram_suggestion": "Diagram showing the Unreal Engine's garbage collection process, focusing on root sets and how objects become eligible for collection when no longer referenced. Illustrate how level streaming affects object references."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:12",
+      "procedural_step": "An Unreal Engine project is not a single file.",
+      "why": "Unreal Engine uses an asset-based system. Changes to individual assets are tracked separately, allowing for modularity, version control, and efficient collaboration. This contrasts with monolithic game engines.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:43",
+      "procedural_step": "Levels allow us to add or spawn actors.",
+      "why": "Levels define the spatial context for Actors. The Level's persistent level stores static actors, while streamed sub-levels can dynamically load and unload content, optimizing memory usage and performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:07",
+      "procedural_step": "No matter what you are trying to display, you're always going to need some type of level.",
+      "why": "The Level acts as the root of the scene graph. All Actors must be part of a Level to be rendered and simulated by the engine. Without a Level, there is no world context.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:25",
+      "prompt": "Why does Unreal Engine structure projects as collections of files instead of a single monolithic file? What are the trade-offs?",
+      "expected_insight": "Breaking down the project into individual assets allows for modularity, efficient version control, and parallel workflows. However, it also introduces complexity in asset management and dependency tracking."
+    },
+    {
+      "insert_after_timestamp": "0:50",
+      "prompt": "How does the concept of sub-levels relate to level streaming and optimization in large open-world games?",
+      "expected_insight": "Sub-levels enable level streaming, where portions of the world are loaded and unloaded dynamically based on the player's location. This reduces memory footprint and improves performance in large environments."
+    },
+    {
+      "insert_after_timestamp": "1:42",
+      "prompt": "What are the key differences between the 'Basic' and 'Open World' templates, and when would you choose one over the other?",
+      "expected_insight": "The 'Basic' template provides a minimal setup for smaller, self-contained levels. The 'Open World' template includes features like World Partition and landscape tools, optimized for large, streaming environments."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of scene graphs",
+    "Familiarity with asset management systems",
+    "Knowledge of object-oriented programming principles"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to use Levels in Unreal Engine?",
+      "options": [
+        "To provide a container for Actors and define the scene graph.",
+        "To store all the project's source code.",
+        "To manage plugin configurations.",
+        "To create backups of the project."
+      ],
+      "correct_index": 0,
+      "explanation": "Levels define the spatial context for Actors and are the root of the scene graph, enabling rendering and simulation."
+    },
+    {
+      "question": "What is the primary benefit of using sub-levels in a large open-world game?",
+      "options": [
+        "Improved lighting quality.",
+        "Reduced memory footprint through level streaming.",
+        "Simplified blueprint scripting.",
+        "Faster material creation."
+      ],
+      "correct_index": 1,
+      "explanation": "Sub-levels enable level streaming, allowing portions of the world to be loaded and unloaded dynamically, reducing memory usage."
+    },
+    {
+      "question": "Which of the following best describes the role of Actors within a Level?",
+      "options": [
+        "Actors define the overall project settings.",
+        "Actors are the fundamental building blocks that bring life to the level.",
+        "Actors manage the version control system.",
+        "Actors are used for creating user interfaces."
+      ],
+      "correct_index": 1,
+      "explanation": "Actors are the objects that populate the level and provide visual and functional elements."
+    },
+    {
+      "question": "How does Unreal Engine's asset-based system contribute to efficient collaboration?",
+      "options": [
+        "By storing all project data in a single monolithic file.",
+        "By allowing multiple developers to work on the same asset simultaneously.",
+        "By tracking changes to individual assets separately, enabling parallel workflows.",
+        "By automatically generating documentation for the project."
+      ],
+      "correct_index": 2,
+      "explanation": "The asset-based system allows for modularity and efficient version control, enabling parallel workflows and easier collaboration."
+    },
+    {
+      "question": "What happens to Actors in an unloaded sub-level?",
+      "options": [
+        "They are automatically deleted from the project.",
+        "They remain in memory but are not rendered.",
+        "They are subject to garbage collection if no longer referenced.",
+        "They are moved to the persistent level."
+      ],
+      "correct_index": 2,
+      "explanation": "Unloaded levels and their contents are subject to garbage collection. Understanding object lifetime and referencing is critical to prevent memory leaks when streaming levels."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 23,
+    "grade": "D"
+  }
+}

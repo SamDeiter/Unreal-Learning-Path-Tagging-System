@@ -1,0 +1,143 @@
+{
+  "course_code": "207.01",
+  "conceptual_score": {
+    "procedural_pct": 90,
+    "conceptual_pct": 10,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:18",
+      "title": "Alembic Geometry Caches: Data Representation",
+      "concept": "Alembic files store baked geometry as a sequence of snapshots. Understand how this differs from skeletal animation and the implications for memory usage, especially with high-resolution meshes. Explain the internal data structures used by Unreal to represent Alembic data (e.g., vertex buffers, index buffers) and how they are managed by the engine's rendering pipeline.",
+      "diagram_suggestion": "Diagram showing the difference between skeletal animation (bones + skin) and Alembic animation (baked geometry snapshots). Illustrate how vertex data changes over time in an Alembic cache."
+    },
+    {
+      "insert_after_timestamp": "0:26",
+      "title": "Live Link: Real-time Data Streaming Architecture",
+      "concept": "Live Link streams animation data directly into the Unreal Editor. Explain the underlying network protocol (UDP) and how it transmits transform data. Detail the Live Link plugin architecture, including the roles of the Live Link Engine module, the Live Link provider (e.g., Maya Live Link plugin), and the Live Link message bus. Explain how Live Link handles time synchronization and potential latency issues.",
+      "diagram_suggestion": "Diagram illustrating the Live Link pipeline: Maya -> Maya Live Link Plugin -> Network (UDP) -> Unreal Engine -> Live Link Engine Module -> Scene. Show the flow of animation data and timecode."
+    },
+    {
+      "insert_after_timestamp": "0:40",
+      "title": "Sequencer: Non-Linear Animation and Playback",
+      "concept": "Sequencer is Unreal's non-linear animation editor. Explain how Sequencer manages animation tracks, keyframes, and playback. Discuss the different types of tracks available (e.g., transform tracks, material parameter tracks) and how they can be used to control Alembic animations. Explain the concept of 'master tracks' and how they can be used to control the overall timing of a sequence.",
+      "diagram_suggestion": "Screenshot of the Sequencer interface, highlighting the different track types, keyframes, and the timeline. Show how to scrub through the timeline and manipulate keyframes."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:15",
+      "procedural_step": "Exporting from Maya",
+      "why": "Understanding export settings (e.g., frame rate, sample rate, UVs) is critical because they directly impact the fidelity and performance of the Alembic animation in Unreal Engine. Incorrect settings can lead to visual artifacts or performance bottlenecks.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:26",
+      "procedural_step": "Streaming animations into Unreal Engine",
+      "why": "Live Link enables real-time iteration on animations, but it's crucial to understand its limitations. High-frequency updates can strain network bandwidth and CPU resources, potentially leading to dropped frames or editor instability. Consider optimizing the animation data stream to minimize overhead.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:40",
+      "procedural_step": "Playing Alembic caches in Sequencer",
+      "why": "Sequencer provides powerful tools for controlling Alembic animations, but complex sequences with numerous tracks and keyframes can impact performance. Optimize Sequencer tracks by reducing the number of keyframes and using curve simplification techniques to minimize the performance overhead.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:18",
+      "prompt": "Why might you choose Alembic over skeletal animation for a complex character with cloth simulation?",
+      "expected_insight": "Alembic caches pre-bake the simulation, offloading the computation from the runtime. However, this comes at the cost of increased file size and reduced flexibility."
+    },
+    {
+      "insert_after_timestamp": "0:31",
+      "prompt": "What are the trade-offs between using Live Link and importing a pre-baked Alembic file?",
+      "expected_insight": "Live Link offers real-time feedback but requires a stable network connection and can impact editor performance. Importing a pre-baked Alembic file provides better performance but requires re-importing the file every time the animation changes."
+    },
+    {
+      "insert_after_timestamp": "0:40",
+      "prompt": "How could you use Sequencer to create a cinematic sequence using multiple Alembic animations and camera cuts?",
+      "expected_insight": "Sequencer allows you to orchestrate multiple Alembic animations, camera movements, and other effects into a cohesive cinematic sequence. You can use tracks to control the timing, visibility, and properties of each element."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Editor interface.",
+    "Familiarity with animation principles.",
+    "Knowledge of content creation tools like Maya or Blender."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary advantage of using Alembic caches for complex animations in Unreal Engine 5?",
+      "options": [
+        "Reduced runtime computational cost by pre-baking simulations.",
+        "Increased flexibility in animation editing within Unreal Engine.",
+        "Automatic LOD generation for improved performance.",
+        "Simplified rigging and skinning workflows."
+      ],
+      "correct_index": 0,
+      "explanation": "Alembic caches pre-bake complex simulations, reducing the computational load during runtime. This is especially useful for animations with cloth, hair, or other physics-based effects."
+    },
+    {
+      "question": "How does Live Link transmit animation data from a DCC tool (like Maya) to Unreal Engine 5?",
+      "options": [
+        "Through a shared memory buffer.",
+        "Via a TCP/IP connection.",
+        "Using a UDP network protocol.",
+        "By writing to a temporary Alembic file."
+      ],
+      "correct_index": 2,
+      "explanation": "Live Link uses UDP for real-time streaming of animation data. UDP is preferred for its speed, although it does not guarantee packet delivery."
+    },
+    {
+      "question": "What is the main purpose of Sequencer in the context of Alembic animations?",
+      "options": [
+        "To import Alembic files into Unreal Engine.",
+        "To create and edit skeletal meshes.",
+        "To control and orchestrate Alembic animations within a cinematic sequence.",
+        "To optimize Alembic file size."
+      ],
+      "correct_index": 2,
+      "explanation": "Sequencer is a non-linear animation editor that allows you to control and combine multiple Alembic animations, camera movements, and other effects into a cinematic sequence."
+    },
+    {
+      "question": "Which of the following is a key consideration when exporting Alembic caches for use in Unreal Engine 5?",
+      "options": [
+        "The number of bones in the skeleton.",
+        "The frame rate and sample rate of the animation.",
+        "The presence of morph targets.",
+        "The complexity of the material shaders."
+      ],
+      "correct_index": 1,
+      "explanation": "The frame rate and sample rate determine the temporal resolution of the Alembic animation. Incorrect settings can lead to visual artifacts or performance issues."
+    },
+    {
+      "question": "What is a primary limitation of using Alembic caches compared to skeletal meshes for character animation?",
+      "options": [
+        "Alembic caches are more difficult to import into Unreal Engine.",
+        "Alembic caches cannot be used with physics simulations.",
+        "Alembic caches are less flexible for runtime animation changes.",
+        "Alembic caches require more complex material setups."
+      ],
+      "correct_index": 3,
+      "explanation": "Alembic caches store baked geometry, making them less flexible for runtime animation changes compared to skeletal meshes, which can be manipulated through bone transformations."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 25,
+    "grade": "D"
+  }
+}

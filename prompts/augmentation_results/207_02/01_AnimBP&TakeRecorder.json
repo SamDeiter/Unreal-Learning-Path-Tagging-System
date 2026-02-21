@@ -1,0 +1,215 @@
+{
+  "course_code": "207.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:32",
+      "title": "AnimGraph Architecture",
+      "concept": "The AnimGraph is a visual scripting graph within an Animation Blueprint responsible for the final pose calculation. It evaluates a network of animation nodes, blending and manipulating poses based on runtime parameters to drive the character's animation.",
+      "diagram_suggestion": "A flowchart illustrating the data flow through the AnimGraph, from input parameters (variables, events) to animation nodes (blends, state machines) to the final output pose."
+    },
+    {
+      "insert_after_timestamp": "2:24",
+      "title": "Additive Animation Spaces",
+      "concept": "Additive animations operate in different spaces (local, world, component). Choosing the correct space is critical for predictable blending. Local space is relative to the bone; world space is absolute. Component space is relative to the actor.",
+      "diagram_suggestion": "Three side-by-side character models, each with an additive animation applied in local, world, and component space, respectively, highlighting the differences in the resulting poses."
+    },
+    {
+      "insert_after_timestamp": "8:20",
+      "title": "Skeletal Mesh Bone Hierarchy",
+      "concept": "Skeletal Meshes are organized in a bone hierarchy. Transforms applied to parent bones propagate to children. Understanding this hierarchy is crucial when using Blend Bone By Channel, as blending a parent bone will influence all child bones.",
+      "diagram_suggestion": "A visual representation of a skeletal mesh's bone hierarchy, highlighting parent-child relationships and demonstrating how transforms propagate down the chain."
+    },
+    {
+      "insert_after_timestamp": "20:33",
+      "title": "Animation State Machines",
+      "concept": "Animation State Machines are a core component of Animation Blueprints, defining the different animation states a character can be in (e.g., idle, walking, jumping) and the rules for transitioning between them. Blend Poses By Bool/Int/Enum are often used within state machine transitions.",
+      "diagram_suggestion": "A state machine diagram showing different animation states (Idle, Walk, Run, Jump) as nodes and the transition rules (e.g., IsMoving, Speed > Threshold) as arrows connecting the nodes."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "2:12",
+      "procedural_step": "Using Apply Additive node",
+      "why": "This node allows layering animations, enabling effects like flinching or aiming without re-authoring entire animation sequences. This reduces animation asset creation and improves runtime flexibility.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:56",
+      "procedural_step": "Setting animation to additive",
+      "why": "Failing to set an animation as 'additive' will lead to incorrect pose calculations, because the engine will not correctly compute the delta between the base pose and the additive animation, resulting in visual artifacts.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:49",
+      "procedural_step": "Additive animation color coding",
+      "why": "The green color-coding provides visual feedback within the AnimGraph, improving debugging efficiency. This reduces iteration time by quickly identifying incorrectly configured additive animations.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:07",
+      "procedural_step": "Transitioning between animations",
+      "why": "Two-way blending allows smooth transitions, but can introduce interpolation artifacts if the blended animations have significantly different root motion. This can lead to foot sliding or unnatural movement.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:27",
+      "procedural_step": "Using Blend Bone By Channel",
+      "why": "This node offers fine-grained control, but overuse can increase AnimGraph complexity and computational cost. Consider layered blend per bone for more efficient blending of entire bone chains.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "18:40",
+      "procedural_step": "Blending multiple animations",
+      "why": "Blend Multi node simplifies blending, but each additional input increases the computational cost of pose evaluation. This can impact performance, especially on lower-end hardware or with complex skeletal meshes.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "21:35",
+      "procedural_step": "Using Blend Poses By Bool",
+      "why": "This node provides a simple switch, but frequent toggling can introduce visual popping if the blended animations don't have compatible poses. Consider using a blend space for smoother transitions.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "24:45",
+      "procedural_step": "Using Enumerations",
+      "why": "Enums improve code readability and maintainability by providing named states instead of magic numbers. This reduces the risk of errors when modifying animation logic.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "4:58",
+      "prompt": "Why is the 'selected animation frame' base pose type more appropriate in this scenario than the default 'skeleton reference pose'?",
+      "expected_insight": "Because the base animation already contains motion, comparing to the reference pose introduces an unwanted offset. Comparing to the base animation ensures the additive animation is applied relative to the existing motion."
+    },
+    {
+      "insert_after_timestamp": "7:50",
+      "prompt": "How does the 'alpha' value in the Two-Way Blend node affect the final animation, and what are the potential drawbacks of relying solely on this node for complex animation blending?",
+      "expected_insight": "The alpha value determines the weight of each input animation. Solely relying on this node for complex blending can lead to abrupt transitions and a lack of nuanced control compared to state machines or blend spaces."
+    },
+    {
+      "insert_after_timestamp": "12:51",
+      "prompt": "What are the limitations of recording animation directly from the animation blueprint, and when might it be more appropriate to author animations externally?",
+      "expected_insight": "Recording from the AnimBP bakes the blended result, losing the flexibility to adjust individual animation components. External authoring allows for iterative refinement and non-destructive editing."
+    },
+    {
+      "insert_after_timestamp": "18:51",
+      "prompt": "Explain the trade-offs between animation complexity and performance, and how you might optimize an animation blueprint with a large number of blended animations.",
+      "expected_insight": "More blended animations increase computational cost. Optimization strategies include using simpler animation sequences, caching intermediate poses, and using Level of Detail (LOD) to reduce animation complexity on distant characters."
+    },
+    {
+      "insert_after_timestamp": "27:31",
+      "prompt": "How can Animation Notifies be used in conjunction with Blend Poses By Enum to create more reactive and dynamic animation behaviors?",
+      "expected_insight": "Animation Notifies can trigger state changes in the animation blueprint, allowing for precise synchronization between animation playback and gameplay events. This enables reactive behaviors like playing a specific animation when a character lands after a jump."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "6:15",
+      "warning": "Promoting the 'alpha' value to a variable and driving it from the Event Graph can lead to excessive Blueprint execution, impacting performance. Consider caching the variable or using a Timeline for smoother transitions.",
+      "severity": "MEDIUM",
+      "fix": "Cache the alpha value or use a Timeline for smoother transitions."
+    },
+    {
+      "timestamp": "12:51",
+      "warning": "Recording animation directly from the AnimBP bakes the blended result, losing the flexibility to adjust individual animation components. This can lead to a destructive workflow and hinder iteration.",
+      "severity": "MEDIUM",
+      "fix": "Author animations externally for iterative refinement and non-destructive editing."
+    },
+    {
+      "timestamp": "18:40",
+      "warning": "The Blend Multi node can become a performance bottleneck with many inputs. This can lead to increased CPU usage and reduced frame rates, especially on lower-end hardware.",
+      "severity": "MEDIUM",
+      "fix": "Use simpler animation sequences, cache intermediate poses, and use Level of Detail (LOD) to reduce animation complexity on distant characters."
+    },
+    {
+      "timestamp": "21:35",
+      "warning": "Frequent toggling of the Blend Poses By Bool node can introduce visual popping if the blended animations don't have compatible poses. This can lead to jarring transitions and an unnatural look.",
+      "severity": "LOW",
+      "fix": "Use a blend space for smoother transitions."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Skeletal Meshes and Skeletons",
+    "Familiarity with the Unreal Engine Editor interface",
+    "Knowledge of Blueprint scripting fundamentals (variables, events)",
+    "Understanding of animation terminology (poses, sequences, blending)"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to set the 'Additive Anim Type' in an animation sequence when using the 'Apply Additive' node?",
+      "options": [
+        "To specify the coordinate space in which the additive animation is applied, ensuring correct blending.",
+        "To reduce the memory footprint of the animation sequence.",
+        "To enable looping of the animation.",
+        "To prevent the animation from being garbage collected."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'Additive Anim Type' determines the coordinate space (e.g., local, world) for blending. Incorrect settings lead to visual artifacts due to misaligned pose calculations."
+    },
+    {
+      "question": "What is the primary difference between the 'Two-Way Blend' node and the 'Apply Additive' node in the AnimGraph?",
+      "options": [
+        "The 'Two-Way Blend' node cross-blends two animations, while the 'Apply Additive' node layers one animation on top of a base animation.",
+        "The 'Two-Way Blend' node only works with root motion, while the 'Apply Additive' node does not.",
+        "The 'Two-Way Blend' node is more performant than the 'Apply Additive' node.",
+        "The 'Two-Way Blend' node requires additive animations, while the 'Apply Additive' node does not."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'Two-Way Blend' node performs a weighted average of two input poses, whereas 'Apply Additive' adds the delta of one pose to another."
+    },
+    {
+      "question": "When using the 'Blend Bone by Channel' node, what is the significance of the 'Source Bone' and 'Target Bone' parameters?",
+      "options": [
+        "The 'Source Bone' provides the transform, and the 'Target Bone' is where the transform is applied.",
+        "The 'Source Bone' defines the animation to blend from, and the 'Target Bone' defines the animation to blend to.",
+        "The 'Source Bone' is the root bone of the animation, and the 'Target Bone' is the end effector.",
+        "The 'Source Bone' is used for additive blending, and the 'Target Bone' is used for multiplicative blending."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'Source Bone' provides the transform data, which is then applied to the 'Target Bone', allowing for selective blending of specific bone transforms."
+    },
+    {
+      "question": "What is the main advantage of using an enumeration (enum) with the 'Blend Poses by Enum' node compared to using an integer with the 'Blend Poses by Int' node?",
+      "options": [
+        "Enums provide named states, improving code readability and maintainability.",
+        "Enums are more performant than integers.",
+        "Enums allow for more complex blending logic.",
+        "Enums automatically handle animation transitions."
+      ],
+      "correct_index": 0,
+      "explanation": "Enums offer better readability by associating meaningful names with animation states, reducing the risk of errors compared to using raw integer values."
+    },
+    {
+      "question": "Why is it important to consider optimization when using the 'Blend Multi' node with a large number of input animations?",
+      "options": [
+        "Each additional input increases the computational cost of pose evaluation, potentially impacting performance.",
+        "The 'Blend Multi' node only supports a limited number of input animations.",
+        "The 'Blend Multi' node can cause memory leaks if not properly managed.",
+        "The 'Blend Multi' node is incompatible with certain skeletal meshes."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'Blend Multi' node's performance degrades linearly with the number of inputs, so minimizing inputs or using alternative blending techniques is crucial for optimization."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 27,
+    "grade": "D"
+  }
+}
