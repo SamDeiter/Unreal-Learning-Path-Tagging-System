@@ -16,9 +16,8 @@ export function clampedScale(value, minIn, maxIn, minOut, maxOut) {
   return minOut + ratio * (maxOut - minOut);
 }
 
-/** Node size 20–60px based on tag count */
 export function getNodeSize(count, minCount, maxCount) {
-  return clampedScale(count, minCount, maxCount, 20, 60);
+  return clampedScale(count, minCount, maxCount, 25, 70);
 }
 
 /** Edge width 3–10px based on weight */
@@ -73,13 +72,15 @@ export const GRAPH_STYLESHEET = [
       "border-width": 2,
       "border-color": "data(borderColor)",
       label: "data(label)",
-      "font-size": "10px",
+      "font-size": "12px",
       color: "#e6edf3",
       "text-valign": "bottom",
       "text-halign": "center",
-      "text-margin-y": 8,
-      "text-outline-width": 2,
+      "text-margin-y": 10,
+      "text-outline-width": 3,
       "text-outline-color": "#0d1117",
+      "text-wrap": "ellipsis",
+      "text-max-width": "80px",
       "transition-property": "opacity, background-color, border-color",
       "transition-duration": "0ms",
       "z-index": 10,

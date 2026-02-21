@@ -108,7 +108,7 @@
     .insight-bar div { height:100%; }
 
     /* Course cards */
-    .courses-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; margin-bottom:28px; }
+    .courses-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; margin-bottom:28px; max-height:400px; overflow-y:auto; padding-right:4px; }
     .course-card {
       background:var(--card); border:1px solid var(--border); border-radius:10px;
       padding:14px 16px; cursor:pointer; transition:transform 0.15s, border-color 0.15s;
@@ -415,8 +415,8 @@ function render(data){
 
       ${renderCriteriaBreakdown(o)}
 
-      <div class="section-heading" style="cursor:pointer;user-select:none;" onclick="document.getElementById('coursesGrid').style.display=document.getElementById('coursesGrid').style.display==='none'?'grid':'none';this.querySelector('.caret').textContent=document.getElementById('coursesGrid').style.display==='none'?'▶':'▼'">Courses (${Object.keys(courseMap).length}) <span class="caret">▼</span></div>
-      <div class="courses-grid" id="coursesGrid">
+      <div class="section-heading" style="cursor:pointer;user-select:none;" onclick="document.getElementById('coursesGrid').style.display=document.getElementById('coursesGrid').style.display==='none'?'grid':'none';this.querySelector('.caret').textContent=document.getElementById('coursesGrid').style.display==='none'?'▶':'▼'">Courses (${Object.keys(courseMap).length}) <span class="caret">▶</span></div>
+      <div class="courses-grid" id="coursesGrid" style="display:none;">
         ${Object.entries(courseMap).sort((a,b)=>a[0].localeCompare(b[0])).map(([code,c])=>{
           const avg=Math.round(c.totalScore/c.videos.length);
           const avgGrade=avg>=45?'A':avg>=39?'B':avg>=33?'C':avg>=22?'D':'F';
