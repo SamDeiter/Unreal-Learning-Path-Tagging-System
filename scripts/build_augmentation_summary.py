@@ -13,6 +13,24 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = REPO_ROOT / "prompts" / "augmentation_results"
 OUTPUT_FILE = REPO_ROOT / "prototype" / "augmentation_summary.json"
+LIBRARY_FILE = REPO_ROOT / "content" / "video_library.json"
+
+# Videos that are not real instructional content — filter from aggregates
+SKIP_PATTERNS = [
+    "introduction", "intro", "outro", "recap", "thank you", "thankyou",
+    "wrap up", "wrapup", "exercise", "course outline", "courseoutline",
+    "overview",
+]
+
+
+def is_filler_video(title: str) -> bool:
+    """Return True if this video is non-instructional filler."""
+    t = title.lower().replace("_", " ").replace("-", " ").strip()
+    # Strip leading numbers like "01 "
+    import re
+    t = re.sub(r"^\d+\s*", "", t).strip()
+    return any(t == p or t.startswith(p + " ") or t.endswith(" " + p) or t == p.replace(" ", "")
+               for p in SKIP_PATTERNS)
 
 
 def main():
@@ -29,6 +47,29 @@ def main():
         "total_warnings": 0,
         "total_prereqs": 0,
     }
+
+    # Track per-criteria scores for averages
+    CRITERIA_KEYS = [
+        "concept_clarification", "misconception_addressing", "narrative_logic",
+        "content_first_language", "dynamic_visualizations", "explicit_signaling",
+        "strict_segmentation", "extraneous_load_reduction", "worked_example_fading",
+        "self_explanation_prompting", "affective_tone"
+    ]
+    criteria_totals = {k: 0 for k in CRITERIA_KEYS}
+    skipped = 0
+
+    # Load course titles from video_library.json
+    course_titles = {}
+    try:
+        lib = json.loads(LIBRARY_FILE.read_text(encoding="utf-8"))
+        for c in lib.get("courses", []):
+            code = c.get("code", "")
+            title = c.get("title", "")
+            if code and title:
+                course_titles[code] = title
+        print(f"Loaded {len(course_titles)} course titles")
+    except Exception as e:
+        print(f"Warning: Could not load course titles: {e}")
 
     for course_dir in sorted(RESULTS_DIR.iterdir()):
         if not course_dir.is_dir():
@@ -57,10 +98,18 @@ def main():
 
             video_key = f"{course_code}/{json_file.stem}"
             video_title = json_file.stem.replace("_", " ").lstrip("0123456789 ")
+            course_code_dotted = course_code.replace("_", ".")
+            course_title = course_titles.get(course_code_dotted, "")
+
+            # Skip filler videos (intro, outro, recap, etc.)
+            if is_filler_video(json_file.stem):
+                skipped += 1
+                continue
 
             videos.append({
                 "key": video_key,
-                "course": course_code.replace("_", "."),
+                "course": course_code_dotted,
+                "course_title": course_title,
                 "title": video_title,
                 "grade": grade,
                 "score": total,
@@ -89,6 +138,10 @@ def main():
             totals["total_warnings"] += n_warnings
             totals["total_prereqs"] += n_prereqs
 
+            # Accumulate per-criteria scores
+            for ck in CRITERIA_KEYS:
+                criteria_totals[ck] += score.get(ck, 0)
+
     n = len(videos) or 1
 
     summary = {
@@ -105,7 +158,10 @@ def main():
             "total_prompts": totals["total_prompts"],
             "total_warnings": totals["total_warnings"],
             "total_prereqs": totals["total_prereqs"],
+            "criteria_averages": {k: round(v / n, 2) for k, v in criteria_totals.items()},
         },
+        "skipped_filler": skipped,
+        "course_titles": course_titles,
         "videos": videos,
     }
 

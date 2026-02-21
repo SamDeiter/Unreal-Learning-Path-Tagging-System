@@ -54,8 +54,9 @@
       display:flex; align-items:center; gap:12px;
       background:var(--card); border:1px solid var(--border); border-radius:12px;
       padding:14px 18px; transition:transform 0.15s, border-color 0.15s;
+      position:relative;
     }
-    .hero-stat:hover { transform:translateY(-2px); border-color:rgba(255,255,255,0.1); }
+    .hero-stat:hover { transform:translateY(-2px); border-color:rgba(255,255,255,0.1); z-index:20; }
     .hero-stat .icon {
       width:40px; height:40px; border-radius:10px;
       display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;
@@ -74,10 +75,10 @@
     .grade-row { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:24px; }
     .grade-card {
       background:var(--card); border:1px solid var(--border); border-radius:10px;
-      padding:16px; text-align:center; position:relative; overflow:hidden;
+      padding:16px; text-align:center; position:relative;
       transition:transform 0.15s;
     }
-    .grade-card:hover { transform:translateY(-2px); }
+    .grade-card:hover { transform:translateY(-2px); z-index:20; }
     .grade-card .bar-bg { position:absolute; bottom:0; left:0; right:0; }
     .grade-card .letter { font-size:24px; font-weight:900; position:relative; }
     .grade-card .cnt { font-size:18px; font-weight:700; font-family:'JetBrains Mono',monospace; position:relative; margin-top:2px; }
@@ -92,7 +93,9 @@
     .insights-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }
     .insight-card {
       background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px;
+      position:relative;
     }
+    .insight-card:hover { z-index:20; }
     .insight-card .heading {
       font-size:11px; font-weight:700; color:var(--dim);
       text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;
@@ -156,8 +159,9 @@
       text-transform:uppercase; letter-spacing:0.5px;
       border-bottom:2px solid var(--border);
       cursor:pointer; -webkit-user-select:none; user-select:none; white-space:nowrap;
+      position:relative;
     }
-    .video-table th:hover { color:var(--text); }
+    .video-table th:hover { color:var(--text); z-index:20; }
     .video-table td {
       padding:10px; border-bottom:1px solid rgba(255,255,255,0.03);
       font-size:12px; vertical-align:middle;
@@ -248,6 +252,7 @@
     [data-tip] {
       position:relative; cursor:help;
     }
+    [data-tip]:hover { z-index:999; }
     [data-tip]::after {
       content:attr(data-tip);
       position:absolute; bottom:calc(100% + 8px); left:50%;
@@ -257,7 +262,7 @@
       color:var(--dim); line-height:1.5; white-space:normal;
       width:max-content; max-width:280px;
       pointer-events:none; opacity:0;
-      transition:opacity 0.15s; z-index:100;
+      transition:opacity 0.15s; z-index:9999;
       box-shadow:0 8px 24px rgba(0,0,0,0.4);
       font-family:'Inter',sans-serif; text-transform:none;
       letter-spacing:normal;
@@ -271,7 +276,7 @@
       border:5px solid transparent;
       border-top-color:#1a2744;
       opacity:0; transition:opacity 0.15s;
-      z-index:101;
+      z-index:9999;
     }
     [data-tip]:hover::before { opacity:1; }
     /* For elements near the bottom, put tooltip below */
@@ -314,6 +319,42 @@ async function init(){
   render(data);
 }
 
+const CRITERIA_LABELS={
+  concept_clarification:'Concept Clarification',
+  misconception_addressing:'Misconception Addressing',
+  narrative_logic:'Narrative Logic',
+  content_first_language:'Content-First Language',
+  dynamic_visualizations:'Dynamic Visualizations',
+  explicit_signaling:'Explicit Signaling',
+  strict_segmentation:'Strict Segmentation',
+  extraneous_load_reduction:'Extraneous Load Reduction',
+  worked_example_fading:'Worked Example Fading',
+  self_explanation_prompting:'Self-Explanation Prompting',
+  affective_tone:'Affective Tone'
+};
+function barColor(v){return v<=1.5?'var(--red)':v<=2.5?'var(--orange)':v<=3.5?'var(--yellow)':v<=4?'var(--accent)':'var(--green)';}
+function renderCriteriaBreakdown(o){
+  const ca=o.criteria_averages;
+  if(!ca)return '';
+  const sorted=Object.entries(ca).sort((a,b)=>a[1]-b[1]);
+  return `
+    <div class="section-heading">Evaluation Criteria Breakdown <span class="tip-icon" data-tip="Average score per evaluation criterion across all videos. Sorted weakest-first to highlight improvement priorities. Each criterion is rated 1-5.">?</span></div>
+    <div class="insight-card" style="padding:16px 20px;">
+      ${sorted.map(([k,v])=>{
+        const pct=(v/5)*100;
+        const label=CRITERIA_LABELS[k]||k.replace(/_/g,' ');
+        return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <div style="width:180px;font-size:11px;color:var(--dim);text-align:right;flex-shrink:0;">${label}</div>
+          <div style="flex:1;height:8px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:${barColor(v)};border-radius:4px;transition:width 0.5s;"></div>
+          </div>
+          <div style="width:32px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:${barColor(v)};text-align:right;">${v}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
 function render(data){
   const o=data.overall, n=data.total_videos;
   const maxGrade=Math.max(...Object.values(o.grade_distribution),1);
@@ -327,7 +368,7 @@ function render(data){
 
   document.getElementById('app').innerHTML=`
     <div class="hero"><div class="hero-inner">
-      <div class="hero-badge"><span class="dot"></span> Pipeline Active — ${n} videos processed</div>
+      <div class="hero-badge"><span class="dot"></span> Pipeline Active — ${n} instructional videos (${data.skipped_filler||0} filler filtered)</div>
       <h1>Augmentation Dashboard</h1>
       <p class="subtitle">AI-generated conceptual analysis of <strong>${n} Unreal Engine tutorial videos</strong>. Each video is evaluated against 11 pedagogical criteria to identify where conceptual depth is missing.</p>
       <div class="hero-stats">
@@ -371,13 +412,18 @@ function render(data){
         </div>
       </div>
 
-      <div class="section-heading">Courses (${Object.keys(courseMap).length})</div>
-      <div class="courses-grid">
+      ${renderCriteriaBreakdown(o)}
+
+      <div class="section-heading" style="cursor:pointer;user-select:none;" onclick="document.getElementById('coursesGrid').style.display=document.getElementById('coursesGrid').style.display==='none'?'grid':'none';this.querySelector('.caret').textContent=document.getElementById('coursesGrid').style.display==='none'?'▶':'▼'">Courses (${Object.keys(courseMap).length}) <span class="caret">▼</span></div>
+      <div class="courses-grid" id="coursesGrid">
         ${Object.entries(courseMap).sort((a,b)=>a[0].localeCompare(b[0])).map(([code,c])=>{
           const avg=Math.round(c.totalScore/c.videos.length);
           const avgGrade=avg>=45?'A':avg>=39?'B':avg>=33?'C':avg>=22?'D':'F';
+          const ct=data.course_titles&&data.course_titles[code]?data.course_titles[code]:'';
+          const shortTitle=ct.length>40?ct.substring(0,37)+'…':ct;
           return `<div class="course-card" onclick="scrollToTable('${code}')">
             <div class="top"><span class="code">${esc(code)}</span><span class="avg-grade grade-${avgGrade}">${avgGrade} · ${avg}/55</span></div>
+            ${shortTitle?`<div style="font-size:11px;color:var(--dim);margin:4px 0 2px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(ct)}">${esc(shortTitle)}</div>`:''}
             <div class="stats"><span>🎬 ${c.videos.length}</span><span>🧠 ${c.videos.reduce((s,v)=>s+v.theory_breaks,0)}</span><span>⚠️ ${c.videos.reduce((s,v)=>s+v.warnings,0)}</span></div>
             <div class="mini-grades">${c.grades.map(g=>`<div class="mini-grade-dot mg-${g}"></div>`).join('')}</div>
           </div>`;
