@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTagData } from "../../context/TagDataContext";
+import { getAllPersonas } from "../../services/PersonaService";
 import VertexAIMonitor from "../VertexAIMonitor/VertexAIMonitor";
 import "./Dashboard.css";
 
@@ -13,6 +14,7 @@ function Dashboard() {
   const [sortDirection, setSortDirection] = useState("asc");
   const [showMissingVideos, setShowMissingVideos] = useState(false);
   const [sourceFilter, setSourceFilter] = useState("all");
+  const [courseSearch, setCourseSearch] = useState("");
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -22,6 +24,65 @@ function Dashboard() {
     const aiEnriched = courses.filter((c) => c.gemini_enriched).length;
 
     return { totalCourses, totalVideos, coursesWithVideos, aiEnriched };
+  }, [courses]);
+
+  // Readiness Score (Option B)
+  const readinessScore = useMemo(() => {
+    if (courses.length === 0) return 0;
+    const hasVideos = courses.filter((c) => c.video_count > 0).length;
+    const hasAI = courses.filter((c) => c.gemini_enriched).length;
+    const hasTags = courses.filter(
+      (c) => c.tags?.level && c.tags?.topic && c.tags?.industry
+    ).length;
+    // Weighted: 40% videos, 30% AI, 30% tags
+    return Math.round(
+      (hasVideos / courses.length) * 40 +
+        (hasAI / courses.length) * 30 +
+        (hasTags / courses.length) * 30
+    );
+  }, [courses]);
+
+  // Persona Distribution (Option D)
+  const personaDistribution = useMemo(() => {
+    const allPersonas = getAllPersonas();
+    // Map industry → persona(s)
+    const industryToPersona = {
+      games: ["indie_isaac", "logic_liam"],
+      "game development": ["indie_isaac", "logic_liam"],
+      film: ["animator_alex", "rigger_regina"],
+      "film / animation": ["animator_alex", "rigger_regina"],
+      animation: ["animator_alex", "rigger_regina"],
+      "retail / cpg": ["designer_cpg"],
+      "product viz": ["designer_cpg"],
+      marketing: ["designer_cpg"],
+      architecture: ["architect_amy"],
+      archviz: ["architect_amy"],
+      industrial: ["simulation_sam"],
+      defense: ["simulation_sam"],
+      simulation: ["simulation_sam"],
+      vfx: ["vfx_victor"],
+      effects: ["vfx_victor"],
+      automotive: ["automotive_andy"],
+    };
+
+    const counts = {};
+    allPersonas.forEach((p) => {
+      counts[p.id] = 0;
+    });
+
+    courses.forEach((course) => {
+      const industry = (course.tags?.industry || "General").toLowerCase();
+      const matched = industryToPersona[industry];
+      if (matched) {
+        matched.forEach((pid) => {
+          counts[pid] = (counts[pid] || 0) + 1;
+        });
+      }
+    });
+
+    return allPersonas
+      .map((p) => ({ id: p.id, name: p.name, emoji: p.emoji, count: counts[p.id] || 0 }))
+      .sort((a, b) => b.count - a.count);
   }, [courses]);
 
   // Calculate source distribution
@@ -173,6 +234,18 @@ function Dashboard() {
   const coursesWithVideos = sortedCourses.filter((c) => (c.video_count || 0) > 0);
   const coursesMissingVideos = sortedCourses.filter((c) => (c.video_count || 0) === 0);
 
+  // Quick Search filter (Option C)
+  const displayedCourses = useMemo(() => {
+    if (!courseSearch.trim()) return coursesWithVideos;
+    const q = courseSearch.toLowerCase();
+    return coursesWithVideos.filter(
+      (c) =>
+        (c.code || "").toLowerCase().includes(q) ||
+        (c.title || c.name || "").toLowerCase().includes(q) ||
+        (c.tags?.topic || "").toLowerCase().includes(q)
+    );
+  }, [coursesWithVideos, courseSearch]);
+
   // Calculate max for chart scaling
   const maxTopicCount =
     topicDistribution.length > 0 ? Math.max(...topicDistribution.map((t) => t.count)) : 1;
@@ -269,6 +342,13 @@ function Dashboard() {
           <div className="stat-number">{stats.aiEnriched}</div>
           <div className="stat-label">AI-ENRICHED</div>
         </div>
+        <div className="stat-card readiness">
+          <div className="stat-number">{readinessScore}%</div>
+          <div className="stat-label">READINESS</div>
+          <div className="readiness-bar">
+            <div className="readiness-fill" style={{ width: `${readinessScore}%` }} />
+          </div>
+        </div>
       </div>
 
       {/* Source Filter Bar */}
@@ -311,6 +391,32 @@ function Dashboard() {
                 <span className="bar-value">{topic.count}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Persona Distribution Chart (Option D) */}
+        <div className="chart-card">
+          <h3>
+            <span className="chart-indicator purple" /> Persona Coverage
+          </h3>
+          <div className="bar-chart">
+            {personaDistribution.map((p) => {
+              const maxP = personaDistribution[0]?.count || 1;
+              return (
+                <div key={p.id} className="bar-row">
+                  <span className="bar-label">
+                    {p.emoji} {p.name}
+                  </span>
+                  <div className="bar-container">
+                    <div
+                      className="bar-fill persona-bar"
+                      style={{ width: `${(p.count / maxP) * 100}%` }}
+                    />
+                  </div>
+                  <span className="bar-value">{p.count}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -505,6 +611,21 @@ function Dashboard() {
         <h3>
           <span className="section-icon">📚</span> All Courses
         </h3>
+        {/* Quick Search (Option C) */}
+        <div className="course-search-bar">
+          <input
+            type="text"
+            className="course-search-input"
+            placeholder="🔍 Search courses by name, code, or topic…"
+            value={courseSearch}
+            onChange={(e) => setCourseSearch(e.target.value)}
+          />
+          {courseSearch && (
+            <button className="course-search-clear" onClick={() => setCourseSearch("")}>
+              ✕
+            </button>
+          )}
+        </div>
         <div className="courses-table-wrapper">
           <table className="courses-table">
             <thead>
@@ -532,7 +653,7 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {coursesWithVideos.map((course, index) => (
+              {displayedCourses.map((course, index) => (
                 <tr key={course.id || course.code || index}>
                   <td className="code-cell">{course.code || "—"}</td>
                   <td className="title-cell">{course.title || course.name || "Untitled"}</td>
