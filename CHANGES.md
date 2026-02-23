@@ -13,6 +13,15 @@ All notable changes to the Unreal Learning Path Tagging System.
 - **"Change My Role" button** — allows users to retake the persona quiz at any time from the header
 - **Expandable course cards** — course-level statistics (grade distribution, weakest criteria, augmentation load) in the augmentation view
 - **Video detail cards** — criteria bar charts and priority indicators per video
+- **Automated Testing Suite (316 tests)** — 7-phase test infrastructure:
+  - Phase 1: Data integrity tests (32 tests) — JSON schema validation and field linkage
+  - Phase 2: Service unit tests (39 tests) — TagGraphService, narratorService, semanticSearchService
+  - Phase 3: E2E browser tests (9 tests) — Playwright with Firebase auth bypass via `VITE_E2E_BYPASS`
+  - Phase 4: Component smoke tests (13 tests) — LoadingSpinner, ErrorBoundary, DiagnosisCard, etc.
+  - Phase 5: Search quality regression (16 tests) — known-answer tag extraction, course scoring, cosine invariants
+  - Phase 6: Bundle regression (7 tests) — build verification, size caps, code-splitting validation
+  - Phase 7: CI pipeline — Playwright + Vitest integrated into GitHub Actions `path-builder-quality` job
+
 
 ### Changed
 

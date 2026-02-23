@@ -1,16 +1,56 @@
-# React + Vite
+# Path Builder — React Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The interactive learning path builder for the Unreal Learning Path Tagging System. Built with React 19 + Vite 7.
 
-Currently, two official plugins are available:
+## Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+npm run dev          # http://localhost:5173/Unreal-Learning-Path-Tagging-System/
+```
 
-## React Compiler
+## Scripts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server (port 5173) |
+| `npm run build` | Production build to `dist/` |
+| `npm test` | Unit + component + regression tests (Vitest, 300 tests) |
+| `npm run test:watch` | Watch mode |
+| `npm run test:e2e` | Playwright E2E browser tests (9 tests) |
+| `npm run lint` | ESLint |
+| `npm run lint:css` | Stylelint |
 
-## Expanding the ESLint configuration
+## Testing
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**316 tests** across 26 files:
+
+- **Data integrity** (32) — JSON schema validation, field linkage
+- **Service units** (39) — TagGraphService, narratorService, semanticSearchService
+- **E2E browser** (9) — Playwright with Firebase auth bypass (`VITE_E2E_BYPASS`)
+- **Component smoke** (13) — LoadingSpinner, ErrorBoundary, DiagnosisCard, etc.
+- **Search quality** (16) — Known-answer tag extraction, cosine similarity invariants
+- **Bundle regression** (7) — Build verification, size caps, code-splitting validation
+- **Pre-existing** (200) — Quiz, config, float16, stemmer, logger, etc.
+
+### E2E Setup
+
+Playwright runs on a separate Vite server (port 5174) with `VITE_E2E_BYPASS=true` to bypass Firebase auth. Install browsers first:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+## Project Structure
+
+```
+src/
+├── components/       # 24 component modules (ProblemFirst, GuidedPlayer, etc.)
+├── context/          # PathContext, TagDataContext, constants
+├── hooks/            # 7 custom hooks
+├── services/         # 25 service modules (search, AI, analytics)
+├── data/             # 24 static JSON data files (~30MB)
+├── utils/            # Shared helpers (stemming, float16, logger)
+└── __tests__/        # Test files
+```

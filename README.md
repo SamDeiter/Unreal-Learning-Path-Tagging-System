@@ -32,7 +32,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 | **AI** | Google Gemini 2.0 Flash (enrichment, narration, embeddings) |
 | **Search** | Semantic embeddings + TF-IDF transcript index + tag matching |
 | **Hosting** | GitHub Pages (frontend), Firebase Hosting (API) |
-| **Testing** | Vitest + React Testing Library |
+| **Testing** | Vitest + React Testing Library + Playwright (316 tests) |
 | **Linting** | ESLint 9 (flat config) + Stylelint |
 
 ---
@@ -124,9 +124,12 @@ npm run dev          # http://localhost:5173/Unreal-Learning-Path-Tagging-System
 
 ```bash
 cd path-builder
-npm test             # Run all tests
+npm test             # Unit + component + regression tests (300 tests, ~3s)
 npm run test:watch   # Watch mode
+npm run test:e2e     # Playwright E2E browser tests (9 tests, ~13s)
 ```
+
+Tests are organized in 7 phases — see [CHANGES.md](./CHANGES.md) for details. CI runs automatically via GitHub Actions on push/PR.
 
 ### Run Linters
 
