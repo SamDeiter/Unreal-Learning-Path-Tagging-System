@@ -106,17 +106,17 @@ export default function ProblemFirst() {
 
       {stage === STAGES.ANSWERED && answerData && (
         <>
+          <OfficialDocsSummary
+            data={vertexAIDocs}
+            isLoading={vertexAILoading}
+            error={vertexAIError}
+          />
           <AnswerView
             answer={answerData}
             onFeedback={handleFeedback}
             onBackToVideos={handleBackToVideos}
             onStartOver={handleReset}
             isRerunning={isRerunning}
-          />
-          <OfficialDocsSummary
-            data={vertexAIDocs}
-            isLoading={vertexAILoading}
-            error={vertexAIError}
           />
         </>
       )}
