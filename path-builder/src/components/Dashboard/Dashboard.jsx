@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTagData } from "../../context/TagDataContext";
+import VertexAIMonitor from "../VertexAIMonitor/VertexAIMonitor";
 import "./Dashboard.css";
 
 /**
@@ -498,6 +499,9 @@ function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* 🔍 Vertex AI Search Monitor */}
+      <VertexAIMonitor />
 
       {/* All Courses Table */}
       <div className="section-card">
