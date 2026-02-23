@@ -2,7 +2,202 @@
 
 All notable changes to the Unreal Learning Path Tagging System.
 
-## [1.0.0] - 2027-01-27
+---
+
+## [2.5.0] - 2026-02-23
+
+### Added
+
+- **Persona Onboarding Quiz** — 3-question modal with weighted scoring to detect user role (Artist, Programmer, Designer, etc.) and personalize the experience
+- **Augmentation Dashboard** — embedded dashboard for monitoring transcript augmentation quality, grade distribution, and per-course augmentation load
+- **"Change My Role" button** — allows users to retake the persona quiz at any time from the header
+- **Expandable course cards** — course-level statistics (grade distribution, weakest criteria, augmentation load) in the augmentation view
+- **Video detail cards** — criteria bar charts and priority indicators per video
+
+### Changed
+
+- Augmentation iframe styling switched to `position: absolute` for reliable sizing
+- Courses grid uses scroll container for better layout
+- Tag graph label readability improvements
+- Updated dist build for GitHub Pages deployment
+
+### Fixed
+
+- Video playback order — sort video arrays by filename prefix to fix sequence issues
+- "Change My Role" button styling refined to integrate with dark theme
+
+---
+
+## [2.4.0] - 2026-02-20
+
+### Added
+
+- **"Fix a Problem" UX redesign** — 2-column layout with always-visible Case Details panel
+- **Diagnosis loading screen** — animated loading state with bold UE5 term highlighting in answers
+- **RAG pipeline for onboarding** — 3-stage architecture (Planner → Retriever → Assembler) replacing monolithic handler
+- **First Hour Quick-Win generator** — upgraded onboarding handler that generates actionable quick wins
+- **Codebase refactoring** — extracted shared utilities (float16 decoding, stemming, stopwords) into `utils/`, consolidated `constants.js`
+- **Service unit tests** — added test coverage for services that previously lacked them
+- **"Learn More" section refactor** — removed redundant info, relocated transferable skills inline
+
+### Changed
+
+- Analytics tooltips added to all metrics, removed debug text
+- Output panel resized for better horizontal space usage
+
+---
+
+## [2.3.0] - 2026-02-19
+
+### Added
+
+- **Third-Party Notices** — auto-generated `THIRD_PARTY_NOTICES.md` documenting all 338 open-source dependencies with license types
+- **Pipeline reliability refactor** — Zod validation, repair retries, caching, and telemetry for enrichment pipeline
+- **Comprehensive dist build** — production build for GitHub Pages with code-splitting optimizations
+
+---
+
+## [2.2.0] - 2026-02-17
+
+### Added
+
+- **Invite-based access control** — admin-only invite code management with `InviteManager` component
+- **Admin feedback panel** — review, triage, and manage user-submitted feedback with real-time badge count
+- **Feedback submission system** — `FeedbackButton` component with thumbs up/down on video results, stored in Firestore
+- **Confidence routing analytics** — `ConfidenceAnalytics` visualization showing search confidence distribution
+
+### Changed
+
+- Firestore security rules updated for feedback and invite collections
+
+---
+
+## [2.1.0] - 2026-02-14
+
+### Added
+
+- **Semantic search pipeline** — embedding-based matching via `semanticSearchService.js` + `segment_embeddings.json` (~6MB)
+- **TF-IDF transcript search** — `segmentSearchService.js` with `search_index.json` (~5MB) and `segment_index.json` (~4MB)
+- **Search pipeline orchestrator** — `searchPipeline.js` that routes queries through semantic → transcript → tag-based strategies with confidence scoring
+- **Tag graph visualization** — interactive Cytoscape.js graph with co-occurrence edges, category coloring, and drill-down
+- **Skill Radar & Gap Analysis** — `SkillRadar` and `SkillGapAnalysis` visualizations comparing coverage vs. industry demand
+- **Analytics tab** — full suite: `JourneyHeatmap`, `TagTimeline`, `TagTrends`, `PrereqFlow`, `InstructorMap`, `TagHeatmap`, `TagHistorySparkline`
+- **Insights panel** — actionable recommendations from analytics data with navigation links
+- **Advanced code-splitting** — Vite `manualChunks` config for vendor libs, data files, and search indices
+
+---
+
+## [2.0.0] - 2026-02-07
+
+### Added
+
+#### React App (`path-builder/`)
+
+- **Complete rewrite as React 19 + Vite app** replacing standalone HTML/JS prototype
+- **11-tab navigation**: Dashboard, Path Readiness, Tag Sources, Tag Editor, Path Builder, Onboarding, Fix a Problem, Analytics, Augmentation, Invites, Feedback
+- **PathContext & TagDataContext** — centralized state management via React Context
+- **7 custom hooks**: `useProblemFirst`, `useGuidedPlayer`, `useExploreFirst`, `useOnboardingRAG`, `useCourseBuilder`, `useTagGraph`, `useVideoCart`
+- **GuidedPlayer** — AI-narrated learning experience with intro → videos → quizzes → challenges → reflection
+- **ProblemFirst** — main search flow: user describes a problem, system returns matched videos with explanations
+- **Path Builder** — 3-panel layout: course library (left), drag-and-drop assembly (center), SCORM/JSON output (right)
+- **Dashboard** — overview of content library health, tag coverage, video counts
+- **Path Readiness** — evaluate which learning paths are ready for deployment
+- **Tag Sources** — compare tag origins across canonical, AI, transcript, and Gemini sources
+- **Tag Editor** — CRUD interface for editing tag assignments per course
+- **Personas** — persona definitions and routing logic
+- **CourseLibrary & CartPanel** — browsable catalog with video cart for path building
+- **ErrorBoundary** — graceful error handling wrapper
+- **LoadingSpinner** — consistent loading states across lazy-loaded components
+
+#### Services
+
+- **25 service modules** including:
+  - `geminiService.js` — Gemini AI integration for enrichment and narration
+  - `narratorService.js` — AI narrator for guided learning paths
+  - `PersonaService.js` — persona detection and personalized messaging
+  - `PersonalizedMessaging.js` — persona-aware content adaptation
+  - `QueryNormalizer.js` — query cleanup and normalization
+  - `PathBuilder.js` — learning path assembly logic
+  - `blendedPathBuilder.js` — hybrid path building with multiple strategies
+  - `coverageAnalyzer.js` — content gap and coverage analysis
+  - `ContentGapService.js` — identifies missing content areas
+  - `challengeService.js` — challenge generation for guided paths
+  - `courseToVideos.js` — course-to-video mapping utility
+  - `docsSearchService.js` — UE5 documentation search integration
+  - `externalContentService.js` — external resource discovery
+  - `domainTypes.js` — shared type definitions
+  - `firebaseConfig.js` — Firebase initialization
+  - `googleAuthService.js` — Google Sign-In authentication
+  - `learningProgressService.js` — user progress tracking
+  - `onboardingTelemetry.js` — onboarding flow analytics
+  - `feedbackService.js` — feedback CRUD operations
+
+#### Data Files (24 total)
+
+- `video_library_enriched.json` — core course + video catalog with AI enrichment
+- `course_embeddings.json` — course-level semantic vectors
+- `segment_embeddings.json` — segment-level semantic vectors (~6MB)
+- `search_index.json` — TF-IDF search index (~5MB)
+- `segment_index.json` — segment search index (~4MB)
+- `transcript_segments.json` — 7,000+ parsed transcript segments
+- `tags.json` — 500+ tag definitions with metadata
+- `edges.json` — tag relationship edges
+- `personas.json` — persona definitions and scoring
+- `challengeRegistry.json` — hands-on challenge definitions
+- `doc_links.json` — UE5 documentation links (~4MB)
+- `docs_embeddings.json` — documentation embeddings (~5MB)
+- `course_prerequisites.json` — prerequisite relationships
+- `synonym_map.json` — tag synonym mappings
+- `curated_solutions.json`, `curator_insights.json`, `demand_benchmarks.json`, `external_sources.json`, `tag_history.json`, `youtube_curated.json`
+
+#### Enrichment Scripts (83+)
+
+- `build_embeddings.py` — generate semantic embeddings for courses
+- `embed_segments.py` — generate segment-level embeddings
+- `build_search_index.py` — build TF-IDF search index
+- `build_segment_index.py` — build segment search index
+- `augment_transcript.py` — transcript augmentation with AI
+- `scrape_epic_docs.py` — UDN documentation scraping
+- `expand_synonyms.py` — synonym expansion via AI
+- `enrich_doc_links.py` — documentation link enrichment
+- `extract_key_steps.py` — key step extraction from transcripts
+- `generate_cooccurrence_edges.py` — co-occurrence edge generation
+- 70+ additional audit, validation, and enrichment scripts
+
+#### Firebase Cloud Functions (`functions/`)
+
+- `ai/` — Gemini-powered AI endpoints for learning path generation
+- `data/` — data management functions
+- `pipeline/` — server-side enrichment pipeline
+- `triggers/` — Firestore event triggers
+- `scheduled/` — scheduled/cron functions
+
+#### Testing
+
+- Vitest + React Testing Library test suite
+- 11+ test files across `src/__tests__/` and `src/services/__tests__/`
+- `vitest.config.js` with jsdom environment
+
+### Changed
+
+- **Hosting moved to GitHub Pages** — `vite.config.js` base path set to `/Unreal-Learning-Path-Tagging-System/`
+- Firebase Hosting retained for API endpoints via rewrites
+- ESLint upgraded to v9 flat config
+- Stylelint added for CSS linting
+
+### Breaking Changes
+
+> [!CAUTION]
+> v2.0.0 is a complete rewrite. The standalone HTML/JS prototype is archived in `prototype/`.
+
+1. **React app replaces HTML prototype** — all UI is now in `path-builder/src/`
+2. **Firebase Auth required** — users must sign in with Google
+3. **Invite-based access** — new users need an invite code or admin approval
+4. **JSON data files restructured** — enriched data includes AI-generated fields
+
+---
+
+## [1.0.0] - 2026-01-27
 
 ### Added
 
@@ -74,7 +269,7 @@ tag_ids = [t.tag_id for t in results]      # Extract IDs if needed
 
 ---
 
-## [0.1.0] - 2027-01-15
+## [0.1.0] - 2026-01-26
 
 ### Added
 
@@ -83,29 +278,3 @@ tag_ids = [t.tag_id for t in results]      # Extract IDs if needed
 - Match rules (`ingestion/match_rules.json`)
 - Learning path templates (`learning_paths/templates/`)
 - Sample queries (`user_queries/examples/`)
-
----
-
-## Roadmap
-
-### Phase 5 — Diagnosis Caching & Similar Query Reuse
-
-Cache AI diagnosis results in Firestore so similar future questions get instant answers.
-
-**Approach:**
-1. After each diagnosis, store `{ queryEmbedding, rootCauses, matchedCourses, microLesson, timestamp }` in a `cached_diagnoses` Firestore collection
-2. On new queries, compute cosine similarity against cached embeddings before calling Gemini
-3. If similarity > 0.9, reuse the cached result (instant response, no API cost)
-4. Surface a "📖 Further Reading" section linking to matched Epic UE5 docs (already retrieved via `docsSearchService.js` but not yet shown in UI)
-5. Optionally ingest local UE 5.6 editor docs (`D:\Fortnite\UE_5.6\Engine\Documentation\Source\Shared\`) for property-level tooltip references
-
-### Phase 6 — Feedback Submission Backend
-
-Connect the feedback modal to a real backend so bug reports, feature requests, and attachments are persisted.
-
-**Approach:**
-
-1. Store feedback in a `feedback` Firestore collection: `{ type, description, attachments[], userId, timestamp, status }`
-2. Upload file attachments to Firebase Storage under `feedback/{docId}/`
-3. Send email notification on new submissions (Firebase Cloud Function trigger)
-4. Add an admin view to review/triage submitted feedback
