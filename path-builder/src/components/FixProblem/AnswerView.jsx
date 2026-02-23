@@ -46,9 +46,6 @@ export default function AnswerView({
 
       <p className="answer-cause">{highlightTerms(answer.mostLikelyCause)}</p>
 
-      {/* ─── Official Docs (between cause and quick checks) ─── */}
-      <OfficialDocsSummary data={vertexAIDocs} isLoading={vertexAILoading} error={vertexAIError} />
-
       {/* ─── Fast Checks ─── */}
       {answer.fastChecks?.length > 0 && (
         <div className="answer-section answer-fast-checks">
@@ -142,6 +139,9 @@ export default function AnswerView({
 
       {/* ─── Feedback ─── */}
       <FeedbackPanel onFeedback={onFeedback} isRerunning={isRerunning} />
+
+      {/* ─── Official Docs (bottom of page) ─── */}
+      <OfficialDocsSummary data={vertexAIDocs} isLoading={vertexAILoading} error={vertexAIError} />
     </div>
   );
 }
