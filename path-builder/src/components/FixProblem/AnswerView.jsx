@@ -7,7 +7,7 @@ import PropTypes from "prop-types";
 import EvidencePanel from "./EvidencePanel";
 import FeedbackPanel from "./FeedbackPanel";
 import OfficialDocsSummary from "../OfficialDocsSummary/OfficialDocsSummary";
-import highlightTerms from "../../utils/highlightTerms";
+import highlightWithCitations from "../../utils/highlightWithCitations";
 import "./FixProblem.css";
 
 export default function AnswerView({
@@ -24,6 +24,9 @@ export default function AnswerView({
 
   const confidenceColor =
     answer.confidence === "high" ? "#10b981" : answer.confidence === "med" ? "#f59e0b" : "#ef4444";
+
+  // Shorthand: highlight terms + make [N] citations clickable
+  const cite = (text) => highlightWithCitations(text, vertexAIDocs?.results);
 
   return (
     <div className="answer-view">
@@ -44,7 +47,7 @@ export default function AnswerView({
         </span>
       </div>
 
-      <p className="answer-cause">{highlightTerms(answer.mostLikelyCause)}</p>
+      <p className="answer-cause">{cite(answer.mostLikelyCause)}</p>
 
       {/* ─── Fast Checks ─── */}
       {answer.fastChecks?.length > 0 && (
@@ -56,7 +59,7 @@ export default function AnswerView({
             {answer.fastChecks.map((check, i) => (
               <li key={i}>
                 <span className="check-number">{i + 1}</span>
-                <span>{highlightTerms(check)}</span>
+                <span>{cite(check)}</span>
               </li>
             ))}
           </ul>
@@ -71,7 +74,7 @@ export default function AnswerView({
           </h3>
           <ol>
             {answer.fixSteps.map((step, i) => (
-              <li key={i}>{highlightTerms(step)}</li>
+              <li key={i}>{cite(step)}</li>
             ))}
           </ol>
         </div>
@@ -86,8 +89,8 @@ export default function AnswerView({
           <div className="branch-list">
             {answer.ifStillBrokenBranches.map((branch, i) => (
               <div key={i} className="branch-item">
-                <span className="branch-condition">If {highlightTerms(branch.condition)}:</span>
-                <span className="branch-action">{highlightTerms(branch.action)}</span>
+                <span className="branch-condition">If {cite(branch.condition)}:</span>
+                <span className="branch-action">{cite(branch.action)}</span>
               </div>
             ))}
           </div>
@@ -102,7 +105,7 @@ export default function AnswerView({
           </h3>
           <ul className="skills-list">
             {answer.learnPath.objectives.transferable.map((skill, i) => (
-              <li key={i}>{highlightTerms(skill)}</li>
+              <li key={i}>{cite(skill)}</li>
             ))}
           </ul>
         </div>
@@ -117,7 +120,7 @@ export default function AnswerView({
           <ul className="reasoning-list">
             {answer.whyThisResult.map((reason, i) => (
               <li key={i}>
-                <span>{highlightTerms(reason)}</span>
+                <span>{cite(reason)}</span>
               </li>
             ))}
           </ul>
