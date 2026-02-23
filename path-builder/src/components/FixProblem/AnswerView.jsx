@@ -6,6 +6,7 @@
 import PropTypes from "prop-types";
 import EvidencePanel from "./EvidencePanel";
 import FeedbackPanel from "./FeedbackPanel";
+import OfficialDocsSummary from "../OfficialDocsSummary/OfficialDocsSummary";
 import highlightTerms from "../../utils/highlightTerms";
 import "./FixProblem.css";
 
@@ -15,6 +16,9 @@ export default function AnswerView({
   onBackToVideos,
   onStartOver,
   isRerunning,
+  vertexAIDocs,
+  vertexAILoading,
+  vertexAIError,
 }) {
   if (!answer) return null;
 
@@ -41,6 +45,9 @@ export default function AnswerView({
       </div>
 
       <p className="answer-cause">{highlightTerms(answer.mostLikelyCause)}</p>
+
+      {/* ─── Official Docs (between cause and quick checks) ─── */}
+      <OfficialDocsSummary data={vertexAIDocs} isLoading={vertexAILoading} error={vertexAIError} />
 
       {/* ─── Fast Checks ─── */}
       {answer.fastChecks?.length > 0 && (

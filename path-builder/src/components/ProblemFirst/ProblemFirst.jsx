@@ -17,7 +17,6 @@ import AnswerView from "../FixProblem/AnswerView";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import CartPanel from "../CartPanel/CartPanel";
 import VideoResultCard from "../VideoResultCard/VideoResultCard";
-import OfficialDocsSummary from "../OfficialDocsSummary/OfficialDocsSummary";
 import useProblemFirst, { STAGES } from "../../hooks/useProblemFirst";
 import { buildGuidedCourses } from "../../domain/buildGuidedCourses";
 import "./ProblemFirst.css";
@@ -105,20 +104,16 @@ export default function ProblemFirst() {
       )}
 
       {stage === STAGES.ANSWERED && answerData && (
-        <>
-          <OfficialDocsSummary
-            data={vertexAIDocs}
-            isLoading={vertexAILoading}
-            error={vertexAIError}
-          />
-          <AnswerView
-            answer={answerData}
-            onFeedback={handleFeedback}
-            onBackToVideos={handleBackToVideos}
-            onStartOver={handleReset}
-            isRerunning={isRerunning}
-          />
-        </>
+        <AnswerView
+          answer={answerData}
+          onFeedback={handleFeedback}
+          onBackToVideos={handleBackToVideos}
+          onStartOver={handleReset}
+          isRerunning={isRerunning}
+          vertexAIDocs={vertexAIDocs}
+          vertexAILoading={vertexAILoading}
+          vertexAIError={vertexAIError}
+        />
       )}
 
       {stage === STAGES.ERROR && (
