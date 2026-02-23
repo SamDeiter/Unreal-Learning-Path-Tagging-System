@@ -17,7 +17,7 @@ import {
 import "./OfficialDocsSummary.css";
 
 export default function OfficialDocsSummary({ data, isLoading, error }) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (!isLoading && !error && (!data || (!data.summary && data.results?.length === 0))) {
     return null;
