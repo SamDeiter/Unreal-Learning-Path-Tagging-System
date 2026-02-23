@@ -58,6 +58,9 @@ export default function useProblemFirst() {
   const [isRerunning, setIsRerunning] = useState(false);
   const [lastInputData, setLastInputData] = useState(null);
   const [conversationHistory, setConversationHistory] = useState([]);
+  const [vertexAIDocs, setVertexAIDocs] = useState(null);
+  const [vertexAILoading, setVertexAILoading] = useState(false);
+  const [vertexAIError, setVertexAIError] = useState(null);
 
   // ── Derived ──
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
@@ -82,6 +85,9 @@ export default function useProblemFirst() {
       setAnswerData(null);
       setClarifyData(null);
       setLastInputData(inputData);
+      setVertexAIDocs(null);
+      setVertexAILoading(true);
+      setVertexAIError(null);
 
       const activeCaseReport = overrideCaseReport || caseReport;
 
@@ -189,10 +195,18 @@ export default function useProblemFirst() {
         );
 
         // ── Step 1: Shared search pipeline ──
-        let { semanticResults, retrievedPassages } = await runSearchPipeline(
+        let { semanticResults, retrievedPassages, vertexAIDocs: vaDocs } = await runSearchPipeline(
           inputData.query,
           { maxPassages: 10 }
         );
+
+        // Vertex AI docs (available immediately, independent of diagnosis)
+        if (vaDocs) {
+          setVertexAIDocs(vaDocs);
+          setVertexAILoading(false);
+        } else {
+          setVertexAILoading(false);
+        }
 
         // ── Step 2: Call queryLearningPath Cloud Function ──
         const app = getFirebaseApp();
@@ -411,6 +425,7 @@ export default function useProblemFirst() {
         console.error("[ProblemFirst] Error:", err);
         setError(err.message || "An unexpected error occurred");
         setStage(STAGES.ERROR);
+        setVertexAILoading(false);
       }
     },
     [courses, getDetectedPersona, clearCart, caseReport, conversationHistory]
@@ -430,6 +445,9 @@ export default function useProblemFirst() {
     setCaseReport(null);
     setIsRerunning(false);
     setConversationHistory([]);
+    setVertexAIDocs(null);
+    setVertexAILoading(false);
+    setVertexAIError(null);
   }, []);
 
   const handleClarifyAnswer = useCallback(
@@ -512,6 +530,9 @@ export default function useProblemFirst() {
     clarifyData,
     isRerunning,
     courses,
+    vertexAIDocs,
+    vertexAILoading,
+    vertexAIError,
 
     // Cart
     cart,

@@ -12,6 +12,50 @@ import { devLog, devWarn } from "../utils/logger";
 import { decodeFloat16Vector } from "../utils/float16";
 import { stemMatch } from "../utils/stemmer";
 
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFirebaseApp } from "./firebaseConfig";
+
+// ── Vertex AI Search (Cloud Function proxy) ────────────────────────────────
+
+/**
+ * Search official UE5 docs via Vertex AI Search (Discovery Engine).
+ * Calls the searchVertexAIDocs Cloud Function which proxies to the data store.
+ *
+ * @param {string} query - User's natural-language query
+ * @param {number} [pageSize=5] - Max results
+ * @returns {Promise<{results: Array, summary: string, citations: Array, references: Array}>}
+ */
+export async function searchDocsVertexAI(query, pageSize = 5) {
+  if (!query || query.trim().length === 0) {
+    return { results: [], summary: "", citations: [], references: [] };
+  }
+
+  try {
+    const app = getFirebaseApp();
+    const functions = getFunctions(app, "us-central1");
+    const searchFn = httpsCallable(functions, "searchVertexAIDocs");
+
+    const result = await searchFn({ query: query.trim(), pageSize });
+
+    if (result.data?.success) {
+      devLog(`[VertexAI] ${result.data.results?.length || 0} doc results, summary: ${result.data.summary ? "yes" : "no"}`);
+      return {
+        results: result.data.results || [],
+        summary: result.data.summary || "",
+        citations: result.data.citations || [],
+        references: result.data.references || [],
+      };
+    }
+
+    devWarn("[VertexAI] Search returned unsuccessful:", result.data);
+    return { results: [], summary: "", citations: [], references: [] };
+  } catch (err) {
+    devWarn("[VertexAI] Search failed:", err.message);
+    return { results: [], summary: "", citations: [], references: [] };
+  }
+}
+
+
 // Lazy-loaded (4.8MB quantized)
 let _docsEmbeddings = null;
 let _decodedVectors = null;
@@ -303,6 +347,7 @@ export async function getDocReadingPath(topics, { limit = 8 } = {}) {
 
 export default {
   searchDocsSemantic,
+  searchDocsVertexAI,
   getDocsForTopic,
   getDocReadingPath,
 };

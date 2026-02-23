@@ -17,6 +17,7 @@ import AnswerView from "../FixProblem/AnswerView";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import CartPanel from "../CartPanel/CartPanel";
 import VideoResultCard from "../VideoResultCard/VideoResultCard";
+import OfficialDocsSummary from "../OfficialDocsSummary/OfficialDocsSummary";
 import useProblemFirst, { STAGES } from "../../hooks/useProblemFirst";
 import { buildGuidedCourses } from "../../domain/buildGuidedCourses";
 import "./ProblemFirst.css";
@@ -32,6 +33,9 @@ export default function ProblemFirst() {
     clarifyData,
     isRerunning,
     courses,
+    vertexAIDocs,
+    vertexAILoading,
+    vertexAIError,
     cart,
     addToCart,
     removeFromCart,
@@ -101,13 +105,20 @@ export default function ProblemFirst() {
       )}
 
       {stage === STAGES.ANSWERED && answerData && (
-        <AnswerView
-          answer={answerData}
-          onFeedback={handleFeedback}
-          onBackToVideos={handleBackToVideos}
-          onStartOver={handleReset}
-          isRerunning={isRerunning}
-        />
+        <>
+          <OfficialDocsSummary
+            data={vertexAIDocs}
+            isLoading={vertexAILoading}
+            error={vertexAIError}
+          />
+          <AnswerView
+            answer={answerData}
+            onFeedback={handleFeedback}
+            onBackToVideos={handleBackToVideos}
+            onStartOver={handleReset}
+            isRerunning={isRerunning}
+          />
+        </>
       )}
 
       {stage === STAGES.ERROR && (
@@ -152,6 +163,13 @@ export default function ProblemFirst() {
                 </p>
               )}
             </div>
+
+            {/* 📖 Official UE5 Documentation (Vertex AI Search) */}
+            <OfficialDocsSummary
+              data={vertexAIDocs}
+              isLoading={vertexAILoading}
+              error={vertexAIError}
+            />
 
             {/* 🎬 Videos for You — Grouped by Role */}
             <h2 className="results-title">🎬 Videos for You ({videoResults.length})</h2>

@@ -11,7 +11,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "./firebaseConfig";
 import { findSimilarCourses } from "./semanticSearchService";
 import { searchSegmentsHybrid } from "./segmentSearchService";
-import { searchDocsSemantic } from "./docsSearchService";
+import { searchDocsSemantic, searchDocsVertexAI } from "./docsSearchService";
 import { devLog, devWarn } from "../utils/logger";
 
 /**
@@ -24,7 +24,7 @@ import { devLog, devWarn } from "../utils/logger";
  * @param {number} [options.maxSegments=8]  - Max transcript segments
  * @param {number} [options.maxDocs=6]      - Max doc passages
  * @param {number} [options.minSimilarity=0.35] - Similarity threshold for courses/docs
- * @returns {Promise<{queryEmbedding: number[]|null, semanticResults: Array, retrievedPassages: Array, expandedQueries: string[]}>}
+ * @returns {Promise<{queryEmbedding: number[]|null, semanticResults: Array, retrievedPassages: Array, expandedQueries: string[], vertexAIDocs: Object|null}>}
  */
 export async function runSearchPipeline(query, options = {}) {
   const {
@@ -42,15 +42,25 @@ export async function runSearchPipeline(query, options = {}) {
   let semanticResults = [];
   let retrievedPassages = [];
   let expandedQueries = [];
+  let vertexAIDocs = null;
 
   try {
     const embedQueryFn = httpsCallable(functions, "embedQuery");
     const expandQueryFn = httpsCallable(functions, "expandQuery");
 
-    const [embedResult, expandResult] = await Promise.allSettled([
+    const [embedResult, expandResult, vertexResult] = await Promise.allSettled([
       embedQueryFn({ query }),
       expandQueryFn({ query }),
+      searchDocsVertexAI(query, maxDocs),
     ]);
+
+    // Vertex AI docs (independent of embedding)
+    if (vertexResult.status === "fulfilled" && vertexResult.value) {
+      vertexAIDocs = vertexResult.value;
+      devLog(`[VertexAI] ${vertexAIDocs.results?.length || 0} official doc results`);
+    } else if (vertexResult.status === "rejected") {
+      devWarn("⚠️ Vertex AI docs search failed:", vertexResult.reason?.message);
+    }
 
     if (expandResult.status === "fulfilled" && expandResult.value.data?.expansions) {
       expandedQueries = expandResult.value.data.expansions;
@@ -167,5 +177,5 @@ export async function runSearchPipeline(query, options = {}) {
   }
   retrievedPassages = retrievedPassages.slice(0, maxPassages);
 
-  return { queryEmbedding, semanticResults, retrievedPassages, expandedQueries };
+  return { queryEmbedding, semanticResults, retrievedPassages, expandedQueries, vertexAIDocs };
 }
