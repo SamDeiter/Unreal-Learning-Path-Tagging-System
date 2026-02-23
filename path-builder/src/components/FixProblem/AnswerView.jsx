@@ -79,6 +79,19 @@ export default function AnswerView({
           </ol>
         </div>
       )}
+      {/* ─── Skills You'll Build (transferable only) ─── */}
+      {answer.learnPath?.objectives?.transferable?.length > 0 && (
+        <div className="answer-section answer-skills">
+          <h3>
+            <span className="section-icon">🔄</span> Skills You&apos;ll Build
+          </h3>
+          <ul className="skills-list">
+            {answer.learnPath.objectives.transferable.map((skill, i) => (
+              <li key={i}>{cite(skill)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* ─── If Still Broken ─── */}
       {answer.ifStillBrokenBranches?.length > 0 && (
@@ -94,20 +107,6 @@ export default function AnswerView({
               </div>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* ─── Skills You'll Build (transferable only) ─── */}
-      {answer.learnPath?.objectives?.transferable?.length > 0 && (
-        <div className="answer-section answer-skills">
-          <h3>
-            <span className="section-icon">🔄</span> Skills You&apos;ll Build
-          </h3>
-          <ul className="skills-list">
-            {answer.learnPath.objectives.transferable.map((skill, i) => (
-              <li key={i}>{cite(skill)}</li>
-            ))}
-          </ul>
         </div>
       )}
 
