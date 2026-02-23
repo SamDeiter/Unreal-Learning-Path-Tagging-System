@@ -1,365 +1,291 @@
-/* ── Vertex AI Monitor ─────────────────────────────────────────────────── */
+/* ── Vertex AI Monitor Widget ─────────────────────────────────────────── */
 
-.vai-monitor {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+.vai-widget {
+  border: 1px solid rgba(100, 140, 255, 0.12);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(25, 30, 45, 0.95), rgba(18, 22, 36, 0.95));
+  overflow: hidden;
+  margin-bottom: 1rem;
 }
 
-.vai-monitor-header {
+/* ── Header Bar (always visible) ──────────────────────────────────────── */
+
+.vai-header-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  color: #c0c8e0;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
-.vai-monitor-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #e0e4f0;
+.vai-header-bar:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.vai-monitor-title h2 {
-  margin: 0;
-  font-size: 1.3rem;
-  font-weight: 700;
-}
-
-.vai-monitor-badge {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgba(255, 200, 50, 0.12);
-  color: #f0c040;
-  border: 1px solid rgba(255, 200, 50, 0.2);
-}
-
-/* ── Panels ───────────────────────────────────────────────────────────── */
-
-.vai-panel {
-  background: linear-gradient(135deg, rgba(30, 35, 50, 0.95), rgba(20, 25, 40, 0.95));
-  border: 1px solid rgba(100, 140, 255, 0.15);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 1rem;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-
-.vai-panel h3 {
+.vai-header-left {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 14px;
-  font-size: 1rem;
+}
+
+.vai-header-title {
   font-weight: 600;
-  color: #c0c8e0;
-}
-
-.vai-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.vai-panel-header h3 {
-  margin: 0;
-}
-
-/* ── Health Grid ──────────────────────────────────────────────────────── */
-
-.vai-health-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-}
-
-.vai-health-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 16px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  text-align: center;
-}
-
-.vai-health-icon {
-  color: #8090a8;
-}
-
-.vai-health-label {
   font-size: 0.85rem;
-  font-weight: 600;
-  color: #c0c8e0;
 }
 
-.vai-health-sublabel {
-  font-size: 0.7rem;
+.vai-admin-tag {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 200, 50, 0.1);
+  color: #f0c040;
+  border: 1px solid rgba(255, 200, 50, 0.15);
+}
+
+.vai-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: #5a6880;
 }
 
-.vai-health-healthy .vai-health-icon {
-  color: #4ade80;
-}
-.vai-health-error .vai-health-icon {
-  color: #f87171;
-}
-.vai-health-checking .vai-health-icon {
-  color: #60a5fa;
-}
+/* ── Status Pills ─────────────────────────────────────────────────────── */
 
-.vai-health-healthy {
-  border-color: rgba(74, 222, 128, 0.2);
-  background: rgba(74, 222, 128, 0.05);
-}
-.vai-health-error {
-  border-color: rgba(248, 113, 113, 0.2);
-  background: rgba(248, 113, 113, 0.05);
-}
-
-/* ── Buttons ──────────────────────────────────────────────────────────── */
-
-.vai-btn {
+.vai-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border: 1px solid rgba(100, 140, 255, 0.3);
-  border-radius: 8px;
-  background: rgba(100, 140, 255, 0.1);
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+
+.vai-pill-ok {
+  background: rgba(74, 222, 128, 0.1);
+  color: #4ade80;
+}
+.vai-pill-err {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+}
+.vai-pill-checking {
+  background: rgba(96, 165, 250, 0.1);
+  color: #60a5fa;
+}
+.vai-pill-ms {
+  opacity: 0.6;
+  margin-left: 2px;
+}
+
+.vai-inline-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(100, 140, 255, 0.2);
+  background: rgba(100, 140, 255, 0.06);
   color: #8aa8ff;
-  font-size: 0.85rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.vai-btn:hover {
-  background: rgba(100, 140, 255, 0.2);
-}
-.vai-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.vai-btn-sm {
-  padding: 6px 12px;
-  font-size: 0.8rem;
+.vai-inline-check:hover {
+  background: rgba(100, 140, 255, 0.12);
 }
 
 .vai-spin {
-  animation: vai-rotate 1s linear infinite;
+  animation: vai-r 1s linear infinite;
 }
-@keyframes vai-rotate {
+@keyframes vai-r {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* ── Search Form ──────────────────────────────────────────────────────── */
+/* ── Detail Panel ─────────────────────────────────────────────────────── */
 
-.vai-search-form {
-  display: flex;
-  gap: 8px;
+.vai-detail {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 16px 14px;
+}
+
+.vai-detail-row {
   margin-bottom: 10px;
 }
 
-.vai-search-input {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.3);
-  color: #e0e4f0;
-  font-size: 0.9rem;
-  outline: none;
-  transition: border-color 0.2s;
+.vai-detail-row:last-child {
+  margin-bottom: 0;
 }
 
-.vai-search-input:focus {
-  border-color: rgba(100, 140, 255, 0.4);
-}
-
-.vai-quick-queries {
+.vai-detail-stats {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.vai-quick-btn {
-  padding: 4px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.03);
-  color: #8090a8;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.vai-quick-btn:hover {
-  background: rgba(100, 140, 255, 0.08);
-  color: #a0b4e0;
-  border-color: rgba(100, 140, 255, 0.2);
-}
-
-.vai-latency-badge {
-  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  color: #8aa8ff;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgba(100, 140, 255, 0.08);
-  margin-bottom: 12px;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
-/* ── Search Results ───────────────────────────────────────────────────── */
-
-.vai-search-results {
-  margin-top: 12px;
+.vai-stat {
+  display: flex;
+  flex-direction: column;
+}
+.vai-stat-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4a5568;
+}
+.vai-stat-val {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #c0c8e0;
+}
+.vai-c-healthy {
+  color: #4ade80;
+}
+.vai-c-error {
+  color: #f87171;
+}
+.vai-c-checking {
+  color: #60a5fa;
 }
 
-.vai-summary-preview {
-  padding: 12px 14px;
-  border-radius: 8px;
-  background: rgba(160, 100, 255, 0.06);
-  border: 1px solid rgba(160, 100, 255, 0.15);
-  margin-bottom: 10px;
-}
-
-.vai-summary-label {
+.vai-btn-sm {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #a78bfa;
-  margin-bottom: 6px;
-}
-
-.vai-summary-preview p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #c0c8e0;
-  line-height: 1.5;
-}
-
-.vai-results-count {
-  font-size: 0.75rem;
-  color: #5a6880;
-  margin-bottom: 8px;
-}
-
-.vai-result-row {
-  padding: 8px 12px;
+  padding: 4px 10px;
+  border: 1px solid rgba(100, 140, 255, 0.2);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  margin-bottom: 4px;
-}
-
-.vai-result-row a {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 500;
+  background: rgba(100, 140, 255, 0.06);
   color: #8aa8ff;
-  text-decoration: none;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
-.vai-result-row a:hover {
-  text-decoration: underline;
+.vai-btn-sm:hover {
+  background: rgba(100, 140, 255, 0.14);
+}
+.vai-btn-sm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-.vai-result-url {
-  display: block;
-  font-size: 0.7rem;
-  color: #4a5568;
-  margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* ── Error Box ────────────────────────────────────────────────────────── */
-
-.vai-error-box {
+.vai-err-line {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: rgba(248, 113, 113, 0.08);
-  border: 1px solid rgba(248, 113, 113, 0.2);
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.72rem;
   color: #f87171;
-  font-size: 0.82rem;
 }
 
-/* ── Activity Log ─────────────────────────────────────────────────────── */
+/* ── Search ───────────────────────────────────────────────────────────── */
 
-.vai-log-list {
-  max-height: 200px;
-  overflow-y: auto;
-  font-family: "Fira Code", "JetBrains Mono", monospace;
-  font-size: 0.75rem;
-}
-
-.vai-log-empty {
-  padding: 12px 0;
-  color: #4a5568;
-  text-align: center;
-  font-style: italic;
-}
-
-.vai-log-entry {
+.vai-search-row {
   display: flex;
-  gap: 8px;
-  padding: 4px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  align-items: baseline;
+  align-items: center;
+  gap: 6px;
+  color: #5a6880;
 }
 
-.vai-log-time {
-  color: #4a5568;
-  min-width: 70px;
+.vai-search-inp {
+  flex: 1;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  color: #e0e4f0;
+  font-size: 0.78rem;
+  outline: none;
 }
-.vai-log-type {
-  min-width: 58px;
-  font-weight: 600;
-  text-transform: uppercase;
+
+.vai-search-inp:focus {
+  border-color: rgba(100, 140, 255, 0.3);
+}
+
+.vai-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.vai-chip {
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.02);
+  color: #6a7890;
+  font-size: 0.65rem;
+  cursor: pointer;
+}
+
+.vai-chip:hover {
+  background: rgba(100, 140, 255, 0.06);
+  color: #8aa8ff;
+}
+
+.vai-search-out {
+  margin-top: 8px;
+}
+.vai-latency {
+  font-size: 0.65rem;
+  color: #5a6880;
+}
+.vai-summary {
+  font-size: 0.78rem;
+  color: #b0b8d0;
+  margin: 4px 0 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.vai-res-count {
+  font-size: 0.65rem;
+  color: #4a5568;
+}
+
+/* ── Log ──────────────────────────────────────────────────────────────── */
+
+.vai-log-box {
+  max-height: 100px;
+  overflow-y: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  margin-top: 8px;
+  padding-top: 6px;
+  font-family: "Fira Code", monospace;
   font-size: 0.65rem;
 }
-.vai-log-msg {
-  color: #8090a8;
-  flex: 1;
-}
-.vai-log-details {
-  color: #4a5568;
-  font-size: 0.7rem;
+
+.vai-log {
+  display: flex;
+  gap: 6px;
+  padding: 1px 0;
 }
 
-.vai-log-info .vai-log-type {
-  color: #60a5fa;
+.vai-log-t {
+  color: #3a4558;
+  min-width: 55px;
 }
-.vai-log-success .vai-log-type {
+.vai-log-m {
+  color: #6a7890;
+}
+.vai-log-success .vai-log-m {
   color: #4ade80;
 }
-.vai-log-warning .vai-log-type {
-  color: #fbbf24;
-}
-.vai-log-error .vai-log-type {
+.vai-log-error .vai-log-m {
   color: #f87171;
+}
+.vai-log-warning .vai-log-m {
+  color: #fbbf24;
 }

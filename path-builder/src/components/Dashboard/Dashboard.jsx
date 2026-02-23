@@ -500,9 +500,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* 🔍 Vertex AI Search Monitor */}
-      <VertexAIMonitor />
-
       {/* All Courses Table */}
       <div className="section-card">
         <h3>
@@ -631,6 +628,9 @@ function Dashboard() {
           )}
         </p>
       </div>
+
+      {/* 🔍 Vertex AI Search Monitor */}
+      <VertexAIMonitor />
     </div>
   );
 }

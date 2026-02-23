@@ -1,8 +1,6 @@
 /**
- * VertexAIMonitor — Admin monitoring dashboard for Vertex AI Search integration.
- *
- * Shows: connection health, live search testing, latency metrics, and error logs.
- * Accessible via a debug route or admin panel.
+ * VertexAIMonitor — Compact monitoring widget for Vertex AI Search.
+ * Shows inline health status; full details (live search, logs) expand on click.
  */
 import { useState, useCallback, useRef } from "react";
 import { searchDocsVertexAI } from "../../services/docsSearchService";
@@ -14,22 +12,23 @@ import {
   Search,
   RefreshCw,
   AlertTriangle,
-  Zap,
-  BookOpen,
+  ChevronDown,
+  ChevronUp,
   Sparkles,
 } from "lucide-react";
 import "./VertexAIMonitor.css";
 
 const TEST_QUERIES = [
-  "Lumen global illumination setup",
+  "Lumen global illumination",
   "Nanite virtual geometry",
   "Blueprint compile error",
-  "Niagara particle system",
-  "World Partition streaming",
+  "Niagara particles",
+  "World Partition",
 ];
 
 export default function VertexAIMonitor() {
-  const [healthStatus, setHealthStatus] = useState(null); // null | 'checking' | 'healthy' | 'error'
+  const [expanded, setExpanded] = useState(false);
+  const [healthStatus, setHealthStatus] = useState(null);
   const [healthLatency, setHealthLatency] = useState(null);
   const [healthError, setHealthError] = useState(null);
   const [searchResults, setSearchResults] = useState(null);
@@ -39,252 +38,215 @@ export default function VertexAIMonitor() {
   const [logs, setLogs] = useState([]);
   const logIdRef = useRef(0);
 
-  const addLog = useCallback((type, message, details = null) => {
+  const addLog = useCallback((type, message) => {
     setLogs((prev) => [
       {
         id: logIdRef.current++,
-        timestamp: new Date().toISOString().split("T")[1].split(".")[0],
+        time: new Date().toISOString().split("T")[1].split(".")[0],
         type,
         message,
-        details,
       },
-      ...prev.slice(0, 49), // Keep last 50 logs
+      ...prev.slice(0, 19),
     ]);
   }, []);
 
-  // ── Health Check ─────────────────────────────────────────────────────────
   const runHealthCheck = useCallback(async () => {
     setHealthStatus("checking");
     setHealthError(null);
-    addLog("info", "Starting health check...");
-
+    addLog("info", "Health check…");
     const start = performance.now();
     try {
-      const result = await searchDocsVertexAI("Unreal Engine 5 overview", 1);
-      const elapsed = Math.round(performance.now() - start);
-      setHealthLatency(elapsed);
-
+      const result = await searchDocsVertexAI("Unreal Engine 5", 1);
+      const ms = Math.round(performance.now() - start);
+      setHealthLatency(ms);
       if (result.results?.length > 0 || result.summary) {
         setHealthStatus("healthy");
-        addLog("success", `Health check passed (${elapsed}ms)`, {
-          results: result.results?.length || 0,
-          hasSummary: !!result.summary,
-        });
+        addLog("success", `Passed (${ms}ms, ${result.results?.length || 0} results)`);
       } else {
         setHealthStatus("error");
-        setHealthError("No results returned — data store may not be indexed yet");
-        addLog("warning", `Health check: no results (${elapsed}ms)`);
+        setHealthError("No results — data store may still be indexing");
+        addLog("warning", `No results (${ms}ms)`);
       }
     } catch (err) {
-      const elapsed = Math.round(performance.now() - start);
-      setHealthLatency(elapsed);
+      setHealthLatency(Math.round(performance.now() - start));
       setHealthStatus("error");
       setHealthError(err.message);
-      addLog("error", `Health check failed (${elapsed}ms): ${err.message}`);
+      addLog("error", err.message);
     }
   }, [addLog]);
 
-  // ── Live Search Test ─────────────────────────────────────────────────────
-  const runSearch = useCallback(
-    async (query) => {
-      if (!query?.trim()) return;
-      setIsSearching(true);
-      setSearchResults(null);
-      addLog("info", `Searching: "${query}"`);
-
-      const start = performance.now();
-      try {
-        const result = await searchDocsVertexAI(query, 5);
-        const elapsed = Math.round(performance.now() - start);
-        setSearchLatency(elapsed);
-        setSearchResults(result);
-        addLog("success", `Search returned ${result.results?.length || 0} results (${elapsed}ms)`, {
-          hasSummary: !!result.summary,
-          references: result.references?.length || 0,
-        });
-      } catch (err) {
-        const elapsed = Math.round(performance.now() - start);
-        setSearchLatency(elapsed);
-        addLog("error", `Search failed (${elapsed}ms): ${err.message}`);
-      } finally {
-        setIsSearching(false);
-      }
-    },
-    [addLog]
-  );
-
-  const handleSearchSubmit = useCallback(
-    (e) => {
-      e.preventDefault();
-      runSearch(searchQuery);
-    },
-    [searchQuery, runSearch]
-  );
+  const runSearch = useCallback(async (q) => {
+    if (!q?.trim()) return;
+    setIsSearching(true);
+    setSearchResults(null);
+    const start = performance.now();
+    try {
+      const result = await searchDocsVertexAI(q, 5);
+      setSearchLatency(Math.round(performance.now() - start));
+      setSearchResults(result);
+    } catch {
+      /* swallow */
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
 
   return (
-    <div className="vai-monitor">
-      <div className="vai-monitor-header">
-        <div className="vai-monitor-title">
-          <Activity size={20} />
-          <h2>Vertex AI Search Monitor</h2>
-        </div>
-        <span className="vai-monitor-badge">Admin Tool</span>
-      </div>
-
-      {/* ── Health Check Panel ─────────────────────────────────────────── */}
-      <div className="vai-panel">
-        <div className="vai-panel-header">
-          <h3>
-            <Zap size={16} /> Connection Health
-          </h3>
-          <button
-            className="vai-btn vai-btn-sm"
-            onClick={runHealthCheck}
-            disabled={healthStatus === "checking"}
-          >
-            <RefreshCw size={14} className={healthStatus === "checking" ? "vai-spin" : ""} />
-            {healthStatus === "checking" ? "Checking…" : "Run Health Check"}
-          </button>
+    <div className="vai-widget">
+      {/* ── Compact header bar (always visible) ────────────────────── */}
+      <button className="vai-header-bar" onClick={() => setExpanded(!expanded)}>
+        <div className="vai-header-left">
+          <Activity size={15} />
+          <span className="vai-header-title">Vertex AI Search</span>
+          <span className="vai-admin-tag">ADMIN</span>
         </div>
 
-        <div className="vai-health-grid">
-          <div className={`vai-health-card vai-health-${healthStatus || "unknown"}`}>
-            <div className="vai-health-icon">
-              {healthStatus === "healthy" && <CheckCircle2 size={28} />}
-              {healthStatus === "error" && <XCircle size={28} />}
-              {healthStatus === "checking" && <RefreshCw size={28} className="vai-spin" />}
-              {!healthStatus && <Activity size={28} />}
-            </div>
-            <div className="vai-health-label">
-              {healthStatus === "healthy" && "Connected & Serving"}
-              {healthStatus === "error" && "Error"}
-              {healthStatus === "checking" && "Checking…"}
-              {!healthStatus && "Not Checked"}
-            </div>
-          </div>
-
-          <div className="vai-health-card">
-            <div className="vai-health-icon">
-              <Clock size={28} />
-            </div>
-            <div className="vai-health-label">{healthLatency ? `${healthLatency}ms` : "—"}</div>
-            <div className="vai-health-sublabel">Latency</div>
-          </div>
-
-          <div className="vai-health-card">
-            <div className="vai-health-icon">
-              <BookOpen size={28} />
-            </div>
-            <div className="vai-health-label">ue5-docs-datastore</div>
-            <div className="vai-health-sublabel">Data Store</div>
-          </div>
-
-          <div className="vai-health-card">
-            <div className="vai-health-icon">
-              <Sparkles size={28} />
-            </div>
-            <div className="vai-health-label">development-317819</div>
-            <div className="vai-health-sublabel">GCP Project</div>
-          </div>
-        </div>
-
-        {healthError && (
-          <div className="vai-error-box">
-            <AlertTriangle size={14} /> {healthError}
-          </div>
-        )}
-      </div>
-
-      {/* ── Live Search Test ───────────────────────────────────────────── */}
-      <div className="vai-panel">
-        <h3>
-          <Search size={16} /> Live Search Test
-        </h3>
-
-        <form className="vai-search-form" onSubmit={handleSearchSubmit}>
-          <input
-            className="vai-search-input"
-            type="text"
-            placeholder="Test a UE5 query…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button className="vai-btn" type="submit" disabled={isSearching}>
-            {isSearching ? "Searching…" : "Search"}
-          </button>
-        </form>
-
-        <div className="vai-quick-queries">
-          {TEST_QUERIES.map((q) => (
+        <div className="vai-header-right">
+          {healthStatus === "healthy" && (
+            <span className="vai-status-pill vai-pill-ok">
+              <CheckCircle2 size={12} /> Connected
+              {healthLatency && <span className="vai-pill-ms">{healthLatency}ms</span>}
+            </span>
+          )}
+          {healthStatus === "error" && (
+            <span className="vai-status-pill vai-pill-err">
+              <XCircle size={12} /> Error
+            </span>
+          )}
+          {healthStatus === "checking" && (
+            <span className="vai-status-pill vai-pill-checking">
+              <RefreshCw size={12} className="vai-spin" /> Checking
+            </span>
+          )}
+          {!healthStatus && (
             <button
-              key={q}
-              className="vai-quick-btn"
-              onClick={() => {
-                setSearchQuery(q);
-                runSearch(q);
+              className="vai-inline-check"
+              onClick={(e) => {
+                e.stopPropagation();
+                runHealthCheck();
               }}
             >
-              {q}
+              <RefreshCw size={12} /> Check
             </button>
-          ))}
+          )}
+          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </div>
+      </button>
 
-        {searchLatency && (
-          <div className="vai-latency-badge">
-            <Clock size={12} /> Response time: {searchLatency}ms
-          </div>
-        )}
-
-        {searchResults && (
-          <div className="vai-search-results">
-            {searchResults.summary && (
-              <div className="vai-summary-preview">
-                <div className="vai-summary-label">
-                  <Sparkles size={12} /> AI Summary
-                </div>
-                <p>{searchResults.summary}</p>
+      {/* ── Expandable detail panel ────────────────────────────────── */}
+      {expanded && (
+        <div className="vai-detail">
+          {/* Health row */}
+          <div className="vai-detail-row">
+            <div className="vai-detail-stats">
+              <div className="vai-stat">
+                <span className="vai-stat-label">Status</span>
+                <span className={`vai-stat-val vai-c-${healthStatus || "unknown"}`}>
+                  {healthStatus === "healthy"
+                    ? "Connected"
+                    : healthStatus === "error"
+                      ? "Error"
+                      : healthStatus === "checking"
+                        ? "Checking…"
+                        : "—"}
+                </span>
+              </div>
+              <div className="vai-stat">
+                <span className="vai-stat-label">Latency</span>
+                <span className="vai-stat-val">{healthLatency ? `${healthLatency}ms` : "—"}</span>
+              </div>
+              <div className="vai-stat">
+                <span className="vai-stat-label">Data Store</span>
+                <span className="vai-stat-val">ue5-docs-datastore</span>
+              </div>
+              <div className="vai-stat">
+                <span className="vai-stat-label">Project</span>
+                <span className="vai-stat-val">development-317819</span>
+              </div>
+              <button
+                className="vai-btn-sm"
+                onClick={runHealthCheck}
+                disabled={healthStatus === "checking"}
+              >
+                <RefreshCw size={12} className={healthStatus === "checking" ? "vai-spin" : ""} />
+                Health Check
+              </button>
+            </div>
+            {healthError && (
+              <div className="vai-err-line">
+                <AlertTriangle size={12} /> {healthError}
               </div>
             )}
-
-            <div className="vai-results-count">
-              {searchResults.results?.length || 0} results
-              {searchResults.references?.length > 0 &&
-                `, ${searchResults.references.length} references`}
-            </div>
-
-            {searchResults.results?.map((r, i) => (
-              <div key={i} className="vai-result-row">
-                <a href={r.url} target="_blank" rel="noopener noreferrer">
-                  {r.title || "Untitled"}
-                </a>
-                <span className="vai-result-url">{r.url}</span>
-              </div>
-            ))}
           </div>
-        )}
-      </div>
 
-      {/* ── Activity Log ──────────────────────────────────────────────── */}
-      <div className="vai-panel">
-        <h3>
-          <Activity size={16} /> Activity Log
-        </h3>
-        <div className="vai-log-list">
-          {logs.length === 0 && (
-            <div className="vai-log-empty">No activity yet. Run a health check to start.</div>
-          )}
-          {logs.map((log) => (
-            <div key={log.id} className={`vai-log-entry vai-log-${log.type}`}>
-              <span className="vai-log-time">{log.timestamp}</span>
-              <span className="vai-log-type">{log.type.toUpperCase()}</span>
-              <span className="vai-log-msg">{log.message}</span>
-              {log.details && (
-                <span className="vai-log-details">{JSON.stringify(log.details)}</span>
-              )}
+          {/* Search test */}
+          <div className="vai-detail-row">
+            <form
+              className="vai-search-row"
+              onSubmit={(e) => {
+                e.preventDefault();
+                runSearch(searchQuery);
+              }}
+            >
+              <Search size={14} />
+              <input
+                className="vai-search-inp"
+                placeholder="Test a query…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button className="vai-btn-sm" type="submit" disabled={isSearching}>
+                {isSearching ? "…" : "Go"}
+              </button>
+            </form>
+            <div className="vai-chips">
+              {TEST_QUERIES.map((q) => (
+                <button
+                  key={q}
+                  className="vai-chip"
+                  onClick={() => {
+                    setSearchQuery(q);
+                    runSearch(q);
+                  }}
+                >
+                  {q}
+                </button>
+              ))}
             </div>
-          ))}
+            {searchResults && (
+              <div className="vai-search-out">
+                {searchLatency && (
+                  <span className="vai-latency">
+                    <Clock size={10} /> {searchLatency}ms
+                  </span>
+                )}
+                {searchResults.summary && (
+                  <p className="vai-summary">
+                    <Sparkles size={10} /> {searchResults.summary}
+                  </p>
+                )}
+                <span className="vai-res-count">
+                  {searchResults.results?.length || 0} results
+                  {searchResults.references?.length > 0 &&
+                    `, ${searchResults.references.length} refs`}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Log */}
+          {logs.length > 0 && (
+            <div className="vai-log-box">
+              {logs.map((l) => (
+                <div key={l.id} className={`vai-log vai-log-${l.type}`}>
+                  <span className="vai-log-t">{l.time}</span>
+                  <span className="vai-log-m">{l.message}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
