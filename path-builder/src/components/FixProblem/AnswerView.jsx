@@ -30,6 +30,20 @@ export default function AnswerView({
 
   return (
     <div className="answer-view">
+      {/* ─── Skills You'll Build (transferable only) ─── */}
+      {answer.learnPath?.objectives?.transferable?.length > 0 && (
+        <div className="answer-section answer-skills">
+          <h3>
+            <span className="section-icon">🔄</span> Skills You&apos;ll Build
+          </h3>
+          <ul className="skills-list">
+            {answer.learnPath.objectives.transferable.map((skill, i) => (
+              <li key={i}>{cite(skill)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* ─── Header ─── */}
       <div className="answer-header">
         <h2 className="answer-title">
@@ -77,19 +91,6 @@ export default function AnswerView({
               <li key={i}>{cite(step)}</li>
             ))}
           </ol>
-        </div>
-      )}
-      {/* ─── Skills You'll Build (transferable only) ─── */}
-      {answer.learnPath?.objectives?.transferable?.length > 0 && (
-        <div className="answer-section answer-skills">
-          <h3>
-            <span className="section-icon">🔄</span> Skills You&apos;ll Build
-          </h3>
-          <ul className="skills-list">
-            {answer.learnPath.objectives.transferable.map((skill, i) => (
-              <li key={i}>{cite(skill)}</li>
-            ))}
-          </ul>
         </div>
       )}
 
