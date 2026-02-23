@@ -46,6 +46,7 @@ const SkillGapAnalysis = lazy(() => import("./components/Visualizations/SkillGap
 const ConfidenceAnalytics = lazy(() => import("./components/Visualizations/ConfidenceAnalytics"));
 const TagHistorySparkline = lazy(() => import("./components/Visualizations/TagHistorySparkline"));
 const InviteManager = lazy(() => import("./components/InviteManager/InviteManager"));
+const VertexAIMonitor = lazy(() => import("./components/VertexAIMonitor/VertexAIMonitor"));
 
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -292,6 +293,14 @@ function App() {
                       )}
                     </button>
                   )}
+                  {userIsAdmin && (
+                    <button
+                      className={`nav-tab ${activeTab === "vertex-monitor" ? "active" : ""}`}
+                      onClick={() => setActiveTab("vertex-monitor")}
+                    >
+                      🔍 Search Monitor
+                    </button>
+                  )}
                 </nav>
               </div>
               <div className="header-right">
@@ -383,6 +392,11 @@ function App() {
                 {activeTab === "problem" && (
                   <div className="dashboard-layout">
                     <ProblemFirst />
+                  </div>
+                )}
+                {activeTab === "vertex-monitor" && userIsAdmin && (
+                  <div className="dashboard-layout">
+                    <VertexAIMonitor />
                   </div>
                 )}
                 {activeTab === "analytics" && (
