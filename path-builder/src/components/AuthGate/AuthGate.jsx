@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  signInWithGoogle,
-  signOutUser,
-  onAuthChange,
-} from "../../services/googleAuthService";
+import { signInWithGoogle, signOutUser, onAuthChange } from "../../services/googleAuthService";
 import {
   isAuthorized,
   isEpicEmployee,
@@ -22,7 +18,7 @@ import "./AuthGate.css";
  *   2. Firestore allowlist (via invite codes)
  *   3. Everyone else → access denied
  */
-export default function AuthGate({ children }) {
+function AuthGate({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
@@ -235,9 +231,16 @@ export default function AuthGate({ children }) {
   }
 
   // ── Authorized — render app (user bar is in App header) ──
-  return (
-    <div className="auth-gate-authorized">
-      {children}
-    </div>
-  );
+  return <div className="auth-gate-authorized">{children}</div>;
+}
+
+/**
+ * Wrapper — returns children directly (bypassing auth) when running E2E tests.
+ * In production builds VITE_E2E_BYPASS is never set, so AuthGate runs normally.
+ */
+export default function AuthGateWrapper({ children }) {
+  if (import.meta.env.VITE_E2E_BYPASS === "true") {
+    return <div className="auth-gate-authorized">{children}</div>;
+  }
+  return <AuthGate>{children}</AuthGate>;
 }
