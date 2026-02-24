@@ -1,0 +1,166 @@
+{
+  "course_code": "201.04",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:32",
+      "title": "Material Instance Parameter Overrides",
+      "concept": "Material Functions encapsulate shader logic, but Material Instances provide the mechanism for overriding parameters *without* recompiling the base material. This allows for non-destructive, artist-friendly iteration on material properties.",
+      "diagram_suggestion": "A diagram showing a Material Function connected to a Master Material, which then feeds into multiple Material Instances, each with different parameter overrides."
+    },
+    {
+      "insert_after_timestamp": "2:55",
+      "title": "Light Function Materials and Shadow Casting",
+      "concept": "Light Function Materials modulate the light emitted from a light source. By setting the material domain to 'Light Function', you're leveraging the Deferred Rendering pipeline to apply material properties to the light's contribution to the scene. Shadow casting is then controlled by the material's properties.",
+      "diagram_suggestion": "A diagram illustrating the Deferred Rendering pipeline, highlighting where the Light Function Material is applied to the light buffer."
+    },
+    {
+      "insert_after_timestamp": "4:32",
+      "title": "Dynamic Lighting and Light Functions",
+      "concept": "Dynamic lights in Unreal Engine 5 calculate their lighting contribution every frame. Applying a Light Function Material to a dynamic light allows for real-time modulation of the light's appearance, enabling effects like animated shadows or projected textures.",
+      "diagram_suggestion": "A flow chart showing how dynamic lights are calculated per frame and how the light function material modifies the final light output."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:45",
+      "procedural_step": "Reusing material functionality",
+      "why": "Reduces shader complexity and compile times across the project. Without material functions, identical shader code would be duplicated, increasing memory footprint and potentially exceeding shader instruction limits.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:22",
+      "procedural_step": "Using function inputs",
+      "why": "Exposes customizable parameters within the material function, allowing artists to tweak the effect without needing to modify the underlying shader code. This promotes iteration and avoids unnecessary material recompiles.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:50",
+      "procedural_step": "Changing material domain to light function",
+      "why": "Restricts the material's output to only affect the light's emissive properties. This is because light functions operate on the light's contribution to the scene, not directly on surface properties.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:58",
+      "procedural_step": "Connecting texture to emissive",
+      "why": "Modulates the light's color and intensity based on the texture's values. This creates the caustic effect by projecting the texture's pattern through the light.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:32",
+      "procedural_step": "Plugging material into light function",
+      "why": "Applies the material's effect to the light's contribution to the scene. The material's emissive output is used to modulate the light's color and intensity, creating the desired visual effect.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:17",
+      "prompt": "Why is it more efficient to use a Material Function than copy-pasting the same node network into multiple materials?",
+      "expected_insight": "Material Functions are compiled once and referenced, reducing shader complexity and compile times. Copy-pasting duplicates the code, increasing memory footprint and compile times."
+    },
+    {
+      "insert_after_timestamp": "2:03",
+      "prompt": "How does the sorting priority of function inputs affect the user experience when editing a Material Instance?",
+      "expected_insight": "Sorting priority controls the order in which parameters appear in the Material Instance editor, allowing for a more intuitive and organized workflow."
+    },
+    {
+      "insert_after_timestamp": "3:33",
+      "prompt": "Why is it necessary to change the Material Domain to 'Light Function' when creating a caustic effect?",
+      "expected_insight": "The 'Light Function' domain restricts the material's output to only affect the light's emissive properties, ensuring that the caustic effect is applied correctly to the light's contribution to the scene."
+    },
+    {
+      "insert_after_timestamp": "4:08",
+      "prompt": "What are the performance implications of using complex Material Functions within Light Functions, especially with dynamic lights?",
+      "expected_insight": "Complex Material Functions can increase the cost of lighting calculations, especially with dynamic lights that are calculated every frame. Optimizing the material function is crucial to maintain performance."
+    },
+    {
+      "insert_after_timestamp": "4:48",
+      "prompt": "How do Master Materials and Material Instances work together to allow for efficient material variations?",
+      "expected_insight": "Master Materials define the base material properties, while Material Instances allow for overriding specific parameters without recompiling the base material, enabling efficient creation of material variations."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine 5 material editor interface.",
+    "Familiarity with common material nodes (e.g., Texture Sample, Scalar Parameter, Multiply).",
+    "Knowledge of the difference between Master Materials and Material Instances.",
+    "Understanding of the Deferred Rendering pipeline in Unreal Engine 5."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary benefit of using Material Functions in Unreal Engine 5?",
+      "options": [
+        "Reducing shader complexity and improving reusability.",
+        "Increasing the number of draw calls for more detailed rendering.",
+        "Automatically generating LODs for materials.",
+        "Enabling real-time ray tracing in the material editor."
+      ],
+      "correct_index": 0,
+      "explanation": "Material Functions encapsulate shader logic, promoting reusability and reducing overall shader complexity across the project. This reduces compile times and memory footprint."
+    },
+    {
+      "question": "How do Material Instances relate to Master Materials and Material Functions?",
+      "options": [
+        "Material Instances allow overriding parameters defined in Master Materials that use Material Functions.",
+        "Material Instances are used to create Material Functions.",
+        "Master Materials are instances of Material Functions.",
+        "Material Functions are instances of Master Materials."
+      ],
+      "correct_index": 0,
+      "explanation": "Material Instances provide a non-destructive way to modify parameters exposed by a Master Material, which may incorporate Material Functions for complex shader logic."
+    },
+    {
+      "question": "What is the purpose of setting the Material Domain to 'Light Function'?",
+      "options": [
+        "To restrict the material's output to only affect the light's emissive properties.",
+        "To enable the material to cast shadows.",
+        "To optimize the material for mobile devices.",
+        "To allow the material to interact with global illumination."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'Light Function' domain limits the material's effect to modulating the light's color and intensity, which is essential for creating effects like caustics."
+    },
+    {
+      "question": "What is the impact of complex Material Functions on dynamic lighting performance?",
+      "options": [
+        "It can increase the cost of lighting calculations, especially with dynamic lights.",
+        "It has no impact on lighting performance.",
+        "It improves lighting performance by caching shader results.",
+        "It only affects static lighting."
+      ],
+      "correct_index": 0,
+      "explanation": "Complex Material Functions increase the computational load for dynamic lights, as their lighting contribution is calculated every frame. Optimization is crucial."
+    },
+    {
+      "question": "Why is it important to consider the sorting priority of function inputs?",
+      "options": [
+        "It controls the order in which parameters appear in the Material Instance editor.",
+        "It determines the order in which nodes are executed in the material graph.",
+        "It affects the compile time of the material.",
+        "It optimizes the material for specific hardware."
+      ],
+      "correct_index": 0,
+      "explanation": "Sorting priority allows for a more organized and intuitive user experience when artists are tweaking parameters in Material Instances."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

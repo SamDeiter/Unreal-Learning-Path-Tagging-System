@@ -1,0 +1,189 @@
+{
+  "course_code": "103.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "2:27",
+      "title": "Lumen Global Illumination",
+      "concept": "Lumen is Unreal Engine 5's fully dynamic global illumination and reflections system. It reacts to scene and light changes in real-time, eliminating the need for precomputed lighting in many scenarios.",
+      "diagram_suggestion": "A diagram illustrating the ray tracing process of Lumen, showing primary rays, global illumination rays, and reflections, highlighting the dynamic nature of the system."
+    },
+    {
+      "insert_after_timestamp": "3:39",
+      "title": "Sky Light and Indirect Lighting",
+      "concept": "Sky Lights capture the overall scene lighting and contribute to indirect lighting by generating a cubemap. This cubemap is used to simulate ambient lighting and subtle color bleeding, enhancing the realism of the scene.",
+      "diagram_suggestion": "A diagram showing how the Sky Light captures scene information and generates a cubemap, illustrating its contribution to global illumination."
+    },
+    {
+      "insert_after_timestamp": "4:43",
+      "title": "Static vs. Dynamic Lighting",
+      "concept": "Unreal Engine 5 offers different lighting mobility options: Static, Stationary, and Movable. Static lighting is precomputed, offering the best performance but no runtime changes. Movable lighting is fully dynamic, enabling real-time changes but at a higher performance cost. Stationary is a hybrid.",
+      "diagram_suggestion": "A comparison chart showing the trade-offs between Static, Stationary, and Movable lighting in terms of performance, memory usage, and dynamic capabilities."
+    },
+    {
+      "insert_after_timestamp": "7:17",
+      "title": "Inverse Square Falloff",
+      "concept": "Light intensity decreases with the square of the distance from the light source. This is the 'inverse square falloff'. It means light is much brighter closer to the source and rapidly diminishes with distance, creating realistic lighting gradients.",
+      "diagram_suggestion": "A graph illustrating the inverse square law, showing how light intensity decreases exponentially with distance from the source."
+    },
+    {
+      "insert_after_timestamp": "7:49",
+      "title": "IES Profiles",
+      "concept": "IES profiles are data files that describe the distribution of light emitted from a real-world light fixture. Using IES profiles in Unreal Engine 5 allows you to accurately replicate the light distribution of specific light sources, adding realism to your scenes.",
+      "diagram_suggestion": "A visual representation of an IES profile, showing the light distribution pattern and how it affects the scene lighting."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "2:31",
+      "procedural_step": "Directional Light acts like a sun.",
+      "why": "Directional Lights simulate sunlight because their parallel rays mimic a distant, powerful light source. This impacts shadow sharpness and overall scene illumination, influencing the mood and realism of the environment.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:33",
+      "procedural_step": "Sky Light generates a cube map.",
+      "why": "Sky Lights generate cubemaps to efficiently capture ambient lighting from the environment. This affects the indirect lighting and color bleeding in the scene, contributing to a more realistic and immersive visual experience.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:29",
+      "procedural_step": "Static Lighting needs to be baked.",
+      "why": "Static lighting requires pre-computation because its immobility prevents real-time updates. This pre-calculation reduces runtime performance costs but limits dynamic lighting changes, impacting interactivity.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:18",
+      "procedural_step": "Stationary lights become Movable when overlapping.",
+      "why": "Overlapping Stationary lights revert to Movable to maintain lighting accuracy. This negates the performance benefits of Stationary lights and increases runtime computational load, potentially impacting frame rates.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:13",
+      "procedural_step": "All lights use inverse square falloff.",
+      "why": "Inverse square falloff dictates how light intensity diminishes with distance. This affects the perceived brightness and realism of the scene, influencing how objects are illuminated and how shadows are cast.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:46",
+      "procedural_step": "Adjusting indirect lighting intensity.",
+      "why": "Modifying indirect lighting intensity directly influences the strength of bounced light. This affects the overall scene brightness and the visibility of details in shadowed areas, impacting the perceived realism and depth of the environment.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "12:04",
+      "procedural_step": "IES profiles control light distribution.",
+      "why": "IES profiles precisely control light distribution by mimicking real-world light fixture characteristics. This affects the shape and intensity of shadows and highlights, resulting in more accurate and visually compelling lighting scenarios.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "2:52",
+      "prompt": "Why does rotating the Directional Light affect the entire scene's lighting, unlike a Point Light?",
+      "expected_insight": "Because a Directional Light simulates a distant sun, its rotation changes the angle of incidence of light across the entire level, affecting shadows and overall illumination globally. Point Lights have local effects."
+    },
+    {
+      "insert_after_timestamp": "4:43",
+      "prompt": "How would you optimize a scene with many overlapping lights for a VR experience, given the performance implications of Movable lights?",
+      "expected_insight": "I would bake static lighting where possible, reduce the number of overlapping stationary lights, and use lightmap baking to precompute lighting for static objects, minimizing the number of dynamic lights."
+    },
+    {
+      "insert_after_timestamp": "7:54",
+      "prompt": "Why is Kelvin temperature preferred over RGB color values when simulating architectural lighting?",
+      "expected_insight": "Kelvin temperature directly correlates to real-world light bulb specifications, allowing for accurate replication of lighting conditions. RGB values are more abstract and less directly tied to physical light properties."
+    },
+    {
+      "insert_after_timestamp": "9:15",
+      "prompt": "How does the attenuation radius interact with the inverse square falloff to determine the final look of a lit object?",
+      "expected_insight": "The attenuation radius defines the maximum distance light travels, while the inverse square falloff determines how intensity decreases within that radius. A smaller radius with inverse square falloff creates a more dramatic drop-off."
+    },
+    {
+      "insert_after_timestamp": "12:20",
+      "prompt": "If IES profiles accurately represent real-world light distribution, why might I still need to adjust intensity or color temperature in Unreal Engine?",
+      "expected_insight": "While IES profiles define the shape of light, the overall intensity and color temperature might need adjustment to match the specific context of the scene, accounting for material properties and desired mood."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine 5 editor interface.",
+    "Familiarity with navigating the content browser.",
+    "Knowledge of basic scene manipulation (translation, rotation, scaling)."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to understand light mobility (Static, Stationary, Movable) in Unreal Engine 5?",
+      "options": [
+        "It determines the visual appearance of the light.",
+        "It affects the performance and memory usage of the scene.",
+        "It controls the color of the light.",
+        "It dictates the size of the light actor."
+      ],
+      "correct_index": 1,
+      "explanation": "Light mobility directly impacts performance. Static lights are pre-computed, offering the best performance, while Movable lights are dynamic but more resource-intensive. Stationary lights are a hybrid."
+    },
+    {
+      "question": "What is the primary benefit of using IES profiles in Unreal Engine 5 lighting?",
+      "options": [
+        "They automatically adjust light intensity based on the scene.",
+        "They accurately replicate the light distribution of real-world light fixtures.",
+        "They reduce the memory footprint of light actors.",
+        "They simplify the process of creating custom light shapes."
+      ],
+      "correct_index": 1,
+      "explanation": "IES profiles allow for accurate replication of real-world light distribution, enhancing the realism of the scene by mimicking the specific characteristics of light fixtures."
+    },
+    {
+      "question": "How does the inverse square law affect lighting in Unreal Engine 5?",
+      "options": [
+        "Light intensity increases linearly with distance.",
+        "Light intensity decreases linearly with distance.",
+        "Light intensity decreases exponentially with the square of the distance.",
+        "Light intensity remains constant regardless of distance."
+      ],
+      "correct_index": 2,
+      "explanation": "The inverse square law dictates that light intensity decreases exponentially with the square of the distance from the light source, creating realistic lighting gradients."
+    },
+    {
+      "question": "Why is Kelvin temperature a preferred unit for specifying light color in AEC projects?",
+      "options": [
+        "It's easier to adjust than RGB values.",
+        "It directly corresponds to real-world light bulb specifications.",
+        "It provides a wider range of color options.",
+        "It's the default unit in Unreal Engine 5."
+      ],
+      "correct_index": 1,
+      "explanation": "Kelvin temperature directly correlates to real-world light bulb specifications, allowing for accurate replication of lighting conditions based on known physical light properties."
+    },
+    {
+      "question": "What is the role of a Sky Light in Unreal Engine 5's lighting system?",
+      "options": [
+        "To cast direct shadows from the sun.",
+        "To simulate ambient lighting and contribute to indirect illumination.",
+        "To create volumetric lighting effects.",
+        "To control the color temperature of the scene."
+      ],
+      "correct_index": 1,
+      "explanation": "Sky Lights capture the overall scene lighting and contribute to indirect lighting by generating a cubemap, simulating ambient lighting and subtle color bleeding."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 3,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 3,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 3,
+    "affective_tone": 4,
+    "total": 31,
+    "grade": "D"
+  }
+}

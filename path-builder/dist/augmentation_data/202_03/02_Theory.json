@@ -1,0 +1,197 @@
+{
+  "course_code": "202.03",
+  "conceptual_score": {
+    "procedural_pct": 70,
+    "conceptual_pct": 30,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:29",
+      "title": "Editor-Only Modules",
+      "concept": "Unreal Engine distinguishes between editor modules and runtime modules. Editor modules contain classes and functions that are only available within the Unreal Editor environment. This separation prevents shipping editor-specific code in the final game build, reducing package size and potential security vulnerabilities.",
+      "diagram_suggestion": "A diagram showing the Unreal Engine architecture with clear separation between Editor Modules (e.g., EditorUtilityWidget) and Runtime Modules (e.g., GameplayAbility). Arrows indicate dependencies and data flow."
+    },
+    {
+      "insert_after_timestamp": "1:39",
+      "title": "Asset Import Pipeline",
+      "concept": "The Unreal Engine's asset import pipeline allows developers to customize how assets are brought into the engine. This includes defining custom importers that can enforce naming conventions, validate data, and automatically configure assets based on project-specific rules. Using Python scripting, you can extend the import process to automate tasks such as LOD generation, material assignment, and collision setup.",
+      "diagram_suggestion": "Flowchart illustrating the asset import pipeline: Import -> Custom Importer (Python Script) -> Validation -> Configuration -> Asset Creation."
+    },
+    {
+      "insert_after_timestamp": "3:24",
+      "title": "Construction Script Execution Context",
+      "concept": "The Construction Script executes within the Unreal Editor and during level initialization. It's crucial to understand that the Construction Script runs in a different context than the Event Graph. Heavy computations or blocking operations within the Construction Script can significantly impact editor performance and level loading times.",
+      "diagram_suggestion": "A comparison table highlighting the differences between Construction Script and Event Graph: Execution Time, Context, Use Cases, Performance Implications."
+    },
+    {
+      "insert_after_timestamp": "4:46",
+      "title": "Editor Tick vs. Game Tick",
+      "concept": "The 'Tick' event in editor tools operates differently from the game's Tick event. While both execute periodically, the editor Tick can have a more direct and immediate impact on the editor's responsiveness. Overloading the editor Tick with complex calculations can lead to editor freezes and data loss. Consider using timers or asynchronous tasks for less critical operations.",
+      "diagram_suggestion": "Two timelines, one for Game Tick and one for Editor Tick, showing the frequency and potential impact of heavy operations on each."
+    },
+    {
+      "insert_after_timestamp": "5:59",
+      "title": "Startup Actors",
+      "concept": "Startup Actors are actors that are automatically spawned when the editor starts. They are useful for initializing editor-specific systems or performing setup tasks. However, excessive use of Startup Actors can increase editor startup time. It's important to carefully manage the number and complexity of Startup Actors to maintain a responsive editor experience.",
+      "diagram_suggestion": "A sequence diagram illustrating the editor startup process, highlighting the initialization of Startup Actors and their impact on overall startup time."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:10",
+      "procedural_step": "Tools are used in the editor or as an extension.",
+      "why": "Editor tools enhance the content creation workflow, while extensions facilitate interoperability with external applications. This separation ensures that game builds remain lean and focused on runtime performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:38",
+      "procedural_step": "Some functions are unavailable at runtime.",
+      "why": "Editor-specific functions rely on modules that are stripped from the packaged game to reduce size and prevent security vulnerabilities. Attempting to use these functions at runtime will result in errors.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:20",
+      "procedural_step": "Tools enforce a specific pipeline.",
+      "why": "Enforcing a consistent pipeline reduces integration errors, improves team collaboration, and ensures that assets adhere to performance budgets. This is crucial for maintaining project stability and scalability.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:30",
+      "procedural_step": "Tools automatically monitor things or identify issues.",
+      "why": "Automated monitoring allows for early detection of errors, performance bottlenecks, and inconsistencies. This proactive approach prevents issues from escalating and reduces the cost of fixing them later in the development cycle.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:13",
+      "procedural_step": "Construction script triggers when an actor is placed.",
+      "why": "The construction script allows for dynamic setup of actors based on their environment. However, excessive calculations in the construction script can cause performance issues, especially when many actors are being placed or moved simultaneously.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:46",
+      "procedural_step": "Tick is considered dangerous.",
+      "why": "The Tick event runs every frame, so computationally expensive operations will severely impact editor performance. This can lead to editor freezes, data loss, and a frustrating user experience.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:11",
+      "prompt": "Why is automating repetitive tasks more important in large Unreal Engine projects compared to smaller ones?",
+      "expected_insight": "In larger projects, the cumulative time saved by automating repetitive tasks becomes significant. It also reduces the likelihood of human error, which can have cascading effects across the project."
+    },
+    {
+      "insert_after_timestamp": "2:16",
+      "prompt": "How can a tool ensure accuracy in asset placement that a human might struggle with?",
+      "expected_insight": "Tools can perform precise calculations and follow strict rules, ensuring consistent and accurate placement of assets based on mathematical formulas or predefined parameters. This is especially useful for complex arrangements or procedurally generated environments."
+    },
+    {
+      "insert_after_timestamp": "3:52",
+      "prompt": "Why expose functions instead of directly modifying the actor's properties in the editor?",
+      "expected_insight": "Exposing functions allows for more complex operations to be performed with a single click, encapsulating logic and preventing accidental modification of individual properties. It also provides a clear and controlled interface for interacting with the actor."
+    },
+    {
+      "insert_after_timestamp": "5:12",
+      "prompt": "Why is it more difficult to recover from a frozen editor than a frozen game?",
+      "expected_insight": "A frozen editor can lead to data loss and requires a force quit, potentially corrupting project files. A frozen game can usually be closed without affecting the underlying project data."
+    },
+    {
+      "insert_after_timestamp": "6:15",
+      "prompt": "Why are actors a common asset for making tools?",
+      "expected_insight": "Actors provide a container for components and logic, allowing for the creation of reusable and modular tools. They can be easily placed in the world and interacted with through the editor interface."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:13",
+      "warning": "Heavy calculations in Construction Scripts can lead to editor slowdowns.",
+      "severity": "MEDIUM",
+      "fix": "Defer complex calculations to a separate function triggered by a button or timer. Use asynchronous tasks for non-critical operations."
+    },
+    {
+      "timestamp": "4:46",
+      "warning": "Overusing Tick in editor tools can cause editor freezes.",
+      "severity": "HIGH",
+      "fix": "Minimize the amount of work done in the Tick event. Use timers or asynchronous tasks for less critical operations. Profile the editor to identify performance bottlenecks."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic Blueprint scripting",
+    "Understanding of Unreal Engine's editor interface",
+    "Familiarity with UMG (Unreal Motion Graphics)",
+    "Basic Python scripting (optional)"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to distinguish between editor-only and runtime code in Unreal Engine?",
+      "options": [
+        "To reduce the size of the packaged game and prevent security vulnerabilities.",
+        "To make the code easier to read.",
+        "To allow for faster compilation times.",
+        "To enable cross-platform compatibility."
+      ],
+      "correct_index": 0,
+      "explanation": "Editor-only code relies on modules that are stripped from the packaged game to reduce size and prevent security vulnerabilities."
+    },
+    {
+      "question": "What is the primary benefit of enforcing a specific pipeline using editor tools?",
+      "options": [
+        "It reduces integration errors and improves team collaboration.",
+        "It makes the game more fun to play.",
+        "It allows for faster iteration times.",
+        "It reduces the cost of the engine license."
+      ],
+      "correct_index": 0,
+      "explanation": "Enforcing a consistent pipeline reduces integration errors, improves team collaboration, and ensures that assets adhere to performance budgets."
+    },
+    {
+      "question": "Why should you avoid performing heavy calculations in the Construction Script?",
+      "options": [
+        "It can cause performance issues in the editor, especially when placing or moving many actors.",
+        "It can cause the game to crash.",
+        "It can make the code harder to read.",
+        "It can increase the size of the packaged game."
+      ],
+      "correct_index": 0,
+      "explanation": "Excessive calculations in the construction script can cause performance issues, especially when many actors are being placed or moved simultaneously."
+    },
+    {
+      "question": "What is the main risk associated with using the Tick event in editor tools?",
+      "options": [
+        "It can cause editor freezes if computationally expensive operations are performed.",
+        "It can cause the game to crash.",
+        "It can make the code harder to read.",
+        "It can increase the size of the packaged game."
+      ],
+      "correct_index": 0,
+      "explanation": "The Tick event runs every frame, so computationally expensive operations will severely impact editor performance, potentially leading to editor freezes."
+    },
+    {
+      "question": "What is the purpose of Startup Actors?",
+      "options": [
+        "To initialize editor-specific systems or perform setup tasks when the editor starts.",
+        "To make the game more fun to play.",
+        "To allow for faster iteration times.",
+        "To reduce the cost of the engine license."
+      ],
+      "correct_index": 0,
+      "explanation": "Startup Actors are actors that are automatically spawned when the editor starts. They are useful for initializing editor-specific systems or performing setup tasks."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 3,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 4,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 3,
+    "strict_segmentation": 4,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 3,
+    "affective_tone": 4,
+    "total": 31,
+    "grade": "D"
+  }
+}

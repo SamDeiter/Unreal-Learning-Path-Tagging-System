@@ -1,0 +1,143 @@
+{
+  "course_code": "213.01",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:47",
+      "title": "Understanding Control Rig Architecture",
+      "concept": "Control Rigs in Unreal Engine 5 are Blueprint-based animation tools that allow animators to manipulate skeletal meshes in a non-destructive way. They operate within the Animation Graph and can be driven by various inputs, including pose libraries and animation sequences. The forward/backward solve distinction is critical: forward solve means you're creating animation from scratch, while backward solve means you're adapting an existing animation.",
+      "diagram_suggestion": "A diagram showing the Animation Graph pipeline: Input (Pose Library/Animation Sequence) -> Control Rig (Forward/Backward Solve) -> Skeletal Mesh Output."
+    },
+    {
+      "insert_after_timestamp": "4:15",
+      "title": "Baking Animations and Additive Layers",
+      "concept": "Baking an animation to a Control Rig converts the animation curves into keyframes on the rig's controls. This allows for direct manipulation of the animation. Additive layers provide a non-destructive way to add additional animation on top of the baked animation. This is achieved by creating an offset from the base animation, which is then applied additively.",
+      "diagram_suggestion": "A layered diagram showing the base animation curves, the baked animation curves on the control rig, and the additive layer curves, illustrating how they combine."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:27",
+      "procedural_step": "Setting gizmo to translate and local space",
+      "why": "Local space ensures transformations are relative to the control's orientation, preventing unintended global movements. This is crucial for precise facial posing and avoids gimbal lock issues when rotating multiple controls.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:09",
+      "procedural_step": "Baking animation curves to the control rig",
+      "why": "Baking converts animation sequence data into editable keyframes directly on the control rig. This allows for granular adjustments but increases file size and complexity. Without baking, you're limited to non-destructive adjustments via additive layers or modifying the source animation.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:18",
+      "procedural_step": "Adding an additive layer",
+      "why": "Additive layers allow for non-destructive animation editing. They create an offset from the base animation, enabling you to add subtle expressions or correct minor imperfections without altering the original animation data. This promotes iteration and prevents data loss.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:10",
+      "procedural_step": "Baking animation sequence",
+      "why": "Baking the animation sequence consolidates all control rig adjustments into a new, self-contained animation asset. This is essential for exporting the animation or using it in other parts of the game. However, it's a destructive process; the link to the control rig is severed.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:31",
+      "prompt": "Why is the pose library organized into folders like 'expressions' and 'visemes'? What problem does this organization solve?",
+      "expected_insight": "The folder structure categorizes poses based on their function (emotional expression vs. speech articulation). This improves organization and allows animators to quickly find the specific pose they need, reducing search time and cognitive load."
+    },
+    {
+      "insert_after_timestamp": "4:47",
+      "prompt": "What are the trade-offs between adjusting animation curves directly versus using an additive backward solve? When would you choose one over the other?",
+      "expected_insight": "Direct curve editing offers precise control but is destructive. Additive solves are non-destructive but can be less precise. Choose direct editing for major changes and additive solves for minor tweaks or layering expressions."
+    },
+    {
+      "insert_after_timestamp": "6:49",
+      "prompt": "Why is it important to set a 'neutral' keyframe before making adjustments to specific sections of the animation?",
+      "expected_insight": "The neutral keyframe establishes a baseline for the additive animation. Without it, the changes would be applied globally, creating unwanted offsets throughout the entire animation."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Understanding of Unreal Engine 5's Animation Graph system.",
+    "Familiarity with Control Rig Blueprints and their basic usage.",
+    "Knowledge of Sequencer and its animation editing tools."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary difference between a 'forward solve' and a 'backward solve' when using Control Rigs in Unreal Engine 5?",
+      "options": [
+        "Forward solve creates animation from scratch; backward solve adapts existing animation.",
+        "Forward solve is used for facial animation; backward solve is used for body animation.",
+        "Forward solve is destructive; backward solve is non-destructive.",
+        "Forward solve is real-time; backward solve is pre-computed."
+      ],
+      "correct_index": 0,
+      "explanation": "Forward solve involves creating animation from the ground up, while backward solve modifies pre-existing animation data. This distinction impacts the workflow and the level of control."
+    },
+    {
+      "question": "Why is it beneficial to use additive layers when editing animations with Control Rigs?",
+      "options": [
+        "They allow for non-destructive editing, preserving the original animation data.",
+        "They automatically optimize animation performance.",
+        "They simplify the animation baking process.",
+        "They enable real-time animation retargeting."
+      ],
+      "correct_index": 0,
+      "explanation": "Additive layers provide a non-destructive way to layer animation changes, allowing for iterative adjustments without altering the original animation."
+    },
+    {
+      "question": "What is the purpose of 'baking' an animation to a Control Rig in Unreal Engine 5?",
+      "options": [
+        "To convert animation curves into editable keyframes on the control rig.",
+        "To optimize the animation for mobile platforms.",
+        "To create a backup of the original animation data.",
+        "To automatically generate facial expressions."
+      ],
+      "correct_index": 0,
+      "explanation": "Baking converts the animation data into keyframes directly on the control rig, enabling granular control but increasing file size."
+    },
+    {
+      "question": "In what space should the transform gizmo be set when manipulating facial controls and why?",
+      "options": [
+        "Local space, to ensure transformations are relative to the control's orientation.",
+        "World space, to ensure transformations are relative to the world origin.",
+        "Screen space, to ensure transformations are relative to the camera view.",
+        "Global space, to ensure transformations are absolute."
+      ],
+      "correct_index": 0,
+      "explanation": "Local space ensures transformations are relative to the control's orientation, preventing unintended global movements and gimbal lock issues."
+    },
+    {
+      "question": "What is the primary benefit of organizing a pose library into folders based on expressions and visemes?",
+      "options": [
+        "Improved organization and faster access to specific poses.",
+        "Reduced file size of the pose library.",
+        "Automatic animation retargeting.",
+        "Enhanced real-time performance."
+      ],
+      "correct_index": 0,
+      "explanation": "Categorizing poses by function (expression vs. speech) improves organization and reduces search time, improving workflow efficiency."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

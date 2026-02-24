@@ -1,0 +1,165 @@
+{
+  "course_code": "100.14",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:37",
+      "title": "Plugin Architecture",
+      "concept": "Unreal Engine's plugin system allows extending engine functionality without modifying the core engine code. Plugins can introduce new features, asset types, or editor tools.",
+      "diagram_suggestion": "A block diagram showing the Unreal Engine core, with plugins as separate modules interacting through well-defined interfaces. Show data flow between the engine and a sample plugin (e.g., a custom physics solver)."
+    },
+    {
+      "insert_after_timestamp": "3:22",
+      "title": "Asset Management System",
+      "concept": "Unreal Engine's asset management system handles the loading, unloading, and streaming of assets. It optimizes memory usage and ensures efficient resource utilization during gameplay.",
+      "diagram_suggestion": "A flowchart illustrating the asset loading process: asset request -> dependency check -> loading from disk -> memory allocation -> usage in scene -> unloading when no longer needed. Highlight the role of the Asset Registry."
+    },
+    {
+      "insert_after_timestamp": "5:15",
+      "title": "Unreal Engine's Reflection System",
+      "concept": "The engine's reflection system allows runtime discovery of object properties and methods. This is fundamental for Blueprint scripting, serialization, and garbage collection.",
+      "diagram_suggestion": "A class diagram showing a UObject with UProperties and UFunctions, and how the reflection system exposes these to the editor and scripting environments. Show the UCLASS, UPROPERTY, and UFUNCTION macros."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "1:14",
+      "procedural_step": "Unreal Engine manages assets and logic.",
+      "why": "Managing assets as UAssets enables the engine to track dependencies, optimize memory usage via streaming, and ensure cross-platform compatibility through shader permutations. Logic, primarily Blueprints, benefits from the engine's garbage collection and reflection systems, preventing memory leaks and enabling dynamic behavior.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:51",
+      "procedural_step": "Unreal Engine can package an executable.",
+      "why": "Packaging creates a standalone executable by resolving all project dependencies, compiling shaders for the target platform, and optimizing assets. This ensures the end-user doesn't need the Unreal Editor installed and experiences consistent performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:44",
+      "procedural_step": "The engine holds all the systems and tools.",
+      "why": "The engine provides the core functionality, including rendering, physics, audio, and networking. These systems are implemented in C++ for performance and stability. The editor exposes these systems through a user-friendly interface.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:27",
+      "procedural_step": "It sends information from the project to the engine.",
+      "why": "The editor translates user actions into commands that modify the project's data. This data is then processed by the engine to update the scene, simulate physics, and render the final output. This separation allows for iterative development and non-destructive editing.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:45",
+      "procedural_step": "Everything starts with U. So U asset is just an Unreal Engine readable file extension.",
+      "why": "The 'U' prefix signifies that the asset is managed by Unreal Engine's object management system. This system provides features like garbage collection, serialization, and reflection, which are crucial for the engine's stability and functionality.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:35",
+      "prompt": "Why is it important to house interactive, cinematic, and animation-driven experiences within an Unreal Engine project structure?",
+      "expected_insight": "The project structure provides a container for all assets and code, enabling version control, collaboration, and efficient packaging for deployment. The engine's asset management system optimizes loading and memory usage."
+    },
+    {
+      "insert_after_timestamp": "2:31",
+      "prompt": "How does the 'assembly line' analogy explain Unreal Engine's development process?",
+      "expected_insight": "It highlights the modularity and interconnectedness of different tools and systems within the engine. Each tool contributes to the final product, and the workflow is continuous and iterative."
+    },
+    {
+      "insert_after_timestamp": "3:34",
+      "prompt": "What are the implications of the project housing information and the engine presenting it?",
+      "expected_insight": "This separation of concerns allows for a clear distinction between data and processing. The project contains the raw data, while the engine interprets and renders it. This enables flexibility and allows for different rendering pipelines or target platforms."
+    },
+    {
+      "insert_after_timestamp": "4:39",
+      "prompt": "Why does the UProject file reference all the files within the project folder instead of containing them directly?",
+      "expected_insight": "Referencing allows the engine to efficiently load and manage assets on demand. It also enables sharing assets between projects and reduces redundancy. The UProject file acts as a manifest, describing the project's structure and dependencies."
+    },
+    {
+      "insert_after_timestamp": "6:18",
+      "prompt": "Why is it crucial for all team members to use the same engine version?",
+      "expected_insight": "Incompatibilities between engine versions can lead to asset corruption, Blueprint errors, and rendering issues. Using the same version ensures consistency and prevents wasted time troubleshooting version-related problems."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of file system organization.",
+    "Familiarity with version control systems (e.g., Git, Perforce).",
+    "General knowledge of game development pipelines."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary function of the Unreal Engine 'Editor'?",
+      "options": [
+        "To provide a user interface for interacting with the engine's systems and tools.",
+        "To directly manage the low-level rendering pipeline.",
+        "To store all project assets in a compressed format.",
+        "To execute the final packaged game."
+      ],
+      "correct_index": 0,
+      "explanation": "The Editor exposes the engine's functionality through a visual interface, allowing users to create and manipulate assets and logic without directly interacting with the underlying C++ code."
+    },
+    {
+      "question": "Why does Unreal Engine convert imported assets into 'UAssets'?",
+      "options": [
+        "To reduce file size for distribution.",
+        "To enable version control.",
+        "To integrate them with the engine's object management and reflection systems.",
+        "To encrypt the assets and prevent unauthorized access."
+      ],
+      "correct_index": 2,
+      "explanation": "UAssets are managed by the engine's object system, which provides features like garbage collection, serialization, and reflection, essential for stability and functionality."
+    },
+    {
+      "question": "What is the main benefit of packaging a project into an executable?",
+      "options": [
+        "It allows end-users to run the project without needing the Unreal Engine installed.",
+        "It automatically optimizes all assets for maximum performance.",
+        "It encrypts the project's source code.",
+        "It reduces the project's file size."
+      ],
+      "correct_index": 0,
+      "explanation": "Packaging creates a standalone executable that includes all necessary dependencies, allowing end-users to run the project without the Unreal Editor."
+    },
+    {
+      "question": "What role does the engine's reflection system play in Blueprint scripting?",
+      "options": [
+        "It allows Blueprints to access and manipulate properties and functions of C++ classes.",
+        "It automatically generates C++ code from Blueprint graphs.",
+        "It optimizes Blueprint execution speed.",
+        "It prevents Blueprint scripts from crashing the engine."
+      ],
+      "correct_index": 0,
+      "explanation": "The reflection system enables runtime discovery of object properties and methods, allowing Blueprints to interact with C++ code and access engine functionality."
+    },
+    {
+      "question": "Why is it important to store the 'Config' folder in a version control system like Perforce?",
+      "options": [
+        "It contains the project's settings and configurations, ensuring consistency across team members.",
+        "It stores the compiled shaders for the project.",
+        "It contains the project's source code.",
+        "It stores the project's temporary files."
+      ],
+      "correct_index": 0,
+      "explanation": "The Config folder stores critical project settings, including input mappings, rendering options, and editor preferences. Storing it in version control ensures that all team members are using the same configurations, preventing inconsistencies and errors."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 3,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

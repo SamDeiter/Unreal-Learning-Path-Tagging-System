@@ -1,0 +1,165 @@
+{
+  "course_code": "100.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:37",
+      "title": "Mip-Mapping and Texture Streaming",
+      "concept": "Unreal Engine 5's texture streaming system relies on MIP maps to efficiently load lower-resolution versions of textures based on distance and screen size. Understanding how MIP levels are generated and utilized is crucial for optimizing memory usage and performance, especially in large open worlds.",
+      "diagram_suggestion": "A diagram illustrating how different MIP levels of a texture are loaded based on the camera's distance from the object."
+    },
+    {
+      "insert_after_timestamp": "3:17",
+      "title": "Texture Groups and INI Configuration",
+      "concept": "Texture Groups in Unreal Engine 5 allow for centralized control over texture settings via INI files. This enables project-wide adjustments to compression, LOD bias, and other parameters, streamlining optimization and ensuring consistency across assets. Understanding INI file structure and Texture Group hierarchies is essential for advanced texture management.",
+      "diagram_suggestion": "A diagram showing the hierarchy of Texture Groups and how settings in INI files cascade down to individual textures."
+    },
+    {
+      "insert_after_timestamp": "5:51",
+      "title": "sRGB and Gamma Correction",
+      "concept": "sRGB and gamma correction are crucial for ensuring accurate color representation in Unreal Engine 5. Linear color space is required for correct lighting calculations. Textures authored in sRGB space must be converted to linear space before being used in materials. Normal maps and masks should always be flagged as 'linear' (sRGB disabled) to prevent incorrect interpretation of data.",
+      "diagram_suggestion": "A diagram illustrating the difference between sRGB and linear color spaces, and how gamma correction affects color values."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:06",
+      "procedural_step": "Adjusting texture properties",
+      "why": "Modifying texture settings directly impacts memory usage, rendering performance, and visual fidelity. Incorrect settings can lead to blurry textures, excessive memory consumption, or incorrect lighting.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:04",
+      "procedural_step": "Isolating color channels",
+      "why": "Inspecting individual color channels is critical for debugging texture packing and ensuring correct data is being passed to material expressions. Incorrect channel packing can lead to visual artifacts and unexpected material behavior.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:34",
+      "procedural_step": "Constraining texture resolution",
+      "why": "Limiting texture resolution reduces memory footprint and improves performance, especially on lower-end hardware. However, excessive downscaling can result in noticeable loss of detail and visual quality.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:40",
+      "procedural_step": "Compressing without alpha",
+      "why": "Removing unnecessary alpha channels reduces texture size and memory usage. Alpha channels, even if unused, consume significant memory. For opaque textures, disabling alpha compression is a crucial optimization step.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:58",
+      "procedural_step": "Disabling sRGB for normal maps",
+      "why": "Normal maps contain vector data, not color data. Applying sRGB gamma correction to normal maps corrupts the vector information, leading to incorrect lighting and shading. This is a common source of visual artifacts.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "2:21",
+      "prompt": "Why is it important to monitor the 'Max In-Game Size' of a texture?",
+      "expected_insight": "Understanding the 'Max In-Game Size' allows developers to predict memory usage and optimize texture settings to prevent performance bottlenecks, especially on target hardware with limited resources."
+    },
+    {
+      "insert_after_timestamp": "3:00",
+      "prompt": "How does the 'Method Streamed' setting relate to level streaming in large open worlds?",
+      "expected_insight": "The 'Method Streamed' setting indicates whether a texture is compatible with Unreal Engine's texture streaming system, which is essential for efficiently loading and unloading textures in large, dynamically loaded environments."
+    },
+    {
+      "insert_after_timestamp": "4:28",
+      "prompt": "Why would you want to adjust texture settings project-wide using Texture Groups and INI files instead of individually?",
+      "expected_insight": "Using Texture Groups and INI files ensures consistency across all textures in a project, simplifies optimization, and allows for global adjustments without having to manually modify each texture asset."
+    },
+    {
+      "insert_after_timestamp": "5:31",
+      "prompt": "What are the consequences of using the default compression settings for a HDR environment map?",
+      "expected_insight": "Default compression settings are not suitable for HDR images, as they can clamp the high dynamic range, resulting in loss of detail in bright areas and inaccurate lighting calculations. Specific compression methods like BC6H are required for HDR textures."
+    },
+    {
+      "insert_after_timestamp": "6:20",
+      "prompt": "Even though texture adjustments in the editor are non-destructive, why should you avoid making significant color corrections directly in the Texture Editor?",
+      "expected_insight": "While non-destructive, color corrections are best handled within the Material Editor. This allows for dynamic adjustments, parameterization, and integration with other material properties, offering greater flexibility and control over the final appearance."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of color spaces (sRGB, linear)",
+    "Familiarity with material editor and material instances",
+    "Knowledge of texture compression algorithms (DXT, BC7, etc.)"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to ensure normal maps have sRGB disabled?",
+      "options": [
+        "To prevent incorrect lighting calculations due to gamma correction.",
+        "To increase the perceived brightness of the surface.",
+        "To reduce the file size of the texture.",
+        "To improve the texture's mipmap generation."
+      ],
+      "correct_index": 0,
+      "explanation": "Normal maps store vector data representing surface normals. Applying sRGB gamma correction corrupts this data, leading to incorrect lighting and shading."
+    },
+    {
+      "question": "What is the primary benefit of using Texture Groups and INI files to manage texture settings?",
+      "options": [
+        "Ensuring consistency and simplifying project-wide optimization.",
+        "Reducing the number of draw calls during rendering.",
+        "Improving the performance of the garbage collector.",
+        "Enabling real-time texture editing in packaged builds."
+      ],
+      "correct_index": 0,
+      "explanation": "Texture Groups and INI files allow for centralized control over texture settings, ensuring consistency and simplifying optimization across the entire project."
+    },
+    {
+      "question": "How does Unreal Engine 5 utilize MIP maps to optimize rendering performance?",
+      "options": [
+        "By loading lower-resolution versions of textures based on distance and screen size.",
+        "By compressing textures using advanced algorithms.",
+        "By generating procedural textures at runtime.",
+        "By caching textures in GPU memory for faster access."
+      ],
+      "correct_index": 0,
+      "explanation": "MIP maps are pre-generated, lower-resolution versions of a texture. The engine automatically selects the appropriate MIP level based on the object's distance from the camera, reducing the amount of texture data that needs to be processed."
+    },
+    {
+      "question": "What is the consequence of accidentally including an alpha channel in a texture that doesn't require transparency?",
+      "options": [
+        "Increased memory usage due to uncompressed alpha information.",
+        "Reduced texture resolution due to alpha channel packing.",
+        "Incorrect color blending in materials.",
+        "Inability to generate MIP maps for the texture."
+      ],
+      "correct_index": 0,
+      "explanation": "Alpha channels, even if unused, consume significant memory. For opaque textures, disabling alpha compression is a crucial optimization step."
+    },
+    {
+      "question": "Why is it important to consider the 'Max In-Game Size' of a texture when developing for mobile platforms?",
+      "options": [
+        "To avoid exceeding the device's memory limits and causing crashes.",
+        "To ensure textures are displayed at the highest possible resolution.",
+        "To improve the performance of the UI system.",
+        "To enable real-time texture streaming over the network."
+      ],
+      "correct_index": 0,
+      "explanation": "Mobile devices have limited memory. Monitoring and controlling the 'Max In-Game Size' of textures is crucial for preventing memory-related crashes and ensuring smooth performance."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 3,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

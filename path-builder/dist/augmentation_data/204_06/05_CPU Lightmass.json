@@ -1,0 +1,197 @@
+{
+  "course_code": "204.06",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:22",
+      "title": "Lumen Global Illumination",
+      "concept": "Lumen is Unreal Engine 5's fully dynamic global illumination and reflections system. It reacts to scene and lighting changes in real-time, eliminating the need for precomputed lighting in many scenarios. Lumen traces rays at runtime to gather lighting information, enabling dynamic indirect lighting and reflections.",
+      "diagram_suggestion": "A diagram showing the Lumen pipeline: tracing rays, gathering lighting data, and updating the scene in real-time."
+    },
+    {
+      "insert_after_timestamp": "3:52",
+      "title": "Static vs. Stationary Lighting",
+      "concept": "Static lighting is baked into lightmaps and has the lowest runtime cost. Stationary lights allow for changing intensity and color at runtime, affecting dynamic objects, but require precomputed shadowmaps. Movable lights are fully dynamic, casting shadows and contributing to global illumination in real-time, but are the most performance-intensive.",
+      "diagram_suggestion": "A comparison table outlining the characteristics, performance implications, and use cases for static, stationary, and movable lights."
+    },
+    {
+      "insert_after_timestamp": "5:57",
+      "title": "Lightmap Resolution and Texel Density",
+      "concept": "Lightmap resolution determines the fidelity of baked lighting. Texel density refers to the number of texels (texture pixels) per unit area on a surface. Consistent texel density across surfaces is crucial to avoid lighting artifacts and ensure uniform lighting quality. Inconsistent texel density can lead to light leaking and blotchy shadows.",
+      "diagram_suggestion": "A visual representation of texel density on different surfaces, highlighting the impact of varying resolutions on lighting quality."
+    },
+    {
+      "insert_after_timestamp": "10:27",
+      "title": "Lightmass Portals",
+      "concept": "Lightmass Portals are used to improve the quality of baked lighting in enclosed spaces, such as interiors. They guide the Lightmass global illumination solver by providing hints about the flow of light between interior and exterior spaces. They do not function with GPU Lightmass.",
+      "diagram_suggestion": "A diagram illustrating how Lightmass Portals direct light flow between interior and exterior spaces, improving the accuracy of baked lighting."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:23",
+      "procedural_step": "Lumen updates on the fly.",
+      "why": "Lumen uses Software Ray Tracing to calculate global illumination in real-time. This eliminates the need to pre-bake lighting, but increases GPU processing.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:33",
+      "procedural_step": "Set lights to static or stationary.",
+      "why": "Static lights pre-calculate lighting data into lightmaps, reducing runtime cost. Stationary lights allow some dynamic changes (color, intensity) while still leveraging pre-computed data, balancing performance and flexibility. Movable lights are fully dynamic and most expensive.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:27",
+      "procedural_step": "Increasing the size of a Rect Light reduces energy.",
+      "why": "Rect Lights simulate area lighting by distributing light emission over a rectangular surface. Increasing the size spreads the same amount of light over a larger area, thus reducing the intensity per unit area. This avoids hotspots but increases lightmap computation.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:47",
+      "procedural_step": "Match lightmap resolution to prevent dark regions.",
+      "why": "Inconsistent lightmap resolution causes lighting discontinuities. Low-resolution lightmaps can produce blocky shadows and inaccurate indirect lighting, while mismatched resolutions between adjacent surfaces create seams and light leaks.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:47",
+      "procedural_step": "Make sure your geo is solid.",
+      "why": "Hollow geometry can cause incorrect lightmap calculations due to the lightmass solver not knowing which side is 'inside' or 'outside'. This leads to light leaking and incorrect shadowing. This is less of an issue with Lumen due to mesh distance fields, but still best practice.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:33",
+      "prompt": "Why might CPU/GPU baking be preferred over Lumen in specific areas of a scene, despite Lumen's real-time updates?",
+      "expected_insight": "CPU/GPU baking allows for finer control over indirect lighting and can reduce noise in specific areas where Lumen's real-time calculations struggle. Baked lighting is static, so it can be optimized for performance."
+    },
+    {
+      "insert_after_timestamp": "4:47",
+      "prompt": "How does the size of a Rect Light affect the overall lighting of a scene, and what are the trade-offs?",
+      "expected_insight": "Increasing the size of a Rect Light softens shadows and reduces hotspots, creating a more natural look. However, it also reduces the light's intensity and increases the computational cost due to the larger surface area."
+    },
+    {
+      "insert_after_timestamp": "6:22",
+      "prompt": "Why is it important to set the build quality to 'Production' when baking lighting?",
+      "expected_insight": "Setting the build quality to 'Production' ensures that the lighting is baked with the highest possible accuracy, including multiple indirect lighting bounces. Preview builds are faster but less accurate, suitable for iteration but not final results."
+    },
+    {
+      "insert_after_timestamp": "8:19",
+      "prompt": "Why are area shadows important for stationary lights, and what visual artifacts might occur without them?",
+      "expected_insight": "Area shadows simulate the penumbra (soft edge) of shadows cast by area lights, creating a more realistic look. Without area shadows, stationary lights can produce hard, unrealistic shadow edges."
+    },
+    {
+      "insert_after_timestamp": "10:00",
+      "prompt": "Under what circumstances would you use Lightmass Portals, and why are they incompatible with GPU Lightmass?",
+      "expected_insight": "Lightmass Portals are used to improve the quality of baked lighting in enclosed spaces by guiding the lightmass solver. They are incompatible with GPU Lightmass because the GPU-based solver uses a different algorithm that doesn't support portals."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:52",
+      "warning": "Using Movable lights excessively can lead to significant performance bottlenecks, especially in complex scenes. Each movable light requires real-time shadow calculations and contributes to global illumination, increasing GPU load.",
+      "severity": "HIGH",
+      "fix": "Optimize light count, reduce shadow casting distance, and consider using static or stationary lights where appropriate."
+    },
+    {
+      "timestamp": "6:14",
+      "warning": "Changing the environment color or other global settings before baking can invalidate previous bakes and increase build times. This can lead to iterative inefficiencies.",
+      "severity": "MEDIUM",
+      "fix": "Finalize global settings before starting the baking process to minimize rebuilds."
+    },
+    {
+      "timestamp": "11:09",
+      "warning": "Using Level Snapshots with static lighting can be clunky due to the baked nature of the lighting. Switching between snapshots may not accurately reflect lighting changes.",
+      "severity": "LOW",
+      "fix": "Use Level Snapshots primarily with Lumen or stationary lights for smoother transitions."
+    },
+    {
+      "timestamp": "11:19",
+      "warning": "Streaming levels for lighting scenarios is limited to three at a time due to GPU memory constraints. Exceeding this limit can cause crashes or performance issues.",
+      "severity": "MEDIUM",
+      "fix": "Optimize level content and lighting complexity to reduce memory usage, or use Lumen for dynamic lighting scenarios."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine 5's user interface and navigation.",
+    "Familiarity with the different types of lights in Unreal Engine 5 (Point Light, Spot Light, Rect Light, etc.).",
+    "Knowledge of material creation and application in Unreal Engine 5.",
+    "Understanding of global illumination concepts."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally more performant to use static lighting for elements that do not move in a scene?",
+      "options": [
+        "Static lighting pre-calculates lighting data into lightmaps, reducing runtime cost.",
+        "Static lighting allows for real-time adjustments of color and intensity.",
+        "Static lighting automatically adjusts to changes in the environment.",
+        "Static lighting uses ray tracing for more accurate reflections."
+      ],
+      "correct_index": 0,
+      "explanation": "Static lighting bakes the lighting information into textures (lightmaps), so the engine doesn't have to calculate it every frame. This significantly reduces the computational load during gameplay."
+    },
+    {
+      "question": "What is the primary benefit of using Lumen over traditional light baking methods?",
+      "options": [
+        "Lumen provides fully dynamic global illumination and reflections, eliminating the need for precomputed lighting in many scenarios.",
+        "Lumen is significantly faster for initial scene setup compared to light baking.",
+        "Lumen produces higher quality lighting results than baked lighting.",
+        "Lumen is compatible with older versions of Unreal Engine."
+      ],
+      "correct_index": 0,
+      "explanation": "Lumen's real-time global illumination eliminates the need for baking, allowing for dynamic lighting changes and faster iteration. However, it may require more GPU power."
+    },
+    {
+      "question": "How does increasing the 'Indirect Lighting Quality' setting in Lightmass affect the baking process?",
+      "options": [
+        "It increases the accuracy of indirect lighting calculations, but also increases build times.",
+        "It reduces the amount of indirect lighting in the scene.",
+        "It speeds up the baking process without affecting quality.",
+        "It only affects direct lighting, not indirect lighting."
+      ],
+      "correct_index": 0,
+      "explanation": "A higher 'Indirect Lighting Quality' setting results in more accurate and detailed indirect lighting, but it also increases the computational cost and, therefore, the build time."
+    },
+    {
+      "question": "What problem does inconsistent lightmap resolution between adjacent surfaces cause?",
+      "options": [
+        "Light leaking and seams in the lighting.",
+        "Improved performance due to lower memory usage.",
+        "More realistic shadows.",
+        "Faster build times."
+      ],
+      "correct_index": 0,
+      "explanation": "Mismatched lightmap resolutions can lead to visible seams and light leaks where the surfaces meet, as the lighting information is not consistent across the boundary."
+    },
+    {
+      "question": "Why are Lightmass Portals used in architectural visualization?",
+      "options": [
+        "To improve the quality of baked lighting in enclosed spaces by guiding the lightmass solver.",
+        "To automatically generate lightmaps for the entire scene.",
+        "To reduce the build time for baked lighting.",
+        "To enable real-time global illumination."
+      ],
+      "correct_index": 0,
+      "explanation": "Lightmass Portals help the lightmass solver accurately calculate the flow of light between interior and exterior spaces, resulting in more realistic and accurate baked lighting in enclosed areas."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 3,
+    "affective_tone": 3,
+    "total": 27,
+    "grade": "D"
+  }
+}

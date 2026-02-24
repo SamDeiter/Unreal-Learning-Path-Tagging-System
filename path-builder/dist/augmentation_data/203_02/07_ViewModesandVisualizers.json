@@ -1,0 +1,197 @@
+{
+  "course_code": "203.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:20",
+      "title": "Stationary Lighting and Overlap Limits",
+      "concept": "Unreal Engine 5 limits the number of overlapping stationary lights to optimize rendering performance. This limitation stems from the need to precompute and store lighting information in lightmaps for stationary lights. Exceeding the limit forces lights to behave as movable lights, negating the performance benefits of stationary lighting.",
+      "diagram_suggestion": "A diagram illustrating the overlapping radii of stationary lights, highlighting the areas where the overlap count exceeds the limit and the performance implications."
+    },
+    {
+      "insert_after_timestamp": "3:34",
+      "title": "Lightmap Density and Resolution",
+      "concept": "Lightmap density represents the texel-to-world-space ratio used for storing baked lighting information. Discrepancies in lightmap resolution between adjacent objects can lead to visual artifacts due to inconsistent sampling rates during lighting evaluation. Understanding lightmap resolution is crucial for optimizing memory usage and preventing aliasing.",
+      "diagram_suggestion": "A visual comparison of different lightmap resolutions on a simple cube, showcasing the effect on shadow quality and memory footprint."
+    },
+    {
+      "insert_after_timestamp": "7:22",
+      "title": "Nanite Virtualized Geometry",
+      "concept": "Nanite is Unreal Engine 5's virtualized geometry system that intelligently streams and renders only the necessary level of detail based on camera distance. This allows for massive polygon counts without sacrificing performance. The triangle density adapts dynamically, optimizing both memory usage and rendering time.",
+      "diagram_suggestion": "A side-by-side comparison of a high-poly mesh rendered with and without Nanite, highlighting the difference in triangle count and performance."
+    },
+    {
+      "insert_after_timestamp": "8:04",
+      "title": "Virtual Shadow Maps (VSM)",
+      "concept": "Virtual Shadow Maps provide high-resolution shadows at a lower performance cost by dynamically paging in shadow data as needed. This system avoids pre-baking shadows, allowing for dynamic lighting scenarios with detailed shadows. The clipmap level adjusts based on distance, optimizing memory usage.",
+      "diagram_suggestion": "A visualization of the VSM clipmap levels, showing how the shadow resolution changes with distance from the camera."
+    },
+    {
+      "insert_after_timestamp": "10:20",
+      "title": "Volumetric Lightmaps",
+      "concept": "Volumetric lightmaps store precomputed lighting information in a 3D grid, enabling efficient shadowing for dynamic objects under stationary lights. The density of the grid affects the accuracy of the shadows and the memory footprint. These are crucial for realistic character lighting in baked environments.",
+      "diagram_suggestion": "A visual representation of the volumetric lightmap grid, showing how it interpolates lighting information for a moving character."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:24",
+      "procedural_step": "Overlapping movable lights are the most expensive",
+      "why": "Movable lights require per-pixel calculations for every light affecting a surface, leading to increased GPU load. Overlapping lights compound this cost, as each overlapping light adds to the rendering time.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:34",
+      "procedural_step": "Only four overlapping stationary lights allowed when baking.",
+      "why": "Stationary lights rely on precomputed lightmaps. The engine limits the number of overlapping stationary lights to control lightmap complexity and baking time. Exceeding this limit can lead to inaccurate or missing lighting.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:59",
+      "procedural_step": "Uneven lightmap resolutions can cause blobby shadows.",
+      "why": "Inconsistent lightmap resolutions between adjacent objects result in mismatched sampling rates during lighting evaluation. This can lead to visible seams and artifacts in the baked lighting, particularly in shadow areas.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:14",
+      "procedural_step": "Nanite gives higher resolution at lower cost.",
+      "why": "Nanite virtualizes geometry, streaming in only the necessary level of detail based on camera distance. This reduces memory overhead and allows for rendering extremely high-polygon meshes without performance bottlenecks.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "13:19",
+      "procedural_step": "Increasing bounces past 10 may not be noticeable.",
+      "why": "Indirect lighting bounces diminish in intensity with each subsequent bounce. After a certain point (around 10 bounces), the contribution of additional bounces becomes negligible and does not perceptibly improve the visual quality, while still increasing computational cost.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:54",
+      "prompt": "Why does exceeding the stationary light overlap limit cause some lights to be ignored?",
+      "expected_insight": "The engine prioritizes performance by limiting the number of stationary lights contributing to a single lightmap. When the limit is exceeded, some lights are downgraded to movable, which have different performance characteristics."
+    },
+    {
+      "insert_after_timestamp": "4:35",
+      "prompt": "How does lightmap resolution affect the final baked lighting quality, and what are the trade-offs?",
+      "expected_insight": "Higher lightmap resolutions capture more detail but increase memory usage and baking time. Lower resolutions are faster but can result in blocky shadows and loss of detail. The goal is to find a balance that provides acceptable visual quality without excessive overhead."
+    },
+    {
+      "insert_after_timestamp": "7:01",
+      "prompt": "Why does Nanite adjust triangle density based on camera distance?",
+      "expected_insight": "Nanite optimizes rendering by only displaying the level of detail that is perceptible to the viewer. As the camera moves further away, the triangle density is reduced, saving GPU resources without sacrificing visual fidelity."
+    },
+    {
+      "insert_after_timestamp": "8:30",
+      "prompt": "How do virtual shadow maps improve shadow rendering performance compared to traditional shadow mapping techniques?",
+      "expected_insight": "Virtual shadow maps avoid pre-baking shadows and dynamically page in shadow data as needed. This allows for high-resolution shadows in dynamic lighting scenarios without the memory overhead of traditional shadow maps."
+    },
+    {
+      "insert_after_timestamp": "10:58",
+      "prompt": "Why are volumetric lightmaps important for character lighting in baked environments?",
+      "expected_insight": "Volumetric lightmaps provide a way to approximate indirect lighting for dynamic objects (like characters) in scenes with precomputed lighting. They allow characters to receive realistic shadows and lighting even though the environment is static."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "0:24",
+      "warning": "Overlapping movable lights can lead to significant performance degradation, especially in complex scenes. This can manifest as frame rate drops and increased GPU usage.",
+      "severity": "HIGH",
+      "fix": "Reduce the number of overlapping movable lights by optimizing light placement, reducing attenuation radii, or using stationary lights where appropriate."
+    },
+    {
+      "timestamp": "4:59",
+      "warning": "Mismatched lightmap resolutions between adjacent objects can create visible seams and artifacts in baked lighting, leading to a visually unappealing result.",
+      "severity": "MEDIUM",
+      "fix": "Ensure consistent lightmap resolutions across objects that are close to each other. Use the lightmap density view mode to identify areas with mismatched resolutions."
+    },
+    {
+      "timestamp": "12:24",
+      "warning": "High shader complexity, indicated by quad overdraw, can strain GPU resources and reduce performance. This is especially problematic on lower-end hardware.",
+      "severity": "MEDIUM",
+      "fix": "Optimize materials to reduce shader complexity. Simplify shader graphs, reduce the number of texture samples, and use cheaper material functions where possible."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine 5 editor interface",
+    "Familiarity with lighting concepts (e.g., direct vs. indirect lighting)",
+    "Knowledge of material creation and shader graphs",
+    "Experience with static mesh import and placement"
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary performance benefit of using stationary lights over movable lights in Unreal Engine 5?",
+      "options": [
+        "Stationary lights have their lighting precomputed and stored in lightmaps.",
+        "Stationary lights cast more accurate shadows.",
+        "Stationary lights can be dynamically adjusted at runtime.",
+        "Stationary lights do not contribute to global illumination."
+      ],
+      "correct_index": 0,
+      "explanation": "Stationary lights have their lighting precomputed and stored in lightmaps, reducing the real-time rendering cost. Movable lights, on the other hand, require per-pixel calculations for every light affecting a surface."
+    },
+    {
+      "question": "What happens when the number of overlapping stationary lights exceeds the engine's limit?",
+      "options": [
+        "The engine crashes.",
+        "The extra lights are automatically converted to movable lights.",
+        "The lightmaps become corrupted.",
+        "The scene refuses to build lighting."
+      ],
+      "correct_index": 1,
+      "explanation": "When the limit is exceeded, the engine automatically converts the extra lights to movable lights, negating the performance benefits of stationary lighting."
+    },
+    {
+      "question": "Why is it important to maintain consistent lightmap resolutions between adjacent objects?",
+      "options": [
+        "To prevent texture streaming issues.",
+        "To avoid visual artifacts and seams in baked lighting.",
+        "To reduce the overall memory footprint of the scene.",
+        "To improve the accuracy of shadow calculations."
+      ],
+      "correct_index": 1,
+      "explanation": "Inconsistent lightmap resolutions can lead to mismatched sampling rates during lighting evaluation, resulting in visible seams and artifacts in the baked lighting, particularly in shadow areas."
+    },
+    {
+      "question": "How does Nanite contribute to improved rendering performance in Unreal Engine 5?",
+      "options": [
+        "By pre-baking all the lighting information.",
+        "By dynamically adjusting triangle density based on camera distance.",
+        "By using simplified shader models.",
+        "By compressing textures more efficiently."
+      ],
+      "correct_index": 1,
+      "explanation": "Nanite virtualizes geometry, streaming in only the necessary level of detail based on camera distance. This reduces memory overhead and allows for rendering extremely high-polygon meshes without performance bottlenecks."
+    },
+    {
+      "question": "What is the purpose of volumetric lightmaps in Unreal Engine 5?",
+      "options": [
+        "To store precomputed lighting information for static objects.",
+        "To approximate indirect lighting for dynamic objects in baked environments.",
+        "To create realistic reflections on metallic surfaces.",
+        "To simulate atmospheric scattering effects."
+      ],
+      "correct_index": 1,
+      "explanation": "Volumetric lightmaps provide a way to approximate indirect lighting for dynamic objects (like characters) in scenes with precomputed lighting. They allow characters to receive realistic shadows and lighting even though the environment is static."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 27,
+    "grade": "D"
+  }
+}
