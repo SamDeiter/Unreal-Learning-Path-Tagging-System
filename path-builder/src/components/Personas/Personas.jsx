@@ -218,7 +218,14 @@ const ONBOARDING_ROLE_SECTIONS = [
   },
 ];
 
-function OnboardingVideosByRole({ courses, isInCart, addToCart, removeFromCart, userQuery }) {
+function OnboardingVideosByRole({
+  courses,
+  isInCart,
+  addToCart,
+  removeFromCart,
+  userQuery,
+  experience,
+}) {
   // Build video result objects from courses — never filter out, just assign roles
   const videoResults = courses.map((course) => {
     const title = (course.title || course.name || "").replace(/_/g, " ");
@@ -249,19 +256,42 @@ function OnboardingVideosByRole({ courses, isInCart, addToCart, removeFromCart, 
     };
   });
 
-  // Topic generality score — broad foundations first, specialized topics later
+  // Experience-aware topic priority — beginners see "Intro to UE5" first,
+  // experienced users see it later (they already know the basics)
+  const isBeginner = !experience || experience === "beginner";
+
   const topicPriority = (title) => {
     const t = title.toLowerCase();
-    if (t.includes("quickstart") || t.includes("your first") || t.includes("first project"))
-      return 0;
-    if (
-      t.includes("introduction to unreal") ||
-      t.includes("intro to unreal") ||
-      t.includes("getting started")
-    )
-      return 1;
-    if (t.includes("editor") || t.includes("viewport") || t.includes("navigate")) return 2;
-    if (t.includes("blueprint") || t.includes("visual script")) return 3;
+    // Filter out executive/management content — should never be a prerequisite
+    if (t.includes("executive") || t.includes("leadership") || t.includes("management overview"))
+      return 99;
+
+    if (isBeginner) {
+      // Beginners: QuickStart → Intro to UE5 → Editor → Blueprint → world-building → specialized
+      if (t.includes("quickstart") || t.includes("your first") || t.includes("first project"))
+        return 0;
+      if (
+        t.includes("introduction to unreal") ||
+        t.includes("intro to unreal") ||
+        t.includes("getting started")
+      )
+        return 1;
+      if (t.includes("editor") || t.includes("viewport") || t.includes("navigate")) return 2;
+      if (t.includes("blueprint") || t.includes("visual script")) return 3;
+    } else {
+      // Experienced: skip basic intros, lead with topic-specific content
+      if (t.includes("quickstart") || t.includes("your first") || t.includes("first project"))
+        return 12;
+      if (
+        t.includes("introduction to unreal") ||
+        t.includes("intro to unreal") ||
+        t.includes("getting started")
+      )
+        return 13;
+      if (t.includes("editor") || t.includes("viewport") || t.includes("navigate")) return 11;
+      if (t.includes("blueprint") || t.includes("visual script")) return 3;
+    }
+    // Shared ordering for all experience levels
     if (
       t.includes("landscape") ||
       t.includes("terrain") ||
@@ -1460,6 +1490,7 @@ export default function Personas() {
                 addToCart={addToCart}
                 removeFromCart={removeFromCart}
                 userQuery={answers.startPrompt || ""}
+                experience={answers.experience}
               />
 
               {blendedPath?.docs?.length > 0 && (
