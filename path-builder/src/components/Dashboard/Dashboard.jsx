@@ -301,7 +301,10 @@ function Dashboard() {
     <div className="dashboard">
       {/* Stats Cards */}
       <div className="stats-cards">
-        <div className="stat-card primary">
+        <div
+          className="stat-card primary"
+          title="Total number of learning paths and courses in the library, across all sources"
+        >
           <div className="stat-number">{stats.totalCourses}</div>
           <div className="stat-label">TOTAL COURSES</div>
         </div>
@@ -312,6 +315,7 @@ function Dashboard() {
             cursor: "pointer",
             outline: sourceFilter === "youtube" ? "2px solid #f85149" : "none",
           }}
+          title="YouTube videos imported from official Epic Games and community channels. Click to filter."
         >
           <div className="stat-number">{sourceDistribution.youtube}</div>
           <div className="stat-label">▶ YOUTUBE</div>
@@ -323,6 +327,7 @@ function Dashboard() {
             cursor: "pointer",
             outline: sourceFilter === "lms" ? "2px solid #3fb950" : "none",
           }}
+          title="Courses from Epic’s official Learning Management System (dev.epicgames.com). Click to filter."
         >
           <div className="stat-number">{sourceDistribution.lms}</div>
           <div className="stat-label">🎓 EPIC LMS</div>
@@ -334,15 +339,22 @@ function Dashboard() {
             cursor: "pointer",
             outline: sourceFilter === "docs" ? "2px solid #58a6ff" : "none",
           }}
+          title="Documentation pages from Epic’s official Unreal Engine docs. Click to filter."
         >
           <div className="stat-number">{sourceDistribution.docs}</div>
           <div className="stat-label">📖 EPIC DOCS</div>
         </div>
-        <div className="stat-card accent">
+        <div
+          className="stat-card accent"
+          title="Courses that have been processed by Gemini AI for auto-tagging, summaries, and enrichment"
+        >
           <div className="stat-number">{stats.aiEnriched}</div>
           <div className="stat-label">AI-ENRICHED</div>
         </div>
-        <div className="stat-card readiness">
+        <div
+          className="stat-card readiness"
+          title="Library completeness score: 40% weight for courses with videos, 30% for AI enrichment, 30% for complete tags (level + topic + industry)"
+        >
           <div className="stat-number">{readinessScore}%</div>
           <div className="stat-label">READINESS</div>
           <div className="readiness-bar">
@@ -375,7 +387,7 @@ function Dashboard() {
       <div className="charts-row">
         {/* Topic Distribution Bar Chart */}
         <div className="chart-card">
-          <h3>
+          <h3 title="Number of courses grouped by their primary UE5 topic area">
             <span className="chart-indicator"></span> Content by Topic
           </h3>
           <div className="bar-chart">
@@ -396,7 +408,7 @@ function Dashboard() {
 
         {/* Persona Distribution Chart (Option D) */}
         <div className="chart-card">
-          <h3>
+          <h3 title="How many courses serve each learner persona, based on the course’s industry tag. Personas with 0 courses represent gaps in coverage.">
             <span className="chart-indicator purple" /> Persona Coverage
           </h3>
           <div className="bar-chart">
@@ -422,7 +434,7 @@ function Dashboard() {
 
         {/* Level Distribution Donut Chart */}
         <div className="chart-card">
-          <h3>
+          <h3 title="Breakdown of courses by difficulty level: Beginner, Intermediate, and Advanced">
             <span className="chart-indicator red"></span> Level Distribution
           </h3>
           <div className="donut-chart-container">
@@ -520,7 +532,7 @@ function Dashboard() {
 
       {/* Tag Cloud Section */}
       <div className="section-card">
-        <h3>
+        <h3 title="Most frequently used tags across all courses. Larger count = more courses tagged with that term. Export for LMS import.">
           <span className="section-icon">🏷️</span> Tag Cloud
         </h3>
         <div className="section-desc">
@@ -586,7 +598,7 @@ function Dashboard() {
 
       {/* Coverage Recommendations Section */}
       <div className="section-card">
-        <h3>
+        <h3 title="Auto-detected gaps in your library: topics with low coverage and missing difficulty levels for complete learning paths">
           <span className="section-icon">📋</span> Coverage Recommendations
         </h3>
         <div className="recommendations-grid">
@@ -608,7 +620,7 @@ function Dashboard() {
 
       {/* All Courses Table */}
       <div className="section-card">
-        <h3>
+        <h3 title="Sortable table of every course with video content. Click column headers to sort. Use the search bar to filter.">
           <span className="section-icon">📚</span> All Courses
         </h3>
         {/* Quick Search (Option C) */}
