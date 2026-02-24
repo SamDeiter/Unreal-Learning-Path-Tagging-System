@@ -3,7 +3,13 @@
  * Extracted from TagGraph.jsx (Pass 4 refactor)
  */
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import { getNodeSize, getEdgeWidth, getEdgeOpacity, getCategoryColor, LAYOUT_CONFIG } from "../components/TagGraph/tagGraphConfig";
+import {
+  getNodeSize,
+  getEdgeWidth,
+  getEdgeOpacity,
+  getCategoryColor,
+  LAYOUT_CONFIG,
+} from "../components/TagGraph/tagGraphConfig";
 import { resolveCollisions } from "../components/TagGraph/layoutUtils";
 
 /**
@@ -24,7 +30,7 @@ export default function useTagGraph({ tags = [], edges = [] }) {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [pinnedNode, setPinnedNode] = useState(null);
   const [pinnedData, setPinnedData] = useState(null);
-  const [minWeightFilter, setMinWeightFilter] = useState(0);
+  const [minWeightFilter, setMinWeightFilter] = useState(2);
   const [searchQuery, setSearchQuery] = useState("");
   const [maxNodesDisplay, setMaxNodesDisplay] = useState(50);
   const [isLayoutRunning, setIsLayoutRunning] = useState(false);
@@ -32,7 +38,9 @@ export default function useTagGraph({ tags = [], edges = [] }) {
   const [tooltipData, setTooltipData] = useState(null);
 
   // Keep ref in sync
-  useEffect(() => { focusedNodeIdRef.current = focusedNodeId; }, [focusedNodeId]);
+  useEffect(() => {
+    focusedNodeIdRef.current = focusedNodeId;
+  }, [focusedNodeId]);
 
   // ── Derived: min/max ──
   const { minCount, maxCount, minWeight, maxWeight } = useMemo(() => {
@@ -84,7 +92,7 @@ export default function useTagGraph({ tags = [], edges = [] }) {
           hasConnections: connectedNodeIds.has(tag.id),
           bgColor: colors.bg,
           borderColor: colors.border,
-          category: tag.id.split('.')[0] || 'other',
+          category: tag.id.split(".")[0] || "other",
         },
       };
     });
@@ -292,27 +300,37 @@ export default function useTagGraph({ tags = [], edges = [] }) {
 
     cy.on("layoutstop", handleLayoutStop);
     if (cy.elements().length > 0) handleLayoutStop();
-    return () => { cy.off("layoutstop", handleLayoutStop); };
+    return () => {
+      cy.off("layoutstop", handleLayoutStop);
+    };
   }, [cyReady, isLayoutRunning]);
 
   // ── Keyboard shortcuts ──
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
       switch (e.key) {
-        case 'Escape': handleClearFocus(); break;
-        case 'f': case 'F': handleFitToScreen(); break;
-        case '+': case '=':
+        case "Escape":
+          handleClearFocus();
+          break;
+        case "f":
+        case "F":
+          handleFitToScreen();
+          break;
+        case "+":
+        case "=":
           if (cyRef.current) cyRef.current.zoom(cyRef.current.zoom() * 1.2);
           break;
-        case '-': case '_':
+        case "-":
+        case "_":
           if (cyRef.current) cyRef.current.zoom(cyRef.current.zoom() * 0.8);
           break;
-        default: break;
+        default:
+          break;
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleClearFocus, handleFitToScreen]);
 
   // ── Unpin handler ──
@@ -323,18 +341,32 @@ export default function useTagGraph({ tags = [], edges = [] }) {
 
   return {
     // Refs
-    cyRef, containerRef,
+    cyRef,
+    containerRef,
     // State
-    focusedNodeId, hoveredNode, tooltipPosition, tooltipData,
-    pinnedNode, pinnedData,
-    minWeightFilter, setMinWeightFilter,
-    searchQuery, setSearchQuery,
-    maxNodesDisplay, setMaxNodesDisplay,
+    focusedNodeId,
+    hoveredNode,
+    tooltipPosition,
+    tooltipData,
+    pinnedNode,
+    pinnedData,
+    minWeightFilter,
+    setMinWeightFilter,
+    searchQuery,
+    setSearchQuery,
+    maxNodesDisplay,
+    setMaxNodesDisplay,
     isLayoutRunning,
     // Derived
-    maxWeight, filteredElements, searchResults,
+    maxWeight,
+    filteredElements,
+    searchResults,
     // Handlers
-    handleCy, handleFitToScreen, handleClearFocus,
-    handleRunLayout, handleSearchSelect, handleUnpin,
+    handleCy,
+    handleFitToScreen,
+    handleClearFocus,
+    handleRunLayout,
+    handleSearchSelect,
+    handleUnpin,
   };
 }

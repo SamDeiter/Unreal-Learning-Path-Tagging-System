@@ -20,14 +20,14 @@ export function getNodeSize(count, minCount, maxCount) {
   return clampedScale(count, minCount, maxCount, 25, 70);
 }
 
-/** Edge width 3–10px based on weight */
+/** Edge width 1.5–6px based on weight */
 export function getEdgeWidth(weight, minWeight, maxWeight) {
-  return clampedScale(weight, minWeight, maxWeight, 3, 10);
+  return clampedScale(weight, minWeight, maxWeight, 1.5, 6);
 }
 
-/** Edge opacity 0.6–1 based on weight */
+/** Edge opacity 0.12–0.35 based on weight (low baseline to reduce clutter) */
 export function getEdgeOpacity(weight, minWeight, maxWeight) {
-  return clampedScale(weight, minWeight, maxWeight, 0.6, 1);
+  return clampedScale(weight, minWeight, maxWeight, 0.12, 0.35);
 }
 
 // ============================================================================
@@ -35,25 +35,25 @@ export function getEdgeOpacity(weight, minWeight, maxWeight) {
 // ============================================================================
 
 export const CATEGORY_COLORS = {
-  scripting:    { bg: '#a371f7', border: '#8957e5' },
-  rendering:    { bg: '#58a6ff', border: '#1f6feb' },
-  animation:    { bg: '#3fb950', border: '#238636' },
-  environment:  { bg: '#f0883e', border: '#d47616' },
-  character:    { bg: '#f778ba', border: '#db61a2' },
-  multiplayer:  { bg: '#56d4dd', border: '#39c5cf' },
-  ai:           { bg: '#d29922', border: '#bb8009' },
-  ui:           { bg: '#bc8cff', border: '#a371f7' },
-  optimization: { bg: '#ff7b72', border: '#f85149' },
-  cinematic:    { bg: '#79c0ff', border: '#58a6ff' },
-  audio:        { bg: '#7ee787', border: '#56d364' },
-  procedural:   { bg: '#ffa657', border: '#f0883e' },
-  default:      { bg: '#8b949e', border: '#6e7681' },
+  scripting: { bg: "#a371f7", border: "#8957e5" },
+  rendering: { bg: "#58a6ff", border: "#1f6feb" },
+  animation: { bg: "#3fb950", border: "#238636" },
+  environment: { bg: "#f0883e", border: "#d47616" },
+  character: { bg: "#f778ba", border: "#db61a2" },
+  multiplayer: { bg: "#56d4dd", border: "#39c5cf" },
+  ai: { bg: "#d29922", border: "#bb8009" },
+  ui: { bg: "#bc8cff", border: "#a371f7" },
+  optimization: { bg: "#ff7b72", border: "#f85149" },
+  cinematic: { bg: "#79c0ff", border: "#58a6ff" },
+  audio: { bg: "#7ee787", border: "#56d364" },
+  procedural: { bg: "#ffa657", border: "#f0883e" },
+  default: { bg: "#8b949e", border: "#6e7681" },
 };
 
 /** Gets color pair for a tag based on its category prefix */
 export function getCategoryColor(tagId) {
   if (!tagId) return CATEGORY_COLORS.default;
-  const category = tagId.split('.')[0]?.toLowerCase();
+  const category = tagId.split(".")[0]?.toLowerCase();
   return CATEGORY_COLORS[category] || CATEGORY_COLORS.default;
 }
 
@@ -72,7 +72,8 @@ export const GRAPH_STYLESHEET = [
       "border-width": 2,
       "border-color": "data(borderColor)",
       label: "data(label)",
-      "font-size": "12px",
+      "font-size": "11px",
+      "min-zoomed-font-size": 8,
       color: "#e6edf3",
       "text-valign": "bottom",
       "text-halign": "center",
@@ -80,7 +81,7 @@ export const GRAPH_STYLESHEET = [
       "text-outline-width": 3,
       "text-outline-color": "#0d1117",
       "text-wrap": "ellipsis",
-      "text-max-width": "80px",
+      "text-max-width": "120px",
       "transition-property": "opacity, background-color, border-color",
       "transition-duration": "0ms",
       "z-index": 10,
@@ -92,7 +93,8 @@ export const GRAPH_STYLESHEET = [
     style: {
       width: "data(width)",
       "line-color": "#58a6ff",
-      "curve-style": "bezier",
+      "curve-style": "haystack",
+      "haystack-radius": 0.5,
       opacity: "data(opacity)",
       "z-index": 1,
     },
@@ -149,20 +151,20 @@ export const GRAPH_STYLESHEET = [
 
 export const LAYOUT_CONFIG = {
   name: "cose-bilkent",
-  idealEdgeLength: 300,
-  nodeRepulsion: 40000,
+  idealEdgeLength: 200,
+  nodeRepulsion: 85000,
   nestingFactor: 0.1,
-  gravity: 0.15,
+  gravity: 0.25,
   gravityRange: 3.0,
-  numIter: 2500,
+  numIter: 3500,
   tile: true,
-  tilingPaddingVertical: 80,
-  tilingPaddingHorizontal: 80,
+  tilingPaddingVertical: 40,
+  tilingPaddingHorizontal: 40,
   nodeDimensionsIncludeLabels: true,
   randomize: true,
   edgeElasticity: 0.45,
   componentSpacing: 100,
-  nodeOverlap: 10,
+  nodeOverlap: 30,
   fit: true,
   padding: 40,
   quality: "default",
