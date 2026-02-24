@@ -15,7 +15,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 3. **Intelligent Matching** — Hybrid pipeline: semantic embeddings → transcript search → tag-based fallback with confidence routing
 4. **Guided Learning Path** — AI-narrated sequence: intro → videos → quizzes → challenges → reflection
 5. **Citation-linked Answers** — Diagnosis responses include clickable `[N]` references linking to Vertex AI documentation
-6. **Dashboard Insights** — Readiness score, persona coverage chart, quick search, and tooltips on all metrics
+6. **Dashboard Insights** — Readiness score, persona coverage chart, content gap analysis, quick search, and tooltips on all metrics
 7. **Analytics & Insights** — Tag heatmaps, skill radar, prerequisite flows, industry demand gap analysis, and more
 8. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
 9. **Mobile Responsive** — Optimized for phone (480px), tablet (768px), and desktop viewports
@@ -35,7 +35,8 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 | **AI** | Google Gemini 2.0 Flash (enrichment, narration, embeddings) |
 | **Search** | Semantic embeddings + TF-IDF transcript index + tag matching |
 | **Hosting** | GitHub Pages (frontend), Firebase Hosting (API) |
-| **Testing** | Vitest + React Testing Library + Playwright (316 tests) |
+| **Testing** | Vitest + React Testing Library + Playwright (324 tests) |
+| **Security** | DOMPurify (XSS sanitization), Firebase Security Rules, invite-based access control |
 | **Linting** | ESLint 9 (flat config) + Stylelint |
 
 ---
@@ -51,7 +52,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   │   │   ├── PersonaQuiz/       # Role-detection onboarding quiz
 │   │   │   ├── TagGraph/          # Interactive Cytoscape tag relationship graph
 │   │   │   ├── Visualizations/    # Analytics charts (heatmaps, radar, trends)
-│   │   │   ├── Dashboard/         # Overview dashboard
+│   │   │   ├── Dashboard/         # Overview dashboard + Content Gap Analysis
 │   │   │   ├── AssemblyLine/      # Drag-and-drop path assembly
 │   │   │   ├── CourseLibrary/     # Browsable course catalog
 │   │   │   ├── AdminFeedback/     # Admin feedback review panel

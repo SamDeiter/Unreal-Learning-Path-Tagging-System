@@ -4,6 +4,26 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [2.6.0] - 2026-02-24
+
+### Added
+
+- **Persona Content Gaps dashboard** — interactive section in Dashboard tab with persona selector chips, 4 gap stat cards (Relevant / Too Technical / Topics Covered / Keyword Gaps), required topic coverage bars, expandable top-relevant and too-technical course lists, and keyword gap recommendations for content creation
+- **DOMPurify XSS sanitization** — added `dompurify` to sanitize the one `dangerouslySetInnerHTML` usage in `OfficialDocsSummary.jsx`, eliminating the last potential XSS vector
+- **Drive-to-TXT transcription script** (`scripts/drive_to_txt.py`) — downloads videos from a Google Drive folder and transcribes with GPU-accelerated Whisper, outputting `.txt` files formatted for NotebookLLM with timestamped segments
+
+### Changed
+
+- Dashboard now surfaces `analyzeGaps()` from `ContentGapService.js` — previously the function existed but had no UI consumer
+- Updated `vertex-ai-integration.test.js` to properly expand the collapsible `OfficialDocsSummary` component before asserting on body content (pre-existing test gap)
+
+### Security
+
+- Codebase audit: zero `innerHTML`, `document.write()`, or `eval()` usage; all dynamic `href`/`src` attributes use safe sources; React JSX auto-escaping covers 99% of rendering
+- `DOMPurify.sanitize()` now wraps all raw HTML rendering
+
+---
+
 ## [2.5.0] - 2026-02-23
 
 ### Added

@@ -90,7 +90,7 @@ describe("OfficialDocsSummary — Component Renders", () => {
 
   it("should render loading state", async () => {
     const React = await import("react");
-    const { render, screen } = await import("@testing-library/react");
+    const { render, screen, fireEvent } = await import("@testing-library/react");
     const { default: OfficialDocsSummary } = await import(
       "../components/OfficialDocsSummary/OfficialDocsSummary"
     );
@@ -99,12 +99,15 @@ describe("OfficialDocsSummary — Component Renders", () => {
       React.createElement(OfficialDocsSummary, { data: null, isLoading: true, error: null })
     );
 
+    // Expand the collapsible section to see loading content
+    fireEvent.click(screen.getByText(/Official UE5 Documentation/i));
+
     expect(screen.getByText(/searching official documentation/i)).toBeTruthy();
   });
 
   it("should render error state", async () => {
     const React = await import("react");
-    const { render, screen } = await import("@testing-library/react");
+    const { render, screen, fireEvent } = await import("@testing-library/react");
     const { default: OfficialDocsSummary } = await import(
       "../components/OfficialDocsSummary/OfficialDocsSummary"
     );
@@ -117,12 +120,15 @@ describe("OfficialDocsSummary — Component Renders", () => {
       })
     );
 
+    // Expand the collapsible section to see error content
+    fireEvent.click(screen.getByText(/Official UE5 Documentation/i));
+
     expect(screen.getByText("Connection failed")).toBeTruthy();
   });
 
   it("should render AI summary when data is present", async () => {
     const React = await import("react");
-    const { render, screen } = await import("@testing-library/react");
+    const { render, screen, fireEvent } = await import("@testing-library/react");
     const { default: OfficialDocsSummary } = await import(
       "../components/OfficialDocsSummary/OfficialDocsSummary"
     );
@@ -141,6 +147,10 @@ describe("OfficialDocsSummary — Component Renders", () => {
     render(
       React.createElement(OfficialDocsSummary, { data: mockData, isLoading: false, error: null })
     );
+
+    // Expand the collapsible section to see summary content
+    const expandBtn = document.querySelector("[aria-expanded]");
+    fireEvent.click(expandBtn);
 
     expect(screen.getByText(/AI Summary/i)).toBeTruthy();
     expect(

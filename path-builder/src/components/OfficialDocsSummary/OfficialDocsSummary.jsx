@@ -5,6 +5,7 @@
  * Features: AI summary with citations, collapsible result list, loading/error states.
  */
 import { useState } from "react";
+import DOMPurify from "dompurify";
 import {
   BookOpen,
   ChevronDown,
@@ -103,7 +104,7 @@ export default function OfficialDocsSummary({ data, isLoading, error }) {
                       {result.snippet && (
                         <p
                           className="doc-result-snippet"
-                          dangerouslySetInnerHTML={{ __html: result.snippet }}
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(result.snippet) }}
                         />
                       )}
                       <span className="doc-result-url">{result.url}</span>
