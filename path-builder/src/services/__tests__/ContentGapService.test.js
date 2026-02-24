@@ -3,37 +3,11 @@
  */
 import { describe, it, expect } from "vitest";
 import { getRelevanceBadge, analyzeGaps } from "../ContentGapService";
-
-// ── Mock course objects ──────────────────────────────────────────────────
-const animCourse = {
-  code: "200.01",
-  title: "Getting Started with Sequencer",
-  canonical_tags: ["sequencer", "cinematics"],
-  ai_tags: ["animation"],
-  gemini_system_tags: [],
-  transcript_tags: [],
-  extracted_tags: [],
-};
-
-const cppCourse = {
-  code: "300.01",
-  title: "C++ Gameplay Programming Fundamentals",
-  canonical_tags: ["c++", "programming"],
-  ai_tags: ["code"],
-  gemini_system_tags: [],
-  transcript_tags: ["blueprint"],
-  extracted_tags: [],
-};
-
-const neutralCourse = {
-  code: "100.01",
-  title: "UE5 Editor Overview",
-  canonical_tags: ["editor"],
-  ai_tags: [],
-  gemini_system_tags: [],
-  transcript_tags: [],
-  extracted_tags: [],
-};
+import {
+  sequencerCourse as animCourse,
+  cppGameplayCourse as cppCourse,
+  blueprintBasicsCourse as neutralCourse,
+} from "../../__tests__/fixtures/testCourses";
 
 // ── getRelevanceBadge ────────────────────────────────────────────────────
 describe("getRelevanceBadge", () => {

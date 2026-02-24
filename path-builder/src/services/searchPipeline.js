@@ -13,6 +13,7 @@ import { findSimilarCourses } from "./semanticSearchService";
 import { searchSegmentsHybrid } from "./segmentSearchService";
 import { searchDocsSemantic, searchDocsVertexAI } from "./docsSearchService";
 import { devLog, devWarn } from "../utils/logger";
+import { deduplicateBy } from "../utils/collectionUtils";
 
 /**
  * Run the full RAG search pipeline: embed → expand → multi-source search → dedup → re-rank.
@@ -144,13 +145,10 @@ export async function runSearchPipeline(query, options = {}) {
 
       // Rank + dedup
       retrievedPassages.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
-      const seen = new Set();
-      retrievedPassages = retrievedPassages.filter((p) => {
-        const key = (p.text || "").trim().toLowerCase().slice(0, 120);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
+      retrievedPassages = deduplicateBy(
+        retrievedPassages,
+        (p) => (p.text || "").trim().toLowerCase().slice(0, 120)
+      );
       devLog(`[RAG] Total: ${retrievedPassages.length} passages after rank+dedup`);
     }
   } catch (semanticErr) {

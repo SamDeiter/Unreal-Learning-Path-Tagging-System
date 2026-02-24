@@ -3,27 +3,10 @@
  */
 import { describe, it, expect } from "vitest";
 import { getPersonaWelcome, getContextBlock, getPathContextBlocks } from "../PersonalizedMessaging";
-
-// ── Mock course objects ──────────────────────────────────────────────────
-const sequencerCourse = {
-  code: "200.01",
-  title: "Getting Started with Sequencer",
-  canonical_tags: ["sequencer", "cinematics"],
-  ai_tags: ["animation"],
-  gemini_system_tags: [],
-  transcript_tags: [],
-  extracted_tags: [],
-};
-
-const materialsCoFurse = {
-  code: "150.02",
-  title: "Master Materials & Shaders",
-  canonical_tags: ["materials", "shaders", "rendering"],
-  ai_tags: [],
-  gemini_system_tags: [],
-  transcript_tags: [],
-  extracted_tags: [],
-};
+import {
+  sequencerCourse,
+  materialsCourse,
+} from "../../__tests__/fixtures/testCourses";
 
 // ── getPersonaWelcome ────────────────────────────────────────────────────
 describe("getPersonaWelcome", () => {
@@ -84,11 +67,11 @@ describe("getContextBlock", () => {
 // ── getPathContextBlocks ─────────────────────────────────────────────────
 describe("getPathContextBlocks", () => {
   it("returns array of context blocks for a course list", () => {
-    const courses = [sequencerCourse, materialsCoFurse];
+    const courses = [sequencerCourse, materialsCourse];
     const blocks = getPathContextBlocks("animator_alex", courses);
     expect(blocks).toHaveLength(2);
     expect(blocks[0]).toHaveProperty("courseCode", "200.01");
-    expect(blocks[1]).toHaveProperty("courseCode", "150.02");
+    expect(blocks[1]).toHaveProperty("courseCode", "311.01");
   });
 
   it("returns empty array for no courses", () => {
