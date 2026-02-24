@@ -11,11 +11,15 @@ All notable changes to the Unreal Learning Path Tagging System.
 - **Persona Content Gaps dashboard** — interactive section in Dashboard tab with persona selector chips, 4 gap stat cards (Relevant / Too Technical / Topics Covered / Keyword Gaps), required topic coverage bars, expandable top-relevant and too-technical course lists, and keyword gap recommendations for content creation
 - **DOMPurify XSS sanitization** — added `dompurify` to sanitize the one `dangerouslySetInnerHTML` usage in `OfficialDocsSummary.jsx`, eliminating the last potential XSS vector
 - **Drive-to-TXT transcription script** (`scripts/drive_to_txt.py`) — downloads videos from a Google Drive folder and transcribes with GPU-accelerated Whisper, outputting `.txt` files formatted for NotebookLLM with timestamped segments
+- **Shared test fixtures** (`__tests__/fixtures/testCourses.js`) — 6 production-realistic course objects replacing generic `TEST.01` / `Test Course` mock data across 4 test files
+- **GitHub Pages deploy script** (`scripts/deploy_ghpages.py`) — orphan-branch deploy that bypasses `npx gh-pages` long-filename bugs
 
 ### Changed
 
 - Dashboard now surfaces `analyzeGaps()` from `ContentGapService.js` — previously the function existed but had no UI consumer
-- Updated `vertex-ai-integration.test.js` to properly expand the collapsible `OfficialDocsSummary` component before asserting on body content (pre-existing test gap)
+- Updated `vertex-ai-integration.test.js` with `vi.resetModules()` isolation and realistic Vertex AI response data
+- All test files now use production-shaped mock data instead of generic placeholders
+- Test count: 325 tests across 28 files (0 failures)
 
 ### Security
 

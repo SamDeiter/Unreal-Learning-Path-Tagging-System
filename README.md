@@ -35,7 +35,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 | **AI** | Google Gemini 2.0 Flash (enrichment, narration, embeddings) |
 | **Search** | Semantic embeddings + TF-IDF transcript index + tag matching |
 | **Hosting** | GitHub Pages (frontend), Firebase Hosting (API) |
-| **Testing** | Vitest + React Testing Library + Playwright (324 tests) |
+| **Testing** | Vitest + React Testing Library + Playwright (325 tests) |
 | **Security** | DOMPurify (XSS sanitization), Firebase Security Rules, invite-based access control |
 | **Linting** | ESLint 9 (flat config) + Stylelint |
 
@@ -77,7 +77,8 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   │   │   ├── tags.json                    # 500+ tag definitions
 │   │   │   ├── personas.json                # Persona definitions & routing
 │   │   │   └── ...                          # edges, prerequisites, challenges, etc.
-│   │   └── utils/                 # Shared helpers (stemming, stopwords, float16, etc.)
+│   │   ├── utils/                 # Shared helpers (stemming, stopwords, float16, etc.)
+│   │   └── __tests__/fixtures/    # Shared test fixtures (production-realistic course data)
 │   └── vite.config.js             # Advanced code-splitting (vendor, data, search chunks)
 ├── functions/                     # Firebase Cloud Functions
 │   ├── ai/                        # Gemini-powered AI endpoints
@@ -96,6 +97,8 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   ├── augment_transcript.py              # Transcript augmentation
 │   ├── scrape_epic_docs.py                # UDN documentation scraping
 │   ├── embed_segments.py                  # Segment embedding generation
+│   ├── drive_to_txt.py                    # GPU Whisper video transcription
+│   ├── deploy_ghpages.py                  # Orphan-branch GitHub Pages deploy
 │   └── ...                                # 70+ more enrichment/audit/validation scripts
 ├── content/transcripts/           # 616+ VTT transcript files
 ├── tags/                          # Tag schema & relationship graph
@@ -128,7 +131,7 @@ npm run dev          # http://localhost:5173/Unreal-Learning-Path-Tagging-System
 
 ```bash
 cd path-builder
-npm test             # Unit + component + regression tests (300 tests, ~3s)
+npm test             # Unit + component + regression tests (325 tests, ~40s)
 npm run test:watch   # Watch mode
 npm run test:e2e     # Playwright E2E browser tests (9 tests, ~13s)
 ```
