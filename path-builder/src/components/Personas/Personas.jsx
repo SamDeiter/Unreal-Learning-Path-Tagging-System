@@ -249,6 +249,36 @@ function OnboardingVideosByRole({ courses, isInCart, addToCart, removeFromCart, 
     };
   });
 
+  // Topic generality score — broad foundations first, specialized topics later
+  const topicPriority = (title) => {
+    const t = title.toLowerCase();
+    if (t.includes("quickstart") || t.includes("your first") || t.includes("first project"))
+      return 0;
+    if (
+      t.includes("introduction to unreal") ||
+      t.includes("intro to unreal") ||
+      t.includes("getting started")
+    )
+      return 1;
+    if (t.includes("editor") || t.includes("viewport") || t.includes("navigate")) return 2;
+    if (t.includes("blueprint") || t.includes("visual script")) return 3;
+    if (
+      t.includes("landscape") ||
+      t.includes("terrain") ||
+      t.includes("foliage") ||
+      t.includes("environment")
+    )
+      return 4;
+    if (t.includes("material") || t.includes("texture") || t.includes("shader")) return 5;
+    if (t.includes("lighting") || t.includes("lumen")) return 6;
+    if (t.includes("static mesh") || t.includes("import")) return 7;
+    if (t.includes("animation") || t.includes("sequencer")) return 8;
+    if (t.includes("niagara") || t.includes("particle") || t.includes("vfx")) return 9;
+    if (t.includes("control rig") || t.includes("rigging") || t.includes("retarget")) return 10;
+    if (t.includes("metahuman") || t.includes("character")) return 11;
+    return 8; // default: between general and specialized
+  };
+
   // Group by role — with _other catch-all (matching Fix a Problem pattern)
   const grouped = {};
   for (const section of ONBOARDING_ROLE_SECTIONS) grouped[section.key] = [];
@@ -256,6 +286,16 @@ function OnboardingVideosByRole({ courses, isInCart, addToCart, removeFromCart, 
   for (const item of videoResults) {
     const role = item.video.role || "_other";
     (grouped[role] || grouped._other).push(item);
+  }
+
+  // Sub-sort each group: prerequisites by topic generality, others by match score
+  for (const key of Object.keys(grouped)) {
+    grouped[key].sort((a, b) => {
+      if (key === "prerequisite") {
+        return topicPriority(a.video.title) - topicPriority(b.video.title);
+      }
+      return (b.video.matchPercent || 0) - (a.video.matchPercent || 0);
+    });
   }
 
   const totalCount = videoResults.length;
