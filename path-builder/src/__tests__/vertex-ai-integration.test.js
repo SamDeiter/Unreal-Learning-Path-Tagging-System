@@ -4,7 +4,14 @@
  * Monitors: API contract, service resilience, pipeline integration, and component rendering.
  * These tests use mocks — they don't call the real Cloud Function.
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { cleanup } from "@testing-library/react";
+
+// Reset module cache before each test to prevent vi.doMock contamination
+beforeEach(() => {
+  vi.resetModules();
+  cleanup();
+});
 
 // ── Test 1: Service contract ───────────────────────────────────────────────
 
@@ -133,30 +140,36 @@ describe("OfficialDocsSummary — Component Renders", () => {
       "../components/OfficialDocsSummary/OfficialDocsSummary"
     );
 
-    const mockData = {
+    const realisticVertexData = {
       results: [
-        { title: "Lumen Overview", url: "https://dev.epicgames.com/lumen", snippet: "Lumen is..." },
+        {
+          title: "Lumen Global Illumination and Reflections",
+          url: "https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine",
+          snippet: "Lumen is Unreal Engine 5's fully dynamic global illumination and reflections system that is designed for next-generation consoles.",
+        },
       ],
-      summary: "Lumen is a dynamic global illumination system in UE5.",
+      summary: "Lumen is a fully dynamic global illumination and reflection system in UE5, designed for next-gen consoles and high-end PCs.",
       citations: [],
       references: [
-        { title: "Lumen Docs", uri: "https://dev.epicgames.com/lumen" },
+        {
+          title: "Lumen Technical Details",
+          uri: "https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-technical-details-in-unreal-engine",
+        },
       ],
     };
 
     render(
-      React.createElement(OfficialDocsSummary, { data: mockData, isLoading: false, error: null })
+      React.createElement(OfficialDocsSummary, { data: realisticVertexData, isLoading: false, error: null })
     );
 
     // Expand the collapsible section to see summary content
-    const expandBtn = document.querySelector("[aria-expanded]");
-    fireEvent.click(expandBtn);
+    fireEvent.click(screen.getByText(/Official UE5 Documentation/i));
 
     expect(screen.getByText(/AI Summary/i)).toBeTruthy();
     expect(
-      screen.getByText("Lumen is a dynamic global illumination system in UE5.")
+      screen.getByText("Lumen is a fully dynamic global illumination and reflection system in UE5, designed for next-gen consoles and high-end PCs.")
     ).toBeTruthy();
-    expect(screen.getByText("Lumen Docs")).toBeTruthy();
+    expect(screen.getByText("Lumen Technical Details")).toBeTruthy();
     expect(screen.getByText(/1 results/i)).toBeTruthy();
   });
 });

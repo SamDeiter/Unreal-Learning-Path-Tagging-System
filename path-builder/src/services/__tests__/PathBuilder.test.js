@@ -5,6 +5,11 @@ import {
   buildLearningPath,
   ROLE_PRIORITY,
 } from "../../services/PathBuilder";
+import {
+  makeCourse,
+  blueprintBasicsCourse,
+  materialsCourse,
+} from "../../__tests__/fixtures/testCourses";
 
 // Mock TagGraphService to avoid real graph dependency
 vi.mock("../../services/TagGraphService.js", () => ({
@@ -13,20 +18,6 @@ vi.mock("../../services/TagGraphService.js", () => ({
     edgesBySource: new Map(),
   },
 }));
-
-// ─── Helper ──────────────────────────────────────────────────
-
-function makeCourse(overrides = {}) {
-  return {
-    code: "TEST.01",
-    title: "Test Course",
-    canonical_tags: [],
-    gemini_system_tags: [],
-    transcript_tags: [],
-    _relevanceScore: 50,
-    ...overrides,
-  };
-}
 
 // ─── ROLE_PRIORITY ───────────────────────────────────────────
 
@@ -69,38 +60,54 @@ describe("estimateDuration", () => {
       })
     ).toBe(20);
   });
+
+  it("works with real course fixtures", () => {
+    expect(estimateDuration(blueprintBasicsCourse)).toBe(45);
+    expect(estimateDuration(materialsCourse)).toBe(90);
+  });
 });
 
 // ─── overlapRatio ────────────────────────────────────────────
 
 describe("overlapRatio", () => {
   it("returns 0 for empty selectedTags", () => {
-    const course = makeCourse({ canonical_tags: ["blueprint", "material"] });
-    expect(overlapRatio(course, new Set())).toBe(0);
+    expect(overlapRatio(blueprintBasicsCourse, new Set())).toBe(0);
   });
 
   it("returns 0 for course with no tags", () => {
-    const course = makeCourse();
-    expect(overlapRatio(course, new Set(["blueprint"]))).toBe(0);
+    const emptyTagCourse = makeCourse({
+      canonical_tags: [],
+      gemini_system_tags: [],
+      transcript_tags: [],
+      tags: [],
+    });
+    expect(overlapRatio(emptyTagCourse, new Set(["blueprint"]))).toBe(0);
   });
 
   it("returns 1 for full overlap", () => {
-    const course = makeCourse({ canonical_tags: ["blueprint"] });
-    const result = overlapRatio(course, new Set(["blueprint"]));
-    expect(result).toBe(1);
+    const singleTagCourse = makeCourse({
+      canonical_tags: ["blueprint"],
+      gemini_system_tags: [],
+      transcript_tags: [],
+      tags: [],
+    });
+    expect(overlapRatio(singleTagCourse, new Set(["blueprint"]))).toBe(1);
   });
 
   it("returns fractional overlap for partial match", () => {
-    const course = makeCourse({ canonical_tags: ["blueprint", "material", "lighting"] });
-    const result = overlapRatio(course, new Set(["blueprint"]));
+    const result = overlapRatio(materialsCourse, new Set(["materials"]));
     expect(result).toBeGreaterThan(0);
     expect(result).toBeLessThan(1);
   });
 
   it("handles case-insensitive matching", () => {
-    const course = makeCourse({ canonical_tags: ["Blueprint"] });
-    const result = overlapRatio(course, new Set(["blueprint"]));
-    expect(result).toBe(1);
+    const course = makeCourse({
+      canonical_tags: ["Blueprint"],
+      gemini_system_tags: [],
+      transcript_tags: [],
+      tags: [],
+    });
+    expect(overlapRatio(course, new Set(["blueprint"]))).toBe(1);
   });
 });
 
@@ -119,7 +126,7 @@ describe("buildLearningPath", () => {
 
   it("returns path items with correct structure", () => {
     const courses = [
-      makeCourse({ code: "A", canonical_tags: ["blueprint"], _relevanceScore: 90 }),
+      makeCourse({ code: "102.01", canonical_tags: ["blueprint"], _relevanceScore: 90 }),
     ];
     const result = buildLearningPath(courses, ["blueprint"]);
     expect(result.path.length).toBe(1);
@@ -131,7 +138,12 @@ describe("buildLearningPath", () => {
 
   it("respects maxItems constraint", () => {
     const courses = Array.from({ length: 20 }, (_, i) =>
-      makeCourse({ code: `C${i}`, canonical_tags: [`tag${i}`], _relevanceScore: 90 - i })
+      makeCourse({
+        code: `${100 + i}.0${i}`,
+        title: `UE5 Course Module ${i + 1}`,
+        canonical_tags: [`tag${i}`],
+        _relevanceScore: 90 - i,
+      })
     );
     const result = buildLearningPath(courses, ["tag0"], { maxItems: 5 });
     expect(result.path.length).toBeLessThanOrEqual(5);
@@ -141,7 +153,8 @@ describe("buildLearningPath", () => {
   it("respects timeBudgetMinutes constraint", () => {
     const courses = Array.from({ length: 10 }, (_, i) =>
       makeCourse({
-        code: `C${i}`,
+        code: `${200 + i}.0${i}`,
+        title: `UE5 Lighting Module ${i + 1}`,
         canonical_tags: [`tag${i}`],
         estimated_minutes: 30,
         _relevanceScore: 90 - i,
@@ -151,24 +164,11 @@ describe("buildLearningPath", () => {
     expect(result.metadata.totalMinutes).toBeLessThanOrEqual(60);
   });
 
-  it("computes metadata correctly", () => {
-    const courses = [
-      makeCourse({
-        code: "A",
-        canonical_tags: ["blueprint"],
-        estimated_minutes: 20,
-        _relevanceScore: 90,
-      }),
-      makeCourse({
-        code: "B",
-        canonical_tags: ["material"],
-        estimated_minutes: 30,
-        _relevanceScore: 80,
-      }),
-    ];
-    const result = buildLearningPath(courses, ["blueprint", "material"], { diversity: false });
+  it("computes metadata correctly with real fixtures", () => {
+    const courses = [blueprintBasicsCourse, materialsCourse];
+    const result = buildLearningPath(courses, ["blueprint", "materials"], { diversity: false });
     expect(result.metadata.itemCount).toBe(2);
-    expect(result.metadata.totalMinutes).toBe(50);
+    expect(result.metadata.totalMinutes).toBe(135); // 45 + 90
     expect(result.metadata.tagCoverage).toBeGreaterThanOrEqual(0);
     expect(result.metadata.tagCoverage).toBeLessThanOrEqual(1);
     expect(result.metadata.diversityScore).toBeGreaterThanOrEqual(0);
@@ -179,8 +179,9 @@ describe("buildLearningPath", () => {
     // Create courses with identical tags — diversity should filter duplicates
     const courses = Array.from({ length: 5 }, (_, i) =>
       makeCourse({
-        code: `C${i}`,
-        canonical_tags: ["blueprint", "material"], // same tags
+        code: `${300 + i}.0${i}`,
+        title: `Blueprint Variations ${i + 1}`,
+        canonical_tags: ["blueprint", "materials"], // same tags
         _relevanceScore: 90 - i,
       })
     );
