@@ -8,6 +8,8 @@ import { onAuthChange, signOutUser } from "./services/googleAuthService";
 import { isAdmin } from "./services/accessControl";
 import { getFirestore, collection, query, where, onSnapshot } from "firebase/firestore";
 import { getFirebaseApp } from "./services/firebaseConfig";
+import useIsMobile from "./hooks/useIsMobile";
+import MobileNavDrawer from "./components/MobileNav/MobileNavDrawer";
 import "./App.css";
 
 // Import course data
@@ -46,6 +48,30 @@ const ConfidenceAnalytics = lazy(() => import("./components/Visualizations/Confi
 const TagHistorySparkline = lazy(() => import("./components/Visualizations/TagHistorySparkline"));
 const InviteManager = lazy(() => import("./components/InviteManager/InviteManager"));
 
+// Tab definitions — mobile reorders these for relevance
+const BASE_TABS = [
+  { key: "dashboard", label: "Dashboard", icon: "📊" },
+  { key: "readiness", label: "Path Readiness", icon: "📚" },
+  { key: "tags", label: "Tags", icon: "🏷️" },
+  { key: "builder", label: "Path Builder", icon: "🏗️" },
+  { key: "personas", label: "Onboarding", icon: "🚀" },
+  { key: "problem", label: "Fix a Problem", icon: "🔧" },
+  { key: "analytics", label: "Analytics", icon: "📊" },
+  { key: "augmentation", label: "Augmentation", icon: "🔬" },
+];
+
+// On mobile, surface the most useful tabs first
+const MOBILE_TAB_ORDER = [
+  "personas",
+  "problem",
+  "dashboard",
+  "readiness",
+  "builder",
+  "tags",
+  "analytics",
+  "augmentation",
+];
+
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [preSelectedSkill, setPreSelectedSkill] = useState(null);
@@ -53,6 +79,31 @@ function App() {
   const [userIsAdmin, setUserIsAdmin] = useState(false);
   const [newFeedbackCount, setNewFeedbackCount] = useState(0);
   const [showQuiz, setShowQuiz] = useState(() => !localStorage.getItem("ue5_persona_id"));
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { isMobile } = useIsMobile();
+
+  // Build ordered tab list (mobile reorders, admin tabs appended)
+  const tabs = useMemo(() => {
+    const adminTabs = userIsAdmin
+      ? [
+          { key: "invites", label: "Invites", icon: "🎟️", adminOnly: true },
+          { key: "admin-feedback", label: "Feedback", icon: "📋", adminOnly: true },
+        ]
+      : [];
+    const allTabs = [...BASE_TABS, ...adminTabs];
+    if (!isMobile) return allTabs;
+    // Reorder for mobile
+    const ordered = [];
+    for (const key of MOBILE_TAB_ORDER) {
+      const tab = allTabs.find((t) => t.key === key);
+      if (tab) ordered.push(tab);
+    }
+    // Append any remaining (admin tabs)
+    for (const tab of allTabs) {
+      if (!ordered.includes(tab)) ordered.push(tab);
+    }
+    return ordered;
+  }, [isMobile, userIsAdmin]);
 
   // Check if current user is admin for showing invite tab
   useEffect(() => {
@@ -214,83 +265,23 @@ function App() {
         >
           <div className="app">
             {/* Header */}
-            <header className="app-header">
-              <div className="header-left">
-                <h1 className="app-title">UE5 Learning Path Builder</h1>
-                <nav className="main-nav">
+            <header className={`app-header ${isMobile ? "mobile-header" : ""}`}>
+              {isMobile ? (
+                /* ── Mobile: hamburger + active tab name ── */
+                <>
                   <button
-                    className={`nav-tab ${activeTab === "dashboard" ? "active" : ""}`}
-                    onClick={() => setActiveTab("dashboard")}
+                    className="hamburger-btn"
+                    onClick={() => setDrawerOpen(true)}
+                    aria-label="Open menu"
                   >
-                    📊 Dashboard
+                    ☰
                   </button>
-                  <button
-                    className={`nav-tab ${activeTab === "readiness" ? "active" : ""}`}
-                    onClick={() => setActiveTab("readiness")}
-                  >
-                    📚 Path Readiness
-                  </button>
-                  <button
-                    className={`nav-tab ${activeTab === "tags" ? "active" : ""}`}
-                    onClick={() => setActiveTab("tags")}
-                  >
-                    🏷️ Tags
-                  </button>
-                  <button
-                    className={`nav-tab ${activeTab === "builder" ? "active" : ""}`}
-                    onClick={() => setActiveTab("builder")}
-                  >
-                    🏗️ Path Builder
-                  </button>
-                  <button
-                    className={`nav-tab ${activeTab === "personas" ? "active" : ""}`}
-                    onClick={() => setActiveTab("personas")}
-                  >
-                    🚀 Onboarding
-                  </button>
-                  <button
-                    className={`nav-tab ${activeTab === "problem" ? "active" : ""}`}
-                    onClick={() => setActiveTab("problem")}
-                  >
-                    🔧 Fix a Problem
-                  </button>
-                  <button
-                    className={`nav-tab ${activeTab === "analytics" ? "active" : ""}`}
-                    onClick={() => setActiveTab("analytics")}
-                  >
-                    📊 Analytics
-                  </button>
-                  <button
-                    className={`nav-tab ${activeTab === "augmentation" ? "active" : ""}`}
-                    onClick={() => setActiveTab("augmentation")}
-                  >
-                    🔬 Augmentation
-                  </button>
-                  {userIsAdmin && (
-                    <button
-                      className={`nav-tab ${activeTab === "invites" ? "active" : ""}`}
-                      onClick={() => setActiveTab("invites")}
-                    >
-                      🎟️ Invites
-                    </button>
-                  )}
-                  {userIsAdmin && (
-                    <button
-                      className={`nav-tab ${activeTab === "admin-feedback" ? "active" : ""}`}
-                      onClick={() => setActiveTab("admin-feedback")}
-                    >
-                      📋 Feedback
-                      {newFeedbackCount > 0 && (
-                        <span className="feedback-badge">{newFeedbackCount}</span>
-                      )}
-                    </button>
-                  )}
-                </nav>
-              </div>
-              <div className="header-right">
-                {currentUser && (
-                  <div className="header-user-info">
-                    {currentUser.photoURL && (
+                  <span className="mobile-active-tab">
+                    {tabs.find((t) => t.key === activeTab)?.icon}{" "}
+                    {tabs.find((t) => t.key === activeTab)?.label}
+                  </span>
+                  <div className="header-right mobile-header-right">
+                    {currentUser?.photoURL && (
                       <img
                         src={currentUser.photoURL}
                         alt=""
@@ -298,25 +289,71 @@ function App() {
                         referrerPolicy="no-referrer"
                       />
                     )}
-                    <span className="header-user-name">
-                      {currentUser.displayName || currentUser.email}
-                    </span>
-                    <button className="header-signout-btn" onClick={() => signOutUser()}>
-                      Sign Out
-                    </button>
-                    <button
-                      className="retake-quiz-btn"
-                      onClick={() => {
-                        localStorage.removeItem("ue5_persona_id");
-                        setShowQuiz(true);
-                      }}
-                    >
-                      🔄 Change My Role
-                    </button>
                   </div>
-                )}
-              </div>
+                </>
+              ) : (
+                /* ── Desktop: inline tabs ── */
+                <>
+                  <div className="header-left">
+                    <h1 className="app-title">UE5 Learning Path Builder</h1>
+                    <nav className="main-nav">
+                      {tabs.map((tab) => (
+                        <button
+                          key={tab.key}
+                          className={`nav-tab ${activeTab === tab.key ? "active" : ""}`}
+                          onClick={() => setActiveTab(tab.key)}
+                        >
+                          {tab.icon} {tab.label}
+                          {tab.key === "admin-feedback" && newFeedbackCount > 0 && (
+                            <span className="feedback-badge">{newFeedbackCount}</span>
+                          )}
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+                  <div className="header-right">
+                    {currentUser && (
+                      <div className="header-user-info">
+                        {currentUser.photoURL && (
+                          <img
+                            src={currentUser.photoURL}
+                            alt=""
+                            className="header-avatar"
+                            referrerPolicy="no-referrer"
+                          />
+                        )}
+                        <span className="header-user-name">
+                          {currentUser.displayName || currentUser.email}
+                        </span>
+                        <button className="header-signout-btn" onClick={() => signOutUser()}>
+                          Sign Out
+                        </button>
+                        <button
+                          className="retake-quiz-btn"
+                          onClick={() => {
+                            localStorage.removeItem("ue5_persona_id");
+                            setShowQuiz(true);
+                          }}
+                        >
+                          🔄 Change My Role
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </header>
+
+            {/* Mobile Nav Drawer */}
+            {isMobile && (
+              <MobileNavDrawer
+                tabs={tabs}
+                activeTab={activeTab}
+                onSelect={setActiveTab}
+                isOpen={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+              />
+            )}
 
             {/* Main Content */}
             <main className="app-main">
@@ -337,30 +374,34 @@ function App() {
                   </div>
                 )}
                 {activeTab === "builder" && (
-                  <div className="builder-layout">
+                  <div className={`builder-layout ${isMobile ? "builder-mobile" : ""}`}>
                     {/* Top: Intent */}
                     <div className="builder-header-area">
                       <LearningIntentHeader />
                     </div>
 
-                    {/* Left: Input Panel */}
-                    <aside className="library-panel">
-                      <LeftPanel
-                        courses={courses}
-                        preSelectedSkill={preSelectedSkill}
-                        onSkillUsed={() => setPreSelectedSkill(null)}
-                      />
-                    </aside>
+                    {/* Left: Input Panel — hidden on mobile */}
+                    {!isMobile && (
+                      <aside className="library-panel">
+                        <LeftPanel
+                          courses={courses}
+                          preSelectedSkill={preSelectedSkill}
+                          onSkillUsed={() => setPreSelectedSkill(null)}
+                        />
+                      </aside>
+                    )}
 
                     {/* Center: Path Canvas */}
                     <section className="assembly-panel">
                       <AssemblyLine />
                     </section>
 
-                    {/* Right: Outputs */}
-                    <aside className="output-panel-area">
-                      <OutputPanel />
-                    </aside>
+                    {/* Right: Outputs — hidden on mobile */}
+                    {!isMobile && (
+                      <aside className="output-panel-area">
+                        <OutputPanel />
+                      </aside>
+                    )}
                   </div>
                 )}
                 {activeTab === "personas" && (
@@ -388,7 +429,7 @@ function App() {
                       <CollapsibleSection
                         title="Confidence Routing"
                         icon="🧠"
-                        defaultExpanded={true}
+                        defaultExpanded={!isMobile}
                       >
                         <ConfidenceAnalytics />
                       </CollapsibleSection>
@@ -397,7 +438,7 @@ function App() {
                       <CollapsibleSection
                         title="Coverage vs Industry Demand"
                         icon="🎯"
-                        defaultExpanded={true}
+                        defaultExpanded={!isMobile}
                       >
                         <div className="coverage-grid">
                           <SkillRadar />
@@ -428,7 +469,7 @@ function App() {
                       <CollapsibleSection
                         title="Tag Relationship Graph"
                         icon="🔗"
-                        defaultExpanded={true}
+                        defaultExpanded={!isMobile}
                       >
                         <div className="tag-graph-wrapper">
                           <TagGraph tags={tags} edges={edges} courses={courses} />
@@ -439,6 +480,11 @@ function App() {
                 )}
                 {activeTab === "augmentation" && (
                   <div className="augmentation-layout">
+                    {isMobile && (
+                      <div className="mobile-desktop-banner">
+                        💻 This tool works best on a desktop browser for the full experience.
+                      </div>
+                    )}
                     <iframe
                       className="augmentation-frame"
                       src={`${import.meta.env.BASE_URL}augmentation_index.html`}
