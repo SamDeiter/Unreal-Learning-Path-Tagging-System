@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTagData } from "../../context/TagDataContext";
-import { getAllPersonas } from "../../services/PersonaService";
+import { getAllPersonas, personaScoringRules } from "../../services/PersonaService";
 import VertexAIMonitor from "../VertexAIMonitor/VertexAIMonitor";
 import "./Dashboard.css";
 
@@ -42,41 +42,39 @@ function Dashboard() {
     );
   }, [courses]);
 
-  // Persona Distribution (Option D)
+  // Persona Distribution (Option D) — keyword-scored
   const personaDistribution = useMemo(() => {
     const allPersonas = getAllPersonas();
-    // Map industry → persona(s)
-    const industryToPersona = {
-      games: ["indie_isaac", "logic_liam"],
-      "game development": ["indie_isaac", "logic_liam"],
-      film: ["animator_alex", "rigger_regina"],
-      "film / animation": ["animator_alex", "rigger_regina"],
-      animation: ["animator_alex", "rigger_regina"],
-      "retail / cpg": ["designer_cpg"],
-      "product viz": ["designer_cpg"],
-      marketing: ["designer_cpg"],
-      architecture: ["architect_amy"],
-      archviz: ["architect_amy"],
-      industrial: ["simulation_sam"],
-      defense: ["simulation_sam"],
-      simulation: ["simulation_sam"],
-      vfx: ["vfx_victor"],
-      effects: ["vfx_victor"],
-      automotive: ["automotive_andy"],
-    };
-
     const counts = {};
     allPersonas.forEach((p) => {
       counts[p.id] = 0;
     });
 
     courses.forEach((course) => {
-      const industry = (course.tags?.industry || "General").toLowerCase();
-      const matched = industryToPersona[industry];
-      if (matched) {
-        matched.forEach((pid) => {
-          counts[pid] = (counts[pid] || 0) + 1;
+      const text = [
+        course.title || course.name || "",
+        course.tags?.topic || "",
+        course.tags?.industry || "",
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      let bestPersona = null;
+      let bestScore = 0;
+
+      Object.entries(personaScoringRules).forEach(([pid, rules]) => {
+        let score = 0;
+        (rules.boostKeywords || []).forEach((kw) => {
+          if (text.includes(kw.toLowerCase())) score += 1;
         });
+        if (score > bestScore) {
+          bestScore = score;
+          bestPersona = pid;
+        }
+      });
+
+      if (bestPersona && bestScore > 0) {
+        counts[bestPersona] = (counts[bestPersona] || 0) + 1;
       }
     });
 
