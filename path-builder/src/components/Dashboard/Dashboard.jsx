@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useTagData } from "../../context/TagDataContext";
 import { getAllPersonas, personaScoringRules } from "../../services/PersonaService";
 import VertexAIMonitor from "../VertexAIMonitor/VertexAIMonitor";
+import ContentGapDashboard from "./ContentGapDashboard";
 import "./Dashboard.css";
 
 /**
@@ -527,6 +528,9 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Persona Content Gap Analysis */}
+      <ContentGapDashboard />
 
       {/* Tag Cloud Section */}
       <div className="section-card">
