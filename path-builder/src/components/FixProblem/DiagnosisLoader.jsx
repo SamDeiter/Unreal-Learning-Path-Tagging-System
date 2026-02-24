@@ -66,6 +66,25 @@ export default function DiagnosisLoader({ query }) {
             <p className="dx-query-text">&ldquo;{query}&rdquo;</p>
           </div>
         )}
+
+        {/* Skeleton preview — shows what the answer will look like */}
+        <div className="dx-skeleton">
+          <div className="dx-skel-header">
+            <div className="dx-skel-line w60" />
+          </div>
+          <div className="dx-skel-row">
+            <div className="dx-skel-line w90" />
+            <div className="dx-skel-line w75" />
+            <div className="dx-skel-line w50" />
+          </div>
+          <div className="dx-skel-divider" />
+          <div className="dx-skel-row">
+            <div className="dx-skel-line w80" />
+            <div className="dx-skel-line w65" />
+            <div className="dx-skel-line w85" />
+            <div className="dx-skel-line w45" />
+          </div>
+        </div>
       </div>
     </div>
   );

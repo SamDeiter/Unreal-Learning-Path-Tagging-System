@@ -121,9 +121,22 @@ export default function ProblemFirst() {
           <div className="error-icon">⚠️</div>
           <h3>Something went wrong</h3>
           <p>{error}</p>
-          <button className="retry-btn" onClick={handleReset}>
-            Try Again
-          </button>
+          <div className="error-tips">
+            <p className="error-tips-label">💡 Things to try:</p>
+            <ul>
+              <li>Be more specific — mention the UE5 system (e.g. Lumen, Nanite, Blueprints)</li>
+              <li>Include your engine version (e.g. UE 5.4)</li>
+              <li>Paste the exact error message if you have one</li>
+            </ul>
+          </div>
+          <div className="error-actions">
+            <button className="retry-btn" onClick={handleAskAgain}>
+              🔄 Retry Same Question
+            </button>
+            <button className="retry-btn secondary" onClick={handleReset}>
+              ✏️ Ask Something Else
+            </button>
+          </div>
         </div>
       )}
 
