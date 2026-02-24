@@ -1,29 +1,21 @@
 /**
  * useExploreFirst — Controller hook for the "Explore & Learn" page.
  *
- * Uses shared services (searchPipeline, blendedPathBuilder, courseToVideos)
- * for the core RAG pipeline. Keeps persona detection and simple stage flow.
+ * Uses shared services (useSearchSubmit, useVideoActions) for the core
+ * RAG pipeline. Keeps persona detection and simple stage flow.
  *
  * Flow: INPUT → LOADING → RESULTS → GUIDED
  */
-import { useState, useCallback, useMemo } from "react";
-import { getFirebaseApp } from "../services/firebaseConfig";
-import {
-  trackQuerySubmitted,
-  trackDiagnosisGenerated,
-  trackLearningPathGenerated,
-} from "../services/analyticsService";
-import { useTagData } from "../context/TagDataContext";
+import { useState, useCallback } from "react";
 import { useVideoCart } from "./useVideoCart";
-import { devLog, devWarn } from "../utils/logger";
+import { devLog } from "../utils/logger";
 import { personaScoringRules } from "../services/PersonaService";
 import { getPersonaById } from "../services/PersonaService";
 import personaData from "../data/personas.json";
 
-// Shared services (Phase 2 refactor)
-import { runSearchPipeline } from "../services/searchPipeline";
-import { buildBlendedPathFromDiagnosis } from "../services/blendedPathBuilder";
-import { matchAndFlattenToVideos } from "../services/courseToVideos";
+// Shared hooks (deduplication refactor)
+import { executeSearchPipeline, useCourses } from "./useSearchSubmit";
+import { useVideoActions } from "./useVideoActions";
 import { EXPLORE_STOPWORDS as STOP_WORDS } from "../domain/constants";
 
 // ──────────── Constants ────────────
@@ -34,6 +26,12 @@ export const STAGES = {
   GUIDED: "guided",
   ERROR: "error",
 };
+
+const EXPLORE_EXAMPLES = [
+  "I want to learn Blueprint scripting",
+  "How to set up materials and lighting",
+  "Getting started with Niagara particles",
+];
 
 // ──────────── Silent Persona Detection ────────────
 function detectPersonaFromQuery(query) {
@@ -98,10 +96,13 @@ export default function useExploreFirst() {
   const [videoResults, setVideoResults] = useState([]);
   const [detectedPersona, setDetectedPersona] = useState(null);
 
-  // ── Derived ──
+  // ── Shared hooks ──
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
-  const tagData = useTagData();
-  const courses = useMemo(() => tagData?.courses || [], [tagData?.courses]);
+  const courses = useCourses();
+  const { handleVideoToggle, handleWatchPath } = useVideoActions({
+    isInCart, addToCart, removeFromCart, cart, setStage,
+    guidedStage: STAGES.GUIDED,
+  });
 
   // ──────────── Main submit handler ────────────
   const handleSubmit = useCallback(
@@ -118,114 +119,36 @@ export default function useExploreFirst() {
       }
 
       try {
-        await trackQuerySubmitted(
-          inputData.query,
-          inputData.detectedTagIds,
-          persona?.id
-        );
-
-        // ── Step 1: Shared search pipeline ──
-        const { semanticResults, retrievedPassages } = await runSearchPipeline(
-          inputData.query,
-          { maxPassages: 8 }
-        );
-
-        // ── Step 2: Call queryLearningPath Cloud Function (explore mode) ──
-        let cartData;
-        let geminiSucceeded = true;
-        try {
-          const { getFunctions, httpsCallable } = await import("firebase/functions");
-          const app = getFirebaseApp();
-          const functions = getFunctions(app, "us-central1");
-          const queryLearningPath = httpsCallable(functions, "queryLearningPath");
-
-          const result = await queryLearningPath({
-            query: inputData.query,
+        // ── Shared 4-step pipeline ──
+        const result = await executeSearchPipeline({
+          inputData,
+          courses,
+          cloudFnPayload: {
             mode: "explore",
-            detectedTagIds: inputData.detectedTagIds,
             personaHint: persona?.id || inputData.personaHint,
-            retrievedContext: retrievedPassages.slice(0, 8),
-          });
-
-          if (!result.data.success && result.data.error === "off_topic") {
-            setError(
-              result.data.message ||
-                "This doesn't appear to be a UE5 topic. Please describe what you want to learn about Unreal Engine 5."
-            );
-            setStage(STAGES.ERROR);
-            return;
-          }
-
-          if (!result.data.success)
-            throw new Error(result.data.message || "Failed to process query");
-
-          cartData = result.data.cart;
-        } catch (geminiErr) {
-          const isOffTopic =
-            geminiErr.message?.includes("off_topic") || geminiErr.message?.includes("not a UE5");
-
-          if (isOffTopic) {
-            setError(
-              "This doesn't appear to be a UE5 topic. Try describing what you want to learn, for example:\n" +
-                '• "I want to learn Blueprints"\n' +
-                '• "How to create materials and shaders"\n' +
-                '• "Getting started with Niagara particles"'
-            );
-            setStage(STAGES.ERROR);
-            return;
-          }
-
-          devWarn(`⚠️ Gemini error: ${geminiErr.message}. Falling back to local matching.`);
-          geminiSucceeded = false;
-          cartData = {
-            diagnosis: {
-              problem_summary: inputData.query,
-              matched_tag_ids: inputData.detectedTagIds || [],
-            },
-            objectives: [],
-            intent: { systems: [] },
-          };
-        }
-        cartData.userQuery = inputData.query;
-        cartData.retrievedPassages = retrievedPassages;
-        cartData._localFallback = !geminiSucceeded;
-
-        // ── Step 3: Shared course → video pipeline ──
-        const { matchedCourses, driveVideos, nonVideoItems, allItems } =
-          await matchAndFlattenToVideos(cartData, courses, inputData, semanticResults, {
+          },
+          pipelineOpts: {
+            maxPassages: 8,
             preferTroubleshooting: false,
             errorLog: "",
-          });
+            stopWords: STOP_WORDS,
+            personaId: persona?.id,
+            offTopicExamples: EXPLORE_EXAMPLES,
+          },
+        });
 
-        if (allItems.length === 0) {
-          setError(
-            "We couldn't find content matching your query. " +
-              "Try describing what you want to learn, for example:\n" +
-              '• "I want to learn Blueprint scripting"\n' +
-              '• "How to set up materials and lighting"\n' +
-              '• "Getting started with Niagara particles"'
-          );
+        // Handle pipeline errors
+        if (result.error) {
+          setError(result.error);
           setStage(STAGES.ERROR);
           return;
         }
 
-        setVideoResults(driveVideos);
-        setDiagnosisData(cartData);
-
-        // ── Step 4: Shared blended path builder ──
-        const blended = await buildBlendedPathFromDiagnosis(
-          inputData, cartData, driveVideos, nonVideoItems, STOP_WORDS
-        );
-        if (blended) setBlendedPath(blended);
-
+        // Success — apply results
+        setVideoResults(result.driveVideos);
+        setDiagnosisData(result.cartData);
+        if (result.blendedPath) setBlendedPath(result.blendedPath);
         setStage(STAGES.RESULTS);
-
-        await trackDiagnosisGenerated(cartData.diagnosis);
-        await trackLearningPathGenerated(
-          cartData.objectives,
-          matchedCourses,
-          cartData.validation?.approved
-        );
       } catch (err) {
         console.error("[ExploreFirst] Error:", err);
         setError(err.message || "An unexpected error occurred");
@@ -244,18 +167,6 @@ export default function useExploreFirst() {
     setBlendedPath(null);
     setDetectedPersona(null);
   }, []);
-
-  const handleVideoToggle = useCallback(
-    (video) => {
-      if (isInCart(video.driveId)) removeFromCart(video.driveId);
-      else addToCart(video);
-    },
-    [isInCart, addToCart, removeFromCart]
-  );
-
-  const handleWatchPath = useCallback(() => {
-    if (cart.length > 0) setStage(STAGES.GUIDED);
-  }, [cart]);
 
   const handleBackToResults = useCallback(() => {
     setStage(STAGES.RESULTS);

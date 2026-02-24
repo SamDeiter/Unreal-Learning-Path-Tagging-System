@@ -7,7 +7,7 @@
  *
  * @returns {Object} All state + handlers the view needs
  */
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 
@@ -23,11 +23,14 @@ import {
   trackLearningPathGenerated,
 } from "../services/analyticsService";
 
-import { useTagData } from "../context/TagDataContext";
 import { useVideoCart } from "./useVideoCart";
 import { devLog, devWarn } from "../utils/logger";
 
-// Shared services (Phase 2 refactor)
+// Shared hooks (deduplication refactor)
+import { useCourses } from "./useSearchSubmit";
+import { useVideoActions } from "./useVideoActions";
+
+// Shared services
 import { runSearchPipeline } from "../services/searchPipeline";
 import { buildBlendedPathFromDiagnosis } from "../services/blendedPathBuilder";
 import { matchAndFlattenToVideos } from "../services/courseToVideos";
@@ -62,10 +65,13 @@ export default function useProblemFirst() {
   const [vertexAILoading, setVertexAILoading] = useState(false);
   const [vertexAIError, setVertexAIError] = useState(null);
 
-  // ── Derived ──
+  // ── Shared hooks ──
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
-  const tagData = useTagData();
-  const courses = useMemo(() => tagData?.courses || [], [tagData?.courses]);
+  const courses = useCourses();
+  const { handleVideoToggle, handleWatchPath } = useVideoActions({
+    isInCart, addToCart, removeFromCart, cart, setStage,
+    guidedStage: STAGES.GUIDED,
+  });
 
   const getDetectedPersona = useCallback(() => {
     try {
@@ -505,18 +511,6 @@ export default function useProblemFirst() {
   const handleBackToVideos = useCallback(() => {
     setStage(STAGES.DIAGNOSIS);
   }, []);
-
-  const handleVideoToggle = useCallback(
-    (video) => {
-      if (isInCart(video.driveId)) removeFromCart(video.driveId);
-      else addToCart(video);
-    },
-    [isInCart, addToCart, removeFromCart]
-  );
-
-  const handleWatchPath = useCallback(() => {
-    if (cart.length > 0) setStage(STAGES.GUIDED);
-  }, [cart]);
 
   // ── Return ──
   return {
