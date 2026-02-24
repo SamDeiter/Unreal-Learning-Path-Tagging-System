@@ -22,8 +22,7 @@ const OutputPanel = lazy(() => import("./components/OutputPanel/OutputPanel"));
 const LearningIntentHeader = lazy(() => import("./components/LearningIntent/LearningIntentHeader"));
 const TagGraph = lazy(() => import("./components/TagGraph/TagGraph"));
 const PathReadiness = lazy(() => import("./components/PathReadiness/PathReadiness"));
-const TagSources = lazy(() => import("./components/TagSources/TagSources"));
-const TagEditor = lazy(() => import("./components/TagEditor/TagEditor"));
+const TagManager = lazy(() => import("./components/TagManager/TagManager"));
 const Personas = lazy(() => import("./components/Personas/Personas"));
 const ProblemFirst = lazy(() =>
   import("./components/ProblemFirst").then((m) => ({ default: m.ProblemFirst }))
@@ -232,16 +231,10 @@ function App() {
                     📚 Path Readiness
                   </button>
                   <button
-                    className={`nav-tab ${activeTab === "sources" ? "active" : ""}`}
-                    onClick={() => setActiveTab("sources")}
+                    className={`nav-tab ${activeTab === "tags" ? "active" : ""}`}
+                    onClick={() => setActiveTab("tags")}
                   >
-                    🏷️ Tag Sources
-                  </button>
-                  <button
-                    className={`nav-tab ${activeTab === "editor" ? "active" : ""}`}
-                    onClick={() => setActiveTab("editor")}
-                  >
-                    ✏️ Tag Editor
+                    🏷️ Tags
                   </button>
                   <button
                     className={`nav-tab ${activeTab === "builder" ? "active" : ""}`}
@@ -338,14 +331,9 @@ function App() {
                     <PathReadiness />
                   </div>
                 )}
-                {activeTab === "sources" && (
+                {activeTab === "tags" && (
                   <div className="dashboard-layout">
-                    <TagSources />
-                  </div>
-                )}
-                {activeTab === "editor" && (
-                  <div className="dashboard-layout">
-                    <TagEditor />
+                    <TagManager />
                   </div>
                 )}
                 {activeTab === "builder" && (
