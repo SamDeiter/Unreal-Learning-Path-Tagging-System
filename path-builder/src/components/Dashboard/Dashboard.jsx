@@ -43,7 +43,9 @@ function Dashboard() {
     );
   }, [courses]);
 
-  // Persona Distribution (Option D) — keyword-scored
+  // Persona Distribution (Option D) — multi-persona keyword scoring
+  // A course counts for EVERY persona that has >= 2 keyword matches,
+  // giving a more honest view of coverage overlap.
   const personaDistribution = useMemo(() => {
     const allPersonas = getAllPersonas();
     const counts = {};
@@ -60,23 +62,16 @@ function Dashboard() {
         .join(" ")
         .toLowerCase();
 
-      let bestPersona = null;
-      let bestScore = 0;
-
       Object.entries(personaScoringRules).forEach(([pid, rules]) => {
         let score = 0;
         (rules.boostKeywords || []).forEach((kw) => {
           if (text.includes(kw.toLowerCase())) score += 1;
         });
-        if (score > bestScore) {
-          bestScore = score;
-          bestPersona = pid;
+        // Count course for this persona if >= 2 keyword hits
+        if (score >= 2) {
+          counts[pid] = (counts[pid] || 0) + 1;
         }
       });
-
-      if (bestPersona && bestScore > 0) {
-        counts[bestPersona] = (counts[bestPersona] || 0) + 1;
-      }
     });
 
     return allPersonas
