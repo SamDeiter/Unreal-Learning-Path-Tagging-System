@@ -11,11 +11,14 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 ## 🎯 What It Does
 
 1. **Persona Onboarding** — 3-question quiz identifies user role (Artist, Programmer, Designer, etc.) to personalize the experience
-2. **Problem Analysis** — User describes their UE5 issue in plain language
+2. **Problem Analysis** — User describes their UE5 issue in plain language; skeleton preview shows while AI diagnoses
 3. **Intelligent Matching** — Hybrid pipeline: semantic embeddings → transcript search → tag-based fallback with confidence routing
 4. **Guided Learning Path** — AI-narrated sequence: intro → videos → quizzes → challenges → reflection
-5. **Analytics & Insights** — Tag heatmaps, skill radar, prerequisite flows, industry demand gap analysis, and more
-6. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
+5. **Citation-linked Answers** — Diagnosis responses include clickable `[N]` references linking to Vertex AI documentation
+6. **Dashboard Insights** — Readiness score, persona coverage chart, quick search, and tooltips on all metrics
+7. **Analytics & Insights** — Tag heatmaps, skill radar, prerequisite flows, industry demand gap analysis, and more
+8. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
+9. **Mobile Responsive** — Optimized for phone (480px), tablet (768px), and desktop viewports
 
 ---
 
@@ -155,13 +158,13 @@ python scripts/run_enrichment_pipeline.py
 
 | Tab | Description |
 |-----|-------------|
-| **📊 Dashboard** | Overview of content library, tag coverage, and system health |
+| **📊 Dashboard** | Readiness score, persona coverage chart, quick search, tag cloud, tooltips on all metrics |
 | **📚 Path Readiness** | Evaluate which learning paths are ready for deployment |
 | **🏷️ Tag Sources** | Compare tag origins (canonical, AI, transcript, Gemini) |
 | **✏️ Tag Editor** | Edit and curate tag assignments per course |
 | **🏗️ Path Builder** | Drag-and-drop learning path assembly with intent headers |
 | **🚀 Onboarding** | Persona definitions and onboarding flow management |
-| **🔧 Fix a Problem** | The main user-facing "describe your problem" search flow |
+| **🔧 Fix a Problem** | Describe your problem → skeleton loader → AI diagnosis with citation links, search history, and enhanced error recovery |
 | **📊 Analytics** | Rich visualizations: tag heatmaps, skill radar, demand gaps, prerequisite flows |
 | **🔬 Augmentation** | Embedded dashboard for transcript augmentation quality monitoring |
 | **🎟️ Invites** | Admin-only invite code management |

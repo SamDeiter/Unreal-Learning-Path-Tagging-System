@@ -13,6 +13,14 @@ All notable changes to the Unreal Learning Path Tagging System.
 - **"Change My Role" button** — allows users to retake the persona quiz at any time from the header
 - **Expandable course cards** — course-level statistics (grade distribution, weakest criteria, augmentation load) in the augmentation view
 - **Video detail cards** — criteria bar charts and priority indicators per video
+- **Clickable citation links** — `[N]` references in diagnosis answers now link to Vertex AI documentation sources with hover tooltips
+- **Dashboard: Readiness Score** — weighted completeness gauge (40% videos, 30% AI enrichment, 30% complete tags) with progress bar
+- **Dashboard: Persona Coverage chart** — keyword-scored distribution showing how many courses serve each of the 9 learner personas
+- **Dashboard: Quick Search** — filter bar above the courses table (searches by name, code, or topic)
+- **Dashboard tooltips** — explanatory title tooltips on all 6 stat cards, 3 charts, and 3 section headings
+- **Diagnosis skeleton loader** — animated pulse lines in DiagnosisLoader that preview the answer structure while loading
+- **Enhanced error state** — tips section with UE5-specific suggestions + dual buttons (Retry Same Question / Ask Something Else)
+- **Mobile responsive breakpoints** — Dashboard (480px), FixProblem (768px), App header (600px) with compact nav, hidden title, single-column layouts
 - **Automated Testing Suite (316 tests)** — 7-phase test infrastructure:
   - Phase 1: Data integrity tests (32 tests) — JSON schema validation and field linkage
   - Phase 2: Service unit tests (39 tests) — TagGraphService, narratorService, semanticSearchService
@@ -29,11 +37,14 @@ All notable changes to the Unreal Learning Path Tagging System.
 - Courses grid uses scroll container for better layout
 - Tag graph label readability improvements
 - Updated dist build for GitHub Pages deployment
+- Persona distribution chart now uses keyword scoring from `personaScoringRules.boostKeywords` instead of industry-only mapping
+- Official UE5 Documentation section consistently placed at bottom of Answer View
 
 ### Fixed
 
 - Video playback order — sort video arrays by filename prefix to fix sequence issues
 - "Change My Role" button styling refined to integrate with dark theme
+- Persona coverage chart — 5 personas previously showed 0 courses due to industry-only mapping
 
 ---
 
