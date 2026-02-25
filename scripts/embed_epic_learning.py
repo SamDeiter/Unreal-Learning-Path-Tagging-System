@@ -30,7 +30,7 @@ TRANSCRIPT_DIR = Path("content/epic_learning/transcripts")
 OUTPUT_FILE = Path("path-builder/src/data/epic_learning_embeddings.json")
 CHECKPOINT_FILE = Path("content/epic_learning_embed_checkpoint.json")
 
-MODEL = "text-embedding-004"
+MODEL = "gemini-embedding-001"
 DIMENSION = 768
 TASK_TYPE = "RETRIEVAL_DOCUMENT"
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embedContent"
@@ -189,34 +189,42 @@ def load_all_content():
 
 
 # ── Embedding ───────────────────────────────────────────────────────────
+MAX_RETRIES = 3
+
 def embed_text(text, api_key):
-    """Call Gemini embedding API. Returns 768-dim vector."""
+    """Call Gemini embedding API with retry. Returns 768-dim vector."""
     url = f"{API_URL}?key={api_key}"
     payload = {
-        "model": f"models/{MODEL}",
         "content": {"parts": [{"text": text}]},
         "taskType": TASK_TYPE,
         "outputDimensionality": DIMENSION,
     }
 
-    req = urllib.request.Request(
-        url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
+    req_data = json.dumps(payload).encode("utf-8")
 
-    try:
-        with urllib.request.urlopen(req) as response:
-            result = json.loads(response.read().decode("utf-8"))
-            values = result.get("embedding", {}).get("values", [])
-            if len(values) != DIMENSION:
-                raise ValueError(f"Expected {DIMENSION} dims, got {len(values)}")
-            return values
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8")[:300]
-        print(f"  API error {e.code}: {body}")
-        raise
+    for attempt in range(MAX_RETRIES):
+        req = urllib.request.Request(
+            url,
+            data=req_data,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req) as response:
+                result = json.loads(response.read().decode("utf-8"))
+                values = result.get("embedding", {}).get("values", [])
+                if len(values) != DIMENSION:
+                    raise ValueError(f"Expected {DIMENSION} dims, got {len(values)}")
+                return values
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8")[:200]
+            if attempt < MAX_RETRIES - 1:
+                wait = 2 ** (attempt + 1)
+                print(f"  Retry {attempt+1}/{MAX_RETRIES} after {wait}s (HTTP {e.code})")
+                time.sleep(wait)
+            else:
+                print(f"  API error {e.code}: {body}")
+                raise
 
 
 def save_checkpoint(chunk_id, done):
@@ -283,7 +291,7 @@ def main():
 
     # Embed
     api_key = get_api_key()
-    print(f"\n  API key: {api_key[:8]}...{api_key[-4:]}")
+    print(f"\n  API key loaded (len={len(api_key)})")
 
     # Resume support
     start_idx = 0
