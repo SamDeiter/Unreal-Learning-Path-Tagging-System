@@ -17,6 +17,7 @@ import AnswerView from "../FixProblem/AnswerView";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import CartPanel from "../CartPanel/CartPanel";
 import VideoResultCard from "../VideoResultCard/VideoResultCard";
+import OfficialDocsSummary from "../OfficialDocsSummary/OfficialDocsSummary";
 import useProblemFirst, { STAGES } from "../../hooks/useProblemFirst";
 import { buildGuidedCourses } from "../../domain/buildGuidedCourses";
 import "./ProblemFirst.css";
