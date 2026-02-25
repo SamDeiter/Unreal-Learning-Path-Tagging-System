@@ -32,7 +32,7 @@ export default defineConfig({
   /* Start a separate Vite dev server with auth bypass on a different port */
   webServer: {
     command: "npx vite --port 5174",
-    url: "http://localhost:5174",
+    url: "http://localhost:5174/Unreal-Learning-Path-Tagging-System/",
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
     env: {
