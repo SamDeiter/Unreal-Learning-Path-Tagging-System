@@ -33,9 +33,13 @@ import { devLog, devWarn } from "../utils/logger";
 
 import { decodeFloat16Vector } from "../utils/float16";
 
-// Lazy-loaded embeddings (5.9MB, loaded on first semantic query)
+// Lazy-loaded embeddings (loaded on first semantic query)
 let _segmentEmbeddings = null;
 let _decodedVectors = null;
+
+// Epic Learning embeddings (separate source)
+let _epicEmbeddings = null;
+let _epicDecodedVectors = null;
 
 /**
  * Lazily load and decode segment embeddings.
@@ -79,6 +83,52 @@ async function getSegmentEmbeddings() {
 
   devLog(`[SegmentSearch] Decoded ${_decodedVectors.size} segment embeddings`);
   return _decodedVectors;
+}
+
+/**
+ * Lazily load and decode Epic Learning embeddings.
+ * These are articles/tutorials from dev.epicgames.com, not video transcripts.
+ * @returns {Promise<Map<string, {vector: Float32Array, meta: Object}>|null>}
+ */
+async function getEpicEmbeddings() {
+  if (_epicDecodedVectors) return _epicDecodedVectors;
+
+  if (!_epicEmbeddings) {
+    try {
+      const resp = await fetch(new URL("../data/epic_learning_embeddings.json", import.meta.url));
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      _epicEmbeddings = await resp.json();
+    } catch (err) {
+      devWarn("⚠️ epic_learning_embeddings.json not available:", err.message);
+      return null;
+    }
+  }
+
+  const chunks = _epicEmbeddings?.chunks;
+  if (!chunks) return null;
+
+  _epicDecodedVectors = new Map();
+  for (const [id, chunk] of Object.entries(chunks)) {
+    // Epic embeddings are raw float arrays (not float16 encoded)
+    const vector =
+      chunk.embedding instanceof Float32Array ? chunk.embedding : new Float32Array(chunk.embedding);
+
+    _epicDecodedVectors.set(id, {
+      vector,
+      hashId: chunk.hash_id,
+      title: chunk.title,
+      url: chunk.url,
+      contentType: chunk.content_type,
+      author: chunk.author,
+      tags: chunk.tags,
+      text: chunk.text,
+      tokenEstimate: chunk.token_estimate,
+      chunkIndex: chunk.chunk_index,
+    });
+  }
+
+  devLog(`[SegmentSearch] Decoded ${_epicDecodedVectors.size} Epic Learning embeddings`);
+  return _epicDecodedVectors;
 }
 
 import { SEARCH_STOPWORDS } from "../domain/constants";
@@ -227,8 +277,6 @@ export async function findTopSegments(courseCode, keywords) {
   return scoredSegments.sort((a, b) => b.score - a.score).slice(0, 3);
 }
 
-
-
 /**
  * Get top courses matching a problem query
  * Returns fewer, more targeted results than matchCoursesToCart
@@ -275,29 +323,60 @@ export function formatSegmentCard(segment) {
 export async function searchSegmentsSemantic(queryEmbedding, topK = 10, threshold = 0.35) {
   if (!queryEmbedding) return [];
 
+  const results = [];
+
+  // Search existing segment embeddings (video transcripts)
   const embeddings = await getSegmentEmbeddings();
-  if (!embeddings) {
-    devWarn("[SegmentSearch] Semantic search unavailable — no embeddings loaded");
-    return [];
+  if (embeddings) {
+    for (const [id, seg] of embeddings) {
+      const similarity = cosineSimilarity(queryEmbedding, seg.vector);
+      if (similarity >= threshold) {
+        results.push({
+          id,
+          courseCode: seg.courseCode,
+          videoKey: seg.videoKey,
+          videoTitle: seg.videoTitle,
+          timestamp: seg.startTimestamp,
+          endTimestamp: seg.endTimestamp,
+          startSeconds: seg.startSeconds,
+          previewText: seg.text,
+          similarity,
+          source: "transcript",
+        });
+      }
+    }
   }
 
-  const results = [];
-  for (const [id, seg] of embeddings) {
-    const similarity = cosineSimilarity(queryEmbedding, seg.vector);
-    if (similarity >= threshold) {
-      results.push({
-        id,
-        courseCode: seg.courseCode,
-        videoKey: seg.videoKey,
-        videoTitle: seg.videoTitle,
-        timestamp: seg.startTimestamp,
-        endTimestamp: seg.endTimestamp,
-        startSeconds: seg.startSeconds,
-        previewText: seg.text,
-        similarity,
-        source: "transcript",
-      });
+  // Search Epic Learning embeddings (articles, tutorials, talks)
+  const epicEmbeddings = await getEpicEmbeddings();
+  if (epicEmbeddings) {
+    for (const [id, chunk] of epicEmbeddings) {
+      const similarity = cosineSimilarity(queryEmbedding, chunk.vector);
+      if (similarity >= threshold) {
+        results.push({
+          id,
+          courseCode: null,
+          videoKey: null,
+          videoTitle: chunk.title,
+          timestamp: null,
+          endTimestamp: null,
+          startSeconds: null,
+          previewText: chunk.text,
+          similarity,
+          source: "epic_learning",
+          // Epic-specific fields
+          epicUrl: chunk.url,
+          epicContentType: chunk.contentType,
+          epicAuthor: chunk.author,
+          epicTags: chunk.tags,
+          epicHashId: chunk.hashId,
+        });
+      }
     }
+  }
+
+  if (results.length === 0 && !embeddings && !epicEmbeddings) {
+    devWarn("[SegmentSearch] Semantic search unavailable — no embeddings loaded");
   }
 
   results.sort((a, b) => b.similarity - a.similarity);

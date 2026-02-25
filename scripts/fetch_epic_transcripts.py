@@ -160,13 +160,14 @@ def cleanup_audio(audio_path):
 
 # ── Main ────────────────────────────────────────────────────────────────
 def main():
+    global WHISPER_MODEL
+
     parser = argparse.ArgumentParser(description="Fetch transcripts for Epic Learning videos")
     parser.add_argument("--subs-only", action="store_true", help="Only download subtitles, skip Whisper")
     parser.add_argument("--whisper-model", default=WHISPER_MODEL,
                         help="Whisper model size: tiny, base, small, medium, large (default: base)")
     args = parser.parse_args()
 
-    global WHISPER_MODEL
     WHISPER_MODEL = args.whisper_model
 
     TRANSCRIPT_DIR.mkdir(parents=True, exist_ok=True)

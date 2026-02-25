@@ -342,8 +342,16 @@ def _extract_video_refs(blocks, result):
             if yt_id:
                 videos.append({"type": "youtube", "id": yt_id})
         elif btype == "video":
+            provider = block.get("provider", "unknown")
+            video_id = block.get("video_id", "")
             url = block.get("url", block.get("src", ""))
-            if url:
+            if video_id:
+                videos.append({
+                    "type": provider,  # e.g. "kaltura", "youtube"
+                    "id": video_id,
+                    "caption": block.get("caption", ""),
+                })
+            elif url:
                 videos.append({"type": "epic_video", "url": url})
         elif btype == "embed":
             url = block.get("url", "")
