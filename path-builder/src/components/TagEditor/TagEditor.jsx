@@ -2,6 +2,14 @@ import { useMemo, useState, useCallback } from "react";
 import { useTagData } from "../../context/TagDataContext";
 import "./TagEditor.css";
 
+const EDGE_RELATION_TYPES = [
+  { value: "symptom_of", label: "Symptom Of", emoji: "🩺" },
+  { value: "often_caused_by", label: "Often Caused By", emoji: "⚡" },
+  { value: "related", label: "Related", emoji: "🔗" },
+  { value: "subtopic", label: "Subtopic Of", emoji: "📂" },
+  { value: "replaces", label: "Replaces", emoji: "🔄" },
+];
+
 /**
  * Tag Editor - Bulk tagging interface for efficient content tagging
  * Features: Multi-select courses, bulk add/remove tags, autocomplete, filters
@@ -14,12 +22,19 @@ function TagEditor() {
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [filter, setFilter] = useState("all"); // 'all' | 'untagged' | 'pending'
   const [pendingChanges, setPendingChanges] = useState([]); // Track changes before export
-  const [activeTab, setActiveTab] = useState("bullkTagging"); // 'bulkTagging' | 'synonyms'
+  const [activeTab, setActiveTab] = useState("bulkTagging"); // 'bulkTagging' | 'synonyms' | 'edges'
 
   // --- Synonym State ---
   const [synonymTarget, setSynonymTarget] = useState("");
   const [synonymSource, setSynonymSource] = useState("");
   const [pendingSynonyms, setPendingSynonyms] = useState([]);
+
+  // --- Edge State ---
+  const [edgeSource, setEdgeSource] = useState("");
+  const [edgeTarget, setEdgeTarget] = useState("");
+  const [edgeRelation, setEdgeRelation] = useState("related");
+  const [edgeWeight, setEdgeWeight] = useState(0.8);
+  const [pendingEdges, setPendingEdges] = useState([]);
 
   // Get all unique tags from the taxonomy
   const availableTags = useMemo(() => {
@@ -223,6 +238,51 @@ function TagEditor() {
     setPendingSynonyms([]);
   }, []);
 
+  // --- Edge Handlers ---
+  const addEdge = useCallback(() => {
+    if (!edgeSource.trim() || !edgeTarget.trim()) return;
+    const edge = {
+      source: edgeSource.trim(),
+      target: edgeTarget.trim(),
+      relation: edgeRelation,
+      weight: parseFloat(edgeWeight) || 0.8,
+      timestamp: new Date().toISOString(),
+    };
+    setPendingEdges((prev) => [...prev, edge]);
+    setEdgeSource("");
+    setEdgeTarget("");
+  }, [edgeSource, edgeTarget, edgeRelation, edgeWeight]);
+
+  const removeEdge = useCallback((idx) => {
+    setPendingEdges((prev) => prev.filter((_, i) => i !== idx));
+  }, []);
+
+  const exportEdges = useCallback(() => {
+    if (pendingEdges.length === 0) return;
+    const exportFormat = {
+      description: "Edge relationship additions",
+      edges: pendingEdges.map(({ source, target, relation, weight }) => ({
+        source,
+        target,
+        relation,
+        weight,
+      })),
+    };
+    const blob = new Blob([JSON.stringify(exportFormat, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `edge_additions_${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [pendingEdges]);
+
+  const clearEdges = useCallback(() => {
+    setPendingEdges([]);
+  }, []);
+
   return (
     <div className="tag-editor">
       {/* Header */}
@@ -240,14 +300,20 @@ function TagEditor() {
               className={activeTab === "synonyms" ? "active" : ""}
               onClick={() => setActiveTab("synonyms")}
             >
-              Synonyms & Ontology
+              Synonyms
+            </button>
+            <button
+              className={activeTab === "edges" ? "active" : ""}
+              onClick={() => setActiveTab("edges")}
+            >
+              Edges
             </button>
           </div>
         </div>
         <p>Manage content tags, synonyms, and relationships efficiently.</p>
       </div>
 
-      {activeTab === "bulkTagging" ? (
+      {activeTab === "bulkTagging" && (
         <>
           {/* Toolbar */}
           <div className="te-toolbar">
@@ -441,7 +507,9 @@ function TagEditor() {
             </div>
           </div>
         </>
-      ) : (
+      )}
+
+      {activeTab === "synonyms" && (
         <>
           {/* Synonyms Tab */}
           <div className="te-synonym-content">
@@ -509,6 +577,122 @@ function TagEditor() {
                       📥 Export JSON
                     </button>
                     <button className="clear-btn" onClick={clearSynonyms}>
+                      🗑️ Clear
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {activeTab === "edges" && (
+        <>
+          <div className="te-edge-content">
+            <div className="te-synonym-panel te-actions-section">
+              <h3>Add Tag Relationship</h3>
+              <p className="te-hint">
+                Define directed edges between tags (e.g., &quot;lumen_noise&quot; → symptom_of →
+                &quot;rendering.lumen&quot;)
+              </p>
+
+              <div className="edge-form-row">
+                <div className="synonym-input-group">
+                  <label>Source Tag ID</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. symptom.lumen_noise"
+                    value={edgeSource}
+                    onChange={(e) => setEdgeSource(e.target.value)}
+                  />
+                </div>
+                <div className="edge-arrow">→</div>
+                <div className="synonym-input-group">
+                  <label>Target Tag ID</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. rendering.lumen"
+                    value={edgeTarget}
+                    onChange={(e) => setEdgeTarget(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="edge-form-row">
+                <div className="synonym-input-group">
+                  <label>Relation Type</label>
+                  <select
+                    value={edgeRelation}
+                    onChange={(e) => setEdgeRelation(e.target.value)}
+                    className="edge-select"
+                  >
+                    {EDGE_RELATION_TYPES.map((rt) => (
+                      <option key={rt.value} value={rt.value}>
+                        {rt.emoji} {rt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="synonym-input-group">
+                  <label>Weight ({edgeWeight})</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={edgeWeight}
+                    onChange={(e) => setEdgeWeight(e.target.value)}
+                    className="edge-weight-slider"
+                  />
+                </div>
+              </div>
+
+              <button
+                className="add-btn synonym-add-btn"
+                onClick={addEdge}
+                disabled={!edgeSource.trim() || !edgeTarget.trim()}
+              >
+                + Add Edge
+              </button>
+            </div>
+
+            {/* Pending Edges Sidebar */}
+            <div className="te-actions">
+              <div className="te-actions-section te-pending">
+                <h3>Pending Edges ({pendingEdges.length})</h3>
+                <div className="te-changes-list edge-list">
+                  {pendingEdges.map((edge, idx) => {
+                    const rt = EDGE_RELATION_TYPES.find((r) => r.value === edge.relation);
+                    return (
+                      <div key={idx} className="change-item add edge-item">
+                        <div className="edge-item-content">
+                          <span className="mini-tag ai">{edge.source}</span>
+                          <span className="edge-relation-badge">
+                            {rt?.emoji} {rt?.label}
+                          </span>
+                          <span className="mini-tag base">{edge.target}</span>
+                          <span className="edge-weight-badge">w:{edge.weight}</span>
+                        </div>
+                        <button
+                          className="edge-remove-btn"
+                          onClick={() => removeEdge(idx)}
+                          title="Remove this edge"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
+                  {pendingEdges.length === 0 && <p className="te-hint">No edges staged yet.</p>}
+                </div>
+
+                {pendingEdges.length > 0 && (
+                  <div className="te-actions-buttons">
+                    <button className="export-btn" onClick={exportEdges}>
+                      📥 Export JSON
+                    </button>
+                    <button className="clear-btn" onClick={clearEdges}>
                       🗑️ Clear
                     </button>
                   </div>
