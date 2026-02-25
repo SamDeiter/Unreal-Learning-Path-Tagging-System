@@ -19,6 +19,7 @@ import CartPanel from "../CartPanel/CartPanel";
 import VideoResultCard from "../VideoResultCard/VideoResultCard";
 import OfficialDocsSummary from "../OfficialDocsSummary/OfficialDocsSummary";
 import useProblemFirst, { STAGES } from "../../hooks/useProblemFirst";
+import { ExternalLink, FileText, Presentation, BookOpen } from "lucide-react";
 import { buildGuidedCourses } from "../../domain/buildGuidedCourses";
 import "./ProblemFirst.css";
 
@@ -76,6 +77,7 @@ export default function ProblemFirst() {
     vertexAIDocs,
     vertexAILoading,
     vertexAIError,
+    epicResults,
     cart,
     addToCart,
     removeFromCart,
@@ -256,6 +258,9 @@ export default function ProblemFirst() {
                   removeFromCart={removeFromCart}
                 />
               )}
+
+              {/* 📝 Epic Learning Articles */}
+              {epicResults.length > 0 && <EpicLearningSection epicResults={epicResults} />}
 
               {/* Bottom actions */}
               <div className="results-actions-bottom">
@@ -571,6 +576,84 @@ function YouTubeSection({ youtube, isInCart, addToCart, removeFromCart }) {
               >
                 {inCart ? "✓ Added" : "➕ Add"}
               </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const CONTENT_TYPE_ICONS = {
+  talks_and_demos: Presentation,
+  tutorial: BookOpen,
+  knowledge_base: FileText,
+  course: BookOpen,
+};
+
+const CONTENT_TYPE_LABELS = {
+  talks_and_demos: "Talk / Demo",
+  tutorial: "Tutorial",
+  knowledge_base: "Knowledge Base",
+  course: "Course",
+};
+
+function EpicLearningSection({ epicResults }) {
+  return (
+    <div className="blended-section">
+      <div className="blended-section-header">
+        <h2 className="blended-section-title">📝 Epic Learning Articles ({epicResults.length})</h2>
+        <p className="blended-section-desc">
+          Related articles, tutorials, and talks from the Epic Developer Community.
+        </p>
+      </div>
+      <div className="doc-cards-grid">
+        {epicResults.map((item) => {
+          const ContentIcon = CONTENT_TYPE_ICONS[item.epicContentType] || FileText;
+          const typeLabel = CONTENT_TYPE_LABELS[item.epicContentType] || item.epicContentType;
+          const matchPct = Math.round((item.similarity || 0) * 100);
+          const matchTier =
+            matchPct >= 70
+              ? "best"
+              : matchPct >= 50
+                ? "strong"
+                : matchPct >= 35
+                  ? "good"
+                  : "related";
+
+          return (
+            <div key={item.id} className="doc-card epic-card">
+              <a
+                href={item.epicUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="doc-card-link"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="doc-card-header">
+                  <span
+                    className={`doc-match-badge doc-match-${matchTier}`}
+                    title={`${matchPct}% semantic match`}
+                  >
+                    <span className="doc-match-dot" />
+                    {matchPct}%
+                  </span>
+                  <span className="epic-type-badge">
+                    <ContentIcon size={12} />
+                    {typeLabel}
+                  </span>
+                </div>
+                <h4 className="doc-card-title">{item.videoTitle}</h4>
+                {item.previewText && (
+                  <p className="doc-card-desc">{item.previewText.slice(0, 180)}...</p>
+                )}
+                <div className="doc-card-footer">
+                  <span className="doc-source-badge epic-source-badge">
+                    <ExternalLink size={11} /> Epic Learning
+                  </span>
+                  {item.epicAuthor && <span className="epic-author">by {item.epicAuthor}</span>}
+                </div>
+              </a>
             </div>
           );
         })}

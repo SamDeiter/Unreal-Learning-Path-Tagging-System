@@ -64,12 +64,17 @@ export default function useProblemFirst() {
   const [vertexAIDocs, setVertexAIDocs] = useState(null);
   const [vertexAILoading, setVertexAILoading] = useState(false);
   const [vertexAIError, setVertexAIError] = useState(null);
+  const [epicResults, setEpicResults] = useState([]);
 
   // ── Shared hooks ──
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
   const courses = useCourses();
   const { handleVideoToggle, handleWatchPath } = useVideoActions({
-    isInCart, addToCart, removeFromCart, cart, setStage,
+    isInCart,
+    addToCart,
+    removeFromCart,
+    cart,
+    setStage,
     guidedStage: STAGES.GUIDED,
   });
 
@@ -181,9 +186,7 @@ export default function useProblemFirst() {
                   "[Cache] Cached cart produced 0 videos — falling through to fresh diagnosis"
                 );
               } else {
-                devLog(
-                  `[Cache Expired] Cart is ${Math.round(ageMs / 3600000)}h old — refreshing`
-                );
+                devLog(`[Cache Expired] Cart is ${Math.round(ageMs / 3600000)}h old — refreshing`);
               }
             } else {
               devLog(`[Cache Miss] Cart ${inputData.cachedCartId} not found in Firestore`);
@@ -201,10 +204,19 @@ export default function useProblemFirst() {
         );
 
         // ── Step 1: Shared search pipeline ──
-        let { semanticResults, retrievedPassages, vertexAIDocs: vaDocs } = await runSearchPipeline(
-          inputData.query,
-          { maxPassages: 10 }
+        let {
+          semanticResults,
+          retrievedPassages,
+          vertexAIDocs: vaDocs,
+        } = await runSearchPipeline(inputData.query, { maxPassages: 10 });
+
+        // Fork out Epic Learning results (articles/tutorials from dev.epicgames.com)
+        const epicHits = (semanticResults || []).filter((r) => r.source === "epic_learning");
+        const videoSemanticResults = (semanticResults || []).filter(
+          (r) => r.source !== "epic_learning"
         );
+        setEpicResults(epicHits);
+        semanticResults = videoSemanticResults;
 
         // Vertex AI docs (available immediately, independent of diagnosis)
         if (vaDocs) {
@@ -306,7 +318,9 @@ export default function useProblemFirst() {
               deduped.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
               const enrichedPassages = deduped.slice(0, 12);
 
-              devLog(`[AgenticRAG] Re-submitting with ${enrichedPassages.length} enriched passages`);
+              devLog(
+                `[AgenticRAG] Re-submitting with ${enrichedPassages.length} enriched passages`
+              );
               const retryResult = await queryLearningPath({
                 query: inputData.query,
                 mode: "problem-first",
@@ -325,14 +339,18 @@ export default function useProblemFirst() {
                 devWarn("[AgenticRAG] Retry didn't produce ANSWER, using original result");
               }
             } catch (agenticErr) {
-              devWarn("[AgenticRAG] Escalation failed, proceeding with best-effort:", agenticErr.message);
+              devWarn(
+                "[AgenticRAG] Escalation failed, proceeding with best-effort:",
+                agenticErr.message
+              );
             }
           }
 
           if (!result.data.success)
             throw new Error(result.data.message || "Failed to process query");
 
-          const hasAnswerData = result.data.responseType === "ANSWER" && result.data.mostLikelyCause;
+          const hasAnswerData =
+            result.data.responseType === "ANSWER" && result.data.mostLikelyCause;
           if (hasAnswerData) {
             gotAnswerData = true;
             setAnswerData({
@@ -407,7 +425,11 @@ export default function useProblemFirst() {
 
         // ── Step 4: Shared blended path builder ──
         const blended = await buildBlendedPathFromDiagnosis(
-          inputData, cartData, driveVideos, nonVideoItems, STOP_WORDS
+          inputData,
+          cartData,
+          driveVideos,
+          nonVideoItems,
+          STOP_WORDS
         );
         if (blended) setBlendedPath(blended);
 
@@ -454,15 +476,13 @@ export default function useProblemFirst() {
     setVertexAIDocs(null);
     setVertexAILoading(false);
     setVertexAIError(null);
+    setEpicResults([]);
   }, []);
 
   const handleClarifyAnswer = useCallback(
     (answer) => {
       if (!lastInputData) return;
-      const updatedHistory = [
-        ...conversationHistory,
-        { role: "user", content: answer },
-      ];
+      const updatedHistory = [...conversationHistory, { role: "user", content: answer }];
       setConversationHistory(updatedHistory);
       const augmentedInput = {
         ...lastInputData,
@@ -527,6 +547,7 @@ export default function useProblemFirst() {
     vertexAIDocs,
     vertexAILoading,
     vertexAIError,
+    epicResults,
 
     // Cart
     cart,
