@@ -46,6 +46,16 @@ const EVENT_META = {
   [EVENTS.ONBOARDING_PATH_GENERATED]: { label: "Onboarding", color: "#22d3ee" },
 };
 
+/** Small info-icon tooltip — CSS-only, no JS needed */
+function Tip({ text }) {
+  return (
+    <span className="aa-tooltip-wrap">
+      <span className="aa-info-icon">ⓘ</span>
+      <span className="aa-tooltip-text">{text}</span>
+    </span>
+  );
+}
+
 export default function AdminAnalytics() {
   const [timeRange, setTimeRange] = useState("7d");
   const [events, setEvents] = useState([]);
@@ -104,8 +114,9 @@ export default function AdminAnalytics() {
       {/* Header */}
       <div className="aa-header">
         <div>
-          <h2 title="Admin dashboard showing real-time usage data from Firestore analytics_events">
-            📈 Usage Analytics
+          <h2>
+            📈 Usage Analytics{" "}
+            <Tip text="Admin dashboard showing real-time usage data from Firestore analytics_events" />
           </h2>
           <p className="aa-subtitle">{events.length} events in selected period</p>
         </div>
@@ -157,8 +168,9 @@ export default function AdminAnalytics() {
       {/* Daily Volume Chart */}
       {dailyVolume.length > 0 && (
         <div className="aa-section">
-          <h3 title="Number of analytics events per day over the selected time range">
-            📅 Daily Volume
+          <h3>
+            📅 Daily Volume{" "}
+            <Tip text="Number of analytics events per day over the selected time range" />
           </h3>
           <div className="aa-daily-chart">
             {dailyVolume.map((day) => {
@@ -179,8 +191,9 @@ export default function AdminAnalytics() {
       <div className="aa-grid">
         {/* Event Type Breakdown */}
         <div className="aa-section">
-          <h3 title="Distribution of event types — shows which features are used most">
-            🎯 Event Breakdown
+          <h3>
+            🎯 Event Breakdown{" "}
+            <Tip text="Distribution of event types — shows which features are used most" />
           </h3>
           <div className="aa-bar-chart">
             {Object.entries(eventCounts)
@@ -206,8 +219,9 @@ export default function AdminAnalytics() {
 
         {/* Top Queries */}
         <div className="aa-section">
-          <h3 title="Most frequently searched queries, with persona badges showing who asked">
-            🔍 Top Queries
+          <h3>
+            🔍 Top Queries{" "}
+            <Tip text="Most frequently searched queries, with persona badges showing who asked" />
           </h3>
           {topQueries.length === 0 ? (
             <p className="aa-empty">No queries in selected period</p>
@@ -237,8 +251,9 @@ export default function AdminAnalytics() {
       <div className="aa-grid">
         {/* Persona Distribution */}
         <div className="aa-section">
-          <h3 title="Breakdown of detected user personas — shows which roles use the tool most">
-            🎭 Persona Distribution
+          <h3>
+            🎭 Persona Distribution{" "}
+            <Tip text="Breakdown of detected user personas — shows which roles use the tool most" />
           </h3>
           {personaDist.length === 0 ? (
             <p className="aa-empty">No persona detections in selected period</p>
@@ -266,8 +281,9 @@ export default function AdminAnalytics() {
 
         {/* Recent Events */}
         <div className="aa-section">
-          <h3 title="Live feed of the most recent analytics events in chronological order">
-            🔔 Recent Events
+          <h3>
+            🔔 Recent Events{" "}
+            <Tip text="Live feed of the most recent analytics events in chronological order" />
           </h3>
           <div className="aa-event-feed">
             {recentEvents.map((evt) => {
@@ -295,13 +311,16 @@ export default function AdminAnalytics() {
 
 function StatCard({ label, value, icon, color, tooltip }) {
   return (
-    <div className="aa-stat-card" style={{ borderColor: `${color}44` }} title={tooltip}>
+    <div className="aa-stat-card" style={{ borderColor: `${color}44` }}>
       <span className="aa-stat-icon">{icon}</span>
       <div className="aa-stat-info">
         <span className="aa-stat-value" style={{ color }}>
           {value}
         </span>
-        <span className="aa-stat-label">{label}</span>
+        <span className="aa-stat-label">
+          {label}
+          {tooltip && <Tip text={tooltip} />}
+        </span>
       </div>
     </div>
   );
