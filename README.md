@@ -57,6 +57,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   │   │   ├── Dashboard/         # Overview dashboard + Content Gap Analysis
 │   │   │   ├── AssemblyLine/      # Drag-and-drop path assembly
 │   │   │   ├── CourseLibrary/     # Browsable course catalog
+│   │   │   ├── TagEditor/         # Bulk tagging, synonym mapping + edge editor
 │   │   │   ├── AdminFeedback/     # Admin feedback review panel
 │   │   │   └── ...               # AuthGate, InviteManager, Feedback, etc.
 │   │   ├── context/               # PathContext, TagDataContext, constants

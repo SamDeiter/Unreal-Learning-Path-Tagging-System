@@ -9,13 +9,20 @@ All notable changes to the Unreal Learning Path Tagging System.
 ### Added
 
 - **Persona Context:** Added persona detection and specialized messaging to the `GuidedPlayer` IntroCard.
-- **Content Gap Dashboard:** Added CSV export functionality allowing admins to download gap analysis reports.
-- **Tag & Synonym Editor:** Added a new sub-tab to `TagEditor` to securely manage tag synonyms and ontology aliases.
+- **Tag & Synonym Editor:** New sub-tab in `TagEditor` for managing tag synonym/alias mappings with export to JSON.
+- **Edge Relationship Editor:** New sub-tab in `TagEditor` for defining directed tag relationships (symptom_of, often_caused_by, related, subtopic, replaces) with weight slider and JSON export.
 
 ### Changed
 
 - Refactored `PersonaService.js` to store messaging directly in `personaScoringRules`.
 - `useGuidedPlayer.js` updated to import `generateProgressText` seamlessly.
+
+### Fixed
+
+- Removed confusing `▶` triangle icon from YouTube stat card.
+- Removed out-of-place CSV export button from Content Gap Dashboard header.
+- Fixed 6 CI ESLint errors (`playwright.config.js`, `PersonaService.test.js`, `TagGraphService.test.js`, `ContentGapDashboard.jsx`).
+- Fixed default tab typo in TagEditor (`"bullkTagging"` → `"bulkTagging"`).
 
 ## [2.6.0] - 2026-02-24
 
