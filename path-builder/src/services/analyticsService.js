@@ -8,7 +8,7 @@
  */
 
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
-
+import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
 
 /**
@@ -60,7 +60,7 @@ function getSessionId() {
  */
 export async function trackEvent(eventName, payload = {}) {
   try {
-    const db = getFirestore();
+    const db = getFirestore(getFirebaseApp());
 
     const eventData = {
       event: eventName,
