@@ -104,7 +104,9 @@ export default function AdminAnalytics() {
       {/* Header */}
       <div className="aa-header">
         <div>
-          <h2>📈 Usage Analytics</h2>
+          <h2 title="Admin dashboard showing real-time usage data from Firestore analytics_events">
+            📈 Usage Analytics
+          </h2>
           <p className="aa-subtitle">{events.length} events in selected period</p>
         </div>
         <div className="aa-time-range">
@@ -122,21 +124,42 @@ export default function AdminAnalytics() {
 
       {/* Stat Cards */}
       <div className="aa-stats-row">
-        <StatCard label="Total Events" value={events.length} icon="📊" color="#8b5cf6" />
-        <StatCard label="Queries" value={totalQueries} icon="🔍" color="#06b6d4" />
-        <StatCard label="Sessions" value={sessionMetrics.totalSessions} icon="👤" color="#10b981" />
+        <StatCard
+          label="Total Events"
+          value={events.length}
+          icon="📊"
+          color="#8b5cf6"
+          tooltip="Total tracked interactions (queries, sessions, persona detections, path generations, etc.)"
+        />
+        <StatCard
+          label="Queries"
+          value={totalQueries}
+          icon="🔍"
+          color="#06b6d4"
+          tooltip="Number of search queries submitted via Fix a Problem or Follow-up"
+        />
+        <StatCard
+          label="Sessions"
+          value={sessionMetrics.totalSessions}
+          icon="👤"
+          color="#10b981"
+          tooltip="Unique user sessions started (one per page load)"
+        />
         <StatCard
           label="Completion"
           value={`${sessionMetrics.completionRate}%`}
           icon="✅"
           color="#f59e0b"
+          tooltip="Percentage of sessions where the user completed a learning path"
         />
       </div>
 
       {/* Daily Volume Chart */}
       {dailyVolume.length > 0 && (
         <div className="aa-section">
-          <h3>📅 Daily Volume</h3>
+          <h3 title="Number of analytics events per day over the selected time range">
+            📅 Daily Volume
+          </h3>
           <div className="aa-daily-chart">
             {dailyVolume.map((day) => {
               const maxDay = Math.max(...dailyVolume.map((d) => d.count), 1);
@@ -156,7 +179,9 @@ export default function AdminAnalytics() {
       <div className="aa-grid">
         {/* Event Type Breakdown */}
         <div className="aa-section">
-          <h3>🎯 Event Breakdown</h3>
+          <h3 title="Distribution of event types — shows which features are used most">
+            🎯 Event Breakdown
+          </h3>
           <div className="aa-bar-chart">
             {Object.entries(eventCounts)
               .sort(([, a], [, b]) => b - a)
@@ -181,7 +206,9 @@ export default function AdminAnalytics() {
 
         {/* Top Queries */}
         <div className="aa-section">
-          <h3>🔍 Top Queries</h3>
+          <h3 title="Most frequently searched queries, with persona badges showing who asked">
+            🔍 Top Queries
+          </h3>
           {topQueries.length === 0 ? (
             <p className="aa-empty">No queries in selected period</p>
           ) : (
@@ -210,7 +237,9 @@ export default function AdminAnalytics() {
       <div className="aa-grid">
         {/* Persona Distribution */}
         <div className="aa-section">
-          <h3>🎭 Persona Distribution</h3>
+          <h3 title="Breakdown of detected user personas — shows which roles use the tool most">
+            🎭 Persona Distribution
+          </h3>
           {personaDist.length === 0 ? (
             <p className="aa-empty">No persona detections in selected period</p>
           ) : (
@@ -237,7 +266,9 @@ export default function AdminAnalytics() {
 
         {/* Recent Events */}
         <div className="aa-section">
-          <h3>🔔 Recent Events</h3>
+          <h3 title="Live feed of the most recent analytics events in chronological order">
+            🔔 Recent Events
+          </h3>
           <div className="aa-event-feed">
             {recentEvents.map((evt) => {
               const meta = EVENT_META[evt.event] || { label: evt.event, color: "#64748b" };
@@ -262,9 +293,9 @@ export default function AdminAnalytics() {
   );
 }
 
-function StatCard({ label, value, icon, color }) {
+function StatCard({ label, value, icon, color, tooltip }) {
   return (
-    <div className="aa-stat-card" style={{ borderColor: `${color}44` }}>
+    <div className="aa-stat-card" style={{ borderColor: `${color}44` }} title={tooltip}>
       <span className="aa-stat-icon">{icon}</span>
       <div className="aa-stat-info">
         <span className="aa-stat-value" style={{ color }}>
