@@ -6,13 +6,14 @@ import { test, expect } from "@playwright/test";
 test.describe("Search flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
-    await page.waitForSelector("nav.main-nav", { timeout: 15_000 });
+    await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     // Set persona then reload to dismiss quiz
     await page.evaluate(() => {
       localStorage.setItem("ue5_persona_id", "programmer_pat");
     });
     await page.reload();
-    await page.waitForSelector("nav.main-nav", { timeout: 15_000 });
+    await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
+    await page.waitForSelector("nav.main-nav", { timeout: 10_000 });
 
     // Navigate to Fix a Problem
     const tab = page.locator("button.nav-tab").filter({ hasText: /Fix a Problem/ });

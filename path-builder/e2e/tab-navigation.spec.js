@@ -6,13 +6,14 @@ import { test, expect } from "@playwright/test";
 test.describe("Tab navigation", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
-    await page.waitForSelector("nav.main-nav", { timeout: 15_000 });
+    await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     // Set persona to bypass quiz modal
     await page.evaluate(() => {
       localStorage.setItem("ue5_persona_id", "programmer_pat");
     });
     await page.reload();
-    await page.waitForSelector("nav.main-nav", { timeout: 15_000 });
+    await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
+    await page.waitForSelector("nav.main-nav", { timeout: 10_000 });
   });
 
   test("should navigate to the Dashboard tab", async ({ page }) => {

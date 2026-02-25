@@ -1,16 +1,18 @@
 /**
  * analyticsService — Unit tests
  *
- * Tests the EVENTS constants and event-building functions.
- * Firestore is mocked at module level to avoid runtime errors.
+ * Tests the EVENTS constants, event-building functions, and verifies
+ * that each convenience function calls addDoc with the correct event
+ * type and expected payload fields.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock Firebase Firestore
+// Mock Firebase Firestore — capture addDoc calls for verification
+const mockAddDoc = vi.fn(() => Promise.resolve());
 vi.mock("firebase/firestore", () => ({
   getFirestore: vi.fn(() => ({})),
-  collection: vi.fn(),
-  addDoc: vi.fn(() => Promise.resolve()),
+  collection: vi.fn((_db, name) => `collection:${name}`),
+  addDoc: (...args) => mockAddDoc(...args),
   serverTimestamp: vi.fn(() => "MOCK_TIMESTAMP"),
 }));
 
@@ -63,104 +65,193 @@ describe("analyticsService", () => {
   // -- trackEvent --
 
   describe("trackEvent", () => {
-    it("should not throw on valid call", async () => {
-      await expect(trackEvent("test_event", { foo: "bar" })).resolves.not.toThrow();
+    it("calls addDoc with analytics_events collection and correct event name", async () => {
+      await trackEvent("test_event", { foo: "bar" });
+      expect(mockAddDoc).toHaveBeenCalledTimes(1);
+      const [collectionRef, eventData] = mockAddDoc.mock.calls[0];
+      expect(collectionRef).toBe("collection:analytics_events");
+      expect(eventData.event).toBe("test_event");
+      expect(eventData.foo).toBe("bar");
+      expect(eventData.timestamp).toBe("MOCK_TIMESTAMP");
+      expect(eventData.client_timestamp).toBeTruthy();
+      expect(eventData.session_id).toMatch(/^session_/);
     });
 
-    it("should handle missing payload gracefully", async () => {
-      await expect(trackEvent("test_event")).resolves.not.toThrow();
+    it("handles missing payload gracefully", async () => {
+      await trackEvent("bare_event");
+      expect(mockAddDoc).toHaveBeenCalledTimes(1);
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("bare_event");
     });
   });
 
   // -- Convenience track functions --
 
   describe("trackPersonaDetected", () => {
-    it("should not throw with valid persona", async () => {
-      await expect(
-        trackPersonaDetected({ id: "indie_isaac", name: "Indie Isaac" }, "onboarding")
-      ).resolves.not.toThrow();
+    it("sends PERSONA_DETECTED event with persona fields", async () => {
+      await trackPersonaDetected(
+        { id: "indie_isaac", name: "Indie Isaac", industry: "gaming" },
+        "onboarding"
+      );
+      expect(mockAddDoc).toHaveBeenCalledTimes(1);
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("persona_detected");
+      expect(eventData.persona_id).toBe("indie_isaac");
+      expect(eventData.persona_name).toBe("Indie Isaac");
+      expect(eventData.industry).toBe("gaming");
+      expect(eventData.source).toBe("onboarding");
     });
 
-    it("should handle null persona gracefully", async () => {
-      await expect(trackPersonaDetected(null)).resolves.not.toThrow();
+    it("handles null persona gracefully", async () => {
+      await trackPersonaDetected(null);
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("persona_detected");
+      expect(eventData.persona_id).toBeUndefined();
+      expect(eventData.source).toBe("onboarding"); // default
     });
   });
 
   describe("trackOnboardingPathGenerated", () => {
-    it("should not throw with valid args", async () => {
-      await expect(
-        trackOnboardingPathGenerated({ id: "test" }, [{ id: "c1" }], 120)
-      ).resolves.not.toThrow();
+    it("sends ONBOARDING_PATH_GENERATED with course count and time", async () => {
+      await trackOnboardingPathGenerated({ id: "test_persona" }, [{ id: "c1" }, { id: "c2" }], 120);
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("onboarding_path_generated");
+      expect(eventData.persona_id).toBe("test_persona");
+      expect(eventData.course_count).toBe(2);
+      expect(eventData.total_minutes).toBe(120);
+      expect(eventData.course_ids).toEqual(["c1", "c2"]);
     });
   });
 
   describe("trackQuerySubmitted", () => {
-    it("should not throw with valid query", async () => {
-      await expect(
-        trackQuerySubmitted("How to fix lumen reflections", ["rendering.lumen"], "indie_isaac")
-      ).resolves.not.toThrow();
+    it("sends QUERY_SUBMITTED with query metadata", async () => {
+      await trackQuerySubmitted(
+        "How to fix lumen reflections",
+        ["rendering.lumen", "lighting"],
+        "indie_isaac"
+      );
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("query_submitted");
+      expect(eventData.query_length).toBe(28);
+      expect(eventData.query_preview).toBe("How to fix lumen reflections");
+      expect(eventData.detected_tag_count).toBe(2);
+      expect(eventData.detected_tags).toEqual(["rendering.lumen", "lighting"]);
+      expect(eventData.persona_id).toBe("indie_isaac");
     });
 
-    it("should handle null query", async () => {
-      await expect(trackQuerySubmitted(null)).resolves.not.toThrow();
+    it("handles null query", async () => {
+      await trackQuerySubmitted(null);
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.query_length).toBe(0);
+      expect(eventData.query_preview).toBeUndefined();
     });
   });
 
   describe("trackIntentExtracted", () => {
-    it("should not throw", async () => {
-      await expect(
-        trackIntentExtracted({ intent_id: "i1", systems: ["rendering"] })
-      ).resolves.not.toThrow();
+    it("sends INTENT_EXTRACTED with system counts", async () => {
+      await trackIntentExtracted({
+        intent_id: "i1",
+        systems: ["rendering", "lighting"],
+        constraints: ["PS5"],
+      });
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("intent_extracted");
+      expect(eventData.intent_id).toBe("i1");
+      expect(eventData.systems_count).toBe(2);
+      expect(eventData.systems).toEqual(["rendering", "lighting"]);
+      expect(eventData.constraints_count).toBe(1);
     });
   });
 
   describe("trackDiagnosisGenerated", () => {
-    it("should not throw", async () => {
-      await expect(
-        trackDiagnosisGenerated({ diagnosis_id: "d1", root_causes: [] })
-      ).resolves.not.toThrow();
+    it("sends DIAGNOSIS_GENERATED with root cause counts", async () => {
+      await trackDiagnosisGenerated({
+        diagnosis_id: "d1",
+        root_causes: ["bad normals", "missing lightmaps"],
+        signals_to_watch_for: ["shadow artifacts"],
+        generalization_scope: ["all static meshes"],
+      });
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("diagnosis_generated");
+      expect(eventData.diagnosis_id).toBe("d1");
+      expect(eventData.root_causes_count).toBe(2);
+      expect(eventData.signals_count).toBe(1);
+      expect(eventData.generalization_scope).toEqual(["all static meshes"]);
     });
   });
 
   describe("trackLearningPathGenerated", () => {
-    it("should not throw", async () => {
-      await expect(
-        trackLearningPathGenerated({ fix_specific: [] }, [{ id: "c1" }], true)
-      ).resolves.not.toThrow();
+    it("sends LEARNING_PATH_GENERATED with objective counts", async () => {
+      await trackLearningPathGenerated(
+        { fix_specific: ["fix lumen"], transferable: ["understand GI", "debug rendering"] },
+        [{ id: "c1" }, { id: "c2" }, { id: "c3" }],
+        true
+      );
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("learning_path_generated");
+      expect(eventData.fix_specific_count).toBe(1);
+      expect(eventData.transferable_count).toBe(2);
+      expect(eventData.course_count).toBe(3);
+      expect(eventData.passed_validation).toBe(true);
     });
   });
 
   describe("trackModuleSkipped", () => {
-    it("should not throw", async () => {
-      await expect(trackModuleSkipped("mod1", "already know this")).resolves.not.toThrow();
+    it("sends MODULE_SKIPPED with module ID and reason", async () => {
+      await trackModuleSkipped("mod1", "already know this");
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("module_skipped");
+      expect(eventData.module_id).toBe("mod1");
+      expect(eventData.reason).toBe("already know this");
     });
   });
 
   describe("trackModuleReordered", () => {
-    it("should not throw", async () => {
-      await expect(trackModuleReordered("mod1", 0, 2)).resolves.not.toThrow();
+    it("sends MODULE_REORDERED with index positions", async () => {
+      await trackModuleReordered("mod1", 0, 2);
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("module_reordered");
+      expect(eventData.module_id).toBe("mod1");
+      expect(eventData.from_index).toBe(0);
+      expect(eventData.to_index).toBe(2);
     });
   });
 
   describe("trackSessionCompleted", () => {
-    it("should not throw", async () => {
-      await expect(
-        trackSessionCompleted("problem-first", { courses_watched: 3 })
-      ).resolves.not.toThrow();
+    it("sends SESSION_COMPLETED with mode and summary data", async () => {
+      await trackSessionCompleted("problem-first", { courses_watched: 3, total_minutes: 45 });
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("session_completed");
+      expect(eventData.mode).toBe("problem-first");
+      expect(eventData.courses_watched).toBe(3);
+      expect(eventData.total_minutes).toBe(45);
     });
   });
 
   describe("trackFollowupQuery", () => {
-    it("should not throw", async () => {
-      await expect(
-        trackFollowupQuery("original query preview", "follow up query")
-      ).resolves.not.toThrow();
+    it("sends FOLLOWUP_QUERY_SUBMITTED with original and followup previews", async () => {
+      await trackFollowupQuery("original query preview", "my follow up question about lighting");
+      const eventData = mockAddDoc.mock.calls[0][1];
+      expect(eventData.event).toBe("followup_query_submitted");
+      expect(eventData.original_preview).toBe("original query preview");
+      expect(eventData.followup_length).toBe(36);
+      expect(eventData.followup_preview).toBe("my follow up question about lighting");
     });
   });
 
   describe("startSession", () => {
-    it("should not throw and reset session ID", async () => {
-      await expect(startSession()).resolves.not.toThrow();
+    it("sends SESSION_STARTED and resets session ID", async () => {
+      // First call to establish a session
+      await trackEvent("warmup");
+      const firstSessionId = mockAddDoc.mock.calls[0][1].session_id;
+
+      // startSession should reset and create a new session
+      await startSession();
+      const eventData = mockAddDoc.mock.calls[1][1];
+      expect(eventData.event).toBe("session_started");
+      expect(eventData.session_id).not.toBe(firstSessionId);
+      expect(eventData.screen_width).toBeDefined();
+      expect(eventData.screen_height).toBeDefined();
     });
   });
 
@@ -171,6 +262,15 @@ describe("analyticsService", () => {
       expect(analyticsService.EVENTS).toBeDefined();
       expect(typeof analyticsService.trackEvent).toBe("function");
       expect(typeof analyticsService.trackPersonaDetected).toBe("function");
+      expect(typeof analyticsService.trackOnboardingPathGenerated).toBe("function");
+      expect(typeof analyticsService.trackQuerySubmitted).toBe("function");
+      expect(typeof analyticsService.trackIntentExtracted).toBe("function");
+      expect(typeof analyticsService.trackDiagnosisGenerated).toBe("function");
+      expect(typeof analyticsService.trackLearningPathGenerated).toBe("function");
+      expect(typeof analyticsService.trackModuleSkipped).toBe("function");
+      expect(typeof analyticsService.trackModuleReordered).toBe("function");
+      expect(typeof analyticsService.trackSessionCompleted).toBe("function");
+      expect(typeof analyticsService.trackFollowupQuery).toBe("function");
       expect(typeof analyticsService.startSession).toBe("function");
     });
   });

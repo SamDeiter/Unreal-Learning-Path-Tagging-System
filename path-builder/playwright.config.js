@@ -17,6 +17,7 @@ export default defineConfig({
 
   use: {
     baseURL: "http://localhost:5174",
+    viewport: { width: 1280, height: 720 },
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -33,7 +34,7 @@ export default defineConfig({
     command: "npx vite --port 5174",
     url: "http://localhost:5174",
     reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
+    timeout: 60_000,
     env: {
       VITE_E2E_BYPASS: "true",
     },
