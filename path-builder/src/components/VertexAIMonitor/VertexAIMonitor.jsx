@@ -94,7 +94,18 @@ export default function VertexAIMonitor() {
   return (
     <div className="vai-widget">
       {/* ── Compact header bar (always visible) ────────────────────── */}
-      <button className="vai-header-bar" onClick={() => setExpanded(!expanded)}>
+      <div
+        className="vai-header-bar"
+        role="button"
+        tabIndex={0}
+        onClick={() => setExpanded(!expanded)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setExpanded(!expanded);
+          }
+        }}
+      >
         <div className="vai-header-left">
           <Activity size={15} />
           <span className="vai-header-title">Vertex AI Search</span>
@@ -131,7 +142,7 @@ export default function VertexAIMonitor() {
           )}
           {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </div>
-      </button>
+      </div>
 
       {/* ── Expandable detail panel ────────────────────────────────── */}
       {expanded && (

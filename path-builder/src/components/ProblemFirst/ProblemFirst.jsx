@@ -8,7 +8,7 @@
  *   domain/videoRanking.js  — video flattening + persona weighting
  *   domain/buildGuidedCourses.js — cart → GuidedPlayer course array
  */
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, Component } from "react";
 import ProblemInput from "./ProblemInput";
 import CaseReportForm from "../FixProblem/CaseReportForm";
 import ClarifyStep from "../FixProblem/ClarifyStep";
@@ -20,6 +20,46 @@ import VideoResultCard from "../VideoResultCard/VideoResultCard";
 import useProblemFirst, { STAGES } from "../../hooks/useProblemFirst";
 import { buildGuidedCourses } from "../../domain/buildGuidedCourses";
 import "./ProblemFirst.css";
+
+/**
+ * Error boundary for the DIAGNOSIS view.
+ * Prevents the entire app from crashing when transitioning stages.
+ */
+class DiagnosisErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    console.error("[DiagnosisErrorBoundary]", error, info?.componentStack);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="problem-first-error" style={{ padding: "40px 20px", textAlign: "center" }}>
+          <h3>⚠️ Something went wrong loading the results</h3>
+          <p style={{ color: "var(--text-muted, #94a3b8)", marginTop: 8 }}>
+            {this.state.error?.message || "Unknown error"}
+          </p>
+          <button
+            className="back-btn"
+            onClick={() => {
+              this.setState({ hasError: false, error: null });
+              this.props.onReset?.();
+            }}
+            style={{ marginTop: 16 }}
+          >
+            ← Try Again
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export default function ProblemFirst() {
   const {
@@ -141,100 +181,102 @@ export default function ProblemFirst() {
       )}
 
       {stage === STAGES.DIAGNOSIS && diagnosisData && (
-        <div className="shopping-layout">
-          <div className="results-column">
-            <div className="tldr-diagnosis">
-              <div className="tldr-user-query">
-                <span className="tldr-query-label">🔍 You asked:</span>
-                <p className="tldr-query-text">{diagnosisData.userQuery}</p>
+        <DiagnosisErrorBoundary onReset={handleReset}>
+          <div className="shopping-layout">
+            <div className="results-column">
+              <div className="tldr-diagnosis">
+                <div className="tldr-user-query">
+                  <span className="tldr-query-label">🔍 You asked:</span>
+                  <p className="tldr-query-text">{diagnosisData.userQuery}</p>
+                </div>
+                {diagnosisData._localFallback && (
+                  <div
+                    className="tldr-fallback-notice"
+                    style={{
+                      background: "rgba(255, 193, 7, 0.1)",
+                      border: "1px solid rgba(255, 193, 7, 0.3)",
+                      borderRadius: "8px",
+                      padding: "8px 14px",
+                      margin: "8px 0",
+                      fontSize: "0.85rem",
+                      color: "var(--text-muted, #aaa)",
+                    }}
+                  >
+                    ⚡ <strong>Fast results</strong> — AI diagnosis temporarily unavailable. Videos
+                    matched by tag taxonomy. Try again in a moment for AI-powered results.
+                  </div>
+                )}
+                {diagnosisData.diagnosis?.problem_summary && (
+                  <p className="tldr-bridge">
+                    Based on your question, we think these videos will help you:
+                  </p>
+                )}
               </div>
-              {diagnosisData._localFallback && (
-                <div
-                  className="tldr-fallback-notice"
-                  style={{
-                    background: "rgba(255, 193, 7, 0.1)",
-                    border: "1px solid rgba(255, 193, 7, 0.3)",
-                    borderRadius: "8px",
-                    padding: "8px 14px",
-                    margin: "8px 0",
-                    fontSize: "0.85rem",
-                    color: "var(--text-muted, #aaa)",
-                  }}
-                >
-                  ⚡ <strong>Fast results</strong> — AI diagnosis temporarily unavailable. Videos
-                  matched by tag taxonomy. Try again in a moment for AI-powered results.
+
+              {/* 📖 Official UE5 Documentation (Vertex AI Search) */}
+              <OfficialDocsSummary
+                data={vertexAIDocs}
+                isLoading={vertexAILoading}
+                error={vertexAIError}
+              />
+
+              {/* 🎬 Videos for You — Grouped by Role */}
+              <h2 className="results-title">🎬 Videos for You ({videoResults.length})</h2>
+
+              {videoResults.length === 0 && (
+                <div className="no-results">
+                  <p>No matching videos found. Try rephrasing your question.</p>
                 </div>
               )}
-              {diagnosisData.diagnosis?.problem_summary && (
-                <p className="tldr-bridge">
-                  Based on your question, we think these videos will help you:
-                </p>
+
+              <VideosByRole
+                videoResults={videoResults}
+                isInCart={isInCart}
+                handleVideoToggle={handleVideoToggle}
+                userQuery={diagnosisData?.userQuery || ""}
+              />
+
+              {/* 📚 Recommended Reading — Official Epic Docs */}
+              {blendedPath?.docs?.length > 0 && (
+                <DocsSection
+                  docs={blendedPath.docs}
+                  isInCart={isInCart}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
+                />
               )}
-            </div>
 
-            {/* 📖 Official UE5 Documentation (Vertex AI Search) */}
-            <OfficialDocsSummary
-              data={vertexAIDocs}
-              isLoading={vertexAILoading}
-              error={vertexAIError}
-            />
+              {/* 📺 Official Epic YouTube */}
+              {blendedPath?.youtube?.length > 0 && (
+                <YouTubeSection
+                  youtube={blendedPath.youtube}
+                  isInCart={isInCart}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
+                />
+              )}
 
-            {/* 🎬 Videos for You — Grouped by Role */}
-            <h2 className="results-title">🎬 Videos for You ({videoResults.length})</h2>
-
-            {videoResults.length === 0 && (
-              <div className="no-results">
-                <p>No matching videos found. Try rephrasing your question.</p>
+              {/* Bottom actions */}
+              <div className="results-actions-bottom">
+                <button className="back-btn" onClick={handleReset}>
+                  ← Start Over
+                </button>
+                <button className="ask-again-btn" onClick={handleAskAgain}>
+                  + Ask Another Question
+                </button>
               </div>
-            )}
+            </div>
 
-            <VideosByRole
-              videoResults={videoResults}
-              isInCart={isInCart}
-              handleVideoToggle={handleVideoToggle}
-              userQuery={diagnosisData?.userQuery || ""}
-            />
-
-            {/* 📚 Recommended Reading — Official Epic Docs */}
-            {blendedPath?.docs?.length > 0 && (
-              <DocsSection
-                docs={blendedPath.docs}
-                isInCart={isInCart}
-                addToCart={addToCart}
-                removeFromCart={removeFromCart}
+            <div className="cart-column">
+              <CartPanel
+                cart={cart}
+                onRemove={removeFromCart}
+                onClear={clearCart}
+                onWatchPath={handleWatchPath}
               />
-            )}
-
-            {/* 📺 Official Epic YouTube */}
-            {blendedPath?.youtube?.length > 0 && (
-              <YouTubeSection
-                youtube={blendedPath.youtube}
-                isInCart={isInCart}
-                addToCart={addToCart}
-                removeFromCart={removeFromCart}
-              />
-            )}
-
-            {/* Bottom actions */}
-            <div className="results-actions-bottom">
-              <button className="back-btn" onClick={handleReset}>
-                ← Start Over
-              </button>
-              <button className="ask-again-btn" onClick={handleAskAgain}>
-                + Ask Another Question
-              </button>
             </div>
           </div>
-
-          <div className="cart-column">
-            <CartPanel
-              cart={cart}
-              onRemove={removeFromCart}
-              onClear={clearCart}
-              onWatchPath={handleWatchPath}
-            />
-          </div>
-        </div>
+        </DiagnosisErrorBoundary>
       )}
 
       {stage === STAGES.GUIDED && (

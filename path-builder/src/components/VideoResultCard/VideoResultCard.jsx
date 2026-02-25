@@ -110,8 +110,6 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
     <div
       ref={cardRef}
       className={`video-result-card ${isAdded ? "added" : ""} ${_curatedMatch ? "curated" : ""} ${feedbackState === "down" ? "demoted" : ""}`}
-      role="button"
-      tabIndex={0}
     >
       {/* === Compact Card View (always visible) === */}
       <div className="vrc-compact">
