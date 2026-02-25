@@ -11,15 +11,15 @@ npm run dev          # http://localhost:5173/Unreal-Learning-Path-Tagging-System
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start dev server (port 5173) |
-| `npm run build` | Production build to `dist/` |
-| `npm test` | Unit + component + regression tests (Vitest, 300 tests) |
-| `npm run test:watch` | Watch mode |
-| `npm run test:e2e` | Playwright E2E browser tests (9 tests) |
-| `npm run lint` | ESLint |
-| `npm run lint:css` | Stylelint |
+| Command              | Description                                             |
+| -------------------- | ------------------------------------------------------- |
+| `npm run dev`        | Start dev server (port 5173)                            |
+| `npm run build`      | Production build to `dist/`                             |
+| `npm test`           | Unit + component + regression tests (Vitest, 300 tests) |
+| `npm run test:watch` | Watch mode                                              |
+| `npm run test:e2e`   | Playwright E2E browser tests (9 tests)                  |
+| `npm run lint`       | ESLint                                                  |
+| `npm run lint:css`   | Stylelint                                               |
 
 ## Testing
 
@@ -46,9 +46,9 @@ npm run test:e2e
 
 ```
 src/
-├── components/       # 24 component modules (ProblemFirst, GuidedPlayer, etc.)
+├── components/       # 25 component modules (MobileNav, ProblemFirst, GuidedPlayer)
 ├── context/          # PathContext, TagDataContext, constants
-├── hooks/            # 7 custom hooks
+├── hooks/            # 8 custom hooks (useIsMobile, useProblemFirst)
 ├── services/         # 25 service modules (search, AI, analytics)
 ├── data/             # 24 static JSON data files (~30MB)
 ├── utils/            # Shared helpers (stemming, float16, logger)

@@ -13,31 +13,32 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 1. **Persona Onboarding** — 3-question quiz identifies user role (Artist, Programmer, Designer, etc.) to personalize the experience
 2. **Problem Analysis** — User describes their UE5 issue in plain language; skeleton preview shows while AI diagnoses
 3. **Intelligent Matching** — Hybrid pipeline: semantic embeddings → transcript search → tag-based fallback with confidence routing
-4. **Guided Learning Path** — AI-narrated sequence: intro → videos → quizzes → challenges → reflection
-5. **Citation-linked Answers** — Diagnosis responses include clickable `[N]` references linking to Vertex AI documentation
-6. **Dashboard Insights** — Readiness score, persona coverage chart, content gap analysis, quick search, and tooltips on all metrics
-7. **Analytics & Insights** — Tag heatmaps, skill radar, prerequisite flows, industry demand gap analysis, and more
-8. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
-9. **Mobile Responsive** — Optimized for phone (480px), tablet (768px), and desktop viewports
+4. **Experience-Aware Ordering** — Prerequisite sorting based on user experience level and topic generality
+5. **Guided Learning Path** — AI-narrated sequence: intro → videos → quizzes → challenges → reflection
+6. **Citation-linked Answers** — Diagnosis responses include clickable `[N]` references linking to Vertex AI documentation
+7. **Dashboard Insights** — Readiness score, persona coverage chart, content gap analysis, quick search, and tooltips on all metrics
+8. **Analytics & Insights** — Tag heatmaps, skill radar, prerequisite flows, industry demand gap analysis, and more
+9. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
+10. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | React 19 + Vite 7 (in `path-builder/`) |
-| **State** | React Context (`PathContext`, `TagDataContext`) |
-| **Visualizations** | Cytoscape.js (tag graph), custom chart components |
-| **Backend** | Firebase Cloud Functions (Node.js 20) |
-| **Database** | Firebase Firestore |
-| **Auth** | Firebase Auth with Google Sign-In + invite-based access control |
-| **AI** | Google Gemini 2.0 Flash (enrichment, narration, embeddings) |
-| **Search** | Semantic embeddings + TF-IDF transcript index + tag matching |
-| **Hosting** | GitHub Pages (frontend), Firebase Hosting (API) |
-| **Testing** | Vitest + React Testing Library + Playwright (325 tests) |
-| **Security** | DOMPurify (XSS sanitization), Firebase Security Rules, invite-based access control |
-| **Linting** | ESLint 9 (flat config) + Stylelint |
+| Layer              | Technology                                                                         |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| **Frontend**       | React 19 + Vite 7 (in `path-builder/`)                                             |
+| **State**          | React Context (`PathContext`, `TagDataContext`)                                    |
+| **Visualizations** | Cytoscape.js (tag graph), custom chart components                                  |
+| **Backend**        | Firebase Cloud Functions (Node.js 20)                                              |
+| **Database**       | Firebase Firestore                                                                 |
+| **Auth**           | Firebase Auth with Google Sign-In + invite-based access control                    |
+| **AI**             | Google Gemini 2.0 Flash (enrichment, narration, embeddings)                        |
+| **Search**         | Semantic embeddings + TF-IDF transcript index + tag matching                       |
+| **Hosting**        | GitHub Pages (frontend), Firebase Hosting (API)                                    |
+| **Testing**        | Vitest + React Testing Library + Playwright (325 tests)                            |
+| **Security**       | DOMPurify (XSS sanitization), Firebase Security Rules, invite-based access control |
+| **Linting**        | ESLint 9 (flat config) + Stylelint                                                 |
 
 ---
 
@@ -46,7 +47,8 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 ```
 ├── path-builder/                  # React app (main UI)
 │   ├── src/
-│   │   ├── components/            # 24 component modules
+│   │   ├── components/            # 25 component modules
+│   │   │   ├── MobileNav/         # Adaptive hamburger drawer navigation
 │   │   │   ├── ProblemFirst/      # "Fix a Problem" — main user-facing flow
 │   │   │   ├── GuidedPlayer/      # AI-narrated learning experience
 │   │   │   ├── PersonaQuiz/       # Role-detection onboarding quiz
@@ -58,7 +60,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   │   │   ├── AdminFeedback/     # Admin feedback review panel
 │   │   │   └── ...               # AuthGate, InviteManager, Feedback, etc.
 │   │   ├── context/               # PathContext, TagDataContext, constants
-│   │   ├── hooks/                 # 7 custom hooks (useProblemFirst, useGuidedPlayer, etc.)
+│   │   ├── hooks/                 # 8 custom hooks (useIsMobile, useProblemFirst, etc.)
 │   │   ├── services/              # 25 service modules
 │   │   │   ├── searchPipeline.js          # Orchestrates search strategies
 │   │   │   ├── segmentSearchService.js    # TF-IDF transcript segment search
@@ -160,35 +162,35 @@ python scripts/run_enrichment_pipeline.py
 
 ## 🧩 Application Tabs
 
-| Tab | Description |
-|-----|-------------|
-| **📊 Dashboard** | Readiness score, persona coverage chart, quick search, tag cloud, tooltips on all metrics |
-| **📚 Path Readiness** | Evaluate which learning paths are ready for deployment |
-| **🏷️ Tag Sources** | Compare tag origins (canonical, AI, transcript, Gemini) |
-| **✏️ Tag Editor** | Edit and curate tag assignments per course |
-| **🏗️ Path Builder** | Drag-and-drop learning path assembly with intent headers |
-| **🚀 Onboarding** | Persona definitions and onboarding flow management |
-| **🔧 Fix a Problem** | Describe your problem → skeleton loader → AI diagnosis with citation links, search history, and enhanced error recovery |
-| **📊 Analytics** | Rich visualizations: tag heatmaps, skill radar, demand gaps, prerequisite flows |
-| **🔬 Augmentation** | Embedded dashboard for transcript augmentation quality monitoring |
-| **🎟️ Invites** | Admin-only invite code management |
-| **📋 Feedback** | Admin-only user feedback review and triage |
+| Tab                   | Description                                                                                                             |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **📊 Dashboard**      | Readiness score, persona coverage chart, quick search, tag cloud, tooltips on all metrics                               |
+| **📚 Path Readiness** | Evaluate which learning paths are ready for deployment                                                                  |
+| **🏷️ Tag Sources**    | Compare tag origins (canonical, AI, transcript, Gemini)                                                                 |
+| **✏️ Tag Editor**     | Edit and curate tag assignments per course                                                                              |
+| **🏗️ Path Builder**   | Drag-and-drop learning path assembly with intent headers                                                                |
+| **🚀 Onboarding**     | Persona definitions and onboarding flow management                                                                      |
+| **🔧 Fix a Problem**  | Describe your problem → skeleton loader → AI diagnosis with citation links, search history, and enhanced error recovery |
+| **📊 Analytics**      | Rich visualizations: tag heatmaps, skill radar, demand gaps, prerequisite flows                                         |
+| **🔬 Augmentation**   | Embedded dashboard for transcript augmentation quality monitoring                                                       |
+| **🎟️ Invites**        | Admin-only invite code management                                                                                       |
+| **📋 Feedback**       | Admin-only user feedback review and triage                                                                              |
 
 ---
 
 ## 🧪 Enrichment Pipeline
 
-| Script | Output | Purpose |
-|--------|--------|---------|
-| `build_transcript_index.py` | `transcript_segments.json` | Parse 616 VTT files → 7,000+ segments |
-| `build_embeddings.py` | `course_embeddings.json` | Semantic vectors for course matching |
-| `embed_segments.py` | `segment_embeddings.json` | Semantic vectors for segment-level search |
-| `build_search_index.py` | `search_index.json` | TF-IDF index for fast text search |
-| `summarize_segments.py` | Updates `transcript_segments.json` | Natural language summaries per segment |
-| `generate_learning_objectives.py` | `learning_objectives.json` | 3–5 objectives per course |
-| `generate_quiz_questions.py` | `quiz_questions.json` | 2–3 MCQs per video |
-| `detect_prerequisites.py` | `course_prerequisites.json` | Prerequisite relationships |
-| `augment_transcript.py` | Augmented transcripts | Add context, keywords, and summaries |
+| Script                            | Output                             | Purpose                                   |
+| --------------------------------- | ---------------------------------- | ----------------------------------------- |
+| `build_transcript_index.py`       | `transcript_segments.json`         | Parse 616 VTT files → 7,000+ segments     |
+| `build_embeddings.py`             | `course_embeddings.json`           | Semantic vectors for course matching      |
+| `embed_segments.py`               | `segment_embeddings.json`          | Semantic vectors for segment-level search |
+| `build_search_index.py`           | `search_index.json`                | TF-IDF index for fast text search         |
+| `summarize_segments.py`           | Updates `transcript_segments.json` | Natural language summaries per segment    |
+| `generate_learning_objectives.py` | `learning_objectives.json`         | 3–5 objectives per course                 |
+| `generate_quiz_questions.py`      | `quiz_questions.json`              | 2–3 MCQs per video                        |
+| `detect_prerequisites.py`         | `course_prerequisites.json`        | Prerequisite relationships                |
+| `augment_transcript.py`           | Augmented transcripts              | Add context, keywords, and summaries      |
 
 All AI-powered scripts use the Google Gemini API.
 
@@ -197,6 +199,7 @@ All AI-powered scripts use the Google Gemini API.
 ## 🔒 Access Control
 
 The platform uses **invite-based access**:
+
 - Users must sign in with Google via Firebase Auth
 - Access is granted through invite codes managed by admins
 - Admin users get additional tabs (Invites, Feedback) for platform management

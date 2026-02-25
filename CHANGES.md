@@ -8,6 +8,9 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ### Added
 
+- **Mobile Adaptive UI** — new `useIsMobile` hook driving a slide-out hamburger navigation drawer. Mobile viewports now feature prioritized tab ordering (Onboarding & Fix a Problem first), simplified builder layouts (single column), and auto-collapsed analytics panels
+- **Experience-Aware Prerequisite Ordering** — paths now sort based on user role experience (e.g. Beginners get Intro/Quickstarts first, Experienced users get topic-specific content first, Executives get executive summaries pushed to the end)
+- **Responsive CSS Fixes** — resolved horizontal overflow issues in the Path Readiness Content Gap matrix and Tag Sources cards on 375px screens
 - **Persona Content Gaps dashboard** — interactive section in Dashboard tab with persona selector chips, 4 gap stat cards (Relevant / Too Technical / Topics Covered / Keyword Gaps), required topic coverage bars, expandable top-relevant and too-technical course lists, and keyword gap recommendations for content creation
 - **DOMPurify XSS sanitization** — added `dompurify` to sanitize the one `dangerouslySetInnerHTML` usage in `OfficialDocsSummary.jsx`, eliminating the last potential XSS vector
 - **Drive-to-TXT transcription script** (`scripts/drive_to_txt.py`) — downloads videos from a Google Drive folder and transcribes with GPU-accelerated Whisper, outputting `.txt` files formatted for NotebookLLM with timestamped segments
@@ -53,7 +56,6 @@ All notable changes to the Unreal Learning Path Tagging System.
   - Phase 5: Search quality regression (16 tests) — known-answer tag extraction, course scoring, cosine invariants
   - Phase 6: Bundle regression (7 tests) — build verification, size caps, code-splitting validation
   - Phase 7: CI pipeline — Playwright + Vitest integrated into GitHub Actions `path-builder-quality` job
-
 
 ### Changed
 
