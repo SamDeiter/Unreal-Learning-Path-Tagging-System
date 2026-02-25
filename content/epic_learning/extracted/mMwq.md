@@ -1,0 +1,4 @@
+# Bringing Megascans Trees to Life
+
+*Trees have always been one of the most sought after 3D assets in the Megascans library. It is one of the most complicated, time-consuming, and difficult assets to create in the world of computer graphics. This session will take the developers through the journey of bringing the early access Megascans trees onto the Unreal Marketplace. There will be examples of how Quixel’s collective knowledge of field scanning, logistics, deployment, and data processing was brought together to make this happen.*
+

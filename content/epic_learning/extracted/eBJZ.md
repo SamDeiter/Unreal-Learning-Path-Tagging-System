@@ -1,0 +1,4 @@
+# Optimizing UE5: Advanced Rendering, Graphics Performance, and Memory Management | Unreal Fest 2024
+
+*As you continue to push the boundaries of the next-gen graphics features of UE5, you may find yourself in unexplored territory with an overloaded backpack and nary a trail marker in sight. How do you find your way back to the trail? Should you be changing how you pack your bag for the trek? Was there anything you could have done before you set out to make things easier? Let’s dive deeper into debugging Nanite, Lumen, and VSM performance issues so that we can get back on to the trail. Then, we’ll learn more about managing the memory of our new graphics features, including how we can leverage virtual texturing to make sure our pack is properly balanced. Along the way we’ll learn about what we can do to make sure we’re staying on track far into the future.*
+
