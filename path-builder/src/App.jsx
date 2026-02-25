@@ -441,7 +441,7 @@ function App() {
                       <CollapsibleSection
                         title="Confidence Routing"
                         icon="🧠"
-                        defaultExpanded={!isMobile}
+                        defaultExpanded={false}
                       >
                         <ConfidenceAnalytics />
                       </CollapsibleSection>
@@ -450,7 +450,7 @@ function App() {
                       <CollapsibleSection
                         title="Coverage vs Industry Demand"
                         icon="🎯"
-                        defaultExpanded={!isMobile}
+                        defaultExpanded={false}
                       >
                         <div className="coverage-grid">
                           <SkillRadar />
@@ -459,12 +459,16 @@ function App() {
                       </CollapsibleSection>
 
                       {/* Overview Section */}
-                      <CollapsibleSection title="Overview" icon="📈">
+                      <CollapsibleSection title="Overview" icon="📈" defaultExpanded={false}>
                         <JourneyHeatmap />
                       </CollapsibleSection>
 
                       {/* Library Analysis Section */}
-                      <CollapsibleSection title="Library Analysis" icon="📚">
+                      <CollapsibleSection
+                        title="Library Analysis"
+                        icon="📚"
+                        defaultExpanded={false}
+                      >
                         <TagTrends />
                         <TagHistorySparkline />
                         <TagHeatmap />
@@ -473,7 +477,7 @@ function App() {
                       </CollapsibleSection>
 
                       {/* Learning Paths Section */}
-                      <CollapsibleSection title="Learning Paths" icon="🛤️">
+                      <CollapsibleSection title="Learning Paths" icon="🛤️" defaultExpanded={false}>
                         <PrereqFlow />
                       </CollapsibleSection>
 
@@ -481,7 +485,7 @@ function App() {
                       <CollapsibleSection
                         title="Tag Relationship Graph"
                         icon="🔗"
-                        defaultExpanded={!isMobile}
+                        defaultExpanded={false}
                       >
                         <div className="tag-graph-wrapper">
                           <TagGraph tags={tags} edges={edges} courses={courses} />
