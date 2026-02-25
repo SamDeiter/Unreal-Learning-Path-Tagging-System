@@ -36,7 +36,7 @@ describe("Production Build", () => {
 
     const html = fs.readFileSync(indexPath, "utf8");
     expect(html).toContain("<script");
-    expect(html).toContain("type=\"module\"");
+    expect(html).toContain('type="module"');
   });
 
   it("should produce JS and CSS assets", () => {
@@ -53,7 +53,7 @@ describe("Production Build", () => {
 });
 
 describe("Bundle Size Regression", () => {
-  it("total bundle should be under 35 MB (data-heavy app)", () => {
+  it("total bundle should be under 55 MB (data-heavy app with embeddings)", () => {
     const assets = path.join(DIST, "assets");
     if (!fs.existsSync(assets)) return;
 
@@ -65,7 +65,7 @@ describe("Bundle Size Regression", () => {
     }
 
     const totalMB = totalBytes / (1024 * 1024);
-    expect(totalMB).toBeLessThan(35);
+    expect(totalMB).toBeLessThan(55);
   });
 
   it("no individual JS chunk should exceed 5 MB (excluding data chunks)", () => {
