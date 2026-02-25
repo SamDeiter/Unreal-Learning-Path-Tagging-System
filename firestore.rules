@@ -106,6 +106,13 @@ service cloud.firestore {
       allow write: if false; // Cloud Functions only (Admin SDK bypasses rules)
     }
 
+    // Analytics events — admin reads, authenticated users can create
+    match /analytics_events/{docId} {
+      allow read: if isAdmin();
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+    }
+
     // Default deny everything else
     match /{document=**} {
       allow read, write: if false;

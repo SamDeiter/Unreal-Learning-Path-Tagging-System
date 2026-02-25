@@ -47,6 +47,7 @@ const SkillGapAnalysis = lazy(() => import("./components/Visualizations/SkillGap
 const ConfidenceAnalytics = lazy(() => import("./components/Visualizations/ConfidenceAnalytics"));
 const TagHistorySparkline = lazy(() => import("./components/Visualizations/TagHistorySparkline"));
 const InviteManager = lazy(() => import("./components/InviteManager/InviteManager"));
+const AdminAnalytics = lazy(() => import("./components/AdminAnalytics/AdminAnalytics"));
 
 // Tab definitions — mobile reorders these for relevance
 const BASE_TABS = [
@@ -422,6 +423,17 @@ function App() {
                     </div>
 
                     <div className="analytics-grid">
+                      {/* Admin-only: Usage Analytics */}
+                      {userIsAdmin && (
+                        <CollapsibleSection
+                          title="Usage Analytics"
+                          icon="📈"
+                          defaultExpanded={false}
+                        >
+                          <AdminAnalytics />
+                        </CollapsibleSection>
+                      )}
+
                       {/* Insights & Recommendations */}
                       <InsightsPanel onNavigate={handleInsightNavigate} />
 
