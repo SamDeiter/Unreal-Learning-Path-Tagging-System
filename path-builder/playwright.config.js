@@ -16,7 +16,7 @@ export default defineConfig({
   reporter: [["html", { open: "never" }]],
 
   use: {
-    baseURL: "http://localhost:5174",
+    baseURL: "http://localhost:5174/Unreal-Learning-Path-Tagging-System/",
     viewport: { width: 1280, height: 720 },
     trace: "on-first-retry",
     screenshot: "only-on-failure",
