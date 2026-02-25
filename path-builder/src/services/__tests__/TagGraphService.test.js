@@ -4,7 +4,7 @@
  * Tests the singleton tag-graph service which loads from tags.json and edges.json.
  * All methods are pure (graph lookups) so no mocking is needed.
  */
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import tagGraphService, { TagGraphService } from "../TagGraphService";
 
 // -- Construction / data integrity --

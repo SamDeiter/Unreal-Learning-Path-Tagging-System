@@ -312,7 +312,7 @@ function Dashboard() {
           title="YouTube videos imported from official Epic Games and community channels. Click to filter."
         >
           <div className="stat-number">{sourceDistribution.youtube}</div>
-          <div className="stat-label">▶ YOUTUBE</div>
+          <div className="stat-label">YOUTUBE</div>
         </div>
         <div
           className="stat-card source-lms"

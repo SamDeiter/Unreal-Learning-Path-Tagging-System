@@ -42,9 +42,11 @@ function ContentGapDashboard() {
 
   return (
     <div className="content-gap-dashboard">
-      <h3 title="Analyze content coverage for each learner persona. Shows which required topics are covered, which are missing, and recommends content to fill gaps.">
-        <span className="section-icon">🎯</span> Persona Content Gaps
-      </h3>
+      <div className="gap-dashboard-header">
+        <h3 title="Analyze content coverage for each learner persona. Shows which required topics are covered, which are missing, and recommends content to fill gaps.">
+          <span className="section-icon">🎯</span> Persona Content Gaps
+        </h3>
+      </div>
 
       {/* Persona Selector Chips */}
       <div className="gap-persona-chips">

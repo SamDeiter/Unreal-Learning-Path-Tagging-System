@@ -13,12 +13,12 @@ The tagging system exists to **drive new user growth & successful onboarding** b
 
 ## Core Pillars
 
-| Pillar | Description |
-|--------|-------------|
-| **The Encyclopedia** | Comprehensive documentation of all UE5 topics |
-| **The Paths** | Curated learning journeys based on skill gaps |
-| **Onboarding & Adoption** | First-time user success optimization |
-| **Third Party Content** | Integration with YouTube, GDC Vault, community tutorials |
+| Pillar                    | Description                                              |
+| ------------------------- | -------------------------------------------------------- |
+| **The Encyclopedia**      | Comprehensive documentation of all UE5 topics            |
+| **The Paths**             | Curated learning journeys based on skill gaps            |
+| **Onboarding & Adoption** | First-time user success optimization                     |
+| **Third Party Content**   | Integration with YouTube, GDC Vault, community tutorials |
 
 ---
 
@@ -32,7 +32,7 @@ The tagging system exists to **drive new user growth & successful onboarding** b
 
 ### Mindset
 
-- **Artist-First, Tech-Second**: Interested in how shaders *look*, not the math
+- **Artist-First, Tech-Second**: Interested in how shaders _look_, not the math
 - **Creative Problem Solvers**: Want tools that stay out of their way
 - **Apprehensive but Curious**: Fear UE is "too programming-like" vs artist-friendly DCCs
 
@@ -44,12 +44,12 @@ The tagging system exists to **drive new user growth & successful onboarding** b
 
 ### Pain Points
 
-| Pain Point | Description |
-|------------|-------------|
-| **Uncanny Valley Fears** | Worried real-time won't match offline render quality |
-| **Rigging Translation** | Maya rigs breaking when imported to game engines |
-| **Black Box Shaders** | Fear of math nodes (Dot Product, Lerp) gate-keeping art |
-| **Data Management Anxiety** | Version control, FBX exports, broken file paths |
+| Pain Point                  | Description                                             |
+| --------------------------- | ------------------------------------------------------- |
+| **Uncanny Valley Fears**    | Worried real-time won't match offline render quality    |
+| **Rigging Translation**     | Maya rigs breaking when imported to game engines        |
+| **Black Box Shaders**       | Fear of math nodes (Dot Product, Lerp) gate-keeping art |
+| **Data Management Anxiety** | Version control, FBX exports, broken file paths         |
 
 ### Content Preferences
 
@@ -96,12 +96,12 @@ The tagging system exists to **drive new user growth & successful onboarding** b
 
 ### Tag Taxonomy Alignment
 
-| Tag Category | Persona Relevance | Example Tags |
-|--------------|-------------------|--------------|
-| **Animation** | Core interest | Control Rig, Animation Blueprint, Sequencer |
-| **Cinematics** | High passion area | Virtual Camera, Movie Render Queue, Lumen |
-| **Materials** | Artist-friendly needed | Material Editor, Subsurface, Skin Shaders |
-| **Real-Time VFX** | Efficiency focus | Niagara, GPU Particles, Real-Time Hair |
+| Tag Category      | Persona Relevance      | Example Tags                                |
+| ----------------- | ---------------------- | ------------------------------------------- |
+| **Animation**     | Core interest          | Control Rig, Animation Blueprint, Sequencer |
+| **Cinematics**    | High passion area      | Virtual Camera, Movie Render Queue, Lumen   |
+| **Materials**     | Artist-friendly needed | Material Editor, Subsurface, Skin Shaders   |
+| **Real-Time VFX** | Efficiency focus       | Niagara, GPU Particles, Real-Time Hair      |
 
 ---
 
@@ -128,22 +128,20 @@ The tagging system exists to **drive new user growth & successful onboarding** b
 - [ ] Output learning objectives aligned with persona goals
 - [ ] Track successful onboarding metrics
 
-### Phase 4: Third-Party Integration
+### Phase 4: Third-Party Integration ❌ REJECTED
 
-- [ ] YouTube API integration for recommended external content
-- [ ] GDC Vault talk recommendations
-- [ ] Community resource links (ArtStation references, Discord servers)
+> **Note (2026-02-25):** This phase was removed from the roadmap. The Learning Path Tagging System must remain an _official Epic Games tool_ and will only direct users to official resources (Epic Developer Community, UDN, official documentation). Third-party YouTube content will not be integrated.
 
 ---
 
 ## Success Metrics
 
-| Metric | Target | How We Measure |
-|--------|--------|----------------|
-| **Path Completion Rate** | 70%+ | Users who finish generated paths |
-| **Time to First Project** | < 2 weeks | New users creating real work |
-| **Skill Gap Reduction** | -20% avg gap | Coverage vs industry demand |
-| **Persona Satisfaction** | 4.5/5 | "This felt made for me" ratings |
+| Metric                    | Target       | How We Measure                   |
+| ------------------------- | ------------ | -------------------------------- |
+| **Path Completion Rate**  | 70%+         | Users who finish generated paths |
+| **Time to First Project** | < 2 weeks    | New users creating real work     |
+| **Skill Gap Reduction**   | -20% avg gap | Coverage vs industry demand      |
+| **Persona Satisfaction**  | 4.5/5        | "This felt made for me" ratings  |
 
 ---
 

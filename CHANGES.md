@@ -1,8 +1,21 @@
-# Changelog
+# Unreal Engine Learning Path Tagging System - Changelog
 
 All notable changes to the Unreal Learning Path Tagging System.
 
 ---
+
+## [1.2.0-personas] - 2026-02-25
+
+### Added
+
+- **Persona Context:** Added persona detection and specialized messaging to the `GuidedPlayer` IntroCard.
+- **Content Gap Dashboard:** Added CSV export functionality allowing admins to download gap analysis reports.
+- **Tag & Synonym Editor:** Added a new sub-tab to `TagEditor` to securely manage tag synonyms and ontology aliases.
+
+### Changed
+
+- Refactored `PersonaService.js` to store messaging directly in `personaScoringRules`.
+- `useGuidedPlayer.js` updated to import `generateProgressText` seamlessly.
 
 ## [2.6.0] - 2026-02-24
 

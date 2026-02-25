@@ -19,6 +19,7 @@ import {
 import { generateChallenge } from "../services/challengeService";
 import { signInWithGoogle, onAuthChange } from "../services/googleAuthService";
 import { recordPathCompletion, getStreakInfo } from "../services/learningProgressService";
+import { detectPersona, getPersonaMessaging } from "../services/PersonaService";
 import quizData from "../data/quiz_questions.json";
 import { logVideoFeedback } from "../services/feedbackService";
 
@@ -80,10 +81,23 @@ export default function useGuidedPlayer({
   const hasNextVideo = hasMoreVideos || !!nextCourse;
   const courseVideoCount = currentVideos.length;
 
-  const introContent = useMemo(
-    () => generatePathIntro({ problemSummary, courses, diagnosis }),
-    [problemSummary, courses, diagnosis]
-  );
+  // Detect persona to tailor messaging
+  const detectedPersona = useMemo(() => {
+    // If we have courses, use their tags to help detect the persona
+    const courseTags = courses.flatMap((c) => c.canonical_tags || []);
+    return detectPersona(problemSummary || "", courseTags);
+  }, [problemSummary, courses]);
+
+  const personaMessaging = useMemo(() => {
+    if (!detectedPersona) return null;
+    return getPersonaMessaging(detectedPersona);
+  }, [detectedPersona]);
+
+  const introContent = useMemo(() => {
+    // Pass the detected persona down so narrator service can use it if needed,
+    // but we will also pass the messaging explicitly to the IntroCard.
+    return generatePathIntro({ problemSummary, courses, diagnosis, persona: detectedPersona });
+  }, [problemSummary, courses, diagnosis, detectedPersona]);
 
   const streak = useMemo(() => getStreakInfo(), []);
 
@@ -125,7 +139,12 @@ export default function useGuidedPlayer({
   const handleVideoComplete = useCallback(() => {
     // Log "watched" signal (fire-and-forget)
     if (currentCourse && currentVideo && user?.uid) {
-      logVideoFeedback(user.uid, currentCourse.code, currentVideo.key || currentVideo.title, "watched");
+      logVideoFeedback(
+        user.uid,
+        currentCourse.code,
+        currentVideo.key || currentVideo.title,
+        "watched"
+      );
     }
     vidStartRef.current = Date.now();
 
@@ -169,7 +188,12 @@ export default function useGuidedPlayer({
     // Log "skipped" if user clicks Next within 30s of starting
     const elapsed = Date.now() - vidStartRef.current;
     if (elapsed < 30000 && currentCourse && currentVideo && user?.uid) {
-      logVideoFeedback(user.uid, currentCourse.code, currentVideo.key || currentVideo.title, "skipped");
+      logVideoFeedback(
+        user.uid,
+        currentCourse.code,
+        currentVideo.key || currentVideo.title,
+        "skipped"
+      );
     }
     vidStartRef.current = Date.now();
 
@@ -247,6 +271,7 @@ export default function useGuidedPlayer({
     hasNextVideo,
     courseVideoCount,
     introContent,
+    personaMessaging,
     streak,
     progress,
     bridgeContent,

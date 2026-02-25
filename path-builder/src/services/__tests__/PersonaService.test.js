@@ -134,7 +134,7 @@ describe("personaScoringRules", () => {
   });
 
   it("each rule has required keys", () => {
-    for (const [id, rule] of Object.entries(personaScoringRules)) {
+    for (const [_id, rule] of Object.entries(personaScoringRules)) {
       expect(rule).toHaveProperty("boostKeywords");
       expect(rule).toHaveProperty("penaltyKeywords");
       expect(rule).toHaveProperty("requiredTopics");

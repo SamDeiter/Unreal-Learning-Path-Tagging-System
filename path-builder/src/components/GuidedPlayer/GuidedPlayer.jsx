@@ -104,6 +104,7 @@ export default function GuidedPlayer(props) {
       {gp.stage === STAGES.INTRO && (
         <IntroCard
           introContent={gp.introContent}
+          personaMessaging={gp.personaMessaging}
           streak={gp.streak}
           courses={gp.courses}
           pathSummary={gp.pathSummary}
@@ -229,6 +230,7 @@ GuidedPlayer.defaultProps = {
 /** IntroCard — welcome screen with course preview */
 function IntroCard({
   introContent,
+  personaMessaging,
   streak,
   courses,
   pathSummary,
@@ -251,6 +253,14 @@ function IntroCard({
 
       {streak.isActive && streak.count > 1 && (
         <div className="streak-badge">🔥 {streak.count}-day learning streak!</div>
+      )}
+
+      {personaMessaging && (
+        <div className="persona-messaging-card">
+          <h4>💡 Specialized for You</h4>
+          <p className="persona-pain-point">{personaMessaging.painPoints}</p>
+          <p className="persona-encouragement">{personaMessaging.encouragement}</p>
+        </div>
       )}
 
       <div className="course-preview">

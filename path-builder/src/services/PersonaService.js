@@ -111,7 +111,7 @@ export function getPainPointMessaging(persona) {
   return legacyMessaging[persona.id] || [];
 }
 
-// ─────────── Persona-Specific Scoring Rules ───────────
+// ─────────── Persona-Specific Scoring Rules & Messaging ───────────
 // Used by generatePath() in Personas.jsx to rank courses per persona.
 // boostKeywords:   +5 title match, +3 tag match
 // penaltyKeywords: -10 per match
@@ -147,6 +147,11 @@ export const personaScoringRules = {
       "archviz",
     ],
     requiredTopics: ["viewport", "blueprint", "lighting", "packaging"],
+    messaging: {
+      painPoints: "We know that balancing art, code, and design by yourself is overwhelming.",
+      encouragement:
+        "This path prioritizes Blueprint-friendly workflows and quick minimal viable products so you can prototype faster.",
+    },
   },
   logic_liam: {
     boostKeywords: [
@@ -169,6 +174,12 @@ export const personaScoringRules = {
     ],
     penaltyKeywords: ["marketing", "brand", "product viz", "archviz", "automotive", "configurator"],
     requiredTopics: ["blueprint", "C++", "profiling"],
+    messaging: {
+      painPoints:
+        "Finding deep technical resources on engine architecture and networking can be frustrating.",
+      encouragement:
+        "This path skips the beginner UI tutorials and jumps straight into engineering patterns, C++, and profiling.",
+    },
   },
   animator_alex: {
     boostKeywords: [
@@ -196,6 +207,12 @@ export const personaScoringRules = {
       "manufacturing",
     ],
     requiredTopics: ["animation", "sequencer", "lighting"],
+    messaging: {
+      painPoints:
+        "We know migrating from offline DCCs (like Maya/Blender) to a real-time game engine feels like learning a new language.",
+      encouragement:
+        "This path focuses purely on the art: camera, sequencer, and lighting. No C++ required.",
+    },
   },
   rigger_regina: {
     boostKeywords: [
@@ -224,6 +241,12 @@ export const personaScoringRules = {
       "digital twin",
     ],
     requiredTopics: ["animation", "control rig", "character"],
+    messaging: {
+      painPoints:
+        "Worrying about deformation quality and translating offline rigs into a game engine is stressful.",
+      encouragement:
+        "We've curated these steps to highlight Control Rig and robust constraints for characters.",
+    },
   },
   designer_cpg: {
     boostKeywords: [
@@ -251,6 +274,12 @@ export const personaScoringRules = {
       "digital twin",
     ],
     requiredTopics: ["lighting", "materials", "camera"],
+    messaging: {
+      painPoints:
+        "Reaching photorealistic rendering standards on tight client timelines is challenging.",
+      encouragement:
+        "This sequence bypasses gameplay logic heavily in favor of Path Tracer, Lumen, and studio lighting setups.",
+    },
   },
   // Legacy personas get basic rules for consistency
   architect_amy: {
@@ -313,8 +342,30 @@ export const personaScoringRules = {
     ],
     penaltyKeywords: ["archviz", "gameplay", "digital twin", "multiplayer"],
     requiredTopics: ["materials", "lighting"],
+    messaging: {
+      painPoints:
+        "Achieving high-fidelity material representation for complex manufactured products is tough.",
+      encouragement:
+        "We've prioritized configurators, advanced materials, and precise lighting environments.",
+    },
   },
 };
+
+/**
+ * Gets specific empathetic messaging mapped to a persona ID
+ * @param {string|Object} personaOrId - The persona object or ID string
+ * @returns {Object|null} - {painPoints, encouragement} or null
+ */
+export function getPersonaMessaging(personaOrId) {
+  if (!personaOrId) return null;
+  const id = typeof personaOrId === "string" ? personaOrId : personaOrId.id;
+
+  if (personaScoringRules[id] && personaScoringRules[id].messaging) {
+    return personaScoringRules[id].messaging;
+  }
+
+  return null;
+}
 
 export default {
   detectPersona,
@@ -322,5 +373,6 @@ export default {
   getOnboardingPersonas,
   getPersonaById,
   getPainPointMessaging,
+  getPersonaMessaging,
   personaScoringRules,
 };
