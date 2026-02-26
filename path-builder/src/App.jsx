@@ -12,6 +12,8 @@ import useIsMobile from "./hooks/useIsMobile";
 import MobileNavDrawer from "./components/MobileNav/MobileNavDrawer";
 import "./App.css";
 
+const isE2EBypass = import.meta.env.VITE_E2E_BYPASS === "true";
+
 // Import course data
 import videoLibrary from "./data/video_library_enriched.json";
 import tagsData from "./data/tags.json";
@@ -108,6 +110,7 @@ function App() {
 
   // Check if current user is admin for showing invite tab
   useEffect(() => {
+    if (isE2EBypass) return; // No Firebase in E2E mode
     const unsub = onAuthChange((u) => {
       setCurrentUser(u);
       setUserIsAdmin(u ? isAdmin(u.email) : false);
@@ -117,7 +120,7 @@ function App() {
 
   // Real-time listener for "new" feedback count (admin only)
   useEffect(() => {
-    if (!userIsAdmin) return;
+    if (isE2EBypass || !userIsAdmin) return; // No Firebase in E2E mode
     const db = getFirestore(getFirebaseApp());
     const q = query(collection(db, "feedback"), where("status", "==", "new"));
     const unsub = onSnapshot(
