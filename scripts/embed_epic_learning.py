@@ -24,9 +24,16 @@ import urllib.request
 from datetime import datetime
 from pathlib import Path
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass
+
 # ── Config ──────────────────────────────────────────────────────────────
 EXTRACTED_DIR = Path("content/epic_learning/extracted")
 TRANSCRIPT_DIR = Path("content/epic_learning/transcripts")
+MANIFEST_PATH = Path("content/epic_learning/video_manifest.json")
 OUTPUT_FILE = Path("path-builder/src/data/epic_learning_embeddings.json")
 CHECKPOINT_FILE = Path("content/epic_learning_embed_checkpoint.json")
 
@@ -151,6 +158,17 @@ def load_all_content():
     docs = []
     md_files = sorted(EXTRACTED_DIR.glob("*.md"))
 
+    # Build hash_id → [youtube_id, ...] lookup from video manifest
+    manifest_yt_lookup = {}  # hash_id -> list of youtube IDs
+    if MANIFEST_PATH.exists():
+        with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+        for yt in manifest.get("youtube_videos", []):
+            h = yt.get("article_hash", "")
+            if h:
+                manifest_yt_lookup.setdefault(h, []).append(yt["id"])
+        print(f"  Manifest: {len(manifest_yt_lookup)} articles with YouTube videos")
+
     for md_file in md_files:
         hash_id = md_file.stem
         meta_file = EXTRACTED_DIR / f"{hash_id}.meta.json"
@@ -165,7 +183,7 @@ def load_all_content():
             with open(meta_file, "r", encoding="utf-8") as f:
                 meta = json.load(f)
 
-        # Load transcript if available
+        # Load transcripts from meta.json videos array (legacy)
         transcript = ""
         for vid in meta.get("videos", []):
             if vid.get("type") == "youtube":
@@ -174,6 +192,13 @@ def load_all_content():
                 if txt_path.exists():
                     with open(txt_path, "r", encoding="utf-8") as f:
                         transcript += f"\n\n## Video Transcript\n\n{f.read()}"
+
+        # Also load transcripts from manifest (primary source)
+        for yt_id in manifest_yt_lookup.get(hash_id, []):
+            txt_path = TRANSCRIPT_DIR / f"{yt_id}.txt"
+            if txt_path.exists():
+                with open(txt_path, "r", encoding="utf-8") as f:
+                    transcript += f"\n\n## Video Transcript\n\n{f.read()}"
 
         # Combine markdown + transcript
         full_text = markdown
