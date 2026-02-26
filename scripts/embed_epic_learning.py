@@ -154,12 +154,15 @@ def _make_chunk(text, meta, idx):
 
 # ── Load Content ────────────────────────────────────────────────────────
 def load_all_content():
-    """Load Markdown + transcripts, return list of chunk-ready documents."""
+    """Load Markdown + ALL transcript types, return list of chunk-ready documents."""
     docs = []
     md_files = sorted(EXTRACTED_DIR.glob("*.md"))
 
     # Build hash_id → [youtube_id, ...] lookup from video manifest
-    manifest_yt_lookup = {}  # hash_id -> list of youtube IDs
+    manifest_yt_lookup = {}   # hash_id -> list of youtube IDs
+    manifest_cms_lookup = {}  # hash_id -> list of CMS video IDs
+    all_article_hashes = set()  # track which hash_ids have articles
+    
     if MANIFEST_PATH.exists():
         with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
             manifest = json.load(f)
@@ -167,10 +170,19 @@ def load_all_content():
             h = yt.get("article_hash", "")
             if h:
                 manifest_yt_lookup.setdefault(h, []).append(yt["id"])
-        print(f"  Manifest: {len(manifest_yt_lookup)} articles with YouTube videos")
+        for cms in manifest.get("cms_videos", []):
+            h = cms.get("article_hash", "")
+            if h:
+                manifest_cms_lookup.setdefault(h, []).append(cms["id"])
+        print(f"  Manifest: {len(manifest_yt_lookup)} articles with YT, "
+              f"{len(manifest_cms_lookup)} with CMS videos")
+
+    # Track which transcript files get consumed (to find standalone ones later)
+    consumed_transcripts = set()
 
     for md_file in md_files:
         hash_id = md_file.stem
+        all_article_hashes.add(hash_id)
         meta_file = EXTRACTED_DIR / f"{hash_id}.meta.json"
 
         # Load markdown
@@ -183,7 +195,7 @@ def load_all_content():
             with open(meta_file, "r", encoding="utf-8") as f:
                 meta = json.load(f)
 
-        # Load transcripts from meta.json videos array (legacy)
+        # Load transcripts from meta.json videos array (legacy YouTube)
         transcript = ""
         for vid in meta.get("videos", []):
             if vid.get("type") == "youtube":
@@ -192,13 +204,42 @@ def load_all_content():
                 if txt_path.exists():
                     with open(txt_path, "r", encoding="utf-8") as f:
                         transcript += f"\n\n## Video Transcript\n\n{f.read()}"
+                    consumed_transcripts.add(txt_path.name)
 
-        # Also load transcripts from manifest (primary source)
+        # Load YouTube transcripts from manifest (primary source)
         for yt_id in manifest_yt_lookup.get(hash_id, []):
             txt_path = TRANSCRIPT_DIR / f"{yt_id}.txt"
             if txt_path.exists():
                 with open(txt_path, "r", encoding="utf-8") as f:
                     transcript += f"\n\n## Video Transcript\n\n{f.read()}"
+                consumed_transcripts.add(txt_path.name)
+
+        # Load CMS VTT transcripts (cms_ prefix with hash)
+        for cms_id in manifest_cms_lookup.get(hash_id, []):
+            # Try multiple naming patterns
+            for prefix in ["cms_", "whisper_", ""]:
+                for pattern in [f"{prefix}{cms_id}.txt",
+                               f"{prefix}{hash_id}_{cms_id}.txt"]:
+                    txt_path = TRANSCRIPT_DIR / pattern
+                    if txt_path.exists() and txt_path.name not in consumed_transcripts:
+                        with open(txt_path, "r", encoding="utf-8") as f:
+                            transcript += f"\n\n## Video Transcript\n\n{f.read()}"
+                        consumed_transcripts.add(txt_path.name)
+
+        # Also match cms_ files by hash prefix pattern
+        for t in TRANSCRIPT_DIR.glob(f"cms_{hash_id}_*.txt"):
+            if t.name not in consumed_transcripts:
+                with open(t, "r", encoding="utf-8") as f:
+                    transcript += f"\n\n## Video Transcript\n\n{f.read()}"
+                consumed_transcripts.add(t.name)
+
+        # Match whisper_ files by CMS video ID
+        for cms_id in manifest_cms_lookup.get(hash_id, []):
+            t = TRANSCRIPT_DIR / f"whisper_{cms_id}.txt"
+            if t.exists() and t.name not in consumed_transcripts:
+                with open(t, "r", encoding="utf-8") as f:
+                    transcript += f"\n\n## Video Transcript (Whisper)\n\n{f.read()}"
+                consumed_transcripts.add(t.name)
 
         # Combine markdown + transcript
         full_text = markdown
@@ -210,6 +251,32 @@ def load_all_content():
 
         docs.append({"text": full_text, "meta": meta})
 
+    # ── Standalone YouTube channel transcripts (yt_ prefix) ─────────────
+    # These don't match any article; embed them as independent documents
+    standalone_count = 0
+    for t in sorted(TRANSCRIPT_DIR.glob("yt_*.txt")):
+        if t.name in consumed_transcripts:
+            continue
+        yt_id = t.stem[3:]  # Remove "yt_" prefix
+        with open(t, "r", encoding="utf-8") as f:
+            text = f.read()
+        if len(text.strip()) < 50:
+            continue
+        
+        meta = {
+            "hash_id": f"yt_{yt_id}",
+            "title": f"YouTube: {yt_id}",
+            "url": f"https://www.youtube.com/watch?v={yt_id}",
+            "content_type": "youtube_transcript",
+            "author": "Unreal Engine",
+            "tags": ["youtube", "unreal-engine"],
+        }
+        docs.append({"text": f"## YouTube Transcript\n\n{text}", "meta": meta})
+        consumed_transcripts.add(t.name)
+        standalone_count += 1
+
+    print(f"  Standalone YouTube transcripts: {standalone_count}")
+    print(f"  Total transcript files consumed: {len(consumed_transcripts)}")
     return docs
 
 
