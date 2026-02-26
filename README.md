@@ -197,6 +197,51 @@ All AI-powered scripts use the Google Gemini API.
 
 ---
 
+## 🎙️ Video Transcript Pipeline
+
+Video transcripts power the semantic search and RAG database. Three sources feed transcripts into `content/epic_learning/transcripts/`:
+
+| Stage | Source                    | Prefix     | Count | Method                                                                                   |
+| ----- | ------------------------- | ---------- | ----- | ---------------------------------------------------------------------------------------- |
+| 1     | YouTube captions          | `yt_`      | ~150  | `fetch_yt_channel_transcripts.py` — downloads official captions                          |
+| 2     | CMS embedded captions     | `cms_`     | ~95   | `fetch_cms_transcripts.py` — extracts from Epic's CMS player                             |
+| 3     | Whisper GPU transcription | `whisper_` | ~87   | `whisper_cms_transcripts_v2.py` — OpenAI Whisper on CUDA for CMS videos without captions |
+
+### Whisper Transcription
+
+```powershell
+# Run Whisper on all CMS videos without existing transcripts
+python scripts/whisper_cms_transcripts_v2.py --phase both --model medium
+```
+
+- **Phase A**: Extracts stream URLs from CMS video pages → `cms_stream_urls_v2.json`
+- **Phase B**: Downloads audio, transcribes with Whisper, saves to `whisper_*.txt`
+- Recommended model: `medium` (best accuracy/speed tradeoff for UE5 terminology)
+
+### Post-Processing & Quality
+
+```powershell
+# Audit transcript health (broken files, hallucinations, coverage)
+python scripts/audit_transcripts.py
+
+# Clean Whisper transcripts (fix UE5 misspellings, detect hallucination loops)
+python scripts/clean_whisper_transcripts.py --dry-run    # preview
+python scripts/clean_whisper_transcripts.py              # apply fixes
+python scripts/clean_whisper_transcripts.py --all        # all transcripts
+```
+
+### Embedding
+
+After transcripts are collected, generate the RAG embeddings:
+
+```powershell
+python scripts/embed_epic_learning.py
+```
+
+This produces `epic_learning_embeddings.json` (~20MB) containing chunked transcript embeddings for semantic search.
+
+---
+
 ## 🔒 Access Control
 
 The platform uses **invite-based access**:
