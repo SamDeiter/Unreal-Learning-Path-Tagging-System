@@ -21,6 +21,7 @@ from pathlib import Path
 
 # ── Config ──────────────────────────────────────────────────────────────
 EXTRACTED_DIR = Path("content/epic_learning/extracted")
+MANIFEST_PATH = Path("content/epic_learning/video_manifest.json")
 TRANSCRIPT_DIR = Path("content/epic_learning/transcripts")
 AUDIO_DIR = Path("content/epic_learning/_audio_tmp")
 BATCH_DELAY = 1.0
@@ -46,6 +47,26 @@ def find_youtube_videos():
                         "title": title,
                         "youtube_id": yt_id,
                     })
+    return videos
+
+
+def find_youtube_from_manifest():
+    """Load YouTube video IDs from discover_epic_videos.py manifest."""
+    if not MANIFEST_PATH.exists():
+        print(f"  ERROR: Manifest not found at {MANIFEST_PATH}")
+        print("  Run: python scripts/discover_epic_videos.py")
+        return []
+
+    with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+
+    videos = []
+    for yt in manifest.get("youtube_videos", []):
+        videos.append({
+            "hash_id": yt.get("article_hash", ""),
+            "title": yt.get("article_title", "Unknown"),
+            "youtube_id": yt["id"],
+        })
     return videos
 
 
@@ -164,6 +185,8 @@ def main():
 
     parser = argparse.ArgumentParser(description="Fetch transcripts for Epic Learning videos")
     parser.add_argument("--subs-only", action="store_true", help="Only download subtitles, skip Whisper")
+    parser.add_argument("--from-manifest", action="store_true",
+                        help="Read YouTube IDs from video_manifest.json (from discover_epic_videos.py)")
     parser.add_argument("--whisper-model", default=WHISPER_MODEL,
                         help="Whisper model size: tiny, base, small, medium, large (default: base)")
     args = parser.parse_args()
@@ -173,8 +196,12 @@ def main():
     TRANSCRIPT_DIR.mkdir(parents=True, exist_ok=True)
 
     # Find all YouTube references
-    print("Scanning extracted metadata for YouTube videos...")
-    videos = find_youtube_videos()
+    if args.from_manifest:
+        print("Loading YouTube videos from manifest...")
+        videos = find_youtube_from_manifest()
+    else:
+        print("Scanning extracted metadata for YouTube videos...")
+        videos = find_youtube_videos()
     print(f"  Found {len(videos)} YouTube video references")
 
     if not videos:
