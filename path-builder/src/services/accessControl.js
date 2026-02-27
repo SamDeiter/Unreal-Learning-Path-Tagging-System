@@ -11,6 +11,7 @@
  */
 
 import { getFirebaseApp } from "./firebaseConfig";
+import { IS_E2E } from "./e2eBypass";
 import {
   getFirestore,
   doc,
@@ -25,8 +26,10 @@ import {
   orderBy,
 } from "firebase/firestore";
 
-const app = getFirebaseApp();
-const db = getFirestore(app);
+// In E2E mode getFirebaseApp() returns null, so skip Firestore init
+// to avoid "Cannot read properties of null (reading 'container')".
+const app = IS_E2E ? null : getFirebaseApp();
+const db = IS_E2E ? null : getFirestore(app);
 
 // ── Domain & Admin Check ─────────────────────────────────────────────
 
