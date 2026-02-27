@@ -35,11 +35,7 @@ PRIORITY_TITLES = [
 
 
 def matches_priority(title):
-    for pt in PRIORITY_TITLES:
-        if pt.lower() in title.lower():
-            return True
-    return False
-
+    return True  # Changed to process ALL videos, bypass filter
 
 # Build the priority list
 priority = []
