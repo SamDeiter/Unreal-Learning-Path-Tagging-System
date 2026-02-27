@@ -231,6 +231,55 @@ All secrets are stored as **GitHub Actions secrets** and injected at build time:
 
 ---
 
+## Video Transcript Pipeline
+
+Transcripts are the foundation of the RAG search system. Three sources feed into `content/epic_learning/transcripts/`:
+
+```mermaid
+graph TB
+    subgraph "Source Discovery"
+        EP["Epic Dev Portal<br/>(1,331 articles)"]
+        VM["video_manifest.json<br/>(34 YT + 187 CMS)"]
+        WP["whisper_priority.json<br/>(118 priority videos)"]
+    end
+
+    subgraph "Transcript Pipelines"
+        YT["fetch_yt_channel_transcripts.py<br/>YouTube API captions"]
+        CMS["fetch_cms_transcripts.py<br/>CMS embedded captions"]
+        WH["whisper_cms_transcripts_v2.py<br/>CUDA GPU Whisper"]
+    end
+
+    subgraph "Post-Processing"
+        CLN["clean_whisper_transcripts.py<br/>Term fixes + hallucination detection"]
+        AUD["audit_transcripts.py<br/>Coverage + health checks"]
+    end
+
+    subgraph "Output"
+        TR["content/epic_learning/transcripts/<br/>428+ files (yt_*, cms_*, whisper_*)"]
+        EMB["embed_epic_learning.py"]
+        ELJ["epic_learning_embeddings.json<br/>(~20MB, chunked vectors)"]
+    end
+
+    EP --> VM
+    VM --> WP
+    VM --> YT --> TR
+    VM --> CMS --> TR
+    WP --> WH --> TR
+    TR --> CLN --> TR
+    TR --> AUD
+    TR --> EMB --> ELJ
+    ELJ --> |"loaded by"| SP["searchPipeline.js"]
+```
+
+### Whisper 2-Phase Architecture
+
+| Phase | Tool              | Purpose                                                                                                    |
+| ----- | ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| **A** | Playwright + DASH | Opens CMS embed pages, intercepts network requests, captures base64-encoded MPD XML manifests              |
+| **B** | ffmpeg + Whisper  | Downloads audio streams via ffmpeg, transcribes with OpenAI Whisper on CUDA GPU (`base` or `medium` model) |
+
+Phase A results are cached in `cms_stream_urls_v2.json`, allowing Phase B to be re-run independently for failed or missing transcriptions.
+
 ## Firestore Security Rules
 
 - **Read/Write** on `path_builder_access` and `path_builder_invites`: authenticated users only

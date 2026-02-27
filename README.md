@@ -89,7 +89,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   ├── pipeline/                  # Server-side enrichment pipeline
 │   ├── triggers/                  # Firestore event triggers
 │   └── scheduled/                 # Cron/scheduled functions
-├── scripts/                       # 83+ build-time enrichment & data scripts
+├── scripts/                       # 98+ build-time enrichment & data scripts
 │   ├── build_embeddings.py                # Generate semantic embeddings
 │   ├── build_search_index.py              # Build TF-IDF search index
 │   ├── build_transcript_index.py          # Parse VTT → transcript segments
@@ -101,9 +101,16 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   ├── scrape_epic_docs.py                # UDN documentation scraping
 │   ├── embed_segments.py                  # Segment embedding generation
 │   ├── drive_to_txt.py                    # GPU Whisper video transcription
+│   ├── whisper_cms_transcripts_v2.py      # 2-phase CMS Whisper pipeline
+│   ├── clean_whisper_transcripts.py       # Transcript cleanup & hallucination detection
+│   ├── embed_epic_learning.py             # Epic Learning RAG embeddings
+│   ├── content_gap_analysis.py            # Content gap identification
 │   ├── deploy_ghpages.py                  # Orphan-branch GitHub Pages deploy
 │   └── ...                                # 70+ more enrichment/audit/validation scripts
-├── content/transcripts/           # 616+ VTT transcript files
+├── content/epic_learning/         # Epic Learning transcript pipeline
+│   ├── transcripts/               # 428+ transcript files (yt_*, cms_*, whisper_*)
+│   ├── video_manifest.json        # 34 YouTube + 187 CMS video catalog
+│   └── whisper_priority.json      # 118 priority videos for Whisper
 ├── tags/                          # Tag schema & relationship graph
 ├── docs/                          # Architecture & strategy documentation
 ├── prototype/                     # Standalone prototypes (augmentation dashboard, etc.)
@@ -192,6 +199,8 @@ python scripts/run_enrichment_pipeline.py
 | `generate_quiz_questions.py`      | `quiz_questions.json`              | 2–3 MCQs per video                        |
 | `detect_prerequisites.py`         | `course_prerequisites.json`        | Prerequisite relationships                |
 | `augment_transcript.py`           | Augmented transcripts              | Add context, keywords, and summaries      |
+| `embed_epic_learning.py`          | `epic_learning_embeddings.json`    | Chunked transcript embeddings for RAG     |
+| `content_gap_analysis.py`         | Gap report                         | Identifies missing content areas          |
 
 All AI-powered scripts use the Google Gemini API.
 
@@ -204,8 +213,8 @@ Video transcripts power the semantic search and RAG database. Three sources feed
 | Stage | Source                    | Prefix     | Count | Method                                                                                   |
 | ----- | ------------------------- | ---------- | ----- | ---------------------------------------------------------------------------------------- |
 | 1     | YouTube captions          | `yt_`      | ~150  | `fetch_yt_channel_transcripts.py` — downloads official captions                          |
-| 2     | CMS embedded captions     | `cms_`     | ~95   | `fetch_cms_transcripts.py` — extracts from Epic's CMS player                             |
-| 3     | Whisper GPU transcription | `whisper_` | ~87   | `whisper_cms_transcripts_v2.py` — OpenAI Whisper on CUDA for CMS videos without captions |
+| 2     | CMS embedded captions     | `cms_`     | ~110  | `fetch_cms_transcripts.py` — extracts from Epic's CMS player                             |
+| 3     | Whisper GPU transcription | `whisper_` | ~148  | `whisper_cms_transcripts_v2.py` — OpenAI Whisper on CUDA for CMS videos without captions |
 
 ### Whisper Transcription
 

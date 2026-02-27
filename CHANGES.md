@@ -4,6 +4,31 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [1.3.0-transcripts] - 2026-02-27
+
+### Added
+
+- **Epic Learning Video Discovery** — `discover_epic_videos.py` and `extract_epic_learning.py` scrape 1,331 articles from Epic Dev Portal into Markdown + metadata
+- **YouTube Channel Transcripts** — `fetch_yt_channel_transcripts.py` downloads official captions for 150+ videos (`yt_*.txt`)
+- **CMS Transcript Extraction** — `fetch_cms_transcripts.py` captures captions from Epic's embedded CMS player for 110+ videos (`cms_*.txt`)
+- **Whisper GPU Transcription Pipeline v2** — `whisper_cms_transcripts_v2.py` with 2-phase architecture:
+  - Phase A: Playwright opens embed pages directly, intercepts DASH manifests, decodes base64 MPD XML
+  - Phase B: ffmpeg extracts audio from MPD, OpenAI Whisper transcribes on CUDA GPU
+- **Whisper Priority Builder** — `_build_priority.py` generates `whisper_priority.json` from article-title-based prioritization (118 CMS videos queued)
+- **Transcript Cleanup** — `clean_whisper_transcripts.py` fixes UE5 terminology misspellings (tessellation, Voronoi, Lumen, Nanite, Niagara, MetaHumans) and detects hallucination loops
+- **Transcript Audit Suite** — `audit_transcripts.py`, `_audit_coverage.py`, `_audit_missing_whisper.py` for coverage and health monitoring
+- **Epic Learning Embeddings** — `embed_epic_learning.py` generates chunked transcript embeddings for RAG semantic search (`epic_learning_embeddings.json` ~20MB)
+- **Content Gap Analysis** — `content_gap_analysis.py` identifies missing content areas across the catalog
+
+### Changed
+
+- Transcript pipeline now supports 3 sources with 428+ transcript files in `content/epic_learning/transcripts/`
+- Integrated Epic Learning embeddings into hybrid search pipeline (`searchPipeline.js`)
+- Scripts directory expanded from 83+ to 98+ enrichment, audit, and validation scripts
+- Video manifest (`video_manifest.json`) tracks 34 YouTube + 187 CMS videos
+
+---
+
 ## [1.2.0-personas] - 2026-02-25
 
 ### Added
