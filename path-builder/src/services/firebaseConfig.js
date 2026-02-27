@@ -6,12 +6,13 @@
  * so the CI runner doesn't need VITE_FIREBASE_* secrets.
  */
 import { initializeApp, getApps } from "firebase/app";
+import { IS_E2E } from "./e2eBypass";
 
 // ── E2E stub ──────────────────────────────────────────────────────────────
 // When running Playwright tests, the AuthGate is bypassed entirely.
 // Return a sentinel object so any accidental Firebase call fails gracefully
 // instead of crashing the Vite dev server with misleading errors.
-const IS_E2E = import.meta.env.VITE_E2E_BYPASS === "true";
+// IS_E2E imported from e2eBypass.js (checks both env var and localStorage)
 
 /** @type {Record<string, string>} */
 export const firebaseConfig = IS_E2E

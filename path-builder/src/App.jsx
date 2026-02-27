@@ -8,11 +8,12 @@ import { onAuthChange, signOutUser } from "./services/googleAuthService";
 import { isAdmin } from "./services/accessControl";
 import { getFirestore, collection, query, where, onSnapshot } from "firebase/firestore";
 import { getFirebaseApp } from "./services/firebaseConfig";
+import { IS_E2E } from "./services/e2eBypass";
 import useIsMobile from "./hooks/useIsMobile";
 import MobileNavDrawer from "./components/MobileNav/MobileNavDrawer";
 import "./App.css";
 
-const isE2EBypass = import.meta.env.VITE_E2E_BYPASS === "true";
+// IS_E2E imported from services/e2eBypass.js (checks both env var and localStorage)
 
 // Import course data
 import videoLibrary from "./data/video_library_enriched.json";
@@ -110,7 +111,7 @@ function App() {
 
   // Check if current user is admin for showing invite tab
   useEffect(() => {
-    if (isE2EBypass) return; // No Firebase in E2E mode
+    if (IS_E2E) return; // No Firebase in E2E mode
     const unsub = onAuthChange((u) => {
       setCurrentUser(u);
       setUserIsAdmin(u ? isAdmin(u.email) : false);
@@ -120,7 +121,7 @@ function App() {
 
   // Real-time listener for "new" feedback count (admin only)
   useEffect(() => {
-    if (isE2EBypass || !userIsAdmin) return; // No Firebase in E2E mode
+    if (IS_E2E || !userIsAdmin) return; // No Firebase in E2E mode
     const db = getFirestore(getFirebaseApp());
     const q = query(collection(db, "feedback"), where("status", "==", "new"));
     const unsub = onSnapshot(

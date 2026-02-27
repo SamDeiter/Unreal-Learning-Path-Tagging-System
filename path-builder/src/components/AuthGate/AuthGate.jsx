@@ -8,6 +8,7 @@ import {
   clearInviteFromUrl,
 } from "../../services/accessControl";
 import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
+import { IS_E2E } from "../../services/e2eBypass";
 import "./AuthGate.css";
 
 /**
@@ -244,10 +245,7 @@ function AuthGate({ children }) {
  * In production builds neither is set, so AuthGate runs normally.
  */
 export default function AuthGateWrapper({ children }) {
-  if (
-    import.meta.env.VITE_E2E_BYPASS === "true" ||
-    (typeof window !== "undefined" && window.localStorage.getItem("e2e_auth_bypass") === "true")
-  ) {
+  if (IS_E2E) {
     return <div className="auth-gate-authorized">{children}</div>;
   }
   return <AuthGate>{children}</AuthGate>;

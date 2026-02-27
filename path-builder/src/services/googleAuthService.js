@@ -6,6 +6,7 @@
  * because the AuthGate wrapper skips rendering this code path entirely.
  */
 import { getFirebaseApp } from "./firebaseConfig";
+import { IS_E2E } from "./e2eBypass";
 import {
   getAuth,
   signInWithPopup,
@@ -14,7 +15,7 @@ import {
   signOut,
 } from "firebase/auth";
 
-const IS_E2E = import.meta.env.VITE_E2E_BYPASS === "true";
+// IS_E2E imported from e2eBypass.js (checks both env var and localStorage)
 
 const app = IS_E2E ? null : getFirebaseApp();
 const auth = IS_E2E ? null : getAuth(app);
