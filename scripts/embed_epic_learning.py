@@ -1,26 +1,25 @@
 """embed_epic_learning.py — Phase 3: RAG Vectorization
 
 Reads extracted Markdown files + transcripts, chunks them with a
-Markdown-aware splitter, embeds via Gemini text-embedding-004,
+Markdown-aware splitter, embeds via Gemini gemini-embedding-001,
 and outputs a single JSON file ready for semantic search.
 
 Output: path-builder/src/data/epic_learning_embeddings.json
 
 Usage:
-  python scripts/embed_epic_learning.py               # Full run
+  python scripts/embed_epic_learning.py               # Full run (batch + concurrent)
   python scripts/embed_epic_learning.py --dry-run      # Preview chunks only
-  python scripts/embed_epic_learning.py --resume       # Resume from checkpoint
+  python scripts/embed_epic_learning.py --incremental  # Only embed new/changed chunks
 """
 
 import argparse
+import asyncio
 import hashlib
 import json
 import os
 import re
 import sys
 import time
-import urllib.error
-import urllib.request
 from datetime import datetime
 from pathlib import Path
 
@@ -40,7 +39,7 @@ CHECKPOINT_FILE = Path("content/epic_learning_embed_checkpoint.json")
 MODEL = "gemini-embedding-001"
 DIMENSION = 768
 TASK_TYPE = "RETRIEVAL_DOCUMENT"
-API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embedContent"
+BATCH_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:batchEmbedContents"
 
 # Chunking
 TARGET_TOKENS = 500
@@ -48,9 +47,10 @@ MAX_TOKENS = 700
 OVERLAP_CHARS = 200
 APPROX_CHARS_PER_TOKEN = 4
 
-# Rate limiting
-BATCH_DELAY = 0.05
-CHECKPOINT_INTERVAL = 50
+# Batch embedding — Gemini supports up to 100 texts per batchEmbedContents call
+BATCH_SIZE = 100        # texts per API call
+MAX_CONCURRENT = 5      # parallel API calls (5 * 100 = 500 texts in flight)
+MAX_RETRIES = 5         # more retries for rate-limit resilience
 
 
 def get_api_key():
@@ -64,6 +64,11 @@ def get_api_key():
 
 def estimate_tokens(text):
     return len(text) // APPROX_CHARS_PER_TOKEN
+
+
+def content_hash(text):
+    """SHA-256 hash of chunk text for incremental embedding detection."""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
 
 
 # ── Markdown-Aware Chunker ──────────────────────────────────────────────
@@ -280,64 +285,140 @@ def load_all_content():
     return docs
 
 
-# ── Embedding ───────────────────────────────────────────────────────────
-MAX_RETRIES = 3
+# ── Batch Embedding (async + concurrent) ────────────────────────────────
 
-def embed_text(text, api_key):
-    """Call Gemini embedding API with retry. Returns 768-dim vector."""
-    url = f"{API_URL}?key={api_key}"
+async def embed_batch_async(session, texts, api_key, semaphore):
+    """Embed a batch of up to 100 texts in a single batchEmbedContents call."""
+    url = f"{BATCH_URL}?key={api_key}"
     payload = {
-        "content": {"parts": [{"text": text}]},
-        "taskType": TASK_TYPE,
-        "outputDimensionality": DIMENSION,
+        "requests": [
+            {
+                "model": f"models/{MODEL}",
+                "content": {"parts": [{"text": t}]},
+                "taskType": TASK_TYPE,
+                "outputDimensionality": DIMENSION,
+            }
+            for t in texts
+        ]
     }
 
-    req_data = json.dumps(payload).encode("utf-8")
-
-    for attempt in range(MAX_RETRIES):
-        req = urllib.request.Request(
-            url,
-            data=req_data,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        try:
-            with urllib.request.urlopen(req) as response:
-                result = json.loads(response.read().decode("utf-8"))
-                values = result.get("embedding", {}).get("values", [])
-                if len(values) != DIMENSION:
-                    raise ValueError(f"Expected {DIMENSION} dims, got {len(values)}")
-                return values
-        except urllib.error.HTTPError as e:
-            body = e.read().decode("utf-8")[:200]
-            if attempt < MAX_RETRIES - 1:
-                wait = 2 ** (attempt + 1)
-                print(f"  Retry {attempt+1}/{MAX_RETRIES} after {wait}s (HTTP {e.code})")
-                time.sleep(wait)
-            else:
-                print(f"  API error {e.code}: {body}")
-                raise
-
-
-def save_checkpoint(chunk_id, done):
-    CHECKPOINT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(CHECKPOINT_FILE, "w") as f:
-        json.dump({"last_chunk_id": chunk_id, "done": done,
-                    "timestamp": datetime.now().isoformat()}, f)
-
-
-def load_checkpoint():
-    if CHECKPOINT_FILE.exists():
-        with open(CHECKPOINT_FILE) as f:
-            return json.load(f)
+    async with semaphore:
+        for attempt in range(MAX_RETRIES):
+            try:
+                async with session.post(url, json=payload) as resp:
+                    if resp.status == 200:
+                        result = await resp.json()
+                        embeddings = result.get("embeddings", [])
+                        vectors = [e.get("values", []) for e in embeddings]
+                        return vectors
+                    elif resp.status == 429:
+                        # Rate limited — back off
+                        wait = 2 ** (attempt + 1)
+                        print(f"  Rate limited, waiting {wait}s...")
+                        await asyncio.sleep(wait)
+                    else:
+                        body = (await resp.text())[:200]
+                        if attempt < MAX_RETRIES - 1:
+                            wait = 2 ** (attempt + 1)
+                            print(f"  Retry {attempt+1}/{MAX_RETRIES} (HTTP {resp.status})")
+                            await asyncio.sleep(wait)
+                        else:
+                            print(f"  API error {resp.status}: {body}")
+                            return None
+            except Exception as e:
+                if attempt < MAX_RETRIES - 1:
+                    await asyncio.sleep(2 ** (attempt + 1))
+                else:
+                    print(f"  Request failed: {e}")
+                    return None
     return None
+
+
+async def embed_all_async(chunks, api_key):
+    """Embed all chunks using concurrent batch requests for maximum speed."""
+    try:
+        import aiohttp
+    except ImportError:
+        print("Installing aiohttp for async batch requests...")
+        import subprocess
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "aiohttp", "-q"])
+        import aiohttp
+
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT)
+    results = {}
+    errors = 0
+    start_time = time.time()
+
+    # Split chunks into batches of BATCH_SIZE
+    batches = []
+    for i in range(0, len(chunks), BATCH_SIZE):
+        batches.append(chunks[i:i + BATCH_SIZE])
+
+    print(f"\n  {len(batches)} API calls needed ({BATCH_SIZE} texts/call, "
+          f"{MAX_CONCURRENT} concurrent)")
+
+    async with aiohttp.ClientSession() as session:
+        # Process batches concurrently
+        tasks = []
+        for batch_idx, batch in enumerate(batches):
+            texts = [c["text"] for c in batch]
+            task = asyncio.ensure_future(
+                embed_batch_async(session, texts, api_key, semaphore)
+            )
+            tasks.append((batch_idx, batch, task))
+
+        completed = 0
+        for batch_idx, batch, task in tasks:
+            vectors = await task
+            completed += 1
+
+            if vectors and len(vectors) == len(batch):
+                for chunk, vector in zip(batch, vectors):
+                    if len(vector) == DIMENSION:
+                        results[chunk["id"]] = {
+                            "embedding": vector,
+                            "hash_id": chunk["hash_id"],
+                            "title": chunk["title"],
+                            "url": chunk["url"],
+                            "content_type": chunk["content_type"],
+                            "author": chunk["author"],
+                            "tags": chunk["tags"],
+                            "text": chunk["text"][:400],
+                            "token_estimate": chunk["token_estimate"],
+                            "chunk_index": chunk["chunk_index"],
+                            "source": "epic_learning",
+                            "text_hash": content_hash(chunk["text"]),
+                        }
+            else:
+                errors += len(batch)
+                print(f"  Batch {batch_idx} failed ({len(batch)} chunks lost)")
+
+            # Progress reporting
+            done_chunks = completed * BATCH_SIZE
+            if done_chunks > len(chunks):
+                done_chunks = len(chunks)
+            elapsed = time.time() - start_time
+            rate = done_chunks / elapsed if elapsed > 0 else 0
+            eta = (len(chunks) - done_chunks) / rate if rate > 0 else 0
+            pct = completed * 100 // len(batches)
+            print(f"  [{done_chunks}/{len(chunks)}] {pct}% "
+                  f"({rate:.0f} chunks/sec, ETA: {eta:.0f}s)")
+
+    elapsed = time.time() - start_time
+    print(f"\n  Embedded {len(results)} chunks in {elapsed:.1f}s "
+          f"({len(results)/elapsed:.0f} chunks/sec)")
+    if errors:
+        print(f"  Errors: {errors}")
+
+    return results
 
 
 # ── Main ────────────────────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="Embed Epic Learning content for RAG")
     parser.add_argument("--dry-run", action="store_true", help="Preview chunks only")
-    parser.add_argument("--resume", action="store_true", help="Resume from checkpoint")
+    parser.add_argument("--incremental", action="store_true",
+                       help="Only embed new/changed chunks (skip unchanged)")
     args = parser.parse_args()
 
     # Load all extracted content
@@ -381,67 +462,57 @@ def main():
             print(f"  Text: {c['text'][:120]}...")
         return
 
+    # Incremental: skip chunks whose content hasn't changed
+    chunks_to_embed = all_chunks
+    existing_chunks = {}
+    if args.incremental and OUTPUT_FILE.exists():
+        print("\n  Loading existing embeddings for incremental update...")
+        with open(OUTPUT_FILE, "r") as f:
+            existing_data = json.load(f)
+            existing_chunks = existing_data.get("chunks", {})
+
+        # Build hash lookup from existing
+        existing_hashes = {}
+        for cid, cdata in existing_chunks.items():
+            h = cdata.get("text_hash")
+            if h:
+                existing_hashes[cid] = h
+
+        # Filter to only new/changed chunks
+        unchanged = 0
+        new_chunks = []
+        for chunk in all_chunks:
+            chunk_h = content_hash(chunk["text"])
+            if chunk["id"] in existing_hashes and existing_hashes[chunk["id"]] == chunk_h:
+                unchanged += 1
+            else:
+                new_chunks.append(chunk)
+
+        chunks_to_embed = new_chunks
+        print(f"  Unchanged: {unchanged}, New/Modified: {len(new_chunks)}")
+
+        if not new_chunks:
+            print("\n  Nothing to embed — all chunks are up to date!")
+            return
+
     # Embed
     api_key = get_api_key()
     print(f"\n  API key loaded (len={len(api_key)})")
+    print(f"\nEmbedding {len(chunks_to_embed)} chunks...\n")
 
-    # Resume support
-    start_idx = 0
-    existing = {}
-    if args.resume:
-        cp = load_checkpoint()
-        if cp:
-            start_idx = cp["done"]
-            print(f"  Resuming from chunk {start_idx}")
-            if OUTPUT_FILE.exists():
-                with open(OUTPUT_FILE) as f:
-                    existing = json.load(f).get("chunks", {})
+    # Run async embedding loop
+    new_embeddings = asyncio.run(embed_all_async(chunks_to_embed, api_key))
 
-    embeddings = dict(existing)
-    total = len(all_chunks)
-    errors = 0
-    start_time = time.time()
-
-    print(f"\nEmbedding {total - start_idx} chunks...\n")
-
-    for i in range(start_idx, total):
-        chunk = all_chunks[i]
-        try:
-            vector = embed_text(chunk["text"], api_key)
-            embeddings[chunk["id"]] = {
-                "embedding": vector,
-                "hash_id": chunk["hash_id"],
-                "title": chunk["title"],
-                "url": chunk["url"],
-                "content_type": chunk["content_type"],
-                "author": chunk["author"],
-                "tags": chunk["tags"],
-                "text": chunk["text"][:400],
-                "token_estimate": chunk["token_estimate"],
-                "chunk_index": chunk["chunk_index"],
-                "source": "epic_learning",
-            }
-
-            done = i + 1
-            if done % 10 == 0 or done == total:
-                elapsed = time.time() - start_time
-                rate = (done - start_idx) / elapsed if elapsed > 0 else 0
-                eta = (total - done) / rate if rate > 0 else 0
-                print(f"  [{done}/{total}] {done * 100 // total}% "
-                      f"({rate:.1f}/sec, ETA: {eta:.0f}s)")
-
-            if done % CHECKPOINT_INTERVAL == 0:
-                save_checkpoint(chunk["id"], done)
-
-            time.sleep(BATCH_DELAY)
-
-        except Exception as e:
-            errors += 1
-            print(f"  ERROR on {chunk['id']}: {e}")
-            if errors > 10:
-                print("  Too many errors, stopping.")
-                break
-            time.sleep(2)
+    # Merge with existing (for incremental mode)
+    if args.incremental:
+        merged = dict(existing_chunks)
+        merged.update(new_embeddings)
+        # Remove chunks that no longer exist in current corpus
+        current_ids = {c["id"] for c in all_chunks}
+        merged = {k: v for k, v in merged.items() if k in current_ids}
+        embeddings = merged
+    else:
+        embeddings = new_embeddings
 
     # Save output
     output = {
@@ -459,12 +530,10 @@ def main():
         json.dump(output, f)
 
     mb = OUTPUT_FILE.stat().st_size / (1024 * 1024)
-    elapsed = time.time() - start_time
 
     print(f"\n{'=' * 50}")
-    print(f"Done! {len(embeddings)} chunks embedded in {elapsed:.0f}s")
+    print(f"Done! {len(embeddings)} chunks embedded")
     print(f"Output: {OUTPUT_FILE} ({mb:.1f} MB)")
-    print(f"Errors: {errors}")
 
     if CHECKPOINT_FILE.exists():
         CHECKPOINT_FILE.unlink()
@@ -472,3 +541,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
