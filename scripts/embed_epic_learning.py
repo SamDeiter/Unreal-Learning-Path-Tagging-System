@@ -49,7 +49,7 @@ APPROX_CHARS_PER_TOKEN = 4
 
 # Batch embedding — Gemini supports up to 100 texts per batchEmbedContents call
 BATCH_SIZE = 100        # texts per API call
-MAX_CONCURRENT = 5      # parallel API calls (5 * 100 = 500 texts in flight)
+MAX_CONCURRENT = 2      # parallel API calls (2 * 100 = 200 texts in flight)
 MAX_RETRIES = 5         # more retries for rate-limit resilience
 
 
