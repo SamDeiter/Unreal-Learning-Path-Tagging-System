@@ -4,6 +4,7 @@ import { PlayCircle, Check, Plus } from "lucide-react";
 import { recordUpvote, recordDownvote, getFeedbackStatus } from "../../services/feedbackService";
 import prereqData from "../../data/course_prerequisites.json";
 import libraryData from "../../data/video_library_enriched.json";
+import displayNames from "../../data/display_names.json";
 import "./VideoResultCard.css";
 
 // Build code→title and code→versions lookups once
@@ -69,8 +70,10 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
           ? "Good Match"
           : "Related";
 
+  // Use Gemini-cleaned display name if available, fall back to raw title
+  const cleanTitle = (courseCode && displayNames[courseCode]) || rawTitle;
   // Strip "Part A/B/C" and "PT1/PT2" suffixes from display title
-  const title = rawTitle?.replace(/\s+(?:Part\s+[A-Z]|PT\s*\d+)$/i, "").trim() || rawTitle;
+  const title = cleanTitle?.replace(/\s+(?:Part\s+[A-Z]|PT\s*\d+)$/i, "").trim() || cleanTitle;
   // Look up prereq data for this course
   const prereqEntry = courseCode ? prereqData[courseCode] : null;
   const prereqCourses = prereqEntry?.prereqs || [];
