@@ -77,7 +77,14 @@ JS_EXTRACT_VIDEO_ID = """
 # ── Phase A: Discover video IDs from lesson pages ──────────────────────
 
 async def phase_a_discover_videos(lessons_flat, max_videos=None):
-    """Visit each lesson page and extract its CMS video ID."""
+    """Visit each lesson page, extract video ID, then visit embed page to capture MPD.
+
+    Uses the proven pattern from whisper_cms_transcripts_v2.py:
+    - headless=False to avoid bot detection
+    - Intercept cdn.qstv.on.epicgames.com JSON responses
+    - Decode base64 'playlist' field to get DASH MPD XML
+    - Click play button on embed page to trigger manifest loading
+    """
     try:
         from playwright.async_api import async_playwright
     except ImportError:
@@ -89,28 +96,37 @@ async def phase_a_discover_videos(lessons_flat, max_videos=None):
     if LESSON_STREAMS_PATH.exists():
         stream_urls = json.load(open(LESSON_STREAMS_PATH, "r", encoding="utf-8"))
 
-    # Filter out already-captured lessons
-    pending = [l for l in lessons_flat if l["lessonHash"] not in stream_urls]
+    # Filter out already-captured lessons (skip ones that already have mpd_xml)
+    pending = [l for l in lessons_flat
+               if l["lessonHash"] not in stream_urls
+               or not stream_urls.get(l["lessonHash"], {}).get("mpd_xml")]
     if max_videos:
         pending = pending[:max_videos]
 
     print(f"\n  Phase A: Discovering video IDs for {len(pending)} lessons")
-    print(f"  Already captured: {len(stream_urls)}")
+    print(f"  Already captured: {sum(1 for v in stream_urls.values() if v.get('mpd_xml'))}")
     print(f"  {'=' * 50}")
 
     if not pending:
         print("  All lessons already captured!")
         return stream_urls
 
-    captured_mpds = {}
-
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(user_agent=USER_AGENT)
+        # headless=False is critical — Epic's CDN player doesn't load in headless
+        browser = await p.chromium.launch(
+            headless=False,
+            args=["--disable-blink-features=AutomationControlled"],
+        )
+        context = await browser.new_context(
+            user_agent=USER_AGENT,
+            viewport={"width": 1280, "height": 720},
+        )
+        await context.add_init_script(ANTI_DETECT)
 
         success = 0
         no_video = 0
         errors = 0
+        page = await context.new_page()
 
         for i, lesson in enumerate(pending):
             lesson_hash = lesson["lessonHash"]
@@ -118,74 +134,74 @@ async def phase_a_discover_videos(lessons_flat, max_videos=None):
             title = lesson.get("title", "")[:50]
             href = lesson.get("href", "")
 
-            # Build full URL
+            # Build full lesson page URL
             url = f"https://dev.epicgames.com{href}" if href.startswith("/") else href
 
             try:
-                page = await context.new_page()
+                # Step 1: Visit the lesson page to extract the video ID
+                await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                await page.wait_for_timeout(4000)
 
-                # Intercept network requests to capture MPD manifests
-                mpd_data = {}
+                video_id = await page.evaluate(JS_EXTRACT_VIDEO_ID)
+
+                if not video_id:
+                    no_video += 1
+                    print(f"  [{i+1}/{len(pending)}] ○ no video found  {title}")
+                    continue
+
+                # Step 2: Visit the embed page with CDN intercept
+                embed_url = EMBED_URL_TEMPLATE.format(vid=video_id)
+                mpd_xml = None
 
                 async def on_response(response):
+                    nonlocal mpd_xml
+                    resp_url = response.url
                     try:
-                        resp_url = response.url
-                        if "manifest" in resp_url and response.status == 200:
-                            body = await response.text()
-                            if "adaptationset" in body.lower() or "mpd" in body.lower():
-                                mpd_data["mpd_xml"] = body
-                                mpd_data["mpd_url"] = resp_url
-                        elif resp_url.endswith(".json") and "cms" in resp_url and response.status == 200:
-                            body = await response.text()
-                            try:
+                        if "cdn.qstv.on.epicgames.com" in resp_url and response.status == 200:
+                            ct = response.headers.get("content-type", "")
+                            if "json" in ct:
+                                body = await response.text()
                                 data = json.loads(body)
-                                # CMS API returns manifest as base64 in JSON
-                                if isinstance(data, dict):
-                                    for key in ["dashManifest", "manifest", "dash"]:
-                                        if key in data:
-                                            decoded = base64.b64decode(data[key]).decode("utf-8")
-                                            if "adaptationset" in decoded.lower():
-                                                mpd_data["mpd_xml"] = decoded
-                                                mpd_data["source"] = "cms_json"
-                            except:
-                                pass
-                    except:
+                                playlist_b64 = data.get("playlist", "")
+                                playlist_type = data.get("playlistType", "")
+                                if playlist_b64 and "dash" in playlist_type:
+                                    mpd_xml = base64.b64decode(playlist_b64).decode("utf-8")
+                    except Exception:
                         pass
 
                 page.on("response", on_response)
-                await page.add_init_script(ANTI_DETECT)
 
-                await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                await page.wait_for_timeout(6000)
+                await page.goto(embed_url, wait_until="domcontentloaded", timeout=15000)
+                await page.wait_for_timeout(3000)
 
-                # Try to extract video ID from the page
-                video_id = await page.evaluate(JS_EXTRACT_VIDEO_ID)
-
-                if video_id and not mpd_data:
-                    # Visit embed page directly to trigger manifest load
-                    embed_url = EMBED_URL_TEMPLATE.format(vid=video_id)
-                    embed_page = await context.new_page()
-                    embed_page.on("response", on_response)
-                    await embed_page.add_init_script(ANTI_DETECT)
+                # Click play button to trigger manifest loading
+                if not mpd_xml:
                     try:
-                        await embed_page.goto(embed_url, wait_until="domcontentloaded", timeout=20000)
-                        await embed_page.wait_for_timeout(5000)
-                    except:
+                        play_btn = await page.query_selector(".vjs-big-play-button")
+                        if play_btn:
+                            await play_btn.click()
+                            await page.wait_for_timeout(4000)
+                    except Exception:
                         pass
-                    await embed_page.close()
 
-                if mpd_data.get("mpd_xml"):
+                # Wait a bit more if still no manifest
+                if not mpd_xml:
+                    await page.wait_for_timeout(3000)
+
+                page.remove_listener("response", on_response)
+
+                if mpd_xml:
                     stream_urls[lesson_hash] = {
                         "lesson_hash": lesson_hash,
                         "course_hash": course_hash,
                         "title": lesson.get("title", ""),
                         "video_id": video_id,
-                        "mpd_xml": mpd_data["mpd_xml"],
+                        "mpd_xml": mpd_xml,
                         "captured_at": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     }
                     success += 1
-                    print(f"  [{i+1}/{len(pending)}] ✓ {title}")
-                elif video_id:
+                    print(f"  [{i+1}/{len(pending)}] ✓ vid={video_id}  {title}")
+                else:
                     stream_urls[lesson_hash] = {
                         "lesson_hash": lesson_hash,
                         "course_hash": course_hash,
@@ -196,11 +212,6 @@ async def phase_a_discover_videos(lessons_flat, max_videos=None):
                     }
                     no_video += 1
                     print(f"  [{i+1}/{len(pending)}] ○ vid={video_id} no MPD  {title}")
-                else:
-                    no_video += 1
-                    print(f"  [{i+1}/{len(pending)}] ○ no video found  {title}")
-
-                await page.close()
 
             except Exception as e:
                 print(f"  [{i+1}/{len(pending)}] ✗ {title} — {e}")
@@ -212,8 +223,10 @@ async def phase_a_discover_videos(lessons_flat, max_videos=None):
                     json.dump(stream_urls, f, indent=2, ensure_ascii=False)
                 print(f"  [checkpoint] {success} ok, {no_video} no-video, {errors} errors")
 
-            await asyncio.sleep(2)  # Polite delay
+            await asyncio.sleep(1)  # Polite delay
 
+        await page.close()
+        await context.close()
         await browser.close()
 
     # Final save
@@ -221,9 +234,9 @@ async def phase_a_discover_videos(lessons_flat, max_videos=None):
         json.dump(stream_urls, f, indent=2, ensure_ascii=False)
 
     print(f"\n  {'=' * 50}")
-    print(f"  Captured: {success}")
-    print(f"  No video: {no_video}")
-    print(f"  Errors:   {errors}")
+    print(f"  Captured MPDs: {success}")
+    print(f"  No manifest:   {no_video}")
+    print(f"  Errors:        {errors}")
 
     return stream_urls
 
