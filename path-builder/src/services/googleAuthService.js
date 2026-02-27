@@ -1,6 +1,9 @@
 /**
  * Google Auth Service for Drive video access
  * Simple Firebase Google Auth to enable authenticated iframe embeds
+ *
+ * In E2E test mode (VITE_E2E_BYPASS=true) all auth calls are no-ops
+ * because the AuthGate wrapper skips rendering this code path entirely.
  */
 import { getFirebaseApp } from "./firebaseConfig";
 import {
@@ -11,20 +14,22 @@ import {
   signOut,
 } from "firebase/auth";
 
+const IS_E2E = import.meta.env.VITE_E2E_BYPASS === "true";
 
-const app = getFirebaseApp();
-const auth = getAuth(app);
+const app = IS_E2E ? null : getFirebaseApp();
+const auth = IS_E2E ? null : getAuth(app);
 
 // Provider — email + profile only (no restricted scopes)
 // Drive video embeds use browser cookies, not OAuth tokens
-const provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: "select_account" });
+const provider = IS_E2E ? null : new GoogleAuthProvider();
+if (provider) provider.setCustomParameters({ prompt: "select_account" });
 
 /**
  * Sign in with Google popup
  * @returns {Promise<{user: object, error: string | null}>}
  */
 export async function signInWithGoogle() {
+  if (IS_E2E) return { user: null, error: null };
   try {
     const result = await signInWithPopup(auth, provider);
     return { user: result.user, error: null };
@@ -38,6 +43,7 @@ export async function signInWithGoogle() {
  * Sign out
  */
 export async function signOutUser() {
+  if (IS_E2E) return;
   try {
     await signOut(auth);
   } catch (error) {
@@ -51,6 +57,7 @@ export async function signOutUser() {
  * @returns {Function} Unsubscribe function
  */
 export function onAuthChange(callback) {
+  if (IS_E2E) return () => {}; // no-op unsubscribe
   return onAuthStateChanged(auth, callback);
 }
 
@@ -59,6 +66,7 @@ export function onAuthChange(callback) {
  * @returns {object | null}
  */
 export function getCurrentUser() {
+  if (IS_E2E) return null;
   return auth.currentUser;
 }
 
