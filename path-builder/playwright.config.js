@@ -28,6 +28,17 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
     trace: "on-first-retry",
     screenshot: "only-on-failure",
+    // Inject localStorage bypass flag so AuthGateWrapper skips Firebase auth.
+    // This is the most reliable mechanism — no env var propagation needed.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: "http://localhost:5174",
+          localStorage: [{ name: "e2e_auth_bypass", value: "true" }],
+        },
+      ],
+    },
   },
 
   projects: [

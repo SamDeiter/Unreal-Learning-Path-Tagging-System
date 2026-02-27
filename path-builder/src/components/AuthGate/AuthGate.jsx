@@ -236,10 +236,18 @@ function AuthGate({ children }) {
 
 /**
  * Wrapper — returns children directly (bypassing auth) when running E2E tests.
- * In production builds VITE_E2E_BYPASS is never set, so AuthGate runs normally.
+ *
+ * Two bypass mechanisms (belt-and-suspenders):
+ *   1. Vite env var: VITE_E2E_BYPASS=true (works in local dev)
+ *   2. localStorage: e2e_auth_bypass=true (reliable in CI via Playwright addInitScript)
+ *
+ * In production builds neither is set, so AuthGate runs normally.
  */
 export default function AuthGateWrapper({ children }) {
-  if (import.meta.env.VITE_E2E_BYPASS === "true") {
+  if (
+    import.meta.env.VITE_E2E_BYPASS === "true" ||
+    (typeof window !== "undefined" && window.localStorage.getItem("e2e_auth_bypass") === "true")
+  ) {
     return <div className="auth-gate-authorized">{children}</div>;
   }
   return <AuthGate>{children}</AuthGate>;
