@@ -11,13 +11,9 @@ import { defineConfig } from "@playwright/test";
  * On Windows: relies on webServer.env + the .env file written by CI.
  */
 
-const isWindows = process.platform === "win32";
-
-// Inline the env var on Linux/Mac so it's guaranteed to reach the Vite
-// process regardless of how Playwright passes webServer.env variables.
-const viteCommand = isWindows
-  ? "npx vite --port 5174"
-  : "VITE_E2E_BYPASS=true npx vite --port 5174";
+// VITE_E2E_BYPASS is injected via vite.config.js `define` at compile time,
+// so we no longer need platform-conditional shell commands.
+const viteCommand = "npx vite --port 5174";
 
 export default defineConfig({
   testDir: "./e2e",

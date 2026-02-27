@@ -5,6 +5,11 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   base: "/Unreal-Learning-Path-Tagging-System/",
   plugins: [react()],
+  // Inject VITE_E2E_BYPASS at compile time so it reliably reaches
+  // import.meta.env in CI regardless of env-var propagation quirks.
+  define: {
+    "import.meta.env.VITE_E2E_BYPASS": JSON.stringify(process.env.VITE_E2E_BYPASS || ""),
+  },
   build: {
     rollupOptions: {
       output: {
@@ -23,14 +28,11 @@ export default defineConfig({
           // Split JSON data files into parallel-loadable chunks
           if (nid.includes("src/data/")) {
             // Search indices (~8.6MB) — loaded on first search
-            if (nid.includes("search_index") || nid.includes("segment_index"))
-              return "data-search";
+            if (nid.includes("search_index") || nid.includes("segment_index")) return "data-search";
             // Transcript data (~4.1MB) — loaded on video playback
-            if (nid.includes("transcript_segments"))
-              return "data-transcripts";
+            if (nid.includes("transcript_segments")) return "data-transcripts";
             // Embedding vectors (~11.3MB) — loaded on semantic search
-            if (nid.includes("embeddings"))
-              return "data-embeddings";
+            if (nid.includes("embeddings")) return "data-embeddings";
             // Core course data (~1.3MB) — loaded on app init
             return "data-courses";
           }
@@ -43,4 +45,3 @@ export default defineConfig({
     exclude: ["e2e/**", "**/node_modules/**"],
   },
 });
-
