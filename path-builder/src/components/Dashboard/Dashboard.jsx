@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useTagData } from "../../context/TagDataContext";
 import { getAllPersonas, personaScoringRules } from "../../services/PersonaService";
 import VertexAIMonitor from "../VertexAIMonitor/VertexAIMonitor";
@@ -16,6 +16,45 @@ function Dashboard() {
   const [showMissingVideos, setShowMissingVideos] = useState(false);
   const [sourceFilter, setSourceFilter] = useState("all");
   const [courseSearch, setCourseSearch] = useState("");
+
+  // RAG Database Stats — loaded from epic_learning_embeddings.json metadata
+  const [ragStats, setRagStats] = useState(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        const mod = await import("../../data/epic_learning_embeddings.json");
+        const data = mod.default || mod;
+        // chunks is an object keyed by chunk ID, not an array
+        const chunksObj = data.chunks || {};
+        const chunks = Array.isArray(chunksObj) ? chunksObj : Object.values(chunksObj);
+        const types = {};
+        chunks.forEach((c) => {
+          const t = c.type || c.content_type || "unknown";
+          types[t] = (types[t] || 0) + 1;
+        });
+        // Count source types from chunk metadata
+        const sources = { whisper: 0, youtube: 0, cms: 0, markdown: 0 };
+        chunks.forEach((c) => {
+          const src = (c.source || c.source_file || c.hash_id || "").toLowerCase();
+          if (src.includes("whisper")) sources.whisper++;
+          else if (src.includes("yt_") || src.includes("youtube")) sources.youtube++;
+          else if (src.includes("cms_") || src.includes("stream")) sources.cms++;
+          else sources.markdown++;
+        });
+        setRagStats({
+          totalChunks: chunks.length,
+          model: data.model || "unknown",
+          dimension: data.dimension || 768,
+          generatedAt: data.generated_at,
+          fileSizeMB: "~22",
+          types,
+          sources,
+        });
+      } catch (err) {
+        console.warn("RAG stats unavailable:", err.message);
+      }
+    })();
+  }, []);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -356,6 +395,89 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* 🔍 Vertex AI Search Monitor — moved to top for visibility */}
+      <VertexAIMonitor />
+
+      {/* RAG Database Stats */}
+      {ragStats && (
+        <div className="section-card rag-stats-card">
+          <h3 title="Real-time stats from the RAG embedding database powering semantic search">
+            <span className="section-icon">🧠</span> RAG Database
+            <span className="rag-status-pill">LIVE</span>
+          </h3>
+          <div className="rag-stats-grid">
+            <div className="rag-stat">
+              <div className="rag-stat-number">{ragStats.totalChunks.toLocaleString()}</div>
+              <div className="rag-stat-label">TOTAL CHUNKS</div>
+            </div>
+            <div className="rag-stat">
+              <div className="rag-stat-number">{ragStats.fileSizeMB} MB</div>
+              <div className="rag-stat-label">DATABASE SIZE</div>
+            </div>
+            <div className="rag-stat">
+              <div className="rag-stat-number">{ragStats.dimension}d</div>
+              <div className="rag-stat-label">VECTOR DIM</div>
+            </div>
+            <div className="rag-stat">
+              <div className="rag-stat-number">{ragStats.model.replace("models/", "")}</div>
+              <div className="rag-stat-label">MODEL</div>
+            </div>
+          </div>
+          <div className="rag-breakdown">
+            <div className="rag-breakdown-title">Content Types</div>
+            <div className="rag-type-pills">
+              {Object.entries(ragStats.types)
+                .sort((a, b) => b[1] - a[1])
+                .map(([type, count]) => (
+                  <span
+                    key={type}
+                    className={`rag-type-pill rag-type-${type.replace(/[^a-z]/g, "")}`}
+                  >
+                    {type.replace(/_/g, " ")} <strong>{count}</strong>
+                  </span>
+                ))}
+            </div>
+            <div className="rag-breakdown-title" style={{ marginTop: "10px" }}>
+              Data Sources
+            </div>
+            <div className="rag-source-pills">
+              {ragStats.sources.whisper > 0 && (
+                <span className="rag-source-pill whisper">
+                  🎤 Whisper Transcripts <strong>{ragStats.sources.whisper}</strong>
+                </span>
+              )}
+              {ragStats.sources.youtube > 0 && (
+                <span className="rag-source-pill youtube">
+                  ▶ YouTube Transcripts <strong>{ragStats.sources.youtube}</strong>
+                </span>
+              )}
+              {ragStats.sources.cms > 0 && (
+                <span className="rag-source-pill cms">
+                  📹 CMS Videos <strong>{ragStats.sources.cms}</strong>
+                </span>
+              )}
+              {ragStats.sources.markdown > 0 && (
+                <span className="rag-source-pill markdown">
+                  📄 Articles & Docs <strong>{ragStats.sources.markdown}</strong>
+                </span>
+              )}
+            </div>
+            {ragStats.generatedAt && (
+              <div className="rag-generated">
+                Last embedded:{" "}
+                {new Date(ragStats.generatedAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Source Filter Bar */}
       {sourceFilter !== "all" && (
@@ -743,24 +865,29 @@ function Dashboard() {
         <p>
           📊 {tags?.length || 0} tags • {edges?.length || 0} tag connections •{" "}
           {Object.keys(industryDistribution).length} industries
-          {lastUpdated && (
-            <span className="last-updated">
-              {" "}
-              • 🕐 Last updated:{" "}
-              {new Date(lastUpdated).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-          )}
+          {ragStats && <> • 🧠 {ragStats.totalChunks.toLocaleString()} RAG chunks</>}
+          {(() => {
+            // Use the most recent timestamp from any data source
+            const dates = [lastUpdated, ragStats?.generatedAt]
+              .filter(Boolean)
+              .map((d) => new Date(d));
+            const mostRecent = dates.length > 0 ? new Date(Math.max(...dates)) : null;
+            return mostRecent ? (
+              <span className="last-updated">
+                {" "}
+                • 🕐 Last updated:{" "}
+                {mostRecent.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            ) : null;
+          })()}
         </p>
       </div>
-
-      {/* 🔍 Vertex AI Search Monitor */}
-      <VertexAIMonitor />
     </div>
   );
 }
