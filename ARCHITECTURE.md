@@ -38,6 +38,28 @@ graph TB
 
 ---
 
+## Product Positioning — Design Principles
+
+> [!IMPORTANT]
+> **This platform must NOT compete with Epic's [in-editor AI Assistant](https://dev.epicgames.com/community/assistant/unreal-engine/).** Our tool and Epic's tool serve complementary roles.
+
+| Concern     | Epic's In-Editor AI Assistant                                      | Our Platform                                                                                                               |
+| ----------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| **Focus**   | Step-by-step procedural help                                       | Conceptual "why" understanding                                                                                             |
+| **Context** | Inside UE5 Editor                                                  | Web-based, outside the editor                                                                                              |
+| **Answers** | "How do I fix this?"                                               | "Why is this happening?"                                                                                                   |
+| **Content** | Procedural instructions, node-by-node steps                        | Root causes, system interactions, design patterns                                                                          |
+| **Example** | "1. Open Details Panel → 2. Enable Lumen → 3. Set quality to High" | "Lumen uses software ray tracing by default because hardware RT requires specific GPU features. Flickering occurs when..." |
+
+### Guiding Rules
+
+1. **Fix a Problem** mode surfaces _why_ an issue occurs — root causes, system interactions, common misconceptions
+2. **Learning Path** mode teaches _why_ things work the way they do — concepts, architecture decisions, design patterns
+3. **Never** provide rote step-by-step instructions — that's Epic's in-editor assistant's job
+4. RAG content (video transcripts, expert lectures) naturally supports this — instructors explain _reasoning_, not just _clicks_
+
+---
+
 ## Authentication Flow
 
 Authentication uses **Firebase Auth with Google Sign-In** combined with an **invite-based access control** layer.
