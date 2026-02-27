@@ -58,6 +58,18 @@ graph TB
 3. **Never** provide rote step-by-step instructions — that's Epic's in-editor assistant's job
 4. RAG content (video transcripts, expert lectures) naturally supports this — instructors explain _reasoning_, not just _clicks_
 
+### Product Vision: Bespoke On-Demand Learning Paths
+
+> [!TIP]
+> The north-star output is a **personalized video learning path generated on demand** from a user's question.
+
+When a user asks "Why are my Lumen reflections flickering?", the platform should:
+
+1. **Identify relevant video segments** from Epic's expert lectures (using RAG + transcript search)
+2. **Sequence them into a curated playlist** that explains the _why_ — e.g., how Lumen's software RT works, what triggers flickering, how scene complexity interacts with the GI system
+3. **Output a guided video experience** — each clip teaches the reasoning behind the solution, not just the steps
+4. The result: a bespoke learning path that **helps the user understand what they're doing and why**, not just _how_ to do it
+
 ---
 
 ## Authentication Flow
