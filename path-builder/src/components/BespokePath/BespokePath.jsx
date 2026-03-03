@@ -8,6 +8,7 @@
 import { useState, useCallback } from "react";
 import { generateBespokePath } from "../../services/bespokePathService";
 import { generateQuizForStep } from "../../services/quizService";
+import { findCachedPath, cachePath, addToHistory } from "../../services/pathCacheService";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PathStep from "./PathStep";
 import BridgeNarration from "./BridgeNarration";
@@ -48,12 +49,26 @@ export default function BespokePath() {
     setQuizScores(new Map());
     setShowQuiz(null);
 
-    // Show pipeline stages for UX feedback
+    // 1. Check cache first (zero cost)
+    setPipelineStage("Checking cache...");
+    const cached = findCachedPath(trimmed);
+    if (cached) {
+      setPipelineStage("Found cached path!");
+      setPathResult({ ...cached, fromCache: true });
+      addToHistory(trimmed, cached);
+      setIsLoading(false);
+      setPipelineStage("");
+      return;
+    }
+
+    // 2. Generate fresh path via AI pipeline
     setPipelineStage("Finding relevant content...");
     const result = await generateBespokePath(trimmed);
 
     if (!result.error && result.path.length > 0) {
       setPipelineStage("Path ready!");
+      cachePath(trimmed, result);
+      addToHistory(trimmed, result);
     }
 
     setPathResult(result);
@@ -108,6 +123,7 @@ export default function BespokePath() {
       isPreSeeded: true,
     };
     setPathResult(fakeResult);
+    addToHistory(path.query, fakeResult);
     setQuery(path.query);
     setCurrentStep(0);
     setQuizzes(new Map());
