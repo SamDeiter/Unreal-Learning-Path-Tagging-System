@@ -800,13 +800,29 @@ function Dashboard() {
                     {course.gemini_enriched ? <span className="ai-check">✓</span> : "—"}
                   </td>
                   <td>
-                    <span className={`source-badge source-${course.source || "lms"}`}>
-                      {course.source === "youtube"
-                        ? "▶ YT"
-                        : course.source === "epic_docs"
-                          ? "📖 Doc"
-                          : "🎓 LMS"}
-                    </span>
+                    {course.video_url || course.youtube_url || course.url ? (
+                      <a
+                        href={course.video_url || course.youtube_url || course.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`source-badge source-${course.source || "lms"} source-link`}
+                        title={`Open in ${course.source === "youtube" ? "YouTube" : course.source === "epic_docs" ? "Epic Docs" : "Epic Learning"}`}
+                      >
+                        {course.source === "youtube"
+                          ? "▶ YT"
+                          : course.source === "epic_docs"
+                            ? "📖 Doc"
+                            : "🎓 LMS"}
+                      </a>
+                    ) : (
+                      <span className={`source-badge source-${course.source || "lms"}`}>
+                        {course.source === "youtube"
+                          ? "▶ YT"
+                          : course.source === "epic_docs"
+                            ? "📖 Doc"
+                            : "🎓 LMS"}
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
