@@ -33,6 +33,11 @@ Object.assign(exports, require("./ai/rerankPassages"));
 Object.assign(exports, require("./ai/searchVertexAIDocs"));
 
 // ============================================================================
+// Vector Search - Firestore KNN (replaces client-side cosine similarity)
+// ============================================================================
+Object.assign(exports, require("./ai/vectorSearch"));
+
+// ============================================================================
 // Telemetry
 // ============================================================================
 Object.assign(exports, require("./ai/logTelemetry"));

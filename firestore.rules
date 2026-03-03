@@ -113,6 +113,25 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Embedding collections — public read (Cloud Functions serve via findNearest)
+    // Writes are admin-only via Admin SDK (upload script)
+    match /epic_embeddings/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /course_embeddings/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /segment_embeddings/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /docs_embeddings/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Default deny everything else
     match /{document=**} {
       allow read, write: if false;
