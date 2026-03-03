@@ -3,7 +3,7 @@
 This document lists all open-source software packages used in the
 **Unreal Learning Path Tagging System** project.
 
-_Generated on 2026-02-27_
+_Generated on 2026-03-03_
 
 ---
 
@@ -11,7 +11,7 @@ _Generated on 2026-02-27_
 
 | License                   | Package Count |
 | ------------------------- | ------------- |
-| MIT                       | 288           |
+
 | Apache-2.0                | 70            |
 | ISC                       | 22            |
 | BSD-3-Clause              | 16            |
@@ -24,9 +24,9 @@ _Generated on 2026-02-27_
 | BlueOak-1.0.0             | 1             |
 | CC0-1.0                   | 1             |
 | (MIT AND Zlib)            | 1             |
-| UNLICENSED                | 1             |
+| MIT                       | 289           |
 | 0BSD                      | 1             |
-| **Total**                 | **417**       |
+| **Total**                 | **416**       |
 
 ---
 
@@ -510,11 +510,11 @@ _Generated on 2026-02-27_
 | ------- | ------- | --------- | -------------------------------------- |
 | pako    | 1.0.11  | Frontend  | [Link](https://github.com/nodeca/pako) |
 
-## UNLICENSED
+## path-builder (Internal)
 
-| Package      | Version | Component | Repository |
-| ------------ | ------- | --------- | ---------- |
-| path-builder | 0.0.0   | Frontend  |            |
+| Package      | Version | Component | License | Repository |
+| ------------ | ------- | --------- | ------- | ---------- |
+| path-builder | 0.0.0   | Frontend  | MIT     | Internal   |
 
 ## 0BSD
 
