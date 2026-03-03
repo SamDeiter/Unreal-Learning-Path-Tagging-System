@@ -1,15 +1,12 @@
 /**
  * Docs Search Service - Search Epic UE5 documentation passages
- * Uses pre-computed embeddings from scrape_epic_docs.py (docs_embeddings.json)
+ * Uses Firestore vector KNN via vectorSearchDocs Cloud Function.
  *
- * Follows the same lazy-loading + float16 decoding pattern as segmentSearchService.
+ * Semantic search delegates to server-side Firestore findNearest().
+ * Topic-aware search still uses local doc_links.json.
  */
 
-import { cosineSimilarity } from "./semanticSearchService";
-
 import { devLog, devWarn } from "../utils/logger";
-
-import { decodeFloat16Vector } from "../utils/float16";
 import { stemMatch } from "../utils/stemmer";
 
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -38,7 +35,9 @@ export async function searchDocsVertexAI(query, pageSize = 5) {
     const result = await searchFn({ query: query.trim(), pageSize });
 
     if (result.data?.success) {
-      devLog(`[VertexAI] ${result.data.results?.length || 0} doc results, summary: ${result.data.summary ? "yes" : "no"}`);
+      devLog(
+        `[VertexAI] ${result.data.results?.length || 0} doc results, summary: ${result.data.summary ? "yes" : "no"}`
+      );
       return {
         results: result.data.results || [],
         summary: result.data.summary || "",
@@ -55,96 +54,47 @@ export async function searchDocsVertexAI(query, pageSize = 5) {
   }
 }
 
-
-// Lazy-loaded (4.8MB quantized)
-let _docsEmbeddings = null;
-let _decodedVectors = null;
-
-/**
- * Lazily load and decode doc embeddings.
- */
-async function getDocsEmbeddings() {
-  if (_decodedVectors) return _decodedVectors;
-
-  if (!_docsEmbeddings) {
-    try {
-      // Use fetch() instead of import() — Vite resolves import() at build time,
-      // which fails in CI where this optional file doesn't exist.
-      const resp = await fetch(new URL("../data/docs_embeddings.json", import.meta.url));
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      _docsEmbeddings = await resp.json();
-    } catch (err) {
-      devWarn("⚠️ docs_embeddings.json not available:", err.message);
-      return null;
-    }
-  }
-
-  const docs = _docsEmbeddings?.docs;
-  if (!docs) return null;
-
-  _decodedVectors = new Map();
-  for (const [id, doc] of Object.entries(docs)) {
-    // Phase 4: Support both base64 float16 and native array embeddings
-    let vector;
-    if (typeof doc.embedding === "string") {
-      vector = decodeFloat16Vector(doc.embedding);
-    } else if (Array.isArray(doc.embedding)) {
-      vector = new Float32Array(doc.embedding);
-    } else {
-      devWarn(`[DocsSearch] Skipping doc ${id}: unknown embedding format (${typeof doc.embedding})`);
-      continue;
-    }
-    _decodedVectors.set(id, {
-      vector,
-      slug: doc.slug,
-      url: doc.url,
-      title: doc.title,
-      section: doc.section,
-      text: doc.text,
-      tokenEstimate: doc.token_estimate,
-    });
-  }
-
-  devLog(`[DocsSearch] Decoded ${_decodedVectors.size} doc embeddings`);
-  return _decodedVectors;
-}
+// Lazy-loaded (4.8MB quantized) — REMOVED, now served via Firestore
 
 /**
  * Search Epic UE5 documentation by semantic similarity.
+ * Delegates to vectorSearchDocs Cloud Function (Firestore KNN).
  *
- * @param {number[]|Float32Array} queryEmbedding - 768-dim query vector
+ * @param {number[]|Float32Array} queryEmbedding - Query vector
  * @param {number} topK - Max results (default 5)
- * @param {number} threshold - Min similarity (default 0.35)
+ * @param {number} _threshold - Unused, server handles ranking
  * @returns {Promise<Array<{id, slug, url, title, section, text, similarity}>>}
  */
-export async function searchDocsSemantic(queryEmbedding, topK = 5, threshold = 0.35) {
+export async function searchDocsSemantic(queryEmbedding, topK = 5, _threshold = 0.35) {
   if (!queryEmbedding) return [];
 
-  const embeddings = await getDocsEmbeddings();
-  if (!embeddings) {
-    devWarn("[DocsSearch] Semantic search unavailable — no embeddings loaded");
+  try {
+    const app = getFirebaseApp();
+    const functions = getFunctions(app, "us-central1");
+    const searchFn = httpsCallable(functions, "vectorSearchDocs");
+
+    const queryVector = Array.isArray(queryEmbedding) ? queryEmbedding : Array.from(queryEmbedding);
+
+    const result = await searchFn({ queryVector, topK });
+
+    if (result.data?.results) {
+      devLog(`[DocsSearch] ${result.data.results.length} results via Firestore KNN`);
+      return result.data.results.map((r) => ({
+        id: r.id,
+        slug: r.slug || "",
+        url: r.url || "",
+        title: r.title || "",
+        section: r.section || "",
+        previewText: r.text || "",
+        similarity: r.similarity || 0,
+        source: "epic_docs",
+      }));
+    }
+    return [];
+  } catch (err) {
+    devWarn("[DocsSearch] vectorSearchDocs failed:", err.message);
     return [];
   }
-
-  const results = [];
-  for (const [id, doc] of embeddings) {
-    const similarity = cosineSimilarity(queryEmbedding, doc.vector);
-    if (similarity >= threshold) {
-      results.push({
-        id,
-        slug: doc.slug,
-        url: doc.url,
-        title: doc.title,
-        section: doc.section,
-        previewText: doc.text,
-        similarity,
-        source: "epic_docs",
-      });
-    }
-  }
-
-  results.sort((a, b) => b.similarity - a.similarity);
-  return results.slice(0, topK);
 }
 
 // ── Topic-Aware Doc Lookup (uses expanded doc_links.json) ──
@@ -209,23 +159,54 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
     for (const topic of topicSet) {
       let matched = false;
       // Priority 1: Key matches (what the doc IS about)
-      if (keyLower === topic) { score += 15; matched = true; }
-      else if (keyLower.includes(topic)) { score += 8; matched = true; }
-      else if (topic.includes(keyLower)) { score += 6; matched = true; }
+      if (keyLower === topic) {
+        score += 15;
+        matched = true;
+      } else if (keyLower.includes(topic)) {
+        score += 8;
+        matched = true;
+      } else if (topic.includes(keyLower)) {
+        score += 6;
+        matched = true;
+      }
       // Priority 2: Label/subsystem matches (the doc's title)
-      else if (doc.subsystem === topic) { score += 5; matched = true; }
-      else if (labelLower.includes(topic)) { score += 6; matched = true; }
+      else if (doc.subsystem === topic) {
+        score += 5;
+        matched = true;
+      } else if (labelLower.includes(topic)) {
+        score += 6;
+        matched = true;
+      }
       // Priority 3: Tag matches (often noisy/inherited — lower weight)
-      else if (docTags.includes(topic)) { score += 2; matched = true; }
-      else if (docTags.some((t) => t.includes(topic) || topic.includes(t))) { score += 1; matched = true; }
+      else if (docTags.includes(topic)) {
+        score += 2;
+        matched = true;
+      } else if (docTags.some((t) => t.includes(topic) || topic.includes(t))) {
+        score += 1;
+        matched = true;
+      }
       // Priority 4: URL slug and description matches
-      else if (urlSlug.includes(topic)) { score += 2; matched = true; }
-      else if (descLower.includes(topic)) { score += 1; matched = true; }
+      else if (urlSlug.includes(topic)) {
+        score += 2;
+        matched = true;
+      } else if (descLower.includes(topic)) {
+        score += 1;
+        matched = true;
+      }
       // Stem-aware fallback: "mesh" ↔ "meshes", "import" ↔ "importing"
-      else if (stemMatch(topic, keyLower)) { score += 4; matched = true; }
-      else if (stemMatch(topic, labelLower)) { score += 3; matched = true; }
-      else if (docTags.some((t) => stemMatch(topic, t))) { score += 1; matched = true; }
-      else if (stemMatch(topic, descLower)) { score += 1; matched = true; }
+      else if (stemMatch(topic, keyLower)) {
+        score += 4;
+        matched = true;
+      } else if (stemMatch(topic, labelLower)) {
+        score += 3;
+        matched = true;
+      } else if (docTags.some((t) => stemMatch(topic, t))) {
+        score += 1;
+        matched = true;
+      } else if (stemMatch(topic, descLower)) {
+        score += 1;
+        matched = true;
+      }
       if (matched) matchedTopicCount++;
     }
 
@@ -262,10 +243,10 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
   // Deduplicate near-identical docs (e.g. "Mesh Distance Fields" + "Mesh Distance Fields Properties")
   const deduped = [];
   for (const doc of results) {
-    const docWords = new Set(doc.key.split(/[-_]+/).filter(w => w.length > 2));
-    const isDupe = deduped.some(existing => {
-      const existWords = new Set(existing.key.split(/[-_]+/).filter(w => w.length > 2));
-      const overlap = [...docWords].filter(w => existWords.has(w)).length;
+    const docWords = new Set(doc.key.split(/[-_]+/).filter((w) => w.length > 2));
+    const isDupe = deduped.some((existing) => {
+      const existWords = new Set(existing.key.split(/[-_]+/).filter((w) => w.length > 2));
+      const overlap = [...docWords].filter((w) => existWords.has(w)).length;
       return overlap / Math.min(docWords.size, existWords.size) > 0.6;
     });
     if (!isDupe) deduped.push(doc);

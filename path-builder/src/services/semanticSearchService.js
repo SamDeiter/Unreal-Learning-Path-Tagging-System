@@ -1,22 +1,17 @@
 /**
- * semanticSearchService.js — Client-side semantic search using pre-computed embeddings.
+ * semanticSearchService.js — Semantic search via Firestore vector KNN.
  *
- * Loads course_embeddings.json and provides cosine similarity search
- * against a query embedding from the embedQuery Cloud Function.
+ * Previously loaded course_embeddings.json locally and computed cosine
+ * similarity client-side. Now delegates to vectorSearchCourses Cloud Function
+ * which uses Firestore findNearest() for server-side KNN.
  */
 
-// Lazy-loaded course embeddings (0.4MB)
-let _courseEmbeddings = null;
-async function getCourseEmbeddings() {
-  if (!_courseEmbeddings) {
-    const mod = await import("../data/course_embeddings.json");
-    _courseEmbeddings = mod.default || mod;
-  }
-  return _courseEmbeddings;
-}
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFirebaseApp } from "./firebaseConfig";
 
 /**
  * Compute cosine similarity between two vectors.
+ * Still used for local re-ranking and hybrid search merging.
  * @param {number[]} a - First vector
  * @param {number[]} b - Second vector
  * @returns {number} Similarity score between -1 and 1
@@ -42,31 +37,35 @@ export function cosineSimilarity(a, b) {
 
 /**
  * Find courses most similar to a query embedding.
+ * Delegates to vectorSearchCourses Cloud Function (Firestore KNN).
+ *
  * @param {number[]} queryEmbedding - 768-dim query vector from embedQuery Cloud Function
  * @param {number} topK - Number of results to return (default 5)
- * @param {number} threshold - Minimum similarity to include (default 0.3)
+ * @param {number} threshold - Minimum similarity to include (default 0.3) — unused, server handles ranking
  * @returns {Array<{code: string, title: string, similarity: number}>}
  */
 export async function findSimilarCourses(queryEmbedding, topK = 5, threshold = 0.3) {
-  const courseEmbeddings = await getCourseEmbeddings();
-  if (!queryEmbedding || !courseEmbeddings?.courses) return [];
+  if (!queryEmbedding) return [];
 
-  const results = [];
+  try {
+    const app = getFirebaseApp();
+    const functions = getFunctions(app, "us-central1");
+    const searchFn = httpsCallable(functions, "vectorSearchCourses");
 
-  for (const [code, data] of Object.entries(courseEmbeddings.courses)) {
-    const similarity = cosineSimilarity(queryEmbedding, data.embedding);
-    if (similarity >= threshold) {
-      results.push({
-        code,
-        title: data.title,
-        similarity,
-      });
+    const result = await searchFn({ queryVector: queryEmbedding, topK });
+
+    if (result.data?.results) {
+      return result.data.results.map((r) => ({
+        code: r.course_code || r.id,
+        title: r.title || "",
+        similarity: r.similarity || 0,
+      }));
     }
+    return [];
+  } catch (err) {
+    console.warn("[SemanticSearch] vectorSearchCourses failed:", err.message);
+    return [];
   }
-
-  // Sort by similarity descending, take top K
-  results.sort((a, b) => b.similarity - a.similarity);
-  return results.slice(0, topK);
 }
 
 /**
@@ -74,8 +73,7 @@ export async function findSimilarCourses(queryEmbedding, topK = 5, threshold = 0
  * @returns {number}
  */
 export async function getEmbeddingDimension() {
-  const courseEmbeddings = await getCourseEmbeddings();
-  return courseEmbeddings?.dimension || 768;
+  return 768;
 }
 
 /**
@@ -83,6 +81,5 @@ export async function getEmbeddingDimension() {
  * @returns {number}
  */
 export async function getEmbeddedCourseCount() {
-  const courseEmbeddings = await getCourseEmbeddings();
-  return courseEmbeddings?.total_courses || 0;
+  return 61; // Known count from Firestore upload
 }

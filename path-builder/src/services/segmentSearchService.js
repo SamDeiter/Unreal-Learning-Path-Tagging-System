@@ -1,9 +1,9 @@
 /**
  * Segment Search Service - Find exact moments in video transcripts
- * Supports both keyword search (TF scoring) and semantic search (cosine similarity).
+ * Supports both keyword search (TF scoring) and semantic search (Firestore vector KNN).
  *
- * Keyword search: uses search_index.json + segment_index.json
- * Semantic search: uses segment_embeddings.json (pre-computed 768-dim vectors)
+ * Keyword search: uses search_index.json + segment_index.json (local)
+ * Semantic search: vectorSearchSegments + vectorSearchEpic Cloud Functions (Firestore)
  */
 
 // Lazy-loaded data (deferred from initial bundle)
@@ -27,109 +27,10 @@ export async function getSegmentIndex() {
   }
   return _segmentIndex;
 }
-import { cosineSimilarity } from "./semanticSearchService";
-
 import { devLog, devWarn } from "../utils/logger";
 
-import { decodeFloat16Vector } from "../utils/float16";
-
-// Lazy-loaded embeddings (loaded on first semantic query)
-let _segmentEmbeddings = null;
-let _decodedVectors = null;
-
-// Epic Learning embeddings (separate source)
-let _epicEmbeddings = null;
-let _epicDecodedVectors = null;
-
-/**
- * Lazily load and decode segment embeddings.
- * Only loaded on first semantic search call.
- * @returns {Promise<Map<string, {vector: Float32Array, meta: Object}>>}
- */
-async function getSegmentEmbeddings() {
-  if (_decodedVectors) return _decodedVectors;
-
-  if (!_segmentEmbeddings) {
-    try {
-      // Use fetch() instead of import() — Vite resolves import() at build time,
-      // which fails in CI where this optional file doesn't exist.
-      const resp = await fetch(new URL("../data/segment_embeddings.json", import.meta.url));
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      _segmentEmbeddings = await resp.json();
-    } catch (err) {
-      devWarn("⚠️ segment_embeddings.json not available:", err.message);
-      return null;
-    }
-  }
-
-  const segments = _segmentEmbeddings?.segments;
-  if (!segments) return null;
-
-  // Decode all vectors once
-  _decodedVectors = new Map();
-  for (const [id, seg] of Object.entries(segments)) {
-    _decodedVectors.set(id, {
-      vector: decodeFloat16Vector(seg.embedding),
-      courseCode: seg.course_code,
-      videoKey: seg.video_key,
-      videoTitle: seg.video_title,
-      startTimestamp: seg.start_timestamp,
-      endTimestamp: seg.end_timestamp,
-      startSeconds: seg.start_seconds,
-      text: seg.text,
-      tokenEstimate: seg.token_estimate,
-    });
-  }
-
-  devLog(`[SegmentSearch] Decoded ${_decodedVectors.size} segment embeddings`);
-  return _decodedVectors;
-}
-
-/**
- * Lazily load and decode Epic Learning embeddings.
- * These are articles/tutorials from dev.epicgames.com, not video transcripts.
- * @returns {Promise<Map<string, {vector: Float32Array, meta: Object}>|null>}
- */
-async function getEpicEmbeddings() {
-  if (_epicDecodedVectors) return _epicDecodedVectors;
-
-  if (!_epicEmbeddings) {
-    try {
-      const resp = await fetch(new URL("../data/epic_learning_embeddings.json", import.meta.url));
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      _epicEmbeddings = await resp.json();
-    } catch (err) {
-      devWarn("⚠️ epic_learning_embeddings.json not available:", err.message);
-      return null;
-    }
-  }
-
-  const chunks = _epicEmbeddings?.chunks;
-  if (!chunks) return null;
-
-  _epicDecodedVectors = new Map();
-  for (const [id, chunk] of Object.entries(chunks)) {
-    // Epic embeddings are raw float arrays (not float16 encoded)
-    const vector =
-      chunk.embedding instanceof Float32Array ? chunk.embedding : new Float32Array(chunk.embedding);
-
-    _epicDecodedVectors.set(id, {
-      vector,
-      hashId: chunk.hash_id,
-      title: chunk.title,
-      url: chunk.url,
-      contentType: chunk.content_type,
-      author: chunk.author,
-      tags: chunk.tags,
-      text: chunk.text,
-      tokenEstimate: chunk.token_estimate,
-      chunkIndex: chunk.chunk_index,
-    });
-  }
-
-  devLog(`[SegmentSearch] Decoded ${_epicDecodedVectors.size} Epic Learning embeddings`);
-  return _epicDecodedVectors;
-}
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFirebaseApp } from "./firebaseConfig";
 
 import { SEARCH_STOPWORDS } from "../domain/constants";
 
@@ -312,124 +213,87 @@ export function formatSegmentCard(segment) {
 }
 
 /**
- * Semantic segment search using pre-computed embeddings.
- * Finds segments closest to the query embedding via cosine similarity.
+ * Semantic segment search using Firestore vector KNN.
+ * Calls vectorSearchSegments + vectorSearchEpic Cloud Functions.
  *
- * @param {number[]|Float32Array} queryEmbedding - 768-dim query vector (from embedQuery Cloud Function)
+ * @param {number[]|Float32Array} queryEmbedding - Query vector from embedQuery Cloud Function
  * @param {number} topK - Number of results (default 10)
- * @param {number} threshold - Minimum similarity (default 0.35)
+ * @param {number} threshold - Minimum similarity (default 0.35) — unused, server handles ranking
  * @returns {Promise<Array<{id, courseCode, videoKey, videoTitle, timestamp, startSeconds, text, similarity}>>}
  */
-export async function searchSegmentsSemantic(queryEmbedding, topK = 10, threshold = 0.35) {
+export async function searchSegmentsSemantic(queryEmbedding, topK = 10, _threshold = 0.35) {
   if (!queryEmbedding) return [];
+
+  const queryVector = Array.isArray(queryEmbedding) ? queryEmbedding : Array.from(queryEmbedding);
+
+  const app = getFirebaseApp();
+  const functions = getFunctions(app, "us-central1");
 
   const results = [];
 
-  // Search existing segment embeddings (video transcripts)
-  const embeddings = await getSegmentEmbeddings();
-  if (embeddings) {
-    for (const [id, seg] of embeddings) {
-      const similarity = cosineSimilarity(queryEmbedding, seg.vector);
-      if (similarity >= threshold) {
+  // Search segment embeddings (video transcripts) via Cloud Function
+  try {
+    const segmentSearchFn = httpsCallable(functions, "vectorSearchSegments");
+    const segResult = await segmentSearchFn({ queryVector, topK });
+
+    if (segResult.data?.results) {
+      for (const r of segResult.data.results) {
         results.push({
-          id,
-          courseCode: seg.courseCode,
-          videoKey: seg.videoKey,
-          videoTitle: seg.videoTitle,
-          timestamp: seg.startTimestamp,
-          endTimestamp: seg.endTimestamp,
-          startSeconds: seg.startSeconds,
-          previewText: seg.text,
-          similarity,
+          id: r.id,
+          courseCode: r.course_code || null,
+          videoKey: r.video_key || null,
+          videoTitle: r.video_title || "",
+          timestamp: r.start_timestamp || null,
+          endTimestamp: r.end_timestamp || null,
+          startSeconds: r.start_seconds || null,
+          previewText: r.text || "",
+          similarity: r.similarity || 0,
           source: "transcript",
         });
       }
     }
+  } catch (err) {
+    devWarn("[SegmentSearch] vectorSearchSegments failed:", err.message);
   }
 
-  // Search Epic Learning embeddings (articles, tutorials, talks)
-  const epicEmbeddings = await getEpicEmbeddings();
-  if (epicEmbeddings) {
-    for (const [id, chunk] of epicEmbeddings) {
-      const similarity = cosineSimilarity(queryEmbedding, chunk.vector);
-      if (similarity >= threshold) {
+  // Search Epic Learning embeddings (articles, tutorials, talks) via Cloud Function
+  try {
+    const epicSearchFn = httpsCallable(functions, "vectorSearchEpic");
+    const epicResult = await epicSearchFn({ queryVector, topK });
+
+    if (epicResult.data?.results) {
+      for (const r of epicResult.data.results) {
         results.push({
-          id,
+          id: r.id,
           courseCode: null,
           videoKey: null,
-          videoTitle: chunk.title,
+          videoTitle: r.title || "",
           timestamp: null,
           endTimestamp: null,
           startSeconds: null,
-          previewText: chunk.text,
-          similarity,
+          previewText: r.text || "",
+          similarity: r.similarity || 0,
           source: "epic_learning",
           // Epic-specific fields
-          epicUrl: chunk.url,
-          epicContentType: chunk.contentType,
-          epicAuthor: chunk.author,
-          epicTags: chunk.tags,
-          epicHashId: chunk.hashId,
+          epicUrl: r.url || null,
+          epicContentType: r.content_type || null,
+          epicAuthor: r.author || null,
+          epicTags: r.tags || [],
+          epicHashId: r.hash_id || null,
         });
       }
     }
+  } catch (err) {
+    devWarn("[SegmentSearch] vectorSearchEpic failed:", err.message);
   }
 
-  if (results.length === 0 && !embeddings && !epicEmbeddings) {
-    devWarn("[SegmentSearch] Semantic search unavailable — no embeddings loaded");
+  if (results.length === 0) {
+    devWarn("[SegmentSearch] Semantic search returned no results");
   }
 
   results.sort((a, b) => b.similarity - a.similarity);
-  const top = results.slice(0, topK);
-
-  // ── Chunk overlap: bleed 1 sentence from adjacent segments ──
-  // Build a lookup of segments grouped by courseCode:videoKey for neighbor access
-  if (top.length > 0) {
-    const videoSegments = new Map(); // key = courseCode:videoKey, value = sorted [{ id, text, startSeconds }]
-    for (const [id, seg] of embeddings) {
-      const vk = `${seg.courseCode}:${seg.videoKey}`;
-      if (!videoSegments.has(vk)) videoSegments.set(vk, []);
-      videoSegments.get(vk).push({ id, text: seg.text, startSeconds: seg.startSeconds });
-    }
-    // Sort each video's segments by start time
-    for (const segs of videoSegments.values()) {
-      segs.sort((a, b) => a.startSeconds - b.startSeconds);
-    }
-
-    for (const result of top) {
-      const vk = `${result.courseCode}:${result.videoKey}`;
-      const segs = videoSegments.get(vk);
-      if (!segs) continue;
-      const idx = segs.findIndex((s) => s.id === result.id);
-      if (idx === -1) continue;
-
-      // Grab trailing sentence from previous segment
-      let contextBefore = "";
-      if (idx > 0) {
-        const prevText = segs[idx - 1].text || "";
-        const sentences = prevText.split(/[.!?]+\s*/);
-        contextBefore = sentences[sentences.length - 1]?.trim() || "";
-      }
-      // Grab leading sentence from next segment
-      let contextAfter = "";
-      if (idx < segs.length - 1) {
-        const nextText = segs[idx + 1].text || "";
-        const sentences = nextText.split(/[.!?]+\s*/);
-        contextAfter = sentences[0]?.trim() || "";
-      }
-
-      // Enrich previewText with context bleed
-      if (contextBefore || contextAfter) {
-        const parts = [];
-        if (contextBefore) parts.push("..." + contextBefore);
-        parts.push(result.previewText);
-        if (contextAfter) parts.push(contextAfter + "...");
-        result.previewText = parts.join(" ");
-      }
-    }
-  }
-
-  return top;
+  devLog(`[SegmentSearch] Found ${results.length} semantic results via Firestore KNN`);
+  return results.slice(0, topK);
 }
 
 /**

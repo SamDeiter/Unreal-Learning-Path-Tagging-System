@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useTagData } from "../../context/TagDataContext";
 import { getAllPersonas, personaScoringRules } from "../../services/PersonaService";
 import VertexAIMonitor from "../VertexAIMonitor/VertexAIMonitor";
@@ -17,44 +17,16 @@ function Dashboard() {
   const [sourceFilter, setSourceFilter] = useState("all");
   const [courseSearch, setCourseSearch] = useState("");
 
-  // RAG Database Stats — loaded from epic_learning_embeddings.json metadata
-  const [ragStats, setRagStats] = useState(null);
-  useEffect(() => {
-    (async () => {
-      try {
-        const mod = await import("../../data/epic_learning_embeddings.json");
-        const data = mod.default || mod;
-        // chunks is an object keyed by chunk ID, not an array
-        const chunksObj = data.chunks || {};
-        const chunks = Array.isArray(chunksObj) ? chunksObj : Object.values(chunksObj);
-        const types = {};
-        chunks.forEach((c) => {
-          const t = c.type || c.content_type || "unknown";
-          types[t] = (types[t] || 0) + 1;
-        });
-        // Count source types from chunk metadata
-        const sources = { whisper: 0, youtube: 0, cms: 0, markdown: 0 };
-        chunks.forEach((c) => {
-          const src = (c.source || c.source_file || c.hash_id || "").toLowerCase();
-          if (src.includes("whisper")) sources.whisper++;
-          else if (src.includes("yt_") || src.includes("youtube")) sources.youtube++;
-          else if (src.includes("cms_") || src.includes("stream")) sources.cms++;
-          else sources.markdown++;
-        });
-        setRagStats({
-          totalChunks: chunks.length,
-          model: data.model || "unknown",
-          dimension: data.dimension || 768,
-          generatedAt: data.generated_at,
-          fileSizeMB: "~22",
-          types,
-          sources,
-        });
-      } catch (err) {
-        console.warn("RAG stats unavailable:", err.message);
-      }
-    })();
-  }, []);
+  // RAG Database Stats — known values from Firestore upload (no longer loading 41MB JSON)
+  const [ragStats] = useState({
+    totalChunks: 8181,
+    model: "gemini-embedding-001",
+    dimension: 768,
+    generatedAt: "2026-03-03T00:00:00Z",
+    fileSizeMB: "Firestore",
+    types: { transcript: 3831, segment: 2402, docs: 1887, course: 61 },
+    sources: { whisper: 1925, youtube: 0, cms: 0, markdown: 1525 },
+  });
 
   // Calculate stats
   const stats = useMemo(() => {
