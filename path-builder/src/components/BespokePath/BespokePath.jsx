@@ -9,6 +9,7 @@ import { useState, useCallback } from "react";
 import { generateBespokePath } from "../../services/bespokePathService";
 import { generateQuizForStep } from "../../services/quizService";
 import { findCachedPath, cachePath, addToHistory } from "../../services/pathCacheService";
+import { sanitizeQuery, checkRateLimit, recordQuery } from "../../services/securityGuardrails";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PathStep from "./PathStep";
 import BridgeNarration from "./BridgeNarration";
@@ -31,6 +32,7 @@ export default function BespokePath() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [pipelineStage, setPipelineStage] = useState("");
+  const [inputError, setInputError] = useState("");
 
   // Quiz state
   const [quizzes, setQuizzes] = useState(new Map()); // stepIndex → questions[]
@@ -42,6 +44,22 @@ export default function BespokePath() {
     const trimmed = query.trim();
     if (!trimmed || isLoading) return;
 
+    // Security: validate + sanitize input
+    const { valid, sanitized, error: sanitizeError } = sanitizeQuery(trimmed);
+    if (!valid) {
+      setInputError(sanitizeError);
+      return;
+    }
+    setInputError("");
+
+    // Security: rate limit check
+    const { allowed, error: rateError } = checkRateLimit();
+    if (!allowed) {
+      setInputError(rateError);
+      return;
+    }
+
+    recordQuery();
     setIsLoading(true);
     setPathResult(null);
     setCurrentStep(0);
@@ -63,7 +81,7 @@ export default function BespokePath() {
 
     // 2. Generate fresh path via AI pipeline
     setPipelineStage("Finding relevant content...");
-    const result = await generateBespokePath(trimmed);
+    const result = await generateBespokePath(sanitized);
 
     if (!result.error && result.path.length > 0) {
       setPipelineStage("Path ready!");
@@ -159,12 +177,25 @@ export default function BespokePath() {
             <textarea
               className="bespoke-input"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                if (inputError) setInputError("");
+              }}
               onKeyDown={handleKeyDown}
               placeholder="What UE5 problem are you trying to solve?"
               rows={2}
+              maxLength={500}
               disabled={isLoading}
             />
+            {/* Char counter */}
+            {query.length > 400 && (
+              <span
+                className="char-counter"
+                style={{ color: query.length >= 500 ? "#f85149" : "#8b949e" }}
+              >
+                {query.length}/500
+              </span>
+            )}
             <button
               className="bespoke-submit"
               onClick={handleGenerate}
@@ -186,6 +217,13 @@ export default function BespokePath() {
             </div>
           )}
         </div>
+
+        {/* Input error message */}
+        {inputError && (
+          <div className="bespoke-input-error">
+            <span>⚠️</span> {inputError}
+          </div>
+        )}
 
         {/* Pre-seeded popular paths (shown before first search) */}
         {!pathResult && !isLoading && (
