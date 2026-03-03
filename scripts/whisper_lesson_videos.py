@@ -252,6 +252,8 @@ def download_audio_from_mpd(mpd_xml, vid, output_path):
 
     cmd = [
         "ffmpeg", "-y",
+        "-loglevel", "warning",
+        "-protocol_whitelist", "file,http,https,tcp,tls,crypto,data",
         "-i", str(mpd_path),
         "-vn",                # no video
         "-acodec", "pcm_s16le",
@@ -261,18 +263,19 @@ def download_audio_from_mpd(mpd_xml, vid, output_path):
     ]
     try:
         result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=120
+            cmd, capture_output=True, text=True, timeout=1800
         )
+        if mpd_path.exists():
+            mpd_path.unlink()
         if result.returncode != 0:
             return False, result.stderr[:200]
         return True, None
     except subprocess.TimeoutExpired:
-        return False, "ffmpeg timeout"
-    except FileNotFoundError:
-        return False, "ffmpeg not found — install from https://ffmpeg.org"
-    finally:
         if mpd_path.exists():
             mpd_path.unlink()
+        return False, "ffmpeg timeout (30 min)"
+    except FileNotFoundError:
+        return False, "ffmpeg not found — install from https://ffmpeg.org"
 
 
 def run_phase_b(stream_urls, max_videos=None, model_name="base"):
@@ -308,7 +311,7 @@ def run_phase_b(stream_urls, max_videos=None, model_name="base"):
 
     if device == "cuda":
         gpu_name = torch.cuda.get_device_name(0)
-        vram = torch.cuda.get_device_properties(0).total_mem / (1024**3)
+        vram = torch.cuda.get_device_properties(0).total_memory / (1024**3)
         print(f"  GPU: {gpu_name} ({vram:.1f} GB VRAM)")
 
     success = 0

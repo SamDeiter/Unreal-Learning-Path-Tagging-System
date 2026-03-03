@@ -33,6 +33,7 @@ except ImportError:
 EXTRACTED_DIR = Path("content/epic_learning/extracted")
 TRANSCRIPT_DIR = Path("content/epic_learning/transcripts")
 MANIFEST_PATH = Path("content/epic_learning/video_manifest.json")
+LESSON_URLS_PATH = Path("content/epic_learning/lesson_stream_urls.json")
 OUTPUT_FILE = Path("path-builder/src/data/epic_learning_embeddings.json")
 CHECKPOINT_FILE = Path("content/epic_learning_embed_checkpoint.json")
 
@@ -281,6 +282,43 @@ def load_all_content():
         standalone_count += 1
 
     print(f"  Standalone YouTube transcripts: {standalone_count}")
+
+    # ── Standalone lesson transcripts (lesson_ prefix from Whisper pipeline) ──
+    # These are transcribed from Epic's Kaltura-hosted lesson videos
+    lesson_lookup = {}
+    if LESSON_URLS_PATH.exists():
+        with open(LESSON_URLS_PATH, "r", encoding="utf-8-sig") as f:
+            lesson_lookup = json.load(f)
+
+    lesson_count = 0
+    for t in sorted(TRANSCRIPT_DIR.glob("lesson_*.txt")):
+        if t.name in consumed_transcripts:
+            continue
+        lesson_hash = t.stem.replace("lesson_", "")  # e.g. "lesson_l5Yj" -> "l5Yj"
+        with open(t, "r", encoding="utf-8") as f:
+            text = f.read()
+        if len(text.strip()) < 50:
+            continue
+
+        # Look up metadata from lesson_stream_urls.json
+        lesson_info = lesson_lookup.get(lesson_hash, {})
+        title = lesson_info.get("title", f"Lesson {lesson_hash}")
+        course_hash = lesson_info.get("course_hash", "")
+
+        meta = {
+            "hash_id": f"lesson_{lesson_hash}",
+            "title": title,
+            "url": f"https://dev.epicgames.com/community/learning/courses/{course_hash}",
+            "content_type": "lesson_transcript",
+            "author": "Epic Games",
+            "tags": ["epic-learning", "lesson", "whisper-transcript"],
+            "course_hash": course_hash,
+        }
+        docs.append({"text": f"## Lesson Transcript: {title}\n\n{text}", "meta": meta})
+        consumed_transcripts.add(t.name)
+        lesson_count += 1
+
+    print(f"  Standalone lesson transcripts (Whisper): {lesson_count}")
     print(f"  Total transcript files consumed: {len(consumed_transcripts)}")
     return docs
 
