@@ -53,11 +53,14 @@ const TagHistorySparkline = lazy(() => import("./components/Visualizations/TagHi
 const InviteManager = lazy(() => import("./components/InviteManager/InviteManager"));
 const AdminAnalytics = lazy(() => import("./components/AdminAnalytics/AdminAnalytics"));
 
-// Tab definitions — mobile reorders these for relevance
-const BASE_TABS = [
+// Tab definitions — split into student-facing and admin/builder
+const PRIMARY_TABS = [
   { key: "bespoke", label: "Fix a Problem", icon: "🔧" },
   { key: "personas", label: "Onboarding", icon: "🚀" },
   { key: "problem", label: "Learn Why", icon: "🧠" },
+];
+
+const SECONDARY_TABS = [
   { key: "dashboard", label: "Dashboard", icon: "📊" },
   { key: "readiness", label: "Path Readiness", icon: "📚" },
   { key: "tags", label: "Tags", icon: "🏷️" },
@@ -65,6 +68,8 @@ const BASE_TABS = [
   { key: "analytics", label: "Analytics", icon: "📈" },
   { key: "augmentation", label: "Augmentation", icon: "🔬" },
 ];
+
+const BASE_TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
 
 // On mobile, surface the most useful tabs first
 const MOBILE_TAB_ORDER = [
@@ -87,6 +92,7 @@ function App() {
   const [newFeedbackCount, setNewFeedbackCount] = useState(0);
   const [showQuiz, setShowQuiz] = useState(() => !localStorage.getItem("ue5_persona_id"));
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [hamburgerOpen, setHamburgerOpen] = useState(false);
   const { isMobile } = useIsMobile();
 
   // Build ordered tab list (mobile reorders, admin tabs appended)
@@ -305,18 +311,55 @@ function App() {
                   <div className="header-left">
                     <h1 className="app-title">UE5 Learning Path Builder</h1>
                     <nav className="main-nav">
-                      {tabs.map((tab) => (
+                      {/* Primary tabs — always visible */}
+                      {PRIMARY_TABS.map((tab) => (
                         <button
                           key={tab.key}
                           className={`nav-tab ${activeTab === tab.key ? "active" : ""}`}
                           onClick={() => setActiveTab(tab.key)}
                         >
                           {tab.icon} {tab.label}
-                          {tab.key === "admin-feedback" && newFeedbackCount > 0 && (
-                            <span className="feedback-badge">{newFeedbackCount}</span>
-                          )}
                         </button>
                       ))}
+
+                      {/* Hamburger — secondary + admin tabs */}
+                      <div className="hamburger-container">
+                        <button
+                          className={`nav-tab hamburger-btn ${hamburgerOpen ? "active" : ""}`}
+                          onClick={() => setHamburgerOpen((prev) => !prev)}
+                          aria-label="More tools"
+                        >
+                          ☰ Tools
+                        </button>
+                        {hamburgerOpen && (
+                          <>
+                            <div
+                              className="hamburger-backdrop"
+                              onClick={() => setHamburgerOpen(false)}
+                            />
+                            <div className="hamburger-dropdown">
+                              {[...SECONDARY_TABS, ...tabs.filter((t) => t.adminOnly)].map(
+                                (tab) => (
+                                  <button
+                                    key={tab.key}
+                                    className={`hamburger-item ${activeTab === tab.key ? "active" : ""}`}
+                                    onClick={() => {
+                                      setActiveTab(tab.key);
+                                      setHamburgerOpen(false);
+                                    }}
+                                  >
+                                    <span className="hamburger-icon">{tab.icon}</span>
+                                    <span>{tab.label}</span>
+                                    {tab.key === "admin-feedback" && newFeedbackCount > 0 && (
+                                      <span className="feedback-badge">{newFeedbackCount}</span>
+                                    )}
+                                  </button>
+                                )
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </nav>
                   </div>
                   <div className="header-right">
