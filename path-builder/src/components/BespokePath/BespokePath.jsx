@@ -8,10 +8,12 @@
 import { useState, useCallback } from "react";
 import { generateBespokePath } from "../../services/bespokePathService";
 import { generateQuizForStep } from "../../services/quizService";
+import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PathStep from "./PathStep";
 import BridgeNarration from "./BridgeNarration";
 import PathProgress from "./PathProgress";
 import QuizEngine from "./QuizEngine";
+import PreSeededPaths from "./PreSeededPaths";
 import "./BespokePath.css";
 
 const EXAMPLE_QUERIES = [
@@ -81,6 +83,38 @@ export default function BespokePath() {
     setShowQuiz(null);
   }, []);
 
+  // Handle selecting a pre-seeded path (zero API cost)
+  const handlePreSeededSelect = useCallback((path) => {
+    // Convert pre-seeded format to the same shape as generateBespokePath output
+    const fakeResult = {
+      query: path.query,
+      path: path.steps.map((step, i) => ({
+        category: step.category,
+        segment: {
+          id: `${path.id}-step-${i}`,
+          title: step.title,
+          summary: step.summary,
+          source: step.sourceType,
+          text: step.summary,
+        },
+      })),
+      bridges: path.steps.slice(1).map((_, i) => ({
+        from: i,
+        to: i + 1,
+        text: "", // No bridge narration for pre-seeded
+      })),
+      segments: path.steps,
+      generatedAt: new Date().toISOString(),
+      isPreSeeded: true,
+    };
+    setPathResult(fakeResult);
+    setQuery(path.query);
+    setCurrentStep(0);
+    setQuizzes(new Map());
+    setQuizScores(new Map());
+    setShowQuiz(null);
+  }, []);
+
   const handleExampleClick = (example) => {
     setQuery(example);
   };
@@ -136,6 +170,11 @@ export default function BespokePath() {
             </div>
           )}
         </div>
+
+        {/* Pre-seeded popular paths (shown before first search) */}
+        {!pathResult && !isLoading && (
+          <PreSeededPaths paths={PRE_SEEDED_PATHS} onSelect={handlePreSeededSelect} />
+        )}
       </div>
 
       {/* Loading State */}
