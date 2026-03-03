@@ -14,6 +14,7 @@
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
+import { recordTokenUsage } from "./tokenTracker";
 
 /**
  * Generate quiz questions for a single path step.
@@ -89,6 +90,11 @@ Return ONLY a JSON array with this exact format:
     );
 
     devLog(`[Quiz] Generated ${valid.length} questions for ${step.category} step`);
+    recordTokenUsage(
+      "quizGeneration",
+      Math.ceil(prompt.length / 4),
+      Math.ceil(responseText.length / 4)
+    );
     return valid;
   } catch (err) {
     devWarn("[Quiz] AI quiz generation failed:", err.message);

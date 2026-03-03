@@ -11,6 +11,7 @@
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
+import { recordTokenUsage } from "./tokenTracker";
 
 // ── Constants ──────────────────────────────────────────────────────────
 const SEGMENT_CATEGORIES = ["foundation", "diagnosis", "fix", "transfer"];
@@ -47,6 +48,8 @@ export async function findRelevantSegments(userQuery, topK = 5) {
     queryVector = embedResult.data?.embedding;
     if (!queryVector) throw new Error("No embedding returned");
     devLog(`[BespokePath] Got ${queryVector.length}-dim embedding for query`);
+    // Track: embedding is ~50 input tokens, 0 output
+    recordTokenUsage("embedQuery", Math.ceil(userQuery.length / 4), 0);
   } catch (err) {
     devWarn("[BespokePath] embedQuery failed:", err.message);
     return { segments: [], embedding: [] };
@@ -206,6 +209,12 @@ Rules:
     }
 
     devLog(`[BespokePath] Sequenced ${sequenced.length} segments into learning path`);
+    // Track: sequencing prompt is large, response is small JSON
+    recordTokenUsage(
+      "sequencePath",
+      Math.ceil(prompt.length / 4),
+      Math.ceil(responseText.length / 4)
+    );
     return sequenced;
   } catch (err) {
     devWarn("[BespokePath] sequencePath failed:", err.message);
@@ -274,6 +283,12 @@ Keep narrations natural, concise, and helpful. Max 50 words each.`;
     if (jsonMatch) {
       const narrations = JSON.parse(jsonMatch[0]);
       devLog(`[BespokePath] Generated ${narrations.length} AI bridge narrations`);
+      // Track: narration prompt + response
+      recordTokenUsage(
+        "bridgeNarration",
+        Math.ceil(prompt.length / 4),
+        Math.ceil(responseText.length / 4)
+      );
       return narrations;
     }
   } catch (err) {
