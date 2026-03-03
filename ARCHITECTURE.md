@@ -172,8 +172,14 @@ graph TB
         UF["userFeedback/{userId}/videoSignals/{videoId}<br/>• liked, completed, skippedAt"]
         AE["analytics_events/{docId}<br/>• type, timestamp, metadata"]
         AU["apiUsage/{docId}<br/>• type, outcome, pipelineDurationMs<br/>(written by Cloud Function)"]
+        CE["course_embeddings/{courseCode}\n\u2022 title, embedding: vector(768), metadata"]
+        SE["segment_embeddings/{segmentId}\n\u2022 text, embedding: vector(768), courseCode, videoTitle"]
+        DE["docs_embeddings/{docId}\n\u2022 text, embedding: vector(768), url, title, section"]
+        CP["cached_paths/{pathId}\n\u2022 question, path, createdAt, ttl: 90d"]
     end
 ```
+
+> **Planned Migration**: Embedding vectors are migrating from bundled JSON files to Firestore collections with native vector search (`findNearest()` KNN). This removes ~33MB from the client bundle and enables server-side semantic search.
 
 ### User Query Pipeline
 
@@ -323,13 +329,51 @@ Phase A results are cached in `cms_stream_urls_v2.json`, allowing Phase B to be 
 
 ---
 
+## Bespoke Learning Path Architecture (Planned)
+
+The "Learn Why" feature generates personalized learning paths using a 4-stage pipeline:
+
+```
+User Question -> [1. Segment Finder] -> [2. Path Sequencer] -> [3. Path Renderer] -> [4. Quiz] -> UI
+```
+
+| Stage | Purpose | Backend |
+| --- | --- | --- |
+| **Segment Finder** | RAG search across 1,900+ transcript embeddings | Firestore vector search + Vertex AI |
+| **Path Sequencer** | Orders clips into Foundation, Diagnosis, Fix, Transfer | Gemini 2.0 Flash |
+| **Path Renderer** | Generates bridge narration between clips | Gemini 2.0 Flash |
+| **Quiz Generator** | Creates MCQs testing conceptual understanding | Gemini 2.0 Flash |
+
+### Cloud Functions (New)
+
+| Function | Purpose | Trigger |
+| --- | --- | --- |
+| `vectorSearchCourses` | KNN search against `course_embeddings` collection | HTTPS callable |
+| `vectorSearchSegments` | KNN search against `segment_embeddings` collection | HTTPS callable |
+| `vectorSearchDocs` | KNN search against `docs_embeddings` collection | HTTPS callable |
+
+### Security Guardrails
+
+| Guard | Attack Vector | Defense |
+| --- | --- | --- |
+| Input Sanitization | Prompt injection | 500 char limit, HTML stripping, system prompt isolation |
+| XSS Prevention | Script injection | React auto-escape, DOMPurify, CSP headers |
+| API Key Protection | Key theft | `.env` only, domain-restricted, quarterly rotation |
+| Rate Limiting | DoS / cost abuse | 3s throttle, 20/session limit, $10/day circuit breaker |
+| Cache Poisoning | Harmful cached paths | Source-grounded validation, admin-only Featured pins |
+| Data Exfiltration | Extract prompts/data | Stateless queries, no PII in prompts |
+| SCORM Integrity | Package tampering | SHA-256 manifest, SRI attributes |
+
+---
+
 ## Key Services Reference
 
 | Service                    | Responsibility                                | External Dependencies                                     |
 | -------------------------- | --------------------------------------------- | --------------------------------------------------------- |
 | `searchPipeline.js`        | Orchestrates embed → expand → search → rerank | Cloud Functions (embedQuery, expandQuery, rerankPassages) |
-| `semanticSearchService.js` | Cosine similarity against course embeddings   | None (client-side)                                        |
-| `segmentSearchService.js`  | TF-IDF transcript segment search              | None (client-side)                                        |
+| `semanticSearchService.js` | Vector search against course embeddings       | Firestore vector search (planned migration from client-side) |
+| `segmentSearchService.js`  | Hybrid keyword + semantic segment search      | Firestore vector search (planned migration from client-side) |
+| `docsSearchService.js`     | Semantic doc search + Vertex AI Search        | Vertex AI Discovery Engine, Firestore vector search       |
 | `coverageAnalyzer.js`      | Multi-source coverage analysis                | docsSearchService, externalContentService                 |
 | `PathBuilder.js`           | Sequencing, role assignment, time budgeting   | None (pure logic)                                         |
 | `narratorService.js`       | AI narration generation                       | Cloud Functions (Gemini)                                  |

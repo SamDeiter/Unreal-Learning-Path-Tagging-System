@@ -17,7 +17,8 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 5. **Guided Learning Path** — AI-narrated sequence: intro → videos → quizzes → challenges → reflection
 6. **Citation-linked Answers** — Diagnosis responses include clickable `[N]` references linking to Vertex AI documentation
 7. **Dashboard Insights** — Readiness score, persona coverage chart, content gap analysis, quick search, and tooltips on all metrics
-8. **Analytics & Insights** — Tag heatmaps, skill radar, prerequisite flows, industry demand gap analysis, and more
+8. **Analytics & Insights**
+9. **Bespoke Learning Paths** — AI-generated personalized paths using RAG search across 1,900+ video transcripts, with Firestore vector search, security guardrails, and 10 pre-seeded popular paths — Tag heatmaps, skill radar, prerequisite flows, industry demand gap analysis, and more
 9. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
 10. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
 
@@ -34,7 +35,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 | **Database**       | Firebase Firestore                                                                 |
 | **Auth**           | Firebase Auth with Google Sign-In + invite-based access control                    |
 | **AI**             | Google Gemini 2.0 Flash (enrichment, narration, embeddings)                        |
-| **Search**         | Semantic embeddings + TF-IDF transcript index + tag matching                       |
+| **Search**         | Firestore vector search + TF-IDF transcript index + Vertex AI docs + tag matching                       |
 | **Hosting**        | GitHub Pages (frontend), Firebase Hosting (API)                                    |
 | **Testing**        | Vitest + React Testing Library + Playwright (325 tests)                            |
 | **Security**       | DOMPurify (XSS sanitization), Firebase Security Rules, invite-based access control |
@@ -72,7 +73,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   │   │   ├── accessControl.js           # Invite-based access + admin roles
 │   │   │   ├── analyticsService.js        # Usage analytics
 │   │   │   └── ...                        # feedbackService, TagGraphService, etc.
-│   │   ├── data/                  # 24 static JSON data files (~30MB total)
+│   │   ├── data/                  # 20+ static JSON data files (~22MB after Firestore vector migration)
 │   │   │   ├── video_library_enriched.json  # Core course + video catalog
 │   │   │   ├── segment_embeddings.json      # Semantic vectors (~6MB)
 │   │   │   ├── search_index.json            # TF-IDF search index (~5MB)
@@ -255,7 +256,7 @@ After transcripts are collected, generate the RAG embeddings:
 python scripts/embed_epic_learning.py
 ```
 
-This produces `epic_learning_embeddings.json` (~20MB) containing chunked transcript embeddings for semantic search.
+This produces transcript embeddings for semantic search. Embeddings are uploaded to Firestore vector collections for server-side KNN search via `upload_embeddings_to_firestore.py`.
 
 ---
 

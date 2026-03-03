@@ -4,6 +4,32 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [1.5.0-vector-migration] - 2026-03-03 (Planned)
+
+### Added
+
+- **Firestore Vector Search** — Migrating embedding storage from bundled JSON files (~33MB) to Firestore collections with native `findNearest()` KNN search:
+  - `course_embeddings` — 768-dim vectors for course-level semantic search
+  - `segment_embeddings` — 768-dim vectors for transcript segment search
+  - `docs_embeddings` — 768-dim vectors for Epic documentation search
+- **3 New Cloud Functions** — `vectorSearchCourses`, `vectorSearchSegments`, `vectorSearchDocs` for server-side vector search
+- **Bespoke Learning Path Pipeline** — 4-stage AI path generation (Segment Finder, Path Sequencer, Path Renderer, Quiz Generator) using Gemini 2.0 Flash
+- **10 Pre-Seeded Popular Paths** — Research-backed top UE5 beginner issues (Event Tick, Casting vs Interfaces, Nanite, Lumen, Blueprint communication, project organization, World Partition, optimization, profiling, Lumen+Nanite interaction)
+- **Security Guardrails** — 7 guards covering prompt injection, XSS, API key protection, rate limiting, cache poisoning, data exfiltration, SCORM integrity
+- **Cached Path Library** — Anonymous path caching with 90-day TTL, admin-pinned Featured Paths, similarity-based cache hits
+
+### Changed
+
+- **Bundle size reduction** — Removing 33.3MB of embedding JSON files from `src/data/` (bundle drops from 62.4MB to ~29MB)
+- **Search pipeline** — `semanticSearchService.js`, `segmentSearchService.js`, `docsSearchService.js` updated to call Firestore vector search Cloud Functions instead of client-side cosine similarity
+- **Error handling** — 8 graceful error scenarios with user-friendly messages that don't expose infrastructure details
+
+### Fixed
+
+- **CI bundle regression** — `bundle-regression.test.js` was failing (62.4MB > 55MB threshold) due to growing embedding JSON files
+
+---
+
 ## [1.4.0-lesson-whisper] - 2026-03-03
 
 ### Added
