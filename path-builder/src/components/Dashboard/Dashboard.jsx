@@ -265,7 +265,9 @@ function Dashboard() {
 
   // Split courses by video availability
   const coursesWithVideos = sortedCourses.filter((c) => (c.video_count || 0) > 0);
-  const coursesMissingVideos = sortedCourses.filter((c) => (c.video_count || 0) === 0);
+  const coursesMissingVideos = sortedCourses.filter(
+    (c) => (c.video_count || 0) === 0 && c.source !== "epic_docs"
+  );
 
   // Quick Search filter (Option C)
   const displayedCourses = useMemo(() => {
