@@ -32,6 +32,7 @@ const Personas = lazy(() => import("./components/Personas/Personas"));
 const ProblemFirst = lazy(() =>
   import("./components/ProblemFirst").then((m) => ({ default: m.ProblemFirst }))
 );
+const BespokePath = lazy(() => import("./components/BespokePath/BespokePath"));
 const AdminFeedback = lazy(() => import("./components/AdminFeedback/AdminFeedback"));
 const InsightsPanel = lazy(() => import("./components/Visualizations/InsightsPanel"));
 const CollapsibleSection = lazy(() => import("./components/Visualizations/CollapsibleSection"));
@@ -54,18 +55,20 @@ const AdminAnalytics = lazy(() => import("./components/AdminAnalytics/AdminAnaly
 
 // Tab definitions — mobile reorders these for relevance
 const BASE_TABS = [
+  { key: "bespoke", label: "Fix a Problem", icon: "🔧" },
+  { key: "personas", label: "Onboarding", icon: "🚀" },
+  { key: "problem", label: "Learn Why", icon: "🧠" },
   { key: "dashboard", label: "Dashboard", icon: "📊" },
   { key: "readiness", label: "Path Readiness", icon: "📚" },
   { key: "tags", label: "Tags", icon: "🏷️" },
   { key: "builder", label: "Path Builder", icon: "🏗️" },
-  { key: "personas", label: "Onboarding", icon: "🚀" },
-  { key: "problem", label: "Fix a Problem", icon: "🔧" },
-  { key: "analytics", label: "Analytics", icon: "📊" },
+  { key: "analytics", label: "Analytics", icon: "📈" },
   { key: "augmentation", label: "Augmentation", icon: "🔬" },
 ];
 
 // On mobile, surface the most useful tabs first
 const MOBILE_TAB_ORDER = [
+  "bespoke",
   "personas",
   "problem",
   "dashboard",
@@ -77,7 +80,7 @@ const MOBILE_TAB_ORDER = [
 ];
 
 function App() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("bespoke");
   const [preSelectedSkill, setPreSelectedSkill] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userIsAdmin, setUserIsAdmin] = useState(false);
@@ -417,6 +420,11 @@ function App() {
                 {activeTab === "problem" && (
                   <div className="dashboard-layout">
                     <ProblemFirst />
+                  </div>
+                )}
+                {activeTab === "bespoke" && (
+                  <div className="dashboard-layout">
+                    <BespokePath />
                   </div>
                 )}
                 {activeTab === "analytics" && (
