@@ -7,9 +7,11 @@
 
 import { useState, useCallback } from "react";
 import { generateBespokePath } from "../../services/bespokePathService";
+import { generateQuizForStep } from "../../services/quizService";
 import PathStep from "./PathStep";
 import BridgeNarration from "./BridgeNarration";
 import PathProgress from "./PathProgress";
+import QuizEngine from "./QuizEngine";
 import "./BespokePath.css";
 
 const EXAMPLE_QUERIES = [
@@ -27,6 +29,12 @@ export default function BespokePath() {
   const [currentStep, setCurrentStep] = useState(0);
   const [pipelineStage, setPipelineStage] = useState("");
 
+  // Quiz state
+  const [quizzes, setQuizzes] = useState(new Map()); // stepIndex → questions[]
+  const [quizLoading, setQuizLoading] = useState(null); // stepIndex currently loading
+  const [quizScores, setQuizScores] = useState(new Map()); // stepIndex → {score, total}
+  const [showQuiz, setShowQuiz] = useState(null); // stepIndex showing quiz
+
   const handleGenerate = useCallback(async () => {
     const trimmed = query.trim();
     if (!trimmed || isLoading) return;
@@ -34,6 +42,9 @@ export default function BespokePath() {
     setIsLoading(true);
     setPathResult(null);
     setCurrentStep(0);
+    setQuizzes(new Map());
+    setQuizScores(new Map());
+    setShowQuiz(null);
 
     // Show pipeline stages for UX feedback
     setPipelineStage("Finding relevant content...");
@@ -47,6 +58,28 @@ export default function BespokePath() {
     setIsLoading(false);
     setPipelineStage("");
   }, [query, isLoading]);
+
+  // Generate quiz for a specific step (on-demand)
+  const handleTakeQuiz = useCallback(
+    async (stepIndex) => {
+      if (quizzes.has(stepIndex) || !pathResult) {
+        setShowQuiz(stepIndex);
+        return;
+      }
+      setQuizLoading(stepIndex);
+      const questions = await generateQuizForStep(pathResult.path[stepIndex], pathResult.query, 2);
+      setQuizzes((prev) => new Map(prev).set(stepIndex, questions));
+      setQuizLoading(null);
+      setShowQuiz(stepIndex);
+    },
+    [quizzes, pathResult]
+  );
+
+  // Handle quiz completion for a step
+  const handleQuizComplete = useCallback(({ stepIndex, score, total }) => {
+    setQuizScores((prev) => new Map(prev).set(stepIndex, { score, total }));
+    setShowQuiz(null);
+  }, []);
 
   const handleExampleClick = (example) => {
     setQuery(example);
@@ -154,9 +187,49 @@ export default function BespokePath() {
                   isActive={i === currentStep}
                   onClick={() => setCurrentStep(i)}
                 />
+
+                {/* Quiz button or quiz component */}
+                {i === currentStep && (
+                  <div className="step-quiz-area">
+                    {showQuiz === i && quizzes.has(i) ? (
+                      <QuizEngine
+                        questions={quizzes.get(i)}
+                        stepIndex={i}
+                        onComplete={handleQuizComplete}
+                      />
+                    ) : quizScores.has(i) ? (
+                      <div className="quiz-score-badge">
+                        ✅ Quiz: {quizScores.get(i).score}/{quizScores.get(i).total}
+                      </div>
+                    ) : (
+                      <button
+                        className="take-quiz-btn"
+                        onClick={() => handleTakeQuiz(i)}
+                        disabled={quizLoading === i}
+                      >
+                        {quizLoading === i ? "Generating quiz..." : "📝 Take Quiz on This Step"}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
+
+          {/* Final Score Summary */}
+          {quizScores.size > 0 && (
+            <div className="bespoke-score-summary">
+              <span className="score-icon">🏆</span>
+              <span>
+                Path Score:{" "}
+                <strong>
+                  {[...quizScores.values()].reduce((s, q) => s + q.score, 0)}/
+                  {[...quizScores.values()].reduce((s, q) => s + q.total, 0)}
+                </strong>{" "}
+                across {quizScores.size} quizzes
+              </span>
+            </div>
+          )}
 
           {/* Meta info */}
           <div className="bespoke-meta">
