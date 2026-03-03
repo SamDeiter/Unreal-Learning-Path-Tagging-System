@@ -4,6 +4,27 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [1.4.0-lesson-whisper] - 2026-03-03
+
+### Added
+
+- **Lesson Video Whisper Pipeline** — `whisper_lesson_videos.py` with 2-phase architecture:
+  - Phase A: Playwright captures Kaltura DASH manifests by intercepting CDN responses, decoding base64 MPD XML (793+ MPDs from 2,050 lesson pages)
+  - Phase B: ffmpeg extracts audio from MPD streams, OpenAI Whisper `base` model transcribes on RTX 3080 GPU (~25s/video average)
+- **1,900+ Lesson Transcripts** — 24-hour GPU pipeline produced `lesson_*.txt` files covering Nanite, Lumen, MetaSounds, GAS, Blueprints, Animation, Materials, Level Design, Lighting, Virtual Production, and 180+ courses
+- **Lesson Stream URL Manifest** — `lesson_stream_urls.json` maps lesson hashes to titles, course hashes, and video IDs for metadata resolution
+
+### Changed
+
+- **Embed script updated** — `embed_epic_learning.py` now loads `lesson_*.txt` transcripts as standalone documents with metadata from `lesson_stream_urls.json`
+- Transcript count expanded from 428+ to **1,900+** files in `content/epic_learning/transcripts/`
+
+### Fixed
+
+- **Critical embed gap** — `embed_epic_learning.py` previously only handled `yt_`, `cms_`, and `whisper_` prefixed transcripts, missing 77% of all transcripts (`lesson_` prefix)
+
+---
+
 ## [1.3.0-transcripts] - 2026-02-27
 
 ### Added

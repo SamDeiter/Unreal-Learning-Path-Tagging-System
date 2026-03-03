@@ -89,7 +89,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   ├── pipeline/                  # Server-side enrichment pipeline
 │   ├── triggers/                  # Firestore event triggers
 │   └── scheduled/                 # Cron/scheduled functions
-├── scripts/                       # 98+ build-time enrichment & data scripts
+├── scripts/                       # 100+ build-time enrichment & data scripts
 │   ├── build_embeddings.py                # Generate semantic embeddings
 │   ├── build_search_index.py              # Build TF-IDF search index
 │   ├── build_transcript_index.py          # Parse VTT → transcript segments
@@ -108,8 +108,9 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   ├── deploy_ghpages.py                  # Orphan-branch GitHub Pages deploy
 │   └── ...                                # 70+ more enrichment/audit/validation scripts
 ├── content/epic_learning/         # Epic Learning transcript pipeline
-│   ├── transcripts/               # 428+ transcript files (yt_*, cms_*, whisper_*)
+│   ├── transcripts/               # 1,900+ transcript files (yt_*, cms_*, whisper_*, lesson_*)
 │   ├── video_manifest.json        # 34 YouTube + 187 CMS video catalog
+│   ├── lesson_stream_urls.json    # 793+ lesson stream manifests
 │   └── whisper_priority.json      # 118 priority videos for Whisper
 ├── tags/                          # Tag schema & relationship graph
 ├── docs/                          # Architecture & strategy documentation
@@ -210,22 +211,29 @@ All AI-powered scripts use the Google Gemini API.
 
 Video transcripts power the semantic search and RAG database. Three sources feed transcripts into `content/epic_learning/transcripts/`:
 
-| Stage | Source                    | Prefix     | Count | Method                                                                                   |
-| ----- | ------------------------- | ---------- | ----- | ---------------------------------------------------------------------------------------- |
-| 1     | YouTube captions          | `yt_`      | ~150  | `fetch_yt_channel_transcripts.py` — downloads official captions                          |
-| 2     | CMS embedded captions     | `cms_`     | ~110  | `fetch_cms_transcripts.py` — extracts from Epic's CMS player                             |
-| 3     | Whisper GPU transcription | `whisper_` | ~148  | `whisper_cms_transcripts_v2.py` — OpenAI Whisper on CUDA for CMS videos without captions |
+| Stage | Source                | Prefix     | Count  | Method                                                                                           |
+| ----- | --------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------ |
+| 1     | YouTube captions      | `yt_`      | ~166   | `fetch_yt_channel_transcripts.py` — downloads official captions                                  |
+| 2     | CMS embedded captions | `cms_`     | ~95    | `fetch_cms_transcripts.py` — extracts from Epic's CMS player                                     |
+| 3     | Whisper GPU (CMS)     | `whisper_` | ~168   | `whisper_cms_transcripts_v2.py` — OpenAI Whisper on CUDA for CMS videos without captions         |
+| 4     | Whisper GPU (Lessons) | `lesson_`  | ~1,476 | `whisper_lesson_videos.py` — 2-phase Kaltura MPD capture + Whisper transcription (24hr pipeline) |
 
 ### Whisper Transcription
 
 ```powershell
-# Run Whisper on all CMS videos without existing transcripts
+# CMS videos (from embedded player pages)
 python scripts/whisper_cms_transcripts_v2.py --phase both --model medium
+
+# Lesson videos (from Kaltura-hosted course pages)
+python scripts/whisper_lesson_videos.py --phase a    # Capture MPD manifests
+python scripts/whisper_lesson_videos.py --phase b --model base   # Transcribe
 ```
 
-- **Phase A**: Extracts stream URLs from CMS video pages → `cms_stream_urls_v2.json`
-- **Phase B**: Downloads audio, transcribes with Whisper, saves to `whisper_*.txt`
-- Recommended model: `medium` (best accuracy/speed tradeoff for UE5 terminology)
+- **CMS Phase A**: Extracts stream URLs from CMS video pages → `cms_stream_urls_v2.json`
+- **CMS Phase B**: Downloads audio, transcribes with Whisper, saves to `whisper_*.txt`
+- **Lesson Phase A**: Playwright captures Kaltura DASH manifests → `lesson_stream_urls.json` (793+ MPDs)
+- **Lesson Phase B**: ffmpeg extracts audio from MPD streams, Whisper transcribes → `lesson_*.txt`
+- Recommended models: `medium` for CMS (best accuracy), `base` for lessons (speed at scale)
 
 ### Post-Processing & Quality
 
