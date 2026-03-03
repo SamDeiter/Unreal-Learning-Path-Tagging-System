@@ -44,7 +44,7 @@ export async function findRelevantSegments(userQuery, topK = 5) {
   let queryVector;
   try {
     const embedFn = httpsCallable(functions, "embedQuery");
-    const embedResult = await embedFn({ text: userQuery });
+    const embedResult = await embedFn({ query: userQuery });
     queryVector = embedResult.data?.embedding;
     if (!queryVector) throw new Error("No embedding returned");
     devLog(`[BespokePath] Got ${queryVector.length}-dim embedding for query`);

@@ -92,7 +92,6 @@ function App() {
   const [newFeedbackCount, setNewFeedbackCount] = useState(0);
   const [showQuiz, setShowQuiz] = useState(() => !localStorage.getItem("ue5_persona_id"));
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [hamburgerOpen, setHamburgerOpen] = useState(false);
   const { isMobile } = useIsMobile();
 
   // Build ordered tab list (mobile reorders, admin tabs appended)
@@ -311,7 +310,6 @@ function App() {
                   <div className="header-left">
                     <h1 className="app-title">UE5 Learning Path Builder</h1>
                     <nav className="main-nav">
-                      {/* Primary tabs — always visible */}
                       {PRIMARY_TABS.map((tab) => (
                         <button
                           key={tab.key}
@@ -321,46 +319,23 @@ function App() {
                           {tab.icon} {tab.label}
                         </button>
                       ))}
-
-                      {/* Hamburger — secondary + admin tabs */}
-                      <div className="hamburger-container">
-                        <button
-                          className={`nav-tab hamburger-btn ${hamburgerOpen ? "active" : ""}`}
-                          onClick={() => setHamburgerOpen((prev) => !prev)}
-                          aria-label="More tools"
-                        >
-                          ☰ Tools
-                        </button>
-                        {hamburgerOpen && (
-                          <>
-                            <div
-                              className="hamburger-backdrop"
-                              onClick={() => setHamburgerOpen(false)}
-                            />
-                            <div className="hamburger-dropdown">
-                              {[...SECONDARY_TABS, ...tabs.filter((t) => t.adminOnly)].map(
-                                (tab) => (
-                                  <button
-                                    key={tab.key}
-                                    className={`hamburger-item ${activeTab === tab.key ? "active" : ""}`}
-                                    onClick={() => {
-                                      setActiveTab(tab.key);
-                                      setHamburgerOpen(false);
-                                    }}
-                                  >
-                                    <span className="hamburger-icon">{tab.icon}</span>
-                                    <span>{tab.label}</span>
-                                    {tab.key === "admin-feedback" && newFeedbackCount > 0 && (
-                                      <span className="feedback-badge">{newFeedbackCount}</span>
-                                    )}
-                                  </button>
-                                )
-                              )}
-                            </div>
-                          </>
-                        )}
-                      </div>
                     </nav>
+                  </div>
+                  <div className="tool-cards">
+                    {[...SECONDARY_TABS, ...tabs.filter((t) => t.adminOnly)].map((tab) => (
+                      <button
+                        key={tab.key}
+                        className={`tool-card ${activeTab === tab.key ? "active" : ""}`}
+                        onClick={() => setActiveTab(tab.key)}
+                        title={tab.label}
+                      >
+                        <span className="tool-card-icon">{tab.icon}</span>
+                        <span className="tool-card-label">{tab.label}</span>
+                        {tab.key === "admin-feedback" && newFeedbackCount > 0 && (
+                          <span className="feedback-badge">{newFeedbackCount}</span>
+                        )}
+                      </button>
+                    ))}
                   </div>
                   <div className="header-right">
                     {currentUser && (
