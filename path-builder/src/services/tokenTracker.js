@@ -7,11 +7,28 @@
  * - Path sequencing (extractIntent)
  * - Bridge narration
  * - Quiz generation
+ * - Step audio briefings
+ * - Step takeaways
+ *
+ * Data is stored in both localStorage (fast cache) and
+ * Firestore (persistent cloud storage for historical trends).
  *
  * Gemini 2.0 Flash pricing:
  *   Input:  $0.10 / 1M tokens
  *   Output: $0.40 / 1M tokens
  */
+
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+} from "firebase/firestore";
+import { getFirebaseApp } from "./firebaseConfig";
 
 const TRACKER_KEY = "bespoke_token_tracker";
 const DAILY_BUDGET_ALERT = 10.0; // $10/day threshold
@@ -65,6 +82,9 @@ export function recordTokenUsage(operation, inputTokens = 0, outputTokens = 0) {
   }
 
   saveTracker(tracker);
+
+  // Sync to Firestore (fire-and-forget, non-blocking)
+  syncDayToFirestore(today, day).catch(() => {});
 }
 
 /**
@@ -194,6 +214,56 @@ export function isDailyBudgetExceeded() {
  */
 export function resetTokenTracker() {
   localStorage.removeItem(TRACKER_KEY);
+}
+
+// ── Firestore Cloud Sync ──────────────────────────────
+
+/**
+ * Sync a day's token data to Firestore for persistent storage.
+ * Writes to: token_usage/{date}
+ */
+async function syncDayToFirestore(dateKey, dayData) {
+  try {
+    const app = getFirebaseApp();
+    if (!app) return;
+    const db = getFirestore(app);
+    const docRef = doc(db, "token_usage", dateKey);
+    await setDoc(
+      docRef,
+      {
+        date: dateKey,
+        totalInput: dayData.totalInput,
+        totalOutput: dayData.totalOutput,
+        calls: dayData.calls,
+        operations: dayData.operations,
+        estimatedCost: estimateCost(dayData.totalInput, dayData.totalOutput),
+        lastUpdated: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+  } catch (err) {
+    // Don't let sync failures break the app
+    console.warn("[TokenTracker] Firestore sync failed:", err.message);
+  }
+}
+
+/**
+ * Fetch historical token usage from Firestore.
+ * @param {number} days - Number of days to fetch (default 30)
+ * @returns {Promise<Array>} Array of daily usage records
+ */
+export async function fetchCloudStats(days = 30) {
+  try {
+    const app = getFirebaseApp();
+    if (!app) return [];
+    const db = getFirestore(app);
+    const q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.warn("[TokenTracker] Failed to fetch cloud stats:", err.message);
+    return [];
+  }
 }
 
 // ── Internal ───────────────────────────────────────────

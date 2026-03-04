@@ -22,6 +22,7 @@ import {
   getEventsByDay,
 } from "../../services/analyticsQueryService";
 import { EVENTS } from "../../services/analyticsService";
+import { getTokenStats, fetchCloudStats, estimateCost } from "../../services/tokenTracker";
 import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
 import "./AdminAnalytics.css";
 
@@ -61,6 +62,8 @@ export default function AdminAnalytics() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tokenStats, setTokenStats] = useState(null);
+  const [cloudCostHistory, setCloudCostHistory] = useState([]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -68,6 +71,11 @@ export default function AdminAnalytics() {
     try {
       const data = await fetchEvents(timeRange);
       setEvents(data);
+      // Load token cost data
+      setTokenStats(getTokenStats());
+      const daysToFetch = timeRange === "24h" ? 1 : timeRange === "7d" ? 7 : 30;
+      const cloudData = await fetchCloudStats(daysToFetch);
+      setCloudCostHistory(cloudData);
     } catch (err) {
       console.error("[AdminAnalytics] Failed to load:", err);
       setError(err.message || "Failed to load analytics data");
@@ -184,6 +192,135 @@ export default function AdminAnalytics() {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* AI Generation Costs */}
+      {tokenStats && (
+        <div className="aa-section" style={{ marginBottom: 24 }}>
+          <h3>
+            💰 AI Generation Costs{" "}
+            <Tip text="Token usage and estimated costs for all AI operations (path generation, audio, quizzes, takeaways). Synced to Firestore for historical tracking." />
+          </h3>
+
+          {/* Cost stat cards */}
+          <div className="aa-stats-row" style={{ marginBottom: 16 }}>
+            <StatCard
+              label="Today's Cost"
+              value={tokenStats.today.costFormatted}
+              icon="💵"
+              color="#10b981"
+              tooltip="Estimated cost for all AI API calls made today"
+            />
+            <StatCard
+              label="Lifetime Cost"
+              value={tokenStats.lifetime.costFormatted}
+              icon="📊"
+              color="#6366f1"
+              tooltip="Total estimated cost since tracking began (localStorage)"
+            />
+            <StatCard
+              label="API Calls Today"
+              value={tokenStats.today.calls}
+              icon="🔄"
+              color="#06b6d4"
+              tooltip="Number of Gemini API calls made today"
+            />
+            <StatCard
+              label="Budget Used"
+              value={`${tokenStats.today.budgetPercent.toFixed(1)}%`}
+              icon={tokenStats.today.budgetPercent > 80 ? "⚠️" : "🛡️"}
+              color={tokenStats.today.budgetPercent > 80 ? "#ef4444" : "#f59e0b"}
+              tooltip={`$${tokenStats.today.budgetRemaining.toFixed(4)} remaining of $10/day budget`}
+            />
+          </div>
+
+          {/* Per-operation breakdown */}
+          {tokenStats.today.operations && Object.keys(tokenStats.today.operations).length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <h4
+                style={{
+                  fontSize: "0.85rem",
+                  color: "#94a3b8",
+                  margin: "0 0 8px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Per-Operation Breakdown (Today)
+              </h4>
+              <div className="aa-bar-chart">
+                {Object.entries(tokenStats.today.operations)
+                  .sort(([, a], [, b]) => b.input + b.output - (a.input + a.output))
+                  .map(([op, data]) => {
+                    const cost = estimateCost(data.input, data.output);
+                    const maxTokens = Math.max(
+                      ...Object.values(tokenStats.today.operations).map((d) => d.input + d.output),
+                      1
+                    );
+                    const pct = Math.round(((data.input + data.output) / maxTokens) * 100);
+                    return (
+                      <div key={op} className="aa-bar-row">
+                        <span className="aa-bar-label" style={{ width: 120 }}>
+                          {op}
+                        </span>
+                        <div className="aa-bar-track">
+                          <div
+                            className="aa-bar-fill"
+                            style={{ width: `${pct}%`, backgroundColor: "#10b981" }}
+                          />
+                        </div>
+                        <span className="aa-bar-value" style={{ width: 60 }}>
+                          ${cost.toFixed(4)}
+                        </span>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+
+          {/* Cloud cost history trend */}
+          {cloudCostHistory.length > 0 && (
+            <div>
+              <h4
+                style={{
+                  fontSize: "0.85rem",
+                  color: "#94a3b8",
+                  margin: "0 0 8px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Daily Cost Trend (Cloud)
+              </h4>
+              <div className="aa-daily-chart">
+                {[...cloudCostHistory].reverse().map((day) => {
+                  const maxCost = Math.max(
+                    ...cloudCostHistory.map((d) => d.estimatedCost || 0),
+                    0.001
+                  );
+                  const pct = Math.round(((day.estimatedCost || 0) / maxCost) * 100);
+                  return (
+                    <div
+                      key={day.date}
+                      className="aa-day-bar"
+                      title={`${day.date}: $${(day.estimatedCost || 0).toFixed(4)} (${day.calls || 0} calls)`}
+                    >
+                      <div
+                        className="aa-day-fill"
+                        style={{
+                          height: `${pct}%`,
+                          background: "linear-gradient(180deg, #10b981, #059669)",
+                        }}
+                      />
+                      <span className="aa-day-label">{(day.date || "").substring(5)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
