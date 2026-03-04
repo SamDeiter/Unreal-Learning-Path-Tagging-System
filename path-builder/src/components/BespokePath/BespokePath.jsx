@@ -18,6 +18,7 @@ import BridgeNarration from "./BridgeNarration";
 import PathProgress from "./PathProgress";
 import QuizEngine from "./QuizEngine";
 import PreSeededPaths from "./PreSeededPaths";
+import { generateStepAudio, generateStepTakeaways } from "../../services/stepBriefingService";
 import "./BespokePath.css";
 
 // Analytics & Token Tracking
@@ -57,6 +58,12 @@ export default function BespokePath() {
   const [briefingLoading, setBriefingLoading] = useState(false);
   const [briefingStatus, setBriefingStatus] = useState("");
   const audioRef = useRef(null);
+
+  // Per-step audio and takeaways state
+  const [stepAudios, setStepAudios] = useState(new Map());
+  const [stepAudioLoading, setStepAudioLoading] = useState(null);
+  const [stepTakeaways, setStepTakeaways] = useState(new Map());
+  const [takeawayLoading, setTakeawayLoading] = useState(null);
   const isFollowUp = useRef(false);
 
   // Start analytics session on mount
@@ -189,6 +196,33 @@ export default function BespokePath() {
     setQuizScores(new Map());
     setShowQuiz(null);
   }, []);
+
+  // Generate per-step audio on demand
+  const handleStepAudio = useCallback(async (stepIndex) => {
+    if (stepAudios.has(stepIndex) || !pathResult) return;
+    setStepAudioLoading(stepIndex);
+    const url = await generateStepAudio(pathResult.path[stepIndex], pathResult.query || query);
+    if (url) {
+      setStepAudios(prev => new Map(prev).set(stepIndex, url));
+    }
+    setStepAudioLoading(null);
+  }, [stepAudios, pathResult, query]);
+
+  // Generate takeaways on demand when step becomes active
+  const handleLoadTakeaways = useCallback(async (stepIndex) => {
+    if (stepTakeaways.has(stepIndex) || !pathResult) return;
+    setTakeawayLoading(stepIndex);
+    const takeaways = await generateStepTakeaways(pathResult.path[stepIndex], pathResult.query || query);
+    setStepTakeaways(prev => new Map(prev).set(stepIndex, takeaways));
+    setTakeawayLoading(null);
+  }, [stepTakeaways, pathResult, query]);
+
+  // Auto-load takeaways when step changes
+  useEffect(() => {
+    if (pathResult && pathResult.path && currentStep >= 0) {
+      handleLoadTakeaways(currentStep);
+    }
+  }, [currentStep, pathResult, handleLoadTakeaways]);
 
   const handleExampleClick = (example) => {
     setQuery(example);
@@ -399,6 +433,11 @@ export default function BespokePath() {
                   index={i}
                   isActive={i === currentStep}
                   onClick={() => setCurrentStep(i)}
+                  stepAudioUrl={stepAudios.get(i)}
+                  stepAudioLoading={stepAudioLoading === i}
+                  onGenerateAudio={() => handleStepAudio(i)}
+                  takeaways={stepTakeaways.get(i)}
+                  takeawayLoading={takeawayLoading === i}
                 />
 
                 {/* Quiz button or quiz component */}

@@ -37,6 +37,9 @@ exports.generateAudioBriefing = functions
       );
     }
 
+    // Determine mode: "overview" (default) or "step" (single step)
+    const mode = data.mode || "overview";
+
     try {
       let apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) apiKey = functions.config().gemini?.api_key;
@@ -46,6 +49,91 @@ exports.generateAudioBriefing = functions
           "Server configuration error: API Key missing."
         );
       }
+
+      // ── STEP MODE: single-step short briefing ──
+      if (mode === "step") {
+        const { stepContent, stepCategory, stepTitle } = data;
+        if (!stepContent) {
+          throw new functions.https.HttpsError("invalid-argument", "stepContent is required for step mode.");
+        }
+
+        // Generate a short single-speaker explanation (50 words max)
+        const stepPrompt = `You are a friendly UE5 instructor giving a concise audio tip.
+
+The learner asked: "${query}"
+This is the ${stepCategory || "learning"} step titled "${stepTitle || ""}":
+
+"${stepContent.substring(0, 500)}"
+
+In exactly 2-3 sentences (under 50 words), explain the KEY THING the learner should focus on in this step. Be specific to the actual content, not generic. Speak directly to the learner using "you".
+
+Do NOT use any markdown, bullet points, or formatting. Just plain conversational text.`;
+
+        const stepScriptUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const stepScriptResp = await fetch(stepScriptUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: stepPrompt }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 256 },
+          }),
+        });
+
+        if (!stepScriptResp.ok) throw new Error("Step script generation failed");
+        const stepScriptJson = await stepScriptResp.json();
+        const stepScript = stepScriptJson.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        // TTS — single speaker, short
+        const stepTtsPrompt = `Narrator: ${stepScript}`;
+        const stepTtsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+        const stepTtsBody = {
+          contents: [{ parts: [{ text: stepTtsPrompt }] }],
+          generationConfig: {
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              multiSpeakerVoiceConfig: {
+                speakerVoiceConfigs: [
+                  { speaker: "Narrator", voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } },
+                ],
+              },
+            },
+          },
+        };
+
+        const stepTtsResp = await fetch(stepTtsUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(stepTtsBody),
+        });
+
+        if (!stepTtsResp.ok) throw new Error("Step TTS failed");
+        const stepTtsJson = await stepTtsResp.json();
+        const stepAudioPart = stepTtsJson.candidates?.[0]?.content?.parts?.[0];
+        const stepAudioData = stepAudioPart?.inlineData || stepAudioPart?.inline_data;
+        if (!stepAudioData?.data) throw new Error("No audio data in step TTS response");
+
+        // Convert PCM to WAV
+        const pcm = Buffer.from(stepAudioData.data, "base64");
+        const sr = 24000; const bps = 16; const ch = 1;
+        const hdr = Buffer.alloc(44);
+        hdr.write("RIFF", 0); hdr.writeUInt32LE(36 + pcm.length, 4);
+        hdr.write("WAVE", 8); hdr.write("fmt ", 12);
+        hdr.writeUInt32LE(16, 16); hdr.writeUInt16LE(1, 20);
+        hdr.writeUInt16LE(ch, 22); hdr.writeUInt32LE(sr, 24);
+        hdr.writeUInt32LE(sr * ch * (bps / 8), 28);
+        hdr.writeUInt16LE(ch * (bps / 8), 32);
+        hdr.writeUInt16LE(bps, 34); hdr.write("data", 36);
+        hdr.writeUInt32LE(pcm.length, 40);
+        const wav = Buffer.concat([hdr, pcm]);
+
+        console.log(JSON.stringify({ severity: "INFO", message: "step_audio_ready", wavSize: wav.length, stepCategory }));
+
+        await logApiUsage(userId, { model: "gemini-2.5-flash-preview-tts", type: "stepAudio", query: query.substring(0, 50) });
+
+        return { success: true, audio: wav.toString("base64"), mimeType: "audio/wav", script: stepScript };
+      }
+
+      // ── OVERVIEW MODE (original behavior) ──
 
       // -- Step 1: Generate a 2-speaker dialog script --
       const stepSummaries = steps

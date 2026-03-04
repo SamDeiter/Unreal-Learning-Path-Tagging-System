@@ -79,7 +79,7 @@ function cleanText(raw) {
 
 // ── Component ─────────────────────────────────────────────────────────
 
-export default function PathStep({ step, index, isActive, onClick }) {
+export default function PathStep({ step, index, isActive, onClick, stepAudioUrl, stepAudioLoading, onGenerateAudio, takeaways, takeawayLoading }) {
   const { segment, category } = step;
   const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.foundation;
 
@@ -200,6 +200,40 @@ export default function PathStep({ step, index, isActive, onClick }) {
       <div className="step-text">
         <p>{displayText}</p>
       </div>
+
+      {/* Per-step audio + key takeaways (only on active step) */}
+      {isActive && (
+        <div className="step-extras">
+          {/* Key Takeaways */}
+          <div className="step-takeaways">
+            <h4 className="takeaways-title">🎯 Key Takeaways</h4>
+            {takeawayLoading ? (
+              <p className="takeaways-loading">Generating takeaways…</p>
+            ) : takeaways && takeaways.length > 0 ? (
+              <ul className="takeaways-list">
+                {takeaways.map((t, i) => (
+                  <li key={i}>{t}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+
+          {/* Step Audio */}
+          <div className="step-audio">
+            {stepAudioUrl ? (
+              <audio controls src={stepAudioUrl} className="step-audio-player" />
+            ) : (
+              <button
+                className="step-audio-btn"
+                onClick={(e) => { e.stopPropagation(); onGenerateAudio?.(); }}
+                disabled={stepAudioLoading}
+              >
+                {stepAudioLoading ? "⏳ Generating…" : "🔊 Listen to Step Briefing"}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
