@@ -66,12 +66,13 @@ This is a ${step.category || "learning"} step:
 "${content.substring(0, 600)}"
 
 Generate exactly 3 key takeaways the learner MUST know from this step. Each takeaway should be:
-- One concise sentence (under 15 words)
-- Specific to the actual content (not generic advice)
-- Actionable or insightful
+- One concise sentence (under 20 words)
+- ACTIONABLE: mention a specific UE5 property, file, Blueprint node, menu path, or setting they should check/adjust
+- NOT just restating the problem — tell them WHAT to DO (e.g. "Set NetUpdateFrequency to 100 on your Character Movement Component")
+- Include concrete specifics from the content above
 
 Return ONLY a JSON array of 3 strings. Example:
-["Takeaway one", "Takeaway two", "Takeaway three"]`;
+["Enable 'Replicate Movement' on your Character Blueprint's Movement Component", "Set NetUpdateFrequency to at least 100 in your character's defaults", "Use CharacterMovementComponent::SmoothCorrection for client-side prediction"]`;
 
     const result = await fn({ query: prompt });
     const text = result.data?.intent || "";
