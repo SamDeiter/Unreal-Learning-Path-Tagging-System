@@ -17,6 +17,7 @@ import { findCachedPath, cachePath } from "../../services/pathCacheService";
 import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
 import { generateStepAudio, generateStepTakeaways } from "../../services/stepBriefingService";
+import "../BespokePath/BespokePath.css";
 import "./AdaptivePath.css";
 
 const DEFAULT_SUGGESTIONS = [
@@ -40,7 +41,7 @@ export default function AdaptivePath() {
   const [stepAudio, setStepAudio] = useState({});
   const [stepTakeaways, setStepTakeaways] = useState({});
   const [quizStep, setQuizStep] = useState(null);
-  const [pathNarration, setPathNarration] = useState(null);
+  const [_pathNarration, setPathNarration] = useState(null);
 
   const {
     stage,
@@ -137,7 +138,7 @@ export default function AdaptivePath() {
     [query, stepAudio]
   );
 
-  const handleStepTakeaways = useCallback(
+  const _handleStepTakeaways = useCallback(
     async (index, step) => {
       if (stepTakeaways[index]) return;
       setStepTakeaways((prev) => ({ ...prev, [index]: { loading: true } }));
@@ -350,51 +351,152 @@ export default function AdaptivePath() {
     );
   }
 
-  // ── RENDER: Path ready (reuses BespokePath step rendering) ──
+  // ── RENDER: Path ready (BespokePath-style modal overlay) ──
   if (pathData && pathData.path) {
+    // Group steps into phases (same logic as BespokePath)
+    const PHASE_CONFIG = [
+      { key: "problem", icon: "📋", label: "Questions", categories: ["foundation", "diagnosis"] },
+      { key: "solution", icon: "🔧", label: "Solution", categories: ["fix"] },
+      { key: "apply", icon: "🚀", label: "Apply It", categories: ["transfer"] },
+    ];
+
+    const phases = [];
+    for (const config of PHASE_CONFIG) {
+      const steps = pathData.path
+        .map((s, i) => ({ ...s, globalIndex: i }))
+        .filter((s) => config.categories.includes(s.category));
+      if (steps.length > 0) {
+        phases.push({ ...config, steps });
+      }
+    }
+
+    const activePhaseKey =
+      phases.find((p) => p.steps.some((s) => s.globalIndex === (expandedStep ?? 0)))?.key || "";
+
     return (
-      <div className="adaptive-path">
-        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <h2 className="adaptive-title" style={{ fontSize: "1.4rem" }}>
-            🎯 Your Adaptive Learning Path
-          </h2>
-          <p className="adaptive-subtitle" style={{ marginBottom: "0.5rem" }}>
-            Personalized for your <strong>{knowledgeProfile?.level}</strong> level —{" "}
-            {pathData.path.length} steps
-          </p>
-          {knowledgeProfile?.gaps.length > 0 && (
-            <p style={{ fontSize: "0.8rem", color: "var(--accent-orange)" }}>
-              Deep focus on: {knowledgeProfile.gaps.map((g) => g.replace(/_/g, " ")).join(", ")}
-            </p>
-          )}
+      <div className="adaptive-path bespoke-path">
+        <div className="path-modal-overlay">
+          <div className="path-modal-container">
+            <button className="path-modal-close" onClick={handleReset}>
+              <i className="fa-solid fa-xmark"></i>
+            </button>
 
-          <button
-            className="adaptive-retry-btn"
-            onClick={handleReset}
-            style={{ marginTop: "0.75rem" }}
-          >
-            🔄 Start New Diagnostic
-          </button>
+            {/* Sidebar Navigation */}
+            <aside className="epic-sidebar">
+              <div className="sidebar-title">
+                🎯 Adaptive Path
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: "0.65rem",
+                    color: "var(--accent-orange)",
+                    marginTop: "4px",
+                  }}
+                >
+                  {knowledgeProfile?.level} level
+                </span>
+              </div>
+              <nav className="phase-nav">
+                {phases.map((phase) => (
+                  <div key={phase.key} className="phase-group">
+                    <button
+                      className={`phase-nav-item ${activePhaseKey === phase.key ? "active" : ""}`}
+                      onClick={() => {
+                        const idx = phase.steps[0]?.globalIndex ?? 0;
+                        setExpandedStep(idx);
+                      }}
+                    >
+                      {phase.label}
+                    </button>
+                    <ul className="substep-list">
+                      {phase.steps.map((substep, i) => {
+                        const step = pathData.path[substep.globalIndex];
+                        let rawTitle =
+                          step?.segment?.title || step?.segment?.videoTitle || `Step ${i + 1}`;
+                        const shortTitle =
+                          rawTitle.length > 35 ? rawTitle.substring(0, 33) + "…" : rawTitle;
+                        return (
+                          <li key={substep.globalIndex}>
+                            <button
+                              className={`substep-item ${(expandedStep ?? 0) === substep.globalIndex ? "active" : ""}`}
+                              onClick={() => setExpandedStep(substep.globalIndex)}
+                              title={rawTitle}
+                            >
+                              {i + 1}. {shortTitle}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ))}
+              </nav>
+            </aside>
+
+            {/* Main Content Area */}
+            <main className="epic-main-content">
+              <div className="main-scroll-area">
+                {/* Knowledge profile banner */}
+                {knowledgeProfile?.gaps.length > 0 && (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "8px 16px",
+                      fontSize: "0.75rem",
+                      color: "var(--accent-orange)",
+                      borderBottom: "1px solid var(--border-color)",
+                    }}
+                  >
+                    Deep focus on:{" "}
+                    {knowledgeProfile.gaps.map((g) => g.replace(/_/g, " ")).join(", ")}
+                  </div>
+                )}
+
+                {(expandedStep ?? 0) >= 0 && (expandedStep ?? 0) < pathData.path.length && (
+                  <div className="step-content-container">
+                    <PathStep
+                      step={pathData.path[expandedStep ?? 0]}
+                      isActive={true}
+                      takeaways={stepTakeaways[expandedStep ?? 0]}
+                      takeawayLoading={false}
+                      onGenerateAudio={() =>
+                        handleStepAudio(expandedStep ?? 0, pathData.path[expandedStep ?? 0])
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Navigation */}
+              <footer className="epic-footer">
+                <button
+                  className="nav-btn"
+                  onClick={() => {
+                    const cur = expandedStep ?? 0;
+                    if (cur > 0) setExpandedStep(cur - 1);
+                  }}
+                  disabled={(expandedStep ?? 0) <= 0}
+                >
+                  <i className="fa-solid fa-chevron-left"></i>
+                </button>
+                <div className="footer-status">
+                  Step {Math.min((expandedStep ?? 0) + 1, pathData.path.length)} of{" "}
+                  {pathData.path.length}
+                </div>
+                <button
+                  className="nav-btn"
+                  onClick={() => {
+                    const cur = expandedStep ?? 0;
+                    if (cur < pathData.path.length - 1) setExpandedStep(cur + 1);
+                  }}
+                  disabled={(expandedStep ?? 0) >= pathData.path.length - 1}
+                >
+                  <i className="fa-solid fa-chevron-right"></i>
+                </button>
+              </footer>
+            </main>
+          </div>
         </div>
-
-        {pathData.path.map((step, index) => (
-          <PathStep
-            key={index}
-            step={step}
-            index={index}
-            total={pathData.path.length}
-            bridge={pathData.bridges?.[index - 1]}
-            expanded={expandedStep === index}
-            onToggle={() => setExpandedStep(expandedStep === index ? null : index)}
-            audio={stepAudio[index]}
-            onRequestAudio={() => handleStepAudio(index, step)}
-            takeaways={stepTakeaways[index]}
-            onRequestTakeaways={() => handleStepTakeaways(index, step)}
-            onQuiz={() => setQuizStep(index)}
-            narration={pathNarration}
-            query={query}
-          />
-        ))}
 
         {/* Quiz overlay */}
         {quizStep !== null && pathData.path[quizStep] && (
