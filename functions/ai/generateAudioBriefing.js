@@ -232,6 +232,7 @@ Rules:
 - Conversational, warm, mentor tone — like explaining to a colleague
 - Speak directly using "you"
 - Be SPECIFIC to the content — reference actual UE5 concepts
+- ALWAYS spell out acronyms on first use (e.g. "Gameplay Ability System, or G.A.S.", "Inverse Kinematics, or I.K.")
 - NO markdown, no bullet points, no headers, no formatting
 - Just plain spoken text, separated by "---"
 - TOTAL must be under 300 words`;
