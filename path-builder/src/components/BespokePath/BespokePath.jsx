@@ -273,7 +273,7 @@ export default function BespokePath() {
           {/* Audio Briefing - Top of path */}
           {!pathResult.isPreSeeded && (
             <div className="audio-briefing-section top-briefing">
-              <h3>\ud83c\udfa7 Audio Briefing</h3>
+              <h3>🎧 Audio Briefing</h3>
               {briefingAudioUrl ? (
                 <div className="audio-player-wrapper">
                   <audio ref={audioRef} controls src={briefingAudioUrl} />
@@ -285,12 +285,12 @@ export default function BespokePath() {
                     disabled={briefingLoading}
                     onClick={async () => {
                       setBriefingLoading(true);
-                      setBriefingStatus("Generating script\u2026");
+                      setBriefingStatus("Generating script…");
                       try {
                         const app = getFirebaseApp();
                         const functions = getFunctions(app, "us-central1");
                         const genFn = httpsCallable(functions, "generateAudioBriefing");
-                        setBriefingStatus("Synthesizing audio (this may take 30-60s)\u2026");
+                        setBriefingStatus("Synthesizing audio (this may take 30-60s)…");
                         const result = await genFn({
                           query: pathResult.query || query,
                           steps: pathResult.path.map((s) => ({
@@ -313,7 +313,7 @@ export default function BespokePath() {
                       }
                     }}
                   >
-                    {briefingLoading ? "\u23f3 Generating\u2026" : "\ud83c\udfa7 Listen to Briefing"}
+                    {briefingLoading ? "⏳ Generating…" : "🎧 Listen to Briefing"}
                   </button>
                   {briefingStatus && <p className="briefing-status">{briefingStatus}</p>}
                 </>

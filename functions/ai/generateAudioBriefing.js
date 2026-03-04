@@ -205,7 +205,7 @@ Start with Instructor greeting the learner and mentioning their specific problem
       const wavBuffer = Buffer.concat([wavHeader, pcmBuffer]);
 
       // Upload to Firebase Storage
-      const bucket = admin.storage().bucket();
+      const bucket = admin.storage().bucket("ue5-learning-paths.firebasestorage.app");
       const filename = `audio-briefings/${userId}/${Date.now()}.wav`;
       const file = bucket.file(filename);
 
