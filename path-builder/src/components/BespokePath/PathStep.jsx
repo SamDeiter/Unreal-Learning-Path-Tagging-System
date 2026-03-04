@@ -7,7 +7,7 @@
  * 2. Per-step audio (fallback): isolated clip from generateStepAudio
  */
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { CATEGORY_STYLES } from "./pathConstants";
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -56,10 +56,21 @@ export default function PathStep({
   narrationLoading,
   onGenerateNarration,
   hasNarration,
+  autoPlayAudio,
+  onAudioEnded,
   takeaways,
   takeawayLoading,
 }) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
+  const audioRef = useRef(null);
+
+  // Auto-play audio when transitioning between phases
+  useEffect(() => {
+    if (autoPlayAudio && stepAudioUrl && audioRef.current) {
+      audioRef.current.play().catch(() => {});
+    }
+  }, [autoPlayAudio, stepAudioUrl]);
+
   if (!step) return null;
   const { segment, category } = step;
 
@@ -89,8 +100,14 @@ export default function PathStep({
       {isActive && (
         <div className="video-progress-container">
           {stepAudioUrl ? (
-            /* Dark-themed native audio player */
-            <audio controls src={stepAudioUrl} className="dark-audio-player" />
+            /* Dark-themed native audio player — auto-advances on end */
+            <audio
+              ref={audioRef}
+              controls
+              src={stepAudioUrl}
+              className="dark-audio-player"
+              onEnded={onAudioEnded}
+            />
           ) : narrationLoading ? (
             <div className="audio-generating">
               <div className="bespoke-spinner" style={{ width: "18px", height: "18px" }} />

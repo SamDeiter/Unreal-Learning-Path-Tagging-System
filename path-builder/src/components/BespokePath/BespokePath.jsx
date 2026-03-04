@@ -106,6 +106,7 @@ export default function BespokePath() {
   // Path Narrator state (button-triggered, not auto)
   const [narrationData, setNarrationData] = useState(null); // Map<stepIndex, {script, audioUrl}>
   const [narrationLoading, setNarrationLoading] = useState(false);
+  const [autoPlayAudio, setAutoPlayAudio] = useState(false);
 
   const isFollowUp = useRef(false);
 
@@ -534,6 +535,22 @@ export default function BespokePath() {
                       narrationLoading={narrationLoading}
                       onGenerateNarration={handleGenerateNarration}
                       hasNarration={!!narrationData}
+                      autoPlayAudio={autoPlayAudio}
+                      onAudioEnded={() => {
+                        // Auto-advance to next phase when audio ends
+                        if (!narrationData) return;
+                        const currentPhase = narrationData.get(currentStep)?.phase;
+                        // Find next step in a DIFFERENT phase
+                        for (let i = currentStep + 1; i < pathResult.path.length; i++) {
+                          const nextPhase = narrationData.get(i)?.phase;
+                          if (nextPhase && nextPhase !== currentPhase) {
+                            setAutoPlayAudio(true);
+                            setCurrentStep(i);
+                            return;
+                          }
+                        }
+                        setAutoPlayAudio(false);
+                      }}
                       takeaways={stepTakeaways.get(currentStep)}
                       takeawayLoading={takeawayLoading === currentStep}
                     />
