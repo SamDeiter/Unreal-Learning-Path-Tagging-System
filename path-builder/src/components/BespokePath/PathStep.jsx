@@ -46,13 +46,18 @@ function filterTakeaways(items) {
 
 /**
  * Convert single-quoted terms in text to bold elements.
+ * Uses word-boundary checks to avoid catching apostrophes in
+ * contractions like "isn't", "it's", "don't".
  * e.g. "Adjust 'NetClientTicksPerSecond' in config" →
  *       Adjust <strong>NetClientTicksPerSecond</strong> in config
  */
 function highlightKeyTerms(text) {
-  const parts = text.split(/('.*?')/g);
+  // Match 'QuotedTerm' only when NOT part of a contraction
+  // i.e. the quote must be preceded by a non-word char (or start) and
+  //       followed by a non-word char (or end)
+  const parts = text.split(/((?<!\w)'[^']{2,}'(?!\w))/g);
   return parts.map((part, i) => {
-    if (part.startsWith("'") && part.endsWith("'")) {
+    if (part && part.startsWith("'") && part.endsWith("'") && part.length > 2) {
       return <strong key={i}>{part.slice(1, -1)}</strong>;
     }
     return part;
