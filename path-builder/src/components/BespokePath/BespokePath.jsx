@@ -444,31 +444,51 @@ export default function BespokePath() {
                       {/* Substep list — only for non-quiz phases with multiple steps */}
                       {phase.key !== "quiz" && phase.steps.length > 0 && (
                         <ul className="substep-list">
-                          {phase.steps.map((substep, i) => {
-                            const step = pathResult.path[substep.globalIndex];
-                            const rawTitle =
-                              step?.segment?.title || step?.segment?.videoTitle || `Step ${i + 1}`;
-                            // Decode HTML entities & truncate
-                            const title = rawTitle
-                              .replace(/&amp;/g, "&")
-                              .replace(/&lt;/g, "<")
-                              .replace(/&gt;/g, ">")
-                              .replace(/&quot;/g, '"')
-                              .replace(/&#39;/g, "'");
-                            const shortTitle =
-                              title.length > 35 ? title.substring(0, 33) + "…" : title;
-                            return (
-                              <li key={substep.globalIndex}>
-                                <button
-                                  className={`substep-item ${currentStep === substep.globalIndex ? "active" : ""}`}
-                                  onClick={() => setCurrentStep(substep.globalIndex)}
-                                  title={title}
-                                >
-                                  {i + 1}. {shortTitle}
-                                </button>
-                              </li>
-                            );
-                          })}
+                          {(() => {
+                            // Pre-scan for duplicate titles within this phase
+                            const titleCounts = {};
+                            const titleOccurrence = {};
+                            phase.steps.forEach((substep) => {
+                              const step = pathResult.path[substep.globalIndex];
+                              const rawT = step?.segment?.title || step?.segment?.videoTitle || "";
+                              titleCounts[rawT] = (titleCounts[rawT] || 0) + 1;
+                            });
+
+                            return phase.steps.map((substep, i) => {
+                              const step = pathResult.path[substep.globalIndex];
+                              let rawTitle =
+                                step?.segment?.title ||
+                                step?.segment?.videoTitle ||
+                                `Step ${i + 1}`;
+
+                              // Append "Part N" for duplicates
+                              if (titleCounts[rawTitle] > 1) {
+                                titleOccurrence[rawTitle] = (titleOccurrence[rawTitle] || 0) + 1;
+                                rawTitle = `${rawTitle} (Part ${titleOccurrence[rawTitle]})`;
+                              }
+
+                              // Decode HTML entities & truncate
+                              const title = rawTitle
+                                .replace(/&amp;/g, "&")
+                                .replace(/&lt;/g, "<")
+                                .replace(/&gt;/g, ">")
+                                .replace(/&quot;/g, '"')
+                                .replace(/&#39;/g, "'");
+                              const shortTitle =
+                                title.length > 35 ? title.substring(0, 33) + "…" : title;
+                              return (
+                                <li key={substep.globalIndex}>
+                                  <button
+                                    className={`substep-item ${currentStep === substep.globalIndex ? "active" : ""}`}
+                                    onClick={() => setCurrentStep(substep.globalIndex)}
+                                    title={title}
+                                  >
+                                    {i + 1}. {shortTitle}
+                                  </button>
+                                </li>
+                              );
+                            });
+                          })()}
                         </ul>
                       )}
                     </div>
