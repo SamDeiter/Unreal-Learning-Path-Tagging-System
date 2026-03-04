@@ -396,79 +396,72 @@ export default function BespokePath() {
                 <em>"{pathResult.query || query}"</em>
               </p>
 
-              <div className="epic-step-list">
-                {/* Audio Briefing entry */}
-                {!pathResult.isPreSeeded && (
-                  <div
-                    className={`epic-step-item ${currentStep === -1 ? "active" : ""}`}
-                    onClick={() => setCurrentStep(-1)}
-                  >
-                    <div className="epic-step-indicator">
-                      <span className="step-dot">🎧</span>
-                    </div>
-                    <div className="epic-step-info">
-                      <strong className="epic-step-category">Overview</strong>
-                      <span className="epic-step-title">Listen to Briefing</span>
-                    </div>
+              {/* Condensed Phase Navigation (matches mockup) */}
+              {(() => {
+                const phases = groupStepsIntoPhases(pathResult.path);
+                // Determine which phase is active
+                const activePhaseKey = currentStep === -1 ? "overview"
+                  : currentStep === -2 ? "quiz"
+                  : phases.find((p) => p.steps.some((s) => s.globalIndex === currentStep))?.key || "problem";
+
+                return (
+                  <nav className="phase-nav">
+                    {!pathResult.isPreSeeded && (
+                      <button
+                        className={`phase-nav-item ${currentStep === -1 ? "active" : ""}`}
+                        onClick={() => setCurrentStep(-1)}
+                      >
+                        Overview
+                      </button>
+                    )}
+                    {phases.map((phase) => (
+                      <button
+                        key={phase.key}
+                        className={`phase-nav-item ${activePhaseKey === phase.key ? "active" : ""}`}
+                        onClick={() => {
+                          if (phase.key === "quiz") {
+                            setCurrentStep(-2);
+                          } else {
+                            setCurrentStep(phase.steps[0]?.globalIndex ?? 0);
+                          }
+                        }}
+                      >
+                        {phase.key === "problem" ? "Problem" :
+                         phase.key === "solution" ? "Solution" :
+                         phase.key === "quiz" ? "Quiz" :
+                         phase.key === "apply" ? "Apply It" : phase.label}
+                        {phase.key === "quiz" && quizScores.size > 0 && (
+                          <span className="phase-check">✓</span>
+                        )}
+                      </button>
+                    ))}
+                  </nav>
+                );
+              })()}
+
+              {/* Step sub-nav within active phase */}
+              {currentStep >= 0 && (() => {
+                const phases = groupStepsIntoPhases(pathResult.path);
+                const activePhase = phases.find((p) =>
+                  p.steps.some((s) => s.globalIndex === currentStep)
+                );
+                if (!activePhase || activePhase.steps.length <= 1) return null;
+                return (
+                  <div className="step-sub-nav">
+                    {activePhase.steps.map((step) => (
+                      <button
+                        key={step.globalIndex}
+                        className={`step-sub-item ${step.globalIndex === currentStep ? "active" : ""}`}
+                        onClick={() => setCurrentStep(step.globalIndex)}
+                      >
+                        {step.globalIndex + 1}
+                      </button>
+                    ))}
                   </div>
-                )}
+                );
+              })()}
 
-                {/* Phased step groups */}
-                {groupStepsIntoPhases(pathResult.path).map((phase) => (
-                  <div key={phase.key} className="phase-group">
-                    <div className={`phase-label phase-${phase.key}`}>
-                      <span className="phase-icon">{phase.icon}</span>
-                      <span className="phase-text">{phase.label}</span>
-                      {phase.key === "quiz" && quizScores.size > 0 && (
-                        <span className="phase-score">
-                          {[...quizScores.values()].reduce((s, q) => s + q.score, 0)}/
-                          {[...quizScores.values()].reduce((s, q) => s + q.total, 0)} ✓
-                        </span>
-                      )}
-                    </div>
-
-                    {phase.steps.map((step) => {
-                      if (step.category === "__quiz__") {
-                        return (
-                          <div
-                            key="quiz-phase"
-                            className={`epic-step-item ${currentStep === -2 ? "active" : ""} ${quizScores.size > 0 ? "completed" : ""}`}
-                            onClick={() => setCurrentStep(-2)}
-                          >
-                            <div className="epic-step-indicator">
-                              <span className="step-dot">{quizScores.size > 0 ? "✓" : "📝"}</span>
-                            </div>
-                            <div className="epic-step-info">
-                              <span className="epic-step-title">Knowledge Check</span>
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      const isActive = step.globalIndex === currentStep;
-                      const isCompleted = step.globalIndex < currentStep && currentStep >= 0;
-                      return (
-                        <div
-                          key={step.globalIndex}
-                          className={`epic-step-item ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`}
-                          onClick={() => setCurrentStep(step.globalIndex)}
-                        >
-                          <div className="epic-step-indicator">
-                            <span className="step-dot">{isCompleted ? "✓" : step.globalIndex + 1}</span>
-                          </div>
-                          <div className="epic-step-info">
-                            <span className="epic-step-title">
-                              {step.summary || step.segment?.title || "Step Details"}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-
-              {/* Final Score Summary in Sidebar */}
+              {/* Score Summary */}
               {quizScores.size > 0 && (
                 <div className="sidebar-score-summary">
                   <span className="score-icon">🏆</span>

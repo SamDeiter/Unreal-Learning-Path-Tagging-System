@@ -195,14 +195,10 @@ export default function PathStep({
       onClick={onClick}
       style={{ "--step-accent": style.color }}
     >
-      <div className="step-header">
-        <div className="step-number">
-          <span className="step-num">{index + 1}</span>
-        </div>
-        <div className="step-category-badge" style={{ background: style.color }}>
+      <div className="step-phase-tag">
+        <span className="phase-tag-badge" style={{ background: style.color }}>
           {style.icon} {style.label}
-        </div>
-        {similarityPct > 0 && <div className="step-similarity">{similarityPct}% match</div>}
+        </span>
       </div>
 
       {renderSource()}
