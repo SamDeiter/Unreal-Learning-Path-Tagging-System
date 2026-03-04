@@ -55,48 +55,22 @@ export async function generateStepTakeaways(step, query) {
   try {
     const app = getFirebaseApp();
     const functions = getFunctions(app, "us-central1");
-    const fn = httpsCallable(functions, "extractIntent");
+    const fn = httpsCallable(functions, "generateAudioBriefing");
 
-    const content = step.summary || step.segment?.text || "";
+    const content = step.summary || step.segment?.text || step.description || "";
     const actionSteps = step.action || step.segment?.action || "";
-    const prompt = `You are a UE5 instructor highlighting KEY TAKEAWAYS for a learner.
 
-The learner asked: "${query}"
-This is a ${step.category || "learning"} step:
+    const result = await fn({
+      mode: "takeaways",
+      query,
+      stepContent: content,
+      stepCategory: step.category || "learning",
+      stepAction: actionSteps,
+    });
 
-"${content.substring(0, 1500)}"
-${actionSteps ? `\nAction steps from this content:\n"${actionSteps.substring(0, 500)}"` : ""}
-
-Generate exactly 3 key takeaways the learner MUST know from this step. Each takeaway should be:
-- One concise sentence (under 20 words)
-- ACTIONABLE: mention a specific UE5 property, file, Blueprint node, menu path, or setting they should check/adjust
-- NOT just restating the problem — tell them WHAT to DO (e.g. "Set NetUpdateFrequency to 100 on your Character Movement Component")
-- Include concrete specifics from the content above
-
-Return ONLY a JSON array of 3 strings. Example:
-["Enable 'Replicate Movement' on your Character Blueprint's Movement Component", "Set NetUpdateFrequency to at least 100 in your character's defaults", "Use CharacterMovementComponent::SmoothCorrection for client-side prediction"]`;
-
-    const result = await fn({ query: prompt });
-    const text = result.data?.intent || "";
-
-    // Parse JSON array from response
-    const match = typeof text === "string" ? text.match(/\[.*\]/s) : null;
-    if (match) {
-      const parsed = JSON.parse(match[0]);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        devLog("[Takeaways] Generated", parsed.length, "takeaways");
-        return parsed.slice(0, 3);
-      }
-    }
-
-    // If intent came back as an object (original extractIntent behavior),
-    // create takeaways from it
-    if (typeof text === "object" && text.goal) {
-      return [
-        text.goal,
-        text.problem_description || "Review the step content carefully",
-        `Key systems: ${(text.systems || []).join(", ") || "UE5 fundamentals"}`,
-      ];
+    if (result.data?.takeaways && Array.isArray(result.data.takeaways)) {
+      devLog("[Takeaways] Generated", result.data.takeaways.length, "takeaways");
+      return result.data.takeaways.slice(0, 3);
     }
 
     return [

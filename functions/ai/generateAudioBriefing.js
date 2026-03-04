@@ -24,11 +24,11 @@ exports.generateAudioBriefing = functions
     const mode = data.mode || "overview";
 
     // Validate based on mode
-    if (mode === "step") {
+    if (mode === "step" || mode === "takeaways") {
       if (!query || !data.stepContent) {
         throw new functions.https.HttpsError(
           "invalid-argument",
-          "Must provide query and stepContent for step mode."
+          `Must provide query and stepContent for ${mode} mode.`
         );
       }
     } else {
@@ -172,6 +172,71 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
           audio: wav.toString("base64"),
           mimeType: "audio/wav",
           script: stepScript,
+        };
+      }
+
+      // ── TAKEAWAYS MODE: generate actionable key takeaways ──
+      if (mode === "takeaways") {
+        const { stepContent, stepCategory, stepAction } = data;
+
+        const takeawayPrompt = `You are a UE5 instructor highlighting KEY TAKEAWAYS for a learner.
+
+The learner asked: "${query}"
+This is a ${stepCategory || "learning"} step:
+
+"${(stepContent || "").substring(0, 1500)}"
+${stepAction ? `\nAction steps from this content:\n"${stepAction.substring(0, 500)}"` : ""}
+
+Generate exactly 3 key takeaways the learner MUST know from this step. Each takeaway should be:
+- One concise sentence (under 20 words)
+- ACTIONABLE: mention a specific UE5 property, file, Blueprint node, menu path, or setting they should check/adjust
+- NOT just restating the problem — tell them WHAT to DO (e.g. "Set NetUpdateFrequency to 100 on your Character Movement Component")
+- Include concrete specifics from the content above
+
+Return ONLY a JSON array of 3 strings.`;
+
+        const takeawayUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const takeawayResp = await fetch(takeawayUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: takeawayPrompt }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 512 },
+          }),
+        });
+
+        if (!takeawayResp.ok) {
+          const err = await takeawayResp.text();
+          throw new Error(`Takeaway generation failed: ${err}`);
+        }
+
+        const takeawayJson = await takeawayResp.json();
+        const takeawayText = takeawayJson.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        // Parse JSON array
+        const match = takeawayText.match(/\[.*\]/s);
+        let takeaways = [];
+        if (match) {
+          try {
+            takeaways = JSON.parse(match[0]);
+          } catch (e) {
+            console.warn("Failed to parse takeaways JSON:", e.message);
+          }
+        }
+
+        if (!Array.isArray(takeaways) || takeaways.length === 0) {
+          takeaways = ["Review this step for actionable UE5 specifics"];
+        }
+
+        await logApiUsage(userId, {
+          model: "gemini-2.0-flash",
+          type: "takeaways",
+          query: query.substring(0, 50),
+        });
+
+        return {
+          success: true,
+          takeaways: takeaways.slice(0, 3),
         };
       }
 
