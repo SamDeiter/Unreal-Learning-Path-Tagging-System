@@ -1,13 +1,11 @@
 /**
  * PathStep — A single step in a bespoke learning path.
- * Renders differently based on source type (transcript, epic_learning, docs).
+ * Renders in the "Epic-style" layout from the mockup.
  */
 
 import { CATEGORY_STYLES } from "./pathConstants";
 
 // ── Helpers ───────────────────────────────────────────────────────────
-
-const MAX_DISPLAY_CHARS = 300;
 
 /**
  * Decode common HTML entities in titles/text.
@@ -24,299 +22,114 @@ function decodeEntities(str) {
 }
 
 /**
- * Clean raw text that may contain stringified structured data.
- * Epic Learning chunks sometimes store text as stringified lists of
- * paragraph objects like: [{'type': 'paragraph', 'content': '...'}]
- * or separated by ` - ` between dicts.
+ * Clean raw text from stringified JSON if needed.
  */
 function cleanText(raw) {
   if (!raw) return "";
   let text = String(raw);
 
-  // Detect stringified Python-style list of dicts
-  if (/['"]type['"]\s*:\s*['"]paragraph['"]/.test(text)) {
-    // Strategy: split on content key, grab everything after the value opener
-    // until the closing quote+brace pattern.  Handles apostrophes inside text.
-    const contentParts = [];
-    // Split the text at each 'content': or "content": marker
-    const splits = text.split(/['"]content['"]\s*:\s*['"]/);
-    for (let i = 1; i < splits.length; i++) {
-      // Grab text up to the closing pattern: '}] or '} or '] or similar
-      // Look for the last quote before a closing brace
-      const chunk = splits[i];
-      // Find the end: either '} or "} at the end of this content value
-      const endMatch = chunk.match(/^([\s\S]*?)(?:['"]\s*\})/);
-      if (endMatch && endMatch[1]) {
-        contentParts.push(endMatch[1].trim());
-      }
-    }
-    if (contentParts.length > 0) {
-      text = contentParts.join(" ");
-    }
-  }
-
-  // Strip leading "#### -" markdown artifacts and heading markers
+  // Strip leading "#### -" markdown artifacts
   text = text.replace(/^(#{1,6}\s*-?\s*)+/gm, "").trim();
-  // Remove ` - ` list separators from concatenated chunks
-  text = text.replace(/\s*-\s*\[?\{?\s*$/gm, "").trim();
-
-  // Strip inline HTML tags like <mark>, <code>, etc.
+  // Strip inline HTML tags
   text = text.replace(/<[^>]+>/g, "");
-
   // Decode HTML entities
   text = decodeEntities(text);
-
   // Collapse excess whitespace
   text = text.replace(/\s+/g, " ").trim();
-
-  // Truncate with ellipsis
-  if (text.length > MAX_DISPLAY_CHARS) {
-    text = text.slice(0, MAX_DISPLAY_CHARS).replace(/\s+\S*$/, "") + "…";
-  }
 
   return text;
 }
 
 // ── Component ─────────────────────────────────────────────────────────
 
-export default function PathStep({
-  step,
-  index,
-  isActive,
-  onClick,
-  stepAudioUrl,
-  stepAudioLoading,
-  onGenerateAudio,
-  takeaways,
-  takeawayLoading,
-}) {
+export default function PathStep({ step, isActive, takeaways, takeawayLoading }) {
+  if (!step) return null; // Guard against undefined step during state transitions
   const { segment, category } = step;
-  const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.foundation;
 
-  const displayTitle = decodeEntities(segment.title || segment.videoTitle || "");
-  // Prefer AI-generated summary; fall back to cleaned raw text
+  const displayTitle = decodeEntities(segment.title || segment.videoTitle || "Step Details");
   const displayText = step.summary || cleanText(segment.text);
-  const hasAuthor = segment.author && segment.author !== "Unknown";
-  const similarityPct = Math.round((segment.similarity || 0) * 100);
 
-  const renderSource = () => {
-    switch (segment.type) {
-      case "transcript":
-        return (
-          <div className="step-source transcript-source">
-            {segment.thumbnailUrl && (
-              <a
-                href={segment.videoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="video-thumbnail-link"
-              >
-                <img
-                  src={segment.thumbnailUrl}
-                  alt={segment.videoTitle || "Video clip"}
-                  className="video-thumbnail"
-                />
-                <span className="play-overlay">▶</span>
-              </a>
-            )}
-            <div className="source-info">
-              <span className="source-title">{decodeEntities(segment.videoTitle)}</span>
-              {segment.startTimestamp && (
-                <span className="source-timestamp">
-                  ⏱ {segment.startTimestamp}
-                  {segment.endTimestamp ? ` – ${segment.endTimestamp}` : ""}
-                </span>
-              )}
-              {segment.courseCode && <span className="source-course">📚 {segment.courseCode}</span>}
-              {segment.videoUrl && (
-                <a
-                  href={segment.videoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="source-link video-link"
-                >
-                  🎬 Watch this clip →
-                </a>
-              )}
-            </div>
-          </div>
-        );
-
-      case "epic_learning":
-        return (
-          <div className="step-source epic-source">
-            <span className="source-icon">📖</span>
-            <div className="source-info">
-              <span className="source-title">{displayTitle}</span>
-              {hasAuthor && <span className="source-author">by {segment.author}</span>}
-              {segment.url && (
-                <a
-                  href={segment.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="source-link"
-                >
-                  Open in Epic Dev →
-                </a>
-              )}
-            </div>
-          </div>
-        );
-
-      case "docs":
-        return (
-          <div className="step-source docs-source">
-            <span className="source-icon">📄</span>
-            <div className="source-info">
-              <span className="source-title">{displayTitle}</span>
-              {segment.section && <span className="source-section">§ {segment.section}</span>}
-              {segment.url && (
-                <a
-                  href={segment.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="source-link"
-                >
-                  Open Docs →
-                </a>
-              )}
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  // Derive source type — real paths use segment.type, pre-seeded use segment.source
+  // Source type for pills
   const sourceType = segment.type || segment.source || "docs";
-  const sourceUrl = segment.videoUrl || segment.url || "#";
-  const sourceTitle = decodeEntities(
-    segment.videoTitle || segment.title || segment.section || "Source"
-  );
-
-  // Build inline source citation text
-  const getSourceIcon = () => {
-    if (sourceType === "transcript") return "📹";
-    if (sourceType === "epic_learning") return "📖";
-    return "📄";
-  };
-  const getSourceLabel = () => {
-    if (sourceType === "transcript") return "Video";
-    if (sourceType === "epic_learning") return "Article";
-    return "Docs";
-  };
+  const sourceLabel =
+    sourceType === "transcript" ? "Video" : sourceType === "epic_learning" ? "Article" : "Docs";
+  const sourceIcon = sourceType === "transcript" ? "fa-video" : "fa-book-open";
 
   return (
-    <div
-      className={`path-step ${isActive ? "active" : ""} category-${category}`}
-      onClick={onClick}
-      style={{ "--step-accent": style.color }}
-    >
-      {/* 1. Phase Badge */}
-      <div className="step-phase-tag">
-        <span className="phase-tag-badge" style={{ background: style.color }}>
-          {style.icon} {style.label}
-        </span>
-      </div>
-
-      {/* 2. Audio Track Bar (mockup style) */}
-      {isActive && (
-        <div className="audio-track-bar">
-          {stepAudioUrl ? (
-            <audio controls src={stepAudioUrl} className="audio-track-player" />
-          ) : stepAudioLoading ? (
-            <div className="audio-track-generating" onClick={(e) => e.stopPropagation()}>
-              <div className="audio-gen-spinner" />
-              <div className="audio-gen-progress">
-                <div className="audio-gen-bar" />
-              </div>
-              <span className="audio-gen-text">Generating audio…</span>
-            </div>
-          ) : (
-            <div
-              className="audio-track-idle"
-              onClick={(e) => {
-                e.stopPropagation();
-                onGenerateAudio?.();
-              }}
-            >
-              <button className="audio-play-circle">▶</button>
-              <div className="audio-scrubber">
-                <div className="audio-scrubber-track" />
-              </div>
-              <span className="audio-time">0:00</span>
-            </div>
-          )}
+    <div className={`step-article ${isActive ? "active" : ""}`}>
+      {/* Header with Phase Badge and Title */}
+      <header className="step-header">
+        <div className="badge-container">
+          <span className={`category-badge category-${category}`}>{category.toUpperCase()}</span>
         </div>
-      )}
+        <h1 className="step-title">{displayTitle}</h1>
+      </header>
 
-      {/* 3. Large Title */}
-      <h2 className="step-title">{displayTitle || "Step Details"}</h2>
-
-      {/* 4. Body Text */}
-      <div className="step-text">
-        <p>{displayText}</p>
+      {/* Video Progress / Control Bar (Mockup Style) */}
+      <div className="video-progress-container">
+        <button className="play-pause-btn">
+          <i className="fa-solid fa-play"></i>
+        </button>
+        <div className="video-progress-bar">
+          <div className="progress-fill" style={{ width: "35%" }}></div>
+        </div>
+        <span className="video-time">02:45 / 08:30</span>
       </div>
 
-      {/* 5. Inline Source Citation (right after text, like mockup) */}
-      <div className="step-source-inline">
-        <a
-          href={sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="source-citation-inline"
-        >
-          <span className="source-icon">{getSourceIcon()}</span>
-          Source: {sourceTitle}
-          {sourceType === "transcript" && segment.startSeconds != null &&
-            ` — ${Math.floor(segment.startSeconds / 60)}:${String(Math.floor(segment.startSeconds % 60)).padStart(2, "0")}`}
-          {" "}<span className="source-link-icon">🔗</span>
-        </a>
-      </div>
+      {/* Main Content Area */}
+      <div className="content-area">
+        <div className="sources-pills">
+          <span className="source-pill">
+            <i className={`fa-solid ${sourceIcon}`}></i> {sourceLabel}
+          </span>
+          <span className="source-pill">
+            <i className="fa-solid fa-tags"></i> {category}
+          </span>
+        </div>
 
-      {/* 6. Key Takeaways */}
-      {isActive && (
-        <div className="step-takeaways">
-          <h4 className="takeaways-title">Key Takeaways</h4>
+        <div className="step-body-text">
+          <p>{displayText}</p>
+        </div>
+
+        {/* Key Takeaways Box */}
+        <div className="takeaways-box">
+          <h3 className="takeaways-title">Key Takeaways</h3>
           {takeawayLoading ? (
-            <p className="takeaways-loading">Generating takeaways…</p>
+            <div className="loading-dots">
+              <span>.</span>
+              <span>.</span>
+              <span>.</span>
+            </div>
           ) : takeaways && takeaways.length > 0 ? (
             <ul className="takeaways-list">
               {takeaways.map((t, i) => (
                 <li key={i}>{t}</li>
               ))}
             </ul>
-          ) : null}
+          ) : (
+            <p className="no-takeaways">No specific takeaways extracted for this segment.</p>
+          )}
         </div>
-      )}
 
-      {/* 7. Sources Summary at bottom */}
-      {isActive && (
-        <div className="sources-footer">
-          <details open>
-            <summary>📎 Sources</summary>
-            <div className="sources-list">
-              <a
-                href={sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="source-citation"
-              >
-                <span className="source-icon">{getSourceIcon()}</span>
-                {sourceTitle} ({getSourceLabel()})
-              </a>
-              {hasAuthor && (
-                <span className="source-citation">
-                  <span className="source-icon">👤</span>
-                  {segment.author}
-                </span>
-              )}
-            </div>
-          </details>
+        {/* Sources / Footnotes Section */}
+        <div className="footnotes-section">
+          <div className="footnotes-header">
+            <span>Sources</span>
+            <i className="fa-solid fa-chevron-down"></i>
+          </div>
+          <div className="footnotes-content">
+            <a
+              href={segment.videoUrl || segment.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footnote-link"
+            >
+              <i className={`fa-solid ${sourceIcon}`}></i>
+              {displayTitle}
+            </a>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

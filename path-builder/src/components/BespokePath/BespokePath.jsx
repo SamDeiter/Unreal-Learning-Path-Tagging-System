@@ -451,17 +451,16 @@ export default function BespokePath() {
                       })()}
                     </div>
                   </div>
-                ) : (
+                ) : currentStep >= 0 && currentStep < pathResult.path.length ? (
                   <div className="step-content-container">
                     <PathStep
                       step={pathResult.path[currentStep]}
-                      index={currentStep}
                       isActive={true}
                       takeaways={stepTakeaways.get(currentStep)}
                       takeawayLoading={takeawayLoading === currentStep}
                     />
                   </div>
-                )}
+                ) : null}
               </div>
 
               {/* Footer Navigation */}
