@@ -497,7 +497,7 @@ export default function BespokePath() {
           {/* Example queries */}
           {!pathResult && !isLoading && (
             <div className="bespoke-examples">
-              <span className="examples-label">Try:</span>
+              <span className="examples-label">Suggested:</span>
               {DEFAULT_SUGGESTIONS.map((ex, i) => (
                 <button key={i} className="example-chip" onClick={() => handleExampleClick(ex)}>
                   {ex}
