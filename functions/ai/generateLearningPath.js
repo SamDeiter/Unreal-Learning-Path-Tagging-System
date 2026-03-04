@@ -12,19 +12,97 @@ const { PROMPT_VERSION } = require("../pipeline/promptVersions");
 
 // Hardcoded fallback videos (verified real @UnrealEngine IDs)
 const FALLBACK_VIDEOS = [
-  { id: "-OyVWhP2ekk", title: "Packaging Your Project in Unreal Engine", tags: ["build", "packaging"], duration: 319, url: "https://www.youtube.com/watch?v=-OyVWhP2ekk" },
-  { id: "ARfQ58w31Vs", title: "Package Your Project in Unreal Engine", tags: ["build", "packaging"], duration: 49, url: "https://www.youtube.com/watch?v=ARfQ58w31Vs" },
-  { id: "Bpw8LIud3SM", title: "Compiling Your Project in Unreal Engine", tags: ["build", "compile"], duration: 187, url: "https://www.youtube.com/watch?v=Bpw8LIud3SM" },
-  { id: "VVpZW4pKafQ", title: "Introduction to Player Blueprints", tags: ["blueprint", "gameplay"], duration: 346, url: "https://www.youtube.com/watch?v=VVpZW4pKafQ" },
-  { id: "ZkP4VOOlNbM", title: "Adding Blueprint Components", tags: ["blueprint", "components"], duration: 327, url: "https://www.youtube.com/watch?v=ZkP4VOOlNbM" },
-  { id: "TiDo_J4VOFA", title: "Enhanced Input Action Mapping", tags: ["gameplay", "input"], duration: 414, url: "https://www.youtube.com/watch?v=TiDo_J4VOFA" },
-  { id: "U4x2AvWnFKw", title: "Building a HUD with UMG", tags: ["ui", "umg"], duration: 57, url: "https://www.youtube.com/watch?v=U4x2AvWnFKw" },
-  { id: "7GmEMMJ6v60", title: "Introduction to Unreal Motion Graphics", tags: ["ui", "umg"], duration: 391, url: "https://www.youtube.com/watch?v=7GmEMMJ6v60" },
-  { id: "H5jIMq98hRg", title: "Landscape Basics: Getting Started", tags: ["world", "landscape"], duration: 1750, url: "https://www.youtube.com/watch?v=H5jIMq98hRg" },
-  { id: "ArdM5qdGi6g", title: "Landscape Basics: Landscape Materials", tags: ["materials", "landscape"], duration: 1318, url: "https://www.youtube.com/watch?v=ArdM5qdGi6g" },
-  { id: "W9a6511ZBsc", title: "Adding a Coin Material", tags: ["materials", "beginner"], duration: 291, url: "https://www.youtube.com/watch?v=W9a6511ZBsc" },
-  { id: "u7QQztB7JWM", title: "Installing Unreal Engine", tags: ["onboarding", "installation"], duration: 251, url: "https://www.youtube.com/watch?v=u7QQztB7JWM" },
-  { id: "EsvfCEtATMk", title: "Navigating the Viewport", tags: ["onboarding", "editor"], duration: 445, url: "https://www.youtube.com/watch?v=EsvfCEtATMk" },
+  {
+    id: "-OyVWhP2ekk",
+    title: "Packaging Your Project in Unreal Engine",
+    tags: ["build", "packaging"],
+    duration: 319,
+    url: "https://www.youtube.com/watch?v=-OyVWhP2ekk",
+  },
+  {
+    id: "ARfQ58w31Vs",
+    title: "Package Your Project in Unreal Engine",
+    tags: ["build", "packaging"],
+    duration: 49,
+    url: "https://www.youtube.com/watch?v=ARfQ58w31Vs",
+  },
+  {
+    id: "Bpw8LIud3SM",
+    title: "Compiling Your Project in Unreal Engine",
+    tags: ["build", "compile"],
+    duration: 187,
+    url: "https://www.youtube.com/watch?v=Bpw8LIud3SM",
+  },
+  {
+    id: "VVpZW4pKafQ",
+    title: "Introduction to Player Blueprints",
+    tags: ["blueprint", "gameplay"],
+    duration: 346,
+    url: "https://www.youtube.com/watch?v=VVpZW4pKafQ",
+  },
+  {
+    id: "ZkP4VOOlNbM",
+    title: "Adding Blueprint Components",
+    tags: ["blueprint", "components"],
+    duration: 327,
+    url: "https://www.youtube.com/watch?v=ZkP4VOOlNbM",
+  },
+  {
+    id: "TiDo_J4VOFA",
+    title: "Enhanced Input Action Mapping",
+    tags: ["gameplay", "input"],
+    duration: 414,
+    url: "https://www.youtube.com/watch?v=TiDo_J4VOFA",
+  },
+  {
+    id: "U4x2AvWnFKw",
+    title: "Building a HUD with UMG",
+    tags: ["ui", "umg"],
+    duration: 57,
+    url: "https://www.youtube.com/watch?v=U4x2AvWnFKw",
+  },
+  {
+    id: "7GmEMMJ6v60",
+    title: "Introduction to Unreal Motion Graphics",
+    tags: ["ui", "umg"],
+    duration: 391,
+    url: "https://www.youtube.com/watch?v=7GmEMMJ6v60",
+  },
+  {
+    id: "H5jIMq98hRg",
+    title: "Landscape Basics: Getting Started",
+    tags: ["world", "landscape"],
+    duration: 1750,
+    url: "https://www.youtube.com/watch?v=H5jIMq98hRg",
+  },
+  {
+    id: "ArdM5qdGi6g",
+    title: "Landscape Basics: Landscape Materials",
+    tags: ["materials", "landscape"],
+    duration: 1318,
+    url: "https://www.youtube.com/watch?v=ArdM5qdGi6g",
+  },
+  {
+    id: "W9a6511ZBsc",
+    title: "Adding a Coin Material",
+    tags: ["materials", "beginner"],
+    duration: 291,
+    url: "https://www.youtube.com/watch?v=W9a6511ZBsc",
+  },
+  {
+    id: "u7QQztB7JWM",
+    title: "Installing Unreal Engine",
+    tags: ["onboarding", "installation"],
+    duration: 251,
+    url: "https://www.youtube.com/watch?v=u7QQztB7JWM",
+  },
+  {
+    id: "EsvfCEtATMk",
+    title: "Navigating the Viewport",
+    tags: ["onboarding", "editor"],
+    duration: 445,
+    url: "https://www.youtube.com/watch?v=EsvfCEtATMk",
+  },
 ];
 
 /**
@@ -69,7 +147,10 @@ function buildVideoContext(query, maxVideos = 20) {
   if (relevant.length === 0) return null;
 
   return relevant
-    .map((v) => `[${v.id}] "${v.title}" (${Math.round(v.duration / 60)}min) - ${v.tags.join(", ")} - ${v.url}`)
+    .map(
+      (v) =>
+        `[${v.id}] "${v.title}" (${Math.round(v.duration / 60)}min) - ${v.tags.join(", ")} - ${v.url}`
+    )
     .join("\n");
 }
 
@@ -168,25 +249,33 @@ This developer has a specific problem. Your learning path should:
 3. RESOLVE: Step-by-step fix with practical actions
 4. PREVENT: Best practices so this NEVER happens again
 
+CRITICAL — SELF-CONTAINED STEPS:
+Each step's "description" MUST contain the ACTUAL ANSWER, not just a summary of what a doc covers.
+- BAD: "This document covers multiplayer networking concepts in Unreal Engine."
+- GOOD: "Character jitter in multiplayer happens because the server's authoritative position updates arrive at irregular intervals. The CharacterMovementComponent uses prediction to smooth this, but if NetUpdateFrequency is too low (default 100Hz), the corrections feel jarring."
+
+The learner should be able to SOLVE THEIR PROBLEM by reading just the steps — without clicking any sources.
+Sources (videos, docs) are supplemental "want to go deeper?" material, NOT required reading.
+
 Return JSON:
 {
   "title": "Learning Path: [problem]",
-  "ai_summary": "WHY this happens in plain language",
-  "ai_root_cause": "The fundamental reason this occurs",
+  "ai_summary": "WHY this happens in plain language — give the root cause, not a description of the topic",
+  "ai_root_cause": "The specific technical reason (name exact properties, classes, or systems)",
   "ai_what_you_learn": ["concept 1", "skill 2", "prevention technique"],
   "ai_estimated_time": "X-Y minutes",
   "ai_difficulty": "Beginner/Intermediate/Advanced",
-  "ai_hint": "Quick prevention tip they can apply immediately",
+  "ai_hint": "Quick fix they can try RIGHT NOW (specific property or setting to change)",
   "steps": [
     {
       "number": 1,
       "type": "understand",
       "title": "Why This Happens",
-      "description": "The underlying concept explained in detail",
-      "action": "1. **Open your Blueprint**...",
-      "takeaway": "Key insight they should remember",
+      "description": "2-3 sentences EXPLAINING the root cause with specific UE5 class names, properties, or systems. NOT a summary of a doc — the actual technical explanation.",
+      "action": "1. Open [specific file/Blueprint]\\n2. Find [specific property]\\n3. Set it to [specific value]",
+      "takeaway": "One actionable insight naming a specific property, node, or setting",
       "content": [
-        {"type": "video", "title": "Focused Clip Title", "url": "https://youtube.com/watch?v=VIDEO_ID&t=330", "thumbnail_url": "https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg", "description": "(5 min) Covers essentials"}
+        {"type": "video", "title": "Focused Clip Title", "url": "https://youtube.com/watch?v=VIDEO_ID&t=330", "thumbnail_url": "https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg", "description": "(5 min) Deep dive for those wanting more detail"}
       ]
     }
   ]
@@ -245,12 +334,21 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
       // Cache the path to Firestore
       try {
         const db = admin.firestore();
-        await db.collection("cached_paths").doc(pathData.path_id).set({
-          ...pathData,
-          cached_at: admin.firestore.FieldValue.serverTimestamp(),
-        });
+        await db
+          .collection("cached_paths")
+          .doc(pathData.path_id)
+          .set({
+            ...pathData,
+            cached_at: admin.firestore.FieldValue.serverTimestamp(),
+          });
       } catch (cacheError) {
-        console.warn(JSON.stringify({ severity: "WARNING", message: "path_cache_error", error: cacheError.message }));
+        console.warn(
+          JSON.stringify({
+            severity: "WARNING",
+            message: "path_cache_error",
+            error: cacheError.message,
+          })
+        );
       }
 
       const response = {
@@ -265,7 +363,9 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
 
       return response;
     } catch (error) {
-      console.error(JSON.stringify({ severity: "ERROR", message: "learning_path_error", error: error.message }));
+      console.error(
+        JSON.stringify({ severity: "ERROR", message: "learning_path_error", error: error.message })
+      );
       if (error.code) throw error;
       throw new functions.https.HttpsError(
         "internal",
