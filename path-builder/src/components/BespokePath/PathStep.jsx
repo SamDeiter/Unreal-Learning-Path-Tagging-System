@@ -3,6 +3,7 @@
  * Renders in the "Epic-style" layout from the mockup.
  */
 
+import { useState } from "react";
 import { CATEGORY_STYLES } from "./pathConstants";
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -40,9 +41,33 @@ function cleanText(raw) {
   return text;
 }
 
+/**
+ * Filter out low-quality takeaways like "Key systems: Blueprint"
+ */
+function filterTakeaways(items) {
+  if (!items || !items.length) return items;
+  return items.filter((t) => {
+    const lower = t.toLowerCase().trim();
+    // Filter out stub-style entries
+    if (lower.startsWith("key systems:")) return false;
+    if (lower.startsWith("key concepts:")) return false;
+    if (lower.length < 15) return false; // Too short to be useful
+    return true;
+  });
+}
+
 // ── Component ─────────────────────────────────────────────────────────
 
-export default function PathStep({ step, isActive, takeaways, takeawayLoading }) {
+export default function PathStep({
+  step,
+  isActive,
+  stepAudioUrl,
+  stepAudioLoading,
+  onGenerateAudio,
+  takeaways,
+  takeawayLoading,
+}) {
+  const [sourcesOpen, setSourcesOpen] = useState(false);
   if (!step) return null; // Guard against undefined step during state transitions
   const { segment, category } = step;
 
@@ -55,6 +80,9 @@ export default function PathStep({ step, isActive, takeaways, takeawayLoading })
     sourceType === "transcript" ? "Video" : sourceType === "epic_learning" ? "Article" : "Docs";
   const sourceIcon = sourceType === "transcript" ? "fa-video" : "fa-book-open";
 
+  // Filter takeaways for quality
+  const filteredTakeaways = filterTakeaways(takeaways);
+
   return (
     <div className={`step-article ${isActive ? "active" : ""}`}>
       {/* Header with Phase Badge and Title */}
@@ -65,16 +93,41 @@ export default function PathStep({ step, isActive, takeaways, takeawayLoading })
         <h1 className="step-title">{displayTitle}</h1>
       </header>
 
-      {/* Video Progress / Control Bar (Mockup Style) */}
-      <div className="video-progress-container">
-        <button className="play-pause-btn">
-          <i className="fa-solid fa-play"></i>
-        </button>
-        <div className="video-progress-bar">
-          <div className="progress-fill" style={{ width: "35%" }}></div>
+      {/* Audio Track Bar — real audio controls */}
+      {isActive && (
+        <div className="video-progress-container">
+          {stepAudioUrl ? (
+            <audio controls src={stepAudioUrl} style={{ width: "100%" }} />
+          ) : stepAudioLoading ? (
+            <div
+              className="audio-generating"
+              style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 0" }}
+            >
+              <div className="bespoke-spinner" style={{ width: "18px", height: "18px" }} />
+              <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Generating audio…</span>
+            </div>
+          ) : (
+            <button
+              className="play-pause-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onGenerateAudio?.();
+              }}
+              title="Generate audio briefing for this step"
+            >
+              <i className="fa-solid fa-play"></i>
+            </button>
+          )}
+          {!stepAudioUrl && !stepAudioLoading && (
+            <>
+              <div className="video-progress-bar">
+                <div className="progress-fill" style={{ width: "0%" }}></div>
+              </div>
+              <span className="video-time">Click ▶ to generate</span>
+            </>
+          )}
         </div>
-        <span className="video-time">02:45 / 08:30</span>
-      </div>
+      )}
 
       {/* Main Content Area */}
       <div className="content-area">
@@ -100,10 +153,10 @@ export default function PathStep({ step, isActive, takeaways, takeawayLoading })
               <span>.</span>
               <span>.</span>
             </div>
-          ) : takeaways && takeaways.length > 0 ? (
+          ) : filteredTakeaways && filteredTakeaways.length > 0 ? (
             <ul className="takeaways-list">
-              {takeaways.map((t, i) => (
-                <li key={i}>{t}</li>
+              {filteredTakeaways.map((t, i) => (
+                <li key={i}>{t.charAt(0).toUpperCase() + t.slice(1)}</li>
               ))}
             </ul>
           ) : (
@@ -111,23 +164,29 @@ export default function PathStep({ step, isActive, takeaways, takeawayLoading })
           )}
         </div>
 
-        {/* Sources / Footnotes Section */}
+        {/* Sources / Footnotes Section — Collapsible */}
         <div className="footnotes-section">
-          <div className="footnotes-header">
+          <div
+            className="footnotes-header"
+            onClick={() => setSourcesOpen(!sourcesOpen)}
+            style={{ cursor: "pointer" }}
+          >
             <span>Sources</span>
-            <i className="fa-solid fa-chevron-down"></i>
+            <i className={`fa-solid ${sourcesOpen ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
           </div>
-          <div className="footnotes-content">
-            <a
-              href={segment.videoUrl || segment.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footnote-link"
-            >
-              <i className={`fa-solid ${sourceIcon}`}></i>
-              {displayTitle}
-            </a>
-          </div>
+          {sourcesOpen && (
+            <div className="footnotes-content">
+              <a
+                href={segment.videoUrl || segment.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footnote-link"
+              >
+                <i className={`fa-solid ${sourceIcon}`}></i>
+                {displayTitle}
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>

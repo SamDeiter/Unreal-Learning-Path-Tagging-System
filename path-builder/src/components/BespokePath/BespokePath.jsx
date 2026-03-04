@@ -14,7 +14,7 @@ import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PathStep from "./PathStep";
 import QuizEngine from "./QuizEngine";
 import PreSeededPaths from "./PreSeededPaths";
-import { generateStepTakeaways } from "../../services/stepBriefingService";
+import { generateStepAudio, generateStepTakeaways } from "../../services/stepBriefingService";
 import "./BespokePath.css";
 
 import {
@@ -93,7 +93,9 @@ export default function BespokePath() {
   const [quizScores, setQuizScores] = useState(new Map()); // stepIndex → {score, total}
   const [showQuiz, setShowQuiz] = useState(null); // stepIndex showing quiz
 
-  // Per-step takeaways state
+  // Per-step audio and takeaways state
+  const [stepAudios, setStepAudios] = useState(new Map());
+  const [stepAudioLoading, setStepAudioLoading] = useState(null);
   const [stepTakeaways, setStepTakeaways] = useState(new Map());
   const [takeawayLoading, setTakeawayLoading] = useState(null);
 
@@ -234,6 +236,20 @@ export default function BespokePath() {
     setQuizScores(new Map());
     setShowQuiz(null);
   }, []);
+
+  // Generate per-step audio on demand
+  const handleStepAudio = useCallback(
+    async (stepIndex) => {
+      if (stepAudios.has(stepIndex) || !pathResult) return;
+      setStepAudioLoading(stepIndex);
+      const url = await generateStepAudio(pathResult.path[stepIndex], pathResult.query || query);
+      if (url) {
+        setStepAudios((prev) => new Map(prev).set(stepIndex, url));
+      }
+      setStepAudioLoading(null);
+    },
+    [stepAudios, pathResult, query]
+  );
 
   // Generate takeaways on demand when step becomes active
   const handleLoadTakeaways = useCallback(
@@ -388,24 +404,54 @@ export default function BespokePath() {
                     currentStep === -2
                       ? "quiz"
                       : phases.find((p) => p.steps.some((s) => s.globalIndex === currentStep))
-                          ?.key || "problem";
+                          ?.key || "";
 
                   return phases.map((phase) => (
-                    <button
-                      key={phase.key}
-                      className={`phase-nav-item ${activePhaseKey === phase.key ? "active" : ""}`}
-                      onClick={() => {
-                        if (phase.key === "quiz") {
-                          setCurrentStep(-2);
-                        } else {
-                          const idx = phase.steps[0]?.globalIndex ?? 0;
-                          // Clamp to valid range
-                          setCurrentStep(Math.max(0, Math.min(idx, pathResult.path.length - 1)));
-                        }
-                      }}
-                    >
-                      {phase.label}
-                    </button>
+                    <div key={phase.key} className="phase-group">
+                      <button
+                        className={`phase-nav-item ${activePhaseKey === phase.key ? "active" : ""}`}
+                        onClick={() => {
+                          if (phase.key === "quiz") {
+                            setCurrentStep(-2);
+                          } else {
+                            const idx = phase.steps[0]?.globalIndex ?? 0;
+                            setCurrentStep(Math.max(0, Math.min(idx, pathResult.path.length - 1)));
+                          }
+                        }}
+                      >
+                        {phase.label}
+                      </button>
+                      {/* Substep list — only for non-quiz phases with multiple steps */}
+                      {phase.key !== "quiz" && phase.steps.length > 0 && (
+                        <ul className="substep-list">
+                          {phase.steps.map((substep, i) => {
+                            const step = pathResult.path[substep.globalIndex];
+                            const rawTitle =
+                              step?.segment?.title || step?.segment?.videoTitle || `Step ${i + 1}`;
+                            // Decode HTML entities & truncate
+                            const title = rawTitle
+                              .replace(/&amp;/g, "&")
+                              .replace(/&lt;/g, "<")
+                              .replace(/&gt;/g, ">")
+                              .replace(/&quot;/g, '"')
+                              .replace(/&#39;/g, "'");
+                            const shortTitle =
+                              title.length > 35 ? title.substring(0, 33) + "…" : title;
+                            return (
+                              <li key={substep.globalIndex}>
+                                <button
+                                  className={`substep-item ${currentStep === substep.globalIndex ? "active" : ""}`}
+                                  onClick={() => setCurrentStep(substep.globalIndex)}
+                                  title={title}
+                                >
+                                  {i + 1}. {shortTitle}
+                                </button>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
                   ));
                 })()}
               </nav>
@@ -460,6 +506,9 @@ export default function BespokePath() {
                     <PathStep
                       step={pathResult.path[currentStep]}
                       isActive={true}
+                      stepAudioUrl={stepAudios.get(currentStep)}
+                      stepAudioLoading={stepAudioLoading === currentStep}
+                      onGenerateAudio={() => handleStepAudio(currentStep)}
                       takeaways={stepTakeaways.get(currentStep)}
                       takeawayLoading={takeawayLoading === currentStep}
                     />
