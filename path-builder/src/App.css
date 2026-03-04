@@ -131,11 +131,11 @@ body {
 
 .app {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   min-height: 100vh;
 }
 
-/* Header */
+/* Header — mobile only now */
 .app-header {
   display: flex;
   justify-content: space-between;
@@ -148,109 +148,148 @@ body {
   z-index: 100;
 }
 
-.header-left {
+/* ==========================================================================
+   Sidebar Navigation (Desktop)
+   ========================================================================== */
+
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 220px;
+  height: 100vh;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
   display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
+  flex-direction: column;
+  z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.app-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+.sidebar-header {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-header .app-title {
+  font-size: 1.1rem;
+  font-weight: 700;
   background: var(--gradient-epic);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
-.main-nav {
+.sidebar-nav {
+  flex: 1;
+  padding: var(--spacing-sm) 0;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.sidebar-section-label {
+  display: block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: var(--spacing-sm) var(--spacing-md);
+}
+
+.sidebar-tab {
   display: flex;
-  gap: var(--spacing-xs);
-  overflow: visible;
-  scrollbar-width: none;
-}
-
-.main-nav::-webkit-scrollbar {
-  display: none;
-}
-
-.nav-tab {
-  padding: var(--spacing-sm) var(--spacing-md);
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: 0.5rem 0.75rem;
   background: transparent;
   border: none;
   border-radius: var(--radius-md);
   color: var(--text-secondary);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.nav-tab:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-}
-
-.nav-tab.active {
-  background: var(--bg-tertiary);
-  color: var(--accent-blue);
-}
-
-/* ── Right-Side Tool Cards ──────────────────────────── */
-
-.tool-cards {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  margin-left: auto;
-  padding: 0 var(--spacing-sm);
-  border-left: 1px solid var(--border-color);
-  border-right: 1px solid var(--border-color);
-}
-
-.tool-card {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
-  white-space: nowrap;
+  text-align: left;
+  margin: 1px 0;
 }
 
-.tool-card:hover {
+.sidebar-tab:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
-  border-color: var(--border-color);
 }
 
-.tool-card.active {
+.sidebar-tab.active {
   background: rgba(88, 166, 255, 0.1);
   color: var(--accent-blue);
-  border-color: rgba(88, 166, 255, 0.3);
+  border-left: 2px solid var(--accent-blue);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
-.tool-card-icon {
+.sidebar-tab-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-tab-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-tab-sm {
+  font-size: 0.78rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.sidebar-tab-sm .sidebar-tab-icon {
   font-size: 0.85rem;
 }
 
-.tool-card-label {
-  max-width: 80px;
+/* Sidebar user info (bottom) */
+.sidebar-user {
+  border-top: 1px solid var(--border-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: auto;
+}
+
+.sidebar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-user-name {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-user-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* Old tool-cards kept for potential reuse */
+.tool-cards {
+  display: none;
 }
 
 /* Feedback notification badge */
@@ -361,6 +400,8 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  margin-left: 220px;
+  min-height: 100vh;
 }
 
 /* ==========================================================================
@@ -381,7 +422,7 @@ body {
   gap: 0;
   flex: 1;
   overflow: hidden;
-  height: calc(100vh - 60px);
+  height: 100vh;
 }
 
 .builder-header-area {
@@ -421,7 +462,7 @@ body {
 .dashboard-layout {
   flex: 1;
   overflow-y: auto;
-  height: calc(100vh - 60px);
+  height: 100vh;
   background: var(--bg-primary);
 }
 
@@ -433,7 +474,7 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 60px); /* Full height minus header */
+  height: calc(100vh); /* Full height minus header */
   width: 100%;
   overflow: hidden;
 }
@@ -445,7 +486,7 @@ body {
 .analytics-layout {
   flex: 1;
   overflow-y: auto;
-  height: calc(100vh - 60px);
+  height: 100vh;
   background: var(--bg-primary);
   padding: var(--spacing-lg);
 }
@@ -456,7 +497,7 @@ body {
 
 .augmentation-layout {
   position: relative;
-  height: calc(100vh - 60px);
+  height: 100vh;
   background: var(--bg-primary);
 }
 
@@ -680,22 +721,16 @@ body {
 
 /* ─── Mobile Header ─── */
 @media (max-width: 600px) {
-  .app-header {
-    padding: 0.5rem 0.75rem;
-    gap: 0.5rem;
+  .app {
+    flex-direction: column;
   }
 
-  .app-title {
+  .app-main {
+    margin-left: 0;
+  }
+
+  .app-sidebar {
     display: none;
-  }
-
-  .main-nav {
-    gap: 2px;
-  }
-
-  .nav-tab {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.78rem;
   }
 
   .course-count {

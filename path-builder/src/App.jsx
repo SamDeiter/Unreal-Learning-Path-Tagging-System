@@ -54,17 +54,19 @@ const InviteManager = lazy(() => import("./components/InviteManager/InviteManage
 const AdminAnalytics = lazy(() => import("./components/AdminAnalytics/AdminAnalytics"));
 
 // Tab definitions — split into student-facing and admin/builder
+// Newest mode always at the top of the list
 const PRIMARY_TABS = [
+  { key: "adaptive", label: "Adaptive Path", icon: "🎯" },
   { key: "bespoke", label: "Fix a Problem", icon: "🔧" },
-  { key: "personas", label: "Onboarding", icon: "🚀" },
   { key: "problem", label: "Learn Why", icon: "🧠" },
+  { key: "personas", label: "Onboarding", icon: "🚀" },
+  { key: "builder", label: "Path Builder", icon: "🏗️" },
 ];
 
 const SECONDARY_TABS = [
   { key: "dashboard", label: "Dashboard", icon: "📊" },
   { key: "readiness", label: "Path Readiness", icon: "📚" },
   { key: "tags", label: "Tags", icon: "🏷️" },
-  { key: "builder", label: "Path Builder", icon: "🏗️" },
   { key: "analytics", label: "Analytics", icon: "📈" },
   { key: "augmentation", label: "Augmentation", icon: "🔬" },
 ];
@@ -73,19 +75,20 @@ const BASE_TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
 
 // On mobile, surface the most useful tabs first
 const MOBILE_TAB_ORDER = [
+  "adaptive",
   "bespoke",
-  "personas",
   "problem",
+  "personas",
+  "builder",
   "dashboard",
   "readiness",
-  "builder",
   "tags",
   "analytics",
   "augmentation",
 ];
 
 function App() {
-  const [activeTab, setActiveTab] = useState("bespoke");
+  const [activeTab, setActiveTab] = useState("adaptive");
   const [preSelectedSkill, setPreSelectedSkill] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userIsAdmin, setUserIsAdmin] = useState(false);
@@ -277,98 +280,106 @@ function App() {
           lastUpdated={videoLibrary.generated_at}
         >
           <div className="app">
-            {/* Header */}
-            <header className={`app-header ${isMobile ? "mobile-header" : ""}`}>
-              {isMobile ? (
-                /* ── Mobile: hamburger + active tab name ── */
-                <>
-                  <button
-                    className="hamburger-btn"
-                    onClick={() => setDrawerOpen(true)}
-                    aria-label="Open menu"
-                  >
-                    ☰
-                  </button>
-                  <span className="mobile-active-tab">
-                    {tabs.find((t) => t.key === activeTab)?.icon}{" "}
-                    {tabs.find((t) => t.key === activeTab)?.label}
-                  </span>
-                  <div className="header-right mobile-header-right">
-                    {currentUser?.photoURL && (
-                      <img
-                        src={currentUser.photoURL}
-                        alt=""
-                        className="header-avatar"
-                        referrerPolicy="no-referrer"
-                      />
-                    )}
+            {isMobile ? (
+              /* ── Mobile: hamburger + active tab name ── */
+              <header className="app-header mobile-header">
+                <button
+                  className="hamburger-btn"
+                  onClick={() => setDrawerOpen(true)}
+                  aria-label="Open menu"
+                >
+                  ☰
+                </button>
+                <span className="mobile-active-tab">
+                  {tabs.find((t) => t.key === activeTab)?.icon}{" "}
+                  {tabs.find((t) => t.key === activeTab)?.label}
+                </span>
+                <div className="header-right mobile-header-right">
+                  {currentUser?.photoURL && (
+                    <img
+                      src={currentUser.photoURL}
+                      alt=""
+                      className="header-avatar"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
+                </div>
+              </header>
+            ) : (
+              /* ── Desktop: left sidebar ── */
+              <aside className="app-sidebar">
+                <div className="sidebar-header">
+                  <h1 className="app-title">UE5 LPB</h1>
+                </div>
+
+                <nav className="sidebar-nav">
+                  <div className="sidebar-section">
+                    <span className="sidebar-section-label">Learning</span>
+                    {PRIMARY_TABS.map((tab) => (
+                      <button
+                        key={tab.key}
+                        className={`sidebar-tab ${activeTab === tab.key ? "active" : ""}`}
+                        onClick={() => setActiveTab(tab.key)}
+                      >
+                        <span className="sidebar-tab-icon">{tab.icon}</span>
+                        <span className="sidebar-tab-label">{tab.label}</span>
+                      </button>
+                    ))}
                   </div>
-                </>
-              ) : (
-                /* ── Desktop: inline tabs ── */
-                <>
-                  <div className="header-left">
-                    <h1 className="app-title">UE5 Learning Path Builder</h1>
-                    <nav className="main-nav">
-                      {PRIMARY_TABS.map((tab) => (
-                        <button
-                          key={tab.key}
-                          className={`nav-tab ${activeTab === tab.key ? "active" : ""}`}
-                          onClick={() => setActiveTab(tab.key)}
-                        >
-                          {tab.icon} {tab.label}
-                        </button>
-                      ))}
-                    </nav>
-                  </div>
-                  <div className="tool-cards">
+
+                  <div className="sidebar-divider" />
+
+                  <div className="sidebar-section">
+                    <span className="sidebar-section-label">Tools</span>
                     {[...SECONDARY_TABS, ...tabs.filter((t) => t.adminOnly)].map((tab) => (
                       <button
                         key={tab.key}
-                        className={`tool-card ${activeTab === tab.key ? "active" : ""}`}
+                        className={`sidebar-tab sidebar-tab-sm ${activeTab === tab.key ? "active" : ""}`}
                         onClick={() => setActiveTab(tab.key)}
-                        title={tab.label}
                       >
-                        <span className="tool-card-icon">{tab.icon}</span>
-                        <span className="tool-card-label">{tab.label}</span>
+                        <span className="sidebar-tab-icon">{tab.icon}</span>
+                        <span className="sidebar-tab-label">{tab.label}</span>
                         {tab.key === "admin-feedback" && newFeedbackCount > 0 && (
                           <span className="feedback-badge">{newFeedbackCount}</span>
                         )}
                       </button>
                     ))}
                   </div>
-                  <div className="header-right">
-                    {currentUser && (
-                      <div className="header-user-info">
-                        {currentUser.photoURL && (
-                          <img
-                            src={currentUser.photoURL}
-                            alt=""
-                            className="header-avatar"
-                            referrerPolicy="no-referrer"
-                          />
-                        )}
-                        <span className="header-user-name">
-                          {currentUser.displayName || currentUser.email}
-                        </span>
-                        <button className="header-signout-btn" onClick={() => signOutUser()}>
-                          Sign Out
-                        </button>
-                        <button
-                          className="retake-quiz-btn"
-                          onClick={() => {
-                            localStorage.removeItem("ue5_persona_id");
-                            setShowQuiz(true);
-                          }}
-                        >
-                          🔄 Change My Role
-                        </button>
-                      </div>
-                    )}
+                </nav>
+
+                {currentUser && (
+                  <div className="sidebar-user">
+                    <div className="sidebar-user-info">
+                      {currentUser.photoURL && (
+                        <img
+                          src={currentUser.photoURL}
+                          alt=""
+                          className="header-avatar"
+                          referrerPolicy="no-referrer"
+                        />
+                      )}
+                      <span className="sidebar-user-name">
+                        {currentUser.displayName || currentUser.email}
+                      </span>
+                    </div>
+                    <div className="sidebar-user-actions">
+                      <button
+                        className="retake-quiz-btn"
+                        onClick={() => {
+                          localStorage.removeItem("ue5_persona_id");
+                          setShowQuiz(true);
+                        }}
+                      >
+                        🔄 Change Role
+                      </button>
+                      <button className="header-signout-btn" onClick={() => signOutUser()}>
+                        Sign Out
+                      </button>
+                    </div>
                   </div>
-                </>
-              )}
-            </header>
+                )}
+              </aside>
+            )}
 
             {/* Mobile Nav Drawer */}
             {isMobile && (
@@ -438,6 +449,19 @@ function App() {
                 {activeTab === "problem" && (
                   <div className="dashboard-layout">
                     <ProblemFirst />
+                  </div>
+                )}
+                {activeTab === "adaptive" && (
+                  <div className="dashboard-layout">
+                    <div
+                      style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)" }}
+                    >
+                      <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>🎯 Adaptive Path</h2>
+                      <p style={{ fontSize: "1.1rem", maxWidth: "500px", margin: "0 auto" }}>
+                        Coming soon — a diagnostic quiz will assess your knowledge gaps, then build
+                        a depth-adjusted learning path just for you.
+                      </p>
+                    </div>
                   </div>
                 )}
                 {activeTab === "bespoke" && (
