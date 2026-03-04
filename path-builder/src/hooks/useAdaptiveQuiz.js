@@ -8,6 +8,7 @@
 
 import { useState, useCallback } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFirebaseApp } from "../services/firebaseConfig";
 
 const STAGES = {
   IDLE: "idle",
@@ -41,7 +42,8 @@ export default function useAdaptiveQuiz() {
     setKnowledgeProfile(null);
 
     try {
-      const functions = getFunctions();
+      const app = getFirebaseApp();
+      const functions = getFunctions(app, "us-central1");
       const generateAudioBriefing = httpsCallable(functions, "generateAudioBriefing");
 
       const result = await generateAudioBriefing({

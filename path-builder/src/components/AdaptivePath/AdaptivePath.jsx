@@ -59,9 +59,10 @@ export default function AdaptivePath() {
    * Handle starting the diagnostic quiz
    */
   const handleStart = useCallback(async () => {
-    const cleaned = sanitizeQuery(query);
-    if (!cleaned) return;
+    const result = sanitizeQuery(query);
+    if (!result.valid) return;
 
+    const cleaned = result.sanitized;
     const rateCheck = checkRateLimit();
     if (!rateCheck.allowed) return;
 
