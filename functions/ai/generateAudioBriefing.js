@@ -21,12 +21,23 @@ exports.generateAudioBriefing = functions
   .https.onCall(async (data, context) => {
     const userId = context.auth?.uid || "anonymous";
     const { query, steps } = data;
+    const mode = data.mode || "overview";
 
-    if (!query || !steps || !Array.isArray(steps) || steps.length === 0) {
-      throw new functions.https.HttpsError(
-        "invalid-argument",
-        "Must provide query and steps array."
-      );
+    // Validate based on mode
+    if (mode === "step") {
+      if (!query || !data.stepContent) {
+        throw new functions.https.HttpsError(
+          "invalid-argument",
+          "Must provide query and stepContent for step mode."
+        );
+      }
+    } else {
+      if (!query || !steps || !Array.isArray(steps) || steps.length === 0) {
+        throw new functions.https.HttpsError(
+          "invalid-argument",
+          "Must provide query and steps array."
+        );
+      }
     }
 
     const rateLimitCheck = await checkRateLimit(userId, "audioBriefing");
@@ -36,9 +47,6 @@ exports.generateAudioBriefing = functions
         `Rate limit exceeded. ${rateLimitCheck.message}`
       );
     }
-
-    // Determine mode: "overview" (default) or "step" (single step)
-    const mode = data.mode || "overview";
 
     try {
       let apiKey = process.env.GEMINI_API_KEY;
@@ -54,7 +62,10 @@ exports.generateAudioBriefing = functions
       if (mode === "step") {
         const { stepContent, stepCategory, stepTitle } = data;
         if (!stepContent) {
-          throw new functions.https.HttpsError("invalid-argument", "stepContent is required for step mode.");
+          throw new functions.https.HttpsError(
+            "invalid-argument",
+            "stepContent is required for step mode."
+          );
         }
 
         // Generate a short single-speaker explanation (50 words max)
@@ -93,7 +104,10 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
             speechConfig: {
               multiSpeakerVoiceConfig: {
                 speakerVoiceConfigs: [
-                  { speaker: "Narrator", voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } },
+                  {
+                    speaker: "Narrator",
+                    voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+                  },
                 ],
               },
             },
@@ -114,23 +128,46 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
 
         // Convert PCM to WAV
         const pcm = Buffer.from(stepAudioData.data, "base64");
-        const sr = 24000; const bps = 16; const ch = 1;
+        const sr = 24000;
+        const bps = 16;
+        const ch = 1;
         const hdr = Buffer.alloc(44);
-        hdr.write("RIFF", 0); hdr.writeUInt32LE(36 + pcm.length, 4);
-        hdr.write("WAVE", 8); hdr.write("fmt ", 12);
-        hdr.writeUInt32LE(16, 16); hdr.writeUInt16LE(1, 20);
-        hdr.writeUInt16LE(ch, 22); hdr.writeUInt32LE(sr, 24);
+        hdr.write("RIFF", 0);
+        hdr.writeUInt32LE(36 + pcm.length, 4);
+        hdr.write("WAVE", 8);
+        hdr.write("fmt ", 12);
+        hdr.writeUInt32LE(16, 16);
+        hdr.writeUInt16LE(1, 20);
+        hdr.writeUInt16LE(ch, 22);
+        hdr.writeUInt32LE(sr, 24);
         hdr.writeUInt32LE(sr * ch * (bps / 8), 28);
         hdr.writeUInt16LE(ch * (bps / 8), 32);
-        hdr.writeUInt16LE(bps, 34); hdr.write("data", 36);
+        hdr.writeUInt16LE(bps, 34);
+        hdr.write("data", 36);
         hdr.writeUInt32LE(pcm.length, 40);
         const wav = Buffer.concat([hdr, pcm]);
 
-        console.log(JSON.stringify({ severity: "INFO", message: "step_audio_ready", wavSize: wav.length, stepCategory }));
+        console.log(
+          JSON.stringify({
+            severity: "INFO",
+            message: "step_audio_ready",
+            wavSize: wav.length,
+            stepCategory,
+          })
+        );
 
-        await logApiUsage(userId, { model: "gemini-2.5-flash-preview-tts", type: "stepAudio", query: query.substring(0, 50) });
+        await logApiUsage(userId, {
+          model: "gemini-2.5-flash-preview-tts",
+          type: "stepAudio",
+          query: query.substring(0, 50),
+        });
 
-        return { success: true, audio: wav.toString("base64"), mimeType: "audio/wav", script: stepScript };
+        return {
+          success: true,
+          audio: wav.toString("base64"),
+          mimeType: "audio/wav",
+          script: stepScript,
+        };
       }
 
       // ── OVERVIEW MODE (original behavior) ──
@@ -280,8 +317,8 @@ Start with Instructor greeting the learner and mentioning their specific problem
       wavHeader.writeUInt32LE(36 + dataSize, 4);
       wavHeader.write("WAVE", 8);
       wavHeader.write("fmt ", 12);
-      wavHeader.writeUInt32LE(16, 16);        // PCM chunk size
-      wavHeader.writeUInt16LE(1, 20);          // PCM format
+      wavHeader.writeUInt32LE(16, 16); // PCM chunk size
+      wavHeader.writeUInt16LE(1, 20); // PCM format
       wavHeader.writeUInt16LE(numChannels, 22);
       wavHeader.writeUInt32LE(sampleRate, 24);
       wavHeader.writeUInt32LE(byteRate, 28);
