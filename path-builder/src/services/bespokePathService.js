@@ -180,6 +180,8 @@ Return a JSON array of objects with this format:
 Rules:
 - Include only segments with "high" or "medium" relevance
 - Order: foundation → diagnosis → fix → transfer
+- You MUST include at least ONE segment of each category (foundation, diagnosis, fix, transfer)
+- If no segment perfectly fits "transfer", pick the one that best teaches prevention or broader application
 - Max ${MAX_PATH_SEGMENTS} segments total
 - Min ${MIN_PATH_SEGMENTS} segments if enough are relevant
 - Prefer transcript segments over docs for hands-on topics

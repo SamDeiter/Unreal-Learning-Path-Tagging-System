@@ -26,76 +26,37 @@ import { recordTokenUsage } from "./tokenTracker";
  * @param {number} count - Number of questions to generate (default 2)
  * @returns {Promise<Array<{stem: string, choices: {A:string, B:string, C:string, D:string}, correct: string, explanation: string}>>}
  */
-export async function generateQuizForStep(step, userQuery, count = 2) {
-  if (!step?.segment?.text) return [];
+export async function generateQuizForStep(step, userQuery, count = 3) {
+  if (!step?.segment?.text && !step?.summary) return [];
 
-  const contentSnippet = step.segment.text.slice(0, 800);
-  const sourceLabel =
-    step.segment.type === "transcript"
-      ? `Video: ${step.segment.videoTitle}`
-      : step.segment.type === "epic_learning"
-        ? `Article: ${step.segment.title}`
-        : `Docs: ${step.segment.title}`;
-
-  const prompt = `You are a UE5 instructor creating a quick comprehension quiz.
-
-The learner asked: "${userQuery}"
-They just studied this ${step.category} content from ${sourceLabel}:
-
-"""
-${contentSnippet}
-"""
-
-Generate exactly ${count} multiple-choice questions that test whether the learner understood the key concepts. Each question should:
-- Be directly answerable from the content above
-- Have exactly 4 choices (A, B, C, D)
-- Have only ONE correct answer
-- Include a 1-sentence explanation for the correct answer
-- Be practical and UE5-specific (not generic trivia)
-
-Return ONLY a JSON array with this exact format:
-[{
-  "stem": "What is the primary purpose of...",
-  "choices": {"A": "...", "B": "...", "C": "...", "D": "..."},
-  "correct": "B",
-  "explanation": "B is correct because..."
-}]`;
+  const contentSnippet = (step.summary || step.segment?.text || "").slice(0, 1500);
 
   try {
     const app = getFirebaseApp();
     const functions = getFunctions(app, "us-central1");
-    const quizFn = httpsCallable(functions, "extractIntent");
+    const quizFn = httpsCallable(functions, "generateAudioBriefing");
 
-    const result = await quizFn({ query: prompt });
-    const responseText = result.data?.intent || result.data?.text || "";
+    const result = await quizFn({
+      mode: "quiz",
+      query: userQuery,
+      stepContent: contentSnippet,
+      stepCategory: step.category || "learning",
+      quizCount: count,
+    });
 
-    // Parse JSON from response
-    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
-      devWarn("[Quiz] Could not parse quiz JSON from AI response");
-      return fallbackQuestions(step);
+    if (result.data?.questions && Array.isArray(result.data.questions)) {
+      devLog(
+        `[Quiz] Generated ${result.data.questions.length} questions for ${step.category} step`
+      );
+      recordTokenUsage(
+        "quizGeneration",
+        Math.ceil(contentSnippet.length / 4),
+        Math.ceil(JSON.stringify(result.data.questions).length / 4)
+      );
+      return result.data.questions;
     }
 
-    const questions = JSON.parse(jsonMatch[0]);
-
-    // Validate structure
-    const valid = questions.filter(
-      (q) =>
-        q.stem &&
-        q.choices &&
-        typeof q.choices === "object" &&
-        Object.keys(q.choices).length === 4 &&
-        q.correct &&
-        ["A", "B", "C", "D"].includes(q.correct)
-    );
-
-    devLog(`[Quiz] Generated ${valid.length} questions for ${step.category} step`);
-    recordTokenUsage(
-      "quizGeneration",
-      Math.ceil(prompt.length / 4),
-      Math.ceil(responseText.length / 4)
-    );
-    return valid;
+    return fallbackQuestions(step);
   } catch (err) {
     devWarn("[Quiz] AI quiz generation failed:", err.message);
     return fallbackQuestions(step);

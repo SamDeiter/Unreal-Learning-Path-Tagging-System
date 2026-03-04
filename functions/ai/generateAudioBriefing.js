@@ -24,7 +24,7 @@ exports.generateAudioBriefing = functions
     const mode = data.mode || "overview";
 
     // Validate based on mode
-    if (mode === "step" || mode === "takeaways") {
+    if (mode === "step" || mode === "takeaways" || mode === "quiz") {
       if (!query || !data.stepContent) {
         throw new functions.https.HttpsError(
           "invalid-argument",
@@ -237,6 +237,78 @@ Return ONLY a JSON array of 3 strings.`;
         return {
           success: true,
           takeaways: takeaways.slice(0, 3),
+        };
+      }
+
+      // ── QUIZ MODE: generate quiz questions from step content ──
+      if (mode === "quiz") {
+        const { stepContent, stepCategory, quizCount } = data;
+        const count = Math.min(quizCount || 3, 5);
+
+        const quizPrompt = `You are a UE5 instructor creating a comprehension quiz.
+
+The learner asked: "${query}"
+They just studied this ${stepCategory || "learning"} content:
+
+"""
+${(stepContent || "").substring(0, 1500)}
+"""
+
+Generate exactly ${count} multiple-choice questions that test whether the learner UNDERSTOOD the specific concepts above. Each question should:
+- Be DIRECTLY answerable from the content — not generic UE5 trivia
+- Reference specific properties, classes, nodes, or settings from the content
+- Have exactly 4 choices (A, B, C, D) — only ONE correct
+- Include a 1-sentence explanation for the correct answer
+
+Return ONLY a JSON array:
+[{"stem": "What specific property...", "choices": {"A": "...", "B": "...", "C": "...", "D": "..."}, "correct": "B", "explanation": "B is correct because..."}]`;
+
+        const quizUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const quizResp = await fetch(quizUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: quizPrompt }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+          }),
+        });
+
+        if (!quizResp.ok) {
+          const err = await quizResp.text();
+          throw new Error(`Quiz generation failed: ${err}`);
+        }
+
+        const quizJson = await quizResp.json();
+        const quizText = quizJson.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        const match = quizText.match(/\[[\s\S]*\]/);
+        let questions = [];
+        if (match) {
+          try {
+            const parsed = JSON.parse(match[0]);
+            questions = parsed.filter(
+              (q) =>
+                q.stem &&
+                q.choices &&
+                typeof q.choices === "object" &&
+                Object.keys(q.choices).length === 4 &&
+                q.correct &&
+                ["A", "B", "C", "D"].includes(q.correct)
+            );
+          } catch (e) {
+            console.warn("Failed to parse quiz JSON:", e.message);
+          }
+        }
+
+        await logApiUsage(userId, {
+          model: "gemini-2.0-flash",
+          type: "quiz",
+          query: query.substring(0, 50),
+        });
+
+        return {
+          success: true,
+          questions: questions.slice(0, count),
         };
       }
 
