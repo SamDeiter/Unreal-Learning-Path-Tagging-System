@@ -5,7 +5,7 @@
  * 1. Query input → 2. Loading pipeline → 3. Sequenced path with bridge narrations
  */
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "../../services/firebaseConfig";
 import { generateBespokePath } from "../../services/bespokePathService";
@@ -19,6 +19,16 @@ import PathProgress from "./PathProgress";
 import QuizEngine from "./QuizEngine";
 import PreSeededPaths from "./PreSeededPaths";
 import "./BespokePath.css";
+
+// Analytics & Token Tracking
+import {
+  startSession,
+  trackEvent,
+  trackQuerySubmitted,
+  trackFollowupQuery,
+  EVENTS,
+} from "../../services/analyticsService";
+import { recordTokenUsage } from "../../services/tokenTracker";
 
 const EXAMPLE_QUERIES = [
   "How do I fix character animation jittering in multiplayer?",
@@ -47,6 +57,12 @@ export default function BespokePath() {
   const [briefingLoading, setBriefingLoading] = useState(false);
   const [briefingStatus, setBriefingStatus] = useState("");
   const audioRef = useRef(null);
+  const isFollowUp = useRef(false);
+
+  // Start analytics session on mount
+  useEffect(() => {
+    startSession();
+  }, []);
 
   const handleGenerate = useCallback(async () => {
     const trimmed = query.trim();
@@ -68,6 +84,13 @@ export default function BespokePath() {
     }
 
     recordQuery();
+
+    // Track analytics
+    if (isFollowUp.current) {
+      trackFollowupQuery(pathResult?.query || "", sanitized);
+    }
+    trackQuerySubmitted(sanitized, []);
+    isFollowUp.current = true;
     setIsLoading(true);
     setPathResult(null);
     setCurrentStep(0);
@@ -80,6 +103,11 @@ export default function BespokePath() {
     const cached = findCachedPath(trimmed);
     if (cached) {
       setPipelineStage("Found cached path!");
+      trackEvent(EVENTS.LEARNING_PATH_GENERATED, {
+        query: trimmed,
+        step_count: cached.path?.length || 0,
+        from_cache: true,
+      });
       setPathResult({ ...cached, fromCache: true });
       addToHistory(trimmed, cached);
       setIsLoading(false);
@@ -93,6 +121,11 @@ export default function BespokePath() {
 
     if (!result.error && result.path.length > 0) {
       setPipelineStage("Path ready!");
+      trackEvent(EVENTS.LEARNING_PATH_GENERATED, {
+        query: sanitized,
+        step_count: result.path?.length || 0,
+        from_cache: false,
+      });
       cachePath(trimmed, result);
       addToHistory(trimmed, result);
     }
@@ -307,6 +340,10 @@ export default function BespokePath() {
                           const blob = new Blob([bytes], { type: "audio/wav" });
                           setBriefingAudioUrl(URL.createObjectURL(blob));
                           setBriefingStatus("");
+                          trackEvent("audio_briefing_generated", {
+                            query: pathResult.query?.substring(0, 100),
+                            step_count: pathResult.path?.length || 0,
+                          });
                         } else {
                           setBriefingStatus("Error: No audio data returned");
                         }

@@ -38,6 +38,13 @@ export const EVENTS = {
   // Validation
   CURRICULUM_VALIDATED: "curriculum_validated",
   CURRICULUM_REJECTED: "curriculum_rejected",
+
+  // New features
+  AUDIO_BRIEFING_GENERATED: "audio_briefing_generated",
+  AUDIO_BRIEFING_PLAYED: "audio_briefing_played",
+  QUIZ_STARTED: "quiz_started",
+  QUIZ_COMPLETED: "quiz_completed",
+  PATH_STEP_VIEWED: "path_step_viewed",
 };
 
 /**
