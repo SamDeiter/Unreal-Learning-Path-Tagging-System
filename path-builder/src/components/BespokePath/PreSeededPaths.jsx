@@ -20,7 +20,7 @@ export default function PreSeededPaths({ paths, onSelect }) {
       <div className="preseeded-header">
         <h3 className="preseeded-title">🔥 Popular Learning Paths</h3>
         <p className="preseeded-subtitle">
-          Pre-built paths for the most common UE5 questions — instant, no AI cost.
+          Pre-built paths for the most common UE5 questions — instant results.
         </p>
       </div>
 

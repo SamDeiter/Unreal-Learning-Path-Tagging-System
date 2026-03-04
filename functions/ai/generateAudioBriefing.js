@@ -94,21 +94,15 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
         const stepScriptJson = await stepScriptResp.json();
         const stepScript = stepScriptJson.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-        // TTS — single speaker, short
-        const stepTtsPrompt = `Narrator: ${stepScript}`;
+        // TTS — single speaker (no multiSpeakerVoiceConfig, just voiceConfig)
         const stepTtsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
         const stepTtsBody = {
-          contents: [{ parts: [{ text: stepTtsPrompt }] }],
+          contents: [{ parts: [{ text: stepScript }] }],
           generationConfig: {
             responseModalities: ["AUDIO"],
             speechConfig: {
-              multiSpeakerVoiceConfig: {
-                speakerVoiceConfigs: [
-                  {
-                    speaker: "Narrator",
-                    voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
-                  },
-                ],
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: "Kore" },
               },
             },
           },
@@ -181,9 +175,7 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
         };
       }
 
-      // ── OVERVIEW MODE (original behavior) ──
-
-      // -- Step 1: Generate a 2-speaker dialog script --
+      // -- Step 1: Generate a single-narrator briefing script --
       const stepSummaries = steps
         .map(
           (s, i) =>
@@ -191,30 +183,24 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
         )
         .join("\n");
 
-      const scriptPrompt = `You are writing a short, 2-person audio briefing script for a UE5 learning path.
+      const scriptPrompt = `You are writing a short audio briefing script for a UE5 learning path. Single narrator, friendly expert tone.
 
 The learner asked: "${query}"
 
 Here are the learning path steps:
 ${stepSummaries}
 
-Write a conversational and BRIEF (MAXIMUM 150 words, ~45 seconds) dialog between two speakers:
-- "Instructor": A friendly UE5 expert who explains the root cause and the fix
-- "Learner": A curious developer who asks clarifying questions
+Write a BRIEF (MAXIMUM 150 words, ~45 seconds) narrator monologue that:
+- Greets the learner and acknowledges their specific problem
+- Briefly explains the root cause
+- Previews the key steps they'll learn
+- Encourages them that by the end they'll have it solved
 
 Rules:
-- Keep it under 800 words total (about 2-3 minutes of audio)
-- Instructor should explain WHY the problem happens (root cause) and HOW to fix it
-- Learner should ask 2-3 natural follow-up questions
-- Use conversational language, not lecture-style
+- Conversational, warm, expert tone — like a mentor
 - DO NOT use any markdown or formatting
-- Format EXACTLY as:
-Instructor: [text]
-Learner: [text]
-Instructor: [text]
-...
-
-Start with Instructor greeting the learner and mentioning their specific problem.`;
+- Just plain spoken text, no speaker labels
+- Keep it concise and engaging`;
 
       const scriptUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
       const scriptResp = await fetch(scriptUrl, {
@@ -246,30 +232,15 @@ Start with Instructor greeting the learner and mentioning their specific problem
         })
       );
 
-      // -- Step 2: Synthesize multi-speaker audio via Gemini TTS --
-      const ttsPrompt = `TTS the following conversation between Instructor and Learner:\n\n${script}`;
-
+      // -- Step 2: Synthesize single-speaker audio via Gemini TTS --
       const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
       const ttsBody = {
-        contents: [{ parts: [{ text: ttsPrompt }] }],
+        contents: [{ parts: [{ text: script }] }],
         generationConfig: {
           responseModalities: ["AUDIO"],
           speechConfig: {
-            multiSpeakerVoiceConfig: {
-              speakerVoiceConfigs: [
-                {
-                  speaker: "Instructor",
-                  voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: "Kore" },
-                  },
-                },
-                {
-                  speaker: "Learner",
-                  voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: "Puck" },
-                  },
-                },
-              ],
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: "Kore" },
             },
           },
         },

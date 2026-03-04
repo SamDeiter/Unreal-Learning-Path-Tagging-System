@@ -198,24 +198,33 @@ export default function BespokePath() {
   }, []);
 
   // Generate per-step audio on demand
-  const handleStepAudio = useCallback(async (stepIndex) => {
-    if (stepAudios.has(stepIndex) || !pathResult) return;
-    setStepAudioLoading(stepIndex);
-    const url = await generateStepAudio(pathResult.path[stepIndex], pathResult.query || query);
-    if (url) {
-      setStepAudios(prev => new Map(prev).set(stepIndex, url));
-    }
-    setStepAudioLoading(null);
-  }, [stepAudios, pathResult, query]);
+  const handleStepAudio = useCallback(
+    async (stepIndex) => {
+      if (stepAudios.has(stepIndex) || !pathResult) return;
+      setStepAudioLoading(stepIndex);
+      const url = await generateStepAudio(pathResult.path[stepIndex], pathResult.query || query);
+      if (url) {
+        setStepAudios((prev) => new Map(prev).set(stepIndex, url));
+      }
+      setStepAudioLoading(null);
+    },
+    [stepAudios, pathResult, query]
+  );
 
   // Generate takeaways on demand when step becomes active
-  const handleLoadTakeaways = useCallback(async (stepIndex) => {
-    if (stepTakeaways.has(stepIndex) || !pathResult) return;
-    setTakeawayLoading(stepIndex);
-    const takeaways = await generateStepTakeaways(pathResult.path[stepIndex], pathResult.query || query);
-    setStepTakeaways(prev => new Map(prev).set(stepIndex, takeaways));
-    setTakeawayLoading(null);
-  }, [stepTakeaways, pathResult, query]);
+  const handleLoadTakeaways = useCallback(
+    async (stepIndex) => {
+      if (stepTakeaways.has(stepIndex) || !pathResult) return;
+      setTakeawayLoading(stepIndex);
+      const takeaways = await generateStepTakeaways(
+        pathResult.path[stepIndex],
+        pathResult.query || query
+      );
+      setStepTakeaways((prev) => new Map(prev).set(stepIndex, takeaways));
+      setTakeawayLoading(null);
+    },
+    [stepTakeaways, pathResult, query]
+  );
 
   // Auto-load takeaways when step changes
   useEffect(() => {
@@ -243,8 +252,8 @@ export default function BespokePath() {
           <span className="bespoke-icon">🔧</span> Fix a Problem
         </h2>
         <p className="bespoke-subtitle">
-          Describe your UE5 problem and get an AI-curated learning path with video clips, docs, and
-          step-by-step guidance.
+          Describe your UE5 problem and get an expert-curated learning path with video clips, docs,
+          and step-by-step guidance.
         </p>
 
         <div className="bespoke-input-area">
@@ -356,7 +365,9 @@ export default function BespokePath() {
                       try {
                         const app = getFirebaseApp();
                         const functions = getFunctions(app, "us-central1");
-                        const genFn = httpsCallable(functions, "generateAudioBriefing", { timeout: 120000 });
+                        const genFn = httpsCallable(functions, "generateAudioBriefing", {
+                          timeout: 120000,
+                        });
                         setBriefingStatus("Synthesizing audio (this may take 30-60s)…");
                         const result = await genFn({
                           query: pathResult.query || query,
@@ -400,7 +411,9 @@ export default function BespokePath() {
           {/* Path Overview */}
           <div className="key-highlights">
             <h3>Your Learning Path</h3>
-            <p className="highlights-query">For: <em>"{pathResult.query || query}"</em></p>
+            <p className="highlights-query">
+              For: <em>"{pathResult.query || query}"</em>
+            </p>
             <ul className="highlights-list">
               {pathResult.path.map((step, i) => (
                 <li key={i} className="highlight-item" onClick={() => setCurrentStep(i)}>
