@@ -100,13 +100,13 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
         const stepTtsBody = {
           contents: [{ parts: [{ text: stepTtsPrompt }] }],
           generationConfig: {
-            responseModalities: ["AUDIO"],
-            speechConfig: {
-              multiSpeakerVoiceConfig: {
-                speakerVoiceConfigs: [
+            response_modalities: ["AUDIO"],
+            speech_config: {
+              multi_speaker_voice_config: {
+                speaker_voice_configs: [
                   {
                     speaker: "Narrator",
-                    voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+                    voice_config: { prebuilt_voice_config: { voice_name: "Kore" } },
                   },
                 ],
               },
@@ -242,20 +242,20 @@ Start with Instructor greeting the learner and mentioning their specific problem
       const ttsBody = {
         contents: [{ parts: [{ text: ttsPrompt }] }],
         generationConfig: {
-          responseModalities: ["AUDIO"],
-          speechConfig: {
-            multiSpeakerVoiceConfig: {
-              speakerVoiceConfigs: [
+          response_modalities: ["AUDIO"],
+          speech_config: {
+            multi_speaker_voice_config: {
+              speaker_voice_configs: [
                 {
                   speaker: "Instructor",
-                  voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: "Kore" },
+                  voice_config: {
+                    prebuilt_voice_config: { voice_name: "Kore" },
                   },
                 },
                 {
                   speaker: "Learner",
-                  voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: "Puck" },
+                  voice_config: {
+                    prebuilt_voice_config: { voice_name: "Puck" },
                   },
                 },
               ],
