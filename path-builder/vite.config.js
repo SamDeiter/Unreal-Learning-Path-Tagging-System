@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/Unreal-Learning-Path-Tagging-System/",
+  base: "/",
   plugins: [react()],
   build: {
     rollupOptions: {
