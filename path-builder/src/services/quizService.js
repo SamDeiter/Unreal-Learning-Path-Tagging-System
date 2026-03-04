@@ -66,7 +66,7 @@ Return ONLY a JSON array with this exact format:
     const functions = getFunctions(app, "us-central1");
     const quizFn = httpsCallable(functions, "extractIntent");
 
-    const result = await quizFn({ text: prompt });
+    const result = await quizFn({ query: prompt });
     const responseText = result.data?.intent || result.data?.text || "";
 
     // Parse JSON from response
