@@ -58,12 +58,14 @@ export async function generateStepTakeaways(step, query) {
     const fn = httpsCallable(functions, "extractIntent");
 
     const content = step.summary || step.segment?.text || "";
+    const actionSteps = step.action || step.segment?.action || "";
     const prompt = `You are a UE5 instructor highlighting KEY TAKEAWAYS for a learner.
 
 The learner asked: "${query}"
 This is a ${step.category || "learning"} step:
 
-"${content.substring(0, 600)}"
+"${content.substring(0, 1500)}"
+${actionSteps ? `\nAction steps from this content:\n"${actionSteps.substring(0, 500)}"` : ""}
 
 Generate exactly 3 key takeaways the learner MUST know from this step. Each takeaway should be:
 - One concise sentence (under 20 words)
