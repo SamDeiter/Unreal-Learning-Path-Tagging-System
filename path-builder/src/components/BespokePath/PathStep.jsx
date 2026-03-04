@@ -44,6 +44,21 @@ function filterTakeaways(items) {
   });
 }
 
+/**
+ * Convert single-quoted terms in text to bold elements.
+ * e.g. "Adjust 'NetClientTicksPerSecond' in config" →
+ *       Adjust <strong>NetClientTicksPerSecond</strong> in config
+ */
+function highlightKeyTerms(text) {
+  const parts = text.split(/('.*?')/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("'") && part.endsWith("'")) {
+      return <strong key={i}>{part.slice(1, -1)}</strong>;
+    }
+    return part;
+  });
+}
+
 // ── Component ─────────────────────────────────────────────────────────
 
 export default function PathStep({
@@ -194,7 +209,7 @@ export default function PathStep({
           ) : filteredTakeaways && filteredTakeaways.length > 0 ? (
             <ul className="takeaways-list">
               {filteredTakeaways.map((t, i) => (
-                <li key={i}>{t.charAt(0).toUpperCase() + t.slice(1)}</li>
+                <li key={i}>{highlightKeyTerms(t.charAt(0).toUpperCase() + t.slice(1))}</li>
               ))}
             </ul>
           ) : (

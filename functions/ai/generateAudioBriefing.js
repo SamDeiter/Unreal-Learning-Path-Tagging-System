@@ -259,6 +259,7 @@ Generate exactly ${count} multiple-choice questions that test whether the learne
 - Reference specific properties, classes, nodes, or settings from the content
 - Have exactly 4 choices (A, B, C, D) — only ONE correct
 - Include a 1-sentence explanation for the correct answer
+- Write choices as clean readable text — NEVER use (...) or () or code-style signatures in choices
 
 Return ONLY a JSON array:
 [{"stem": "What specific property...", "choices": {"A": "...", "B": "...", "C": "...", "D": "..."}, "correct": "B", "explanation": "B is correct because..."}]`;
