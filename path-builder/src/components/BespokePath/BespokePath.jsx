@@ -299,11 +299,16 @@ export default function BespokePath() {
                             title: s.segment?.title || s.segment?.videoTitle || "",
                           })),
                         });
-                        if (result.data?.audioUrl) {
-                          setBriefingAudioUrl(result.data.audioUrl);
+                        if (result.data?.audio) {
+                          // Convert base64 WAV to blob URL
+                          const binary = atob(result.data.audio);
+                          const bytes = new Uint8Array(binary.length);
+                          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                          const blob = new Blob([bytes], { type: "audio/wav" });
+                          setBriefingAudioUrl(URL.createObjectURL(blob));
                           setBriefingStatus("");
                         } else {
-                          setBriefingStatus("Error: No audio URL returned");
+                          setBriefingStatus("Error: No audio data returned");
                         }
                       } catch (err) {
                         console.error("Audio briefing error:", err);

@@ -204,32 +204,16 @@ Start with Instructor greeting the learner and mentioning their specific problem
 
       const wavBuffer = Buffer.concat([wavHeader, pcmBuffer]);
 
-      // Upload to Firebase Storage
-      const bucket = admin.storage().bucket("ue5-learning-paths.firebasestorage.app");
-      const filename = `audio-briefings/${userId}/${Date.now()}.wav`;
-      const file = bucket.file(filename);
-
-      await file.save(wavBuffer, {
-        metadata: {
-          contentType: "audio/wav",
-          metadata: { query: query.substring(0, 100) },
-        },
-      });
-
-      // Make publicly accessible (signed URL valid for 1 hour)
-      const [signedUrl] = await file.getSignedUrl({
-        action: "read",
-        expires: Date.now() + 60 * 60 * 1000, // 1 hour
-      });
-
       console.log(
         JSON.stringify({
           severity: "INFO",
-          message: "audio_uploaded",
-          filename,
+          message: "audio_ready",
           wavSize: wavBuffer.length,
         })
       );
+
+      // Return base64 WAV directly (no Storage needed)
+      const audioBase64 = wavBuffer.toString("base64");
 
       await logApiUsage(userId, {
         model: "gemini-2.5-flash-preview-tts",
@@ -239,7 +223,7 @@ Start with Instructor greeting the learner and mentioning their specific problem
 
       return {
         success: true,
-        audioUrl: signedUrl,
+        audio: audioBase64,
         mimeType: "audio/wav",
         script,
       };
