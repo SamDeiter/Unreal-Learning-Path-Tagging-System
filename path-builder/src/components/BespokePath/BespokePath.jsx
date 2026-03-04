@@ -384,9 +384,12 @@ export default function BespokePath() {
         </div>
       )}
 
-      {/* Path Results */}
+      {/* Path Results — Modal Overlay */}
       {pathResult && !pathResult.error && pathResult.path.length > 0 && (
-        <div className="bespoke-results">
+        <div className="path-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) { setPathResult(null); setCurrentStep(0); } }}>
+          <div className="path-modal-container">
+            <button className="path-modal-close" onClick={() => { setPathResult(null); setCurrentStep(0); }}>✕</button>
+            <div className="bespoke-results">
           {/* Epic-style Split Stepper Layout */}
           <div className="epic-stepper-layout">
             {/* Left Sidebar: Phased Navigation */}
@@ -409,7 +412,7 @@ export default function BespokePath() {
                     {!pathResult.isPreSeeded && (
                       <button
                         className={`phase-nav-item ${currentStep === -1 ? "active" : ""}`}
-                        onClick={() => setCurrentStep(-1)}
+                        onClick={() => setCurrentStep(0)}
                       >
                         Overview
                       </button>
@@ -626,7 +629,7 @@ export default function BespokePath() {
                       }}
                       disabled={currentStep === 0 && pathResult.isPreSeeded}
                     >
-                      {currentStep === 0 ? "← Back to Overview" : `← Previous`}
+                      {currentStep === 0 ? "‹" : `‹`}
                     </button>
 
                     {(() => {
@@ -647,7 +650,7 @@ export default function BespokePath() {
                             className="epic-nav-btn complete-btn"
                             onClick={() => window.scrollTo(0, 0)}
                           >
-                            Complete Path ✓
+                            ✓ Complete
                           </button>
                         );
                       }
@@ -679,7 +682,7 @@ export default function BespokePath() {
                           className="epic-nav-btn next-btn"
                           onClick={() => setCurrentStep(currentStep + 1)}
                         >
-                          Next Step →
+                          ›
                         </button>
                       );
                     })()}
@@ -770,6 +773,8 @@ export default function BespokePath() {
               {pathResult.path.length} steps • {pathResult.segments.length} sources searched •{" "}
               Generated {new Date(pathResult.generatedAt).toLocaleTimeString()}
             </span>
+          </div>
+        </div>
           </div>
         </div>
       )}

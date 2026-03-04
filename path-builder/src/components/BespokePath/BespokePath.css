@@ -39,7 +39,7 @@
 .bespoke-input-wrapper {
   display: flex;
   gap: 12px;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .bespoke-input {
@@ -921,6 +921,7 @@
 /* ── Epic Games Stepper Layout ──────────────────────── */
 
 .epic-stepper-layout {
+  align-items: stretch;
   display: flex;
   gap: 32px;
   align-items: flex-start;
@@ -1573,4 +1574,221 @@
   line-height: 1.7;
   font-size: 0.95rem;
   margin: 0 0 4px 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MODAL OVERLAY
+   ══════════════════════════════════════════════════════════════ */
+
+.path-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.path-modal-container {
+  position: relative;
+  width: 92vw;
+  max-width: 1200px;
+  height: 88vh;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 16px;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  animation: modalSlideUp 0.3s ease;
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.path-modal-close {
+  position: sticky;
+  top: 12px;
+  right: 0;
+  float: right;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  margin: 12px 12px 0 0;
+  border-radius: 50%;
+  border: 1px solid #30363d;
+  background: #161b22;
+  color: #8b949e;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.path-modal-close:hover {
+  background: #21262d;
+  color: #f85149;
+  border-color: #f85149;
+}
+
+/* Inside modal, bespoke-results needs no extra padding */
+.path-modal-container .bespoke-results {
+  padding: 0 20px 20px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AUDIO TRACK BAR (Mockup Style)
+   ══════════════════════════════════════════════════════════════ */
+
+.audio-track-bar {
+  margin: 12px 0 20px 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Idle state — faux track bar that triggers generation */
+.audio-track-idle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #161b22 0%, #1a2332 100%);
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.audio-track-idle:hover {
+  border-color: #58a6ff;
+  background: linear-gradient(135deg, #1a2332 0%, #1e2d42 100%);
+}
+
+.audio-play-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #58a6ff;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  padding-left: 3px; /* optical centering for play icon */
+}
+
+.audio-play-circle:hover {
+  background: #79c0ff;
+  transform: scale(1.05);
+}
+
+.audio-scrubber {
+  flex: 1;
+  height: 4px;
+  background: #21262d;
+  border-radius: 2px;
+  position: relative;
+}
+
+.audio-scrubber-track {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #58a6ff, #79c0ff);
+  border-radius: 2px;
+}
+
+.audio-time {
+  color: #8b949e;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Generating state — animated progress */
+.audio-track-generating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #161b22 0%, #1a2332 100%);
+  border: 1px solid #30363d;
+  border-radius: 12px;
+}
+
+.audio-gen-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #21262d;
+  border-top-color: #58a6ff;
+  border-radius: 50%;
+  animation: audioSpin 0.8s linear infinite;
+}
+
+@keyframes audioSpin {
+  to { transform: rotate(360deg); }
+}
+
+.audio-gen-progress {
+  flex: 1;
+  height: 4px;
+  background: #21262d;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.audio-gen-bar {
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, #58a6ff, #79c0ff);
+  border-radius: 2px;
+  animation: audioProgress 2s ease-in-out infinite;
+}
+
+@keyframes audioProgress {
+  0% { width: 10%; margin-left: 0; }
+  50% { width: 50%; margin-left: 25%; }
+  100% { width: 10%; margin-left: 90%; }
+}
+
+.audio-gen-text {
+  color: #8b949e;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+/* Real audio player (once generated) */
+.audio-track-player {
+  width: 100%;
+  height: 42px;
+  border-radius: 12px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NAVIGATION ARROWS (< > style from mockup)
+   ══════════════════════════════════════════════════════════════ */
+
+.epic-step-navigation .epic-nav-btn.prev-btn,
+.epic-step-navigation .epic-nav-btn.next-btn {
+  min-width: 44px;
+  padding: 10px 16px;
+  font-size: 1.3rem;
 }

@@ -221,22 +221,33 @@ export default function PathStep({
         </span>
       </div>
 
-      {/* 2. Audio Player (at top, like mockup) */}
+      {/* 2. Audio Track Bar (mockup style) */}
       {isActive && (
-        <div className="step-audio step-audio-top">
+        <div className="audio-track-bar">
           {stepAudioUrl ? (
-            <audio controls src={stepAudioUrl} className="step-audio-player" />
+            <audio controls src={stepAudioUrl} className="audio-track-player" />
+          ) : stepAudioLoading ? (
+            <div className="audio-track-generating" onClick={(e) => e.stopPropagation()}>
+              <div className="audio-gen-spinner" />
+              <div className="audio-gen-progress">
+                <div className="audio-gen-bar" />
+              </div>
+              <span className="audio-gen-text">Generating audio…</span>
+            </div>
           ) : (
-            <button
-              className="step-audio-btn"
+            <div
+              className="audio-track-idle"
               onClick={(e) => {
                 e.stopPropagation();
                 onGenerateAudio?.();
               }}
-              disabled={stepAudioLoading}
             >
-              {stepAudioLoading ? "⏳ Generating…" : "🎧 Listen to Step Briefing"}
-            </button>
+              <button className="audio-play-circle">▶</button>
+              <div className="audio-scrubber">
+                <div className="audio-scrubber-track" />
+              </div>
+              <span className="audio-time">0:00</span>
+            </div>
           )}
         </div>
       )}
