@@ -112,12 +112,14 @@ Return ONLY a JSON array of 3 strings. Example:
 }
 
 /**
- * Generate a cohesive multi-section narration for an entire learning path.
+ * Generate a cohesive 2-phase narration for a learning path.
+ * Phase 1 = Questions (foundation/diagnosis steps)
+ * Phase 2 = Solution (fix/transfer steps)
  * User-triggered (not automatic) to control costs.
  *
  * @param {Object} pathResult - The full path result object
  * @param {string} query - The original user query
- * @returns {Promise<Map<number, {script: string, audioUrl: string|null}>|null>}
+ * @returns {Promise<Map<number, {script: string, audioUrl: string|null, phase: string}>|null>}
  */
 export async function generatePathNarration(pathResult, query) {
   try {
@@ -132,7 +134,7 @@ export async function generatePathNarration(pathResult, query) {
       category: step.category || "learning",
     }));
 
-    devLog("[PathNarration] Requesting narration for", steps.length, "steps");
+    devLog("[PathNarration] Requesting 2-phase narration for", steps.length, "steps");
 
     const result = await genFn({
       mode: "narrate",
@@ -140,26 +142,44 @@ export async function generatePathNarration(pathResult, query) {
       steps,
     });
 
-    if (result.data?.sections && Array.isArray(result.data.sections)) {
+    if (result.data?.phases && Array.isArray(result.data.phases)) {
       const narrationMap = new Map();
 
-      for (const section of result.data.sections) {
-        let audioUrl = null;
-        if (section.audio) {
-          const binary = atob(section.audio);
-          const bytes = new Uint8Array(binary.length);
-          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-          const blob = new Blob([bytes], { type: "audio/wav" });
-          audioUrl = URL.createObjectURL(blob);
-        }
+      // Helper: convert base64 audio to blob URL
+      const toBlobUrl = (base64) => {
+        if (!base64) return null;
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const blob = new Blob([bytes], { type: "audio/wav" });
+        return URL.createObjectURL(blob);
+      };
 
-        narrationMap.set(section.stepIndex, {
-          script: section.script || "",
-          audioUrl,
+      // Map each phase to the step indices that belong to it
+      for (const phase of result.data.phases) {
+        const audioUrl = toBlobUrl(phase.audio);
+        const phaseCategories =
+          phase.phase === "questions" ? ["foundation", "diagnosis"] : ["fix", "transfer"];
+
+        // Assign this narration to all steps matching this phase's categories
+        pathResult.path.forEach((step, idx) => {
+          if (phaseCategories.includes(step.category)) {
+            narrationMap.set(idx, {
+              script: phase.script || "",
+              audioUrl,
+              phase: phase.phase,
+            });
+          }
         });
       }
 
-      devLog("[PathNarration] Generated", narrationMap.size, "sections");
+      devLog(
+        "[PathNarration] Mapped",
+        narrationMap.size,
+        "steps to",
+        result.data.phases.length,
+        "phases"
+      );
       return narrationMap;
     }
 

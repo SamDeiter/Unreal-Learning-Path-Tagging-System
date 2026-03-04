@@ -175,7 +175,7 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
         };
       }
 
-      // ── NARRATE MODE: cohesive multi-section narrator script ──
+      // ── NARRATE MODE: 2-phase narration (Questions + Solution) ──
       if (mode === "narrate") {
         if (!steps || !Array.isArray(steps) || steps.length === 0) {
           throw new functions.https.HttpsError(
@@ -184,55 +184,57 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
           );
         }
 
-        // Cost guardrail: cap at 7 sections
-        const cappedSteps = steps.slice(0, 7);
-        const stepCount = cappedSteps.length;
+        // Split steps into two phases
+        const questionSteps = steps.filter(
+          (s) => s.category === "foundation" || s.category === "diagnosis"
+        );
+        const solutionSteps = steps.filter(
+          (s) => s.category === "fix" || s.category === "transfer"
+        );
 
-        // Build the step outline for the prompt
-        const stepOutline = cappedSteps
+        // Build summaries for each phase
+        const questionOutline = questionSteps
           .map(
-            (s, i) =>
-              `Section ${i + 1} (${s.category || "learning"} - "${s.title || `Step ${i + 1}`}"): ${(s.summary || "").substring(0, 200)}`
+            (s, i) => `- "${s.title || `Step ${i + 1}`}": ${(s.summary || "").substring(0, 200)}`
+          )
+          .join("\n");
+        const solutionOutline = solutionSteps
+          .map(
+            (s, i) => `- "${s.title || `Step ${i + 1}`}": ${(s.summary || "").substring(0, 200)}`
           )
           .join("\n");
 
-        // Build category-aware section instructions
-        const sectionInstructions = cappedSteps
-          .map((s, i) => {
-            const cat = s.category || "learning";
-            if (i === 0 && (cat === "foundation" || cat === "diagnosis")) {
-              return `Section ${i + 1} (INTRO): Greet the learner, restate their specific problem, explain WHY this happens based on the content, and preview what they'll learn.`;
-            } else if (cat === "foundation" || cat === "diagnosis") {
-              return `Section ${i + 1} (UNDERSTANDING): Build on the previous section. Explain the key concept from "${s.title || "this step"}" and why it matters for solving their problem.`;
-            } else if (cat === "fix") {
-              return `Section ${i + 1} (SOLUTION): Transition naturally from understanding to action. Walk through the fix described in "${s.title || "this step"}".`;
-            } else if (cat === "transfer") {
-              return `Section ${i + 1} (APPLY): Wrap up by explaining how to apply this knowledge. Encourage the learner.`;
-            }
-            return `Section ${i + 1}: Cover the key points from "${s.title || "this step"}".`;
-          })
-          .join("\n");
-
-        const narratePrompt = `You are a friendly UE5 instructor recording a guided audio walkthrough for a learner. You're explaining their specific problem and walking them through the solution step by step.
+        const narratePrompt = `You are a friendly, knowledgeable UE5 instructor recording a guided audio walkthrough for a learner who has a specific problem. Write TWO narration sections separated by "---" on its own line.
 
 The learner asked: "${query}"
 
-Here are the learning path steps:
-${stepOutline}
+SECTION 1 — UNDERSTANDING THE PROBLEM (covers these steps):
+${questionOutline || "General UE5 foundation concepts"}
 
-Write a narrator script divided into exactly ${stepCount} sections, separated by "---" on its own line.
+Write 120-150 words that:
+- Greet the learner warmly and restate their specific problem
+- Explain WHY this problem happens (root cause from the content above)
+- Walk through the key concepts they need to understand
+- Build confidence: "once you understand this, the fix becomes clear"
 
-${sectionInstructions}
+---
+
+SECTION 2 — THE SOLUTION (covers these steps):
+${solutionOutline || "Practical fix and application steps"}
+
+Write 120-150 words that:
+- Transition naturally: "Now that you understand the cause..."
+- Walk through the specific fix step by step
+- Reference actual UE5 concepts, nodes, or systems from the content
+- End with encouragement and a practical next step
 
 Rules:
-- Each section MUST be 60-90 words (about 30-45 seconds of audio)
-- Each section must flow naturally into the next — use transitions like "Now that you understand..." or "With that in mind..."
-- Speak directly to the learner using "you"
-- Be specific to the actual content — reference real UE5 concepts, not generic advice
-- DO NOT use any markdown, bullet points, headers, or formatting
-- Just plain conversational text
-- Do NOT include section labels like "Section 1:" — just the spoken text
-- TOTAL script must be under 600 words`;
+- Conversational, warm, mentor tone — like explaining to a colleague
+- Speak directly using "you"
+- Be SPECIFIC to the content — reference actual UE5 concepts
+- NO markdown, no bullet points, no headers, no formatting
+- Just plain spoken text, separated by "---"
+- TOTAL must be under 300 words`;
 
         const narrateScriptUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         const narrateScriptResp = await fetch(narrateScriptUrl, {
@@ -240,7 +242,7 @@ Rules:
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [{ parts: [{ text: narratePrompt }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+            generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
           }),
         });
 
@@ -252,12 +254,12 @@ Rules:
         const narrateScriptJson = await narrateScriptResp.json();
         const fullScript = narrateScriptJson.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-        if (!fullScript || fullScript.length < 100) {
+        if (!fullScript || fullScript.length < 50) {
           throw new Error("Generated narration script too short");
         }
 
-        // Split into sections by "---" separator
-        const rawSections = fullScript
+        // Split into 2 phases by "---" separator
+        const rawPhases = fullScript
           .split(/\n\s*---\s*\n/)
           .map((s) => s.trim())
           .filter((s) => s.length > 0);
@@ -267,28 +269,39 @@ Rules:
             severity: "INFO",
             message: "narration_script_generated",
             totalLength: fullScript.length,
-            sectionCount: rawSections.length,
+            phaseCount: rawPhases.length,
             totalWords: fullScript.split(/\s+/).length,
           })
         );
 
-        // Cost guardrail: enforce 8000 char total for TTS
-        let charBudget = 8000;
-        const sections = [];
+        // Helper: convert PCM to WAV
+        const pcmToWav = (pcmData) => {
+          const pcm = Buffer.from(pcmData, "base64");
+          const sr = 24000;
+          const bps = 16;
+          const ch = 1;
+          const hdr = Buffer.alloc(44);
+          hdr.write("RIFF", 0);
+          hdr.writeUInt32LE(36 + pcm.length, 4);
+          hdr.write("WAVE", 8);
+          hdr.write("fmt ", 12);
+          hdr.writeUInt32LE(16, 16);
+          hdr.writeUInt16LE(1, 20);
+          hdr.writeUInt16LE(ch, 22);
+          hdr.writeUInt32LE(sr, 24);
+          hdr.writeUInt32LE(sr * ch * (bps / 8), 28);
+          hdr.writeUInt16LE(ch * (bps / 8), 32);
+          hdr.writeUInt16LE(bps, 34);
+          hdr.write("data", 36);
+          hdr.writeUInt32LE(pcm.length, 40);
+          return Buffer.concat([hdr, pcm]).toString("base64");
+        };
 
-        for (let i = 0; i < rawSections.length && i < cappedSteps.length; i++) {
-          let sectionText = rawSections[i];
-
-          // Trim if exceeding budget
-          if (sectionText.length > charBudget) {
-            sectionText = sectionText.substring(0, charBudget);
-          }
-          charBudget -= sectionText.length;
-
-          // Generate TTS for this section
-          const sectionTtsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
-          const sectionTtsBody = {
-            contents: [{ parts: [{ text: sectionText }] }],
+        // Helper: generate TTS with one retry
+        const generateTts = async (text) => {
+          const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+          const ttsBody = {
+            contents: [{ parts: [{ text }] }],
             generationConfig: {
               responseModalities: ["AUDIO"],
               speechConfig: {
@@ -299,65 +312,56 @@ Rules:
             },
           };
 
-          const sectionTtsResp = await fetch(sectionTtsUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(sectionTtsBody),
-          });
+          for (let attempt = 0; attempt < 2; attempt++) {
+            const resp = await fetch(ttsUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(ttsBody),
+            });
 
-          let audioBase64 = null;
-          if (sectionTtsResp.ok) {
-            const sectionTtsJson = await sectionTtsResp.json();
-            const part = sectionTtsJson.candidates?.[0]?.content?.parts?.[0];
-            const ad = part?.inlineData || part?.inline_data;
-            if (ad?.data) {
-              // Convert PCM to WAV
-              const pcm = Buffer.from(ad.data, "base64");
-              const sr = 24000;
-              const bps = 16;
-              const ch = 1;
-              const hdr = Buffer.alloc(44);
-              hdr.write("RIFF", 0);
-              hdr.writeUInt32LE(36 + pcm.length, 4);
-              hdr.write("WAVE", 8);
-              hdr.write("fmt ", 12);
-              hdr.writeUInt32LE(16, 16);
-              hdr.writeUInt16LE(1, 20);
-              hdr.writeUInt16LE(ch, 22);
-              hdr.writeUInt32LE(sr, 24);
-              hdr.writeUInt32LE(sr * ch * (bps / 8), 28);
-              hdr.writeUInt16LE(ch * (bps / 8), 32);
-              hdr.writeUInt16LE(bps, 34);
-              hdr.write("data", 36);
-              hdr.writeUInt32LE(pcm.length, 40);
-              audioBase64 = Buffer.concat([hdr, pcm]).toString("base64");
+            if (resp.ok) {
+              const json = await resp.json();
+              const part = json.candidates?.[0]?.content?.parts?.[0];
+              const ad = part?.inlineData || part?.inline_data;
+              if (ad?.data) return pcmToWav(ad.data);
+            } else {
+              const errText = await resp.text();
+              console.log(
+                JSON.stringify({
+                  severity: "WARNING",
+                  message: `tts_attempt_${attempt + 1}_failed`,
+                  status: resp.status,
+                  error: errText.substring(0, 300),
+                })
+              );
+              // Wait 2s before retry
+              if (attempt === 0) await new Promise((r) => setTimeout(r, 2000));
             }
-          } else {
-            console.log(
-              JSON.stringify({
-                severity: "WARNING",
-                message: "section_tts_failed",
-                sectionIndex: i,
-                status: sectionTtsResp.status,
-              })
-            );
           }
+          return null; // Both attempts failed
+        };
 
-          sections.push({
-            stepIndex: i,
-            script: sectionText,
+        // Generate TTS for each phase
+        const phases = [];
+        const phaseNames = ["questions", "solution"];
+
+        for (let i = 0; i < Math.min(rawPhases.length, 2); i++) {
+          const phaseText = rawPhases[i].substring(0, 4000); // Cost cap per phase
+          const audioBase64 = await generateTts(phaseText);
+
+          phases.push({
+            phase: phaseNames[i] || `phase_${i}`,
+            script: phaseText,
             audio: audioBase64,
           });
-
-          if (charBudget <= 0) break;
         }
 
         console.log(
           JSON.stringify({
             severity: "INFO",
             message: "narration_complete",
-            sectionsGenerated: sections.length,
-            sectionsWithAudio: sections.filter((s) => s.audio).length,
+            phasesGenerated: phases.length,
+            phasesWithAudio: phases.filter((p) => p.audio).length,
           })
         );
 
@@ -365,12 +369,12 @@ Rules:
           model: "gemini-2.5-flash-preview-tts",
           type: "pathNarration",
           query: query.substring(0, 50),
-          sectionCount: sections.length,
+          phaseCount: phases.length,
         });
 
         return {
           success: true,
-          sections,
+          phases,
           totalWords: fullScript.split(/\s+/).length,
         };
       }
