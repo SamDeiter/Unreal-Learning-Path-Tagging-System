@@ -191,7 +191,7 @@ export default function BespokePath() {
     setQuizScores(new Map());
   }, [query, isLoading, pathResult?.query]);
 
-  // Generate quiz for a specific step (on-demand)
+  // Generate quiz for the full path (on-demand)
   const handleTakeQuiz = useCallback(
     async (stepIndex) => {
       if (quizzes.has(stepIndex) || !pathResult) {
@@ -199,7 +199,17 @@ export default function BespokePath() {
         return;
       }
       setQuizLoading(stepIndex);
-      const questions = await generateQuizForStep(pathResult.path[stepIndex], pathResult.query, 2);
+
+      // Aggregate ALL step content for a comprehensive quiz
+      const aggregatedStep = {
+        summary: pathResult.path
+          .map((s) => (s.summary || s.segment?.text || "").substring(0, 400))
+          .join("\n\n"),
+        segment: pathResult.path[0]?.segment,
+        category: "comprehensive",
+      };
+
+      const questions = await generateQuizForStep(aggregatedStep, pathResult.query, 3);
       setQuizzes((prev) => new Map(prev).set(stepIndex, questions));
       setQuizLoading(null);
       setShowQuiz(stepIndex);
