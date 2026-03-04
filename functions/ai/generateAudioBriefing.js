@@ -116,20 +116,20 @@ Start with Instructor greeting the learner and mentioning their specific problem
       const ttsBody = {
         contents: [{ parts: [{ text: ttsPrompt }] }],
         generationConfig: {
-          response_modalities: ["AUDIO"],
-          speech_config: {
-            multi_speaker_voice_config: {
-              speaker_voice_configs: [
+          responseModalities: ["AUDIO"],
+          speechConfig: {
+            multiSpeakerVoiceConfig: {
+              speakerVoiceConfigs: [
                 {
                   speaker: "Instructor",
-                  voice_config: {
-                    prebuilt_voice_config: { voice_name: "Kore" },
+                  voiceConfig: {
+                    prebuilt_voiceConfig: { voiceName: "Kore" },
                   },
                 },
                 {
                   speaker: "Learner",
-                  voice_config: {
-                    prebuilt_voice_config: { voice_name: "Puck" },
+                  voiceConfig: {
+                    prebuilt_voiceConfig: { voiceName: "Puck" },
                   },
                 },
               ],
@@ -174,7 +174,7 @@ Start with Instructor greeting the learner and mentioning their specific problem
       return {
         success: true,
         audio: audioData.data, // base64 encoded audio
-        mimeType: audioData.mime_type || "audio/L16;rate=24000",
+        mimeType: audioData.mimeType || audioData.mime_type || "audio/L16;rate=24000",
         script, // Return script for optional display
       };
     } catch (error) {
