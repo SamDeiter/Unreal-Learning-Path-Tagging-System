@@ -150,6 +150,7 @@ export default function BespokePath() {
       });
       setPathResult({ ...cached, fromCache: true });
       addToHistory(trimmed, cached);
+      setCurrentStep(0);
       setIsLoading(false);
       setPipelineStage("");
       return;
@@ -171,6 +172,7 @@ export default function BespokePath() {
     }
 
     setPathResult(result);
+    setCurrentStep(0);
     setIsLoading(false);
     setPipelineStage("");
     // Also reset quizzes and scores for new search
