@@ -31,6 +31,13 @@ exports.generateAudioBriefing = functions
           `Must provide query and stepContent for ${mode} mode.`
         );
       }
+    } else if (mode === "diagnostic") {
+      if (!query) {
+        throw new functions.https.HttpsError(
+          "invalid-argument",
+          "Must provide query for diagnostic mode."
+        );
+      }
     } else {
       if (!query || !steps || !Array.isArray(steps) || steps.length === 0) {
         throw new functions.https.HttpsError(
@@ -310,6 +317,71 @@ Return ONLY a JSON array:
         return {
           success: true,
           questions: questions.slice(0, count),
+        };
+      }
+
+      // ── DIAGNOSTIC MODE: generate narrowing questions for adaptive path ──
+      if (mode === "diagnostic") {
+        const diagnosticPrompt = `You are an experienced UE5 instructor creating a diagnostic quiz to ASSESS a learner's existing knowledge before teaching them.
+
+The learner wants to learn about: "${query}"
+
+Generate exactly 4 multiple-choice questions that test whether the learner ALREADY KNOWS key prerequisites and concepts related to this topic. Each question should:
+- Test a DISTINCT concept area (e.g., one about fundamentals, one about practical experience, one about UE5-specific knowledge, one about advanced patterns)
+- Have exactly 4 choices — only ONE correct
+- Include a "concept" field that names the knowledge area being tested (use snake_case, e.g. "actor_replication", "blueprint_networking")
+- Be ordered from FOUNDATIONAL to ADVANCED
+- Be specific to Unreal Engine 5, not generic programming trivia
+
+Return ONLY a JSON array with this exact format:
+[{"q": "What does bReplicates do on an Actor?", "options": ["Marks the actor for garbage collection", "Enables the actor to be replicated across the network", "Creates a copy of the actor in the editor", "Allows the actor to be saved to disk"], "correctIndex": 1, "concept": "actor_replication"}]`;
+
+        const diagnosticUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const diagnosticResp = await fetch(diagnosticUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: diagnosticPrompt }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+          }),
+        });
+
+        if (!diagnosticResp.ok) {
+          const err = await diagnosticResp.text();
+          throw new Error(`Diagnostic generation failed: ${err}`);
+        }
+
+        const diagnosticJson = await diagnosticResp.json();
+        const diagnosticText = diagnosticJson.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        const dMatch = diagnosticText.match(/\[[\s\S]*\]/);
+        let diagnosticQuestions = [];
+        if (dMatch) {
+          try {
+            const parsed = JSON.parse(dMatch[0]);
+            diagnosticQuestions = parsed.filter(
+              (q) =>
+                q.q &&
+                Array.isArray(q.options) &&
+                q.options.length === 4 &&
+                typeof q.correctIndex === "number" &&
+                q.concept
+            );
+          } catch (e) {
+            console.warn("Failed to parse diagnostic JSON:", e.message);
+          }
+        }
+
+        await logApiUsage(userId, {
+          model: "gemini-2.0-flash",
+          type: "diagnostic",
+          query: query.substring(0, 50),
+        });
+
+        return {
+          success: diagnosticQuestions.length > 0,
+          questions: diagnosticQuestions.slice(0, 5),
+          error: diagnosticQuestions.length === 0 ? "No valid questions generated" : null,
         };
       }
 

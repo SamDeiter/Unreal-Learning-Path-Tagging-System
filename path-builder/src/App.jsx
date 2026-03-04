@@ -33,6 +33,7 @@ const ProblemFirst = lazy(() =>
   import("./components/ProblemFirst").then((m) => ({ default: m.ProblemFirst }))
 );
 const BespokePath = lazy(() => import("./components/BespokePath/BespokePath"));
+const AdaptivePath = lazy(() => import("./components/AdaptivePath/AdaptivePath"));
 const AdminFeedback = lazy(() => import("./components/AdminFeedback/AdminFeedback"));
 const InsightsPanel = lazy(() => import("./components/Visualizations/InsightsPanel"));
 const CollapsibleSection = lazy(() => import("./components/Visualizations/CollapsibleSection"));
@@ -453,15 +454,7 @@ function App() {
                 )}
                 {activeTab === "adaptive" && (
                   <div className="dashboard-layout">
-                    <div
-                      style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)" }}
-                    >
-                      <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>🎯 Adaptive Path</h2>
-                      <p style={{ fontSize: "1.1rem", maxWidth: "500px", margin: "0 auto" }}>
-                        Coming soon — a diagnostic quiz will assess your knowledge gaps, then build
-                        a depth-adjusted learning path just for you.
-                      </p>
-                    </div>
+                    <AdaptivePath />
                   </div>
                 )}
                 {activeTab === "bespoke" && (

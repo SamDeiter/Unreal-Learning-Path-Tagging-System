@@ -1,0 +1,163 @@
+/**
+ * useAdaptiveQuiz — hook for managing the diagnostic quiz flow
+ *
+ * Calls the generateAudioBriefing CF in "diagnostic" mode to get
+ * 3-5 narrowing questions about the user's topic, then collects
+ * answers to build a knowledge profile.
+ */
+
+import { useState, useCallback } from "react";
+import { getFunctions, httpsCallable } from "firebase/functions";
+
+const STAGES = {
+  IDLE: "idle",
+  LOADING: "loading",
+  QUIZZING: "quizzing",
+  COMPLETE: "complete",
+  ERROR: "error",
+};
+
+/**
+ * @returns {Object} Quiz state and handlers
+ */
+export default function useAdaptiveQuiz() {
+  const [stage, setStage] = useState(STAGES.IDLE);
+  const [questions, setQuestions] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answers, setAnswers] = useState([]); // { questionIndex, selectedOption, concept, correct }
+  const [knowledgeProfile, setKnowledgeProfile] = useState(null);
+  const [error, setError] = useState(null);
+
+  /**
+   * Generate diagnostic questions for a topic.
+   * @param {string} query - The user's question/topic
+   */
+  const startDiagnostic = useCallback(async (query) => {
+    setStage(STAGES.LOADING);
+    setError(null);
+    setQuestions([]);
+    setCurrentIndex(0);
+    setAnswers([]);
+    setKnowledgeProfile(null);
+
+    try {
+      const functions = getFunctions();
+      const generateAudioBriefing = httpsCallable(functions, "generateAudioBriefing");
+
+      const result = await generateAudioBriefing({
+        query,
+        mode: "diagnostic",
+      });
+
+      const data = result.data;
+
+      if (!data.success || !data.questions || data.questions.length === 0) {
+        throw new Error(data.error || "Failed to generate diagnostic questions.");
+      }
+
+      setQuestions(data.questions);
+      setStage(STAGES.QUIZZING);
+    } catch (err) {
+      console.error("[AdaptiveQuiz] Error generating questions:", err);
+      setError(err.message || "Failed to generate diagnostic questions. Please try again.");
+      setStage(STAGES.ERROR);
+    }
+  }, []);
+
+  /**
+   * Submit an answer for the current question.
+   * @param {number} selectedOption - Index of the selected option (0-3), or -1 for "I'm not sure"
+   */
+  const submitAnswer = useCallback(
+    (selectedOption) => {
+      const question = questions[currentIndex];
+      if (!question) return;
+
+      const isCorrect = selectedOption !== -1 && selectedOption === question.correctIndex;
+
+      const answer = {
+        questionIndex: currentIndex,
+        selectedOption,
+        concept: question.concept,
+        correct: selectedOption === -1 ? false : isCorrect,
+        unsure: selectedOption === -1,
+      };
+
+      const updatedAnswers = [...answers, answer];
+      setAnswers(updatedAnswers);
+
+      // Move to next question or complete
+      if (currentIndex + 1 < questions.length) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        // Build knowledge profile from all answers
+        const profile = buildKnowledgeProfile(updatedAnswers, questions);
+        setKnowledgeProfile(profile);
+        setStage(STAGES.COMPLETE);
+      }
+    },
+    [currentIndex, questions, answers]
+  );
+
+  /**
+   * Reset the quiz to allow a new diagnostic.
+   */
+  const reset = useCallback(() => {
+    setStage(STAGES.IDLE);
+    setQuestions([]);
+    setCurrentIndex(0);
+    setAnswers([]);
+    setKnowledgeProfile(null);
+    setError(null);
+  }, []);
+
+  return {
+    stage,
+    questions,
+    currentIndex,
+    currentQuestion: questions[currentIndex] || null,
+    answers,
+    knowledgeProfile,
+    error,
+    startDiagnostic,
+    submitAnswer,
+    reset,
+    STAGES,
+  };
+}
+
+/**
+ * Build a knowledge profile from quiz answers.
+ * @param {Array} answers - All collected answers
+ * @param {Array} questions - The original questions
+ * @returns {{ knows: string[], gaps: string[], level: string }}
+ */
+function buildKnowledgeProfile(answers, _questions) {
+  const knows = [];
+  const gaps = [];
+
+  answers.forEach((answer) => {
+    const concept = answer.concept || `concept_${answer.questionIndex}`;
+    if (answer.correct) {
+      knows.push(concept);
+    } else {
+      gaps.push(concept);
+    }
+  });
+
+  // Determine level based on ratio of correct answers
+  const correctCount = answers.filter((a) => a.correct).length;
+  const total = answers.length;
+  const ratio = total > 0 ? correctCount / total : 0;
+
+  let level;
+  if (ratio >= 0.8) {
+    level = "advanced";
+  } else if (ratio >= 0.4) {
+    level = "intermediate";
+  } else {
+    level = "beginner";
+  }
+
+  return { knows, gaps, level };
+}
