@@ -84,7 +84,8 @@ export default function PathStep({ step, index, isActive, onClick }) {
   const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.foundation;
 
   const displayTitle = decodeEntities(segment.title || segment.videoTitle || "");
-  const displayText = cleanText(segment.text);
+  // Prefer AI-generated summary; fall back to cleaned raw text
+  const displayText = step.summary || cleanText(segment.text);
   const hasAuthor = segment.author && segment.author !== "Unknown";
   const similarityPct = Math.round((segment.similarity || 0) * 100);
 

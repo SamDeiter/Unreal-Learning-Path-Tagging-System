@@ -133,7 +133,7 @@ export async function findRelevantSegments(userQuery, topK = 5) {
 export async function sequencePath(userQuery, segments) {
   if (!segments || segments.length === 0) return [];
 
-  // Build context for Gemini
+  // Build context for Gemini — give it enough text to summarize from
   const segmentSummaries = segments
     .map((s, i) => {
       const source =
@@ -142,7 +142,7 @@ export async function sequencePath(userQuery, segments) {
           : s.type === "epic_learning"
             ? `Article: ${s.title}`
             : `Docs: ${s.title} > ${s.section}`;
-      return `[${i}] ${source}\n   ${s.text.slice(0, 200)}...`;
+      return `[${i}] ${source}\n   ${s.text.slice(0, 400)}`;
     })
     .join("\n\n");
 
@@ -152,30 +152,33 @@ Here are ${segments.length} content segments found via semantic search:
 
 ${segmentSummaries}
 
-Classify each segment into ONE of these categories:
+Classify each segment and write a learner-friendly summary for each.
+
+Categories:
 - foundation: Background concepts the learner needs first
 - diagnosis: How to identify the specific problem or concept
 - fix: Step-by-step solution or implementation
 - transfer: How this knowledge applies to other contexts
 
 Return a JSON array of objects with this format:
-[{"index": 0, "category": "foundation", "relevance": "high|medium|low"}]
+[{"index": 0, "category": "foundation", "relevance": "high|medium|low", "summary": "2-3 sentence explanation of what this content covers and why it helps answer the learner's question. Write in second person (you/your). No markdown formatting."}]
 
 Rules:
 - Include only segments with "high" or "medium" relevance
 - Order: foundation → diagnosis → fix → transfer
 - Max ${MAX_PATH_SEGMENTS} segments total
 - Min ${MIN_PATH_SEGMENTS} segments if enough are relevant
-- Prefer transcript segments over docs for hands-on topics`;
+- Prefer transcript segments over docs for hands-on topics
+- Each summary should be plain text only — no asterisks, no markdown, no code blocks
+- Summaries should connect to the learner's question and explain why this step matters`;
 
   try {
     const app = getFirebaseApp();
     const functions = getFunctions(app, "us-central1");
-    const classifyFn = httpsCallable(functions, "extractIntent");
+    const classifyFn = httpsCallable(functions, "classifySegments");
 
-    // Reuse extractIntent with a custom prompt
-    const result = await classifyFn({ text: prompt });
-    const responseText = result.data?.intent || result.data?.text || "";
+    const result = await classifyFn({ prompt });
+    const responseText = result.data?.text || "";
 
     // Parse JSON from response
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
@@ -202,6 +205,7 @@ Rules:
           sequenced.push({
             segment: segments[c.index],
             category: c.category,
+            summary: c.summary || "", // AI-generated step summary
             order: sequenced.length,
           });
         }
@@ -265,9 +269,9 @@ export async function generateBridgeNarration(sequencedPath, userQuery) {
   try {
     const app = getFirebaseApp();
     const functions = getFunctions(app, "us-central1");
-    const narrateFn = httpsCallable(functions, "extractIntent");
+    const narrateFn = httpsCallable(functions, "classifySegments");
 
-    const prompt = `You are a UE5 instructor creating bridge narrations for a learning path.
+    const narrationPrompt = `You are a UE5 instructor creating bridge narrations for a learning path.
 The learner asked: "${userQuery}"
 
 Generate a short (1-2 sentence) transition for each step:
@@ -276,8 +280,8 @@ ${transitions.map((t) => `Step ${t.from + 1} (${t.fromCategory}) → Step ${t.to
 Return a JSON array: [{"from": 0, "to": 1, "narration": "..."}]
 Keep narrations natural, concise, and helpful. Max 50 words each.`;
 
-    const result = await narrateFn({ text: prompt });
-    const responseText = result.data?.intent || result.data?.text || "";
+    const result = await narrateFn({ prompt: narrationPrompt });
+    const responseText = result.data?.text || "";
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
 
     if (jsonMatch) {
