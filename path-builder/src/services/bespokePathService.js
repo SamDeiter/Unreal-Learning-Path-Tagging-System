@@ -114,6 +114,20 @@ export async function findRelevantSegments(userQuery, topK = 5) {
     }
   }
 
+  // Boost transcript segments so video content ranks higher than articles
+  const TRANSCRIPT_BOOST = 1.3;
+  for (const seg of segments) {
+    if (seg.type === "transcript") {
+      seg.similarity *= TRANSCRIPT_BOOST;
+      // Construct YouTube URL with timestamp for direct linking
+      if (seg.videoKey) {
+        const t = Math.floor(seg.startSeconds || 0);
+        seg.videoUrl = `https://youtube.com/watch?v=${seg.videoKey}&t=${t}`;
+        seg.thumbnailUrl = `https://img.youtube.com/vi/${seg.videoKey}/mqdefault.jpg`;
+      }
+    }
+  }
+
   // Sort by similarity, take top results
   segments.sort((a, b) => b.similarity - a.similarity);
   devLog(`[BespokePath] Found ${segments.length} total segments across all sources`);

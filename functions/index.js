@@ -37,6 +37,7 @@ Object.assign(exports, require("./ai/searchVertexAIDocs"));
 // ============================================================================
 Object.assign(exports, require("./ai/vectorSearch"));
 Object.assign(exports, require("./ai/classifySegments"));
+Object.assign(exports, require("./ai/generateAudioBriefing"));
 
 // ============================================================================
 // Telemetry

@@ -94,7 +94,21 @@ export default function PathStep({ step, index, isActive, onClick }) {
       case "transcript":
         return (
           <div className="step-source transcript-source">
-            <span className="source-icon">🎬</span>
+            {segment.thumbnailUrl && (
+              <a
+                href={segment.videoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="video-thumbnail-link"
+              >
+                <img
+                  src={segment.thumbnailUrl}
+                  alt={segment.videoTitle || "Video clip"}
+                  className="video-thumbnail"
+                />
+                <span className="play-overlay">▶</span>
+              </a>
+            )}
             <div className="source-info">
               <span className="source-title">{decodeEntities(segment.videoTitle)}</span>
               {segment.startTimestamp && (
@@ -104,6 +118,16 @@ export default function PathStep({ step, index, isActive, onClick }) {
                 </span>
               )}
               {segment.courseCode && <span className="source-course">📚 {segment.courseCode}</span>}
+              {segment.videoUrl && (
+                <a
+                  href={segment.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="source-link video-link"
+                >
+                  🎬 Watch this clip →
+                </a>
+              )}
             </div>
           </div>
         );

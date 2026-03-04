@@ -5,7 +5,9 @@
  * 1. Query input → 2. Loading pipeline → 3. Sequenced path with bridge narrations
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFirebaseApp } from "../../services/firebaseConfig";
 import { generateBespokePath } from "../../services/bespokePathService";
 import { generateQuizForStep } from "../../services/quizService";
 import { findCachedPath, cachePath, addToHistory } from "../../services/pathCacheService";
@@ -39,6 +41,12 @@ export default function BespokePath() {
   const [quizLoading, setQuizLoading] = useState(null); // stepIndex currently loading
   const [quizScores, setQuizScores] = useState(new Map()); // stepIndex → {score, total}
   const [showQuiz, setShowQuiz] = useState(null); // stepIndex showing quiz
+
+  // Audio briefing state
+  const [briefingAudioUrl, setBriefingAudioUrl] = useState(null);
+  const [briefingLoading, setBriefingLoading] = useState(false);
+  const [briefingStatus, setBriefingStatus] = useState("");
+  const audioRef = useRef(null);
 
   const handleGenerate = useCallback(async () => {
     const trimmed = query.trim();
@@ -321,6 +329,84 @@ export default function BespokePath() {
                 </strong>{" "}
                 across {quizScores.size} quizzes
               </span>
+            </div>
+          )}
+
+          {/* Audio Briefing */}
+          {!pathResult.isPreSeeded && (
+            <div className="audio-briefing-section">
+              <h3>🎧 Audio Briefing</h3>
+              {briefingAudioUrl ? (
+                <div className="audio-player-wrapper">
+                  <audio ref={audioRef} controls src={briefingAudioUrl} />
+                </div>
+              ) : (
+                <>
+                  <button
+                    className="briefing-btn"
+                    disabled={briefingLoading}
+                    onClick={async () => {
+                      setBriefingLoading(true);
+                      setBriefingStatus("Generating script…");
+                      try {
+                        const app = getFirebaseApp();
+                        const functions = getFunctions(app, "us-central1");
+                        const genFn = httpsCallable(functions, "generateAudioBriefing");
+                        setBriefingStatus("Synthesizing audio (this may take 30-60s)…");
+                        const result = await genFn({
+                          query: pathResult.query || query,
+                          steps: pathResult.path.map((s) => ({
+                            category: s.category,
+                            summary: s.summary || s.segment?.title || "",
+                            title: s.segment?.title || s.segment?.videoTitle || "",
+                          })),
+                        });
+                        if (result.data?.audio) {
+                          // Convert base64 PCM to WAV blob
+                          const raw = atob(result.data.audio);
+                          const bytes = new Uint8Array(raw.length);
+                          for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+                          // Build WAV header (PCM 16-bit, 24kHz, mono)
+                          const sampleRate = 24000;
+                          const numChannels = 1;
+                          const bitsPerSample = 16;
+                          const dataSize = bytes.length;
+                          const header = new ArrayBuffer(44);
+                          const view = new DataView(header);
+                          const writeStr = (off, s) => {
+                            for (let i = 0; i < s.length; i++)
+                              view.setUint8(off + i, s.charCodeAt(i));
+                          };
+                          writeStr(0, "RIFF");
+                          view.setUint32(4, 36 + dataSize, true);
+                          writeStr(8, "WAVE");
+                          writeStr(12, "fmt ");
+                          view.setUint32(16, 16, true);
+                          view.setUint16(20, 1, true); // PCM
+                          view.setUint16(22, numChannels, true);
+                          view.setUint32(24, sampleRate, true);
+                          view.setUint32(28, (sampleRate * numChannels * bitsPerSample) / 8, true);
+                          view.setUint16(32, (numChannels * bitsPerSample) / 8, true);
+                          view.setUint16(34, bitsPerSample, true);
+                          writeStr(36, "data");
+                          view.setUint32(40, dataSize, true);
+                          const wav = new Blob([header, bytes], { type: "audio/wav" });
+                          setBriefingAudioUrl(URL.createObjectURL(wav));
+                          setBriefingStatus("");
+                        }
+                      } catch (err) {
+                        console.error("Audio briefing error:", err);
+                        setBriefingStatus(`Error: ${err.message}`);
+                      } finally {
+                        setBriefingLoading(false);
+                      }
+                    }}
+                  >
+                    {briefingLoading ? "⏳ Generating…" : "🎧 Listen to Briefing"}
+                  </button>
+                  {briefingStatus && <p className="briefing-status">{briefingStatus}</p>}
+                </>
+              )}
             </div>
           )}
 
