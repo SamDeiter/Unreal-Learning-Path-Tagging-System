@@ -9,7 +9,7 @@
  * 4. Generate a depth-adjusted BespokePath based on the profile
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import useAdaptiveQuiz from "../../hooks/useAdaptiveQuiz";
 import { sanitizeQuery, checkRateLimit, recordQuery } from "../../services/securityGuardrails";
 import { generateBespokePath } from "../../services/bespokePathService";
@@ -138,15 +138,15 @@ export default function AdaptivePath() {
     [query, stepAudio]
   );
 
-  const _handleStepTakeaways = useCallback(
+  const handleStepTakeaways = useCallback(
     async (index, step) => {
       if (stepTakeaways[index]) return;
       setStepTakeaways((prev) => ({ ...prev, [index]: { loading: true } }));
       try {
-        const result = await generateStepTakeaways(query, step);
+        const result = await generateStepTakeaways(step, query);
         setStepTakeaways((prev) => ({
           ...prev,
-          [index]: { items: result.takeaways, loading: false },
+          [index]: { items: result, loading: false },
         }));
       } catch {
         setStepTakeaways((prev) => ({
@@ -157,6 +157,17 @@ export default function AdaptivePath() {
     },
     [query, stepTakeaways]
   );
+
+  // Auto-generate takeaways for all steps when path loads
+  useEffect(() => {
+    if (!pathData?.path || pathData.path.length === 0) return;
+    pathData.path.forEach((step, index) => {
+      if (!stepTakeaways[index]) {
+        handleStepTakeaways(index, step);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathData]);
 
   // ── RENDER: Input Stage ──
   if (stage === STAGES.IDLE) {
@@ -457,8 +468,8 @@ export default function AdaptivePath() {
                     <PathStep
                       step={pathData.path[expandedStep ?? 0]}
                       isActive={true}
-                      takeaways={stepTakeaways[expandedStep ?? 0]}
-                      takeawayLoading={false}
+                      takeaways={stepTakeaways[expandedStep ?? 0]?.items}
+                      takeawayLoading={!!stepTakeaways[expandedStep ?? 0]?.loading}
                       onGenerateAudio={() =>
                         handleStepAudio(expandedStep ?? 0, pathData.path[expandedStep ?? 0])
                       }
