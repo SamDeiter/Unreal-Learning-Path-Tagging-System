@@ -62,6 +62,7 @@ export default function PathStep({
   takeawayLoading,
 }) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [scriptOpen, setScriptOpen] = useState(false);
   const audioRef = useRef(null);
 
   // Auto-play audio when transitioning between phases
@@ -162,9 +163,24 @@ export default function PathStep({
           )}
         </div>
 
-        <div className="step-body-text">
-          <p>{displayText}</p>
-        </div>
+        {narrationScript ? (
+          /* Collapsible narrator script — collapsed by default */
+          <div className="narrator-script-toggle">
+            <button className="script-toggle-btn" onClick={() => setScriptOpen(!scriptOpen)}>
+              <i className={`fa-solid fa-chevron-${scriptOpen ? "up" : "down"}`}></i>
+              📝 Narrator Script
+            </button>
+            {scriptOpen && (
+              <div className="step-body-text script-collapsed">
+                <p>{displayText}</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="step-body-text">
+            <p>{displayText}</p>
+          </div>
+        )}
 
         {/* Key Takeaways */}
         <div className="takeaways-box">
