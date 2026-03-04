@@ -214,6 +214,7 @@ CRITICAL RULES:
 - Step 1 MUST explain the underlying concept - users should understand WHY the error exists
 - Step 4 MUST include prevention strategies and best practices
 - Be specific to their ACTUAL problem, not generic advice
+- EVERY step MUST have a UNIQUE, descriptive title — NO duplicate titles
 
 CONTENT REQUIREMENTS (MANDATORY):
 - EVERY step MUST have a "content" array with at least ONE video
