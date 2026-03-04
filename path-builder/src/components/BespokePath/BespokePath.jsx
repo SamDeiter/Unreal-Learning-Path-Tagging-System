@@ -391,7 +391,7 @@ export default function BespokePath() {
           <div className="epic-stepper-layout">
             {/* Left Sidebar: Phased Navigation */}
             <div className="epic-sidebar">
-              <h3 className="sidebar-title">Path Overview</h3>
+              <h3 className="sidebar-title">LEARNING PATH</h3>
               <p className="sidebar-query">
                 <em>"{pathResult.query || query}"</em>
               </p>

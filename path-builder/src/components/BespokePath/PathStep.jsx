@@ -189,73 +189,113 @@ export default function PathStep({
     }
   };
 
+  // Derive source type — real paths use segment.type, pre-seeded use segment.source
+  const sourceType = segment.type || segment.source || "docs";
+  const sourceUrl = segment.videoUrl || segment.url || "#";
+  const sourceTitle = decodeEntities(
+    segment.videoTitle || segment.title || segment.section || "Source"
+  );
+
+  // Build inline source citation text
+  const getSourceIcon = () => {
+    if (sourceType === "transcript") return "📹";
+    if (sourceType === "epic_learning") return "📖";
+    return "📄";
+  };
+  const getSourceLabel = () => {
+    if (sourceType === "transcript") return "Video";
+    if (sourceType === "epic_learning") return "Article";
+    return "Docs";
+  };
+
   return (
     <div
       className={`path-step ${isActive ? "active" : ""} category-${category}`}
       onClick={onClick}
       style={{ "--step-accent": style.color }}
     >
+      {/* 1. Phase Badge */}
       <div className="step-phase-tag">
         <span className="phase-tag-badge" style={{ background: style.color }}>
           {style.icon} {style.label}
         </span>
       </div>
 
-      {renderSource()}
+      {/* 2. Audio Player (at top, like mockup) */}
+      {isActive && (
+        <div className="step-audio step-audio-top">
+          {stepAudioUrl ? (
+            <audio controls src={stepAudioUrl} className="step-audio-player" />
+          ) : (
+            <button
+              className="step-audio-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onGenerateAudio?.();
+              }}
+              disabled={stepAudioLoading}
+            >
+              {stepAudioLoading ? "⏳ Generating…" : "🎧 Listen to Step Briefing"}
+            </button>
+          )}
+        </div>
+      )}
 
+      {/* 3. Large Title */}
+      <h2 className="step-title">{displayTitle || "Step Details"}</h2>
+
+      {/* 4. Body Text */}
       <div className="step-text">
         <p>{displayText}</p>
       </div>
 
-      {/* Source Citation Pills */}
-      {isActive && segment && (
+      {/* 5. Inline Source Citation (right after text, like mockup) */}
+      <div className="step-source-inline">
+        <a
+          href={sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="source-citation-inline"
+        >
+          <span className="source-icon">{getSourceIcon()}</span>
+          Source: {sourceTitle}
+          {sourceType === "transcript" && segment.startSeconds != null &&
+            ` — ${Math.floor(segment.startSeconds / 60)}:${String(Math.floor(segment.startSeconds % 60)).padStart(2, "0")}`}
+          {" "}<span className="source-link-icon">🔗</span>
+        </a>
+      </div>
+
+      {/* 6. Key Takeaways */}
+      {isActive && (
+        <div className="step-takeaways">
+          <h4 className="takeaways-title">Key Takeaways</h4>
+          {takeawayLoading ? (
+            <p className="takeaways-loading">Generating takeaways…</p>
+          ) : takeaways && takeaways.length > 0 ? (
+            <ul className="takeaways-list">
+              {takeaways.map((t, i) => (
+                <li key={i}>{t}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      )}
+
+      {/* 7. Sources Summary at bottom */}
+      {isActive && (
         <div className="sources-footer">
-          <details>
-            <summary>
-              📎 Sources (
-              {segment.type === "transcript"
-                ? "Video"
-                : segment.type === "epic_learning"
-                  ? "Article"
-                  : "Docs"}
-              )
-            </summary>
+          <details open>
+            <summary>📎 Sources</summary>
             <div className="sources-list">
-              {segment.type === "transcript" && segment.videoUrl && (
-                <a
-                  href={segment.videoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="source-citation"
-                >
-                  <span className="source-icon">📹</span>
-                  {decodeEntities(segment.videoTitle || "Video Source")}
-                  {segment.startTime != null &&
-                    ` — ${Math.floor(segment.startTime / 60)}:${String(Math.floor(segment.startTime % 60)).padStart(2, "0")}`}
-                </a>
-              )}
-              {segment.type === "epic_learning" && (
-                <a
-                  href={segment.url || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="source-citation"
-                >
-                  <span className="source-icon">📖</span>
-                  {decodeEntities(segment.title || "Epic Dev Article")}
-                </a>
-              )}
-              {segment.type === "docs" && (
-                <a
-                  href={segment.url || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="source-citation"
-                >
-                  <span className="source-icon">📄</span>
-                  {decodeEntities(segment.title || "Documentation")}
-                </a>
-              )}
+              <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="source-citation"
+              >
+                <span className="source-icon">{getSourceIcon()}</span>
+                {sourceTitle} ({getSourceLabel()})
+              </a>
               {hasAuthor && (
                 <span className="source-citation">
                   <span className="source-icon">👤</span>
@@ -264,43 +304,6 @@ export default function PathStep({
               )}
             </div>
           </details>
-        </div>
-      )}
-
-      {/* Per-step audio + key takeaways (only on active step) */}
-      {isActive && (
-        <div className="step-extras">
-          {/* Key Takeaways */}
-          <div className="step-takeaways">
-            <h4 className="takeaways-title">🎯 Key Takeaways</h4>
-            {takeawayLoading ? (
-              <p className="takeaways-loading">Generating takeaways…</p>
-            ) : takeaways && takeaways.length > 0 ? (
-              <ul className="takeaways-list">
-                {takeaways.map((t, i) => (
-                  <li key={i}>{t}</li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-
-          {/* Step Audio */}
-          <div className="step-audio">
-            {stepAudioUrl ? (
-              <audio controls src={stepAudioUrl} className="step-audio-player" />
-            ) : (
-              <button
-                className="step-audio-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onGenerateAudio?.();
-                }}
-                disabled={stepAudioLoading}
-              >
-                {stepAudioLoading ? "⏳ Generating…" : "🔊 Listen to Step Briefing"}
-              </button>
-            )}
-          </div>
         </div>
       )}
     </div>
