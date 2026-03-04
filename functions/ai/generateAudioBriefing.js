@@ -1,5 +1,5 @@
 const functions = require("firebase-functions");
-const admin = require("firebase-admin");
+
 const { checkRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
 
@@ -172,6 +172,206 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
           audio: wav.toString("base64"),
           mimeType: "audio/wav",
           script: stepScript,
+        };
+      }
+
+      // ── NARRATE MODE: cohesive multi-section narrator script ──
+      if (mode === "narrate") {
+        if (!steps || !Array.isArray(steps) || steps.length === 0) {
+          throw new functions.https.HttpsError(
+            "invalid-argument",
+            "Must provide steps array for narrate mode."
+          );
+        }
+
+        // Cost guardrail: cap at 7 sections
+        const cappedSteps = steps.slice(0, 7);
+        const stepCount = cappedSteps.length;
+
+        // Build the step outline for the prompt
+        const stepOutline = cappedSteps
+          .map(
+            (s, i) =>
+              `Section ${i + 1} (${s.category || "learning"} - "${s.title || `Step ${i + 1}`}"): ${(s.summary || "").substring(0, 200)}`
+          )
+          .join("\n");
+
+        // Build category-aware section instructions
+        const sectionInstructions = cappedSteps
+          .map((s, i) => {
+            const cat = s.category || "learning";
+            if (i === 0 && (cat === "foundation" || cat === "diagnosis")) {
+              return `Section ${i + 1} (INTRO): Greet the learner, restate their specific problem, explain WHY this happens based on the content, and preview what they'll learn.`;
+            } else if (cat === "foundation" || cat === "diagnosis") {
+              return `Section ${i + 1} (UNDERSTANDING): Build on the previous section. Explain the key concept from "${s.title || "this step"}" and why it matters for solving their problem.`;
+            } else if (cat === "fix") {
+              return `Section ${i + 1} (SOLUTION): Transition naturally from understanding to action. Walk through the fix described in "${s.title || "this step"}".`;
+            } else if (cat === "transfer") {
+              return `Section ${i + 1} (APPLY): Wrap up by explaining how to apply this knowledge. Encourage the learner.`;
+            }
+            return `Section ${i + 1}: Cover the key points from "${s.title || "this step"}".`;
+          })
+          .join("\n");
+
+        const narratePrompt = `You are a friendly UE5 instructor recording a guided audio walkthrough for a learner. You're explaining their specific problem and walking them through the solution step by step.
+
+The learner asked: "${query}"
+
+Here are the learning path steps:
+${stepOutline}
+
+Write a narrator script divided into exactly ${stepCount} sections, separated by "---" on its own line.
+
+${sectionInstructions}
+
+Rules:
+- Each section MUST be 60-90 words (about 30-45 seconds of audio)
+- Each section must flow naturally into the next — use transitions like "Now that you understand..." or "With that in mind..."
+- Speak directly to the learner using "you"
+- Be specific to the actual content — reference real UE5 concepts, not generic advice
+- DO NOT use any markdown, bullet points, headers, or formatting
+- Just plain conversational text
+- Do NOT include section labels like "Section 1:" — just the spoken text
+- TOTAL script must be under 600 words`;
+
+        const narrateScriptUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const narrateScriptResp = await fetch(narrateScriptUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: narratePrompt }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+          }),
+        });
+
+        if (!narrateScriptResp.ok) {
+          const err = await narrateScriptResp.text();
+          throw new Error(`Narration script generation failed: ${err}`);
+        }
+
+        const narrateScriptJson = await narrateScriptResp.json();
+        const fullScript = narrateScriptJson.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        if (!fullScript || fullScript.length < 100) {
+          throw new Error("Generated narration script too short");
+        }
+
+        // Split into sections by "---" separator
+        const rawSections = fullScript
+          .split(/\n\s*---\s*\n/)
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
+
+        console.log(
+          JSON.stringify({
+            severity: "INFO",
+            message: "narration_script_generated",
+            totalLength: fullScript.length,
+            sectionCount: rawSections.length,
+            totalWords: fullScript.split(/\s+/).length,
+          })
+        );
+
+        // Cost guardrail: enforce 8000 char total for TTS
+        let charBudget = 8000;
+        const sections = [];
+
+        for (let i = 0; i < rawSections.length && i < cappedSteps.length; i++) {
+          let sectionText = rawSections[i];
+
+          // Trim if exceeding budget
+          if (sectionText.length > charBudget) {
+            sectionText = sectionText.substring(0, charBudget);
+          }
+          charBudget -= sectionText.length;
+
+          // Generate TTS for this section
+          const sectionTtsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+          const sectionTtsBody = {
+            contents: [{ parts: [{ text: sectionText }] }],
+            generationConfig: {
+              responseModalities: ["AUDIO"],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: { voiceName: "Kore" },
+                },
+              },
+            },
+          };
+
+          const sectionTtsResp = await fetch(sectionTtsUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(sectionTtsBody),
+          });
+
+          let audioBase64 = null;
+          if (sectionTtsResp.ok) {
+            const sectionTtsJson = await sectionTtsResp.json();
+            const part = sectionTtsJson.candidates?.[0]?.content?.parts?.[0];
+            const ad = part?.inlineData || part?.inline_data;
+            if (ad?.data) {
+              // Convert PCM to WAV
+              const pcm = Buffer.from(ad.data, "base64");
+              const sr = 24000;
+              const bps = 16;
+              const ch = 1;
+              const hdr = Buffer.alloc(44);
+              hdr.write("RIFF", 0);
+              hdr.writeUInt32LE(36 + pcm.length, 4);
+              hdr.write("WAVE", 8);
+              hdr.write("fmt ", 12);
+              hdr.writeUInt32LE(16, 16);
+              hdr.writeUInt16LE(1, 20);
+              hdr.writeUInt16LE(ch, 22);
+              hdr.writeUInt32LE(sr, 24);
+              hdr.writeUInt32LE(sr * ch * (bps / 8), 28);
+              hdr.writeUInt16LE(ch * (bps / 8), 32);
+              hdr.writeUInt16LE(bps, 34);
+              hdr.write("data", 36);
+              hdr.writeUInt32LE(pcm.length, 40);
+              audioBase64 = Buffer.concat([hdr, pcm]).toString("base64");
+            }
+          } else {
+            console.log(
+              JSON.stringify({
+                severity: "WARNING",
+                message: "section_tts_failed",
+                sectionIndex: i,
+                status: sectionTtsResp.status,
+              })
+            );
+          }
+
+          sections.push({
+            stepIndex: i,
+            script: sectionText,
+            audio: audioBase64,
+          });
+
+          if (charBudget <= 0) break;
+        }
+
+        console.log(
+          JSON.stringify({
+            severity: "INFO",
+            message: "narration_complete",
+            sectionsGenerated: sections.length,
+            sectionsWithAudio: sections.filter((s) => s.audio).length,
+          })
+        );
+
+        await logApiUsage(userId, {
+          model: "gemini-2.5-flash-preview-tts",
+          type: "pathNarration",
+          query: query.substring(0, 50),
+          sectionCount: sections.length,
+        });
+
+        return {
+          success: true,
+          sections,
+          totalWords: fullScript.split(/\s+/).length,
         };
       }
 

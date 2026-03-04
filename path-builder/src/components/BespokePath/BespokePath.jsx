@@ -14,7 +14,11 @@ import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PathStep from "./PathStep";
 import QuizEngine from "./QuizEngine";
 import PreSeededPaths from "./PreSeededPaths";
-import { generateStepAudio, generateStepTakeaways } from "../../services/stepBriefingService";
+import {
+  generateStepAudio,
+  generateStepTakeaways,
+  generatePathNarration,
+} from "../../services/stepBriefingService";
 import "./BespokePath.css";
 
 import {
@@ -98,6 +102,10 @@ export default function BespokePath() {
   const [stepAudioLoading, setStepAudioLoading] = useState(null);
   const [stepTakeaways, setStepTakeaways] = useState(new Map());
   const [takeawayLoading, setTakeawayLoading] = useState(null);
+
+  // Path Narrator state (button-triggered, not auto)
+  const [narrationData, setNarrationData] = useState(null); // Map<stepIndex, {script, audioUrl}>
+  const [narrationLoading, setNarrationLoading] = useState(false);
 
   const isFollowUp = useRef(false);
 
@@ -250,6 +258,17 @@ export default function BespokePath() {
     },
     [stepAudios, pathResult, query]
   );
+
+  // Generate full path narration on demand (button-triggered)
+  const handleGenerateNarration = useCallback(async () => {
+    if (narrationData || narrationLoading || !pathResult) return;
+    setNarrationLoading(true);
+    const result = await generatePathNarration(pathResult, pathResult.query || query);
+    if (result) {
+      setNarrationData(result);
+    }
+    setNarrationLoading(false);
+  }, [narrationData, narrationLoading, pathResult, query]);
 
   // Generate takeaways on demand when step becomes active
   const handleLoadTakeaways = useCallback(
@@ -506,9 +525,15 @@ export default function BespokePath() {
                     <PathStep
                       step={pathResult.path[currentStep]}
                       isActive={true}
-                      stepAudioUrl={stepAudios.get(currentStep)}
+                      narrationScript={narrationData?.get(currentStep)?.script}
+                      stepAudioUrl={
+                        narrationData?.get(currentStep)?.audioUrl || stepAudios.get(currentStep)
+                      }
                       stepAudioLoading={stepAudioLoading === currentStep}
                       onGenerateAudio={() => handleStepAudio(currentStep)}
+                      narrationLoading={narrationLoading}
+                      onGenerateNarration={handleGenerateNarration}
+                      hasNarration={!!narrationData}
                       takeaways={stepTakeaways.get(currentStep)}
                       takeawayLoading={takeawayLoading === currentStep}
                     />

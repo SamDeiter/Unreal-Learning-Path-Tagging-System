@@ -96,9 +96,76 @@ Return ONLY a JSON array of 3 strings. Example:
       ];
     }
 
-    return ["Review this step carefully", "Pay attention to the specific details", "Practice applying this concept"];
+    return [
+      "Review this step carefully",
+      "Pay attention to the specific details",
+      "Practice applying this concept",
+    ];
   } catch (err) {
     devWarn("[Takeaways] Generation failed:", err.message);
-    return ["Review this step carefully", "Pay attention to the specific details", "Practice applying this concept"];
+    return [
+      "Review this step carefully",
+      "Pay attention to the specific details",
+      "Practice applying this concept",
+    ];
+  }
+}
+
+/**
+ * Generate a cohesive multi-section narration for an entire learning path.
+ * User-triggered (not automatic) to control costs.
+ *
+ * @param {Object} pathResult - The full path result object
+ * @param {string} query - The original user query
+ * @returns {Promise<Map<number, {script: string, audioUrl: string|null}>|null>}
+ */
+export async function generatePathNarration(pathResult, query) {
+  try {
+    const app = getFirebaseApp();
+    const functions = getFunctions(app, "us-central1");
+    const genFn = httpsCallable(functions, "generateAudioBriefing", { timeout: 300000 });
+
+    // Build steps payload for the CF
+    const steps = pathResult.path.map((step) => ({
+      title: step.segment?.title || step.segment?.videoTitle || "",
+      summary: step.summary || step.segment?.text?.substring(0, 300) || "",
+      category: step.category || "learning",
+    }));
+
+    devLog("[PathNarration] Requesting narration for", steps.length, "steps");
+
+    const result = await genFn({
+      mode: "narrate",
+      query,
+      steps,
+    });
+
+    if (result.data?.sections && Array.isArray(result.data.sections)) {
+      const narrationMap = new Map();
+
+      for (const section of result.data.sections) {
+        let audioUrl = null;
+        if (section.audio) {
+          const binary = atob(section.audio);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+          const blob = new Blob([bytes], { type: "audio/wav" });
+          audioUrl = URL.createObjectURL(blob);
+        }
+
+        narrationMap.set(section.stepIndex, {
+          script: section.script || "",
+          audioUrl,
+        });
+      }
+
+      devLog("[PathNarration] Generated", narrationMap.size, "sections");
+      return narrationMap;
+    }
+
+    return null;
+  } catch (err) {
+    devWarn("[PathNarration] Generation failed:", err.message);
+    return null;
   }
 }

@@ -1,6 +1,10 @@
 /**
  * PathStep — A single step in a bespoke learning path.
  * Renders in the "Epic-style" layout from the mockup.
+ *
+ * Supports two audio modes:
+ * 1. Path Narration (preferred): cohesive script from generatePathNarration
+ * 2. Per-step audio (fallback): isolated clip from generateStepAudio
  */
 
 import { useState } from "react";
@@ -8,9 +12,6 @@ import { CATEGORY_STYLES } from "./pathConstants";
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
-/**
- * Decode common HTML entities in titles/text.
- */
 function decodeEntities(str) {
   if (!str) return "";
   return str
@@ -22,36 +23,23 @@ function decodeEntities(str) {
     .replace(/&#x27;/g, "'");
 }
 
-/**
- * Clean raw text from stringified JSON if needed.
- */
 function cleanText(raw) {
   if (!raw) return "";
   let text = String(raw);
-
-  // Strip leading "#### -" markdown artifacts
   text = text.replace(/^(#{1,6}\s*-?\s*)+/gm, "").trim();
-  // Strip inline HTML tags
   text = text.replace(/<[^>]+>/g, "");
-  // Decode HTML entities
   text = decodeEntities(text);
-  // Collapse excess whitespace
   text = text.replace(/\s+/g, " ").trim();
-
   return text;
 }
 
-/**
- * Filter out low-quality takeaways like "Key systems: Blueprint"
- */
 function filterTakeaways(items) {
   if (!items || !items.length) return items;
   return items.filter((t) => {
     const lower = t.toLowerCase().trim();
-    // Filter out stub-style entries
     if (lower.startsWith("key systems:")) return false;
     if (lower.startsWith("key concepts:")) return false;
-    if (lower.length < 15) return false; // Too short to be useful
+    if (lower.length < 15) return false;
     return true;
   });
 }
@@ -61,31 +49,35 @@ function filterTakeaways(items) {
 export default function PathStep({
   step,
   isActive,
+  narrationScript,
   stepAudioUrl,
   stepAudioLoading,
   onGenerateAudio,
+  narrationLoading,
+  onGenerateNarration,
+  hasNarration,
   takeaways,
   takeawayLoading,
 }) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
-  if (!step) return null; // Guard against undefined step during state transitions
+  if (!step) return null;
   const { segment, category } = step;
 
   const displayTitle = decodeEntities(segment.title || segment.videoTitle || "Step Details");
-  const displayText = step.summary || cleanText(segment.text);
 
-  // Source type for pills
+  // Use narration script when available, otherwise fall back to raw segment text
+  const displayText = narrationScript || step.summary || cleanText(segment.text);
+
   const sourceType = segment.type || segment.source || "docs";
   const sourceLabel =
     sourceType === "transcript" ? "Video" : sourceType === "epic_learning" ? "Article" : "Docs";
   const sourceIcon = sourceType === "transcript" ? "fa-video" : "fa-book-open";
 
-  // Filter takeaways for quality
   const filteredTakeaways = filterTakeaways(takeaways);
 
   return (
     <div className={`step-article ${isActive ? "active" : ""}`}>
-      {/* Header with Phase Badge and Title */}
+      {/* Header */}
       <header className="step-header">
         <div className="badge-container">
           <span className={`category-badge category-${category}`}>{category.toUpperCase()}</span>
@@ -93,43 +85,51 @@ export default function PathStep({
         <h1 className="step-title">{displayTitle}</h1>
       </header>
 
-      {/* Audio Track Bar — real audio controls */}
+      {/* Audio Controls */}
       {isActive && (
         <div className="video-progress-container">
           {stepAudioUrl ? (
-            <audio controls src={stepAudioUrl} style={{ width: "100%" }} />
-          ) : stepAudioLoading ? (
-            <div
-              className="audio-generating"
-              style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 0" }}
-            >
+            /* Dark-themed native audio player */
+            <audio controls src={stepAudioUrl} className="dark-audio-player" />
+          ) : narrationLoading ? (
+            <div className="audio-generating">
               <div className="bespoke-spinner" style={{ width: "18px", height: "18px" }} />
-              <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Generating audio…</span>
+              <span>Generating narration…</span>
             </div>
+          ) : stepAudioLoading ? (
+            <div className="audio-generating">
+              <div className="bespoke-spinner" style={{ width: "18px", height: "18px" }} />
+              <span>Generating audio…</span>
+            </div>
+          ) : !hasNarration ? (
+            /* Primary action: generate full path narration */
+            <button
+              className="generate-narration-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onGenerateNarration?.();
+              }}
+              title="Generate a cohesive narrated walkthrough for the entire path"
+            >
+              <i className="fa-solid fa-headphones"></i> Generate Narration
+            </button>
           ) : (
+            /* Fallback: per-step audio if narration exists but this step has no audio */
             <button
               className="play-pause-btn"
               onClick={(e) => {
                 e.stopPropagation();
                 onGenerateAudio?.();
               }}
-              title="Generate audio briefing for this step"
+              title="Generate audio for this step"
             >
               <i className="fa-solid fa-play"></i>
             </button>
           )}
-          {!stepAudioUrl && !stepAudioLoading && (
-            <>
-              <div className="video-progress-bar">
-                <div className="progress-fill" style={{ width: "0%" }}></div>
-              </div>
-              <span className="video-time">Click ▶ to generate</span>
-            </>
-          )}
         </div>
       )}
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div className="content-area">
         <div className="sources-pills">
           <span className="source-pill">
@@ -138,13 +138,18 @@ export default function PathStep({
           <span className="source-pill">
             <i className="fa-solid fa-tags"></i> {category}
           </span>
+          {narrationScript && (
+            <span className="source-pill narration-pill">
+              <i className="fa-solid fa-headphones"></i> Narrated
+            </span>
+          )}
         </div>
 
         <div className="step-body-text">
           <p>{displayText}</p>
         </div>
 
-        {/* Key Takeaways Box */}
+        {/* Key Takeaways */}
         <div className="takeaways-box">
           <h3 className="takeaways-title">Key Takeaways</h3>
           {takeawayLoading ? (
@@ -164,7 +169,7 @@ export default function PathStep({
           )}
         </div>
 
-        {/* Sources / Footnotes Section — Collapsible */}
+        {/* Sources — Collapsible */}
         <div className="footnotes-section">
           <div
             className="footnotes-header"
