@@ -289,7 +289,7 @@ export default function BespokePath() {
                       try {
                         const app = getFirebaseApp();
                         const functions = getFunctions(app, "us-central1");
-                        const genFn = httpsCallable(functions, "generateAudioBriefing");
+                        const genFn = httpsCallable(functions, "generateAudioBriefing", { timeout: 120000 });
                         setBriefingStatus("Synthesizing audio (this may take 30-60s)…");
                         const result = await genFn({
                           query: pathResult.query || query,

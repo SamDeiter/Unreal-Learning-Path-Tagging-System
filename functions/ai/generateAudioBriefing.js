@@ -62,7 +62,7 @@ The learner asked: "${query}"
 Here are the learning path steps:
 ${stepSummaries}
 
-Write a conversational dialog between two speakers:
+Write a conversational and BRIEF (MAXIMUM 150 words, ~45 seconds) dialog between two speakers:
 - "Instructor": A friendly UE5 expert who explains the root cause and the fix
 - "Learner": A curious developer who asks clarifying questions
 
