@@ -270,6 +270,76 @@ export default function BespokePath() {
             onStepClick={setCurrentStep}
           />
 
+          {/* Audio Briefing - Top of path */}
+          {!pathResult.isPreSeeded && (
+            <div className="audio-briefing-section top-briefing">
+              <h3>\ud83c\udfa7 Audio Briefing</h3>
+              {briefingAudioUrl ? (
+                <div className="audio-player-wrapper">
+                  <audio ref={audioRef} controls src={briefingAudioUrl} />
+                </div>
+              ) : (
+                <>
+                  <button
+                    className="briefing-btn"
+                    disabled={briefingLoading}
+                    onClick={async () => {
+                      setBriefingLoading(true);
+                      setBriefingStatus("Generating script\u2026");
+                      try {
+                        const app = getFirebaseApp();
+                        const functions = getFunctions(app, "us-central1");
+                        const genFn = httpsCallable(functions, "generateAudioBriefing");
+                        setBriefingStatus("Synthesizing audio (this may take 30-60s)\u2026");
+                        const result = await genFn({
+                          query: pathResult.query || query,
+                          steps: pathResult.path.map((s) => ({
+                            category: s.category,
+                            summary: s.summary || s.segment?.title || "",
+                            title: s.segment?.title || s.segment?.videoTitle || "",
+                          })),
+                        });
+                        if (result.data?.audioUrl) {
+                          setBriefingAudioUrl(result.data.audioUrl);
+                          setBriefingStatus("");
+                        } else {
+                          setBriefingStatus("Error: No audio URL returned");
+                        }
+                      } catch (err) {
+                        console.error("Audio briefing error:", err);
+                        setBriefingStatus(`Error: ${err.message}`);
+                      } finally {
+                        setBriefingLoading(false);
+                      }
+                    }}
+                  >
+                    {briefingLoading ? "\u23f3 Generating\u2026" : "\ud83c\udfa7 Listen to Briefing"}
+                  </button>
+                  {briefingStatus && <p className="briefing-status">{briefingStatus}</p>}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Path Overview */}
+          <div className="key-highlights">
+            <h3>Your Learning Path</h3>
+            <p className="highlights-query">For: <em>"{pathResult.query || query}"</em></p>
+            <ul className="highlights-list">
+              {pathResult.path.map((step, i) => (
+                <li key={i} className="highlight-item" onClick={() => setCurrentStep(i)}>
+                  <span className="highlight-number">{i + 1}</span>
+                  <div className="highlight-content">
+                    <strong className={`highlight-category cat-${step.category}`}>
+                      {step.category}
+                    </strong>
+                    <p>{step.summary || step.segment?.title || "Review this step"}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <div className="path-steps">
             {pathResult.path.map((step, i) => (
               <div key={step.segment.id || i}>
@@ -329,57 +399,6 @@ export default function BespokePath() {
                 </strong>{" "}
                 across {quizScores.size} quizzes
               </span>
-            </div>
-          )}
-
-          {/* Audio Briefing */}
-          {!pathResult.isPreSeeded && (
-            <div className="audio-briefing-section">
-              <h3>🎧 Audio Briefing</h3>
-              {briefingAudioUrl ? (
-                <div className="audio-player-wrapper">
-                  <audio ref={audioRef} controls src={briefingAudioUrl} />
-                </div>
-              ) : (
-                <>
-                  <button
-                    className="briefing-btn"
-                    disabled={briefingLoading}
-                    onClick={async () => {
-                      setBriefingLoading(true);
-                      setBriefingStatus("Generating script…");
-                      try {
-                        const app = getFirebaseApp();
-                        const functions = getFunctions(app, "us-central1");
-                        const genFn = httpsCallable(functions, "generateAudioBriefing");
-                        setBriefingStatus("Synthesizing audio (this may take 30-60s)…");
-                        const result = await genFn({
-                          query: pathResult.query || query,
-                          steps: pathResult.path.map((s) => ({
-                            category: s.category,
-                            summary: s.summary || s.segment?.title || "",
-                            title: s.segment?.title || s.segment?.videoTitle || "",
-                          })),
-                        });
-                        if (result.data?.audioUrl) {
-                          setBriefingAudioUrl(result.data.audioUrl);
-                          setBriefingStatus("");
-                        } else {
-                          setBriefingStatus("Error: No audio URL returned");
-                        }
-                      } catch (err) {
-                        console.error("Audio briefing error:", err);
-                        setBriefingStatus(`Error: ${err.message}`);
-                      } finally {
-                        setBriefingLoading(false);
-                      }
-                    }}
-                  >
-                    {briefingLoading ? "⏳ Generating…" : "🎧 Listen to Briefing"}
-                  </button>
-                  {briefingStatus && <p className="briefing-status">{briefingStatus}</p>}
-                </>
-              )}
             </div>
           )}
 
