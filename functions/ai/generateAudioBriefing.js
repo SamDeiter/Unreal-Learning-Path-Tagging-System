@@ -1,21 +1,22 @@
 const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 const { checkRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
 
 /**
- * generateAudioBriefing — NotebookLM-style audio overview for a learning path.
+ * generateAudioBriefing - NotebookLM-style audio overview for a learning path.
  *
  * Pipeline:
  * 1. Accept learning path data (steps, summaries, user query)
  * 2. Generate a 2-speaker dialog script via Gemini Flash
  * 3. Synthesize audio via Gemini 2.5 Flash Preview TTS (multi-speaker)
- * 4. Return base64 WAV audio directly (avoids Firebase Storage dependency)
+ * 4. Upload WAV to Firebase Storage and return download URL
  */
 exports.generateAudioBriefing = functions
   .runWith({
     secrets: ["GEMINI_API_KEY"],
-    timeoutSeconds: 120,
-    memory: "512MB",
+    timeoutSeconds: 300,
+    memory: "1GB",
   })
   .https.onCall(async (data, context) => {
     const userId = context.auth?.uid || "anonymous";
@@ -46,7 +47,7 @@ exports.generateAudioBriefing = functions
         );
       }
 
-      // ── Step 1: Generate a 2-speaker dialog script ────────────────────
+      // -- Step 1: Generate a 2-speaker dialog script --
       const stepSummaries = steps
         .map(
           (s, i) =>
@@ -109,7 +110,7 @@ Start with Instructor greeting the learner and mentioning their specific problem
         })
       );
 
-      // ── Step 2: Synthesize multi-speaker audio via Gemini TTS ─────────
+      // -- Step 2: Synthesize multi-speaker audio via Gemini TTS --
       const ttsPrompt = `TTS the following conversation between Instructor and Learner:\n\n${script}`;
 
       const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
@@ -123,13 +124,13 @@ Start with Instructor greeting the learner and mentioning their specific problem
                 {
                   speaker: "Instructor",
                   voiceConfig: {
-                    prebuilt_voiceConfig: { voiceName: "Kore" },
+                    prebuiltVoiceConfig: { voiceName: "Kore" },
                   },
                 },
                 {
                   speaker: "Learner",
                   voiceConfig: {
-                    prebuilt_voiceConfig: { voiceName: "Puck" },
+                    prebuiltVoiceConfig: { voiceName: "Puck" },
                   },
                 },
               ],
@@ -150,18 +151,83 @@ Start with Instructor greeting the learner and mentioning their specific problem
       }
 
       const ttsJson = await ttsResp.json();
-      const audioData = ttsJson.candidates?.[0]?.content?.parts?.[0]?.inline_data;
+      const firstPart = ttsJson.candidates?.[0]?.content?.parts?.[0];
+      const audioData = firstPart?.inlineData || firstPart?.inline_data;
 
       if (!audioData?.data) {
+        console.error(
+          JSON.stringify({
+            severity: "ERROR",
+            message: "tts_no_audio_detail",
+            response: JSON.stringify(ttsJson).substring(0, 2000),
+          })
+        );
         throw new Error("No audio data in TTS response");
       }
+
+      const mimeType = audioData.mimeType || audioData.mime_type || "audio/L16;rate=24000";
+      const rawBase64 = audioData.data;
 
       console.log(
         JSON.stringify({
           severity: "INFO",
           message: "audio_synthesized",
-          mimeType: audioData.mime_type,
-          dataLength: audioData.data.length,
+          mimeType,
+          dataLength: rawBase64.length,
+        })
+      );
+
+      // -- Step 3: Convert PCM to WAV and upload to Firebase Storage --
+      const pcmBuffer = Buffer.from(rawBase64, "base64");
+      const sampleRate = 24000;
+      const bitsPerSample = 16;
+      const numChannels = 1;
+      const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+      const blockAlign = numChannels * (bitsPerSample / 8);
+      const dataSize = pcmBuffer.length;
+
+      // Build WAV header (44 bytes)
+      const wavHeader = Buffer.alloc(44);
+      wavHeader.write("RIFF", 0);
+      wavHeader.writeUInt32LE(36 + dataSize, 4);
+      wavHeader.write("WAVE", 8);
+      wavHeader.write("fmt ", 12);
+      wavHeader.writeUInt32LE(16, 16);        // PCM chunk size
+      wavHeader.writeUInt16LE(1, 20);          // PCM format
+      wavHeader.writeUInt16LE(numChannels, 22);
+      wavHeader.writeUInt32LE(sampleRate, 24);
+      wavHeader.writeUInt32LE(byteRate, 28);
+      wavHeader.writeUInt16LE(blockAlign, 32);
+      wavHeader.writeUInt16LE(bitsPerSample, 34);
+      wavHeader.write("data", 36);
+      wavHeader.writeUInt32LE(dataSize, 40);
+
+      const wavBuffer = Buffer.concat([wavHeader, pcmBuffer]);
+
+      // Upload to Firebase Storage
+      const bucket = admin.storage().bucket();
+      const filename = `audio-briefings/${userId}/${Date.now()}.wav`;
+      const file = bucket.file(filename);
+
+      await file.save(wavBuffer, {
+        metadata: {
+          contentType: "audio/wav",
+          metadata: { query: query.substring(0, 100) },
+        },
+      });
+
+      // Make publicly accessible (signed URL valid for 1 hour)
+      const [signedUrl] = await file.getSignedUrl({
+        action: "read",
+        expires: Date.now() + 60 * 60 * 1000, // 1 hour
+      });
+
+      console.log(
+        JSON.stringify({
+          severity: "INFO",
+          message: "audio_uploaded",
+          filename,
+          wavSize: wavBuffer.length,
         })
       );
 
@@ -173,9 +239,9 @@ Start with Instructor greeting the learner and mentioning their specific problem
 
       return {
         success: true,
-        audio: audioData.data, // base64 encoded audio
-        mimeType: audioData.mimeType || audioData.mime_type || "audio/L16;rate=24000",
-        script, // Return script for optional display
+        audioUrl: signedUrl,
+        mimeType: "audio/wav",
+        script,
       };
     } catch (error) {
       console.error(
