@@ -79,7 +79,17 @@ function cleanText(raw) {
 
 // ── Component ─────────────────────────────────────────────────────────
 
-export default function PathStep({ step, index, isActive, onClick, stepAudioUrl, stepAudioLoading, onGenerateAudio, takeaways, takeawayLoading }) {
+export default function PathStep({
+  step,
+  index,
+  isActive,
+  onClick,
+  stepAudioUrl,
+  stepAudioLoading,
+  onGenerateAudio,
+  takeaways,
+  takeawayLoading,
+}) {
   const { segment, category } = step;
   const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.foundation;
 
@@ -201,6 +211,66 @@ export default function PathStep({ step, index, isActive, onClick, stepAudioUrl,
         <p>{displayText}</p>
       </div>
 
+      {/* Source Citation Pills */}
+      {isActive && segment && (
+        <div className="sources-footer">
+          <details>
+            <summary>
+              📎 Sources (
+              {segment.type === "transcript"
+                ? "Video"
+                : segment.type === "epic_learning"
+                  ? "Article"
+                  : "Docs"}
+              )
+            </summary>
+            <div className="sources-list">
+              {segment.type === "transcript" && segment.videoUrl && (
+                <a
+                  href={segment.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="source-citation"
+                >
+                  <span className="source-icon">📹</span>
+                  {decodeEntities(segment.videoTitle || "Video Source")}
+                  {segment.startTime != null &&
+                    ` — ${Math.floor(segment.startTime / 60)}:${String(Math.floor(segment.startTime % 60)).padStart(2, "0")}`}
+                </a>
+              )}
+              {segment.type === "epic_learning" && (
+                <a
+                  href={segment.url || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="source-citation"
+                >
+                  <span className="source-icon">📖</span>
+                  {decodeEntities(segment.title || "Epic Dev Article")}
+                </a>
+              )}
+              {segment.type === "docs" && (
+                <a
+                  href={segment.url || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="source-citation"
+                >
+                  <span className="source-icon">📄</span>
+                  {decodeEntities(segment.title || "Documentation")}
+                </a>
+              )}
+              {hasAuthor && (
+                <span className="source-citation">
+                  <span className="source-icon">👤</span>
+                  {segment.author}
+                </span>
+              )}
+            </div>
+          </details>
+        </div>
+      )}
+
       {/* Per-step audio + key takeaways (only on active step) */}
       {isActive && (
         <div className="step-extras">
@@ -225,7 +295,10 @@ export default function PathStep({ step, index, isActive, onClick, stepAudioUrl,
             ) : (
               <button
                 className="step-audio-btn"
-                onClick={(e) => { e.stopPropagation(); onGenerateAudio?.(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onGenerateAudio?.();
+                }}
                 disabled={stepAudioLoading}
               >
                 {stepAudioLoading ? "⏳ Generating…" : "🔊 Listen to Step Briefing"}

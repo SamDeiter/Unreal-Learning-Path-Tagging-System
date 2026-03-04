@@ -39,6 +39,53 @@ const EXAMPLE_QUERIES = [
   "Why is my landscape material tiling so visible at distance?",
 ];
 
+
+// ── Phase Grouping ──────────────────────────────────────
+// Maps step categories to the 4-phase pedagogical flow
+const PHASE_CONFIG = [
+  { key: "problem",  icon: "📋", label: "THE PROBLEM",  categories: ["foundation", "diagnosis"] },
+  { key: "solution", icon: "🔧", label: "THE SOLUTION", categories: ["fix"] },
+  { key: "quiz",     icon: "📝", label: "QUIZ",         categories: ["__quiz__"] },
+  { key: "apply",    icon: "🚀", label: "APPLY IT",     categories: ["transfer"] },
+];
+
+/**
+ * Group path steps into the 4-phase flow and inject a virtual quiz phase.
+ * Returns: [{ phase, icon, label, steps: [{ ...step, globalIndex }] }]
+ */
+function groupStepsIntoPhases(path) {
+  const phases = [];
+
+  // Problem phase: foundation + diagnosis
+  const problemSteps = path
+    .map((s, i) => ({ ...s, globalIndex: i }))
+    .filter((s) => ["foundation", "diagnosis"].includes(s.category));
+  if (problemSteps.length > 0) {
+    phases.push({ ...PHASE_CONFIG[0], steps: problemSteps });
+  }
+
+  // Solution phase: fix steps
+  const solutionSteps = path
+    .map((s, i) => ({ ...s, globalIndex: i }))
+    .filter((s) => s.category === "fix");
+  if (solutionSteps.length > 0) {
+    phases.push({ ...PHASE_CONFIG[1], steps: solutionSteps });
+  }
+
+  // Quiz phase: virtual (no actual steps from API)
+  phases.push({ ...PHASE_CONFIG[2], steps: [{ category: "__quiz__", globalIndex: -2 }] });
+
+  // Apply It phase: transfer steps
+  const applySteps = path
+    .map((s, i) => ({ ...s, globalIndex: i }))
+    .filter((s) => s.category === "transfer");
+  if (applySteps.length > 0) {
+    phases.push({ ...PHASE_CONFIG[3], steps: applySteps });
+  }
+
+  return phases;
+}
+
 export default function BespokePath() {
   const [query, setQuery] = useState("");
   const [pathResult, setPathResult] = useState(null);
@@ -340,161 +387,389 @@ export default function BespokePath() {
       {/* Path Results */}
       {pathResult && !pathResult.error && pathResult.path.length > 0 && (
         <div className="bespoke-results">
-          <PathProgress
-            steps={pathResult.path}
-            currentStep={currentStep}
-            onStepClick={setCurrentStep}
-          />
+          {/* Epic-style Split Stepper Layout */}
+          <div className="epic-stepper-layout">
+            {/* Left Sidebar: Phased Navigation */}
+            <div className="epic-sidebar">
+              <h3 className="sidebar-title">Path Overview</h3>
+              <p className="sidebar-query">
+                <em>"{pathResult.query || query}"</em>
+              </p>
 
-          {/* Audio Briefing - Top of path */}
-          {!pathResult.isPreSeeded && (
-            <div className="audio-briefing-section top-briefing">
-              <h3>🎧 Audio Briefing</h3>
-              {briefingAudioUrl ? (
-                <div className="audio-player-wrapper">
-                  <audio ref={audioRef} controls src={briefingAudioUrl} />
-                </div>
-              ) : (
-                <>
-                  <button
-                    className="briefing-btn"
-                    disabled={briefingLoading}
-                    onClick={async () => {
-                      setBriefingLoading(true);
-                      setBriefingStatus("Generating script…");
-                      try {
-                        const app = getFirebaseApp();
-                        const functions = getFunctions(app, "us-central1");
-                        const genFn = httpsCallable(functions, "generateAudioBriefing", {
-                          timeout: 120000,
-                        });
-                        setBriefingStatus("Synthesizing audio (this may take 30-60s)…");
-                        const result = await genFn({
-                          query: pathResult.query || query,
-                          steps: pathResult.path.map((s) => ({
-                            category: s.category,
-                            summary: s.summary || s.segment?.title || "",
-                            title: s.segment?.title || s.segment?.videoTitle || "",
-                          })),
-                        });
-                        if (result.data?.audio) {
-                          // Convert base64 WAV to blob URL
-                          const binary = atob(result.data.audio);
-                          const bytes = new Uint8Array(binary.length);
-                          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                          const blob = new Blob([bytes], { type: "audio/wav" });
-                          setBriefingAudioUrl(URL.createObjectURL(blob));
-                          setBriefingStatus("");
-                          trackEvent("audio_briefing_generated", {
-                            query: pathResult.query?.substring(0, 100),
-                            step_count: pathResult.path?.length || 0,
-                          });
-                        } else {
-                          setBriefingStatus("Error: No audio data returned");
-                        }
-                      } catch (err) {
-                        console.error("Audio briefing error:", err);
-                        setBriefingStatus(`Error: ${err.message}`);
-                      } finally {
-                        setBriefingLoading(false);
-                      }
-                    }}
+              <div className="epic-step-list">
+                {/* Audio Briefing entry */}
+                {!pathResult.isPreSeeded && (
+                  <div
+                    className={`epic-step-item ${currentStep === -1 ? "active" : ""}`}
+                    onClick={() => setCurrentStep(-1)}
                   >
-                    {briefingLoading ? "⏳ Generating…" : "🎧 Listen to Briefing"}
-                  </button>
-                  {briefingStatus && <p className="briefing-status">{briefingStatus}</p>}
-                </>
-              )}
-            </div>
-          )}
-
-          {/* Path Overview */}
-          <div className="key-highlights">
-            <h3>Your Learning Path</h3>
-            <p className="highlights-query">
-              For: <em>"{pathResult.query || query}"</em>
-            </p>
-            <ul className="highlights-list">
-              {pathResult.path.map((step, i) => (
-                <li key={i} className="highlight-item" onClick={() => setCurrentStep(i)}>
-                  <span className="highlight-number">{i + 1}</span>
-                  <div className="highlight-content">
-                    <strong className={`highlight-category cat-${step.category}`}>
-                      {step.category}
-                    </strong>
-                    <p>{step.summary || step.segment?.title || "Review this step"}</p>
+                    <div className="epic-step-indicator">
+                      <span className="step-dot">🎧</span>
+                    </div>
+                    <div className="epic-step-info">
+                      <strong className="epic-step-category">Overview</strong>
+                      <span className="epic-step-title">Listen to Briefing</span>
+                    </div>
                   </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="path-steps">
-            {pathResult.path.map((step, i) => (
-              <div key={step.segment.id || i}>
-                {/* Bridge narration between steps */}
-                {i > 0 && (
-                  <BridgeNarration
-                    bridge={pathResult.bridges.find((b) => b.from === i - 1 && b.to === i)}
-                    fromCategory={pathResult.path[i - 1].category}
-                    toCategory={step.category}
-                  />
                 )}
 
-                <PathStep
-                  step={step}
-                  index={i}
-                  isActive={i === currentStep}
-                  onClick={() => setCurrentStep(i)}
-                  stepAudioUrl={stepAudios.get(i)}
-                  stepAudioLoading={stepAudioLoading === i}
-                  onGenerateAudio={() => handleStepAudio(i)}
-                  takeaways={stepTakeaways.get(i)}
-                  takeawayLoading={takeawayLoading === i}
-                />
+                {/* Phased step groups */}
+                {groupStepsIntoPhases(pathResult.path).map((phase) => (
+                  <div key={phase.key} className="phase-group">
+                    <div className={`phase-label phase-${phase.key}`}>
+                      <span className="phase-icon">{phase.icon}</span>
+                      <span className="phase-text">{phase.label}</span>
+                      {phase.key === "quiz" && quizScores.size > 0 && (
+                        <span className="phase-score">
+                          {[...quizScores.values()].reduce((s, q) => s + q.score, 0)}/
+                          {[...quizScores.values()].reduce((s, q) => s + q.total, 0)} ✓
+                        </span>
+                      )}
+                    </div>
 
-                {/* Quiz button or quiz component */}
-                {i === currentStep && (
+                    {phase.steps.map((step) => {
+                      if (step.category === "__quiz__") {
+                        return (
+                          <div
+                            key="quiz-phase"
+                            className={`epic-step-item ${currentStep === -2 ? "active" : ""} ${quizScores.size > 0 ? "completed" : ""}`}
+                            onClick={() => setCurrentStep(-2)}
+                          >
+                            <div className="epic-step-indicator">
+                              <span className="step-dot">{quizScores.size > 0 ? "✓" : "📝"}</span>
+                            </div>
+                            <div className="epic-step-info">
+                              <span className="epic-step-title">Knowledge Check</span>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      const isActive = step.globalIndex === currentStep;
+                      const isCompleted = step.globalIndex < currentStep && currentStep >= 0;
+                      return (
+                        <div
+                          key={step.globalIndex}
+                          className={`epic-step-item ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`}
+                          onClick={() => setCurrentStep(step.globalIndex)}
+                        >
+                          <div className="epic-step-indicator">
+                            <span className="step-dot">{isCompleted ? "✓" : step.globalIndex + 1}</span>
+                          </div>
+                          <div className="epic-step-info">
+                            <span className="epic-step-title">
+                              {step.summary || step.segment?.title || "Step Details"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+
+              {/* Final Score Summary in Sidebar */}
+              {quizScores.size > 0 && (
+                <div className="sidebar-score-summary">
+                  <span className="score-icon">🏆</span>
+                  <div>
+                    Score:
+                    <br />
+                    <strong>
+                      {[...quizScores.values()].reduce((s, q) => s + q.score, 0)}/
+                      {[...quizScores.values()].reduce((s, q) => s + q.total, 0)}
+                    </strong>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Main Content Area: Active Step */}
+            <div className="epic-main-content">
+              {/* Show Audio Briefing if selected */}
+              {currentStep === -1 && !pathResult.isPreSeeded && (
+                <div className="audio-briefing-section top-briefing">
+                  <h3 className="section-title">Overview Audio Briefing</h3>
+                  <p className="section-desc">
+                    Get a high-level summary of the solution before diving into the steps.
+                  </p>
+
+                  {briefingAudioUrl ? (
+                    <div className="audio-player-wrapper">
+                      <audio ref={audioRef} controls src={briefingAudioUrl} />
+                    </div>
+                  ) : (
+                    <div className="briefing-gen-area">
+                      <button
+                        className="briefing-btn epic-primary-btn"
+                        disabled={briefingLoading}
+                        onClick={async () => {
+                          setBriefingLoading(true);
+                          setBriefingStatus("Generating script…");
+                          try {
+                            const app = getFirebaseApp();
+                            const functions = getFunctions(app, "us-central1");
+                            const genFn = httpsCallable(functions, "generateAudioBriefing", {
+                              timeout: 120000,
+                            });
+                            setBriefingStatus("Synthesizing audio (this may take 30-60s)…");
+                            const result = await genFn({
+                              query: pathResult.query || query,
+                              steps: pathResult.path.map((s) => ({
+                                category: s.category,
+                                summary: s.summary || s.segment?.title || "",
+                                title: s.segment?.title || s.segment?.videoTitle || "",
+                              })),
+                            });
+                            if (result.data?.audio) {
+                              const binary = atob(result.data.audio);
+                              const bytes = new Uint8Array(binary.length);
+                              for (let i = 0; i < binary.length; i++)
+                                bytes[i] = binary.charCodeAt(i);
+                              const blob = new Blob([bytes], { type: "audio/wav" });
+                              setBriefingAudioUrl(URL.createObjectURL(blob));
+                              setBriefingStatus("");
+
+                              trackEvent("audio_briefing_generated", {
+                                query: pathResult.query?.substring(0, 100),
+                                step_count: pathResult.path?.length || 0,
+                              });
+
+                              // Track Token Usage
+                              if (result.data?.tokenUsage) {
+                                recordTokenUsage(
+                                  "audioBriefing",
+                                  result.data.tokenUsage.inputTokens || 0,
+                                  result.data.tokenUsage.outputTokens || 0
+                                );
+                              }
+                            } else {
+                              setBriefingStatus("Error: No audio data returned");
+                            }
+                          } catch (err) {
+                            console.error("Audio briefing error:", err);
+                            setBriefingStatus(`Error: ${err.message}`);
+                          } finally {
+                            setBriefingLoading(false);
+                          }
+                        }}
+                      >
+                        {briefingLoading ? "⏳ Generating Audio..." : "🎧 Listen to Briefing"}
+                      </button>
+                      {briefingStatus && <p className="briefing-status">{briefingStatus}</p>}
+                    </div>
+                  )}
+
+                  <div className="epic-step-navigation">
+                    <button className="epic-nav-btn next-btn" onClick={() => setCurrentStep(0)}>
+                      Start First Step →
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Show Active Step Content */}
+              {currentStep >= 0 && currentStep < pathResult.path.length && (
+                <div className="active-step-container">
+                  {/* Optional: Show bridge narration if arriving from previous step */}
+                  {currentStep > 0 && pathResult.bridges && (
+                    <BridgeNarration
+                      bridge={pathResult.bridges.find(
+                        (b) => b.from === currentStep - 1 && b.to === currentStep
+                      )}
+                      fromCategory={pathResult.path[currentStep - 1].category}
+                      toCategory={pathResult.path[currentStep].category}
+                    />
+                  )}
+
+                  <PathStep
+                    step={pathResult.path[currentStep]}
+                    index={currentStep}
+                    isActive={true} /* Force true since it's only rendered when active */
+                    onClick={() => {}}
+                    stepAudioUrl={stepAudios.get(currentStep)}
+                    stepAudioLoading={stepAudioLoading === currentStep}
+                    onGenerateAudio={() => handleStepAudio(currentStep)}
+                    takeaways={stepTakeaways.get(currentStep)}
+                    takeawayLoading={takeawayLoading === currentStep}
+                  />
+
+                  {/* Quiz Area */}
                   <div className="step-quiz-area">
-                    {showQuiz === i && quizzes.has(i) ? (
+                    {showQuiz === currentStep && quizzes.has(currentStep) ? (
                       <QuizEngine
-                        questions={quizzes.get(i)}
-                        stepIndex={i}
+                        questions={quizzes.get(currentStep)}
+                        stepIndex={currentStep}
                         onComplete={handleQuizComplete}
                       />
-                    ) : quizScores.has(i) ? (
+                    ) : quizScores.has(currentStep) ? (
                       <div className="quiz-score-badge">
-                        ✅ Quiz: {quizScores.get(i).score}/{quizScores.get(i).total}
+                        ✅ Quiz: {quizScores.get(currentStep).score}/
+                        {quizScores.get(currentStep).total}
                       </div>
                     ) : (
                       <button
-                        className="take-quiz-btn"
-                        onClick={() => handleTakeQuiz(i)}
-                        disabled={quizLoading === i}
+                        className="take-quiz-btn epic-secondary-btn"
+                        onClick={() => handleTakeQuiz(currentStep)}
+                        disabled={quizLoading === currentStep}
                       >
-                        {quizLoading === i ? "Generating quiz..." : "📝 Take Quiz on This Step"}
+                        {quizLoading === currentStep
+                          ? "Generating quiz..."
+                          : "📝 Take Quiz on This Step"}
                       </button>
                     )}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
 
-          {/* Final Score Summary */}
-          {quizScores.size > 0 && (
-            <div className="bespoke-score-summary">
-              <span className="score-icon">🏆</span>
-              <span>
-                Path Score:{" "}
-                <strong>
-                  {[...quizScores.values()].reduce((s, q) => s + q.score, 0)}/
-                  {[...quizScores.values()].reduce((s, q) => s + q.total, 0)}
-                </strong>{" "}
-                across {quizScores.size} quizzes
-              </span>
+                  {/* Phase-Aware Navigation Buttons */}
+                  <div className="epic-step-navigation">
+                    <button
+                      className="epic-nav-btn prev-btn"
+                      onClick={() => {
+                        if (currentStep === 0 && !pathResult.isPreSeeded) {
+                          setCurrentStep(-1); // Back to overview
+                        } else if (currentStep > 0) {
+                          setCurrentStep(currentStep - 1);
+                        }
+                      }}
+                      disabled={currentStep === 0 && pathResult.isPreSeeded}
+                    >
+                      {currentStep === 0 ? "← Back to Overview" : `← Previous`}
+                    </button>
+
+                    {(() => {
+                      const phases = groupStepsIntoPhases(pathResult.path);
+                      const currentPhase = phases.find((p) =>
+                        p.steps.some((s) => s.globalIndex === currentStep)
+                      );
+                      const currentPhaseIdx = phases.indexOf(currentPhase);
+                      const nextPhase = phases[currentPhaseIdx + 1];
+                      const isLastInPhase =
+                        currentPhase &&
+                        currentStep === currentPhase.steps[currentPhase.steps.length - 1]?.globalIndex;
+                      const isLastStep = currentStep === pathResult.path.length - 1;
+
+                      if (isLastStep && !nextPhase) {
+                        return (
+                          <button
+                            className="epic-nav-btn complete-btn"
+                            onClick={() => window.scrollTo(0, 0)}
+                          >
+                            Complete Path ✓
+                          </button>
+                        );
+                      }
+
+                      if (isLastInPhase && nextPhase && nextPhase.key === "quiz") {
+                        return (
+                          <button
+                            className="epic-nav-btn next-btn"
+                            onClick={() => setCurrentStep(-2)}
+                          >
+                            Continue to Quiz →
+                          </button>
+                        );
+                      }
+
+                      if (isLastInPhase && nextPhase) {
+                        return (
+                          <button
+                            className="epic-nav-btn next-btn"
+                            onClick={() => setCurrentStep(nextPhase.steps[0]?.globalIndex ?? currentStep + 1)}
+                          >
+                            {nextPhase.icon} Continue to {nextPhase.label} →
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <button
+                          className="epic-nav-btn next-btn"
+                          onClick={() => setCurrentStep(currentStep + 1)}
+                        >
+                          Next Step →
+                        </button>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {/* Quiz Phase View (currentStep === -2) */}
+              {currentStep === -2 && (
+                <div className="active-step-container quiz-phase-container">
+                  <div className="phase-header">
+                    <span className="phase-header-icon">📝</span>
+                    <h3>Knowledge Check</h3>
+                    <p className="phase-header-desc">
+                      Test your understanding of the concepts covered in this path.
+                    </p>
+                  </div>
+
+                  {/* Generate quiz from all fix steps */}
+                  {(() => {
+                    const fixStepIdx = pathResult.path.findIndex((s) => s.category === "fix");
+                    const quizIdx = fixStepIdx >= 0 ? fixStepIdx : 0;
+
+                    if (showQuiz === quizIdx && quizzes.has(quizIdx)) {
+                      return (
+                        <QuizEngine
+                          questions={quizzes.get(quizIdx)}
+                          stepIndex={quizIdx}
+                          onComplete={handleQuizComplete}
+                        />
+                      );
+                    }
+
+                    if (quizScores.has(quizIdx)) {
+                      return (
+                        <div className="quiz-score-badge">
+                          ✅ Quiz: {quizScores.get(quizIdx).score}/
+                          {quizScores.get(quizIdx).total}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <button
+                        className="take-quiz-btn epic-secondary-btn"
+                        onClick={() => handleTakeQuiz(quizIdx)}
+                        disabled={quizLoading === quizIdx}
+                      >
+                        {quizLoading === quizIdx ? "Generating quiz..." : "📝 Start Quiz"}
+                      </button>
+                    );
+                  })()}
+
+                  <div className="epic-step-navigation">
+                    <button
+                      className="epic-nav-btn prev-btn"
+                      onClick={() => {
+                        const lastFixIdx = [...pathResult.path.keys()]
+                          .reverse()
+                          .find((i) => pathResult.path[i].category === "fix");
+                        setCurrentStep(lastFixIdx ?? 0);
+                      }}
+                    >
+                      ← Back to Solutions
+                    </button>
+                    {pathResult.path.some((s) => s.category === "transfer") && (
+                      <button
+                        className="epic-nav-btn next-btn"
+                        onClick={() => {
+                          const firstTransferIdx = pathResult.path.findIndex(
+                            (s) => s.category === "transfer"
+                          );
+                          setCurrentStep(firstTransferIdx);
+                        }}
+                      >
+                        🚀 Continue to Apply It →
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Meta info */}
           <div className="bespoke-meta">

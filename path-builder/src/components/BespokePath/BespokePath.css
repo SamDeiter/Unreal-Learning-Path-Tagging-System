@@ -315,7 +315,9 @@
 .path-step.active {
   border-color: var(--step-accent);
   background: #1c2128;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--step-accent);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 0 1px var(--step-accent);
 }
 
 .step-header {
@@ -631,7 +633,6 @@
   margin: 4px 0 0;
 }
 
-
 /* Step Text */
 .step-text {
   color: #d2dce6;
@@ -800,7 +801,6 @@
   color: #58a6ff;
 }
 
-
 /* ── Per-Step Extras (Audio + Takeaways) ──────────────── */
 
 .step-extras {
@@ -916,4 +916,481 @@
   .bridge-narration {
     margin-left: 16px;
   }
+}
+
+/* ── Epic Games Stepper Layout ──────────────────────── */
+
+.epic-stepper-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  margin-top: 32px;
+}
+
+/* Sidebar Navigation */
+.epic-sidebar {
+  flex: 0 0 280px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 24px 16px;
+  position: sticky;
+  top: 24px;
+}
+
+.sidebar-title {
+  color: #e6edf3;
+  font-size: 1.15rem;
+  margin: 0 0 4px;
+}
+
+.sidebar-query {
+  color: #8b949e;
+  font-size: 0.85rem;
+  margin: 0 0 24px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.epic-step-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Gap handled by connector padding or step margin */
+}
+
+.epic-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  cursor: pointer;
+  padding: 12px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.epic-step-item:hover {
+  background: rgba(88, 166, 255, 0.05);
+}
+
+.epic-step-item.active {
+  background: rgba(88, 166, 255, 0.1);
+  box-shadow: inset 3px 0 0 #58a6ff;
+}
+
+.epic-step-item.completed:not(.active) {
+  opacity: 0.7;
+}
+
+.epic-step-item.completed:hover {
+  opacity: 1;
+}
+
+.epic-step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #21262d;
+  border: 2px solid #484f58;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b949e;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.epic-step-item.active .step-dot {
+  background: #58a6ff;
+  border-color: #58a6ff;
+  color: #0d1117;
+  box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.2);
+}
+
+.epic-step-item.completed .step-dot {
+  background: #2ea043;
+  border-color: #2ea043;
+  color: #fff;
+}
+
+.step-connector {
+  position: absolute;
+  top: 28px;
+  bottom: -24px;
+  width: 2px;
+  background: #30363d;
+  z-index: 1;
+}
+
+.epic-step-item.completed .step-connector {
+  background: #2ea043;
+}
+
+.epic-step-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 8px;
+}
+
+.epic-step-category {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8b949e;
+}
+
+/* Category Colors */
+.cat-foundation {
+  color: #58a6ff;
+}
+.cat-diagnosis {
+  color: #3fb950;
+}
+.cat-fix {
+  color: #d29922;
+}
+.cat-transfer {
+  color: #a371f7;
+}
+
+.epic-step-item.active .epic-step-category {
+  color: #e6edf3;
+}
+
+.epic-step-title {
+  color: #c9d1d9;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.epic-step-item.active .epic-step-title {
+  color: #fff;
+  font-weight: 600;
+}
+
+.sidebar-score-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 16px;
+  background: rgba(63, 185, 80, 0.1);
+  border: 1px solid rgba(63, 185, 80, 0.2);
+  border-radius: 8px;
+}
+
+.sidebar-score-summary .score-icon {
+  font-size: 1.5rem;
+}
+
+.sidebar-score-summary div {
+  color: #8b949e;
+  font-size: 0.8rem;
+}
+
+.sidebar-score-summary strong {
+  color: #3fb950;
+  font-size: 1.1rem;
+}
+
+/* Main Content Area */
+.epic-main-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.active-step-container {
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Navigation Buttons */
+.epic-step-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #30363d;
+}
+
+.epic-nav-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.epic-nav-btn.prev-btn {
+  background: transparent;
+  color: #8b949e;
+  border: 1px solid #30363d;
+}
+
+.epic-nav-btn.prev-btn:hover:not(:disabled) {
+  border-color: #8b949e;
+  color: #c9d1d9;
+}
+
+.epic-nav-btn.next-btn {
+  background: #58a6ff;
+  color: #0d1117;
+  border: none;
+  margin-left: auto;
+}
+
+.epic-nav-btn.next-btn:hover {
+  background: #79c0ff;
+  transform: translateY(-1px);
+}
+
+.epic-nav-btn.complete-btn {
+  background: #238636;
+  color: #fff;
+  border: none;
+  margin-left: auto;
+}
+
+.epic-nav-btn.complete-btn:hover {
+  background: #2ea043;
+  transform: translateY(-1px);
+}
+
+.epic-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.epic-primary-btn {
+  background: #58a6ff;
+  color: #0d1117;
+  border: none;
+}
+
+.epic-primary-btn:hover {
+  background: #79c0ff;
+  transform: translateY(-1px);
+}
+
+.epic-secondary-btn {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+}
+
+.epic-secondary-btn:hover {
+  background: #30363d;
+  color: #e6edf3;
+}
+
+@media (max-width: 900px) {
+  .epic-stepper-layout {
+    flex-direction: column;
+  }
+  .epic-sidebar {
+    width: 100%;
+    flex: none;
+    position: static;
+  }
+}
+
+/* ── Phase Group Labels ────────────────────────────────── */
+
+.phase-group {
+  margin-bottom: 4px;
+}
+
+.phase-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin: 12px 0 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b949e;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+}
+
+.phase-group:first-child .phase-label {
+  margin-top: 0;
+}
+
+.phase-icon {
+  font-size: 0.85rem;
+}
+
+.phase-text {
+  flex: 1;
+}
+
+.phase-score {
+  font-size: 0.7rem;
+  color: #3fb950;
+  font-weight: 600;
+}
+
+/* Phase-specific accent colors */
+.phase-problem {
+  color: #58a6ff;
+  border-bottom-color: rgba(88, 166, 255, 0.2);
+}
+.phase-solution {
+  color: #d29922;
+  border-bottom-color: rgba(210, 153, 34, 0.2);
+}
+.phase-quiz {
+  color: #a371f7;
+  border-bottom-color: rgba(163, 113, 247, 0.2);
+}
+.phase-apply {
+  color: #3fb950;
+  border-bottom-color: rgba(63, 185, 80, 0.2);
+}
+
+/* ── Quiz Phase Container ──────────────────────────────── */
+
+.quiz-phase-container {
+  text-align: center;
+  padding: 32px 24px;
+}
+
+.phase-header {
+  margin-bottom: 32px;
+}
+
+.phase-header-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.phase-header h3 {
+  color: #e6edf3;
+  font-size: 1.4rem;
+  margin: 0 0 8px;
+}
+
+.phase-header-desc {
+  color: #8b949e;
+  font-size: 0.9rem;
+  margin: 0;
+  max-width: 480px;
+  margin-inline: auto;
+  line-height: 1.5;
+}
+
+/* ── Source Citations ──────────────────────────────────── */
+
+.source-citation {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: rgba(88, 166, 255, 0.08);
+  border: 1px solid rgba(88, 166, 255, 0.15);
+  border-radius: 12px;
+  font-size: 0.7rem;
+  color: #8b949e;
+  margin: 4px 4px 0 0;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.source-citation:hover {
+  background: rgba(88, 166, 255, 0.15);
+  color: #58a6ff;
+  border-color: rgba(88, 166, 255, 0.3);
+}
+
+.source-citation .source-icon {
+  font-size: 0.75rem;
+}
+
+.sources-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #21262d;
+}
+
+.sources-footer summary {
+  font-size: 0.75rem;
+  color: #8b949e;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.sources-footer summary:hover {
+  color: #c9d1d9;
+}
+
+.sources-footer .sources-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+/* ── Subtle Takeaways ─────────────────────────────────── */
+/* Overrides existing heavy takeaway styles to be more subtle */
+
+.step-takeaways {
+  border-left: 3px solid rgba(88, 166, 255, 0.3);
+  padding: 12px 16px;
+  margin: 16px 0;
+  background: rgba(88, 166, 255, 0.03);
+  border-radius: 0 8px 8px 0;
+}
+
+.takeaways-title {
+  font-size: 0.85rem;
+  color: #c9d1d9;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.takeaways-list {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.takeaways-list li {
+  color: #8b949e;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin-bottom: 4px;
 }
