@@ -142,9 +142,10 @@ export async function findRelevantSegments(userQuery, topK = 5) {
  *
  * @param {string} userQuery - Original user question
  * @param {Array} segments - Raw segments from Stage 1
+ * @param {Object} [knowledgeProfile] - Optional adaptive profile { knows, gaps, level }
  * @returns {Promise<Array<{segment: Object, category: string, order: number}>>}
  */
-export async function sequencePath(userQuery, segments) {
+export async function sequencePath(userQuery, segments, knowledgeProfile = null) {
   if (!segments || segments.length === 0) return [];
 
   // Build context for Gemini — give it enough text to summarize from
@@ -159,6 +160,24 @@ export async function sequencePath(userQuery, segments) {
       return `[${i}] ${source}\n   ${s.text.slice(0, 400)}`;
     })
     .join("\n\n");
+
+  // Build adaptive depth instructions when knowledge profile is available
+  let adaptiveInstructions = "";
+  if (knowledgeProfile) {
+    const { knows = [], gaps = [], level = "beginner" } = knowledgeProfile;
+    adaptiveInstructions = `\n\nADAPTIVE DEPTH INSTRUCTIONS (IMPORTANT):
+This learner completed a diagnostic quiz. Their assessed level is: ${level.toUpperCase()}
+${knows.length > 0 ? `\nConcepts they ALREADY KNOW (skim these — keep summaries brief, 1 sentence max):\n${knows.map((c) => `  - ${c.replace(/_/g, " ")}`).join("\n")}` : ""}
+${gaps.length > 0 ? `\nKnowledge GAPS to fill (go deep — write detailed 3-4 sentence summaries with specific steps):\n${gaps.map((c) => `  - ${c.replace(/_/g, " ")}`).join("\n")}` : ""}
+
+Depth rules based on level:
+${level === "beginner" ? "- Start with absolute basics. Explain every concept. More foundation steps." : ""}
+${level === "intermediate" ? "- Skip basic introductions. Focus on practical application and diagnosis." : ""}
+${level === "advanced" ? "- Skip all basics. Go straight to advanced techniques, edge cases, and optimization." : ""}
+- Prioritize segments covering the GAP concepts over ones covering KNOWN concepts
+- For KNOWN concepts, only include if absolutely essential for context (and mark relevance as "medium")
+- For GAP concepts, always mark relevance as "high"`;
+  }
 
   const prompt = `You are a UE5 curriculum designer. A learner asked: "${userQuery}"
 
@@ -186,7 +205,7 @@ Rules:
 - Min ${MIN_PATH_SEGMENTS} segments if enough are relevant
 - Prefer transcript segments over docs for hands-on topics
 - Each summary should be plain text only — no asterisks, no markdown, no code blocks
-- Summaries should connect to the learner's question and explain why this step matters`;
+- Summaries should connect to the learner's question and explain why this step matters${adaptiveInstructions}`;
 
   try {
     const app = getFirebaseApp();
@@ -333,9 +352,10 @@ Keep narrations natural, concise, and helpful. Max 50 words each.`;
  * Orchestrates all 3 stages and returns a ready-to-render path.
  *
  * @param {string} userQuery - The learner's question
+ * @param {Object} [knowledgeProfile] - Optional adaptive profile { knows, gaps, level }
  * @returns {Promise<{query: string, segments: Array, path: Array, bridges: Array, error: string|null}>}
  */
-export async function generateBespokePath(userQuery) {
+export async function generateBespokePath(userQuery, knowledgeProfile = null) {
   const result = {
     query: userQuery,
     segments: [],
@@ -343,6 +363,7 @@ export async function generateBespokePath(userQuery) {
     bridges: [],
     error: null,
     generatedAt: new Date().toISOString(),
+    knowledgeProfile: knowledgeProfile || null,
   };
 
   try {
@@ -357,9 +378,11 @@ export async function generateBespokePath(userQuery) {
       return result;
     }
 
-    // Stage 2: Sequence into learning path
-    devLog("[BespokePath] Stage 2: Sequencing path...");
-    result.path = await sequencePath(userQuery, segments);
+    // Stage 2: Sequence into learning path (with adaptive depth if profile provided)
+    devLog(
+      `[BespokePath] Stage 2: Sequencing path...${knowledgeProfile ? ` (adaptive: ${knowledgeProfile.level})` : ""}`
+    );
+    result.path = await sequencePath(userQuery, segments, knowledgeProfile);
 
     if (result.path.length === 0) {
       result.error =
