@@ -396,7 +396,9 @@ export default function BespokePath() {
                         if (phase.key === "quiz") {
                           setCurrentStep(-2);
                         } else {
-                          setCurrentStep(phase.steps[0]?.globalIndex ?? 0);
+                          const idx = phase.steps[0]?.globalIndex ?? 0;
+                          // Clamp to valid range
+                          setCurrentStep(Math.max(0, Math.min(idx, pathResult.path.length - 1)));
                         }
                       }}
                     >
@@ -467,13 +469,22 @@ export default function BespokePath() {
               <footer className="epic-footer">
                 <button
                   className="nav-btn"
-                  onClick={() => currentStep > 0 && setCurrentStep(currentStep - 1)}
-                  disabled={currentStep <= 0}
+                  onClick={() => {
+                    if (currentStep === -2) {
+                      // From quiz, go back to last step
+                      setCurrentStep(pathResult.path.length - 1);
+                    } else if (currentStep > 0) {
+                      setCurrentStep(currentStep - 1);
+                    }
+                  }}
+                  disabled={currentStep <= 0 && currentStep !== -2}
                 >
-                  <i className="fa-solid fa-arrow-left"></i>
+                  <i className="fa-solid fa-chevron-left"></i>
                 </button>
                 <div className="footer-status">
-                  Step {currentStep >= 0 ? currentStep + 1 : "?"} of {pathResult.path.length}
+                  {currentStep === -2
+                    ? "Quiz"
+                    : `Step ${Math.min(currentStep + 1, pathResult.path.length)} of ${pathResult.path.length}`}
                 </div>
                 <button
                   className="nav-btn"
@@ -486,7 +497,7 @@ export default function BespokePath() {
                   }}
                   disabled={currentStep === -2}
                 >
-                  <i className="fa-solid fa-arrow-right"></i>
+                  <i className="fa-solid fa-chevron-right"></i>
                 </button>
               </footer>
             </main>
