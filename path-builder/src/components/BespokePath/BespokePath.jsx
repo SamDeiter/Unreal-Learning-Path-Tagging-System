@@ -485,14 +485,14 @@ export default function BespokePath() {
                 {query.length}/500
               </span>
             )}
-            <button
-              className="bespoke-submit"
-              onClick={handleGenerate}
-              disabled={isLoading || !query.trim()}
-            >
-              {isLoading ? <span className="bespoke-spinner" /> : "🚀 Generate Path"}
-            </button>
           </div>
+          <button
+            className="bespoke-submit"
+            onClick={handleGenerate}
+            disabled={isLoading || !query.trim()}
+          >
+            {isLoading ? <span className="bespoke-spinner" /> : "🚀 Generate Path"}
+          </button>
 
           {/* Example queries */}
           {!pathResult && !isLoading && (
