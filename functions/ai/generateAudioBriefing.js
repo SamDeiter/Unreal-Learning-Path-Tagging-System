@@ -100,13 +100,13 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
         const stepTtsBody = {
           contents: [{ parts: [{ text: stepTtsPrompt }] }],
           generationConfig: {
-            response_modalities: ["AUDIO"],
-            speech_config: {
-              multi_speaker_voice_config: {
-                speaker_voice_configs: [
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              multiSpeakerVoiceConfig: {
+                speakerVoiceConfigs: [
                   {
                     speaker: "Narrator",
-                    voice_config: { prebuilt_voice_config: { voice_name: "Kore" } },
+                    voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
                   },
                 ],
               },
@@ -120,7 +120,18 @@ Do NOT use any markdown, bullet points, or formatting. Just plain conversational
           body: JSON.stringify(stepTtsBody),
         });
 
-        if (!stepTtsResp.ok) throw new Error("Step TTS failed");
+        if (!stepTtsResp.ok) {
+          const errBody = await stepTtsResp.text();
+          console.log(
+            JSON.stringify({
+              severity: "ERROR",
+              message: "step_tts_api_error",
+              status: stepTtsResp.status,
+              body: errBody.substring(0, 500),
+            })
+          );
+          throw new Error(`Step TTS failed (${stepTtsResp.status}): ${errBody.substring(0, 200)}`);
+        }
         const stepTtsJson = await stepTtsResp.json();
         const stepAudioPart = stepTtsJson.candidates?.[0]?.content?.parts?.[0];
         const stepAudioData = stepAudioPart?.inlineData || stepAudioPart?.inline_data;
@@ -242,20 +253,20 @@ Start with Instructor greeting the learner and mentioning their specific problem
       const ttsBody = {
         contents: [{ parts: [{ text: ttsPrompt }] }],
         generationConfig: {
-          response_modalities: ["AUDIO"],
-          speech_config: {
-            multi_speaker_voice_config: {
-              speaker_voice_configs: [
+          responseModalities: ["AUDIO"],
+          speechConfig: {
+            multiSpeakerVoiceConfig: {
+              speakerVoiceConfigs: [
                 {
                   speaker: "Instructor",
-                  voice_config: {
-                    prebuilt_voice_config: { voice_name: "Kore" },
+                  voiceConfig: {
+                    prebuiltVoiceConfig: { voiceName: "Kore" },
                   },
                 },
                 {
                   speaker: "Learner",
-                  voice_config: {
-                    prebuilt_voice_config: { voice_name: "Puck" },
+                  voiceConfig: {
+                    prebuiltVoiceConfig: { voiceName: "Puck" },
                   },
                 },
               ],
