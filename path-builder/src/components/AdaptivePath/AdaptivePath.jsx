@@ -17,6 +17,7 @@ import { findCachedPath, cachePath } from "../../services/pathCacheService";
 import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
 import { generateStepAudio, generateStepTakeaways } from "../../services/stepBriefingService";
+import { generateQuizForStep } from "../../services/quizService";
 import "../BespokePath/BespokePath.css";
 import "./AdaptivePath.css";
 
@@ -40,8 +41,13 @@ export default function AdaptivePath() {
   const [expandedStep, setExpandedStep] = useState(null);
   const [stepAudio, setStepAudio] = useState({});
   const [stepTakeaways, setStepTakeaways] = useState({});
-  const [quizStep, setQuizStep] = useState(null);
   const [_pathNarration, setPathNarration] = useState(null);
+
+  // Quiz state
+  const [quizzes, setQuizzes] = useState(new Map());
+  const [quizLoading, setQuizLoading] = useState(null);
+  const [quizScores, setQuizScores] = useState(new Map());
+  const [showQuiz, setShowQuiz] = useState(null);
 
   const {
     stage,
@@ -119,9 +125,44 @@ export default function AdaptivePath() {
 
     setStepAudio({});
     setStepTakeaways({});
-    setQuizStep(null);
     setPathNarration(null);
+    setQuizzes(new Map());
+    setQuizScores(new Map());
+    setShowQuiz(null);
   }, [reset]);
+
+  // Generate quiz for the full path (on-demand)
+  const handleTakeQuiz = useCallback(
+    async (stepIndex) => {
+      if (quizzes.has(stepIndex)) {
+        setShowQuiz(stepIndex);
+        return;
+      }
+      if (!pathData) return;
+      setQuizLoading(stepIndex);
+
+      // Aggregate ALL step content for a comprehensive quiz
+      const aggregatedStep = {
+        summary: pathData.path
+          .map((s) => (s.summary || s.segment?.text || "").substring(0, 400))
+          .join("\n\n"),
+        segment: pathData.path[0]?.segment,
+        category: "comprehensive",
+      };
+
+      const questions = await generateQuizForStep(aggregatedStep, pathData.query || query, 3);
+      setQuizzes((prev) => new Map(prev).set(stepIndex, questions));
+      setQuizLoading(null);
+      setShowQuiz(stepIndex);
+    },
+    [quizzes, pathData, query]
+  );
+
+  // Handle quiz completion
+  const handleQuizComplete = useCallback(({ stepIndex, score, total }) => {
+    setQuizScores((prev) => new Map(prev).set(stepIndex, { score, total }));
+    setShowQuiz(null);
+  }, []);
 
   // Audio/takeaway handlers (same pattern as BespokePath)
   const handleStepAudio = useCallback(
@@ -391,11 +432,17 @@ export default function AdaptivePath() {
     const PHASE_CONFIG = [
       { key: "problem", icon: "📋", label: "Questions", categories: ["foundation", "diagnosis"] },
       { key: "solution", icon: "🔧", label: "Solution", categories: ["fix"] },
+      { key: "quiz", icon: "📝", label: "Quiz", categories: ["__quiz__"] },
       { key: "apply", icon: "🚀", label: "Apply It", categories: ["transfer"] },
     ];
 
     const phases = [];
     for (const config of PHASE_CONFIG) {
+      if (config.key === "quiz") {
+        // Quiz is a virtual phase, always include it
+        phases.push({ ...config, steps: [{ category: "__quiz__", globalIndex: -2 }] });
+        continue;
+      }
       const steps = pathData.path
         .map((s, i) => ({ ...s, globalIndex: i }))
         .filter((s) => config.categories.includes(s.category));
@@ -405,7 +452,9 @@ export default function AdaptivePath() {
     }
 
     const activePhaseKey =
-      phases.find((p) => p.steps.some((s) => s.globalIndex === (expandedStep ?? 0)))?.key || "";
+      expandedStep === -2
+        ? "quiz"
+        : phases.find((p) => p.steps.some((s) => s.globalIndex === (expandedStep ?? 0)))?.key || "";
 
     return (
       <div className="adaptive-path bespoke-path">
@@ -436,32 +485,39 @@ export default function AdaptivePath() {
                     <button
                       className={`phase-nav-item ${activePhaseKey === phase.key ? "active" : ""}`}
                       onClick={() => {
-                        const idx = phase.steps[0]?.globalIndex ?? 0;
-                        setExpandedStep(idx);
+                        if (phase.key === "quiz") {
+                          setExpandedStep(-2);
+                        } else {
+                          const idx = phase.steps[0]?.globalIndex ?? 0;
+                          setExpandedStep(idx);
+                        }
                       }}
                     >
                       {phase.label}
                     </button>
-                    <ul className="substep-list">
-                      {phase.steps.map((substep, i) => {
-                        const step = pathData.path[substep.globalIndex];
-                        let rawTitle =
-                          step?.segment?.title || step?.segment?.videoTitle || `Step ${i + 1}`;
-                        const shortTitle =
-                          rawTitle.length > 35 ? rawTitle.substring(0, 33) + "…" : rawTitle;
-                        return (
-                          <li key={substep.globalIndex}>
-                            <button
-                              className={`substep-item ${(expandedStep ?? 0) === substep.globalIndex ? "active" : ""}`}
-                              onClick={() => setExpandedStep(substep.globalIndex)}
-                              title={rawTitle}
-                            >
-                              {i + 1}. {shortTitle}
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
+                    {/* Substep list — only for non-quiz phases */}
+                    {phase.key !== "quiz" && phase.steps.length > 0 && (
+                      <ul className="substep-list">
+                        {phase.steps.map((substep, i) => {
+                          const step = pathData.path[substep.globalIndex];
+                          let rawTitle =
+                            step?.segment?.title || step?.segment?.videoTitle || `Step ${i + 1}`;
+                          const shortTitle =
+                            rawTitle.length > 35 ? rawTitle.substring(0, 33) + "…" : rawTitle;
+                          return (
+                            <li key={substep.globalIndex}>
+                              <button
+                                className={`substep-item ${(expandedStep ?? 0) === substep.globalIndex ? "active" : ""}`}
+                                onClick={() => setExpandedStep(substep.globalIndex)}
+                                title={rawTitle}
+                              >
+                                {i + 1}. {shortTitle}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
                   </div>
                 ))}
               </nav>
@@ -486,7 +542,47 @@ export default function AdaptivePath() {
                   </div>
                 )}
 
-                {(expandedStep ?? 0) >= 0 && (expandedStep ?? 0) < pathData.path.length && (
+                {expandedStep === -2 ? (
+                  <div className="quiz-phase-container">
+                    <div className="step-article">
+                      <h1>Knowledge Check</h1>
+                      <p>Test your understanding of the concepts covered in this path.</p>
+
+                      {(() => {
+                        const quizIdx = 0;
+
+                        if (showQuiz === quizIdx && quizzes.has(quizIdx)) {
+                          return (
+                            <QuizEngine
+                              questions={quizzes.get(quizIdx)}
+                              stepIndex={quizIdx}
+                              onComplete={handleQuizComplete}
+                            />
+                          );
+                        }
+
+                        if (quizScores.has(quizIdx)) {
+                          return (
+                            <div className="quiz-score-badge">
+                              ✅ Quiz: {quizScores.get(quizIdx).score}/
+                              {quizScores.get(quizIdx).total}
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <button
+                            className="take-quiz-btn"
+                            onClick={() => handleTakeQuiz(quizIdx)}
+                            disabled={quizLoading === quizIdx}
+                          >
+                            {quizLoading === quizIdx ? "Generating quiz..." : "Take Quiz"}
+                          </button>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                ) : (expandedStep ?? 0) >= 0 && (expandedStep ?? 0) < pathData.path.length ? (
                   <div className="step-content-container">
                     <PathStep
                       step={pathData.path[expandedStep ?? 0]}
@@ -505,7 +601,7 @@ export default function AdaptivePath() {
                       }
                     />
                   </div>
-                )}
+                ) : null}
               </div>
 
               {/* Footer Navigation */}
@@ -513,24 +609,34 @@ export default function AdaptivePath() {
                 <button
                   className="nav-btn"
                   onClick={() => {
-                    const cur = expandedStep ?? 0;
-                    if (cur > 0) setExpandedStep(cur - 1);
+                    if (expandedStep === -2) {
+                      // From quiz, go back to last step
+                      setExpandedStep(pathData.path.length - 1);
+                    } else {
+                      const cur = expandedStep ?? 0;
+                      if (cur > 0) setExpandedStep(cur - 1);
+                    }
                   }}
-                  disabled={(expandedStep ?? 0) <= 0}
+                  disabled={(expandedStep ?? 0) <= 0 && expandedStep !== -2}
                 >
                   <i className="fa-solid fa-chevron-left"></i>
                 </button>
                 <div className="footer-status">
-                  Step {Math.min((expandedStep ?? 0) + 1, pathData.path.length)} of{" "}
-                  {pathData.path.length}
+                  {expandedStep === -2
+                    ? "Quiz"
+                    : `Step ${Math.min((expandedStep ?? 0) + 1, pathData.path.length)} of ${pathData.path.length}`}
                 </div>
                 <button
                   className="nav-btn"
                   onClick={() => {
                     const cur = expandedStep ?? 0;
-                    if (cur < pathData.path.length - 1) setExpandedStep(cur + 1);
+                    if (cur < pathData.path.length - 1) {
+                      setExpandedStep(cur + 1);
+                    } else if (cur === pathData.path.length - 1) {
+                      setExpandedStep(-2); // Go to quiz
+                    }
                   }}
-                  disabled={(expandedStep ?? 0) >= pathData.path.length - 1}
+                  disabled={expandedStep === -2}
                 >
                   <i className="fa-solid fa-chevron-right"></i>
                 </button>
@@ -538,15 +644,6 @@ export default function AdaptivePath() {
             </main>
           </div>
         </div>
-
-        {/* Quiz overlay */}
-        {quizStep !== null && pathData.path[quizStep] && (
-          <QuizEngine
-            step={pathData.path[quizStep]}
-            query={query}
-            onClose={() => setQuizStep(null)}
-          />
-        )}
       </div>
     );
   }
