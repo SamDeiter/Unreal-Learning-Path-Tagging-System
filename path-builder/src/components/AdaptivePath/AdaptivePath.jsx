@@ -131,12 +131,35 @@ export default function AdaptivePath() {
       try {
         const audioUrl = await generateStepAudio(step, query);
         setStepAudio((prev) => ({ ...prev, [index]: { url: audioUrl || null, loading: false } }));
+
+        // Pre-generate next step's audio in background
+        const nextIdx = index + 1;
+        if (nextIdx < (pathData?.path?.length ?? 0) && !stepAudio[nextIdx]) {
+          // Fire-and-forget: don't await
+          generateStepAudio(pathData.path[nextIdx], query)
+            .then((nextUrl) => {
+              setStepAudio((prev) => {
+                if (prev[nextIdx]) return prev; // already generated
+                return { ...prev, [nextIdx]: { url: nextUrl || null, loading: false } };
+              });
+            })
+            .catch(() => {}); // silent fail for pre-gen
+        }
       } catch {
         setStepAudio((prev) => ({ ...prev, [index]: { error: true, loading: false } }));
       }
     },
-    [query, stepAudio]
+    [query, stepAudio, pathData]
   );
+
+  // Auto-advance to next step when audio finishes playing
+  const handleAudioEnded = useCallback(() => {
+    const cur = expandedStep ?? 0;
+    const total = pathData?.path?.length ?? 0;
+    if (cur < total - 1) {
+      setExpandedStep(cur + 1);
+    }
+  }, [expandedStep, pathData]);
 
   const handleStepTakeaways = useCallback(
     async (index, step) => {
@@ -472,6 +495,8 @@ export default function AdaptivePath() {
                       takeawayLoading={!!stepTakeaways[expandedStep ?? 0]?.loading}
                       stepAudioUrl={stepAudio[expandedStep ?? 0]?.url}
                       stepAudioLoading={!!stepAudio[expandedStep ?? 0]?.loading}
+                      autoPlayAudio={!!stepAudio[expandedStep ?? 0]?.url}
+                      onAudioEnded={handleAudioEnded}
                       onGenerateNarration={() =>
                         handleStepAudio(expandedStep ?? 0, pathData.path[expandedStep ?? 0])
                       }
