@@ -838,6 +838,7 @@ export default function AdaptivePath() {
                       }
                       deepDive={stepDeepDives[expandedStep ?? 0]?.sections}
                       deepDiveLoading={!!stepDeepDives[expandedStep ?? 0]?.loading}
+                      editorContext={stepDeepDives[expandedStep ?? 0]?.editorContext || ""}
                       onGoDeeper={async () => {
                         const idx = expandedStep ?? 0;
                         const step = pathData.path[idx];
@@ -845,12 +846,16 @@ export default function AdaptivePath() {
                           ...prev,
                           [idx]: { loading: true },
                         }));
-                        const sections = await generateStepDeepDive(step, query, {
+                        const result = await generateStepDeepDive(step, query, {
                           userLevel: knowledgeProfile?.level || "intermediate",
                         });
                         setStepDeepDives((prev) => ({
                           ...prev,
-                          [idx]: { loading: false, sections: sections || [] },
+                          [idx]: {
+                            loading: false,
+                            sections: result?.sections || [],
+                            editorContext: result?.editorContext || "",
+                          },
                         }));
                       }}
                     />

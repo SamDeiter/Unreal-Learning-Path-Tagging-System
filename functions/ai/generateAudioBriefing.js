@@ -242,6 +242,7 @@ The practical section must teach what is UNIQUE about THIS step title, not just 
 
 Return ONLY valid JSON (no markdown, no code fences):
 {
+  "editorContext": "The specific UE5 editor tool used in this step — one of: Blueprint Editor, Material Editor, Texture Graph, Modeling Mode, Niagara, Sequencer, Level Editor, Animation Blueprint, or Other",
   "sections": [
     {
       "title": "Short title (e.g. 'Core Concept')",
@@ -271,6 +272,7 @@ RULES:
 - SOURCE GROUNDING: ONLY use information present in the provided source text. Do NOT fill gaps with general UE5 knowledge. If the source text does not mention specific values, provide reasonable UE5 defaults.
 - SELF-CHECK: Before returning, verify that (1) every practical step has a concrete number or value, (2) all 3 sections discuss the SAME topic from the step title, (3) the practical section references concepts from sections 1 and 2
 - DIFFERENTIATION: The practical section must teach the SPECIFIC distinguishing concept in the step title. Ask yourself: "Would this exact exercise also work for a different step on the same general topic?" If yes, it is too generic — rewrite it to be unique to THIS title.
+- EDITOR CONTEXT: Start the practical section's FIRST step by naming the specific UE5 editor tool (e.g. "In the Texture Graph…", "In the Blueprint Editor…", "Using Modeling Mode…"). If the step title implies 3D work (mesh, model, shape) but the source is about a 2D tool (Texture Graph, Material Editor), explicitly clarify "This creates a 2D texture pattern, not a 3D mesh."
 - Each section: 60-100 words MAX
 - Do NOT use markdown formatting inside the JSON strings`;
 
@@ -293,9 +295,11 @@ RULES:
         const deepdiveText = deepdiveJson.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
 
         let sections = [];
+        let editorContext = "";
         try {
           const parsed = JSON.parse(deepdiveText);
           sections = parsed.sections || [];
+          editorContext = parsed.editorContext || "";
         } catch {
           console.warn("Failed to parse deepdive JSON, returning raw text");
           sections = [{ title: "Deep Dive", content: deepdiveText, type: "concept" }];
@@ -310,6 +314,7 @@ RULES:
         return {
           success: true,
           sections,
+          editorContext,
         };
       }
 

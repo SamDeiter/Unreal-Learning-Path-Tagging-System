@@ -113,6 +113,7 @@ export default function PathStep({
   takeawayLoading,
   deepDive,
   deepDiveLoading,
+  editorContext,
   onGoDeeper,
 }) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
@@ -294,6 +295,7 @@ export default function PathStep({
                 >
                   <i className={`fa-solid fa-chevron-${deepDiveOpen ? "up" : "down"}`}></i>
                   🔍 Deep Dive ({deepDive.length} sections)
+                  {editorContext && <span className="editor-context-badge">{editorContext}</span>}
                 </button>
                 {deepDiveOpen && (
                   <div className="deepdive-panels">

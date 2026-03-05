@@ -79,7 +79,10 @@ export async function generateStepDeepDive(step, query, options = {}) {
 
     if (result.data?.sections?.length) {
       devLog(`[DeepDive] Generated ${result.data.sections.length} sub-sections`);
-      return result.data.sections;
+      return {
+        sections: result.data.sections,
+        editorContext: result.data.editorContext || "",
+      };
     }
     return null;
   } catch (err) {
