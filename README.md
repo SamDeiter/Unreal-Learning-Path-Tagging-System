@@ -18,9 +18,10 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 6. **Citation-linked Answers** — Diagnosis responses include clickable `[N]` references linking to Vertex AI documentation
 7. **Dashboard Insights** — Readiness score, persona coverage chart, content gap analysis, quick search, and tooltips on all metrics
 8. **Analytics & Insights**
-9. **Bespoke Learning Paths** — AI-generated personalized paths using RAG search across 1,900+ video transcripts, with Firestore vector search, security guardrails, and 10 pre-seeded popular paths — Tag heatmaps, skill radar, prerequisite flows, industry demand gap analysis, and more
-9. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
-10. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
+9. **Bespoke Learning Paths** — AI-generated personalized paths using RAG + transcript search, Firestore vector search, security guardrails, and 10 pre-seeded popular paths
+10. **Adaptive Learning Paths** — Diagnostic quiz builds a knowledge profile, then generates a depth-adjusted path with Blueprint-first content bias, audio briefings with auto-advance, and an end-of-path knowledge check quiz
+11. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
+12. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
 
 ---
 
@@ -53,6 +54,8 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   │   │   ├── ProblemFirst/      # "Fix a Problem" — main user-facing flow
 │   │   │   ├── GuidedPlayer/      # AI-narrated learning experience
 │   │   │   ├── PersonaQuiz/       # Role-detection onboarding quiz
+│   │   │   ├── AdaptivePath/      # Diagnostic quiz → depth-adjusted learning path
+│   │   │   ├── BespokePath/       # On-demand AI-generated learning paths
 │   │   │   ├── TagGraph/          # Interactive Cytoscape tag relationship graph
 │   │   │   ├── Visualizations/    # Analytics charts (heatmaps, radar, trends)
 │   │   │   ├── Dashboard/         # Overview dashboard + Content Gap Analysis
@@ -62,7 +65,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   │   │   ├── AdminFeedback/     # Admin feedback review panel
 │   │   │   └── ...               # AuthGate, InviteManager, Feedback, etc.
 │   │   ├── context/               # PathContext, TagDataContext, constants
-│   │   ├── hooks/                 # 8 custom hooks (useIsMobile, useProblemFirst, etc.)
+│   │   ├── hooks/                 # 9 custom hooks (useIsMobile, useProblemFirst, etc.)
 │   │   ├── services/              # 25 service modules
 │   │   │   ├── searchPipeline.js          # Orchestrates search strategies
 │   │   │   ├── segmentSearchService.js    # TF-IDF transcript segment search

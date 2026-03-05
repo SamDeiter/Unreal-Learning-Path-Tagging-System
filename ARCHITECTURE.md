@@ -179,7 +179,7 @@ graph TB
     end
 ```
 
-> **Planned Migration**: Embedding vectors are migrating from bundled JSON files to Firestore collections with native vector search (`findNearest()` KNN). This removes ~33MB from the client bundle and enables server-side semantic search.
+> **Completed Migration**: Embedding vectors have been migrated from bundled JSON files to Firestore collections with native vector search (`findNearest()` KNN). This removed ~33MB from the client bundle and enabled server-side semantic search.
 
 ### User Query Pipeline
 
@@ -329,9 +329,9 @@ Phase A results are cached in `cms_stream_urls_v2.json`, allowing Phase B to be 
 
 ---
 
-## Bespoke Learning Path Architecture (Planned)
+## Bespoke Learning Path Architecture
 
-The "Learn Why" feature generates personalized learning paths using a 4-stage pipeline:
+The **Bespoke Path** and **Adaptive Path** components generate personalized learning paths using a 4-stage pipeline:
 
 ```
 User Question -> [1. Segment Finder] -> [2. Path Sequencer] -> [3. Path Renderer] -> [4. Quiz] -> UI
@@ -366,13 +366,40 @@ User Question -> [1. Segment Finder] -> [2. Path Sequencer] -> [3. Path Renderer
 
 ---
 
+## Adaptive Path Architecture
+
+The **Adaptive Path** (`AdaptivePath.jsx`) extends the Bespoke Path with a diagnostic quiz that calibrates content to the user's knowledge level:
+
+```
+User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Path] -> [Quiz] -> UI
+```
+
+| Stage | Purpose | Backend |
+| --- | --- | --- |
+| **Diagnostic Quiz** | Adaptive multi-question flow calibrating user knowledge | `useAdaptiveQuiz` hook + Cloud Function |
+| **Knowledge Profile** | Maps strengths/weaknesses across UE5 domains | Client-side aggregation |
+| **Depth-Adjusted Path** | Generates path biased by knowledge profile | Gemini 2.0 Flash (Blueprint-first bias) |
+| **Knowledge Check Quiz** | End-of-path MCQs testing conceptual understanding | `quizService.js` + `QuizEngine` component |
+
+### Key Components
+
+| Component | Purpose |
+| --- | --- |
+| `AdaptivePath.jsx` | Main component: modal overlay with sidebar, step navigation, quiz |
+| `useAdaptiveQuiz.js` | Hook managing diagnostic quiz state, scoring, knowledge profile |
+| `QuizEngine.jsx` | Reusable quiz component (shared with BespokePath) |
+| `quizService.js` | Generates MCQs from path content via Gemini |
+| `stepBriefingService.js` | AI-generated audio briefings with auto-advance |
+
+---
+
 ## Key Services Reference
 
 | Service                    | Responsibility                                | External Dependencies                                     |
 | -------------------------- | --------------------------------------------- | --------------------------------------------------------- |
 | `searchPipeline.js`        | Orchestrates embed → expand → search → rerank | Cloud Functions (embedQuery, expandQuery, rerankPassages) |
-| `semanticSearchService.js` | Vector search against course embeddings       | Firestore vector search (planned migration from client-side) |
-| `segmentSearchService.js`  | Hybrid keyword + semantic segment search      | Firestore vector search (planned migration from client-side) |
+| `semanticSearchService.js` | Vector search against course embeddings       | Firestore vector search |
+| `segmentSearchService.js`  | Hybrid keyword + semantic segment search      | Firestore vector search |
 | `docsSearchService.js`     | Semantic doc search + Vertex AI Search        | Vertex AI Discovery Engine, Firestore vector search       |
 | `coverageAnalyzer.js`      | Multi-source coverage analysis                | docsSearchService, externalContentService                 |
 | `PathBuilder.js`           | Sequencing, role assignment, time budgeting   | None (pure logic)                                         |

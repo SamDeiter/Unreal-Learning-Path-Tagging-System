@@ -4,6 +4,33 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [1.6.0-adaptive-path] - 2026-03-04
+
+### Added
+
+- **Adaptive Path Component** — Problem-first diagnostic quiz that builds a knowledge profile, then generates a depth-adjusted learning path via Gemini 2.0 Flash
+  - **Diagnostic Quiz** — Adaptive multi-question flow using `useAdaptiveQuiz` hook; questions calibrate to user's knowledge level
+  - **Knowledge Check Quiz** — Integrated `QuizEngine` into Adaptive Path with a dedicated "Quiz" phase in the sidebar navigation
+  - **Audio Auto-Advance** — Audio briefings auto-advance to the next step when playback completes, with sequential generation for seamless listening
+  - **BespokePath-style Modal** — Full modal overlay with sidebar navigation (Questions → Solution → Quiz → Apply It) and step controls
+  - **Key Takeaways** — Auto-generated Key Takeaway panels for each step
+- **Blueprint-First Content Bias** — Diagnostic quiz and path sequencing prompts now prioritize Blueprint/visual scripting content over C++ unless explicitly requested
+- **Direct Teaching Content** — Rewritten `sequencePath` prompt generates content that teaches concepts directly rather than describing source articles
+
+### Changed
+
+- **Modal viewport fit** — Expanded modal to 92vh and tightened padding throughout (overlay, footer, scroll area) to minimize scrolling
+- **LLM JSON parsing** — Added trailing comma repair for more robust parsing of Gemini responses
+
+### Fixed
+
+- 3 ESLint errors: unused `getFilteredSuggestions`, synchronous `setState` in `useEffect`, unused `threshold` parameter
+- Firebase init and `sanitizeQuery` import errors in Adaptive Path
+- Takeaway formatting (flex layout removal, contraction regex fix)
+- `generateStepAudio` argument order in Adaptive Path
+
+---
+
 ## [1.5.0-vector-migration] - 2026-03-03 (Planned)
 
 ### Added
