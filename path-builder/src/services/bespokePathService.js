@@ -26,13 +26,17 @@ const FALLBACK_NARRATION_TEMPLATES = {
   default: "Let's continue to the next part of your learning path.",
 };
 
+// Minimum cosine similarity for a segment to be considered a "good" match.
+// Segments below this are kept but flagged; if ALL are below, hybrid fallback kicks in.
+const SIMILARITY_THRESHOLD = 0.65;
+
 /**
  * Stage 1: Find relevant segments across all embedding collections.
  * Calls embedQuery → then vectorSearchSegments + vectorSearchEpic + vectorSearchDocs.
  *
  * @param {string} userQuery - The user's natural language question
  * @param {number} topK - Results per collection (default 5)
- * @returns {Promise<{segments: Array, embedding: number[]}>}
+ * @returns {Promise<{segments: Array, embedding: number[], lowCorpusCoverage: boolean}>}
  */
 export async function findRelevantSegments(userQuery, topK = 5) {
   if (!userQuery?.trim()) return { segments: [], embedding: [] };
@@ -130,9 +134,24 @@ export async function findRelevantSegments(userQuery, topK = 5) {
 
   // Sort by similarity, take top results
   segments.sort((a, b) => b.similarity - a.similarity);
-  devLog(`[BespokePath] Found ${segments.length} total segments across all sources`);
 
-  return { segments: segments.slice(0, topK * 3), embedding: queryVector };
+  const topSegments = segments.slice(0, topK * 3);
+
+  // Check if ANY segment meets the quality threshold
+  const bestScore = topSegments.length > 0 ? topSegments[0].similarity : 0;
+  const lowCorpusCoverage = bestScore < SIMILARITY_THRESHOLD;
+
+  if (lowCorpusCoverage) {
+    devWarn(
+      `[BespokePath] Low corpus coverage: best similarity ${bestScore.toFixed(3)} < ${SIMILARITY_THRESHOLD}`
+    );
+  }
+
+  devLog(
+    `[BespokePath] Found ${topSegments.length} segments (best: ${bestScore.toFixed(3)}, lowCoverage: ${lowCorpusCoverage})`
+  );
+
+  return { segments: topSegments, embedding: queryVector, lowCorpusCoverage };
 }
 
 /**
@@ -197,6 +216,16 @@ Return a JSON array of objects with this format:
 [{"index": 0, "category": "foundation", "relevance": "high|medium|low", "summary": "A direct mini-lesson that teaches the concept. Extract the actual knowledge from the source and present it as clear instruction — explain what it is, how it works, and what the learner should do. Write 3-5 sentences in second person (you/your). No markdown formatting."}]
 
 Rules:
+- WORKFLOW INTENT MATCHING (CRITICAL): Before classifying, determine the learner's IMPLIED WORKFLOW from their query. Common intent→workflow mappings:
+  "create/make [3D object]" → Import FBX, Static Mesh Editor, Modeling Mode, Blueprint actor
+  "customize appearance" → Materials, Material Editor, texture parameters
+  "animate [object]" → Skeletal Mesh, Animation Blueprint, Sequencer
+  "add interaction" → Blueprint, Collision, Overlap Events
+  If a segment teaches a DIFFERENT tool than the implied workflow, mark it "low" relevance even if semantically similar. Mismatches to reject:
+  - Texture Graph for 3D mesh creation (Texture Graph makes 2D procedural patterns, not 3D meshes)
+  - Customizable Objects for basic item setup (advanced runtime customization system, not beginner workflow)
+  - Control Rig for simple animation playback
+  - Niagara for non-particle-related queries
 - PRIORITIZE Blueprint-based content over C++ content unless the query explicitly asks about C++. When teaching concepts, explain using Blueprint nodes, property panels, and editor UI rather than code syntax.
 - NEVER start a summary with 'This article...' or 'This video...' or 'This segment...' — teach the concept directly
 - Write as if YOU are the instructor explaining the concept, not describing someone else's content
@@ -351,6 +380,87 @@ Keep narrations natural, concise, and helpful. Max 50 words each.`;
 }
 
 /**
+ * Hybrid Fallback: Generate a learning path from Gemini's own knowledge
+ * when the embedding corpus doesn't have good matches.
+ *
+ * @param {string} userQuery - The learner's question
+ * @param {Object} [knowledgeProfile] - Optional adaptive profile
+ * @returns {Promise<Array<{segment: Object, category: string, summary: string, order: number}>>}
+ */
+async function generateHybridPath(userQuery, knowledgeProfile = null) {
+  let adaptiveContext = "";
+  if (knowledgeProfile) {
+    const { level = "beginner" } = knowledgeProfile;
+    adaptiveContext = `\nThe learner's assessed level is: ${level.toUpperCase()}. Adjust complexity accordingly.`;
+  }
+
+  const prompt = `You are a UE5 curriculum designer. A learner asked: "${userQuery}"
+
+Our content library does not have strong matches for this topic, so generate a learning path from your own Unreal Engine 5 knowledge.
+
+Create a 4-6 step learning path with these categories:
+- foundation (1-2 steps): Background concepts the learner needs first
+- diagnosis (1 step): How to identify the specific problem or key decision points
+- fix (1-2 steps): Step-by-step implementation — the actual workflow in the UE5 editor
+- transfer (1 step): How this knowledge applies to other contexts or projects
+
+IMPORTANT RULES:
+- PRIORITIZE Blueprint-based approaches over C++ unless the query asks about C++
+- Be specific: include actual menu paths, property names, panel names, and node names
+- For "create/make" queries: Start with asset import or Modeling Mode, then material, then Blueprint actor
+- Each summary should be 3-5 sentences teaching the concept directly in second person
+- Plain text only — no markdown, no asterisks, no code blocks
+${adaptiveContext}
+
+Return a JSON array:
+[{"category": "foundation", "title": "Step Title", "summary": "Direct teaching content..."}]`;
+
+  try {
+    const app = getFirebaseApp();
+    const functions = getFunctions(app, "us-central1");
+    const classifyFn = httpsCallable(functions, "classifySegments");
+
+    const result = await classifyFn({ prompt });
+    const responseText = result.data?.text || "";
+
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      devWarn("[BespokePath] Hybrid path generation failed to parse JSON");
+      return [];
+    }
+
+    const steps = JSON.parse(jsonMatch[0]);
+    const CATEGORY_ORDER = { foundation: 0, diagnosis: 1, fix: 2, transfer: 3 };
+
+    const sequenced = steps
+      .sort((a, b) => (CATEGORY_ORDER[a.category] ?? 99) - (CATEGORY_ORDER[b.category] ?? 99))
+      .map((step, i) => ({
+        segment: {
+          id: `hybrid-${i}`,
+          type: "ai_generated",
+          title: step.title,
+          text: step.summary,
+          source: "ai_generated",
+        },
+        category: step.category || "foundation",
+        summary: step.summary,
+        order: i,
+      }));
+
+    devLog(`[BespokePath] Hybrid path generated: ${sequenced.length} AI steps`);
+    recordTokenUsage(
+      "hybridPath",
+      Math.ceil(prompt.length / 4),
+      Math.ceil(responseText.length / 4)
+    );
+    return sequenced;
+  } catch (err) {
+    devWarn("[BespokePath] Hybrid path generation failed:", err.message);
+    return [];
+  }
+}
+
+/**
  * Full pipeline: generate a complete bespoke learning path.
  * Orchestrates all 3 stages and returns a ready-to-render path.
  *
@@ -372,12 +482,26 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
   try {
     // Stage 1: Find relevant content
     devLog("[BespokePath] Stage 1: Finding relevant segments...");
-    const { segments } = await findRelevantSegments(userQuery);
+    const { segments, lowCorpusCoverage } = await findRelevantSegments(userQuery);
     result.segments = segments;
 
-    if (segments.length === 0) {
-      result.error =
-        "No relevant content found for your question. Try rephrasing or being more specific.";
+    // ── HYBRID FALLBACK: If corpus can't answer, let Gemini generate from its own knowledge ──
+    if (segments.length === 0 || lowCorpusCoverage) {
+      devLog("[BespokePath] Low corpus coverage — using hybrid AI generation");
+      result.path = await generateHybridPath(userQuery, knowledgeProfile);
+      result.isAiGenerated = true;
+
+      if (result.path.length === 0) {
+        result.error =
+          "No relevant content found for your question. Try rephrasing or being more specific.";
+        return result;
+      }
+
+      // Stage 3: Generate bridge narrations for hybrid path
+      devLog("[BespokePath] Stage 3: Generating narrations for hybrid path...");
+      result.bridges = await generateBridgeNarration(result.path, userQuery);
+
+      devLog(`[BespokePath] Hybrid pipeline complete: ${result.path.length} AI-generated steps`);
       return result;
     }
 

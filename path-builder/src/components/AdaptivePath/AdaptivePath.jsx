@@ -435,6 +435,19 @@ export default function AdaptivePath() {
               </span>
             )}
 
+            {currentQuestion.image && (
+              <div className="quiz-image-container">
+                <img
+                  src={currentQuestion.image}
+                  alt={currentQuestion.imageHint || "UE5 Editor Screenshot"}
+                  className="quiz-image"
+                />
+                {currentQuestion.imageHint && (
+                  <span className="quiz-image-hint">{currentQuestion.imageHint}</span>
+                )}
+              </div>
+            )}
+
             <p className="diagnostic-question-text">{currentQuestion.q}</p>
 
             <div className="diagnostic-options">

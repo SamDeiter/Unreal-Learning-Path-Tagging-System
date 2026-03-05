@@ -9,6 +9,7 @@
 import { useState, useCallback } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "../services/firebaseConfig";
+import { findQuizImage } from "../data/quizImageBank";
 
 const STAGES = {
   IDLE: "idle",
@@ -57,7 +58,13 @@ export default function useAdaptiveQuiz() {
         throw new Error(data.error || "Failed to generate diagnostic questions.");
       }
 
-      setQuestions(data.questions);
+      // Enrich questions with images from the quiz image bank
+      const enriched = data.questions.map((q) => {
+        const imageMatch = findQuizImage(q.concept);
+        return imageMatch ? { ...q, image: imageMatch.image, imageHint: imageMatch.hint } : q;
+      });
+
+      setQuestions(enriched);
       setStage(STAGES.QUIZZING);
     } catch (err) {
       console.error("[AdaptiveQuiz] Error generating questions:", err);

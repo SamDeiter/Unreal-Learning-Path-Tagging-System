@@ -121,7 +121,6 @@ export default function PathStep({
   const [scriptOpen, setScriptOpen] = useState(false);
   const [deepDiveOpen, setDeepDiveOpen] = useState(true);
   const [sectionRatings, setSectionRatings] = useState({}); // { 0: "good", 2: "bad" }
-  const [checkedSteps, setCheckedSteps] = useState({}); // { 0: true, 2: true }
   const audioRef = useRef(null);
 
   // Save deepdive section rating to Firestore
@@ -166,8 +165,19 @@ export default function PathStep({
 
   const sourceType = segment.type || segment.source || "docs";
   const sourceLabel =
-    sourceType === "transcript" ? "Video" : sourceType === "epic_learning" ? "Article" : "Docs";
-  const sourceIcon = sourceType === "transcript" ? "fa-video" : "fa-book-open";
+    sourceType === "ai_generated"
+      ? "AI-Generated"
+      : sourceType === "transcript"
+        ? "Video"
+        : sourceType === "epic_learning"
+          ? "Article"
+          : "Docs";
+  const sourceIcon =
+    sourceType === "ai_generated"
+      ? "fa-robot"
+      : sourceType === "transcript"
+        ? "fa-video"
+        : "fa-book-open";
 
   const filteredTakeaways = filterTakeaways(takeaways);
 
@@ -240,6 +250,11 @@ export default function PathStep({
           <span className="source-pill">
             <i className="fa-solid fa-tags"></i> {category}
           </span>
+          {sourceType === "ai_generated" && (
+            <span className="source-pill ai-generated-pill">
+              <i className="fa-solid fa-robot"></i> AI-generated — no source video available
+            </span>
+          )}
           {narrationScript && (
             <span className="source-pill narration-pill">
               <i className="fa-solid fa-headphones"></i> Narrated
@@ -290,31 +305,6 @@ export default function PathStep({
         {isActive &&
           (() => {
             const conceptSections = deepDive?.filter((s) => s.type !== "practical") || [];
-            const practicalSection = deepDive?.find((s) => s.type === "practical");
-            const practicalIndex = deepDive?.findIndex((s) => s.type === "practical") ?? -1;
-
-            // Parse practical steps into groups
-            const parsePracticalSteps = (content) => {
-              if (!content) return [];
-              const lines = content.split("\n").filter(Boolean);
-              const groups = [];
-              lines.forEach((l) => {
-                const trimmed = l.trim();
-                if (/^\d+[.)]/.test(trimmed)) {
-                  groups.push({ text: trimmed.replace(/^\d+[.)]\s*/, ""), subs: [] });
-                } else if (trimmed.startsWith("•") && groups.length > 0) {
-                  groups[groups.length - 1].subs.push(trimmed.replace(/^•\s*/, ""));
-                } else if (trimmed.startsWith("•") && groups.length === 0) {
-                  groups.push({ text: trimmed.replace(/^•\s*/, ""), subs: [] });
-                } else if (groups.length > 0) {
-                  groups[groups.length - 1].subs.push(trimmed);
-                }
-              });
-              return groups;
-            };
-
-            const practicalSteps = parsePracticalSteps(practicalSection?.content);
-            const doneCount = Object.values(checkedSteps).filter(Boolean).length;
 
             return (
               <>
@@ -452,77 +442,7 @@ export default function PathStep({
                   ) : null}
                 </div>
 
-                {/* Apply It — standalone practical section with checkboxes */}
-                {practicalSection && practicalSteps.length > 0 && (
-                  <div className="apply-it-section">
-                    <div className="apply-it-header">
-                      <h4 className="apply-it-title">✅ Apply It</h4>
-                      <span className="apply-it-progress">
-                        {doneCount}/{practicalSteps.length} done
-                      </span>
-                    </div>
-                    <ol className="apply-it-steps">
-                      {practicalSteps.map((g, j) => (
-                        <li
-                          key={j}
-                          className={`apply-it-step ${checkedSteps[j] ? "completed" : ""}`}
-                        >
-                          <label className="apply-it-checkbox-label">
-                            <input
-                              type="checkbox"
-                              className="apply-it-checkbox"
-                              checked={!!checkedSteps[j]}
-                              onChange={() =>
-                                setCheckedSteps((prev) => ({ ...prev, [j]: !prev[j] }))
-                              }
-                            />
-                            <span className="apply-it-step-text">{highlightKeyTerms(g.text)}</span>
-                          </label>
-                          {g.subs.length > 0 && (
-                            <ul className="apply-it-sub-bullets">
-                              {g.subs.map((s, k) => (
-                                <li key={k}>{highlightKeyTerms(s)}</li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      ))}
-                    </ol>
-                    {/* Rating for practical section */}
-                    <div className="deepdive-rating">
-                      {sectionRatings[practicalIndex] ? (
-                        <span className="deepdive-rating-done">
-                          {sectionRatings[practicalIndex] === "good" ? "👍" : "👎"} Rated
-                        </span>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            className="deepdive-rate-btn deepdive-rate-good"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              rateSection(practicalIndex, "good");
-                            }}
-                            title="This section is helpful and specific"
-                          >
-                            👍
-                          </button>
-                          <button
-                            type="button"
-                            className="deepdive-rate-btn deepdive-rate-bad"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              rateSection(practicalIndex, "bad");
-                            }}
-                            title="This section is vague or off-topic"
-                          >
-                            👎
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
+                {/* Apply It section removed — now lives in standalone sidebar section */}
               </>
             );
           })()}
