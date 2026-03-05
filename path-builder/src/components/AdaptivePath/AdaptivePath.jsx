@@ -129,8 +129,8 @@ export default function AdaptivePath() {
       if (stepAudio[index]) return;
       setStepAudio((prev) => ({ ...prev, [index]: { loading: true } }));
       try {
-        const audio = await generateStepAudio(query, step);
-        setStepAudio((prev) => ({ ...prev, [index]: { url: audio.url, loading: false } }));
+        const audioUrl = await generateStepAudio(step, query);
+        setStepAudio((prev) => ({ ...prev, [index]: { url: audioUrl || null, loading: false } }));
       } catch {
         setStepAudio((prev) => ({ ...prev, [index]: { error: true, loading: false } }));
       }
@@ -470,6 +470,11 @@ export default function AdaptivePath() {
                       isActive={true}
                       takeaways={stepTakeaways[expandedStep ?? 0]?.items}
                       takeawayLoading={!!stepTakeaways[expandedStep ?? 0]?.loading}
+                      stepAudioUrl={stepAudio[expandedStep ?? 0]?.url}
+                      stepAudioLoading={!!stepAudio[expandedStep ?? 0]?.loading}
+                      onGenerateNarration={() =>
+                        handleStepAudio(expandedStep ?? 0, pathData.path[expandedStep ?? 0])
+                      }
                       onGenerateAudio={() =>
                         handleStepAudio(expandedStep ?? 0, pathData.path[expandedStep ?? 0])
                       }
