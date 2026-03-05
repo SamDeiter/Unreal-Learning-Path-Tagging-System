@@ -470,12 +470,18 @@ Generate exactly 4 multiple-choice questions that test whether the learner ALREA
 - Test a DISTINCT concept area (e.g., one about fundamentals, one about practical experience, one about UE5-specific knowledge, one about advanced patterns)
 - Have exactly 4 choices — only ONE correct
 - Include a "concept" field that names the knowledge area being tested (use snake_case, e.g. "actor_replication", "blueprint_networking")
-- Be ordered from FOUNDATIONAL to ADVANCED
+- Include a "difficulty" field: 1 = beginner, 2 = intermediate, 3 = advanced
 - Be specific to Unreal Engine 5, not generic programming trivia
 - IMPORTANT: Focus questions on Blueprint-based workflows and visual scripting approaches. Only reference C++ if the learner's query explicitly mentions C++ or programming. Frame answers using Blueprint node names, property panels, and editor workflows rather than code syntax.
 
+QUESTION ORDER (strictly follow):
+1. BEGINNER (difficulty: 1) — Test basic editor vocabulary: "What panel shows…", "Where do you find…", "What is this called…"
+2. INTERMEDIATE (difficulty: 2) — Test working knowledge: "What happens when…", "How do you configure…"
+3. ADVANCED (difficulty: 3) — Test implementation experience: "What is the correct workflow for…", "Why would you choose X over Y…"
+4. APPLIED (difficulty: 2) — Test practical troubleshooting: "If X isn't working, what should you check…"
+
 Return ONLY a JSON array with this exact format:
-[{"q": "What does bReplicates do on an Actor?", "options": ["Marks the actor for garbage collection", "Enables the actor to be replicated across the network", "Creates a copy of the actor in the editor", "Allows the actor to be saved to disk"], "correctIndex": 1, "concept": "actor_replication"}]`;
+[{"q": "What panel shows an Actor's components?", "options": ["Content Browser", "World Outliner", "Details Panel", "Output Log"], "correctIndex": 2, "concept": "editor_panels", "difficulty": 1}]`;
 
         const diagnosticUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         const diagnosticResp = await fetch(diagnosticUrl, {

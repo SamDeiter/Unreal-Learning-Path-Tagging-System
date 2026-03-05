@@ -1,5 +1,6 @@
 /**
  * AdaptivePath — Diagnostic quiz + depth-adjusted learning path
+ * Recent queries stored in localStorage (privacy: never leaves browser)
  *
  * Flow: INPUT → DIAGNOSING → PROFILE_READY → PATH_READY
  *
@@ -9,7 +10,7 @@
  * 4. Generate a depth-adjusted BespokePath based on the profile
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import useAdaptiveQuiz from "../../hooks/useAdaptiveQuiz";
 import { sanitizeQuery, checkRateLimit, recordQuery } from "../../services/securityGuardrails";
 import { generateBespokePath } from "../../services/bespokePathService";
@@ -38,13 +39,24 @@ function fixEpicUrl(url) {
     .replace("/learning/talks_and_demos/", "/learning/talks-and-demos/");
 }
 
-const DEFAULT_SUGGESTIONS = [
-  "Why is my multiplayer character not replicating properly?",
-  "How do I set up Gameplay Ability System from scratch?",
-  "My landscape material looks tiled — how to fix it?",
-  "How to optimize draw calls in a large open world?",
-  "Why does my AI Behavior Tree keep failing?",
-];
+const RECENT_QUERIES_KEY = "ue5_recent_queries";
+const MAX_RECENT = 10;
+
+function loadRecentQueries() {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_QUERIES_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentQuery(q) {
+  const trimmed = q.trim();
+  if (!trimmed) return;
+  const current = loadRecentQueries().filter((x) => x !== trimmed);
+  current.unshift(trimmed);
+  localStorage.setItem(RECENT_QUERIES_KEY, JSON.stringify(current.slice(0, MAX_RECENT)));
+}
 
 const LETTERS = ["A", "B", "C", "D"];
 
@@ -81,6 +93,12 @@ export default function AdaptivePath() {
   const [quizLoading, setQuizLoading] = useState(null);
   const [quizScores, setQuizScores] = useState(new Map());
   const [showQuiz, setShowQuiz] = useState(null);
+  const [recentQueries, setRecentQueries] = useState([]);
+
+  // Load recent queries on mount
+  useEffect(() => {
+    setRecentQueries(loadRecentQueries());
+  }, []);
 
   const {
     stage,
@@ -107,6 +125,8 @@ export default function AdaptivePath() {
     if (!rateCheck.allowed) return;
 
     recordQuery(cleaned);
+    saveRecentQuery(cleaned);
+    setRecentQueries(loadRecentQueries());
     startDiagnostic(cleaned);
   }, [query, startDiagnostic]);
 
@@ -357,14 +377,18 @@ export default function AdaptivePath() {
               🎯 Generate Path
             </button>
 
-            <div className="adaptive-pills">
-              <span className="adaptive-pills-label">Suggested:</span>
-              {DEFAULT_SUGGESTIONS.map((s, i) => (
-                <button key={i} className="adaptive-pill" onClick={() => setQuery(s)}>
-                  {s}
-                </button>
-              ))}
-            </div>
+            {recentQueries.length > 0 && (
+              <div className="recent-queries-section">
+                <span className="recent-queries-label">🕐 Recent Questions:</span>
+                <div className="recent-queries-grid">
+                  {recentQueries.map((q, i) => (
+                    <button key={i} className="recent-query-card" onClick={() => setQuery(q)}>
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Pre-seeded popular paths (skip diagnostic, instant results) */}

@@ -134,7 +134,7 @@ export default function useAdaptiveQuiz() {
  * @param {Array} questions - The original questions
  * @returns {{ knows: string[], gaps: string[], level: string }}
  */
-function buildKnowledgeProfile(answers, _questions) {
+function buildKnowledgeProfile(answers, questions) {
   const knows = [];
   const gaps = [];
 
@@ -147,10 +147,14 @@ function buildKnowledgeProfile(answers, _questions) {
     }
   });
 
-  // Determine level based on ratio of correct answers
-  const correctCount = answers.filter((a) => a.correct).length;
-  const total = answers.length;
-  const ratio = total > 0 ? correctCount / total : 0;
+  // Weighted scoring: advanced questions count more than beginner ones
+  const score = answers.reduce((sum, a) => {
+    const q = questions[a.questionIndex];
+    const weight = q?.difficulty || 1;
+    return sum + (a.correct ? weight : 0);
+  }, 0);
+  const maxScore = questions.reduce((sum, q) => sum + (q?.difficulty || 1), 0);
+  const ratio = maxScore > 0 ? score / maxScore : 0;
 
   let level;
   if (ratio >= 0.8) {
