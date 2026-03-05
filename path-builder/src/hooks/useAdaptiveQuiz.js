@@ -134,7 +134,7 @@ export default function useAdaptiveQuiz() {
  * @param {Array} questions - The original questions
  * @returns {{ knows: string[], gaps: string[], level: string }}
  */
-function buildKnowledgeProfile(answers, questions) {
+export function buildKnowledgeProfile(answers, questions) {
   const knows = [];
   const gaps = [];
 

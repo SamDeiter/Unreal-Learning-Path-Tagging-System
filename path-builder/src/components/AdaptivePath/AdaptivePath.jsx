@@ -24,6 +24,7 @@ import {
 } from "../../services/stepBriefingService";
 import { generateQuizForStep } from "../../services/quizService";
 import { cleanTitle } from "../../utils/cleanTitle";
+import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
@@ -37,25 +38,6 @@ function fixEpicUrl(url) {
     .replace("/learning/knowledge_base/", "/learning/knowledge-base/")
     .replace("/learning/course/", "/learning/courses/")
     .replace("/learning/talks_and_demos/", "/learning/talks-and-demos/");
-}
-
-const RECENT_QUERIES_KEY = "ue5_recent_queries";
-const MAX_RECENT = 10;
-
-function loadRecentQueries() {
-  try {
-    return JSON.parse(localStorage.getItem(RECENT_QUERIES_KEY)) || [];
-  } catch {
-    return [];
-  }
-}
-
-function saveRecentQuery(q) {
-  const trimmed = q.trim();
-  if (!trimmed) return;
-  const current = loadRecentQueries().filter((x) => x !== trimmed);
-  current.unshift(trimmed);
-  localStorage.setItem(RECENT_QUERIES_KEY, JSON.stringify(current.slice(0, MAX_RECENT)));
 }
 
 const LETTERS = ["A", "B", "C", "D"];
