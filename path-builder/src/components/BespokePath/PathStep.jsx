@@ -11,6 +11,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { getFirebaseApp } from "../../services/firebaseConfig";
 import { CATEGORY_STYLES } from "./pathConstants";
+import { getBlueprintUrl } from "../../data/blueprintPresets";
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -164,6 +165,7 @@ export default function PathStep({
   const displayText = narrationScript || step.summary || cleanText(segment.text);
 
   const sourceType = segment.type || segment.source || "docs";
+  const blueprintUrl = getBlueprintUrl(step);
   const sourceLabel =
     sourceType === "ai_generated"
       ? "AI-Generated"
@@ -259,6 +261,17 @@ export default function PathStep({
             <span className="source-pill narration-pill">
               <i className="fa-solid fa-headphones"></i> Narrated
             </span>
+          )}
+          {blueprintUrl && (
+            <a
+              href={blueprintUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="source-pill blueprint-pill"
+              title="Open an interactive Blueprint graph for this concept"
+            >
+              <i className="fa-solid fa-diagram-project"></i> View Blueprint
+            </a>
           )}
         </div>
 
