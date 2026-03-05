@@ -220,34 +220,34 @@ This is the ${stepCategory || "learning"} step titled "${stepTitle || ""}":
 
 "${stepContent.substring(0, 2000)}"
 
-Create exactly 3 focused sub-sections that go deeper into this content. Each should teach something ACTIONABLE.
+Create exactly 3 focused sub-sections. Be CONCISE — use bullet points, not paragraphs.
 
 Return ONLY valid JSON (no markdown, no code fences):
 {
   "sections": [
     {
-      "title": "Short title (e.g. 'Understanding the Concept')",
-      "content": "2-3 paragraphs (150-200 words) explaining this aspect in detail. Reference specific UE5 classes, functions, settings, or Blueprint nodes. Include concrete examples.",
+      "title": "Short title (e.g. 'Core Concept')",
+      "content": "2-4 bullet points (use • prefix). Each bullet is one clear sentence. Total ~80 words. Reference specific UE5 classes or nodes.",
       "type": "concept"
     },
     {
-      "title": "Short title (e.g. 'How It Works Under the Hood')",
-      "content": "2-3 paragraphs explaining the technical mechanics. Why does UE5 do it this way? What are the performance implications? What common mistakes do developers make?",
+      "title": "Short title (e.g. 'Why It Matters')",
+      "content": "2-4 bullet points covering: how it works, performance implications, common mistakes. ~80 words total.",
       "type": "mechanics"
     },
     {
-      "title": "Short title (e.g. 'Try It: Step-by-Step')",
-      "content": "A practical mini-tutorial with numbered steps the learner can follow in the UE5 editor. Be specific about menu locations, node names, and property values.",
+      "title": "Short title (e.g. 'Try It Now')",
+      "content": "3-5 numbered steps (use 1. 2. 3. prefix) the learner can follow in UE5. Be specific about menu paths and node names. ~80 words total.",
       "type": "practical"
     }
   ]
 }
 
 RULES:
-- Ground everything in real UE5 knowledge — mention actual class names, functions, and editor paths
-- The practical section should be immediately actionable — something they can try right now
-- Do NOT use markdown formatting inside the JSON strings
-- Keep each section 150-200 words`;
+- CONCISE: use bullet points (•) or numbered lists (1. 2. 3.), NEVER paragraphs
+- Reference real UE5 class names, functions, editor paths
+- Each section: 60-100 words MAX
+- Do NOT use markdown formatting inside the JSON strings`;
 
         const deepdiveUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         const deepdiveResp = await fetch(deepdiveUrl, {

@@ -261,12 +261,32 @@ export default function PathStep({
                           {section.title}
                         </h4>
                         <div className="deepdive-panel-content">
-                          {section.content
-                            .split("\n")
-                            .filter(Boolean)
-                            .map((p, j) => (
-                              <p key={j}>{highlightKeyTerms(p)}</p>
-                            ))}
+                          {(() => {
+                            const lines = section.content.split("\n").filter(Boolean);
+                            const isBullets = lines.some((l) => l.trim().startsWith("•"));
+                            const isNumbered = lines.some((l) => /^\d+[.)]/.test(l.trim()));
+                            if (isBullets) {
+                              return (
+                                <ul className="deepdive-bullets">
+                                  {lines.map((l, j) => (
+                                    <li key={j}>{highlightKeyTerms(l.replace(/^•\s*/, ""))}</li>
+                                  ))}
+                                </ul>
+                              );
+                            }
+                            if (isNumbered) {
+                              return (
+                                <ol className="deepdive-steps">
+                                  {lines.map((l, j) => (
+                                    <li key={j}>
+                                      {highlightKeyTerms(l.replace(/^\d+[.)]\s*/, ""))}
+                                    </li>
+                                  ))}
+                                </ol>
+                              );
+                            }
+                            return lines.map((p, j) => <p key={j}>{highlightKeyTerms(p)}</p>);
+                          })()}
                         </div>
                       </div>
                     ))}
