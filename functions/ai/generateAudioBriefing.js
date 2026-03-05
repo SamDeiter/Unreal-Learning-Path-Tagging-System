@@ -24,7 +24,7 @@ exports.generateAudioBriefing = functions
     const mode = data.mode || "overview";
 
     // Validate based on mode
-    if (mode === "step" || mode === "takeaways" || mode === "quiz") {
+    if (mode === "step" || mode === "takeaways" || mode === "quiz" || mode === "deepdive") {
       if (!query || !data.stepContent) {
         throw new functions.https.HttpsError(
           "invalid-argument",
