@@ -13,10 +13,10 @@ test.describe("Search flow", () => {
     });
     await page.reload();
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
-    await page.waitForSelector("nav.main-nav", { timeout: 10_000 });
+    await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
     // Navigate to Fix a Problem
-    const tab = page.locator("button.nav-tab").filter({ hasText: /Fix a Problem/ });
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
     await tab.click();
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });

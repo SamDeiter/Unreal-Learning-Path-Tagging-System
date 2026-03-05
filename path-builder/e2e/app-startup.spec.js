@@ -11,7 +11,7 @@ test.describe("App startup", () => {
     await page.goto("/");
     // Auth bypass renders .auth-gate-authorized immediately
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
-    await page.waitForSelector("nav.main-nav", { timeout: 10_000 });
+    await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
     expect(errors).toEqual([]);
   });
@@ -19,16 +19,16 @@ test.describe("App startup", () => {
   test("should display the app header", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
-    await page.waitForSelector("nav.main-nav", { timeout: 10_000 });
-    const header = page.getByText("UE5 Learning Path Builder");
+    await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
+    const header = page.getByText("UE5 LPB");
     await expect(header).toBeVisible();
   });
 
   test("should render navigation tabs", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
-    await page.waitForSelector("nav.main-nav", { timeout: 10_000 });
-    const tabs = page.locator("button.nav-tab");
+    await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
+    const tabs = page.locator("button.sidebar-tab");
     await expect(tabs.first()).toBeVisible();
 
     const count = await tabs.count();
