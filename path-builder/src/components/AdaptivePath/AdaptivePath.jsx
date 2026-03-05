@@ -23,6 +23,8 @@ import {
 } from "../../services/stepBriefingService";
 import { generateQuizForStep } from "../../services/quizService";
 import { cleanTitle } from "../../utils/cleanTitle";
+import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
+import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
 import "./AdaptivePath.css";
 
@@ -107,6 +109,36 @@ export default function AdaptivePath() {
     recordQuery(cleaned);
     startDiagnostic(cleaned);
   }, [query, startDiagnostic]);
+
+  /**
+   * Handle selecting a pre-seeded path (skip diagnostic, instantly show path)
+   */
+  const handlePreSeededSelect = useCallback((path) => {
+    // Convert pre-seeded format to the same shape as generateBespokePath output
+    const fakeResult = {
+      query: path.query,
+      path: path.steps.map((step, i) => ({
+        category: step.category,
+        segment: {
+          id: `${path.id}-step-${i}`,
+          title: step.title,
+          summary: step.summary,
+          source: step.sourceType,
+          text: step.summary,
+        },
+      })),
+      bridges: path.steps.slice(1).map((_, i) => ({
+        from: i,
+        to: i + 1,
+        text: "",
+      })),
+      segments: path.steps,
+      generatedAt: new Date().toISOString(),
+      isPreSeeded: true,
+    };
+    setQuery(path.query);
+    setPathData(fakeResult);
+  }, []);
 
   /**
    * After diagnostic, generate the depth-adjusted path
@@ -334,6 +366,9 @@ export default function AdaptivePath() {
               ))}
             </div>
           </div>
+
+          {/* Pre-seeded popular paths (skip diagnostic, instant results) */}
+          <PreSeededPaths paths={PRE_SEEDED_PATHS} onSelect={handlePreSeededSelect} />
         </div>
       </div>
     );

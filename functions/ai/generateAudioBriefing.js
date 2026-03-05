@@ -103,7 +103,8 @@ ${positionInstruction}
 In about 100-120 words (4-6 sentences), explain what the learner should understand and focus on in this step. Be specific to the actual content — reference concrete UE5 concepts, classes, functions, or workflows mentioned in the text. Speak directly to the learner using "you".
 
 IMPORTANT:
-- ONLY discuss Unreal Engine / game development concepts. NEVER reference real-world physics, hardware, or physical mechanisms. If a term (e.g. "muzzle report", "recoil") appears in the source text, explain it ONLY in the context of implementing it in UE5 (sound cues, animations, Blueprint nodes, etc.), NOT what it means in the real world.
+- ONLY discuss Unreal Engine / game development concepts. NEVER reference real-world physics, hardware, or physical mechanisms. If a term (e.g. "muzzle report", "recoil") appears in the source text, explain it ONLY in the context of implementing it in UE5 (sound cues, animations, Blueprint nodes, property panels, editor workflows), NOT what it means in the real world.
+- ALWAYS explain using Blueprint nodes, property panels, and editor UI. Avoid C++ code references unless the learner's query explicitly asks about C++.
 - If the source content is ambiguous or thin, stay within UE5 context. Do NOT fill gaps with real-world knowledge.
 - Do NOT tell the learner to "search the Content Browser" or "look for X in the editor" — instead explain what the concept IS and how it works.
 - Focus on UNDERSTANDING, not on generic navigation instructions.
@@ -248,9 +249,9 @@ Return ONLY valid JSON (no markdown, no code fences):
 }
 
 RULES:
-- ONLY discuss Unreal Engine / game development concepts. NEVER reference real-world physics, hardware, or mechanisms. Explain terms only in UE5 context (Blueprint nodes, C++ classes, sound cues, materials, etc.).
+- ONLY discuss Unreal Engine / game development concepts. NEVER reference real-world physics, hardware, or mechanisms. Explain terms only in UE5 context (Blueprint nodes, sound cues, materials, property panels, editor menus). Avoid C++ code syntax unless the learner explicitly asked about C++.
 - CONCISE: use bullet points (•) or numbered lists (1. 2. 3.), NEVER paragraphs
-- Reference real UE5 class names, functions, editor paths
+- Reference Blueprint node names, property names, and editor paths rather than C++ class names
 - Each section: 60-100 words MAX
 - Do NOT use markdown formatting inside the JSON strings`;
 
@@ -307,7 +308,8 @@ ${stepAction ? `\nAction steps from this content:\n"${stepAction.substring(0, 50
 
 Generate exactly 3 key takeaways the learner MUST know from this step. Each takeaway should be:
 - One concise sentence (under 20 words)
-- ACTIONABLE: mention a specific UE5 property, file, Blueprint node, menu path, or setting they should check/adjust
+- ACTIONABLE: mention a specific UE5 property, Blueprint node, editor menu path, or setting they should check/adjust
+- Frame using Blueprint workflows and editor UI, not C++ code syntax
 - NOT just restating the problem — tell them WHAT to DO (e.g. "Set NetUpdateFrequency to 100 on your Character Movement Component")
 - Include concrete specifics from the content above
 
@@ -375,7 +377,7 @@ ${(stepContent || "").substring(0, 1500)}
 
 Generate exactly ${count} multiple-choice questions that test whether the learner UNDERSTOOD the specific concepts above. Each question should:
 - Be DIRECTLY answerable from the content — not generic UE5 trivia
-- Reference specific properties, classes, nodes, or settings from the content
+- Reference specific properties, Blueprint nodes, editor settings, or workflows from the content — avoid C++ syntax unless the source content is explicitly about C++
 - Have exactly 4 choices (A, B, C, D) — only ONE correct
 - Include a 1-sentence explanation for the correct answer
 - Write choices as clean readable text — NEVER use (...) or () or code-style signatures in choices

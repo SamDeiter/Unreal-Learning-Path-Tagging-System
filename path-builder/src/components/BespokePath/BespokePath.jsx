@@ -283,7 +283,7 @@ export default function BespokePath() {
 
     // 1. Check cache first (zero cost)
     setPipelineStage("Checking cache...");
-    const cached = findCachedPath(trimmed);
+    const cached = await findCachedPath(trimmed);
     if (cached) {
       setPipelineStage("Found cached path!");
       trackEvent(EVENTS.LEARNING_PATH_GENERATED, {
