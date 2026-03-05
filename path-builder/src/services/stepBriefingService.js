@@ -35,6 +35,7 @@ export async function generateStepAudio(step, query, options = {}) {
 
     if (options.stepPosition) payload.stepPosition = options.stepPosition;
     if (options.sourceLinks?.length) payload.sourceLinks = options.sourceLinks;
+    if (options.voiceName) payload.voiceName = options.voiceName;
 
     const result = await genFn(payload);
 
@@ -59,19 +60,22 @@ export async function generateStepAudio(step, query, options = {}) {
  * @param {string} query - The original user query
  * @returns {Promise<Array|null>} Array of {title, content, type}, or null on failure
  */
-export async function generateStepDeepDive(step, query) {
+export async function generateStepDeepDive(step, query, options = {}) {
   try {
     const app = getFirebaseApp();
     const functions = getFunctions(app, "us-central1");
     const genFn = httpsCallable(functions, "generateAudioBriefing", { timeout: 60000 });
 
-    const result = await genFn({
+    const payload = {
       mode: "deepdive",
       query,
       stepContent: step.summary || step.segment?.text || "",
       stepCategory: step.category || "learning",
       stepTitle: step.segment?.title || step.segment?.videoTitle || "",
-    });
+    };
+    if (options.userLevel) payload.userLevel = options.userLevel;
+
+    const result = await genFn(payload);
 
     if (result.data?.sections?.length) {
       devLog(`[DeepDive] Generated ${result.data.sections.length} sub-sections`);

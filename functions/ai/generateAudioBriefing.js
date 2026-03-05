@@ -130,7 +130,7 @@ IMPORTANT:
             responseModalities: ["AUDIO"],
             speechConfig: {
               voiceConfig: {
-                prebuiltVoiceConfig: { voiceName: "Kore" },
+                prebuiltVoiceConfig: { voiceName: data.voiceName || "Kore" },
               },
             },
           },
@@ -213,7 +213,9 @@ IMPORTANT:
           );
         }
 
+        const userLevel = data.userLevel || "intermediate";
         const deepdivePrompt = `You are an expert UE5 instructor creating an in-depth breakdown of a learning step.
+The learner is at the ${userLevel.toUpperCase()} level, so tailor depth and vocabulary accordingly.
 
 The learner asked: "${query}"
 This is the ${stepCategory || "learning"} step titled "${stepTitle || ""}":

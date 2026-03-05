@@ -16,7 +16,8 @@ import { filterCourses } from "../../utils/dataProcessing";
 import { matchCoursesToGoal } from "../../utils/courseMatchingUtils";
 import { Search, Sparkles, Clock, Clapperboard, Layers, Plus, X, Check } from "lucide-react";
 import { getRelevanceBadge } from "../../services/ContentGapService";
-import { detectPersona } from "../../services/PersonaService";
+import { detectPersona, getPersonaById } from "../../services/PersonaService";
+import { trackPersonaDetected } from "../../services/analyticsService";
 import "./CourseLibrary.css";
 
 // ... (highlightText helper remains same)
@@ -58,6 +59,14 @@ function CourseLibrary({ courses }) {
     const result = detectPersona(goal);
     return result?.id || null;
   }, [learningIntent]);
+
+  // Track persona detection analytics
+  useEffect(() => {
+    if (activePersonaId) {
+      const persona = getPersonaById(activePersonaId);
+      if (persona) trackPersonaDetected(persona, "inferred");
+    }
+  }, [activePersonaId]);
 
   // Filter out already-in-path courses from suggestions
   const availableSuggestions = useMemo(() => {

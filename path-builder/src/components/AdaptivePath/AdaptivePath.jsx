@@ -70,6 +70,9 @@ export default function AdaptivePath() {
   // Deep dive state
   const [stepDeepDives, setStepDeepDives] = useState({});
 
+  // Voice selector
+  const [voiceName, setVoiceName] = useState("Kore");
+
   // Quiz state
   const [quizzes, setQuizzes] = useState(new Map());
   const [quizLoading, setQuizLoading] = useState(null);
@@ -160,6 +163,7 @@ export default function AdaptivePath() {
 
     setStepAudio({});
     setStepTakeaways({});
+    setStepDeepDives({});
     setPathNarration(null);
     setQuizzes(new Map());
     setQuizScores(new Map());
@@ -221,14 +225,21 @@ export default function AdaptivePath() {
           : [];
 
       try {
-        const audioUrl = await generateStepAudio(step, query, { stepPosition, sourceLinks });
+        const audioUrl = await generateStepAudio(step, query, {
+          stepPosition,
+          sourceLinks,
+          voiceName,
+        });
         setStepAudio((prev) => ({ ...prev, [index]: { url: audioUrl || null, loading: false } }));
 
         // Pre-generate next step's audio in background
         const nextIdx = index + 1;
         if (nextIdx < totalSteps && !stepAudio[nextIdx]) {
           const nextPosition = nextIdx >= totalSteps - 1 ? "last" : "middle";
-          generateStepAudio(pathData.path[nextIdx], query, { stepPosition: nextPosition })
+          generateStepAudio(pathData.path[nextIdx], query, {
+            stepPosition: nextPosition,
+            voiceName,
+          })
             .then((nextUrl) => {
               setStepAudio((prev) => {
                 if (prev[nextIdx]) return prev;
@@ -241,7 +252,7 @@ export default function AdaptivePath() {
         setStepAudio((prev) => ({ ...prev, [index]: { error: true, loading: false } }));
       }
     },
-    [query, stepAudio, pathData]
+    [query, stepAudio, pathData, voiceName]
   );
 
   // Auto-advance to next step when audio finishes playing
@@ -594,6 +605,26 @@ export default function AdaptivePath() {
                   </div>
                 ))}
               </nav>
+              <div className="voice-selector">
+                <label className="voice-label" htmlFor="voice-select">
+                  🎤 Narrator Voice
+                </label>
+                <select
+                  id="voice-select"
+                  className="voice-dropdown"
+                  value={voiceName}
+                  onChange={(e) => setVoiceName(e.target.value)}
+                >
+                  <option value="Kore">Kore (Female)</option>
+                  <option value="Aoede">Aoede (Female)</option>
+                  <option value="Leda">Leda (Female)</option>
+                  <option value="Puck">Puck (Male)</option>
+                  <option value="Charon">Charon (Male)</option>
+                  <option value="Fenrir">Fenrir (Male)</option>
+                  <option value="Orus">Orus (Male)</option>
+                  <option value="Zephyr">Zephyr (Neutral)</option>
+                </select>
+              </div>
             </aside>
 
             {/* Main Content Area */}
@@ -763,7 +794,9 @@ export default function AdaptivePath() {
                           ...prev,
                           [idx]: { loading: true },
                         }));
-                        const sections = await generateStepDeepDive(step, query);
+                        const sections = await generateStepDeepDive(step, query, {
+                          userLevel: knowledgeProfile?.level || "intermediate",
+                        });
                         setStepDeepDives((prev) => ({
                           ...prev,
                           [idx]: { loading: false, sections: sections || [] },

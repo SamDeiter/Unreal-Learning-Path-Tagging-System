@@ -11,7 +11,8 @@ import {
   downloadFile,
 } from "../../utils/pathExporter";
 import { getPersonaWelcome, getPathContextBlocks } from "../../services/PersonalizedMessaging";
-import { detectPersona } from "../../services/PersonaService";
+import { detectPersona, getPersonaById } from "../../services/PersonaService";
+import { trackPersonaDetected } from "../../services/analyticsService";
 import "./OutputPanel.css";
 
 function OutputPanel() {
@@ -31,6 +32,14 @@ function OutputPanel() {
     const result = detectPersona(goal);
     return result?.id || null;
   }, [learningIntent]);
+
+  // Track persona detection event for analytics
+  useEffect(() => {
+    if (activePersonaId) {
+      const persona = getPersonaById(activePersonaId);
+      if (persona) trackPersonaDetected(persona, "inferred");
+    }
+  }, [activePersonaId]);
 
   // Persona welcome + context blocks
   const personaWelcome = useMemo(() => getPersonaWelcome(activePersonaId), [activePersonaId]);
