@@ -216,16 +216,19 @@ Return a JSON array of objects with this format:
 [{"index": 0, "category": "foundation", "relevance": "high|medium|low", "summary": "A direct mini-lesson that teaches the concept. Extract the actual knowledge from the source and present it as clear instruction — explain what it is, how it works, and what the learner should do. Write 3-5 sentences in second person (you/your). No markdown formatting."}]
 
 Rules:
-- WORKFLOW INTENT MATCHING (CRITICAL): Before classifying, determine the learner's IMPLIED WORKFLOW from their query. Common intent→workflow mappings:
-  "create/make [3D object]" → Import FBX, Static Mesh Editor, Modeling Mode, Blueprint actor
+- WORKFLOW INTENT MATCHING (CRITICAL): Before classifying, determine the learner's IMPLIED WORKFLOW from their query.
+  ASSET ASSUMPTION: Assume learners already have a Static Mesh from FAB (Unreal Marketplace) or a Skeletal Mesh they imported. "Create/make [object]" means setting up and using an existing asset in a project, NOT modeling from scratch or generating 2D shapes.
+  Common intent→workflow mappings:
+  "create/make [3D object]" → Import FBX from FAB, Static Mesh setup, Materials, Blueprint actor, collision
   "customize appearance" → Materials, Material Editor, texture parameters
   "animate [object]" → Skeletal Mesh, Animation Blueprint, Sequencer
   "add interaction" → Blueprint, Collision, Overlap Events
   If a segment teaches a DIFFERENT tool than the implied workflow, mark it "low" relevance even if semantically similar. Mismatches to reject:
-  - Texture Graph for 3D mesh creation (Texture Graph makes 2D procedural patterns, not 3D meshes)
+  - Texture Graph for 3D object creation (Texture Graph makes 2D procedural patterns, not 3D mesh setup)
   - Customizable Objects for basic item setup (advanced runtime customization system, not beginner workflow)
   - Control Rig for simple animation playback
   - Niagara for non-particle-related queries
+  - Modeling Mode unless the query specifically asks about modeling/sculpting geometry
 - PRIORITIZE Blueprint-based content over C++ content unless the query explicitly asks about C++. When teaching concepts, explain using Blueprint nodes, property panels, and editor UI rather than code syntax.
 - NEVER start a summary with 'This article...' or 'This video...' or 'This segment...' — teach the concept directly
 - Write as if YOU are the instructor explaining the concept, not describing someone else's content
@@ -407,7 +410,8 @@ Create a 4-6 step learning path with these categories:
 IMPORTANT RULES:
 - PRIORITIZE Blueprint-based approaches over C++ unless the query asks about C++
 - Be specific: include actual menu paths, property names, panel names, and node names
-- For "create/make" queries: Start with asset import or Modeling Mode, then material, then Blueprint actor
+- ASSET ASSUMPTION: Assume the learner already has a Static Mesh from FAB (Unreal Marketplace) or an FBX they imported. "Create" means setting up the asset in their project — NOT modeling from scratch or using Texture Graph.
+- For "create/make" queries: Start with importing the asset or downloading from FAB, then setting up materials, then creating a Blueprint actor with the mesh component, then configuring collision
 - Each summary should be 3-5 sentences teaching the concept directly in second person
 - Plain text only — no markdown, no asterisks, no code blocks
 ${adaptiveContext}
@@ -534,6 +538,33 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
       `[BespokePath] Stage 2: Sequencing path...${knowledgeProfile ? ` (adaptive: ${knowledgeProfile.level})` : ""}`
     );
     result.path = await sequencePath(userQuery, segments, knowledgeProfile);
+
+    // ── POST-SEQUENCE SAFETY NET ──
+    // If the corpus had segments but most were filtered as "low" relevance
+    // (e.g., Texture Graph matching "sword" semantically but wrong workflow),
+    // supplement with hybrid AI-generated steps so the path isn't anemic.
+    if (result.path.length < MIN_PATH_SEGMENTS) {
+      devLog(
+        `[BespokePath] Only ${result.path.length} steps survived sequencing (min ${MIN_PATH_SEGMENTS}) — supplementing with hybrid AI content`
+      );
+      const hybridSteps = await generateHybridPath(userQuery, knowledgeProfile);
+      if (hybridSteps.length > 0) {
+        // Replace entirely with hybrid if corpus gave ≤1 usable step
+        if (result.path.length <= 1) {
+          result.path = hybridSteps;
+          result.isAiGenerated = true;
+        } else {
+          // Fill in missing categories from hybrid
+          const existingCategories = new Set(result.path.map((s) => s.category));
+          const supplemental = hybridSteps.filter((s) => !existingCategories.has(s.category));
+          result.path = [...result.path, ...supplemental].map((s, i) => ({
+            ...s,
+            order: i,
+          }));
+        }
+        devLog(`[BespokePath] Path supplemented to ${result.path.length} steps`);
+      }
+    }
 
     if (result.path.length === 0) {
       result.error =
