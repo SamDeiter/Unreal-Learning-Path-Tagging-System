@@ -52,7 +52,6 @@ const EVENT_META = {
   [EVENTS.VECTOR_SEARCH_COMPLETED]: { label: "Searches", color: "#3b82f6" },
   [EVENTS.HYBRID_FALLBACK_TRIGGERED]: { label: "Fallbacks", color: "#f43f5e" },
   [EVENTS.PATH_SEQUENCED]: { label: "Sequenced", color: "#6366f1" },
-  [EVENTS.BLUEPRINT_LINK_SHOWN]: { label: "Blueprint", color: "#60a5fa" },
 };
 
 /** Small info-icon tooltip — CSS-only, no JS needed */

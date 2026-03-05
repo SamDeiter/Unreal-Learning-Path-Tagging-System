@@ -50,7 +50,6 @@ export const EVENTS = {
   VECTOR_SEARCH_COMPLETED: "vector_search_completed",
   HYBRID_FALLBACK_TRIGGERED: "hybrid_fallback_triggered",
   PATH_SEQUENCED: "path_sequenced",
-  BLUEPRINT_LINK_SHOWN: "blueprint_link_shown",
 };
 
 /**
@@ -305,18 +304,6 @@ export function trackPathSequenced(params) {
   });
 }
 
-/**
- * Track when a Blueprint visual link is shown to the user.
- * @param {string} presetKey - The matched preset name
- * @param {string} stepTitle - Title of the step it appeared on
- */
-export function trackBlueprintLinkShown(presetKey, stepTitle) {
-  return trackEvent(EVENTS.BLUEPRINT_LINK_SHOWN, {
-    preset_key: presetKey,
-    step_title: stepTitle?.substring(0, 80),
-  });
-}
-
 export default {
   EVENTS,
   trackEvent,
@@ -334,5 +321,4 @@ export default {
   trackVectorSearchCompleted,
   trackHybridFallbackTriggered,
   trackPathSequenced,
-  trackBlueprintLinkShown,
 };

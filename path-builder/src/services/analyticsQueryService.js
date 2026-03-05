@@ -167,7 +167,6 @@ export function getRAGMetrics(events) {
   const searches = events.filter((e) => e.event === EVENTS.VECTOR_SEARCH_COMPLETED);
   const fallbacks = events.filter((e) => e.event === EVENTS.HYBRID_FALLBACK_TRIGGERED);
   const sequenced = events.filter((e) => e.event === EVENTS.PATH_SEQUENCED);
-  const blueprints = events.filter((e) => e.event === EVENTS.BLUEPRINT_LINK_SHOWN);
 
   const searchCount = searches.length;
   const avgSimilarity =
@@ -205,7 +204,6 @@ export function getRAGMetrics(events) {
     hybridCount: fallbacks.length,
     avgCorpusRatio,
     pathCount: sequenced.length,
-    blueprintShown: blueprints.length,
     collectionBreakdown: {
       transcripts: totalTranscripts,
       epic: totalEpic,
