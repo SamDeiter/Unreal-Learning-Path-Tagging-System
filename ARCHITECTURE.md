@@ -170,7 +170,7 @@ graph TB
         PBI["path_builder_invites/{code}<br/>• maxUses, usedCount, revoked, expiresAt"]
         FB["feedback/{docId}<br/>• query, rating, comment, userId"]
         UF["userFeedback/{userId}/videoSignals/{videoId}<br/>• liked, completed, skippedAt"]
-        AE["analytics_events/{docId}<br/>• type, timestamp, metadata"]
+        AE["analytics_events/{docId}<br/>• type, timestamp, metadata<br/>• RAG metrics (similarity, fallback)"]
         AU["apiUsage/{docId}<br/>• type, outcome, pipelineDurationMs<br/>(written by Cloud Function)"]
         CE["course_embeddings/{courseCode}\n\u2022 title, embedding: vector(768), metadata"]
         SE["segment_embeddings/{segmentId}\n\u2022 text, embedding: vector(768), courseCode, videoTitle"]
@@ -411,5 +411,7 @@ User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Pat
 | `narratorService.js`       | AI narration generation                       | Cloud Functions (Gemini)                                  |
 | `PersonaService.js`        | Persona detection + messaging                 | None (pure logic)                                         |
 | `feedbackService.js`       | User feedback + video signals                 | Firestore                                                 |
-| `analyticsService.js`      | Event logging                                 | Firestore                                                 |
+| `analyticsService.js`      | Event logging + RAG pipeline tracking         | Firestore                                                 |
+| `analyticsQueryService.js` | Analytics aggregation + RAG health metrics    | Firestore                                                 |
+| `bespokePathService.js`    | RAG pipeline: vector search → sequencing      | Cloud Functions (embedQuery, vectorSearch\*)              |
 | `accessControl.js`         | Auth gating + invite system                   | Firestore                                                 |

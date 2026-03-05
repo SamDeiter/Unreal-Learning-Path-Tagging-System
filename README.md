@@ -17,7 +17,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 5. **Guided Learning Path** — AI-narrated sequence: intro → videos → quizzes → challenges → reflection
 6. **Citation-linked Answers** — Diagnosis responses include clickable `[N]` references linking to Vertex AI documentation
 7. **Dashboard Insights** — Readiness score, persona coverage chart, content gap analysis, quick search, and tooltips on all metrics
-8. **Analytics & Insights**
+8. **Analytics & Insights** — Admin dashboard with parallel data loading, RAG pipeline health metrics (similarity scores, fallback rates, collection breakdown), AI cost tracking, daily volume charts, and persona distribution
 9. **Bespoke Learning Paths** — AI-generated personalized paths using RAG + transcript search, Firestore vector search, security guardrails, and 10 pre-seeded popular paths
 10. **Adaptive Learning Paths** — Diagnostic quiz (with image-based questions) builds a knowledge profile, then generates a depth-adjusted path with Blueprint-first content bias, audio briefings with auto-advance, and an end-of-path knowledge check quiz
 11. **Hybrid AI Fallback** — When corpus coverage is too low, generates learning paths from Gemini's general UE5 knowledge with workflow intent matching (e.g., assumes FAB assets for "create a sword" queries)
@@ -39,7 +39,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 | **AI**             | Google Gemini 2.0 Flash (enrichment, narration, embeddings)                        |
 | **Search**         | Firestore vector search + TF-IDF transcript index + Vertex AI docs + tag matching  |
 | **Hosting**        | GitHub Pages (frontend), Firebase Hosting (API)                                    |
-| **Testing**        | Vitest + React Testing Library + Playwright (546 tests)                            |
+| **Testing**        | Vitest + React Testing Library + Playwright (566 tests)                            |
 | **Security**       | DOMPurify (XSS sanitization), Firebase Security Rules, invite-based access control |
 | **Linting**        | ESLint 9 (flat config) + Stylelint                                                 |
 

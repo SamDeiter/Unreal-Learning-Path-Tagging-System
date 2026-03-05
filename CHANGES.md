@@ -4,6 +4,37 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [1.8.0-analytics-rag] - 2026-03-05
+
+### Added
+
+- **RAG Pipeline Tracking** — 3 new analytics events instrument the RAG pipeline end-to-end:
+  - `VECTOR_SEARCH_COMPLETED`: per-collection hit counts (transcripts, Epic Learning, docs), best/avg similarity scores, search latency
+  - `HYBRID_FALLBACK_TRIGGERED`: reason (no_segments, low_similarity, post_sequence_empty), best similarity, corpus segment count
+  - `PATH_SEQUENCED`: step count, categories used, AI vs corpus ratio
+- **RAG Pipeline Health Dashboard** — New "🧠 RAG Pipeline Health" section in Admin Analytics showing avg similarity, hybrid fallback %, search latency, corpus ratio, and collection breakdown bar chart
+- **`getRAGMetrics()` aggregation** in `analyticsQueryService.js` — computes all RAG health metrics from raw analytics events
+- **Sources fallback URLs** — Sources links in path steps are always clickable; when segments lack a direct URL, falls back to search on dev.epicgames.com/community (Epic Learning), YouTube (transcripts), or Epic Docs
+
+### Changed
+
+- **Analytics Performance** — `AdminAnalytics.jsx` rewritten for speed:
+  - `Promise.all` parallelizes `fetchEvents` + `fetchCloudStats` (was sequential)
+  - `useRef` caching skips re-fetch when time range hasn't changed
+  - `useMemo` for all aggregation functions (was recalculating on every render)
+  - Progressive rendering: cloud cost section loads independently
+- **Dashboard UI/UX Reorganization** — New layout order: Overview stat cards → RAG Health → AI Costs → Daily Volume/Event Breakdown (side-by-side) → Top Queries/Persona Distribution (side-by-side) → Recent Events (full-width)
+
+### Removed
+
+- **Blueprint Visual Links** — Removed `blueprintPresets.js`, PathStep integration, CSS, and `BLUEPRINT_LINK_SHOWN` event (tech debt concern; deep-linking approach didn't fit workflow)
+
+### Fixed
+
+- **Sources link not clickable** — Epic Learning segments often lacked `url` field (Firestore returned empty string), causing non-clickable `<span>` instead of `<a>`. Now always renders clickable with fallback search URLs.
+
+---
+
 ## [1.7.0-hybrid-intelligence] - 2026-03-05
 
 ### Added
