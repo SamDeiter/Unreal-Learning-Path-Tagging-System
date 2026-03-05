@@ -197,6 +197,7 @@ Return a JSON array of objects with this format:
 [{"index": 0, "category": "foundation", "relevance": "high|medium|low", "summary": "A direct mini-lesson that teaches the concept. Extract the actual knowledge from the source and present it as clear instruction — explain what it is, how it works, and what the learner should do. Write 3-5 sentences in second person (you/your). No markdown formatting."}]
 
 Rules:
+- PRIORITIZE Blueprint-based content over C++ content unless the query explicitly asks about C++. When teaching concepts, explain using Blueprint nodes, property panels, and editor UI rather than code syntax.
 - NEVER start a summary with 'This article...' or 'This video...' or 'This segment...' — teach the concept directly
 - Write as if YOU are the instructor explaining the concept, not describing someone else's content
 - Include specific technical details, property names, menu paths, or code patterns from the source

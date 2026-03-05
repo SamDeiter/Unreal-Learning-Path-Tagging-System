@@ -334,6 +334,7 @@ Generate exactly 4 multiple-choice questions that test whether the learner ALREA
 - Include a "concept" field that names the knowledge area being tested (use snake_case, e.g. "actor_replication", "blueprint_networking")
 - Be ordered from FOUNDATIONAL to ADVANCED
 - Be specific to Unreal Engine 5, not generic programming trivia
+- IMPORTANT: Focus questions on Blueprint-based workflows and visual scripting approaches. Only reference C++ if the learner's query explicitly mentions C++ or programming. Frame answers using Blueprint node names, property panels, and editor workflows rather than code syntax.
 
 Return ONLY a JSON array with this exact format:
 [{"q": "What does bReplicates do on an Actor?", "options": ["Marks the actor for garbage collection", "Enables the actor to be replicated across the network", "Creates a copy of the actor in the editor", "Allows the actor to be saved to disk"], "correctIndex": 1, "concept": "actor_replication"}]`;
