@@ -14,21 +14,29 @@ import { devLog, devWarn } from "../utils/logger";
  *
  * @param {Object} step - The path step object
  * @param {string} query - The original user query
+ * @param {Object} [options] - Optional position + source info
+ * @param {string} [options.stepPosition] - "first" | "middle" | "last"
+ * @param {Array}  [options.sourceLinks]  - [{title, url}] for further reading
  * @returns {Promise<string|null>} Blob URL for the audio, or null on failure
  */
-export async function generateStepAudio(step, query) {
+export async function generateStepAudio(step, query, options = {}) {
   try {
     const app = getFirebaseApp();
     const functions = getFunctions(app, "us-central1");
     const genFn = httpsCallable(functions, "generateAudioBriefing", { timeout: 60000 });
 
-    const result = await genFn({
+    const payload = {
       mode: "step",
       query,
       stepContent: step.summary || step.segment?.text || "",
       stepCategory: step.category || "learning",
       stepTitle: step.segment?.title || step.segment?.videoTitle || "",
-    });
+    };
+
+    if (options.stepPosition) payload.stepPosition = options.stepPosition;
+    if (options.sourceLinks?.length) payload.sourceLinks = options.sourceLinks;
+
+    const result = await genFn(payload);
 
     if (result.data?.audio) {
       const binary = atob(result.data.audio);

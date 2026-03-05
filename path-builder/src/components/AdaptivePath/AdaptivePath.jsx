@@ -187,22 +187,38 @@ export default function AdaptivePath() {
     async (index, step) => {
       if (stepAudio[index]?.url || stepAudio[index]?.loading) return;
       setStepAudio((prev) => ({ ...prev, [index]: { loading: true } }));
+
+      // Determine position in path for greeting/outro control
+      const totalSteps = pathData?.path?.length ?? 0;
+      const stepPosition = index === 0 ? "first" : index >= totalSteps - 1 ? "last" : "middle";
+
+      // Collect source links for further reading (used in last step narration)
+      const sourceLinks =
+        stepPosition === "last" && pathData?.path
+          ? pathData.path
+              .map((s) => ({
+                title: s.segment?.title || s.segment?.videoTitle || "",
+                url: s.segment?.videoUrl || s.segment?.url || "",
+              }))
+              .filter((s) => s.title)
+          : [];
+
       try {
-        const audioUrl = await generateStepAudio(step, query);
+        const audioUrl = await generateStepAudio(step, query, { stepPosition, sourceLinks });
         setStepAudio((prev) => ({ ...prev, [index]: { url: audioUrl || null, loading: false } }));
 
         // Pre-generate next step's audio in background
         const nextIdx = index + 1;
-        if (nextIdx < (pathData?.path?.length ?? 0) && !stepAudio[nextIdx]) {
-          // Fire-and-forget: don't await
-          generateStepAudio(pathData.path[nextIdx], query)
+        if (nextIdx < totalSteps && !stepAudio[nextIdx]) {
+          const nextPosition = nextIdx >= totalSteps - 1 ? "last" : "middle";
+          generateStepAudio(pathData.path[nextIdx], query, { stepPosition: nextPosition })
             .then((nextUrl) => {
               setStepAudio((prev) => {
-                if (prev[nextIdx]) return prev; // already generated
+                if (prev[nextIdx]) return prev;
                 return { ...prev, [nextIdx]: { url: nextUrl || null, loading: false } };
               });
             })
-            .catch(() => {}); // silent fail for pre-gen
+            .catch(() => {});
         }
       } catch {
         setStepAudio((prev) => ({ ...prev, [index]: { error: true, loading: false } }));
@@ -463,6 +479,7 @@ export default function AdaptivePath() {
       { key: "solution", icon: "🔧", label: "Solution", categories: ["fix"] },
       { key: "quiz", icon: "📝", label: "Quiz", categories: ["__quiz__"] },
       { key: "apply", icon: "🚀", label: "Apply It", categories: ["transfer"] },
+      { key: "reading", icon: "📖", label: "Further Reading", categories: ["__reading__"] },
     ];
 
     const phases = [];
@@ -470,6 +487,11 @@ export default function AdaptivePath() {
       if (config.key === "quiz") {
         // Quiz is a virtual phase, always include it
         phases.push({ ...config, steps: [{ category: "__quiz__", globalIndex: -2 }] });
+        continue;
+      }
+      if (config.key === "reading") {
+        // Further Reading is a virtual phase, always include it
+        phases.push({ ...config, steps: [{ category: "__reading__", globalIndex: -3 }] });
         continue;
       }
       const steps = pathData.path
@@ -483,7 +505,10 @@ export default function AdaptivePath() {
     const activePhaseKey =
       expandedStep === -2
         ? "quiz"
-        : phases.find((p) => p.steps.some((s) => s.globalIndex === (expandedStep ?? 0)))?.key || "";
+        : expandedStep === -3
+          ? "reading"
+          : phases.find((p) => p.steps.some((s) => s.globalIndex === (expandedStep ?? 0)))?.key ||
+            "";
 
     return (
       <div className="adaptive-path bespoke-path">
@@ -516,6 +541,8 @@ export default function AdaptivePath() {
                       onClick={() => {
                         if (phase.key === "quiz") {
                           setExpandedStep(-2);
+                        } else if (phase.key === "reading") {
+                          setExpandedStep(-3);
                         } else {
                           const idx = phase.steps[0]?.globalIndex ?? 0;
                           setExpandedStep(idx);
@@ -609,6 +636,88 @@ export default function AdaptivePath() {
                           </button>
                         );
                       })()}
+                    </div>
+                  </div>
+                ) : expandedStep === -3 ? (
+                  /* Further Reading phase */
+                  <div className="quiz-phase-container">
+                    <div className="step-article">
+                      <h1>📖 Further Reading</h1>
+                      <p>
+                        Dive deeper into the topics covered in this path with these source
+                        materials.
+                      </p>
+                      <div
+                        className="further-reading-list"
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "12px",
+                          marginTop: "20px",
+                        }}
+                      >
+                        {pathData.path.map((step, i) => {
+                          const url = step.segment?.videoUrl || step.segment?.url;
+                          const title =
+                            step.segment?.title || step.segment?.videoTitle || `Step ${i + 1}`;
+                          const sourceType = step.segment?.type || step.segment?.source || "docs";
+                          const icon = sourceType === "transcript" ? "fa-video" : "fa-book-open";
+                          const typeLabel =
+                            sourceType === "transcript"
+                              ? "Video"
+                              : sourceType === "epic_learning"
+                                ? "Article"
+                                : "Docs";
+                          return (
+                            <a
+                              key={i}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                padding: "14px 18px",
+                                background: "rgba(88, 166, 255, 0.06)",
+                                border: "1px solid var(--border-color, #30363d)",
+                                borderRadius: "10px",
+                                color: "var(--accent-blue, #58a6ff)",
+                                textDecoration: "none",
+                                transition: "all 0.2s",
+                                fontSize: "0.9rem",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = "rgba(88, 166, 255, 0.12)";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = "rgba(88, 166, 255, 0.06)";
+                              }}
+                            >
+                              <i
+                                className={`fa-solid ${icon}`}
+                                style={{ fontSize: "1.1rem", width: "20px" }}
+                              />
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 500 }}>{title}</div>
+                                <div
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: "var(--text-secondary)",
+                                    marginTop: "2px",
+                                  }}
+                                >
+                                  {typeLabel} • Step {i + 1}
+                                </div>
+                              </div>
+                              <i
+                                className="fa-solid fa-arrow-up-right-from-square"
+                                style={{ opacity: 0.5, fontSize: "0.8rem" }}
+                              />
+                            </a>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 ) : (expandedStep ?? 0) >= 0 && (expandedStep ?? 0) < pathData.path.length ? (

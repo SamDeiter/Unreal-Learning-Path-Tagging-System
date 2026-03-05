@@ -76,6 +76,20 @@ exports.generateAudioBriefing = functions
         }
 
         // Generate a short single-speaker explanation (50 words max)
+        // Adapt tone based on position in the learning path
+        const position = data.stepPosition || "middle"; // first | middle | last
+        const sourceLinks = data.sourceLinks || []; // [{title, url}]
+
+        let positionInstruction;
+        if (position === "first") {
+          positionInstruction = `Start with a brief, warm greeting like "Alright, let's dive in." Then set up the context for this step.`;
+        } else if (position === "last") {
+          const sourceNames = sourceLinks.map((s) => s.title).join(", ");
+          positionInstruction = `Do NOT greet or say hello — continue naturally. This is the LAST step. After your explanation, wrap up with something like: "And if you want to go deeper, check out the source materials linked below${sourceNames ? ` — especially ${sourceNames}` : ""}." End with brief encouragement.`;
+        } else {
+          positionInstruction = `Do NOT greet, say hello, or introduce yourself. Continue naturally from the previous step as if you're mid-conversation.`;
+        }
+
         const stepPrompt = `You are a friendly UE5 instructor giving a concise audio tip.
 
 The learner asked: "${query}"
@@ -83,9 +97,14 @@ This is the ${stepCategory || "learning"} step titled "${stepTitle || ""}":
 
 "${stepContent.substring(0, 500)}"
 
+${positionInstruction}
+
 In exactly 2-3 sentences (under 50 words), explain the KEY THING the learner should focus on in this step. Be specific to the actual content, not generic. Speak directly to the learner using "you".
 
-Do NOT use any markdown, bullet points, or formatting. Just plain conversational text.`;
+IMPORTANT:
+- Do NOT tell the learner to "search the Content Browser" or "look for X in the editor" — instead explain what the concept IS and how it works.
+- Focus on UNDERSTANDING, not on generic navigation instructions.
+- Do NOT use any markdown, bullet points, or formatting. Just plain conversational text.`;
 
         const stepScriptUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         const stepScriptResp = await fetch(stepScriptUrl, {
