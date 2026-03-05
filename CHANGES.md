@@ -4,6 +4,34 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [1.7.0-hybrid-intelligence] - 2026-03-05
+
+### Added
+
+- **Hybrid AI Fallback** — When corpus coverage is too low (best similarity < 0.65), the system generates learning paths from Gemini's general UE5 knowledge instead of returning empty results
+  - Steps generated via hybrid fallback are marked with `type: "ai_generated"` and labeled "AI-assisted — beyond current course library"
+  - Post-sequencing safety net: if too few steps survive relevance filtering after sequencing, automatically supplements with hybrid AI content
+- **Workflow Intent Matching** — `sequencePath` prompt rejects corpus segments that teach the wrong workflow for the user's query (e.g., Texture Graph for 3D mesh setup)
+  - **FAB Asset Assumption**: "Create/make [object]" queries assume learners have a Static Mesh from FAB or an existing FBX/Skeletal Mesh
+  - Modeling Mode added to reject list (unless query specifically asks about sculpting)
+- **Image-Based Quiz Questions** — `quizImageBank.js` maps UE5 concepts to screenshot images displayed above diagnostic quiz questions
+- **Cosine Similarity Scoring** — `vectorSearch.js` CF now returns real cosine distance via Firestore `distanceResultField: 'vector_distance'`
+- **Deepdive TOOL APPROPRIATENESS Rule** — `generateAudioBriefing.js` prompt now acknowledges when source content describes an advanced tool that doesn't match the user's simpler workflow
+
+### Changed
+
+- **classifySegments CF** — Added `responseMimeType: "application/json"` to force valid JSON output from Gemini, eliminating client-side parse failures
+- **Further Reading** — AI-generated steps now display with robot icon and "AI-Assisted" label; rendered as non-clickable items instead of broken links
+- **Apply It Section** — Removed from per-step rendering to avoid overlap with Epic's in-editor AI Assistant (which handles procedural how-to guidance)
+
+### Fixed
+
+- **Hybrid JSON parsing** — Hardened sanitization for Gemini output: strips code fences, fixes smart quotes, removes trailing commas, fallback for single-quoted keys
+- **Quiz image 404s** — Resolved by using `import.meta.env.BASE_URL` for Vite's base path in image URLs
+- **Similarity scores always 0.000** — `vectorSearch.js` was missing `distanceResultField` in Firestore `findNearest()` call
+
+---
+
 ## [1.6.0-adaptive-path] - 2026-03-04
 
 ### Added

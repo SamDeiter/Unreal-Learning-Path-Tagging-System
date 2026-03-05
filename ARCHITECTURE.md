@@ -337,32 +337,35 @@ The **Bespoke Path** and **Adaptive Path** components generate personalized lear
 User Question -> [1. Segment Finder] -> [2. Path Sequencer] -> [3. Path Renderer] -> [4. Quiz] -> UI
 ```
 
-| Stage | Purpose | Backend |
-| --- | --- | --- |
-| **Segment Finder** | RAG search across 1,900+ transcript embeddings | Firestore vector search + Vertex AI |
-| **Path Sequencer** | Orders clips into Foundation, Diagnosis, Fix, Transfer | Gemini 2.0 Flash |
-| **Path Renderer** | Generates bridge narration between clips | Gemini 2.0 Flash |
-| **Quiz Generator** | Creates MCQs testing conceptual understanding | Gemini 2.0 Flash |
+| Stage                     | Purpose                                                                      | Backend                                  |
+| ------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------- |
+| **Segment Finder**        | RAG search across 1,900+ transcript embeddings (similarity threshold ≥ 0.65) | Firestore vector search + Vertex AI      |
+| **Workflow Intent Guard** | Rejects segments teaching wrong tools (e.g., Texture Graph for mesh setup)   | Gemini 2.0 Flash                         |
+| **Hybrid Fallback**       | Generates AI content when corpus coverage is too low                         | Gemini 2.0 Flash (general UE5 knowledge) |
+| **Path Sequencer**        | Orders clips into Foundation, Diagnosis, Fix, Transfer                       | Gemini 2.0 Flash                         |
+| **Path Renderer**         | Generates bridge narration between clips                                     | Gemini 2.0 Flash                         |
+| **Quiz Generator**        | Creates MCQs testing conceptual understanding                                | Gemini 2.0 Flash                         |
 
-### Cloud Functions (New)
+### Cloud Functions
 
-| Function | Purpose | Trigger |
-| --- | --- | --- |
-| `vectorSearchCourses` | KNN search against `course_embeddings` collection | HTTPS callable |
-| `vectorSearchSegments` | KNN search against `segment_embeddings` collection | HTTPS callable |
-| `vectorSearchDocs` | KNN search against `docs_embeddings` collection | HTTPS callable |
+| Function               | Purpose                                                                                       | Trigger        |
+| ---------------------- | --------------------------------------------------------------------------------------------- | -------------- |
+| `vectorSearchCourses`  | KNN search against `course_embeddings` collection                                             | HTTPS callable |
+| `vectorSearchSegments` | KNN search against `segment_embeddings` (returns cosine similarity via `distanceResultField`) | HTTPS callable |
+| `vectorSearchDocs`     | KNN search against `docs_embeddings` collection                                               | HTTPS callable |
+| `classifySegments`     | Gemini relay for path sequencing (`responseMimeType: application/json`)                       | HTTPS callable |
 
 ### Security Guardrails
 
-| Guard | Attack Vector | Defense |
-| --- | --- | --- |
-| Input Sanitization | Prompt injection | 500 char limit, HTML stripping, system prompt isolation |
-| XSS Prevention | Script injection | React auto-escape, DOMPurify, CSP headers |
-| API Key Protection | Key theft | `.env` only, domain-restricted, quarterly rotation |
-| Rate Limiting | DoS / cost abuse | 3s throttle, 20/session limit, $10/day circuit breaker |
-| Cache Poisoning | Harmful cached paths | Source-grounded validation, admin-only Featured pins |
-| Data Exfiltration | Extract prompts/data | Stateless queries, no PII in prompts |
-| SCORM Integrity | Package tampering | SHA-256 manifest, SRI attributes |
+| Guard              | Attack Vector        | Defense                                                 |
+| ------------------ | -------------------- | ------------------------------------------------------- |
+| Input Sanitization | Prompt injection     | 500 char limit, HTML stripping, system prompt isolation |
+| XSS Prevention     | Script injection     | React auto-escape, DOMPurify, CSP headers               |
+| API Key Protection | Key theft            | `.env` only, domain-restricted, quarterly rotation      |
+| Rate Limiting      | DoS / cost abuse     | 3s throttle, 20/session limit, $10/day circuit breaker  |
+| Cache Poisoning    | Harmful cached paths | Source-grounded validation, admin-only Featured pins    |
+| Data Exfiltration  | Extract prompts/data | Stateless queries, no PII in prompts                    |
+| SCORM Integrity    | Package tampering    | SHA-256 manifest, SRI attributes                        |
 
 ---
 
@@ -374,22 +377,24 @@ The **Adaptive Path** (`AdaptivePath.jsx`) extends the Bespoke Path with a diagn
 User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Path] -> [Quiz] -> UI
 ```
 
-| Stage | Purpose | Backend |
-| --- | --- | --- |
-| **Diagnostic Quiz** | Adaptive multi-question flow calibrating user knowledge | `useAdaptiveQuiz` hook + Cloud Function |
-| **Knowledge Profile** | Maps strengths/weaknesses across UE5 domains | Client-side aggregation |
-| **Depth-Adjusted Path** | Generates path biased by knowledge profile | Gemini 2.0 Flash (Blueprint-first bias) |
-| **Knowledge Check Quiz** | End-of-path MCQs testing conceptual understanding | `quizService.js` + `QuizEngine` component |
+| Stage                    | Purpose                                                 | Backend                                   |
+| ------------------------ | ------------------------------------------------------- | ----------------------------------------- |
+| **Diagnostic Quiz**      | Adaptive multi-question flow calibrating user knowledge | `useAdaptiveQuiz` hook + Cloud Function   |
+| **Knowledge Profile**    | Maps strengths/weaknesses across UE5 domains            | Client-side aggregation                   |
+| **Depth-Adjusted Path**  | Generates path biased by knowledge profile              | Gemini 2.0 Flash (Blueprint-first bias)   |
+| **Knowledge Check Quiz** | End-of-path MCQs testing conceptual understanding       | `quizService.js` + `QuizEngine` component |
 
 ### Key Components
 
-| Component | Purpose |
-| --- | --- |
-| `AdaptivePath.jsx` | Main component: modal overlay with sidebar, step navigation, quiz |
-| `useAdaptiveQuiz.js` | Hook managing diagnostic quiz state, scoring, knowledge profile |
-| `QuizEngine.jsx` | Reusable quiz component (shared with BespokePath) |
-| `quizService.js` | Generates MCQs from path content via Gemini |
-| `stepBriefingService.js` | AI-generated audio briefings with auto-advance |
+| Component                | Purpose                                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `AdaptivePath.jsx`       | Main component: modal overlay with sidebar, step navigation, quiz                               |
+| `useAdaptiveQuiz.js`     | Hook managing diagnostic quiz state, scoring, knowledge profile                                 |
+| `QuizEngine.jsx`         | Reusable quiz component (shared with BespokePath)                                               |
+| `quizService.js`         | Generates MCQs from path content via Gemini                                                     |
+| `stepBriefingService.js` | AI-generated audio briefings with auto-advance                                                  |
+| `bespokePathService.js`  | Path generation pipeline: segment search → workflow intent guard → hybrid fallback → sequencing |
+| `quizImageBank.js`       | Maps UE5 concepts to screenshot images for diagnostic quiz questions                            |
 
 ---
 
@@ -398,8 +403,8 @@ User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Pat
 | Service                    | Responsibility                                | External Dependencies                                     |
 | -------------------------- | --------------------------------------------- | --------------------------------------------------------- |
 | `searchPipeline.js`        | Orchestrates embed → expand → search → rerank | Cloud Functions (embedQuery, expandQuery, rerankPassages) |
-| `semanticSearchService.js` | Vector search against course embeddings       | Firestore vector search |
-| `segmentSearchService.js`  | Hybrid keyword + semantic segment search      | Firestore vector search |
+| `semanticSearchService.js` | Vector search against course embeddings       | Firestore vector search                                   |
+| `segmentSearchService.js`  | Hybrid keyword + semantic segment search      | Firestore vector search                                   |
 | `docsSearchService.js`     | Semantic doc search + Vertex AI Search        | Vertex AI Discovery Engine, Firestore vector search       |
 | `coverageAnalyzer.js`      | Multi-source coverage analysis                | docsSearchService, externalContentService                 |
 | `PathBuilder.js`           | Sequencing, role assignment, time budgeting   | None (pure logic)                                         |

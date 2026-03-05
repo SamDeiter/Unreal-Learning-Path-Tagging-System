@@ -19,9 +19,10 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 7. **Dashboard Insights** — Readiness score, persona coverage chart, content gap analysis, quick search, and tooltips on all metrics
 8. **Analytics & Insights**
 9. **Bespoke Learning Paths** — AI-generated personalized paths using RAG + transcript search, Firestore vector search, security guardrails, and 10 pre-seeded popular paths
-10. **Adaptive Learning Paths** — Diagnostic quiz builds a knowledge profile, then generates a depth-adjusted path with Blueprint-first content bias, audio briefings with auto-advance, and an end-of-path knowledge check quiz
-11. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
-12. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
+10. **Adaptive Learning Paths** — Diagnostic quiz (with image-based questions) builds a knowledge profile, then generates a depth-adjusted path with Blueprint-first content bias, audio briefings with auto-advance, and an end-of-path knowledge check quiz
+11. **Hybrid AI Fallback** — When corpus coverage is too low, generates learning paths from Gemini's general UE5 knowledge with workflow intent matching (e.g., assumes FAB assets for "create a sword" queries)
+12. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
+13. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
 
 ---
 
@@ -36,9 +37,9 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 | **Database**       | Firebase Firestore                                                                 |
 | **Auth**           | Firebase Auth with Google Sign-In + invite-based access control                    |
 | **AI**             | Google Gemini 2.0 Flash (enrichment, narration, embeddings)                        |
-| **Search**         | Firestore vector search + TF-IDF transcript index + Vertex AI docs + tag matching                       |
+| **Search**         | Firestore vector search + TF-IDF transcript index + Vertex AI docs + tag matching  |
 | **Hosting**        | GitHub Pages (frontend), Firebase Hosting (API)                                    |
-| **Testing**        | Vitest + React Testing Library + Playwright (325 tests)                            |
+| **Testing**        | Vitest + React Testing Library + Playwright (546 tests)                            |
 | **Security**       | DOMPurify (XSS sanitization), Firebase Security Rules, invite-based access control |
 | **Linting**        | ESLint 9 (flat config) + Stylelint                                                 |
 
@@ -146,7 +147,7 @@ npm run dev          # http://localhost:5173/Unreal-Learning-Path-Tagging-System
 
 ```bash
 cd path-builder
-npm test             # Unit + component + regression tests (325 tests, ~40s)
+npm test             # Unit + component + regression tests (546 tests, ~40s)
 npm run test:watch   # Watch mode
 npm run test:e2e     # Playwright E2E browser tests (9 tests, ~13s)
 ```
