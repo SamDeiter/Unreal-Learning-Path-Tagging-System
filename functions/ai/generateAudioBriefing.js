@@ -225,7 +225,8 @@ Return ONLY a JSON array of 3 strings.`;
         let takeaways = [];
         if (match) {
           try {
-            takeaways = JSON.parse(match[0]);
+            const cleaned = match[0].replace(/,\s*([\]}])/g, "$1");
+            takeaways = JSON.parse(cleaned);
           } catch (e) {
             console.warn("Failed to parse takeaways JSON:", e.message);
           }
@@ -293,7 +294,8 @@ Return ONLY a JSON array:
         let questions = [];
         if (match) {
           try {
-            const parsed = JSON.parse(match[0]);
+            const cleaned = match[0].replace(/,\s*([\]}])/g, "$1");
+            const parsed = JSON.parse(cleaned);
             questions = parsed.filter(
               (q) =>
                 q.stem &&
@@ -358,7 +360,8 @@ Return ONLY a JSON array with this exact format:
         let diagnosticQuestions = [];
         if (dMatch) {
           try {
-            const parsed = JSON.parse(dMatch[0]);
+            const cleaned = dMatch[0].replace(/,\s*([\]}])/g, "$1");
+            const parsed = JSON.parse(cleaned);
             diagnosticQuestions = parsed.filter(
               (q) =>
                 q.q &&
