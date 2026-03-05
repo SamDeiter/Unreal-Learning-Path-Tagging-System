@@ -228,22 +228,27 @@ This is the ${stepCategory || "learning"} step titled "${stepTitle || ""}":
 
 Create exactly 3 focused sub-sections about the step title: "${stepTitle || ""}". Do NOT introduce concepts from other parts of the source text. Stay anchored to the title topic. Be CONCISE — use bullet points, not paragraphs.
 
+EXAMPLE OF BAD vs GOOD output for the practical section:
+BAD: "1. Add a Force module to simulate explosion force. • Adjust the Force Strength parameter."
+GOOD: "1. In the Emitter Update section, right-click > Add Module > Force. • Set Force Strength to 500 as a starting point for a medium-range explosion."
+The BAD version is vague and gives no actionable values. The GOOD version gives exact menu paths and concrete numbers.
+
 Return ONLY valid JSON (no markdown, no code fences):
 {
   "sections": [
     {
       "title": "Short title (e.g. 'Core Concept')",
-      "content": "2-4 bullet points ONLY (every line starts with •). No introductory sentences. Each bullet is one clear sentence. Total ~80 words. Reference specific UE5 classes or nodes.",
+      "content": "2-4 bullet points ONLY (every line starts with •). No introductory sentences. Each bullet is one clear sentence. Total ~80 words. Reference specific UE5 classes or nodes FROM THE SOURCE TEXT ONLY.",
       "type": "concept"
     },
     {
       "title": "Short title (e.g. 'Why It Matters')",
-      "content": "2-4 bullet points ONLY (every line starts with •). Cover: how it works, performance implications, common mistakes. ~80 words total.",
+      "content": "2-4 bullet points ONLY (every line starts with •). Cover: how it works, performance implications, common mistakes. Reference concepts from section 1. ~80 words total.",
       "type": "mechanics"
     },
     {
       "title": "Short title (e.g. 'Try It Now')",
-      "content": "3-5 numbered steps (1. 2. 3.) the learner can follow in UE5. For any step that needs clarification, add sub-bullets (• prefix) underneath. Be specific about menu paths and node names. ~80-100 words total.",
+      "content": "3-5 numbered steps (1. 2. 3.) the learner can follow in UE5. Each step MUST directly apply a concept from sections 1 and 2 above — do NOT introduce new topics. For any step that needs clarification, add sub-bullets (• prefix) underneath. Be specific about menu paths, node names, AND parameter values. ALWAYS give concrete numbers — e.g. 'set Force Strength to 500' NOT 'adjust Force Strength'. If a reasonable default exists, state it. ~80-100 words total.",
       "type": "practical"
     }
   ]
@@ -254,6 +259,10 @@ RULES:
 - CONCISE: EVERY line must start with a bullet (•) or number (1. 2. 3.), NEVER prose sentences or introductory text
 - Reference Blueprint node names, property names, and editor paths rather than C++ class names
 - Write out number abbreviations in full (e.g. "100 million" not "100M", "1 thousand" not "1K")
+- NEVER use vague instructions like "adjust", "tweak", "experiment with", or "try different values". ALWAYS give a specific value or range (e.g. "set to 500", "use a value between 100 and 300")
+- In the practical section, every step MUST be actionable with exact menu paths (e.g. "Details > Force > Strength") and concrete parameter values
+- SOURCE GROUNDING: ONLY use information present in the provided source text. Do NOT fill gaps with general UE5 knowledge. If the source text does not mention specific values, provide reasonable UE5 defaults.
+- SELF-CHECK: Before returning, verify that (1) every practical step has a concrete number or value, (2) all 3 sections discuss the SAME topic from the step title, (3) the practical section references concepts from sections 1 and 2
 - Each section: 60-100 words MAX
 - Do NOT use markdown formatting inside the JSON strings`;
 
@@ -264,7 +273,7 @@ RULES:
           body: JSON.stringify({
             contents: [{ parts: [{ text: deepdivePrompt }] }],
             generationConfig: {
-              temperature: 0.7,
+              temperature: 0.4,
               maxOutputTokens: 1024,
               responseMimeType: "application/json",
             },
