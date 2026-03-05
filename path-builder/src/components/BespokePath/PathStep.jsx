@@ -460,22 +460,34 @@ export default function PathStep({
           </div>
           {sourcesOpen && (
             <div className="footnotes-content">
-              {segment.videoUrl || segment.url ? (
-                <a
-                  href={fixEpicUrl(segment.videoUrl || segment.url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footnote-link"
-                >
-                  <i className={`fa-solid ${sourceIcon}`}></i>
-                  {displayTitle}
-                </a>
-              ) : (
-                <span className="footnote-link footnote-no-link">
-                  <i className={`fa-solid ${sourceIcon}`}></i>
-                  {displayTitle}
-                </span>
-              )}
+              {(() => {
+                // Determine the best available URL for this source
+                const directUrl = segment.videoUrl || segment.url;
+                const fallbackUrl =
+                  sourceType === "transcript"
+                    ? `https://www.youtube.com/results?search_query=unreal+engine+${encodeURIComponent(displayTitle)}`
+                    : sourceType === "epic_learning"
+                      ? `https://dev.epicgames.com/community/search?query=${encodeURIComponent(displayTitle)}`
+                      : `https://dev.epicgames.com/documentation/en-us/unreal-engine/?query=${encodeURIComponent(displayTitle)}`;
+                const sourceUrl = directUrl || fallbackUrl;
+
+                return sourceType !== "ai_generated" ? (
+                  <a
+                    href={fixEpicUrl(sourceUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="footnote-link"
+                  >
+                    <i className={`fa-solid ${sourceIcon}`}></i>
+                    {displayTitle}
+                  </a>
+                ) : (
+                  <span className="footnote-link footnote-no-link">
+                    <i className={`fa-solid ${sourceIcon}`}></i>
+                    {displayTitle}
+                  </span>
+                );
+              })()}
             </div>
           )}
         </div>
