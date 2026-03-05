@@ -45,6 +45,12 @@ export const EVENTS = {
   QUIZ_STARTED: "quiz_started",
   QUIZ_COMPLETED: "quiz_completed",
   PATH_STEP_VIEWED: "path_step_viewed",
+
+  // RAG Pipeline Metrics
+  VECTOR_SEARCH_COMPLETED: "vector_search_completed",
+  HYBRID_FALLBACK_TRIGGERED: "hybrid_fallback_triggered",
+  PATH_SEQUENCED: "path_sequenced",
+  BLUEPRINT_LINK_SHOWN: "blueprint_link_shown",
 };
 
 /**
@@ -238,6 +244,79 @@ export function startSession() {
   });
 }
 
+// ── RAG Pipeline Tracking ──────────────────────────────────────────
+
+/**
+ * Track vector search completion with quality metrics.
+ * @param {Object} params
+ * @param {string} params.query - The user query
+ * @param {number} params.transcriptCount - Results from transcript collection
+ * @param {number} params.epicCount - Results from Epic Learning collection
+ * @param {number} params.docsCount - Results from docs collection
+ * @param {number} params.bestSimilarity - Highest similarity score
+ * @param {number} params.avgSimilarity - Average similarity across all results
+ * @param {boolean} params.lowCorpusCoverage - Whether fallback was needed
+ * @param {number} params.searchTimeMs - How long the search took
+ */
+export function trackVectorSearchCompleted(params) {
+  return trackEvent(EVENTS.VECTOR_SEARCH_COMPLETED, {
+    query_preview: params.query?.substring(0, 80),
+    transcript_count: params.transcriptCount || 0,
+    epic_count: params.epicCount || 0,
+    docs_count: params.docsCount || 0,
+    total_segments:
+      (params.transcriptCount || 0) + (params.epicCount || 0) + (params.docsCount || 0),
+    best_similarity: Number((params.bestSimilarity || 0).toFixed(3)),
+    avg_similarity: Number((params.avgSimilarity || 0).toFixed(3)),
+    low_corpus_coverage: !!params.lowCorpusCoverage,
+    search_time_ms: params.searchTimeMs || 0,
+  });
+}
+
+/**
+ * Track when hybrid AI fallback is triggered.
+ * @param {Object} params
+ * @param {string} params.reason - Why fallback triggered ("low_similarity" | "post_sequence_empty")
+ * @param {number} params.bestSimilarity - Best score that wasn't good enough
+ * @param {number} params.corpusSegments - How many corpus segments were available
+ */
+export function trackHybridFallbackTriggered(params) {
+  return trackEvent(EVENTS.HYBRID_FALLBACK_TRIGGERED, {
+    reason: params.reason || "unknown",
+    best_similarity: Number((params.bestSimilarity || 0).toFixed(3)),
+    corpus_segments: params.corpusSegments || 0,
+  });
+}
+
+/**
+ * Track path sequencing completion.
+ * @param {Object} params
+ * @param {number} params.stepCount - Steps in final path
+ * @param {string[]} params.categories - Categories used (foundation, diagnosis, fix, transfer)
+ * @param {boolean} params.isAiGenerated - Was AI hybrid fallback used?
+ * @param {number} params.corpusRatio - % of steps from real corpus vs AI
+ */
+export function trackPathSequenced(params) {
+  return trackEvent(EVENTS.PATH_SEQUENCED, {
+    step_count: params.stepCount || 0,
+    categories: params.categories || [],
+    is_ai_generated: !!params.isAiGenerated,
+    corpus_ratio: Number((params.corpusRatio || 0).toFixed(2)),
+  });
+}
+
+/**
+ * Track when a Blueprint visual link is shown to the user.
+ * @param {string} presetKey - The matched preset name
+ * @param {string} stepTitle - Title of the step it appeared on
+ */
+export function trackBlueprintLinkShown(presetKey, stepTitle) {
+  return trackEvent(EVENTS.BLUEPRINT_LINK_SHOWN, {
+    preset_key: presetKey,
+    step_title: stepTitle?.substring(0, 80),
+  });
+}
+
 export default {
   EVENTS,
   trackEvent,
@@ -252,4 +331,8 @@ export default {
   trackSessionCompleted,
   trackFollowupQuery,
   startSession,
+  trackVectorSearchCompleted,
+  trackHybridFallbackTriggered,
+  trackPathSequenced,
+  trackBlueprintLinkShown,
 };

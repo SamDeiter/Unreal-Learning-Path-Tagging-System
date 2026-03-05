@@ -4,14 +4,17 @@
  * Visualizes analytics_events data from Firestore:
  *  - Time range selector (24h / 7d / 30d)
  *  - Stat cards (total events, queries, sessions, completion rate)
+ *  - RAG Pipeline Health section (NEW)
  *  - Event type breakdown bar chart (CSS-based)
  *  - Top queries list with persona badges
  *  - Persona distribution
  *  - Daily volume sparkline
  *  - Live event feed
+ *
+ * Performance: parallel fetches, ref-based caching, progressive render.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   fetchEvents,
   countByEventType,
@@ -20,6 +23,7 @@ import {
   getSessionMetrics,
   getRecentEvents,
   getEventsByDay,
+  getRAGMetrics,
 } from "../../services/analyticsQueryService";
 import { EVENTS } from "../../services/analyticsService";
 import { getTokenStats, fetchCloudStats, estimateCost } from "../../services/tokenTracker";
@@ -45,6 +49,10 @@ const EVENT_META = {
   [EVENTS.MODULE_REORDERED]: { label: "Reordered", color: "#f97316" },
   [EVENTS.FOLLOWUP_QUERY_SUBMITTED]: { label: "Follow-ups", color: "#a855f7" },
   [EVENTS.ONBOARDING_PATH_GENERATED]: { label: "Onboarding", color: "#22d3ee" },
+  [EVENTS.VECTOR_SEARCH_COMPLETED]: { label: "Searches", color: "#3b82f6" },
+  [EVENTS.HYBRID_FALLBACK_TRIGGERED]: { label: "Fallbacks", color: "#f43f5e" },
+  [EVENTS.PATH_SEQUENCED]: { label: "Sequenced", color: "#6366f1" },
+  [EVENTS.BLUEPRINT_LINK_SHOWN]: { label: "Blueprint", color: "#60a5fa" },
 };
 
 /** Small info-icon tooltip — CSS-only, no JS needed */
@@ -64,18 +72,49 @@ export default function AdminAnalytics() {
   const [error, setError] = useState(null);
   const [tokenStats, setTokenStats] = useState(null);
   const [cloudCostHistory, setCloudCostHistory] = useState([]);
+  const [costLoading, setCostLoading] = useState(false);
+
+  // Cache: avoid re-fetching if time range hasn't changed
+  const cacheRef = useRef({ range: null, events: null, cloud: null });
 
   const loadData = useCallback(async () => {
+    // Return cached data if available for this range
+    if (cacheRef.current.range === timeRange && cacheRef.current.events) {
+      setEvents(cacheRef.current.events);
+      setCloudCostHistory(cacheRef.current.cloud || []);
+      setTokenStats(getTokenStats());
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchEvents(timeRange);
-      setEvents(data);
-      // Load token cost data
-      setTokenStats(getTokenStats());
+      // Parallel fetch — don't wait for cloud stats to show main data
       const daysToFetch = timeRange === "24h" ? 1 : timeRange === "7d" ? 7 : 30;
-      const cloudData = await fetchCloudStats(daysToFetch);
-      setCloudCostHistory(cloudData);
+
+      const [eventData] = await Promise.all([
+        fetchEvents(timeRange),
+        // Start cloud stats fetch in background
+        (async () => {
+          setCostLoading(true);
+          try {
+            const cloudData = await fetchCloudStats(daysToFetch);
+            setCloudCostHistory(cloudData);
+            cacheRef.current.cloud = cloudData;
+          } catch (e) {
+            console.warn("[AdminAnalytics] Cloud stats failed:", e.message);
+          } finally {
+            setCostLoading(false);
+          }
+        })(),
+      ]);
+
+      setEvents(eventData);
+      setTokenStats(getTokenStats());
+
+      // Update cache
+      cacheRef.current = { range: timeRange, events: eventData, cloud: cacheRef.current.cloud };
     } catch (err) {
       console.error("[AdminAnalytics] Failed to load:", err);
       setError(err.message || "Failed to load analytics data");
@@ -87,6 +126,15 @@ export default function AdminAnalytics() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Memoize expensive aggregations so they don't re-run on every render
+  const eventCounts = useMemo(() => countByEventType(events), [events]);
+  const topQueries = useMemo(() => getTopQueries(events), [events]);
+  const personaDist = useMemo(() => getPersonaDistribution(events), [events]);
+  const sessionMetrics = useMemo(() => getSessionMetrics(events), [events]);
+  const dailyVolume = useMemo(() => getEventsByDay(events), [events]);
+  const recentEvents = useMemo(() => getRecentEvents(events, 15), [events]);
+  const ragMetrics = useMemo(() => getRAGMetrics(events), [events]);
 
   if (loading) {
     return (
@@ -106,13 +154,6 @@ export default function AdminAnalytics() {
       </div>
     );
   }
-
-  const eventCounts = countByEventType(events);
-  const topQueries = getTopQueries(events);
-  const personaDist = getPersonaDistribution(events);
-  const sessionMetrics = getSessionMetrics(events);
-  const dailyVolume = getEventsByDay(events);
-  const recentEvents = getRecentEvents(events, 15);
 
   const totalQueries = eventCounts[EVENTS.QUERY_SUBMITTED] || 0;
   const maxBarValue = Math.max(...Object.values(eventCounts), 1);
@@ -141,7 +182,7 @@ export default function AdminAnalytics() {
         </div>
       </div>
 
-      {/* Stat Cards */}
+      {/* ── Primary Stat Cards ── */}
       <div className="aa-stats-row">
         <StatCard
           label="Total Events"
@@ -173,29 +214,89 @@ export default function AdminAnalytics() {
         />
       </div>
 
-      {/* Daily Volume Chart */}
-      {dailyVolume.length > 0 && (
-        <div className="aa-section">
+      {/* ── RAG Pipeline Health ── */}
+      {ragMetrics.searchCount > 0 && (
+        <div className="aa-section" style={{ marginBottom: 24 }}>
           <h3>
-            📅 Daily Volume{" "}
-            <Tip text="Number of analytics events per day over the selected time range" />
+            🧠 RAG Pipeline Health{" "}
+            <Tip text="Metrics from the vector search & content retrieval pipeline — shows how well the corpus matches user queries" />
           </h3>
-          <div className="aa-daily-chart">
-            {dailyVolume.map((day) => {
-              const maxDay = Math.max(...dailyVolume.map((d) => d.count), 1);
-              const pct = Math.round((day.count / maxDay) * 100);
+          <div className="aa-stats-row" style={{ marginBottom: 16 }}>
+            <StatCard
+              label="Avg Similarity"
+              value={ragMetrics.avgSimilarity.toFixed(2)}
+              icon="🎯"
+              color={ragMetrics.avgSimilarity >= 0.65 ? "#10b981" : "#ef4444"}
+              tooltip="Average best similarity score across all vector searches. ≥0.65 is good, <0.65 triggers hybrid fallback"
+            />
+            <StatCard
+              label="Hybrid Fallback"
+              value={`${ragMetrics.hybridRate}%`}
+              icon={ragMetrics.hybridRate > 30 ? "⚠️" : "🛡️"}
+              color={ragMetrics.hybridRate > 30 ? "#f43f5e" : "#10b981"}
+              tooltip={`${ragMetrics.hybridCount} of ${ragMetrics.searchCount} searches fell back to AI generation. High rate = corpus gaps`}
+            />
+            <StatCard
+              label="Avg Search"
+              value={`${ragMetrics.avgSearchMs}ms`}
+              icon="⚡"
+              color={ragMetrics.avgSearchMs > 2000 ? "#f59e0b" : "#06b6d4"}
+              tooltip="Average vector search latency (embedding + 3 collection searches)"
+            />
+            <StatCard
+              label="Corpus Ratio"
+              value={`${ragMetrics.avgCorpusRatio}%`}
+              icon="📚"
+              color={ragMetrics.avgCorpusRatio >= 50 ? "#6366f1" : "#f97316"}
+              tooltip="Percentage of path steps from real corpus content vs AI-generated. Higher is better."
+            />
+          </div>
+
+          {/* Collection breakdown */}
+          <div className="aa-bar-chart">
+            {[
+              {
+                label: "Transcripts",
+                count: ragMetrics.collectionBreakdown.transcripts,
+                color: "#8b5cf6",
+              },
+              {
+                label: "Epic Learning",
+                count: ragMetrics.collectionBreakdown.epic,
+                color: "#f59e0b",
+              },
+              { label: "Docs", count: ragMetrics.collectionBreakdown.docs, color: "#06b6d4" },
+            ].map((col) => {
+              const maxCol = Math.max(
+                ragMetrics.collectionBreakdown.transcripts,
+                ragMetrics.collectionBreakdown.epic,
+                ragMetrics.collectionBreakdown.docs,
+                1
+              );
+              const pct = Math.round((col.count / maxCol) * 100);
               return (
-                <div key={day.date} className="aa-day-bar" title={`${day.date}: ${day.count}`}>
-                  <div className="aa-day-fill" style={{ height: `${pct}%` }} />
-                  <span className="aa-day-label">{day.date.substring(5)}</span>
+                <div key={col.label} className="aa-bar-row">
+                  <span className="aa-bar-label">{col.label}</span>
+                  <div className="aa-bar-track">
+                    <div
+                      className="aa-bar-fill"
+                      style={{ width: `${pct}%`, backgroundColor: col.color }}
+                    />
+                  </div>
+                  <span className="aa-bar-value">{col.count}</span>
                 </div>
               );
             })}
           </div>
+          {ragMetrics.blueprintShown > 0 && (
+            <p style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: 12 }}>
+              📐 Blueprint links shown: {ragMetrics.blueprintShown}
+            </p>
+          )}
         </div>
       )}
 
-      {/* AI Generation Costs */}
+      {/* ── AI Generation Costs ── */}
       {tokenStats && (
         <div className="aa-section" style={{ marginBottom: 24 }}>
           <h3>
@@ -281,51 +382,81 @@ export default function AdminAnalytics() {
           )}
 
           {/* Cloud cost history trend */}
-          {cloudCostHistory.length > 0 && (
-            <div>
-              <h4
-                style={{
-                  fontSize: "0.85rem",
-                  color: "#94a3b8",
-                  margin: "0 0 8px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                Daily Cost Trend (Cloud)
-              </h4>
-              <div className="aa-daily-chart">
-                {[...cloudCostHistory].reverse().map((day) => {
-                  const maxCost = Math.max(
-                    ...cloudCostHistory.map((d) => d.estimatedCost || 0),
-                    0.001
-                  );
-                  const pct = Math.round(((day.estimatedCost || 0) / maxCost) * 100);
-                  return (
-                    <div
-                      key={day.date}
-                      className="aa-day-bar"
-                      title={`${day.date}: $${(day.estimatedCost || 0).toFixed(4)} (${day.calls || 0} calls)`}
-                    >
+          {costLoading ? (
+            <p style={{ fontSize: "0.75rem", color: "#64748b", fontStyle: "italic" }}>
+              Loading cloud cost history…
+            </p>
+          ) : (
+            cloudCostHistory.length > 0 && (
+              <div>
+                <h4
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "#94a3b8",
+                    margin: "0 0 8px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Daily Cost Trend (Cloud)
+                </h4>
+                <div className="aa-daily-chart">
+                  {[...cloudCostHistory].reverse().map((day) => {
+                    const maxCost = Math.max(
+                      ...cloudCostHistory.map((d) => d.estimatedCost || 0),
+                      0.001
+                    );
+                    const pct = Math.round(((day.estimatedCost || 0) / maxCost) * 100);
+                    return (
                       <div
-                        className="aa-day-fill"
-                        style={{
-                          height: `${pct}%`,
-                          background: "linear-gradient(180deg, #10b981, #059669)",
-                        }}
-                      />
-                      <span className="aa-day-label">{(day.date || "").substring(5)}</span>
-                    </div>
-                  );
-                })}
+                        key={day.date}
+                        className="aa-day-bar"
+                        title={`${day.date}: $${(day.estimatedCost || 0).toFixed(4)} (${day.calls || 0} calls)`}
+                      >
+                        <div
+                          className="aa-day-fill"
+                          style={{
+                            height: `${pct}%`,
+                            background: "linear-gradient(180deg, #10b981, #059669)",
+                          }}
+                        />
+                        <span className="aa-day-label">{(day.date || "").substring(5)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )
           )}
         </div>
       )}
 
-      {/* Main Grid */}
+      {/* ── Daily Volume + Event Breakdown ── */}
       <div className="aa-grid">
+        {/* Daily Volume Chart */}
+        <div className="aa-section">
+          <h3>
+            📅 Daily Volume{" "}
+            <Tip text="Number of analytics events per day over the selected time range" />
+          </h3>
+          {dailyVolume.length > 0 ? (
+            <div className="aa-daily-chart">
+              {dailyVolume.map((day) => {
+                const maxDay = Math.max(...dailyVolume.map((d) => d.count), 1);
+                const pct = Math.round((day.count / maxDay) * 100);
+                return (
+                  <div key={day.date} className="aa-day-bar" title={`${day.date}: ${day.count}`}>
+                    <div className="aa-day-fill" style={{ height: `${pct}%` }} />
+                    <span className="aa-day-label">{day.date.substring(5)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="aa-empty">No events in selected period</p>
+          )}
+        </div>
+
         {/* Event Type Breakdown */}
         <div className="aa-section">
           <h3>
@@ -353,7 +484,10 @@ export default function AdminAnalytics() {
               })}
           </div>
         </div>
+      </div>
 
+      {/* ── Top Queries + Persona Distribution ── */}
+      <div className="aa-grid">
         {/* Top Queries */}
         <div className="aa-section">
           <h3>
@@ -382,10 +516,7 @@ export default function AdminAnalytics() {
             </ol>
           )}
         </div>
-      </div>
 
-      {/* Second Grid Row */}
-      <div className="aa-grid">
         {/* Persona Distribution */}
         <div className="aa-section">
           <h3>
@@ -415,31 +546,29 @@ export default function AdminAnalytics() {
             </div>
           )}
         </div>
+      </div>
 
-        {/* Recent Events */}
-        <div className="aa-section">
-          <h3>
-            🔔 Recent Events{" "}
-            <Tip text="Live feed of the most recent analytics events in chronological order" />
-          </h3>
-          <div className="aa-event-feed">
-            {recentEvents.map((evt) => {
-              const meta = EVENT_META[evt.event] || { label: evt.event, color: "#64748b" };
-              const ts = evt.client_timestamp
-                ? new Date(evt.client_timestamp).toLocaleString()
-                : "—";
-              return (
-                <div key={evt.id} className="aa-event-row">
-                  <span className="aa-event-dot" style={{ backgroundColor: meta.color }} />
-                  <span className="aa-event-type">{meta.label}</span>
-                  <span className="aa-event-detail">
-                    {evt.query_preview || evt.persona_name || evt.module_id || ""}
-                  </span>
-                  <span className="aa-event-time">{ts}</span>
-                </div>
-              );
-            })}
-          </div>
+      {/* ── Recent Events Feed (full width) ── */}
+      <div className="aa-section">
+        <h3>
+          🔔 Recent Events{" "}
+          <Tip text="Live feed of the most recent analytics events in chronological order" />
+        </h3>
+        <div className="aa-event-feed">
+          {recentEvents.map((evt) => {
+            const meta = EVENT_META[evt.event] || { label: evt.event, color: "#64748b" };
+            const ts = evt.client_timestamp ? new Date(evt.client_timestamp).toLocaleString() : "—";
+            return (
+              <div key={evt.id} className="aa-event-row">
+                <span className="aa-event-dot" style={{ backgroundColor: meta.color }} />
+                <span className="aa-event-type">{meta.label}</span>
+                <span className="aa-event-detail">
+                  {evt.query_preview || evt.persona_name || evt.module_id || evt.preset_key || ""}
+                </span>
+                <span className="aa-event-time">{ts}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

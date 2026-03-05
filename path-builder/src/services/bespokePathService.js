@@ -12,6 +12,11 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
 import { recordTokenUsage } from "./tokenTracker";
+import {
+  trackVectorSearchCompleted,
+  trackHybridFallbackTriggered,
+  trackPathSequenced,
+} from "./analyticsService";
 
 // ── Constants ──────────────────────────────────────────────────────────
 const SEGMENT_CATEGORIES = ["foundation", "diagnosis", "fix", "transfer"];
@@ -510,12 +515,39 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
   try {
     // Stage 1: Find relevant content
     devLog("[BespokePath] Stage 1: Finding relevant segments...");
+    const searchStart = Date.now();
     const { segments, lowCorpusCoverage } = await findRelevantSegments(userQuery);
+    const searchTimeMs = Date.now() - searchStart;
     result.segments = segments;
+
+    // ── RAG Telemetry ──
+    const transcriptCount = segments.filter((s) => s.type === "transcript").length;
+    const epicCount = segments.filter((s) => s.type === "epic_learning").length;
+    const docsCount = segments.filter((s) => s.type === "docs").length;
+    const bestSimilarity = segments.length > 0 ? segments[0].similarity : 0;
+    const avgSimilarity =
+      segments.length > 0
+        ? segments.reduce((sum, s) => sum + (s.similarity || 0), 0) / segments.length
+        : 0;
+    trackVectorSearchCompleted({
+      query: userQuery,
+      transcriptCount,
+      epicCount,
+      docsCount,
+      bestSimilarity,
+      avgSimilarity,
+      lowCorpusCoverage,
+      searchTimeMs,
+    });
 
     // ── HYBRID FALLBACK: If corpus can't answer, let Gemini generate from its own knowledge ──
     if (segments.length === 0 || lowCorpusCoverage) {
       devLog("[BespokePath] Low corpus coverage — using hybrid AI generation");
+      trackHybridFallbackTriggered({
+        reason: segments.length === 0 ? "no_segments" : "low_similarity",
+        bestSimilarity,
+        corpusSegments: segments.length,
+      });
       result.path = await generateHybridPath(userQuery, knowledgeProfile);
       result.isAiGenerated = true;
 
@@ -553,6 +585,11 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
         if (result.path.length <= 1) {
           result.path = hybridSteps;
           result.isAiGenerated = true;
+          trackHybridFallbackTriggered({
+            reason: "post_sequence_empty",
+            bestSimilarity,
+            corpusSegments: segments.length,
+          });
         } else {
           // Fill in missing categories from hybrid
           const existingCategories = new Set(result.path.map((s) => s.category));
@@ -579,6 +616,16 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
     devLog(
       `[BespokePath] Pipeline complete: ${result.path.length} steps, ${result.bridges.length} bridges`
     );
+
+    // ── Track final path metrics ──
+    const corpusSteps = result.path.filter((s) => s.segment?.type !== "ai_generated").length;
+    trackPathSequenced({
+      stepCount: result.path.length,
+      categories: [...new Set(result.path.map((s) => s.category))],
+      isAiGenerated: !!result.isAiGenerated,
+      corpusRatio: result.path.length > 0 ? corpusSteps / result.path.length : 0,
+    });
+
     return result;
   } catch (err) {
     devWarn("[BespokePath] Pipeline failed:", err.message);
