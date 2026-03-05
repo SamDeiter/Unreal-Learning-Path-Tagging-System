@@ -103,6 +103,7 @@ ${positionInstruction}
 In about 100-120 words (4-6 sentences), explain what the learner should understand and focus on in this step. Be specific to the actual content — reference concrete UE5 concepts, classes, functions, or workflows mentioned in the text. Speak directly to the learner using "you".
 
 IMPORTANT:
+- STAY ON TOPIC: Your explanation must DIRECTLY address the topic in the step title: "${stepTitle || ""}". Do NOT drift to related but different concepts from the source text. If the source content covers multiple topics, focus ONLY on the one matching the title.
 - ONLY discuss Unreal Engine / game development concepts. NEVER reference real-world physics, hardware, or physical mechanisms. If a term (e.g. "muzzle report", "recoil") appears in the source text, explain it ONLY in the context of implementing it in UE5 (sound cues, animations, Blueprint nodes, property panels, editor workflows), NOT what it means in the real world.
 - ALWAYS explain using Blueprint nodes, property panels, and editor UI. Avoid C++ code references unless the learner's query explicitly asks about C++.
 - If the source content is ambiguous or thin, stay within UE5 context. Do NOT fill gaps with real-world knowledge.
@@ -225,7 +226,7 @@ This is the ${stepCategory || "learning"} step titled "${stepTitle || ""}":
 
 "${stepContent.substring(0, 2000)}"
 
-Create exactly 3 focused sub-sections. Be CONCISE — use bullet points, not paragraphs.
+Create exactly 3 focused sub-sections about the step title: "${stepTitle || ""}". Do NOT introduce concepts from other parts of the source text. Stay anchored to the title topic. Be CONCISE — use bullet points, not paragraphs.
 
 Return ONLY valid JSON (no markdown, no code fences):
 {
