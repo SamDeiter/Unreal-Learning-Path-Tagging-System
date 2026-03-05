@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTagData } from "../../context/TagDataContext";
+import { SKILL_CATEGORIES, courseMatchesKeywords } from "./skillMatchUtils";
 import curatorData from "../../data/curator_insights.json";
 import externalData from "../../data/external_sources.json";
 import InsightsSidebar from "./InsightsSidebar";
@@ -14,40 +15,18 @@ function InsightsPanel({ onNavigate }) {
   const { courses } = useTagData();
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // Skill categories used for coverage analysis
-  const skillCategories = useMemo(
-    () => [
-      { name: "Blueprints", keywords: ["blueprint", "visual scripting", "bp"] },
-      { name: "Materials", keywords: ["material", "shader", "texture"] },
-      { name: "Niagara", keywords: ["niagara", "particle", "vfx"] },
-      { name: "Lighting", keywords: ["light", "lumen", "raytracing"] },
-      { name: "Animation", keywords: ["animation", "skeletal", "rigging"] },
-      { name: "UI/UMG", keywords: ["ui", "umg", "widget", "hud"] },
-      { name: "Audio", keywords: ["audio", "sound", "metasound"] },
-      { name: "Landscape", keywords: ["landscape", "terrain", "foliage"] },
-    ],
-    []
-  );
-
   // Calculate skill coverage for both insights and sidebar
   const skillCoverage = useMemo(() => {
-    return skillCategories.map((skill) => {
-      const matchingCourses = courses.filter((course) => {
-        const allTags = [
-          ...(course.gemini_system_tags || []),
-          ...(course.ai_tags || []),
-          course.title || "",
-        ].map((t) => t.toLowerCase());
-
-        return skill.keywords.some((kw) => allTags.some((tag) => tag.includes(kw)));
-      });
-
+    return SKILL_CATEGORIES.map((skill) => {
+      const matchingCourses = courses.filter((course) =>
+        courseMatchesKeywords(course, skill.keywords)
+      );
       return {
         ...skill,
         courseCount: matchingCourses.length,
       };
     });
-  }, [courses, skillCategories]);
+  }, [courses]);
 
   // Level distribution for sidebar
   const levels = useMemo(() => {

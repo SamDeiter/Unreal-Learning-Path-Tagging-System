@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTagData } from "../../context/TagDataContext";
+import { SKILL_CATEGORIES, courseMatchesKeywords } from "./skillMatchUtils";
 import demandData from "../../data/demand_benchmarks.json";
 import "./SkillRadar.css";
 
@@ -19,50 +20,20 @@ function SkillRadar() {
 
   // Analyze skill coverage from actual course data
   const skillAnalysis = useMemo(() => {
-    // Define skill categories to measure (aligned with industry demand keys)
-    const skillCategories = [
-      { name: "Blueprints", keywords: ["blueprint", "visual scripting", "bp", "logic", "node"] },
-      { name: "Materials", keywords: ["material", "shader", "texture", "pbr", "substance"] },
-      { name: "Lighting", keywords: ["light", "lumen", "raytracing", "gi", "shadow"] },
-      { name: "Animation", keywords: ["animation", "skeletal", "rigging", "anim", "pose"] },
-      { name: "Niagara", keywords: ["niagara", "particle", "vfx", "effects", "cascade"] },
-      {
-        name: "Landscape",
-        keywords: [
-          "landscape",
-          "terrain",
-          "foliage",
-          "world partition",
-          "world composition",
-          "open world",
-          "landmass",
-        ],
-      },
-      { name: "Audio", keywords: ["audio", "sound", "music", "acoustic"] },
-      { name: "UI/UMG", keywords: ["ui", "umg", "widget", "hud", "interface"] },
-    ];
-
     // Count courses per category with per-keyword breakdown
-    const coverage = skillCategories.map((cat) => {
+    // Uses shared SKILL_CATEGORIES + word-boundary matching from skillMatchUtils
+    const coverage = SKILL_CATEGORIES.map((cat) => {
       const keywordHits = {};
       cat.keywords.forEach((kw) => {
         keywordHits[kw] = 0;
       });
 
       const matchingCourses = courses.filter((course) => {
-        const allTags = [
-          ...(course.gemini_system_tags || []),
-          ...(course.ai_tags || []),
-          ...(course.transcript_tags || []),
-          ...Object.keys(course.tags || {}),
-        ].map((t) => t.toLowerCase());
-
-        const matched = cat.keywords.some((kw) => {
-          const hit = allTags.some((tag) => tag.includes(kw));
-          if (hit) keywordHits[kw]++;
-          return hit;
+        return courseMatchesKeywords(course, cat.keywords, {
+          includeTranscriptTags: true,
+          includeTagKeys: true,
+          keywordHits,
         });
-        return matched;
       });
 
       return {

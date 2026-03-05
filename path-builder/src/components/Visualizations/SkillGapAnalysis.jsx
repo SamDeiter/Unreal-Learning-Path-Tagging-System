@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useTagData } from "../../context/TagDataContext";
+import { SKILL_CATEGORIES, courseMatchesKeywords } from "./skillMatchUtils";
 import demandData from "../../data/demand_benchmarks.json";
 import "./SkillGapAnalysis.css";
 
@@ -25,67 +26,36 @@ function SkillGapAnalysis() {
   const { courses } = useTagData();
 
   // Analyze skill coverage from actual course data
+  // Uses shared SKILL_CATEGORIES + word-boundary matching from skillMatchUtils
   const gapAnalysis = useMemo(() => {
-    const skillCategories = [
-      { name: "Blueprints", keywords: ["blueprint", "visual scripting", "bp", "logic", "node"] },
-      { name: "Niagara/VFX", keywords: ["niagara", "particle", "vfx", "effects", "cascade"] },
-      { name: "Materials", keywords: ["material", "shader", "texture", "pbr", "substance"] },
-      { name: "Animation", keywords: ["animation", "skeletal", "rigging", "anim", "pose"] },
-      { name: "Lighting", keywords: ["light", "lumen", "raytracing", "gi", "shadow"] },
-      { name: "UI/UMG", keywords: ["ui", "umg", "widget", "hud", "interface"] },
-      {
-        name: "Landscape",
-        keywords: [
-          "landscape",
-          "terrain",
-          "foliage",
-          "world partition",
-          "world composition",
-          "open world",
-          "landmass",
-        ],
-      },
-      { name: "Audio", keywords: ["audio", "sound", "music", "acoustic", "metasound"] },
-    ];
+    return SKILL_CATEGORIES.map((cat) => {
+      const keywordHits = {};
+      cat.keywords.forEach((kw) => {
+        keywordHits[kw] = 0;
+      });
 
-    return skillCategories
-      .map((cat) => {
-        const keywordHits = {};
-        cat.keywords.forEach((kw) => {
-          keywordHits[kw] = 0;
-        });
-
-        const matchingCourses = courses.filter((course) => {
-          const allTags = [
-            ...(course.gemini_system_tags || []),
-            ...(course.ai_tags || []),
-            ...(course.transcript_tags || []),
-            ...Object.keys(course.tags || {}),
-          ].map((t) => t.toLowerCase());
-
-          const matched = cat.keywords.some((kw) => {
-            const hit = allTags.some((tag) => tag.includes(kw));
-            if (hit) keywordHits[kw]++;
-            return hit;
-          });
-          return matched;
-        });
-
-        const coverage = Math.min(100, (matchingCourses.length / courses.length) * 200);
-        const demand = getDemand(cat.name);
-        const gap = demand - coverage;
-
-        return {
-          category: cat.name,
-          courseCount: matchingCourses.length,
-          coverage: Math.round(coverage),
-          demand,
-          gap: Math.round(gap),
-          status: gap > 15 ? "behind" : gap > 0 ? "close" : "ahead",
+      const matchingCourses = courses.filter((course) => {
+        return courseMatchesKeywords(course, cat.keywords, {
+          includeTranscriptTags: true,
+          includeTagKeys: true,
           keywordHits,
-        };
-      })
-      .sort((a, b) => b.gap - a.gap); // Sort by gap (biggest gaps first)
+        });
+      });
+
+      const coverage = Math.min(100, (matchingCourses.length / courses.length) * 200);
+      const demand = getDemand(cat.name);
+      const gap = demand - coverage;
+
+      return {
+        category: cat.name,
+        courseCount: matchingCourses.length,
+        coverage: Math.round(coverage),
+        demand,
+        gap: Math.round(gap),
+        status: gap > 15 ? "behind" : gap > 0 ? "close" : "ahead",
+        keywordHits,
+      };
+    }).sort((a, b) => b.gap - a.gap); // Sort by gap (biggest gaps first)
   }, [courses]);
 
   const computedAt = useMemo(() => new Date(), [gapAnalysis]); // eslint-disable-line react-hooks/exhaustive-deps
