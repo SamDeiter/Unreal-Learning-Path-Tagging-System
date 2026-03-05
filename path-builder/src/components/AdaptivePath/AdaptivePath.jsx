@@ -30,7 +30,9 @@ function fixEpicUrl(url) {
   if (!url) return url;
   return url
     .replace("/learning/tutorial/", "/learning/tutorials/")
-    .replace("/learning/knowledge_base/", "/learning/knowledge-base/");
+    .replace("/learning/knowledge_base/", "/learning/knowledge-base/")
+    .replace("/learning/course/", "/learning/courses/")
+    .replace("/learning/talks_and_demos/", "/learning/talks-and-demos/");
 }
 
 const DEFAULT_SUGGESTIONS = [

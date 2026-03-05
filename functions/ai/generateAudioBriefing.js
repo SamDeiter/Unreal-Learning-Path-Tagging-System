@@ -237,7 +237,7 @@ Return ONLY valid JSON (no markdown, no code fences):
     },
     {
       "title": "Short title (e.g. 'Try It Now')",
-      "content": "3-5 numbered steps (use 1. 2. 3. prefix) the learner can follow in UE5. Be specific about menu paths and node names. ~80 words total.",
+      "content": "3-5 numbered steps (1. 2. 3.) the learner can follow in UE5. For any step that needs clarification, add sub-bullets (• prefix) underneath. Be specific about menu paths and node names. ~80-100 words total.",
       "type": "practical"
     }
   ]

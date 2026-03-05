@@ -17,7 +17,9 @@ function fixEpicUrl(url) {
   if (!url) return url;
   return url
     .replace("/learning/tutorial/", "/learning/tutorials/")
-    .replace("/learning/knowledge_base/", "/learning/knowledge-base/");
+    .replace("/learning/knowledge_base/", "/learning/knowledge-base/")
+    .replace("/learning/course/", "/learning/courses/")
+    .replace("/learning/talks_and_demos/", "/learning/talks-and-demos/");
 }
 
 function decodeEntities(str) {
@@ -53,21 +55,23 @@ function filterTakeaways(items) {
 }
 
 /**
- * Convert single-quoted or backtick-quoted terms in text to bold elements.
+ * Convert quoted or backtick-quoted terms in text to bold elements.
+ * Handles 'single', `backtick`, and "double" quoted terms (2+ chars).
  * Uses word-boundary checks to avoid catching apostrophes in
  * contractions like "isn't", "it's", "don't".
- * e.g. "Adjust 'NetClientTicksPerSecond' in config" →
- *       Adjust <strong>NetClientTicksPerSecond</strong> in config
- * Also handles `BacktickTerms` → <strong>BacktickTerms</strong>
  */
 function highlightKeyTerms(text) {
-  // Match 'QuotedTerm' (not contractions) OR `BacktickTerm`
-  const parts = text.split(/((?<!\w)'[^']{2,}'(?!\w)|`[^`]{2,}`)/g);
+  if (typeof text !== "string") return text;
+  // Match 'QuotedTerm' (not contractions) OR `BacktickTerm` OR "DoubleQuoted"
+  const parts = text.split(/((?<!\w)'[^']{2,}'(?!\w)|`[^`]{2,}`|"[^"]{2,}")/g);
   return parts.map((part, i) => {
     if (part && part.startsWith("'") && part.endsWith("'") && part.length > 2) {
       return <strong key={i}>{part.slice(1, -1)}</strong>;
     }
     if (part && part.startsWith("`") && part.endsWith("`") && part.length > 2) {
+      return <strong key={i}>{part.slice(1, -1)}</strong>;
+    }
+    if (part && part.startsWith('"') && part.endsWith('"') && part.length > 2) {
       return <strong key={i}>{part.slice(1, -1)}</strong>;
     }
     return part;
@@ -275,11 +279,31 @@ export default function PathStep({
                               );
                             }
                             if (isNumbered) {
+                              // Group: numbered steps with optional sub-bullets
+                              const groups = [];
+                              lines.forEach((l) => {
+                                if (/^\d+[.)]/.test(l.trim())) {
+                                  groups.push({ text: l.replace(/^\d+[.)]\s*/, ""), subs: [] });
+                                } else if (l.trim().startsWith("•") && groups.length > 0) {
+                                  groups[groups.length - 1].subs.push(
+                                    l.replace(/^•\s*/, "").trim()
+                                  );
+                                } else if (groups.length > 0) {
+                                  groups[groups.length - 1].subs.push(l.trim());
+                                }
+                              });
                               return (
                                 <ol className="deepdive-steps">
-                                  {lines.map((l, j) => (
+                                  {groups.map((g, j) => (
                                     <li key={j}>
-                                      {highlightKeyTerms(l.replace(/^\d+[.)]\s*/, ""))}
+                                      {highlightKeyTerms(g.text)}
+                                      {g.subs.length > 0 && (
+                                        <ul className="deepdive-sub-bullets">
+                                          {g.subs.map((s, k) => (
+                                            <li key={k}>{highlightKeyTerms(s)}</li>
+                                          ))}
+                                        </ul>
+                                      )}
                                     </li>
                                   ))}
                                 </ol>
