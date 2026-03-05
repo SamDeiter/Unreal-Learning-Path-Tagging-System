@@ -3,7 +3,7 @@
  * Populates the caseReport object sent to the backend for better diagnosis.
  * Shows a confidence boost indicator for each filled field.
  */
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import PropTypes from "prop-types";
 import "./FixProblem.css";
 
@@ -15,8 +15,16 @@ const FIELD_SCORES = {
   whatChangedRecently: { points: 10, label: "Recent Changes" },
   goal: { points: 5, label: "Goal" },
   features: { points: 5, label: "Features" },
+  logText: { points: 15, label: "Output Log" },
+  screenshot: { points: 10, label: "Screenshot" },
 };
 const MAX_BOOST = Object.values(FIELD_SCORES).reduce((s, f) => s + f.points, 0);
+
+/** Truncate log to last N lines */
+const MAX_LOG_LINES = 200;
+const MAX_LOG_CHARS = 4000;
+const MAX_IMAGE_MB = 2;
+const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 export default function CaseReportForm({ onUpdate, disabled }) {
   const [fields, setFields] = useState({
@@ -27,12 +35,28 @@ export default function CaseReportForm({ onUpdate, disabled }) {
     features: "",
     whatChangedRecently: "",
     goal: "",
+    logText: "",
   });
+  const [screenshot, setScreenshot] = useState(null); // { file, previewUrl }
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleChange = useCallback(
     (field, value) => {
       const updated = { ...fields, [field]: value };
       setFields(updated);
+
+      // Truncate log text if needed
+      let logText = updated.logText.trim() || undefined;
+      if (logText) {
+        const lines = logText.split("\n");
+        if (lines.length > MAX_LOG_LINES) {
+          logText = lines.slice(-MAX_LOG_LINES).join("\n");
+        }
+        if (logText.length > MAX_LOG_CHARS) {
+          logText = logText.slice(-MAX_LOG_CHARS);
+        }
+      }
 
       const caseReport = {
         engineVersion: updated.engineVersion.trim() || undefined,
@@ -47,6 +71,8 @@ export default function CaseReportForm({ onUpdate, disabled }) {
           : [],
         whatChangedRecently: updated.whatChangedRecently.trim() || undefined,
         goal: updated.goal.trim() || undefined,
+        logText,
+        screenshotFile: screenshot?.file || undefined,
       };
 
       const hasData = Object.values(caseReport).some(
@@ -54,7 +80,7 @@ export default function CaseReportForm({ onUpdate, disabled }) {
       );
       onUpdate(hasData ? caseReport : null);
     },
-    [fields, onUpdate]
+    [fields, onUpdate, screenshot]
   );
 
   // Compute confidence boost from filled fields
@@ -66,8 +92,49 @@ export default function CaseReportForm({ onUpdate, disabled }) {
     if (fields.whatChangedRecently.trim()) pts += FIELD_SCORES.whatChangedRecently.points;
     if (fields.goal.trim()) pts += FIELD_SCORES.goal.points;
     if (fields.features.trim()) pts += FIELD_SCORES.features.points;
+    if (fields.logText.trim()) pts += FIELD_SCORES.logText.points;
+    if (screenshot) pts += FIELD_SCORES.screenshot.points;
     return pts;
-  }, [fields]);
+  }, [fields, screenshot]);
+
+  // --- Image handling ---
+  const handleImageFile = useCallback((file) => {
+    if (!file) return;
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      alert("Please drop a PNG, JPEG, or WebP image.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      alert(`Image must be under ${MAX_IMAGE_MB}MB.`);
+      return;
+    }
+    const previewUrl = URL.createObjectURL(file);
+    setScreenshot({ file, previewUrl });
+  }, []);
+
+  const handleDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer?.files?.[0];
+      handleImageFile(file);
+    },
+    [handleImageFile]
+  );
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const removeScreenshot = useCallback(() => {
+    if (screenshot?.previewUrl) URL.revokeObjectURL(screenshot.previewUrl);
+    setScreenshot(null);
+  }, [screenshot]);
 
   const boostPct = Math.round((boost / MAX_BOOST) * 100);
   const boostLevel = boost === 0 ? "none" : boost <= 15 ? "low" : boost <= 30 ? "med" : "high";
@@ -181,6 +248,79 @@ export default function CaseReportForm({ onUpdate, disabled }) {
           />
         </div>
       </div>
+
+      {/* Collapsible context drawer */}
+      <details className="case-context-drawer">
+        <summary className="case-context-summary">📎 Add logs & screenshots (optional)</summary>
+
+        <div className="case-context-content">
+          {/* Log paste area */}
+          <div className="case-report-field">
+            <label>UE5 Output Log</label>
+            <textarea
+              className="case-log-textarea"
+              placeholder="Paste your UE5 output log here... (last 200 lines used)"
+              value={fields.logText}
+              onChange={(e) => handleChange("logText", e.target.value)}
+              disabled={disabled}
+              rows={6}
+            />
+            {fields.logText.trim() && (
+              <span className="case-log-hint">
+                {fields.logText.split("\n").length} lines
+                {fields.logText.split("\n").length > MAX_LOG_LINES
+                  ? ` (last ${MAX_LOG_LINES} will be used)`
+                  : ""}
+              </span>
+            )}
+          </div>
+
+          {/* Image drop zone */}
+          <div className="case-report-field">
+            <label>Screenshot</label>
+            {screenshot ? (
+              <div className="case-screenshot-preview">
+                <img
+                  src={screenshot.previewUrl}
+                  alt="Screenshot preview"
+                  className="case-screenshot-img"
+                />
+                <button
+                  type="button"
+                  className="case-screenshot-remove"
+                  onClick={removeScreenshot}
+                  disabled={disabled}
+                  title="Remove screenshot"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <div
+                className={`case-dropzone ${isDragging ? "case-dropzone-active" : ""}`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => fileInputRef.current?.click()}
+                role="button"
+                tabIndex={0}
+              >
+                <span className="case-dropzone-icon">📷</span>
+                <span className="case-dropzone-text">Drop image here or click to browse</span>
+                <span className="case-dropzone-hint">PNG, JPEG, WebP — max {MAX_IMAGE_MB}MB</span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="case-dropzone-input"
+                  onChange={(e) => handleImageFile(e.target.files?.[0])}
+                  disabled={disabled}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </details>
     </div>
   );
 }

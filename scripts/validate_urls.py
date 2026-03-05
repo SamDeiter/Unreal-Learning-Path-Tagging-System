@@ -131,8 +131,8 @@ def check_url_health(url: str) -> dict:
 
     domain = urlparse(url).netloc
 
-    # YouTube: use oembed
-    if "youtube.com" in domain or "youtu.be" in domain:
+    # YouTube: use oembed (only for video/playlist URLs, not channels)
+    if ("youtube.com" in domain or "youtu.be" in domain) and "/@" not in url and "/channel/" not in url:
         try:
             resp = requests.get(
                 YOUTUBE_OEMBED.format(url=quote_plus(url)),
@@ -145,26 +145,35 @@ def check_url_health(url: str) -> dict:
         except requests.RequestException as e:
             return {"status": "error", "reason": str(e)}
 
-    # Epic / UE docs: HEAD request
+    # Epic / UE docs: GET request (not HEAD — Epic SPA returns 200 for everything)
+    # We check body size to detect empty SPA shells vs real content pages
     try:
-        resp = requests.head(
+        resp = requests.get(
             url,
             timeout=REQUEST_TIMEOUT,
             allow_redirects=True,
             headers={"User-Agent": "UE5-LearningPath-URLChecker/1.0"},
         )
-        # Epic SPA returns 200 for everything but empty page
-        # Check if we got redirected to a generic page
         final_url = resp.url
+        body_size = len(resp.content)
         status = "ok"
+
         if resp.status_code in BROKEN_CODES:
             status = "broken"
+        elif "dev.epicgames.com" in domain:
+            # Epic SPA: shell is ~3-4KB, real pages inject data making them > 5KB
+            # Also check for common "not found" signals in the HTML
+            if body_size < 5000:
+                status = "broken"  # Empty SPA shell — no real content
+            elif "Page not found" in resp.text or "404" in resp.text[:500]:
+                status = "broken"
         elif resp.status_code == 200 and final_url != url:
             status = "redirected"
 
         return {
             "status": status,
             "code": resp.status_code,
+            "body_size": body_size,
             "final_url": final_url if final_url != url else None,
         }
     except requests.RequestException as e:
