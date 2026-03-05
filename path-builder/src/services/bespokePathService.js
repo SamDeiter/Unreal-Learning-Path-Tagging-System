@@ -157,7 +157,7 @@ export async function sequencePath(userQuery, segments, knowledgeProfile = null)
           : s.type === "epic_learning"
             ? `Article: ${s.title}`
             : `Docs: ${s.title} > ${s.section}`;
-      return `[${i}] ${source}\n   ${s.text.slice(0, 400)}`;
+      return `[${i}] ${source}\n   ${s.text.slice(0, 1200)}`;
     })
     .join("\n\n");
 
@@ -185,7 +185,7 @@ Here are ${segments.length} content segments found via semantic search:
 
 ${segmentSummaries}
 
-Classify each segment and write a learner-friendly summary for each.
+Classify each segment and write a DIRECT TEACHING SUMMARY for each. Do NOT describe the article or video — TEACH the concept yourself using the source material.
 
 Categories:
 - foundation: Background concepts the learner needs first
@@ -194,9 +194,12 @@ Categories:
 - transfer: How this knowledge applies to other contexts
 
 Return a JSON array of objects with this format:
-[{"index": 0, "category": "foundation", "relevance": "high|medium|low", "summary": "2-3 sentence explanation of what this content covers and why it helps answer the learner's question. Write in second person (you/your). No markdown formatting."}]
+[{"index": 0, "category": "foundation", "relevance": "high|medium|low", "summary": "A direct mini-lesson that teaches the concept. Extract the actual knowledge from the source and present it as clear instruction — explain what it is, how it works, and what the learner should do. Write 3-5 sentences in second person (you/your). No markdown formatting."}]
 
 Rules:
+- NEVER start a summary with 'This article...' or 'This video...' or 'This segment...' — teach the concept directly
+- Write as if YOU are the instructor explaining the concept, not describing someone else's content
+- Include specific technical details, property names, menu paths, or code patterns from the source
 - Include only segments with "high" or "medium" relevance
 - Order: foundation → diagnosis → fix → transfer
 - You MUST include at least ONE segment of each category (foundation, diagnosis, fix, transfer)
@@ -204,8 +207,7 @@ Rules:
 - Max ${MAX_PATH_SEGMENTS} segments total
 - Min ${MIN_PATH_SEGMENTS} segments if enough are relevant
 - Prefer transcript segments over docs for hands-on topics
-- Each summary should be plain text only — no asterisks, no markdown, no code blocks
-- Summaries should connect to the learner's question and explain why this step matters${adaptiveInstructions}`;
+- Each summary should be plain text only — no asterisks, no markdown, no code blocks${adaptiveInstructions}`;
 
   try {
     const app = getFirebaseApp();
