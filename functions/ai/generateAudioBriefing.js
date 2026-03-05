@@ -232,12 +232,12 @@ Return ONLY valid JSON (no markdown, no code fences):
   "sections": [
     {
       "title": "Short title (e.g. 'Core Concept')",
-      "content": "2-4 bullet points (use • prefix). Each bullet is one clear sentence. Total ~80 words. Reference specific UE5 classes or nodes.",
+      "content": "2-4 bullet points ONLY (every line starts with •). No introductory sentences. Each bullet is one clear sentence. Total ~80 words. Reference specific UE5 classes or nodes.",
       "type": "concept"
     },
     {
       "title": "Short title (e.g. 'Why It Matters')",
-      "content": "2-4 bullet points covering: how it works, performance implications, common mistakes. ~80 words total.",
+      "content": "2-4 bullet points ONLY (every line starts with •). Cover: how it works, performance implications, common mistakes. ~80 words total.",
       "type": "mechanics"
     },
     {
@@ -250,7 +250,7 @@ Return ONLY valid JSON (no markdown, no code fences):
 
 RULES:
 - ONLY discuss Unreal Engine / game development concepts. NEVER reference real-world physics, hardware, or mechanisms. Explain terms only in UE5 context (Blueprint nodes, sound cues, materials, property panels, editor menus). Avoid C++ code syntax unless the learner explicitly asked about C++.
-- CONCISE: use bullet points (•) or numbered lists (1. 2. 3.), NEVER paragraphs
+- CONCISE: EVERY line must start with a bullet (•) or number (1. 2. 3.), NEVER prose sentences or introductory text
 - Reference Blueprint node names, property names, and editor paths rather than C++ class names
 - Write out number abbreviations in full (e.g. "100 million" not "100M", "1 thousand" not "1K")
 - Each section: 60-100 words MAX
