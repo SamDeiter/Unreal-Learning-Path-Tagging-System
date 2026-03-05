@@ -28,6 +28,8 @@ export default defineConfig({
             if (nid.includes("transcript_segments")) return "data-transcripts";
             // Embedding vectors (~11.3MB) — loaded on semantic search
             if (nid.includes("embeddings")) return "data-embeddings";
+            // Doc links (~4.1MB) — loaded on reading steps / doc search
+            if (nid.includes("doc_links")) return "data-docs";
             // Core course data (~1.3MB) — loaded on app init
             return "data-courses";
           }

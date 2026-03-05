@@ -7,7 +7,6 @@
 import { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import useGuidedPlayer, { STAGES } from "../../hooks/useGuidedPlayer";
-import docLinks from "../../data/doc_links.json";
 
 import ChallengeCard from "./ChallengeCard";
 import BridgeCard from "./BridgeCard";
@@ -702,6 +701,17 @@ function AiGuidePanel({ microLesson, courses: _courses }) {
 /* ─── ReadingStep — card for doc/YouTube reading steps ─── */
 function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
   const [isRead, setIsRead] = useState(false);
+  // Lazy-load doc_links.json only when this component mounts (saves ~4 MB from initial bundle)
+  const [docLinks, setDocLinks] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    import("../../data/doc_links.json").then((mod) => {
+      if (!cancelled) setDocLinks(mod.default || mod);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const typeIcon = course._resourceType === "doc" ? "📖" : "▶️";
   const typeLabel = course._resourceType === "doc" ? "Documentation" : "YouTube Video";
   const sourceLabel = course._resourceType === "doc" ? "Epic Docs" : course._channel || "YouTube";
