@@ -31,6 +31,15 @@ const DEFAULT_SUGGESTIONS = [
 
 const LETTERS = ["A", "B", "C", "D"];
 
+// Pipeline steps shown during path generation loading
+const PIPELINE_STEPS = [
+  { label: "Analyzing your question...", icon: "🔍", delay: 0 },
+  { label: "Applying knowledge profile...", icon: "🧠", delay: 1500 },
+  { label: "Searching course transcripts...", icon: "📚", delay: 3500 },
+  { label: "Matching relevant lessons...", icon: "🎯", delay: 5500 },
+  { label: "Building your learning sequence...", icon: "✨", delay: 8000 },
+];
+
 export default function AdaptivePath() {
   const [query, setQuery] = useState("");
   const [pathData, setPathData] = useState(null);
@@ -40,6 +49,7 @@ export default function AdaptivePath() {
   // Step expansion / briefing state (mirrors BespokePath)
   const [expandedStep, setExpandedStep] = useState(null);
   const [stepAudio, setStepAudio] = useState({});
+  const [pipelineStep, setPipelineStep] = useState(0);
   const [stepTakeaways, setStepTakeaways] = useState({});
   const [_pathNarration, setPathNarration] = useState(null);
 
@@ -85,12 +95,19 @@ export default function AdaptivePath() {
 
     setPathLoading(true);
     setPathError(null);
+    setPipelineStep(0);
+
+    // Animate pipeline steps during generation
+    const timers = PIPELINE_STEPS.slice(1).map((step, i) =>
+      setTimeout(() => setPipelineStep(i + 1), step.delay)
+    );
 
     try {
       // Check cache first (include profile hash in cache key)
       const profileKey = `${query}_adaptive_${knowledgeProfile.level}`;
       const cached = await findCachedPath(profileKey);
       if (cached) {
+        timers.forEach(clearTimeout);
         setPathData(cached);
         setPathLoading(false);
         return;
@@ -108,6 +125,7 @@ export default function AdaptivePath() {
     } catch (err) {
       setPathError(err.message || "Failed to generate learning path.");
     } finally {
+      timers.forEach(clearTimeout);
       setPathLoading(false);
     }
   }, [query, knowledgeProfile]);
@@ -167,7 +185,7 @@ export default function AdaptivePath() {
   // Audio/takeaway handlers (same pattern as BespokePath)
   const handleStepAudio = useCallback(
     async (index, step) => {
-      if (stepAudio[index]) return;
+      if (stepAudio[index]?.url || stepAudio[index]?.loading) return;
       setStepAudio((prev) => ({ ...prev, [index]: { loading: true } }));
       try {
         const audioUrl = await generateStepAudio(step, query);
@@ -398,15 +416,26 @@ export default function AdaptivePath() {
     );
   }
 
-  // ── RENDER: Path loading ──
+  // ── RENDER: Path loading with pipeline steps ──
   if (pathLoading) {
     return (
       <div className="adaptive-path">
         <div className="adaptive-loading">
           <div className="adaptive-loading-spinner" />
-          <p className="adaptive-loading-text">
-            Building your personalized learning path based on your knowledge profile...
-          </p>
+          <div className="adaptive-pipeline-steps">
+            {PIPELINE_STEPS.map((step, i) => (
+              <div
+                key={i}
+                className={`pipeline-step ${
+                  i < pipelineStep ? "done" : i === pipelineStep ? "active" : "pending"
+                }`}
+              >
+                <span className="pipeline-icon">{step.icon}</span>
+                <span className="pipeline-label">{step.label}</span>
+                {i < pipelineStep && <span className="pipeline-check">✓</span>}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
