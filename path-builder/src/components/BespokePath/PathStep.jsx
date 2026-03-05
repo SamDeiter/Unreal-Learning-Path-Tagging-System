@@ -121,6 +121,7 @@ export default function PathStep({
   const [scriptOpen, setScriptOpen] = useState(false);
   const [deepDiveOpen, setDeepDiveOpen] = useState(true);
   const [sectionRatings, setSectionRatings] = useState({}); // { 0: "good", 2: "bad" }
+  const [checkedSteps, setCheckedSteps] = useState({}); // { 0: true, 2: true }
   const audioRef = useRef(null);
 
   // Save deepdive section rating to Firestore
@@ -285,195 +286,246 @@ export default function PathStep({
           )}
         </div>
 
-        {/* Go Deeper */}
-        {isActive && (
-          <div className="deepdive-section">
-            {deepDive && deepDive.length > 0 ? (
+        {/* Go Deeper — concept + mechanics only */}
+        {isActive &&
+          (() => {
+            const conceptSections = deepDive?.filter((s) => s.type !== "practical") || [];
+            const practicalSection = deepDive?.find((s) => s.type === "practical");
+            const practicalIndex = deepDive?.findIndex((s) => s.type === "practical") ?? -1;
+
+            // Parse practical steps into groups
+            const parsePracticalSteps = (content) => {
+              if (!content) return [];
+              const lines = content.split("\n").filter(Boolean);
+              const groups = [];
+              lines.forEach((l) => {
+                const trimmed = l.trim();
+                if (/^\d+[.)]/.test(trimmed)) {
+                  groups.push({ text: trimmed.replace(/^\d+[.)]\s*/, ""), subs: [] });
+                } else if (trimmed.startsWith("•") && groups.length > 0) {
+                  groups[groups.length - 1].subs.push(trimmed.replace(/^•\s*/, ""));
+                } else if (trimmed.startsWith("•") && groups.length === 0) {
+                  groups.push({ text: trimmed.replace(/^•\s*/, ""), subs: [] });
+                } else if (groups.length > 0) {
+                  groups[groups.length - 1].subs.push(trimmed);
+                }
+              });
+              return groups;
+            };
+
+            const practicalSteps = parsePracticalSteps(practicalSection?.content);
+            const doneCount = Object.values(checkedSteps).filter(Boolean).length;
+
+            return (
               <>
-                <button
-                  className="deepdive-toggle-btn"
-                  onClick={() => setDeepDiveOpen(!deepDiveOpen)}
-                >
-                  <i className={`fa-solid fa-chevron-${deepDiveOpen ? "up" : "down"}`}></i>
-                  🔍 Deep Dive ({deepDive.length} sections)
-                  {editorContext && <span className="editor-context-badge">{editorContext}</span>}
-                </button>
-                {deepDiveOpen && (
-                  <div className="deepdive-panels">
-                    {deepDive.map((section, i) => (
-                      <div key={i} className={`deepdive-panel deepdive-${section.type}`}>
-                        <h4 className="deepdive-panel-title">
-                          {section.type === "concept"
-                            ? "💡"
-                            : section.type === "mechanics"
-                              ? "⚙️"
-                              : "🛠️"}{" "}
-                          {section.title}
-                        </h4>
-                        <div className="deepdive-panel-content">
-                          {(() => {
-                            const lines = section.content.split("\n").filter(Boolean);
-                            const isBullets = lines.some((l) => l.trim().startsWith("•"));
-                            const isNumbered = lines.some((l) => /^\d+[.)]/.test(l.trim()));
+                <div className="deepdive-section">
+                  {conceptSections.length > 0 ? (
+                    <>
+                      <button
+                        className="deepdive-toggle-btn"
+                        onClick={() => setDeepDiveOpen(!deepDiveOpen)}
+                      >
+                        <i className={`fa-solid fa-chevron-${deepDiveOpen ? "up" : "down"}`}></i>
+                        🔍 Deep Dive ({conceptSections.length} sections)
+                        {editorContext && (
+                          <span className="editor-context-badge">{editorContext}</span>
+                        )}
+                      </button>
+                      {deepDiveOpen && (
+                        <div className="deepdive-panels">
+                          {conceptSections.map((section, i) => {
+                            const origIdx = deepDive.indexOf(section);
+                            return (
+                              <div key={i} className={`deepdive-panel deepdive-${section.type}`}>
+                                <h4 className="deepdive-panel-title">
+                                  {section.type === "concept" ? "💡" : "⚙️"} {section.title}
+                                </h4>
+                                <div className="deepdive-panel-content">
+                                  {(() => {
+                                    const lines = section.content.split("\n").filter(Boolean);
+                                    const isBullets = lines.some((l) => l.trim().startsWith("•"));
+                                    const isNumbered = lines.some((l) => /^\d+[.)]/.test(l.trim()));
 
-                            // For practical sections, always try numbered format first
-                            if (section.type === "practical" && (isNumbered || isBullets)) {
-                              // If AI returned bullets instead of numbers, convert top-level bullets to numbered
-                              const normalized = isNumbered
-                                ? lines
-                                : lines.map((l, idx) => {
-                                    const trimmed = l.trim();
-                                    if (trimmed.startsWith("•")) {
-                                      // Check if this looks like a sub-bullet (preceded by a numbered/bullet step)
-                                      const prevIsStep =
-                                        idx > 0 &&
-                                        (/^\d+[.)]/.test(lines[idx - 1].trim()) ||
-                                          (idx > 0 && !lines[idx - 1].trim().startsWith("•")));
-                                      if (
-                                        l.startsWith("  ") ||
-                                        l.startsWith("\t") ||
-                                        prevIsStep === false
-                                      ) {
-                                        return l; // keep as sub-bullet
-                                      }
+                                    if (isBullets) {
+                                      return (
+                                        <ul className="deepdive-bullets">
+                                          {lines.map((l, j) => (
+                                            <li key={j}>
+                                              {highlightKeyTerms(l.replace(/^•\s*/, ""))}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      );
                                     }
-                                    return l;
-                                  });
-
-                              const groups = [];
-                              normalized.forEach((l) => {
-                                const trimmed = l.trim();
-                                if (/^\d+[.)]/.test(trimmed)) {
-                                  groups.push({
-                                    text: trimmed.replace(/^\d+[.)]\s*/, ""),
-                                    subs: [],
-                                  });
-                                } else if (trimmed.startsWith("•") && groups.length > 0) {
-                                  groups[groups.length - 1].subs.push(trimmed.replace(/^•\s*/, ""));
-                                } else if (trimmed.startsWith("•") && groups.length === 0) {
-                                  // Top-level bullet with no prior number — treat as numbered step
-                                  groups.push({ text: trimmed.replace(/^•\s*/, ""), subs: [] });
-                                } else if (groups.length > 0) {
-                                  groups[groups.length - 1].subs.push(trimmed);
-                                }
-                              });
-                              return (
-                                <ol className="deepdive-steps">
-                                  {groups.map((g, j) => (
-                                    <li key={j}>
-                                      {highlightKeyTerms(g.text)}
-                                      {g.subs.length > 0 && (
-                                        <ul className="deepdive-sub-bullets">
-                                          {g.subs.map((s, k) => (
-                                            <li key={k}>{highlightKeyTerms(s)}</li>
+                                    if (isNumbered) {
+                                      const groups = [];
+                                      lines.forEach((l) => {
+                                        if (/^\d+[.)]/.test(l.trim())) {
+                                          groups.push({
+                                            text: l.replace(/^\d+[.)]\s*/, ""),
+                                            subs: [],
+                                          });
+                                        } else if (l.trim().startsWith("•") && groups.length > 0) {
+                                          groups[groups.length - 1].subs.push(
+                                            l.replace(/^•\s*/, "").trim()
+                                          );
+                                        } else if (groups.length > 0) {
+                                          groups[groups.length - 1].subs.push(l.trim());
+                                        }
+                                      });
+                                      return (
+                                        <ol className="deepdive-steps">
+                                          {groups.map((g, j) => (
+                                            <li key={j}>
+                                              {highlightKeyTerms(g.text)}
+                                              {g.subs.length > 0 && (
+                                                <ul className="deepdive-sub-bullets">
+                                                  {g.subs.map((s, k) => (
+                                                    <li key={k}>{highlightKeyTerms(s)}</li>
+                                                  ))}
+                                                </ul>
+                                              )}
+                                            </li>
                                           ))}
-                                        </ul>
-                                      )}
-                                    </li>
-                                  ))}
-                                </ol>
-                              );
-                            }
-
-                            if (isBullets) {
-                              return (
-                                <ul className="deepdive-bullets">
-                                  {lines.map((l, j) => (
-                                    <li key={j}>{highlightKeyTerms(l.replace(/^•\s*/, ""))}</li>
-                                  ))}
-                                </ul>
-                              );
-                            }
-                            if (isNumbered) {
-                              // Group: numbered steps with optional sub-bullets
-                              const groups = [];
-                              lines.forEach((l) => {
-                                if (/^\d+[.)]/.test(l.trim())) {
-                                  groups.push({ text: l.replace(/^\d+[.)]\s*/, ""), subs: [] });
-                                } else if (l.trim().startsWith("•") && groups.length > 0) {
-                                  groups[groups.length - 1].subs.push(
-                                    l.replace(/^•\s*/, "").trim()
-                                  );
-                                } else if (groups.length > 0) {
-                                  groups[groups.length - 1].subs.push(l.trim());
-                                }
-                              });
-                              return (
-                                <ol className="deepdive-steps">
-                                  {groups.map((g, j) => (
-                                    <li key={j}>
-                                      {highlightKeyTerms(g.text)}
-                                      {g.subs.length > 0 && (
-                                        <ul className="deepdive-sub-bullets">
-                                          {g.subs.map((s, k) => (
-                                            <li key={k}>{highlightKeyTerms(s)}</li>
-                                          ))}
-                                        </ul>
-                                      )}
-                                    </li>
-                                  ))}
-                                </ol>
-                              );
-                            }
-                            return lines.map((p, j) => <p key={j}>{highlightKeyTerms(p)}</p>);
-                          })()}
+                                        </ol>
+                                      );
+                                    }
+                                    return lines.map((p, j) => (
+                                      <p key={j}>{highlightKeyTerms(p)}</p>
+                                    ));
+                                  })()}
+                                </div>
+                                {/* Rating buttons */}
+                                <div className="deepdive-rating">
+                                  {sectionRatings[origIdx] ? (
+                                    <span className="deepdive-rating-done">
+                                      {sectionRatings[origIdx] === "good" ? "👍" : "👎"} Rated
+                                    </span>
+                                  ) : (
+                                    <>
+                                      <button
+                                        type="button"
+                                        className="deepdive-rate-btn deepdive-rate-good"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          rateSection(origIdx, "good");
+                                        }}
+                                        title="This section is helpful and specific"
+                                      >
+                                        👍
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="deepdive-rate-btn deepdive-rate-bad"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          rateSection(origIdx, "bad");
+                                        }}
+                                        title="This section is vague or off-topic"
+                                      >
+                                        👎
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                        {/* Rating buttons */}
-                        <div className="deepdive-rating">
-                          {sectionRatings[i] ? (
-                            <span className="deepdive-rating-done">
-                              {sectionRatings[i] === "good" ? "👍" : "👎"} Rated
-                            </span>
-                          ) : (
-                            <>
-                              <button
-                                type="button"
-                                className="deepdive-rate-btn deepdive-rate-good"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  rateSection(i, "good");
-                                }}
-                                title="This section is helpful and specific"
-                              >
-                                👍
-                              </button>
-                              <button
-                                type="button"
-                                className="deepdive-rate-btn deepdive-rate-bad"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  rateSection(i, "bad");
-                                }}
-                                title="This section is vague or off-topic"
-                              >
-                                👎
-                              </button>
-                            </>
+                      )}
+                    </>
+                  ) : deepDiveLoading ? (
+                    <div className="deepdive-loading">
+                      <div className="bespoke-spinner" style={{ width: "18px", height: "18px" }} />
+                      <span>Generating deeper content…</span>
+                    </div>
+                  ) : !deepDive || deepDive.length === 0 ? (
+                    <button
+                      className="go-deeper-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onGoDeeper?.();
+                      }}
+                    >
+                      <i className="fa-solid fa-layer-group"></i> Go Deeper
+                    </button>
+                  ) : null}
+                </div>
+
+                {/* Apply It — standalone practical section with checkboxes */}
+                {practicalSection && practicalSteps.length > 0 && (
+                  <div className="apply-it-section">
+                    <div className="apply-it-header">
+                      <h4 className="apply-it-title">✅ Apply It</h4>
+                      <span className="apply-it-progress">
+                        {doneCount}/{practicalSteps.length} done
+                      </span>
+                    </div>
+                    <ol className="apply-it-steps">
+                      {practicalSteps.map((g, j) => (
+                        <li
+                          key={j}
+                          className={`apply-it-step ${checkedSteps[j] ? "completed" : ""}`}
+                        >
+                          <label className="apply-it-checkbox-label">
+                            <input
+                              type="checkbox"
+                              className="apply-it-checkbox"
+                              checked={!!checkedSteps[j]}
+                              onChange={() =>
+                                setCheckedSteps((prev) => ({ ...prev, [j]: !prev[j] }))
+                              }
+                            />
+                            <span className="apply-it-step-text">{highlightKeyTerms(g.text)}</span>
+                          </label>
+                          {g.subs.length > 0 && (
+                            <ul className="apply-it-sub-bullets">
+                              {g.subs.map((s, k) => (
+                                <li key={k}>{highlightKeyTerms(s)}</li>
+                              ))}
+                            </ul>
                           )}
-                        </div>
-                      </div>
-                    ))}
+                        </li>
+                      ))}
+                    </ol>
+                    {/* Rating for practical section */}
+                    <div className="deepdive-rating">
+                      {sectionRatings[practicalIndex] ? (
+                        <span className="deepdive-rating-done">
+                          {sectionRatings[practicalIndex] === "good" ? "👍" : "👎"} Rated
+                        </span>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="deepdive-rate-btn deepdive-rate-good"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              rateSection(practicalIndex, "good");
+                            }}
+                            title="This section is helpful and specific"
+                          >
+                            👍
+                          </button>
+                          <button
+                            type="button"
+                            className="deepdive-rate-btn deepdive-rate-bad"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              rateSection(practicalIndex, "bad");
+                            }}
+                            title="This section is vague or off-topic"
+                          >
+                            👎
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 )}
               </>
-            ) : deepDiveLoading ? (
-              <div className="deepdive-loading">
-                <div className="bespoke-spinner" style={{ width: "18px", height: "18px" }} />
-                <span>Generating deeper content…</span>
-              </div>
-            ) : (
-              <button
-                className="go-deeper-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onGoDeeper?.();
-                }}
-              >
-                🔍 Go Deeper
-              </button>
-            )}
-          </div>
-        )}
+            );
+          })()}
 
         {/* Sources — Collapsible */}
         <div className="footnotes-section">
