@@ -16,7 +16,11 @@ import { generateBespokePath } from "../../services/bespokePathService";
 import { findCachedPath, cachePath } from "../../services/pathCacheService";
 import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
-import { generateStepAudio, generateStepTakeaways } from "../../services/stepBriefingService";
+import {
+  generateStepAudio,
+  generateStepTakeaways,
+  generateStepDeepDive,
+} from "../../services/stepBriefingService";
 import { generateQuizForStep } from "../../services/quizService";
 import "../BespokePath/BespokePath.css";
 import "./AdaptivePath.css";
@@ -52,6 +56,9 @@ export default function AdaptivePath() {
   const [pipelineStep, setPipelineStep] = useState(0);
   const [stepTakeaways, setStepTakeaways] = useState({});
   const [_pathNarration, setPathNarration] = useState(null);
+
+  // Deep dive state
+  const [stepDeepDives, setStepDeepDives] = useState({});
 
   // Quiz state
   const [quizzes, setQuizzes] = useState(new Map());
@@ -477,8 +484,8 @@ export default function AdaptivePath() {
     const PHASE_CONFIG = [
       { key: "problem", icon: "📋", label: "Questions", categories: ["foundation", "diagnosis"] },
       { key: "solution", icon: "🔧", label: "Solution", categories: ["fix"] },
-      { key: "quiz", icon: "📝", label: "Quiz", categories: ["__quiz__"] },
       { key: "apply", icon: "🚀", label: "Apply It", categories: ["transfer"] },
+      { key: "quiz", icon: "📝", label: "Quiz", categories: ["__quiz__"] },
       { key: "reading", icon: "📖", label: "Further Reading", categories: ["__reading__"] },
     ];
 
@@ -737,6 +744,21 @@ export default function AdaptivePath() {
                       onGenerateAudio={() =>
                         handleStepAudio(expandedStep ?? 0, pathData.path[expandedStep ?? 0])
                       }
+                      deepDive={stepDeepDives[expandedStep ?? 0]?.sections}
+                      deepDiveLoading={!!stepDeepDives[expandedStep ?? 0]?.loading}
+                      onGoDeeper={async () => {
+                        const idx = expandedStep ?? 0;
+                        const step = pathData.path[idx];
+                        setStepDeepDives((prev) => ({
+                          ...prev,
+                          [idx]: { loading: true },
+                        }));
+                        const sections = await generateStepDeepDive(step, query);
+                        setStepDeepDives((prev) => ({
+                          ...prev,
+                          [idx]: { loading: false, sections: sections || [] },
+                        }));
+                      }}
                     />
                   </div>
                 ) : null}
@@ -747,22 +769,25 @@ export default function AdaptivePath() {
                 <button
                   className="nav-btn"
                   onClick={() => {
-                    if (expandedStep === -2) {
-                      // From quiz, go back to last step
-                      setExpandedStep(pathData.path.length - 1);
+                    if (expandedStep === -3) {
+                      setExpandedStep(-2); // From reading, go back to quiz
+                    } else if (expandedStep === -2) {
+                      setExpandedStep(pathData.path.length - 1); // From quiz, go to last step
                     } else {
                       const cur = expandedStep ?? 0;
                       if (cur > 0) setExpandedStep(cur - 1);
                     }
                   }}
-                  disabled={(expandedStep ?? 0) <= 0 && expandedStep !== -2}
+                  disabled={(expandedStep ?? 0) <= 0 && expandedStep !== -2 && expandedStep !== -3}
                 >
                   <i className="fa-solid fa-chevron-left"></i>
                 </button>
                 <div className="footer-status">
                   {expandedStep === -2
                     ? "Quiz"
-                    : `Step ${Math.min((expandedStep ?? 0) + 1, pathData.path.length)} of ${pathData.path.length}`}
+                    : expandedStep === -3
+                      ? "Further Reading"
+                      : `Step ${Math.min((expandedStep ?? 0) + 1, pathData.path.length)} of ${pathData.path.length}`}
                 </div>
                 <button
                   className="nav-btn"
@@ -771,10 +796,12 @@ export default function AdaptivePath() {
                     if (cur < pathData.path.length - 1) {
                       setExpandedStep(cur + 1);
                     } else if (cur === pathData.path.length - 1) {
-                      setExpandedStep(-2); // Go to quiz
+                      setExpandedStep(-2); // Last step → quiz
+                    } else if (expandedStep === -2) {
+                      setExpandedStep(-3); // Quiz → further reading
                     }
                   }}
-                  disabled={expandedStep === -2}
+                  disabled={expandedStep === -3}
                 >
                   <i className="fa-solid fa-chevron-right"></i>
                 </button>

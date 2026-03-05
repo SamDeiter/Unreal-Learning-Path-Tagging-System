@@ -203,6 +203,91 @@ IMPORTANT:
         };
       }
 
+      // ── DEEPDIVE MODE: generate expanded sub-sections for a step ──
+      if (mode === "deepdive") {
+        const { stepContent, stepCategory, stepTitle } = data;
+        if (!stepContent) {
+          throw new functions.https.HttpsError(
+            "invalid-argument",
+            "stepContent is required for deepdive mode."
+          );
+        }
+
+        const deepdivePrompt = `You are an expert UE5 instructor creating an in-depth breakdown of a learning step.
+
+The learner asked: "${query}"
+This is the ${stepCategory || "learning"} step titled "${stepTitle || ""}":
+
+"${stepContent.substring(0, 2000)}"
+
+Create exactly 3 focused sub-sections that go deeper into this content. Each should teach something ACTIONABLE.
+
+Return ONLY valid JSON (no markdown, no code fences):
+{
+  "sections": [
+    {
+      "title": "Short title (e.g. 'Understanding the Concept')",
+      "content": "2-3 paragraphs (150-200 words) explaining this aspect in detail. Reference specific UE5 classes, functions, settings, or Blueprint nodes. Include concrete examples.",
+      "type": "concept"
+    },
+    {
+      "title": "Short title (e.g. 'How It Works Under the Hood')",
+      "content": "2-3 paragraphs explaining the technical mechanics. Why does UE5 do it this way? What are the performance implications? What common mistakes do developers make?",
+      "type": "mechanics"
+    },
+    {
+      "title": "Short title (e.g. 'Try It: Step-by-Step')",
+      "content": "A practical mini-tutorial with numbered steps the learner can follow in the UE5 editor. Be specific about menu locations, node names, and property values.",
+      "type": "practical"
+    }
+  ]
+}
+
+RULES:
+- Ground everything in real UE5 knowledge — mention actual class names, functions, and editor paths
+- The practical section should be immediately actionable — something they can try right now
+- Do NOT use markdown formatting inside the JSON strings
+- Keep each section 150-200 words`;
+
+        const deepdiveUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const deepdiveResp = await fetch(deepdiveUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: deepdivePrompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 1024,
+              responseMimeType: "application/json",
+            },
+          }),
+        });
+
+        if (!deepdiveResp.ok) throw new Error("Deepdive generation failed");
+        const deepdiveJson = await deepdiveResp.json();
+        const deepdiveText = deepdiveJson.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+
+        let sections = [];
+        try {
+          const parsed = JSON.parse(deepdiveText);
+          sections = parsed.sections || [];
+        } catch {
+          console.warn("Failed to parse deepdive JSON, returning raw text");
+          sections = [{ title: "Deep Dive", content: deepdiveText, type: "concept" }];
+        }
+
+        await logApiUsage(userId, {
+          model: "gemini-2.0-flash",
+          type: "deepdive",
+          query: query.substring(0, 50),
+        });
+
+        return {
+          success: true,
+          sections,
+        };
+      }
+
       // ── TAKEAWAYS MODE: generate actionable key takeaways ──
       if (mode === "takeaways") {
         const { stepContent, stepCategory, stepAction } = data;

@@ -53,6 +53,38 @@ export async function generateStepAudio(step, query, options = {}) {
 }
 
 /**
+ * Generate deep-dive sub-sections for a learning path step.
+ *
+ * @param {Object} step - The path step object
+ * @param {string} query - The original user query
+ * @returns {Promise<Array|null>} Array of {title, content, type}, or null on failure
+ */
+export async function generateStepDeepDive(step, query) {
+  try {
+    const app = getFirebaseApp();
+    const functions = getFunctions(app, "us-central1");
+    const genFn = httpsCallable(functions, "generateAudioBriefing", { timeout: 60000 });
+
+    const result = await genFn({
+      mode: "deepdive",
+      query,
+      stepContent: step.summary || step.segment?.text || "",
+      stepCategory: step.category || "learning",
+      stepTitle: step.segment?.title || step.segment?.videoTitle || "",
+    });
+
+    if (result.data?.sections?.length) {
+      devLog(`[DeepDive] Generated ${result.data.sections.length} sub-sections`);
+      return result.data.sections;
+    }
+    return null;
+  } catch (err) {
+    devWarn("[DeepDive] Generation failed:", err.message);
+    return null;
+  }
+}
+
+/**
  * Generate key takeaways for a single learning path step.
  *
  * @param {Object} step - The path step object

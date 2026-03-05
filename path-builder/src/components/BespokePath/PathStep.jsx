@@ -82,9 +82,13 @@ export default function PathStep({
   onAudioEnded,
   takeaways,
   takeawayLoading,
+  deepDive,
+  deepDiveLoading,
+  onGoDeeper,
 }) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [scriptOpen, setScriptOpen] = useState(false);
+  const [deepDiveOpen, setDeepDiveOpen] = useState(true);
   const audioRef = useRef(null);
 
   // Auto-play audio when transitioning between phases
@@ -223,6 +227,62 @@ export default function PathStep({
             <p className="no-takeaways">No specific takeaways extracted for this segment.</p>
           )}
         </div>
+
+        {/* Go Deeper */}
+        {isActive && (
+          <div className="deepdive-section">
+            {deepDive && deepDive.length > 0 ? (
+              <>
+                <button
+                  className="deepdive-toggle-btn"
+                  onClick={() => setDeepDiveOpen(!deepDiveOpen)}
+                >
+                  <i className={`fa-solid fa-chevron-${deepDiveOpen ? "up" : "down"}`}></i>
+                  🔍 Deep Dive ({deepDive.length} sections)
+                </button>
+                {deepDiveOpen && (
+                  <div className="deepdive-panels">
+                    {deepDive.map((section, i) => (
+                      <div key={i} className={`deepdive-panel deepdive-${section.type}`}>
+                        <h4 className="deepdive-panel-title">
+                          {section.type === "concept"
+                            ? "💡"
+                            : section.type === "mechanics"
+                              ? "⚙️"
+                              : "🛠️"}{" "}
+                          {section.title}
+                        </h4>
+                        <div className="deepdive-panel-content">
+                          {section.content
+                            .split("\n")
+                            .filter(Boolean)
+                            .map((p, j) => (
+                              <p key={j}>{highlightKeyTerms(p)}</p>
+                            ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : deepDiveLoading ? (
+              <div className="deepdive-loading">
+                <div className="bespoke-spinner" style={{ width: "18px", height: "18px" }} />
+                <span>Generating deeper content…</span>
+              </div>
+            ) : (
+              <button
+                className="go-deeper-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onGoDeeper?.();
+                }}
+              >
+                🔍 Go Deeper
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Sources — Collapsible */}
         <div className="footnotes-section">
