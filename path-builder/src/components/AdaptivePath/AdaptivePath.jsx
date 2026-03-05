@@ -25,6 +25,14 @@ import { generateQuizForStep } from "../../services/quizService";
 import "../BespokePath/BespokePath.css";
 import "./AdaptivePath.css";
 
+/** Normalize known broken Epic Learning URL patterns */
+function fixEpicUrl(url) {
+  if (!url) return url;
+  return url
+    .replace("/learning/tutorial/", "/learning/tutorials/")
+    .replace("/learning/knowledge_base/", "/learning/knowledge-base/");
+}
+
 const DEFAULT_SUGGESTIONS = [
   "Why is my multiplayer character not replicating properly?",
   "How do I set up Gameplay Ability System from scratch?",
@@ -205,7 +213,7 @@ export default function AdaptivePath() {
           ? pathData.path
               .map((s) => ({
                 title: s.segment?.title || s.segment?.videoTitle || "",
-                url: s.segment?.videoUrl || s.segment?.url || "",
+                url: fixEpicUrl(s.segment?.videoUrl || s.segment?.url || ""),
               }))
               .filter((s) => s.title)
           : [];
@@ -558,8 +566,8 @@ export default function AdaptivePath() {
                     >
                       {phase.label}
                     </button>
-                    {/* Substep list — only for non-quiz phases */}
-                    {phase.key !== "quiz" && phase.steps.length > 0 && (
+                    {/* Substep list — only for real content phases */}
+                    {phase.key !== "quiz" && phase.key !== "reading" && phase.steps.length > 0 && (
                       <ul className="substep-list">
                         {phase.steps.map((substep, i) => {
                           const step = pathData.path[substep.globalIndex];
@@ -664,7 +672,7 @@ export default function AdaptivePath() {
                         }}
                       >
                         {pathData.path.map((step, i) => {
-                          const url = step.segment?.videoUrl || step.segment?.url;
+                          const url = fixEpicUrl(step.segment?.videoUrl || step.segment?.url);
                           const title =
                             step.segment?.title || step.segment?.videoTitle || `Step ${i + 1}`;
                           const sourceType = step.segment?.type || step.segment?.source || "docs";

@@ -12,6 +12,14 @@ import { CATEGORY_STYLES } from "./pathConstants";
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
+/** Normalize known broken Epic Learning URL patterns */
+function fixEpicUrl(url) {
+  if (!url) return url;
+  return url
+    .replace("/learning/tutorial/", "/learning/tutorials/")
+    .replace("/learning/knowledge_base/", "/learning/knowledge-base/");
+}
+
 function decodeEntities(str) {
   if (!str) return "";
   return str
@@ -297,7 +305,7 @@ export default function PathStep({
           {sourcesOpen && (
             <div className="footnotes-content">
               <a
-                href={segment.videoUrl || segment.url}
+                href={fixEpicUrl(segment.videoUrl || segment.url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="footnote-link"
