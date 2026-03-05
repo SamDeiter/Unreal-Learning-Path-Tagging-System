@@ -22,6 +22,7 @@ import {
   generateStepDeepDive,
 } from "../../services/stepBriefingService";
 import { generateQuizForStep } from "../../services/quizService";
+import { cleanTitle } from "../../utils/cleanTitle";
 import "../BespokePath/BespokePath.css";
 import "./AdaptivePath.css";
 
@@ -321,7 +322,7 @@ export default function AdaptivePath() {
               }}
             />
             <button className="adaptive-start-btn" onClick={handleStart} disabled={!query.trim()}>
-              🧪 Start Diagnostic
+              🎯 Generate Path
             </button>
 
             <div className="adaptive-pills">
@@ -585,9 +586,10 @@ export default function AdaptivePath() {
                         {phase.steps.map((substep, i) => {
                           const step = pathData.path[substep.globalIndex];
                           let rawTitle =
-                            step?.segment?.title || step?.segment?.videoTitle || `Step ${i + 1}`;
+                            cleanTitle(step?.segment?.title || step?.segment?.videoTitle) ||
+                            `Step ${i + 1}`;
                           const shortTitle =
-                            rawTitle.length > 35 ? rawTitle.substring(0, 33) + "…" : rawTitle;
+                            rawTitle.length > 40 ? rawTitle.substring(0, 38) + "…" : rawTitle;
                           return (
                             <li key={substep.globalIndex}>
                               <button
@@ -707,7 +709,8 @@ export default function AdaptivePath() {
                         {pathData.path.map((step, i) => {
                           const url = fixEpicUrl(step.segment?.videoUrl || step.segment?.url);
                           const title =
-                            step.segment?.title || step.segment?.videoTitle || `Step ${i + 1}`;
+                            cleanTitle(step.segment?.title || step.segment?.videoTitle) ||
+                            `Step ${i + 1}`;
                           const sourceType = step.segment?.type || step.segment?.source || "docs";
                           const icon = sourceType === "transcript" ? "fa-video" : "fa-book-open";
                           const typeLabel =

@@ -110,6 +110,7 @@ export async function generateStepTakeaways(step, query) {
       stepContent: content,
       stepCategory: step.category || "learning",
       stepAction: actionSteps,
+      stepTitle: step.segment?.title || step.segment?.videoTitle || "",
     });
 
     if (result.data?.takeaways && Array.isArray(result.data.takeaways)) {
@@ -117,17 +118,19 @@ export async function generateStepTakeaways(step, query) {
       return result.data.takeaways.slice(0, 3);
     }
 
+    const title = step.segment?.title || step.segment?.videoTitle || "this topic";
     return [
-      "Review this step carefully",
-      "Pay attention to the specific details",
-      "Practice applying this concept",
+      `Study the core concepts covered in "${title}"`,
+      `Try applying these techniques in a UE5 test project`,
+      `Revisit the source material to solidify your understanding`,
     ];
   } catch (err) {
     devWarn("[Takeaways] Generation failed:", err.message);
+    const title = step.segment?.title || step.segment?.videoTitle || "this topic";
     return [
-      "Review this step carefully",
-      "Pay attention to the specific details",
-      "Practice applying this concept",
+      `Study the core concepts covered in "${title}"`,
+      `Try applying these techniques in a UE5 test project`,
+      `Revisit the source material to solidify your understanding`,
     ];
   }
 }

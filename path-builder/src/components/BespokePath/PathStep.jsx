@@ -43,6 +43,22 @@ function cleanText(raw) {
   return text;
 }
 
+/** Strip conference / brand suffixes from video titles.
+ *  e.g. "Refactoring the Mesh Drawing Pipeline | Unreal Fest Europe 2019 | Unreal Engine"
+ *  becomes "Refactoring the Mesh Drawing Pipeline" */
+function cleanTitle(raw) {
+  if (!raw) return raw;
+  let t = String(raw);
+  // If the title is just a raw YouTube ID, return null so caller uses fallback
+  if (/^YouTube:\s*[A-Za-z0-9_-]{8,15}$/i.test(t.trim())) return null;
+  // Strip trailing pipe-delimited suffixes like "| Unreal Fest...", "| Unreal Engine", "| Epic Games"
+  t = t.replace(
+    /\s*\|\s*(Unreal\s+(Fest|Engine|Summit)|Epic\s+Games|GDC|Inside\s+Unreal)[^|]*/gi,
+    ""
+  );
+  return t.trim();
+}
+
 function filterTakeaways(items) {
   if (!items || !items.length) return items;
   return items.filter((t) => {
@@ -113,7 +129,9 @@ export default function PathStep({
   if (!step) return null;
   const { segment, category } = step;
 
-  const displayTitle = decodeEntities(segment.title || segment.videoTitle || "Step Details");
+  const displayTitle =
+    cleanTitle(decodeEntities(segment.title || segment.videoTitle || "Step Details")) ||
+    "Step Details";
 
   // Use narration script when available, otherwise fall back to raw segment text
   const displayText = narrationScript || step.summary || cleanText(segment.text);
@@ -269,6 +287,68 @@ export default function PathStep({
                             const lines = section.content.split("\n").filter(Boolean);
                             const isBullets = lines.some((l) => l.trim().startsWith("•"));
                             const isNumbered = lines.some((l) => /^\d+[.)]/.test(l.trim()));
+
+                            // For practical sections, always try numbered format first
+                            if (section.type === "practical" && (isNumbered || isBullets)) {
+                              // If AI returned bullets instead of numbers, convert top-level bullets to numbered
+                              const normalized = isNumbered
+                                ? lines
+                                : lines.map((l, idx) => {
+                                    const trimmed = l.trim();
+                                    if (trimmed.startsWith("•")) {
+                                      // Check if this looks like a sub-bullet (preceded by a numbered/bullet step)
+                                      const prevIsStep =
+                                        idx > 0 &&
+                                        (/^\d+[.)]/.test(lines[idx - 1].trim()) ||
+                                          (idx > 0 && !lines[idx - 1].trim().startsWith("•")));
+                                      if (
+                                        l.startsWith("  ") ||
+                                        l.startsWith("\t") ||
+                                        prevIsStep === false
+                                      ) {
+                                        return l; // keep as sub-bullet
+                                      }
+                                    }
+                                    return l;
+                                  });
+
+                              const groups = [];
+                              normalized.forEach((l) => {
+                                const trimmed = l.trim();
+                                if (/^\d+[.)]/.test(trimmed)) {
+                                  groups.push({
+                                    text: trimmed.replace(/^\d+[.)]\\s*/, ""),
+                                    subs: [],
+                                  });
+                                } else if (trimmed.startsWith("•") && groups.length > 0) {
+                                  groups[groups.length - 1].subs.push(
+                                    trimmed.replace(/^•\\s*/, "")
+                                  );
+                                } else if (trimmed.startsWith("•") && groups.length === 0) {
+                                  // Top-level bullet with no prior number — treat as numbered step
+                                  groups.push({ text: trimmed.replace(/^•\\s*/, ""), subs: [] });
+                                } else if (groups.length > 0) {
+                                  groups[groups.length - 1].subs.push(trimmed);
+                                }
+                              });
+                              return (
+                                <ol className="deepdive-steps">
+                                  {groups.map((g, j) => (
+                                    <li key={j}>
+                                      {highlightKeyTerms(g.text)}
+                                      {g.subs.length > 0 && (
+                                        <ul className="deepdive-sub-bullets">
+                                          {g.subs.map((s, k) => (
+                                            <li key={k}>{highlightKeyTerms(s)}</li>
+                                          ))}
+                                        </ul>
+                                      )}
+                                    </li>
+                                  ))}
+                                </ol>
+                              );
+                            }
+
                             if (isBullets) {
                               return (
                                 <ul className="deepdive-bullets">
@@ -283,10 +363,10 @@ export default function PathStep({
                               const groups = [];
                               lines.forEach((l) => {
                                 if (/^\d+[.)]/.test(l.trim())) {
-                                  groups.push({ text: l.replace(/^\d+[.)]\s*/, ""), subs: [] });
+                                  groups.push({ text: l.replace(/^\d+[.)]\\s*/, ""), subs: [] });
                                 } else if (l.trim().startsWith("•") && groups.length > 0) {
                                   groups[groups.length - 1].subs.push(
-                                    l.replace(/^•\s*/, "").trim()
+                                    l.replace(/^•\\s*/, "").trim()
                                   );
                                 } else if (groups.length > 0) {
                                   groups[groups.length - 1].subs.push(l.trim());

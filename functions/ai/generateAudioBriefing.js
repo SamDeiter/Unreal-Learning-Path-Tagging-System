@@ -103,9 +103,11 @@ ${positionInstruction}
 In about 100-120 words (4-6 sentences), explain what the learner should understand and focus on in this step. Be specific to the actual content — reference concrete UE5 concepts, classes, functions, or workflows mentioned in the text. Speak directly to the learner using "you".
 
 IMPORTANT:
+- ONLY discuss Unreal Engine / game development concepts. NEVER reference real-world physics, hardware, or physical mechanisms. If a term (e.g. "muzzle report", "recoil") appears in the source text, explain it ONLY in the context of implementing it in UE5 (sound cues, animations, Blueprint nodes, etc.), NOT what it means in the real world.
+- If the source content is ambiguous or thin, stay within UE5 context. Do NOT fill gaps with real-world knowledge.
 - Do NOT tell the learner to "search the Content Browser" or "look for X in the editor" — instead explain what the concept IS and how it works.
 - Focus on UNDERSTANDING, not on generic navigation instructions.
-- Give practical context: WHY this concept matters and WHEN you'd use it.
+- Give practical context: WHY this concept matters in UE5 and WHEN you'd use it.
 - Do NOT use any markdown, bullet points, or formatting. Just plain conversational text.`;
 
         const stepScriptUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
@@ -246,6 +248,7 @@ Return ONLY valid JSON (no markdown, no code fences):
 }
 
 RULES:
+- ONLY discuss Unreal Engine / game development concepts. NEVER reference real-world physics, hardware, or mechanisms. Explain terms only in UE5 context (Blueprint nodes, C++ classes, sound cues, materials, etc.).
 - CONCISE: use bullet points (•) or numbered lists (1. 2. 3.), NEVER paragraphs
 - Reference real UE5 class names, functions, editor paths
 - Each section: 60-100 words MAX
@@ -292,12 +295,12 @@ RULES:
 
       // ── TAKEAWAYS MODE: generate actionable key takeaways ──
       if (mode === "takeaways") {
-        const { stepContent, stepCategory, stepAction } = data;
+        const { stepContent, stepCategory, stepAction, stepTitle } = data;
 
         const takeawayPrompt = `You are a UE5 instructor highlighting KEY TAKEAWAYS for a learner.
 
 The learner asked: "${query}"
-This is a ${stepCategory || "learning"} step:
+This is a ${stepCategory || "learning"} step titled "${stepTitle || ""}":
 
 "${(stepContent || "").substring(0, 1500)}"
 ${stepAction ? `\nAction steps from this content:\n"${stepAction.substring(0, 500)}"` : ""}
