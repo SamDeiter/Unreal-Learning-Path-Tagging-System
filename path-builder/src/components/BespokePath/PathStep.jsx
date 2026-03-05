@@ -7,7 +7,8 @@
  * 2. Per-step audio (fallback): isolated clip from generateStepAudio
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { CATEGORY_STYLES } from "./pathConstants";
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -117,7 +118,31 @@ export default function PathStep({
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [scriptOpen, setScriptOpen] = useState(false);
   const [deepDiveOpen, setDeepDiveOpen] = useState(true);
+  const [sectionRatings, setSectionRatings] = useState({}); // { 0: "good", 2: "bad" }
   const audioRef = useRef(null);
+
+  // Save deepdive section rating to Firestore
+  const rateSection = useCallback(
+    async (sectionIndex, rating) => {
+      const section = deepDive?.[sectionIndex];
+      if (!section) return;
+      setSectionRatings((prev) => ({ ...prev, [sectionIndex]: rating }));
+      try {
+        const db = getFirestore();
+        await addDoc(collection(db, "deepdive_ratings"), {
+          stepTitle: step?.segment?.title || "",
+          sectionType: section.type,
+          sectionTitle: section.title,
+          sectionContent: section.content,
+          rating, // "good" or "bad"
+          timestamp: serverTimestamp(),
+        });
+      } catch (err) {
+        console.error("Failed to save rating:", err);
+      }
+    },
+    [deepDive, step]
+  );
 
   // Auto-play audio when transitioning between phases
   useEffect(() => {
@@ -389,6 +414,31 @@ export default function PathStep({
                             }
                             return lines.map((p, j) => <p key={j}>{highlightKeyTerms(p)}</p>);
                           })()}
+                        </div>
+                        {/* Rating buttons */}
+                        <div className="deepdive-rating">
+                          {sectionRatings[i] ? (
+                            <span className="deepdive-rating-done">
+                              {sectionRatings[i] === "good" ? "👍" : "👎"} Rated
+                            </span>
+                          ) : (
+                            <>
+                              <button
+                                className="deepdive-rate-btn deepdive-rate-good"
+                                onClick={() => rateSection(i, "good")}
+                                title="This section is helpful and specific"
+                              >
+                                👍
+                              </button>
+                              <button
+                                className="deepdive-rate-btn deepdive-rate-bad"
+                                onClick={() => rateSection(i, "bad")}
+                                title="This section is vague or off-topic"
+                              >
+                                👎
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     ))}
