@@ -317,16 +317,14 @@ export default function PathStep({
                                 const trimmed = l.trim();
                                 if (/^\d+[.)]/.test(trimmed)) {
                                   groups.push({
-                                    text: trimmed.replace(/^\d+[.)]\\s*/, ""),
+                                    text: trimmed.replace(/^\d+[.)]\s*/, ""),
                                     subs: [],
                                   });
                                 } else if (trimmed.startsWith("•") && groups.length > 0) {
-                                  groups[groups.length - 1].subs.push(
-                                    trimmed.replace(/^•\\s*/, "")
-                                  );
+                                  groups[groups.length - 1].subs.push(trimmed.replace(/^•\s*/, ""));
                                 } else if (trimmed.startsWith("•") && groups.length === 0) {
                                   // Top-level bullet with no prior number — treat as numbered step
-                                  groups.push({ text: trimmed.replace(/^•\\s*/, ""), subs: [] });
+                                  groups.push({ text: trimmed.replace(/^•\s*/, ""), subs: [] });
                                 } else if (groups.length > 0) {
                                   groups[groups.length - 1].subs.push(trimmed);
                                 }
@@ -363,10 +361,10 @@ export default function PathStep({
                               const groups = [];
                               lines.forEach((l) => {
                                 if (/^\d+[.)]/.test(l.trim())) {
-                                  groups.push({ text: l.replace(/^\d+[.)]\\s*/, ""), subs: [] });
+                                  groups.push({ text: l.replace(/^\d+[.)]\s*/, ""), subs: [] });
                                 } else if (l.trim().startsWith("•") && groups.length > 0) {
                                   groups[groups.length - 1].subs.push(
-                                    l.replace(/^•\\s*/, "").trim()
+                                    l.replace(/^•\s*/, "").trim()
                                   );
                                 } else if (groups.length > 0) {
                                   groups[groups.length - 1].subs.push(l.trim());
@@ -428,15 +426,22 @@ export default function PathStep({
           </div>
           {sourcesOpen && (
             <div className="footnotes-content">
-              <a
-                href={fixEpicUrl(segment.videoUrl || segment.url)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="footnote-link"
-              >
-                <i className={`fa-solid ${sourceIcon}`}></i>
-                {displayTitle}
-              </a>
+              {segment.videoUrl || segment.url ? (
+                <a
+                  href={fixEpicUrl(segment.videoUrl || segment.url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footnote-link"
+                >
+                  <i className={`fa-solid ${sourceIcon}`}></i>
+                  {displayTitle}
+                </a>
+              ) : (
+                <span className="footnote-link footnote-no-link">
+                  <i className={`fa-solid ${sourceIcon}`}></i>
+                  {displayTitle}
+                </span>
+              )}
             </div>
           )}
         </div>
