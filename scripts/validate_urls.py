@@ -9,6 +9,7 @@ Usage:
     python scripts/validate_urls.py              # Report only (stdout + JSON)
     python scripts/validate_urls.py --fix        # Report + patch JSON files
     python scripts/validate_urls.py --verbose    # Extra logging
+    python scripts/validate_urls.py --workers 30 # Parallel checks (default: 20)
 """
 
 import argparse
@@ -18,6 +19,8 @@ import re
 import sys
 import time
 import hashlib
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.parse import urlparse, quote_plus
 
@@ -238,6 +241,7 @@ def main():
     parser = argparse.ArgumentParser(description="URL Health Checker")
     parser.add_argument("--fix", action="store_true", help="Auto-patch broken URLs")
     parser.add_argument("--verbose", action="store_true", help="Extra logging")
+    parser.add_argument("--workers", type=int, default=20, help="Parallel workers (default: 20)")
     args = parser.parse_args()
 
     if not HAS_REQUESTS:
@@ -274,38 +278,51 @@ def main():
 
     print(f"\n  Total unique URLs: {len(unique_urls)}")
 
-    # Phase 2: Validate URLs
+    # Phase 2: Validate URLs (parallel)
     print("\n" + "━" * 60)
-    print("Phase 2: Checking URL health...")
+    print(f"Phase 2: Checking URL health ({args.workers} workers)...")
     print("━" * 60)
 
     broken = []
     ok_count = 0
     error_count = 0
+    completed = 0
+    lock = threading.Lock()
+    total = len(unique_urls)
 
-    for i, entry in enumerate(unique_urls):
-        url = entry["url"]
-        if args.verbose:
-            print(f"  [{i+1}/{len(unique_urls)}] {url[:70]}...")
-
-        health = check_url_health(url)
+    def check_one(entry):
+        """Check a single URL and return the result."""
+        health = check_url_health(entry["url"])
         entry["health"] = health
+        return entry
 
-        if health["status"] == "ok":
-            ok_count += 1
-        elif health["status"] == "broken":
-            title = get_title_context(DATA_DIR / entry["file"], entry["json_path"])
-            entry["title_context"] = title
-            broken.append(entry)
-            print(f"  ✗ BROKEN ({health.get('code', '?')}): {url[:70]}...")
-            if title:
-                print(f"    Context: \"{title}\"")
-        elif health["status"] == "error":
-            error_count += 1
-            if args.verbose:
-                print(f"  ⚠ ERROR: {url[:50]}... — {health.get('reason', '')[:50]}")
+    with ThreadPoolExecutor(max_workers=args.workers) as executor:
+        futures = {executor.submit(check_one, e): e for e in unique_urls}
 
-        time.sleep(REQUEST_DELAY)
+        for future in as_completed(futures):
+            entry = future.result()
+            health = entry["health"]
+            url = entry["url"]
+
+            with lock:
+                completed += 1
+                if health["status"] == "ok":
+                    ok_count += 1
+                elif health["status"] == "broken":
+                    title = get_title_context(DATA_DIR / entry["file"], entry["json_path"])
+                    entry["title_context"] = title
+                    broken.append(entry)
+                    print(f"  ✗ BROKEN ({health.get('code', '?')}): {url[:70]}...")
+                    if title:
+                        print(f"    Context: \"{title}\"")
+                elif health["status"] == "error":
+                    error_count += 1
+                    if args.verbose:
+                        print(f"  ⚠ ERROR: {url[:50]}... — {health.get('reason', '')[:50]}")
+
+                # Progress update every 100 URLs
+                if completed % 100 == 0 or completed == total:
+                    print(f"  ⏳ Progress: {completed}/{total} ({completed*100//total}%)")
 
     print(f"\n  OK: {ok_count} | Broken: {len(broken)} | Errors: {error_count}")
 
