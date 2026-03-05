@@ -429,7 +429,31 @@ Return a JSON array:
       return [];
     }
 
-    const steps = JSON.parse(jsonMatch[0]);
+    // Sanitize common Gemini JSON issues
+    let jsonStr = jsonMatch[0]
+      .replace(/```json?\s*/gi, "") // strip code fences
+      .replace(/```\s*/g, "") // strip closing fences
+      .replace(/[\u201C\u201D]/g, '"') // smart quotes → straight
+      .replace(/[\u2018\u2019]/g, "'") // smart single quotes
+      .replace(/,\s*([}\]])/g, "$1"); // trailing commas
+
+    let steps;
+    try {
+      steps = JSON.parse(jsonStr);
+      // eslint-disable-next-line no-unused-vars
+    } catch (_parseErr) {
+      // Last-ditch: try replacing single-quoted keys with double-quoted
+      jsonStr = jsonStr.replace(/'/g, '"');
+      try {
+        steps = JSON.parse(jsonStr);
+      } catch (finalErr) {
+        devWarn(
+          "[BespokePath] Hybrid JSON parse failed even after sanitization:",
+          finalErr.message
+        );
+        return [];
+      }
+    }
     const CATEGORY_ORDER = { foundation: 0, diagnosis: 1, fix: 2, transfer: 3 };
 
     const sequenced = steps

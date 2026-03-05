@@ -30,6 +30,7 @@ async function searchCollection(collectionName, queryVector, topK) {
       queryVector: FieldValue.vector(queryVector),
       limit: topK,
       distanceMeasure: "COSINE",
+      distanceResultField: "vector_distance",
     })
     .get();
 
@@ -38,9 +39,12 @@ async function searchCollection(collectionName, queryVector, topK) {
     const data = doc.data();
     // Remove the embedding vector from results (too large to send back)
     // eslint-disable-next-line no-unused-vars
-    const { embedding: _embedding, ...metadata } = data;
+    const { embedding: _embedding, vector_distance: rawDist, ...metadata } = data;
+    // Convert cosine distance (0 = identical, 2 = opposite) to similarity (1 = identical, -1 = opposite)
+    const similarity = rawDist !== null && rawDist !== undefined ? 1 - rawDist : 0;
     results.push({
       id: doc.id,
+      similarity,
       ...metadata,
     });
   });
