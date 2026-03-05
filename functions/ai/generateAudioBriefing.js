@@ -273,6 +273,7 @@ RULES:
 - SELF-CHECK: Before returning, verify that (1) every practical step has a concrete number or value, (2) all 3 sections discuss the SAME topic from the step title, (3) the practical section references concepts from sections 1 and 2
 - DIFFERENTIATION: The practical section must teach the SPECIFIC distinguishing concept in the step title. Ask yourself: "Would this exact exercise also work for a different step on the same general topic?" If yes, it is too generic — rewrite it to be unique to THIS title.
 - EDITOR CONTEXT: Start the practical section's FIRST step by naming the specific UE5 editor tool (e.g. "In the Texture Graph…", "In the Blueprint Editor…", "Using Modeling Mode…"). If the step title implies 3D work (mesh, model, shape) but the source is about a 2D tool (Texture Graph, Material Editor), explicitly clarify "This creates a 2D texture pattern, not a 3D mesh."
+- SKILL LEVEL: The learner is ${userLevel.toUpperCase()} level. For BEGINNER learners: if the source text uses advanced tools or workflows (e.g. Customizable Objects, Control Rig, Niagara advanced modules, C++ classes), suggest the simplest Blueprint-based alternative that achieves the same learning goal. State "For beginners, use [simpler approach] instead of [advanced tool]." For INTERMEDIATE/ADVANCED learners: use the tools as described in the source.
 - Each section: 60-100 words MAX
 - Do NOT use markdown formatting inside the JSON strings`;
 
