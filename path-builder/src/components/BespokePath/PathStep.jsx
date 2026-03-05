@@ -9,6 +9,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { getFirebaseApp } from "../../services/firebaseConfig";
 import { CATEGORY_STYLES } from "./pathConstants";
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -129,7 +130,7 @@ export default function PathStep({
       if (!section) return;
       setSectionRatings((prev) => ({ ...prev, [sectionIndex]: rating }));
       try {
-        const db = getFirestore();
+        const db = getFirestore(getFirebaseApp());
         await addDoc(collection(db, "deepdive_ratings"), {
           stepTitle: step?.segment?.title || "",
           sectionType: section.type,
