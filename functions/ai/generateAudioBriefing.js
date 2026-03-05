@@ -228,10 +228,17 @@ This is the ${stepCategory || "learning"} step titled "${stepTitle || ""}":
 
 Create exactly 3 focused sub-sections about the step title: "${stepTitle || ""}". Do NOT introduce concepts from other parts of the source text. Stay anchored to the title topic. Be CONCISE — use bullet points, not paragraphs.
 
-EXAMPLE OF BAD vs GOOD output for the practical section:
+EXAMPLES OF BAD vs GOOD output for the practical section:
+
+Example 1 — Vague vs Specific:
 BAD: "1. Add a Force module to simulate explosion force. • Adjust the Force Strength parameter."
 GOOD: "1. In the Emitter Update section, right-click > Add Module > Force. • Set Force Strength to 500 as a starting point for a medium-range explosion."
-The BAD version is vague and gives no actionable values. The GOOD version gives exact menu paths and concrete numbers.
+The BAD version is vague. The GOOD version has exact menu paths and values.
+
+Example 2 — Generic vs Title-Specific (CRITICAL):
+If the step title is "Replication Ordering Guarantees", a BAD practical section would be: "1. Open your Blueprint. 2. Create a Health variable. 3. Set Replication to Replicated." This is BAD because it teaches basic replication, not ORDERING GUARANTEES specifically.
+A GOOD practical section for "Replication Ordering Guarantees" would be: "1. Create two replicated variables: Health and MaxHealth. 2. In the RepNotify function for Health, check if Health > MaxHealth. 3. Note: MaxHealth may not have replicated yet — this demonstrates ordering dependency."
+The practical section must teach what is UNIQUE about THIS step title, not just the general topic area.
 
 Return ONLY valid JSON (no markdown, no code fences):
 {
@@ -263,6 +270,7 @@ RULES:
 - In the practical section, every step MUST be actionable with exact menu paths (e.g. "Details > Force > Strength") and concrete parameter values
 - SOURCE GROUNDING: ONLY use information present in the provided source text. Do NOT fill gaps with general UE5 knowledge. If the source text does not mention specific values, provide reasonable UE5 defaults.
 - SELF-CHECK: Before returning, verify that (1) every practical step has a concrete number or value, (2) all 3 sections discuss the SAME topic from the step title, (3) the practical section references concepts from sections 1 and 2
+- DIFFERENTIATION: The practical section must teach the SPECIFIC distinguishing concept in the step title. Ask yourself: "Would this exact exercise also work for a different step on the same general topic?" If yes, it is too generic — rewrite it to be unique to THIS title.
 - Each section: 60-100 words MAX
 - Do NOT use markdown formatting inside the JSON strings`;
 

@@ -424,15 +424,23 @@ export default function PathStep({
                           ) : (
                             <>
                               <button
+                                type="button"
                                 className="deepdive-rate-btn deepdive-rate-good"
-                                onClick={() => rateSection(i, "good")}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  rateSection(i, "good");
+                                }}
                                 title="This section is helpful and specific"
                               >
                                 👍
                               </button>
                               <button
+                                type="button"
                                 className="deepdive-rate-btn deepdive-rate-bad"
-                                onClick={() => rateSection(i, "bad")}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  rateSection(i, "bad");
+                                }}
                                 title="This section is vague or off-topic"
                               >
                                 👎
