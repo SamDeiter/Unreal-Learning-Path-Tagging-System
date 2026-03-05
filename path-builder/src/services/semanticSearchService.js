@@ -44,7 +44,7 @@ export function cosineSimilarity(a, b) {
  * @param {number} threshold - Minimum similarity to include (default 0.3) — unused, server handles ranking
  * @returns {Array<{code: string, title: string, similarity: number}>}
  */
-export async function findSimilarCourses(queryEmbedding, topK = 5, threshold = 0.3) {
+export async function findSimilarCourses(queryEmbedding, topK = 5, _threshold = 0.3) {
   if (!queryEmbedding) return [];
 
   try {

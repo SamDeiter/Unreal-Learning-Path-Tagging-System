@@ -139,7 +139,7 @@ const SUGGESTION_POOL = [
 const DEFAULT_SUGGESTIONS = SUGGESTION_POOL.slice(0, 5).map((s) => s.q);
 
 /** Filter suggestions by keyword match against user input */
-function getFilteredSuggestions(input) {
+function _getFilteredSuggestions(input) {
   if (!input || input.trim().length < 2) return DEFAULT_SUGGESTIONS;
 
   const words = input
@@ -433,7 +433,10 @@ export default function BespokePath() {
     if (pathResult && pathResult.path && currentStep >= 0) {
       // Ensure we don't trigger if already loaded or loading
       if (!stepTakeaways.has(currentStep) && takeawayLoading !== currentStep) {
-        handleLoadTakeaways(currentStep);
+        // Defer to avoid synchronous setState in effect body
+        const step = currentStep;
+        const id = setTimeout(() => handleLoadTakeaways(step), 0);
+        return () => clearTimeout(id);
       }
     }
   }, [currentStep, pathResult, handleLoadTakeaways, stepTakeaways, takeawayLoading]);
