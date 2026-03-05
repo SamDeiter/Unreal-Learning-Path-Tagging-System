@@ -761,14 +761,26 @@ export default function AdaptivePath() {
                         }}
                       >
                         {pathData.path.map((step, i) => {
-                          const url = fixEpicUrl(step.segment?.videoUrl || step.segment?.url);
+                          const isAiGenerated =
+                            step.segment?.type === "ai_generated" ||
+                            step.segment?.source === "ai_generated";
+                          const url = isAiGenerated
+                            ? null
+                            : fixEpicUrl(step.segment?.videoUrl || step.segment?.url);
                           const title =
                             cleanTitle(step.segment?.title || step.segment?.videoTitle) ||
                             `Step ${i + 1}`;
-                          const sourceType = step.segment?.type || step.segment?.source || "docs";
-                          const icon = sourceType === "transcript" ? "fa-video" : "fa-book-open";
-                          const typeLabel =
-                            sourceType === "transcript"
+                          const sourceType = isAiGenerated
+                            ? "ai_generated"
+                            : step.segment?.type || step.segment?.source || "docs";
+                          const icon = isAiGenerated
+                            ? "fa-robot"
+                            : sourceType === "transcript"
+                              ? "fa-video"
+                              : "fa-book-open";
+                          const typeLabel = isAiGenerated
+                            ? "AI-Assisted"
+                            : sourceType === "transcript"
                               ? "Video"
                               : sourceType === "epic_learning"
                                 ? "Article"

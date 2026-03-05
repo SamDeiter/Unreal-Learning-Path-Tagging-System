@@ -252,7 +252,7 @@ export default function PathStep({
           </span>
           {sourceType === "ai_generated" && (
             <span className="source-pill ai-generated-pill">
-              <i className="fa-solid fa-robot"></i> AI-generated — no source video available
+              <i className="fa-solid fa-robot"></i> AI-assisted — beyond current course library
             </span>
           )}
           {narrationScript && (
