@@ -754,12 +754,18 @@ export default function AdaptivePath() {
                               : sourceType === "epic_learning"
                                 ? "Article"
                                 : "Docs";
+                          const Wrapper = url ? "a" : "div";
+                          const wrapperProps = url
+                            ? {
+                                href: url,
+                                target: "_blank",
+                                rel: "noopener noreferrer",
+                              }
+                            : {};
                           return (
-                            <a
+                            <Wrapper
                               key={i}
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              {...wrapperProps}
                               style={{
                                 display: "flex",
                                 alignItems: "center",
@@ -768,16 +774,21 @@ export default function AdaptivePath() {
                                 background: "rgba(88, 166, 255, 0.06)",
                                 border: "1px solid var(--border-color, #30363d)",
                                 borderRadius: "10px",
-                                color: "var(--accent-blue, #58a6ff)",
+                                color: url
+                                  ? "var(--accent-blue, #58a6ff)"
+                                  : "var(--text-secondary, #8b949e)",
                                 textDecoration: "none",
                                 transition: "all 0.2s",
                                 fontSize: "0.9rem",
+                                cursor: url ? "pointer" : "default",
                               }}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.background = "rgba(88, 166, 255, 0.12)";
+                                if (url)
+                                  e.currentTarget.style.background = "rgba(88, 166, 255, 0.12)";
                               }}
                               onMouseLeave={(e) => {
-                                e.currentTarget.style.background = "rgba(88, 166, 255, 0.06)";
+                                if (url)
+                                  e.currentTarget.style.background = "rgba(88, 166, 255, 0.06)";
                               }}
                             >
                               <i
@@ -796,11 +807,13 @@ export default function AdaptivePath() {
                                   {typeLabel} • Step {i + 1}
                                 </div>
                               </div>
-                              <i
-                                className="fa-solid fa-arrow-up-right-from-square"
-                                style={{ opacity: 0.5, fontSize: "0.8rem" }}
-                              />
-                            </a>
+                              {url && (
+                                <i
+                                  className="fa-solid fa-arrow-up-right-from-square"
+                                  style={{ opacity: 0.5, fontSize: "0.8rem" }}
+                                />
+                              )}
+                            </Wrapper>
                           );
                         })}
                       </div>

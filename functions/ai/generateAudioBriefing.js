@@ -252,6 +252,7 @@ RULES:
 - ONLY discuss Unreal Engine / game development concepts. NEVER reference real-world physics, hardware, or mechanisms. Explain terms only in UE5 context (Blueprint nodes, sound cues, materials, property panels, editor menus). Avoid C++ code syntax unless the learner explicitly asked about C++.
 - CONCISE: use bullet points (•) or numbered lists (1. 2. 3.), NEVER paragraphs
 - Reference Blueprint node names, property names, and editor paths rather than C++ class names
+- Write out number abbreviations in full (e.g. "100 million" not "100M", "1 thousand" not "1K")
 - Each section: 60-100 words MAX
 - Do NOT use markdown formatting inside the JSON strings`;
 
