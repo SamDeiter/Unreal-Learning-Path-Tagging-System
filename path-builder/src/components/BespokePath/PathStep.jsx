@@ -283,6 +283,20 @@ export default function PathStep({
                       .join(" ") + ":"
                 );
                 const final = normalized.charAt(0).toUpperCase() + normalized.slice(1);
+
+                // Split "— success:" onto its own line
+                const successMatch = final.match(/^(.*?)\s*—\s*success:\s*(.*)$/i);
+                if (successMatch) {
+                  const [, main, outcome] = successMatch;
+                  return (
+                    <li key={i}>
+                      {highlightKeyTerms(main)}
+                      <div className="takeaway-success">
+                        ✅ Success: {outcome.charAt(0).toUpperCase() + outcome.slice(1)}
+                      </div>
+                    </li>
+                  );
+                }
                 return <li key={i}>{highlightKeyTerms(final)}</li>;
               })}
             </ul>
