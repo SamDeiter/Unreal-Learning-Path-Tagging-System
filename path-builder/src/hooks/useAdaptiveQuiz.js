@@ -19,16 +19,46 @@ const STAGES = {
   ERROR: "error",
 };
 
+const STORAGE_KEY = "ue5_learner_profile";
+
+/** Load a previously saved learner profile from localStorage. */
+function loadSavedProfile() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.level && Array.isArray(parsed.gaps)) return parsed;
+  } catch {
+    /* corrupt data — ignore */
+  }
+  return null;
+}
+
+/** Persist a learner profile to localStorage. */
+function saveProfile(profile) {
+  try {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ ...profile, savedAt: new Date().toISOString() })
+    );
+  } catch {
+    /* storage full — ignore */
+  }
+}
+
 /**
  * @returns {Object} Quiz state and handlers
  */
 export default function useAdaptiveQuiz() {
-  const [stage, setStage] = useState(STAGES.IDLE);
+  // Auto-restore saved profile on mount
+  const saved = loadSavedProfile();
+  const [stage, setStage] = useState(saved ? STAGES.COMPLETE : STAGES.IDLE);
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState([]); // { questionIndex, selectedOption, concept, correct }
-  const [knowledgeProfile, setKnowledgeProfile] = useState(null);
+  const [answers, setAnswers] = useState([]);
+  const [knowledgeProfile, setKnowledgeProfile] = useState(saved || null);
   const [error, setError] = useState(null);
+  const hasSavedProfile = !!saved;
 
   /**
    * Generate diagnostic questions for a topic.
@@ -102,6 +132,7 @@ export default function useAdaptiveQuiz() {
         // Build knowledge profile from all answers
         const profile = buildKnowledgeProfile(updatedAnswers, questions);
         setKnowledgeProfile(profile);
+        saveProfile(profile);
         setStage(STAGES.COMPLETE);
       }
     },
@@ -120,6 +151,23 @@ export default function useAdaptiveQuiz() {
     setError(null);
   }, []);
 
+  /**
+   * Clear saved profile and reset — used for "Retake Assessment".
+   */
+  const clearProfile = useCallback(() => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+    setKnowledgeProfile(null);
+    setStage(STAGES.IDLE);
+    setQuestions([]);
+    setCurrentIndex(0);
+    setAnswers([]);
+    setError(null);
+  }, []);
+
   return {
     stage,
     questions,
@@ -128,9 +176,11 @@ export default function useAdaptiveQuiz() {
     answers,
     knowledgeProfile,
     error,
+    hasSavedProfile,
     startDiagnostic,
     submitAnswer,
     reset,
+    clearProfile,
     STAGES,
   };
 }

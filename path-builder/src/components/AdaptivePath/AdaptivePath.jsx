@@ -90,15 +90,19 @@ export default function AdaptivePath() {
     currentQuestion,
     knowledgeProfile,
     error: quizError,
+    hasSavedProfile,
     startDiagnostic,
     submitAnswer,
     reset,
+    clearProfile,
     STAGES,
   } = useAdaptiveQuiz();
 
   /**
    * Handle starting the diagnostic quiz
    */
+  const [pendingGeneration, setPendingGeneration] = useState(false);
+
   const handleStart = useCallback(async () => {
     const result = sanitizeQuery(query);
     if (!result.valid) return;
@@ -110,8 +114,24 @@ export default function AdaptivePath() {
     recordQuery(cleaned);
     saveRecentQuery(cleaned);
     setRecentQueries(loadRecentQueries());
+
+    // Skip diagnostic if we already have a saved learner profile
+    if (hasSavedProfile) {
+      setQuery(cleaned);
+      setPendingGeneration(true);
+      return;
+    }
+
     startDiagnostic(cleaned);
-  }, [query, startDiagnostic]);
+  }, [query, startDiagnostic, hasSavedProfile]);
+
+  // Auto-generate path when skipping diagnostic (saved profile)
+  useEffect(() => {
+    if (pendingGeneration && query && knowledgeProfile && !pathLoading) {
+      setPendingGeneration(false);
+      handleGeneratePath();
+    }
+  }, [pendingGeneration, query, knowledgeProfile, pathLoading, handleGeneratePath]);
 
   /**
    * Handle selecting a pre-seeded path (skip diagnostic, instantly show path)
@@ -639,6 +659,27 @@ export default function AdaptivePath() {
                 >
                   {knowledgeProfile?.level} level
                 </span>
+                {hasSavedProfile && (
+                  <button
+                    onClick={() => {
+                      clearProfile();
+                      startDiagnostic(query);
+                    }}
+                    style={{
+                      display: "block",
+                      marginTop: "6px",
+                      background: "transparent",
+                      border: "none",
+                      color: "#64748b",
+                      fontSize: "0.6rem",
+                      cursor: "pointer",
+                      padding: 0,
+                      textDecoration: "underline",
+                    }}
+                  >
+                    ⚙️ Retake Assessment
+                  </button>
+                )}
               </div>
               <nav className="phase-nav">
                 {phases.map((phase) => (
