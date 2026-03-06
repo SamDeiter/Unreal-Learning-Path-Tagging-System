@@ -158,9 +158,12 @@ function buildContentAwareFallback(step, title) {
   if (sentences.length >= 2) {
     const categoryVerb =
       {
+        prerequisite: "Understand",
         foundation: "Understand",
         diagnosis: "Identify",
+        core: "Apply",
         fix: "Apply",
+        practice: "Practice",
         transfer: "Extend",
       }[category] || "Review";
 

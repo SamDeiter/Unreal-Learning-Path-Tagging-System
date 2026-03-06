@@ -233,36 +233,39 @@ This is the ${stepCategory || "learning"} step titled "${stepTitle || ""}":
 ${takeawayContext}
 Create exactly 3 focused sub-sections about the step title: "${stepTitle || ""}". Do NOT introduce concepts from other parts of the source text. Stay anchored to the title topic. Be CONCISE — use bullet points, not paragraphs.
 
-EXAMPLES OF BAD vs GOOD output for the practical section:
+CRITICAL: Each section serves a COMPLETELY DIFFERENT purpose. They must NOT repeat each other:
+1. "Key Properties & Settings" = REFERENCE: the exact names and locations of things in UE5
+2. "Common Pitfalls" = WARNINGS: mistakes people make and how to avoid them
+3. "Try It" = ACTION: a quick hands-on exercise
 
-Example 1 — Vague vs Specific:
+EXAMPLES OF BAD vs GOOD output:
+
+Example — Redundancy (THE #1 PROBLEM TO AVOID):
+BAD: Section 1 says "Line traces detect collisions" and Section 2 says "Incorrect trace settings cause missed targets" — these are the SAME concept rephrased.
+GOOD: Section 1 lists "LineTraceByChannel node > Trace Channel dropdown > set to Visibility" (REFERENCE), Section 2 says "Setting Trace Channel to 'Camera' instead of 'Visibility' silently skips static meshes" (WARNING — a specific mistake).
+
+Example — Vague vs Specific:
 BAD: "1. Add a Force module to simulate explosion force. • Adjust the Force Strength parameter."
 GOOD: "1. In the Emitter Update section, right-click > Add Module > Force. • Set Force Strength to 500 as a starting point for a medium-range explosion."
-The BAD version is vague. The GOOD version has exact menu paths and values.
-
-Example 2 — Generic vs Title-Specific (CRITICAL):
-If the step title is "Replication Ordering Guarantees", a BAD practical section would be: "1. Open your Blueprint. 2. Create a Health variable. 3. Set Replication to Replicated." This is BAD because it teaches basic replication, not ORDERING GUARANTEES specifically.
-A GOOD practical section for "Replication Ordering Guarantees" would be: "1. Create two replicated variables: Health and MaxHealth. 2. In the RepNotify function for Health, check if Health > MaxHealth. 3. Note: MaxHealth may not have replicated yet — this demonstrates ordering dependency."
-The practical section must teach what is UNIQUE about THIS step title, not just the general topic area.
 
 Return ONLY valid JSON (no markdown, no code fences):
 {
   "editorContext": "The specific UE5 editor tool used in this step — one of: Blueprint Editor, Material Editor, Texture Graph, Modeling Mode, Niagara, Sequencer, Level Editor, Animation Blueprint, or Other",
   "sections": [
     {
-      "title": "Short title (e.g. 'Core Concept')",
-      "content": "2-4 bullet points ONLY (every line starts with •). No introductory sentences. Each bullet is one clear sentence. Total ~80 words. Reference specific UE5 classes or nodes FROM THE SOURCE TEXT ONLY.",
-      "type": "concept"
+      "title": "Key Properties & Settings",
+      "content": "2-4 bullet points ONLY (every line starts with •). Each bullet names a SPECIFIC property, node, or panel and WHERE to find it. Format: '• PropertyName — found in PanelName > SectionName'. Do NOT explain what it does here (that is the summary's job). This is a REFERENCE CARD. ~60-80 words.",
+      "type": "properties"
     },
     {
-      "title": "Short title (e.g. 'Why It Matters')",
-      "content": "2-4 bullet points ONLY (every line starts with •). Cover: how it works, performance implications, common mistakes. Reference concepts from section 1. ~80 words total.",
-      "type": "mechanics"
+      "title": "Common Pitfalls",
+      "content": "2-4 bullet points ONLY (every line starts with •). Each bullet describes a SPECIFIC MISTAKE and its consequence. Format: '• If you [wrong action], [bad result]. Instead, [correct action].' These must be DIFFERENT information from section 1 — not the same facts rephrased as warnings. ~60-80 words.",
+      "type": "pitfalls"
     },
     {
-      "title": "Short title (e.g. 'Try It Now')",
-      "content": "3-5 numbered steps (1. 2. 3.) the learner can follow in UE5. Each step MUST directly apply a concept from sections 1 and 2 above — do NOT introduce new topics. For any step that needs clarification, add sub-bullets (• prefix) underneath. Be specific about menu paths, node names, AND parameter values. ALWAYS give concrete numbers — e.g. 'set Force Strength to 500' NOT 'adjust Force Strength'. If a reasonable default exists, state it. ~80-100 words total.",
-      "type": "practical"
+      "title": "Try It",
+      "content": "2-3 numbered steps (1. 2. 3.) the learner can follow right now in UE5. Each step MUST reference a property or node from section 1 above. Be specific about menu paths and parameter values. ALWAYS give concrete numbers. ~60-80 words total.",
+      "type": "tryit"
     }
   ]
 }
@@ -329,6 +332,16 @@ RULES:
       if (mode === "takeaways") {
         const { stepContent, stepCategory, stepAction, stepTitle } = data;
 
+        const categoryInstruction =
+          {
+            prerequisite: `Format as CONCEPTUAL takeaways — "what you need to know before proceeding". Start each with a concept name. Example: "Global Time Dilation controls the speed of all actors, physics, and animations simultaneously."`,
+            foundation: `Format as CONCEPTUAL takeaways — "what you need to know before proceeding". Start each with a concept name. Example: "Global Time Dilation controls the speed of all actors, physics, and animations simultaneously."`,
+            core: `Format as NUMBERED ACTION STEPS the learner should do. Example: "1. Open the Level Blueprint and add a Set Global Time Dilation node" or "2. Set the Time Dilation value to 0.3 for slow motion"`,
+            fix: `Format as NUMBERED ACTION STEPS the learner should do. Example: "1. Open the Level Blueprint and add a Set Global Time Dilation node" or "2. Set the Time Dilation value to 0.3 for slow motion"`,
+            practice: `Format as a MINI-CHALLENGE with a success criterion. Example: "Create a Blueprint that toggles slow motion on key press — you'll know it works when all actors visibly slow down but the UI stays responsive."`,
+            transfer: `Format as a MINI-CHALLENGE with a success criterion. Example: "Create a Blueprint that toggles slow motion on key press — you'll know it works when all actors visibly slow down but the UI stays responsive."`,
+          }[stepCategory] || "";
+
         const takeawayPrompt = `You are a UE5 instructor highlighting KEY TAKEAWAYS for a learner.
 
 The learner asked: "${query}"
@@ -343,12 +356,12 @@ Generate exactly 3 key takeaways the learner MUST know from this step. Each take
 - Frame using Blueprint workflows and editor UI, not C++ code syntax
 - NOT just restating the problem — tell them WHAT to DO (e.g. "Set NetUpdateFrequency to 100 on your Character Movement Component")
 - Include concrete specifics from the content above
-- CRITICAL DIFFERENTIATION (the Deep Dive section covers concepts separately — takeaways are ONLY for actions):
+${categoryInstruction ? `\nCATEGORY-SPECIFIC FORMAT:\n${categoryInstruction}` : ""}
+- CRITICAL DIFFERENTIATION (the Deep Dive section covers properties, pitfalls, and exercises separately — takeaways are SHORT ACTION SUMMARIES only):
   - NEVER start with "Blueprints are...", "Blueprints let you...", "Blueprints use...", or any definition/description
   - BAD: "Blueprints let you create interactive experiences without writing C++ code" (this is a DEFINITION, not an action)
   - GOOD: "Open Window > Blueprints and add an Event BeginPlay node to start scripting gameplay logic" (this is a specific ACTION)
   - BAD: "The visual nature of Blueprints makes it easier to understand game logic" (this is an OPINION)
-  - BAD: "Extremely complex Blueprints can become difficult to manage, potentially impacting performance" (this is OVERSIMPLIFIED — reality has many conditionals)
   - GOOD: "Right-click the Event Graph canvas and search for 'Print String' to test your first Blueprint node" (this is an ACTION)
 - ANTI-HALLUCINATION: ONLY reference UE5 tools, properties, and features that are EXPLICITLY mentioned in the content above. Do NOT invent or assume any UE5 features, volume types, or settings that are not in the provided text.
 - BLUEPRINT PRECISION: Blueprints ARE visual programming. NEVER say 'without code' or 'no code needed'. Say 'without writing C++ or text-based code'.

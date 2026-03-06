@@ -369,7 +369,16 @@ export default function PathStep({
                             return (
                               <div key={i} className={`deepdive-panel deepdive-${section.type}`}>
                                 <h4 className="deepdive-panel-title">
-                                  {section.type === "concept" ? "💡" : "⚙️"} {section.title}
+                                  {section.type === "properties"
+                                    ? "🔧"
+                                    : section.type === "pitfalls"
+                                      ? "⚠️"
+                                      : section.type === "tryit"
+                                        ? "🎯"
+                                        : section.type === "concept"
+                                          ? "💡"
+                                          : "⚙️"}{" "}
+                                  {section.title}
                                 </h4>
                                 <div className="deepdive-panel-content">
                                   {(() => {
