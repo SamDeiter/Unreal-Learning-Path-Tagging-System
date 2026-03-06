@@ -507,10 +507,20 @@ export default function PathStep({
                     {displayTitle}
                   </a>
                 ) : (
-                  <span className="footnote-link footnote-no-link">
-                    <i className={`fa-solid ${sourceIcon}`}></i>
-                    {displayTitle}
-                  </span>
+                  <div className="footnote-ai-note">
+                    <span className="footnote-ai-label">
+                      <i className="fa-solid fa-robot"></i> AI-synthesized from multiple sources
+                    </span>
+                    <a
+                      href={`https://dev.epicgames.com/documentation/en-us/unreal-engine/?query=${encodeURIComponent(displayTitle)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="footnote-link footnote-search-link"
+                    >
+                      <i className="fa-solid fa-magnifying-glass"></i>
+                      Search Epic Docs for "{displayTitle}"
+                    </a>
+                  </div>
                 );
               })()}
             </div>
