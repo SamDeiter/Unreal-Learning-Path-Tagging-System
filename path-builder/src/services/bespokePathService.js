@@ -40,6 +40,10 @@ const SIMILARITY_THRESHOLD = 0.7;
  * Stage 1: Find relevant segments across all embedding collections.
  * Calls embedQuery → then vectorSearchSegments + vectorSearchEpic + vectorSearchDocs.
  *
+ * When a knowledgeProfile with gaps is provided, a SECOND search is run using
+ * only the gap terms. Results are merged (gap-sourced segments get a 1.5x boost)
+ * so the sequencing stage has gap-relevant content to choose from.
+ *
  * @param {string} userQuery - The user's natural language question
  * @param {number} topK - Results per collection (default 5)
  * @param {Object} [knowledgeProfile] - Optional adaptive profile { knows, gaps, level }
@@ -51,100 +55,133 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
   const app = getFirebaseApp();
   const functions = getFunctions(app, "us-central1");
 
-  // Step 1a: Build augmented query that includes knowledge gap topics
-  // This steers the vector search toward gap-relevant content.
-  let searchQuery = userQuery;
-  if (knowledgeProfile?.gaps?.length > 0) {
-    const gapTerms = knowledgeProfile.gaps.map((g) => g.replace(/_/g, " ")).join(", ");
-    searchQuery = `${userQuery} | ${gapTerms}`;
-    devLog(`[BespokePath] Augmented search query with gaps: "${searchQuery}"`);
+  // Helper: embed a query string and return the vector
+  async function getEmbedding(query) {
+    const embedFn = httpsCallable(functions, "embedQuery");
+    const embedResult = await embedFn({ query });
+    recordTokenUsage("embedQuery", Math.ceil(query.length / 4), 0);
+    return embedResult.data?.embedding;
   }
 
-  // Step 1b: Get embedding for the (possibly augmented) query
+  // Helper: run vector search across all 3 collections
+  async function searchAllCollections(queryVector) {
+    const [segResults, epicResults, docsResults] = await Promise.allSettled([
+      httpsCallable(functions, "vectorSearchSegments")({ queryVector, topK }),
+      httpsCallable(functions, "vectorSearchEpic")({ queryVector, topK }),
+      httpsCallable(functions, "vectorSearchDocs")({ queryVector, topK }),
+    ]);
+
+    const segments = [];
+
+    if (segResults.status === "fulfilled" && segResults.value?.data?.results) {
+      for (const r of segResults.value.data.results) {
+        segments.push({
+          id: r.id,
+          type: "transcript",
+          courseCode: r.course_code,
+          videoKey: r.video_key,
+          videoTitle: r.video_title || "",
+          startTimestamp: r.start_timestamp,
+          endTimestamp: r.end_timestamp,
+          startSeconds: r.start_seconds,
+          text: r.text || "",
+          similarity: r.similarity || 0,
+        });
+      }
+    }
+
+    if (epicResults.status === "fulfilled" && epicResults.value?.data?.results) {
+      for (const r of epicResults.value.data.results) {
+        segments.push({
+          id: r.id,
+          type: "epic_learning",
+          title: r.title || "",
+          url: r.url || "",
+          contentType: r.content_type || "",
+          author: r.author || "",
+          text: r.text || "",
+          similarity: r.similarity || 0,
+        });
+      }
+    }
+
+    if (docsResults.status === "fulfilled" && docsResults.value?.data?.results) {
+      for (const r of docsResults.value.data.results) {
+        segments.push({
+          id: r.id,
+          type: "docs",
+          slug: r.slug || "",
+          url: r.url || "",
+          title: r.title || "",
+          section: r.section || "",
+          text: r.text || "",
+          similarity: r.similarity || 0,
+        });
+      }
+    }
+
+    return segments;
+  }
+
+  // ── Primary search: user's original query ──
   let queryVector;
   try {
-    const embedFn = httpsCallable(functions, "embedQuery");
-    const embedResult = await embedFn({ query: searchQuery });
-    queryVector = embedResult.data?.embedding;
+    queryVector = await getEmbedding(userQuery);
     if (!queryVector) throw new Error("No embedding returned");
     devLog(`[BespokePath] Got ${queryVector.length}-dim embedding for query`);
-    // Track: embedding is ~50 input tokens, 0 output
-    recordTokenUsage("embedQuery", Math.ceil(searchQuery.length / 4), 0);
   } catch (err) {
     devWarn("[BespokePath] embedQuery failed:", err.message);
     return { segments: [], embedding: [] };
   }
 
-  // Step 1b: Run parallel vector searches
-  const [segResults, epicResults, docsResults] = await Promise.allSettled([
-    httpsCallable(functions, "vectorSearchSegments")({ queryVector, topK }),
-    httpsCallable(functions, "vectorSearchEpic")({ queryVector, topK }),
-    httpsCallable(functions, "vectorSearchDocs")({ queryVector, topK }),
-  ]);
+  let segments = await searchAllCollections(queryVector);
 
-  const segments = [];
+  // ── Secondary search: gap-specific terms (only when adaptive) ──
+  // This ensures the segment pool always contains gap-relevant content,
+  // even when the user's phrasing doesn't semantically match the gap concepts.
+  if (knowledgeProfile?.gaps?.length > 0) {
+    const gapQuery = knowledgeProfile.gaps.map((g) => g.replace(/_/g, " ")).join(", ");
+    devLog(`[BespokePath] Running gap-specific search: "${gapQuery}"`);
 
-  // Collect segment (transcript) results
-  if (segResults.status === "fulfilled" && segResults.value?.data?.results) {
-    for (const r of segResults.value.data.results) {
-      segments.push({
-        id: r.id,
-        type: "transcript",
-        courseCode: r.course_code,
-        videoKey: r.video_key,
-        videoTitle: r.video_title || "",
-        startTimestamp: r.start_timestamp,
-        endTimestamp: r.end_timestamp,
-        startSeconds: r.start_seconds,
-        text: r.text || "",
-        similarity: r.similarity || 0,
-      });
+    try {
+      const gapVector = await getEmbedding(gapQuery);
+      if (gapVector) {
+        const gapSegments = await searchAllCollections(gapVector);
+        // Boost gap-sourced segments so they rank above generic query matches
+        const GAP_BOOST = 1.5;
+        for (const seg of gapSegments) {
+          seg.similarity *= GAP_BOOST;
+          seg._gapSourced = true;
+        }
+        devLog(`[BespokePath] Gap search returned ${gapSegments.length} segments`);
+        segments = segments.concat(gapSegments);
+      }
+    } catch (err) {
+      devWarn("[BespokePath] Gap-specific search failed (non-fatal):", err.message);
     }
   }
 
-  // Collect Epic Learning results
-  if (epicResults.status === "fulfilled" && epicResults.value?.data?.results) {
-    for (const r of epicResults.value.data.results) {
-      segments.push({
-        id: r.id,
-        type: "epic_learning",
-        title: r.title || "",
-        url: r.url || "",
-        contentType: r.content_type || "",
-        author: r.author || "",
-        text: r.text || "",
-        similarity: r.similarity || 0,
-      });
+  // Deduplicate by id (keep the higher-similarity version)
+  const segmentMap = new Map();
+  for (const seg of segments) {
+    const existing = segmentMap.get(seg.id);
+    if (!existing || seg.similarity > existing.similarity) {
+      segmentMap.set(seg.id, seg);
     }
   }
-
-  // Collect docs results
-  if (docsResults.status === "fulfilled" && docsResults.value?.data?.results) {
-    for (const r of docsResults.value.data.results) {
-      segments.push({
-        id: r.id,
-        type: "docs",
-        slug: r.slug || "",
-        url: r.url || "",
-        title: r.title || "",
-        section: r.section || "",
-        text: r.text || "",
-        similarity: r.similarity || 0,
-      });
-    }
-  }
+  segments = Array.from(segmentMap.values());
 
   // Boost transcript segments so video content ranks higher than articles
   const TRANSCRIPT_BOOST = 1.3;
   for (const seg of segments) {
-    if (seg.type === "transcript") {
+    if (seg.type === "transcript" && !seg._gapSourced) {
       seg.similarity *= TRANSCRIPT_BOOST;
-      // Construct YouTube URL with timestamp for direct linking
-      if (seg.videoKey) {
-        const t = Math.floor(seg.startSeconds || 0);
-        seg.videoUrl = `https://youtube.com/watch?v=${seg.videoKey}&t=${t}`;
-        seg.thumbnailUrl = `https://img.youtube.com/vi/${seg.videoKey}/mqdefault.jpg`;
-      }
+    }
+    // Construct YouTube URL with timestamp for direct linking
+    if (seg.type === "transcript" && seg.videoKey) {
+      const t = Math.floor(seg.startSeconds || 0);
+      seg.videoUrl = `https://youtube.com/watch?v=${seg.videoKey}&t=${t}`;
+      seg.thumbnailUrl = `https://img.youtube.com/vi/${seg.videoKey}/mqdefault.jpg`;
     }
   }
 

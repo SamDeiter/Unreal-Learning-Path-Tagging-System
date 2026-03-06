@@ -154,13 +154,13 @@ describe("bespokePathService", () => {
       // Each collection contributes a segment with a distinct type
       expect(result.segments.length).toBe(3);
     });
-    it("augments embedQuery with gap topics when knowledgeProfile has gaps", async () => {
-      let capturedQuery = null;
+    it("runs a separate gap-specific search when knowledgeProfile has gaps", async () => {
+      const capturedQueries = [];
       httpsCallable.mockImplementation((_app, fnName) => {
         switch (fnName) {
           case "embedQuery":
             return vi.fn().mockImplementation(({ query }) => {
-              capturedQuery = query;
+              capturedQueries.push(query);
               return Promise.resolve({ data: { embedding: new Array(768).fill(0.1) } });
             });
           case "vectorSearchSegments":
@@ -182,10 +182,11 @@ describe("bespokePathService", () => {
 
       await findRelevantSegments("how can i make my character go in slow mo", 5, profile);
 
-      // The embed query should include both the original query AND the gap terms
-      expect(capturedQuery).toContain("how can i make my character go in slow mo");
-      expect(capturedQuery).toContain("actor time dilation");
-      expect(capturedQuery).toContain("animation time dilation");
+      // Dual-search: first call is the original query, second call is gap terms only
+      expect(capturedQueries.length).toBe(2);
+      expect(capturedQueries[0]).toBe("how can i make my character go in slow mo");
+      expect(capturedQueries[1]).toContain("actor time dilation");
+      expect(capturedQueries[1]).toContain("animation time dilation");
     });
 
     it("uses original query when no knowledgeProfile is provided", async () => {
