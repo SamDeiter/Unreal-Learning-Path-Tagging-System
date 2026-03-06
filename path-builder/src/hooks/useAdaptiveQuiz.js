@@ -147,7 +147,7 @@ export default function useAdaptiveQuiz() {
     setQuestions([]);
     setCurrentIndex(0);
     setAnswers([]);
-    setKnowledgeProfile(null);
+    setKnowledgeProfile(loadSavedProfile()); // Preserve saved profile
     setError(null);
   }, []);
 
