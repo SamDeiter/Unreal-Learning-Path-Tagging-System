@@ -52,7 +52,7 @@ function saveProfile(profile) {
 export default function useAdaptiveQuiz() {
   // Auto-restore saved profile on mount
   const saved = loadSavedProfile();
-  const [stage, setStage] = useState(saved ? STAGES.COMPLETE : STAGES.IDLE);
+  const [stage, setStage] = useState(STAGES.IDLE);
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
