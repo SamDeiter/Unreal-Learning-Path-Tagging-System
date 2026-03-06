@@ -15,6 +15,7 @@ import useAdaptiveQuiz from "../../hooks/useAdaptiveQuiz";
 import { sanitizeQuery, checkRateLimit, recordQuery } from "../../services/securityGuardrails";
 import { generateBespokePath } from "../../services/bespokePathService";
 import { findCachedPath, cachePath } from "../../services/pathCacheService";
+import { trackSessionCompleted } from "../../services/analyticsService";
 import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
 import {
@@ -233,10 +234,24 @@ export default function AdaptivePath() {
   );
 
   // Handle quiz completion
-  const handleQuizComplete = useCallback(({ stepIndex, score, total }) => {
-    setQuizScores((prev) => new Map(prev).set(stepIndex, { score, total }));
-    setShowQuiz(null);
-  }, []);
+  const handleQuizComplete = useCallback(
+    ({ stepIndex, score, total }) => {
+      setQuizScores((prev) => new Map(prev).set(stepIndex, { score, total }));
+      setShowQuiz(null);
+
+      // Track path completion when the end-of-path quiz finishes
+      if (stepIndex === -2) {
+        trackSessionCompleted("adaptive-path", {
+          query: pathData?.query || query,
+          stepsCompleted: pathData?.path?.length || 0,
+          quizScore: score,
+          quizTotal: total,
+          knowledgeLevel: knowledgeProfile?.level || "unknown",
+        });
+      }
+    },
+    [pathData, query, knowledgeProfile]
+  );
 
   // Audio/takeaway handlers (same pattern as BespokePath)
   const handleStepAudio = useCallback(

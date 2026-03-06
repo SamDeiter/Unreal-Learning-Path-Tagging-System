@@ -12,6 +12,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
 import { recordTokenUsage } from "./tokenTracker";
+import { validatePathQuality } from "../utils/pathQualityValidator";
 import {
   trackVectorSearchCompleted,
   trackHybridFallbackTriggered,
@@ -181,7 +182,7 @@ export async function sequencePath(userQuery, segments, knowledgeProfile = null)
           : s.type === "epic_learning"
             ? `Article: ${s.title}`
             : `Docs: ${s.title} > ${s.section}`;
-      return `[${i}] ${source}\n   ${s.text.slice(0, 1200)}`;
+      return `[${i}] ${source}\n   ${s.text.slice(0, 2000)}`;
     })
     .join("\n\n");
 
@@ -235,9 +236,17 @@ Rules:
   - Niagara for non-particle-related queries
   - Modeling Mode unless the query specifically asks about modeling/sculpting geometry
 - PRIORITIZE Blueprint-based content over C++ content unless the query explicitly asks about C++. When teaching concepts, explain using Blueprint nodes, property panels, and editor UI rather than code syntax.
+- BLUEPRINT PRECISION: Blueprints ARE a form of programming (visual scripting). NEVER say 'without code' or 'no code needed'. Instead say 'without writing C++ or text-based code'. Blueprints are visual code.
 - NEVER start a summary with 'This article...' or 'This video...' or 'This segment...' — teach the concept directly
 - Write as if YOU are the instructor explaining the concept, not describing someone else's content
 - Include specific technical details, property names, menu paths, or code patterns from the source
+- ANTI-HALLUCINATION (CRITICAL):
+  - ONLY reference UE5 tools, properties, nodes, volumes, and menu items that are EXPLICITLY mentioned in the source text above
+  - Do NOT invent or assume UE5 features. If a concept is not in the source text, do NOT mention it
+  - Do NOT fabricate volume types, component names, or editor features that are not in the provided segments
+  - When in doubt, be LESS specific rather than inventing details
+  - Every UE5-specific term in your summary must trace back to a word in the source segments
+- DEDUPLICATION: Do NOT assign the same segment to more than one category. Each segment index may appear at most once in your output. If a segment could fit multiple categories, assign it to the BEST-fitting one only.
 - Include only segments with "high" or "medium" relevance
 - Order: foundation → diagnosis → fix → transfer
 - You MUST include at least ONE segment of each category (foundation, diagnosis, fix, transfer)
@@ -288,13 +297,23 @@ Rules:
     }
 
     devLog(`[BespokePath] Sequenced ${sequenced.length} segments into learning path`);
+
+    // ── POST-GENERATION QUALITY GATE ──
+    const { cleanedPath, warnings, autoFixes } = validatePathQuality(sequenced, segments);
+    if (autoFixes.length > 0) {
+      devLog(`[BespokePath] Quality gate applied ${autoFixes.length} auto-fix(es):`, autoFixes);
+    }
+    if (warnings.length > 0) {
+      devWarn(`[BespokePath] Quality gate warnings:`, warnings);
+    }
+
     // Track: sequencing prompt is large, response is small JSON
     recordTokenUsage(
       "sequencePath",
       Math.ceil(prompt.length / 4),
       Math.ceil(responseText.length / 4)
     );
-    return sequenced;
+    return cleanedPath;
   } catch (err) {
     devWarn("[BespokePath] sequencePath failed:", err.message);
     return fallbackSequence(segments);
