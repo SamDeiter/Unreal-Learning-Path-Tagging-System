@@ -159,8 +159,12 @@ export default function AdaptivePath() {
     );
 
     try {
-      // Check cache first (include profile hash in cache key)
-      const profileKey = `${query}_adaptive_${knowledgeProfile.level}`;
+      // Check cache first (include profile hash with gaps in cache key)
+      const gapsKey =
+        knowledgeProfile.gaps?.length > 0
+          ? `_gaps_${[...knowledgeProfile.gaps].sort().join(",")}`
+          : "";
+      const profileKey = `${query}_adaptive_${knowledgeProfile.level}${gapsKey}`;
       const cached = await findCachedPath(profileKey);
       if (cached) {
         timers.forEach(clearTimeout);

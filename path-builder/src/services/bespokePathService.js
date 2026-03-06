@@ -42,24 +42,34 @@ const SIMILARITY_THRESHOLD = 0.7;
  *
  * @param {string} userQuery - The user's natural language question
  * @param {number} topK - Results per collection (default 5)
+ * @param {Object} [knowledgeProfile] - Optional adaptive profile { knows, gaps, level }
  * @returns {Promise<{segments: Array, embedding: number[], lowCorpusCoverage: boolean}>}
  */
-export async function findRelevantSegments(userQuery, topK = 5) {
+export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile = null) {
   if (!userQuery?.trim()) return { segments: [], embedding: [] };
 
   const app = getFirebaseApp();
   const functions = getFunctions(app, "us-central1");
 
-  // Step 1a: Get embedding for the query
+  // Step 1a: Build augmented query that includes knowledge gap topics
+  // This steers the vector search toward gap-relevant content.
+  let searchQuery = userQuery;
+  if (knowledgeProfile?.gaps?.length > 0) {
+    const gapTerms = knowledgeProfile.gaps.map((g) => g.replace(/_/g, " ")).join(", ");
+    searchQuery = `${userQuery} | ${gapTerms}`;
+    devLog(`[BespokePath] Augmented search query with gaps: "${searchQuery}"`);
+  }
+
+  // Step 1b: Get embedding for the (possibly augmented) query
   let queryVector;
   try {
     const embedFn = httpsCallable(functions, "embedQuery");
-    const embedResult = await embedFn({ query: userQuery });
+    const embedResult = await embedFn({ query: searchQuery });
     queryVector = embedResult.data?.embedding;
     if (!queryVector) throw new Error("No embedding returned");
     devLog(`[BespokePath] Got ${queryVector.length}-dim embedding for query`);
     // Track: embedding is ~50 input tokens, 0 output
-    recordTokenUsage("embedQuery", Math.ceil(userQuery.length / 4), 0);
+    recordTokenUsage("embedQuery", Math.ceil(searchQuery.length / 4), 0);
   } catch (err) {
     devWarn("[BespokePath] embedQuery failed:", err.message);
     return { segments: [], embedding: [] };
@@ -424,8 +434,16 @@ Keep narrations natural, concise, and helpful. Max 50 words each.`;
 async function generateHybridPath(userQuery, knowledgeProfile = null) {
   let adaptiveContext = "";
   if (knowledgeProfile) {
-    const { level = "beginner" } = knowledgeProfile;
-    adaptiveContext = `\nThe learner's assessed level is: ${level.toUpperCase()}. Adjust complexity accordingly.`;
+    const { level = "beginner", gaps = [], knows = [] } = knowledgeProfile;
+    const gapText =
+      gaps.length > 0
+        ? `\nKnowledge GAPS the path MUST address (these are the learner's weak areas — focus content on these topics):\n${gaps.map((c) => `  - ${c.replace(/_/g, " ")}`).join("\n")}`
+        : "";
+    const knowsText =
+      knows.length > 0
+        ? `\nConcepts they ALREADY KNOW (keep brief, 1 sentence max):\n${knows.map((c) => `  - ${c.replace(/_/g, " ")}`).join("\n")}`
+        : "";
+    adaptiveContext = `\nThe learner's assessed level is: ${level.toUpperCase()}. Adjust complexity accordingly.${gapText}${knowsText}`;
   }
 
   const prompt = `You are a UE5 curriculum designer. A learner asked: "${userQuery}"
@@ -542,7 +560,11 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
     // Stage 1: Find relevant content
     devLog("[BespokePath] Stage 1: Finding relevant segments...");
     const searchStart = Date.now();
-    const { segments, lowCorpusCoverage } = await findRelevantSegments(userQuery);
+    const { segments, lowCorpusCoverage } = await findRelevantSegments(
+      userQuery,
+      5,
+      knowledgeProfile
+    );
     const searchTimeMs = Date.now() - searchStart;
     result.segments = segments;
 

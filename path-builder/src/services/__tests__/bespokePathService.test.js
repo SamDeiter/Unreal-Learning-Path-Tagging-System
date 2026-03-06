@@ -154,6 +154,65 @@ describe("bespokePathService", () => {
       // Each collection contributes a segment with a distinct type
       expect(result.segments.length).toBe(3);
     });
+    it("augments embedQuery with gap topics when knowledgeProfile has gaps", async () => {
+      let capturedQuery = null;
+      httpsCallable.mockImplementation((_app, fnName) => {
+        switch (fnName) {
+          case "embedQuery":
+            return vi.fn().mockImplementation(({ query }) => {
+              capturedQuery = query;
+              return Promise.resolve({ data: { embedding: new Array(768).fill(0.1) } });
+            });
+          case "vectorSearchSegments":
+            return mockCallable({ results: [] });
+          case "vectorSearchEpic":
+            return mockCallable({ results: [] });
+          case "vectorSearchDocs":
+            return mockCallable({ results: [] });
+          default:
+            return mockCallable({});
+        }
+      });
+
+      const profile = {
+        knows: ["blueprint_basics"],
+        gaps: ["actor_time_dilation", "animation_time_dilation"],
+        level: "beginner",
+      };
+
+      await findRelevantSegments("how can i make my character go in slow mo", 5, profile);
+
+      // The embed query should include both the original query AND the gap terms
+      expect(capturedQuery).toContain("how can i make my character go in slow mo");
+      expect(capturedQuery).toContain("actor time dilation");
+      expect(capturedQuery).toContain("animation time dilation");
+    });
+
+    it("uses original query when no knowledgeProfile is provided", async () => {
+      let capturedQuery = null;
+      httpsCallable.mockImplementation((_app, fnName) => {
+        switch (fnName) {
+          case "embedQuery":
+            return vi.fn().mockImplementation(({ query }) => {
+              capturedQuery = query;
+              return Promise.resolve({ data: { embedding: new Array(768).fill(0.1) } });
+            });
+          case "vectorSearchSegments":
+            return mockCallable({ results: [] });
+          case "vectorSearchEpic":
+            return mockCallable({ results: [] });
+          case "vectorSearchDocs":
+            return mockCallable({ results: [] });
+          default:
+            return mockCallable({});
+        }
+      });
+
+      await findRelevantSegments("how can i make my character go in slow mo");
+
+      // Without a profile, the query should be unmodified
+      expect(capturedQuery).toBe("how can i make my character go in slow mo");
+    });
   });
 
   // ── generateBespokePath: hybrid fallback ────────────────────────────
