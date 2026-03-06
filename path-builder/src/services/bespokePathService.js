@@ -33,8 +33,8 @@ const FALLBACK_NARRATION_TEMPLATES = {
 };
 
 // Minimum cosine similarity for a segment to be considered a "good" match.
-// Segments below this are kept but flagged; if ALL are below, hybrid fallback kicks in.
-const SIMILARITY_THRESHOLD = 0.65;
+// Raised to 0.70 — rejects weak semantic matches (e.g., "time dilation" ≠ "delay nodes").
+const SIMILARITY_THRESHOLD = 0.7;
 
 /**
  * Stage 1: Find relevant segments across all embedding collections.
@@ -235,6 +235,13 @@ Rules:
   - Control Rig for simple animation playback
   - Niagara for non-particle-related queries
   - Modeling Mode unless the query specifically asks about modeling/sculpting geometry
+- TOPICAL RELEVANCE CROSS-CHECK (CRITICAL): Before marking a segment "high" or "medium", verify it teaches the SAME CONCEPT the user asked about — not just a related concept.
+  Semantically similar ≠ topically relevant. Examples of FALSE MATCHES to reject as "low":
+  - Query: "time dilation" → Segment about Delay nodes (pausing execution ≠ slowing world time)
+  - Query: "physics simulation" → Segment about animation physics (ragdoll ≠ rigid body sim)
+  - Query: "networking" → Segment about Blueprint communication (actor messaging ≠ multiplayer replication)
+  - Query: "LOD" → Segment about Nanite (automatic virtualized geometry ≠ manual LOD setup)
+  If the segment's PRIMARY topic is a different UE5 system/concept than what the user asked about, mark it "low" even if it shares vocabulary.
 - PRIORITIZE Blueprint-based content over C++ content unless the query explicitly asks about C++. When teaching concepts, explain using Blueprint nodes, property panels, and editor UI rather than code syntax.
 - BLUEPRINT PRECISION: Blueprints ARE a form of programming (visual scripting). NEVER say 'without code' or 'no code needed'. Instead say 'without writing C++ or text-based code'. Blueprints are visual code.
 - NEVER start a summary with 'This article...' or 'This video...' or 'This segment...' — teach the concept directly
