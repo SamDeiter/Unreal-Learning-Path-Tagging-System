@@ -23,7 +23,7 @@ import {
   generateStepDeepDive,
 } from "../../services/stepBriefingService";
 import { generateQuizForStep } from "../../services/quizService";
-import { cleanTitle } from "../../utils/cleanTitle";
+import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
@@ -640,10 +640,8 @@ export default function AdaptivePath() {
                         {phase.steps.map((substep, i) => {
                           const step = pathData.path[substep.globalIndex];
                           let rawTitle =
-                            cleanTitle(step?.segment?.title || step?.segment?.videoTitle) ||
+                            cleanVideoTitle(step?.segment?.title || step?.segment?.videoTitle) ||
                             `Step ${i + 1}`;
-                          const shortTitle =
-                            rawTitle.length > 40 ? rawTitle.substring(0, 38) + "…" : rawTitle;
                           return (
                             <li key={substep.globalIndex}>
                               <button
@@ -651,7 +649,7 @@ export default function AdaptivePath() {
                                 onClick={() => setExpandedStep(substep.globalIndex)}
                                 title={rawTitle}
                               >
-                                {i + 1}. {shortTitle}
+                                {i + 1}. {rawTitle}
                               </button>
                             </li>
                           );
@@ -768,7 +766,7 @@ export default function AdaptivePath() {
                             ? null
                             : fixEpicUrl(step.segment?.videoUrl || step.segment?.url);
                           const title =
-                            cleanTitle(step.segment?.title || step.segment?.videoTitle) ||
+                            cleanVideoTitle(step.segment?.title || step.segment?.videoTitle) ||
                             `Step ${i + 1}`;
                           const sourceType = isAiGenerated
                             ? "ai_generated"
