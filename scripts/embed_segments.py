@@ -26,7 +26,7 @@ SEGMENT_INDEX = Path("path-builder/src/data/segment_index.json")
 OUTPUT_FILE = Path("path-builder/src/data/segment_embeddings.json")
 CHECKPOINT_FILE = Path("content/embedding_checkpoint.json")
 
-MODEL = "text-embedding-004"          # same as embedQuery Cloud Function
+MODEL = "gemini-embedding-001"          # same as embedQuery Cloud Function
 DIMENSION = 768
 TASK_TYPE = "RETRIEVAL_DOCUMENT"        # documents use RETRIEVAL_DOCUMENT
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embedContent"

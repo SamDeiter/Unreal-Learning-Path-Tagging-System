@@ -79,9 +79,20 @@ def init_firebase():
     """Initialize Firebase Admin SDK using application default credentials."""
     if not firebase_admin._apps:
         # Uses GOOGLE_APPLICATION_CREDENTIALS env var or gcloud auth
+        import subprocess
         try:
+            # Get project ID from gcloud config
+            project_id = os.environ.get("GCLOUD_PROJECT") or os.environ.get("GCP_PROJECT")
+            if not project_id:
+                result = subprocess.run(
+                    ["gcloud", "config", "get-value", "project"],
+                    capture_output=True, text=True, timeout=10
+                )
+                project_id = result.stdout.strip()
+            
             cred = credentials.ApplicationDefault()
-            firebase_admin.initialize_app(cred)
+            firebase_admin.initialize_app(cred, {"projectId": project_id})
+            print(f"  Project: {project_id}")
         except Exception:
             # Fallback: try without explicit credentials (works in GCP env)
             firebase_admin.initialize_app()

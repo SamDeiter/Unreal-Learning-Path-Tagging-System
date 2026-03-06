@@ -34,7 +34,7 @@ CHECKPOINT_FILE = Path("content/docs_embedding_checkpoint.json")
 
 BASE_URL = "https://dev.epicgames.com/documentation/en-us/unreal-engine"
 
-MODEL = "text-embedding-004"
+MODEL = "gemini-embedding-001"
 DIMENSION = 768
 TASK_TYPE = "RETRIEVAL_DOCUMENT"
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embedContent"
