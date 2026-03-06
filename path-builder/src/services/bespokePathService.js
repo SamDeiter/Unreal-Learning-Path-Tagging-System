@@ -634,10 +634,33 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
     });
 
     // ── HYBRID FALLBACK: If corpus can't answer, let Gemini generate from its own knowledge ──
-    if (segments.length === 0 || lowCorpusCoverage) {
-      devLog("[BespokePath] Low corpus coverage — using hybrid AI generation");
+    // Check 1: No segments or low similarity
+    let forceHybrid = segments.length === 0 || lowCorpusCoverage;
+    let hybridReason = segments.length === 0 ? "no_segments" : "low_similarity";
+
+    // Check 2: Gap-relevance — when the learner has identified gaps, verify
+    // that the retrieved segments actually discuss those gap topics.
+    // Without this, semantically-similar but topically-wrong content (e.g.,
+    // "animation timelines" when the gap is "time dilation") gets served.
+    if (!forceHybrid && knowledgeProfile?.gaps?.length > 0) {
+      const gapTerms = knowledgeProfile.gaps.map((g) => g.replace(/_/g, " ").toLowerCase());
+      const segmentTexts = segments.map((s) =>
+        `${s.text} ${s.title || ""} ${s.videoTitle || ""}`.toLowerCase()
+      );
+      const gapMentioned = gapTerms.some((gap) => segmentTexts.some((txt) => txt.includes(gap)));
+      if (!gapMentioned) {
+        forceHybrid = true;
+        hybridReason = "gap_not_in_corpus";
+        devWarn(
+          `[BespokePath] No segments mention gap topics [${gapTerms.join(", ")}] — forcing hybrid`
+        );
+      }
+    }
+
+    if (forceHybrid) {
+      devLog(`[BespokePath] Hybrid fallback triggered (reason: ${hybridReason})`);
       trackHybridFallbackTriggered({
-        reason: segments.length === 0 ? "no_segments" : "low_similarity",
+        reason: hybridReason,
         bestSimilarity,
         corpusSegments: segments.length,
       });
