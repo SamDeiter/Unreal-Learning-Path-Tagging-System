@@ -211,3 +211,84 @@ export function getRAGMetrics(events) {
     },
   };
 }
+
+/**
+ * Get content gap intelligence from AI coverage report events.
+ * @param {Object[]} events - All analytics events
+ * @returns {Object} { avgAiRatio, totalReports, topGapQueries, knowledgeGapFrequency, gapTrend }
+ */
+export function getContentGapMetrics(events) {
+  const reports = events.filter((e) => e.event === EVENTS.AI_COVERAGE_REPORT);
+
+  if (reports.length === 0) {
+    return {
+      avgAiRatio: 0,
+      totalReports: 0,
+      topGapQueries: [],
+      knowledgeGapFrequency: [],
+      gapTrend: [],
+    };
+  }
+
+  // Average AI fill ratio
+  const avgAiRatio = reports.reduce((sum, r) => sum + (r.ai_ratio || 0), 0) / reports.length;
+
+  // Top queries with highest AI ratio (worst corpus coverage)
+  const queryMap = {};
+  for (const r of reports) {
+    const q = r.query_preview || "unknown";
+    if (!queryMap[q]) {
+      queryMap[q] = { query: q, totalAiRatio: 0, count: 0, lowCoverage: 0 };
+    }
+    queryMap[q].totalAiRatio += r.ai_ratio || 0;
+    queryMap[q].count++;
+    if (r.low_corpus_coverage) queryMap[q].lowCoverage++;
+  }
+  const topGapQueries = Object.values(queryMap)
+    .map((q) => ({
+      query: q.query,
+      avgAiRatio: Number((q.totalAiRatio / q.count).toFixed(2)),
+      count: q.count,
+      lowCoverageRate: Math.round((q.lowCoverage / q.count) * 100),
+    }))
+    .sort((a, b) => b.avgAiRatio - a.avgAiRatio)
+    .slice(0, 15);
+
+  // Knowledge gap frequency — what concepts do learners fail on most
+  const gapCounts = {};
+  for (const r of reports) {
+    for (const gap of r.knowledge_gaps || []) {
+      gapCounts[gap] = (gapCounts[gap] || 0) + 1;
+    }
+  }
+  const knowledgeGapFrequency = Object.entries(gapCounts)
+    .map(([concept, count]) => ({ concept, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 15);
+
+  // Gap trend — AI ratio by day
+  const dayMap = {};
+  for (const r of reports) {
+    const ts = r.client_timestamp || r.timestamp?.toDate?.()?.toISOString();
+    if (!ts) continue;
+    const day = ts.substring(0, 10);
+    if (!dayMap[day]) dayMap[day] = { totalRatio: 0, count: 0 };
+    dayMap[day].totalRatio += r.ai_ratio || 0;
+    dayMap[day].count++;
+  }
+  const gapTrend = Object.entries(dayMap)
+    .map(([date, d]) => ({
+      date,
+      avgAiRatio: Number((d.totalRatio / d.count).toFixed(2)),
+      reports: d.count,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  return {
+    avgAiRatio: Number(avgAiRatio.toFixed(2)),
+    totalReports: reports.length,
+    topGapQueries,
+    knowledgeGapFrequency,
+    gapTrend,
+  };
+}

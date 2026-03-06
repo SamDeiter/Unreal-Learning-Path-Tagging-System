@@ -17,6 +17,7 @@ import {
   trackVectorSearchCompleted,
   trackHybridFallbackTriggered,
   trackPathSequenced,
+  trackAICoverageReport,
 } from "./analyticsService";
 
 // ── Constants ──────────────────────────────────────────────────────────
@@ -744,11 +745,21 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
 
     // ── Track final path metrics ──
     const corpusSteps = result.path.filter((s) => s.segment?.type !== "ai_generated").length;
+    const aiGenSteps = result.path.length - corpusSteps;
     trackPathSequenced({
       stepCount: result.path.length,
       categories: [...new Set(result.path.map((s) => s.category))],
       isAiGenerated: !!result.isAiGenerated,
       corpusRatio: result.path.length > 0 ? corpusSteps / result.path.length : 0,
+    });
+    trackAICoverageReport({
+      query: userQuery,
+      learnerLevel: knowledgeProfile?.level || "unknown",
+      knowledgeGaps: knowledgeProfile?.gaps || [],
+      totalSteps: result.path.length,
+      corpusSteps,
+      aiGeneratedSteps: aiGenSteps,
+      lowCorpusCoverage: !!lowCorpusCoverage,
     });
 
     return result;

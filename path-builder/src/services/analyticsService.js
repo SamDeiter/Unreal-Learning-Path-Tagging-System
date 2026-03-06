@@ -50,6 +50,9 @@ export const EVENTS = {
   VECTOR_SEARCH_COMPLETED: "vector_search_completed",
   HYBRID_FALLBACK_TRIGGERED: "hybrid_fallback_triggered",
   PATH_SEQUENCED: "path_sequenced",
+
+  // Content Gap Intelligence
+  AI_COVERAGE_REPORT: "ai_coverage_report",
 };
 
 /**
@@ -304,6 +307,35 @@ export function trackPathSequenced(params) {
   });
 }
 
+// ── Content Gap Intelligence ───────────────────────────────────────
+
+/**
+ * Track AI content gap coverage for a generated path.
+ * Fired once per path generation to capture where official docs fall short.
+ * @param {Object} params
+ * @param {string} params.query - User's original query
+ * @param {string} params.learnerLevel - From knowledge profile (beginner/intermediate/advanced)
+ * @param {string[]} params.knowledgeGaps - Concepts the learner doesn't know
+ * @param {number} params.totalSteps - Total steps in the path
+ * @param {number} params.corpusSteps - Steps from real corpus content
+ * @param {number} params.aiGeneratedSteps - Steps AI had to generate
+ * @param {boolean} params.lowCorpusCoverage - Whether corpus coverage was low
+ */
+export function trackAICoverageReport(params) {
+  const total = params.totalSteps || 0;
+  const aiSteps = params.aiGeneratedSteps || 0;
+  return trackEvent(EVENTS.AI_COVERAGE_REPORT, {
+    query_preview: params.query?.substring(0, 100),
+    learner_level: params.learnerLevel || "unknown",
+    knowledge_gaps: (params.knowledgeGaps || []).slice(0, 10),
+    total_steps: total,
+    corpus_steps: params.corpusSteps || 0,
+    ai_generated_steps: aiSteps,
+    ai_ratio: total > 0 ? Number((aiSteps / total).toFixed(2)) : 0,
+    low_corpus_coverage: !!params.lowCorpusCoverage,
+  });
+}
+
 export default {
   EVENTS,
   trackEvent,
@@ -321,4 +353,5 @@ export default {
   trackVectorSearchCompleted,
   trackHybridFallbackTriggered,
   trackPathSequenced,
+  trackAICoverageReport,
 };

@@ -1,17 +1,7 @@
 /**
- * AdminAnalytics — Admin-only usage analytics dashboard
- *
- * Visualizes analytics_events data from Firestore:
- *  - Time range selector (24h / 7d / 30d)
- *  - Stat cards (total events, queries, sessions, completion rate)
- *  - RAG Pipeline Health section (NEW)
- *  - Event type breakdown bar chart (CSS-based)
- *  - Top queries list with persona badges
- *  - Persona distribution
- *  - Daily volume sparkline
- *  - Live event feed
- *
- * Performance: parallel fetches, ref-based caching, progressive render.
+ * AdminAnalytics — Overview sub-page
+ * Stat cards, daily volume, top queries, and recent events.
+ * Pipeline, costs, and content gaps are in their own sub-pages.
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
@@ -19,14 +9,11 @@ import {
   fetchEvents,
   countByEventType,
   getTopQueries,
-  getPersonaDistribution,
   getSessionMetrics,
   getRecentEvents,
   getEventsByDay,
-  getRAGMetrics,
 } from "../../services/analyticsQueryService";
 import { EVENTS } from "../../services/analyticsService";
-import { getTokenStats, fetchCloudStats, estimateCost } from "../../services/tokenTracker";
 import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
 import "./AdminAnalytics.css";
 
@@ -36,7 +23,6 @@ const TIME_RANGES = [
   { key: "30d", label: "30 Days" },
 ];
 
-// Friendly labels and colors for event types
 const EVENT_META = {
   [EVENTS.QUERY_SUBMITTED]: { label: "Queries", color: "#8b5cf6" },
   [EVENTS.SESSION_STARTED]: { label: "Sessions", color: "#06b6d4" },
@@ -52,9 +38,9 @@ const EVENT_META = {
   [EVENTS.VECTOR_SEARCH_COMPLETED]: { label: "Searches", color: "#3b82f6" },
   [EVENTS.HYBRID_FALLBACK_TRIGGERED]: { label: "Fallbacks", color: "#f43f5e" },
   [EVENTS.PATH_SEQUENCED]: { label: "Sequenced", color: "#6366f1" },
+  [EVENTS.AI_COVERAGE_REPORT]: { label: "AI Coverage", color: "#f97316" },
 };
 
-/** Small info-icon tooltip — CSS-only, no JS needed */
 function Tip({ text }) {
   return (
     <span className="aa-tooltip-wrap">
@@ -64,76 +50,55 @@ function Tip({ text }) {
   );
 }
 
-export default function AdminAnalytics() {
+/**
+ * AdminAnalytics — the Overview sub-page.
+ * Also exposes events via onEventsLoaded for sibling sub-pages.
+ */
+export default function AdminAnalytics({ onEventsLoaded, onTimeRangeChange }) {
   const [timeRange, setTimeRange] = useState("7d");
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [tokenStats, setTokenStats] = useState(null);
-  const [cloudCostHistory, setCloudCostHistory] = useState([]);
-  const [costLoading, setCostLoading] = useState(false);
 
-  // Cache: avoid re-fetching if time range hasn't changed
-  const cacheRef = useRef({ range: null, events: null, cloud: null });
+  const cacheRef = useRef({ range: null, events: null });
 
   const loadData = useCallback(async () => {
-    // Return cached data if available for this range
     if (cacheRef.current.range === timeRange && cacheRef.current.events) {
       setEvents(cacheRef.current.events);
-      setCloudCostHistory(cacheRef.current.cloud || []);
-      setTokenStats(getTokenStats());
       setLoading(false);
       return;
     }
-
     setLoading(true);
     setError(null);
     try {
-      // Parallel fetch — don't wait for cloud stats to show main data
-      const daysToFetch = timeRange === "24h" ? 1 : timeRange === "7d" ? 7 : 30;
-
-      const [eventData] = await Promise.all([
-        fetchEvents(timeRange),
-        // Start cloud stats fetch in background
-        (async () => {
-          setCostLoading(true);
-          try {
-            const cloudData = await fetchCloudStats(daysToFetch);
-            setCloudCostHistory(cloudData);
-            cacheRef.current.cloud = cloudData;
-          } catch (e) {
-            console.warn("[AdminAnalytics] Cloud stats failed:", e.message);
-          } finally {
-            setCostLoading(false);
-          }
-        })(),
-      ]);
-
+      const eventData = await fetchEvents(timeRange);
       setEvents(eventData);
-      setTokenStats(getTokenStats());
-
-      // Update cache
-      cacheRef.current = { range: timeRange, events: eventData, cloud: cacheRef.current.cloud };
+      cacheRef.current = { range: timeRange, events: eventData };
+      // Share events with parent for sibling sub-pages
+      if (onEventsLoaded) onEventsLoaded(eventData);
     } catch (err) {
       console.error("[AdminAnalytics] Failed to load:", err);
       setError(err.message || "Failed to load analytics data");
     } finally {
       setLoading(false);
     }
-  }, [timeRange]);
+  }, [timeRange, onEventsLoaded]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  // Memoize expensive aggregations so they don't re-run on every render
+  useEffect(() => {
+    if (onTimeRangeChange) onTimeRangeChange(timeRange);
+  }, [timeRange, onTimeRangeChange]);
+
   const eventCounts = useMemo(() => countByEventType(events), [events]);
   const topQueries = useMemo(() => getTopQueries(events), [events]);
-  const personaDist = useMemo(() => getPersonaDistribution(events), [events]);
   const sessionMetrics = useMemo(() => getSessionMetrics(events), [events]);
   const dailyVolume = useMemo(() => getEventsByDay(events), [events]);
   const recentEvents = useMemo(() => getRecentEvents(events, 15), [events]);
-  const ragMetrics = useMemo(() => getRAGMetrics(events), [events]);
+
+  const totalQueries = eventCounts[EVENTS.QUERY_SUBMITTED] || 0;
 
   if (loading) {
     return (
@@ -154,17 +119,13 @@ export default function AdminAnalytics() {
     );
   }
 
-  const totalQueries = eventCounts[EVENTS.QUERY_SUBMITTED] || 0;
-  const maxBarValue = Math.max(...Object.values(eventCounts), 1);
-
   return (
     <div className="admin-analytics">
       {/* Header */}
       <div className="aa-header">
         <div>
           <h2>
-            📈 Usage Analytics{" "}
-            <Tip text="Admin dashboard showing real-time usage data from Firestore analytics_events" />
+            📊 Usage Overview <Tip text="Real-time usage data from Firestore analytics_events" />
           </h2>
           <p className="aa-subtitle">{events.length} events in selected period</p>
         </div>
@@ -181,262 +142,43 @@ export default function AdminAnalytics() {
         </div>
       </div>
 
-      {/* ── Primary Stat Cards ── */}
+      {/* Primary Stat Cards */}
       <div className="aa-stats-row">
         <StatCard
           label="Total Events"
           value={events.length}
           icon="📊"
           color="#8b5cf6"
-          tooltip="Total tracked interactions (queries, sessions, persona detections, path generations, etc.)"
+          tooltip="Total tracked interactions"
         />
         <StatCard
           label="Queries"
           value={totalQueries}
           icon="🔍"
           color="#06b6d4"
-          tooltip="Number of search queries submitted via Fix a Problem or Follow-up"
+          tooltip="Search queries submitted"
         />
         <StatCard
           label="Sessions"
           value={sessionMetrics.totalSessions}
           icon="👤"
           color="#10b981"
-          tooltip="Unique user sessions started (one per page load)"
+          tooltip="Unique user sessions started"
         />
         <StatCard
           label="Completion"
           value={`${sessionMetrics.completionRate}%`}
           icon="✅"
           color="#f59e0b"
-          tooltip="Percentage of sessions where the user completed a learning path"
+          tooltip="Percentage of completed sessions"
         />
       </div>
 
-      {/* ── RAG Pipeline Health ── */}
-      {ragMetrics.searchCount > 0 && (
-        <div className="aa-section" style={{ marginBottom: 24 }}>
-          <h3>
-            🧠 RAG Pipeline Health{" "}
-            <Tip text="Metrics from the vector search & content retrieval pipeline — shows how well the corpus matches user queries" />
-          </h3>
-          <div className="aa-stats-row" style={{ marginBottom: 16 }}>
-            <StatCard
-              label="Avg Similarity"
-              value={ragMetrics.avgSimilarity.toFixed(2)}
-              icon="🎯"
-              color={ragMetrics.avgSimilarity >= 0.65 ? "#10b981" : "#ef4444"}
-              tooltip="Average best similarity score across all vector searches. ≥0.65 is good, <0.65 triggers hybrid fallback"
-            />
-            <StatCard
-              label="Hybrid Fallback"
-              value={`${ragMetrics.hybridRate}%`}
-              icon={ragMetrics.hybridRate > 30 ? "⚠️" : "🛡️"}
-              color={ragMetrics.hybridRate > 30 ? "#f43f5e" : "#10b981"}
-              tooltip={`${ragMetrics.hybridCount} of ${ragMetrics.searchCount} searches fell back to AI generation. High rate = corpus gaps`}
-            />
-            <StatCard
-              label="Avg Search"
-              value={`${ragMetrics.avgSearchMs}ms`}
-              icon="⚡"
-              color={ragMetrics.avgSearchMs > 2000 ? "#f59e0b" : "#06b6d4"}
-              tooltip="Average vector search latency (embedding + 3 collection searches)"
-            />
-            <StatCard
-              label="Corpus Ratio"
-              value={`${ragMetrics.avgCorpusRatio}%`}
-              icon="📚"
-              color={ragMetrics.avgCorpusRatio >= 50 ? "#6366f1" : "#f97316"}
-              tooltip="Percentage of path steps from real corpus content vs AI-generated. Higher is better."
-            />
-          </div>
-
-          {/* Collection breakdown */}
-          <div className="aa-bar-chart">
-            {[
-              {
-                label: "Transcripts",
-                count: ragMetrics.collectionBreakdown.transcripts,
-                color: "#8b5cf6",
-              },
-              {
-                label: "Epic Learning",
-                count: ragMetrics.collectionBreakdown.epic,
-                color: "#f59e0b",
-              },
-              { label: "Docs", count: ragMetrics.collectionBreakdown.docs, color: "#06b6d4" },
-            ].map((col) => {
-              const maxCol = Math.max(
-                ragMetrics.collectionBreakdown.transcripts,
-                ragMetrics.collectionBreakdown.epic,
-                ragMetrics.collectionBreakdown.docs,
-                1
-              );
-              const pct = Math.round((col.count / maxCol) * 100);
-              return (
-                <div key={col.label} className="aa-bar-row">
-                  <span className="aa-bar-label">{col.label}</span>
-                  <div className="aa-bar-track">
-                    <div
-                      className="aa-bar-fill"
-                      style={{ width: `${pct}%`, backgroundColor: col.color }}
-                    />
-                  </div>
-                  <span className="aa-bar-value">{col.count}</span>
-                </div>
-              );
-            })}
-          </div>
-          {ragMetrics.blueprintShown > 0 && (
-            <p style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: 12 }}>
-              📐 Blueprint links shown: {ragMetrics.blueprintShown}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* ── AI Generation Costs ── */}
-      {tokenStats && (
-        <div className="aa-section" style={{ marginBottom: 24 }}>
-          <h3>
-            💰 AI Generation Costs{" "}
-            <Tip text="Token usage and estimated costs for all AI operations (path generation, audio, quizzes, takeaways). Synced to Firestore for historical tracking." />
-          </h3>
-
-          {/* Cost stat cards */}
-          <div className="aa-stats-row" style={{ marginBottom: 16 }}>
-            <StatCard
-              label="Today's Cost"
-              value={tokenStats.today.costFormatted}
-              icon="💵"
-              color="#10b981"
-              tooltip="Estimated cost for all AI API calls made today"
-            />
-            <StatCard
-              label="Lifetime Cost"
-              value={tokenStats.lifetime.costFormatted}
-              icon="📊"
-              color="#6366f1"
-              tooltip="Total estimated cost since tracking began (localStorage)"
-            />
-            <StatCard
-              label="API Calls Today"
-              value={tokenStats.today.calls}
-              icon="🔄"
-              color="#06b6d4"
-              tooltip="Number of Gemini API calls made today"
-            />
-            <StatCard
-              label="Budget Used"
-              value={`${tokenStats.today.budgetPercent.toFixed(1)}%`}
-              icon={tokenStats.today.budgetPercent > 80 ? "⚠️" : "🛡️"}
-              color={tokenStats.today.budgetPercent > 80 ? "#ef4444" : "#f59e0b"}
-              tooltip={`$${tokenStats.today.budgetRemaining.toFixed(4)} remaining of $10/day budget`}
-            />
-          </div>
-
-          {/* Per-operation breakdown */}
-          {tokenStats.today.operations && Object.keys(tokenStats.today.operations).length > 0 && (
-            <div style={{ marginBottom: 16 }}>
-              <h4
-                style={{
-                  fontSize: "0.85rem",
-                  color: "#94a3b8",
-                  margin: "0 0 8px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                Per-Operation Breakdown (Today)
-              </h4>
-              <div className="aa-bar-chart">
-                {Object.entries(tokenStats.today.operations)
-                  .sort(([, a], [, b]) => b.input + b.output - (a.input + a.output))
-                  .map(([op, data]) => {
-                    const cost = estimateCost(data.input, data.output);
-                    const maxTokens = Math.max(
-                      ...Object.values(tokenStats.today.operations).map((d) => d.input + d.output),
-                      1
-                    );
-                    const pct = Math.round(((data.input + data.output) / maxTokens) * 100);
-                    return (
-                      <div key={op} className="aa-bar-row">
-                        <span className="aa-bar-label" style={{ width: 120 }}>
-                          {op}
-                        </span>
-                        <div className="aa-bar-track">
-                          <div
-                            className="aa-bar-fill"
-                            style={{ width: `${pct}%`, backgroundColor: "#10b981" }}
-                          />
-                        </div>
-                        <span className="aa-bar-value" style={{ width: 60 }}>
-                          ${cost.toFixed(4)}
-                        </span>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* Cloud cost history trend */}
-          {costLoading ? (
-            <p style={{ fontSize: "0.75rem", color: "#64748b", fontStyle: "italic" }}>
-              Loading cloud cost history…
-            </p>
-          ) : (
-            cloudCostHistory.length > 0 && (
-              <div>
-                <h4
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "#94a3b8",
-                    margin: "0 0 8px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  Daily Cost Trend (Cloud)
-                </h4>
-                <div className="aa-daily-chart">
-                  {[...cloudCostHistory].reverse().map((day) => {
-                    const maxCost = Math.max(
-                      ...cloudCostHistory.map((d) => d.estimatedCost || 0),
-                      0.001
-                    );
-                    const pct = Math.round(((day.estimatedCost || 0) / maxCost) * 100);
-                    return (
-                      <div
-                        key={day.date}
-                        className="aa-day-bar"
-                        title={`${day.date}: $${(day.estimatedCost || 0).toFixed(4)} (${day.calls || 0} calls)`}
-                      >
-                        <div
-                          className="aa-day-fill"
-                          style={{
-                            height: `${pct}%`,
-                            background: "linear-gradient(180deg, #10b981, #059669)",
-                          }}
-                        />
-                        <span className="aa-day-label">{(day.date || "").substring(5)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )
-          )}
-        </div>
-      )}
-
-      {/* ── Daily Volume + Event Breakdown ── */}
+      {/* Daily Volume + Top Queries side by side */}
       <div className="aa-grid">
-        {/* Daily Volume Chart */}
         <div className="aa-section">
           <h3>
-            📅 Daily Volume{" "}
-            <Tip text="Number of analytics events per day over the selected time range" />
+            📅 Daily Volume <Tip text="Events per day" />
           </h3>
           {dailyVolume.length > 0 ? (
             <div className="aa-daily-chart">
@@ -456,42 +198,9 @@ export default function AdminAnalytics() {
           )}
         </div>
 
-        {/* Event Type Breakdown */}
         <div className="aa-section">
           <h3>
-            🎯 Event Breakdown{" "}
-            <Tip text="Distribution of event types — shows which features are used most" />
-          </h3>
-          <div className="aa-bar-chart">
-            {Object.entries(eventCounts)
-              .sort(([, a], [, b]) => b - a)
-              .map(([type, count]) => {
-                const meta = EVENT_META[type] || { label: type, color: "#64748b" };
-                const pct = Math.round((count / maxBarValue) * 100);
-                return (
-                  <div key={type} className="aa-bar-row">
-                    <span className="aa-bar-label">{meta.label}</span>
-                    <div className="aa-bar-track">
-                      <div
-                        className="aa-bar-fill"
-                        style={{ width: `${pct}%`, backgroundColor: meta.color }}
-                      />
-                    </div>
-                    <span className="aa-bar-value">{count}</span>
-                  </div>
-                );
-              })}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Top Queries + Persona Distribution ── */}
-      <div className="aa-grid">
-        {/* Top Queries */}
-        <div className="aa-section">
-          <h3>
-            🔍 Top Queries{" "}
-            <Tip text="Most frequently searched queries, with persona badges showing who asked" />
+            🔍 Top Queries <Tip text="Most searched topics" />
           </h3>
           {topQueries.length === 0 ? (
             <p className="aa-empty">No queries in selected period</p>
@@ -515,43 +224,12 @@ export default function AdminAnalytics() {
             </ol>
           )}
         </div>
-
-        {/* Persona Distribution */}
-        <div className="aa-section">
-          <h3>
-            🎭 Persona Distribution{" "}
-            <Tip text="Breakdown of detected user personas — shows which roles use the tool most" />
-          </h3>
-          {personaDist.length === 0 ? (
-            <p className="aa-empty">No persona detections in selected period</p>
-          ) : (
-            <div className="aa-persona-chart">
-              {personaDist.map((p) => {
-                const maxP = Math.max(...personaDist.map((x) => x.count), 1);
-                const pct = Math.round((p.count / maxP) * 100);
-                return (
-                  <div key={p.persona} className="aa-bar-row">
-                    <span className="aa-bar-label">{p.persona}</span>
-                    <div className="aa-bar-track">
-                      <div
-                        className="aa-bar-fill"
-                        style={{ width: `${pct}%`, backgroundColor: "#f59e0b" }}
-                      />
-                    </div>
-                    <span className="aa-bar-value">{p.count}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* ── Recent Events Feed (full width) ── */}
+      {/* Recent Events Feed */}
       <div className="aa-section">
         <h3>
-          🔔 Recent Events{" "}
-          <Tip text="Live feed of the most recent analytics events in chronological order" />
+          🔔 Recent Events <Tip text="Latest analytics events" />
         </h3>
         <div className="aa-event-feed">
           {recentEvents.map((evt) => {

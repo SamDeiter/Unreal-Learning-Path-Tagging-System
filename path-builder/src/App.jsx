@@ -53,6 +53,9 @@ const ConfidenceAnalytics = lazy(() => import("./components/Visualizations/Confi
 const TagHistorySparkline = lazy(() => import("./components/Visualizations/TagHistorySparkline"));
 const InviteManager = lazy(() => import("./components/InviteManager/InviteManager"));
 const AdminAnalytics = lazy(() => import("./components/AdminAnalytics/AdminAnalytics"));
+const ContentGaps = lazy(() => import("./components/AdminAnalytics/ContentGaps"));
+const AnalyticsPipeline = lazy(() => import("./components/AdminAnalytics/AnalyticsPipeline"));
+const AnalyticsCosts = lazy(() => import("./components/AdminAnalytics/AnalyticsCosts"));
 
 // Tab definitions — split into student-facing and admin/builder
 // Newest mode always at the top of the list
@@ -68,8 +71,15 @@ const SECONDARY_TABS = [
   { key: "dashboard", label: "Dashboard", icon: "📊" },
   { key: "readiness", label: "Path Readiness", icon: "📚" },
   { key: "tags", label: "Tags", icon: "🏷️" },
-  { key: "analytics", label: "Analytics", icon: "📈" },
+  { key: "analytics", label: "Analytics", icon: "📈", expandable: true },
   { key: "augmentation", label: "Augmentation", icon: "🔬" },
+];
+
+const ANALYTICS_SUBTABS = [
+  { key: "analytics-overview", label: "Overview", icon: "📊" },
+  { key: "analytics-gaps", label: "Content Gaps", icon: "🧠" },
+  { key: "analytics-pipeline", label: "Pipeline", icon: "⚙️" },
+  { key: "analytics-costs", label: "Costs", icon: "💰" },
 ];
 
 const BASE_TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
@@ -84,7 +94,10 @@ const MOBILE_TAB_ORDER = [
   "dashboard",
   "readiness",
   "tags",
-  "analytics",
+  "analytics-overview",
+  "analytics-gaps",
+  "analytics-pipeline",
+  "analytics-costs",
   "augmentation",
 ];
 
@@ -96,6 +109,9 @@ function App() {
   const [newFeedbackCount, setNewFeedbackCount] = useState(0);
   const [showQuiz, setShowQuiz] = useState(() => !localStorage.getItem("ue5_persona_id"));
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
+  const [analyticsEvents, setAnalyticsEvents] = useState([]);
+  const [analyticsTimeRange, setAnalyticsTimeRange] = useState("7d");
   const { isMobile } = useIsMobile();
 
   // Build ordered tab list (mobile reorders, admin tabs appended)
@@ -332,19 +348,61 @@ function App() {
 
                   <div className="sidebar-section">
                     <span className="sidebar-section-label">Tools</span>
-                    {[...SECONDARY_TABS, ...tabs.filter((t) => t.adminOnly)].map((tab) => (
-                      <button
-                        key={tab.key}
-                        className={`sidebar-tab sidebar-tab-sm ${activeTab === tab.key ? "active" : ""}`}
-                        onClick={() => setActiveTab(tab.key)}
-                      >
-                        <span className="sidebar-tab-icon">{tab.icon}</span>
-                        <span className="sidebar-tab-label">{tab.label}</span>
-                        {tab.key === "admin-feedback" && newFeedbackCount > 0 && (
-                          <span className="feedback-badge">{newFeedbackCount}</span>
-                        )}
-                      </button>
-                    ))}
+                    {[...SECONDARY_TABS, ...tabs.filter((t) => t.adminOnly)].map((tab) => {
+                      // Analytics is expandable with sub-items
+                      if (tab.expandable && tab.key === "analytics") {
+                        const isAnyAnalyticsActive = activeTab.startsWith("analytics-");
+                        return (
+                          <div key={tab.key}>
+                            <button
+                              className={`sidebar-tab sidebar-tab-sm ${isAnyAnalyticsActive ? "active" : ""}`}
+                              onClick={() => {
+                                setAnalyticsExpanded(!analyticsExpanded);
+                                if (!isAnyAnalyticsActive) {
+                                  setActiveTab("analytics-overview");
+                                  setAnalyticsExpanded(true);
+                                }
+                              }}
+                            >
+                              <span className="sidebar-tab-icon">{tab.icon}</span>
+                              <span className="sidebar-tab-label">{tab.label}</span>
+                              <span
+                                className={`sidebar-expand-arrow ${analyticsExpanded ? "expanded" : ""}`}
+                              >
+                                ▸
+                              </span>
+                            </button>
+                            {analyticsExpanded && (
+                              <div className="sidebar-subtabs">
+                                {ANALYTICS_SUBTABS.map((sub) => (
+                                  <button
+                                    key={sub.key}
+                                    className={`sidebar-tab sidebar-tab-sub ${activeTab === sub.key ? "active" : ""}`}
+                                    onClick={() => setActiveTab(sub.key)}
+                                  >
+                                    <span className="sidebar-tab-icon">{sub.icon}</span>
+                                    <span className="sidebar-tab-label">{sub.label}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                      return (
+                        <button
+                          key={tab.key}
+                          className={`sidebar-tab sidebar-tab-sm ${activeTab === tab.key ? "active" : ""}`}
+                          onClick={() => setActiveTab(tab.key)}
+                        >
+                          <span className="sidebar-tab-icon">{tab.icon}</span>
+                          <span className="sidebar-tab-label">{tab.label}</span>
+                          {tab.key === "admin-feedback" && newFeedbackCount > 0 && (
+                            <span className="feedback-badge">{newFeedbackCount}</span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </nav>
 
@@ -462,23 +520,15 @@ function App() {
                     <BespokePath />
                   </div>
                 )}
-                {activeTab === "analytics" && (
+                {activeTab === "analytics-overview" && (
                   <div className="analytics-layout">
-                    <div className="analytics-header">
-                      <h2>📊 Tag & Skill Analytics</h2>
-                      <p className="analytics-subtitle">Insights from {courses.length} courses</p>
-                    </div>
-
                     <div className="analytics-grid">
-                      {/* Admin-only: Usage Analytics */}
+                      {/* Admin-only: Usage Overview */}
                       {userIsAdmin && (
-                        <CollapsibleSection
-                          title="Usage Analytics"
-                          icon="📈"
-                          defaultExpanded={false}
-                        >
-                          <AdminAnalytics />
-                        </CollapsibleSection>
+                        <AdminAnalytics
+                          onEventsLoaded={setAnalyticsEvents}
+                          onTimeRangeChange={setAnalyticsTimeRange}
+                        />
                       )}
 
                       {/* Insights & Recommendations */}
@@ -539,6 +589,21 @@ function App() {
                         </div>
                       </CollapsibleSection>
                     </div>
+                  </div>
+                )}
+                {activeTab === "analytics-gaps" && userIsAdmin && (
+                  <div className="dashboard-layout">
+                    <ContentGaps events={analyticsEvents} />
+                  </div>
+                )}
+                {activeTab === "analytics-pipeline" && userIsAdmin && (
+                  <div className="dashboard-layout">
+                    <AnalyticsPipeline events={analyticsEvents} />
+                  </div>
+                )}
+                {activeTab === "analytics-costs" && userIsAdmin && (
+                  <div className="dashboard-layout">
+                    <AnalyticsCosts timeRange={analyticsTimeRange} />
                   </div>
                 )}
                 {activeTab === "augmentation" && (
