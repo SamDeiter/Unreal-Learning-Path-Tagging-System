@@ -370,7 +370,7 @@ export default function AdaptivePath() {
   }, [pathData]);
 
   // ── RENDER: Input Stage ──
-  if (stage === STAGES.IDLE) {
+  if (stage === STAGES.IDLE && !pathLoading && !pendingGeneration && !pathData) {
     return (
       <div className="adaptive-path">
         <div className="adaptive-input-section">
