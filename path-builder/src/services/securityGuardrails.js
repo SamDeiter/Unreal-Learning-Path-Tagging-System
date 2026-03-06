@@ -7,7 +7,7 @@
  */
 
 const MAX_QUERY_LENGTH = 500;
-const MAX_PATHS_PER_SESSION = 20;
+const MAX_PATHS_PER_SESSION = 100;
 const SESSION_COUNTER_KEY = "bespoke_session_count";
 const COOLDOWN_MS = 3000;
 
