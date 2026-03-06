@@ -4,6 +4,19 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [1.8.1-rag-fix] - 2026-03-06
+
+### Fixed
+
+- **RAG Pipeline 0-Hit Issue** — Generated and uploaded missing embeddings for `segment_embeddings` (2,402 chunks) and `docs_embeddings` (1,880 chunks) to Firestore
+- **Deprecated Embedding Model** — Updated 3 scripts from `text-embedding-004` (removed by Google) to `gemini-embedding-001`:
+  - `scripts/embed_segments.py`
+  - `scripts/scrape_epic_docs.py`
+  - `scripts/build_embeddings.py`
+- **Upload Script Project Detection** — `upload_embeddings_to_firestore.py` now auto-detects the GCP project ID from gcloud config instead of relying on implicit ADC resolution
+
+---
+
 ## [1.8.0-analytics-rag] - 2026-03-05
 
 ### Added
