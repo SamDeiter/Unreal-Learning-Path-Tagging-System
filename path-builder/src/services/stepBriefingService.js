@@ -107,35 +107,100 @@ export async function generateStepTakeaways(step, query) {
     const content = step.summary || step.segment?.text || step.description || "";
     const actionSteps = step.action || step.segment?.action || "";
 
+    const title = step.segment?.title || step.segment?.videoTitle || "this topic";
+    devLog(
+      `[Takeaways] Requesting for "${title}" (content length: ${content.length}, category: ${step.category})`
+    );
+
     const result = await fn({
       mode: "takeaways",
       query,
       stepContent: content,
       stepCategory: step.category || "learning",
       stepAction: actionSteps,
-      stepTitle: step.segment?.title || step.segment?.videoTitle || "",
+      stepTitle: title,
     });
+
+    devLog("[Takeaways] CF response:", JSON.stringify(result.data)?.substring(0, 200));
 
     if (result.data?.takeaways && Array.isArray(result.data.takeaways)) {
       devLog("[Takeaways] Generated", result.data.takeaways.length, "takeaways");
       return result.data.takeaways.slice(0, 3);
     }
 
-    const title = step.segment?.title || step.segment?.videoTitle || "this topic";
-    return [
-      `Study the core concepts covered in "${title}"`,
-      `Try applying these techniques in a UE5 test project`,
-      `Revisit the source material to solidify your understanding`,
-    ];
+    devWarn("[Takeaways] CF returned no takeaways array, using content-aware fallback");
+    return buildContentAwareFallback(step, title);
   } catch (err) {
-    devWarn("[Takeaways] Generation failed:", err.message);
-    const title = step.segment?.title || step.segment?.videoTitle || "this topic";
-    return [
-      `Study the core concepts covered in "${title}"`,
-      `Try applying these techniques in a UE5 test project`,
-      `Revisit the source material to solidify your understanding`,
-    ];
+    devWarn("[Takeaways] CF call failed:", err.message);
+    return buildContentAwareFallback(
+      step,
+      step.segment?.title || step.segment?.videoTitle || "this topic"
+    );
   }
+}
+
+/**
+ * Build takeaways from the step's own content rather than using generic boilerplate.
+ * Extracts key sentences and frames them by category.
+ */
+function buildContentAwareFallback(step, title) {
+  const text = step.summary || step.segment?.text || "";
+  const category = step.category || "learning";
+
+  // Extract first 2-3 meaningful sentences from the content
+  const sentences = text
+    .replace(/\s+/g, " ")
+    .split(/(?<=[.!?])\s+/)
+    .filter((s) => s.length > 20 && s.length < 200)
+    .slice(0, 5);
+
+  if (sentences.length >= 2) {
+    const categoryVerb =
+      {
+        foundation: "Understand",
+        diagnosis: "Identify",
+        fix: "Apply",
+        transfer: "Extend",
+      }[category] || "Review";
+
+    // Build takeaways from actual content
+    const takeaways = [];
+
+    // First takeaway: extract the core concept from the first sentence
+    takeaways.push(
+      `${categoryVerb}: ${sentences[0].replace(/^(This|In this|The)\s+/i, "").trim()}`
+    );
+
+    // Second takeaway: actionable item from the content
+    if (sentences.length > 1) {
+      takeaways.push(sentences[1].trim());
+    }
+
+    // Third takeaway: encourage hands-on practice with specifics
+    const ue5Terms = text.match(
+      /\b(Material Editor|Blueprint|Niagara|Lumen|Nanite|World Partition|Level Streaming|Animation Blueprint|Behavior Tree|Widget Blueprint|Sequencer|MetaSound|Chaos|Mass Entity|PCG|Water System|Foliage|Data Table)\b/i
+    );
+    if (ue5Terms) {
+      takeaways.push(
+        `Open ${ue5Terms[0]} in UE5 and experiment with the settings discussed in "${title}"`
+      );
+    } else if (sentences.length > 2) {
+      takeaways.push(sentences[2].trim());
+    } else {
+      takeaways.push(
+        `Practice these concepts in a UE5 test project focused on ${title.toLowerCase()}`
+      );
+    }
+
+    return takeaways.slice(0, 3);
+  }
+
+  // Last resort: at least reference the title meaningfully
+  return [
+    `Focus on understanding the core techniques covered in "${title}"`,
+    `Create a test project to practice ${title.toLowerCase()} hands-on`,
+    `Note any UE5 editor settings or properties mentioned for future reference`,
+  ];
 }
 
 /**
