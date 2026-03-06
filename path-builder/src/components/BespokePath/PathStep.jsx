@@ -78,16 +78,32 @@ function highlightKeyTerms(text) {
   const parts = text.split(/(\*\*[^*]{2,}\*\*|(?<!\w)'[^']{2,}'(?!\w)|`[^`]{2,}`|"[^"]{2,}")/g);
   return parts.map((part, i) => {
     if (part && part.startsWith("**") && part.endsWith("**") && part.length > 4) {
-      return <strong key={i}>{part.slice(2, -2)}</strong>;
+      return (
+        <strong key={i} className="ue-term">
+          {part.slice(2, -2)}
+        </strong>
+      );
     }
     if (part && part.startsWith("'") && part.endsWith("'") && part.length > 2) {
-      return <strong key={i}>{part.slice(1, -1)}</strong>;
+      return (
+        <strong key={i} className="ue-term">
+          {part.slice(1, -1)}
+        </strong>
+      );
     }
     if (part && part.startsWith("`") && part.endsWith("`") && part.length > 2) {
-      return <strong key={i}>{part.slice(1, -1)}</strong>;
+      return (
+        <strong key={i} className="ue-term">
+          {part.slice(1, -1)}
+        </strong>
+      );
     }
     if (part && part.startsWith('"') && part.endsWith('"') && part.length > 2) {
-      return <strong key={i}>{part.slice(1, -1)}</strong>;
+      return (
+        <strong key={i} className="ue-term">
+          {part.slice(1, -1)}
+        </strong>
+      );
     }
     return part;
   });
