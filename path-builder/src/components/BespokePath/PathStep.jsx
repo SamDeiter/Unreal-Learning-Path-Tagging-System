@@ -11,6 +11,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { getFirebaseApp } from "../../services/firebaseConfig";
 import { submitStepFeedback } from "../../services/feedbackService";
+import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { CATEGORY_STYLES } from "./pathConstants";
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -46,20 +47,11 @@ function cleanText(raw) {
   return text;
 }
 
-/** Strip conference / brand suffixes from video titles.
- *  e.g. "Refactoring the Mesh Drawing Pipeline | Unreal Fest Europe 2019 | Unreal Engine"
- *  becomes "Refactoring the Mesh Drawing Pipeline" */
+/** Strip conference / brand suffixes from video titles — delegates to cleanVideoTitle
+ *  for consistent formatting across the app. */
 function cleanTitle(raw) {
   if (!raw) return raw;
-  let t = String(raw);
-  // If the title is just a raw YouTube ID, return null so caller uses fallback
-  if (/^YouTube:\s*[A-Za-z0-9_-]{8,15}$/i.test(t.trim())) return null;
-  // Strip trailing pipe-delimited suffixes like "| Unreal Fest...", "| Unreal Engine", "| Epic Games"
-  t = t.replace(
-    /\s*\|\s*(Unreal\s+(Fest|Engine|Summit)|Epic\s+Games|GDC|Inside\s+Unreal)[^|]*/gi,
-    ""
-  );
-  return t.trim();
+  return cleanVideoTitle(raw);
 }
 
 function filterTakeaways(items) {
