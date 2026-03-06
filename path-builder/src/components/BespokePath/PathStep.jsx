@@ -360,7 +360,12 @@ export default function PathStep({
                                 </h4>
                                 <div className="deepdive-panel-content">
                                   {(() => {
-                                    const lines = section.content.split("\n").filter(Boolean);
+                                    const lines = section.content
+                                      .split("\n")
+                                      .filter(Boolean)
+                                      .map((l) =>
+                                        l.replace(/— ([a-z])/, (_, c) => "— " + c.toUpperCase())
+                                      );
                                     const isBullets = lines.some((l) => l.trim().startsWith("•"));
                                     const isNumbered = lines.some((l) => /^\d+[.)]/.test(l.trim()));
 
