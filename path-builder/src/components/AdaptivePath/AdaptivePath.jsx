@@ -125,14 +125,6 @@ export default function AdaptivePath() {
     startDiagnostic(cleaned);
   }, [query, startDiagnostic, hasSavedProfile]);
 
-  // Auto-generate path when skipping diagnostic (saved profile)
-  useEffect(() => {
-    if (pendingGeneration && query && knowledgeProfile && !pathLoading) {
-      setPendingGeneration(false);
-      handleGeneratePath();
-    }
-  }, [pendingGeneration, query, knowledgeProfile, pathLoading, handleGeneratePath]);
-
   /**
    * Handle selecting a pre-seeded path (skip diagnostic, instantly show path)
    */
@@ -209,6 +201,14 @@ export default function AdaptivePath() {
       setPathLoading(false);
     }
   }, [query, knowledgeProfile]);
+
+  // Auto-generate path when skipping diagnostic (saved profile)
+  useEffect(() => {
+    if (pendingGeneration && query && knowledgeProfile && !pathLoading) {
+      setPendingGeneration(false);
+      handleGeneratePath();
+    }
+  }, [pendingGeneration, query, knowledgeProfile, pathLoading, handleGeneratePath]);
 
   /**
    * Start over completely
