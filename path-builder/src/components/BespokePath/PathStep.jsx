@@ -395,7 +395,18 @@ export default function PathStep({
                                       .filter(Boolean)
                                       .map((l) =>
                                         l.replace(/— ([a-z])/, (_, c) => "— " + c.toUpperCase())
-                                      );
+                                      )
+                                      .map((l) => {
+                                        // In properties sections, auto-bold the property name before "—"
+                                        if (section.type === "properties" && l.includes("—")) {
+                                          return l.replace(
+                                            /^(•\s*)?([^—]+?)(\s*—)/,
+                                            (_, bullet, name, dash) =>
+                                              `${bullet || ""}**${name.trim()}**${dash}`
+                                          );
+                                        }
+                                        return l;
+                                      });
                                     const isBullets = lines.some((l) => l.trim().startsWith("•"));
                                     const isNumbered = lines.some((l) => /^\d+[.)]/.test(l.trim()));
 
