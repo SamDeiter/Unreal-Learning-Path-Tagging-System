@@ -66,16 +66,20 @@ function filterTakeaways(items) {
 }
 
 /**
- * Convert quoted or backtick-quoted terms in text to bold elements.
- * Handles 'single', `backtick`, and "double" quoted terms (2+ chars).
+ * Convert quoted, backtick-quoted, or **markdown bold** terms in text to bold elements.
+ * Handles 'single', `backtick`, "double" quoted terms (2+ chars),
+ * and **double-asterisk** bold terms.
  * Uses word-boundary checks to avoid catching apostrophes in
  * contractions like "isn't", "it's", "don't".
  */
 function highlightKeyTerms(text) {
   if (typeof text !== "string") return text;
-  // Match 'QuotedTerm' (not contractions) OR `BacktickTerm` OR "DoubleQuoted"
-  const parts = text.split(/((?<!\w)'[^']{2,}'(?!\w)|`[^`]{2,}`|"[^"]{2,}")/g);
+  // Match **bold**, 'QuotedTerm' (not contractions), `BacktickTerm`, "DoubleQuoted"
+  const parts = text.split(/(\*\*[^*]{2,}\*\*|(?<!\w)'[^']{2,}'(?!\w)|`[^`]{2,}`|"[^"]{2,}")/g);
   return parts.map((part, i) => {
+    if (part && part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
     if (part && part.startsWith("'") && part.endsWith("'") && part.length > 2) {
       return <strong key={i}>{part.slice(1, -1)}</strong>;
     }
