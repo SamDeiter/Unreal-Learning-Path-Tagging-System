@@ -115,15 +115,15 @@ export default function AdaptivePath() {
     saveRecentQuery(cleaned);
     setRecentQueries(loadRecentQueries());
 
-    // Skip diagnostic if we already have a saved learner profile
-    if (hasSavedProfile) {
+    // Skip diagnostic if we already have a learner profile (saved or just completed)
+    if (knowledgeProfile) {
       setQuery(cleaned);
       setPendingGeneration(true);
       return;
     }
 
     startDiagnostic(cleaned);
-  }, [query, startDiagnostic, hasSavedProfile]);
+  }, [query, startDiagnostic, knowledgeProfile]);
 
   /**
    * Handle selecting a pre-seeded path (skip diagnostic, instantly show path)
