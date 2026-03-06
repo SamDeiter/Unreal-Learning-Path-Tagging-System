@@ -579,9 +579,9 @@ export default function AdaptivePath() {
   if (pathData && pathData.path) {
     // Group steps into phases (same logic as BespokePath)
     const PHASE_CONFIG = [
-      { key: "problem", icon: "📋", label: "Questions", categories: ["foundation", "diagnosis"] },
-      { key: "solution", icon: "🔧", label: "Solution", categories: ["fix"] },
-      { key: "apply", icon: "🚀", label: "Apply It", categories: ["transfer"] },
+      { key: "problem", icon: "📋", label: "Understand", categories: ["foundation", "diagnosis"] },
+      { key: "solution", icon: "🔧", label: "Implement", categories: ["fix"] },
+      { key: "apply", icon: "🚀", label: "Practice", categories: ["transfer"] },
       { key: "quiz", icon: "📝", label: "Quiz", categories: ["__quiz__"] },
       { key: "reading", icon: "📖", label: "Further Reading", categories: ["__reading__"] },
     ];
@@ -660,9 +660,12 @@ export default function AdaptivePath() {
                       <ul className="substep-list">
                         {phase.steps.map((substep, i) => {
                           const step = pathData.path[substep.globalIndex];
+                          // Prefer the AI-generated step title, then segment title, then summary excerpt
                           let rawTitle =
+                            step?.title ||
                             cleanVideoTitle(step?.segment?.title || step?.segment?.videoTitle) ||
-                            `Step ${i + 1}`;
+                            (step?.summary ? step.summary.split(".")[0].substring(0, 50) : null) ||
+                            `Part ${i + 1}`;
                           return (
                             <li key={substep.globalIndex}>
                               <button

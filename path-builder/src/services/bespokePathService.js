@@ -134,7 +134,26 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
     return { segments: [], embedding: [] };
   }
 
+  const TRANSCRIPT_BOOST = 1.3;
   let segments = await searchAllCollections(queryVector);
+
+  // ── Evaluate corpus quality from PRIMARY search only ──
+  // This must happen BEFORE merging gap results, otherwise the gap boost
+  // inflates scores and prevents hybrid fallback when the corpus actually
+  // lacks content for the user's topic.
+  const primaryBoosted = segments.map((seg) => ({
+    ...seg,
+    _score: seg.type === "transcript" ? seg.similarity * TRANSCRIPT_BOOST : seg.similarity,
+  }));
+  const primaryBest =
+    primaryBoosted.length > 0 ? Math.max(...primaryBoosted.map((s) => s._score)) : 0;
+  const lowCorpusCoverage = primaryBest < SIMILARITY_THRESHOLD;
+
+  if (lowCorpusCoverage) {
+    devWarn(
+      `[BespokePath] Low corpus coverage: best primary similarity ${primaryBest.toFixed(3)} < ${SIMILARITY_THRESHOLD}`
+    );
+  }
 
   // ── Secondary search: gap-specific terms (only when adaptive) ──
   // This ensures the segment pool always contains gap-relevant content,
@@ -172,7 +191,6 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
   segments = Array.from(segmentMap.values());
 
   // Boost transcript segments so video content ranks higher than articles
-  const TRANSCRIPT_BOOST = 1.3;
   for (const seg of segments) {
     if (seg.type === "transcript" && !seg._gapSourced) {
       seg.similarity *= TRANSCRIPT_BOOST;
@@ -190,18 +208,8 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
 
   const topSegments = segments.slice(0, topK * 3);
 
-  // Check if ANY segment meets the quality threshold
-  const bestScore = topSegments.length > 0 ? topSegments[0].similarity : 0;
-  const lowCorpusCoverage = bestScore < SIMILARITY_THRESHOLD;
-
-  if (lowCorpusCoverage) {
-    devWarn(
-      `[BespokePath] Low corpus coverage: best similarity ${bestScore.toFixed(3)} < ${SIMILARITY_THRESHOLD}`
-    );
-  }
-
   devLog(
-    `[BespokePath] Found ${topSegments.length} segments (best: ${bestScore.toFixed(3)}, lowCoverage: ${lowCorpusCoverage})`
+    `[BespokePath] Found ${topSegments.length} segments (primaryBest: ${primaryBest.toFixed(3)}, lowCoverage: ${lowCorpusCoverage})`
   );
 
   return { segments: topSegments, embedding: queryVector, lowCorpusCoverage };
