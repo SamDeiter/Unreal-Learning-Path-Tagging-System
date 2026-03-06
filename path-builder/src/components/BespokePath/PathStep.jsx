@@ -256,9 +256,19 @@ export default function PathStep({
             </div>
           ) : filteredTakeaways && filteredTakeaways.length > 0 ? (
             <ul className="takeaways-list">
-              {filteredTakeaways.map((t, i) => (
-                <li key={i}>{highlightKeyTerms(t.charAt(0).toUpperCase() + t.slice(1))}</li>
-              ))}
+              {filteredTakeaways.map((t, i) => {
+                // Normalize ALL CAPS prefix (e.g. "ANIMATION NODE:" → "Animation Node:")
+                const normalized = t.replace(
+                  /^([A-Z][A-Z\s]+):/,
+                  (_, prefix) =>
+                    prefix
+                      .split(" ")
+                      .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+                      .join(" ") + ":"
+                );
+                const final = normalized.charAt(0).toUpperCase() + normalized.slice(1);
+                return <li key={i}>{highlightKeyTerms(final)}</li>;
+              })}
             </ul>
           ) : (
             <p className="no-takeaways">No specific takeaways extracted for this segment.</p>
