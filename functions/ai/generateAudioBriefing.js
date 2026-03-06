@@ -338,6 +338,7 @@ Generate exactly 3 key takeaways the learner MUST know from this step. Each take
 - Frame using Blueprint workflows and editor UI, not C++ code syntax
 - NOT just restating the problem — tell them WHAT to DO (e.g. "Set NetUpdateFrequency to 100 on your Character Movement Component")
 - Include concrete specifics from the content above
+- ANTI-HALLUCINATION: ONLY reference UE5 tools, properties, and features that are EXPLICITLY mentioned in the content above. Do NOT invent or assume any UE5 features, volume types, or settings that are not in the provided text.
 
 Return ONLY a JSON array of 3 strings.`;
 
