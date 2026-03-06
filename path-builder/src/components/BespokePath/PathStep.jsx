@@ -162,23 +162,6 @@ export default function PathStep({
   // Use narration script when available, otherwise fall back to raw segment text
   const displayText = narrationScript || step.summary || cleanText(segment.text);
 
-  const sourceType = segment.type || segment.source || "docs";
-
-  const sourceLabel =
-    sourceType === "ai_generated"
-      ? "AI-Generated"
-      : sourceType === "transcript"
-        ? "Video"
-        : sourceType === "epic_learning"
-          ? "Article"
-          : "Docs";
-  const sourceIcon =
-    sourceType === "ai_generated"
-      ? "fa-robot"
-      : sourceType === "transcript"
-        ? "fa-video"
-        : "fa-book-open";
-
   const filteredTakeaways = filterTakeaways(takeaways);
 
   return (
@@ -243,25 +226,6 @@ export default function PathStep({
 
       {/* Main Content */}
       <div className="content-area">
-        <div className="sources-pills">
-          <span className="source-pill">
-            <i className={`fa-solid ${sourceIcon}`}></i> {sourceLabel}
-          </span>
-          <span className="source-pill">
-            <i className="fa-solid fa-tags"></i> {category}
-          </span>
-          {sourceType === "ai_generated" && (
-            <span className="source-pill ai-generated-pill">
-              <i className="fa-solid fa-robot"></i> AI-assisted — beyond current course library
-            </span>
-          )}
-          {narrationScript && (
-            <span className="source-pill narration-pill">
-              <i className="fa-solid fa-headphones"></i> Narrated
-            </span>
-          )}
-        </div>
-
         {narrationScript ? (
           /* Collapsible narrator script — collapsed by default */
           <div className="narrator-script-toggle">
@@ -514,6 +478,14 @@ export default function PathStep({
           {sourcesOpen && (
             <div className="footnotes-content">
               {(() => {
+                // Derive source type & icon locally for the link
+                const sourceType = segment.type || segment.source || "docs";
+                const sourceIcon =
+                  sourceType === "ai_generated"
+                    ? "fa-robot"
+                    : sourceType === "transcript"
+                      ? "fa-video"
+                      : "fa-book-open";
                 // Determine the best available URL for this source
                 const directUrl = segment.videoUrl || segment.url;
                 const fallbackUrl =
