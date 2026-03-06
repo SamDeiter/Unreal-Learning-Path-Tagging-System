@@ -577,9 +577,14 @@ export default function AdaptivePath() {
   if (pathData && pathData.path) {
     // Group steps into phases (same logic as BespokePath)
     const PHASE_CONFIG = [
-      { key: "problem", icon: "📋", label: "Understand", categories: ["foundation", "diagnosis"] },
-      { key: "solution", icon: "🔧", label: "Implement", categories: ["fix"] },
-      { key: "apply", icon: "🚀", label: "Practice", categories: ["transfer"] },
+      {
+        key: "prereq",
+        icon: "📋",
+        label: "Prerequisites",
+        categories: ["prerequisite", "foundation", "diagnosis"],
+      },
+      { key: "core", icon: "🔧", label: "Core Steps", categories: ["core", "fix"] },
+      { key: "practice", icon: "🚀", label: "Practice", categories: ["practice", "transfer"] },
       { key: "quiz", icon: "📝", label: "Quiz", categories: ["__quiz__"] },
       { key: "reading", icon: "📖", label: "Further Reading", categories: ["__reading__"] },
     ];

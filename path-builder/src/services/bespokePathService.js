@@ -496,12 +496,13 @@ async function generateHybridPath(userQuery, knowledgeProfile = null) {
 Our content library does not have strong matches for this topic, so generate a learning path from your own Unreal Engine 5 knowledge.
 
 Create a 4-6 step learning path with these categories:
-- foundation (1-2 steps): Background concepts the learner needs first
-- diagnosis (1 step): How to identify the specific problem or key decision points
-- fix (1-2 steps): Step-by-step implementation — the actual workflow in the UE5 editor
-- transfer (1 step): How this knowledge applies to other contexts or projects
+- prerequisite (1-2 steps): Background concepts the learner needs before tackling the main topic
+- core (1-2 steps): The main implementation — step-by-step workflow in the UE5 editor
+- practice (1-2 steps): Hands-on exercises or ways to apply and extend the knowledge
 
 IMPORTANT RULES:
+- TITLE FORMAT: Each title must be a short, clear description (3-6 words max) that starts with a gerund. Examples: "Understanding Blueprint Variables", "Setting Up Time Dilation", "Applying Slow Motion Effects". Do NOT use generic titles like "Step 1" or "Assembly".
+- The title MUST directly relate to the learner's original question: "${userQuery}"
 - PRIORITIZE Blueprint-based approaches over C++ unless the query asks about C++
 - Be specific: include actual menu paths, property names, panel names, and node names
 - ASSET ASSUMPTION: Assume the learner already has a Static Mesh from FAB (Unreal Marketplace) or an FBX they imported. "Create" means setting up the asset in their project — NOT modeling from scratch or using Texture Graph.
@@ -511,7 +512,7 @@ IMPORTANT RULES:
 ${adaptiveContext}
 
 Return a JSON array:
-[{"category": "foundation", "title": "Step Title", "summary": "Direct teaching content..."}]`;
+[{"category": "prerequisite", "title": "Understanding Time Dilation", "summary": "Direct teaching content..."}]`;
 
   try {
     const app = getFirebaseApp();
@@ -552,7 +553,15 @@ Return a JSON array:
         return [];
       }
     }
-    const CATEGORY_ORDER = { foundation: 0, diagnosis: 1, fix: 2, transfer: 3 };
+    const CATEGORY_ORDER = {
+      prerequisite: 0,
+      core: 1,
+      practice: 2,
+      foundation: 3,
+      diagnosis: 4,
+      fix: 5,
+      transfer: 6,
+    };
 
     const sequenced = steps
       .sort((a, b) => (CATEGORY_ORDER[a.category] ?? 99) - (CATEGORY_ORDER[b.category] ?? 99))
