@@ -892,6 +892,7 @@ export default function AdaptivePath() {
                         }));
                         const result = await generateStepDeepDive(step, query, {
                           userLevel: knowledgeProfile?.level || "intermediate",
+                          existingTakeaways: stepTakeaways[idx]?.items || [],
                         });
                         setStepDeepDives((prev) => ({
                           ...prev,
@@ -902,6 +903,7 @@ export default function AdaptivePath() {
                           },
                         }));
                       }}
+                      query={query}
                     />
                   </div>
                 ) : null}

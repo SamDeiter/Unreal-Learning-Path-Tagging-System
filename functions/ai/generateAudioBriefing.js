@@ -218,6 +218,11 @@ IMPORTANT:
         }
 
         const userLevel = data.userLevel || "intermediate";
+        const existingTakeaways = data.existingTakeaways || [];
+        const takeawayContext =
+          existingTakeaways.length > 0
+            ? `\nThe learner has ALREADY seen these Key Takeaways for this step:\n${existingTakeaways.map((t) => `• ${t}`).join("\n")}\n\nDo NOT repeat this information. Your sections should go DEEPER — explain WHY, HOW, and WHEN these concepts matter, not WHAT they are (the takeaways already cover WHAT to do).\n`
+            : "";
         const deepdivePrompt = `You are an expert UE5 instructor creating an in-depth breakdown of a learning step.
 The learner is at the ${userLevel.toUpperCase()} level, so tailor depth and vocabulary accordingly.
 
@@ -225,7 +230,7 @@ The learner asked: "${query}"
 This is the ${stepCategory || "learning"} step titled "${stepTitle || ""}":
 
 "${stepContent.substring(0, 2000)}"
-
+${takeawayContext}
 Create exactly 3 focused sub-sections about the step title: "${stepTitle || ""}". Do NOT introduce concepts from other parts of the source text. Stay anchored to the title topic. Be CONCISE — use bullet points, not paragraphs.
 
 EXAMPLES OF BAD vs GOOD output for the practical section:
@@ -334,10 +339,17 @@ ${stepAction ? `\nAction steps from this content:\n"${stepAction.substring(0, 50
 
 Generate exactly 3 key takeaways the learner MUST know from this step. Each takeaway should be:
 - One concise sentence (under 20 words)
-- ACTIONABLE: mention a specific UE5 property, Blueprint node, editor menu path, or setting they should check/adjust
+- A SPECIFIC ACTION: must contain a verb like open, set, add, navigate, click, enable, create, or check
 - Frame using Blueprint workflows and editor UI, not C++ code syntax
 - NOT just restating the problem — tell them WHAT to DO (e.g. "Set NetUpdateFrequency to 100 on your Character Movement Component")
 - Include concrete specifics from the content above
+- CRITICAL DIFFERENTIATION (the Deep Dive section covers concepts separately — takeaways are ONLY for actions):
+  - NEVER start with "Blueprints are...", "Blueprints let you...", "Blueprints use...", or any definition/description
+  - BAD: "Blueprints let you create interactive experiences without writing C++ code" (this is a DEFINITION, not an action)
+  - GOOD: "Open Window > Blueprints and add an Event BeginPlay node to start scripting gameplay logic" (this is a specific ACTION)
+  - BAD: "The visual nature of Blueprints makes it easier to understand game logic" (this is an OPINION)
+  - BAD: "Extremely complex Blueprints can become difficult to manage, potentially impacting performance" (this is OVERSIMPLIFIED — reality has many conditionals)
+  - GOOD: "Right-click the Event Graph canvas and search for 'Print String' to test your first Blueprint node" (this is an ACTION)
 - ANTI-HALLUCINATION: ONLY reference UE5 tools, properties, and features that are EXPLICITLY mentioned in the content above. Do NOT invent or assume any UE5 features, volume types, or settings that are not in the provided text.
 - BLUEPRINT PRECISION: Blueprints ARE visual programming. NEVER say 'without code' or 'no code needed'. Say 'without writing C++ or text-based code'.
 

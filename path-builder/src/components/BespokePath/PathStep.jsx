@@ -10,6 +10,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { getFirebaseApp } from "../../services/firebaseConfig";
+import { submitStepFeedback } from "../../services/feedbackService";
 import { CATEGORY_STYLES } from "./pathConstants";
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -116,11 +117,13 @@ export default function PathStep({
   deepDiveLoading,
   editorContext,
   onGoDeeper,
+  query,
 }) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [scriptOpen, setScriptOpen] = useState(false);
   const [deepDiveOpen, setDeepDiveOpen] = useState(true);
   const [sectionRatings, setSectionRatings] = useState({}); // { 0: "good", 2: "bad" }
+  const [stepRating, setStepRating] = useState(null); // "positive" | "negative"
   const audioRef = useRef(null);
 
   // Save deepdive section rating to Firestore
@@ -299,6 +302,51 @@ export default function PathStep({
             </ul>
           ) : (
             <p className="no-takeaways">No specific takeaways extracted for this segment.</p>
+          )}
+          {/* Step-level feedback */}
+          {filteredTakeaways?.length > 0 && (
+            <div className="deepdive-rating" style={{ marginTop: "0.5rem" }}>
+              {stepRating ? (
+                <span className="deepdive-rating-done">
+                  {stepRating === "positive" ? "👍" : "👎"} Thanks for the feedback
+                </span>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="deepdive-rate-btn deepdive-rate-good"
+                    onClick={() => {
+                      setStepRating("positive");
+                      submitStepFeedback("positive", {
+                        stepTitle: step?.segment?.title || "",
+                        category: step?.category || "",
+                        query: query || "",
+                        summary: step?.summary || "",
+                      });
+                    }}
+                    title="This step's content was helpful"
+                  >
+                    👍
+                  </button>
+                  <button
+                    type="button"
+                    className="deepdive-rate-btn deepdive-rate-bad"
+                    onClick={() => {
+                      setStepRating("negative");
+                      submitStepFeedback("negative", {
+                        stepTitle: step?.segment?.title || "",
+                        category: step?.category || "",
+                        query: query || "",
+                        summary: step?.summary || "",
+                      });
+                    }}
+                    title="This step's content was unhelpful or inaccurate"
+                  >
+                    👎
+                  </button>
+                </>
+              )}
+            </div>
           )}
         </div>
 

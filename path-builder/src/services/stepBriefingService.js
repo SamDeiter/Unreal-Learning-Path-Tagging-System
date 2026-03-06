@@ -74,6 +74,7 @@ export async function generateStepDeepDive(step, query, options = {}) {
       stepTitle: step.segment?.title || step.segment?.videoTitle || "",
     };
     if (options.userLevel) payload.userLevel = options.userLevel;
+    if (options.existingTakeaways?.length) payload.existingTakeaways = options.existingTakeaways;
 
     const result = await genFn(payload);
 

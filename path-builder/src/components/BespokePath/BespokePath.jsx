@@ -718,6 +718,7 @@ export default function BespokePath() {
                       }}
                       takeaways={stepTakeaways.get(currentStep)}
                       takeawayLoading={takeawayLoading === currentStep}
+                      query={pathResult?.query || query}
                     />
                   </div>
                 ) : null}

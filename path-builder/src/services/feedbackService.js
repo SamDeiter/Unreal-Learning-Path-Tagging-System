@@ -13,7 +13,18 @@
  */
 
 import { devLog, devWarn } from "../utils/logger";
-import { getFirestore, doc, setDoc, addDoc, collection, getDocs, query as fsQuery, orderBy, limit, serverTimestamp } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  addDoc,
+  collection,
+  getDocs,
+  query as fsQuery,
+  orderBy,
+  limit,
+  serverTimestamp,
+} from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getFirebaseApp } from "./firebaseConfig";
 
@@ -227,7 +238,13 @@ export async function getBoostMap(userId) {
  * @param {string} [userEmail] - User email for admin triage
  * @returns {Promise<{ id: string, timestamp: string, persisted: "firestore"|"local" }>}
  */
-export async function submitFeedbackToFirestore(type, description, files = [], userId = "anonymous", userEmail = "") {
+export async function submitFeedbackToFirestore(
+  type,
+  description,
+  files = [],
+  userId = "anonymous",
+  userEmail = ""
+) {
   const timestamp = new Date().toISOString();
   const feedbackId = `fb_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -239,7 +256,8 @@ export async function submitFeedbackToFirestore(type, description, files = [], u
     const attachmentUrls = [];
     if (files.length > 0) {
       const storage = getStorage(app);
-      for (const file of files.slice(0, 5)) { // Max 5 attachments
+      for (const file of files.slice(0, 5)) {
+        // Max 5 attachments
         try {
           const storageRef = ref(storage, `feedback/${feedbackId}/${file.name}`);
           await uploadBytes(storageRef, file);
@@ -270,7 +288,11 @@ export async function submitFeedbackToFirestore(type, description, files = [], u
   } catch (err) {
     devWarn("[Feedback] Firestore write failed, falling back to localStorage:", err.message);
     // Fallback to localStorage
-    const localResult = recordFormFeedback(type, description, files.map((f) => f.name));
+    const localResult = recordFormFeedback(
+      type,
+      description,
+      files.map((f) => f.name)
+    );
     return { ...localResult, persisted: "local" };
   }
 }
@@ -292,6 +314,33 @@ export async function getAdminFeedbackList() {
   }
 }
 
+// ── Step-level feedback for AI content quality monitoring ─────────────────────
+
+/**
+ * Submit 👍/👎 feedback for a learning path step.
+ * Fire-and-forget — logs to Firestore `stepFeedback` collection.
+ * No user PII — just anonymous quality signals.
+ *
+ * @param {"positive"|"negative"} sentiment
+ * @param {{ stepTitle: string, category: string, query: string, summary?: string }} context
+ */
+export async function submitStepFeedback(sentiment, context = {}) {
+  try {
+    const db = getFirestore(getFirebaseApp());
+    await addDoc(collection(db, "stepFeedback"), {
+      sentiment,
+      stepTitle: context.stepTitle || "",
+      category: context.category || "",
+      query: context.query || "",
+      summaryPreview: (context.summary || "").substring(0, 200),
+      timestamp: serverTimestamp(),
+    });
+    devLog(`[Feedback] Step ${sentiment} for "${context.stepTitle}"`);
+  } catch (err) {
+    devWarn("[Feedback] Step feedback failed:", err.message);
+  }
+}
+
 export default {
   recordUpvote,
   recordDownvote,
@@ -303,4 +352,5 @@ export default {
   getAdminFeedbackList,
   logVideoFeedback,
   getBoostMap,
+  submitStepFeedback,
 };
