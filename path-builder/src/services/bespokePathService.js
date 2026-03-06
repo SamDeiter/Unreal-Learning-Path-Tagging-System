@@ -735,15 +735,7 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
       return result;
     }
 
-    // Stage 3: Generate bridge narrations
-    devLog("[BespokePath] Stage 3: Generating narrations...");
-    result.bridges = await generateBridgeNarration(result.path, userQuery);
-
-    devLog(
-      `[BespokePath] Pipeline complete: ${result.path.length} steps, ${result.bridges.length} bridges`
-    );
-
-    // ── Track final path metrics ──
+    // ── Track final path metrics (before narration so they always fire) ──
     const corpusSteps = result.path.filter((s) => s.segment?.type !== "ai_generated").length;
     const aiGenSteps = result.path.length - corpusSteps;
     trackPathSequenced({
@@ -751,6 +743,11 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
       categories: [...new Set(result.path.map((s) => s.category))],
       isAiGenerated: !!result.isAiGenerated,
       corpusRatio: result.path.length > 0 ? corpusSteps / result.path.length : 0,
+    });
+    devLog("[BespokePath] >>> Firing coverage report:", {
+      corpusSteps,
+      aiGenSteps,
+      total: result.path.length,
     });
     trackAICoverageReport({
       query: userQuery,
@@ -761,6 +758,14 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
       aiGeneratedSteps: aiGenSteps,
       lowCorpusCoverage: !!lowCorpusCoverage,
     });
+
+    // Stage 3: Generate bridge narrations
+    devLog("[BespokePath] Stage 3: Generating narrations...");
+    result.bridges = await generateBridgeNarration(result.path, userQuery);
+
+    devLog(
+      `[BespokePath] Pipeline complete: ${result.path.length} steps, ${result.bridges.length} bridges`
+    );
 
     return result;
   } catch (err) {

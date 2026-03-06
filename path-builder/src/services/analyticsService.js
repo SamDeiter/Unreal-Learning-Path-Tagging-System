@@ -321,10 +321,10 @@ export function trackPathSequenced(params) {
  * @param {number} params.aiGeneratedSteps - Steps AI had to generate
  * @param {boolean} params.lowCorpusCoverage - Whether corpus coverage was low
  */
-export function trackAICoverageReport(params) {
+export async function trackAICoverageReport(params) {
   const total = params.totalSteps || 0;
   const aiSteps = params.aiGeneratedSteps || 0;
-  return trackEvent(EVENTS.AI_COVERAGE_REPORT, {
+  const payload = {
     query_preview: params.query?.substring(0, 100),
     learner_level: params.learnerLevel || "unknown",
     knowledge_gaps: (params.knowledgeGaps || []).slice(0, 10),
@@ -333,7 +333,14 @@ export function trackAICoverageReport(params) {
     ai_generated_steps: aiSteps,
     ai_ratio: total > 0 ? Number((aiSteps / total).toFixed(2)) : 0,
     low_corpus_coverage: !!params.lowCorpusCoverage,
-  });
+  };
+  devLog("[Analytics] Firing AI_COVERAGE_REPORT:", payload);
+  try {
+    await trackEvent(EVENTS.AI_COVERAGE_REPORT, payload);
+    devLog("[Analytics] AI_COVERAGE_REPORT written successfully");
+  } catch (err) {
+    devWarn("[Analytics] AI_COVERAGE_REPORT FAILED:", err.message, err);
+  }
 }
 
 export default {
