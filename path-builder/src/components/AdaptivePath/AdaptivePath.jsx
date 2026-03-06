@@ -160,12 +160,14 @@ export default function AdaptivePath() {
 
     try {
       // Check cache first (include profile hash with gaps in cache key)
+      // Use threshold=1.0 (exact match only) — fuzzy matching on adaptive
+      // keys would incorrectly match old entries with different gap sets.
       const gapsKey =
         knowledgeProfile.gaps?.length > 0
           ? `_gaps_${[...knowledgeProfile.gaps].sort().join(",")}`
           : "";
       const profileKey = `${query}_adaptive_${knowledgeProfile.level}${gapsKey}`;
-      const cached = await findCachedPath(profileKey);
+      const cached = await findCachedPath(profileKey, 1.0);
       if (cached) {
         timers.forEach(clearTimeout);
         setPathData(cached);
