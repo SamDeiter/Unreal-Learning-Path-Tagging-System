@@ -14,7 +14,7 @@ import { useState, useEffect, useCallback } from "react";
 import useAdaptiveQuiz from "../../hooks/useAdaptiveQuiz";
 import { sanitizeQuery, checkRateLimit, recordQuery } from "../../services/securityGuardrails";
 import { generateBespokePath } from "../../services/bespokePathService";
-import { findCachedPath, cachePath } from "../../services/pathCacheService";
+// import { findCachedPath, cachePath } from "../../services/pathCacheService"; // CACHE DISABLED FOR TESTING
 import { trackSessionCompleted } from "../../services/analyticsService";
 import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
@@ -159,21 +159,19 @@ export default function AdaptivePath() {
     );
 
     try {
-      // Check cache first (include profile hash with gaps in cache key)
-      // Use threshold=1.0 (exact match only) — fuzzy matching on adaptive
-      // keys would incorrectly match old entries with different gap sets.
-      const gapsKey =
-        knowledgeProfile.gaps?.length > 0
-          ? `_gaps_${[...knowledgeProfile.gaps].sort().join(",")}`
-          : "";
-      const profileKey = `${query}_adaptive_${knowledgeProfile.level}${gapsKey}`;
-      const cached = await findCachedPath(profileKey, 1.0);
-      if (cached) {
-        timers.forEach(clearTimeout);
-        setPathData(cached);
-        setPathLoading(false);
-        return;
-      }
+      // ── CACHE DISABLED FOR TESTING ──
+      // const gapsKey =
+      //   knowledgeProfile.gaps?.length > 0
+      //     ? `_gaps_${[...knowledgeProfile.gaps].sort().join(",")}`
+      //     : "";
+      // const profileKey = `${query}_adaptive_${knowledgeProfile.level}${gapsKey}`;
+      // const cached = await findCachedPath(profileKey, 1.0);
+      // if (cached) {
+      //   timers.forEach(clearTimeout);
+      //   setPathData(cached);
+      //   setPathLoading(false);
+      //   return;
+      // }
 
       // Generate path with knowledge profile context
       const result = await generateBespokePath(query, knowledgeProfile);
@@ -182,7 +180,7 @@ export default function AdaptivePath() {
         setPathError(result.error);
       } else {
         setPathData(result);
-        cachePath(profileKey, result);
+        // cachePath(profileKey, result); // CACHE DISABLED FOR TESTING
       }
     } catch (err) {
       setPathError(err.message || "Failed to generate learning path.");
