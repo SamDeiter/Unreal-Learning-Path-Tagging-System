@@ -77,7 +77,13 @@ const SECONDARY_TABS = [
 
 const ANALYTICS_SUBTABS = [
   { key: "analytics-overview", label: "Overview", icon: "📊" },
-  { key: "analytics-gaps", label: "Content Gaps", icon: "🧠" },
+  { key: "analytics-insights", label: "Insights", icon: "💡" },
+  { key: "analytics-confidence", label: "Confidence", icon: "🧠" },
+  { key: "analytics-coverage", label: "Coverage", icon: "🎯" },
+  { key: "analytics-library", label: "Library", icon: "📚" },
+  { key: "analytics-paths", label: "Learning Paths", icon: "🛤️" },
+  { key: "analytics-graph", label: "Tag Graph", icon: "🔗" },
+  { key: "analytics-gaps", label: "Content Gaps", icon: "🕳️" },
   { key: "analytics-pipeline", label: "Pipeline", icon: "⚙️" },
   { key: "analytics-costs", label: "Costs", icon: "💰" },
 ];
@@ -95,6 +101,12 @@ const MOBILE_TAB_ORDER = [
   "readiness",
   "tags",
   "analytics-overview",
+  "analytics-insights",
+  "analytics-confidence",
+  "analytics-coverage",
+  "analytics-library",
+  "analytics-paths",
+  "analytics-graph",
   "analytics-gaps",
   "analytics-pipeline",
   "analytics-costs",
@@ -531,63 +543,47 @@ function App() {
                         />
                       )}
 
-                      {/* Insights & Recommendations */}
-                      <InsightsPanel onNavigate={handleInsightNavigate} />
-
-                      {/* Confidence Routing Analytics */}
-                      <CollapsibleSection
-                        title="Confidence Routing"
-                        icon="🧠"
-                        defaultExpanded={false}
-                      >
-                        <ConfidenceAnalytics />
-                      </CollapsibleSection>
-
-                      {/* Skill Coverage vs Industry Demand */}
-                      <CollapsibleSection
-                        title="Coverage vs Industry Demand"
-                        icon="🎯"
-                        defaultExpanded={false}
-                      >
-                        <div className="coverage-grid">
-                          <SkillRadar />
-                          <SkillGapAnalysis />
-                        </div>
-                      </CollapsibleSection>
-
-                      {/* Overview Section */}
-                      <CollapsibleSection title="Overview" icon="📈" defaultExpanded={false}>
-                        <JourneyHeatmap />
-                      </CollapsibleSection>
-
-                      {/* Library Analysis Section */}
-                      <CollapsibleSection
-                        title="Library Analysis"
-                        icon="📚"
-                        defaultExpanded={false}
-                      >
-                        <TagTrends />
-                        <TagHistorySparkline />
-                        <TagHeatmap />
-                        <TagTimeline />
-                        <InstructorMap />
-                      </CollapsibleSection>
-
-                      {/* Learning Paths Section */}
-                      <CollapsibleSection title="Learning Paths" icon="🛤️" defaultExpanded={false}>
-                        <PrereqFlow />
-                      </CollapsibleSection>
-
-                      {/* Tag Relationship Graph Section */}
-                      <CollapsibleSection
-                        title="Tag Relationship Graph"
-                        icon="🔗"
-                        defaultExpanded={false}
-                      >
-                        <div className="tag-graph-wrapper">
-                          <TagGraph tags={tags} edges={edges} courses={courses} />
-                        </div>
-                      </CollapsibleSection>
+                      {/* Journey Heatmap */}
+                      <JourneyHeatmap />
+                    </div>
+                  </div>
+                )}
+                {activeTab === "analytics-insights" && (
+                  <div className="analytics-layout">
+                    <InsightsPanel onNavigate={handleInsightNavigate} />
+                  </div>
+                )}
+                {activeTab === "analytics-confidence" && (
+                  <div className="analytics-layout">
+                    <ConfidenceAnalytics />
+                  </div>
+                )}
+                {activeTab === "analytics-coverage" && (
+                  <div className="analytics-layout">
+                    <div className="coverage-grid">
+                      <SkillRadar />
+                      <SkillGapAnalysis />
+                    </div>
+                  </div>
+                )}
+                {activeTab === "analytics-library" && (
+                  <div className="analytics-layout">
+                    <TagTrends />
+                    <TagHistorySparkline />
+                    <TagHeatmap />
+                    <TagTimeline />
+                    <InstructorMap />
+                  </div>
+                )}
+                {activeTab === "analytics-paths" && (
+                  <div className="analytics-layout">
+                    <PrereqFlow />
+                  </div>
+                )}
+                {activeTab === "analytics-graph" && (
+                  <div className="analytics-layout">
+                    <div className="tag-graph-wrapper">
+                      <TagGraph tags={tags} edges={edges} courses={courses} />
                     </div>
                   </div>
                 )}
