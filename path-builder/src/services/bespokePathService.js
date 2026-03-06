@@ -688,6 +688,24 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
       result.bridges = await generateBridgeNarration(result.path, userQuery);
 
       devLog(`[BespokePath] Hybrid pipeline complete: ${result.path.length} AI-generated steps`);
+
+      // ── Track metrics for hybrid fallback path ──
+      trackPathSequenced({
+        stepCount: result.path.length,
+        categories: [...new Set(result.path.map((s) => s.category))],
+        isAiGenerated: true,
+        corpusRatio: 0,
+      });
+      trackAICoverageReport({
+        query: userQuery,
+        learnerLevel: knowledgeProfile?.level || "unknown",
+        knowledgeGaps: knowledgeProfile?.gaps || [],
+        totalSteps: result.path.length,
+        corpusSteps: 0,
+        aiGeneratedSteps: result.path.length,
+        lowCorpusCoverage: true,
+      });
+
       return result;
     }
 
