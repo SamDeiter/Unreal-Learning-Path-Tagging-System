@@ -9,6 +9,7 @@
 const functions = require("firebase-functions");
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
 const { normalizeQuery } = require("../pipeline/cache");
+const { checkRateLimit } = require("../utils/rateLimit");
 
 // In-memory cache (per instance) to avoid redundant Gemini calls
 const _cache = new Map();
@@ -20,8 +21,18 @@ exports.expandQuery = functions
     timeoutSeconds: 15,
     memory: "256MB",
   })
-  .https.onCall(async (data) => {
+  .https.onCall(async (data, context) => {
+    const userId = context.auth?.uid || "anonymous";
     const { query } = data;
+
+    // Rate limit check
+    const rateLimitCheck = await checkRateLimit(userId, "generation");
+    if (!rateLimitCheck.allowed) {
+      throw new functions.https.HttpsError(
+        "resource-exhausted",
+        `Rate limit exceeded. ${rateLimitCheck.message}`
+      );
+    }
 
     // Security: sanitize input
     const validation = sanitizeAndValidate(query, 300);

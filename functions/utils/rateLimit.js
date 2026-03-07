@@ -63,4 +63,34 @@ async function checkRateLimit(userId, type = "generation") {
   }
 }
 
-module.exports = { checkRateLimit };
+/**
+ * Global aggregate rate limit — caps TOTAL calls per user across all functions.
+ * Prevents distributed abuse (e.g., spamming 10 different endpoints simultaneously).
+ */
+async function checkGlobalRateLimit(userId) {
+  const db = admin.firestore();
+  const now = Date.now();
+  const oneMinuteAgo = now - 60 * 1000;
+  const GLOBAL_LIMIT = 60; // max 60 total AI calls per user per minute
+
+  try {
+    const recentCalls = await db
+      .collection("apiUsage")
+      .where("userId", "==", userId)
+      .where("timestamp", ">", new Date(oneMinuteAgo))
+      .get();
+
+    if (recentCalls.size >= GLOBAL_LIMIT) {
+      return {
+        allowed: false,
+        message: `Global rate limit exceeded (${GLOBAL_LIMIT} calls/minute). Please wait.`,
+      };
+    }
+    return { allowed: true };
+  } catch (error) {
+    console.log("Global rate limit check skipped:", error.message);
+    return { allowed: true };
+  }
+}
+
+module.exports = { checkRateLimit, checkGlobalRateLimit };

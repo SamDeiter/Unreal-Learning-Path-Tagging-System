@@ -326,6 +326,10 @@ function App() {
           lastUpdated={videoLibrary.generated_at}
         >
           <div className="app">
+            {/* Skip to content link for keyboard/screen reader users */}
+            <a href="#main-content" className="skip-to-content">
+              Skip to main content
+            </a>
             {isMobile ? (
               /* ── Mobile: hamburger + active tab name ── */
               <header className="app-header mobile-header">
@@ -481,7 +485,7 @@ function App() {
             )}
 
             {/* Main Content */}
-            <main className="app-main">
+            <main className="app-main" id="main-content" tabIndex="-1">
               <Suspense fallback={<LoadingSpinner />}>
                 {activeTab === "dashboard" && (
                   <div className="dashboard-layout">

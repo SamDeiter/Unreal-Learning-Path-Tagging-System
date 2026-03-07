@@ -14,8 +14,20 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { FieldValue } = require("firebase-admin/firestore");
+const { checkRateLimit } = require("../utils/rateLimit");
 
 const db = admin.firestore();
+
+/**
+ * Shared rate limit enforcement for vector search endpoints.
+ */
+async function enforceRateLimit(request) {
+  const userId = request.auth?.uid || "anonymous";
+  const rateLimitCheck = await checkRateLimit(userId, "generation");
+  if (!rateLimitCheck.allowed) {
+    throw new HttpsError("resource-exhausted", `Rate limit exceeded. ${rateLimitCheck.message}`);
+  }
+}
 
 /**
  * Generic vector search against a Firestore collection.
@@ -56,6 +68,7 @@ async function searchCollection(collectionName, queryVector, topK) {
  * Search epic_embeddings — main RAG search across all content
  */
 exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10 }, async (request) => {
+  await enforceRateLimit(request);
   const { queryVector, topK = 10 } = request.data;
 
   if (!queryVector || !Array.isArray(queryVector)) {
@@ -76,6 +89,7 @@ exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10 }, a
 exports.vectorSearchCourses = onCall(
   { region: "us-central1", maxInstances: 10 },
   async (request) => {
+    await enforceRateLimit(request);
     const { queryVector, topK = 5 } = request.data;
 
     if (!queryVector || !Array.isArray(queryVector)) {
@@ -94,6 +108,7 @@ exports.vectorSearchCourses = onCall(
 exports.vectorSearchSegments = onCall(
   { region: "us-central1", maxInstances: 10 },
   async (request) => {
+    await enforceRateLimit(request);
     const { queryVector, topK = 10 } = request.data;
 
     if (!queryVector || !Array.isArray(queryVector)) {
@@ -110,6 +125,7 @@ exports.vectorSearchSegments = onCall(
  * Search docs_embeddings — documentation similarity
  */
 exports.vectorSearchDocs = onCall({ region: "us-central1", maxInstances: 10 }, async (request) => {
+  await enforceRateLimit(request);
   const { queryVector, topK = 10 } = request.data;
 
   if (!queryVector || !Array.isArray(queryVector)) {

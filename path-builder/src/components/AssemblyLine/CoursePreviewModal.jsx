@@ -20,18 +20,32 @@ function CoursePreviewModal({
   if (!course && !isGenerating) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="course-preview-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={onClose} role="presentation">
+      <div
+        className="course-preview-modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="course-preview-title"
+      >
         <header className="modal-header">
-          <h2>{isGenerating ? "✨ Generating Course..." : "📚 Course Preview"}</h2>
-          <button className="btn-close" onClick={onClose}>
+          <h2 id="course-preview-title">
+            {isGenerating ? "✨ Generating Course..." : "📚 Course Preview"}
+          </h2>
+          <button className="btn-close" onClick={onClose} aria-label="Close course preview">
             ×
           </button>
         </header>
 
         {isGenerating && (
-          <div className="generation-progress">
-            <div className="progress-bar">
+          <div className="generation-progress" role="status" aria-live="polite">
+            <div
+              className="progress-bar"
+              role="progressbar"
+              aria-valuenow={progress.percent}
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
               <div className="progress-fill" style={{ width: `${progress.percent}%` }} />
             </div>
             <p className="progress-text">{progress.step}</p>

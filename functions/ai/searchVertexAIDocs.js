@@ -11,6 +11,7 @@
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { SearchServiceClient } = require("@google-cloud/discoveryengine").v1beta;
+const { checkRateLimit } = require("../utils/rateLimit");
 
 // ── Configuration ──────────────────────────────────────────────────────────────
 const PROJECT_ID = "development-317819";
@@ -36,22 +37,28 @@ function getClient() {
 exports.searchVertexAIDocs = onCall(
   { region: "us-central1", timeoutSeconds: 30, memory: "256MiB" },
   async (request) => {
+    const userId = request.auth?.uid || "anonymous";
     const { query, pageSize = 5 } = request.data || {};
 
     if (!query || typeof query !== "string" || query.trim().length === 0) {
       throw new HttpsError("invalid-argument", "A non-empty query string is required.");
     }
 
+    // Rate limit check
+    const rateLimitCheck = await checkRateLimit(userId, "generation");
+    if (!rateLimitCheck.allowed) {
+      throw new HttpsError("resource-exhausted", `Rate limit exceeded. ${rateLimitCheck.message}`);
+    }
+
     const client = getClient();
 
-    const servingConfig =
-      client.projectLocationCollectionDataStoreServingConfigPath(
-        PROJECT_ID,
-        LOCATION,
-        COLLECTION_ID,
-        DATA_STORE_ID,
-        SERVING_CONFIG_ID
-      );
+    const servingConfig = client.projectLocationCollectionDataStoreServingConfigPath(
+      PROJECT_ID,
+      LOCATION,
+      COLLECTION_ID,
+      DATA_STORE_ID,
+      SERVING_CONFIG_ID
+    );
 
     const searchRequest = {
       pageSize: Math.min(pageSize, 10),
@@ -89,10 +96,10 @@ exports.searchVertexAIDocs = onCall(
           title: derivedData.title?.stringValue || doc.name || "",
           url: derivedData.link?.stringValue || "",
           snippet:
-            derivedData.snippets?.listValue?.values?.[0]?.structValue?.fields
-              ?.snippet?.stringValue ||
-            derivedData.extractive_segments?.listValue?.values?.[0]
-              ?.structValue?.fields?.content?.stringValue ||
+            derivedData.snippets?.listValue?.values?.[0]?.structValue?.fields?.snippet
+              ?.stringValue ||
+            derivedData.extractive_segments?.listValue?.values?.[0]?.structValue?.fields?.content
+              ?.stringValue ||
             "",
         };
       });

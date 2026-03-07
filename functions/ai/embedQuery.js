@@ -5,6 +5,7 @@
 const functions = require("firebase-functions");
 const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
+const { checkRateLimit } = require("../utils/rateLimit");
 
 const MODEL = "gemini-embedding-001";
 const DIMENSION = 768;
@@ -15,8 +16,18 @@ exports.embedQuery = functions
     timeoutSeconds: 15,
     memory: "256MB",
   })
-  .https.onCall(async (data) => {
+  .https.onCall(async (data, context) => {
+    const userId = context.auth?.uid || "anonymous";
     const { query } = data;
+
+    // Rate limit check
+    const rateLimitCheck = await checkRateLimit(userId, "generation");
+    if (!rateLimitCheck.allowed) {
+      throw new functions.https.HttpsError(
+        "resource-exhausted",
+        `Rate limit exceeded. ${rateLimitCheck.message}`
+      );
+    }
 
     // Security: sanitize input
     const validation = sanitizeAndValidate(query, 300);

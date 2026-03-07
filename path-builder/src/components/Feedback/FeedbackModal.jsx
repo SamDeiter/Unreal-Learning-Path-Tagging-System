@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { X, Upload, MessageSquare, AlertCircle, CheckCircle, Bug, Lightbulb } from "lucide-react";
 import "./FeedbackModal.css";
@@ -21,6 +21,41 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
   const [success, setSuccess] = useState(false);
   const [persistedTo, setPersistedTo] = useState(null);
   const fileInputRef = useRef(null);
+  const modalRef = useRef(null);
+
+  // Focus trap + Escape key handler
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      // Focus trap: cycle focus within modal
+      if (e.key === "Tab" && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    },
+    [onClose]
+  );
+
+  // Auto-focus modal on open
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      const firstFocusable = modalRef.current.querySelector("button, input, textarea");
+      firstFocusable?.focus();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -79,9 +114,17 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
   };
 
   return (
-    <div className="feedback-overlay" onClick={onClose}>
-      <div className="feedback-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="feedback-close" onClick={onClose}>
+    <div className="feedback-overlay" onClick={onClose} role="presentation">
+      <div
+        className="feedback-modal"
+        ref={modalRef}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="feedback-modal-title"
+        onKeyDown={handleKeyDown}
+      >
+        <button className="feedback-close" onClick={onClose} aria-label="Close feedback modal">
           <X size={20} />
         </button>
 
@@ -99,7 +142,7 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="feedback-header">
-              <h2>
+              <h2 id="feedback-modal-title">
                 <MessageSquare size={24} className="icon-inline" /> Send Feedback
               </h2>
               <p>Found a bug or have an idea? Let us know.</p>
@@ -174,7 +217,12 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                   {files.map((file, i) => (
                     <div key={i} className="file-item">
                       <span className="file-name">{file.name}</span>
-                      <button type="button" className="file-remove" onClick={() => removeFile(i)}>
+                      <button
+                        type="button"
+                        className="file-remove"
+                        onClick={() => removeFile(i)}
+                        aria-label={`Remove attachment ${file.name}`}
+                      >
                         <X size={12} />
                       </button>
                     </div>

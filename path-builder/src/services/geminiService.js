@@ -5,6 +5,7 @@
  * API key stored securely in Firebase Secrets - never exposed to client.
  */
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { retryWithBackoff } from "../utils/retryWithBackoff";
 import { getAuth } from "firebase/auth";
 import { getFirebaseApp, firebaseConfig } from "./firebaseConfig";
 import { devWarn } from "../utils/logger";
@@ -92,12 +93,16 @@ Respond with ONLY valid JSON, no markdown.`;
 
   try {
     const generateCourse = httpsCallable(functions, "generateCourseMetadata");
-    const result = await generateCourse({
-      systemPrompt,
-      userPrompt,
-      temperature: 0.3,
-      model: "gemini-1.5-flash",
-    });
+    const result = await retryWithBackoff(
+      () =>
+        generateCourse({
+          systemPrompt,
+          userPrompt,
+          temperature: 0.3,
+          model: "gemini-1.5-flash",
+        }),
+      { maxRetries: 2, baseDelayMs: 1500, label: "generateCourseMetadata" }
+    );
 
     if (!result.data.success) {
       throw new Error(result.data.error || "Cloud Function failed");
@@ -149,12 +154,16 @@ Respond with ONLY valid JSON array, no markdown.`;
 
   try {
     const generateQuiz = httpsCallable(functions, "generateCourseMetadata");
-    const result = await generateQuiz({
-      systemPrompt,
-      userPrompt,
-      temperature: 0.4,
-      model: "gemini-1.5-flash",
-    });
+    const result = await retryWithBackoff(
+      () =>
+        generateQuiz({
+          systemPrompt,
+          userPrompt,
+          temperature: 0.4,
+          model: "gemini-1.5-flash",
+        }),
+      { maxRetries: 2, baseDelayMs: 1500, label: "generateQuiz" }
+    );
 
     if (!result.data.success) {
       throw new Error(result.data.error || "Quiz generation failed");
@@ -231,12 +240,16 @@ Respond with ONLY valid JSON, no markdown.`;
 
   try {
     const generateBlueprint = httpsCallable(functions, "generateCourseMetadata");
-    const result = await generateBlueprint({
-      systemPrompt,
-      userPrompt,
-      temperature: 0.4,
-      model: "gemini-1.5-flash",
-    });
+    const result = await retryWithBackoff(
+      () =>
+        generateBlueprint({
+          systemPrompt,
+          userPrompt,
+          temperature: 0.4,
+          model: "gemini-1.5-flash",
+        }),
+      { maxRetries: 2, baseDelayMs: 1500, label: "generateBlueprint" }
+    );
 
     if (!result.data.success) {
       throw new Error(result.data.error || "Blueprint generation failed");

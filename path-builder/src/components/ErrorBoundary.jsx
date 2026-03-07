@@ -1,8 +1,10 @@
-import { Component } from 'react';
+import { Component } from "react";
+import { reportError } from "../services/errorReportingService";
 
 /**
  * Error Boundary Component
- * Catches JavaScript errors in child components and displays fallback UI
+ * Catches JavaScript errors in child components and displays fallback UI.
+ * Reports errors to Firestore for production monitoring.
  */
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -17,7 +19,12 @@ class ErrorBoundary extends Component {
   componentDidCatch(error, errorInfo) {
     this.setState({ errorInfo });
     // Log error for debugging
-    console.error('ErrorBoundary caught error:', error, errorInfo);
+    console.error("ErrorBoundary caught error:", error, errorInfo);
+    // Report to Firestore for production monitoring
+    reportError(error, {
+      source: "ErrorBoundary",
+      componentStack: errorInfo?.componentStack || "",
+    });
   }
 
   handleReload = () => {
@@ -36,17 +43,15 @@ class ErrorBoundary extends Component {
           <div className="error-content">
             <h2>⚠️ Something went wrong</h2>
             <p>This section encountered an error and couldn't load properly.</p>
-            
+
             {this.props.showDetails && this.state.error && (
               <details className="error-details">
                 <summary>Error Details</summary>
                 <pre>{this.state.error.toString()}</pre>
-                {this.state.errorInfo && (
-                  <pre>{this.state.errorInfo.componentStack}</pre>
-                )}
+                {this.state.errorInfo && <pre>{this.state.errorInfo.componentStack}</pre>}
               </details>
             )}
-            
+
             <div className="error-actions">
               <button onClick={this.handleRetry} className="btn btn-primary">
                 Try Again
@@ -56,7 +61,7 @@ class ErrorBoundary extends Component {
               </button>
             </div>
           </div>
-          
+
           <style>{`
             .error-boundary {
               display: flex;
