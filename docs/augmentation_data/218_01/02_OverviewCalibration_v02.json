@@ -1,0 +1,138 @@
+{
+  "course_code": "218.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:14",
+      "title": "Understanding Lens Distortion Modeling in Unreal Engine",
+      "concept": "The Camera Calibration plugin uses mathematical models to represent lens distortion. These models (e.g., Brown-Conrady) correct for radial and tangential distortions introduced by the lens. Understanding the underlying math is crucial for troubleshooting calibration errors.",
+      "diagram_suggestion": "A diagram illustrating radial and tangential lens distortion, and how the Brown-Conrady model corrects for them."
+    },
+    {
+      "insert_after_timestamp": "0:55",
+      "title": "Interpolating Calibration Data",
+      "concept": "Unreal Engine interpolates between stored focus and zoom points to estimate lens parameters for intermediate values. This interpolation relies on assumptions about the lens's behavior. Understanding these assumptions helps predict calibration accuracy.",
+      "diagram_suggestion": "A graph showing how lens parameters (e.g., distortion coefficients) change with focus and zoom, and how Unreal Engine interpolates between measured points."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:07",
+      "procedural_step": "Calibrate camera",
+      "why": "Accurate calibration ensures that the virtual camera's parameters (position, rotation, focal length, distortion) match the physical camera. Mismatched parameters lead to incorrect compositing, causing CG elements to appear misaligned or distorted in the final image.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:23",
+      "procedural_step": "Calibrate before set extension",
+      "why": "Lens calibration provides the necessary data for accurately projecting CG extensions into the scene. Without it, set extensions will exhibit perspective errors, scale discrepancies, and incorrect parallax, breaking the illusion of realism.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:45",
+      "procedural_step": "Sync video feed and camera tracking",
+      "why": "Precise synchronization between the video feed and camera tracking data is critical. Asynchronous data results in temporal misalignment, causing the CG elements to lag behind or jump ahead of the live action, leading to visual artifacts.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:24",
+      "procedural_step": "Capture multiple focus/zoom points",
+      "why": "Lens characteristics change with focus and zoom. Capturing multiple points allows Unreal Engine to create a more accurate model of the lens's behavior across its entire range. Insufficient data leads to inaccurate interpolation and calibration errors at specific focus/zoom settings.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:19",
+      "prompt": "Why is accurate lens calibration more critical for wide-angle lenses compared to telephoto lenses in set extensions?",
+      "expected_insight": "Wide-angle lenses exhibit more significant distortion, making accurate calibration crucial to avoid noticeable warping in the extended environment. Telephoto lenses have less distortion, so calibration errors are less apparent."
+    },
+    {
+      "insert_after_timestamp": "1:30",
+      "prompt": "Imagine you only calibrate at one focus distance. How would this impact the accuracy of virtual depth of field effects?",
+      "expected_insight": "The virtual depth of field would be inaccurate at other focus distances because the lens characteristics (e.g., circle of confusion) would not be correctly modeled, leading to blurring artifacts."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of camera principles (focal length, aperture, depth of field)",
+    "Familiarity with Unreal Engine's content browser and folder structure",
+    "Knowledge of media profiles and media framework"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is camera calibration essential for compositing CG renders with live video in Unreal Engine?",
+      "options": [
+        "To ensure the virtual camera accurately simulates the physical camera.",
+        "To reduce the file size of the rendered output.",
+        "To simplify the lighting setup in Unreal Engine.",
+        "To enable real-time ray tracing."
+      ],
+      "correct_index": 0,
+      "explanation": "Camera calibration aligns the virtual and physical cameras, ensuring accurate perspective, scale, and distortion, which is crucial for seamless compositing."
+    },
+    {
+      "question": "What happens if the video feed and camera tracking data are not accurately synchronized?",
+      "options": [
+        "CG elements will lag behind or jump ahead of the live action.",
+        "The rendering process will be significantly slower.",
+        "The color grading will be incorrect.",
+        "The audio will be out of sync."
+      ],
+      "correct_index": 0,
+      "explanation": "Temporal misalignment between the video feed and tracking data causes the CG elements to appear desynchronized with the live action, creating visual artifacts."
+    },
+    {
+      "question": "Why is it important to capture multiple focus and zoom points during the lens calibration process?",
+      "options": [
+        "To create a more accurate model of the lens's behavior across its entire range.",
+        "To reduce the amount of data stored in the lens file.",
+        "To simplify the calibration process.",
+        "To improve the performance of the Unreal Engine editor."
+      ],
+      "correct_index": 0,
+      "explanation": "Lens characteristics change with focus and zoom. Capturing multiple points allows Unreal Engine to create a more accurate lens model, preventing calibration errors at different settings."
+    },
+    {
+      "question": "What is the primary purpose of the Lens File asset in Unreal Engine's camera calibration workflow?",
+      "options": [
+        "To store all calibration data for cameras and lenses.",
+        "To store the video footage.",
+        "To store the 3D models used in the scene.",
+        "To store the audio tracks."
+      ],
+      "correct_index": 0,
+      "explanation": "The Lens File asset serves as a central repository for all calibration data, enabling Unreal Engine to accurately model the physical lens and camera."
+    },
+    {
+      "question": "How does inaccurate lens calibration affect set extensions in virtual production?",
+      "options": [
+        "It causes perspective errors, scale discrepancies, and incorrect parallax in the set extension.",
+        "It reduces the rendering quality of the set extension.",
+        "It increases the memory usage of the Unreal Engine project.",
+        "It prevents the set extension from being visible in the final output."
+      ],
+      "correct_index": 0,
+      "explanation": "Inaccurate calibration leads to visual inconsistencies in the set extension, breaking the illusion of realism due to incorrect perspective and scale."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 24,
+    "grade": "D"
+  }
+}

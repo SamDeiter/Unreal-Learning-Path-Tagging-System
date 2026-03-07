@@ -1,0 +1,185 @@
+{
+  "course_code": "219.00",
+  "conceptual_score": {
+    "procedural_pct": 70,
+    "conceptual_pct": 30,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:55",
+      "title": "Level Streaming vs. World Partition",
+      "concept": "The distinction between manual level streaming and UE5's World Partition system is crucial for large open worlds. World Partition automatically manages level loading/unloading based on player proximity, optimizing performance. Manual level streaming requires explicit blueprint control.",
+      "diagram_suggestion": "A comparison table highlighting the pros and cons of Level Streaming vs. World Partition, focusing on scalability, ease of use, and performance implications."
+    },
+    {
+      "insert_after_timestamp": "2:53",
+      "title": "Streaming Methods and Dependency Management",
+      "concept": "The 'Blueprint' streaming method relies on explicit level loading/unloading via Blueprints. Understanding the Asset Manager and its role in managing dependencies between levels is essential to avoid circular dependencies and ensure proper asset loading.",
+      "diagram_suggestion": "A flowchart illustrating the asset loading process with different streaming methods, highlighting the role of the Asset Manager and dependency resolution."
+    },
+    {
+      "insert_after_timestamp": "5:10",
+      "title": "Level Visibility and Rendering Pipeline",
+      "concept": "Streaming levels impact the rendering pipeline. Understanding how the engine determines visibility (frustum culling, occlusion culling) and how level streaming interacts with these processes is crucial for optimizing rendering performance.",
+      "diagram_suggestion": "A simplified rendering pipeline diagram showing how level streaming affects visibility determination and rendering costs."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:38",
+      "procedural_step": "The level system in Unreal allows many people to work on a project and edit different aspects such as lights and geo, as well as effects without interfering with other items.",
+      "why": "Unreal's level system prevents data corruption and merge conflicts in source control by isolating changes within separate levels. This isolation reduces the risk of one artist's changes inadvertently breaking another's work.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:21",
+      "procedural_step": "When working with levels, when it comes to your lighting, make sure that your lighting, for the most part, is in your persistent level.",
+      "why": "Placing lighting in the persistent level simplifies global illumination calculations (Lumen, Lightmass) and ensures consistent lighting across all streamed sub-levels. This avoids visual inconsistencies and reduces the complexity of managing lighting data.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:08",
+      "procedural_step": "If there's extra lights that are in that particular level that you're bringing in, you make sure that that's removed.",
+      "why": "Duplicate lights from streamed levels can cause performance issues due to increased rendering costs and shadow calculations. They can also lead to lighting artifacts and inconsistencies, making it difficult to achieve a consistent visual style.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:02",
+      "procedural_step": "You can also load other outside levels, as mentioned before, to a persistent level and stream them via blueprint to call on it when needed or always loaded if you need it in the level right away while you work.",
+      "why": "Blueprint-controlled level streaming allows for dynamic loading and unloading of content based on gameplay events or player location. This optimizes memory usage by only loading necessary assets, preventing performance bottlenecks in large or complex environments.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:11",
+      "procedural_step": "When it comes to the lighting, like I mentioned before, try to keep your linings not so much on the sub levels if you can.",
+      "why": "Centralizing lighting in the persistent level simplifies debugging and optimization. When lighting is scattered across multiple sub-levels, it becomes difficult to identify and resolve lighting issues, potentially leading to longer iteration times.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:46",
+      "prompt": "Why would you choose to 'Add Existing' level vs. 'Create New' level with selected actors?",
+      "expected_insight": "'Add Existing' is used to incorporate pre-built, self-contained environments, while 'Create New' is for modularly separating parts of the current level. 'Add Existing' promotes reusability, while 'Create New' aids organization."
+    },
+    {
+      "insert_after_timestamp": "3:17",
+      "prompt": "Imagine you have a level with complex lighting. What problems might arise from having lights in both the persistent level AND streamed sub-levels?",
+      "expected_insight": "Conflicts in shadow casting, increased rendering cost due to overlapping lights, and difficulties in achieving consistent lighting across the entire scene. Baking lighting becomes unpredictable."
+    },
+    {
+      "insert_after_timestamp": "4:37",
+      "prompt": "Why is it important to understand the difference between 'Create New with Selected Actors' and simply moving actors to an existing sub-level?",
+      "expected_insight": "'Create New with Selected Actors' creates a new level file on disk, establishing a clear separation of assets. Moving actors only changes their level association within the current level file, which can lead to organizational issues."
+    },
+    {
+      "insert_after_timestamp": "5:08",
+      "prompt": "Under what circumstances would you choose 'Always Loaded' vs. 'Blueprint' streaming method, considering performance and memory usage?",
+      "expected_insight": "'Always Loaded' is suitable for small, essential levels that are always needed. 'Blueprint' streaming is better for larger levels that can be loaded and unloaded dynamically to optimize memory usage."
+    },
+    {
+      "insert_after_timestamp": "6:35",
+      "prompt": "How does the level management strategy differ between a traditional game environment and a virtual production environment, and why?",
+      "expected_insight": "Virtual production prioritizes stability and predictability for real-time rendering and camera tracking. Games often use more dynamic level streaming for performance. Virtual production needs consistent lighting and minimal runtime changes."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "2:31",
+      "warning": "Nesting levels too deeply can lead to issues with light baking and ray tracing.",
+      "severity": "MEDIUM",
+      "fix": "Limit the depth of sub-levels to a maximum of 2-3 levels. Use naming conventions to clearly indicate the hierarchy. Consider using World Partition for extremely large worlds."
+    },
+    {
+      "timestamp": "3:08",
+      "warning": "Leaving duplicate lights in streamed levels can cause performance issues and lighting conflicts.",
+      "severity": "HIGH",
+      "fix": "Implement a strict asset management process to ensure that only necessary assets are included in each level. Use the World Outliner to identify and remove duplicate lights before baking lighting."
+    },
+    {
+      "timestamp": "5:02",
+      "warning": "Using 'Always Loaded' streaming method for large levels can significantly increase memory usage and reduce performance.",
+      "severity": "HIGH",
+      "fix": "Profile memory usage to identify levels that are consuming excessive memory. Switch to Blueprint-controlled streaming for levels that are not always needed. Implement level-of-detail (LOD) settings to reduce the complexity of distant objects."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine's editor interface",
+    "Familiarity with level creation and asset importing",
+    "Knowledge of lighting techniques and global illumination",
+    "Understanding of Blueprints and basic scripting concepts"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally recommended to keep most of the lighting within the persistent level in a virtual production environment?",
+      "options": [
+        "To simplify global illumination calculations and ensure consistent lighting across sub-levels.",
+        "To reduce the number of actors in sub-levels.",
+        "To make it easier to find the lights in the World Outliner.",
+        "To improve the performance of the editor."
+      ],
+      "correct_index": 0,
+      "explanation": "Centralizing lighting in the persistent level ensures consistent global illumination and simplifies management, avoiding conflicts and inconsistencies across streamed levels."
+    },
+    {
+      "question": "What is the primary benefit of using Blueprint-controlled level streaming in Unreal Engine 5?",
+      "options": [
+        "It allows for dynamic loading and unloading of levels based on gameplay events or player location, optimizing memory usage.",
+        "It automatically loads all levels at the start of the game.",
+        "It simplifies the process of creating new levels.",
+        "It reduces the size of the project files."
+      ],
+      "correct_index": 0,
+      "explanation": "Blueprint-controlled streaming allows for dynamic loading/unloading, optimizing memory by loading only necessary assets, crucial for large environments."
+    },
+    {
+      "question": "What is the potential consequence of having duplicate lights in both the persistent level and streamed sub-levels?",
+      "options": [
+        "Increased rendering costs and lighting conflicts, leading to performance issues and visual artifacts.",
+        "Improved lighting quality and realism.",
+        "Reduced memory usage and faster loading times.",
+        "Simplified lighting setup and management."
+      ],
+      "correct_index": 0,
+      "explanation": "Duplicate lights increase rendering costs and cause lighting conflicts, leading to performance bottlenecks and visual inconsistencies."
+    },
+    {
+      "question": "In the context of level management, what is the main difference between 'Add Existing' and 'Create New with Selected Actors'?",
+      "options": [
+        "'Add Existing' incorporates pre-built environments, while 'Create New with Selected Actors' modularly separates parts of the current level into a new level file.",
+        "'Add Existing' creates a copy of the existing level, while 'Create New with Selected Actors' moves the selected actors to a new level within the same file.",
+        "'Add Existing' is used for adding static meshes, while 'Create New with Selected Actors' is used for adding dynamic actors.",
+        "There is no difference; both options achieve the same result."
+      ],
+      "correct_index": 0,
+      "explanation": "'Add Existing' incorporates pre-built, self-contained environments, while 'Create New' is for modularly separating parts of the current level, creating a new level file."
+    },
+    {
+      "question": "Why should you avoid nesting sub-levels too deeply when working with level streaming in Unreal Engine 5?",
+      "options": [
+        "It can lead to issues with light baking, ray tracing, and overall project organization.",
+        "It improves the performance of level streaming.",
+        "It simplifies the process of adding new actors to the level.",
+        "It reduces the size of the level files."
+      ],
+      "correct_index": 0,
+      "explanation": "Deeply nested levels can cause problems with light baking, ray tracing, and project organization, making it difficult to manage and optimize the environment."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 3,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 3,
+    "affective_tone": 3,
+    "total": 30,
+    "grade": "D"
+  }
+}

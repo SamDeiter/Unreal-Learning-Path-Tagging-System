@@ -1,0 +1,185 @@
+{
+  "course_code": "105.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:16",
+      "title": "Sequencer Camera Binding",
+      "concept": "The Camera Cuts track dictates which UCameraComponent's view is rendered to the final output at any given time. This binding is crucial for non-linear editing and multi-camera setups.",
+      "diagram_suggestion": "Diagram showing the Camera Cuts track in Sequencer, linking specific CineCameraActors to the final rendered output. Highlight the data flow from camera actor to render target."
+    },
+    {
+      "insert_after_timestamp": "0:24",
+      "title": "Nested Level Sequences",
+      "concept": "The Shot Track allows for the composition of multiple Level Sequences, each representing a distinct shot. This nesting enables modularity and reusability of animation and camera work.",
+      "diagram_suggestion": "A hierarchical diagram illustrating a parent Level Sequence containing multiple child Level Sequences (shots), each with its own camera and animation tracks. Emphasize the concept of composition."
+    },
+    {
+      "insert_after_timestamp": "5:50",
+      "title": "Level Sequence Time Management",
+      "concept": "Level Sequences use a frame-based time system. Understanding how to set in/out points and manage the overall sequence length is crucial for precise editing and synchronization with other assets.",
+      "diagram_suggestion": "A timeline visualization showing the in and out points of a Level Sequence, highlighting the frame numbers and the overall duration. Illustrate how these parameters affect the rendered output."
+    },
+    {
+      "insert_after_timestamp": "8:12",
+      "title": "Sequencer Take System",
+      "concept": "The Take System allows for non-destructive iteration on shots. By creating multiple takes, you can experiment with different camera angles, animation timings, and other parameters without overwriting the original shot.",
+      "diagram_suggestion": "A branching diagram showing the main Level Sequence with multiple 'takes' branching off, each representing a different version of the shot. Emphasize the non-destructive nature of the system."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:12",
+      "procedural_step": "Binding cameras to the Level Sequence",
+      "why": "Without a Camera Cuts track, the Sequencer does not know which UCameraComponent to use for rendering, resulting in either a black screen or the default perspective view. This binding is essential for directing the final output.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:20",
+      "procedural_step": "Using the Shot track",
+      "why": "The Shot track enables non-linear editing. Shots can be reordered and trimmed without affecting the underlying animation data, providing flexibility in the storytelling process and allowing for rapid iteration.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:05",
+      "procedural_step": "Removing the Control Rig",
+      "why": "Animation Sequences and Control Rigs both drive skeletal mesh transforms. If both are active, the Control Rig will override the Animation Sequence, preventing the desired animation from playing. Muting or removing the Control Rig ensures the Animation Sequence takes precedence.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:07",
+      "procedural_step": "Zeroing out actor transformations",
+      "why": "Animation sequences often contain baked-in root motion. If the sequence was authored with an offset, the character will appear displaced when added to the level. Zeroing out the actor's transform resets its position to the origin, allowing the animation's relative motion to take effect from the desired starting point.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:38",
+      "procedural_step": "Duplicating shots",
+      "why": "Duplicating shots accelerates the iterative process. By reusing existing assets and configurations, you can quickly create variations and explore different creative options. This reduces redundant work and promotes consistency across shots.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:34",
+      "prompt": "Why is Sequencer referred to as a 'non-linear editor' in this context?",
+      "expected_insight": "Unlike traditional linear video editing, Sequencer allows you to rearrange shots in any order without affecting the underlying animation data. This provides flexibility and enables rapid iteration on the final sequence."
+    },
+    {
+      "insert_after_timestamp": "2:58",
+      "prompt": "What is the relationship between a CineCameraActor and the Camera Cuts track?",
+      "expected_insight": "The Camera Cuts track acts as a binding between a specific CineCameraActor in the level and the rendered output of the sequence. It tells Sequencer which camera's view to use at any given time."
+    },
+    {
+      "insert_after_timestamp": "4:20",
+      "prompt": "Why is it necessary to convert the SK_Mannequin to a 'spawnable'?",
+      "expected_insight": "Converting to spawnable ensures that the actor is instanced specifically for the sequence, preventing unintended modifications to the original actor in the level and ensuring clean, predictable behavior within the sequence."
+    },
+    {
+      "insert_after_timestamp": "6:26",
+      "prompt": "What happens if the Camera Cuts track does NOT run the length of the entire shot?",
+      "expected_insight": "If the Camera Cuts track is shorter than the shot, the render will revert to the default perspective after the Camera Cuts track ends, resulting in an incomplete or incorrect shot."
+    },
+    {
+      "insert_after_timestamp": "9:10",
+      "prompt": "Why is it important to review the sequence by clicking the camera icon on the shot track?",
+      "expected_insight": "Clicking the camera icon ensures that you are viewing the sequence through the designated cameras for each shot, allowing you to accurately assess the pacing, composition, and overall flow of the sequence."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:19",
+      "warning": "Adding an SK Mannequin to the level directly instead of using a Content Browser reference can lead to inconsistencies across different levels if the asset is modified. This is a form of Hard-Reference Casting.",
+      "severity": "MEDIUM",
+      "fix": "Always reference assets from the Content Browser to ensure consistency and avoid unintended modifications to the original asset."
+    },
+    {
+      "timestamp": "3:42",
+      "warning": "Adding an actor to sequencer by selecting it in the viewport can create a hard dependency on that specific instance. If the actor is deleted or renamed, the sequence will break. This is a form of Hard-Reference Casting.",
+      "severity": "MEDIUM",
+      "fix": "Use the 'Add Actor to Sequencer' option and select the actor from the list to create a more robust binding."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine 5 editor interface.",
+    "Familiarity with the Content Browser and asset management.",
+    "Knowledge of skeletal meshes and animation sequences.",
+    "Basic understanding of camera properties and cinematography."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary function of the Camera Cuts track in Sequencer?",
+      "options": [
+        "To define which camera's view is rendered for a specific shot.",
+        "To control the movement of the camera within a shot.",
+        "To adjust the color grading and post-processing effects of the camera.",
+        "To add visual effects to the camera's output."
+      ],
+      "correct_index": 0,
+      "explanation": "The Camera Cuts track is responsible for binding specific cameras to the level sequence, ensuring that Unreal Engine 5 knows which camera to render for each shot."
+    },
+    {
+      "question": "Why is it beneficial to use nested Level Sequences (shots) within a parent Level Sequence?",
+      "options": [
+        "It reduces the overall file size of the project.",
+        "It allows for modularity, reusability, and non-linear editing of shots.",
+        "It improves the rendering performance of the sequence.",
+        "It simplifies the process of adding visual effects to the shots."
+      ],
+      "correct_index": 1,
+      "explanation": "Nesting Level Sequences promotes modularity and reusability, enabling non-linear editing and easier management of complex sequences."
+    },
+    {
+      "question": "What is the purpose of converting an actor to 'spawnable' in Sequencer?",
+      "options": [
+        "To make the actor indestructible.",
+        "To create a unique instance of the actor specifically for the sequence, preventing modifications to the original.",
+        "To optimize the actor's performance.",
+        "To hide the actor from the viewport."
+      ],
+      "correct_index": 1,
+      "explanation": "Converting to spawnable creates a unique instance of the actor for the sequence, preventing unintended modifications to the original actor in the level."
+    },
+    {
+      "question": "When should you consider using the Take System in Sequencer?",
+      "options": [
+        "When you want to permanently delete a shot.",
+        "When you want to experiment with different variations of a shot without overwriting the original.",
+        "When you want to optimize the rendering performance of a shot.",
+        "When you want to add visual effects to a shot."
+      ],
+      "correct_index": 1,
+      "explanation": "The Take System allows for non-destructive iteration, enabling you to explore different camera angles, animation timings, and other parameters without affecting the original shot."
+    },
+    {
+      "question": "Why might an animation sequence cause an actor to move to an unexpected location when added to Sequencer?",
+      "options": [
+        "The animation sequence is corrupted.",
+        "The animation sequence was authored with an offset from the origin.",
+        "The actor's collision settings are incorrect.",
+        "Sequencer is not properly initialized."
+      ],
+      "correct_index": 1,
+      "explanation": "Animation sequences often contain baked-in root motion. If the sequence was authored with an offset, the character will appear displaced when added to the level. Zeroing out the actor's transform corrects this."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

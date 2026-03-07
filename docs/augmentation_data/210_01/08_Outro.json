@@ -1,0 +1,143 @@
+{
+  "course_code": "210.01",
+  "conceptual_score": {
+    "procedural_pct": 90,
+    "conceptual_pct": 10,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:22",
+      "title": "Niagara Fluids Core Concepts",
+      "concept": "Niagara Fluids leverages the Material Point Method (MPM) to simulate fluid dynamics. Understanding MPM's strengths (handling complex topology changes) and weaknesses (computational cost) is crucial for effective use.",
+      "diagram_suggestion": "A diagram comparing Eulerian vs. Lagrangian fluid simulation methods, highlighting MPM as a Lagrangian approach with particles carrying mass and momentum."
+    },
+    {
+      "insert_after_timestamp": "1:00",
+      "title": "3D Fluid Simulation Trade-offs",
+      "concept": "3D fluid simulations in Niagara Fluids are computationally expensive. Explain the performance impact of voxel resolution, simulation substeps, and advection methods on GPU utilization.",
+      "diagram_suggestion": "A graph showing the relationship between voxel resolution and simulation time, illustrating the exponential increase in cost."
+    },
+    {
+      "insert_after_timestamp": "1:16",
+      "title": "Niagara Baker Deep Dive",
+      "concept": "The Niagara Baker pre-computes simulation data into textures. Explain the memory implications of baked textures (size, format) and the limitations of pre-baked data (lack of real-time interaction).",
+      "diagram_suggestion": "A memory usage chart comparing real-time simulation vs. baked simulation for different texture resolutions and frame counts."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:27",
+      "procedural_step": "Enabling the Niagara Fluids plugin",
+      "why": "Enabling the plugin unlocks the necessary modules and renderers for fluid simulation within Niagara. Without it, the fluid simulation nodes will not be available.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:38",
+      "procedural_step": "Using the Niagara Fluid content example",
+      "why": "The content example provides pre-built Niagara systems demonstrating best practices for fluid simulation setup, collision handling, and rendering. Analyzing these examples accelerates learning and prevents common errors.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:08",
+      "procedural_step": "Optimizing with the Baker",
+      "why": "Baking complex simulations reduces real-time computational cost by pre-calculating fluid behavior. This is crucial for performance on lower-end hardware or when simulating many fluid effects simultaneously. However, baking sacrifices interactivity.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:18",
+      "prompt": "Why is understanding the underlying physics model important when working with Niagara Fluids?",
+      "expected_insight": "Understanding the Material Point Method (MPM) helps predict simulation behavior, optimize parameters, and troubleshoot artifacts. Without this understanding, users may struggle to achieve desired visual effects or encounter unexpected performance issues."
+    },
+    {
+      "insert_after_timestamp": "0:53",
+      "prompt": "What are the trade-offs between 2D and 3D fluid simulations in Niagara?",
+      "expected_insight": "2D simulations are computationally cheaper but lack depth and realism. 3D simulations offer greater visual fidelity but require more processing power. The choice depends on the visual requirements and performance budget of the project."
+    },
+    {
+      "insert_after_timestamp": "1:16",
+      "prompt": "Under what circumstances would you choose to bake a Niagara fluid simulation instead of running it in real-time?",
+      "expected_insight": "Baking is suitable for simulations that don't require real-time interaction or when performance is a critical constraint. Examples include background smoke or distant explosions. Real-time simulation is necessary for interactive elements like character interactions with fluids."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of the Niagara editor interface and module system.",
+    "Familiarity with material creation and parameterization in Unreal Engine.",
+    "Knowledge of performance profiling tools in Unreal Engine."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary advantage of using the Material Point Method (MPM) in Niagara Fluids?",
+      "options": [
+        "Efficient handling of complex topology changes (e.g., splitting and merging).",
+        "Simplified collision detection with static meshes.",
+        "Lower memory footprint compared to traditional particle systems.",
+        "Automatic LOD (Level of Detail) generation for distant effects."
+      ],
+      "correct_index": 0,
+      "explanation": "MPM excels at simulating fluids undergoing significant shape changes, making it suitable for liquids and deformable materials."
+    },
+    {
+      "question": "Why is it important to consider voxel resolution when creating 3D fluid simulations in Niagara?",
+      "options": [
+        "Higher voxel resolution increases visual fidelity but also increases computational cost.",
+        "Lower voxel resolution prevents the simulation from interacting with collision volumes.",
+        "Voxel resolution only affects the rendering of the fluid, not the simulation itself.",
+        "The voxel resolution determines the maximum number of particles that can be simulated."
+      ],
+      "correct_index": 0,
+      "explanation": "Voxel resolution directly impacts the simulation's detail and performance. Finding the right balance is crucial for optimization."
+    },
+    {
+      "question": "What is the main limitation of using the Niagara Baker to pre-compute fluid simulations?",
+      "options": [
+        "Baked simulations cannot interact with other objects in the scene in real-time.",
+        "Baked simulations require significantly more memory than real-time simulations.",
+        "The Niagara Baker only supports 2D fluid simulations.",
+        "Baked simulations cannot be looped seamlessly."
+      ],
+      "correct_index": 0,
+      "explanation": "Baking sacrifices interactivity for performance. The pre-computed data cannot respond to real-time events."
+    },
+    {
+      "question": "Which of the following factors has the GREATEST impact on the performance of a real-time Niagara fluid simulation?",
+      "options": [
+        "Number of emitters in the Niagara system.",
+        "Voxel resolution of the fluid simulation.",
+        "Complexity of the material applied to the fluid.",
+        "Number of collision events per frame."
+      ],
+      "correct_index": 1,
+      "explanation": "Voxel resolution has an exponential impact on computational cost, making it the most significant performance factor."
+    },
+    {
+      "question": "What is the purpose of the Niagara Fluids plugin?",
+      "options": [
+        "To provide tools for simulating realistic fluid dynamics within Unreal Engine 5.",
+        "To optimize static mesh rendering performance.",
+        "To create particle effects such as sparks and explosions.",
+        "To generate procedural textures for materials."
+      ],
+      "correct_index": 0,
+      "explanation": "The Niagara Fluids plugin extends Niagara's capabilities to include advanced fluid simulation techniques."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 4,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 26,
+    "grade": "D"
+  }
+}

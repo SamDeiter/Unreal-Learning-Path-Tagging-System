@@ -1,0 +1,171 @@
+{
+  "course_code": "103.02",
+  "conceptual_score": {
+    "procedural_pct": 70,
+    "conceptual_pct": 30,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:20",
+      "title": "Lumen Global Illumination",
+      "concept": "Explain how Lumen's Software Ray Tracing approximates global illumination by tracing rays within a scene to gather lighting information, and how this differs from traditional lightmass baking.",
+      "diagram_suggestion": "A diagram illustrating the ray tracing process in Lumen, showing rays bouncing off surfaces and contributing to indirect lighting, contrasted with a diagram of lightmass baking."
+    },
+    {
+      "insert_after_timestamp": "1:17",
+      "title": "Shadow Mapping in Unreal Engine",
+      "concept": "Detail the shadow mapping process, explaining how the engine renders the scene from the light's perspective to create a depth map, and how this depth map is used to determine which surfaces are in shadow. Discuss shadow acne and aliasing artifacts and how they are mitigated.",
+      "diagram_suggestion": "A visual representation of shadow mapping, showing the light's perspective, the depth map, and how it's projected onto surfaces to create shadows."
+    },
+    {
+      "insert_after_timestamp": "2:56",
+      "title": "Real-time Dynamic Lighting with Lumen",
+      "concept": "Elaborate on how Lumen enables real-time dynamic lighting by providing global illumination without the need for pre-computation. Explain the implications of this for interactive architectural visualization and design workflows.",
+      "diagram_suggestion": "A comparison between traditional baked lighting workflows and Lumen's real-time dynamic lighting, highlighting the differences in iteration time and flexibility."
+    },
+    {
+      "insert_after_timestamp": "3:46",
+      "title": "Hardware Ray Tracing vs. Software Ray Tracing in UE5",
+      "concept": "Explain the difference between hardware ray tracing (using dedicated RTX cores) and software ray tracing (using general-purpose GPU compute). Discuss the performance implications and visual fidelity trade-offs of each approach within Unreal Engine 5.",
+      "diagram_suggestion": "A side-by-side comparison of hardware and software ray tracing, illustrating the differences in performance and visual quality."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:32",
+      "procedural_step": "Direct lighting receives the full spectrum of color.",
+      "why": "Because there are no intermediate bounces that would selectively absorb certain wavelengths, altering the light's spectral power distribution. This is crucial for accurate material representation.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:46",
+      "procedural_step": "Indirect lighting is tinted due to surface absorption.",
+      "why": "Because materials have specific spectral reflectance curves. Understanding this is critical for achieving realistic color bleeding and ambient occlusion effects in Lumen.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:03",
+      "procedural_step": "Shadows are a snapshot of a mesh from the light's POV.",
+      "why": "This 'snapshot' is a depth map. Incorrect shadow bias settings can cause shadow acne or peter-panning artifacts. Understanding the underlying projection is critical for artifact-free shadows.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:10",
+      "procedural_step": "Baked lighting cannot be altered at runtime.",
+      "why": "Because lightmaps are pre-rendered textures applied to surfaces. Changing light properties requires a full re-bake, breaking interactivity. Lumen avoids this limitation.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:37",
+      "procedural_step": "Hardware ray tracing requires strong GPUs.",
+      "why": "Because it performs complex ray-triangle intersection calculations. Falling back to software ray tracing on lower-end hardware will impact performance, potentially causing frame rate drops.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:55",
+      "prompt": "Why does indirect lighting contribute to the 'mood' of a scene, and how can you manipulate material properties to enhance this effect in Lumen?",
+      "expected_insight": "Indirect lighting fills in shadows and adds subtle color variations based on the materials in the scene. Adjusting material roughness and albedo affects the color and intensity of bounced light."
+    },
+    {
+      "insert_after_timestamp": "2:28",
+      "prompt": "Imagine you need a light switch to dynamically change the lighting in a room. Why is baked lighting unsuitable, and how does Lumen address this limitation?",
+      "expected_insight": "Baked lighting is static and cannot be changed at runtime. Lumen allows for dynamic lighting updates, enabling interactive lighting scenarios."
+    },
+    {
+      "insert_after_timestamp": "3:14",
+      "prompt": "Why were architectural visualizations traditionally baked, and what specific advancements in Unreal Engine 5 make real-time lighting a viable alternative?",
+      "expected_insight": "Baked lighting offered high quality but was computationally expensive. Lumen's real-time global illumination provides a balance between quality and performance, making dynamic lighting feasible."
+    },
+    {
+      "insert_after_timestamp": "4:21",
+      "prompt": "How does a Skylight differ from other light types in Unreal Engine, and why is it crucial for establishing the overall ambient lighting of a scene?",
+      "expected_insight": "A Skylight captures the entire scene and provides ambient lighting, simulating the effect of atmospheric scattering. It fills in shadows and creates a more natural look."
+    },
+    {
+      "insert_after_timestamp": "4:49",
+      "prompt": "Why are the HDRI Backdrop and Sun and Sky actors implemented as Blueprints, and what advantages does this provide for customization and control?",
+      "expected_insight": "Implementing these actors as Blueprints allows for easy customization of lighting parameters and integration with other systems. Users can modify the Blueprint to create unique lighting setups."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of 3D coordinate systems.",
+    "Familiarity with material properties (albedo, roughness, metallic).",
+    "Knowledge of rendering concepts like global illumination and ambient occlusion."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why does indirect lighting contribute to the color mood of a scene?",
+      "options": [
+        "Because surfaces absorb and reflect different wavelengths of light.",
+        "Because indirect lighting is always white.",
+        "Because indirect lighting only affects shadows.",
+        "Because the engine randomly tints indirect light."
+      ],
+      "correct_index": 0,
+      "explanation": "Indirect lighting is tinted by the spectral reflectance properties of the surfaces it bounces off of. This selective absorption and reflection of wavelengths creates subtle color variations that contribute to the overall mood."
+    },
+    {
+      "question": "What is the primary advantage of using Lumen for global illumination compared to traditional lightmass baking?",
+      "options": [
+        "Lumen produces higher quality lighting.",
+        "Lumen allows for dynamic lighting changes at runtime.",
+        "Lightmass baking is faster than Lumen.",
+        "Lightmass baking requires less memory."
+      ],
+      "correct_index": 1,
+      "explanation": "Lumen enables real-time dynamic lighting, allowing for interactive changes to lighting without the need for pre-computation. Baked lighting is static and cannot be altered at runtime."
+    },
+    {
+      "question": "How does Unreal Engine create shadows using shadow mapping?",
+      "options": [
+        "By tracing rays from the light source to the camera.",
+        "By creating a depth map from the light's perspective.",
+        "By randomly darkening surfaces.",
+        "By using pre-computed shadow textures."
+      ],
+      "correct_index": 1,
+      "explanation": "Shadow mapping involves rendering the scene from the light's perspective to create a depth map. This depth map is then used to determine which surfaces are in shadow."
+    },
+    {
+      "question": "What is the main difference between hardware ray tracing and software ray tracing in Unreal Engine 5?",
+      "options": [
+        "Hardware ray tracing uses dedicated RTX cores for faster calculations.",
+        "Software ray tracing produces more accurate results.",
+        "Hardware ray tracing is only available on consoles.",
+        "Software ray tracing requires a more powerful GPU."
+      ],
+      "correct_index": 0,
+      "explanation": "Hardware ray tracing utilizes dedicated RTX cores on compatible GPUs for accelerated ray-triangle intersection calculations, resulting in faster performance compared to software ray tracing."
+    },
+    {
+      "question": "Why is understanding material properties important when working with Lumen?",
+      "options": [
+        "Material properties determine how light is absorbed and reflected, affecting indirect lighting.",
+        "Material properties only affect direct lighting.",
+        "Material properties are ignored by Lumen.",
+        "Material properties only affect the color of the material."
+      ],
+      "correct_index": 0,
+      "explanation": "Material properties, such as albedo and roughness, dictate how light interacts with surfaces. These interactions directly influence the color and intensity of bounced light, which is crucial for achieving realistic global illumination in Lumen."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

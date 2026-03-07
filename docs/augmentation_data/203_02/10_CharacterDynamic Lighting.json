@@ -1,0 +1,173 @@
+{
+  "course_code": "203.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "4:43",
+      "title": "Lumen Global Illumination",
+      "concept": "Lumen's Global Illumination (GI) system calculates how light bounces around the scene, creating realistic indirect lighting. It uses Software Ray Tracing and Surface Cache to approximate global illumination in real-time.",
+      "diagram_suggestion": "A diagram illustrating the path of light rays in Lumen, showing direct lighting, primary bounces, and secondary bounces, and how Surface Cache is used to store lighting information."
+    },
+    {
+      "insert_after_timestamp": "5:34",
+      "title": "Virtual Shadow Maps (VSM)",
+      "concept": "Virtual Shadow Maps are a shadow mapping technique used in Unreal Engine to provide high-resolution shadows for large, dynamically lit scenes. VSMs divide the scene into tiles and allocate shadow map resolution based on the distance and size of objects, optimizing memory usage and shadow quality.",
+      "diagram_suggestion": "A visual representation of how VSMs divide the scene into tiles, with different resolutions allocated to different areas based on object size and distance from the camera."
+    },
+    {
+      "insert_after_timestamp": "8:46",
+      "title": "Ray Tracing in Unreal Engine",
+      "concept": "Unreal Engine's ray tracing implementation simulates the physical behavior of light, enabling realistic reflections, shadows, and global illumination. It integrates with Lumen and other rendering features to provide high-quality visuals.",
+      "diagram_suggestion": "A diagram illustrating how ray tracing works, showing rays being cast from the camera, intersecting with objects, and calculating lighting and reflections based on material properties."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "2:59",
+      "procedural_step": "Be aware of noise in shadows with Lumen.",
+      "why": "Lumen's real-time GI calculations can introduce noise, especially in areas with complex lighting or shadows. This is due to the stochastic nature of the ray tracing and the limited sample count. Adjusting the Lumen scene quality and final gather settings can mitigate this, but at a performance cost.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:02",
+      "procedural_step": "Ensure Shader Model 6 is active.",
+      "why": "Shader Model 6 is required for many of Unreal Engine's modern rendering features, including ray tracing and Lumen. Without it, these features will either not function or will fall back to less efficient rendering methods, impacting visual quality and performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:50",
+      "procedural_step": "Check if Mesh Distance Fields are enabled.",
+      "why": "Mesh Distance Fields are used by Lumen for tracing indirect lighting and reflections. If disabled, Lumen will rely on screen traces, which are less accurate and can lead to visual artifacts, especially in areas with disocclusion.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:44",
+      "procedural_step": "Avoid intersecting lights with geometry.",
+      "why": "Intersecting lights with geometry can cause ray tracing artifacts and noise. This is because the engine has difficulty determining the light's origin and path, leading to incorrect lighting calculations and visual glitches.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "9:52",
+      "procedural_step": "Use movable lights for dynamic GI updates.",
+      "why": "Stationary lights do not update their contribution to global illumination in real-time. This means that changes to the post-process volume or other dynamic lighting settings will not affect the indirect lighting from stationary lights, leading to inconsistencies and a less dynamic look.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "3:26",
+      "prompt": "Why is strategic shot composition important when using Lumen, even if the technology is improving?",
+      "expected_insight": "Even with improvements, Lumen's real-time GI has limitations. Strategic shot composition minimizes artifacts and noise by avoiding complex lighting scenarios and maximizing the effectiveness of Lumen's algorithms."
+    },
+    {
+      "insert_after_timestamp": "7:43",
+      "prompt": "How does the source angle of a directional light affect the appearance of shadows, and why?",
+      "expected_insight": "A larger source angle creates softer, more diffuse shadows because the light source is effectively larger. This reduces the sharpness of the shadow edges and creates a more natural look."
+    },
+    {
+      "insert_after_timestamp": "8:27",
+      "prompt": "Why are Lumen scene quality and detail settings 'expensive' for the GPU?",
+      "expected_insight": "These settings directly control the number of rays traced and the complexity of the calculations performed by Lumen. Higher settings increase the computational load on the GPU, potentially impacting performance."
+    },
+    {
+      "insert_after_timestamp": "15:06",
+      "prompt": "What are the trade-offs between using point lights and rect lights for fill lighting?",
+      "expected_insight": "Point lights can create unwanted specular highlights due to their single-point emission, while rect lights offer more control over the shape and direction of the light, resulting in softer and more controllable fill lighting."
+    },
+    {
+      "insert_after_timestamp": "22:05",
+      "prompt": "How does the post-process volume influence the reflectivity of materials in a Lumen scene?",
+      "expected_insight": "The post-process volume allows you to fine-tune the reflectivity settings, such as reflection quality and ray tracing parameters, which directly affect how materials reflect light in the Lumen environment."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "9:38",
+      "warning": "Using Stationary lights in a Lumen scene can lead to inconsistencies and unexpected behavior when dynamic GI is expected. This is because stationary lights do not update their contribution to global illumination in real-time.",
+      "severity": "MEDIUM",
+      "fix": "Always use Movable lights when working with Lumen to ensure that lighting updates dynamically with changes in the scene or post-process settings."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine interface and content browser.",
+    "Familiarity with creating and manipulating lights in Unreal Engine.",
+    "Knowledge of post-process volumes and their effects on rendering.",
+    "Understanding of material properties such as roughness and specular highlights."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to enable Mesh Distance Fields when using Lumen?",
+      "options": [
+        "They are required for Lumen to calculate accurate global illumination and reflections.",
+        "They improve the performance of shadow calculations.",
+        "They are necessary for Lumen to render static meshes.",
+        "They allow Lumen to use screen traces for indirect lighting."
+      ],
+      "correct_index": 0,
+      "explanation": "Mesh Distance Fields provide Lumen with the spatial information needed to accurately trace indirect lighting and reflections, leading to more realistic and artifact-free results."
+    },
+    {
+      "question": "What is the primary reason for using movable lights instead of stationary lights when working with Lumen?",
+      "options": [
+        "Movable lights are less performance-intensive.",
+        "Movable lights allow for dynamic updates to global illumination based on changes in the scene.",
+        "Stationary lights are not compatible with Lumen.",
+        "Movable lights provide better shadow quality."
+      ],
+      "correct_index": 1,
+      "explanation": "Movable lights update their contribution to global illumination in real-time, ensuring that changes in the scene or post-process settings are reflected in the indirect lighting."
+    },
+    {
+      "question": "How does increasing the source angle of a directional light affect the shadows it casts?",
+      "options": [
+        "It makes the shadows sharper and more defined.",
+        "It makes the shadows softer and more diffuse.",
+        "It increases the intensity of the shadows.",
+        "It has no effect on the shadows."
+      ],
+      "correct_index": 1,
+      "explanation": "A larger source angle effectively increases the size of the light source, resulting in softer, more diffuse shadows with less defined edges."
+    },
+    {
+      "question": "What is the role of 'Final Gather' in Lumen's rendering process?",
+      "options": [
+        "It improves the performance of ray tracing.",
+        "It reduces noise and artifacts in the final image.",
+        "It increases the resolution of shadow maps.",
+        "It enhances the specular highlights on materials."
+      ],
+      "correct_index": 1,
+      "explanation": "Final Gather is a post-processing step that helps to reduce noise and artifacts in the final rendered image by gathering additional samples and smoothing out the results."
+    },
+    {
+      "question": "Why might intersecting a light source with scene geometry cause rendering artifacts when using ray tracing?",
+      "options": [
+        "The light source becomes occluded, preventing any light from being emitted.",
+        "The engine struggles to determine the light's origin and path, leading to incorrect lighting calculations.",
+        "The material properties of the geometry are overridden by the light source.",
+        "The ray tracing algorithm fails to intersect with the geometry."
+      ],
+      "correct_index": 1,
+      "explanation": "When a light source intersects with geometry, the engine may have difficulty determining the precise origin and path of the light rays, leading to incorrect lighting calculations and visual artifacts."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 27,
+    "grade": "D"
+  }
+}

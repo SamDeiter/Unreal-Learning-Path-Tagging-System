@@ -1,0 +1,179 @@
+{
+  "course_code": "102.03",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:39",
+      "title": "Actor Lifecycle & Instancing",
+      "concept": "Explain the difference between a Blueprint *class* and an *instance* of that class in the level.  How does the Construction Script interact with each?",
+      "diagram_suggestion": "A UML diagram showing the Blueprint class inheriting from Actor, and then multiple instances of that class existing in the level, each with potentially different variable values."
+    },
+    {
+      "insert_after_timestamp": "2:51",
+      "title": "Procedural Content Generation (PCG)",
+      "concept": "Construction Scripts are a *limited* form of PCG.  Explain how the PCG framework offers more advanced features like noise, sampling, and distribution control *at runtime* that Construction Scripts lack.",
+      "diagram_suggestion": "A comparison table highlighting the features of Construction Scripts vs. PCG, focusing on runtime vs. editor-time execution, and complexity of generation rules."
+    },
+    {
+      "insert_after_timestamp": "12:35",
+      "title": "Static Mesh Component Rendering Pipeline",
+      "concept": "Explain how adding Static Mesh Components in the Construction Script affects the scene's rendering pipeline. How does this differ from adding them at runtime? Consider the impact on draw calls and memory usage.",
+      "diagram_suggestion": "A simplified rendering pipeline diagram showing where Static Mesh Components added in the Construction Script are processed, emphasizing the pre-runtime nature of the process."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:43",
+      "procedural_step": "Compile the blueprint",
+      "why": "Compiling triggers the Construction Script, allowing you to preview changes in the editor *before* runtime. This is useful for iterative level design and content creation, but can slow down iteration if the Construction Script is too complex.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:45",
+      "procedural_step": "Add components in Construction Script",
+      "why": "Adding components in the Construction Script modifies the *template* of the Blueprint. Every instance will inherit this template. Adding components at runtime creates *new* components only for that specific instance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:36",
+      "procedural_step": "Moving an instance actor",
+      "why": "Moving an instance actor triggers the Construction Script *again* because the engine re-evaluates the actor's setup in the editor. This allows for dynamic adjustments based on the actor's position, but can lead to performance issues if the script is computationally expensive.",
+      "antipattern_warning": "Avoid complex calculations or heavy asset loading in Construction Scripts to prevent editor slowdowns."
+    },
+    {
+      "timestamp": "12:25",
+      "procedural_step": "Add static mesh component",
+      "why": "Adding a static mesh component in the Construction Script allows you to pre-populate your level with assets. This is more efficient than spawning them at runtime because the meshes are already loaded and rendered, reducing the initial load time of the game.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "15:50",
+      "procedural_step": "Moving the blueprint around",
+      "why": "The Construction Script re-executes every time you move the Blueprint in the editor. This allows for real-time adjustments and previews, but can become a performance bottleneck if the script contains complex logic or spawns a large number of components.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:37",
+      "prompt": "How does using a Construction Script differ from creating the same setup using only static meshes directly placed in the level?",
+      "expected_insight": "Construction Scripts allow for dynamic modification and parameterization, while static meshes are fixed. Construction Scripts enable iterative changes and variations without manual adjustments."
+    },
+    {
+      "insert_after_timestamp": "4:06",
+      "prompt": "Why is the Construction Script's editor-time functionality considered 'powerful' for virtual production?",
+      "expected_insight": "Virtual production often involves rapid iteration and pre-visualization. Construction Scripts enable artists to quickly prototype and adjust scenes without needing to run the game, saving significant time and resources."
+    },
+    {
+      "insert_after_timestamp": "8:30",
+      "prompt": "Why is it important to categorize variables within a Blueprint, especially when using Construction Scripts?",
+      "expected_insight": "Categorization improves organization and readability, making it easier to manage and modify the Blueprint's behavior, especially when multiple artists are collaborating on the same project."
+    },
+    {
+      "insert_after_timestamp": "13:03",
+      "prompt": "What are the trade-offs between exposing a variable to the editor versus keeping it private within the Blueprint?",
+      "expected_insight": "Exposing variables allows for per-instance customization in the editor, but increases complexity. Private variables offer better encapsulation and control within the Blueprint, but limit external modification."
+    },
+    {
+      "insert_after_timestamp": "16:01",
+      "prompt": "In what scenarios would a complex Construction Script become a performance bottleneck, and how could you mitigate this?",
+      "expected_insight": "Complex scripts with heavy calculations or excessive component creation can slow down the editor. Mitigation strategies include optimizing the script's logic, caching results, or deferring some operations to runtime."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:36",
+      "warning": "Over-reliance on Construction Scripts for complex logic can lead to editor slowdowns, especially in large levels with many instances. This impacts iteration speed and artist productivity.",
+      "severity": "MEDIUM",
+      "fix": "Profile the Construction Script to identify bottlenecks. Defer non-critical calculations to runtime or use data assets for pre-computed values."
+    },
+    {
+      "timestamp": "12:35",
+      "warning": "Adding too many Static Mesh Components in the Construction Script can significantly increase the initial load time of the level and impact memory usage. This is especially problematic for mobile platforms or large open-world games.",
+      "severity": "HIGH",
+      "fix": "Use level streaming to load assets on demand. Consider using Hierarchical Instanced Static Mesh Components for efficient rendering of repeated meshes."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine Editor Interface",
+    "Familiarity with Blueprint Visual Scripting",
+    "Knowledge of Actor Components",
+    "Understanding of Transforms (Location, Rotation, Scale)"
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary difference between the Event Graph and the Construction Script in a Blueprint?",
+      "options": [
+        "The Event Graph runs only in the editor, while the Construction Script runs only during gameplay.",
+        "The Event Graph runs during gameplay, while the Construction Script runs primarily in the editor.",
+        "The Event Graph is used for creating UI elements, while the Construction Script is used for gameplay logic.",
+        "The Event Graph is deprecated in Unreal Engine 5, while the Construction Script is the primary scripting tool."
+      ],
+      "correct_index": 1,
+      "explanation": "The Event Graph handles runtime logic, while the Construction Script executes in the editor, allowing for pre-runtime setup and modification."
+    },
+    {
+      "question": "Under what circumstances will a Construction Script NOT execute?",
+      "options": [
+        "When the Blueprint is compiled.",
+        "When an instance of the Blueprint is moved in the level.",
+        "When the 'Run Construction Script' option is disabled in the Blueprint's class settings.",
+        "Construction Scripts always execute."
+      ],
+      "correct_index": 2,
+      "explanation": "Disabling the 'Run Construction Script' option prevents the script from executing, providing control over its behavior."
+    },
+    {
+      "question": "Why is it generally more efficient to add static mesh components using a Construction Script for level design, compared to spawning them at runtime?",
+      "options": [
+        "Construction Script components are automatically optimized by the engine.",
+        "Construction Script components are pre-loaded, reducing runtime load and improving initial performance.",
+        "Runtime spawning is only for dynamic objects, not static level elements.",
+        "Construction Script components have better collision detection."
+      ],
+      "correct_index": 1,
+      "explanation": "Construction Script components are pre-loaded and rendered, reducing the initial load time and improving performance compared to runtime spawning."
+    },
+    {
+      "question": "What is the potential downside of using complex calculations within a Construction Script?",
+      "options": [
+        "It can cause the game to crash during gameplay.",
+        "It can slow down the editor's performance, especially when working with many instances.",
+        "It can increase the size of the packaged game.",
+        "It can prevent the Blueprint from being compiled."
+      ],
+      "correct_index": 1,
+      "explanation": "Complex calculations in Construction Scripts can lead to editor slowdowns, impacting iteration speed and artist productivity."
+    },
+    {
+      "question": "How does exposing a variable in a Construction Script affect its behavior in the editor?",
+      "options": [
+        "It makes the variable read-only.",
+        "It allows the variable to be modified per instance of the Blueprint in the level.",
+        "It prevents the variable from being accessed by other Blueprints.",
+        "It automatically optimizes the variable's memory usage."
+      ],
+      "correct_index": 1,
+      "explanation": "Exposing a variable allows for per-instance customization in the editor, enabling artists to fine-tune the Blueprint's behavior without modifying the class default."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 4,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 28,
+    "grade": "D"
+  }
+}

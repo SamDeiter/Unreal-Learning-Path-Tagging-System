@@ -1,0 +1,179 @@
+{
+  "course_code": "203.02",
+  "conceptual_score": {
+    "procedural_pct": 90,
+    "conceptual_pct": 10,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:10",
+      "title": "Lumen Global Illumination",
+      "concept": "Lumen is Unreal Engine 5's fully dynamic global illumination and reflections system. It reacts to scene and lighting changes in real-time, eliminating the need for precomputed lighting in many scenarios. It uses Software Ray Tracing and Surface Cache to achieve high-quality results.",
+      "diagram_suggestion": "A diagram illustrating the Lumen pipeline: tracing rays, surface cache updates, and final rendering."
+    },
+    {
+      "insert_after_timestamp": "0:14",
+      "title": "Exposure Control in UE5",
+      "concept": "Exposure in UE5 simulates the behavior of a camera's aperture, shutter speed, and ISO. It determines the overall brightness of the scene. Auto Exposure dynamically adjusts these settings based on the scene's luminance, while Manual Exposure allows for precise artistic control.",
+      "diagram_suggestion": "A visual representation of the exposure triangle (aperture, shutter speed, ISO) and their impact on image brightness and depth of field."
+    },
+    {
+      "insert_after_timestamp": "0:17",
+      "title": "Baked Lighting vs. Dynamic Lighting",
+      "concept": "Baked lighting precomputes lighting information and stores it in lightmaps. This is efficient but static. Dynamic lighting calculates lighting in real-time, offering flexibility but at a higher performance cost. Lumen is a form of dynamic lighting.",
+      "diagram_suggestion": "A comparison chart highlighting the pros and cons of baked lighting (static lighting) and dynamic lighting (Lumen)."
+    },
+    {
+      "insert_after_timestamp": "0:20",
+      "title": "Lightmass and Lightmaps",
+      "concept": "Lightmass is UE5's static lighting baking system. It generates lightmaps, which are textures storing precomputed lighting information. These are applied to static meshes to simulate indirect lighting and shadows efficiently. GPU Lightmass accelerates this process using the GPU.",
+      "diagram_suggestion": "A visual breakdown of the Lightmass process: scene analysis, ray tracing, lightmap generation, and application to meshes."
+    },
+    {
+      "insert_after_timestamp": "0:25",
+      "title": "Reflections in Unreal Engine 5",
+      "concept": "UE5 offers various reflection techniques, including Screen Space Reflections (SSR), Lumen Reflections, and Ray Traced Reflections. SSR is a fast but limited technique, while Lumen Reflections provide dynamic reflections based on the Lumen scene representation. Ray Traced Reflections offer the highest quality but are the most performance-intensive.",
+      "diagram_suggestion": "A side-by-side comparison of SSR, Lumen Reflections, and Ray Traced Reflections, showcasing their visual quality and performance impact."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:10",
+      "procedural_step": "Control Lumen settings",
+      "why": "Adjusting Lumen settings directly impacts the quality and performance of global illumination and reflections. Incorrect settings can lead to visual artifacts or performance bottlenecks, especially in complex scenes.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:14",
+      "procedural_step": "Control exposure",
+      "why": "Exposure control affects the perceived brightness and contrast of the scene. Incorrect exposure can result in blown-out highlights or crushed shadows, obscuring details and impacting the overall mood.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:17",
+      "procedural_step": "Look at baked lighting",
+      "why": "Baked lighting, while performant, is static. Changes to the scene require rebaking, which can be time-consuming. Understanding its limitations is crucial when choosing between baked and dynamic lighting solutions.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:20",
+      "procedural_step": "Looking at light mass and light maps",
+      "why": "Lightmass precomputes lighting, storing it in lightmaps. Incorrect lightmap resolution can lead to blocky shadows or aliasing artifacts. Overly large lightmaps consume excessive memory.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:25",
+      "procedural_step": "Look at lighting a character",
+      "why": "Character lighting requires careful consideration of skin shading, subsurface scattering, and shadow casting. Incorrect lighting can make a character look unnatural or flat, breaking immersion.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:10",
+      "prompt": "How does Lumen's global illumination differ from traditional static lighting techniques, and what are the trade-offs?",
+      "expected_insight": "Lumen provides dynamic global illumination, reacting to scene changes in real-time, unlike static lighting which is precomputed. The trade-off is increased performance cost compared to baked lighting."
+    },
+    {
+      "insert_after_timestamp": "0:14",
+      "prompt": "Why is understanding exposure crucial for achieving a cinematic look, and how does it relate to real-world camera settings?",
+      "expected_insight": "Exposure controls the overall brightness and contrast, influencing the mood and clarity of the scene. It mirrors real-world camera settings like aperture, shutter speed, and ISO, allowing for artistic control over the image."
+    },
+    {
+      "insert_after_timestamp": "0:17",
+      "prompt": "In what scenarios would you choose baked lighting over Lumen, and what are the limitations to be aware of?",
+      "expected_insight": "Baked lighting is suitable for static environments where performance is critical. However, it requires rebaking for any scene changes and lacks the dynamic responsiveness of Lumen."
+    },
+    {
+      "insert_after_timestamp": "0:20",
+      "prompt": "How does Lightmass contribute to the visual quality of a scene, and what factors influence the quality of lightmaps?",
+      "expected_insight": "Lightmass precomputes indirect lighting, adding depth and realism to the scene. Lightmap resolution, UV unwrapping, and Lightmass settings all affect the quality of the resulting lightmaps."
+    },
+    {
+      "insert_after_timestamp": "0:25",
+      "prompt": "What are the key considerations when lighting a character to ensure they look realistic and integrated into the scene?",
+      "expected_insight": "Character lighting involves careful attention to skin shading, subsurface scattering, shadow casting, and specular highlights. The goal is to create a natural and believable appearance that complements the environment."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine 5 editor interface",
+    "Familiarity with static and skeletal meshes",
+    "Knowledge of material creation and application",
+    "Basic understanding of UV unwrapping for lightmaps",
+    "Experience with Sequencer for cinematic creation"
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary advantage of using Lumen for global illumination in Unreal Engine 5?",
+      "options": [
+        "It provides fully dynamic global illumination and reflections.",
+        "It requires precomputed lighting for optimal performance.",
+        "It only works with static meshes.",
+        "It is less performance-intensive than static lighting."
+      ],
+      "correct_index": 0,
+      "explanation": "Lumen is a fully dynamic global illumination system, meaning it reacts to changes in the scene in real-time without requiring precomputation."
+    },
+    {
+      "question": "Which of the following best describes the purpose of exposure control in UE5?",
+      "options": [
+        "To adjust the color temperature of the scene.",
+        "To control the overall brightness and contrast of the scene.",
+        "To add post-processing effects to the scene.",
+        "To optimize the scene for mobile devices."
+      ],
+      "correct_index": 1,
+      "explanation": "Exposure control simulates camera settings to manage the scene's brightness and contrast, influencing the overall mood and clarity."
+    },
+    {
+      "question": "What is the main difference between baked lighting and dynamic lighting solutions like Lumen?",
+      "options": [
+        "Baked lighting is calculated in real-time, while dynamic lighting is precomputed.",
+        "Baked lighting is static and requires rebaking for changes, while dynamic lighting is responsive to scene changes.",
+        "Baked lighting offers higher visual quality than dynamic lighting.",
+        "Baked lighting is only suitable for outdoor environments."
+      ],
+      "correct_index": 1,
+      "explanation": "Baked lighting is precomputed and static, requiring rebaking for any changes, whereas dynamic lighting like Lumen reacts in real-time."
+    },
+    {
+      "question": "What is the primary function of Lightmass in Unreal Engine 5?",
+      "options": [
+        "To simulate real-time reflections.",
+        "To precompute static lighting and store it in lightmaps.",
+        "To create dynamic shadows.",
+        "To optimize the scene for ray tracing."
+      ],
+      "correct_index": 1,
+      "explanation": "Lightmass precomputes static lighting information and stores it in lightmaps, which are then applied to static meshes."
+    },
+    {
+      "question": "Which reflection technique generally offers the highest visual quality but is also the most performance-intensive?",
+      "options": [
+        "Screen Space Reflections (SSR)",
+        "Lumen Reflections",
+        "Ray Traced Reflections",
+        "Planar Reflections"
+      ],
+      "correct_index": 2,
+      "explanation": "Ray Traced Reflections provide the most accurate and detailed reflections but come with a higher performance cost compared to SSR or Lumen Reflections."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 1,
+    "strict_segmentation": 2,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 21,
+    "grade": "F"
+  }
+}
