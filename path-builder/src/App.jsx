@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { PathProvider } from "./context/PathContext";
 import { TagDataProvider } from "./context/TagDataContext";
 import Dashboard from "./components/Dashboard/Dashboard";
@@ -127,21 +127,24 @@ function App() {
   const [analyticsEvents, setAnalyticsEvents] = useState([]);
   const [analyticsTimeRange, setAnalyticsTimeRange] = useState("7d");
 
-  // Eagerly load analytics events when any analytics tab becomes active
-  const loadAnalyticsEvents = useCallback(async () => {
-    try {
-      const data = await fetchEvents(analyticsTimeRange);
-      setAnalyticsEvents(data);
-    } catch (err) {
-      console.error("[App] Failed to load analytics events:", err);
-    }
-  }, [analyticsTimeRange]);
+  // Analytics events are loaded inline in the effect below
 
   useEffect(() => {
     if (activeTab.startsWith("analytics-") && analyticsEvents.length === 0) {
-      loadAnalyticsEvents();
+      let cancelled = false;
+      (async () => {
+        try {
+          const data = await fetchEvents(analyticsTimeRange);
+          if (!cancelled) setAnalyticsEvents(data);
+        } catch (err) {
+          console.error("[App] Failed to load analytics events:", err);
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
     }
-  }, [activeTab, analyticsEvents.length, loadAnalyticsEvents]);
+  }, [activeTab, analyticsEvents.length, analyticsTimeRange]);
   const { isMobile } = useIsMobile();
 
   // Build ordered tab list (mobile reorders, admin tabs appended)
