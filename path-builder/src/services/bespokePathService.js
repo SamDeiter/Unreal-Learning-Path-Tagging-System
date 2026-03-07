@@ -38,6 +38,95 @@ const FALLBACK_NARRATION_TEMPLATES = {
 // Raised to 0.70 — rejects weak semantic matches (e.g., "time dilation" ≠ "delay nodes").
 const SIMILARITY_THRESHOLD = 0.7;
 
+// Minimum keyword overlap between user query and a classified step's text.
+// Steps below this threshold are demoted to "low" relevance — catches
+// semantically-similar but topically-wrong content that the AI failed to reject.
+const TOPIC_OVERLAP_THRESHOLD = 0.3;
+
+// Stop words excluded from topical overlap computation
+const STOP_WORDS = new Set([
+  "a",
+  "an",
+  "the",
+  "in",
+  "on",
+  "at",
+  "to",
+  "for",
+  "of",
+  "with",
+  "by",
+  "from",
+  "and",
+  "or",
+  "not",
+  "is",
+  "it",
+  "be",
+  "as",
+  "do",
+  "has",
+  "was",
+  "are",
+  "but",
+  "if",
+  "my",
+  "this",
+  "that",
+  "how",
+  "what",
+  "when",
+  "where",
+  "why",
+  "can",
+  "will",
+  "so",
+  "no",
+  "up",
+  "out",
+  "its",
+  "i",
+  "me",
+  "you",
+  "your",
+  "we",
+  "they",
+  "their",
+  "about",
+  "use",
+  "using",
+  "used",
+  "make",
+  "get",
+  "set",
+]);
+
+/**
+ * Compute keyword overlap between a user query and classified step text.
+ * Returns a ratio (0–1) of query keywords found in the step text.
+ *
+ * @param {string} queryText - The user's original query
+ * @param {string} stepText - The classified step's title + summary text
+ * @returns {number} Overlap ratio (0 = no keywords match, 1 = all match)
+ */
+export function computeTopicOverlap(queryText, stepText) {
+  if (!queryText || !stepText) return 0;
+
+  const tokenize = (text) =>
+    text
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, " ")
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+
+  const queryTokens = tokenize(queryText);
+  if (queryTokens.length === 0) return 1; // trivial query, skip check
+
+  const stepTokenSet = new Set(tokenize(stepText));
+  const matches = queryTokens.filter((t) => stepTokenSet.has(t)).length;
+  return matches / queryTokens.length;
+}
+
 /**
  * Stage 1: Find relevant segments across all embedding collections.
  * Calls embedQuery → then vectorSearchSegments + vectorSearchEpic + vectorSearchDocs.
@@ -345,6 +434,28 @@ Rules:
     }
 
     const classifications = JSON.parse(jsonMatch[0]);
+
+    // ── POST-CLASSIFICATION TOPICAL CROSS-CHECK ──
+    // Code-level guardrail: even if Gemini rated a step as "high" relevance,
+    // demote it if the step text has <30% keyword overlap with the user query.
+    // This catches false semantic matches the AI prompt instructions missed.
+    let demotedCount = 0;
+    for (const c of classifications) {
+      if (c.relevance === "low" || c.index < 0 || c.index >= segments.length) continue;
+      const stepText = `${c.summary || ""} ${segments[c.index]?.title || ""} ${segments[c.index]?.videoTitle || ""} ${segments[c.index]?.text?.slice(0, 500) || ""}`;
+      const overlap = computeTopicOverlap(userQuery, stepText);
+      if (overlap < TOPIC_OVERLAP_THRESHOLD) {
+        devWarn(
+          `[BespokePath] Topical cross-check rejected: "${segments[c.index]?.title || segments[c.index]?.videoTitle || "(untitled)"}" (overlap: ${(overlap * 100).toFixed(0)}%)`
+        );
+        c.relevance = "low";
+        demotedCount++;
+      }
+    }
+    if (demotedCount > 0) {
+      devLog(`[BespokePath] Topical cross-check demoted ${demotedCount} step(s) to low relevance`);
+    }
+
     const sequenced = [];
 
     // Build ordered path by category

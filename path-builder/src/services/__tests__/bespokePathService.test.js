@@ -38,13 +38,35 @@ import { findRelevantSegments, generateBespokePath } from "../../services/bespok
 const mockCallable = (data) => vi.fn().mockResolvedValue({ data });
 
 /** Create a fake segment resembling real corpus output */
-const fakeSegment = (id, similarity = 0.8) => ({
-  id: `seg-${id}`,
-  title: `Segment ${id}`,
-  text: `How to do ${id} in UE5`,
-  source: "segment_embeddings",
-  similarity,
-});
+const fakeSegment = (id, similarity = 0.8) => {
+  // Realistic titles/text so topical cross-check passes when query matches
+  const details = {
+    "mesh-import": {
+      title: "Importing Static Meshes",
+      text: "How to import a static mesh FBX into UE5 using the Content Browser",
+    },
+    "blueprint-actor": {
+      title: "Blueprint Actor Setup",
+      text: "Create a Blueprint actor with a static mesh component for your imported mesh",
+    },
+    "collision-setup": {
+      title: "Collision Configuration",
+      text: "Configure collision settings on your imported static mesh in UE5",
+    },
+    "material-slots": {
+      title: "Material Slot Assignment",
+      text: "Assign materials to material slots on your imported static mesh",
+    },
+  };
+  const d = details[id] || { title: `Segment ${id}`, text: `How to do ${id} in UE5` };
+  return {
+    id: `seg-${id}`,
+    title: d.title,
+    text: d.text,
+    source: "segment_embeddings",
+    similarity,
+  };
+};
 
 /** Valid 4-step hybrid JSON that Gemini would return */
 const GOOD_HYBRID_JSON = JSON.stringify([
@@ -461,22 +483,28 @@ describe("bespokePathService", () => {
                     category: "foundation",
                     relevance: "high",
                     order: 0,
-                    summary: "First step",
+                    summary: "Import your static mesh FBX file into UE5 via the Content Browser",
                   },
                   {
                     index: 1,
                     category: "diagnosis",
                     relevance: "high",
                     order: 1,
-                    summary: "Second step",
+                    summary: "Set up a Blueprint actor with a static mesh component",
                   },
-                  { index: 2, category: "fix", relevance: "high", order: 2, summary: "Third step" },
+                  {
+                    index: 2,
+                    category: "fix",
+                    relevance: "high",
+                    order: 2,
+                    summary: "Configure collision on your imported static mesh",
+                  },
                   {
                     index: 3,
                     category: "transfer",
                     relevance: "medium",
                     order: 3,
-                    summary: "Fourth",
+                    summary: "Assign materials to the mesh material slots",
                   },
                 ]),
               });
@@ -671,10 +699,30 @@ describe("bespokePathService", () => {
               // No groundingMetadata in response
               return mockCallable({
                 text: JSON.stringify([
-                  { index: 0, category: "foundation", relevance: "high", summary: "First" },
-                  { index: 1, category: "diagnosis", relevance: "high", summary: "Second" },
-                  { index: 2, category: "fix", relevance: "high", summary: "Third" },
-                  { index: 3, category: "transfer", relevance: "medium", summary: "Fourth" },
+                  {
+                    index: 0,
+                    category: "foundation",
+                    relevance: "high",
+                    summary: "Import your static mesh FBX file",
+                  },
+                  {
+                    index: 1,
+                    category: "diagnosis",
+                    relevance: "high",
+                    summary: "Set up a Blueprint actor with static mesh",
+                  },
+                  {
+                    index: 2,
+                    category: "fix",
+                    relevance: "high",
+                    summary: "Configure collision on your imported mesh",
+                  },
+                  {
+                    index: 3,
+                    category: "transfer",
+                    relevance: "medium",
+                    summary: "Assign materials to the mesh",
+                  },
                 ]),
               });
             }
