@@ -108,6 +108,7 @@ exports.extractIntent = functions
         model: "gemini-2.0-flash",
         type: "intentExtraction",
         query: query.substring(0, 50),
+        firestoreReads: 2, firestoreWrites: 1,
       });
 
       const response = {

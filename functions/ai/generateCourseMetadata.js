@@ -100,6 +100,7 @@ exports.generateCourseMetadata = functions
       await logApiUsage(userId, {
         model: model,
         type: "courseMetadata",
+        firestoreReads: 3, firestoreWrites: 1,
       });
 
       console.log("[DEBUG] Successfully generated course metadata");

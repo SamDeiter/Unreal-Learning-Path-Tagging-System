@@ -6,6 +6,17 @@
 const admin = require("firebase-admin");
 
 /**
+ * Firebase Firestore pricing (Blaze Plan, per 100K operations).
+ * Used for cost estimation in the analytics dashboard.
+ */
+const FIRESTORE_PRICING = {
+  readPer100K: 0.06, // $0.06 per 100K reads
+  writePer100K: 0.18, // $0.18 per 100K writes
+  deletePer100K: 0.02, // $0.02 per 100K deletes
+  storagePer_GB: 0.18, // $0.18 per GB/month
+};
+
+/**
  * Log API usage for rate limiting and analytics.
  * Optionally pass `startTime` (from Date.now()) to auto-compute durationMs.
  * Fails gracefully - logging should never crash the main function.
@@ -31,4 +42,4 @@ async function logApiUsage(userId, data, startTime = null) {
   }
 }
 
-module.exports = { logApiUsage };
+module.exports = { logApiUsage, FIRESTORE_PRICING };

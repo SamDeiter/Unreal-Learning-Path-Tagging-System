@@ -128,6 +128,6 @@ Include ALL ${truncated.length} passages.`;
       console.error("[rerankPassages] Error:", err.message);
       return { success: true, reranked: truncated, fallback: true };
     } finally {
-      logApiUsage(userId, { type: "generation", function: "rerankPassages" });
+      logApiUsage(userId, { type: "generation", function: "rerankPassages" , firestoreReads: 12, firestoreWrites: 1 });
     }
   });

@@ -179,6 +179,7 @@ This diagnosis should teach the developer to recognize and solve similar problem
         model: "gemini-2.0-flash",
         type: "diagnosis",
         intentId: intent.intent_id,
+        firestoreReads: 2, firestoreWrites: 1,
       });
 
       const response = {

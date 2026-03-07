@@ -4,7 +4,12 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { getTokenStats, fetchCloudStats, estimateCost } from "../../services/tokenTracker";
+import {
+  getTokenStats,
+  fetchCloudStats,
+  estimateCost,
+  fetchFirestoreUsage,
+} from "../../services/tokenTracker";
 import "./AdminAnalytics.css";
 
 function Tip({ text }) {
@@ -36,6 +41,7 @@ function StatCard({ label, value, icon, color, tooltip }) {
 export default function AnalyticsCosts({ timeRange = "7d" }) {
   const [tokenStats, setTokenStats] = useState(null);
   const [cloudCostHistory, setCloudCostHistory] = useState([]);
+  const [firestoreUsage, setFirestoreUsage] = useState(null);
   const [costLoading, setCostLoading] = useState(false);
 
   const loadCosts = useCallback(async () => {
@@ -43,8 +49,12 @@ export default function AnalyticsCosts({ timeRange = "7d" }) {
     setCostLoading(true);
     try {
       const daysToFetch = timeRange === "24h" ? 1 : timeRange === "7d" ? 7 : 30;
-      const cloudData = await fetchCloudStats(daysToFetch);
+      const [cloudData, fsUsage] = await Promise.all([
+        fetchCloudStats(daysToFetch),
+        fetchFirestoreUsage(daysToFetch),
+      ]);
       setCloudCostHistory(cloudData);
+      setFirestoreUsage(fsUsage);
     } catch (e) {
       console.warn("[AnalyticsCosts] Cloud stats failed:", e.message);
     } finally {
@@ -133,6 +143,78 @@ export default function AnalyticsCosts({ timeRange = "7d" }) {
                 );
               })}
           </div>
+        </div>
+      )}
+
+      {/* Firestore R/W Usage */}
+      {firestoreUsage && (
+        <div className="aa-section" style={{ marginBottom: 24 }}>
+          <h3>🗄️ Firestore Read/Write Usage</h3>
+          <div className="aa-stats-row" style={{ marginBottom: 12 }}>
+            <StatCard
+              label="Total Reads"
+              value={firestoreUsage.totalReads.toLocaleString()}
+              icon="📖"
+              color="#3b82f6"
+              tooltip="Firestore document reads from Cloud Functions (rate limiting, vector search, cache)"
+            />
+            <StatCard
+              label="Total Writes"
+              value={firestoreUsage.totalWrites.toLocaleString()}
+              icon="✏️"
+              color="#f59e0b"
+              tooltip="Firestore document writes from Cloud Functions (apiUsage logging, cache)"
+            />
+            <StatCard
+              label="Firestore Cost"
+              value={firestoreUsage.costFormatted}
+              icon="💾"
+              color="#8b5cf6"
+              tooltip="Estimated cost: reads × $0.06/100K + writes × $0.18/100K"
+            />
+            <StatCard
+              label="Combined Total"
+              value={`$${(tokenStats.today.cost + firestoreUsage.estimatedCost).toFixed(4)}`}
+              icon="💰"
+              color="#10b981"
+              tooltip="AI token cost + Firestore R/W cost combined"
+            />
+          </div>
+          {Object.keys(firestoreUsage.byFunction).length > 0 && (
+            <div className="aa-bar-chart">
+              {Object.entries(firestoreUsage.byFunction)
+                .sort(([, a], [, b]) => b.reads + b.writes - (a.reads + a.writes))
+                .slice(0, 10)
+                .map(([fn, data]) => {
+                  const ops = data.reads + data.writes;
+                  const maxOps = Math.max(
+                    ...Object.values(firestoreUsage.byFunction).map((d) => d.reads + d.writes),
+                    1
+                  );
+                  const pct = Math.round((ops / maxOps) * 100);
+                  return (
+                    <div key={fn} className="aa-bar-row">
+                      <span className="aa-bar-label" style={{ width: 140 }}>
+                        {fn}
+                      </span>
+                      <div className="aa-bar-track">
+                        <div
+                          className="aa-bar-fill"
+                          style={{ width: `${pct}%`, backgroundColor: "#8b5cf6" }}
+                        />
+                      </div>
+                      <span className="aa-bar-value" style={{ width: 80, fontSize: "0.7rem" }}>
+                        {data.reads}R / {data.writes}W
+                      </span>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+          <p style={{ fontSize: "0.65rem", color: "#64748b", marginTop: 8 }}>
+            Based on {firestoreUsage.docsScanned} recent apiUsage records • Free tier: 50K reads +
+            20K writes/day
+          </p>
         </div>
       )}
 

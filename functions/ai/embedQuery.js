@@ -83,6 +83,6 @@ exports.embedQuery = functions
       console.error("[embedQuery] Error:", err.message);
       throw new functions.https.HttpsError("internal", "Failed to generate embedding");
     } finally {
-      logApiUsage(userId, { type: "generation", function: "embedQuery" });
+      logApiUsage(userId, { type: "generation", function: "embedQuery" , firestoreReads: 2, firestoreWrites: 1 });
     }
   });

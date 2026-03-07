@@ -131,6 +131,7 @@ Does this curriculum meet the anti-tutorial-hell requirements?
         model: "gemini-2.0-flash",
         type: "validation",
         approved: result.data.approved,
+        firestoreReads: 2, firestoreWrites: 1,
       });
 
       const response = {

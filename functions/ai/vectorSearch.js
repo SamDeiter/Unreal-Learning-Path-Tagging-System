@@ -85,7 +85,7 @@ exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10 }, a
   }
 
   const results = await searchCollection("epic_embeddings", queryVector, Math.min(topK, 20));
-  logApiUsage(userId, { type: "generation", function: "vectorSearchEpic" });
+  logApiUsage(userId, { type: "generation", function: "vectorSearchEpic" , firestoreReads: 12, firestoreWrites: 1 });
 
   return { results, count: results.length };
 });
@@ -104,7 +104,7 @@ exports.vectorSearchCourses = onCall(
     }
 
     const results = await searchCollection("course_embeddings", queryVector, Math.min(topK, 20));
-    logApiUsage(userId, { type: "generation", function: "vectorSearchCourses" });
+    logApiUsage(userId, { type: "generation", function: "vectorSearchCourses" , firestoreReads: 7, firestoreWrites: 1 });
 
     return { results, count: results.length };
   }
@@ -124,7 +124,7 @@ exports.vectorSearchSegments = onCall(
     }
 
     const results = await searchCollection("segment_embeddings", queryVector, Math.min(topK, 20));
-    logApiUsage(userId, { type: "generation", function: "vectorSearchSegments" });
+    logApiUsage(userId, { type: "generation", function: "vectorSearchSegments" , firestoreReads: 12, firestoreWrites: 1 });
 
     return { results, count: results.length };
   }
@@ -142,7 +142,7 @@ exports.vectorSearchDocs = onCall({ region: "us-central1", maxInstances: 10 }, a
   }
 
   const results = await searchCollection("docs_embeddings", queryVector, Math.min(topK, 20));
-  logApiUsage(userId, { type: "generation", function: "vectorSearchDocs" });
+  logApiUsage(userId, { type: "generation", function: "vectorSearchDocs" , firestoreReads: 12, firestoreWrites: 1 });
 
   return { results, count: results.length };
 });

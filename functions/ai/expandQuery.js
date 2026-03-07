@@ -130,6 +130,6 @@ Example: ["ray traced reflections noise", "lumen GI artifact flickering", "scree
       // Graceful fallback — never block the main search
       return { success: true, expansions: [] };
     } finally {
-      logApiUsage(userId, { type: "generation", function: "expandQuery" });
+      logApiUsage(userId, { type: "generation", function: "expandQuery" , firestoreReads: 2, firestoreWrites: 1 });
     }
   });

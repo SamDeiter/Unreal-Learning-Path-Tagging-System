@@ -373,6 +373,7 @@ JSON:{"question":"str","options":["str"],"whyAsking":"str (explain what this inf
         reasons: confidence.reasons,
         round: clarifyRound + 1,
         queryLength: (query || "").length,
+        firestoreReads: 2, firestoreWrites: 1,
       });
       trace.toLog();
       return {
@@ -431,6 +432,7 @@ JSON:{"intent_id":"search_strategy","user_role":"search","goal":"search","proble
           score: confidence.score,
           reasons: confidence.reasons,
           queryLength: (query || "").length,
+          firestoreReads: 2, firestoreWrites: 1,
         });
         trace.toLog();
         return {
@@ -648,28 +650,28 @@ JSON:{
 
   // Log API usage (batched, non-blocking)
   const usageLogs = [
-    logApiUsage(userId, { model: "gemini-2.0-flash", type: "intent", estimatedTokens: 150 }),
-    logApiUsage(userId, { model: "gemini-2.0-flash", type: "diagnosis", estimatedTokens: 300 }),
-    logApiUsage(userId, { model: "gemini-2.0-flash", type: "objectives", estimatedTokens: 100 }),
+    logApiUsage(userId, { model: "gemini-2.0-flash", type: "intent", estimatedTokens: 150 , firestoreReads: 2, firestoreWrites: 1 }),
+    logApiUsage(userId, { model: "gemini-2.0-flash", type: "diagnosis", estimatedTokens: 300 , firestoreReads: 2, firestoreWrites: 1 }),
+    logApiUsage(userId, { model: "gemini-2.0-flash", type: "objectives", estimatedTokens: 100 , firestoreReads: 2, firestoreWrites: 1 }),
   ];
   if (validationResult.status === "fulfilled") {
     usageLogs.push(
-      logApiUsage(userId, { model: "gemini-2.0-flash", type: "validation", estimatedTokens: 80 })
+      logApiUsage(userId, { model: "gemini-2.0-flash", type: "validation", estimatedTokens: 80 , firestoreReads: 2, firestoreWrites: 1 })
     );
   }
   if (summaryResult.status === "fulfilled") {
     usageLogs.push(
-      logApiUsage(userId, { model: "gemini-2.0-flash", type: "path_summary", estimatedTokens: 80 })
+      logApiUsage(userId, { model: "gemini-2.0-flash", type: "path_summary", estimatedTokens: 80 , firestoreReads: 2, firestoreWrites: 1 })
     );
   }
   if (microLesson) {
     usageLogs.push(
-      logApiUsage(userId, { model: "gemini-2.0-flash", type: "micro_lesson", estimatedTokens: 400 })
+      logApiUsage(userId, { model: "gemini-2.0-flash", type: "micro_lesson", estimatedTokens: 400 , firestoreReads: 2, firestoreWrites: 1 })
     );
   }
   if (answerData) {
     usageLogs.push(
-      logApiUsage(userId, { model: "gemini-2.0-flash", type: "answer_data", estimatedTokens: 300 })
+      logApiUsage(userId, { model: "gemini-2.0-flash", type: "answer_data", estimatedTokens: 300 , firestoreReads: 2, firestoreWrites: 1 })
     );
   }
   // Analytics: log direct answer routing decision
@@ -987,6 +989,7 @@ async function handleOnboarding(data, context, apiKey) {
         type: "onboarding_rag",
         archetype,
         passageCount: passages.length,
+        firestoreReads: 2, firestoreWrites: 1,
       });
 
       const curriculum =
@@ -1072,6 +1075,7 @@ async function handleOnboarding(data, context, apiKey) {
       type: "onboarding_rag",
       archetype,
       passageCount: passages.length,
+      firestoreReads: 2, firestoreWrites: 1,
     });
 
     const curriculum =

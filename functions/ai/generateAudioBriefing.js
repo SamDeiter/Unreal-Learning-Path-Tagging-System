@@ -201,6 +201,7 @@ IMPORTANT:
           model: "gemini-2.5-flash-preview-tts",
           type: "stepAudio",
           query: query.substring(0, 50),
+          firestoreReads: 3, firestoreWrites: 2,
         });
 
         return {
@@ -323,6 +324,7 @@ RULES:
           model: "gemini-2.0-flash",
           type: "deepdive",
           query: query.substring(0, 50),
+          firestoreReads: 3, firestoreWrites: 2,
         });
 
         return {
@@ -410,6 +412,7 @@ Return ONLY a JSON array of 3 strings.`;
           model: "gemini-2.0-flash",
           type: "takeaways",
           query: query.substring(0, 50),
+          firestoreReads: 3, firestoreWrites: 2,
         });
 
         return {
@@ -484,6 +487,7 @@ Return ONLY a JSON array:
           model: "gemini-2.0-flash",
           type: "quiz",
           query: query.substring(0, 50),
+          firestoreReads: 3, firestoreWrites: 2,
         });
 
         return {
@@ -556,6 +560,7 @@ Return ONLY a JSON array with this exact format:
           model: "gemini-2.0-flash",
           type: "diagnostic",
           query: query.substring(0, 50),
+          firestoreReads: 3, firestoreWrites: 2,
         });
 
         return {
@@ -761,6 +766,7 @@ Rules:
           type: "pathNarration",
           query: query.substring(0, 50),
           phaseCount: phases.length,
+          firestoreReads: 3, firestoreWrites: 2,
         });
 
         return {
@@ -921,6 +927,7 @@ Rules:
         model: "gemini-2.5-flash-preview-tts",
         type: "audioBriefing",
         query: query.substring(0, 50),
+        firestoreReads: 3, firestoreWrites: 2,
       });
 
       return {

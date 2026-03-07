@@ -137,7 +137,7 @@ exports.searchVertexAIDocs = onCall(
       console.error("[searchVertexAIDocs] Error:", err.message);
       throw new HttpsError("internal", `Vertex AI Search failed: ${err.message}`);
     } finally {
-      logApiUsage(userId, { type: "generation", function: "searchVertexAIDocs" });
+      logApiUsage(userId, { type: "generation", function: "searchVertexAIDocs" , firestoreReads: 2, firestoreWrites: 1 });
     }
   }
 );

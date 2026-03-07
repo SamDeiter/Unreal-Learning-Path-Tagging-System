@@ -25,7 +25,7 @@ exports.logTelemetry = onCall(async (request) => {
 
   const userId = request.auth?.uid || "anonymous";
 
-  await logApiUsage(userId, { type, ...rest });
+  await logApiUsage(userId, { type, ...rest, firestoreReads: 0, firestoreWrites: 1 });
 
   return { success: true };
 });

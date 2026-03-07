@@ -266,6 +266,82 @@ export async function fetchCloudStats(days = 30) {
   }
 }
 
+// ── Firestore R/W Cost Tracking ───────────────────────
+
+// Firebase Firestore Blaze Plan pricing
+export const FIRESTORE_PRICING = {
+  readPer100K: 0.06, // $0.06 per 100K reads
+  writePer100K: 0.18, // $0.18 per 100K writes
+  deletePer100K: 0.02, // $0.02 per 100K deletes
+};
+
+/**
+ * Estimate Firestore cost from read/write counts.
+ */
+export function estimateFirestoreCost(reads, writes) {
+  return (
+    (reads / 100_000) * FIRESTORE_PRICING.readPer100K +
+    (writes / 100_000) * FIRESTORE_PRICING.writePer100K
+  );
+}
+
+/**
+ * Fetch Firestore R/W usage from the apiUsage collection.
+ * Aggregates firestoreReads and firestoreWrites logged by Cloud Functions.
+ * @param {number} days - Number of days to look back
+ * @returns {Promise<{totalReads, totalWrites, estimatedCost, byFunction}>}
+ */
+export async function fetchFirestoreUsage(days = 7) {
+  try {
+    const app = getFirebaseApp();
+    if (!app) return null;
+    const db = getFirestore(app);
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+
+    const q = query(
+      collection(db, "apiUsage"),
+      orderBy("timestamp", "desc"),
+      limit(500) // Cap to avoid reading too many docs
+    );
+    const snapshot = await getDocs(q);
+
+    let totalReads = 0;
+    let totalWrites = 0;
+    const byFunction = {};
+
+    snapshot.docs.forEach((d) => {
+      const data = d.data();
+      const reads = data.firestoreReads || 0;
+      const writes = data.firestoreWrites || 0;
+      totalReads += reads;
+      totalWrites += writes;
+
+      const fn = data.function || data.type || "unknown";
+      if (!byFunction[fn]) {
+        byFunction[fn] = { reads: 0, writes: 0, calls: 0 };
+      }
+      byFunction[fn].reads += reads;
+      byFunction[fn].writes += writes;
+      byFunction[fn].calls += 1;
+    });
+
+    return {
+      totalReads,
+      totalWrites,
+      totalOps: totalReads + totalWrites,
+      estimatedCost: estimateFirestoreCost(totalReads, totalWrites),
+      costFormatted: `$${estimateFirestoreCost(totalReads, totalWrites).toFixed(6)}`,
+      byFunction,
+      docsScanned: snapshot.size,
+    };
+  } catch (err) {
+    console.warn("[TokenTracker] Failed to fetch Firestore usage:", err.message);
+    return null;
+  }
+}
+
 // ── Internal ───────────────────────────────────────────
 
 function loadTracker() {

@@ -77,6 +77,7 @@ exports.classifySegments = functions
         model: "gemini-2.0-flash",
         type: "classifySegments",
         promptLength: prompt.length,
+        firestoreReads: 3, firestoreWrites: 2,
       });
 
       // ── Call 2 (optional): Google Search grounding verification ──
@@ -190,6 +191,7 @@ exports.classifySegments = functions
                 model: "gemini-2.0-flash",
                 type: "classifySegments_grounding",
                 promptLength: verifyPrompt.length,
+                firestoreReads: 3, firestoreWrites: 2,
               });
             }
           }

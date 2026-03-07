@@ -69,12 +69,89 @@ function filterTakeaways(items) {
  * Convert quoted, backtick-quoted, or **markdown bold** terms in text to bold elements.
  * Handles 'single', `backtick`, "double" quoted terms (2+ chars),
  * and **double-asterisk** bold terms.
+ * Also auto-detects known UE5 editor terms and highlights them.
  * Uses word-boundary checks to avoid catching apostrophes in
  * contractions like "isn't", "it's", "don't".
  */
+
+// Known UE5 terms to auto-highlight when found in plain text
+const UE_TERMS = [
+  "Content Browser",
+  "World Outliner",
+  "Details Panel",
+  "Details panel",
+  "Blueprint",
+  "Blueprints",
+  "Blueprint Editor",
+  "Event Graph",
+  "Level Editor",
+  "Material Editor",
+  "Material Instance",
+  "Viewport",
+  "World Settings",
+  "Play In Editor",
+  "PIE",
+  "Actor",
+  "Component",
+  "Pawn",
+  "Character",
+  "GameMode",
+  "PlayerController",
+  "Widget Blueprint",
+  "UMG",
+  "Sequencer",
+  "Niagara",
+  "Nanite",
+  "Lumen",
+  "MetaHuman",
+  "Quixel",
+  "Landscape",
+  "Foliage",
+  "Static Mesh",
+  "Skeletal Mesh",
+  "Animation Blueprint",
+  "Anim Blueprint",
+  "Behavior Tree",
+  "Blackboard",
+  "EQS",
+  "NavMesh",
+  "AI Controller",
+  "Data Table",
+  "Struct",
+  "Enum",
+  "Game Instance",
+  "Level Blueprint",
+  "Construction Script",
+  "Begin Play",
+  "Event Tick",
+  "Collision",
+  "Physics",
+  "Post Process",
+  "Ray Tracing",
+  "Virtual Shadow Maps",
+  "World Partition",
+  "Data Layers",
+  "HLOD",
+  "C\\+\\+",
+  "Unreal Engine",
+  "UE5",
+  "UE4",
+  "Content Drawer",
+  "Output Log",
+  "Message Log",
+  "Class Defaults",
+  "Class Settings",
+];
+
+// Build a single regex that matches any of these terms (case-insensitive word boundaries)
+const UE_TERMS_REGEX = new RegExp(
+  `(${UE_TERMS.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`,
+  "g"
+);
+
 function highlightKeyTerms(text) {
   if (typeof text !== "string") return text;
-  // Match **bold**, 'QuotedTerm' (not contractions), `BacktickTerm`, "DoubleQuoted"
+  // First pass: markdown-style patterns (**bold**, 'quoted', `backtick`, "double")
   const parts = text.split(/(\*\*[^*]{2,}\*\*|(?<!\w)'[^']{2,}'(?!\w)|`[^`]{2,}`|"[^"]{2,}")/g);
   return parts.map((part, i) => {
     if (part && part.startsWith("**") && part.endsWith("**") && part.length > 4) {
@@ -104,6 +181,23 @@ function highlightKeyTerms(text) {
           {part.slice(1, -1)}
         </strong>
       );
+    }
+    // Second pass: auto-detect known UE5 terms in remaining plain text
+    if (part && UE_TERMS_REGEX.test(part)) {
+      // Reset regex lastIndex since we used .test()
+      UE_TERMS_REGEX.lastIndex = 0;
+      const subParts = part.split(UE_TERMS_REGEX);
+      return subParts.map((sub, j) => {
+        if (UE_TERMS_REGEX.test(sub)) {
+          UE_TERMS_REGEX.lastIndex = 0;
+          return (
+            <strong key={`${i}-${j}`} className="ue-term">
+              {sub}
+            </strong>
+          );
+        }
+        return sub;
+      });
     }
     return part;
   });
@@ -265,13 +359,13 @@ export default function PathStep({
             </button>
             {scriptOpen && (
               <div className="step-body-text script-collapsed">
-                <p>{displayText}</p>
+                <p>{highlightKeyTerms(displayText)}</p>
               </div>
             )}
           </div>
         ) : (
           <div className="step-body-text">
-            <p>{displayText}</p>
+            <p>{highlightKeyTerms(displayText)}</p>
           </div>
         )}
 

@@ -141,6 +141,7 @@ REMEMBER: At least ONE transferable objective is REQUIRED!`;
         type: "objectives",
         intentId: intent.intent_id,
         diagnosisId: diagnosis.diagnosis_id,
+        firestoreReads: 2, firestoreWrites: 1,
       });
 
       const response = {
