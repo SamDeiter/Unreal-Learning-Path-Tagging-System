@@ -520,8 +520,9 @@ Return a JSON array:
     const functions = getFunctions(app, "us-central1");
     const classifyFn = httpsCallable(functions, "classifySegments");
 
-    const result = await classifyFn({ prompt });
+    const result = await classifyFn({ prompt, grounded: true });
     const responseText = result.data?.text || "";
+    const groundingMetadata = result.data?.groundingMetadata || null;
 
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
@@ -566,18 +567,45 @@ Return a JSON array:
 
     const sequenced = steps
       .sort((a, b) => (CATEGORY_ORDER[a.category] ?? 99) - (CATEGORY_ORDER[b.category] ?? 99))
-      .map((step, i) => ({
-        segment: {
-          id: `hybrid-${i}`,
-          type: "ai_generated",
-          title: step.title,
-          text: step.summary,
-          source: "ai_generated",
-        },
-        category: step.category || "foundation",
-        summary: step.summary,
-        order: i,
-      }));
+      .map((step, i) => {
+        // Attach grounding sources to this step if available
+        const stepSources = [];
+        if (groundingMetadata?.sources?.length > 0) {
+          // Match supports that reference this step's title or summary
+          const stepText = (step.title + " " + step.summary).toLowerCase();
+          (groundingMetadata.supports || []).forEach((support) => {
+            // Check if any grounding support text overlaps with this step's content
+            const supportText = (support.text || "").toLowerCase();
+            const words = stepText.split(/\s+/).filter((w) => w.length > 4);
+            const hasOverlap = words.some((word) => supportText.includes(word));
+            if (hasOverlap) {
+              (support.sourceIndices || []).forEach((idx) => {
+                if (groundingMetadata.sources[idx]) {
+                  const src = groundingMetadata.sources[idx];
+                  if (!stepSources.some((s) => s.url === src.url)) {
+                    stepSources.push(src);
+                  }
+                }
+              });
+            }
+          });
+        }
+
+        return {
+          segment: {
+            id: `hybrid-${i}`,
+            type: "ai_generated",
+            title: step.title,
+            text: step.summary,
+            source: "ai_generated",
+            sources: stepSources.length > 0 ? stepSources : undefined,
+            unverified: stepSources.length === 0,
+          },
+          category: step.category || "foundation",
+          summary: step.summary,
+          order: i,
+        };
+      });
 
     devLog(`[BespokePath] Hybrid path generated: ${sequenced.length} AI steps`);
     recordTokenUsage(

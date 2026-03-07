@@ -186,6 +186,20 @@ export default function PathStep({
       <header className="step-header">
         <div className="badge-container">
           <span className={`category-badge category-${category}`}>{category.toUpperCase()}</span>
+          {/* Trust badge — visual indicator of content verification status */}
+          {segment.type !== "ai_generated" ? (
+            <span className="trust-badge trust-corpus" title="Matched from course corpus">
+              <span className="trust-dot trust-dot-green"></span>
+            </span>
+          ) : segment.sources && segment.sources.length > 0 ? (
+            <span className="trust-badge trust-grounded" title="Verified via Google Search">
+              <span className="trust-dot trust-dot-blue"></span> Grounded
+            </span>
+          ) : (
+            <span className="trust-badge trust-unverified" title="AI-generated, not verified">
+              <span className="trust-dot trust-dot-amber"></span> AI
+            </span>
+          )}
         </div>
         <h1 className="step-title">{displayTitle}</h1>
       </header>
@@ -533,6 +547,30 @@ export default function PathStep({
           </div>
           {sourcesOpen && (
             <div className="footnotes-content">
+              {/* ── Grounding Sources (from Google Search verification) ── */}
+              {segment.sources && segment.sources.length > 0 && (
+                <div className="grounding-sources">
+                  {segment.sources.map((src, idx) => (
+                    <a
+                      key={idx}
+                      href={src.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="footnote-link grounding-source-link"
+                    >
+                      <i className="fa-solid fa-link"></i>
+                      {src.title || "Verified Source"}
+                    </a>
+                  ))}
+                </div>
+              )}
+              {/* ── Unverified AI warning ── */}
+              {segment.type === "ai_generated" && segment.unverified && (
+                <div className="unverified-banner">
+                  <i className="fa-solid fa-triangle-exclamation"></i>
+                  AI-generated — could not verify against external sources
+                </div>
+              )}
               {(() => {
                 // Derive source type & icon locally for the link
                 const sourceType = segment.type || segment.source || "docs";
@@ -544,12 +582,11 @@ export default function PathStep({
                       : "fa-book-open";
                 // Determine the best available URL for this source
                 const directUrl = segment.videoUrl || segment.url;
+                // Use Google site-scoped search (Epic's ?query= URLs 404)
                 const fallbackUrl =
                   sourceType === "transcript"
                     ? `https://www.youtube.com/results?search_query=unreal+engine+${encodeURIComponent(displayTitle)}`
-                    : sourceType === "epic_learning"
-                      ? `https://dev.epicgames.com/community/search?query=${encodeURIComponent(displayTitle)}`
-                      : `https://dev.epicgames.com/documentation/en-us/unreal-engine/?query=${encodeURIComponent(displayTitle)}`;
+                    : `https://www.google.com/search?q=site%3Adev.epicgames.com+${encodeURIComponent(displayTitle)}`;
                 const sourceUrl = directUrl || fallbackUrl;
 
                 return sourceType !== "ai_generated" ? (
@@ -568,13 +605,13 @@ export default function PathStep({
                       <i className="fa-solid fa-robot"></i> AI-synthesized from multiple sources
                     </span>
                     <a
-                      href={`https://dev.epicgames.com/documentation/en-us/unreal-engine/?query=${encodeURIComponent(displayTitle)}`}
+                      href={`https://www.google.com/search?q=site%3Adev.epicgames.com+unreal+engine+${encodeURIComponent(displayTitle)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="footnote-link footnote-search-link"
                     >
                       <i className="fa-solid fa-magnifying-glass"></i>
-                      Search Epic Docs for "{displayTitle}"
+                      Search Epic Docs for &quot;{displayTitle}&quot;
                     </a>
                   </div>
                 );
