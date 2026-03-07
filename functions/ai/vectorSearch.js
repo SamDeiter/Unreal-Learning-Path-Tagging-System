@@ -14,7 +14,8 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { FieldValue } = require("firebase-admin/firestore");
-const { checkRateLimit } = require("../utils/rateLimit");
+const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { logApiUsage } = require("../utils/apiUsage");
 
 const db = admin.firestore();
 
@@ -27,6 +28,11 @@ async function enforceRateLimit(request) {
   if (!rateLimitCheck.allowed) {
     throw new HttpsError("resource-exhausted", `Rate limit exceeded. ${rateLimitCheck.message}`);
   }
+  const globalCheck = await checkGlobalRateLimit(userId);
+  if (!globalCheck.allowed) {
+    throw new HttpsError("resource-exhausted", `${globalCheck.message}`);
+  }
+  return userId;
 }
 
 /**
@@ -68,7 +74,7 @@ async function searchCollection(collectionName, queryVector, topK) {
  * Search epic_embeddings — main RAG search across all content
  */
 exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10 }, async (request) => {
-  await enforceRateLimit(request);
+  const userId = await enforceRateLimit(request);
   const { queryVector, topK = 10 } = request.data;
 
   if (!queryVector || !Array.isArray(queryVector)) {
@@ -79,6 +85,7 @@ exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10 }, a
   }
 
   const results = await searchCollection("epic_embeddings", queryVector, Math.min(topK, 20));
+  logApiUsage(userId, { type: "generation", function: "vectorSearchEpic" });
 
   return { results, count: results.length };
 });
@@ -89,7 +96,7 @@ exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10 }, a
 exports.vectorSearchCourses = onCall(
   { region: "us-central1", maxInstances: 10 },
   async (request) => {
-    await enforceRateLimit(request);
+    const userId = await enforceRateLimit(request);
     const { queryVector, topK = 5 } = request.data;
 
     if (!queryVector || !Array.isArray(queryVector)) {
@@ -97,6 +104,7 @@ exports.vectorSearchCourses = onCall(
     }
 
     const results = await searchCollection("course_embeddings", queryVector, Math.min(topK, 20));
+    logApiUsage(userId, { type: "generation", function: "vectorSearchCourses" });
 
     return { results, count: results.length };
   }
@@ -108,7 +116,7 @@ exports.vectorSearchCourses = onCall(
 exports.vectorSearchSegments = onCall(
   { region: "us-central1", maxInstances: 10 },
   async (request) => {
-    await enforceRateLimit(request);
+    const userId = await enforceRateLimit(request);
     const { queryVector, topK = 10 } = request.data;
 
     if (!queryVector || !Array.isArray(queryVector)) {
@@ -116,6 +124,7 @@ exports.vectorSearchSegments = onCall(
     }
 
     const results = await searchCollection("segment_embeddings", queryVector, Math.min(topK, 20));
+    logApiUsage(userId, { type: "generation", function: "vectorSearchSegments" });
 
     return { results, count: results.length };
   }
@@ -125,7 +134,7 @@ exports.vectorSearchSegments = onCall(
  * Search docs_embeddings — documentation similarity
  */
 exports.vectorSearchDocs = onCall({ region: "us-central1", maxInstances: 10 }, async (request) => {
-  await enforceRateLimit(request);
+  const userId = await enforceRateLimit(request);
   const { queryVector, topK = 10 } = request.data;
 
   if (!queryVector || !Array.isArray(queryVector)) {
@@ -133,6 +142,7 @@ exports.vectorSearchDocs = onCall({ region: "us-central1", maxInstances: 10 }, a
   }
 
   const results = await searchCollection("docs_embeddings", queryVector, Math.min(topK, 20));
+  logApiUsage(userId, { type: "generation", function: "vectorSearchDocs" });
 
   return { results, count: results.length };
 });

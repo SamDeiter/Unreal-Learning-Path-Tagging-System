@@ -11,7 +11,8 @@
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { SearchServiceClient } = require("@google-cloud/discoveryengine").v1beta;
-const { checkRateLimit } = require("../utils/rateLimit");
+const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { logApiUsage } = require("../utils/apiUsage");
 
 // ── Configuration ──────────────────────────────────────────────────────────────
 const PROJECT_ID = "development-317819";
@@ -48,6 +49,10 @@ exports.searchVertexAIDocs = onCall(
     const rateLimitCheck = await checkRateLimit(userId, "generation");
     if (!rateLimitCheck.allowed) {
       throw new HttpsError("resource-exhausted", `Rate limit exceeded. ${rateLimitCheck.message}`);
+    }
+    const globalCheck = await checkGlobalRateLimit(userId);
+    if (!globalCheck.allowed) {
+      throw new HttpsError("resource-exhausted", `${globalCheck.message}`);
     }
 
     const client = getClient();
@@ -131,6 +136,8 @@ exports.searchVertexAIDocs = onCall(
     } catch (err) {
       console.error("[searchVertexAIDocs] Error:", err.message);
       throw new HttpsError("internal", `Vertex AI Search failed: ${err.message}`);
+    } finally {
+      logApiUsage(userId, { type: "generation", function: "searchVertexAIDocs" });
     }
   }
 );

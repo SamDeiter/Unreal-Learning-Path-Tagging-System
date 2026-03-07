@@ -5,7 +5,8 @@
 const functions = require("firebase-functions");
 const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
-const { checkRateLimit } = require("../utils/rateLimit");
+const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { logApiUsage } = require("../utils/apiUsage");
 
 const MODEL = "gemini-embedding-001";
 const DIMENSION = 768;
@@ -27,6 +28,10 @@ exports.embedQuery = functions
         "resource-exhausted",
         `Rate limit exceeded. ${rateLimitCheck.message}`
       );
+    }
+    const globalCheck = await checkGlobalRateLimit(userId);
+    if (!globalCheck.allowed) {
+      throw new functions.https.HttpsError("resource-exhausted", `${globalCheck.message}`);
     }
 
     // Security: sanitize input
@@ -77,5 +82,7 @@ exports.embedQuery = functions
       if (err instanceof functions.https.HttpsError) throw err;
       console.error("[embedQuery] Error:", err.message);
       throw new functions.https.HttpsError("internal", "Failed to generate embedding");
+    } finally {
+      logApiUsage(userId, { type: "generation", function: "embedQuery" });
     }
   });

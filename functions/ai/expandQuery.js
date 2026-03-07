@@ -9,7 +9,8 @@
 const functions = require("firebase-functions");
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
 const { normalizeQuery } = require("../pipeline/cache");
-const { checkRateLimit } = require("../utils/rateLimit");
+const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { logApiUsage } = require("../utils/apiUsage");
 
 // In-memory cache (per instance) to avoid redundant Gemini calls
 const _cache = new Map();
@@ -32,6 +33,10 @@ exports.expandQuery = functions
         "resource-exhausted",
         `Rate limit exceeded. ${rateLimitCheck.message}`
       );
+    }
+    const globalCheck = await checkGlobalRateLimit(userId);
+    if (!globalCheck.allowed) {
+      throw new functions.https.HttpsError("resource-exhausted", `${globalCheck.message}`);
     }
 
     // Security: sanitize input
@@ -124,5 +129,7 @@ Example: ["ray traced reflections noise", "lumen GI artifact flickering", "scree
       console.error("[expandQuery] Error:", err.message);
       // Graceful fallback — never block the main search
       return { success: true, expansions: [] };
+    } finally {
+      logApiUsage(userId, { type: "generation", function: "expandQuery" });
     }
   });

@@ -1,5 +1,5 @@
 const functions = require("firebase-functions");
-const { checkRateLimit } = require("../utils/rateLimit");
+const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
 const { runStage } = require("../pipeline/llmStage");
 const { createTrace, isAdmin } = require("../pipeline/telemetry");
@@ -64,6 +64,10 @@ exports.validateCurriculum = functions
         "resource-exhausted",
         `Rate limit exceeded. ${rateLimitCheck.message}`
       );
+    }
+    const globalCheck = await checkGlobalRateLimit(userId);
+    if (!globalCheck.allowed) {
+      throw new functions.https.HttpsError("resource-exhausted", `${globalCheck.message}`);
     }
 
     try {
@@ -141,7 +145,9 @@ Does this curriculum meet the anti-tutorial-hell requirements?
 
       return response;
     } catch (error) {
-      console.error(JSON.stringify({ severity: "ERROR", message: "validation_error", error: error.message }));
+      console.error(
+        JSON.stringify({ severity: "ERROR", message: "validation_error", error: error.message })
+      );
       if (error.code) throw error;
       throw new functions.https.HttpsError(
         "internal",

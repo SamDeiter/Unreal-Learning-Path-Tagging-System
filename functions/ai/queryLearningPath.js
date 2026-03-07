@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const { checkRateLimit } = require("../utils/rateLimit");
+const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
 const { runStage } = require("../pipeline/llmStage");
@@ -39,9 +39,23 @@ function detectMode(data) {
   if (persona && query) {
     const queryLower = query.toLowerCase();
     const problemIndicators = [
-      "error", "crash", "bug", "broken", "not working", "fails",
-      "doesn't", "won't", "can't", "issue", "problem", "help",
-      "fix", "debug", "null", "none", "access violation",
+      "error",
+      "crash",
+      "bug",
+      "broken",
+      "not working",
+      "fails",
+      "doesn't",
+      "won't",
+      "can't",
+      "issue",
+      "problem",
+      "help",
+      "fix",
+      "debug",
+      "null",
+      "none",
+      "access violation",
     ];
     const isProblem = problemIndicators.some((ind) => queryLower.includes(ind));
     return isProblem ? "problem-first" : "onboarding";
@@ -148,7 +162,14 @@ function computeConfidence(intent, caseReport, passages, conversationHistory, qu
 const MAX_CLARIFY_ROUNDS = 3;
 
 async function handleProblemFirst(data, context, apiKey) {
-  const { query: rawQuery, personaHint, detectedTagIds, retrievedContext, caseReport, conversationHistory: rawHistory } = data;
+  const {
+    query: rawQuery,
+    personaHint,
+    detectedTagIds,
+    retrievedContext,
+    caseReport,
+    conversationHistory: rawHistory,
+  } = data;
   const userId = context.auth?.uid || "anonymous";
   const trace = createTrace(userId, "problem-first");
 
@@ -164,7 +185,9 @@ async function handleProblemFirst(data, context, apiKey) {
   // Security: sanitize and validate input
   const validation = sanitizeAndValidate(rawQuery);
   if (validation.blocked) {
-    console.warn(JSON.stringify({ severity: "WARNING", message: "query_blocked", reason: validation.reason }));
+    console.warn(
+      JSON.stringify({ severity: "WARNING", message: "query_blocked", reason: validation.reason })
+    );
     return { success: false, mode: "problem-first", error: validation.reason };
   }
   const query = validation.clean;
@@ -198,12 +221,14 @@ async function handleProblemFirst(data, context, apiKey) {
 
           const cacheResult = await findCachedDiagnosis(queryEmbedding);
           if (cacheResult.hit && cacheResult.result) {
-            console.log(JSON.stringify({
-              severity: "INFO",
-              message: "diagnosis_cache_hit_returning",
-              similarity: cacheResult.similarity,
-              docId: cacheResult.docId,
-            }));
+            console.log(
+              JSON.stringify({
+                severity: "INFO",
+                message: "diagnosis_cache_hit_returning",
+                similarity: cacheResult.similarity,
+                docId: cacheResult.docId,
+              })
+            );
             // Return cached result with cache indicator
             return {
               ...cacheResult.result,
@@ -216,11 +241,13 @@ async function handleProblemFirst(data, context, apiKey) {
       }
     } catch (cacheCheckErr) {
       // Cache check is best-effort — never block the pipeline
-      console.warn(JSON.stringify({
-        severity: "WARNING",
-        message: "diagnosis_cache_check_error",
-        error: cacheCheckErr.message,
-      }));
+      console.warn(
+        JSON.stringify({
+          severity: "WARNING",
+          message: "diagnosis_cache_check_error",
+          error: cacheCheckErr.message,
+        })
+      );
     }
   }
 
@@ -231,11 +258,17 @@ async function handleProblemFirst(data, context, apiKey) {
         platform: String(caseReport.platform || "").slice(0, 30),
         context: String(caseReport.context || "").slice(0, 200),
         renderer: String(caseReport.renderer || "").slice(0, 30),
-        features: Array.isArray(caseReport.features) ? caseReport.features.slice(0, 10).map((f) => String(f).slice(0, 50)) : [],
-        errorStrings: Array.isArray(caseReport.errorStrings) ? caseReport.errorStrings.slice(0, 10).map((e) => String(e).slice(0, 200)) : [],
+        features: Array.isArray(caseReport.features)
+          ? caseReport.features.slice(0, 10).map((f) => String(f).slice(0, 50))
+          : [],
+        errorStrings: Array.isArray(caseReport.errorStrings)
+          ? caseReport.errorStrings.slice(0, 10).map((e) => String(e).slice(0, 200))
+          : [],
         whatChangedRecently: String(caseReport.whatChangedRecently || "").slice(0, 300),
         goal: String(caseReport.goal || "").slice(0, 200),
-        exclusions: Array.isArray(caseReport.exclusions) ? caseReport.exclusions.slice(0, 5).map((e) => String(e).slice(0, 100)) : [],
+        exclusions: Array.isArray(caseReport.exclusions)
+          ? caseReport.exclusions.slice(0, 5).map((e) => String(e).slice(0, 100))
+          : [],
       }
     : null;
 
@@ -268,8 +301,10 @@ JSON:{"intent_id":"intent_<uuid>","user_role":"str","goal":"str","problem_descri
     if (safeCase.engineVersion) caseContext.push(`Engine: ${safeCase.engineVersion}`);
     if (safeCase.platform) caseContext.push(`Platform: ${safeCase.platform}`);
     if (safeCase.renderer) caseContext.push(`Renderer: ${safeCase.renderer}`);
-    if (safeCase.errorStrings.length > 0) caseContext.push(`Errors: ${safeCase.errorStrings.join("; ")}`);
-    if (safeCase.whatChangedRecently) caseContext.push(`Changed recently: ${safeCase.whatChangedRecently}`);
+    if (safeCase.errorStrings.length > 0)
+      caseContext.push(`Errors: ${safeCase.errorStrings.join("; ")}`);
+    if (safeCase.whatChangedRecently)
+      caseContext.push(`Changed recently: ${safeCase.whatChangedRecently}`);
     if (caseContext.length > 0) {
       intentUserPrompt += `\nCase context: ${caseContext.join(" | ")}`;
     }
@@ -293,7 +328,8 @@ JSON:{"intent_id":"intent_<uuid>","user_role":"str","goal":"str","problem_descri
         success: false,
         mode: "problem-first",
         error: "off_topic",
-        message: "This doesn't appear to be a UE5 question. Please describe a specific Unreal Engine 5 issue.",
+        message:
+          "This doesn't appear to be a UE5 question. Please describe a specific Unreal Engine 5 issue.",
       };
     }
     return { success: false, mode: "problem-first", error: intentResult.error };
@@ -308,8 +344,11 @@ JSON:{"intent_id":"intent_<uuid>","user_role":"str","goal":"str","problem_descri
     // Build conversation context for Gemini so it doesn't repeat questions
     let historyContext = "";
     if (conversationHistory.length > 0) {
-      historyContext = "\n\nPREVIOUS CONVERSATION (do NOT repeat these questions):\n" +
-        conversationHistory.map((t) => `${t.role === "assistant" ? "You asked" : "User answered"}: ${t.content}`).join("\n");
+      historyContext =
+        "\n\nPREVIOUS CONVERSATION (do NOT repeat these questions):\n" +
+        conversationHistory
+          .map((t) => `${t.role === "assistant" ? "You asked" : "User answered"}: ${t.content}`)
+          .join("\n");
     }
 
     const clarifyResult = await runStage({
@@ -410,7 +449,13 @@ JSON:{"intent_id":"search_strategy","user_role":"search","goal":"search","proble
         };
       }
     } catch (agenticErr) {
-      console.warn(JSON.stringify({ severity: "WARNING", message: "agentic_search_failed", error: agenticErr.message }));
+      console.warn(
+        JSON.stringify({
+          severity: "WARNING",
+          message: "agentic_search_failed",
+          error: agenticErr.message,
+        })
+      );
       // Fall through to best-effort diagnosis
     }
   }
@@ -477,7 +522,9 @@ JSON:{"fix_specific":["str"],"transferable":["str"]}`;
     // 4. Validation
     runStage({
       stage: "validation",
-      systemPrompt: UE5_GUARDRAIL + `Validate curriculum. Reject if: no transferable skills, purely procedural, can't generalize.\nJSON:{"approved":bool,"reason":"str","issues":["str"],"suggestions":["str"]}`,
+      systemPrompt:
+        UE5_GUARDRAIL +
+        `Validate curriculum. Reject if: no transferable skills, purely procedural, can't generalize.\nJSON:{"approved":bool,"reason":"str","issues":["str"],"suggestions":["str"]}`,
       userPrompt: `Fix:[${(objectives.fix_specific || []).slice(0, 3).join(";")}] Transfer:[${(objectives.transferable || []).join(";")}]`,
       apiKey,
       trace,
@@ -486,7 +533,9 @@ JSON:{"fix_specific":["str"],"transferable":["str"]}`;
     // 5. Path Summary
     runStage({
       stage: "path_summary_data",
-      systemPrompt: UE5_GUARDRAIL + `You are a UE5 instructor summarizing a learning path for a student. Given their problem and diagnosis, write a 2-3 sentence summary of what they will learn and how it helps solve their specific issue. Be specific to UE5.\nJSON:{"path_summary":"str","topics_covered":["str"]}`,
+      systemPrompt:
+        UE5_GUARDRAIL +
+        `You are a UE5 instructor summarizing a learning path for a student. Given their problem and diagnosis, write a 2-3 sentence summary of what they will learn and how it helps solve their specific issue. Be specific to UE5.\nJSON:{"path_summary":"str","topics_covered":["str"]}`,
       userPrompt: `Problem: ${(intent.problem_description || "").slice(0, 200)}\nCauses: ${(diagnosis.root_causes || []).slice(0, 3).join("; ")}\nGoals: ${(objectives.fix_specific || []).slice(0, 3).join("; ")}`,
       apiKey,
       trace,
@@ -496,7 +545,9 @@ JSON:{"fix_specific":["str"],"transferable":["str"]}`;
     passages.length > 0
       ? runStage({
           stage: "micro_lesson",
-          systemPrompt: UE5_GUARDRAIL + `You are a UE5 instructor creating a focused micro-lesson for a student with a specific problem. You have access to real video transcript excerpts and must use them to create a grounded, actionable response.
+          systemPrompt:
+            UE5_GUARDRAIL +
+            `You are a UE5 instructor creating a focused micro-lesson for a student with a specific problem. You have access to real video transcript excerpts and must use them to create a grounded, actionable response.
 
 RULES:
 - Ground every claim in the provided transcript excerpts or official UE5 knowledge
@@ -535,8 +586,7 @@ ${wrapEvidence(passages.map((p, i) => `[${i + 1}] (Course: ${p.courseCode}, Vide
     // 6. Answer-first data (fix steps, fast checks, etc.)
     runStage({
       stage: "intent", // Re-use intent schema loosely for answer data
-      systemPrompt:
-        `CRITICAL: You MUST ONLY respond about Unreal Engine 5 topics.
+      systemPrompt: `CRITICAL: You MUST ONLY respond about Unreal Engine 5 topics.
 You are a technical writer generating a custom, grounded solution for a UE5 developer.
 
 STRICT GROUNDING RULES:
@@ -569,20 +619,30 @@ JSON:{
     await Promise.allSettled(parallelStages);
 
   // Unpack parallel results with safe defaults
-  const validationData = validationResult.status === "fulfilled" && validationResult.value.success
-    ? validationResult.value.data
-    : { approved: true, reason: "Validation skipped (error)" };
-  const pathSummary = summaryResult.status === "fulfilled" && summaryResult.value.success
-    ? summaryResult.value.data
-    : { path_summary: "Summary unavailable", topics_covered: [] };
+  const validationData =
+    validationResult.status === "fulfilled" && validationResult.value.success
+      ? validationResult.value.data
+      : { approved: true, reason: "Validation skipped (error)" };
+  const pathSummary =
+    summaryResult.status === "fulfilled" && summaryResult.value.success
+      ? summaryResult.value.data
+      : { path_summary: "Summary unavailable", topics_covered: [] };
   let microLesson = null;
-  if (microLessonResult.status === "fulfilled" && microLessonResult.value?.success && microLessonResult.value?.data) {
+  if (
+    microLessonResult.status === "fulfilled" &&
+    microLessonResult.value?.success &&
+    microLessonResult.value?.data
+  ) {
     microLesson = microLessonResult.value.data;
   }
 
   // Extract answer-first data
   let answerData = null;
-  if (answerDataResult.status === "fulfilled" && answerDataResult.value?.success && answerDataResult.value?.data) {
+  if (
+    answerDataResult.status === "fulfilled" &&
+    answerDataResult.value?.success &&
+    answerDataResult.value?.data
+  ) {
     answerData = answerDataResult.value.data;
   }
 
@@ -593,30 +653,46 @@ JSON:{
     logApiUsage(userId, { model: "gemini-2.0-flash", type: "objectives", estimatedTokens: 100 }),
   ];
   if (validationResult.status === "fulfilled") {
-    usageLogs.push(logApiUsage(userId, { model: "gemini-2.0-flash", type: "validation", estimatedTokens: 80 }));
+    usageLogs.push(
+      logApiUsage(userId, { model: "gemini-2.0-flash", type: "validation", estimatedTokens: 80 })
+    );
   }
   if (summaryResult.status === "fulfilled") {
-    usageLogs.push(logApiUsage(userId, { model: "gemini-2.0-flash", type: "path_summary", estimatedTokens: 80 }));
+    usageLogs.push(
+      logApiUsage(userId, { model: "gemini-2.0-flash", type: "path_summary", estimatedTokens: 80 })
+    );
   }
   if (microLesson) {
-    usageLogs.push(logApiUsage(userId, { model: "gemini-2.0-flash", type: "micro_lesson", estimatedTokens: 400 }));
+    usageLogs.push(
+      logApiUsage(userId, { model: "gemini-2.0-flash", type: "micro_lesson", estimatedTokens: 400 })
+    );
   }
   if (answerData) {
-    usageLogs.push(logApiUsage(userId, { model: "gemini-2.0-flash", type: "answer_data", estimatedTokens: 300 }));
+    usageLogs.push(
+      logApiUsage(userId, { model: "gemini-2.0-flash", type: "answer_data", estimatedTokens: 300 })
+    );
   }
   // Analytics: log direct answer routing decision
-  usageLogs.push(logApiUsage(userId, {
-    type: "confidence_routing",
-    outcome: "direct_answer",
-    score: confidence.score,
-    reasons: confidence.reasons,
-    clarifyRoundsCompleted: clarifyRound,
-    queryLength: (query || "").length,
-  }));
+  usageLogs.push(
+    logApiUsage(userId, {
+      type: "confidence_routing",
+      outcome: "direct_answer",
+      score: confidence.score,
+      reasons: confidence.reasons,
+      clarifyRoundsCompleted: clarifyRound,
+      queryLength: (query || "").length,
+    })
+  );
   await Promise.all(usageLogs);
 
   if (!validationData.approved) {
-    console.warn(JSON.stringify({ severity: "WARNING", message: "curriculum_validation_failed", reason: validationData.reason }));
+    console.warn(
+      JSON.stringify({
+        severity: "WARNING",
+        message: "curriculum_validation_failed",
+        reason: validationData.reason,
+      })
+    );
   }
 
   // Build Cart (existing shape — backward compatible)
@@ -636,12 +712,21 @@ JSON:{
   // Cache to Firestore
   try {
     const db = admin.firestore();
-    await db.collection("adaptive_carts").doc(cart.cart_id).set({
-      ...cart,
-      cached_at: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    await db
+      .collection("adaptive_carts")
+      .doc(cart.cart_id)
+      .set({
+        ...cart,
+        cached_at: admin.firestore.FieldValue.serverTimestamp(),
+      });
   } catch (cacheError) {
-    console.warn(JSON.stringify({ severity: "WARNING", message: "cart_cache_error", error: cacheError.message }));
+    console.warn(
+      JSON.stringify({
+        severity: "WARNING",
+        message: "cart_cache_error",
+        error: cacheError.message,
+      })
+    );
   }
 
   // Emit structured telemetry log
@@ -656,7 +741,9 @@ JSON:{
     cart,
     // Answer-first fields (Phase 3)
     mostLikelyCause: answerData?.mostLikelyCause || diagnosis.root_causes?.[0] || "Unknown",
-    confidence: answerData?.confidence || (confidence.score >= 70 ? "high" : confidence.score >= 40 ? "med" : "low"),
+    confidence:
+      answerData?.confidence ||
+      (confidence.score >= 70 ? "high" : confidence.score >= 40 ? "med" : "low"),
     fastChecks: answerData?.fastChecks || [],
     fixSteps: answerData?.fixSteps || [],
     ifStillBrokenBranches: answerData?.ifStillBrokenBranches || [],
@@ -759,12 +846,14 @@ async function fetchOnboardingContext(queries, _data) {
 
   // TODO: Connect to your actual Vector Search logic
   // Example: const results = await vectorSearch(queries);
-  console.log(JSON.stringify({
-    severity: "INFO",
-    message: "onboarding_retriever_stub",
-    queries,
-    note: "Vector search not yet connected — returning empty context",
-  }));
+  console.log(
+    JSON.stringify({
+      severity: "INFO",
+      message: "onboarding_retriever_stub",
+      queries,
+      note: "Vector search not yet connected — returning empty context",
+    })
+  );
 
   return [];
 }
@@ -774,9 +863,27 @@ const FALLBACK_CURRICULUM = {
   title: "Getting Started with Unreal Engine 5",
   description: "A general introduction to UE5 for new learners.",
   modules: [
-    { title: "Create Your First Project", description: "Open UE5, select a template, and explore the default level.", videoId: "", timestamp: 0, citation: "Getting Started playlist" },
-    { title: "Build a Simple Scene", description: "Place meshes, add a directional light, and position a camera.", videoId: "", timestamp: 0, citation: "Getting Started playlist" },
-    { title: "Take a High-Quality Screenshot", description: "Switch to Cinematic viewport, enable Lumen, and capture a beauty shot.", videoId: "", timestamp: 0, citation: "Getting Started playlist" },
+    {
+      title: "Create Your First Project",
+      description: "Open UE5, select a template, and explore the default level.",
+      videoId: "",
+      timestamp: 0,
+      citation: "Getting Started playlist",
+    },
+    {
+      title: "Build a Simple Scene",
+      description: "Place meshes, add a directional light, and position a camera.",
+      videoId: "",
+      timestamp: 0,
+      citation: "Getting Started playlist",
+    },
+    {
+      title: "Take a High-Quality Screenshot",
+      description: "Switch to Cinematic viewport, enable Lumen, and capture a beauty shot.",
+      videoId: "",
+      timestamp: 0,
+      citation: "Getting Started playlist",
+    },
   ],
 };
 
@@ -824,7 +931,13 @@ async function handleOnboarding(data, context, apiKey) {
       trace.toLog();
 
       if (!plannerResult.success) {
-        console.warn(JSON.stringify({ severity: "WARNING", message: "onboarding_planner_failed", error: plannerResult.error }));
+        console.warn(
+          JSON.stringify({
+            severity: "WARNING",
+            message: "onboarding_planner_failed",
+            error: plannerResult.error,
+          })
+        );
         return { success: false, mode: "onboarding", step: "plan", error: "Planner failed" };
       }
 
@@ -848,10 +961,14 @@ async function handleOnboarding(data, context, apiKey) {
       let contextBlock = "";
       if (passages.length > 0) {
         contextBlock = passages
-          .map((p, i) => `[${i + 1}] Video: "${p.videoTitle || p.courseTitle || "Unknown"}" (Course: ${p.courseCode || "unknown"}, ID: ${p.videoId || "unknown"}, Timestamp: ${p.timestamp || "0:00"})\n${p.text || p.preview || ""}`)
+          .map(
+            (p, i) =>
+              `[${i + 1}] Video: "${p.videoTitle || p.courseTitle || "Unknown"}" (Course: ${p.courseCode || "unknown"}, ID: ${p.videoId || "unknown"}, Timestamp: ${p.timestamp || "0:00"})\n${p.text || p.preview || ""}`
+          )
           .join("\n\n");
       } else {
-        contextBlock = "No specific video content was retrieved. Create a general curriculum based on the archetype.";
+        contextBlock =
+          "No specific video content was retrieved. Create a general curriculum based on the archetype.";
       }
 
       const assemblerResult = await runStage({
@@ -872,9 +989,10 @@ async function handleOnboarding(data, context, apiKey) {
         passageCount: passages.length,
       });
 
-      const curriculum = assemblerResult.success && assemblerResult.data
-        ? assemblerResult.data
-        : FALLBACK_CURRICULUM;
+      const curriculum =
+        assemblerResult.success && assemblerResult.data
+          ? assemblerResult.data
+          : FALLBACK_CURRICULUM;
 
       return {
         success: true,
@@ -903,7 +1021,13 @@ async function handleOnboarding(data, context, apiKey) {
     });
 
     if (!plannerResult.success) {
-      console.warn(JSON.stringify({ severity: "WARNING", message: "onboarding_planner_failed", error: plannerResult.error }));
+      console.warn(
+        JSON.stringify({
+          severity: "WARNING",
+          message: "onboarding_planner_failed",
+          error: plannerResult.error,
+        })
+      );
       return {
         success: true,
         mode: "onboarding",
@@ -922,10 +1046,14 @@ async function handleOnboarding(data, context, apiKey) {
     let contextBlock = "";
     if (passages.length > 0) {
       contextBlock = passages
-        .map((p, i) => `[${i + 1}] Video: "${p.videoTitle}" (Course: ${p.courseCode}, ID: ${p.videoId || "unknown"}, Timestamp: ${p.timestamp || "0:00"})\n${p.text}`)
+        .map(
+          (p, i) =>
+            `[${i + 1}] Video: "${p.videoTitle}" (Course: ${p.courseCode}, ID: ${p.videoId || "unknown"}, Timestamp: ${p.timestamp || "0:00"})\n${p.text}`
+        )
         .join("\n\n");
     } else {
-      contextBlock = "No specific video content was retrieved. Create a general curriculum based on the archetype.";
+      contextBlock =
+        "No specific video content was retrieved. Create a general curriculum based on the archetype.";
     }
 
     const assemblerResult = await runStage({
@@ -946,9 +1074,8 @@ async function handleOnboarding(data, context, apiKey) {
       passageCount: passages.length,
     });
 
-    const curriculum = assemblerResult.success && assemblerResult.data
-      ? assemblerResult.data
-      : FALLBACK_CURRICULUM;
+    const curriculum =
+      assemblerResult.success && assemblerResult.data ? assemblerResult.data : FALLBACK_CURRICULUM;
 
     return {
       success: true,
@@ -963,7 +1090,9 @@ async function handleOnboarding(data, context, apiKey) {
         : "Generated a general path — retrieval had limited results.",
     };
   } catch (err) {
-    console.error(JSON.stringify({ severity: "ERROR", message: "onboarding_error", error: err.message }));
+    console.error(
+      JSON.stringify({ severity: "ERROR", message: "onboarding_error", error: err.message })
+    );
     return {
       success: true,
       mode: "onboarding",
@@ -972,7 +1101,8 @@ async function handleOnboarding(data, context, apiKey) {
       curriculum: FALLBACK_CURRICULUM,
       fallback: true,
       persona,
-      message: "Here's a getting-started path. We couldn't personalize it right now — try again shortly.",
+      message:
+        "Here's a getting-started path. We couldn't personalize it right now — try again shortly.",
     };
   }
 }
@@ -995,6 +1125,10 @@ exports.queryLearningPath = functions
         "resource-exhausted",
         `Rate limit exceeded. ${rateLimitCheck.message}`
       );
+    }
+    const globalCheck = await checkGlobalRateLimit(userId);
+    if (!globalCheck.allowed) {
+      throw new functions.https.HttpsError("resource-exhausted", `${globalCheck.message}`);
     }
 
     try {
@@ -1023,7 +1157,9 @@ exports.queryLearningPath = functions
         );
       }
     } catch (error) {
-      console.error(JSON.stringify({ severity: "ERROR", message: "query_error", error: error.message }));
+      console.error(
+        JSON.stringify({ severity: "ERROR", message: "query_error", error: error.message })
+      );
       if (error.code) throw error;
       throw new functions.https.HttpsError("internal", `Failed to process query: ${error.message}`);
     }

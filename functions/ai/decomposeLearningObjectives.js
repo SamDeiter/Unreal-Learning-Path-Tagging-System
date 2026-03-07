@@ -1,5 +1,5 @@
 const functions = require("firebase-functions");
-const { checkRateLimit } = require("../utils/rateLimit");
+const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
 const { runStage } = require("../pipeline/llmStage");
 const { createTrace, isAdmin } = require("../pipeline/telemetry");
@@ -81,6 +81,10 @@ exports.decomposeLearningObjectives = functions
         `Rate limit exceeded. ${rateLimitCheck.message}`
       );
     }
+    const globalCheck = await checkGlobalRateLimit(userId);
+    if (!globalCheck.allowed) {
+      throw new functions.https.HttpsError("resource-exhausted", `${globalCheck.message}`);
+    }
 
     try {
       let apiKey = process.env.GEMINI_API_KEY;
@@ -151,7 +155,9 @@ REMEMBER: At least ONE transferable objective is REQUIRED!`;
 
       return response;
     } catch (error) {
-      console.error(JSON.stringify({ severity: "ERROR", message: "objectives_error", error: error.message }));
+      console.error(
+        JSON.stringify({ severity: "ERROR", message: "objectives_error", error: error.message })
+      );
       if (error.code) throw error;
       throw new functions.https.HttpsError(
         "internal",

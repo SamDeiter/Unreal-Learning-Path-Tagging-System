@@ -139,6 +139,19 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Performance logs — client-side timing instrumentation
+    // Authenticated users can write timing data, admin reads/manages
+    match /performanceLogs/{docId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['label', 'durationMs', 'timestamp'])
+        && request.resource.data.label is string
+        && request.resource.data.label.size() <= 100
+        && request.resource.data.durationMs is number
+        && request.resource.data.keys().size() <= 10;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
     // Embedding collections — public read (Cloud Functions serve via findNearest)
     // Writes are admin-only via Admin SDK (upload script)
     match /epic_embeddings/{docId} {

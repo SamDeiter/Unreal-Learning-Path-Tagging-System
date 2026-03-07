@@ -7,7 +7,8 @@
  */
 const functions = require("firebase-functions");
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
-const { checkRateLimit } = require("../utils/rateLimit");
+const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { logApiUsage } = require("../utils/apiUsage");
 
 exports.rerankPassages = functions
   .runWith({
@@ -26,6 +27,10 @@ exports.rerankPassages = functions
         "resource-exhausted",
         `Rate limit exceeded. ${rateLimitCheck.message}`
       );
+    }
+    const globalCheck = await checkGlobalRateLimit(userId);
+    if (!globalCheck.allowed) {
+      throw new functions.https.HttpsError("resource-exhausted", `${globalCheck.message}`);
     }
 
     // Validate
@@ -122,5 +127,7 @@ Include ALL ${truncated.length} passages.`;
     } catch (err) {
       console.error("[rerankPassages] Error:", err.message);
       return { success: true, reranked: truncated, fallback: true };
+    } finally {
+      logApiUsage(userId, { type: "generation", function: "rerankPassages" });
     }
   });

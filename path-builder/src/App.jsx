@@ -36,6 +36,7 @@ const ProblemFirst = lazy(() =>
 const BespokePath = lazy(() => import("./components/BespokePath/BespokePath"));
 const AdaptivePath = lazy(() => import("./components/AdaptivePath/AdaptivePath"));
 const AdminFeedback = lazy(() => import("./components/AdminFeedback/AdminFeedback"));
+const AdminErrorLogs = lazy(() => import("./components/AdminErrorLogs/AdminErrorLogs"));
 const InsightsPanel = lazy(() => import("./components/Visualizations/InsightsPanel"));
 const CollapsibleSection = lazy(() => import("./components/Visualizations/CollapsibleSection"));
 const FeedbackButton = lazy(() => import("./components/Feedback/FeedbackButton"));
@@ -149,6 +150,7 @@ function App() {
       ? [
           { key: "invites", label: "Invites", icon: "🎟️", adminOnly: true },
           { key: "admin-feedback", label: "Feedback", icon: "📋", adminOnly: true },
+          { key: "admin-errors", label: "Error Logs", icon: "🚨", adminOnly: true },
         ]
       : [];
     const allTabs = [...BASE_TABS, ...adminTabs];
@@ -645,6 +647,11 @@ function App() {
                 {activeTab === "admin-feedback" && userIsAdmin && (
                   <div className="dashboard-layout">
                     <AdminFeedback />
+                  </div>
+                )}
+                {activeTab === "admin-errors" && userIsAdmin && (
+                  <div className="dashboard-layout">
+                    <AdminErrorLogs />
                   </div>
                 )}
               </Suspense>

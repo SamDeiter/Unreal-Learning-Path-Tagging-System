@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const { checkRateLimit } = require("../utils/rateLimit");
+const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
 const { runStage } = require("../pipeline/llmStage");
 const { createTrace, isAdmin } = require("../pipeline/telemetry");
@@ -98,6 +98,10 @@ exports.generateDiagnosis = functions
         `Rate limit exceeded. ${rateLimitCheck.message}`
       );
     }
+    const globalCheck = await checkGlobalRateLimit(userId);
+    if (!globalCheck.allowed) {
+      throw new functions.https.HttpsError("resource-exhausted", `${globalCheck.message}`);
+    }
 
     try {
       let apiKey = process.env.GEMINI_API_KEY;
@@ -154,7 +158,11 @@ This diagnosis should teach the developer to recognize and solve similar problem
         userPrompt,
         apiKey,
         trace,
-        cacheParams: { query: normalized, mode: "standalone_diagnosis", tags: detectedTags?.slice(0, 5) },
+        cacheParams: {
+          query: normalized,
+          mode: "standalone_diagnosis",
+          tags: detectedTags?.slice(0, 5),
+        },
         maxTokens: 1536,
       });
 
@@ -185,7 +193,9 @@ This diagnosis should teach the developer to recognize and solve similar problem
 
       return response;
     } catch (error) {
-      console.error(JSON.stringify({ severity: "ERROR", message: "diagnosis_error", error: error.message }));
+      console.error(
+        JSON.stringify({ severity: "ERROR", message: "diagnosis_error", error: error.message })
+      );
       if (error.code) throw error;
       throw new functions.https.HttpsError(
         "internal",
