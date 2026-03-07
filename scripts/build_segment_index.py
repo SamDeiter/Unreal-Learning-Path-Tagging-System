@@ -176,9 +176,9 @@ def build_segment_index():
     index = {}
     total_files = 0
     total_segments = 0
-    skipped_unplayable = 0
+    non_playable_indexed = 0
 
-    # Iterate through course directories
+    # Iterate through course directories — index ALL, not just playable
     for course_dir in sorted(TRANSCRIPT_DIR.iterdir()):
         if not course_dir.is_dir():
             continue
@@ -186,8 +186,7 @@ def build_segment_index():
         # Extract course code from directory name (e.g., "102_03" → "102.03")
         code = course_dir.name.replace("_", ".")
         if code not in playable_codes:
-            skipped_unplayable += 1
-            continue
+            non_playable_indexed += 1
 
         videos = {}
         for vtt_file in sorted(course_dir.glob("*.vtt")):
@@ -219,7 +218,7 @@ def build_segment_index():
         json.dump(index, f, indent=1)
 
     print(f"Processed {total_files} VTT files → {total_segments} segments")
-    print(f"Skipped {skipped_unplayable} unplayable course directories")
+    print(f"Skipped {non_playable_indexed} non-playable course directories (still indexed)")
     print(f"Courses indexed: {len(index)}")
     print(f"Saved to: {OUTPUT_PATH}")
 

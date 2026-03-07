@@ -283,6 +283,12 @@ def main():
         open(SEGMENT_INDEX, "rb").read()
     ).hexdigest()
 
+    # Safety check: don't overwrite existing file with empty data
+    if not embeddings:
+        print("\nWARNING: No embeddings generated! Skipping file write to protect existing data.")
+        print(f"Errors: {errors}")
+        return
+
     # Save output
     output = {
         "model": MODEL,
