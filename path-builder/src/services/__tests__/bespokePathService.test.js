@@ -534,4 +534,162 @@ describe("bespokePathService", () => {
       expect(result.error).toBeTruthy();
     });
   });
+
+  // ── generateBespokePath: grounding metadata ─────────────────────────
+
+  describe("generateBespokePath — grounding metadata on corpus paths", () => {
+    it("attaches grounding sources to corpus steps when classifySegments returns groundingMetadata", async () => {
+      let classifyCallCount = 0;
+      httpsCallable.mockImplementation((_app, fnName) => {
+        switch (fnName) {
+          case "embedQuery":
+            return mockCallable({ embedding: new Array(768).fill(0.1) });
+          case "vectorSearchSegments":
+            return mockCallable({
+              results: [
+                {
+                  id: "s1",
+                  title: "Static Mesh Import",
+                  text: "How to import static meshes in UE5",
+                  similarity: 0.88,
+                },
+                {
+                  id: "s2",
+                  title: "Blueprint Actor",
+                  text: "Setting up blueprint actors",
+                  similarity: 0.82,
+                },
+                {
+                  id: "s3",
+                  title: "Collision Setup",
+                  text: "Configuring collision for meshes",
+                  similarity: 0.79,
+                },
+                {
+                  id: "s4",
+                  title: "Material Slots",
+                  text: "Assigning materials to slots",
+                  similarity: 0.77,
+                },
+              ],
+            });
+          case "vectorSearchEpic":
+            return mockCallable({ results: [] });
+          case "vectorSearchDocs":
+            return mockCallable({ results: [] });
+          case "classifySegments": {
+            classifyCallCount++;
+            if (classifyCallCount === 1) {
+              // sequencePath call — return grounding metadata alongside classifications
+              return mockCallable({
+                text: JSON.stringify([
+                  {
+                    index: 0,
+                    category: "foundation",
+                    relevance: "high",
+                    summary: "Import static meshes into your UE5 project",
+                  },
+                  {
+                    index: 1,
+                    category: "diagnosis",
+                    relevance: "high",
+                    summary: "Create blueprint actors for game logic",
+                  },
+                  {
+                    index: 2,
+                    category: "fix",
+                    relevance: "high",
+                    summary: "Configure collision settings properly",
+                  },
+                  {
+                    index: 3,
+                    category: "transfer",
+                    relevance: "medium",
+                    summary: "Assign materials to mesh slots",
+                  },
+                ]),
+                groundingMetadata: {
+                  sources: [
+                    { url: "https://docs.unrealengine.com/static-mesh", title: "Static Mesh Docs" },
+                    { url: "https://docs.unrealengine.com/blueprints", title: "Blueprint Docs" },
+                  ],
+                  supports: [
+                    {
+                      text: "Import static meshes into your project using the content browser",
+                      sourceIndices: [0],
+                    },
+                    {
+                      text: "Create blueprint actors to add game interaction logic",
+                      sourceIndices: [1],
+                    },
+                  ],
+                },
+              });
+            }
+            return mockCallable({ text: GOOD_HYBRID_JSON });
+          }
+          default:
+            return mockCallable({});
+        }
+      });
+
+      const result = await generateBespokePath("how to import a static mesh");
+
+      // Verify steps that matched grounding supports have sources attached
+      const stepsWithSources = result.path.filter((s) => s.segment.sources?.length > 0);
+      expect(stepsWithSources.length).toBeGreaterThanOrEqual(1);
+
+      // Verify the first step (foundation — about importing meshes) got the Static Mesh Docs source
+      const foundationStep = result.path.find((s) => s.category === "foundation");
+      if (foundationStep?.segment?.sources) {
+        expect(foundationStep.segment.sources[0].url).toContain("unrealengine.com");
+      }
+    });
+
+    it("corpus steps have no sources when classifySegments returns no groundingMetadata", async () => {
+      let classifyCallCount = 0;
+      httpsCallable.mockImplementation((_app, fnName) => {
+        switch (fnName) {
+          case "embedQuery":
+            return mockCallable({ embedding: new Array(768).fill(0.1) });
+          case "vectorSearchSegments":
+            return mockCallable({
+              results: [
+                fakeSegment("mesh-import", 0.88),
+                fakeSegment("blueprint-actor", 0.82),
+                fakeSegment("collision-setup", 0.79),
+                fakeSegment("material-slots", 0.77),
+              ],
+            });
+          case "vectorSearchEpic":
+            return mockCallable({ results: [] });
+          case "vectorSearchDocs":
+            return mockCallable({ results: [] });
+          case "classifySegments": {
+            classifyCallCount++;
+            if (classifyCallCount === 1) {
+              // No groundingMetadata in response
+              return mockCallable({
+                text: JSON.stringify([
+                  { index: 0, category: "foundation", relevance: "high", summary: "First" },
+                  { index: 1, category: "diagnosis", relevance: "high", summary: "Second" },
+                  { index: 2, category: "fix", relevance: "high", summary: "Third" },
+                  { index: 3, category: "transfer", relevance: "medium", summary: "Fourth" },
+                ]),
+              });
+            }
+            return mockCallable({ text: GOOD_HYBRID_JSON });
+          }
+          default:
+            return mockCallable({});
+        }
+      });
+
+      const result = await generateBespokePath("how to import a static mesh");
+
+      // No step should have sources when grounding is not returned
+      const stepsWithSources = result.path.filter((s) => s.segment.sources?.length > 0);
+      expect(stepsWithSources.length).toBe(0);
+    });
+  });
 });

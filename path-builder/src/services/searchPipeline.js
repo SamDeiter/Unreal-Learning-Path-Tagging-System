@@ -14,6 +14,7 @@ import { searchSegmentsHybrid } from "./segmentSearchService";
 import { searchDocsSemantic, searchDocsVertexAI } from "./docsSearchService";
 import { devLog, devWarn } from "../utils/logger";
 import { deduplicateBy } from "../utils/collectionUtils";
+import { retryWithBackoff } from "../utils/retryWithBackoff";
 
 /**
  * Run the full RAG search pipeline: embed → expand → multi-source search → dedup → re-rank.
@@ -50,8 +51,8 @@ export async function runSearchPipeline(query, options = {}) {
     const expandQueryFn = httpsCallable(functions, "expandQuery");
 
     const [embedResult, expandResult, vertexResult] = await Promise.allSettled([
-      embedQueryFn({ query }),
-      expandQueryFn({ query }),
+      retryWithBackoff(() => embedQueryFn({ query }), { maxRetries: 2, label: "embedQuery" }),
+      retryWithBackoff(() => expandQueryFn({ query }), { maxRetries: 2, label: "expandQuery" }),
       searchDocsVertexAI(query, maxDocs),
     ]);
 
@@ -145,9 +146,8 @@ export async function runSearchPipeline(query, options = {}) {
 
       // Rank + dedup
       retrievedPassages.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
-      retrievedPassages = deduplicateBy(
-        retrievedPassages,
-        (p) => (p.text || "").trim().toLowerCase().slice(0, 120)
+      retrievedPassages = deduplicateBy(retrievedPassages, (p) =>
+        (p.text || "").trim().toLowerCase().slice(0, 120)
       );
       devLog(`[RAG] Total: ${retrievedPassages.length} passages after rank+dedup`);
     }
@@ -159,10 +159,10 @@ export async function runSearchPipeline(query, options = {}) {
   if (retrievedPassages.length > 2) {
     try {
       const rerankFn = httpsCallable(functions, "rerankPassages");
-      const rerankResult = await rerankFn({
-        query,
-        passages: retrievedPassages.slice(0, 20),
-      });
+      const rerankResult = await retryWithBackoff(
+        () => rerankFn({ query, passages: retrievedPassages.slice(0, 20) }),
+        { maxRetries: 1, label: "rerankPassages" }
+      );
       if (rerankResult.data?.success && rerankResult.data?.reranked) {
         retrievedPassages = rerankResult.data.reranked;
         if (!rerankResult.data.fallback) {

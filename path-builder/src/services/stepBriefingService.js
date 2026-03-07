@@ -8,6 +8,7 @@
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
+import { retryWithBackoff } from "../utils/retryWithBackoff";
 
 /**
  * Generate a short audio briefing for a single learning path step.
@@ -37,7 +38,10 @@ export async function generateStepAudio(step, query, options = {}) {
     if (options.sourceLinks?.length) payload.sourceLinks = options.sourceLinks;
     if (options.voiceName) payload.voiceName = options.voiceName;
 
-    const result = await genFn(payload);
+    const result = await retryWithBackoff(() => genFn(payload), {
+      maxRetries: 2,
+      label: "stepAudio",
+    });
 
     if (result.data?.audio) {
       const binary = atob(result.data.audio);
@@ -76,7 +80,10 @@ export async function generateStepDeepDive(step, query, options = {}) {
     if (options.userLevel) payload.userLevel = options.userLevel;
     if (options.existingTakeaways?.length) payload.existingTakeaways = options.existingTakeaways;
 
-    const result = await genFn(payload);
+    const result = await retryWithBackoff(() => genFn(payload), {
+      maxRetries: 2,
+      label: "stepDeepDive",
+    });
 
     if (result.data?.sections?.length) {
       devLog(`[DeepDive] Generated ${result.data.sections.length} sub-sections`);
@@ -113,14 +120,18 @@ export async function generateStepTakeaways(step, query) {
       `[Takeaways] Requesting for "${title}" (content length: ${content.length}, category: ${step.category})`
     );
 
-    const result = await fn({
-      mode: "takeaways",
-      query,
-      stepContent: content,
-      stepCategory: step.category || "learning",
-      stepAction: actionSteps,
-      stepTitle: title,
-    });
+    const result = await retryWithBackoff(
+      () =>
+        fn({
+          mode: "takeaways",
+          query,
+          stepContent: content,
+          stepCategory: step.category || "learning",
+          stepAction: actionSteps,
+          stepTitle: title,
+        }),
+      { maxRetries: 2, label: "stepTakeaways" }
+    );
 
     devLog("[Takeaways] CF response:", JSON.stringify(result.data)?.substring(0, 200));
 
@@ -232,10 +243,9 @@ export async function generatePathNarration(pathResult, query) {
 
     devLog("[PathNarration] Requesting 2-phase narration for", steps.length, "steps");
 
-    const result = await genFn({
-      mode: "narrate",
-      query,
-      steps,
+    const result = await retryWithBackoff(() => genFn({ mode: "narrate", query, steps }), {
+      maxRetries: 1,
+      label: "pathNarration",
     });
 
     if (result.data?.phases && Array.isArray(result.data.phases)) {

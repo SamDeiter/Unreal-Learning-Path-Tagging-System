@@ -13,6 +13,7 @@ import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
 import { recordTokenUsage } from "./tokenTracker";
 import { validatePathQuality } from "../utils/pathQualityValidator";
+import { retryWithBackoff } from "../utils/retryWithBackoff";
 import {
   trackVectorSearchCompleted,
   trackHybridFallbackTriggered,
@@ -59,7 +60,11 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
   // Helper: embed a query string and return the vector
   async function getEmbedding(query) {
     const embedFn = httpsCallable(functions, "embedQuery");
-    const embedResult = await embedFn({ query });
+    const embedResult = await retryWithBackoff(() => embedFn({ query }), {
+      maxRetries: 2,
+      baseDelayMs: 1000,
+      label: "embedQuery",
+    });
     recordTokenUsage("embedQuery", Math.ceil(query.length / 4), 0);
     return embedResult.data?.embedding;
   }
@@ -324,8 +329,13 @@ Rules:
     const functions = getFunctions(app, "us-central1");
     const classifyFn = httpsCallable(functions, "classifySegments");
 
-    const result = await classifyFn({ prompt });
+    const result = await retryWithBackoff(() => classifyFn({ prompt, grounded: true }), {
+      maxRetries: 2,
+      baseDelayMs: 1500,
+      label: "classifySegments",
+    });
     const responseText = result.data?.text || "";
+    const groundingMetadata = result.data?.groundingMetadata || null;
 
     // Parse JSON from response
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
@@ -349,8 +359,34 @@ Rules:
 
       for (const c of matching) {
         if (c.index >= 0 && c.index < segments.length && sequenced.length < MAX_PATH_SEGMENTS) {
+          // Attach grounding sources to this corpus step if available
+          const stepSources = [];
+          if (groundingMetadata?.sources?.length > 0) {
+            const stepText = (c.summary || segments[c.index].text || "").toLowerCase();
+            (groundingMetadata.supports || []).forEach((support) => {
+              const supportText = (support.text || "").toLowerCase();
+              const words = stepText.split(/\s+/).filter((w) => w.length > 4);
+              const hasOverlap = words.some((word) => supportText.includes(word));
+              if (hasOverlap) {
+                (support.sourceIndices || []).forEach((idx) => {
+                  if (groundingMetadata.sources[idx]) {
+                    const src = groundingMetadata.sources[idx];
+                    if (!stepSources.some((s) => s.url === src.url)) {
+                      stepSources.push(src);
+                    }
+                  }
+                });
+              }
+            });
+          }
+
+          const seg = { ...segments[c.index] };
+          if (stepSources.length > 0) {
+            seg.sources = stepSources;
+          }
+
           sequenced.push({
-            segment: segments[c.index],
+            segment: seg,
             category: c.category,
             summary: c.summary || "", // AI-generated step summary
             order: sequenced.length,
@@ -437,7 +473,11 @@ ${transitions.map((t) => `Step ${t.from + 1} (${t.fromCategory}) → Step ${t.to
 Return a JSON array: [{"from": 0, "to": 1, "narration": "..."}]
 Keep narrations natural, concise, and helpful. Max 50 words each.`;
 
-    const result = await narrateFn({ prompt: narrationPrompt });
+    const result = await retryWithBackoff(() => narrateFn({ prompt: narrationPrompt }), {
+      maxRetries: 2,
+      baseDelayMs: 1000,
+      label: "bridgeNarration",
+    });
     const responseText = result.data?.text || "";
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
 
@@ -520,7 +560,11 @@ Return a JSON array:
     const functions = getFunctions(app, "us-central1");
     const classifyFn = httpsCallable(functions, "classifySegments");
 
-    const result = await classifyFn({ prompt, grounded: true });
+    const result = await retryWithBackoff(() => classifyFn({ prompt, grounded: true }), {
+      maxRetries: 2,
+      baseDelayMs: 1500,
+      label: "hybridPath",
+    });
     const responseText = result.data?.text || "";
     const groundingMetadata = result.data?.groundingMetadata || null;
 
