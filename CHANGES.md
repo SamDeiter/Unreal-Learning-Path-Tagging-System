@@ -4,6 +4,30 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [1.9.0-content-gaps] - 2026-03-06
+
+### Added
+
+- **Content Gap Intelligence Dashboard** — New analytics sub-tab (`ContentGaps.jsx`) that tracks where official docs fall short:
+  - **AI Fill Rate** — percentage of path steps that required AI generation vs corpus matches
+  - **Top Content Gaps** — queries where AI had to generate the most content, ranked by AI ratio
+  - **Most Common Knowledge Gaps** — aggregated learner knowledge gaps across all path generations
+  - **Path Generations Analyzed** — total count of paths with coverage data
+- **`AI_COVERAGE_REPORT` Analytics Event** — New `trackAICoverageReport()` in `analyticsService.js` fires on every path generation (query preview, learner level, knowledge gaps, step counts, corpus/AI ratio, coverage flag)
+- **7-Tier Typography System** — Comprehensive text normalization for BespokePath step cards:
+  - 3 new CSS tokens: `--text-heading`, `--text-highlight`, `--text-muted`
+  - Tier 1–7: Step titles → Section headings → Body copy → List items → Key terms → Metadata → Interactive labels
+  - Auto-bolding of property names before em dashes, consistent cyan highlighting for key terms
+- **Eager Analytics Loading** — `App.jsx` now loads analytics events when any analytics sub-tab is active, not just Overview
+
+### Fixed
+
+- **AI Coverage Report Not Firing** — Root cause: the hybrid fallback path (`forceHybrid` branch) had its own `return result` that completely bypassed all tracking code. Added `trackPathSequenced` and `trackAICoverageReport` to the hybrid path
+- **Tracking Skipped on Bridge Error** — Moved all tracking calls before `generateBridgeNarration()` so they fire even if narration generation throws
+- **Takeaway Prefix Formatting** — Capitalized text after em dashes, indented success takeaways, auto-bolded property names in key properties sections
+
+---
+
 ## [1.8.1-rag-fix] - 2026-03-06
 
 ### Fixed

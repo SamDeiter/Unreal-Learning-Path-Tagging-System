@@ -18,11 +18,12 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 6. **Citation-linked Answers** — Diagnosis responses include clickable `[N]` references linking to Vertex AI documentation
 7. **Dashboard Insights** — Readiness score, persona coverage chart, content gap analysis, quick search, and tooltips on all metrics
 8. **Analytics & Insights** — Admin dashboard with parallel data loading, RAG pipeline health metrics (similarity scores, fallback rates, collection breakdown), AI cost tracking, daily volume charts, and persona distribution
-9. **Bespoke Learning Paths** — AI-generated personalized paths using RAG + transcript search, Firestore vector search, security guardrails, and 10 pre-seeded popular paths
-10. **Adaptive Learning Paths** — Diagnostic quiz (with image-based questions) builds a knowledge profile, then generates a depth-adjusted path with Blueprint-first content bias, audio briefings with auto-advance, and an end-of-path knowledge check quiz
-11. **Hybrid AI Fallback** — When corpus coverage is too low, generates learning paths from Gemini's general UE5 knowledge with workflow intent matching (e.g., assumes FAB assets for "create a sword" queries)
-12. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
-13. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
+9. **Content Gap Intelligence** — Tracks where official docs fall short: AI fill rate, top content gaps ranked by AI ratio, most common knowledge gaps, and per-query coverage analysis
+10. **Bespoke Learning Paths** — AI-generated personalized paths using RAG + transcript search, Firestore vector search, security guardrails, and 10 pre-seeded popular paths
+11. **Adaptive Learning Paths** — Diagnostic quiz (with image-based questions) builds a knowledge profile, then generates a depth-adjusted path with Blueprint-first content bias, audio briefings with auto-advance, and an end-of-path knowledge check quiz
+12. **Hybrid AI Fallback** — When corpus coverage is too low, generates learning paths from Gemini's general UE5 knowledge with workflow intent matching (e.g., assumes FAB assets for "create a sword" queries)
+13. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
+14. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
 
 ---
 
@@ -186,6 +187,7 @@ python scripts/run_enrichment_pipeline.py
 | **🚀 Onboarding**     | Persona definitions and onboarding flow management                                                                      |
 | **🔧 Fix a Problem**  | Describe your problem → skeleton loader → AI diagnosis with citation links, search history, and enhanced error recovery |
 | **📊 Analytics**      | Rich visualizations: tag heatmaps, skill radar, demand gaps, prerequisite flows                                         |
+| **🧩 Content Gaps**   | Content gap intelligence: AI fill rate, top gaps, knowledge gap frequency, path generation analysis                     |
 | **🔬 Augmentation**   | Embedded dashboard for transcript augmentation quality monitoring                                                       |
 | **🎟️ Invites**        | Admin-only invite code management                                                                                       |
 | **📋 Feedback**       | Admin-only user feedback review and triage                                                                              |

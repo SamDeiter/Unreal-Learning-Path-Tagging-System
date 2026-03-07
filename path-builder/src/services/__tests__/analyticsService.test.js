@@ -29,6 +29,7 @@ import analyticsService, {
   trackModuleReordered,
   trackSessionCompleted,
   trackFollowupQuery,
+  trackAICoverageReport,
   startSession,
 } from "../analyticsService";
 
@@ -252,6 +253,93 @@ describe("analyticsService", () => {
       expect(eventData.session_id).not.toBe(firstSessionId);
       expect(eventData.screen_width).toBeDefined();
       expect(eventData.screen_height).toBeDefined();
+    });
+  });
+
+  // -- trackAICoverageReport (Content Gap Intelligence) --
+
+  describe("trackAICoverageReport", () => {
+    it("fires AI_COVERAGE_REPORT with correct payload fields", async () => {
+      await trackAICoverageReport({
+        query: "how to make a sword in UE5",
+        learnerLevel: "beginner",
+        knowledgeGaps: ["blueprints", "static_mesh_import"],
+        totalSteps: 6,
+        corpusSteps: 2,
+        aiGeneratedSteps: 4,
+        lowCorpusCoverage: true,
+      });
+
+      expect(mockAddDoc).toHaveBeenCalledTimes(1);
+      const payload = mockAddDoc.mock.calls[0][1];
+      expect(payload.event).toBe("ai_coverage_report");
+      expect(payload.query_preview).toBe("how to make a sword in UE5");
+      expect(payload.learner_level).toBe("beginner");
+      expect(payload.total_steps).toBe(6);
+      expect(payload.corpus_steps).toBe(2);
+      expect(payload.ai_generated_steps).toBe(4);
+      expect(payload.low_corpus_coverage).toBe(true);
+      expect(payload.knowledge_gaps).toEqual(["blueprints", "static_mesh_import"]);
+    });
+
+    it("truncates long queries to 100 characters", async () => {
+      await trackAICoverageReport({
+        query: "A".repeat(200),
+        totalSteps: 1,
+        corpusSteps: 1,
+        aiGeneratedSteps: 0,
+      });
+
+      const payload = mockAddDoc.mock.calls[0][1];
+      expect(payload.query_preview.length).toBeLessThanOrEqual(100);
+    });
+
+    it("calculates ai_ratio of 0 for 0 total steps", async () => {
+      await trackAICoverageReport({
+        query: "test",
+        totalSteps: 0,
+        corpusSteps: 0,
+        aiGeneratedSteps: 0,
+      });
+
+      const payload = mockAddDoc.mock.calls[0][1];
+      expect(payload.ai_ratio).toBe(0);
+    });
+
+    it("calculates ai_ratio of 1.0 for fully AI-generated path", async () => {
+      await trackAICoverageReport({
+        query: "no corpus matches",
+        totalSteps: 5,
+        corpusSteps: 0,
+        aiGeneratedSteps: 5,
+        lowCorpusCoverage: true,
+      });
+
+      const payload = mockAddDoc.mock.calls[0][1];
+      expect(payload.ai_ratio).toBe(1);
+    });
+
+    it("defaults missing params gracefully", async () => {
+      await trackAICoverageReport({});
+
+      const payload = mockAddDoc.mock.calls[0][1];
+      expect(payload.total_steps).toBe(0);
+      expect(payload.ai_generated_steps).toBe(0);
+      expect(payload.ai_ratio).toBe(0);
+      expect(payload.learner_level).toBe("unknown");
+    });
+
+    it("does not throw when Firestore write fails", async () => {
+      mockAddDoc.mockRejectedValueOnce(new Error("PERMISSION_DENIED"));
+
+      await expect(
+        trackAICoverageReport({
+          query: "test",
+          totalSteps: 3,
+          corpusSteps: 2,
+          aiGeneratedSteps: 1,
+        })
+      ).resolves.not.toThrow();
     });
   });
 

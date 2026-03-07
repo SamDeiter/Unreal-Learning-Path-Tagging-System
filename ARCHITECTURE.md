@@ -400,18 +400,38 @@ User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Pat
 
 ## Key Services Reference
 
-| Service                    | Responsibility                                | External Dependencies                                     |
-| -------------------------- | --------------------------------------------- | --------------------------------------------------------- |
-| `searchPipeline.js`        | Orchestrates embed → expand → search → rerank | Cloud Functions (embedQuery, expandQuery, rerankPassages) |
-| `semanticSearchService.js` | Vector search against course embeddings       | Firestore vector search                                   |
-| `segmentSearchService.js`  | Hybrid keyword + semantic segment search      | Firestore vector search                                   |
-| `docsSearchService.js`     | Semantic doc search + Vertex AI Search        | Vertex AI Discovery Engine, Firestore vector search       |
-| `coverageAnalyzer.js`      | Multi-source coverage analysis                | docsSearchService, externalContentService                 |
-| `PathBuilder.js`           | Sequencing, role assignment, time budgeting   | None (pure logic)                                         |
-| `narratorService.js`       | AI narration generation                       | Cloud Functions (Gemini)                                  |
-| `PersonaService.js`        | Persona detection + messaging                 | None (pure logic)                                         |
-| `feedbackService.js`       | User feedback + video signals                 | Firestore                                                 |
-| `analyticsService.js`      | Event logging + RAG pipeline tracking         | Firestore                                                 |
-| `analyticsQueryService.js` | Analytics aggregation + RAG health metrics    | Firestore                                                 |
-| `bespokePathService.js`    | RAG pipeline: vector search → sequencing      | Cloud Functions (embedQuery, vectorSearch\*)              |
-| `accessControl.js`         | Auth gating + invite system                   | Firestore                                                 |
+| Service                    | Responsibility                                      | External Dependencies                                     |
+| -------------------------- | --------------------------------------------------- | --------------------------------------------------------- |
+| `searchPipeline.js`        | Orchestrates embed → expand → search → rerank       | Cloud Functions (embedQuery, expandQuery, rerankPassages) |
+| `semanticSearchService.js` | Vector search against course embeddings             | Firestore vector search                                   |
+| `segmentSearchService.js`  | Hybrid keyword + semantic segment search            | Firestore vector search                                   |
+| `docsSearchService.js`     | Semantic doc search + Vertex AI Search              | Vertex AI Discovery Engine, Firestore vector search       |
+| `coverageAnalyzer.js`      | Multi-source coverage analysis                      | docsSearchService, externalContentService                 |
+| `PathBuilder.js`           | Sequencing, role assignment, time budgeting         | None (pure logic)                                         |
+| `narratorService.js`       | AI narration generation                             | Cloud Functions (Gemini)                                  |
+| `PersonaService.js`        | Persona detection + messaging                       | None (pure logic)                                         |
+| `feedbackService.js`       | User feedback + video signals                       | Firestore                                                 |
+| `analyticsService.js`      | Event logging + RAG pipeline + content gap tracking | Firestore                                                 |
+| `analyticsQueryService.js` | Analytics aggregation + RAG health metrics          | Firestore                                                 |
+| `bespokePathService.js`    | RAG pipeline: vector search → sequencing            | Cloud Functions (embedQuery, vectorSearch\*)              |
+| `accessControl.js`         | Auth gating + invite system                         | Firestore                                                 |
+
+---
+
+## Content Gap Intelligence
+
+The **Content Gaps** analytics sub-tab (`ContentGaps.jsx`) tracks where the corpus falls short and AI has to fill in:
+
+```
+Path Generation → trackAICoverageReport() → Firestore analytics_events → ContentGaps.jsx
+```
+
+| Metric               | Source                       | Description                                          |
+| -------------------- | ---------------------------- | ---------------------------------------------------- |
+| **AI Fill Rate**     | `ai_ratio` field             | % of steps that were AI-generated vs corpus-matched  |
+| **Top Content Gaps** | `query_preview` + `ai_ratio` | Queries ranked by how much AI had to generate        |
+| **Knowledge Gaps**   | `knowledge_gaps` array       | Aggregated learner weak areas across all generations |
+| **Paths Analyzed**   | event count                  | Total `AI_COVERAGE_REPORT` events in time range      |
+
+> [!IMPORTANT]
+> The `AI_COVERAGE_REPORT` event fires in **both** code paths: the normal corpus pipeline (line ~755) and the hybrid fallback path (line ~700). Both paths must include tracking to avoid data gaps.
