@@ -53,6 +53,9 @@ export const EVENTS = {
 
   // Content Gap Intelligence
   AI_COVERAGE_REPORT: "ai_coverage_report",
+
+  // Step-level Feedback
+  AI_STEP_FEEDBACK: "ai_step_feedback",
 };
 
 /**
@@ -343,6 +346,29 @@ export async function trackAICoverageReport(params) {
   }
 }
 
+// ── Step-Level Feedback ────────────────────────────────────────────
+
+/**
+ * Track when a user gives 👍/👎 feedback on an AI-generated step.
+ * This supplements the Firestore `stepFeedback` collection write
+ * with an analytics event for trend analysis in ContentGaps.
+ *
+ * @param {string} stepTitle - Title of the step receiving feedback
+ * @param {string} category - Step category (foundation, diagnosis, fix, etc.)
+ * @param {string} queryPreview - First 100 chars of the originating query
+ * @param {string} feedback - "positive" or "negative"
+ * @param {string} [reason] - Optional freeform reason
+ */
+export function trackAIStepFeedback(stepTitle, category, queryPreview, feedback, reason = null) {
+  return trackEvent(EVENTS.AI_STEP_FEEDBACK, {
+    step_title: stepTitle?.substring(0, 120),
+    category: category || "unknown",
+    query_preview: queryPreview?.substring(0, 100),
+    feedback, // "positive" | "negative"
+    reason,
+  });
+}
+
 export default {
   EVENTS,
   trackEvent,
@@ -361,4 +387,5 @@ export default {
   trackHybridFallbackTriggered,
   trackPathSequenced,
   trackAICoverageReport,
+  trackAIStepFeedback,
 };

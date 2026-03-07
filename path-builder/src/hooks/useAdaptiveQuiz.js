@@ -22,19 +22,21 @@ const STAGES = {
 const STORAGE_KEY = "ue5_learner_profile";
 
 /** Load a previously saved learner profile from localStorage.
- *  Only returns the profile if the saved query matches the current query.
- *  This prevents stale gaps (e.g., "time dilation") from persisting
- *  into unrelated queries (e.g., "how to make a sword").
+ *  The profile represents general UE5 skill level (beginner/intermediate/advanced),
+ *  which is topic-independent. It persists across different queries.
+ *  Expires after 24 hours to encourage periodic re-assessment.
  */
-function loadSavedProfile(query = "") {
+function loadSavedProfile() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (parsed && parsed.level && Array.isArray(parsed.gaps)) {
-      // Only reuse the profile if the query matches what was used to generate it
-      if (query && parsed.query && parsed.query.toLowerCase() !== query.toLowerCase()) {
-        return null; // Different topic — don't reuse stale gaps
+      // Check 24-hour TTL
+      const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+      if (parsed.savedAt && Date.now() - new Date(parsed.savedAt).getTime() > TWENTY_FOUR_HOURS) {
+        localStorage.removeItem(STORAGE_KEY);
+        return null; // Profile expired — re-run diagnostic
       }
       return parsed;
     }
@@ -182,6 +184,16 @@ export default function useAdaptiveQuiz() {
     setError(null);
   }, []);
 
+  /**
+   * Set a profile directly from the simple level picker (no quiz needed).
+   * @param {{ level: string, knows: string[], gaps: string[] }} profile
+   */
+  const setProfileDirect = useCallback((profile) => {
+    setKnowledgeProfile(profile);
+    saveProfile(profile);
+    setStage(STAGES.COMPLETE);
+  }, []);
+
   return {
     stage,
     questions,
@@ -195,6 +207,7 @@ export default function useAdaptiveQuiz() {
     submitAnswer,
     reset,
     clearProfile,
+    setProfileDirect,
     STAGES,
   };
 }

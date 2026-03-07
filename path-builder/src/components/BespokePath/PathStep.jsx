@@ -11,6 +11,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { getFirebaseApp } from "../../services/firebaseConfig";
 import { submitStepFeedback } from "../../services/feedbackService";
+import { trackAIStepFeedback } from "../../services/analyticsService";
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { CATEGORY_STYLES } from "./pathConstants";
 
@@ -426,6 +427,12 @@ export default function PathStep({
                         query: query || "",
                         summary: step?.summary || "",
                       });
+                      trackAIStepFeedback(
+                        step?.segment?.title || "",
+                        step?.category || "",
+                        query || "",
+                        "positive"
+                      );
                     }}
                     title="This step's content was helpful"
                   >
@@ -442,6 +449,12 @@ export default function PathStep({
                         query: query || "",
                         summary: step?.summary || "",
                       });
+                      trackAIStepFeedback(
+                        step?.segment?.title || "",
+                        step?.category || "",
+                        query || "",
+                        "negative"
+                      );
                     }}
                     title="This step's content was unhelpful or inaccurate"
                   >

@@ -14,7 +14,7 @@ import { useState, useEffect, useCallback } from "react";
 import useAdaptiveQuiz from "../../hooks/useAdaptiveQuiz";
 import { sanitizeQuery, checkRateLimit, recordQuery } from "../../services/securityGuardrails";
 import { generateBespokePath } from "../../services/bespokePathService";
-// import { findCachedPath, cachePath } from "../../services/pathCacheService"; // CACHE DISABLED FOR TESTING
+import { findCachedPath, cachePath } from "../../services/pathCacheService";
 import { trackSessionCompleted } from "../../services/analyticsService";
 import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
@@ -57,6 +57,7 @@ export default function AdaptivePath() {
   const [pathData, setPathData] = useState(null);
   const [pathLoading, setPathLoading] = useState(false);
   const [pathError, setPathError] = useState(null);
+  const [isAiGenerated, setIsAiGenerated] = useState(false);
 
   // Step expansion / briefing state (mirrors BespokePath)
   const [expandedStep, setExpandedStep] = useState(null);
@@ -83,25 +84,15 @@ export default function AdaptivePath() {
     setRecentQueries(loadRecentQueries());
   }, []);
 
-  const {
-    stage,
-    questions,
-    currentIndex,
-    currentQuestion,
-    knowledgeProfile,
-    error: quizError,
-    hasSavedProfile,
-    startDiagnostic,
-    submitAnswer,
-    reset,
-    clearProfile,
-    STAGES,
-  } = useAdaptiveQuiz();
+  const { knowledgeProfile, hasSavedProfile, clearProfile, setProfileDirect, STAGES } =
+    useAdaptiveQuiz();
 
   /**
-   * Handle starting the diagnostic quiz
+   * Handle starting path generation
    */
   const [pendingGeneration, setPendingGeneration] = useState(false);
+  const [showLevelPicker, setShowLevelPicker] = useState(false);
+  const [pendingCleanedQuery, setPendingCleanedQuery] = useState("");
 
   const handleStart = useCallback(async () => {
     const result = sanitizeQuery(query);
@@ -115,15 +106,31 @@ export default function AdaptivePath() {
     saveRecentQuery(cleaned);
     setRecentQueries(loadRecentQueries());
 
-    // Skip diagnostic if we already have a learner profile (saved or just completed)
+    // Skip level picker if we already have a learner profile (saved within 24hr)
     if (knowledgeProfile) {
       setQuery(cleaned);
       setPendingGeneration(true);
       return;
     }
 
-    startDiagnostic(cleaned);
-  }, [query, startDiagnostic, knowledgeProfile]);
+    // Show the simple level picker instead of running a full diagnostic quiz
+    setPendingCleanedQuery(cleaned);
+    setShowLevelPicker(true);
+  }, [query, knowledgeProfile]);
+
+  /**
+   * Handle level selection from the simple picker
+   */
+  const handleLevelSelect = useCallback(
+    (level) => {
+      const profile = { level, knows: [], gaps: [] };
+      setProfileDirect(profile);
+      setQuery(pendingCleanedQuery);
+      setShowLevelPicker(false);
+      setPendingGeneration(true);
+    },
+    [pendingCleanedQuery, setProfileDirect]
+  );
 
   /**
    * Handle selecting a pre-seeded path (skip diagnostic, instantly show path)
@@ -171,19 +178,20 @@ export default function AdaptivePath() {
     );
 
     try {
-      // ── CACHE DISABLED FOR TESTING ──
-      // const gapsKey =
-      //   knowledgeProfile.gaps?.length > 0
-      //     ? `_gaps_${[...knowledgeProfile.gaps].sort().join(",")}`
-      //     : "";
-      // const profileKey = `${query}_adaptive_${knowledgeProfile.level}${gapsKey}`;
-      // const cached = await findCachedPath(profileKey, 1.0);
-      // if (cached) {
-      //   timers.forEach(clearTimeout);
-      //   setPathData(cached);
-      //   setPathLoading(false);
-      //   return;
-      // }
+      // Check cache first (exact match by query + level + gaps)
+      const gapsKey =
+        knowledgeProfile.gaps?.length > 0
+          ? `_gaps_${[...knowledgeProfile.gaps].sort().join(",")}`
+          : "";
+      const profileKey = `${query}_adaptive_${knowledgeProfile.level}${gapsKey}`;
+      const cached = await findCachedPath(profileKey, 1.0);
+      if (cached) {
+        timers.forEach(clearTimeout);
+        setPathData(cached);
+        setIsAiGenerated(!!cached.isAiGenerated);
+        setPathLoading(false);
+        return;
+      }
 
       // Generate path with knowledge profile context
       const result = await generateBespokePath(query, knowledgeProfile);
@@ -192,7 +200,8 @@ export default function AdaptivePath() {
         setPathError(result.error);
       } else {
         setPathData(result);
-        // cachePath(profileKey, result); // CACHE DISABLED FOR TESTING
+        setIsAiGenerated(!!result.isAiGenerated);
+        cachePath(profileKey, result);
       }
     } catch (err) {
       setPathError(err.message || "Failed to generate learning path.");
@@ -214,7 +223,9 @@ export default function AdaptivePath() {
    * Start over completely
    */
   const handleReset = useCallback(() => {
-    reset();
+    clearProfile();
+    setShowLevelPicker(false);
+    setPendingCleanedQuery("");
     setQuery("");
     setPathData(null);
     setPathError(null);
@@ -228,7 +239,7 @@ export default function AdaptivePath() {
     setQuizzes(new Map());
     setQuizScores(new Map());
     setShowQuiz(null);
-  }, [reset]);
+  }, [clearProfile]);
 
   // Generate quiz for the full path (on-demand)
   const handleTakeQuiz = useCallback(
@@ -370,15 +381,14 @@ export default function AdaptivePath() {
   }, [pathData]);
 
   // ── RENDER: Input Stage ──
-  if (stage === STAGES.IDLE && !pathLoading && !pendingGeneration && !pathData) {
+  if (!showLevelPicker && !pathLoading && !pendingGeneration && !pathData) {
     return (
       <div className="adaptive-path">
         <div className="adaptive-input-section">
           <h1 className="adaptive-title">🎯 Adaptive Learning Path</h1>
           <p className="adaptive-subtitle">
-            Tell us what you want to learn about. We&apos;ll start with a quick diagnostic to
-            understand what you already know, then build a personalized path that goes deep where it
-            matters most.
+            Tell us what you want to learn about. We&apos;ll tailor a personalized path based on
+            your experience level.
           </p>
 
           <div className="adaptive-input-wrapper">
@@ -419,136 +429,41 @@ export default function AdaptivePath() {
     );
   }
 
-  // ── RENDER: Loading (generating questions) ──
-  if (stage === STAGES.LOADING) {
-    return (
-      <div className="adaptive-path">
-        <div className="adaptive-loading">
-          <div className="adaptive-loading-spinner" />
-          <p className="adaptive-loading-text">
-            Analyzing your topic and preparing diagnostic questions...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ── RENDER: Error ──
-  if (stage === STAGES.ERROR) {
-    return (
-      <div className="adaptive-path">
-        <div className="adaptive-error">
-          <p className="adaptive-error-msg">⚠️ {quizError}</p>
-          <button className="adaptive-retry-btn" onClick={handleReset}>
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── RENDER: Diagnostic Quiz ──
-  if (stage === STAGES.QUIZZING && currentQuestion) {
-    const progress = ((currentIndex + 1) / questions.length) * 100;
-
+  // ── RENDER: Experience Level Picker (replaces diagnostic quiz) ──
+  if (showLevelPicker) {
     return (
       <div className="adaptive-path">
         <div className="diagnostic-quiz">
           <div className="diagnostic-header">
-            <h2>📋 Knowledge Diagnostic</h2>
-            <p>Answer these questions so we can personalize your learning path</p>
+            <h2>🎯 How familiar are you with Unreal Engine?</h2>
+            <p>This helps us tailor the depth of your learning path</p>
           </div>
 
-          <div className="diagnostic-progress">
-            <div className="diagnostic-progress-fill" style={{ width: `${progress}%` }} />
+          <div className="diagnostic-options" style={{ maxWidth: "420px", margin: "24px auto 0" }}>
+            <button
+              className="diagnostic-option"
+              onClick={() => handleLevelSelect("beginner")}
+              style={{ padding: "16px 20px", marginBottom: "12px" }}
+            >
+              <span className="diagnostic-option-letter">🌱</span>
+              I&apos;m new to UE5
+            </button>
+            <button
+              className="diagnostic-option"
+              onClick={() => handleLevelSelect("intermediate")}
+              style={{ padding: "16px 20px", marginBottom: "12px" }}
+            >
+              <span className="diagnostic-option-letter">⚡</span>I know the basics
+            </button>
+            <button
+              className="diagnostic-option"
+              onClick={() => handleLevelSelect("advanced")}
+              style={{ padding: "16px 20px" }}
+            >
+              <span className="diagnostic-option-letter">🚀</span>
+              I&apos;m experienced
+            </button>
           </div>
-
-          <div className="diagnostic-card" key={currentIndex}>
-            <div className="diagnostic-question-num">
-              Question {currentIndex + 1} of {questions.length}
-            </div>
-
-            {currentQuestion.concept && (
-              <span className="diagnostic-concept-tag">
-                {currentQuestion.concept.replace(/_/g, " ")}
-              </span>
-            )}
-
-            {currentQuestion.image && (
-              <div className="quiz-image-container">
-                <img
-                  src={currentQuestion.image}
-                  alt={currentQuestion.imageHint || "UE5 Editor Screenshot"}
-                  className="quiz-image"
-                />
-                {currentQuestion.imageHint && (
-                  <span className="quiz-image-hint">{currentQuestion.imageHint}</span>
-                )}
-              </div>
-            )}
-
-            <p className="diagnostic-question-text">{currentQuestion.q}</p>
-
-            <div className="diagnostic-options">
-              {currentQuestion.options.map((option, optIdx) => (
-                <button
-                  key={optIdx}
-                  className="diagnostic-option"
-                  onClick={() => submitAnswer(optIdx)}
-                >
-                  <span className="diagnostic-option-letter">{LETTERS[optIdx]}</span>
-                  {option}
-                </button>
-              ))}
-
-              <button className="diagnostic-unsure" onClick={() => submitAnswer(-1)}>
-                🤔 I&apos;m not sure
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ── RENDER: Knowledge Profile (quiz complete, path not yet generated) ──
-  if (stage === STAGES.COMPLETE && knowledgeProfile && !pathData && !pathLoading) {
-    return (
-      <div className="adaptive-path">
-        <div className="knowledge-summary">
-          <h2>📊 Your Knowledge Profile</h2>
-          <p>Based on your diagnostic, here&apos;s what we found:</p>
-
-          <span className={`knowledge-level-badge ${knowledgeProfile.level}`}>
-            {knowledgeProfile.level.charAt(0).toUpperCase() + knowledgeProfile.level.slice(1)} Level
-          </span>
-
-          <div className="knowledge-lists">
-            <div className="knowledge-list knows">
-              <h3>✅ You Know</h3>
-              <ul>
-                {knowledgeProfile.knows.length > 0 ? (
-                  knowledgeProfile.knows.map((c, i) => <li key={i}>{c.replace(/_/g, " ")}</li>)
-                ) : (
-                  <li style={{ fontStyle: "italic" }}>No strong areas detected</li>
-                )}
-              </ul>
-            </div>
-            <div className="knowledge-list gaps">
-              <h3>🔍 Gaps to Fill</h3>
-              <ul>
-                {knowledgeProfile.gaps.length > 0 ? (
-                  knowledgeProfile.gaps.map((c, i) => <li key={i}>{c.replace(/_/g, " ")}</li>)
-                ) : (
-                  <li style={{ fontStyle: "italic" }}>No gaps detected — nice!</li>
-                )}
-              </ul>
-            </div>
-          </div>
-
-          <button className="adaptive-generate-btn" onClick={handleGeneratePath}>
-            ✨ Generate Personalized Path
-          </button>
         </div>
       </div>
     );
@@ -663,7 +578,8 @@ export default function AdaptivePath() {
                   <button
                     onClick={() => {
                       clearProfile();
-                      startDiagnostic(query);
+                      setShowLevelPicker(true);
+                      setPendingCleanedQuery(query);
                     }}
                     style={{
                       display: "block",
@@ -677,7 +593,7 @@ export default function AdaptivePath() {
                       textDecoration: "underline",
                     }}
                   >
-                    ⚙️ Retake Assessment
+                    ⚙️ Change Experience Level
                   </button>
                 )}
               </div>
@@ -765,6 +681,29 @@ export default function AdaptivePath() {
                   >
                     Deep focus on:{" "}
                     {knowledgeProfile.gaps.map((g) => g.replace(/_/g, " ")).join(", ")}
+                  </div>
+                )}
+
+                {/* Low corpus coverage — encourage refinement */}
+                {isAiGenerated && (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "10px 16px",
+                      fontSize: "0.75rem",
+                      color: "#7dd3fc",
+                      background: "rgba(125, 211, 252, 0.06)",
+                      border: "1px solid rgba(125, 211, 252, 0.15)",
+                      borderRadius: "8px",
+                      margin: "0 0 16px 0",
+                    }}
+                  >
+                    🎨 Custom AI-powered path created just for you!
+                    <br />
+                    <span style={{ color: "#94a3b8", fontSize: "0.7rem" }}>
+                      💡 Tip: Adding UE5-specific terms (e.g. &quot;horse <em>character in UE5</em>
+                      &quot;) can unlock even more tailored results.
+                    </span>
                   </div>
                 )}
 

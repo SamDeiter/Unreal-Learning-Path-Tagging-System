@@ -241,42 +241,52 @@ def main():
 
     for i in range(start_idx, total):
         chunk = chunks[i]
-        try:
-            vector = embed_text(chunk["text"], api_key)
-            embeddings[chunk["id"]] = {
-                "embedding": vector,
-                "course_code": chunk["course_code"],
-                "video_key": chunk["video_key"],
-                "video_title": chunk["video_title"],
-                "start_timestamp": chunk["start_timestamp"],
-                "end_timestamp": chunk["end_timestamp"],
-                "start_seconds": chunk["start_seconds"],
-                "text": chunk["text"][:300],   # truncated for storage
-                "token_estimate": chunk["token_estimate"],
-            }
-
-            # Progress
-            done = i + 1
-            if done % 10 == 0 or done == total:
-                elapsed = time.time() - start_time
-                rate = (done - start_idx) / elapsed if elapsed > 0 else 0
-                eta = (total - done) / rate if rate > 0 else 0
-                print(f"  [{done}/{total}] {done * 100 // total}% "
-                      f"({rate:.1f} chunks/sec, ETA: {eta:.0f}s)")
-
-            # Checkpoint
-            if done % CHECKPOINT_INTERVAL == 0:
-                save_checkpoint(chunk["id"], done)
-
-            time.sleep(BATCH_DELAY)
-
-        except Exception as e:
-            errors += 1
-            print(f"  ERROR on chunk {chunk['id']}: {e}")
-            if errors > 10:
-                print("  Too many errors, stopping.")
+        # Retry each chunk up to 3 times with exponential backoff
+        success = False
+        for attempt in range(3):
+            try:
+                vector = embed_text(chunk["text"], api_key)
+                embeddings[chunk["id"]] = {
+                    "embedding": vector,
+                    "course_code": chunk["course_code"],
+                    "video_key": chunk["video_key"],
+                    "video_title": chunk["video_title"],
+                    "start_timestamp": chunk["start_timestamp"],
+                    "end_timestamp": chunk["end_timestamp"],
+                    "start_seconds": chunk["start_seconds"],
+                    "text": chunk["text"][:300],   # truncated for storage
+                    "token_estimate": chunk["token_estimate"],
+                }
+                success = True
+                errors = 0  # reset consecutive error counter on success
                 break
-            time.sleep(2)  # backoff on error
+            except Exception as e:
+                wait = 2 ** (attempt + 1)  # 2s, 4s, 8s
+                if attempt < 2:
+                    print(f"  Retry {attempt+1}/3 for {chunk['id']} (waiting {wait}s)...")
+                    time.sleep(wait)
+                else:
+                    errors += 1
+                    print(f"  FAILED {chunk['id']} after 3 attempts: {e}")
+
+        if not success and errors > 50:
+            print("  Too many consecutive errors, stopping.")
+            break
+
+        # Progress
+        done = i + 1
+        if done % 10 == 0 or done == total:
+            elapsed = time.time() - start_time
+            rate = (done - start_idx) / elapsed if elapsed > 0 else 0
+            eta = (total - done) / rate if rate > 0 else 0
+            print(f"  [{done}/{total}] {done * 100 // total}% "
+                  f"({rate:.1f} chunks/sec, ETA: {eta:.0f}s)")
+
+        # Checkpoint
+        if done % CHECKPOINT_INTERVAL == 0:
+            save_checkpoint(chunk["id"], done)
+
+        time.sleep(BATCH_DELAY)
 
     # Compute source hash for freshness tracking
     source_hash = hashlib.sha256(
