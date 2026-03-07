@@ -34,11 +34,12 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 | **Frontend**       | React 19 + Vite 7 (in `path-builder/`)                                             |
 | **State**          | React Context (`PathContext`, `TagDataContext`)                                    |
 | **Visualizations** | Cytoscape.js (tag graph), custom chart components                                  |
-| **Backend**        | Firebase Cloud Functions (Node.js 20)                                              |
+| **Backend**        | Firebase Cloud Functions (Node.js 20, rate-limited)                                |
 | **Database**       | Firebase Firestore                                                                 |
 | **Auth**           | Firebase Auth with Google Sign-In + invite-based access control                    |
-| **AI**             | Google Gemini 2.0 Flash (enrichment, narration, embeddings)                        |
+| **AI**             | Google Gemini 2.0 Flash (enrichment, narration, embeddings, grounding)             |
 | **Search**         | Firestore vector search + TF-IDF transcript index + Vertex AI docs + tag matching  |
+| **Embeddings**     | 3,622 doc chunks (1,880 scraped + 1,742 UDN/Perforce) + 2,402 segment chunks       |
 | **Hosting**        | GitHub Pages (frontend), Firebase Hosting (API)                                    |
 | **Testing**        | Vitest + React Testing Library + Playwright (566 tests)                            |
 | **Security**       | DOMPurify (XSS sanitization), Firebase Security Rules, invite-based access control |
@@ -95,7 +96,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   ├── pipeline/                  # Server-side enrichment pipeline
 │   ├── triggers/                  # Firestore event triggers
 │   └── scheduled/                 # Cron/scheduled functions
-├── scripts/                       # 100+ build-time enrichment & data scripts
+├── scripts/                       # 110+ build-time enrichment & data scripts
 │   ├── build_embeddings.py                # Generate semantic embeddings
 │   ├── build_search_index.py              # Build TF-IDF search index
 │   ├── build_transcript_index.py          # Parse VTT → transcript segments
@@ -105,14 +106,16 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   ├── detect_prerequisites.py            # Prerequisite detection
 │   ├── augment_transcript.py              # Transcript augmentation
 │   ├── scrape_epic_docs.py                # UDN documentation scraping
+│   ├── embed_udn_docs.py                 # Perforce UDN doc embedding (parallel)
 │   ├── embed_segments.py                  # Segment embedding generation
 │   ├── drive_to_txt.py                    # GPU Whisper video transcription
 │   ├── whisper_cms_transcripts_v2.py      # 2-phase CMS Whisper pipeline
 │   ├── clean_whisper_transcripts.py       # Transcript cleanup & hallucination detection
 │   ├── embed_epic_learning.py             # Epic Learning RAG embeddings
+│   ├── merge_embeddings.py                # Merge scraped + UDN doc embeddings
 │   ├── content_gap_analysis.py            # Content gap identification
 │   ├── deploy_ghpages.py                  # Orphan-branch GitHub Pages deploy
-│   └── ...                                # 70+ more enrichment/audit/validation scripts
+│   └── ...                                # 80+ more enrichment/audit/validation scripts
 ├── content/epic_learning/         # Epic Learning transcript pipeline
 │   ├── transcripts/               # 1,900+ transcript files (yt_*, cms_*, whisper_*, lesson_*)
 │   ├── video_manifest.json        # 34 YouTube + 187 CMS video catalog
@@ -208,6 +211,8 @@ python scripts/run_enrichment_pipeline.py
 | `detect_prerequisites.py`         | `course_prerequisites.json`        | Prerequisite relationships                |
 | `augment_transcript.py`           | Augmented transcripts              | Add context, keywords, and summaries      |
 | `embed_epic_learning.py`          | `epic_learning_embeddings.json`    | Chunked transcript embeddings for RAG     |
+| `embed_udn_docs.py`               | `udn_doc_embeddings.json`          | Perforce UDN docs → 1,742 embedded chunks |
+| `merge_embeddings.py`             | `docs_embeddings.json`             | Merge scraped + UDN embeddings (3,622)    |
 | `content_gap_analysis.py`         | Gap report                         | Identifies missing content areas          |
 
 All AI-powered scripts use the Google Gemini API.

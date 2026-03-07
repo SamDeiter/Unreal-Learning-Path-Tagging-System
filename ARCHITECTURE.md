@@ -174,7 +174,7 @@ graph TB
         AU["apiUsage/{docId}<br/>• type, outcome, pipelineDurationMs<br/>(written by Cloud Function)"]
         CE["course_embeddings/{courseCode}\n\u2022 title, embedding: vector(768), metadata"]
         SE["segment_embeddings/{segmentId}\n\u2022 text, embedding: vector(768), courseCode, videoTitle"]
-        DE["docs_embeddings/{docId}\n\u2022 text, embedding: vector(768), url, title, section"]
+        DE["docs_embeddings/{docId}\n• text, embedding: vector(768), url, title, section\n• source: scraped (1,880) + UDN/Perforce (1,742) = 3,622 chunks"]
         CP["cached_paths/{pathId}\n\u2022 question, path, createdAt, ttl: 90d"]
     end
 ```
@@ -348,24 +348,26 @@ User Question -> [1. Segment Finder] -> [2. Path Sequencer] -> [3. Path Renderer
 
 ### Cloud Functions
 
-| Function               | Purpose                                                                                       | Trigger        |
-| ---------------------- | --------------------------------------------------------------------------------------------- | -------------- |
-| `vectorSearchCourses`  | KNN search against `course_embeddings` collection                                             | HTTPS callable |
-| `vectorSearchSegments` | KNN search against `segment_embeddings` (returns cosine similarity via `distanceResultField`) | HTTPS callable |
-| `vectorSearchDocs`     | KNN search against `docs_embeddings` collection                                               | HTTPS callable |
-| `classifySegments`     | Gemini relay for path sequencing (`responseMimeType: application/json`)                       | HTTPS callable |
+All Cloud Functions enforce **server-side rate limiting** (per-user, per-function) with exponential backoff and retry headers.
+
+| Function               | Purpose                                                                                              | Trigger        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- | -------------- |
+| `vectorSearchCourses`  | KNN search against `course_embeddings` collection                                                    | HTTPS callable |
+| `vectorSearchSegments` | KNN search against `segment_embeddings` (returns cosine similarity via `distanceResultField`)        | HTTPS callable |
+| `vectorSearchDocs`     | KNN search against `docs_embeddings` collection (3,622 chunks: scraped + UDN/Perforce)               | HTTPS callable |
+| `classifySegments`     | Gemini relay for path sequencing with Google Search grounding (`responseMimeType: application/json`) | HTTPS callable |
 
 ### Security Guardrails
 
-| Guard              | Attack Vector        | Defense                                                 |
-| ------------------ | -------------------- | ------------------------------------------------------- |
-| Input Sanitization | Prompt injection     | 500 char limit, HTML stripping, system prompt isolation |
-| XSS Prevention     | Script injection     | React auto-escape, DOMPurify, CSP headers               |
-| API Key Protection | Key theft            | `.env` only, domain-restricted, quarterly rotation      |
-| Rate Limiting      | DoS / cost abuse     | 3s throttle, 20/session limit, $10/day circuit breaker  |
-| Cache Poisoning    | Harmful cached paths | Source-grounded validation, admin-only Featured pins    |
-| Data Exfiltration  | Extract prompts/data | Stateless queries, no PII in prompts                    |
-| SCORM Integrity    | Package tampering    | SHA-256 manifest, SRI attributes                        |
+| Guard              | Attack Vector        | Defense                                                                       |
+| ------------------ | -------------------- | ----------------------------------------------------------------------------- |
+| Input Sanitization | Prompt injection     | 500 char limit, HTML stripping, system prompt isolation                       |
+| XSS Prevention     | Script injection     | React auto-escape, DOMPurify, CSP headers                                     |
+| API Key Protection | Key theft            | `.env` only, domain-restricted, quarterly rotation                            |
+| Rate Limiting      | DoS / cost abuse     | Server-side per-user rate limits, 3s client throttle, $10/day circuit breaker |
+| Cache Poisoning    | Harmful cached paths | Source-grounded validation, admin-only Featured pins                          |
+| Data Exfiltration  | Extract prompts/data | Stateless queries, no PII in prompts                                          |
+| SCORM Integrity    | Package tampering    | SHA-256 manifest, SRI attributes                                              |
 
 ---
 

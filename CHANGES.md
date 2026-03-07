@@ -4,6 +4,27 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [2.0.0-production-hardening] - 2026-03-06
+
+### Added
+
+- **UDN/Perforce Doc Embeddings** — `embed_udn_docs.py` embeds 1,742 Perforce UDN documentation chunks using `gemini-embedding-001` with 10-worker parallelism (32 chunks/sec, 58s total vs ~8min serial)
+- **Embedding Merge Pipeline** — `merge_embeddings.py` deduplicates and merges scraped (1,880) + UDN (1,742) doc embeddings into a unified `docs_embeddings.json` (3,622 chunks, 38.6 MB)
+- **Server-Side Rate Limiting** — All Cloud Functions now enforce per-user, per-function rate limits with `Retry-After` headers and structured `resource-exhausted` error responses
+- **AI Grounding** — `classifySegments` Cloud Function now includes Google Search grounding metadata (support URLs, confidence scores) in path sequencing responses
+- **Usage Logging** — All Cloud Functions log to `apiUsage` Firestore collection for cost tracking and abuse detection
+
+### Changed
+
+- **Firestore `docs_embeddings` Collection** — Expanded from 1,880 scraped-only chunks to 3,622 merged chunks (scraped + UDN/Perforce), closing the Subsurface Scattering search gap
+- **Documentation Updated** — `README.md`, `ARCHITECTURE.md`, `CHANGES.md`, and `AGENTS.md` updated to reflect all recent changes
+
+### Root Cause Analysis
+
+- **SSS Search Gap** — Subsurface Scattering content existed in Perforce UDN docs but was never embedded. The original `scrape_epic_docs.py` only scraped public-facing Epic docs, missing internal UDN documentation. The new `embed_udn_docs.py` + merge pipeline ensures both sources are covered.
+
+---
+
 ## [1.9.0-content-gaps] - 2026-03-06
 
 ### Added
