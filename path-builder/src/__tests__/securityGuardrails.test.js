@@ -138,12 +138,12 @@ describe("securityGuardrails", () => {
     it("allows first request", () => {
       const result = checkRateLimit();
       expect(result.allowed).toBe(true);
-      expect(result.remaining).toBe(20);
+      expect(result.remaining).toBe(100);
     });
 
     it("returns remaining count", () => {
       const stats = getRateLimitStats();
-      expect(stats.maxPerSession).toBe(20);
+      expect(stats.maxPerSession).toBe(100);
       expect(stats.cooldownMs).toBe(3000);
       expect(stats.maxQueryLength).toBe(500);
     });

@@ -6,7 +6,7 @@
  * answers to build a knowledge profile.
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "../services/firebaseConfig";
 import { findQuizImage } from "../data/quizImageBank";
@@ -21,13 +21,23 @@ const STAGES = {
 
 const STORAGE_KEY = "ue5_learner_profile";
 
-/** Load a previously saved learner profile from localStorage. */
-function loadSavedProfile() {
+/** Load a previously saved learner profile from localStorage.
+ *  Only returns the profile if the saved query matches the current query.
+ *  This prevents stale gaps (e.g., "time dilation") from persisting
+ *  into unrelated queries (e.g., "how to make a sword").
+ */
+function loadSavedProfile(query = "") {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (parsed && parsed.level && Array.isArray(parsed.gaps)) return parsed;
+    if (parsed && parsed.level && Array.isArray(parsed.gaps)) {
+      // Only reuse the profile if the query matches what was used to generate it
+      if (query && parsed.query && parsed.query.toLowerCase() !== query.toLowerCase()) {
+        return null; // Different topic — don't reuse stale gaps
+      }
+      return parsed;
+    }
   } catch {
     /* corrupt data — ignore */
   }
@@ -39,7 +49,7 @@ function saveProfile(profile) {
   try {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ ...profile, savedAt: new Date().toISOString() })
+      JSON.stringify({ ...profile, savedAt: new Date().toISOString(), query: profile.query || "" })
     );
   } catch {
     /* storage full — ignore */
@@ -50,7 +60,7 @@ function saveProfile(profile) {
  * @returns {Object} Quiz state and handlers
  */
 export default function useAdaptiveQuiz() {
-  // Auto-restore saved profile on mount
+  // Auto-restore saved profile on mount (no query to match yet — shows "Retake" UI)
   const saved = loadSavedProfile();
   const [stage, setStage] = useState(STAGES.IDLE);
   const [questions, setQuestions] = useState([]);
@@ -59,12 +69,15 @@ export default function useAdaptiveQuiz() {
   const [knowledgeProfile, setKnowledgeProfile] = useState(saved || null);
   const [error, setError] = useState(null);
   const hasSavedProfile = !!saved;
+  // Track the current diagnostic query so we can attach it to the profile
+  const diagnosticQueryRef = useRef("");
 
   /**
    * Generate diagnostic questions for a topic.
    * @param {string} query - The user's question/topic
    */
   const startDiagnostic = useCallback(async (query) => {
+    diagnosticQueryRef.current = query; // Store for profile building
     setStage(STAGES.LOADING);
     setError(null);
     setQuestions([]);
@@ -131,6 +144,7 @@ export default function useAdaptiveQuiz() {
       } else {
         // Build knowledge profile from all answers
         const profile = buildKnowledgeProfile(updatedAnswers, questions);
+        profile.query = diagnosticQueryRef.current; // Attach the query
         setKnowledgeProfile(profile);
         saveProfile(profile);
         setStage(STAGES.COMPLETE);
@@ -147,7 +161,7 @@ export default function useAdaptiveQuiz() {
     setQuestions([]);
     setCurrentIndex(0);
     setAnswers([]);
-    setKnowledgeProfile(loadSavedProfile()); // Preserve saved profile
+    setKnowledgeProfile(null); // Don't reload stale profile — user will start fresh
     setError(null);
   }, []);
 
