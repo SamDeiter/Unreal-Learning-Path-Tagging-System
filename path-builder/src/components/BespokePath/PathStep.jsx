@@ -74,78 +74,66 @@ function filterTakeaways(items) {
  * contractions like "isn't", "it's", "don't".
  */
 
-// Known UE5 terms to auto-highlight when found in plain text
+// Known UE5 terms to auto-highlight when found in plain text.
+// ONLY multi-word or unambiguous terms — single generic words like
+// "Actor", "Component", "Character" match inside compound words
+// (e.g. "ChaosVehicleMovementComponent") and break text rendering.
 const UE_TERMS = [
   "Content Browser",
   "World Outliner",
   "Details Panel",
   "Details panel",
-  "Blueprint",
-  "Blueprints",
   "Blueprint Editor",
   "Event Graph",
   "Level Editor",
   "Material Editor",
   "Material Instance",
-  "Viewport",
   "World Settings",
   "Play In Editor",
-  "PIE",
-  "Actor",
-  "Component",
-  "Pawn",
-  "Character",
-  "GameMode",
-  "PlayerController",
   "Widget Blueprint",
-  "UMG",
-  "Sequencer",
-  "Niagara",
-  "Nanite",
-  "Lumen",
-  "MetaHuman",
-  "Quixel",
-  "Landscape",
-  "Foliage",
   "Static Mesh",
   "Skeletal Mesh",
   "Animation Blueprint",
   "Anim Blueprint",
   "Behavior Tree",
-  "Blackboard",
-  "EQS",
-  "NavMesh",
   "AI Controller",
   "Data Table",
-  "Struct",
-  "Enum",
   "Game Instance",
   "Level Blueprint",
   "Construction Script",
   "Begin Play",
   "Event Tick",
-  "Collision",
-  "Physics",
   "Post Process",
   "Ray Tracing",
   "Virtual Shadow Maps",
   "World Partition",
   "Data Layers",
-  "HLOD",
-  "C\\+\\+",
-  "Unreal Engine",
-  "UE5",
-  "UE4",
   "Content Drawer",
   "Output Log",
   "Message Log",
   "Class Defaults",
   "Class Settings",
+  "Unreal Engine",
+  "UE5",
+  "UE4",
+  "Niagara",
+  "Nanite",
+  "Lumen",
+  "MetaHuman",
+  "Quixel",
+  "Sequencer",
+  "NavMesh",
+  "EQS",
+  "HLOD",
+  "Blackboard",
+  "PlayerController",
+  "GameMode",
 ];
 
-// Build a single regex that matches any of these terms (case-insensitive word boundaries)
+// Build a single regex with word boundaries so "Component" doesn't match
+// inside "ChaosVehicleMovementComponent"
 const UE_TERMS_REGEX = new RegExp(
-  `(${UE_TERMS.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`,
+  `\\b(${UE_TERMS.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
   "g"
 );
 
@@ -284,6 +272,13 @@ export default function PathStep({
           {segment.type !== "ai_generated" ? (
             <span className="trust-badge trust-corpus" title="Matched from course corpus">
               <span className="trust-dot trust-dot-green"></span>
+            </span>
+          ) : segment.corpusVerified ? (
+            <span
+              className="trust-badge trust-corpus-verified"
+              title={`Matches official content: ${segment.corpusMatch?.videoTitle || ""}`}
+            >
+              <span className="trust-dot trust-dot-yellow-green"></span> Corpus Match
             </span>
           ) : segment.sources && segment.sources.length > 0 ? (
             <span className="trust-badge trust-grounded" title="Verified via Google Search">
@@ -658,8 +653,23 @@ export default function PathStep({
                   ))}
                 </div>
               )}
+              {/* ── Corpus Verification Match ── */}
+              {segment.corpusVerified && segment.corpusMatch && (
+                <div className="grounding-sources" style={{ marginBottom: 6 }}>
+                  <a
+                    href={segment.corpusMatch.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="footnote-link grounding-source-link"
+                    title={`${(segment.corpusMatch.similarity * 100).toFixed(0)}% match`}
+                  >
+                    <i className="fa-solid fa-circle-check" style={{ color: "#84cc16" }}></i>
+                    Related official content: {segment.corpusMatch.videoTitle}
+                  </a>
+                </div>
+              )}
               {/* ── Unverified AI warning ── */}
-              {segment.type === "ai_generated" && segment.unverified && (
+              {segment.type === "ai_generated" && segment.unverified && !segment.corpusVerified && (
                 <div className="unverified-banner">
                   <i className="fa-solid fa-triangle-exclamation"></i>
                   AI-generated — could not verify against external sources

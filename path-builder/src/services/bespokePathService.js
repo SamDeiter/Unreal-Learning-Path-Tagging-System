@@ -866,6 +866,40 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
         return result;
       }
 
+      // ── CORPUS VERIFICATION for AI steps ──
+      // For each hybrid step, check if official corpus content matches.
+      // This is a lightweight check — it reuses findRelevantSegments with topK=1.
+      try {
+        const verifyPromises = result.path.map(async (pathStep) => {
+          const summary = pathStep.summary || pathStep.segment?.text || "";
+          if (!summary) return;
+          try {
+            const { segments: matches } = await findRelevantSegments(summary, 1);
+            if (matches.length > 0 && matches[0].similarity >= SIMILARITY_THRESHOLD) {
+              const best = matches[0];
+              pathStep.segment.corpusVerified = true;
+              pathStep.segment.corpusMatch = {
+                videoTitle: best.videoTitle || best.title || "",
+                videoUrl: best.videoUrl || best.url || "",
+                similarity: best.similarity,
+              };
+              devLog(
+                `[BespokePath] Corpus verified: "${pathStep.segment.title}" ↔ "${best.videoTitle || best.title}" (${best.similarity.toFixed(3)})`
+              );
+            }
+          } catch {
+            // Non-fatal — step stays unverified
+          }
+        });
+        await Promise.allSettled(verifyPromises);
+        const verifiedCount = result.path.filter((s) => s.segment.corpusVerified).length;
+        devLog(
+          `[BespokePath] Corpus verification: ${verifiedCount}/${result.path.length} steps verified`
+        );
+      } catch (verifyErr) {
+        devWarn("[BespokePath] Corpus verification failed (non-fatal):", verifyErr.message);
+      }
+
       // Stage 3: Generate bridge narrations for hybrid path
       devLog("[BespokePath] Stage 3: Generating narrations for hybrid path...");
       result.bridges = await generateBridgeNarration(result.path, userQuery);
