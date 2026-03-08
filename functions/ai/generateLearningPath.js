@@ -333,7 +333,10 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
       await logApiUsage(userId, {
         model: "gemini-2.0-flash",
         type: "learningPath",
+        function: "generateLearningPath",
         query: query,
+        firestoreReads: 4, // rate limit checks + catalog lookup
+        firestoreWrites: 2, // this log entry + cached_paths write
       });
 
       // Cache the path to Firestore

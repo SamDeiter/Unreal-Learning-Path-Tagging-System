@@ -26,6 +26,10 @@ async function logApiUsage(userId, data, startTime = null) {
     const db = admin.firestore();
     const entry = {
       userId,
+      // Default Firestore R/W tracking — every log call writes 1 doc (this one).
+      // Callers can override with explicit values for more accurate counting.
+      firestoreReads: 0,
+      firestoreWrites: 1,
       ...data,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
     };
