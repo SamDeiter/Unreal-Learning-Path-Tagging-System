@@ -12,18 +12,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 import useAdaptiveQuiz from "../../hooks/useAdaptiveQuiz";
+import usePathQuiz from "../../hooks/usePathQuiz";
+import usePathStepActions from "../../hooks/usePathStepActions";
 import { sanitizeQuery, checkRateLimit, recordQuery } from "../../services/securityGuardrails";
 import { generateBespokePath } from "../../services/bespokePathService";
 import { findCachedPath, cachePath } from "../../services/pathCacheService";
 import { trackSessionCompleted } from "../../services/analyticsService";
 import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
-import {
-  generateStepAudio,
-  generateStepTakeaways,
-  generateStepDeepDive,
-} from "../../services/stepBriefingService";
-import { generateQuizForStep } from "../../services/quizService";
+
+
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
 import { fixEpicUrl } from "../../utils/urlHelpers";
@@ -51,24 +49,13 @@ export default function AdaptivePath() {
   const [pathError, setPathError] = useState(null);
   const [isAiGenerated, setIsAiGenerated] = useState(false);
 
-  // Step expansion / briefing state (mirrors BespokePath)
+  // Step expansion
   const [expandedStep, setExpandedStep] = useState(null);
-  const [stepAudio, setStepAudio] = useState({});
   const [pipelineStep, setPipelineStep] = useState(0);
-  const [stepTakeaways, setStepTakeaways] = useState({});
-  const [_pathNarration, setPathNarration] = useState(null);
-
-  // Deep dive state
-  const [stepDeepDives, setStepDeepDives] = useState({});
 
   // Voice selector
   const [voiceName, setVoiceName] = useState("Kore");
 
-  // Quiz state
-  const [quizzes, setQuizzes] = useState(new Map());
-  const [quizLoading, setQuizLoading] = useState(null);
-  const [quizScores, setQuizScores] = useState(new Map());
-  const [showQuiz, setShowQuiz] = useState(null);
   const [recentQueries, setRecentQueries] = useState([]);
 
   // Load recent queries on mount
@@ -78,6 +65,47 @@ export default function AdaptivePath() {
 
   const { knowledgeProfile, hasSavedProfile, clearProfile, setProfileDirect, STAGES } =
     useAdaptiveQuiz();
+
+  // Shared hooks for step actions + quiz
+  const {
+    stepAudio,
+    stepTakeaways,
+    stepDeepDives,
+    handleStepAudio,
+    handleGoDeeper,
+    resetStepActions,
+  } = usePathStepActions({
+    pathData: pathData,
+    query,
+    voiceName,
+    userLevel: knowledgeProfile?.level || "intermediate",
+    activeStep: expandedStep,
+  });
+
+  const {
+    quizzes,
+    quizLoading,
+    quizScores,
+    showQuiz,
+    handleTakeQuiz,
+    handleQuizComplete,
+    resetQuiz,
+  } = usePathQuiz({
+    pathData: pathData,
+    query,
+    onComplete: ({ stepIndex, score, total }) => {
+      // Track path completion when the end-of-path quiz finishes
+      if (stepIndex === -2) {
+        trackSessionCompleted("adaptive-path", {
+          query: pathData?.query || query,
+          stepsCompleted: pathData?.path?.length || 0,
+          quizScore: score,
+          quizTotal: total,
+          knowledgeLevel: knowledgeProfile?.level || "unknown",
+        });
+      }
+    },
+  });
 
   /**
    * Handle starting path generation
@@ -223,114 +251,9 @@ export default function AdaptivePath() {
     setPathError(null);
     setPathLoading(false);
     setExpandedStep(null);
-
-    setStepAudio({});
-    setStepTakeaways({});
-    setStepDeepDives({});
-    setPathNarration(null);
-    setQuizzes(new Map());
-    setQuizScores(new Map());
-    setShowQuiz(null);
-  }, [clearProfile]);
-
-  // Generate quiz for the full path (on-demand)
-  const handleTakeQuiz = useCallback(
-    async (stepIndex) => {
-      if (quizzes.has(stepIndex)) {
-        setShowQuiz(stepIndex);
-        return;
-      }
-      if (!pathData) return;
-      setQuizLoading(stepIndex);
-
-      // Aggregate ALL step content for a comprehensive quiz
-      const aggregatedStep = {
-        summary: pathData.path
-          .map((s) => (s.summary || s.segment?.text || "").substring(0, 400))
-          .join("\n\n"),
-        segment: pathData.path[0]?.segment,
-        category: "comprehensive",
-      };
-
-      const questions = await generateQuizForStep(aggregatedStep, pathData.query || query, 3);
-      setQuizzes((prev) => new Map(prev).set(stepIndex, questions));
-      setQuizLoading(null);
-      setShowQuiz(stepIndex);
-    },
-    [quizzes, pathData, query]
-  );
-
-  // Handle quiz completion
-  const handleQuizComplete = useCallback(
-    ({ stepIndex, score, total }) => {
-      setQuizScores((prev) => new Map(prev).set(stepIndex, { score, total }));
-      setShowQuiz(null);
-
-      // Track path completion when the end-of-path quiz finishes
-      if (stepIndex === -2) {
-        trackSessionCompleted("adaptive-path", {
-          query: pathData?.query || query,
-          stepsCompleted: pathData?.path?.length || 0,
-          quizScore: score,
-          quizTotal: total,
-          knowledgeLevel: knowledgeProfile?.level || "unknown",
-        });
-      }
-    },
-    [pathData, query, knowledgeProfile]
-  );
-
-  // Audio/takeaway handlers (same pattern as BespokePath)
-  const handleStepAudio = useCallback(
-    async (index, step) => {
-      if (stepAudio[index]?.url || stepAudio[index]?.loading) return;
-      setStepAudio((prev) => ({ ...prev, [index]: { loading: true } }));
-
-      // Determine position in path for greeting/outro control
-      const totalSteps = pathData?.path?.length ?? 0;
-      const stepPosition = index === 0 ? "first" : index >= totalSteps - 1 ? "last" : "middle";
-
-      // Collect source links for further reading (used in last step narration)
-      const sourceLinks =
-        stepPosition === "last" && pathData?.path
-          ? pathData.path
-              .map((s) => ({
-                title: s.segment?.title || s.segment?.videoTitle || "",
-                url: fixEpicUrl(s.segment?.videoUrl || s.segment?.url || ""),
-              }))
-              .filter((s) => s.title)
-          : [];
-
-      try {
-        const audioUrl = await generateStepAudio(step, query, {
-          stepPosition,
-          sourceLinks,
-          voiceName,
-        });
-        setStepAudio((prev) => ({ ...prev, [index]: { url: audioUrl || null, loading: false } }));
-
-        // Pre-generate next step's audio in background
-        const nextIdx = index + 1;
-        if (nextIdx < totalSteps && !stepAudio[nextIdx]) {
-          const nextPosition = nextIdx >= totalSteps - 1 ? "last" : "middle";
-          generateStepAudio(pathData.path[nextIdx], query, {
-            stepPosition: nextPosition,
-            voiceName,
-          })
-            .then((nextUrl) => {
-              setStepAudio((prev) => {
-                if (prev[nextIdx]) return prev;
-                return { ...prev, [nextIdx]: { url: nextUrl || null, loading: false } };
-              });
-            })
-            .catch(() => {});
-        }
-      } catch {
-        setStepAudio((prev) => ({ ...prev, [index]: { error: true, loading: false } }));
-      }
-    },
-    [query, stepAudio, pathData, voiceName]
-  );
+    resetStepActions();
+    resetQuiz();
+  }, [clearProfile, resetStepActions, resetQuiz]);
 
   // Auto-advance to next step when audio finishes playing
   const handleAudioEnded = useCallback(() => {
@@ -340,37 +263,6 @@ export default function AdaptivePath() {
       setExpandedStep(cur + 1);
     }
   }, [expandedStep, pathData]);
-
-  const handleStepTakeaways = useCallback(
-    async (index, step) => {
-      if (stepTakeaways[index]) return;
-      setStepTakeaways((prev) => ({ ...prev, [index]: { loading: true } }));
-      try {
-        const result = await generateStepTakeaways(step, query);
-        setStepTakeaways((prev) => ({
-          ...prev,
-          [index]: { items: result, loading: false },
-        }));
-      } catch {
-        setStepTakeaways((prev) => ({
-          ...prev,
-          [index]: { error: true, loading: false },
-        }));
-      }
-    },
-    [query, stepTakeaways]
-  );
-
-  // Auto-generate takeaways for all steps when path loads
-  useEffect(() => {
-    if (!pathData?.path || pathData.path.length === 0) return;
-    pathData.path.forEach((step, index) => {
-      if (!stepTakeaways[index]) {
-        handleStepTakeaways(index, step);
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathData]);
 
   // ── RENDER: Input Stage ──
   if (!showLevelPicker && !pathLoading && !pendingGeneration && !pathData) {
@@ -832,26 +724,7 @@ export default function AdaptivePath() {
                       deepDive={stepDeepDives[expandedStep ?? 0]?.sections}
                       deepDiveLoading={!!stepDeepDives[expandedStep ?? 0]?.loading}
                       editorContext={stepDeepDives[expandedStep ?? 0]?.editorContext || ""}
-                      onGoDeeper={async () => {
-                        const idx = expandedStep ?? 0;
-                        const step = pathData.path[idx];
-                        setStepDeepDives((prev) => ({
-                          ...prev,
-                          [idx]: { loading: true },
-                        }));
-                        const result = await generateStepDeepDive(step, query, {
-                          userLevel: knowledgeProfile?.level || "intermediate",
-                          existingTakeaways: stepTakeaways[idx]?.items || [],
-                        });
-                        setStepDeepDives((prev) => ({
-                          ...prev,
-                          [idx]: {
-                            loading: false,
-                            sections: result?.sections || [],
-                            editorContext: result?.editorContext || "",
-                          },
-                        }));
-                      }}
+                      onGoDeeper={() => handleGoDeeper(expandedStep ?? 0)}
                       query={query}
                     />
                   </div>
