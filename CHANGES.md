@@ -4,7 +4,30 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
-## [2.0.0-production-hardening] - 2026-03-06
+## [7.0.0-modular-architecture] - 2026-03-08
+
+### Added
+
+- **`usePathStepActions` Hook** — Shared hook unifying step-level audio (voice selection, position detection, pre-generation), takeaway (auto-load on step change), and deep dive logic. Used by both `BespokePath.jsx` and `AdaptivePath.jsx`
+- **`usePathQuiz` Hook** — Shared quiz generation and scoring hook (created in Phase 1, now wired into AdaptivePath)
+- **Service Modules** — `bespokePathService.js` (1,012 lines) split into 4 focused modules:
+  - `pathSearch.js` — Segment search + workflow intent filtering
+  - `pathSequencer.js` — Classification prompts + step sequencing via Gemini
+  - `pathNarration.js` — Bridge narration generation between steps
+  - `bespokePathService.js` — Orchestrator (425 lines, down from 1,012)
+
+### Changed
+
+- **`BespokePath.jsx`** — 600 → 560 lines; replaced Map-based state with `usePathStepActions` hook
+- **`AdaptivePath.jsx`** — 911 → 784 lines; consolidated inline quiz/audio/takeaway/deep-dive logic into shared hooks
+- **`classifyPrompt.regression.test.js`** — Updated to read `pathSequencer.js` (prompt guardrails moved during service split); all 6 tests now pass
+
+### Architecture
+
+> [!NOTE]
+> This is a **pure refactoring release** — no user-facing behavior changes. The modular split enables independent testing and maintenance of each pipeline stage.
+
+---
 
 ### Added
 

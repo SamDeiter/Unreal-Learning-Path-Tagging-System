@@ -11,7 +11,7 @@ graph TB
     subgraph "Client (React SPA)"
         UI["React 19 + Vite"]
         CTX["PathContext / TagDataContext"]
-        SVC["Service Layer (25 modules)"]
+        SVC["Service Layer (29 modules)"]
     end
 
     subgraph "Firebase"
@@ -331,10 +331,11 @@ Phase A results are cached in `cms_stream_urls_v2.json`, allowing Phase B to be 
 
 ## Bespoke Learning Path Architecture
 
-The **Bespoke Path** and **Adaptive Path** components generate personalized learning paths using a 4-stage pipeline:
+The **Bespoke Path** and **Adaptive Path** components generate personalized learning paths using a modular 4-stage pipeline (v7.0.0 architecture):
 
 ```
-User Question -> [1. Segment Finder] -> [2. Path Sequencer] -> [3. Path Renderer] -> [4. Quiz] -> UI
+User Question -> [1. pathSearch.js] -> [2. pathSequencer.js] -> [3. pathNarration.js] -> [4. Quiz] -> UI
+                      ↑ bespokePathService.js orchestrates all stages ↑
 ```
 
 | Stage                     | Purpose                                                                      | Backend                                  |
@@ -388,15 +389,20 @@ User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Pat
 
 ### Key Components
 
-| Component                | Purpose                                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `AdaptivePath.jsx`       | Main component: modal overlay with sidebar, step navigation, quiz                               |
-| `useAdaptiveQuiz.js`     | Hook managing diagnostic quiz state, scoring, knowledge profile                                 |
-| `QuizEngine.jsx`         | Reusable quiz component (shared with BespokePath)                                               |
-| `quizService.js`         | Generates MCQs from path content via Gemini                                                     |
-| `stepBriefingService.js` | AI-generated audio briefings with auto-advance                                                  |
-| `bespokePathService.js`  | Path generation pipeline: segment search → workflow intent guard → hybrid fallback → sequencing |
-| `quizImageBank.js`       | Maps UE5 concepts to screenshot images for diagnostic quiz questions                            |
+| Component                | Purpose                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `AdaptivePath.jsx`       | Main component: modal overlay with sidebar, step navigation, quiz (784 lines)        |
+| `useAdaptiveQuiz.js`     | Hook managing diagnostic quiz state, scoring, knowledge profile                      |
+| `usePathStepActions.js`  | Shared hook for step audio, takeaways, and deep dives (used by both path components) |
+| `usePathQuiz.js`         | Shared hook for quiz generation and scoring (used by both path components)           |
+| `QuizEngine.jsx`         | Reusable quiz component (shared with BespokePath)                                    |
+| `quizService.js`         | Generates MCQs from path content via Gemini                                          |
+| `stepBriefingService.js` | AI-generated audio briefings with auto-advance                                       |
+| `bespokePathService.js`  | Orchestrator: coordinates pathSearch → pathSequencer → pathNarration (425 lines)     |
+| `pathSearch.js`          | Segment search + workflow intent filtering                                           |
+| `pathSequencer.js`       | Classification prompts + step sequencing via Gemini                                  |
+| `pathNarration.js`       | Bridge narration generation between steps                                            |
+| `quizImageBank.js`       | Maps UE5 concepts to screenshot images for diagnostic quiz questions                 |
 
 ---
 
@@ -415,7 +421,10 @@ User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Pat
 | `feedbackService.js`       | User feedback + video signals                       | Firestore                                                 |
 | `analyticsService.js`      | Event logging + RAG pipeline + content gap tracking | Firestore                                                 |
 | `analyticsQueryService.js` | Analytics aggregation + RAG health metrics          | Firestore                                                 |
-| `bespokePathService.js`    | RAG pipeline: vector search → sequencing            | Cloud Functions (embedQuery, vectorSearch\*)              |
+| `bespokePathService.js`    | Pipeline orchestrator (delegates to 3 sub-modules)  | pathSearch, pathSequencer, pathNarration                  |
+| `pathSearch.js`            | Segment search + workflow intent filtering          | Cloud Functions (embedQuery, vectorSearch\*)              |
+| `pathSequencer.js`         | Classification + step sequencing via Gemini         | Cloud Functions (classifySegments)                        |
+| `pathNarration.js`         | Bridge narration generation                         | Cloud Functions (Gemini)                                  |
 | `accessControl.js`         | Auth gating + invite system                         | Firestore                                                 |
 
 ---
