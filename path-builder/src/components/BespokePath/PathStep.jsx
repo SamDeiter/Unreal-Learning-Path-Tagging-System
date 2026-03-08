@@ -208,8 +208,7 @@ export default function PathStep({
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [scriptOpen, setScriptOpen] = useState(false);
   const [deepDiveOpen, setDeepDiveOpen] = useState(true);
-  const [sectionRatings, setSectionRatings] = useState({}); // { 0: "good", 2: "bad" }
-  const [stepRating, setStepRating] = useState(null); // "positive" | "negative"
+  const [sectionRatings, setSectionRatings] = useState({}); // { 0: "good", 2: "bad", takeaways: "positive" }
   const audioRef = useRef(null);
 
   // Save deepdive section rating to Firestore
@@ -401,9 +400,9 @@ export default function PathStep({
           {/* Step-level feedback */}
           {filteredTakeaways?.length > 0 && (
             <div className="deepdive-rating" style={{ marginTop: "0.5rem" }}>
-              {stepRating ? (
+              {sectionRatings["takeaways"] ? (
                 <span className="deepdive-rating-done">
-                  {stepRating === "positive" ? "👍" : "👎"} Thanks for the feedback
+                  {sectionRatings["takeaways"] === "positive" ? "👍" : "👎"} Thanks for the feedback
                 </span>
               ) : (
                 <>
@@ -411,7 +410,7 @@ export default function PathStep({
                     type="button"
                     className="deepdive-rate-btn deepdive-rate-good"
                     onClick={() => {
-                      setStepRating("positive");
+                      setSectionRatings((prev) => ({ ...prev, takeaways: "positive" }));
                       submitStepFeedback("positive", {
                         stepTitle: step?.segment?.title || "",
                         category: step?.category || "",
@@ -433,7 +432,7 @@ export default function PathStep({
                     type="button"
                     className="deepdive-rate-btn deepdive-rate-bad"
                     onClick={() => {
-                      setStepRating("negative");
+                      setSectionRatings((prev) => ({ ...prev, takeaways: "negative" }));
                       submitStepFeedback("negative", {
                         stepTitle: step?.segment?.title || "",
                         category: step?.category || "",
