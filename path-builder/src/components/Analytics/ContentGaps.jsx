@@ -40,7 +40,7 @@ export default function ContentGaps() {
         const feedbackRef = collection(db, "stepFeedback");
         const feedbackQuery = query(
           feedbackRef,
-          where("rating", "==", "negative"),
+          where("sentiment", "==", "negative"),
           orderBy("timestamp", "desc"),
           limit(50)
         );
