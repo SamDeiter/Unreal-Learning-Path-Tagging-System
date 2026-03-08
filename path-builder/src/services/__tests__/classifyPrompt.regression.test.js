@@ -1,12 +1,15 @@
 /**
  * classifyPrompt.regression.test.js — Prompt regression safeguards.
  *
- * Verifies that the classification prompt in bespokePathService.js
+ * Verifies that the classification prompt in pathSequencer.js
  * contains all required guardrails. If someone removes a guardrail,
  * these tests fail immediately in CI.
  *
  * These tests import the prompt-building logic indirectly by checking
  * the source file text, since the prompt is built inside an async function.
+ *
+ * NOTE: The prompt was moved from bespokePathService.js → pathSequencer.js
+ * during the Phase 1 modular split (v7.0.0).
  */
 
 import { describe, it, expect } from "vitest";
@@ -16,8 +19,8 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Read the source file as text to check prompt contents
-const SERVICE_PATH = resolve(__dirname, "../../services/bespokePathService.js");
+// Read the sequencer module (contains classification prompt guardrails)
+const SERVICE_PATH = resolve(__dirname, "../../services/pathSequencer.js");
 const sourceText = readFileSync(SERVICE_PATH, "utf-8");
 
 describe("Classification Prompt Guardrails", () => {
