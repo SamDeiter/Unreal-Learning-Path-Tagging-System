@@ -127,6 +127,26 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Step feedback — 👍/👎 quality signals on learning path steps
+    // Authenticated users can create feedback, admin reads for content gap analysis
+    match /stepFeedback/{docId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['sentiment', 'timestamp'])
+        && request.resource.data.sentiment in ['positive', 'negative']
+        && request.resource.data.keys().size() <= 10;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Token usage — client-side token tracking for cost dashboard
+    // Authenticated users can read/write their own daily stats
+    match /token_usage/{dateKey} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+        && request.resource.data.keys().size() <= 15;
+      allow delete: if false;
+    }
+
     // Error logs — production crash monitoring
     // Authenticated users can write error reports, admin reads/manages
     match /errorLogs/{docId} {
