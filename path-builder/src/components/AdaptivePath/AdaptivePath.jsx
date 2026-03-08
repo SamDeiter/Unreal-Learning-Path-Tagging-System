@@ -31,6 +31,7 @@ import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
 import "./AdaptivePath.css";
+import LevelPicker from "./LevelPicker";
 
 const LETTERS = ["A", "B", "C", "D"];
 
@@ -422,42 +423,7 @@ export default function AdaptivePath() {
 
   // ── RENDER: Experience Level Picker (replaces diagnostic quiz) ──
   if (showLevelPicker) {
-    return (
-      <div className="adaptive-path">
-        <div className="diagnostic-quiz">
-          <div className="diagnostic-header">
-            <h2>🎯 How familiar are you with Unreal Engine?</h2>
-            <p>This helps us tailor the depth of your learning path</p>
-          </div>
-
-          <div className="diagnostic-options" style={{ maxWidth: "420px", margin: "24px auto 0" }}>
-            <button
-              className="diagnostic-option"
-              onClick={() => handleLevelSelect("beginner")}
-              style={{ padding: "16px 20px", marginBottom: "12px" }}
-            >
-              <span className="diagnostic-option-letter">🌱</span>
-              I&apos;m new to UE5
-            </button>
-            <button
-              className="diagnostic-option"
-              onClick={() => handleLevelSelect("intermediate")}
-              style={{ padding: "16px 20px", marginBottom: "12px" }}
-            >
-              <span className="diagnostic-option-letter">⚡</span>I know the basics
-            </button>
-            <button
-              className="diagnostic-option"
-              onClick={() => handleLevelSelect("advanced")}
-              style={{ padding: "16px 20px" }}
-            >
-              <span className="diagnostic-option-letter">🚀</span>
-              I&apos;m experienced
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return <LevelPicker onSelect={handleLevelSelect} />;
   }
 
   // ── RENDER: Path loading with pipeline steps ──
