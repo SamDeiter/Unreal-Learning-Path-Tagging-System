@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { generateBespokePath } from "../../services/bespokePathService";
-import { generateQuizForStep } from "../../services/quizService";
+import usePathQuiz from "../../hooks/usePathQuiz";
 import { findCachedPath, cachePath, addToHistory } from "../../services/pathCacheService";
 import { sanitizeQuery, checkRateLimit, recordQuery } from "../../services/securityGuardrails";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
@@ -84,11 +84,16 @@ export default function BespokePath() {
   const [pipelineStage, setPipelineStage] = useState("");
   const [inputError, setInputError] = useState("");
 
-  // Quiz state
-  const [quizzes, setQuizzes] = useState(new Map()); // stepIndex → questions[]
-  const [quizLoading, setQuizLoading] = useState(null); // stepIndex currently loading
-  const [quizScores, setQuizScores] = useState(new Map()); // stepIndex → {score, total}
-  const [showQuiz, setShowQuiz] = useState(null); // stepIndex showing quiz
+  // Quiz state (shared hook)
+  const {
+    quizzes,
+    quizLoading,
+    quizScores,
+    showQuiz,
+    handleTakeQuiz,
+    handleQuizComplete,
+    resetQuiz,
+  } = usePathQuiz({ pathData: pathResult, query });
 
   // Per-step audio and takeaways state
   const [stepAudios, setStepAudios] = useState(new Map());
@@ -138,9 +143,7 @@ export default function BespokePath() {
     setIsLoading(true);
     setPathResult(null);
     setCurrentStep(-1);
-    setQuizzes(new Map());
-    setQuizScores(new Map());
-    setShowQuiz(null);
+    resetQuiz();
 
     // 1. Check cache first (zero cost)
     setPipelineStage("Checking cache...");
@@ -180,74 +183,42 @@ export default function BespokePath() {
     setIsLoading(false);
     setPipelineStage("");
     // Also reset quizzes and scores for new search
-    setQuizzes(new Map());
-    setQuizScores(new Map());
-  }, [query, isLoading, pathResult?.query]);
-
-  // Generate quiz for the full path (on-demand)
-  const handleTakeQuiz = useCallback(
-    async (stepIndex) => {
-      if (quizzes.has(stepIndex) || !pathResult) {
-        setShowQuiz(stepIndex);
-        return;
-      }
-      setQuizLoading(stepIndex);
-
-      // Aggregate ALL step content for a comprehensive quiz
-      const aggregatedStep = {
-        summary: pathResult.path
-          .map((s) => (s.summary || s.segment?.text || "").substring(0, 400))
-          .join("\n\n"),
-        segment: pathResult.path[0]?.segment,
-        category: "comprehensive",
-      };
-
-      const questions = await generateQuizForStep(aggregatedStep, pathResult.query, 3);
-      setQuizzes((prev) => new Map(prev).set(stepIndex, questions));
-      setQuizLoading(null);
-      setShowQuiz(stepIndex);
-    },
-    [quizzes, pathResult]
-  );
-
-  // Handle quiz completion for a step
-  const handleQuizComplete = useCallback(({ stepIndex, score, total }) => {
-    setQuizScores((prev) => new Map(prev).set(stepIndex, { score, total }));
-    setShowQuiz(null);
-  }, []);
+    resetQuiz();
+  }, [query, isLoading, pathResult?.query, resetQuiz]);
 
   // Handle selecting a pre-seeded path (zero API cost)
-  const handlePreSeededSelect = useCallback((path) => {
-    // Convert pre-seeded format to the same shape as generateBespokePath output
-    const fakeResult = {
-      query: path.query,
-      path: path.steps.map((step, i) => ({
-        category: step.category,
-        segment: {
-          id: `${path.id}-step-${i}`,
-          title: step.title,
-          summary: step.summary,
-          source: step.sourceType,
-          text: step.summary,
-        },
-      })),
-      bridges: path.steps.slice(1).map((_, i) => ({
-        from: i,
-        to: i + 1,
-        text: "", // No bridge narration for pre-seeded
-      })),
-      segments: path.steps,
-      generatedAt: new Date().toISOString(),
-      isPreSeeded: true,
-    };
-    setPathResult(fakeResult);
-    addToHistory(path.query, fakeResult);
-    setQuery(path.query);
-    setCurrentStep(0);
-    setQuizzes(new Map());
-    setQuizScores(new Map());
-    setShowQuiz(null);
-  }, []);
+  const handlePreSeededSelect = useCallback(
+    (path) => {
+      // Convert pre-seeded format to the same shape as generateBespokePath output
+      const fakeResult = {
+        query: path.query,
+        path: path.steps.map((step, i) => ({
+          category: step.category,
+          segment: {
+            id: `${path.id}-step-${i}`,
+            title: step.title,
+            summary: step.summary,
+            source: step.sourceType,
+            text: step.summary,
+          },
+        })),
+        bridges: path.steps.slice(1).map((_, i) => ({
+          from: i,
+          to: i + 1,
+          text: "", // No bridge narration for pre-seeded
+        })),
+        segments: path.steps,
+        generatedAt: new Date().toISOString(),
+        isPreSeeded: true,
+      };
+      setPathResult(fakeResult);
+      addToHistory(path.query, fakeResult);
+      setQuery(path.query);
+      setCurrentStep(0);
+      resetQuiz();
+    },
+    [resetQuiz]
+  );
 
   // Generate per-step audio on demand
   const handleStepAudio = useCallback(
