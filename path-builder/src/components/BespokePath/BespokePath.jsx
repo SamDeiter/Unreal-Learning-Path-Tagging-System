@@ -138,37 +138,6 @@ const SUGGESTION_POOL = [
 
 const DEFAULT_SUGGESTIONS = SUGGESTION_POOL.slice(0, 5).map((s) => s.q);
 
-/** Filter suggestions by keyword match against user input */
-function _getFilteredSuggestions(input) {
-  if (!input || input.trim().length < 2) return DEFAULT_SUGGESTIONS;
-
-  const words = input
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((w) => w.length > 2);
-  if (words.length === 0) return DEFAULT_SUGGESTIONS;
-
-  // Score each suggestion by keyword overlap
-  const scored = SUGGESTION_POOL.map((s) => {
-    let score = 0;
-    const qLower = s.q.toLowerCase();
-    for (const word of words) {
-      if (s.tags.some((tag) => tag.toLowerCase().includes(word))) score += 2;
-      if (qLower.includes(word)) score += 1;
-    }
-    return { q: s.q, score };
-  });
-
-  // Filter out the exact query if it matches, sort by score, return top 5
-  const filtered = scored
-    .filter((s) => s.score > 0 && s.q.toLowerCase() !== input.toLowerCase().trim())
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
-    .map((s) => s.q);
-
-  return filtered.length > 0 ? filtered : DEFAULT_SUGGESTIONS;
-}
-
 // ── Phase Grouping ──────────────────────────────────────
 // Maps step categories to the 4-phase pedagogical flow
 const PHASE_CONFIG = [

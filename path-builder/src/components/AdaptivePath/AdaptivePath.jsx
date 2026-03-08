@@ -26,20 +26,11 @@ import {
 import { generateQuizForStep } from "../../services/quizService";
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
+import { fixEpicUrl } from "../../utils/urlHelpers";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
 import "./AdaptivePath.css";
-
-/** Normalize known broken Epic Learning URL patterns */
-function fixEpicUrl(url) {
-  if (!url) return url;
-  return url
-    .replace("/learning/tutorial/", "/learning/tutorials/")
-    .replace("/learning/knowledge_base/", "/learning/knowledge-base/")
-    .replace("/learning/course/", "/learning/courses/")
-    .replace("/learning/talks_and_demos/", "/learning/talks-and-demos/");
-}
 
 const LETTERS = ["A", "B", "C", "D"];
 
