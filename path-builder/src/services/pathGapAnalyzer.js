@@ -221,23 +221,39 @@ export async function analyzePathGaps(query, steps, profile = null) {
 
     // 2. Extract what the PATH actually covers (from course titles/content)
     const pathTopics = extractSubtopics(steps, query);
-    const pathText = pathTopics.join(" ").toLowerCase();
 
     devLog(`[GapAnalyzer] Path covers: ${pathTopics.join(", ")}`);
 
     // 3. For each required subtopic, check if the path covers it
-    //    Using keyword overlap against path content
+    //    Multiple strategies to catch coverage:
+    //    a) computeTopicOverlap per-topic (keyword ratio)
+    //    b) Substring containment in full path text (catches "AI Perception" in "AI Perception — AI Damage")
+    //    c) Word-level hits with short keywords preserved (don't filter "ai", "ui", "vr")
     const covered = [];
     const gaps = [];
 
+    // Build full text from ALL path content for aggregate matching
+    const allPathText = steps
+      .map((s) => {
+        const seg = s?.segment;
+        const title = seg?.title || seg?.videoTitle || "";
+        const text = s?.summary || seg?.text || "";
+        return `${title} ${text}`;
+      })
+      .join(" ")
+      .toLowerCase();
+
     for (const required of requiredSubtopics) {
       const requiredLower = required.toLowerCase();
-      const requiredWords = requiredLower.split(/\s+/).filter((w) => w.length > 2);
+      // Keep words >= 2 chars (preserves "ai", "ui", "vr", "fx")
+      const requiredWords = requiredLower
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter((w) => w.length >= 2);
 
-      // Check overlap with each path topic
+      // Strategy A: computeTopicOverlap against each path topic title
       let bestOverlap = 0;
       let bestMatch = "";
-
       for (const pathTopic of pathTopics) {
         const overlap = computeTopicOverlap(required, pathTopic);
         if (overlap > bestOverlap) {
@@ -246,18 +262,28 @@ export async function analyzePathGaps(query, steps, profile = null) {
         }
       }
 
-      // Also check if required words appear anywhere in path text
-      const wordHits = requiredWords.filter((w) => pathText.includes(w)).length;
+      // Strategy B: Check if the required topic appears as a substring
+      //   e.g. "ai perception" found in "ai perception — ai damage"
+      const substringMatch =
+        allPathText.includes(requiredLower) ||
+        // Also check core phrase (first 2-3 significant words)
+        (requiredWords.length >= 2 && allPathText.includes(requiredWords.slice(0, 3).join(" ")));
+
+      // Strategy C: Word-level hits across ALL path text
+      const wordHits = requiredWords.filter((w) => allPathText.includes(w)).length;
       const wordCoverage = requiredWords.length > 0 ? wordHits / requiredWords.length : 0;
 
-      // Consider covered if either good topic overlap OR most words are present
-      const isCovered = bestOverlap > 0.35 || wordCoverage > 0.6;
+      // Consider covered if ANY strategy succeeds:
+      // - Topic overlap > 0.3 with a single course
+      // - Substring match of the topic in full path text
+      // - 70%+ of required words appear across all path content
+      const isCovered = bestOverlap > 0.3 || substringMatch || wordCoverage >= 0.7;
 
       if (isCovered) {
         covered.push({
           topic: required,
-          matchedTo: bestMatch,
-          confidence: Math.max(bestOverlap, wordCoverage),
+          matchedTo: bestMatch || "(multiple courses)",
+          confidence: Math.max(bestOverlap, wordCoverage, substringMatch ? 0.8 : 0),
         });
       } else {
         gaps.push({
