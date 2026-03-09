@@ -1,72 +1,80 @@
 /**
- * PathIntelligencePanel — Right-sidebar intelligence panel for Path Builder
+ * PathIntelligencePanel v3 — Tabbed intelligence sidebar
  *
- * Replaces the old OutputPanel with a two-section layout:
- * 1. TOP: Path intelligence (coverage gauge, gap summary, quick actions)
- * 2. BOTTOM: Blueprint tabs (Outline, Objectives, Goals, Docs) — the old OutputPanel
- *
- * Gap analysis runs on-demand when user clicks "Analyze Path".
+ * Tabs: Coverage | Gaps | Quiz | Export
+ * Only ONE tab visible at a time. Clean and focused.
+ * Setup gate shown when Primary Goal is missing.
  */
 
 import { useState, useCallback, useMemo } from "react";
 import { usePath } from "../../context/PathContext";
-import { analyzePathGaps } from "../../services/pathGapAnalyzer";
-import { exportScormPackage } from "../../services/scormExportService";
-import OutputPanel from "../OutputPanel/OutputPanel";
+import { analyzePathGaps, generateGapFillStep } from "../../services/pathGapAnalyzer";
+import { generateQuizForPath } from "../../services/quizService";
+import PathWizard from "../BespokePath/PathWizard";
 import "./PathIntelligencePanel.css";
 
-// ── Coverage Gauge SVG ─────────────────────────────────────────────
+// ── Coverage Gauge ─────────────────────────────────────────
 function CoverageGauge({ score }) {
-  const radius = 30;
+  const radius = 36;
   const circumference = 2 * Math.PI * radius;
-  const pct = Math.max(0, Math.min(100, score));
+  const pct = Math.round(Math.max(0, Math.min(100, score * 100)));
   const offset = circumference - (pct / 100) * circumference;
-
-  // Color by score
   const color = pct >= 80 ? "#3fb950" : pct >= 50 ? "#d29922" : pct >= 1 ? "#f85149" : "#484f58";
 
   return (
-    <div className="coverage-gauge">
-      <svg width="72" height="72" viewBox="0 0 72 72">
-        <circle cx="36" cy="36" r={radius} className="gauge-bg" />
+    <div className="ip-gauge">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <circle cx="44" cy="44" r={radius} className="ip-gauge-bg" />
         <circle
-          cx="36"
-          cy="36"
+          cx="44"
+          cy="44"
           r={radius}
-          className="gauge-fill"
+          className="ip-gauge-fill"
           stroke={color}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
         />
       </svg>
-      <div className="gauge-label" style={{ color }}>
-        {pct}%<small>coverage</small>
+      <div className="ip-gauge-label" style={{ color }}>
+        <span className="ip-gauge-pct">{pct}%</span>
+        <span className="ip-gauge-sub">coverage</span>
       </div>
     </div>
   );
 }
 
-// ── Main Panel ─────────────────────────────────────────────────────
+// ── Tab definitions ──
+const TABS = [
+  { id: "coverage", icon: "📊", label: "Coverage" },
+  { id: "gaps", icon: "⚠", label: "Gaps" },
+  { id: "quiz", icon: "📝", label: "Quiz" },
+  { id: "export", icon: "📦", label: "Export" },
+];
+
+// ── Main ───────────────────────────────────────────────────
 export default function PathIntelligencePanel() {
   const { courses, learningIntent, pathStats } = usePath();
 
-  // Analysis state
-  const [analysisResult, setAnalysisResult] = useState(null);
+  const [activeTab, setActiveTab] = useState("coverage");
+  const [analysis, setAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [analyzeError, setAnalyzeError] = useState(null);
-
-  // SCORM state
-  const [scormExporting, setScormExporting] = useState(false);
-  const [scormExported, setScormExported] = useState(false);
-  const [scormError, setScormError] = useState(null);
+  const [error, setError] = useState(null);
+  const [fillingGap, setFillingGap] = useState(null);
+  const [fillResults, setFillResults] = useState({});
+  const [quiz, setQuiz] = useState(null);
+  const [generatingQuiz, setGeneratingQuiz] = useState(false);
 
   const hasCourses = courses.length > 0;
+  const hasGoal = !!learningIntent?.primaryGoal?.trim();
+  const hasLevel = !!learningIntent?.skillLevel;
+  const hasBudget = !!learningIntent?.timeBudget;
+  const setupComplete = hasGoal && hasLevel && hasBudget;
+  const isReady = hasCourses && setupComplete;
 
-  // Build a pathResult-like object from PathContext for gap analysis / SCORM
   const pathResult = useMemo(() => {
-    if (!hasCourses) return null;
+    if (!isReady) return null;
     return {
-      query: learningIntent?.primaryGoal || "Manual Learning Path",
+      query: learningIntent.primaryGoal,
       path: courses.map((c, i) => ({
         category: c.role?.toLowerCase() === "prerequisite" ? "foundation" : "core",
         title: c.title || `Step ${i + 1}`,
@@ -78,193 +86,336 @@ export default function PathIntelligencePanel() {
         },
       })),
       bridges: [],
-      gaps: analysisResult,
+      gaps: analysis,
     };
-  }, [hasCourses, courses, learningIntent, analysisResult]);
+  }, [isReady, courses, learningIntent, analysis]);
 
-  // ── Analyze Path ──
+  // ── Analyze ──
   const handleAnalyze = useCallback(async () => {
-    if (!hasCourses || analyzing) return;
+    if (!isReady || analyzing) return;
     setAnalyzing(true);
-    setAnalyzeError(null);
-
+    setError(null);
     try {
-      const query = learningIntent?.primaryGoal || courses.map((c) => c.title).join(", ");
-      const result = await analyzePathGaps(
-        courses.map((c) => ({
-          category: c.role?.toLowerCase() === "prerequisite" ? "foundation" : "core",
-          segment: {
-            title: c.title || "Untitled",
-            text: c.description || c.why || "",
-          },
-        })),
-        query
-      );
-      setAnalysisResult(result);
+      const steps = courses.map((c) => ({
+        category: c.role?.toLowerCase() === "prerequisite" ? "foundation" : "core",
+        segment: { title: c.title || "Untitled", text: c.description || c.why || "" },
+      }));
+      const result = await analyzePathGaps(learningIntent.primaryGoal, steps);
+      setAnalysis(result);
     } catch (err) {
-      setAnalyzeError(err.message || "Analysis failed");
+      setError(err.message || "Analysis failed");
     } finally {
       setAnalyzing(false);
     }
-  }, [hasCourses, analyzing, courses, learningIntent]);
+  }, [isReady, analyzing, courses, learningIntent]);
 
-  // ── SCORM Export ──
-  const handleScormExport = useCallback(async () => {
-    if (!pathResult || scormExporting) return;
-    setScormExporting(true);
-    setScormError(null);
+  // ── Fill Gap ──
+  const handleFillGap = useCallback(
+    async (topic) => {
+      if (fillingGap) return;
+      setFillingGap(topic);
+      try {
+        const steps = courses.map((c) => ({
+          category: "core",
+          segment: { title: c.title || "", text: c.description || "" },
+        }));
+        const result = await generateGapFillStep(topic, learningIntent.primaryGoal, steps);
+        setFillResults((prev) => ({ ...prev, [topic]: result }));
+      } catch {
+        setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
+      } finally {
+        setFillingGap(null);
+      }
+    },
+    [fillingGap, courses, learningIntent]
+  );
 
+  // ── Quiz ──
+  const handleGenerateQuiz = useCallback(async () => {
+    if (!pathResult || generatingQuiz) return;
+    setGeneratingQuiz(true);
     try {
-      await exportScormPackage(pathResult, { includeQuiz: true });
-      setScormExported(true);
-    } catch (err) {
-      setScormError(err.message || "Export failed");
+      const questions = await generateQuizForPath(pathResult.path, learningIntent.primaryGoal, 2);
+      setQuiz(questions);
+    } catch {
+      setQuiz([]);
     } finally {
-      setScormExporting(false);
+      setGeneratingQuiz(false);
     }
-  }, [pathResult, scormExporting]);
+  }, [pathResult, generatingQuiz, learningIntent]);
 
-  // ── Derived data ──
-  const coverageScore = analysisResult?.coverageScore ?? 0;
-  const blindSpots = analysisResult?.blindSpots || [];
-  const prereqs = analysisResult?.prereqChain || [];
+  // Derived
+  const blindSpots = analysis?.blindSpots || [];
+  const suggestions = analysis?.suggestions || [];
+  const assumedKnowledge = analysis?.assumedKnowledge || [];
+  const coverageScore = analysis?.coverageScore ?? 0;
+  const corpusStats = analysis?.corpusStats || {};
+  const gapCount = blindSpots.length;
 
-  // ── Render ──
+  // ── RENDER ──
   return (
-    <div className="intel-panel">
-      {/* Intelligence Header */}
-      <div className="intel-header">
-        <h3>🧠 Path Intelligence</h3>
+    <div className="ip-panel">
+      {/* Header */}
+      <div className="ip-header">
+        <span className="ip-logo">🧠</span>
+        <h3>Path Intelligence</h3>
+      </div>
 
-        {!hasCourses ? (
-          <div className="intel-empty-state">
-            <span className="empty-icon">📊</span>
-            <p>Add courses to your path to unlock intelligence features</p>
+      {/* Gate: setup checklist */}
+      {!setupComplete ? (
+        <div className="ip-gate">
+          <div className="ip-gate-icon">🎯</div>
+          <h4>Define Your Path</h4>
+          <p>Complete the setup above to unlock intelligence:</p>
+          <ul className="ip-checklist">
+            <li className={hasGoal ? "done" : ""}>{hasGoal ? "✅" : "⬜"} Primary Goal</li>
+            <li className={hasLevel ? "done" : ""}>{hasLevel ? "✅" : "⬜"} Skill Level</li>
+            <li className={hasBudget ? "done" : ""}>{hasBudget ? "✅" : "⬜"} Time Budget</li>
+          </ul>
+        </div>
+      ) : !hasCourses ? (
+        <div className="ip-gate">
+          <div className="ip-gate-icon">📚</div>
+          <h4>Add Courses</h4>
+          <p>Drag courses from the left panel to build your path.</p>
+        </div>
+      ) : (
+        <>
+          {/* Tab Bar */}
+          <div className="ip-tabs">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                className={`ip-tab ${activeTab === tab.id ? "active" : ""}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span className="ip-tab-icon">{tab.icon}</span>
+                <span className="ip-tab-label">{tab.label}</span>
+                {tab.id === "gaps" && gapCount > 0 && (
+                  <span className="ip-tab-badge">{gapCount}</span>
+                )}
+              </button>
+            ))}
           </div>
-        ) : (
-          <>
-            {/* Coverage Gauge + Stats */}
-            <div className="intel-coverage-row">
-              <CoverageGauge score={coverageScore} />
-              <div className="coverage-meta">
-                <div className="meta-stat">
-                  <span>Courses</span>
-                  <span>{pathStats.courseCount}</span>
+
+          {/* Tab Content */}
+          <div className="ip-content">
+            {/* ════ COVERAGE TAB ════ */}
+            {activeTab === "coverage" && (
+              <div className="ip-tab-pane">
+                <CoverageGauge score={coverageScore} />
+
+                <div className="ip-stats">
+                  <div className="ip-stat">
+                    <span>Courses</span>
+                    <strong>{pathStats.courseCount}</strong>
+                  </div>
+                  <div className="ip-stat">
+                    <span>Est. Time</span>
+                    <strong>{pathStats.estimatedHours}h</strong>
+                  </div>
+                  {pathStats.levelRange && (
+                    <div className="ip-stat">
+                      <span>Levels</span>
+                      <strong>{pathStats.levelRange}</strong>
+                    </div>
+                  )}
+                  {analysis && (
+                    <div className="ip-stat">
+                      <span>Topics Covered</span>
+                      <strong>
+                        {corpusStats.subtopicsCovered || 0} / {corpusStats.subtopicsChecked || 0}
+                      </strong>
+                    </div>
+                  )}
                 </div>
-                <div className="meta-stat">
-                  <span>Est. Time</span>
-                  <span>{pathStats.estimatedHours}h</span>
-                </div>
-                <div className="meta-stat">
-                  <span>Blind Spots</span>
-                  <span>{blindSpots.length}</span>
-                </div>
-                {pathStats.levelRange && (
-                  <div className="meta-stat">
-                    <span>Levels</span>
-                    <span>{pathStats.levelRange}</span>
+
+                <button className="ip-btn primary" onClick={handleAnalyze} disabled={analyzing}>
+                  {analyzing ? (
+                    <>
+                      <span className="ip-spinner" /> Analyzing…
+                    </>
+                  ) : analysis ? (
+                    "🔄 Re-Analyze"
+                  ) : (
+                    "🔍 Analyze Path"
+                  )}
+                </button>
+
+                {error && <p className="ip-error">❌ {error}</p>}
+
+                {/* Coverage Explanation */}
+                {analysis && (
+                  <div
+                    className={`ip-explain ${coverageScore >= 0.8 ? "good" : coverageScore >= 0.5 ? "warn" : "low"}`}
+                  >
+                    {coverageScore >= 0.8 ? (
+                      <p>
+                        <strong>✅ Great!</strong> Your path covers{" "}
+                        {Math.round(coverageScore * 100)}% of key subtopics.
+                      </p>
+                    ) : coverageScore >= 0.5 ? (
+                      <p>
+                        <strong>⚠️ Partial</strong> — {Math.round(coverageScore * 100)}% covered.
+                        Check the <strong>Gaps</strong> tab to see what&apos;s missing.
+                      </p>
+                    ) : (
+                      <p>
+                        <strong>🔴 Low</strong> — Only {Math.round(coverageScore * 100)}% covered.
+                        Check the <strong>Gaps</strong> tab for blind spots and suggestions.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Gap Summary Chips */}
-            {analysisResult && (
-              <div className="intel-gap-summary">
-                {coverageScore >= 80 ? (
-                  <span className="gap-chip success">✅ Good Coverage</span>
-                ) : coverageScore >= 50 ? (
-                  <span className="gap-chip warning">⚠ Partial Coverage</span>
-                ) : coverageScore >= 1 ? (
-                  <span className="gap-chip">❌ Low Coverage</span>
-                ) : null}
-                {blindSpots.length > 0 && (
-                  <span className="gap-chip warning">
-                    {blindSpots.length} blind spot{blindSpots.length > 1 ? "s" : ""}
-                  </span>
-                )}
-                {prereqs.length > 0 && (
-                  <span className="gap-chip info">
-                    {prereqs.length} prerequisite{prereqs.length > 1 ? "s" : ""}
-                  </span>
-                )}
-              </div>
             )}
 
-            {/* Quick Actions */}
-            <div className="intel-actions">
-              <button
-                className="intel-action-btn analyze-btn"
-                onClick={handleAnalyze}
-                disabled={analyzing || !hasCourses}
-              >
-                {analyzing ? (
-                  <>
-                    <span className="intel-spinner" /> Analyzing...
-                  </>
-                ) : analysisResult ? (
-                  "🔄 Re-Analyze Path"
+            {/* ════ GAPS TAB ════ */}
+            {activeTab === "gaps" && (
+              <div className="ip-tab-pane">
+                {!analysis ? (
+                  <div className="ip-empty">
+                    <p>
+                      Run analysis on the <strong>Coverage</strong> tab first to see gaps.
+                    </p>
+                  </div>
+                ) : gapCount === 0 && suggestions.length === 0 ? (
+                  <div className="ip-empty">
+                    <span className="ip-empty-icon">🎉</span>
+                    <p>No gaps detected! Your path looks solid.</p>
+                  </div>
                 ) : (
-                  "🔍 Analyze Path"
-                )}
-              </button>
-
-              <button
-                className={`intel-action-btn scorm-btn ${scormExported ? "exported" : ""}`}
-                onClick={handleScormExport}
-                disabled={scormExporting || !hasCourses}
-              >
-                {scormExporting
-                  ? "⏳ Generating..."
-                  : scormExported
-                    ? "✅ Downloaded!"
-                    : "📦 SCORM 1.2"}
-              </button>
-
-              <button className="intel-action-btn" disabled>
-                📝 Add Quiz
-              </button>
-            </div>
-
-            {scormError && <div className="scorm-error">❌ {scormError}</div>}
-            {analyzeError && <div className="scorm-error">❌ {analyzeError}</div>}
-
-            {/* Analysis Results — expanded view */}
-            {analysisResult && blindSpots.length > 0 && (
-              <div className="intel-analysis-results">
-                <h4>Blind Spots</h4>
-                <ul className="blind-spot-list">
-                  {blindSpots.slice(0, 5).map((spot, i) => (
-                    <li key={i}>{spot}</li>
-                  ))}
-                </ul>
-
-                {prereqs.length > 0 && (
                   <>
-                    <h4>Prerequisites</h4>
-                    <div className="prereq-mini">
-                      {prereqs.slice(0, 4).map((p, i) => (
-                        <span key={i}>
-                          {i > 0 && <span className="prereq-arrow"> → </span>}
-                          <span className="prereq-node">{p}</span>
-                        </span>
-                      ))}
-                    </div>
+                    {/* Blind Spots */}
+                    {blindSpots.map((spot, i) => {
+                      const topic = typeof spot === "string" ? spot : spot.topic;
+                      const severity = spot.severity || "medium";
+                      const reason = spot.reason || "";
+                      const filled = fillResults[topic];
+                      return (
+                        <div key={i} className={`ip-gap-card ip-sev-${severity}`}>
+                          <div className="ip-gap-header">
+                            <span className={`ip-sev-dot ${severity}`} />
+                            <strong>{topic}</strong>
+                          </div>
+                          {reason && <p className="ip-gap-reason">{reason}</p>}
+                          {filled ? (
+                            filled.error ? (
+                              <p className="ip-gap-status error">Could not generate fill</p>
+                            ) : (
+                              <p className="ip-gap-status success">
+                                ✅ {filled.segment?.title || filled.title || "Fill generated"}
+                              </p>
+                            )
+                          ) : (
+                            <button
+                              className="ip-btn small"
+                              onClick={() => handleFillGap(topic)}
+                              disabled={!!fillingGap}
+                            >
+                              {fillingGap === topic ? "Generating…" : "📄 Suggest Fill"}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Suggestions */}
+                    {suggestions.length > 0 && (
+                      <div className="ip-suggestions">
+                        <h4>💡 Suggestions</h4>
+                        {suggestions.map((s, i) => (
+                          <div key={i} className="ip-suggestion">
+                            <strong>{s.topic || s}</strong>
+                            {s.rationale && <p>{s.rationale}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Assumed Knowledge */}
+                    {assumedKnowledge.length > 0 && (
+                      <div className="ip-assumed">
+                        <h4>🎓 Assumed Knowledge</h4>
+                        <p>Your path assumes learners already know:</p>
+                        <div className="ip-chip-row">
+                          {assumedKnowledge.map((ak, i) => (
+                            <span key={i} className="ip-chip">
+                              {ak}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
             )}
-          </>
-        )}
-      </div>
 
-      {/* Divider */}
-      <div className="intel-divider" />
+            {/* ════ QUIZ TAB ════ */}
+            {activeTab === "quiz" && (
+              <div className="ip-tab-pane">
+                <p className="ip-tab-desc">
+                  Generate knowledge-check questions from your path content.
+                </p>
+                <button
+                  className="ip-btn primary"
+                  onClick={handleGenerateQuiz}
+                  disabled={generatingQuiz}
+                >
+                  {generatingQuiz ? (
+                    <>
+                      <span className="ip-spinner" /> Generating…
+                    </>
+                  ) : quiz ? (
+                    `✅ ${quiz.length} Questions Ready`
+                  ) : (
+                    "📝 Generate Quiz"
+                  )}
+                </button>
 
-      {/* Blueprint Section — existing OutputPanel */}
-      <div className="intel-blueprint">
-        <OutputPanel />
-      </div>
+                {quiz && quiz.length > 0 && (
+                  <div className="ip-quiz-list">
+                    {quiz.map((q, i) => (
+                      <div key={i} className="ip-quiz-card">
+                        <p className="ip-quiz-q">
+                          <strong>Q{i + 1}:</strong> {q.question}
+                        </p>
+                        {q.options && (
+                          <ul className="ip-quiz-opts">
+                            {q.options.map((opt, j) => (
+                              <li key={j} className={opt === q.answer ? "correct" : ""}>
+                                {opt}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {quiz && quiz.length === 0 && (
+                  <p className="ip-error">Could not generate quiz questions. Try again.</p>
+                )}
+              </div>
+            )}
+
+            {/* ════ EXPORT TAB ════ */}
+            {activeTab === "export" && (
+              <div className="ip-tab-pane">
+                {pathResult ? (
+                  <PathWizard pathResult={pathResult} quiz={quiz} />
+                ) : (
+                  <div className="ip-empty">
+                    <p>Add courses and set a goal to enable export.</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
