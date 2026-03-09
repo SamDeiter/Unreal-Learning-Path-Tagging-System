@@ -74,6 +74,7 @@ IMPORTANT RULES:
 - For "create/make" queries: Start with importing the asset or downloading from FAB, then setting up materials, then creating a Blueprint actor with the mesh component, then configuring collision
 - Each summary should be 3-5 sentences teaching the concept directly in second person
 - Plain text only — no markdown, no asterisks, no code blocks
+- UE5 ONLY: This platform is exclusively for Unreal Engine 5. NEVER reference UE4 or Unreal Engine 4. All menu paths, features, and instructions must be UE5-specific.
 ${adaptiveContext}
 
 Return a JSON array:

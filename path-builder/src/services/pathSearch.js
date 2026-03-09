@@ -208,6 +208,12 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
       devLog(`[pathSearch] Filtered junk segment: "${title}"`);
       return false;
     }
+    // Reject UE4 / Unreal Engine 4 content — this LMS is UE5-only
+    const fullText = `${title} ${seg.text || ""}`.toLowerCase();
+    if (/\bue\s*4\b/.test(fullText) || /\bunreal\s+engine\s+4\b/.test(fullText)) {
+      devLog(`[pathSearch] Filtered UE4 segment: "${title}"`);
+      return false;
+    }
     return true;
   });
   if (segments.length < preFilterCount) {

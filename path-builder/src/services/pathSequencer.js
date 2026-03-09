@@ -188,6 +188,7 @@ Rules:
   - Query: "LOD" → Segment about Nanite (automatic virtualized geometry ≠ manual LOD setup)
   If the segment's PRIMARY topic is a different UE5 system/concept than what the user asked about, mark it "low" even if it shares vocabulary.
 - PRIORITIZE Blueprint-based content over C++ content unless the query explicitly asks about C++. When teaching concepts, explain using Blueprint nodes, property panels, and editor UI rather than code syntax.
+- UE5 ONLY (CRITICAL): This platform is exclusively for Unreal Engine 5. NEVER reference UE4 or Unreal Engine 4. If a segment is about UE4, mark it "low" relevance. All instructions, menu paths, and features must be UE5-specific.
 - BLUEPRINT PRECISION: Blueprints ARE a form of programming (visual scripting). NEVER say 'without code' or 'no code needed'. Instead say 'without writing C++ or text-based code'. Blueprints are visual code.
 - NEVER start a summary with 'This article...' or 'This video...' or 'This segment...' — teach the concept directly
 - Write as if YOU are the instructor explaining the concept, not describing someone else's content
@@ -242,6 +243,11 @@ Rules:
       if (overlap < TOPIC_OVERLAP_THRESHOLD) {
         devWarn(
           `[BespokePath] Topical cross-check rejected: "${segments[c.index]?.title || segments[c.index]?.videoTitle || "(untitled)"}" (overlap: ${(overlap * 100).toFixed(0)}%)`
+        );
+        c.relevance = "low";
+      } else if (/\bue\s*4\b/i.test(stepText) || /\bunreal\s+engine\s+4\b/i.test(stepText)) {
+        devWarn(
+          `[BespokePath] UE4 content rejected: "${segments[c.index]?.title || segments[c.index]?.videoTitle || "(untitled)"}"`
         );
         c.relevance = "low";
         demotedCount++;
