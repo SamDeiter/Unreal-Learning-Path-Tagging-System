@@ -10,9 +10,14 @@
  * - Click node to view details or remove
  * - Drop zone at end to add new courses
  */
+import { useMemo } from "react";
 import { usePath } from "../../context/PathContext";
 import { optimizePathOrder } from "../../utils/generationEngine";
 import { useAugmentationData } from "../../hooks/useAugmentationData";
+import { classifySegment, getBloomBadge } from "../../services/bloomClassifier";
+import { estimateCognitiveLoad, getLoadSummary } from "../../services/cognitiveLoadEngine";
+import { topologicalSort } from "../../services/prerequisiteGraph";
+import { interleaveCourses } from "../../services/cognitiveLoadEngine";
 import "./AssemblyLine.css";
 
 function AssemblyLine() {
@@ -57,8 +62,57 @@ function AssemblyLine() {
   };
 
   const handleOptimize = () => {
-    const optimized = optimizePathOrder(courses);
-    reorderCourses(optimized);
+    try {
+      // Phase 1: topological sort by prerequisites
+      const topoSorted = topologicalSort(courses);
+      // Phase 2: interleave by cognitive load
+      const interleaved = interleaveCourses(topoSorted);
+      // Strip cognitiveLoad annotations before saving
+      const cleaned = interleaved.map(({ cognitiveLoad: _cl, ...rest }) => rest);
+      reorderCourses(cleaned);
+    } catch {
+      // Fallback to legacy optimizer
+      const optimized = optimizePathOrder(courses);
+      reorderCourses(optimized);
+    }
+  };
+
+  // Compute cognitive load summary for entire path
+  const loadSummary = useMemo(() => {
+    if (courses.length === 0) return null;
+    return getLoadSummary(courses);
+  }, [courses]);
+
+  // Render Bloom's taxonomy badge for a course
+  const renderBloomBadge = (course) => {
+    const bloom = classifySegment(
+      course.title || "",
+      course.gemini_enriched?.one_sentence_summary || ""
+    );
+    const badge = getBloomBadge(bloom.level);
+    return (
+      <span
+        className="bloom-badge"
+        style={{ color: badge.color, borderColor: badge.color }}
+        title={`Bloom's Taxonomy: ${badge.label} (${Math.round(bloom.confidence * 100)}%)`}
+      >
+        {badge.emoji} {badge.label}
+      </span>
+    );
+  };
+
+  // Render cognitive load dot
+  const renderLoadDot = (course) => {
+    const { load } = estimateCognitiveLoad(course);
+    const color = load < 3 ? "#3fb950" : load < 5 ? "#d29922" : "#f85149";
+    const label = load < 3 ? "Low" : load < 5 ? "Medium" : "High";
+    return (
+      <span
+        className="load-dot"
+        style={{ backgroundColor: color }}
+        title={`Cognitive Load: ${load}/10 (${label})`}
+      />
+    );
   };
 
   // Get node classes
@@ -123,6 +177,18 @@ function AssemblyLine() {
               {courses.length} course{courses.length !== 1 ? "s" : ""} •{" ~"}
               {courses.reduce((sum, c) => sum + (c.duration || 0), 0).toFixed(1)} hours •{" "}
               {courses.reduce((sum, c) => sum + (c.video_count || 0), 0)} videos
+              {loadSummary && (
+                <span
+                  className="load-summary"
+                  title={`Cognitive Load — Low: ${loadSummary.distribution.low}, Medium: ${loadSummary.distribution.medium}, High: ${loadSummary.distribution.high}`}
+                >
+                  {" "}
+                  • 🧠 Load: {loadSummary.avg}/10
+                  <span
+                    className={`load-indicator ${loadSummary.avg < 3 ? "low" : loadSummary.avg < 5 ? "medium" : "high"}`}
+                  />
+                </span>
+              )}
             </span>
           )}
         </div>
@@ -131,9 +197,9 @@ function AssemblyLine() {
             <button
               className="btn btn-secondary btn-sm"
               onClick={handleOptimize}
-              title="Reorder courses by prerequisite, core, then supplemental - with high-weight items first"
+              title="Smart reorder: prerequisite graph → cognitive load interleaving"
             >
-              ⚡ Optimize Order
+              ⚡ Smart Order
             </button>
           )}
           {courses.length > 0 && (
@@ -217,10 +283,14 @@ function AssemblyLine() {
 
                             {/* Node Content */}
                             <div className="node-content">
-                              <span className="node-code">{course.code}</span>
+                              <div className="node-title-row">
+                                <span className="node-code">{course.code}</span>
+                                {renderLoadDot(course)}
+                              </div>
                               <span className="node-title" title={course.title}>
                                 {course.title}
                               </span>
+                              {renderBloomBadge(course)}
                             </div>
 
                             {/* Node Controls */}
@@ -323,10 +393,14 @@ function AssemblyLine() {
                             {/* Augmentation Quality Badge */}
                             {renderAugBadge(course)}
                             <div className="node-content">
-                              <span className="node-code">{course.code}</span>
+                              <div className="node-title-row">
+                                <span className="node-code">{course.code}</span>
+                                {renderLoadDot(course)}
+                              </div>
                               <span className="node-title" title={course.title}>
                                 {course.title}
                               </span>
+                              {renderBloomBadge(course)}
                             </div>
                             <div
                               className="node-controls"

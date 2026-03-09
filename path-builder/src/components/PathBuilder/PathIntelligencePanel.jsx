@@ -12,6 +12,13 @@ import { analyzePathGaps, generateGapFillStep } from "../../services/pathGapAnal
 import { generateQuizForPath } from "../../services/quizService";
 import { detectPersona } from "../../services/PersonaService";
 import { useAugmentationData } from "../../hooks/useAugmentationData";
+import {
+  buildContentSummary,
+  enrichGuideWithBloom,
+  generateFlashcards,
+  generateQuickQuiz,
+} from "../../services/studyGuideGenerator";
+import { downloadScormPackage } from "../../services/scormPackager";
 import PathWizard from "../BespokePath/PathWizard";
 import "./PathIntelligencePanel.css";
 
@@ -78,6 +85,10 @@ export default function PathIntelligencePanel() {
   const [fillResults, setFillResults] = useState({});
   const [quiz, setQuiz] = useState(null);
   const [generatingQuiz, setGeneratingQuiz] = useState(false);
+  const [studyGuide, setStudyGuide] = useState(null);
+  const [flashcards, setFlashcards] = useState(null);
+  const [quickQuiz, setQuickQuiz] = useState(null);
+  const [exportingScorm, setExportingScorm] = useState(false);
 
   // Auto-populate from wizard intent (one-time read)
   useEffect(() => {
@@ -687,7 +698,132 @@ export default function PathIntelligencePanel() {
             {activeTab === "export" && (
               <div className="ip-tab-pane">
                 {pathResult ? (
-                  <PathWizard pathResult={pathResult} quiz={quiz} />
+                  <div className="export-panel">
+                    {/* Original PathWizard */}
+                    <PathWizard pathResult={pathResult} quiz={quiz} />
+
+                    {/* ── Study Guide ─────────────────── */}
+                    <div className="export-section">
+                      <button
+                        className="export-action-btn study-guide-btn"
+                        onClick={() => {
+                          const summary = buildContentSummary(courses);
+                          const guide = enrichGuideWithBloom({
+                            title: `${learningIntent?.primaryGoal || "Learning Path"} — Study Guide`,
+                            sections: summary.courses.map((c) => ({
+                              heading: c.title,
+                              content: c.summary,
+                            })),
+                          });
+                          setStudyGuide(guide);
+                        }}
+                      >
+                        📄 Generate Study Guide
+                      </button>
+                      {studyGuide && (
+                        <div className="export-preview study-guide-preview">
+                          <h4>{studyGuide.title}</h4>
+                          {(studyGuide.sections || []).map((s, i) => (
+                            <div key={i} className="guide-section">
+                              <div className="guide-heading">
+                                {s.bloom && (
+                                  <span className="bloom-badge-sm" style={{ color: s.bloom.color }}>
+                                    {s.bloom.emoji} {s.bloom.level}
+                                  </span>
+                                )}
+                                <strong>{s.heading}</strong>
+                              </div>
+                              <p className="guide-content">{s.content}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ── Flashcards ──────────────────── */}
+                    <div className="export-section">
+                      <button
+                        className="export-action-btn flashcard-btn"
+                        onClick={() => setFlashcards(generateFlashcards(courses))}
+                      >
+                        🃏 Generate Flashcards
+                      </button>
+                      {flashcards && (
+                        <div className="export-preview flashcard-list">
+                          <span className="card-count">{flashcards.length} cards</span>
+                          {flashcards.slice(0, 10).map((card, i) => (
+                            <div key={i} className="flashcard">
+                              <div className="fc-front">
+                                <strong>Q:</strong> {card.front}
+                              </div>
+                              <div className="fc-back">
+                                <strong>A:</strong> {card.back}
+                              </div>
+                            </div>
+                          ))}
+                          {flashcards.length > 10 && (
+                            <p className="more-items">+{flashcards.length - 10} more cards...</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ── Quick Quiz ──────────────────── */}
+                    <div className="export-section">
+                      <button
+                        className="export-action-btn quiz-btn"
+                        onClick={() => setQuickQuiz(generateQuickQuiz(courses))}
+                      >
+                        📝 Generate Quick Quiz
+                      </button>
+                      {quickQuiz && (
+                        <div className="export-preview quiz-list">
+                          <span className="card-count">{quickQuiz.length} questions</span>
+                          {quickQuiz.map((q, i) => (
+                            <div key={i} className="quiz-question">
+                              <p className="qq-prompt">
+                                {i + 1}. {q.question}
+                              </p>
+                              <ul className="qq-options">
+                                {q.options.map((opt, j) => (
+                                  <li key={j} className={j === q.correctIndex ? "correct" : ""}>
+                                    {String.fromCharCode(65 + j)}) {opt}
+                                  </li>
+                                ))}
+                              </ul>
+                              <p className="qq-explain">{q.explanation}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ── SCORM Export ────────────────── */}
+                    <div className="export-section">
+                      <button
+                        className="export-action-btn scorm-btn"
+                        disabled={exportingScorm}
+                        onClick={async () => {
+                          setExportingScorm(true);
+                          try {
+                            await downloadScormPackage({
+                              title: learningIntent?.primaryGoal || "Learning Path",
+                              courses,
+                              studyGuide,
+                              flashcards,
+                              quickQuiz,
+                            });
+                          } catch (err) {
+                            console.error("SCORM export failed:", err);
+                          } finally {
+                            setExportingScorm(false);
+                          }
+                        }}
+                      >
+                        {exportingScorm ? "⏳ Packaging..." : "📦 Download SCORM Package"}
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   <div className="ip-empty">
                     <p>Add courses and set a goal to enable export.</p>
