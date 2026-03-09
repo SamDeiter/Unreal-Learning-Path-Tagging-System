@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { usePath } from "../../context/PathContext";
+import { useVectorSearch } from "../../hooks/useVectorSearch";
 import "./SkillCurriculum.css";
 
 // UE5 concept synonym map for semantic matching
@@ -150,6 +151,9 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
   const [selectedCourses, setSelectedCourses] = useState(new Set());
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const searchRef = useRef(null);
+
+  // Async vector search (fires alongside keyword matching)
+  const { vectorResults, isSearching } = useVectorSearch(searchQuery, courses);
 
   // Use shared time budget from Intelligence Panel (hours → minutes)
   const timeBudget =
@@ -363,15 +367,22 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       .map((item) => item.course);
   }, [searchQuery, courses]);
 
+  // Merge keyword results with vector search results (deduplicated)
+  const mergedCourses = useMemo(() => {
+    const keywordCodes = new Set(matchingCourses.map((c) => c.code));
+    const vectorOnly = vectorResults.filter((c) => !keywordCodes.has(c.code));
+    return [...matchingCourses, ...vectorOnly];
+  }, [matchingCourses, vectorResults]);
+
   // Build curriculum with time filtering
   const curriculum = useMemo(() => {
-    if (matchingCourses.length === 0) return null;
+    if (mergedCourses.length === 0) return null;
 
     const pathCodes = new Set(pathCourses.map((c) => c.code));
     const levelOrder = { Beginner: 1, Foundation: 1, Intermediate: 2, Advanced: 3 };
     const maxMinutes = timeBudget ? parseInt(timeBudget) : Infinity;
 
-    const sorted = [...matchingCourses].sort((a, b) => {
+    const sorted = [...mergedCourses].sort((a, b) => {
       const levelA = levelOrder[a.tags?.level] || 2;
       const levelB = levelOrder[b.tags?.level] || 2;
       return levelA - levelB;
@@ -421,7 +432,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     });
 
     return { tiers, totalCourses: allCourses.length, totalTime, allCourses, learningOutcomes };
-  }, [matchingCourses, pathCourses, timeBudget]);
+  }, [mergedCourses, pathCourses, timeBudget]);
 
   // Sync selection when curriculum changes
   const curriculumKey = curriculum ? curriculum.allCourses.map((c) => c.code).join(",") : "";
@@ -499,6 +510,11 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
           <button className="clear-search" onClick={() => setSearchQuery("")}>
             ×
           </button>
+        )}
+        {isSearching && (
+          <span className="sc-vector-indicator" title="Deep semantic matching...">
+            🔍
+          </span>
         )}
 
         {/* Autocomplete Dropdown */}
