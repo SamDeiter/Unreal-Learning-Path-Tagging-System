@@ -12,6 +12,7 @@ import {
   getSessionMetrics,
   getRecentEvents,
   getEventsByDay,
+  getFeedbackMetrics,
 } from "../../services/analyticsQueryService";
 import { EVENTS } from "../../services/analyticsService";
 import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
@@ -39,6 +40,7 @@ const EVENT_META = {
   [EVENTS.HYBRID_FALLBACK_TRIGGERED]: { label: "Fallbacks", color: "#f43f5e" },
   [EVENTS.PATH_SEQUENCED]: { label: "Sequenced", color: "#6366f1" },
   [EVENTS.AI_COVERAGE_REPORT]: { label: "AI Coverage", color: "#f97316" },
+  [EVENTS.AI_STEP_FEEDBACK]: { label: "Feedback", color: "#eab308" },
 };
 
 function Tip({ text }) {
@@ -97,6 +99,7 @@ export default function AdminAnalytics({ onEventsLoaded, onTimeRangeChange }) {
   const sessionMetrics = useMemo(() => getSessionMetrics(events), [events]);
   const dailyVolume = useMemo(() => getEventsByDay(events), [events]);
   const recentEvents = useMemo(() => getRecentEvents(events, 15), [events]);
+  const feedbackMetrics = useMemo(() => getFeedbackMetrics(events), [events]);
 
   const totalQueries = eventCounts[EVENTS.QUERY_SUBMITTED] || 0;
 
@@ -223,6 +226,99 @@ export default function AdminAnalytics({ onEventsLoaded, onTimeRangeChange }) {
               ))}
             </ol>
           )}
+        </div>
+      </div>
+
+      {/* Step Feedback Intelligence */}
+      <div className="aa-section">
+        <h3>
+          👍👎 Step Feedback <Tip text="Thumbs up/down from learners on AI-generated path steps" />
+        </h3>
+        <div className="aa-stats-row" style={{ marginBottom: "1rem" }}>
+          <StatCard
+            label="Thumbs Up"
+            value={feedbackMetrics.positive}
+            icon="👍"
+            color="#10b981"
+            tooltip="Positive step feedback"
+          />
+          <StatCard
+            label="Thumbs Down"
+            value={feedbackMetrics.negative}
+            icon="👎"
+            color="#ef4444"
+            tooltip="Negative step feedback"
+          />
+          <StatCard
+            label="Approval Rate"
+            value={
+              feedbackMetrics.total > 0
+                ? `${Math.round((feedbackMetrics.positive / feedbackMetrics.total) * 100)}%`
+                : "—"
+            }
+            icon="📈"
+            color="#8b5cf6"
+            tooltip="Positive / total feedback"
+          />
+          <StatCard
+            label="Total Feedback"
+            value={feedbackMetrics.total}
+            icon="💬"
+            color="#06b6d4"
+            tooltip="Total feedback events"
+          />
+        </div>
+
+        <div className="aa-grid">
+          {/* Recent Feedback Feed */}
+          <div className="aa-section">
+            <h4>Recent Feedback</h4>
+            {feedbackMetrics.recentFeedback.length === 0 ? (
+              <p className="aa-empty">No feedback yet in this period</p>
+            ) : (
+              <div className="aa-event-feed">
+                {feedbackMetrics.recentFeedback.map((fb, i) => {
+                  const isPositive = fb.feedback === "positive";
+                  const ts = fb.timestamp ? new Date(fb.timestamp).toLocaleString() : "—";
+                  return (
+                    <div key={i} className="aa-event-row">
+                      <span
+                        className="aa-event-dot"
+                        style={{ backgroundColor: isPositive ? "#10b981" : "#ef4444" }}
+                      />
+                      <span className="aa-event-type" style={{ minWidth: 24, textAlign: "center" }}>
+                        {isPositive ? "👍" : "👎"}
+                      </span>
+                      <span className="aa-event-detail" style={{ flex: 1 }}>
+                        {fb.stepTitle}
+                        {fb.reason && <em style={{ opacity: 0.7 }}> — {fb.reason}</em>}
+                      </span>
+                      <span className="aa-event-time">{ts}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Top Downvoted Steps */}
+          <div className="aa-section">
+            <h4>🚩 Most Downvoted Steps</h4>
+            {feedbackMetrics.topDownvoted.length === 0 ? (
+              <p className="aa-empty">No negative feedback yet</p>
+            ) : (
+              <ol className="aa-query-list">
+                {feedbackMetrics.topDownvoted.map((item, i) => (
+                  <li key={i} className="aa-query-item">
+                    <span className="aa-query-text">{item.title}</span>
+                    <span className="aa-query-count" style={{ color: "#ef4444" }}>
+                      {item.count}×
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
         </div>
       </div>
 

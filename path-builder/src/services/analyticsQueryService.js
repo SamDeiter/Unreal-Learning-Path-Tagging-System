@@ -213,6 +213,45 @@ export function getRAGMetrics(events) {
 }
 
 /**
+ * Get step-level feedback metrics from AI_STEP_FEEDBACK events.
+ * @param {Object[]} events - All analytics events
+ * @returns {Object} { positive, negative, total, recentFeedback, topDownvoted }
+ */
+export function getFeedbackMetrics(events) {
+  const feedbackEvents = events.filter((e) => e.event === EVENTS.AI_STEP_FEEDBACK);
+  const positive = feedbackEvents.filter((e) => e.feedback === "positive").length;
+  const negative = feedbackEvents.filter((e) => e.feedback === "negative").length;
+
+  // Most recent feedback items (newest first)
+  const recentFeedback = feedbackEvents
+    .sort((a, b) => (b.client_timestamp || "").localeCompare(a.client_timestamp || ""))
+    .slice(0, 10)
+    .map((e) => ({
+      stepTitle: e.step_title || "(untitled)",
+      category: e.category || "unknown",
+      query: e.query_preview || "",
+      feedback: e.feedback,
+      reason: e.reason || null,
+      timestamp: e.client_timestamp,
+    }));
+
+  // Top downvoted steps (grouped by step_title)
+  const downvoteCounts = {};
+  feedbackEvents
+    .filter((e) => e.feedback === "negative")
+    .forEach((e) => {
+      const key = e.step_title || "(untitled)";
+      downvoteCounts[key] = (downvoteCounts[key] || 0) + 1;
+    });
+  const topDownvoted = Object.entries(downvoteCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([title, count]) => ({ title, count }));
+
+  return { positive, negative, total: feedbackEvents.length, recentFeedback, topDownvoted };
+}
+
+/**
  * Get content gap intelligence from AI coverage report events.
  * @param {Object[]} events - All analytics events
  * @returns {Object} { avgAiRatio, totalReports, topGapQueries, knowledgeGapFrequency, gapTrend }
