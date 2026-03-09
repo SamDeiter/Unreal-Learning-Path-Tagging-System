@@ -216,12 +216,31 @@ export default function PathIntelligencePanel() {
               onChange={(e) => handleFieldChange("timeBudget", e.target.value)}
             >
               <option value="">Select…</option>
-              <option value="5">~5 Hours</option>
-              <option value="10">~10 Hours</option>
-              <option value="20">~20 Hours</option>
-              <option value="40">~40 Hours</option>
+              <option value="5">
+                ~5 Hours{learningIntent.skillLevel === "Beginner" ? " ★ Recommended" : ""}
+              </option>
+              <option value="10">
+                ~10 Hours{learningIntent.skillLevel === "Intermediate" ? " ★ Recommended" : ""}
+              </option>
+              <option value="15">
+                ~15 Hours{learningIntent.skillLevel === "Intermediate" ? " ★ Max" : ""}
+              </option>
+              <option value="20">
+                ~20 Hours{learningIntent.skillLevel === "Advanced" ? " ★ Recommended" : ""}
+              </option>
+              <option value="25">
+                ~25 Hours{learningIntent.skillLevel === "Advanced" ? " ★ Max" : ""}
+              </option>
               <option value="none">No Limit</option>
             </select>
+            {learningIntent.skillLevel && (
+              <span className="ip-field-hint">
+                {learningIntent.skillLevel === "Beginner" && "📖 Research: ≤5h for beginners"}
+                {learningIntent.skillLevel === "Intermediate" &&
+                  "📖 Research: 5–15h for intermediate"}
+                {learningIntent.skillLevel === "Advanced" && "📖 Research: 10–25h for advanced"}
+              </span>
+            )}
           </div>
 
           <div className="ip-setup-progress">
@@ -302,7 +321,45 @@ export default function PathIntelligencePanel() {
                   )}
                 </div>
 
-                {/* Augmentation Quality Summary */}
+                {/* Research-backed time health warning */}
+                {learningIntent?.skillLevel &&
+                  pathStats.estimatedHours > 0 &&
+                  (() => {
+                    const TIME_LIMITS = {
+                      Beginner: {
+                        max: 5,
+                        label: "Beginner",
+                        research: "learners lose focus past 5h — chunk into 3–5 min segments",
+                      },
+                      Foundation: {
+                        max: 5,
+                        label: "Beginner",
+                        research: "learners lose focus past 5h — chunk into 3–5 min segments",
+                      },
+                      Intermediate: {
+                        max: 15,
+                        label: "Intermediate",
+                        research: "can handle longer sessions but fatigue sets in past 15h",
+                      },
+                      Advanced: {
+                        max: 25,
+                        label: "Advanced",
+                        research:
+                          "self-directed learning allows up to 25h but diminishing returns beyond",
+                      },
+                    };
+                    const limit = TIME_LIMITS[learningIntent.skillLevel];
+                    if (!limit) return null;
+                    const hours = pathStats.estimatedHours;
+                    const exceeds = hours > limit.max;
+                    return (
+                      <div className={`ip-time-warning ${exceeds ? "warn" : "ok"}`}>
+                        {exceeds
+                          ? `⚠️ ${hours}h exceeds recommended ${limit.max}h for ${limit.label} — ${limit.research}`
+                          : `✅ ${hours}h within ${limit.max}h ${limit.label} range`}
+                      </div>
+                    );
+                  })()}
                 {courses.length > 0 &&
                   (() => {
                     const augCourses = courses
@@ -529,40 +586,80 @@ export default function PathIntelligencePanel() {
                 <p className="ip-tab-desc">
                   Generate knowledge-check questions from your path content.
                 </p>
-                <button
-                  className="ip-btn primary"
-                  onClick={handleGenerateQuiz}
-                  disabled={generatingQuiz}
-                >
-                  {generatingQuiz ? (
-                    <>
-                      <span className="ip-spinner" /> Generating…
-                    </>
-                  ) : quiz ? (
-                    `✅ ${quiz.length} Questions Ready`
-                  ) : (
-                    "📝 Generate Quiz"
+                <div className="ip-quiz-actions">
+                  <button
+                    className="ip-btn primary"
+                    onClick={handleGenerateQuiz}
+                    disabled={generatingQuiz}
+                  >
+                    {generatingQuiz ? (
+                      <>
+                        <span className="ip-spinner" /> Generating…
+                      </>
+                    ) : quiz ? (
+                      "🔄 Regenerate All"
+                    ) : (
+                      "📝 Generate Quiz"
+                    )}
+                  </button>
+                  {quiz && quiz.length > 0 && (
+                    <span className="ip-quiz-count">{quiz.length} questions</span>
                   )}
-                </button>
+                </div>
 
                 {quiz && quiz.length > 0 && (
                   <div className="ip-quiz-list">
-                    {quiz.map((q, i) => (
-                      <div key={i} className="ip-quiz-card">
-                        <p className="ip-quiz-q">
-                          <strong>Q{i + 1}:</strong> {q.question}
-                        </p>
-                        {q.options && (
-                          <ul className="ip-quiz-opts">
-                            {q.options.map((opt, j) => (
-                              <li key={j} className={opt === q.answer ? "correct" : ""}>
-                                {opt}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
+                    {quiz.map((q, i) => {
+                      // Support both data formats
+                      const questionText = q.question || q.stem || "";
+                      const explanation = q.explanation || "";
+                      const correctAnswer = q.answer || q.correct || "";
+                      // Handle options as array or {A,B,C,D} object
+                      let options = [];
+                      let correctKey = "";
+                      if (Array.isArray(q.options)) {
+                        options = q.options;
+                        correctKey = correctAnswer;
+                      } else if (q.choices) {
+                        options = Object.entries(q.choices).map(([key, val]) => ({ key, val }));
+                        correctKey = correctAnswer;
+                      }
+
+                      return (
+                        <div key={i} className="ip-quiz-card">
+                          <div className="ip-quiz-header">
+                            <p className="ip-quiz-q">
+                              <strong>Q{i + 1}:</strong> {questionText}
+                            </p>
+                          </div>
+                          {Array.isArray(q.options) ? (
+                            <ul className="ip-quiz-opts">
+                              {options.map((opt, j) => (
+                                <li key={j} className={opt === correctKey ? "correct" : ""}>
+                                  {opt === correctKey && <span className="ip-quiz-check">✓</span>}
+                                  {opt}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : options.length > 0 ? (
+                            <ul className="ip-quiz-opts">
+                              {options.map(({ key, val }) => (
+                                <li key={key} className={key === correctKey ? "correct" : ""}>
+                                  {key === correctKey && <span className="ip-quiz-check">✓</span>}
+                                  <strong>{key}.</strong> {val}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : null}
+                          {explanation && (
+                            <div className="ip-quiz-explanation">
+                              <span className="ip-quiz-explain-icon">💡</span>
+                              {explanation}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
