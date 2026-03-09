@@ -220,6 +220,7 @@ export default function PathStep({
   const { segment, category } = step;
 
   const displayTitle =
+    step.title ||
     cleanTitle(decodeEntities(segment.title || segment.videoTitle || "Step Details")) ||
     "Step Details";
 
