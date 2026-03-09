@@ -4,7 +4,7 @@ import "./SkillCurriculum.css";
 
 /**
  * Skill Curriculum Builder
- * 
+ *
  * Features:
  * - Search autocomplete with suggestions
  * - Time budget filter
@@ -12,13 +12,18 @@ import "./SkillCurriculum.css";
  * - Tiered curriculum organization
  */
 function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
-  const { addCourse, courses: pathCourses } = usePath();
+  const { addCourse, courses: pathCourses, learningIntent } = usePath();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourses, setSelectedCourses] = useState(new Set());
   const [showAutocomplete, setShowAutocomplete] = useState(false);
-  const [timeBudget, setTimeBudget] = useState(""); // "" = no limit, or minutes
   const searchRef = useRef(null);
+
+  // Use shared time budget from Intelligence Panel (hours → minutes)
+  const timeBudget =
+    learningIntent?.timeBudget && learningIntent.timeBudget !== "none"
+      ? String(parseInt(learningIntent.timeBudget) * 60)
+      : "";
 
   // Auto-populate search when preSelectedSkill changes (from Analytics insights)
   useEffect(() => {
@@ -53,25 +58,25 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
   // Calculate skill co-occurrence (which skills appear together)
   const skillRelationships = useMemo(() => {
     const coOccurrence = {};
-    
-    courses.forEach(course => {
+
+    courses.forEach((course) => {
       // Get all tags for this course
       const courseTags = new Set();
       if (course.tags?.topic) courseTags.add(course.tags.topic.toLowerCase());
-      course.gemini_system_tags?.forEach(t => courseTags.add(t.toLowerCase()));
-      
+      course.gemini_system_tags?.forEach((t) => courseTags.add(t.toLowerCase()));
+
       // Count co-occurrences
       const tagArray = Array.from(courseTags);
-      tagArray.forEach(tag1 => {
+      tagArray.forEach((tag1) => {
         if (!coOccurrence[tag1]) coOccurrence[tag1] = {};
-        tagArray.forEach(tag2 => {
+        tagArray.forEach((tag2) => {
           if (tag1 !== tag2) {
             coOccurrence[tag1][tag2] = (coOccurrence[tag1][tag2] || 0) + 1;
           }
         });
       });
     });
-    
+
     return coOccurrence;
   }, [courses]);
 
@@ -81,26 +86,27 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     const queryLower = searchQuery.toLowerCase();
     const related = skillRelationships[queryLower];
     if (!related) return [];
-    
+
     // Sort by co-occurrence count and get top 5
     return Object.entries(related)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([skill, count]) => {
-        const matchingCourses = courses.filter(c => {
+        const matchingCourses = courses.filter((c) => {
           const tags = [...(c.gemini_system_tags || []), c.tags?.topic].filter(Boolean);
-          return tags.some(t => t.toLowerCase() === skill);
+          return tags.some((t) => t.toLowerCase() === skill);
         });
         // Calculate estimated time
         const totalMinutes = matchingCourses.reduce((sum, course) => {
-          const courseTime = course.videos?.reduce((s, v) => s + (v.duration_minutes || 0), 0) || 30;
+          const courseTime =
+            course.videos?.reduce((s, v) => s + (v.duration_minutes || 0), 0) || 30;
           return sum + courseTime;
         }, 0);
         return {
           name: skill,
           count,
           courseCount: matchingCourses.length,
-          estimatedTime: totalMinutes
+          estimatedTime: totalMinutes,
         };
       });
   }, [searchQuery, skillRelationships, courses]);
@@ -109,9 +115,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
   const suggestions = useMemo(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) return [];
     const q = searchQuery.toLowerCase();
-    return allSkills
-      .filter((s) => s.name.toLowerCase().includes(q))
-      .slice(0, 8);
+    return allSkills.filter((s) => s.name.toLowerCase().includes(q)).slice(0, 8);
   }, [searchQuery, allSkills]);
 
   // Smart search: find courses matching the typed phrase
@@ -171,7 +175,8 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     sorted.forEach((course) => {
       const level = course.tags?.level;
       const isInPath = pathCodes.has(course.code);
-      const courseTime = course.videos?.reduce((sum, v) => sum + (v.duration_minutes || 0), 0) || 30;
+      const courseTime =
+        course.videos?.reduce((sum, v) => sum + (v.duration_minutes || 0), 0) || 30;
 
       // Apply time budget filter
       if (runningTime + courseTime > maxMinutes && maxMinutes !== Infinity) {
@@ -212,7 +217,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
 
   // Sync selection when curriculum changes
   const curriculumKey = curriculum ? curriculum.allCourses.map((c) => c.code).join(",") : "";
-  
+
   useEffect(() => {
     if (curriculum && curriculum.allCourses.length > 0) {
       const newSelection = new Set(
@@ -220,7 +225,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       );
       setSelectedCourses(newSelection);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [curriculumKey]);
 
   const toggleCourse = useCallback((code) => {
@@ -234,9 +239,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
 
   const handleAddToPath = useCallback(() => {
     if (!curriculum) return;
-    const toAdd = curriculum.allCourses.filter(
-      (c) => selectedCourses.has(c.code) && !c.isInPath
-    );
+    const toAdd = curriculum.allCourses.filter((c) => selectedCourses.has(c.code) && !c.isInPath);
     toAdd.forEach((course) => addCourse(course));
     setSelectedCourses(new Set());
   }, [curriculum, selectedCourses, addCourse]);
@@ -309,19 +312,6 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
         )}
       </div>
 
-      {/* Time Budget Filter */}
-      <div className="sc-time-filter">
-        <label>⏱️ Time budget:</label>
-        <select value={timeBudget} onChange={(e) => setTimeBudget(e.target.value)}>
-          <option value="">No limit</option>
-          <option value="60">~1 hour</option>
-          <option value="120">~2 hours</option>
-          <option value="180">~3 hours</option>
-          <option value="300">~5 hours</option>
-          <option value="600">~10 hours</option>
-        </select>
-      </div>
-
       {/* Skill Recommendations - "You might also need" */}
       {recommendedSkills.length > 0 && (
         <div className="sc-recommendations">
@@ -330,15 +320,17 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
             <span className="rec-title">You might also need:</span>
           </div>
           <div className="recommendations-list">
-            {recommendedSkills.map(skill => (
+            {recommendedSkills.map((skill) => (
               <button
                 key={skill.name}
                 className="rec-skill-chip"
-                onClick={() => setSearchQuery(prev => 
-                  prev.toLowerCase().includes(skill.name.toLowerCase()) 
-                    ? prev 
-                    : `${prev} ${skill.name}`.trim()
-                )}
+                onClick={() =>
+                  setSearchQuery((prev) =>
+                    prev.toLowerCase().includes(skill.name.toLowerCase())
+                      ? prev
+                      : `${prev} ${skill.name}`.trim()
+                  )
+                }
                 title={`${skill.courseCount} courses • ~${formatTime(skill.estimatedTime)}`}
               >
                 <span className="skill-name">{skill.name}</span>
@@ -347,9 +339,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
               </button>
             ))}
           </div>
-          <p className="rec-hint">
-            Click to add skills • Combined curriculum expands coverage
-          </p>
+          <p className="rec-hint">Click to add skills • Combined curriculum expands coverage</p>
         </div>
       )}
 
@@ -357,15 +347,18 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       {!searchQuery && (
         <div className="sc-skills">
           <span className="sc-skills-label">Popular topics:</span>
-          {allSkills.filter((s) => s.type === "topic").slice(0, 12).map((skill) => (
-            <button
-              key={skill.name}
-              className="skill-chip"
-              onClick={() => setSearchQuery(skill.name)}
-            >
-              {skill.name}
-            </button>
-          ))}
+          {allSkills
+            .filter((s) => s.type === "topic")
+            .slice(0, 12)
+            .map((skill) => (
+              <button
+                key={skill.name}
+                className="skill-chip"
+                onClick={() => setSearchQuery(skill.name)}
+              >
+                {skill.name}
+              </button>
+            ))}
         </div>
       )}
 
@@ -389,9 +382,11 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
               <span>{curriculum.totalCourses} courses</span>
               <span>•</span>
               <span>~{formatTime(curriculum.totalTime)}</span>
-              {timeBudget && <span className="time-badge">⏱️ Fits budget</span>}
+              {timeBudget && (
+                <span className="time-badge">⏱️ Within {learningIntent.timeBudget}h budget</span>
+              )}
             </div>
-            <button 
+            <button
               className="generate-path-btn"
               onClick={handleAddToPath}
               disabled={selectedCourses.size === 0}
@@ -507,9 +502,7 @@ function CourseCard({ course, isSelected, onToggle, formatTime }) {
       className={`curriculum-course ${course.isInPath ? "in-path" : ""} ${isSelected ? "selected" : ""}`}
       onClick={() => !course.isInPath && onToggle(course.code)}
     >
-      {!course.isInPath && (
-        <input type="checkbox" checked={isSelected} onChange={() => {}} />
-      )}
+      {!course.isInPath && <input type="checkbox" checked={isSelected} onChange={() => {}} />}
       <div className="course-info">
         <div className="course-title">{course.title}</div>
         <div className="course-meta">
