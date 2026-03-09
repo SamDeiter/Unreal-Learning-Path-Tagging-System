@@ -12,10 +12,12 @@
  */
 import { usePath } from "../../context/PathContext";
 import { optimizePathOrder } from "../../utils/generationEngine";
+import { useAugmentationData } from "../../hooks/useAugmentationData";
 import "./AssemblyLine.css";
 
 function AssemblyLine() {
   const { courses, removeCourse, reorderCourses, updateCourseMeta } = usePath();
+  const { getCourseSummary } = useAugmentationData();
 
   // Handle drag start
   const handleDragStart = (e, index) => {
@@ -166,6 +168,33 @@ function AssemblyLine() {
                               </button>
                             </div>
 
+                            {/* Augmentation Quality Badge */}
+                            {(() => {
+                              const aug = getCourseSummary(course.code);
+                              if (!aug) return null;
+                              return (
+                                <div className="aug-row">
+                                  <span
+                                    className={`aug-badge aug-${aug.avgGrade}`}
+                                    title={`${aug.avgScore}/55 · ${aug.verdict.replace(/_/g, " ")} · ${aug.videoCount} videos`}
+                                  >
+                                    {aug.avgGrade}
+                                  </span>
+                                  <span className="aug-score">{aug.avgScore}/55</span>
+                                  <div className="aug-bar">
+                                    <div
+                                      className="aug-bar-proc"
+                                      style={{ width: `${aug.avgProcedural}%` }}
+                                    />
+                                    <div
+                                      className="aug-bar-conc"
+                                      style={{ width: `${aug.avgConceptual}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })()}
+
                             {/* Node Content */}
                             <div className="node-content">
                               <span className="node-code">{course.code}</span>
@@ -271,6 +300,32 @@ function AssemblyLine() {
                                 ×
                               </button>
                             </div>
+                            {/* Augmentation Quality Badge */}
+                            {(() => {
+                              const aug = getCourseSummary(course.code);
+                              if (!aug) return null;
+                              return (
+                                <div className="aug-row">
+                                  <span
+                                    className={`aug-badge aug-${aug.avgGrade}`}
+                                    title={`${aug.avgScore}/55 · ${aug.verdict.replace(/_/g, " ")} · ${aug.videoCount} videos`}
+                                  >
+                                    {aug.avgGrade}
+                                  </span>
+                                  <span className="aug-score">{aug.avgScore}/55</span>
+                                  <div className="aug-bar">
+                                    <div
+                                      className="aug-bar-proc"
+                                      style={{ width: `${aug.avgProcedural}%` }}
+                                    />
+                                    <div
+                                      className="aug-bar-conc"
+                                      style={{ width: `${aug.avgConceptual}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })()}
                             <div className="node-content">
                               <span className="node-code">{course.code}</span>
                               <span className="node-title" title={course.title}>
