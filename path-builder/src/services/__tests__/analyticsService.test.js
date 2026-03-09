@@ -30,6 +30,7 @@ import analyticsService, {
   trackSessionCompleted,
   trackFollowupQuery,
   trackAICoverageReport,
+  trackAIStepFeedback,
   startSession,
 } from "../analyticsService";
 
@@ -343,6 +344,47 @@ describe("analyticsService", () => {
     });
   });
 
+  // -- trackAIStepFeedback (Step-Level Feedback) --
+
+  describe("trackAIStepFeedback", () => {
+    it("sends AI_STEP_FEEDBACK event with all fields", async () => {
+      await trackAIStepFeedback(
+        "Understanding Lumen GI",
+        "foundation",
+        "how does lumen work in UE5",
+        "positive"
+      );
+      expect(mockAddDoc).toHaveBeenCalledTimes(1);
+      const payload = mockAddDoc.mock.calls[0][1];
+      expect(payload.event).toBe("ai_step_feedback");
+      expect(payload.step_title).toBe("Understanding Lumen GI");
+      expect(payload.category).toBe("foundation");
+      expect(payload.query_preview).toBe("how does lumen work in UE5");
+      expect(payload.feedback).toBe("positive");
+      expect(payload.reason).toBeNull();
+    });
+
+    it("truncates long stepTitle to 120 chars and queryPreview to 100 chars", async () => {
+      await trackAIStepFeedback(
+        "T".repeat(200),
+        "diagnosis",
+        "Q".repeat(200),
+        "negative",
+        "too vague"
+      );
+      const payload = mockAddDoc.mock.calls[0][1];
+      expect(payload.step_title.length).toBeLessThanOrEqual(120);
+      expect(payload.query_preview.length).toBeLessThanOrEqual(100);
+      expect(payload.reason).toBe("too vague");
+    });
+
+    it("defaults category to 'unknown' when null", async () => {
+      await trackAIStepFeedback("Some Step", null, "query", "negative");
+      const payload = mockAddDoc.mock.calls[0][1];
+      expect(payload.category).toBe("unknown");
+    });
+  });
+
   // -- Default export --
 
   describe("default export", () => {
@@ -360,6 +402,7 @@ describe("analyticsService", () => {
       expect(typeof analyticsService.trackSessionCompleted).toBe("function");
       expect(typeof analyticsService.trackFollowupQuery).toBe("function");
       expect(typeof analyticsService.startSession).toBe("function");
+      expect(typeof analyticsService.trackAIStepFeedback).toBe("function");
     });
   });
 });
