@@ -493,14 +493,64 @@ export async function generateGapFillStep(topic, query, steps) {
   try {
     devLog(`[GapAnalyzer] Generating fill step for gap: "${topic}"`);
 
-    // 1. Fetch closest corpus matches as context
+    // 1. Fetch closest corpus matches as context + augmentation quality
     let corpusContext = "";
     try {
       const { segments } = await findRelevantSegments(topic, GAP_FILL_TOP_K);
       if (segments.length > 0) {
-        corpusContext = `\nRelated content from our corpus (use as reference):\n${segments
+        // Fetch augmentation data to score source quality
+        let augMap = {};
+        try {
+          const augRes = await fetch(`${import.meta.env.BASE_URL}augmentation_summary.json`);
+          if (augRes.ok) {
+            const augRaw = await augRes.json();
+            Object.entries(augRaw).forEach(([key, data]) => {
+              const title = key.replace(/_/g, " ").toLowerCase();
+              augMap[title] = { grade: data.grade || "C", score: data.score || 0 };
+            });
+          }
+        } catch {
+          /* non-fatal */
+        }
+
+        // Adjust similarity based on augmentation grade
+        const augmented = segments.map((s) => {
+          const sTitle = (s.videoTitle || s.title || "").toLowerCase();
+          // Find best matching augmentation entry by substring
+          let augInfo = null;
+          for (const [key, data] of Object.entries(augMap)) {
+            if (sTitle.includes(key) || key.includes(sTitle.split(" ").slice(0, 3).join(" "))) {
+              augInfo = data;
+              break;
+            }
+          }
+          const gradeMultiplier =
+            augInfo?.grade === "A" || augInfo?.grade === "B"
+              ? 1.2
+              : augInfo?.grade === "D" || augInfo?.grade === "F"
+                ? 0.7
+                : 1.0;
+          return {
+            ...s,
+            adjustedSimilarity: (s.similarity || 0.5) * gradeMultiplier,
+            augGrade: augInfo?.grade || null,
+          };
+        });
+
+        // Re-sort by adjusted similarity (prefer higher-quality sources)
+        augmented.sort((a, b) => b.adjustedSimilarity - a.adjustedSimilarity);
+
+        corpusContext = `\nRelated content from our corpus (use as reference, prefer ★-marked high-quality sources):\n${augmented
           .slice(0, 2)
-          .map((s) => `- "${s.title || s.videoTitle}": ${(s.text || "").substring(0, 200)}`)
+          .map((s) => {
+            const quality =
+              s.augGrade === "A" || s.augGrade === "B"
+                ? " ★ HIGH QUALITY"
+                : s.augGrade === "D" || s.augGrade === "F"
+                  ? " ⚠ LOW QUALITY"
+                  : "";
+            return `- "${s.title || s.videoTitle}"${quality}: ${(s.text || "").substring(0, 200)}`;
+          })
           .join("\n")}`;
       }
     } catch {

@@ -11,6 +11,7 @@ import { usePath } from "../../context/PathContext";
 import { analyzePathGaps, generateGapFillStep } from "../../services/pathGapAnalyzer";
 import { generateQuizForPath } from "../../services/quizService";
 import { detectPersona } from "../../services/PersonaService";
+import { useAugmentationData } from "../../hooks/useAugmentationData";
 import PathWizard from "../BespokePath/PathWizard";
 import "./PathIntelligencePanel.css";
 
@@ -55,6 +56,7 @@ const TABS = [
 // ── Main ───────────────────────────────────────────────────
 export default function PathIntelligencePanel() {
   const { courses, learningIntent, setLearningIntent, pathStats } = usePath();
+  const { getCourseSummary } = useAugmentationData();
 
   const handleFieldChange = useCallback(
     (field, value) => {
@@ -299,6 +301,66 @@ export default function PathIntelligencePanel() {
                     </div>
                   )}
                 </div>
+
+                {/* Augmentation Quality Summary */}
+                {courses.length > 0 &&
+                  (() => {
+                    const augCourses = courses
+                      .map((c) => ({ code: c.code, title: c.title, aug: getCourseSummary(c.code) }))
+                      .filter((c) => c.aug);
+                    if (augCourses.length === 0) return null;
+                    const avgScore = Math.round(
+                      augCourses.reduce((s, c) => s + c.aug.avgScore, 0) / augCourses.length
+                    );
+                    const avgGrade =
+                      avgScore >= 45
+                        ? "A"
+                        : avgScore >= 39
+                          ? "B"
+                          : avgScore >= 33
+                            ? "C"
+                            : avgScore >= 22
+                              ? "D"
+                              : "F";
+                    const needsAug = augCourses.filter(
+                      (c) => c.aug.avgGrade === "D" || c.aug.avgGrade === "F"
+                    );
+                    return (
+                      <div className="ip-aug-card">
+                        <div className="ip-aug-header">
+                          <span className={`ip-aug-grade aug-badge aug-${avgGrade}`}>
+                            {avgGrade}
+                          </span>
+                          <div>
+                            <strong>Augmentation Quality</strong>
+                            <span className="ip-aug-sub">
+                              {avgScore}/55 avg · {augCourses.length}/{courses.length} courses
+                              analyzed
+                            </span>
+                          </div>
+                        </div>
+                        {needsAug.length > 0 && (
+                          <div className="ip-aug-alert">
+                            ⚡ {needsAug.length} course{needsAug.length > 1 ? "s" : ""} rated D/F —
+                            pedagogy needs augmentation
+                          </div>
+                        )}
+                        <div className="ip-aug-list">
+                          {augCourses.map((c) => (
+                            <div key={c.code} className="ip-aug-item">
+                              <span className={`ip-aug-dot aug-badge aug-${c.aug.avgGrade}`}>
+                                {c.aug.avgGrade}
+                              </span>
+                              <span className="ip-aug-title" title={c.title}>
+                                {c.code}
+                              </span>
+                              <span className="ip-aug-score">{c.aug.avgScore}/55</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                 <button className="ip-btn primary" onClick={handleAnalyze} disabled={analyzing}>
                   {analyzing ? (
