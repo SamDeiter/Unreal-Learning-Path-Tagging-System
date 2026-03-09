@@ -26,6 +26,8 @@ const LeftPanel = lazy(() => import("./components/LeftPanel/LeftPanel"));
 const AssemblyLine = lazy(() => import("./components/AssemblyLine/AssemblyLine"));
 const OutputPanel = lazy(() => import("./components/OutputPanel/OutputPanel"));
 const PathIntelligencePanel = lazy(() => import("./components/PathBuilder/PathIntelligencePanel"));
+const PathDashboard = lazy(() => import("./components/PathBuilder/PathDashboard"));
+const PathCreationWizard = lazy(() => import("./components/PathBuilder/PathCreationWizard"));
 const LearningIntentHeader = lazy(() => import("./components/LearningIntent/LearningIntentHeader"));
 const TagGraph = lazy(() => import("./components/TagGraph/TagGraph"));
 const PathReadiness = lazy(() => import("./components/PathReadiness/PathReadiness"));
@@ -127,6 +129,9 @@ function App() {
   const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
   const [analyticsEvents, setAnalyticsEvents] = useState([]);
   const [analyticsTimeRange, setAnalyticsTimeRange] = useState("7d");
+  // Path Builder dashboard vs editor view
+  const [builderView, setBuilderView] = useState("dashboard"); // "dashboard" | "editor"
+  const [showWizard, setShowWizard] = useState(false);
 
   // Analytics events are loaded inline in the effect below
 
@@ -508,8 +513,41 @@ function App() {
                     <TagManager />
                   </div>
                 )}
-                {activeTab === "builder" && (
+                {activeTab === "builder" && builderView === "dashboard" && (
+                  <div className="dashboard-layout">
+                    <PathDashboard
+                      onEditPath={(_path) => {
+                        // TODO: load path data into PathContext
+                        setBuilderView("editor");
+                      }}
+                      onCreateNew={() => setShowWizard(true)}
+                      onLegacyMode={() => setBuilderView("editor")}
+                    />
+                  </div>
+                )}
+                {activeTab === "builder" && builderView === "editor" && (
                   <div className={`builder-layout ${isMobile ? "builder-mobile" : ""}`}>
+                    {/* Back to dashboard button */}
+                    <button
+                      className="builder-back-btn"
+                      onClick={() => setBuilderView("dashboard")}
+                      title="Back to Path Dashboard"
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        left: 8,
+                        zIndex: 10,
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid var(--border, #30363d)",
+                        color: "var(--text-secondary, #8b949e)",
+                        borderRadius: 6,
+                        padding: "4px 10px",
+                        fontSize: "0.7rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ← Dashboard
+                    </button>
                     {/* Left: Input Panel — hidden on mobile */}
                     {!isMobile && (
                       <aside className="library-panel">
@@ -533,6 +571,22 @@ function App() {
                       </aside>
                     )}
                   </div>
+                )}
+                {/* Path Creation Wizard Modal */}
+                {showWizard && (
+                  <PathCreationWizard
+                    onComplete={(pathData) => {
+                      setShowWizard(false);
+                      // Save to storage and switch to editor
+                      import("./components/PathBuilder/PathDashboard").then(
+                        ({ savePathToStorage }) => {
+                          savePathToStorage(pathData);
+                        }
+                      );
+                      setBuilderView("editor");
+                    }}
+                    onCancel={() => setShowWizard(false)}
+                  />
                 )}
                 {activeTab === "personas" && (
                   <div className="dashboard-layout">

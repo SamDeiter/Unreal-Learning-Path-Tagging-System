@@ -1,0 +1,292 @@
+/* PathCreationWizard.css — Step-by-step guided path creation modal */
+
+.pcw-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.pcw-modal {
+  background: var(--bg-secondary, #161b22);
+  border: 1px solid var(--border, #30363d);
+  border-radius: 16px;
+  width: 95%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* Header */
+.pcw-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border, #30363d);
+}
+.pcw-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary, #e6edf3);
+}
+.pcw-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #8b949e);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.pcw-close:hover {
+  color: var(--text-primary, #e6edf3);
+}
+
+/* Progress */
+.pcw-progress {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 14px 20px 10px;
+  position: relative;
+}
+.pcw-step {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  z-index: 1;
+  font-size: 0.72rem;
+  color: var(--text-secondary, #8b949e);
+  transition: color 0.2s;
+}
+.pcw-step.active {
+  color: rgba(136, 198, 255, 1);
+  font-weight: 600;
+}
+.pcw-step.done {
+  color: #3fb950;
+}
+.pcw-step-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border, #30363d);
+}
+.pcw-step.active .pcw-step-icon {
+  background: rgba(136, 198, 255, 0.15);
+  border-color: rgba(136, 198, 255, 0.4);
+}
+.pcw-step.done .pcw-step-icon {
+  background: rgba(63, 185, 80, 0.12);
+  border-color: rgba(63, 185, 80, 0.3);
+  color: #3fb950;
+}
+.pcw-progress-line {
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  bottom: 20px;
+  height: 2px;
+  background: var(--border, #30363d);
+  z-index: 0;
+}
+.pcw-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3fb950, rgba(136, 198, 255, 0.8));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Body */
+.pcw-body {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+.pcw-step-content h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  color: var(--text-primary, #e6edf3);
+}
+.pcw-hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #8b949e);
+  margin: 0 0 14px;
+}
+.pcw-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #30363d);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary, #e6edf3);
+  font-size: 0.85rem;
+  transition: border-color 0.15s;
+}
+.pcw-input:focus {
+  outline: none;
+  border-color: rgba(136, 198, 255, 0.5);
+}
+.pcw-input-sm {
+  margin-top: 6px;
+}
+.pcw-optional {
+  margin-top: 14px;
+}
+.pcw-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-secondary, #8b949e);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.pcw-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #30363d);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary, #e6edf3);
+  font-size: 0.8rem;
+}
+
+/* Level cards */
+.pcw-level-cards {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.pcw-level-card {
+  flex: 1;
+  padding: 14px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #30363d);
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+}
+.pcw-level-card:hover {
+  border-color: rgba(136, 198, 255, 0.3);
+  background: rgba(136, 198, 255, 0.04);
+}
+.pcw-level-card.selected {
+  border-color: rgba(136, 198, 255, 0.5);
+  background: rgba(136, 198, 255, 0.08);
+  box-shadow: 0 0 12px rgba(136, 198, 255, 0.1);
+}
+.pcw-level-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary, #e6edf3);
+}
+.pcw-level-time {
+  font-size: 0.65rem;
+  color: rgba(136, 198, 255, 0.8);
+  font-weight: 600;
+}
+.pcw-level-hint {
+  font-size: 0.6rem;
+  color: var(--text-secondary, #8b949e);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.pcw-time-section {
+  margin-top: 10px;
+}
+.pcw-research-note {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--text-secondary, #8b949e);
+  margin-top: 4px;
+}
+
+/* Review */
+.pcw-review-card {
+  border: 1px solid var(--border, #30363d);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.pcw-review-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.pcw-review-row:last-child {
+  border-bottom: none;
+}
+.pcw-review-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #8b949e);
+  font-weight: 600;
+}
+.pcw-review-value {
+  font-size: 0.75rem;
+  color: var(--text-primary, #e6edf3);
+  text-align: right;
+  max-width: 60%;
+}
+.pcw-review-next {
+  font-size: 0.7rem;
+  color: var(--text-secondary, #8b949e);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Footer */
+.pcw-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--border, #30363d);
+}
+.pcw-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+}
+.pcw-btn-primary {
+  background: linear-gradient(135deg, rgba(136, 198, 255, 0.2), rgba(136, 198, 255, 0.1));
+  color: rgba(136, 198, 255, 1);
+  border: 1px solid rgba(136, 198, 255, 0.3);
+}
+.pcw-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(136, 198, 255, 0.3), rgba(136, 198, 255, 0.15));
+  border-color: rgba(136, 198, 255, 0.5);
+}
+.pcw-btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pcw-btn-secondary {
+  background: transparent;
+  color: var(--text-secondary, #8b949e);
+  border: 1px solid var(--border, #30363d);
+}
+.pcw-btn-secondary:hover {
+  color: var(--text-primary, #e6edf3);
+  border-color: var(--text-primary, #e6edf3);
+}
