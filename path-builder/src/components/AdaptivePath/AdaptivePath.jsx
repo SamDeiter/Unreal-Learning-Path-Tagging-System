@@ -709,6 +709,7 @@ export default function AdaptivePath() {
                 ) : (expandedStep ?? 0) >= 0 && (expandedStep ?? 0) < pathData.path.length ? (
                   <div className="step-content-container">
                     <PathStep
+                      key={`step-${expandedStep ?? 0}`}
                       step={pathData.path[expandedStep ?? 0]}
                       isActive={true}
                       takeaways={stepTakeaways[expandedStep ?? 0]?.items}

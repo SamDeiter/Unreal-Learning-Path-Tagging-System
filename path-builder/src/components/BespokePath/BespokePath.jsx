@@ -477,6 +477,7 @@ export default function BespokePath() {
                 ) : currentStep >= 0 && currentStep < pathResult.path.length ? (
                   <div className="step-content-container">
                     <PathStep
+                      key={`step-${currentStep}`}
                       step={pathResult.path[currentStep]}
                       isActive={true}
                       narrationScript={narrationData?.get(currentStep)?.script}
