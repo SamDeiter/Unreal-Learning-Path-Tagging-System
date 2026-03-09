@@ -334,10 +334,16 @@ export default function PathStep({
         <div className="takeaways-box">
           <h3 className="takeaways-title">Key Takeaways</h3>
           {takeawayLoading ? (
-            <div className="loading-dots">
-              <span>.</span>
-              <span>.</span>
-              <span>.</span>
+            <div className="takeaway-loading-state">
+              <div className="takeaway-loading-label">
+                <span className="takeaway-loading-spinner" />
+                Generating key takeaways…
+              </div>
+              <div className="takeaway-skeleton-lines">
+                <div className="skeleton-line" style={{ width: "90%" }} />
+                <div className="skeleton-line" style={{ width: "75%" }} />
+                <div className="skeleton-line" style={{ width: "60%" }} />
+              </div>
             </div>
           ) : filteredTakeaways && filteredTakeaways.length > 0 ? (
             <ul className="takeaways-list">

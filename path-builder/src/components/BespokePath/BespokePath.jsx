@@ -16,9 +16,7 @@ import SUGGESTION_POOL, { DEFAULT_SUGGESTIONS } from "../../data/suggestionPool"
 import PathStep from "./PathStep";
 import QuizEngine from "./QuizEngine";
 import PreSeededPaths from "./PreSeededPaths";
-import {
-  generatePathNarration,
-} from "../../services/stepBriefingService";
+import { generatePathNarration } from "../../services/stepBriefingService";
 import "./BespokePath.css";
 
 import {
@@ -95,13 +93,11 @@ export default function BespokePath() {
   } = usePathQuiz({ pathData: pathResult, query });
 
   // Per-step audio, takeaways (shared hook)
-  const {
-    stepAudio,
-    stepTakeaways,
-    handleStepAudio,
-    handleStepTakeaways,
-    resetStepActions,
-  } = usePathStepActions({ pathData: pathResult, query, activeStep: currentStep });
+  const { stepAudio, stepTakeaways, handleStepAudio } = usePathStepActions({
+    pathData: pathResult,
+    query,
+    activeStep: currentStep,
+  });
 
   // Path Narrator state (button-triggered, not auto)
   const [narrationData, setNarrationData] = useState(null); // Map<stepIndex, {script, audioUrl}>
@@ -488,7 +484,9 @@ export default function BespokePath() {
                         narrationData?.get(currentStep)?.audioUrl || stepAudio[currentStep]?.url
                       }
                       stepAudioLoading={!!stepAudio[currentStep]?.loading}
-                      onGenerateAudio={() => handleStepAudio(currentStep, pathResult.path[currentStep])}
+                      onGenerateAudio={() =>
+                        handleStepAudio(currentStep, pathResult.path[currentStep])
+                      }
                       narrationLoading={narrationLoading}
                       onGenerateNarration={handleGenerateNarration}
                       hasNarration={!!narrationData}
