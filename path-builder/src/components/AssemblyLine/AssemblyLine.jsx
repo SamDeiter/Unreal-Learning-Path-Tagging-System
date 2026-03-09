@@ -16,7 +16,7 @@ import { useAugmentationData } from "../../hooks/useAugmentationData";
 import "./AssemblyLine.css";
 
 function AssemblyLine() {
-  const { courses, removeCourse, reorderCourses, updateCourseMeta } = usePath();
+  const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath } = usePath();
   const { getCourseSummary, getVideoKeys } = useAugmentationData();
 
   // Handle drag start
@@ -142,7 +142,7 @@ function AssemblyLine() {
               title="Remove all courses from your learning path"
               onClick={() => {
                 if (window.confirm(`Clear all ${courses.length} courses from your path?`)) {
-                  courses.forEach((c) => removeCourse(c.code));
+                  clearPath();
                 }
               }}
             >
