@@ -510,11 +510,6 @@ function App() {
                 )}
                 {activeTab === "builder" && (
                   <div className={`builder-layout ${isMobile ? "builder-mobile" : ""}`}>
-                    {/* Top: Intent */}
-                    <div className="builder-header-area">
-                      <LearningIntentHeader />
-                    </div>
-
                     {/* Left: Input Panel — hidden on mobile */}
                     {!isMobile && (
                       <aside className="library-panel">

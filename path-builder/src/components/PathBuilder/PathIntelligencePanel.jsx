@@ -10,6 +10,7 @@ import { useState, useCallback, useMemo } from "react";
 import { usePath } from "../../context/PathContext";
 import { analyzePathGaps, generateGapFillStep } from "../../services/pathGapAnalyzer";
 import { generateQuizForPath } from "../../services/quizService";
+import { detectPersona } from "../../services/PersonaService";
 import PathWizard from "../BespokePath/PathWizard";
 import "./PathIntelligencePanel.css";
 
@@ -53,7 +54,19 @@ const TABS = [
 
 // ── Main ───────────────────────────────────────────────────
 export default function PathIntelligencePanel() {
-  const { courses, learningIntent, pathStats } = usePath();
+  const { courses, learningIntent, setLearningIntent, pathStats } = usePath();
+
+  const handleFieldChange = useCallback(
+    (field, value) => {
+      setLearningIntent({ [field]: value });
+    },
+    [setLearningIntent]
+  );
+
+  const detectedPersona = useMemo(() => {
+    if (!learningIntent?.primaryGoal) return null;
+    return detectPersona(learningIntent.primaryGoal);
+  }, [learningIntent?.primaryGoal]);
 
   const [activeTab, setActiveTab] = useState("coverage");
   const [analysis, setAnalysis] = useState(null);
@@ -161,17 +174,64 @@ export default function PathIntelligencePanel() {
         <h3>Path Intelligence</h3>
       </div>
 
-      {/* Gate: setup checklist */}
+      {/* Gate: inline setup form */}
       {!setupComplete ? (
-        <div className="ip-gate">
-          <div className="ip-gate-icon">🎯</div>
-          <h4>Define Your Path</h4>
-          <p>Complete the setup above to unlock intelligence:</p>
-          <ul className="ip-checklist">
-            <li className={hasGoal ? "done" : ""}>{hasGoal ? "✅" : "⬜"} Primary Goal</li>
-            <li className={hasLevel ? "done" : ""}>{hasLevel ? "✅" : "⬜"} Skill Level</li>
-            <li className={hasBudget ? "done" : ""}>{hasBudget ? "✅" : "⬜"} Time Budget</li>
-          </ul>
+        <div className="ip-setup">
+          <div className="ip-setup-header">
+            <span>🎯</span>
+            <h4>Define Your Path</h4>
+          </div>
+
+          <div className="ip-field">
+            <label>Primary Goal *</label>
+            <input
+              type="text"
+              placeholder="e.g. Master Lumen Lighting"
+              value={learningIntent.primaryGoal || ""}
+              onChange={(e) => handleFieldChange("primaryGoal", e.target.value)}
+            />
+            {detectedPersona && <span className="ip-persona-badge">👤 {detectedPersona.name}</span>}
+          </div>
+
+          <div className="ip-field">
+            <label>Skill Level *</label>
+            <select
+              value={learningIntent.skillLevel || ""}
+              onChange={(e) => handleFieldChange("skillLevel", e.target.value)}
+            >
+              <option value="">Select Level…</option>
+              <option value="Beginner">Beginner (New to topic)</option>
+              <option value="Intermediate">Intermediate (Some exp)</option>
+              <option value="Advanced">Advanced (Expert)</option>
+            </select>
+          </div>
+
+          <div className="ip-field">
+            <label>Time Budget</label>
+            <select
+              value={learningIntent.timeBudget || ""}
+              onChange={(e) => handleFieldChange("timeBudget", e.target.value)}
+            >
+              <option value="">Select…</option>
+              <option value="5">~5 Hours</option>
+              <option value="10">~10 Hours</option>
+              <option value="20">~20 Hours</option>
+              <option value="40">~40 Hours</option>
+              <option value="none">No Limit</option>
+            </select>
+          </div>
+
+          <div className="ip-setup-progress">
+            <div className="ip-progress-bar">
+              <div
+                className="ip-progress-fill"
+                style={{
+                  width: `${([hasGoal, hasLevel, hasBudget].filter(Boolean).length / 3) * 100}%`,
+                }}
+              />
+            </div>
+            <span>{[hasGoal, hasLevel, hasBudget].filter(Boolean).length}/3 complete</span>
+          </div>
         </div>
       ) : !hasCourses ? (
         <div className="ip-gate">
@@ -181,6 +241,15 @@ export default function PathIntelligencePanel() {
         </div>
       ) : (
         <>
+          {/* Compact summary of setup */}
+          <div className="ip-summary">
+            <span className="ip-summary-goal">{learningIntent.primaryGoal}</span>
+            <span className="ip-summary-meta">
+              {learningIntent.skillLevel} ·{" "}
+              {learningIntent.timeBudget === "none" ? "No Limit" : `~${learningIntent.timeBudget}h`}
+            </span>
+          </div>
+
           {/* Tab Bar */}
           <div className="ip-tabs">
             {TABS.map((tab) => (
