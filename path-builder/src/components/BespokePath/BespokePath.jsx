@@ -16,6 +16,9 @@ import SUGGESTION_POOL, { DEFAULT_SUGGESTIONS } from "../../data/suggestionPool"
 import PathStep from "./PathStep";
 import QuizEngine from "./QuizEngine";
 import PreSeededPaths from "./PreSeededPaths";
+import PathGapCard from "./PathGapCard";
+import PathWizard from "./PathWizard";
+import { generateGapFillStep } from "../../services/pathGapAnalyzer";
 import { generatePathNarration } from "../../services/stepBriefingService";
 import "./BespokePath.css";
 
@@ -34,6 +37,7 @@ const PHASE_CONFIG = [
   { key: "solution", icon: "🔧", label: "Solution", categories: ["fix"] },
   { key: "quiz", icon: "📝", label: "Quiz", categories: ["__quiz__"] },
   { key: "apply", icon: "🚀", label: "Apply It", categories: ["transfer"] },
+  { key: "review", icon: "✅", label: "Review", categories: ["__review__"] },
 ];
 
 /**
@@ -69,6 +73,9 @@ function groupStepsIntoPhases(path) {
   if (applySteps.length > 0) {
     phases.push({ ...PHASE_CONFIG[3], steps: applySteps });
   }
+
+  // Review phase: virtual
+  phases.push({ ...PHASE_CONFIG[4], steps: [{ category: "__review__", globalIndex: -3 }] });
 
   return phases;
 }
@@ -233,6 +240,28 @@ export default function BespokePath() {
     setQuery(example);
   };
 
+  // Gap fill callback — generates a fill step and appends to path
+  const handleFillGap = useCallback(
+    async (topic) => {
+      if (!pathResult) return;
+      const fillStep = await generateGapFillStep(topic, pathResult.query || query, pathResult.path);
+      if (fillStep) {
+        setPathResult((prev) => ({
+          ...prev,
+          path: [...prev.path, fillStep],
+        }));
+      }
+    },
+    [pathResult, query]
+  );
+
+  // Explore callback — closes modal and pre-fills query
+  const handleExploreGap = useCallback((topic) => {
+    setPathResult(null);
+    setCurrentStep(0);
+    setQuery(topic);
+  }, []);
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -366,6 +395,8 @@ export default function BespokePath() {
                         onClick={() => {
                           if (phase.key === "quiz") {
                             setCurrentStep(-2);
+                          } else if (phase.key === "review") {
+                            setCurrentStep(-3);
                           } else {
                             const idx = phase.steps[0]?.globalIndex ?? 0;
                             setCurrentStep(Math.max(0, Math.min(idx, pathResult.path.length - 1)));
@@ -428,12 +459,27 @@ export default function BespokePath() {
                   ));
                 })()}
               </nav>
+
+              {/* Gap Analysis Card — below nav */}
+              <PathGapCard
+                gaps={pathResult.gaps}
+                communityPainPoints={pathResult.communityPainPoints}
+                query={pathResult.query || query}
+                steps={pathResult.path}
+                onFillGap={handleFillGap}
+                onExplore={handleExploreGap}
+              />
             </aside>
 
             {/* Main Content Area */}
             <main className="epic-main-content">
               <div className="main-scroll-area">
-                {currentStep === -2 ? (
+                {currentStep === -3 ? (
+                  /* Review Phase — PathWizard */
+                  <div className="step-content-container">
+                    <PathWizard pathResult={pathResult} gaps={pathResult.gaps} />
+                  </div>
+                ) : currentStep === -2 ? (
                   <div className="quiz-phase-container">
                     <div className="step-article">
                       <h1>Knowledge Check</h1>
@@ -520,21 +566,24 @@ export default function BespokePath() {
                 <button
                   className="nav-btn"
                   onClick={() => {
-                    if (currentStep === -2) {
-                      // From quiz, go back to last step
+                    if (currentStep === -3) {
+                      setCurrentStep(-2); // Review → Quiz
+                    } else if (currentStep === -2) {
                       setCurrentStep(pathResult.path.length - 1);
                     } else if (currentStep > 0) {
                       setCurrentStep(currentStep - 1);
                     }
                   }}
-                  disabled={currentStep <= 0 && currentStep !== -2}
+                  disabled={currentStep <= 0 && currentStep !== -2 && currentStep !== -3}
                 >
                   <i className="fa-solid fa-chevron-left"></i>
                 </button>
                 <div className="footer-status">
-                  {currentStep === -2
-                    ? "Quiz"
-                    : `Step ${Math.min(currentStep + 1, pathResult.path.length)} of ${pathResult.path.length}`}
+                  {currentStep === -3
+                    ? "Review"
+                    : currentStep === -2
+                      ? "Quiz"
+                      : `Step ${Math.min(currentStep + 1, pathResult.path.length)} of ${pathResult.path.length}`}
                 </div>
                 <button
                   className="nav-btn"
@@ -543,9 +592,11 @@ export default function BespokePath() {
                       setCurrentStep(currentStep + 1);
                     } else if (currentStep === pathResult.path.length - 1) {
                       setCurrentStep(-2); // Go to quiz
+                    } else if (currentStep === -2) {
+                      setCurrentStep(-3); // Go to review
                     }
                   }}
-                  disabled={currentStep === -2}
+                  disabled={currentStep === -3}
                 >
                   <i className="fa-solid fa-chevron-right"></i>
                 </button>

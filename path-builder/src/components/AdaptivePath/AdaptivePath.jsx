@@ -20,6 +20,9 @@ import { findCachedPath, cachePath } from "../../services/pathCacheService";
 import { trackSessionCompleted } from "../../services/analyticsService";
 import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
+import PathGapCard from "../BespokePath/PathGapCard";
+import PathWizard from "../BespokePath/PathWizard";
+import { generateGapFillStep } from "../../services/pathGapAnalyzer";
 
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
@@ -266,6 +269,30 @@ export default function AdaptivePath() {
     }
   }, [expandedStep, pathData]);
 
+  // Gap fill callback — generates a fill step and appends to path
+  const handleFillGap = useCallback(
+    async (topic) => {
+      if (!pathData) return;
+      const fillStep = await generateGapFillStep(topic, pathData.query || query, pathData.path);
+      if (fillStep) {
+        setPathData((prev) => ({
+          ...prev,
+          path: [...prev.path, fillStep],
+        }));
+      }
+    },
+    [pathData, query]
+  );
+
+  // Explore callback — resets and pre-fills query
+  const handleExploreGap = useCallback(
+    (topic) => {
+      handleReset();
+      setQuery(topic);
+    },
+    [handleReset]
+  );
+
   // ── RENDER: Input Stage ──
   if (!showLevelPicker && !pathLoading && !pendingGeneration && !pathData) {
     return (
@@ -373,6 +400,7 @@ export default function AdaptivePath() {
       { key: "practice", icon: "🚀", label: "Practice", categories: ["practice", "transfer"] },
       { key: "quiz", icon: "📝", label: "Quiz", categories: ["__quiz__"] },
       { key: "reading", icon: "📖", label: "Further Reading", categories: ["__reading__"] },
+      { key: "review", icon: "✅", label: "Review", categories: ["__review__"] },
     ];
 
     const phases = [];
@@ -383,8 +411,11 @@ export default function AdaptivePath() {
         continue;
       }
       if (config.key === "reading") {
-        // Further Reading is a virtual phase, always include it
         phases.push({ ...config, steps: [{ category: "__reading__", globalIndex: -3 }] });
+        continue;
+      }
+      if (config.key === "review") {
+        phases.push({ ...config, steps: [{ category: "__review__", globalIndex: -4 }] });
         continue;
       }
       const steps = pathData.path
@@ -400,8 +431,10 @@ export default function AdaptivePath() {
         ? "quiz"
         : expandedStep === -3
           ? "reading"
-          : phases.find((p) => p.steps.some((s) => s.globalIndex === (expandedStep ?? 0)))?.key ||
-            "";
+          : expandedStep === -4
+            ? "review"
+            : phases.find((p) => p.steps.some((s) => s.globalIndex === (expandedStep ?? 0)))?.key ||
+              "";
 
     return (
       <div className="adaptive-path bespoke-path">
@@ -458,6 +491,8 @@ export default function AdaptivePath() {
                           setExpandedStep(-2);
                         } else if (phase.key === "reading") {
                           setExpandedStep(-3);
+                        } else if (phase.key === "review") {
+                          setExpandedStep(-4);
                         } else {
                           const idx = phase.steps[0]?.globalIndex ?? 0;
                           setExpandedStep(idx);
@@ -467,30 +502,35 @@ export default function AdaptivePath() {
                       {phase.label}
                     </button>
                     {/* Substep list — only for real content phases */}
-                    {phase.key !== "quiz" && phase.key !== "reading" && phase.steps.length > 0 && (
-                      <ul className="substep-list">
-                        {phase.steps.map((substep, i) => {
-                          const step = pathData.path[substep.globalIndex];
-                          // Prefer the AI-generated step title, then segment title, then summary excerpt
-                          let rawTitle =
-                            step?.title ||
-                            cleanVideoTitle(step?.segment?.title || step?.segment?.videoTitle) ||
-                            (step?.summary ? step.summary.split(".")[0].substring(0, 50) : null) ||
-                            `Part ${i + 1}`;
-                          return (
-                            <li key={substep.globalIndex}>
-                              <button
-                                className={`substep-item ${(expandedStep ?? 0) === substep.globalIndex ? "active" : ""}`}
-                                onClick={() => setExpandedStep(substep.globalIndex)}
-                                title={rawTitle}
-                              >
-                                {i + 1}. {rawTitle}
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
+                    {phase.key !== "quiz" &&
+                      phase.key !== "reading" &&
+                      phase.key !== "review" &&
+                      phase.steps.length > 0 && (
+                        <ul className="substep-list">
+                          {phase.steps.map((substep, i) => {
+                            const step = pathData.path[substep.globalIndex];
+                            // Prefer the AI-generated step title, then segment title, then summary excerpt
+                            let rawTitle =
+                              step?.title ||
+                              cleanVideoTitle(step?.segment?.title || step?.segment?.videoTitle) ||
+                              (step?.summary
+                                ? step.summary.split(".")[0].substring(0, 50)
+                                : null) ||
+                              `Part ${i + 1}`;
+                            return (
+                              <li key={substep.globalIndex}>
+                                <button
+                                  className={`substep-item ${(expandedStep ?? 0) === substep.globalIndex ? "active" : ""}`}
+                                  onClick={() => setExpandedStep(substep.globalIndex)}
+                                  title={rawTitle}
+                                >
+                                  {i + 1}. {rawTitle}
+                                </button>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
                   </div>
                 ))}
               </nav>
@@ -514,6 +554,16 @@ export default function AdaptivePath() {
                   <option value="Zephyr">Zephyr (Neutral)</option>
                 </select>
               </div>
+
+              {/* Gap Analysis Card — below voice selector */}
+              <PathGapCard
+                gaps={pathData.gaps}
+                communityPainPoints={pathData.communityPainPoints}
+                query={pathData.query || query}
+                steps={pathData.path}
+                onFillGap={handleFillGap}
+                onExplore={handleExploreGap}
+              />
             </aside>
 
             {/* Main Content Area */}
@@ -558,7 +608,12 @@ export default function AdaptivePath() {
                   </div>
                 )}
 
-                {expandedStep === -2 ? (
+                {expandedStep === -4 ? (
+                  /* Review Phase — PathWizard */
+                  <div className="step-content-container">
+                    <PathWizard pathResult={pathData} gaps={pathData.gaps} />
+                  </div>
+                ) : expandedStep === -2 ? (
                   <div className="quiz-phase-container">
                     <div className="step-article">
                       <h1>Knowledge Check</h1>
@@ -739,8 +794,10 @@ export default function AdaptivePath() {
                 <button
                   className="nav-btn"
                   onClick={() => {
-                    if (expandedStep === -3) {
-                      setExpandedStep(-2); // From reading, go back to quiz
+                    if (expandedStep === -4) {
+                      setExpandedStep(-3); // Review → Reading
+                    } else if (expandedStep === -3) {
+                      setExpandedStep(-2); // Reading → Quiz
                     } else if (expandedStep === -2) {
                       setExpandedStep(pathData.path.length - 1); // From quiz, go to last step
                     } else {
@@ -748,16 +805,23 @@ export default function AdaptivePath() {
                       if (cur > 0) setExpandedStep(cur - 1);
                     }
                   }}
-                  disabled={(expandedStep ?? 0) <= 0 && expandedStep !== -2 && expandedStep !== -3}
+                  disabled={
+                    (expandedStep ?? 0) <= 0 &&
+                    expandedStep !== -2 &&
+                    expandedStep !== -3 &&
+                    expandedStep !== -4
+                  }
                 >
                   <i className="fa-solid fa-chevron-left"></i>
                 </button>
                 <div className="footer-status">
-                  {expandedStep === -2
-                    ? "Quiz"
-                    : expandedStep === -3
-                      ? "Further Reading"
-                      : `Step ${Math.min((expandedStep ?? 0) + 1, pathData.path.length)} of ${pathData.path.length}`}
+                  {expandedStep === -4
+                    ? "Review"
+                    : expandedStep === -2
+                      ? "Quiz"
+                      : expandedStep === -3
+                        ? "Further Reading"
+                        : `Step ${Math.min((expandedStep ?? 0) + 1, pathData.path.length)} of ${pathData.path.length}`}
                 </div>
                 <button
                   className="nav-btn"
@@ -769,9 +833,11 @@ export default function AdaptivePath() {
                       setExpandedStep(-2); // Last step → quiz
                     } else if (expandedStep === -2) {
                       setExpandedStep(-3); // Quiz → further reading
+                    } else if (expandedStep === -3) {
+                      setExpandedStep(-4); // Further reading → review
                     }
                   }}
-                  disabled={expandedStep === -3}
+                  disabled={expandedStep === -4}
                 >
                   <i className="fa-solid fa-chevron-right"></i>
                 </button>
