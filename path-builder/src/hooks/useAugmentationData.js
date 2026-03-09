@@ -6,12 +6,14 @@
  *
  * Returns:
  *  - getCourseSummary(courseCode) → { avgGrade, avgScore, verdict, videoCount, ... } | null
+ *  - getVideoKeys(courseCode) → ["100_01/02_Documentation", ...] | []
  *  - loading: boolean
  */
 import { useState, useEffect, useRef } from "react";
 
 // Singleton cache so multiple components don't re-fetch
 let cachedData = null;
+let cachedVideoKeys = null;
 let fetchPromise = null;
 
 function gradeFromScore(score) {
@@ -24,6 +26,7 @@ function gradeFromScore(score) {
 
 export function useAugmentationData() {
   const [courseMap, setCourseMap] = useState(() => cachedData);
+  const [videoKeysMap, setVideoKeysMap] = useState(() => cachedVideoKeys);
   const [loading, setLoading] = useState(() => !cachedData);
   const mounted = useRef(true);
 
@@ -85,9 +88,19 @@ export function useAugmentationData() {
         };
       }
 
+      // Build video keys map: courseCode → [videoKey1, videoKey2, ...]
+      const vkMap = {};
+      for (const v of data.videos) {
+        const code = v.course;
+        if (!vkMap[code]) vkMap[code] = [];
+        vkMap[code].push(v.key);
+      }
+
       cachedData = result;
+      cachedVideoKeys = vkMap;
       if (mounted.current) {
         setCourseMap(result);
+        setVideoKeysMap(vkMap);
         setLoading(false);
       }
     });
@@ -99,9 +112,13 @@ export function useAugmentationData() {
 
   const getCourseSummary = (courseCode) => {
     if (!courseMap || !courseCode) return null;
-    // Try exact match first, then try with dots replaced
     return courseMap[courseCode] || null;
   };
 
-  return { getCourseSummary, loading };
+  const getVideoKeys = (courseCode) => {
+    if (!videoKeysMap || !courseCode) return [];
+    return videoKeysMap[courseCode] || [];
+  };
+
+  return { getCourseSummary, getVideoKeys, loading };
 }

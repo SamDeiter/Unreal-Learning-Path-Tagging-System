@@ -203,6 +203,7 @@ export async function analyzePathGaps(query, steps, profile = null) {
     blindSpots: [],
     assumedKnowledge: [],
     suggestions: [],
+    weaklyCovered: [],
     coverageScore: 1.0,
     corpusStats: { subtopicsChecked: 0, subtopicsCovered: 0, avgSimilarity: 0 },
   };
@@ -231,6 +232,24 @@ export async function analyzePathGaps(query, steps, profile = null) {
     //    c) Word-level hits with short keywords preserved (don't filter "ai", "ui", "vr")
     const covered = [];
     const gaps = [];
+    const weaklyCovered = [];
+
+    // Fetch augmentation data to check course quality
+    let augData = null;
+    try {
+      const augRes = await fetch(`${import.meta.env.BASE_URL}augmentation_summary.json`);
+      if (augRes.ok) {
+        const raw = await augRes.json();
+        augData = {};
+        for (const v of raw.videos || []) {
+          if (!augData[v.course]) augData[v.course] = { totalScore: 0, count: 0 };
+          augData[v.course].totalScore += v.score || 0;
+          augData[v.course].count++;
+        }
+      }
+    } catch {
+      /* augmentation data is optional */
+    }
 
     // Build full text from ALL path content for aggregate matching
     const allPathText = steps
@@ -280,11 +299,42 @@ export async function analyzePathGaps(query, steps, profile = null) {
       const isCovered = bestOverlap > 0.3 || substringMatch || wordCoverage >= 0.7;
 
       if (isCovered) {
-        covered.push({
-          topic: required,
-          matchedTo: bestMatch || "(multiple courses)",
-          confidence: Math.max(bestOverlap, wordCoverage, substringMatch ? 0.8 : 0),
-        });
+        // Check augmentation quality of the matching course
+        let augWeak = false;
+        let augGrade = null;
+        let augScore = null;
+        if (augData && bestMatch) {
+          // Find the course code from the matched path topic
+          const matchedStep = steps.find((s) => {
+            const seg = s?.segment;
+            const title = (seg?.title || seg?.videoTitle || "").toLowerCase();
+            return title.includes(bestMatch.toLowerCase().slice(0, 10));
+          });
+          const courseCode = matchedStep?.segment?.courseSlug || matchedStep?.segment?.course || "";
+          if (courseCode && augData[courseCode]) {
+            const avg = Math.round(augData[courseCode].totalScore / augData[courseCode].count);
+            augScore = avg;
+            augGrade = avg >= 45 ? "A" : avg >= 39 ? "B" : avg >= 33 ? "C" : avg >= 22 ? "D" : "F";
+            augWeak = augGrade === "D" || augGrade === "F";
+          }
+        }
+
+        if (augWeak) {
+          weaklyCovered.push({
+            topic: required,
+            matchedTo: bestMatch || "(multiple courses)",
+            confidence: Math.max(bestOverlap, wordCoverage, substringMatch ? 0.8 : 0),
+            augGrade,
+            augScore,
+            reason: `Covered by course material rated ${augGrade} (${augScore}/55) — pedagogy needs augmentation`,
+          });
+        } else {
+          covered.push({
+            topic: required,
+            matchedTo: bestMatch || "(multiple courses)",
+            confidence: Math.max(bestOverlap, wordCoverage, substringMatch ? 0.8 : 0),
+          });
+        }
       } else {
         gaps.push({
           topic: required,
@@ -295,18 +345,21 @@ export async function analyzePathGaps(query, steps, profile = null) {
       }
     }
 
+    // Weak coverage counts as half coverage
+    const effectiveCovered = covered.length + weaklyCovered.length * 0.5;
     const coverageScore =
-      requiredSubtopics.length > 0 ? covered.length / requiredSubtopics.length : 1.0;
+      requiredSubtopics.length > 0 ? effectiveCovered / requiredSubtopics.length : 1.0;
 
     devLog(
-      `[GapAnalyzer] Coverage: ${covered.length}/${requiredSubtopics.length} required topics covered (score: ${coverageScore.toFixed(2)})`
+      `[GapAnalyzer] Coverage: ${covered.length} strong + ${weaklyCovered.length} weak + ${gaps.length} gaps out of ${requiredSubtopics.length} required topics (score: ${coverageScore.toFixed(2)})`
     );
 
     // 4. If no gaps found, return with coverage data
-    if (gaps.length === 0) {
+    if (gaps.length === 0 && weaklyCovered.length === 0) {
       return {
         ...emptyResult,
         coverageScore,
+        weaklyCovered,
         corpusStats: {
           subtopicsChecked: requiredSubtopics.length,
           subtopicsCovered: covered.length,
@@ -393,6 +446,7 @@ RULES:
         })),
         assumedKnowledge: [],
         suggestions: [],
+        weaklyCovered,
         coverageScore,
         corpusStats: {
           subtopicsChecked: requiredSubtopics.length,
@@ -407,6 +461,7 @@ RULES:
       blindSpots: parsed.blindSpots || [],
       assumedKnowledge: parsed.assumedKnowledge || [],
       suggestions: (parsed.suggestions || []).slice(0, 3),
+      weaklyCovered,
       coverageScore,
       corpusStats: {
         subtopicsChecked: requiredSubtopics.length,

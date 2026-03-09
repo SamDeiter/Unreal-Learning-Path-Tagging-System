@@ -161,9 +161,10 @@ export default function PathIntelligencePanel() {
   const blindSpots = analysis?.blindSpots || [];
   const suggestions = analysis?.suggestions || [];
   const assumedKnowledge = analysis?.assumedKnowledge || [];
+  const weaklyCovered = analysis?.weaklyCovered || [];
   const coverageScore = analysis?.coverageScore ?? 0;
   const corpusStats = analysis?.corpusStats || {};
-  const gapCount = blindSpots.length;
+  const gapCount = blindSpots.length + weaklyCovered.length;
 
   // ── RENDER ──
   return (
@@ -388,6 +389,45 @@ export default function PathIntelligencePanel() {
                         </div>
                       );
                     })}
+
+                    {/* Weakly Covered */}
+                    {weaklyCovered.length > 0 && (
+                      <div className="ip-weak-section">
+                        <h4>⚠️ Weakly Covered</h4>
+                        <p className="ip-weak-desc">
+                          These topics exist in your path but have low pedagogical quality.
+                        </p>
+                        {weaklyCovered.map((item, i) => (
+                          <div key={`wc-${i}`} className="ip-gap-card ip-sev-low ip-weak-card">
+                            <div className="ip-gap-header">
+                              <span
+                                className={`ip-sev-dot aug-badge aug-${item.augGrade}`}
+                                style={{
+                                  borderRadius: "4px",
+                                  width: "auto",
+                                  height: "auto",
+                                  padding: "1px 5px",
+                                  fontSize: "10px",
+                                }}
+                              >
+                                {item.augGrade}
+                              </span>
+                              <strong>{item.topic}</strong>
+                            </div>
+                            <p className="ip-gap-reason">{item.reason}</p>
+                            <button
+                              className="ip-btn small aug-action-inline"
+                              onClick={() => {
+                                const base = import.meta.env?.BASE_URL || "/";
+                                window.open(`${base}augmentation_viewer.html`, "_blank");
+                              }}
+                            >
+                              ⚡ View Augmented Guide
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Suggestions */}
                     {suggestions.length > 0 && (
