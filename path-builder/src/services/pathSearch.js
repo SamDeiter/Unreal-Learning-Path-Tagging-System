@@ -190,6 +190,30 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
     }
   }
 
+  // ── Junk Title Filter ──────────────────────────────────────────────
+  // Reject segments with non-content titles (outros, credits, garbled IDs)
+  const JUNK_TITLE_PATTERNS = [
+    /^thank\s*you/i, // "Thank You 5.00"
+    /^(intro|outro|credits?|end\s*card)/i, // non-content segments
+    /^[A-Z]{1,3}\s+(GPT|LLM)\d/i, // garbled AI-ish titles
+    /^\d+(\.\d+)?$/, // just a number
+  ];
+  const preFilterCount = segments.length;
+  segments = segments.filter((seg) => {
+    const title = (seg.title || seg.videoTitle || "").trim();
+    // Reject if title is too short (garbled) — skip docs which may have no title
+    if (seg.type === "transcript" && title.length > 0 && title.length < 5) return false;
+    // Reject if title matches a junk pattern
+    if (JUNK_TITLE_PATTERNS.some((p) => p.test(title))) {
+      devLog(`[pathSearch] Filtered junk segment: "${title}"`);
+      return false;
+    }
+    return true;
+  });
+  if (segments.length < preFilterCount) {
+    devLog(`[pathSearch] Junk filter removed ${preFilterCount - segments.length} segment(s)`);
+  }
+
   // Sort by similarity, take top results
   segments.sort((a, b) => b.similarity - a.similarity);
 

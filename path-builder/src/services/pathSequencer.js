@@ -19,7 +19,7 @@ export const SEGMENT_CATEGORIES = ["foundation", "diagnosis", "fix", "transfer"]
 // Minimum keyword overlap between user query and a classified step's text.
 // Steps below this threshold are demoted to "low" relevance — catches
 // semantically-similar but topically-wrong content that the AI failed to reject.
-const TOPIC_OVERLAP_THRESHOLD = 0.3;
+const TOPIC_OVERLAP_THRESHOLD = 0.4;
 
 // Stop words excluded from topical overlap computation
 const STOP_WORDS = new Set([
@@ -164,7 +164,7 @@ Categories:
 - transfer: How this knowledge applies to other contexts
 
 Return a JSON array of objects with this format:
-[{"index": 0, "category": "foundation", "relevance": "high|medium|low", "summary": "A direct mini-lesson that teaches the concept. Extract the actual knowledge from the source and present it as clear instruction — explain what it is, how it works, and what the learner should do. Write 3-5 sentences in second person (you/your). No markdown formatting."}]
+[{"index": 0, "category": "foundation", "relevance": "high|medium|low", "title": "A short descriptive title (3-6 words) that accurately describes this step's content. Must relate to the learner's query.", "summary": "A direct mini-lesson that teaches the concept. Extract the actual knowledge from the source and present it as clear instruction — explain what it is, how it works, and what the learner should do. Write 3-5 sentences in second person (you/your). No markdown formatting."}]
 
 Rules:
 - WORKFLOW INTENT MATCHING (CRITICAL): Before classifying, determine the learner's IMPLIED WORKFLOW from their query.
@@ -294,6 +294,7 @@ Rules:
           sequenced.push({
             segment: seg,
             category: c.category,
+            title: c.title || "", // AI-generated descriptive title
             summary: c.summary || "", // AI-generated step summary
             order: sequenced.length,
           });
