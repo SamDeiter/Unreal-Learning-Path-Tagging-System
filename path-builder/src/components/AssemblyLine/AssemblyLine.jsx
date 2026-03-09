@@ -15,9 +15,11 @@ import { usePath } from "../../context/PathContext";
 import { optimizePathOrder } from "../../utils/generationEngine";
 import { useAugmentationData } from "../../hooks/useAugmentationData";
 import { classifySegment, getBloomBadge } from "../../services/bloomClassifier";
-import { estimateCognitiveLoad, getLoadSummary } from "../../services/cognitiveLoadEngine";
-import { topologicalSort } from "../../services/prerequisiteGraph";
-import { interleaveCourses } from "../../services/cognitiveLoadEngine";
+import {
+  estimateCognitiveLoad,
+  getLoadSummary,
+  interleaveCourses,
+} from "../../services/cognitiveLoadEngine";
 import "./AssemblyLine.css";
 
 function AssemblyLine() {
@@ -62,18 +64,15 @@ function AssemblyLine() {
   };
 
   const handleOptimize = () => {
+    // Step 1: Legacy sort by role/weight (always produces visible change)
+    const baseSorted = optimizePathOrder(courses);
+    // Step 2: Layer on cognitive load interleaving
     try {
-      // Phase 1: topological sort by prerequisites
-      const topoSorted = topologicalSort(courses);
-      // Phase 2: interleave by cognitive load
-      const interleaved = interleaveCourses(topoSorted);
-      // Strip cognitiveLoad annotations before saving
+      const interleaved = interleaveCourses(baseSorted);
       const cleaned = interleaved.map(({ cognitiveLoad: _cl, ...rest }) => rest);
       reorderCourses(cleaned);
     } catch {
-      // Fallback to legacy optimizer
-      const optimized = optimizePathOrder(courses);
-      reorderCourses(optimized);
+      reorderCourses(baseSorted);
     }
   };
 
@@ -206,11 +205,7 @@ function AssemblyLine() {
             <button
               className="btn btn-danger btn-sm"
               title="Remove all courses from your learning path"
-              onClick={() => {
-                if (window.confirm(`Clear all ${courses.length} courses from your path?`)) {
-                  clearPath();
-                }
-              }}
+              onClick={() => clearPath()}
             >
               🗑️ Clear All
             </button>
