@@ -30,7 +30,6 @@ function PathDashboard({ onEditPath, onCreateNew, onLegacyMode }) {
   const [paths, setPaths] = useState(loadSavedPaths);
 
   const handleDelete = useCallback((id) => {
-    if (!window.confirm("Delete this saved path?")) return;
     setPaths((prev) => {
       const next = prev.filter((p) => p.id !== id);
       savePaths(next);
