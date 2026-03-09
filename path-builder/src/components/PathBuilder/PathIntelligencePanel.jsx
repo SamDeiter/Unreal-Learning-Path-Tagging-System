@@ -6,7 +6,7 @@
  * Setup gate shown when Primary Goal is missing.
  */
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { usePath } from "../../context/PathContext";
 import { analyzePathGaps, generateGapFillStep } from "../../services/pathGapAnalyzer";
 import { generateQuizForPath } from "../../services/quizService";
@@ -78,6 +78,20 @@ export default function PathIntelligencePanel() {
   const [fillResults, setFillResults] = useState({});
   const [quiz, setQuiz] = useState(null);
   const [generatingQuiz, setGeneratingQuiz] = useState(false);
+
+  // Auto-populate from wizard intent (one-time read)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("ue5_wizard_intent");
+      if (raw) {
+        const intent = JSON.parse(raw);
+        setLearningIntent(intent);
+        localStorage.removeItem("ue5_wizard_intent");
+      }
+    } catch {
+      /* ignore parse errors */
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const hasCourses = courses.length > 0;
   const hasGoal = !!learningIntent?.primaryGoal?.trim();

@@ -577,12 +577,23 @@ function App() {
                   <PathCreationWizard
                     onComplete={(pathData) => {
                       setShowWizard(false);
-                      // Save to storage and switch to editor
+                      // Save to storage
                       import("./components/PathBuilder/PathDashboard").then(
                         ({ savePathToStorage }) => {
                           savePathToStorage(pathData);
                         }
                       );
+                      // Store wizard intent so PathIntelligencePanel can read it
+                      localStorage.setItem(
+                        "ue5_wizard_intent",
+                        JSON.stringify({
+                          primaryGoal: pathData.goal,
+                          skillLevel: pathData.skillLevel,
+                          timeBudget: pathData.timeBudget,
+                        })
+                      );
+                      // Auto-populate course search with the goal
+                      setPreSelectedSkill(pathData.goal);
                       setBuilderView("editor");
                     }}
                     onCancel={() => setShowWizard(false)}
