@@ -18,7 +18,10 @@ import QuizEngine from "./QuizEngine";
 import PreSeededPaths from "./PreSeededPaths";
 import PathGapCard from "./PathGapCard";
 import PathWizard from "./PathWizard";
-import { generateGapFillStep } from "../../services/pathGapAnalyzer";
+import PathDiff from "./PathDiff";
+import PrereqChain from "./PrereqChain";
+import { generateGapFillStep, buildPrereqChain } from "../../services/pathGapAnalyzer";
+import { getStruggleBadges } from "../../services/struggleBadgeService";
 import { generatePathNarration } from "../../services/stepBriefingService";
 import "./BespokePath.css";
 
@@ -107,15 +110,62 @@ export default function BespokePath() {
   });
 
   // Path Narrator state (button-triggered, not auto)
-  const [narrationData, setNarrationData] = useState(null); // Map<stepIndex, {script, audioUrl}>
+  const [narrationData, setNarrationData] = useState(null);
   const [narrationLoading, setNarrationLoading] = useState(false);
   const [autoPlayAudio, setAutoPlayAudio] = useState(false);
+
+  // Phase 3 state
+  const [originalSteps, setOriginalSteps] = useState(null); // Snapshot for PathDiff
+  const [originalCoverage, setOriginalCoverage] = useState(0);
+  const [prereqChain, setPrereqChain] = useState(null);
+  const [struggleBadges, setStruggleBadges] = useState(new Map());
+  const [reviewTab, setReviewTab] = useState("checklist"); // "checklist" | "diff" | "dependencies"
 
   const isFollowUp = useRef(false);
 
   // Start analytics session on mount
   useEffect(() => {
     startSession();
+  }, []);
+
+  // Phase 3: Fetch prereq chain and struggle badges when path changes
+  useEffect(() => {
+    if (!pathResult || !pathResult.path || pathResult.path.length === 0) return;
+
+    // Build prereq chain (async)
+    buildPrereqChain(pathResult.path).then((chain) => {
+      setPrereqChain(chain);
+    });
+
+    // Fetch struggle badges (async, fire-and-forget)
+    getStruggleBadges(pathResult.path).then((badges) => {
+      setStruggleBadges(badges);
+    });
+  }, [pathResult]);
+
+  // Gap fill callback — generates a new step and appends it
+  const handleFillGap = useCallback(
+    async (blind) => {
+      if (!pathResult) return;
+      try {
+        const newStep = await generateGapFillStep(blind, pathResult.query || query);
+        if (newStep) {
+          setPathResult((prev) => ({
+            ...prev,
+            path: [...prev.path, newStep],
+          }));
+        }
+      } catch (err) {
+        console.warn("[BespokePath] Fill gap failed:", err.message);
+      }
+    },
+    [pathResult, query]
+  );
+
+  // Explore gap callback — opens search for the blind spot topic
+  const handleExploreGap = useCallback((blind) => {
+    const searchUrl = `https://www.google.com/search?q=site%3Adev.epicgames.com+unreal+engine+${encodeURIComponent(blind.topic || blind.title || "")}`;
+    window.open(searchUrl, "_blank", "noopener,noreferrer");
   }, []);
 
   const handleGenerate = useCallback(async () => {
@@ -187,6 +237,11 @@ export default function BespokePath() {
     setCurrentStep(0);
     setIsLoading(false);
     setPipelineStage("");
+    // Snapshot original steps for PathDiff
+    if (result.path?.length > 0) {
+      setOriginalSteps([...result.path]);
+      setOriginalCoverage(result.gaps?.coverageScore || 0);
+    }
     // Also reset quizzes and scores for new search
     resetQuiz();
   }, [query, isLoading, pathResult?.query, resetQuiz]);
@@ -239,28 +294,6 @@ export default function BespokePath() {
   const handleExampleClick = (example) => {
     setQuery(example);
   };
-
-  // Gap fill callback — generates a fill step and appends to path
-  const handleFillGap = useCallback(
-    async (topic) => {
-      if (!pathResult) return;
-      const fillStep = await generateGapFillStep(topic, pathResult.query || query, pathResult.path);
-      if (fillStep) {
-        setPathResult((prev) => ({
-          ...prev,
-          path: [...prev.path, fillStep],
-        }));
-      }
-    },
-    [pathResult, query]
-  );
-
-  // Explore callback — closes modal and pre-fills query
-  const handleExploreGap = useCallback((topic) => {
-    setPathResult(null);
-    setCurrentStep(0);
-    setQuery(topic);
-  }, []);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -385,8 +418,10 @@ export default function BespokePath() {
                   const activePhaseKey =
                     currentStep === -2
                       ? "quiz"
-                      : phases.find((p) => p.steps.some((s) => s.globalIndex === currentStep))
-                          ?.key || "";
+                      : currentStep === -3
+                        ? "review"
+                        : phases.find((p) => p.steps.some((s) => s.globalIndex === currentStep))
+                            ?.key || "";
 
                   return phases.map((phase) => (
                     <div key={phase.key} className="phase-group">
@@ -406,7 +441,7 @@ export default function BespokePath() {
                         {phase.label}
                       </button>
                       {/* Substep list — only for non-quiz phases with multiple steps */}
-                      {phase.key !== "quiz" && phase.steps.length > 0 && (
+                      {phase.key !== "quiz" && phase.key !== "review" && phase.steps.length > 0 && (
                         <ul className="substep-list">
                           {(() => {
                             // Pre-scan for duplicate titles within this phase
@@ -475,9 +510,40 @@ export default function BespokePath() {
             <main className="epic-main-content">
               <div className="main-scroll-area">
                 {currentStep === -3 ? (
-                  /* Review Phase — PathWizard */
+                  /* Review Phase — Tabbed view: Checklist / Diff / Dependencies */
                   <div className="step-content-container">
-                    <PathWizard pathResult={pathResult} gaps={pathResult.gaps} />
+                    <div className="review-tabs">
+                      <button
+                        className={`review-tab-btn ${reviewTab === "checklist" ? "active" : ""}`}
+                        onClick={() => setReviewTab("checklist")}
+                      >
+                        ✅ Checklist
+                      </button>
+                      <button
+                        className={`review-tab-btn ${reviewTab === "diff" ? "active" : ""}`}
+                        onClick={() => setReviewTab("diff")}
+                      >
+                        📊 Path Changes
+                      </button>
+                      <button
+                        className={`review-tab-btn ${reviewTab === "dependencies" ? "active" : ""}`}
+                        onClick={() => setReviewTab("dependencies")}
+                      >
+                        🔗 Dependencies
+                      </button>
+                    </div>
+                    {reviewTab === "checklist" && (
+                      <PathWizard pathResult={pathResult} gaps={pathResult.gaps} />
+                    )}
+                    {reviewTab === "diff" && (
+                      <PathDiff
+                        originalSteps={originalSteps || pathResult.path}
+                        currentSteps={pathResult.path}
+                        originalCoverage={originalCoverage}
+                        currentCoverage={pathResult.gaps?.coverageScore || 0}
+                      />
+                    )}
+                    {reviewTab === "dependencies" && <PrereqChain chain={prereqChain} />}
                   </div>
                 ) : currentStep === -2 ? (
                   <div className="quiz-phase-container">
@@ -556,6 +622,12 @@ export default function BespokePath() {
                       takeaways={stepTakeaways[currentStep]?.items}
                       takeawayLoading={!!stepTakeaways[currentStep]?.loading}
                       query={pathResult?.query || query}
+                      struggleBadge={struggleBadges.get(
+                        pathResult.path[currentStep]?.segment?.title ||
+                          pathResult.path[currentStep]?.segment?.videoTitle ||
+                          pathResult.path[currentStep]?.title ||
+                          ""
+                      )}
                     />
                   </div>
                 ) : null}

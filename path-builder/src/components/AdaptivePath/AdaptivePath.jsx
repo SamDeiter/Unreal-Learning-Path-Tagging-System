@@ -22,7 +22,10 @@ import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
 import PathGapCard from "../BespokePath/PathGapCard";
 import PathWizard from "../BespokePath/PathWizard";
-import { generateGapFillStep } from "../../services/pathGapAnalyzer";
+import PathDiff from "../BespokePath/PathDiff";
+import PrereqChain from "../BespokePath/PrereqChain";
+import { generateGapFillStep, buildPrereqChain } from "../../services/pathGapAnalyzer";
+import { getStruggleBadges } from "../../services/struggleBadgeService";
 
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
@@ -64,6 +67,13 @@ export default function AdaptivePath() {
   useEffect(() => {
     setRecentQueries(loadRecentQueries());
   }, []);
+
+  // Phase 3 state
+  const [originalSteps, setOriginalSteps] = useState(null);
+  const [originalCoverage, setOriginalCoverage] = useState(0);
+  const [prereqChain, setPrereqChain] = useState(null);
+  const [struggleBadges, setStruggleBadges] = useState(new Map());
+  const [reviewTab, setReviewTab] = useState("checklist");
 
   const { knowledgeProfile, hasSavedProfile, clearProfile, setProfileDirect, STAGES } =
     useAdaptiveQuiz();
@@ -243,6 +253,25 @@ export default function AdaptivePath() {
       handleGeneratePath();
     }
   }, [pendingGeneration, query, knowledgeProfile, pathLoading, handleGeneratePath]);
+
+  // Phase 3: Fetch prereq chain and struggle badges when path changes
+  useEffect(() => {
+    if (!pathData || !pathData.path || pathData.path.length === 0) return;
+
+    // Snapshot original steps for PathDiff (only on first load)
+    if (!originalSteps) {
+      setOriginalSteps([...pathData.path]);
+      setOriginalCoverage(pathData.gaps?.coverageScore || 0);
+    }
+
+    buildPrereqChain(pathData.path).then((chain) => {
+      setPrereqChain(chain);
+    });
+
+    getStruggleBadges(pathData.path).then((badges) => {
+      setStruggleBadges(badges);
+    });
+  }, [pathData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Start over completely
@@ -609,9 +638,40 @@ export default function AdaptivePath() {
                 )}
 
                 {expandedStep === -4 ? (
-                  /* Review Phase — PathWizard */
+                  /* Review Phase — Tabbed view: Checklist / Diff / Dependencies */
                   <div className="step-content-container">
-                    <PathWizard pathResult={pathData} gaps={pathData.gaps} />
+                    <div className="review-tabs">
+                      <button
+                        className={`review-tab-btn ${reviewTab === "checklist" ? "active" : ""}`}
+                        onClick={() => setReviewTab("checklist")}
+                      >
+                        ✅ Checklist
+                      </button>
+                      <button
+                        className={`review-tab-btn ${reviewTab === "diff" ? "active" : ""}`}
+                        onClick={() => setReviewTab("diff")}
+                      >
+                        📊 Path Changes
+                      </button>
+                      <button
+                        className={`review-tab-btn ${reviewTab === "dependencies" ? "active" : ""}`}
+                        onClick={() => setReviewTab("dependencies")}
+                      >
+                        🔗 Dependencies
+                      </button>
+                    </div>
+                    {reviewTab === "checklist" && (
+                      <PathWizard pathResult={pathData} gaps={pathData.gaps} />
+                    )}
+                    {reviewTab === "diff" && (
+                      <PathDiff
+                        originalSteps={originalSteps || pathData.path}
+                        currentSteps={pathData.path}
+                        originalCoverage={originalCoverage}
+                        currentCoverage={pathData.gaps?.coverageScore || 0}
+                      />
+                    )}
+                    {reviewTab === "dependencies" && <PrereqChain chain={prereqChain} />}
                   </div>
                 ) : expandedStep === -2 ? (
                   <div className="quiz-phase-container">
@@ -784,6 +844,12 @@ export default function AdaptivePath() {
                       editorContext={stepDeepDives[expandedStep ?? 0]?.editorContext || ""}
                       onGoDeeper={() => handleGoDeeper(expandedStep ?? 0)}
                       query={query}
+                      struggleBadge={struggleBadges.get(
+                        pathData.path[expandedStep ?? 0]?.segment?.title ||
+                          pathData.path[expandedStep ?? 0]?.segment?.videoTitle ||
+                          pathData.path[expandedStep ?? 0]?.title ||
+                          ""
+                      )}
                     />
                   </div>
                 ) : null}

@@ -203,6 +203,7 @@ export default function PathStep({
   editorContext,
   onGoDeeper,
   query,
+  struggleBadge,
 }) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [scriptOpen, setScriptOpen] = useState(false);
@@ -254,6 +255,16 @@ export default function PathStep({
           ) : (
             <span className="trust-badge trust-unverified" title="AI-generated, not verified">
               <span className="trust-dot trust-dot-amber"></span> AI
+            </span>
+          )}
+          {/* Community struggle badge */}
+          {struggleBadge && (
+            <span
+              className="struggle-badge"
+              title={`${struggleBadge.negativePercent}% negative feedback from learners`}
+            >
+              <i className="fa-solid fa-triangle-exclamation"></i>
+              Community Struggles ({struggleBadge.negativePercent}%)
             </span>
           )}
         </div>
