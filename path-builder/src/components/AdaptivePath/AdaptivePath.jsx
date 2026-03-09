@@ -21,7 +21,6 @@ import { trackSessionCompleted } from "../../services/analyticsService";
 import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
 
-
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
 import { fixEpicUrl } from "../../utils/urlHelpers";
@@ -180,6 +179,7 @@ export default function AdaptivePath() {
     };
     setQuery(path.query);
     setPathData(fakeResult);
+    setExpandedStep(0);
   }, []);
 
   /**
@@ -208,6 +208,7 @@ export default function AdaptivePath() {
       if (cached) {
         timers.forEach(clearTimeout);
         setPathData(cached);
+        setExpandedStep(0);
         setIsAiGenerated(!!cached.isAiGenerated);
         setPathLoading(false);
         return;
@@ -220,6 +221,7 @@ export default function AdaptivePath() {
         setPathError(result.error);
       } else {
         setPathData(result);
+        setExpandedStep(0);
         setIsAiGenerated(!!result.isAiGenerated);
         cachePath(profileKey, result);
       }
