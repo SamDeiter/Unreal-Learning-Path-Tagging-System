@@ -79,7 +79,7 @@ function parseGeminiJSON(raw) {
 
 /**
  * Extract key subtopics from a set of learning path steps.
- * Uses step titles and first 100 chars of text, deduplicates by keyword overlap.
+ * Used for building searchable topic lists from the PATH's content.
  *
  * @param {Array} steps - Path steps with segment data
  * @param {string} query - The original user query (included as a topic)
@@ -125,13 +125,73 @@ function extractSubtopics(steps, query) {
   return unique.slice(0, MAX_SUBTOPICS);
 }
 
+/**
+ * Use Gemini to generate what subtopics a learning query REQUIRES.
+ * This is the key fix: instead of checking what the path has,
+ * we check what the query NEEDS.
+ *
+ * @param {string} query - The user's learning goal
+ * @returns {Promise<string[]>} Array of required subtopic strings
+ */
+async function generateRequiredSubtopics(query) {
+  try {
+    const app = getFirebaseApp();
+    const functions = getFunctions(app, "us-central1");
+    const classifyFn = httpsCallable(functions, "classifySegments");
+
+    const prompt = `You are a UE5 curriculum expert. A learner wants to learn: "${query}"
+
+List the 8-12 essential subtopics/skills that a comprehensive learning path for "${query}" MUST cover.
+Think about:
+- Core concepts directly related to the goal
+- Common prerequisites that are often missed
+- Practical skills needed (not just theory)
+- Debugging/troubleshooting knowledge for this area
+
+Return ONLY a JSON array of short topic strings (3-6 words each).
+Example format: ["Blueprint Event Graphs", "Variable Types and Casting", "Debugging with Breakpoints"]
+
+Return valid JSON only, no markdown fences, no explanation.`;
+
+    const result = await retryWithBackoff(() => classifyFn({ prompt }), {
+      maxRetries: 1,
+      baseDelayMs: 1500,
+      label: "requiredSubtopics",
+    });
+
+    const responseText = result.data?.text || "";
+    recordTokenUsage(
+      "requiredSubtopics",
+      Math.ceil(prompt.length / 4),
+      Math.ceil(responseText.length / 4)
+    );
+
+    const parsed = parseGeminiJSON(responseText);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      devLog(`[GapAnalyzer] Generated ${parsed.length} required subtopics for "${query}"`);
+      return parsed.slice(0, 12);
+    }
+
+    devWarn("[GapAnalyzer] Could not parse required subtopics, using fallback");
+    return null;
+  } catch (err) {
+    devWarn("[GapAnalyzer] generateRequiredSubtopics failed:", err.message);
+    return null;
+  }
+}
+
 // ═══════════════════════════════════════════════════════════
 // 1. analyzePathGaps
 // ═══════════════════════════════════════════════════════════
 
 /**
  * Analyze a learning path for blind spots, assumed knowledge, and suggestions.
- * RAG-grounded: vector-searches each subtopic to determine actual corpus coverage.
+ *
+ * NEW APPROACH: Instead of checking if path content exists in the corpus
+ * (which always returns 100% since courses ARE the corpus), we:
+ * 1. Ask Gemini what SUBTOPICS the query requires
+ * 2. Check which of those subtopics the PATH's courses actually cover
+ * 3. The uncovered required subtopics = gaps
  *
  * @param {string} query - The user's original question
  * @param {Array} steps - The sequenced path steps
@@ -150,86 +210,86 @@ export async function analyzePathGaps(query, steps, profile = null) {
   try {
     if (!steps || steps.length === 0) return emptyResult;
 
-    // 1. Extract subtopics from the path
-    const subtopics = extractSubtopics(steps, query);
-    if (subtopics.length === 0) return emptyResult;
+    // 1. Generate what the query REQUIRES (via Gemini)
+    const requiredSubtopics = await generateRequiredSubtopics(query);
+    if (!requiredSubtopics || requiredSubtopics.length === 0) {
+      devWarn("[GapAnalyzer] Could not generate required subtopics, falling back");
+      return emptyResult;
+    }
 
-    devLog(`[GapAnalyzer] Checking ${subtopics.length} subtopics against corpus...`);
+    devLog(`[GapAnalyzer] Required subtopics: ${requiredSubtopics.join(", ")}`);
 
-    // 2. Vector-search each subtopic against the RAG corpus
-    const searchResults = await Promise.allSettled(
-      subtopics.map((topic) => findRelevantSegments(topic, GAP_FILL_TOP_K))
-    );
+    // 2. Extract what the PATH actually covers (from course titles/content)
+    const pathTopics = extractSubtopics(steps, query);
+    const pathText = pathTopics.join(" ").toLowerCase();
 
-    // 3. Classify each subtopic as covered or gap
+    devLog(`[GapAnalyzer] Path covers: ${pathTopics.join(", ")}`);
+
+    // 3. For each required subtopic, check if the path covers it
+    //    Using keyword overlap against path content
     const covered = [];
     const gaps = [];
-    let totalSimilarity = 0;
-    let validSearches = 0;
 
-    searchResults.forEach((result, i) => {
-      const topic = subtopics[i];
-      if (result.status !== "fulfilled") {
-        // Search failed — treat as potential gap with zero confidence
-        gaps.push({
-          topic,
-          bestSimilarity: 0,
-          bestMatch: null,
-          lowCorpusCoverage: true,
-        });
-        return;
+    for (const required of requiredSubtopics) {
+      const requiredLower = required.toLowerCase();
+      const requiredWords = requiredLower.split(/\s+/).filter((w) => w.length > 2);
+
+      // Check overlap with each path topic
+      let bestOverlap = 0;
+      let bestMatch = "";
+
+      for (const pathTopic of pathTopics) {
+        const overlap = computeTopicOverlap(required, pathTopic);
+        if (overlap > bestOverlap) {
+          bestOverlap = overlap;
+          bestMatch = pathTopic;
+        }
       }
 
-      const { segments, lowCorpusCoverage } = result.value;
-      const bestSimilarity = segments.length > 0 ? segments[0].similarity || 0 : 0;
+      // Also check if required words appear anywhere in path text
+      const wordHits = requiredWords.filter((w) => pathText.includes(w)).length;
+      const wordCoverage = requiredWords.length > 0 ? wordHits / requiredWords.length : 0;
 
-      totalSimilarity += bestSimilarity;
-      validSearches++;
+      // Consider covered if either good topic overlap OR most words are present
+      const isCovered = bestOverlap > 0.35 || wordCoverage > 0.6;
 
-      if (lowCorpusCoverage || bestSimilarity < SIMILARITY_THRESHOLD) {
-        gaps.push({
-          topic,
-          bestSimilarity,
-          bestMatch:
-            segments.length > 0
-              ? {
-                  title: segments[0].title || segments[0].videoTitle || "",
-                  similarity: bestSimilarity,
-                }
-              : null,
-          lowCorpusCoverage: !!lowCorpusCoverage,
+      if (isCovered) {
+        covered.push({
+          topic: required,
+          matchedTo: bestMatch,
+          confidence: Math.max(bestOverlap, wordCoverage),
         });
       } else {
-        covered.push({
-          topic,
-          bestSimilarity,
-          matchTitle: segments[0]?.title || segments[0]?.videoTitle || "",
+        gaps.push({
+          topic: required,
+          bestOverlap,
+          bestMatch: bestMatch || null,
+          wordCoverage,
         });
       }
-    });
+    }
 
-    const coverageScore = subtopics.length > 0 ? covered.length / subtopics.length : 1.0;
-    const avgSimilarity = validSearches > 0 ? totalSimilarity / validSearches : 0;
+    const coverageScore =
+      requiredSubtopics.length > 0 ? covered.length / requiredSubtopics.length : 1.0;
 
     devLog(
-      `[GapAnalyzer] Coverage: ${covered.length}/${subtopics.length} topics covered (score: ${coverageScore.toFixed(2)}, avg similarity: ${avgSimilarity.toFixed(3)})`
+      `[GapAnalyzer] Coverage: ${covered.length}/${requiredSubtopics.length} required topics covered (score: ${coverageScore.toFixed(2)})`
     );
 
-    // 4. If no gaps found, return early with full coverage
+    // 4. If no gaps found, return with coverage data
     if (gaps.length === 0) {
       return {
         ...emptyResult,
         coverageScore,
         corpusStats: {
-          subtopicsChecked: subtopics.length,
+          subtopicsChecked: requiredSubtopics.length,
           subtopicsCovered: covered.length,
-          avgSimilarity: Number(avgSimilarity.toFixed(3)),
+          avgSimilarity: 0,
         },
       };
     }
 
     // 5. Ask Gemini to classify gap severity and suggest fills
-    //    (grounded by research context, not hallucinating the gaps)
     const levelContext = profile?.level
       ? `The learner's assessed level is: ${profile.level.toUpperCase()}.`
       : "Assume a beginner-level learner.";
@@ -237,12 +297,12 @@ export async function analyzePathGaps(query, steps, profile = null) {
     const gapSummary = gaps
       .map(
         (g) =>
-          `- "${g.topic}" (best corpus match: ${g.bestMatch ? `"${g.bestMatch.title}" at ${g.bestSimilarity.toFixed(2)} similarity` : "NONE"})`
+          `- "${g.topic}" (best path match: ${g.bestMatch ? `"${g.bestMatch}" at ${g.bestOverlap.toFixed(2)} overlap` : "NONE"})`
       )
       .join("\n");
 
     const coveredSummary = covered
-      .map((c) => `- "${c.topic}" (matched: "${c.matchTitle}")`)
+      .map((c) => `- "${c.topic}" (matched to: "${c.matchedTo}")`)
       .join("\n");
 
     const prompt = `You are a UE5 curriculum designer analyzing a learning path for the query: "${query}"
@@ -251,10 +311,10 @@ ${levelContext}
 
 ${RESEARCH_CONTEXT}
 
-TOPICS THE CORPUS COVERS WELL:
+TOPICS THE PATH COVERS WELL:
 ${coveredSummary || "(none)"}
 
-TOPICS WITH WEAK/NO CORPUS COVERAGE (these are the gaps):
+TOPICS THE PATH IS MISSING (these are the gaps):
 ${gapSummary}
 
 Analyze these gaps and return a JSON object with:
@@ -301,40 +361,31 @@ RULES:
       return {
         blindSpots: gaps.map((g) => ({
           topic: g.topic,
-          severity: g.bestSimilarity < HIGH_SEVERITY_THRESHOLD ? "high" : "medium",
-          reason: "Corpus has weak or no coverage for this topic",
-          corpusBestMatch: g.bestMatch,
+          severity: g.bestOverlap < 0.1 ? "high" : "medium",
+          reason: "This required topic is not addressed by any course in the path",
           researchContext: "",
         })),
         assumedKnowledge: [],
         suggestions: [],
         coverageScore,
         corpusStats: {
-          subtopicsChecked: subtopics.length,
+          subtopicsChecked: requiredSubtopics.length,
           subtopicsCovered: covered.length,
-          avgSimilarity: Number(avgSimilarity.toFixed(3)),
+          avgSimilarity: 0,
         },
       };
     }
 
-    // 6. Merge Gemini classification with corpus data
-    const blindSpots = (parsed.blindSpots || []).map((bs) => {
-      const gapData = gaps.find((g) => g.topic.toLowerCase() === (bs.topic || "").toLowerCase());
-      return {
-        ...bs,
-        corpusBestMatch: gapData?.bestMatch || null,
-      };
-    });
-
+    // 6. Return Gemini-classified results
     return {
-      blindSpots,
+      blindSpots: parsed.blindSpots || [],
       assumedKnowledge: parsed.assumedKnowledge || [],
       suggestions: (parsed.suggestions || []).slice(0, 3),
       coverageScore,
       corpusStats: {
-        subtopicsChecked: subtopics.length,
+        subtopicsChecked: requiredSubtopics.length,
         subtopicsCovered: covered.length,
-        avgSimilarity: Number(avgSimilarity.toFixed(3)),
+        avgSimilarity: 0,
       },
     };
   } catch (err) {
