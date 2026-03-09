@@ -5,6 +5,7 @@
  *   Stage 1 (pathSearch.js):     findRelevantSegments()
  *   Stage 2 (pathSequencer.js):  sequencePath()
  *   Stage 3 (pathNarration.js):  generateBridgeNarration()
+ *   Stage 3b (pathGapAnalyzer.js): analyzePathGaps() + searchCommunityPainPoints()
  *
  * Also contains the hybrid fallback (generateHybridPath) and the
  * main entry point (generateBespokePath).
@@ -26,12 +27,14 @@ import {
 export { findRelevantSegments, SIMILARITY_THRESHOLD, MIN_PATH_SEGMENTS } from "./pathSearch";
 export { sequencePath, computeTopicOverlap } from "./pathSequencer";
 export { generateBridgeNarration } from "./pathNarration";
+export { analyzePathGaps, searchCommunityPainPoints, generateGapFillStep } from "./pathGapAnalyzer";
 
 // Internal imports for orchestration
 import { findRelevantSegments } from "./pathSearch";
 import { SIMILARITY_THRESHOLD, MIN_PATH_SEGMENTS } from "./pathSearch";
 import { sequencePath } from "./pathSequencer";
 import { generateBridgeNarration } from "./pathNarration";
+import { analyzePathGaps, searchCommunityPainPoints } from "./pathGapAnalyzer";
 
 /**
  * Hybrid Fallback: Generate a learning path from Gemini's own knowledge
@@ -314,9 +317,17 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
         devWarn("[BespokePath] Corpus verification failed (non-fatal):", verifyErr.message);
       }
 
-      // Stage 3: Generate bridge narrations for hybrid path
-      devLog("[BespokePath] Stage 3: Generating narrations for hybrid path...");
-      result.bridges = await generateBridgeNarration(result.path, userQuery);
+      // Stage 3: Generate bridge narrations + gap analysis for hybrid path (parallel)
+      devLog("[BespokePath] Stage 3: Generating narrations + gap analysis for hybrid path...");
+      const [hybridBridges, hybridGaps, hybridPainPoints] = await Promise.allSettled([
+        generateBridgeNarration(result.path, userQuery),
+        analyzePathGaps(userQuery, result.path, knowledgeProfile),
+        searchCommunityPainPoints(userQuery),
+      ]);
+      result.bridges = hybridBridges.status === "fulfilled" ? hybridBridges.value : [];
+      result.gaps = hybridGaps.status === "fulfilled" ? hybridGaps.value : null;
+      result.communityPainPoints =
+        hybridPainPoints.status === "fulfilled" ? hybridPainPoints.value : [];
 
       devLog(`[BespokePath] Hybrid pipeline complete: ${result.path.length} AI-generated steps`);
 
@@ -408,12 +419,20 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
       lowCorpusCoverage: !!lowCorpusCoverage,
     });
 
-    // Stage 3: Generate bridge narrations
-    devLog("[BespokePath] Stage 3: Generating narrations...");
-    result.bridges = await generateBridgeNarration(result.path, userQuery);
+    // Stage 3: Generate bridge narrations + gap analysis (parallel — zero added latency)
+    devLog("[BespokePath] Stage 3: Generating narrations + gap analysis...");
+    const [corpusBridges, corpusGaps, corpusPainPoints] = await Promise.allSettled([
+      generateBridgeNarration(result.path, userQuery),
+      analyzePathGaps(userQuery, result.path, knowledgeProfile),
+      searchCommunityPainPoints(userQuery),
+    ]);
+    result.bridges = corpusBridges.status === "fulfilled" ? corpusBridges.value : [];
+    result.gaps = corpusGaps.status === "fulfilled" ? corpusGaps.value : null;
+    result.communityPainPoints =
+      corpusPainPoints.status === "fulfilled" ? corpusPainPoints.value : [];
 
     devLog(
-      `[BespokePath] Pipeline complete: ${result.path.length} steps, ${result.bridges.length} bridges`
+      `[BespokePath] Pipeline complete: ${result.path.length} steps, ${result.bridges.length} bridges, gaps: ${result.gaps ? result.gaps.blindSpots?.length || 0 : "N/A"}`
     );
 
     return result;
