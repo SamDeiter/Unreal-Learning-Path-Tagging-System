@@ -598,17 +598,11 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       {curriculum && (
         <div className="sc-curriculum">
           <div className="sc-curriculum-header">
-            <div className="curriculum-title">
-              <h4>📚 Recommended Curriculum</h4>
-              <span className="search-term">for "{searchQuery}"</span>
-            </div>
-            <div className="curriculum-stats">
-              <span>{curriculum.totalCourses} courses</span>
-              <span>•</span>
-              <span>~{formatTime(curriculum.totalTime)}</span>
-              {timeBudget && (
-                <span className="time-badge">⏱️ Within {learningIntent.timeBudget}h budget</span>
-              )}
+            <div className="curriculum-summary">
+              <span className="curriculum-count">📚 {curriculum.totalCourses} courses</span>
+              <span className="curriculum-sep">·</span>
+              <span className="curriculum-time">~{formatTime(curriculum.totalTime)}</span>
+              {timeBudget && <span className="time-badge">✅ Within budget</span>}
             </div>
             <button
               className="generate-path-btn"
@@ -616,24 +610,12 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
               disabled={selectedCourses.size === 0}
               title={`Add ${selectedCourses.size} selected courses to your learning path`}
             >
-              🚀 Generate Path ({selectedCourses.size})
+              ➕{" "}
+              {selectedCourses.size === curriculum.totalCourses
+                ? `Add All (${selectedCourses.size})`
+                : `Add Selected (${selectedCourses.size})`}
             </button>
           </div>
-
-          {/* Learning Outcomes */}
-          {curriculum.learningOutcomes.length > 0 && (
-            <div className="sc-outcomes">
-              <h5>🎓 After this curriculum, learners will be able to:</h5>
-              <ul>
-                {curriculum.learningOutcomes.slice(0, 5).map((outcome, i) => (
-                  <li key={i}>{outcome}</li>
-                ))}
-                {curriculum.learningOutcomes.length > 5 && (
-                  <li className="more">+{curriculum.learningOutcomes.length - 5} more outcomes</li>
-                )}
-              </ul>
-            </div>
-          )}
 
           <div className="curriculum-tiers">
             {/* Prerequisites */}
@@ -701,17 +683,6 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Actions */}
-          <div className="sc-actions">
-            <button
-              className="add-to-path-btn"
-              onClick={handleAddToPath}
-              disabled={selectedCourses.size === 0}
-            >
-              ➕ Add {selectedCourses.size} Courses to Path
-            </button>
           </div>
         </div>
       )}
