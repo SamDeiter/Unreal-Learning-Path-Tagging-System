@@ -53,6 +53,8 @@ export const EVENTS = {
 
   // Content Gap Intelligence
   AI_COVERAGE_REPORT: "ai_coverage_report",
+  GAP_FILL_ACTION: "gap_fill_action",
+  GAP_EXPLORE_ACTION: "gap_explore_action",
 
   // Step-level Feedback
   AI_STEP_FEEDBACK: "ai_step_feedback",
@@ -323,6 +325,10 @@ export function trackPathSequenced(params) {
  * @param {number} params.corpusSteps - Steps from real corpus content
  * @param {number} params.aiGeneratedSteps - Steps AI had to generate
  * @param {boolean} params.lowCorpusCoverage - Whether corpus coverage was low
+ * @param {Object[]} [params.blindSpots] - Gap analysis blind spots
+ * @param {number} [params.coverageScore] - 0-1 coverage score from gap analysis
+ * @param {Object[]} [params.communityPainPoints] - Community struggle points
+ * @param {number} [params.gapFillCount] - Number of gap fills applied
  */
 export async function trackAICoverageReport(params) {
   const total = params.totalSteps || 0;
@@ -336,6 +342,16 @@ export async function trackAICoverageReport(params) {
     ai_generated_steps: aiSteps,
     ai_ratio: total > 0 ? Number((aiSteps / total).toFixed(2)) : 0,
     low_corpus_coverage: !!params.lowCorpusCoverage,
+    // Phase 4 enhancements
+    blind_spots: (params.blindSpots || []).slice(0, 10).map((b) => ({
+      topic: b.topic?.substring(0, 80),
+      severity: b.severity || "medium",
+    })),
+    coverage_score: params.coverageScore != null ? Number(params.coverageScore.toFixed(2)) : null,
+    community_pain_points: (params.communityPainPoints || []).slice(0, 5).map((p) => ({
+      topic: (p.topic || p.title)?.substring(0, 80),
+    })),
+    gap_fill_count: params.gapFillCount || 0,
   };
   devLog("[Analytics] Firing AI_COVERAGE_REPORT:", payload);
   try {
@@ -344,6 +360,32 @@ export async function trackAICoverageReport(params) {
   } catch (err) {
     devWarn("[Analytics] AI_COVERAGE_REPORT FAILED:", err.message, err);
   }
+}
+
+/**
+ * Track when a user fills a gap (adds a step to cover a blind spot).
+ * @param {string} topic - The blind spot topic
+ * @param {string} severity - high/medium/low
+ * @param {string} queryPreview - First 100 chars of user query
+ */
+export function trackGapFillAction(topic, severity, queryPreview) {
+  return trackEvent(EVENTS.GAP_FILL_ACTION, {
+    topic: topic?.substring(0, 80),
+    severity: severity || "medium",
+    query_preview: queryPreview?.substring(0, 100),
+  });
+}
+
+/**
+ * Track when a user explores a gap topic (opens external search).
+ * @param {string} topic - The blind spot topic
+ * @param {string} queryPreview - First 100 chars of user query
+ */
+export function trackGapExploreAction(topic, queryPreview) {
+  return trackEvent(EVENTS.GAP_EXPLORE_ACTION, {
+    topic: topic?.substring(0, 80),
+    query_preview: queryPreview?.substring(0, 100),
+  });
 }
 
 // ── Step-Level Feedback ────────────────────────────────────────────
@@ -388,4 +430,6 @@ export default {
   trackPathSequenced,
   trackAICoverageReport,
   trackAIStepFeedback,
+  trackGapFillAction,
+  trackGapExploreAction,
 };

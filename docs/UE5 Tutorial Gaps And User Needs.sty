@@ -1,0 +1,198 @@
+Strategic Assessment of Unreal Engine 5 Pedagogical Gaps and Learning Trends (2024-2025)
+The evolution of real-time development within Unreal Engine 5 (UE5) has fundamentally altered the technical landscape for game developers, technical artists, and virtual production professionals. As the engine moves beyond its introductory phase into a period of rapid iterative maturation—exemplified by the transition from version 5.0 to 5.7—the learning ecosystem has struggled to keep pace with the underlying architectural shifts. Market analysis of community inquiries and educational consumption patterns reveals a profound disconnect: while there is an oversaturation of entry-level tutorials focusing on the engine’s aesthetic capabilities, there is a critical scarcity of intermediate and advanced resources addressing production-ready systems, scalable architecture, and performance optimization.1
+The Contemporary Landscape of Unreal Engine 5 Learning
+The current pedagogical state of Unreal Engine 5 is defined by a surplus of "getting started" content that often lacks the depth required for professional-grade development. Beginners are frequently looking for comprehensive tutorials that cover the broad strokes of the engine, including installation, UI navigation, basic modelling, lighting, materials, and basic animation.1 While these resources are abundant, they often lead to a phenomenon known as "tutorial hell," where learners gain the ability to replicate specific sequences without understanding the conceptual "why" behind the actions.4
+Most Searched Tutorial Topics (2024-2025)
+Analysis of search trends across platforms like YouTube and Reddit indicates that the most sought-after topics remain rooted in visual fidelity and environmental storytelling. Users are highly interested in "Ancient Ruins" or "Castle" environment creation, utilizing tools like Kitbash, Megascans, and the engine’s internal modelling suite.1 However, there is a growing demand for more technical skills that enable these visuals, such as realistic animation practices, effective use of Blueprints, and innovative applications of AI in game design.4
+Search Category
+Primary Topics of Interest
+Target Engine Features
+Environment Art
+Photorealistic lighting, landscape painting, foliage optimization
+Lumen, Nanite, PCG, Virtual Shadow Maps
+Gameplay Systems
+Advanced player movement, combat AI, interaction systems
+Blueprints, C++, Enhanced Input, CMC
+Animation
+Motion Matching, procedural fixup, root motion, GASP
+Pose Search, Chooser, Motion Warping, Control Rig
+Optimization
+Build size reduction, frame rate stabilization, profiling
+Unreal Insights, GPU Visualizer, DDC, Zen Storage
+Networking
+Server-side rewind, RPC optimization, Iris integration
+Iris, Replication Graph, Net Driver, Chaos Physics
+
+The data suggests that while users are drawn to the flashy visual features of UE5, such as Lumen and Nanite, they are increasingly hitting walls when it comes to the technical implementation of these features in a production environment.9 There is a noted trend where developers who are "2 weeks into" the engine are already feeling overwhelmed by the complexity of the systems, leading them to search for more structured learning paths rather than fragmented YouTube clips.11
+The Transition Crisis and Versioning Anxiety
+A significant barrier to entry in 2025 is what community members identify as "versioning anxiety." Because UE5 iterates so quickly, tutorials made for version 5.0 or 5.2 are often viewed as obsolete by version 5.6 or 5.7.5 This anxiety is exacerbated by the fact that buttons move, plugins are renamed, and entire systems are deprecated or replaced within months.13 Beginners are often warned by professional peers to avoid tutorials more than two years old, yet many of the "classic" foundational tutorials for Unreal Engine 4 (UE4) still contain valid logic for Blueprints and code fundamentals.5
+The implication of this anxiety is a constant search for "up-to-date" content, even if the underlying logic has not changed. This creates a market where creators are incentivized to produce repetitive "beginner" content for every minor engine update rather than tackling more complex, stable architectural topics.3
+Underserved Domains: The "Intermediate Void"
+Perhaps the most critical finding in the current learning ecosystem is the "Intermediate Void." There is a wealth of content for absolute beginners and a fair amount of high-level documentation or GDC talks for seasoned veterans, but the path from "beginner" to "intermediate" is largely unpaved.2 Intermediate developers are looking for mastery rather than mimicry; they require tutorials that teach them how to build systems that are performant, scalable, and maintainable.2
+The Architectural Scarcity
+One of the most underserved areas is software architecture within the Unreal Framework. Most tutorials focus on "naive" solutions—hard-coding values and putting logic directly into the Level Blueprint or large, monolithic Character Blueprints.2 Professional developers are calling for tutorials that address:
+Composition vs. Inheritance: Moving away from deep inheritance trees toward modular Actor Components.14
+Data-Driven Design: Effectively using Data Assets, Data Tables, and the Gameplay Tags system to separate logic from content.15
+Decoupling Systems: Using interfaces and event dispatchers to create modular systems that do not rely on "casting" to specific actors, which increases load times and performance overhead.9
+The lack of architectural guidance leads to "spaghetti code" in Blueprints and unmanageable projects that are difficult to debug as they grow in complexity.2
+The Data-Oriented Shift: Mass Framework and ECS
+The Mass Framework represents a paradigm shift in how Unreal Engine handles large-scale simulations, yet it remains one of the most underserved and poorly documented sectors of the engine.18 Built as an archetype-based Entity Component System (ECS), Mass allows for tens of thousands of entities to be simulated simultaneously. However, tutorials are almost non-existent because the framework is primarily C++ based and lacks a robust Blueprint interface.16
+Developers attempting to learn MassAI or MassEntity find that documentation is "virtually non-existent" and that they are forced to read the engine's source code to understand how to implement basic behaviors.18 Furthermore, key functionality—such as Smart Object integration with Mass—was removed or changed in UE 5.1 without updated documentation, leaving many learners stuck with broken systems.18
+Mass Framework Pain Points
+Impact on Development
+Future Learning Requirement
+Rigid Traffic Logic
+Unable to create custom NPC behaviors (e.g., "GTA-style")
+Tutorials on custom MassProcessors
+Blueprint Limitations
+High barrier to entry for designers
+Expansion of Mass Blueprint nodes
+Silent Failures
+Entities fail to spawn without error messages
+Improved debugging/validation tools
+Fragment Collisions
+Complex fragment management leads to crashes
+Guides on fragment/tag synchronization
+
+The scarcity of resources for Mass is particularly frustrating for developers who see the potential of ECS for crowd simulations, projectiles, and RTS-style units but lack the technical roadmap to implement them.19
+Advanced Animation Systems: From State Machines to Motion Matching
+Animation is another area where the community is "hitting a wall." While standard state machines and blendspaces are well-documented, the new suite of animation tools introduced in UE5—specifically Motion Matching and the Game Animation Sample Project (GASP)—represents a significant jump in complexity.9
+Motion Matching Implementation
+Motion Matching is a query-based system that selects the best animation pose based on a character's current trajectory.25 Despite its inclusion in flagship samples, there is a lack of "from-scratch" tutorials. Developers are searching for information on:
+Data Preparation: How to correctly configure root motion and looping settings in the Property Matrix for Motion Matching analysis.25
+Pose Search Schema: Determining which bones and trajectory samples provide the most accurate results for specific movement types.25
+Custom Skeleton Support: Moving beyond the default UE5 Mannequin and implementing Motion Matching for unique character skeletons.23
+The community is also requesting information on how to handle transitions that Motion Matching does not natively resolve with high fidelity, such as jumping, landing, and interaction animations.27 The common consensus is that while the results are superior, the setup is far more difficult than traditional methods, and existing tutorials fail to explain the "procedural fixup" required to compensate for low animation coverage.23
+The Mover 2.0 Transition
+Related to animation is character movement. The community has expressed dissatisfaction with the aging UCharacterMovementComponent (CMC), calling it "abhorrently written" and difficult to network.17 While the new "Mover 2.0" system is intended to replace it, it is currently experimental and lacks the educational material needed for widespread adoption.17 Developers are looking for a conceptual layer that explains how movement systems actually work, rather than just how to plug in variables.9
+Networking and the Experimental Iris System
+Multiplayer development is inherently complex, and in UE5, this complexity has increased with the introduction of the Iris replication system.29 Iris seeks to improve performance and scalability by moving from an evaluation-based replication model to a push-based model.30
+The Iris Educational Gap
+Iris is currently experimental and largely opt-in, but there is a clear interest from developers building large-scale games like MMORPGs.30 However, tutorial availability is extremely limited. Critical gaps include:
+Migration Guides: How to adapt existing legacy replication code to work with Iris.30
+Iris Filtering and Prioritization: Understanding how to use the new filtering logic to replace the legacy Replication Graph.31
+Networked Physics: Implementing deterministic physics with "Rewind and Resimulate" mechanics within an Iris framework.33
+Networking System
+Performance Mechanism
+Documentation Status
+Legacy Replication
+Evaluates every property for "dirty" states
+Excellent / Abundant
+Replication Graph
+Culls actors based on grid/relevancy
+Moderate (C++ heavy)
+Iris (Beta)
+Manual/Push-based property gathering
+Critically Low
+Chaos Physics
+Deterministic fixed-delta resimulation
+Experimental / Scarce
+
+Advanced users are also calling for more "lazy replication" vs. "direct RPC" guidance, as overloading the network with RPCs remains a common pitfall in amateur multiplayer projects.31
+Optimization and Production-Ready Workflows
+A recurring theme in community feedback is that "optimization is treated as an afterthought".9 While Nanite and Lumen allow for incredible visual fidelity, they are often used incorrectly, leading to "subpixel hell" and noisy, smeary shadows that depend too heavily on Temporal Super Resolution (TSR).34
+The Profiling Toolset
+There is a significant demand for tutorials that teach "detective-level" optimization using Unreal’s internal profiling tools.35 Developers want to know how to move beyond "magic buttons" and understand:
+Unreal Insights: How to analyze threads, network interfaces, and GPU bottlenecks in real-time.14
+Optimization Viewmodes: effectively using Shader Complexity, Light Complexity, and Quad Overdraw viewmodes to identify specific performance killers.36
+Virtual Production Specifics: Optimizing environments for the "Inner Frustum" of an nDisplay setup, where standard LOD popping is unacceptable.37
+Studio-Level Infrastructure
+Beyond the engine itself, there is a lack of information on setting up a professional development pipeline—what some call "The Epic Way".38 This includes underserved topics like:
+Source Control Strategies: Best practices for branching, merging, and binary delivery using Perforce or Git.38
+Derived Data Cache (DDC): Setting up shared or cloud DDC to prevent massive "re-compiling" waits for team members.38
+Horde and UGS: Using UnrealGameSync and the Horde build system to manage large-scale team iterations.38
+These "technical production" topics are essential for professional work but are rarely covered in tutorial series, which often assume a solo developer working on a single machine.38
+User Interface (UI) and the Logic-Input Disconnect
+The Common UI plugin was designed to modernize UMG and handle cross-platform input natively, but its "beta" status and the lack of comprehensive documentation have made it a major source of headache for developers.39
+Common UI and Enhanced Input Integration
+The integration between Common UI and the Enhanced Input system is particularly chaotic.41 Developers are looking for clear guidance on:
+Input Data Assets: How to set up "Accept" and "Back" actions that work globally across all UI elements.41
+Activatable Widgets: Understanding how to "Push" widgets to a stack so that input is routed correctly and focus is maintained.39
+C++ Navigation: Overcoming the lack of native WASD support in Common UI menus without resorting to "janky" Blueprint workarounds.40
+The community notes that using SetInputMode (a common practice in older tutorials) is "illegal" to use with Common UI and will break the system's logic, yet updated tutorials explaining the correct GetDesiredInputConfig method are rare.39
+Emergent Tools: Procedural Content Generation (PCG)
+The PCG framework is one of the most popular new features in UE5, yet it reveals a "technical artist" gap. While there are many tutorials on spawning trees on a landscape, there is very little content on advanced production workflows.44
+Advanced PCG Requests
+Learners are searching for ways to use PCG beyond simple randomization:
+Hybrid Workflows: Combining automated PCG systems with manual artistic control.47
+Grammar-Based Building: Creating complex, modular structures (like buildings or dungeons) using PCG rules.44
+Vertex Color Control: Using vertex painting to control where PCG spawns foliage or materials in real-time.48
+The community also expresses a need for "PCG Graph Templates" that can be shared across biomes, much like Niagara templates, to expedite the world-building process.46
+Synthesis: The Path Forward for UE5 Education
+The data collected indicates that the Unreal Engine 5 community is moving through a phase of "sophistication-driven demand." The novelty of Nanite and Lumen has worn off, replaced by the practical realities of shipping optimized, maintainable games. The most successful future tutorials will likely be those that bridge the "Intermediate Void" by moving away from step-by-step replication toward a deeper understanding of the engine’s architecture.
+Key Takeaways for Educational Content Creators
+Identified Gap
+Targeted Solution Strategy
+Required Technical Detail
+Outdated Tutorials
+Focus on "Foundational Logic" that survives versioning
+BP logic vs. UI placement
+Intermediate Void
+"Project Architecture" over "Game Mechanics"
+Composition, Data Assets, Interfaces
+Mass/ECS
+C++ to Blueprint bridge tutorials
+MassProcessors, Fragments, Traits
+Networking
+"Iris-First" multiplayer guides
+Iris Filtering, Prioritization, resimulation
+UI Chaos
+"The Proper Way" to use Common UI
+Input Mapping Contexts, Activatable Stacks
+Optimization
+"Profiling Workflows" over "Magic Buttons"
+Unreal Insights, Viewmodes, DDC
+
+The overarching sentiment from professional peers is a desire for "critical thinking" in development.17 Rather than teaching how to "make a shotgun," the community needs to learn how to "design a modular weapon system" that can scale to a full production.49 Educators who focus on the "why" and the underlying engine mechanisms—such as the Character Movement Component's networking or the State Tree’s execution flow—will fill the most significant gaps in the current UE5 learning ecosystem.17
+Ultimately, the future of Unreal Engine 5 education lies in "Production-Ready" instruction. As more AAA and indie titles ship using these new technologies, the collective knowledge of the community will move toward standardization. However, until that point, the most underserved areas—Mass, Iris, Motion Matching, and scalable software architecture—remain the primary bottlenecks for developers looking to push the boundaries of what is possible in real-time 3D. The demand is no longer for "how to use Unreal Engine," but for "how to master Unreal Engine as a professional toolset".3
+Works cited
+Unreal Engine 5 Beginner Tutorial 2025: Introduction - YouTube, accessed February 20, 2026, https://www.youtube.com/watch?v=L9qixi858Ag
+Do you feel there aren't enough resources to learn GameDev ..., accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/1bhe5es/do_you_feel_there_arent_enough_resources_to_learn/
+Unreal Engine isn't the problem – after 12 years I realised what really is : r/UnrealEngine5, accessed February 20, 2026, https://www.reddit.com/r/UnrealEngine5/comments/1mq1dln/unreal_engine_isnt_the_problem_after_12_years_i/
+Best YouTube Tutorial Video for learning Unreal Engine 5? : r/unrealengine - Reddit, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/1dn07ji/best_youtube_tutorial_video_for_learning_unreal/
+Best up-to-date Unreal 5 beginner's tutorial? : r/unrealengine - Reddit, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/1p5zth7/best_uptodate_unreal_5_beginners_tutorial/
+Can't find good tutorials anymore - any suggestions? : r/unrealengine, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/1m6fi15/cant_find_good_tutorials_anymore_any_suggestions/
+Unreal Engine 5.6.1 Beginner Tutorial - UE5 Starter Course 2025 #unrealengine5 #megascans #cgi - YouTube, accessed February 20, 2026, https://www.youtube.com/watch?v=tEQvlhbA8l4
+Unreal Engine 5.5.3 Beginner Tutorial - UE5 Starter Course 2025 #unrealengine5 #megascans #cgi - YouTube, accessed February 20, 2026, https://www.youtube.com/watch?v=iShGXfnn3KI
+What aspects of UE5 are not well-documented enough? : r ... - Reddit, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/141k9e2/what_aspects_of_ue5_are_not_welldocumented_enough/
+These 2025 AAA games suffered for moving to Unreal Engine 5 - XDA Developers, accessed February 20, 2026, https://www.xda-developers.com/worst-unreal-engine-5-games-in-2025/
+With all the Unreal Engine hate - is it risky to learn UE in 2025? : r/UnrealEngine5 - Reddit, accessed February 20, 2026, https://www.reddit.com/r/UnrealEngine5/comments/1k5ihix/with_all_the_unreal_engine_hate_is_it_risky_to/
+Start Game Development in 2025: Your First Week with Unreal Engine 5 (Complete Beginner Guide) | by Alex Stone | Medium, accessed February 20, 2026, https://medium.com/@alex_92960/start-game-development-in-2025-your-first-week-with-unreal-engine-5-complete-beginner-guide-ae931df029ea
+I'm trying to learn UE5 but struggling due to most tutorials being outdated. - Reddit, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/1qr8mqb/im_trying_to_learn_ue5_but_struggling_due_to_most/
+Are there any good C++ tutorial series for experienced programmers? : r/unrealengine, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/174n1o6/are_there_any_good_c_tutorial_series_for/
+Best Practices for Blueprints and C++ | Epic Developer Community, accessed February 20, 2026, https://dev.epicgames.com/community/learning/tutorials/7399/unreal-engine-best-practices-for-blueprints-and-c
+Why is Epic so weird and coy when it comes to Mass? : r/UnrealEngine5 - Reddit, accessed February 20, 2026, https://www.reddit.com/r/UnrealEngine5/comments/1i287gs/why_is_epic_so_weird_and_coy_when_it_comes_to_mass/
+What UE5 topics need better lessons? : r/UnrealEngine5 - Reddit, accessed February 20, 2026, https://www.reddit.com/r/UnrealEngine5/comments/1qa5jqh/what_ue5_topics_need_better_lessons/
+MassFramework | ueHow, accessed February 20, 2026, https://uehow.web.fc2.com/Contents/Eng/UE4/NewSystems/MassFramework/MassFramework_Root.html
+Mass Entity and State Trees : r/UnrealEngine5 - Reddit, accessed February 20, 2026, https://www.reddit.com/r/UnrealEngine5/comments/1qsqqj2/mass_entity_and_state_trees/
+Simulating 5000 Zombies Using Mass Entity ECS Framework : r/unrealengine - Reddit, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/1o1rvo3/simulating_5000_zombies_using_mass_entity_ecs/
+If You've Been Interested In Learning How To Use State Trees For Your AI, Here's A Great Introduction To The Tool! : r/unrealengine - Reddit, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/19c5n83/if_youve_been_interested_in_learning_how_to_use/
+Megafunk/MassSample: My understanding of Unreal Engine 5's experimental ECS plugin with a small sample project. - GitHub, accessed February 20, 2026, https://github.com/Megafunk/MassSample
+Your First 60 Minutes With Motion Matching | Tutorial - Epic Games, accessed February 20, 2026, https://dev.epicgames.com/community/learning/tutorials/lwlG/unreal-engine-your-first-60-minutes-with-motion-matching
+someone knows of any Motion Matching GASP full course or tutorial series? - Reddit, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/1izlvbd/someone_knows_of_any_motion_matching_gasp_full/
+Motion Matching in Unreal Engine - Epic Games, accessed February 20, 2026, https://dev.epicgames.com/documentation/en-us/unreal-engine/motion-matching-in-unreal-engine
+Motion Matching Locomotion System in Unreal Engine | Epic Developer Community, accessed February 20, 2026, https://dev.epicgames.com/community/learning/tutorials/DWjL/motion-matching-locomotion-system-in-unreal-engine
+Tutorial: Your First 60 Minutes With Motion Matching - Unreal Engine Forums, accessed February 20, 2026, https://forums.unrealengine.com/t/tutorial-your-first-60-minutes-with-motion-matching/1865424
+Motion Matching for Jumping in Unreal Engine 5.4 Tutorial - YouTube, accessed February 20, 2026, https://www.youtube.com/watch?v=9yQ47xcx7sI
+Networking and Multiplayer in Unreal Engine - Epic Games Developers, accessed February 20, 2026, https://dev.epicgames.com/documentation/en-us/unreal-engine/networking-and-multiplayer-in-unreal-engine
+Experimental: Getting Started With Iris | Epic Developer Community, accessed February 20, 2026, https://dev.epicgames.com/community/learning/tutorials/Xexv/unreal-engine-experimental-getting-started-with-iris
+Unreal Engine 5 replication system for MMO : r/unrealengine - Reddit, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/1bcl1jf/unreal_engine_5_replication_system_for_mmo/
+Iris Networking UE5.7+ with FastArray Example - Unreal Engine Forums, accessed February 20, 2026, https://forums.unrealengine.com/t/iris-networking-ue5-7-with-fastarray-example/2684404
+Networked Physics - Pawn Tutorial | Epic Developer Community, accessed February 20, 2026, https://dev.epicgames.com/community/learning/tutorials/MoBq/unreal-engine-networked-physics-pawn-tutorial
+NEW(3/22/2024) UE5.5+ Feedback: Please Invest In Actual PERFORMANCE Innovations Beyond Frame Smearing For Actual GAMES. - Page 11 - Feedback & Requests - Epic Developer Community Forums, accessed February 20, 2026, https://forums.unrealengine.com/t/new-3-22-2024-ue5-5-feedback-please-invest-in-actual-performance-innovations-beyond-frame-smearing-for-actual-games/1164987?page=11
+UE5 Optimization Made Easy: Fundamentals - YouTube, accessed February 20, 2026, https://www.youtube.com/watch?v=zVNViTNHHdA
+Any good tutorials on UE5 optimization? : r/unrealengine - Reddit, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/13oydwt/any_good_tutorials_on_ue5_optimization/
+Optimizing UE5 Environments for Virtual Production - CoPilot Co., accessed February 20, 2026, https://www.copilotco.io/blog-posts/optimizing-ue5-environments-for-virtual-production
+Setting up an Unreal Engine Studio the Epic Way | Epic Developer ..., accessed February 20, 2026, https://dev.epicgames.com/community/learning/tutorials/8JYW/epic-for-indies-setting-up-an-unreal-engine-studio-the-epic-way
+[UE5][Intermediate] Integrating CommonUI and Enhanced Input into Gameplay - UI, accessed February 20, 2026, https://forums.unrealengine.com/t/ue5-intermediate-integrating-commonui-and-enhanced-input-into-gameplay/2311758
+Several Questions about Common UI plug-in : r/unrealengine - Reddit, accessed February 20, 2026, https://www.reddit.com/r/unrealengine/comments/1m03fmp/several_questions_about_common_ui_plugin/
+Using CommonUI With Enhnaced Input in Unreal Engine - Epic Games Developers, accessed February 20, 2026, https://dev.epicgames.com/documentation/en-us/unreal-engine/using-commonui-with-enhnaced-input-in-unreal-engine
+How to use Enhanced input with Common UI in UE5.3? - Unreal Engine Forums, accessed February 20, 2026, https://forums.unrealengine.com/t/how-to-use-enhanced-input-with-common-ui-in-ue5-3/1744070
+[UE5][Intermediate] Integrating CommonUI and Enhanced Input into Gameplay - Medium, accessed February 20, 2026, https://medium.com/@zima3x/ue5-intermediate-integrating-commonui-and-enhanced-input-into-gameplay-7b35c5502cb4
+Leveraging PCG for Building and City Creation | Unreal Fest Bali 2025 - YouTube, accessed February 20, 2026, https://www.youtube.com/watch?v=Bh8QJqhJU94
+Do You Need PCG? A Guide to Level Up Your Workflow | Unreal Fest Orlando 2025, accessed February 20, 2026, https://www.youtube.com/watch?v=7dn6UOrOgyg&vl=en
+Procedural Content Generation Overview | Unreal Engine 5.7 Documentation - Epic Games, accessed February 20, 2026, https://dev.epicgames.com/documentation/en-us/unreal-engine/procedural-content-generation-overview
+Integrating Unreal Engine's PCG Framework in a Hybrid World-Building Workflow: A Case Study of Lumios - Aaltodoc, accessed February 20, 2026, https://aaltodoc.aalto.fi/server/api/core/bitstreams/c049a26e-7d00-474b-a026-7b8bc2a5e02f/content
+Optimizing Pre-Production to Prevent Costly Pipelines | Unreal Fest Bali 2025 - YouTube, accessed February 20, 2026, https://www.youtube.com/watch?v=2iSSwImThzs
+Attention UE5 devs! Participate in poll now! : r/GameDevelopment - Reddit, accessed February 20, 2026, https://www.reddit.com/r/GameDevelopment/comments/1hp6tjk/attention_ue5_devs_participate_in_poll_now/
+Tutorial: Your First 60 Minutes with StateTree - Unreal Engine Forums, accessed February 20, 2026, https://forums.unrealengine.com/t/tutorial-your-first-60-minutes-with-statetree/1901811

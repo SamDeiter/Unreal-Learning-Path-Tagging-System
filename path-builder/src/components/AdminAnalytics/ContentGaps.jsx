@@ -1,6 +1,7 @@
 /**
  * ContentGaps — Content Gap Intelligence dashboard
  * Shows where official docs fall short and AI has to fill in.
+ * Phase 4: adds blind spot aggregation, coverage distribution, and gap fill tracking.
  */
 
 import { useMemo } from "react";
@@ -36,6 +37,7 @@ function StatCard({ label, value, icon, color, tooltip }) {
 export default function ContentGaps({ events = [] }) {
   const gapMetrics = useMemo(() => {
     const reports = events.filter((e) => e.event === EVENTS.AI_COVERAGE_REPORT);
+    const gapFills = events.filter((e) => e.event === EVENTS.GAP_FILL_ACTION);
 
     if (reports.length === 0) {
       return {
@@ -44,6 +46,11 @@ export default function ContentGaps({ events = [] }) {
         topGapQueries: [],
         knowledgeGapFrequency: [],
         gapTrend: [],
+        blindSpotFrequency: [],
+        coverageDistribution: [],
+        avgCoverage: 0,
+        totalGapFills: gapFills.length,
+        topFilledTopics: [],
       };
     }
 
@@ -100,12 +107,64 @@ export default function ContentGaps({ events = [] }) {
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
+    // ── Phase 4: Blind Spot Aggregation ──────────────────────────
+    const blindSpotCounts = {};
+    for (const r of reports) {
+      for (const bs of r.blind_spots || []) {
+        const topic = bs.topic || "unknown";
+        if (!blindSpotCounts[topic]) {
+          blindSpotCounts[topic] = { topic, count: 0, highCount: 0 };
+        }
+        blindSpotCounts[topic].count++;
+        if (bs.severity === "high") blindSpotCounts[topic].highCount++;
+      }
+    }
+    const blindSpotFrequency = Object.values(blindSpotCounts)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 15);
+
+    // ── Phase 4: Coverage Score Distribution ─────────────────────
+    // Bucket into 10% ranges: 0-10, 10-20, ..., 90-100
+    const buckets = Array(10).fill(0);
+    let coverageSum = 0;
+    let coverageCount = 0;
+    for (const r of reports) {
+      const score = r.coverage_score;
+      if (score != null && !isNaN(score)) {
+        const idx = Math.min(Math.floor(score * 10), 9);
+        buckets[idx]++;
+        coverageSum += score;
+        coverageCount++;
+      }
+    }
+    const coverageDistribution = buckets.map((count, i) => ({
+      range: `${i * 10}–${(i + 1) * 10}%`,
+      count,
+    }));
+    const avgCoverage = coverageCount > 0 ? coverageSum / coverageCount : 0;
+
+    // ── Phase 4: Gap Fill Tracking ──────────────────────────────
+    const fillCounts = {};
+    for (const f of gapFills) {
+      const t = f.topic || "unknown";
+      fillCounts[t] = (fillCounts[t] || 0) + 1;
+    }
+    const topFilledTopics = Object.entries(fillCounts)
+      .map(([topic, count]) => ({ topic, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
     return {
       avgAiRatio: Number(avgAiRatio.toFixed(2)),
       totalReports: reports.length,
       topGapQueries,
       knowledgeGapFrequency,
       gapTrend,
+      blindSpotFrequency,
+      coverageDistribution,
+      avgCoverage: Number(avgCoverage.toFixed(2)),
+      totalGapFills: gapFills.length,
+      topFilledTopics,
     };
   }, [events]);
 
@@ -140,11 +199,25 @@ export default function ContentGaps({ events = [] }) {
               tooltip="Average percentage of path steps that AI had to generate because the corpus didn't have content"
             />
             <StatCard
+              label="Avg Coverage"
+              value={`${Math.round(gapMetrics.avgCoverage * 100)}%`}
+              icon={gapMetrics.avgCoverage >= 0.7 ? "🛡️" : "⚠️"}
+              color={gapMetrics.avgCoverage >= 0.7 ? "#10b981" : "#f59e0b"}
+              tooltip="Average coverage score from gap analysis — higher means fewer blind spots"
+            />
+            <StatCard
               label="Paths Analyzed"
               value={gapMetrics.totalReports}
               icon="📊"
               color="#6366f1"
               tooltip="Total number of path generations tracked"
+            />
+            <StatCard
+              label="Gap Fills"
+              value={gapMetrics.totalGapFills}
+              icon="🔧"
+              color="#06b6d4"
+              tooltip="Total times users filled a gap with an additional step"
             />
             <StatCard
               label="Gap Topics"
@@ -157,10 +230,94 @@ export default function ContentGaps({ events = [] }) {
               label="Knowledge Gaps"
               value={gapMetrics.knowledgeGapFrequency.length}
               icon="📋"
-              color="#06b6d4"
+              color="#8b5cf6"
               tooltip="Unique concepts identified as learner knowledge gaps from diagnostics"
             />
           </div>
+
+          {/* ── Phase 4: Most Common Blind Spots ─────────────────── */}
+          {gapMetrics.blindSpotFrequency.length > 0 && (
+            <div className="aa-section" style={{ marginBottom: 24 }}>
+              <h3>
+                🔍 Most Common Blind Spots{" "}
+                <Tip text="Topics where gap analysis most frequently identifies missing content across all generated paths" />
+              </h3>
+              <div className="aa-bar-chart">
+                {gapMetrics.blindSpotFrequency.map((bs) => {
+                  const maxBs = gapMetrics.blindSpotFrequency[0]?.count || 1;
+                  const pct = Math.round((bs.count / maxBs) * 100);
+                  return (
+                    <div key={bs.topic} className="aa-bar-row">
+                      <span className="aa-bar-label" title={bs.topic}>
+                        {bs.topic.length > 35 ? bs.topic.substring(0, 35) + "…" : bs.topic}
+                      </span>
+                      <div className="aa-bar-track">
+                        <div
+                          className="aa-bar-fill"
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor:
+                              bs.highCount > 0 ? "#f43f5e" : "#f59e0b",
+                          }}
+                        />
+                      </div>
+                      <span className="aa-bar-value" style={{ width: 60 }}>
+                        ×{bs.count}
+                      </span>
+                      {bs.highCount > 0 && (
+                        <span
+                          className="aa-bar-value"
+                          style={{ width: 50, color: "#f43f5e", fontSize: "0.7rem" }}
+                        >
+                          {bs.highCount} high
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── Phase 4: Coverage Score Distribution ──────────────── */}
+          {gapMetrics.coverageDistribution.some((d) => d.count > 0) && (
+            <div className="aa-section" style={{ marginBottom: 24 }}>
+              <h3>
+                📊 Coverage Score Distribution{" "}
+                <Tip text="How coverage scores are distributed across all generated paths — higher is better" />
+              </h3>
+              <div className="aa-daily-chart" style={{ alignItems: "flex-end" }}>
+                {gapMetrics.coverageDistribution.map((bucket) => {
+                  const maxBucket = Math.max(
+                    ...gapMetrics.coverageDistribution.map((d) => d.count),
+                    1
+                  );
+                  const hPct = maxBucket > 0 ? Math.round((bucket.count / maxBucket) * 100) : 0;
+                  return (
+                    <div
+                      key={bucket.range}
+                      className="aa-day-bar"
+                      title={`${bucket.range}: ${bucket.count} paths`}
+                    >
+                      <div
+                        className="aa-day-fill"
+                        style={{
+                          height: `${hPct}%`,
+                          background:
+                            parseInt(bucket.range) >= 70
+                              ? "linear-gradient(180deg, #10b981, #059669)"
+                              : parseInt(bucket.range) >= 40
+                                ? "linear-gradient(180deg, #f59e0b, #d97706)"
+                                : "linear-gradient(180deg, #f43f5e, #e11d48)",
+                        }}
+                      />
+                      <span className="aa-day-label">{bucket.range.split("–")[0]}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Top Gap Queries — where corpus is weakest */}
           <div className="aa-section" style={{ marginBottom: 24 }}>
@@ -233,6 +390,36 @@ export default function ContentGaps({ events = [] }) {
             </div>
           )}
 
+          {/* ── Phase 4: Gap Fill Actions ──────────────────────── */}
+          {gapMetrics.topFilledTopics.length > 0 && (
+            <div className="aa-section" style={{ marginBottom: 24 }}>
+              <h3>
+                🔧 Most Filled Gaps{" "}
+                <Tip text="Topics where users most frequently used 'Fill This Gap' to add content" />
+              </h3>
+              <div className="aa-bar-chart">
+                {gapMetrics.topFilledTopics.map((t) => {
+                  const maxF = gapMetrics.topFilledTopics[0]?.count || 1;
+                  const pct = Math.round((t.count / maxF) * 100);
+                  return (
+                    <div key={t.topic} className="aa-bar-row">
+                      <span className="aa-bar-label" title={t.topic}>
+                        {t.topic.length > 35 ? t.topic.substring(0, 35) + "…" : t.topic}
+                      </span>
+                      <div className="aa-bar-track">
+                        <div
+                          className="aa-bar-fill"
+                          style={{ width: `${pct}%`, backgroundColor: "#06b6d4" }}
+                        />
+                      </div>
+                      <span className="aa-bar-value">×{t.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Gap Trend */}
           {gapMetrics.gapTrend.length > 1 && (
             <div className="aa-section">
@@ -271,3 +458,4 @@ export default function ContentGaps({ events = [] }) {
     </div>
   );
 }
+

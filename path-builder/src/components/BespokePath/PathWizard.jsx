@@ -21,6 +21,7 @@
  */
 
 import { useState, useMemo } from "react";
+import { exportScormPackage } from "../../services/scormExportService";
 
 /**
  * Run all checks and return results array.
@@ -139,6 +140,9 @@ function evaluateChecks(pathResult, gaps) {
 export default function PathWizard({ pathResult, gaps }) {
   const [signedOff, setSignedOff] = useState(false);
   const [published, setPublished] = useState(false);
+  const [scormExporting, setScormExporting] = useState(false);
+  const [scormExported, setScormExported] = useState(false);
+  const [scormError, setScormError] = useState(null);
 
   const checks = useMemo(() => evaluateChecks(pathResult, gaps), [pathResult, gaps]);
 
@@ -152,7 +156,19 @@ export default function PathWizard({ pathResult, gaps }) {
   const handlePublish = () => {
     if (!allPassed) return;
     setPublished(true);
-    // Future: trigger SCORM export, analytics tracking, etc.
+  };
+
+  const handleScormExport = async () => {
+    setScormExporting(true);
+    setScormError(null);
+    try {
+      await exportScormPackage(pathResult, { includeQuiz: true });
+      setScormExported(true);
+    } catch (err) {
+      setScormError(err.message || "Export failed");
+    } finally {
+      setScormExporting(false);
+    }
   };
 
   if (!pathResult) return null;
@@ -251,7 +267,7 @@ export default function PathWizard({ pathResult, gaps }) {
         </div>
       </div>
 
-      {/* Publish */}
+      {/* Publish + SCORM Export */}
       <div className="wizard-publish-area" id="wizard-publish-area">
         {published ? (
           <div className="wizard-success-toast" id="publish-success-toast">
@@ -259,17 +275,41 @@ export default function PathWizard({ pathResult, gaps }) {
           </div>
         ) : (
           <>
-            <button
-              className={`wizard-publish-btn ${allPassed ? "ready" : "locked"}`}
-              onClick={handlePublish}
-              disabled={!allPassed}
-              id="wizard-publish-btn"
-            >
-              {allPassed ? "🚀 Publish Path" : "🔒 Publish Path"}
-            </button>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <button
+                className={`wizard-publish-btn ${allPassed ? "ready" : "locked"}`}
+                onClick={handlePublish}
+                disabled={!allPassed}
+                id="wizard-publish-btn"
+              >
+                {allPassed ? "🚀 Publish Path" : "🔒 Publish Path"}
+              </button>
+              <button
+                className="wizard-publish-btn ready"
+                onClick={handleScormExport}
+                disabled={scormExporting}
+                id="wizard-scorm-btn"
+                style={{
+                  background: scormExported
+                    ? "linear-gradient(135deg, #10b981, #059669)"
+                    : "linear-gradient(135deg, #6366f1, #4f46e5)",
+                }}
+              >
+                {scormExporting
+                  ? "⏳ Generating..."
+                  : scormExported
+                    ? "✅ Downloaded!"
+                    : "📦 Export SCORM 1.2"}
+              </button>
+            </div>
             {!allPassed && (
               <p className="wizard-publish-hint">
                 Complete all checks and sign off to enable publishing
+              </p>
+            )}
+            {scormError && (
+              <p className="wizard-publish-hint" style={{ color: "#f43f5e" }}>
+                ❌ {scormError}
               </p>
             )}
           </>
