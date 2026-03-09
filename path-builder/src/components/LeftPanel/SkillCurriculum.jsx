@@ -2,6 +2,138 @@ import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { usePath } from "../../context/PathContext";
 import "./SkillCurriculum.css";
 
+// UE5 concept synonym map for semantic matching
+// Maps broad topics → related narrower concepts that should also match
+const UE5_CONCEPT_MAP = {
+  ai: [
+    "behavior tree",
+    "blackboard",
+    "ai perception",
+    "ai controller",
+    "navigation",
+    "navmesh",
+    "eqs",
+    "environment query",
+    "npc",
+    "patrol",
+    "stimulus",
+  ],
+  "ai systems": [
+    "behavior tree",
+    "blackboard",
+    "ai perception",
+    "ai controller",
+    "navigation",
+    "navmesh",
+    "eqs",
+    "environment query",
+    "npc",
+    "patrol",
+  ],
+  animation: [
+    "anim blueprint",
+    "state machine",
+    "montage",
+    "blend space",
+    "ik",
+    "retarget",
+    "skeletal mesh",
+    "control rig",
+    "sequencer",
+  ],
+  blueprint: [
+    "visual scripting",
+    "bp",
+    "event graph",
+    "construction script",
+    "function library",
+    "macro",
+    "interface",
+  ],
+  materials: [
+    "material editor",
+    "shader",
+    "texture",
+    "pbr",
+    "substance",
+    "material instance",
+    "material function",
+    "landscape material",
+  ],
+  lighting: [
+    "lumen",
+    "light source",
+    "shadow",
+    "global illumination",
+    "reflection",
+    "skylight",
+    "exposure",
+    "volumetric",
+  ],
+  landscape: [
+    "terrain",
+    "world partition",
+    "foliage",
+    "heightmap",
+    "landscape material",
+    "erosion",
+    "sculpt",
+    "world building",
+  ],
+  physics: [
+    "collision",
+    "rigid body",
+    "constraint",
+    "physics simulation",
+    "chaos",
+    "destructible",
+    "ragdoll",
+  ],
+  networking: [
+    "replication",
+    "multiplayer",
+    "server",
+    "client",
+    "rpc",
+    "net serialization",
+    "online subsystem",
+  ],
+  ui: ["umg", "widget", "hud", "menu", "slate", "user interface", "common ui"],
+  rendering: [
+    "nanite",
+    "lumen",
+    "virtual shadow",
+    "render pipeline",
+    "post process",
+    "screen space",
+    "ray tracing",
+  ],
+  audio: ["sound", "metasound", "attenuation", "reverb", "ambient", "music", "dialogue"],
+  gameplay: [
+    "game mode",
+    "game state",
+    "player controller",
+    "character",
+    "ability system",
+    "game framework",
+    "pawn",
+  ],
+  "world building": [
+    "landscape",
+    "level design",
+    "environment",
+    "foliage",
+    "world partition",
+    "terrain",
+    "open world",
+    "biome",
+  ],
+  cinematics: ["sequencer", "camera", "cutscene", "cine camera", "level sequence", "movie render"],
+  niagara: ["particle", "vfx", "emitter", "particle system", "visual effects", "fx"],
+  procedural: ["pcg", "procedural generation", "hism", "runtime generation", "procedural mesh"],
+  "c++": ["unreal c++", "uclass", "uproperty", "ufunction", "gameplay framework", "module"],
+};
+
 /**
  * Skill Curriculum Builder
  *
@@ -122,30 +254,106 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
   const matchingCourses = useMemo(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) return [];
 
-    const query = searchQuery.toLowerCase();
-    const queryWords = query.split(/\s+/).filter((w) => w.length > 2);
+    const query = searchQuery.toLowerCase().trim();
+    // Preserve short but important UE5 domain terms
+    const KEEP_SHORT = new Set([
+      "ai",
+      "ui",
+      "vr",
+      "ar",
+      "fx",
+      "bp",
+      "hud",
+      "ik",
+      "lod",
+      "pcg",
+      "rhi",
+      "smr",
+      "umg",
+      "vfx",
+      "c++",
+      "2d",
+      "3d",
+    ]);
+    const queryWords = query.split(/\s+/).filter((w) => w.length > 2 || KEEP_SHORT.has(w));
+
+    if (queryWords.length === 0) return [];
 
     return courses
       .map((course) => {
         let score = 0;
-        const searchableText = [
-          course.title,
-          course.tags?.topic,
-          course.tags?.level,
-          ...(course.gemini_system_tags || []),
-          ...(course.extracted_tags || []),
-          course.gemini_enriched?.one_sentence_summary,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+        const title = (course.title || "").toLowerCase();
+        const topic = (course.tags?.topic || "").toLowerCase();
+        const aiTags = (course.gemini_system_tags || []).map((t) => t.toLowerCase());
+        const extractedTags = (course.extracted_tags || []).map((t) => t.toLowerCase());
+        const summary = (course.gemini_enriched?.one_sentence_summary || "").toLowerCase();
 
+        // Build searchable text for substring matching
+        const searchableText = [title, topic, ...aiTags, ...extractedTags, summary].join(" ");
+
+        // 1. Exact full-phrase match in title → huge bonus
+        if (title.includes(query)) score += 10;
+
+        // 2. Exact full-phrase match in topic → strong bonus
+        if (topic.includes(query)) score += 8;
+
+        // 3. Per-word scoring using word boundaries
+        let wordsMatched = 0;
         queryWords.forEach((word) => {
-          if (searchableText.includes(word)) score += 1;
+          // Use word boundary regex to avoid partial matches
+          const wordRegex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+          if (wordRegex.test(title)) {
+            score += 3; // Title match is most valuable
+            wordsMatched++;
+          } else if (wordRegex.test(topic)) {
+            score += 2.5;
+            wordsMatched++;
+          } else if (aiTags.some((t) => wordRegex.test(t))) {
+            score += 2;
+            wordsMatched++;
+          } else if (wordRegex.test(searchableText)) {
+            score += 1;
+            wordsMatched++;
+          }
         });
 
-        if (searchableText.includes(query)) score += 3;
-        if (course.tags?.topic?.toLowerCase().includes(query)) score += 5;
+        // 4. Semantic synonym expansion — boost courses matching related UE5 concepts
+        // Check both individual words and the full query against the concept map
+        const synonymTerms = new Set();
+        queryWords.forEach((w) => {
+          if (UE5_CONCEPT_MAP[w]) UE5_CONCEPT_MAP[w].forEach((s) => synonymTerms.add(s));
+        });
+        if (UE5_CONCEPT_MAP[query]) {
+          UE5_CONCEPT_MAP[query].forEach((s) => synonymTerms.add(s));
+        }
+        if (synonymTerms.size > 0) {
+          let synonymHits = 0;
+          synonymTerms.forEach((term) => {
+            const termRegex = new RegExp(
+              `\\b${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+              "i"
+            );
+            if (termRegex.test(searchableText)) {
+              synonymHits++;
+            }
+          });
+          // Synonym matches add semantic relevance (reduced weight vs direct match)
+          if (synonymHits > 0) {
+            score += synonymHits * 1.5;
+            // Count as partial word match for the all-words-required check
+            wordsMatched = Math.max(wordsMatched, Math.ceil(queryWords.length * 0.75));
+          }
+        }
+
+        // 5. REQUIRE all query words to match — if any word misses, heavily penalize
+        if (wordsMatched < queryWords.length) {
+          // Allow partial match only if >50% of words match AND score is high
+          if (wordsMatched < queryWords.length * 0.5) {
+            score = 0; // Drop completely if less than half the words match
+          } else {
+            score *= 0.3; // Heavy penalty for partial match
+          }
+        }
 
         return { course, score };
       })
