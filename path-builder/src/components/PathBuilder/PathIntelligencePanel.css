@@ -1,0 +1,349 @@
+/* ── PathIntelligencePanel ────────────────────────────────── */
+.intel-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg, #0d1117);
+  color: var(--text-primary, #e6edf3);
+}
+
+/* ── Top: Intelligence Section ── */
+.intel-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border, #30363d);
+  flex-shrink: 0;
+}
+
+.intel-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: var(--text-primary, #e6edf3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Coverage Gauge ── */
+.intel-coverage-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.coverage-gauge {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.coverage-gauge svg {
+  transform: rotate(-90deg);
+}
+
+.coverage-gauge .gauge-bg {
+  fill: none;
+  stroke: #21262d;
+  stroke-width: 6;
+}
+
+.coverage-gauge .gauge-fill {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition:
+    stroke-dashoffset 0.8s ease,
+    stroke 0.4s ease;
+}
+
+.coverage-gauge .gauge-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.coverage-gauge .gauge-label small {
+  font-size: 0.55rem;
+  font-weight: 400;
+  color: var(--text-secondary, #8b949e);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.coverage-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.coverage-meta .meta-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  padding: 3px 0;
+  color: var(--text-secondary, #8b949e);
+}
+
+.coverage-meta .meta-stat span:last-child {
+  font-weight: 600;
+  color: var(--text-primary, #e6edf3);
+}
+
+/* ── Gap Summary ── */
+.intel-gap-summary {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.gap-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(248, 81, 73, 0.12);
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.2);
+}
+
+.gap-chip.warning {
+  background: rgba(210, 153, 34, 0.12);
+  color: #d29922;
+  border-color: rgba(210, 153, 34, 0.2);
+}
+
+.gap-chip.success {
+  background: rgba(63, 185, 80, 0.12);
+  color: #3fb950;
+  border-color: rgba(63, 185, 80, 0.2);
+}
+
+.gap-chip.info {
+  background: rgba(88, 166, 255, 0.12);
+  color: #58a6ff;
+  border-color: rgba(88, 166, 255, 0.2);
+}
+
+/* ── Quick Actions ── */
+.intel-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.intel-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border: 1px solid var(--border, #30363d);
+  border-radius: 8px;
+  background: rgba(22, 27, 34, 0.8);
+  color: var(--text-primary, #e6edf3);
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.intel-action-btn:hover {
+  background: rgba(88, 166, 255, 0.1);
+  border-color: #58a6ff;
+  color: #58a6ff;
+}
+
+.intel-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.intel-action-btn.scorm-btn {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(79, 70, 229, 0.15));
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+}
+
+.intel-action-btn.scorm-btn:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(79, 70, 229, 0.25));
+  border-color: #6366f1;
+  color: #c7d2fe;
+}
+
+.intel-action-btn.scorm-btn.exported {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+}
+
+.intel-action-btn.analyze-btn {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(56, 139, 253, 0.1));
+  border-color: rgba(88, 166, 255, 0.3);
+  color: #79c0ff;
+  font-weight: 600;
+}
+
+.intel-action-btn.analyze-btn:hover {
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.2), rgba(56, 139, 253, 0.2));
+}
+
+/* ── Analysis Results (expanded) ── */
+.intel-analysis-results {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(22, 27, 34, 0.6);
+  border: 1px solid var(--border, #30363d);
+  border-radius: 8px;
+}
+
+.intel-analysis-results h4 {
+  font-size: 0.78rem;
+  margin: 0 0 6px;
+  color: var(--text-secondary, #8b949e);
+}
+
+.blind-spot-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+
+.blind-spot-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: 0.75rem;
+  color: var(--text-primary, #e6edf3);
+}
+
+.blind-spot-list li::before {
+  content: "⚠";
+  font-size: 0.7rem;
+}
+
+.prereq-mini {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 0.7rem;
+  color: var(--text-secondary, #8b949e);
+}
+
+.prereq-mini .prereq-node {
+  padding: 2px 8px;
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  border-radius: 4px;
+  color: #58a6ff;
+}
+
+.prereq-mini .prereq-arrow {
+  color: #484f58;
+}
+
+/* ── Divider ── */
+.intel-divider {
+  height: 1px;
+  background: var(--border, #30363d);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* ── Bottom: Blueprint Section (existing OutputPanel content) ── */
+.intel-blueprint {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.intel-blueprint .output-panel {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: none;
+  background: transparent;
+}
+
+.intel-blueprint .output-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Empty State ── */
+.intel-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-secondary, #8b949e);
+  gap: 12px;
+}
+
+.intel-empty-state .empty-icon {
+  font-size: 2.5rem;
+  opacity: 0.5;
+}
+
+.intel-empty-state p {
+  font-size: 0.85rem;
+  max-width: 220px;
+  line-height: 1.5;
+}
+
+/* ── Analyzing spinner ── */
+.intel-analyzing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  color: #58a6ff;
+  font-size: 0.8rem;
+}
+
+@keyframes intel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.intel-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(88, 166, 255, 0.3);
+  border-top-color: #58a6ff;
+  border-radius: 50%;
+  animation: intel-spin 0.8s linear infinite;
+}
+
+/* ── SCORM Error ── */
+.scorm-error {
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px solid rgba(248, 81, 73, 0.2);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: #f85149;
+  text-align: center;
+}

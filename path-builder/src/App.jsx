@@ -25,6 +25,7 @@ import edgesData from "./data/edges.json";
 const LeftPanel = lazy(() => import("./components/LeftPanel/LeftPanel"));
 const AssemblyLine = lazy(() => import("./components/AssemblyLine/AssemblyLine"));
 const OutputPanel = lazy(() => import("./components/OutputPanel/OutputPanel"));
+const PathIntelligencePanel = lazy(() => import("./components/PathBuilder/PathIntelligencePanel"));
 const LearningIntentHeader = lazy(() => import("./components/LearningIntent/LearningIntentHeader"));
 const TagGraph = lazy(() => import("./components/TagGraph/TagGraph"));
 const PathReadiness = lazy(() => import("./components/PathReadiness/PathReadiness"));
@@ -533,7 +534,7 @@ function App() {
                     {/* Right: Outputs — hidden on mobile */}
                     {!isMobile && (
                       <aside className="output-panel-area">
-                        <OutputPanel />
+                        <PathIntelligencePanel />
                       </aside>
                     )}
                   </div>
