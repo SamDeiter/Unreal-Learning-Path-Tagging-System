@@ -19,6 +19,7 @@
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "./firebaseConfig";
 import { findRelevantSegments, SIMILARITY_THRESHOLD } from "./pathSearch";
+import { findSimilarCourses } from "./semanticSearchService";
 import { computeTopicOverlap } from "./pathSequencer";
 import { retryWithBackoff } from "../utils/retryWithBackoff";
 import { recordTokenUsage } from "./tokenTracker";
@@ -480,84 +481,87 @@ RULES:
 // ═══════════════════════════════════════════════════════════
 
 /**
- * Generate an AI step to fill a specific identified gap.
- * RAG-grounded: fetches closest corpus matches first, then asks
- * Gemini to build upon them. Runs corpus verification after.
+ * 3-Tier Gap Fill — tries Library → Bespoke → AI in order.
+ *
+ * Returns a structured result so the UI can render each type differently:
+ *   { source: "library", matchedCourses: [{code, title, similarity}] }
+ *   { source: "bespoke", segments: [{title, text, videoTitle, similarity}] }
+ *   { source: "ai",      step: { segment, category, summary, isGapFill } }
  *
  * @param {string} topic - The gap topic to fill
- * @param {string} query - The user's original question
- * @param {Array} steps - The existing path steps (for context)
- * @returns {Promise<Object|null>} A step matching the path step shape, or null on failure
+ * @param {string} query - The user's original learning goal
+ * @param {Array}  steps - The existing path steps (for context & dedup)
+ * @param {string[]} existingCodes - Course codes already in the path (to filter out)
+ * @returns {Promise<Object>} Structured fill result
  */
-export async function generateGapFillStep(topic, query, steps) {
+export async function generateGapFillStep(topic, query, steps, existingCodes = []) {
   try {
-    devLog(`[GapAnalyzer] Generating fill step for gap: "${topic}"`);
+    devLog(`[GapFill] 3-tier fill for gap: "${topic}"`);
+    const pathCodeSet = new Set(existingCodes);
 
-    // 1. Fetch closest corpus matches as context + augmentation quality
+    // ── Tier 1: Library Search ─────────────────────────────
+    try {
+      const app = getFirebaseApp();
+      const functions = getFunctions(app, "us-central1");
+      const embedFn = httpsCallable(functions, "embedQuery");
+      const embedResult = await embedFn({ text: topic });
+      const embedding = embedResult.data?.embedding;
+
+      if (embedding) {
+        const courseMatches = await findSimilarCourses(embedding, 5);
+        // Filter out courses already in path + require decent similarity
+        const filtered = courseMatches.filter(
+          (c) => c.similarity >= 0.4 && !pathCodeSet.has(c.code)
+        );
+        if (filtered.length > 0) {
+          devLog(`[GapFill] Tier 1 HIT — ${filtered.length} library courses for "${topic}"`);
+          return { source: "library", matchedCourses: filtered };
+        }
+        devLog(`[GapFill] Tier 1 MISS — no library matches above 0.4 for "${topic}"`);
+      }
+    } catch (err) {
+      devWarn(`[GapFill] Tier 1 failed, falling through: ${err.message}`);
+    }
+
+    // ── Tier 2: Bespoke Segments ───────────────────────────
+    try {
+      const { segments } = await findRelevantSegments(topic, 5);
+      const relevant = segments.filter((s) => (s.similarity || 0) >= 0.35);
+      if (relevant.length > 0) {
+        devLog(`[GapFill] Tier 2 HIT — ${relevant.length} segments for "${topic}"`);
+        return {
+          source: "bespoke",
+          segments: relevant.map((s) => ({
+            title: s.title || s.videoTitle || "Untitled",
+            text: (s.text || "").substring(0, 300),
+            videoTitle: s.videoTitle || "",
+            videoUrl: s.videoUrl || "",
+            similarity: s.similarity || 0,
+          })),
+        };
+      }
+      devLog(`[GapFill] Tier 2 MISS — no segments above 0.35 for "${topic}"`);
+    } catch (err) {
+      devWarn(`[GapFill] Tier 2 failed, falling through: ${err.message}`);
+    }
+
+    // ── Tier 3: AI-Generated Step ──────────────────────────
+    devLog(`[GapFill] Tier 3 — generating AI step for "${topic}"`);
+
+    // Fetch corpus context if available
     let corpusContext = "";
     try {
-      const { segments } = await findRelevantSegments(topic, GAP_FILL_TOP_K);
-      if (segments.length > 0) {
-        // Fetch augmentation data to score source quality
-        let augMap = {};
-        try {
-          const augRes = await fetch(`${import.meta.env.BASE_URL}augmentation_summary.json`);
-          if (augRes.ok) {
-            const augRaw = await augRes.json();
-            Object.entries(augRaw).forEach(([key, data]) => {
-              const title = key.replace(/_/g, " ").toLowerCase();
-              augMap[title] = { grade: data.grade || "C", score: data.score || 0 };
-            });
-          }
-        } catch {
-          /* non-fatal */
-        }
-
-        // Adjust similarity based on augmentation grade
-        const augmented = segments.map((s) => {
-          const sTitle = (s.videoTitle || s.title || "").toLowerCase();
-          // Find best matching augmentation entry by substring
-          let augInfo = null;
-          for (const [key, data] of Object.entries(augMap)) {
-            if (sTitle.includes(key) || key.includes(sTitle.split(" ").slice(0, 3).join(" "))) {
-              augInfo = data;
-              break;
-            }
-          }
-          const gradeMultiplier =
-            augInfo?.grade === "A" || augInfo?.grade === "B"
-              ? 1.2
-              : augInfo?.grade === "D" || augInfo?.grade === "F"
-                ? 0.7
-                : 1.0;
-          return {
-            ...s,
-            adjustedSimilarity: (s.similarity || 0.5) * gradeMultiplier,
-            augGrade: augInfo?.grade || null,
-          };
-        });
-
-        // Re-sort by adjusted similarity (prefer higher-quality sources)
-        augmented.sort((a, b) => b.adjustedSimilarity - a.adjustedSimilarity);
-
-        corpusContext = `\nRelated content from our corpus (use as reference, prefer ★-marked high-quality sources):\n${augmented
+      const { segments: ctxSegs } = await findRelevantSegments(topic, GAP_FILL_TOP_K);
+      if (ctxSegs.length > 0) {
+        corpusContext = `\nRelated content from our corpus:\n${ctxSegs
           .slice(0, 2)
-          .map((s) => {
-            const quality =
-              s.augGrade === "A" || s.augGrade === "B"
-                ? " ★ HIGH QUALITY"
-                : s.augGrade === "D" || s.augGrade === "F"
-                  ? " ⚠ LOW QUALITY"
-                  : "";
-            return `- "${s.title || s.videoTitle}"${quality}: ${(s.text || "").substring(0, 200)}`;
-          })
+          .map((s) => `- "${s.title || s.videoTitle}": ${(s.text || "").substring(0, 200)}`)
           .join("\n")}`;
       }
     } catch {
-      // Non-fatal — generate without corpus context
+      /* non-fatal */
     }
 
-    // 2. Build Gemini prompt
     const existingTitles = steps
       .map((s) => s.segment?.title || s.segment?.videoTitle || "")
       .filter(Boolean)
@@ -602,21 +606,19 @@ RULES:
     );
 
     if (!responseText) {
-      devWarn("[GapAnalyzer] Empty response from API for gap fill step");
+      devWarn("[GapFill] Empty AI response");
       return {
-        segment: { title: `Learn: ${topic}`, text: `Study ${topic} in context of ${query}.` },
-        category: "core",
-        isGapFill: true,
+        source: "ai",
+        step: {
+          segment: { title: `Learn: ${topic}`, text: `Study ${topic} in context of ${query}.` },
+          category: "core",
+          isGapFill: true,
+        },
       };
     }
 
     let parsed = parseGeminiJSON(responseText);
     if (!parsed || !parsed.title) {
-      // Fallback: try to extract content from plain text response
-      devWarn(
-        "[GapAnalyzer] Failed to parse gap fill JSON, building from raw text:",
-        responseText.slice(0, 200)
-      );
       parsed = {
         title: `Understanding ${topic}`,
         summary: responseText
@@ -627,16 +629,14 @@ RULES:
       };
     }
 
-    // 3. Build step in path-compatible shape
+    // Grounding sources
     const stepSources = [];
     if (groundingMetadata?.sources?.length > 0) {
       (groundingMetadata.supports || []).forEach((support) => {
         (support.sourceIndices || []).forEach((idx) => {
           if (groundingMetadata.sources[idx]) {
             const src = groundingMetadata.sources[idx];
-            if (!stepSources.some((s) => s.url === src.url)) {
-              stepSources.push(src);
-            }
+            if (!stepSources.some((s) => s.url === src.url)) stepSources.push(src);
           }
         });
       });
@@ -658,7 +658,7 @@ RULES:
       isGapFill: true,
     };
 
-    // 4. Corpus verification — same pattern as bespokePathService.js
+    // Corpus verification
     try {
       const { segments: verifyMatches } = await findRelevantSegments(
         parsed.summary || parsed.title,
@@ -672,20 +672,55 @@ RULES:
           videoUrl: best.videoUrl || best.url || "",
           similarity: best.similarity,
         };
-        devLog(
-          `[GapAnalyzer] Gap-fill verified: "${parsed.title}" ↔ "${best.videoTitle || best.title}" (${best.similarity.toFixed(3)})`
-        );
       }
     } catch {
-      // Non-fatal — step stays unverified
+      /* non-fatal */
     }
 
-    devLog(`[GapAnalyzer] Gap fill step generated: "${parsed.title}" [${step.category}]`);
-    return step;
+    devLog(`[GapFill] Tier 3 AI step: "${parsed.title}" [${step.category}]`);
+    return { source: "ai", step };
   } catch (err) {
-    devWarn("[GapAnalyzer] generateGapFillStep failed:", err.message);
+    devWarn("[GapFill] generateGapFillStep failed:", err.message);
     return null;
   }
+}
+
+/**
+ * Generate a path-ready bespoke step from raw segments.
+ * Called when user clicks "Generate Bespoke Step" on Tier 2 results.
+ *
+ * @param {string} topic - The gap topic
+ * @param {Array}  segments - The matched segments from Tier 2
+ * @returns {Object} A course-like object compatible with addCourse()
+ */
+export function generateBespokeGapStep(topic, segments) {
+  const bestSegment = segments[0];
+  const combinedText = segments
+    .slice(0, 3)
+    .map((s) => s.text || "")
+    .filter(Boolean)
+    .join("\n\n");
+
+  return {
+    code: `bespoke-${Date.now()}`,
+    title: `${topic} (Bespoke)`,
+    description: combinedText.substring(0, 500) || `Bespoke step covering ${topic}`,
+    type: "bespoke_segment",
+    role: "core",
+    duration_seconds: segments.length * 300, // ~5 min per segment
+    tags: { level: "Intermediate", industry: "General" },
+    isBespoke: true,
+    isGapFill: true,
+    sourceSegments: segments.map((s) => ({
+      title: s.title,
+      videoTitle: s.videoTitle,
+      videoUrl: s.videoUrl,
+      similarity: s.similarity,
+    })),
+    // Reference to the best segment's video
+    videoTitle: bestSegment?.videoTitle || "",
+    videoUrl: bestSegment?.videoUrl || "",
+  };
 }
 
 // ═══════════════════════════════════════════════════════════

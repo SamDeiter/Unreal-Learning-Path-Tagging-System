@@ -8,7 +8,11 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { usePath } from "../../context/PathContext";
-import { analyzePathGaps, generateGapFillStep } from "../../services/pathGapAnalyzer";
+import {
+  analyzePathGaps,
+  generateGapFillStep,
+  generateBespokeGapStep,
+} from "../../services/pathGapAnalyzer";
 import { generateQuizForPath } from "../../services/quizService";
 import { detectPersona } from "../../services/PersonaService";
 import { useAugmentationData } from "../../hooks/useAugmentationData";
@@ -73,7 +77,7 @@ const TABS = [
 
 // ── Main ───────────────────────────────────────────────────
 export default function PathIntelligencePanel() {
-  const { courses, learningIntent, setLearningIntent, pathStats } = usePath();
+  const { courses, learningIntent, setLearningIntent, pathStats, addCourse } = usePath();
   const { getCourseSummary } = useAugmentationData();
 
   const handleFieldChange = useCallback(
@@ -170,7 +174,13 @@ export default function PathIntelligencePanel() {
           category: "core",
           segment: { title: c.title || "", text: c.description || "" },
         }));
-        const result = await generateGapFillStep(topic, learningIntent.primaryGoal, steps);
+        const existingCodes = courses.map((c) => c.code).filter(Boolean);
+        const result = await generateGapFillStep(
+          topic,
+          learningIntent.primaryGoal,
+          steps,
+          existingCodes
+        );
         setFillResults((prev) => ({ ...prev, [topic]: result }));
       } catch {
         setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
@@ -179,6 +189,38 @@ export default function PathIntelligencePanel() {
       }
     },
     [fillingGap, courses, learningIntent]
+  );
+
+  // ── Add library course from gap fill result ──
+  const handleAddLibraryCourse = useCallback(
+    (courseMatch, topic) => {
+      addCourse({
+        code: courseMatch.code,
+        title: courseMatch.title,
+        role: "core",
+        isGapFill: true,
+        gapTopic: topic,
+      });
+      // Mark as added in fill results
+      setFillResults((prev) => ({
+        ...prev,
+        [topic]: { ...prev[topic], addedCode: courseMatch.code },
+      }));
+    },
+    [addCourse]
+  );
+
+  // ── Generate bespoke step from segments ──
+  const handleBespokeGenerate = useCallback(
+    (segments, topic) => {
+      const bespokeStep = generateBespokeGapStep(topic, segments);
+      addCourse(bespokeStep);
+      setFillResults((prev) => ({
+        ...prev,
+        [topic]: { ...prev[topic], bespokeGenerated: true },
+      }));
+    },
+    [addCourse]
   );
 
   // ── Quiz ──
@@ -591,9 +633,77 @@ export default function PathIntelligencePanel() {
                             <strong>{topic}</strong>
                           </div>
                           {reason && <p className="ip-gap-reason">{reason}</p>}
+
+                          {/* ── Fill Results ── */}
                           {filled ? (
                             filled.error ? (
                               <p className="ip-gap-status error">Could not generate fill</p>
+                            ) : filled.source === "library" ? (
+                              /* Tier 1: Library matches */
+                              <div className="ip-fill-library">
+                                <p className="ip-fill-tier-label">📚 Found in course library</p>
+                                {filled.matchedCourses.map((mc) => (
+                                  <div key={mc.code} className="ip-fill-course-match">
+                                    <div className="ip-fill-course-info">
+                                      <strong>{mc.title || mc.code}</strong>
+                                      <span className="ip-fill-sim">
+                                        {Math.round(mc.similarity * 100)}% match
+                                      </span>
+                                    </div>
+                                    {filled.addedCode === mc.code ? (
+                                      <span className="ip-gap-status success">✅ Added</span>
+                                    ) : (
+                                      <button
+                                        className="ip-btn small"
+                                        onClick={() => handleAddLibraryCourse(mc, topic)}
+                                      >
+                                        ➕ Add to Path
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : filled.source === "bespoke" ? (
+                              /* Tier 2: Bespoke segments */
+                              <div className="ip-fill-bespoke">
+                                <p className="ip-fill-tier-label">🎬 Video segments found</p>
+                                {filled.segments.slice(0, 3).map((seg, si) => (
+                                  <div key={si} className="ip-fill-segment-preview">
+                                    <div className="ip-fill-seg-title">{seg.title}</div>
+                                    {seg.videoTitle && (
+                                      <div className="ip-fill-seg-video">
+                                        from: {seg.videoTitle}
+                                      </div>
+                                    )}
+                                    <span className="ip-fill-sim">
+                                      {Math.round(seg.similarity * 100)}% relevance
+                                    </span>
+                                  </div>
+                                ))}
+                                {filled.bespokeGenerated ? (
+                                  <span className="ip-gap-status success">
+                                    ✅ Bespoke step added
+                                  </span>
+                                ) : (
+                                  <button
+                                    className="ip-btn small"
+                                    onClick={() => handleBespokeGenerate(filled.segments, topic)}
+                                  >
+                                    🎬 Generate Bespoke Step
+                                  </button>
+                                )}
+                              </div>
+                            ) : filled.source === "ai" && filled.step ? (
+                              /* Tier 3: AI-generated fallback */
+                              <div className="ip-fill-ai">
+                                <p className="ip-fill-tier-label">🤖 AI-generated step</p>
+                                <p className="ip-gap-status success">
+                                  ✅ {filled.step.segment?.title || "Fill generated"}
+                                </p>
+                                {filled.step.summary && (
+                                  <p className="ip-fill-ai-summary">{filled.step.summary}</p>
+                                )}
+                              </div>
                             ) : (
                               <p className="ip-gap-status success">
                                 ✅ {filled.segment?.title || filled.title || "Fill generated"}
@@ -605,7 +715,7 @@ export default function PathIntelligencePanel() {
                               onClick={() => handleFillGap(topic)}
                               disabled={!!fillingGap}
                             >
-                              {fillingGap === topic ? "Generating…" : "📄 Suggest Fill"}
+                              {fillingGap === topic ? "Searching…" : "🔍 Find Courses"}
                             </button>
                           )}
                         </div>
