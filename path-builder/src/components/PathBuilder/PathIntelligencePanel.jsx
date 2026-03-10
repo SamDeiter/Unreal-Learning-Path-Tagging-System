@@ -113,30 +113,48 @@ function ExportPanel({
       // Enrich path steps with video data from courses before preview
       const enrichedResult = { ...pathResult };
       if (pathResult?.path && courses?.length) {
-        enrichedResult.path = pathResult.path.map((step) => {
+        console.debug("[SCORM Preview] Enriching steps. courses:", courses.length, "steps:", pathResult.path.length);
+        enrichedResult.path = pathResult.path.map((step, i) => {
           const seg = step.segment || {};
-          // Already has a video URL? Skip enrichment
-          if (seg.videoUrl || seg.url || seg.drive_id) return step;
-          // Try to match this step to a course by code or title
+          // Already has a usable video reference? Skip enrichment
+          if (seg.videoUrl || seg.drive_id) return step;
+
+          // Match step to course — try code first, then title substring
           const matchedCourse = courses.find(
             (c) =>
               (c.code && step.code && c.code === step.code) ||
-              (c.title && step.title && c.title === step.title)
+              (c.title && step.title && c.title === step.title) ||
+              (c.title && step.title && step.title.includes(c.title))
           );
-          if (!matchedCourse) return step;
-          // Copy video info from matched course into segment
+
+          if (!matchedCourse) {
+            console.debug(`[SCORM Preview] Step ${i} "${step.title?.slice(0, 40)}" — no course match. step.code=${step.code}`);
+            return step;
+          }
+
+          // Extract video info from the matched course
           const firstVideo = matchedCourse.videos?.[0];
+          const driveId = firstVideo?.drive_id || "";
+          // Build a YouTube URL from drive_id or use the course _url
+          const videoUrl = matchedCourse._url
+            || (driveId ? `https://drive.google.com/file/d/${driveId}/view` : "")
+            || "";
+
+          console.debug(`[SCORM Preview] Step ${i} matched → "${matchedCourse.title?.slice(0, 40)}" videoUrl=${videoUrl.slice(0, 60)} drive_id=${driveId.slice(0, 20)}`);
+
           return {
             ...step,
             videos: step.videos || matchedCourse.videos,
             segment: {
               ...seg,
-              videoUrl: matchedCourse._url || seg.videoUrl || "",
-              drive_id: firstVideo?.drive_id || "",
-              videoTitle: seg.videoTitle || matchedCourse.title || "",
+              videoUrl,
+              drive_id: driveId,
+              videoTitle: seg.videoTitle || firstVideo?.title || firstVideo?.name || matchedCourse.title || "",
             },
           };
         });
+      } else {
+        console.debug("[SCORM Preview] No enrichment — courses:", courses?.length, "path:", pathResult?.path?.length);
       }
       await previewScormPackage(enrichedResult);
     } catch (err) {
@@ -347,16 +365,32 @@ export default function PathIntelligencePanel() {
     if (!isReady) return null;
     return {
       query: learningIntent.primaryGoal,
-      path: courses.map((c, i) => ({
-        category: c.role?.toLowerCase() === "prerequisite" ? "foundation" : "core",
-        title: c.title || `Step ${i + 1}`,
-        segment: {
+      path: courses.map((c, i) => {
+        const firstVideo = c.videos?.[0];
+        const driveId = firstVideo?.drive_id || "";
+        // Build a video URL from available data
+        const videoUrl = c._url
+          || c.url
+          || (driveId ? `https://drive.google.com/file/d/${driveId}/view` : "")
+          || "";
+        return {
+          code: c.code || "",
+          category: c.role?.toLowerCase() === "prerequisite" ? "foundation" : "core",
           title: c.title || `Step ${i + 1}`,
-          text: c.description || c.why || "",
-          source: c.instructor || c.platform || "",
-          type: c.type || "video",
-        },
-      })),
+          videos: c.videos,
+          segment: {
+            title: c.title || `Step ${i + 1}`,
+            text: c.description || c.why || "",
+            source: c.instructor || c.platform || "",
+            type: c.type || "video",
+            videoUrl,
+            drive_id: driveId,
+            videoTitle: firstVideo?.title || firstVideo?.name || c.title || "",
+            startTime: c.startTime || firstVideo?.start_time || 0,
+            endTime: c.endTime || firstVideo?.end_time || 0,
+          },
+        };
+      }),
       bridges: [],
       gaps: analysis,
     };
