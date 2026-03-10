@@ -143,7 +143,10 @@ export function PathProvider({ children }) {
     const weightMultipliers = { High: 1.2, Medium: 1.0, Low: 0.5 };
     const estimatedHours = courses.reduce((sum, c) => {
       const multiplier = weightMultipliers[c.weight || "Medium"] || 1.0;
-      const baseTime = (c.video_count || 1) * 0.5; // ~30 mins per video default
+      // Use actual video durations if available, else 30 min per course
+      const totalMinutes =
+        c.videos?.reduce((s, v) => s + (v.duration_minutes || 0), 0) || c.duration_minutes || 30; // fallback: 30 min per course, not per segment
+      const baseTime = totalMinutes / 60;
       return sum + baseTime * multiplier;
     }, 0);
 

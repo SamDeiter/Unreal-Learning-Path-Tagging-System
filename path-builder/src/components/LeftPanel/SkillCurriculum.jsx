@@ -369,9 +369,15 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
 
   // Merge keyword results with vector search results (deduplicated)
   const mergedCourses = useMemo(() => {
-    const keywordCodes = new Set(matchingCourses.map((c) => c.code));
-    const vectorOnly = vectorResults.filter((c) => !keywordCodes.has(c.code));
-    return [...matchingCourses, ...vectorOnly];
+    const seen = new Set();
+    const dedup = (list) =>
+      list.filter((c) => {
+        const key = c.code || c.title;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    return [...dedup(matchingCourses), ...dedup(vectorResults)];
   }, [matchingCourses, vectorResults]);
 
   // Build curriculum with time filtering
@@ -597,6 +603,9 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       {/* Curriculum Preview */}
       {curriculum && (
         <div className="sc-curriculum">
+          <div className="sc-search-context">
+            🔎 Results for: <strong>{searchQuery}</strong>
+          </div>
           <div className="sc-curriculum-header">
             <div className="curriculum-summary">
               <span className="curriculum-count">📚 {curriculum.totalCourses} courses</span>
