@@ -189,7 +189,18 @@ function AssemblyLine() {
           {courses.length > 0 && (
             <span className="path-summary">
               {courses.length} course{courses.length !== 1 ? "s" : ""} •{" ~"}
-              {pathStats.estimatedHours}h •{" "}
+              {pathStats.estimatedHours}h
+              {pathStats.estimatedHours >= 40 && (
+                <span className="duration-warn duration-critical" title="Path exceeds 40 hours — consider splitting into multiple paths">
+                  🚨 Very Long
+                </span>
+              )}
+              {pathStats.estimatedHours >= 20 && pathStats.estimatedHours < 40 && (
+                <span className="duration-warn duration-amber" title="Path exceeds 20 hours — learners may struggle with this volume">
+                  ⚠️ Long
+                </span>
+              )}
+              {" "}•{" "}
               {courses.reduce((sum, c) => sum + (c.video_count || c.videos?.length || 0), 0)} videos
               {loadSummary && (
                 <span
