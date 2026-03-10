@@ -9,6 +9,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { usePath } from "../../context/PathContext";
 import { analyzePathGaps, generateGapFillStep } from "../../services/pathGapAnalyzer";
+import { findSimilarCourses } from "../../services/semanticSearchService";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFirebaseApp } from "../../services/firebaseConfig";
 import { generateQuizForPath } from "../../services/quizService";
 import { detectPersona } from "../../services/PersonaService";
 import { useAugmentationData } from "../../hooks/useAugmentationData";
@@ -62,7 +65,7 @@ const TABS = [
 
 // ── Main ───────────────────────────────────────────────────
 export default function PathIntelligencePanel() {
-  const { courses, learningIntent, setLearningIntent, pathStats } = usePath();
+  const { courses, learningIntent, setLearningIntent, pathStats, addCourse } = usePath();
   const { getCourseSummary } = useAugmentationData();
 
   const handleFieldChange = useCallback(
@@ -149,18 +152,42 @@ export default function PathIntelligencePanel() {
     }
   }, [isReady, analyzing, courses, learningIntent]);
 
-  // ── Fill Gap ──
+  // ── Fill Gap — search library first, AI fallback ──
   const handleFillGap = useCallback(
     async (topic) => {
       if (fillingGap) return;
       setFillingGap(topic);
       try {
-        const steps = courses.map((c) => ({
-          category: "core",
-          segment: { title: c.title || "", text: c.description || "" },
-        }));
-        const result = await generateGapFillStep(topic, learningIntent.primaryGoal, steps);
-        setFillResults((prev) => ({ ...prev, [topic]: result }));
+        // Step 1: Search course library for matching courses
+        const app = getFirebaseApp();
+        const functions = getFunctions(app, "us-central1");
+        const embedFn = httpsCallable(functions, "embedQuery");
+        const embedRes = await embedFn({ query: topic });
+        let matchedCourses = [];
+        if (embedRes.data?.success && embedRes.data?.embedding) {
+          const existing = courses.map((c) => c.code);
+          const results = await findSimilarCourses(embedRes.data.embedding, 5, 0.4);
+          matchedCourses = results.filter((r) => !existing.includes(r.code));
+        }
+
+        if (matchedCourses.length > 0) {
+          // Library matches found — show them
+          setFillResults((prev) => ({
+            ...prev,
+            [topic]: { matchedCourses, source: "library" },
+          }));
+        } else {
+          // No matches — fall back to AI generation
+          const steps = courses.map((c) => ({
+            category: "core",
+            segment: { title: c.title || "", text: c.description || "" },
+          }));
+          const result = await generateGapFillStep(topic, learningIntent.primaryGoal, steps);
+          setFillResults((prev) => ({
+            ...prev,
+            [topic]: { ...result, source: "ai" },
+          }));
+        }
       } catch {
         setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
       } finally {
@@ -516,9 +543,26 @@ export default function PathIntelligencePanel() {
                           {filled ? (
                             filled.error ? (
                               <p className="ip-gap-status error">Could not generate fill</p>
+                            ) : filled.source === "library" && filled.matchedCourses ? (
+                              <div className="ip-gap-matches">
+                                <p className="ip-gap-match-label">📚 Found in your library:</p>
+                                {filled.matchedCourses.slice(0, 3).map((mc) => (
+                                  <div key={mc.code} className="ip-gap-match-row">
+                                    <span className="ip-gap-match-title" title={mc.title}>
+                                      {mc.title}
+                                    </span>
+                                    <button className="ip-btn small" onClick={() => addCourse(mc)}>
+                                      ➕ Add
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
                             ) : (
                               <p className="ip-gap-status success">
-                                ✅ {filled.segment?.title || filled.title || "Fill generated"}
+                                ✅{" "}
+                                {filled.segment?.title ||
+                                  filled.title ||
+                                  "AI fill generated — no library match"}
                               </p>
                             )
                           ) : (
@@ -527,7 +571,7 @@ export default function PathIntelligencePanel() {
                               onClick={() => handleFillGap(topic)}
                               disabled={!!fillingGap}
                             >
-                              {fillingGap === topic ? "Generating…" : "📄 Suggest Fill"}
+                              {fillingGap === topic ? "Searching…" : "🔍 Find Courses"}
                             </button>
                           )}
                         </div>
