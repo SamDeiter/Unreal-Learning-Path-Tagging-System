@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef, memo } from "react";
 import { usePath } from "../../context/PathContext";
 import { useVectorSearch } from "../../hooks/useVectorSearch";
 import "./SkillCurriculum.css";
@@ -148,12 +148,29 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
   const { addCourse, courses: pathCourses, learningIntent } = usePath();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedCourses, setSelectedCourses] = useState(new Set());
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const searchRef = useRef(null);
+  const debounceRef = useRef(null);
 
-  // Async vector search (fires alongside keyword matching)
-  const { vectorResults, isSearching } = useVectorSearch(searchQuery, courses);
+  // Debounce search — keyword + vector matching only fires 300ms after last keystroke
+  const updateSearch = useCallback((value) => {
+    setSearchQuery(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedQuery(value), 300);
+  }, []);
+
+  // Cleanup debounce timer
+  useEffect(
+    () => () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    },
+    []
+  );
+
+  // Async vector search (fires on debounced query, not every keystroke)
+  const { vectorResults, isSearching } = useVectorSearch(debouncedQuery, courses);
 
   // Use shared time budget from Intelligence Panel (hours → minutes)
   const timeBudget =
@@ -256,9 +273,9 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
 
   // Smart search: find courses matching the typed phrase
   const matchingCourses = useMemo(() => {
-    if (!searchQuery.trim() || searchQuery.length < 2) return [];
+    if (!debouncedQuery.trim() || debouncedQuery.length < 2) return [];
 
-    const query = searchQuery.toLowerCase().trim();
+    const query = debouncedQuery.toLowerCase().trim();
     // Preserve short but important UE5 domain terms
     const KEEP_SHORT = new Set([
       "ai",
@@ -365,7 +382,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       .sort((a, b) => b.score - a.score)
       .slice(0, 30)
       .map((item) => item.course);
-  }, [searchQuery, courses]);
+  }, [debouncedQuery, courses]);
 
   // Merge keyword results with vector search results (deduplicated)
   const mergedCourses = useMemo(() => {
@@ -507,13 +524,13 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
           placeholder="e.g., lighting fundamentals, Niagara VFX, materials..."
           value={searchQuery}
           onChange={(e) => {
-            setSearchQuery(e.target.value);
+            updateSearch(e.target.value);
             setShowAutocomplete(true);
           }}
           onFocus={() => setShowAutocomplete(true)}
         />
         {searchQuery && (
-          <button className="clear-search" onClick={() => setSearchQuery("")}>
+          <button className="clear-search" onClick={() => updateSearch("")}>
             ×
           </button>
         )}
@@ -584,7 +601,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
               <button
                 key={skill.name}
                 className="skill-chip"
-                onClick={() => setSearchQuery(skill.name)}
+                onClick={() => updateSearch(skill.name)}
               >
                 {skill.name}
               </button>
@@ -699,8 +716,8 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
   );
 }
 
-// Course card subcomponent
-function CourseCard({ course, isSelected, onToggle, formatTime }) {
+// Course card subcomponent (memoized to avoid re-renders when parent state changes)
+const CourseCard = memo(function CourseCard({ course, isSelected, onToggle, formatTime }) {
   return (
     <div
       className={`curriculum-course ${course.isInPath ? "in-path" : ""} ${isSelected ? "selected" : ""}`}
@@ -717,6 +734,6 @@ function CourseCard({ course, isSelected, onToggle, formatTime }) {
       </div>
     </div>
   );
-}
+});
 
 export default SkillCurriculum;

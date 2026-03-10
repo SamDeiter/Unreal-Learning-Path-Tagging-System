@@ -526,27 +526,41 @@ function App() {
                   </div>
                 )}
                 {activeTab === "builder" && builderView === "editor" && (
-                  <div className={`builder-layout ${isMobile ? "builder-mobile" : ""}`}>
+                  <div
+                    className={`builder-layout ${isMobile ? "builder-mobile" : ""}`}
+                    style={{ position: "relative" }}
+                  >
                     {/* Back to dashboard button */}
                     <button
                       className="builder-back-btn"
                       onClick={() => setBuilderView("dashboard")}
-                      title="Back to Path Dashboard"
+                      title="Back to Learning Paths Dashboard"
                       style={{
-                        position: "absolute",
-                        top: 8,
-                        left: 8,
-                        zIndex: 10,
-                        background: "rgba(255,255,255,0.05)",
+                        position: "fixed",
+                        top: 12,
+                        left: isMobile ? 12 : 310,
+                        zIndex: 50,
+                        background: "var(--surface-elevated, #21262d)",
                         border: "1px solid var(--border, #30363d)",
-                        color: "var(--text-secondary, #8b949e)",
-                        borderRadius: 6,
-                        padding: "4px 10px",
-                        fontSize: "0.7rem",
+                        color: "var(--text-primary, #e6edf3)",
+                        borderRadius: 8,
+                        padding: "6px 14px",
+                        fontSize: "0.82rem",
                         cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                        transition: "background 0.15s ease",
                       }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "var(--surface-hover, #30363d)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "var(--surface-elevated, #21262d)")
+                      }
                     >
-                      ← Dashboard
+                      ← Learning Paths
                     </button>
                     {/* Left: Input Panel — hidden on mobile */}
                     {!isMobile && (

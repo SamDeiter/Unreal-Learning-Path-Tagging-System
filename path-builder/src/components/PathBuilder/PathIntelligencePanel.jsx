@@ -175,8 +175,18 @@ export default function PathIntelligencePanel() {
     if (!pathResult || generatingQuiz) return;
     setGeneratingQuiz(true);
     try {
-      const questions = await generateQuizForPath(pathResult.path, learningIntent.primaryGoal, 2);
-      setQuiz(questions);
+      const quizMap = await generateQuizForPath(pathResult.path, learningIntent.primaryGoal, 2);
+      // generateQuizForPath returns a Map<stepIndex, questions[]>
+      // Flatten into a single array for the UI
+      const allQuestions = [];
+      if (quizMap instanceof Map) {
+        for (const questions of quizMap.values()) {
+          allQuestions.push(...questions);
+        }
+      } else if (Array.isArray(quizMap)) {
+        allQuestions.push(...quizMap);
+      }
+      setQuiz(allQuestions);
     } catch {
       setQuiz([]);
     } finally {
@@ -727,7 +737,20 @@ export default function PathIntelligencePanel() {
                             <div key={i} className="guide-section">
                               <div className="guide-heading">
                                 {s.bloom && (
-                                  <span className="bloom-badge-sm" style={{ color: s.bloom.color }}>
+                                  <span
+                                    className="bloom-badge-sm"
+                                    style={{ color: s.bloom.color }}
+                                    title={`Bloom's Taxonomy: ${s.bloom.level} — ${
+                                      {
+                                        Remember: "Recall facts and basic concepts",
+                                        Understand: "Explain ideas or concepts",
+                                        Apply: "Use information in new situations",
+                                        Analyze: "Draw connections among ideas",
+                                        Evaluate: "Justify a stance or decision",
+                                        Create: "Produce new or original work",
+                                      }[s.bloom.level] || s.bloom.level
+                                    }`}
+                                  >
                                     {s.bloom.emoji} {s.bloom.level}
                                   </span>
                                 )}
