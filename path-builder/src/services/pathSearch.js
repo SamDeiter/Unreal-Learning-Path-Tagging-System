@@ -1,7 +1,10 @@
 /**
- * pathSearch.js — Stage 1: Vector Search
+ * pathSearch.js — Stage 1: Hybrid Search (Vector + Keyword RAG)
  *
- * Finds relevant segments across all embedding collections (transcripts, Epic, docs).
+ * Finds relevant segments across:
+ *   - Firestore vector embeddings (semantic similarity via Cloud Functions)
+ *   - Local RAG database (75K+ keyword-matched segments from segment_index.json)
+ *
  * Supports gap-specific dual-search for adaptive learning paths.
  */
 
@@ -10,6 +13,8 @@ import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
 import { recordTokenUsage } from "./tokenTracker";
 import { retryWithBackoff } from "../utils/retryWithBackoff";
+import { getSegmentIndex } from "./segmentSearchService";
+import { SEARCH_STOPWORDS } from "../domain/constants";
 
 // ── Constants ──────────────────────────────────────────────────────────
 export const MAX_PATH_SEGMENTS = 8;
@@ -110,6 +115,75 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
     return segments;
   }
 
+  // ── Local keyword RAG search ──────────────────────────────────────────
+  // Searches the 75K+ segment_index.json for keyword matches.
+  // Runs in parallel with vector search for zero added latency.
+  async function localKeywordSearch(query) {
+    try {
+      const segmentIndex = await getSegmentIndex();
+      if (!segmentIndex) return [];
+
+      const keywords = query
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((w) => w.length > 2 && !SEARCH_STOPWORDS.has(w));
+      if (keywords.length === 0) return [];
+
+      const results = [];
+
+      for (const [courseKey, courseData] of Object.entries(segmentIndex)) {
+        if (!courseData?.videos) continue;
+
+        for (const [videoKey, videoData] of Object.entries(courseData.videos)) {
+          if (!videoData?.segments) continue;
+
+          for (const segment of videoData.segments) {
+            const textLower = (segment.text || "").toLowerCase();
+            let score = 0;
+            const matched = [];
+
+            for (const kw of keywords) {
+              if (textLower.includes(kw)) {
+                // Count occurrences
+                const regex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+                const hits = (textLower.match(regex) || []).length;
+                score += hits * 10;
+                matched.push(kw);
+              }
+            }
+
+            // Require at least 2 keyword matches or a high single-keyword score
+            if (matched.length >= 2 || (matched.length === 1 && score >= 20)) {
+              // Normalize score to 0-1 range (base 0.55, max 0.75)
+              const normalizedSimilarity = Math.min(0.75, 0.55 + (score / 200));
+
+              results.push({
+                id: `rag_${courseKey}_${videoKey}_${results.length}`,
+                type: "keyword_rag",
+                courseCode: courseKey,
+                videoKey: videoKey,
+                videoTitle: videoData.title || videoKey,
+                text: segment.text || "",
+                similarity: normalizedSimilarity,
+                matchedKeywords: matched,
+                source: videoData.source || "local_rag",
+              });
+            }
+          }
+        }
+      }
+
+      // Sort by score, take top results
+      results.sort((a, b) => b.similarity - a.similarity);
+      const topResults = results.slice(0, topK * 2);
+      devLog(`[pathSearch] Local keyword RAG: ${results.length} matches, returning top ${topResults.length}`);
+      return topResults;
+    } catch (err) {
+      devWarn("[pathSearch] Local keyword search failed (non-fatal):", err.message);
+      return [];
+    }
+  }
+
   // ── Primary search: user's original query ──
   let queryVector;
   try {
@@ -122,7 +196,15 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
   }
 
   const TRANSCRIPT_BOOST = 1.3;
-  let segments = await searchAllCollections(queryVector);
+
+  // Run vector search + local keyword search IN PARALLEL (zero added latency)
+  const [vectorSegments, keywordSegments] = await Promise.all([
+    searchAllCollections(queryVector),
+    localKeywordSearch(userQuery),
+  ]);
+
+  let segments = [...vectorSegments, ...keywordSegments];
+  devLog(`[pathSearch] Combined: ${vectorSegments.length} vector + ${keywordSegments.length} keyword RAG segments`);
 
   // ── Evaluate corpus quality from PRIMARY search only ──
   // This must happen BEFORE merging gap results, otherwise the gap boost
