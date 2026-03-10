@@ -235,6 +235,10 @@ export async function previewScormPackage(config) {
     html: generateScoHtml({ title: mod.title, content: mod.htmlContent }),
   }));
 
+  // Encode SCO data as base64 to avoid </script> injection issues
+  const scosJson = JSON.stringify(scos.map((s) => ({ title: s.title, html: s.html })));
+  const scosBase64 = btoa(unescape(encodeURIComponent(scosJson)));
+
   // Build a viewer HTML page with sidebar nav + iframe
   const viewerHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -272,35 +276,38 @@ export async function previewScormPackage(config) {
     </div>
     <iframe id="viewer"></iframe>
   </div>
+  <script id="sco-data" type="application/json">${scosBase64}</script>
   <script>
-    const scos = ${JSON.stringify(scos.map((s) => ({ title: s.title, html: s.html })))};
-    const nav = document.getElementById('nav');
-    const viewer = document.getElementById('viewer');
-    const currentTitle = document.getElementById('current-title');
-    let activeIdx = 0;
+    // Decode base64 SCO data safely (avoids script injection)
+    var raw = document.getElementById('sco-data').textContent;
+    var scos = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    var nav = document.getElementById('nav');
+    var viewer = document.getElementById('viewer');
+    var currentTitle = document.getElementById('current-title');
+    var activeIdx = 0;
 
     function loadSco(idx) {
       activeIdx = idx;
-      const blob = new Blob([scos[idx].html], { type: 'text/html' });
+      var blob = new Blob([scos[idx].html], { type: 'text/html' });
       viewer.src = URL.createObjectURL(blob);
       currentTitle.textContent = scos[idx].title;
-      document.querySelectorAll('.nav-item').forEach((el, i) => {
+      document.querySelectorAll('.nav-item').forEach(function(el, i) {
         el.classList.toggle('active', i === idx);
       });
     }
 
-    scos.forEach((sco, idx) => {
-      const item = document.createElement('div');
+    scos.forEach(function(sco, idx) {
+      var item = document.createElement('div');
       item.className = 'nav-item' + (idx === 0 ? ' active' : '');
       item.innerHTML = '<span class="num">' + (idx + 1) + '</span><span>' + sco.title + '</span>';
-      item.onclick = () => loadSco(idx);
+      item.onclick = function() { loadSco(idx); };
       nav.appendChild(item);
     });
 
     // Listen for SCO navigation messages
-    window.addEventListener('message', (e) => {
-      if (e.data?.type === 'sco_complete' && activeIdx < scos.length - 1) loadSco(activeIdx + 1);
-      if (e.data?.type === 'sco_previous' && activeIdx > 0) loadSco(activeIdx - 1);
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'sco_complete' && activeIdx < scos.length - 1) loadSco(activeIdx + 1);
+      if (e.data && e.data.type === 'sco_previous' && activeIdx > 0) loadSco(activeIdx - 1);
     });
 
     if (scos.length > 0) loadSco(0);
