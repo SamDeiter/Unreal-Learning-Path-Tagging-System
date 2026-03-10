@@ -69,14 +69,26 @@ export async function generateQuizForStep(step, userQuery, count = 3) {
  *
  * @param {Array} path - Sequenced path from bespokePathService
  * @param {string} userQuery - Original query
- * @param {number} questionsPerStep - Questions per step (default 2)
+ * @param {number} totalQuestions - Total target number of questions for the entire path
  * @returns {Promise<Map<number, Array>>} Map of step index → questions
  */
-export async function generateQuizForPath(path, userQuery, questionsPerStep = 2) {
-  if (!path || path.length === 0) return new Map();
+export async function generateQuizForPath(path, userQuery, totalQuestions = 5) {
+  if (!path || path.length === 0 || totalQuestions <= 0) return new Map();
+
+  // Distribute totalQuestions across all steps
+  const baseCount = Math.floor(totalQuestions / path.length);
+  let remainder = totalQuestions % path.length;
 
   const results = await Promise.allSettled(
-    path.map((step) => generateQuizForStep(step, userQuery, questionsPerStep))
+    path.map((step) => {
+      let countForStep = baseCount;
+      if (remainder > 0) {
+        countForStep++;
+        remainder--;
+      }
+      if (countForStep === 0) return Promise.resolve([]); // Skip generating if 0 for this step
+      return generateQuizForStep(step, userQuery, countForStep);
+    })
   );
 
   const quizMap = new Map();
