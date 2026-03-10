@@ -515,9 +515,10 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
   }, [curriculum, selectedCourses, addCourse]);
 
   const selectSuggestion = useCallback((name) => {
-    setSearchQuery(name);
+    updateSearch(name);
+    setDebouncedQuery(name); // Immediately trigger course search (no debounce wait)
     setShowAutocomplete(false);
-  }, []);
+  }, [updateSearch]);
 
   const formatTime = (minutes) => {
     if (minutes < 60) return `${minutes} min`;
