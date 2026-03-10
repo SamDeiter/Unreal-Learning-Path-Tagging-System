@@ -416,6 +416,17 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       if (introCourse) workingCourses.unshift(introCourse);
     }
 
+    // Industry filter — only keep courses matching selected industries
+    const selectedIndustries = learningIntent?.industries;
+    if (selectedIndustries && selectedIndustries.length > 0) {
+      workingCourses = workingCourses.filter((c) => {
+        const courseInd = c.tags?.industry || "General";
+        // Always include General (cross-industry fundamentals)
+        if (courseInd === "General") return true;
+        return selectedIndustries.includes(courseInd);
+      });
+    }
+
     const sorted = workingCourses.sort((a, b) => {
       // Pin intro course to top for beginners
       if (isBeginnerContext) {
@@ -470,7 +481,15 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     });
 
     return { tiers, totalCourses: allCourses.length, totalTime, allCourses, learningOutcomes };
-  }, [mergedCourses, pathCourses, timeBudget, debouncedQuery, learningIntent?.skillLevel, courses]);
+  }, [
+    mergedCourses,
+    pathCourses,
+    timeBudget,
+    debouncedQuery,
+    learningIntent?.skillLevel,
+    learningIntent?.industries,
+    courses,
+  ]);
 
   // Reset selection when curriculum changes — start empty, let user choose
   const curriculumKey = curriculum ? curriculum.allCourses.map((c) => c.code).join(",") : "";

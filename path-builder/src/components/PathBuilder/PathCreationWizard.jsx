@@ -37,12 +37,32 @@ const TIME_RECOMMENDATIONS = {
   },
 };
 
+const INDUSTRIES = [
+  "All",
+  "General",
+  "Games",
+  "Film & Television",
+  "Architecture",
+  "Simulation",
+  "Automotive",
+  "Media & Entertainment",
+];
+
 function PathCreationWizard({ onComplete, onCancel }) {
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState("");
   const [goal, setGoal] = useState("");
   const [skillLevel, setSkillLevel] = useState("");
   const [timeBudget, setTimeBudget] = useState("");
+  const [industries, setIndustries] = useState([]); // empty = All
+
+  const toggleIndustry = useCallback((ind) => {
+    setIndustries((prev) => {
+      if (ind === "All") return []; // "All" clears the filter
+      const next = prev.includes(ind) ? prev.filter((i) => i !== ind) : [...prev, ind];
+      return next;
+    });
+  }, []);
 
   const currentStep = STEPS[step];
 
@@ -69,12 +89,13 @@ function PathCreationWizard({ onComplete, onCancel }) {
       goal: goal.trim(),
       skillLevel,
       timeBudget: timeBudget || TIME_RECOMMENDATIONS[skillLevel]?.default || "none",
+      industries, // array of selected industries (empty = all)
       courseCount: 0,
       totalMinutes: 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
-  }, [onComplete, title, goal, skillLevel, timeBudget]);
+  }, [onComplete, title, goal, skillLevel, timeBudget, industries]);
 
   // Auto-set recommended time when skill level changes
   const handleSkillChange = (level) => {
@@ -187,6 +208,35 @@ function PathCreationWizard({ onComplete, onCancel }) {
                   </span>
                 </div>
               )}
+
+              <div className="pcw-time-section">
+                <label className="pcw-label">Industry Focus</label>
+                <div className="pcw-industry-chips">
+                  <button
+                    type="button"
+                    className={`pcw-industry-chip ${industries.length === 0 ? "selected" : ""}`}
+                    onClick={() => toggleIndustry("All")}
+                  >
+                    All
+                  </button>
+                  {INDUSTRIES.filter((i) => i !== "All").map((ind) => (
+                    <button
+                      key={ind}
+                      type="button"
+                      className={`pcw-industry-chip ${industries.includes(ind) ? "selected" : ""}`}
+                      onClick={() => toggleIndustry(ind)}
+                    >
+                      {ind}
+                    </button>
+                  ))}
+                </div>
+                <span className="pcw-research-note">
+                  🏭{" "}
+                  {industries.length === 0
+                    ? "Showing courses from all industries"
+                    : `Focusing on: ${industries.join(", ")}`}
+                </span>
+              </div>
             </div>
           )}
 
@@ -211,6 +261,12 @@ function PathCreationWizard({ onComplete, onCancel }) {
                   <span className="pcw-review-label">Time Budget</span>
                   <span className="pcw-review-value">
                     {timeBudget === "none" ? "No Limit" : `~${timeBudget}h`}
+                  </span>
+                </div>
+                <div className="pcw-review-row">
+                  <span className="pcw-review-label">Industry</span>
+                  <span className="pcw-review-value">
+                    {industries.length === 0 ? "All Industries" : industries.join(", ")}
                   </span>
                 </div>
               </div>
