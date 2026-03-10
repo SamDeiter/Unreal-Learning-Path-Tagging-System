@@ -127,10 +127,20 @@ function CourseLibrary({ courses }) {
   const PAGE_SIZE = 30;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // Reset visible count when filters change
-  useEffect(() => {
+  // Reset visible count when filters change — via key in handler callbacks
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
     setVisibleCount(PAGE_SIZE);
-  }, [search, levelFilter]);
+  };
+  const handleLevelFilterChange = (level) => {
+    setLevelFilter(levelFilter === level ? null : level);
+    setVisibleCount(PAGE_SIZE);
+  };
+  const handleClearAll = () => {
+    setSearch("");
+    setLevelFilter(null);
+    setVisibleCount(PAGE_SIZE);
+  };
 
   const visibleCourses = filteredCourses.slice(0, visibleCount);
   const hasMore = visibleCount < filteredCourses.length;
@@ -198,10 +208,10 @@ function CourseLibrary({ courses }) {
             className="search-input"
             placeholder="Search courses... (Ctrl+K)"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={handleSearchChange}
           />
           {search && (
-            <button className="search-clear" onClick={() => setSearch("")} title="Clear search">
+            <button className="search-clear" onClick={() => { setSearch(""); setVisibleCount(PAGE_SIZE); }} title="Clear search">
               <X size={14} />
             </button>
           )}
@@ -212,7 +222,7 @@ function CourseLibrary({ courses }) {
             <button
               key={level}
               className={`level-btn ${levelFilter === level ? "active" : ""} ${level.toLowerCase()}`}
-              onClick={() => setLevelFilter(levelFilter === level ? null : level)}
+              onClick={() => handleLevelFilterChange(level)}
             >
               {level}
             </button>
@@ -240,10 +250,7 @@ function CourseLibrary({ courses }) {
         {(search || levelFilter) && (
           <button
             className="clear-filters"
-            onClick={() => {
-              setSearch("");
-              setLevelFilter(null);
-            }}
+            onClick={handleClearAll}
           >
             Clear All
           </button>

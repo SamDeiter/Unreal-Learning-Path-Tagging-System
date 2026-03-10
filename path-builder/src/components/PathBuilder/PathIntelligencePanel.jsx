@@ -105,6 +105,7 @@ export default function PathIntelligencePanel() {
   const [flashcards, setFlashcards] = useState(null);
   const [quickQuiz, setQuickQuiz] = useState(null);
   const [exportingScorm, setExportingScorm] = useState(false);
+  const [quizPerStep, setQuizPerStep] = useState(2);
 
   // Auto-populate from wizard intent (one-time read)
   useEffect(() => {
@@ -297,7 +298,7 @@ export default function PathIntelligencePanel() {
     if (!pathResult || generatingQuiz) return;
     setGeneratingQuiz(true);
     try {
-      const quizMap = await generateQuizForPath(pathResult.path, learningIntent.primaryGoal, 2);
+      const quizMap = await generateQuizForPath(pathResult.path, learningIntent.primaryGoal, quizPerStep);
       // generateQuizForPath returns a Map<stepIndex, questions[]>
       // Flatten into a single array for the UI
       const allQuestions = [];
@@ -314,7 +315,7 @@ export default function PathIntelligencePanel() {
     } finally {
       setGeneratingQuiz(false);
     }
-  }, [pathResult, generatingQuiz, learningIntent]);
+  }, [pathResult, generatingQuiz, learningIntent, quizPerStep]);
 
   // Derived
   const blindSpots = analysis?.blindSpots || [];
@@ -910,6 +911,18 @@ export default function PathIntelligencePanel() {
                 <p className="ip-tab-desc">
                   Generate knowledge-check questions from your path content.
                 </p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: "0.8rem" }}>
+                  <label htmlFor="quiz-per-step">Questions per step:</label>
+                  <input
+                    id="quiz-per-step"
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={quizPerStep}
+                    onChange={(e) => setQuizPerStep(Math.max(1, Math.min(5, +e.target.value || 2)))}
+                    style={{ width: 48, textAlign: "center", padding: "2px 4px", borderRadius: 4, border: "1px solid var(--border, #30363d)", background: "var(--bg-secondary, #161b22)", color: "inherit" }}
+                  />
+                </div>
                 <div className="ip-quiz-actions">
                   <button
                     className="ip-btn primary"

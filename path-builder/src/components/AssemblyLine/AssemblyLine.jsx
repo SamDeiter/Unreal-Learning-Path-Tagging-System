@@ -10,7 +10,7 @@
  * - Click node to view details or remove
  * - Drop zone at end to add new courses
  */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { usePath } from "../../context/PathContext";
 import { optimizePathOrder } from "../../utils/generationEngine";
 import { useAugmentationData } from "../../hooks/useAugmentationData";
@@ -34,6 +34,38 @@ function getContentType(course) {
   if ((course.videos?.length || 0) > 0 || course.video_count > 0)
     return { emoji: "🎬", label: "Video", cls: "ct-video" };
   return { emoji: "📄", label: "Course", cls: "ct-default" };
+}
+
+// Collapsible tag legend explaining Bloom levels and content types
+function TagLegend() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="tag-legend" style={{ padding: "0 16px 8px", fontSize: "0.72rem" }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          background: "none", border: "none", color: "var(--text-muted, #8b949e)",
+          cursor: "pointer", fontSize: "0.72rem", padding: "2px 0",
+        }}
+      >
+        {open ? "▾" : "▸"} What do these tags mean?
+      </button>
+      {open && (
+        <div style={{ margin: "4px 0 0 8px", lineHeight: 1.6, color: "var(--text-secondary, #8b949e)" }}>
+          <div><strong>Bloom Levels:</strong></div>
+          <div>📖 <strong>Remember</strong> — Recall facts and basic concepts</div>
+          <div>💡 <strong>Understand</strong> — Explain ideas or concepts</div>
+          <div>⚙️ <strong>Apply</strong> — Use information in new situations</div>
+          <div>🔍 <strong>Analyze</strong> — Draw connections among ideas</div>
+          <div>⚖️ <strong>Evaluate</strong> — Justify a stance or decision</div>
+          <div>🎨 <strong>Create</strong> — Produce new or original work</div>
+          <div style={{ marginTop: 4 }}><strong>Content Types:</strong></div>
+          <div>🎬 Video · 📄 Doc · 🎞️ Bespoke · 🤖 AI · 📦 SCORM</div>
+          <div style={{ marginTop: 4, fontStyle: "italic" }}>💡 Focus on Apply and Create steps for deeper mastery.</div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function AssemblyLine() {
@@ -238,6 +270,11 @@ function AssemblyLine() {
           )}
         </div>
       </div>
+
+      {/* Tag Legend */}
+      {courses.length > 0 && (
+        <TagLegend />
+      )}
 
       {courses.length === 0 ? (
         <div className="empty-state">
