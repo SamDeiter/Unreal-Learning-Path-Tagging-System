@@ -148,7 +148,7 @@ export function PathProvider({ children }) {
 
       // Also update the named saved path if one is active
       if (activePathId) {
-        const STORAGE_KEY = "ue5-saved-paths";
+        const STORAGE_KEY = "ue5_saved_paths";
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const paths = JSON.parse(saved);
@@ -270,7 +270,7 @@ export function PathProvider({ children }) {
   };
 
   // --- localStorage Persistence ---
-  const STORAGE_KEY = "ue5-saved-paths";
+  const STORAGE_KEY = "ue5_saved_paths";
 
   const getSavedPaths = () => {
     try {
