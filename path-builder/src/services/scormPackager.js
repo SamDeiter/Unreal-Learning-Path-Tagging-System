@@ -248,10 +248,8 @@ export async function previewScormPackage(pathResult) {
     let driveId = null;
     let youtubeId = null;
     if (videoUrl) {
-      // Google Drive: extract file ID from /file/d/{id}/ or ?id={id}
       const driveMatch = videoUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || videoUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       if (driveMatch) driveId = driveMatch[1];
-      // YouTube: extract video ID
       try {
         const vUrl = new URL(videoUrl);
         if (vUrl.hostname.includes("youtube.com")) youtubeId = vUrl.searchParams.get("v");
@@ -261,6 +259,28 @@ export async function previewScormPackage(pathResult) {
     const startSec = Math.round(step.segment?.startTime || 0);
     const endSec = Math.round(step.segment?.endTime || 0);
     const videoTitle = step.segment?.videoTitle || "";
+    const fmtTime = (s) => Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
+
+    // Build video embed HTML as a separate string (avoids nested template literal issues)
+    let videoHtml = "";
+    if (driveId) {
+      videoHtml = '<div class="video-section"><h2>\ud83c\udfac Video Reference</h2>'
+        + '<div class="video-embed"><iframe src="https://drive.google.com/file/d/' + driveId + '/preview" allow="autoplay" allowfullscreen></iframe></div>'
+        + '<div class="video-meta">'
+        + (videoTitle ? '<span>' + escapeXml(videoTitle) + '</span>' : '')
+        + ((startSec || endSec) ? '<span class="timestamp-badge">\u23f1 ' + fmtTime(startSec) + ' \u2013 ' + fmtTime(endSec) + '</span>' : '')
+        + '<a href="https://drive.google.com/file/d/' + driveId + '/view" target="_blank" rel="noopener noreferrer">Open in Drive \u2197</a>'
+        + '</div></div>';
+    } else if (youtubeId) {
+      const startParam = startSec ? "&start=" + startSec : "";
+      videoHtml = '<div class="video-section"><h2>\ud83c\udfac Video Reference</h2>'
+        + '<div class="video-embed"><iframe src="https://www.youtube-nocookie.com/embed/' + youtubeId + '?rel=0&modestbranding=1' + startParam + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'
+        + '<div class="video-meta">'
+        + (videoTitle ? '<span>' + escapeXml(videoTitle) + '</span>' : '')
+        + ((startSec || endSec) ? '<span class="timestamp-badge">\u23f1 ' + fmtTime(startSec) + ' \u2013 ' + fmtTime(endSec) + '</span>' : '')
+        + '<a href="https://www.youtube.com/watch?v=' + youtubeId + (startSec ? '&t=' + startSec : '') + '" target="_blank" rel="noopener noreferrer">Watch on YouTube \u2197</a>'
+        + '</div></div>';
+    }
 
     // Category CSS class
     const catLower = category.toLowerCase();
@@ -309,35 +329,7 @@ export async function previewScormPackage(pathResult) {
   <p class="breadcrumb">${escapeXml(pathTitle)} — Step ${idx + 1} of ${steps.length}</p>
   <h1>${escapeXml(title)}</h1>
   ${bridgeText ? `<div class="bridge-box"><strong>Connection:</strong> ${escapeXml(bridgeText)}</div>` : ""}
-  \${(() => {
-    if (driveId) {
-      return \`<div class="video-section">
-        <h2>🎬 Video Reference</h2>
-        <div class="video-embed">
-          <iframe src="https://drive.google.com/file/d/\${driveId}/preview" allow="autoplay" allowfullscreen></iframe>
-        </div>
-        <div class="video-meta">
-          \${videoTitle ? \`<span>\${escapeXml(videoTitle)}</span>\` : ""}
-          \${startSec || endSec ? \`<span class="timestamp-badge">⏱ \${Math.floor(startSec/60)}:\${String(startSec%60).padStart(2,'0')} – \${Math.floor(endSec/60)}:\${String(endSec%60).padStart(2,'0')}</span>\` : ""}
-          <a href="https://drive.google.com/file/d/\${driveId}/view" target="_blank" rel="noopener noreferrer">Open in Drive ↗</a>
-        </div>
-      </div>\`;
-    } else if (youtubeId) {
-      const startParam = startSec ? \`&start=\${startSec}\` : "";
-      return \`<div class="video-section">
-        <h2>🎬 Video Reference</h2>
-        <div class="video-embed">
-          <iframe src="https://www.youtube-nocookie.com/embed/\${youtubeId}?rel=0&modestbranding=1\${startParam}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-        <div class="video-meta">
-          \${videoTitle ? \`<span>\${escapeXml(videoTitle)}</span>\` : ""}
-          \${startSec || endSec ? \`<span class="timestamp-badge">⏱ \${Math.floor(startSec/60)}:\${String(startSec%60).padStart(2,'0')} – \${Math.floor(endSec/60)}:\${String(endSec%60).padStart(2,'0')}</span>\` : ""}
-          <a href="https://www.youtube.com/watch?v=\${youtubeId}\${startSec ? '&t=' + startSec : ''}" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a>
-        </div>
-      </div>\`;
-    }
-    return "";
-  })()}
+  ${videoHtml}
   <div class="step-card">
     <div class="step-meta">
       <span class="category-badge ${catClass}">${escapeXml(category)}</span>
