@@ -23,7 +23,7 @@ import {
 import "./AssemblyLine.css";
 
 function AssemblyLine() {
-  const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath } = usePath();
+  const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath, pathStats } = usePath();
   const { getCourseSummary, getVideoKeys } = useAugmentationData();
 
   // Handle drag start
@@ -174,16 +174,7 @@ function AssemblyLine() {
           {courses.length > 0 && (
             <span className="path-summary">
               {courses.length} course{courses.length !== 1 ? "s" : ""} •{" ~"}
-              {(
-                courses.reduce((sum, c) => {
-                  const mins =
-                    c.videos?.reduce((s, v) => s + (v.duration_minutes || 0), 0) ||
-                    c.duration_minutes ||
-                    30;
-                  return sum + mins;
-                }, 0) / 60
-              ).toFixed(1)}{" "}
-              hours •{" "}
+              {pathStats.estimatedHours}h •{" "}
               {courses.reduce((sum, c) => sum + (c.video_count || c.videos?.length || 0), 0)} videos
               {loadSummary && (
                 <span
