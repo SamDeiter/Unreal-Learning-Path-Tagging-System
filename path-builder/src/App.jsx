@@ -567,7 +567,7 @@ function App() {
                     onComplete={(pathData) => {
                       setShowWizard(false);
                       // Save to storage
-                      import("./components/PathBuilder/PathDashboard").then(
+                      import("./utils/pathStorageUtils").then(
                         ({ savePathToStorage }) => {
                           savePathToStorage(pathData);
                         }

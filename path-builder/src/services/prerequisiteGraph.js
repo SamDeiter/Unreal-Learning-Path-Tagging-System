@@ -109,12 +109,7 @@ export function topologicalSort(courses, graph) {
   // Calculate in-degrees
   const inDegree = new Map();
   adjList.forEach((_deps, node) => inDegree.set(node, 0));
-  adjList.forEach((deps) => {
-    deps.forEach((dep) => {
-      // dep is a prerequisite of `node`, so node depends on dep
-      // We want dep before node — so node has an incoming edge
-    });
-  });
+
 
   // Rebuild in-degree: for each node, its dependencies are prerequisites
   // A node's in-degree = number of its prerequisites

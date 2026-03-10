@@ -364,6 +364,12 @@ function scoreCourses(personaId, rules, courses) {
         }
       }
 
+      // Explicit cross-industry blocklist penalty (hard suppression)
+      const blockedIndustries = CROSS_INDUSTRY_BLOCKLIST[personaId] || [];
+      if (blockedIndustries.includes(courseIndustry)) {
+        score -= 500;
+      }
+
       return { ...course, score };
     })
     .sort((a, b) => b.score - a.score);

@@ -140,7 +140,7 @@ export default function PathIntelligencePanel() {
     } catch {
       /* ignore sync errors */
     }
-  }, [courses.length, pathStats.totalMinutes]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [courses.length, pathStats.totalMinutes]);
 
   const hasCourses = courses.length > 0;
   const hasGoal = !!learningIntent?.primaryGoal?.trim();
