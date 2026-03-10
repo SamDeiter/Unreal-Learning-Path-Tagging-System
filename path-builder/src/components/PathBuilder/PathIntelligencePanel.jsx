@@ -1,7 +1,7 @@
 /**
  * PathIntelligencePanel v3 — Tabbed intelligence sidebar
  *
- * Tabs: Coverage | Gaps | Quiz | Export
+ * Tabs: Coverage | Gaps | Quiz | Review | Export
  * Only ONE tab visible at a time. Clean and focused.
  * Setup gate shown when Primary Goal is missing.
  */
@@ -72,6 +72,7 @@ const TABS = [
   { id: "coverage", icon: "📊", label: "Coverage" },
   { id: "gaps", icon: "⚠", label: "Gaps" },
   { id: "quiz", icon: "📝", label: "Quiz" },
+  { id: "review", icon: "✅", label: "Review" },
   { id: "export", icon: "📦", label: "Export" },
 ];
 
@@ -971,14 +972,25 @@ export default function PathIntelligencePanel() {
               </div>
             )}
 
+            {/* ════ REVIEW TAB ════ */}
+            {activeTab === "review" && (
+              <div className="ip-tab-pane">
+                {pathResult ? (
+                  <PathWizard pathResult={pathResult} quiz={quiz} />
+                ) : (
+                  <div className="ip-empty">
+                    <span className="ip-empty-icon">✅</span>
+                    <p>Add courses and set a goal to enable path review.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* ════ EXPORT TAB ════ */}
             {activeTab === "export" && (
               <div className="ip-tab-pane">
                 {pathResult ? (
                   <div className="export-panel">
-                    {/* Original PathWizard */}
-                    <PathWizard pathResult={pathResult} quiz={quiz} />
-
                     {/* ── Study Guide ─────────────────── */}
                     <div className="export-section">
                       <button
