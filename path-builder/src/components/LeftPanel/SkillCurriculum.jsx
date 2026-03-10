@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef, memo } from "react";
 import { usePath } from "../../context/PathContext";
 import { useVectorSearch } from "../../hooks/useVectorSearch";
+import { getCourseDurationMinutes } from "../../utils/courseDuration";
 import "./SkillCurriculum.css";
 
 // UE5 concept synonym map for semantic matching
@@ -251,9 +252,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
         });
         // Calculate estimated time
         const totalMinutes = matchingCourses.reduce((sum, course) => {
-          const courseTime =
-            course.videos?.reduce((s, v) => s + (v.duration_minutes || 0), 0) || 30;
-          return sum + courseTime;
+          return sum + getCourseDurationMinutes(course);
         }, 0);
         return {
           name: skill,
@@ -405,7 +404,17 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     const levelOrder = { Beginner: 1, Foundation: 1, Intermediate: 2, Advanced: 3 };
     const maxMinutes = timeBudget ? parseInt(timeBudget) : Infinity;
 
+    // Boost "Introduction to Unreal Engine" for beginners
+    const isBeginnerContext =
+      learningIntent?.skillLevel === "Beginner" || /\bintro(duction)?\b/i.test(debouncedQuery);
+    const UE_INTRO_CODE = "100.01";
+
     const sorted = [...mergedCourses].sort((a, b) => {
+      // Pin intro course to top for beginners
+      if (isBeginnerContext) {
+        if (a.code === UE_INTRO_CODE) return -1;
+        if (b.code === UE_INTRO_CODE) return 1;
+      }
       const levelA = levelOrder[a.tags?.level] || 2;
       const levelB = levelOrder[b.tags?.level] || 2;
       return levelA - levelB;
@@ -417,8 +426,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     sorted.forEach((course) => {
       const level = course.tags?.level;
       const isInPath = pathCodes.has(course.code);
-      const courseTime =
-        course.videos?.reduce((sum, v) => sum + (v.duration_minutes || 0), 0) || 30;
+      const courseTime = getCourseDurationMinutes(course);
 
       // Apply time budget filter
       if (runningTime + courseTime > maxMinutes && maxMinutes !== Infinity) {
@@ -455,19 +463,13 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     });
 
     return { tiers, totalCourses: allCourses.length, totalTime, allCourses, learningOutcomes };
-  }, [mergedCourses, pathCourses, timeBudget]);
+  }, [mergedCourses, pathCourses, timeBudget, debouncedQuery, learningIntent?.skillLevel]);
 
-  // Sync selection when curriculum changes
+  // Reset selection when curriculum changes — start empty, let user choose
   const curriculumKey = curriculum ? curriculum.allCourses.map((c) => c.code).join(",") : "";
 
   useEffect(() => {
-    if (curriculum && curriculum.allCourses.length > 0) {
-      const newSelection = new Set(
-        curriculum.allCourses.filter((c) => !c.isInPath).map((c) => c.code)
-      );
-      setSelectedCourses(newSelection);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setSelectedCourses(new Set());
   }, [curriculumKey]);
 
   const toggleCourse = useCallback((code) => {

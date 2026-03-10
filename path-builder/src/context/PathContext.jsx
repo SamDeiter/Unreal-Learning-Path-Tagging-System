@@ -7,6 +7,7 @@
  * - pathStats: Computed stats (total time, level range, etc.)
  */
 import { createContext, useContext, useReducer, useMemo, useState } from "react";
+import { getCourseDurationMinutes } from "../utils/courseDuration";
 
 const PathContext = createContext(null);
 
@@ -151,9 +152,7 @@ export function PathProvider({ children }) {
     const weightMultipliers = { High: 1.2, Medium: 1.0, Low: 0.5 };
     const estimatedHours = courses.reduce((sum, c) => {
       const multiplier = weightMultipliers[c.weight || "Medium"] || 1.0;
-      // Use actual video durations if available, else 30 min per course
-      const totalMinutes =
-        c.videos?.reduce((s, v) => s + (v.duration_minutes || 0), 0) || c.duration_minutes || 30; // fallback: 30 min per course, not per segment
+      const totalMinutes = getCourseDurationMinutes(c);
       const baseTime = totalMinutes / 60;
       return sum + baseTime * multiplier;
     }, 0);
