@@ -6,7 +6,7 @@
  * - addCourse/removeCourse/reorderCourses: Path manipulation
  * - pathStats: Computed stats (total time, level range, etc.)
  */
-import { createContext, useContext, useReducer, useMemo, useState } from "react";
+import { createContext, useContext, useReducer, useMemo, useState, useEffect } from "react";
 import { getCourseDurationMinutes } from "../utils/courseDuration";
 
 const PathContext = createContext(null);
@@ -105,8 +105,67 @@ const initialState = {
   },
 };
 
+const DRAFT_KEY = "ue5-path-draft";
+
+// Load draft from localStorage (for session restore)
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (raw) {
+      const draft = JSON.parse(raw);
+      return {
+        courses: Array.isArray(draft.courses) ? draft.courses : [],
+        learningIntent: draft.learningIntent || initialState.learningIntent,
+      };
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
 export function PathProvider({ children }) {
-  const [state, dispatch] = useReducer(pathReducer, initialState);
+  const [state, dispatch] = useReducer(pathReducer, initialState, () => {
+    // Initialize from draft if available
+    return loadDraft() || initialState;
+  });
+
+  // Track which saved path is being edited (so we can update it in-place)
+  const [activePathId, setActivePathId] = useState(
+    () => localStorage.getItem("ue5_active_path_id") || null
+  );
+
+  // --- Auto-save draft to localStorage ---
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({
+          courses: state.courses,
+          learningIntent: state.learningIntent,
+        })
+      );
+
+      // Also update the named saved path if one is active
+      if (activePathId) {
+        const STORAGE_KEY = "ue5-saved-paths";
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const paths = JSON.parse(saved);
+          const idx = paths.findIndex((p) => p.id === activePathId);
+          if (idx !== -1) {
+            paths[idx].courses = state.courses;
+            paths[idx].learningIntent = state.learningIntent;
+            paths[idx].courseCount = state.courses.length;
+            paths[idx].savedAt = new Date().toISOString();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(paths));
+          }
+        }
+      }
+    } catch {
+      /* localStorage full or unavailable */
+    }
+  }, [state.courses, state.learningIntent, activePathId]);
 
   // Persona state — persisted in localStorage
   const [activePersonaId, setActivePersonaIdState] = useState(
@@ -201,6 +260,9 @@ export function PathProvider({ children }) {
 
   const clearPath = () => {
     dispatch({ type: ACTIONS.CLEAR_PATH });
+    setActivePathId(null);
+    localStorage.removeItem("ue5_active_path_id");
+    localStorage.removeItem(DRAFT_KEY);
   };
 
   const loadPath = (courses) => {
@@ -235,6 +297,8 @@ export function PathProvider({ children }) {
 
     savedPaths.unshift(newPath); // Add to front
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedPaths.slice(0, 20))); // Keep 20 max
+    setActivePathId(newPath.id);
+    localStorage.setItem("ue5_active_path_id", newPath.id);
     return true;
   };
 
@@ -244,6 +308,8 @@ export function PathProvider({ children }) {
     if (found) {
       dispatch({ type: ACTIONS.LOAD_PATH, payload: found.courses });
       dispatch({ type: ACTIONS.SET_LEARNING_INTENT, payload: found.learningIntent });
+      setActivePathId(pathId);
+      localStorage.setItem("ue5_active_path_id", pathId);
       return true;
     }
     return false;
@@ -273,6 +339,9 @@ export function PathProvider({ children }) {
     // Persona
     activePersonaId,
     setActivePersonaId,
+    // Active path tracking
+    activePathId,
+    setActivePathId,
   };
 
   return <PathContext.Provider value={value}>{children}</PathContext.Provider>;
