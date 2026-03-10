@@ -28,6 +28,7 @@ const OutputPanel = lazy(() => import("./components/OutputPanel/OutputPanel"));
 const PathIntelligencePanel = lazy(() => import("./components/PathBuilder/PathIntelligencePanel"));
 const PathDashboard = lazy(() => import("./components/PathBuilder/PathDashboard"));
 const PathCreationWizard = lazy(() => import("./components/PathBuilder/PathCreationWizard"));
+const PathLoader = lazy(() => import("./components/PathBuilder/PathLoader"));
 const LearningIntentHeader = lazy(() => import("./components/LearningIntent/LearningIntentHeader"));
 const TagGraph = lazy(() => import("./components/TagGraph/TagGraph"));
 const PathReadiness = lazy(() => import("./components/PathReadiness/PathReadiness"));
@@ -132,6 +133,7 @@ function App() {
   // Path Builder dashboard vs editor view
   const [builderView, setBuilderView] = useState("dashboard"); // "dashboard" | "editor"
   const [showWizard, setShowWizard] = useState(false);
+  const [pendingEditPath, setPendingEditPath] = useState(null);
 
   // Analytics events are loaded inline in the effect below
 
@@ -516,8 +518,8 @@ function App() {
                 {activeTab === "builder" && builderView === "dashboard" && (
                   <div className="dashboard-layout">
                     <PathDashboard
-                      onEditPath={(_path) => {
-                        // TODO: load path data into PathContext
+                      onEditPath={(path) => {
+                        setPendingEditPath(path);
                         setBuilderView("editor");
                       }}
                       onCreateNew={() => setShowWizard(true)}
@@ -551,6 +553,13 @@ function App() {
                       </aside>
                     )}
                   </div>
+                )}
+                {/* PathLoader: bridges saved path data into PathContext */}
+                {pendingEditPath && (
+                  <PathLoader
+                    pendingPath={pendingEditPath}
+                    onLoaded={() => setPendingEditPath(null)}
+                  />
                 )}
                 {/* Path Creation Wizard Modal */}
                 {showWizard && (

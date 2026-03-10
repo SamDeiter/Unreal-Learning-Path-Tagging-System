@@ -163,8 +163,16 @@ def check_url_health(url: str) -> dict:
         elif "dev.epicgames.com" in domain:
             # Epic SPA: shell is ~3-4KB, real pages inject data making them > 5KB
             # Also check for common "not found" signals in the HTML
-            if body_size < 5000:
-                status = "broken"  # Empty SPA shell — no real content
+            #
+            # IMPORTANT: Epic migrated their doc URL scheme. Old URLs now return
+            # a ~3KB Angular shell with <meta name="robots" content="noindex">
+            # that JavaScript-redirects to the new URL. These are NOT broken —
+            # they work fine in browsers. Classify them as "redirected".
+            has_noindex = 'content="noindex"' in resp.text or "content='noindex'" in resp.text
+            if has_noindex and body_size < 5000:
+                status = "redirected"  # JS-redirect stub, not broken
+            elif body_size < 5000 and not has_noindex:
+                status = "broken"  # Genuinely empty SPA shell
             elif "Page not found" in resp.text or "404" in resp.text[:500]:
                 status = "broken"
         elif resp.status_code == 200 and final_url != url:
