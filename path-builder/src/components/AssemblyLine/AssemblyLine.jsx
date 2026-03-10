@@ -36,6 +36,17 @@ function getContentType(course) {
   return { emoji: "📄", label: "Course", cls: "ct-default" };
 }
 
+// Clean up display titles — strip file extensions, underscores, numbering prefixes
+function cleanTitle(title) {
+  if (!title) return "";
+  return title
+    .replace(/\.(mp4|mov|avi|mkv|webm|mp3|wav|pdf|docx?)$/i, "") // file extensions
+    .replace(/^\d{1,3}[-_.\s]+/g, "")  // leading numbers like "01_", "001-", "1. "
+    .replace(/[_]/g, " ")               // underscores → spaces
+    .replace(/\s{2,}/g, " ")            // collapse multiple spaces
+    .trim();
+}
+
 // Collapsible tag legend explaining Bloom levels and content types
 function TagLegend() {
   const [open, setOpen] = useState(false);
@@ -161,11 +172,13 @@ function AssemblyLine() {
     );
   };
 
-  // Get node classes
+  // Get node classes — includes content-type for color-coding
   const getNodeClasses = (course) => {
     const classes = ["path-node"];
     if (course.tags?.level) classes.push(course.tags.level.toLowerCase());
     if (course.role) classes.push(course.role.toLowerCase().replace(/\s+/g, "-")); // e.g. "next-step"
+    const ct = getContentType(course);
+    classes.push(ct.cls); // e.g. "ct-video", "ct-doc", "ct-bespoke"
     return classes.join(" ");
   };
 
@@ -346,7 +359,7 @@ function AssemblyLine() {
                                 {renderLoadDot(course)}
                               </div>
                               <span className="node-title" title={course.title}>
-                                {course.title}
+                                {cleanTitle(course.title)}
                               </span>
                               <div className="node-badges">
                                 {renderBloomBadge(course)}
@@ -466,7 +479,7 @@ function AssemblyLine() {
                                 {renderLoadDot(course)}
                               </div>
                               <span className="node-title" title={course.title}>
-                                {course.title}
+                                {cleanTitle(course.title)}
                               </span>
                               {renderBloomBadge(course)}
                             </div>

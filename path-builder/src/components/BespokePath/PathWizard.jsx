@@ -39,7 +39,7 @@ function evaluateChecks(pathResult, gaps) {
     passed: path.some((s) => s.category === "foundation"),
     detail: `${path.filter((s) => s.category === "foundation").length} foundation step(s)`,
     fix: !path.some((s) => s.category === "foundation")
-      ? "Add a foundation step to teach prerequisites"
+      ? "Go to the Gaps tab and add a Beginner-level foundation step"
       : null,
     group: "content",
   });
@@ -50,7 +50,7 @@ function evaluateChecks(pathResult, gaps) {
     passed: path.some((s) => s.category === "fix"),
     detail: `${path.filter((s) => s.category === "fix").length} fix step(s)`,
     fix: !path.some((s) => s.category === "fix")
-      ? "Path needs at least one core solution step"
+      ? "Go to the Gaps tab and use Fill This Gap to add a core solution step"
       : null,
     group: "content",
   });
@@ -61,7 +61,7 @@ function evaluateChecks(pathResult, gaps) {
     passed: path.some((s) => s.category === "transfer"),
     detail: `${path.filter((s) => s.category === "transfer").length} transfer step(s)`,
     fix: !path.some((s) => s.category === "transfer")
-      ? "Add a transfer step so learners can apply the concept"
+      ? "Go to the Gaps tab and add a hands-on exercise or project step"
       : null,
     group: "content",
   });
@@ -75,7 +75,7 @@ function evaluateChecks(pathResult, gaps) {
       highGaps.length === 0
         ? "No critical blind spots detected"
         : `${highGaps.length} high-severity gap(s): ${highGaps.map((g) => g.topic).join(", ")}`,
-    fix: highGaps.length > 0 ? 'Use "Fill This Gap" to address critical gaps' : null,
+    fix: highGaps.length > 0 ? "Go to the Gaps tab and use Fill This Gap for each critical gap" : null,
     group: "content",
   });
 
@@ -85,7 +85,7 @@ function evaluateChecks(pathResult, gaps) {
     label: "Coverage ≥ 70%",
     passed: coverageScore >= 0.7,
     detail: `${Math.round(coverageScore * 100)}% corpus coverage`,
-    fix: coverageScore < 0.7 ? "Fill gaps or add more steps to improve coverage" : null,
+    fix: coverageScore < 0.7 ? "Go to the Gaps tab — fill gaps or add more steps to improve coverage" : null,
     group: "content",
   });
 

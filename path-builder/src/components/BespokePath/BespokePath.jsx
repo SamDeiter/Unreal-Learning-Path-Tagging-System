@@ -611,15 +611,20 @@ export default function BespokePath() {
                       <PathWizard
                         pathResult={pathResult}
                         gaps={pathResult.gaps}
-                        onFixClick={() => {
-                          const gapCard = document.getElementById("gap-analysis-card");
-                          if (gapCard) {
-                            gapCard.scrollIntoView({ behavior: "smooth", block: "start" });
-                            const toggleBtn = document.getElementById("gap-card-toggle-btn");
-                            if (toggleBtn && toggleBtn.getAttribute("aria-expanded") === "false") {
-                              toggleBtn.click();
+                        onFixClick={(checkId) => {
+                          // Content checks → scroll to gap analysis card
+                          const contentChecks = ["has-prerequisites", "has-core", "has-practice", "no-high-gaps", "coverage-threshold"];
+                          if (contentChecks.includes(checkId)) {
+                            const gapCard = document.getElementById("gap-analysis-card");
+                            if (gapCard) {
+                              gapCard.scrollIntoView({ behavior: "smooth", block: "start" });
+                              const toggleBtn = document.getElementById("gap-card-toggle-btn");
+                              if (toggleBtn && toggleBtn.getAttribute("aria-expanded") === "false") {
+                                toggleBtn.click();
+                              }
                             }
                           }
+                          // Structural checks are hint-only (no auto-action)
                         }}
                       />
                     )}
