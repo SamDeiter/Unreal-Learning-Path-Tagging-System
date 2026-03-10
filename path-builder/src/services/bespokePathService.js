@@ -34,7 +34,7 @@ import { findRelevantSegments } from "./pathSearch";
 import { SIMILARITY_THRESHOLD, MIN_PATH_SEGMENTS } from "./pathSearch";
 import { sequencePath } from "./pathSequencer";
 import { generateBridgeNarration } from "./pathNarration";
-import { analyzePathGaps, searchCommunityPainPoints } from "./pathGapAnalyzer";
+import { analyzePathGaps, searchCommunityPainPoints, generateGapFillStep } from "./pathGapAnalyzer";
 
 /**
  * Hybrid Fallback: Generate a learning path from Gemini's own knowledge
@@ -419,20 +419,60 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
       lowCorpusCoverage: !!lowCorpusCoverage,
     });
 
-    // Stage 3: Generate bridge narrations + gap analysis (parallel — zero added latency)
-    devLog("[BespokePath] Stage 3: Generating narrations + gap analysis...");
-    const [corpusBridges, corpusGaps, corpusPainPoints] = await Promise.allSettled([
-      generateBridgeNarration(result.path, userQuery),
+    // Stage 3: Gap analysis + community pain points (parallel)
+    devLog("[BespokePath] Stage 3: Analyzing gaps + community pain points...");
+    const [corpusGaps, corpusPainPoints] = await Promise.allSettled([
       analyzePathGaps(userQuery, result.path, knowledgeProfile),
       searchCommunityPainPoints(userQuery),
     ]);
-    result.bridges = corpusBridges.status === "fulfilled" ? corpusBridges.value : [];
     result.gaps = corpusGaps.status === "fulfilled" ? corpusGaps.value : null;
     result.communityPainPoints =
       corpusPainPoints.status === "fulfilled" ? corpusPainPoints.value : [];
 
+    // ── Stage 3.5: Fill gaps with Gemini (only when no source content exists) ──
+    const blindSpots = result.gaps?.blindSpots || [];
+    if (blindSpots.length > 0) {
+      devLog(`[BespokePath] Filling ${blindSpots.length} gap(s) with 3-tier engine...`);
+      const existingCodes = result.path.map((s) => s.segment?.courseCode).filter(Boolean);
+      const gapFills = await Promise.allSettled(
+        blindSpots.slice(0, 3).map((gap) =>
+          generateGapFillStep(gap.topic, userQuery, result.path, existingCodes)
+        )
+      );
+      let filledCount = 0;
+      for (let i = 0; i < gapFills.length; i++) {
+        if (gapFills[i].status !== "fulfilled" || !gapFills[i].value) continue;
+        const fill = gapFills[i].value;
+        const gapTopic = blindSpots[i].topic;
+        // Wrap the gap fill as a path step
+        result.path.push({
+          segment: {
+            type: fill.source === "ai" ? "ai_generated" : "gap_fill",
+            title: gapTopic,
+            text: fill.summary || fill.segments?.[0]?.text || "",
+            videoTitle: fill.segments?.[0]?.videoTitle || gapTopic,
+            similarity: 0,
+            gapFillSource: fill.source,
+          },
+          category: "transfer",
+          title: gapTopic,
+          summary: fill.summary || fill.segments?.[0]?.text || `Learn about ${gapTopic}`,
+          order: result.path.length,
+        });
+        filledCount++;
+      }
+      if (filledCount > 0) {
+        devLog(`[BespokePath] Filled ${filledCount} gap(s) — path now has ${result.path.length} steps`);
+      }
+    }
+
+    // Stage 4: Generate bridge narrations (runs after gap fill so all steps get narrated)
+    devLog("[BespokePath] Stage 4: Generating narrations...");
+    result.bridges = await generateBridgeNarration(result.path, userQuery)
+      .catch((err) => { devWarn("[BespokePath] Narration failed:", err.message); return []; });
+
     devLog(
-      `[BespokePath] Pipeline complete: ${result.path.length} steps, ${result.bridges.length} bridges, gaps: ${result.gaps ? result.gaps.blindSpots?.length || 0 : "N/A"}`
+      `[BespokePath] Pipeline complete: ${result.path.length} steps, ${result.bridges.length} bridges, gaps: ${blindSpots.length} (filled: ${blindSpots.length > 0 ? result.path.length - corpusSteps : 0})`
     );
 
     return result;
