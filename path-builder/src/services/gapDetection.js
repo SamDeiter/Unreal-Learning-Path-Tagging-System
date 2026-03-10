@@ -66,7 +66,7 @@ export function parseGeminiJSON(raw) {
   }
 
   // Extract JSON object or array
-  const match = raw.match(/[{[\[\s\S]*[}\]]/);
+  const match = raw.match(/[{[\s\S]*[}\]]/);
   if (!match) return null;
 
   let jsonStr = match[0]
