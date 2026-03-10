@@ -123,6 +123,18 @@ function CourseLibrary({ courses }) {
     });
   };
 
+  // ── Progressive rendering ──
+  const PAGE_SIZE = 30;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, levelFilter]);
+
+  const visibleCourses = filteredCourses.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredCourses.length;
+
   return (
     <div className="course-library">
       {/* Suggested Courses Section - appears when goal is set */}
@@ -240,7 +252,7 @@ function CourseLibrary({ courses }) {
 
       {/* Course List */}
       <div className="course-list">
-        {filteredCourses.map((course, index) => (
+        {visibleCourses.map((course, index) => (
           <div
             key={`${course.code}-${index}`}
             className={`course-card ${isInPath(course.code) ? "in-path" : ""}`}
@@ -313,6 +325,16 @@ function CourseLibrary({ courses }) {
             </button>
           </div>
         ))}
+
+        {hasMore && (
+          <button
+            className="ip-btn secondary"
+            style={{ margin: "8px auto", display: "block" }}
+            onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+          >
+            Show More ({filteredCourses.length - visibleCount} remaining)
+          </button>
+        )}
 
         {filteredCourses.length === 0 && (
           <div className="no-results">No courses match your search.</div>

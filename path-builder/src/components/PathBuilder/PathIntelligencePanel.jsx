@@ -169,6 +169,24 @@ export default function PathIntelligencePanel() {
     };
   }, [isReady, courses, learningIntent, analysis]);
 
+  // ── Analysis cache key ──
+  const analysisKey = useMemo(() => {
+    if (!isReady) return null;
+    const codes = courses.map((c) => c.code || c.title).sort().join("|");
+    return `ip-analysis-${learningIntent.primaryGoal}-${codes}`.replace(/\s+/g, "_").slice(0, 120);
+  }, [isReady, courses, learningIntent?.primaryGoal]);
+
+  // Restore cached analysis on mount / key change
+  useEffect(() => {
+    if (!analysisKey) return;
+    try {
+      const cached = localStorage.getItem(analysisKey);
+      if (cached && !analysis) {
+        setAnalysis(JSON.parse(cached));
+      }
+    } catch { /* ignore parse errors */ }
+  }, [analysisKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Analyze ──
   const handleAnalyze = useCallback(async () => {
     if (!isReady || analyzing) return;
@@ -181,12 +199,16 @@ export default function PathIntelligencePanel() {
       }));
       const result = await analyzePathGaps(learningIntent.primaryGoal, steps);
       setAnalysis(result);
+      // Persist to localStorage
+      if (analysisKey) {
+        try { localStorage.setItem(analysisKey, JSON.stringify(result)); } catch { /* quota */ }
+      }
     } catch (err) {
       setError(err.message || "Analysis failed");
     } finally {
       setAnalyzing(false);
     }
-  }, [isReady, analyzing, courses, learningIntent]);
+  }, [isReady, analyzing, courses, learningIntent, analysisKey]);
 
   // ── Fill Gap ──
   const handleFillGap = useCallback(
@@ -225,7 +247,6 @@ export default function PathIntelligencePanel() {
         isGapFill: true,
         gapTopic: topic,
       });
-      // Mark as added in fill results
       setFillResults((prev) => ({
         ...prev,
         [topic]: { ...prev[topic], addedCode: courseMatch.code },
