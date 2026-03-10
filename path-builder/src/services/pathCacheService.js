@@ -77,12 +77,30 @@ function saveCache(entries) {
 }
 
 /**
+ * Check if cache bypass is active (add ?nocache to URL for dev testing).
+ */
+function isCacheBypassed() {
+  try {
+    return new URLSearchParams(window.location.search).has("nocache");
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Look up a cached path by query similarity.
  * Layer 1: localStorage (fast, supports fuzzy matching)
  * Layer 2: Firestore (cross-user, exact match only)
  * Returns the cached result if found, or null.
+ *
+ * Add ?nocache to URL to bypass all caching for dev testing.
  */
 export async function findCachedPath(query, threshold = 0.75) {
+  if (isCacheBypassed()) {
+    devLog("[PathCache] Cache bypassed (?nocache)");
+    return null;
+  }
+
   // Layer 1: localStorage (sync, fast)
   const localResult = findLocalCachedPath(query, threshold);
   if (localResult) {

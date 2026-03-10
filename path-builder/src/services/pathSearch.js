@@ -146,51 +146,74 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
 
       const results = [];
 
-      // transcript_segments.json structure: { courseKey: { videoKey: [{ text, start, end, startSec }] } }
-      for (const [courseKey, videos] of Object.entries(transcriptSegments)) {
-        if (!videos || typeof videos !== "object") continue;
+      // Helper: score a text against keywords
+      function scoreText(text) {
+        const textLower = (text || "").toLowerCase();
+        if (textLower.length < 20) return null;
+        let score = 0;
+        const matched = [];
+        for (const kw of keywords) {
+          if (textLower.includes(kw)) {
+            const regex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+            const hits = (textLower.match(regex) || []).length;
+            score += hits * 10;
+            matched.push(kw);
+          }
+        }
+        if (matched.length >= 2 || (matched.length === 1 && score >= 20)) {
+          const multiBonus = matched.length >= 2 ? matched.length * 5 : 0;
+          return { score: score + multiBonus, matched };
+        }
+        return null;
+      }
 
-        for (const [videoKey, segments] of Object.entries(videos)) {
+      // transcript_segments.json has TWO formats:
+      // 1. VTT nested:  { courseKey: { videoKey: [{ text, start, end, startSec }] } }
+      // 2. TXT flat:    { segKey: { text: "...", segment_index: int, source: "..." } }
+      for (const [topKey, topVal] of Object.entries(transcriptSegments)) {
+        if (!topVal || typeof topVal !== "object") continue;
+
+        // Format 2: flat segment with a direct "text" property
+        if (typeof topVal.text === "string") {
+          const result = scoreText(topVal.text);
+          if (result) {
+            const normalizedSimilarity = Math.min(0.78, 0.55 + (result.score / 150));
+            results.push({
+              id: `rag_flat_${topKey}`,
+              type: "keyword_rag",
+              courseCode: topVal.source || topKey.split("_")[0] || topKey,
+              videoKey: topKey,
+              videoTitle: topKey,
+              text: topVal.text,
+              similarity: normalizedSimilarity,
+              matchedKeywords: result.matched,
+              source: "local_rag",
+            });
+          }
+          continue;
+        }
+
+        // Format 1: nested VTT — iterate video keys
+        for (const [videoKey, segments] of Object.entries(topVal)) {
           if (!Array.isArray(segments)) continue;
 
           for (const segment of segments) {
-            const textLower = (segment.text || "").toLowerCase();
-            if (textLower.length < 20) continue; // skip tiny segments
-
-            let score = 0;
-            const matched = [];
-
-            for (const kw of keywords) {
-              if (textLower.includes(kw)) {
-                // Count occurrences
-                const regex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
-                const hits = (textLower.match(regex) || []).length;
-                score += hits * 10;
-                matched.push(kw);
-              }
-            }
-
-            // Accept: 2+ keyword matches, or 1 keyword with 2+ occurrences
-            if (matched.length >= 2 || (matched.length === 1 && score >= 20)) {
-              // Bonus for multi-keyword matches
-              const multiBonus = matched.length >= 2 ? matched.length * 5 : 0;
-              const totalScore = score + multiBonus;
-
-              // Normalize score to 0-1 range (base 0.55, max 0.78)
-              const normalizedSimilarity = Math.min(0.78, 0.55 + (totalScore / 150));
-
+            if (typeof segment !== "object" || !segment.text) continue;
+            const result = scoreText(segment.text);
+            if (result) {
+              const normalizedSimilarity = Math.min(0.78, 0.55 + (result.score / 150));
               results.push({
-                id: `rag_${courseKey}_${videoKey}_${results.length}`,
+                id: `rag_${topKey}_${videoKey}_${results.length}`,
                 type: "keyword_rag",
-                courseCode: courseKey,
+                courseCode: topKey,
                 videoKey: videoKey,
                 videoTitle: videoKey,
                 startTimestamp: segment.start || null,
                 endTimestamp: segment.end || null,
                 startSeconds: segment.startSec || null,
-                text: segment.text || "",
+                text: segment.text,
                 similarity: normalizedSimilarity,
-                matchedKeywords: matched,
+                matchedKeywords: result.matched,
                 source: "local_rag",
               });
             }
