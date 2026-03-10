@@ -25,6 +25,7 @@ import {
   generateBespokeGapStep,
   buildPrereqChain,
 } from "../../services/pathGapAnalyzer";
+import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
 import { generatePathNarration } from "../../services/stepBriefingService";
 import "./BespokePath.css";
@@ -172,20 +173,18 @@ export default function BespokePath() {
 
   // Add a library course match to the path
   const handleAddLibraryCourse = useCallback((courseMatch, topic) => {
+    const newStep = {
+      category: "fix",
+      segment: {
+        id: courseMatch.code,
+        title: courseMatch.title,
+        text: courseMatch.description || "",
+        source: "library",
+      },
+    };
     setPathResult((prev) => ({
       ...prev,
-      path: [
-        ...prev.path,
-        {
-          category: "fix",
-          segment: {
-            id: courseMatch.code,
-            title: courseMatch.title,
-            text: courseMatch.description || "",
-            source: "library",
-          },
-        },
-      ],
+      path: insertAtPhasePosition(prev.path, newStep),
     }));
     setFillResults((prev) => ({
       ...prev,
@@ -195,20 +194,18 @@ export default function BespokePath() {
 
   // Add a single video segment to the path
   const handleAddSegment = useCallback((segment, topic, segIndex) => {
+    const newStep = {
+      category: "fix",
+      segment: {
+        id: `bespoke-${topic}-${segIndex}`,
+        title: segment.title || `${topic} Segment`,
+        text: segment.text || "",
+        source: segment.videoTitle || "bespoke",
+      },
+    };
     setPathResult((prev) => ({
       ...prev,
-      path: [
-        ...prev.path,
-        {
-          category: "fix",
-          segment: {
-            id: `bespoke-${topic}-${segIndex}`,
-            title: segment.title || `${topic} Segment`,
-            text: segment.text || "",
-            source: segment.videoTitle || "bespoke",
-          },
-        },
-      ],
+      path: insertAtPhasePosition(prev.path, newStep),
     }));
     setFillResults((prev) => ({
       ...prev,
@@ -222,9 +219,13 @@ export default function BespokePath() {
   // Generate a combined bespoke step from segments
   const handleBespokeGenerate = useCallback((segments, topic) => {
     const bespokeStep = generateBespokeGapStep(topic, segments);
+    const wrappedStep = {
+      category: "fix",
+      segment: bespokeStep,
+    };
     setPathResult((prev) => ({
       ...prev,
-      path: [...prev.path, bespokeStep],
+      path: insertAtPhasePosition(prev.path, wrappedStep),
     }));
     setFillResults((prev) => ({
       ...prev,
