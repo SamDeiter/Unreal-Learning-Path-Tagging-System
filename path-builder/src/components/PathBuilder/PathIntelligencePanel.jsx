@@ -72,7 +72,7 @@ function CoverageGauge({ score }) {
 function ExportPanel({
   pathResult,
   analysis,
-  courses: _courses,
+  courses,
   learningIntent: _learningIntent,
   studyGuide: _studyGuide,
   flashcards: _flashcards,
@@ -110,7 +110,35 @@ function ExportPanel({
   const handlePreview = async () => {
     setPreviewing(true);
     try {
-      await previewScormPackage(pathResult);
+      // Enrich path steps with video data from courses before preview
+      const enrichedResult = { ...pathResult };
+      if (pathResult?.path && courses?.length) {
+        enrichedResult.path = pathResult.path.map((step) => {
+          const seg = step.segment || {};
+          // Already has a video URL? Skip enrichment
+          if (seg.videoUrl || seg.url || seg.drive_id) return step;
+          // Try to match this step to a course by code or title
+          const matchedCourse = courses.find(
+            (c) =>
+              (c.code && step.code && c.code === step.code) ||
+              (c.title && step.title && c.title === step.title)
+          );
+          if (!matchedCourse) return step;
+          // Copy video info from matched course into segment
+          const firstVideo = matchedCourse.videos?.[0];
+          return {
+            ...step,
+            videos: step.videos || matchedCourse.videos,
+            segment: {
+              ...seg,
+              videoUrl: matchedCourse._url || seg.videoUrl || "",
+              drive_id: firstVideo?.drive_id || "",
+              videoTitle: seg.videoTitle || matchedCourse.title || "",
+            },
+          };
+        });
+      }
+      await previewScormPackage(enrichedResult);
     } catch (err) {
       console.error("Preview failed:", err);
     } finally {

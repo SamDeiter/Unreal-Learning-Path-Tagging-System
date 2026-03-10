@@ -243,18 +243,52 @@ export async function previewScormPackage(pathResult) {
     const bridge = bridges[idx] || null;
     const bridgeText = bridge?.text || bridge?.narration || "";
 
-    // Extract video embed URL (Google Drive or YouTube)
-    const videoUrl = step.segment?.videoUrl || step.segment?.url || "";
+    // Extract video embed URL — check multiple possible locations
+    const candidateUrls = [
+      step.segment?.videoUrl,
+      step.segment?.url,
+      step._url,
+      step.url,
+    ].filter(Boolean);
+    // Also check for videos array on the step (library courses store drive_id here)
+    const firstVideo = step.videos?.[0] || step.segment?.videos?.[0];
+
     let driveId = null;
     let youtubeId = null;
-    if (videoUrl) {
-      const driveMatch = videoUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || videoUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      if (driveMatch) driveId = driveMatch[1];
-      try {
-        const vUrl = new URL(videoUrl);
-        if (vUrl.hostname.includes("youtube.com")) youtubeId = vUrl.searchParams.get("v");
-        else if (vUrl.hostname.includes("youtu.be")) youtubeId = vUrl.pathname.slice(1);
-      } catch { /* not a valid URL */ }
+
+    // Check explicit drive_id fields first
+    if (firstVideo?.drive_id) {
+      driveId = firstVideo.drive_id;
+    } else if (step.segment?.drive_id) {
+      driveId = step.segment.drive_id;
+    } else if (step.drive_id) {
+      driveId = step.drive_id;
+    }
+
+    // Try to extract from URLs
+    if (!driveId && !youtubeId) {
+      for (const videoUrl of candidateUrls) {
+        if (!videoUrl) continue;
+        // Google Drive URL
+        const driveMatch = videoUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || videoUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (driveMatch) { driveId = driveMatch[1]; break; }
+        // YouTube URL
+        try {
+          const vUrl = new URL(videoUrl);
+          if (vUrl.hostname.includes("youtube.com")) { youtubeId = vUrl.searchParams.get("v"); break; }
+          if (vUrl.hostname.includes("youtu.be")) { youtubeId = vUrl.pathname.slice(1); break; }
+        } catch { /* not a URL, check if raw YouTube ID */ }
+        // Raw YouTube ID (11 chars, alphanumeric + dash/underscore)
+        if (/^[a-zA-Z0-9_-]{11}$/.test(videoUrl)) { youtubeId = videoUrl; break; }
+      }
+    }
+
+    // Last resort: check if segment.title contains a known YouTube ID pattern
+    // (some paths store the video ID in unusual fields)
+    if (!driveId && !youtubeId && step.segment?.videoId) {
+      if (/^[a-zA-Z0-9_-]{11}$/.test(step.segment.videoId)) {
+        youtubeId = step.segment.videoId;
+      }
     }
     const startSec = Math.round(step.segment?.startTime || 0);
     const endSec = Math.round(step.segment?.endTime || 0);
