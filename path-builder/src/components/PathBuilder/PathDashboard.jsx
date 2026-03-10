@@ -111,13 +111,28 @@ function PathDashboard({ onEditPath, onCreateNew, onLegacyMode }) {
 
             <div className="pd-card-stats">
               <span className="pd-stat">📚 {path.courseCount || 0} courses</span>
-              <span className="pd-stat">⏱️ {formatTime(path.totalMinutes)}</span>
+              <span className="pd-stat">
+                ⏱️{" "}
+                {path.timeBudget && path.timeBudget !== "none"
+                  ? `~${path.timeBudget}h`
+                  : formatTime(path.totalMinutes)}
+              </span>
               {path.skillLevel && (
                 <span className={`pd-level pd-level-${(path.skillLevel || "").toLowerCase()}`}>
                   {path.skillLevel}
                 </span>
               )}
             </div>
+
+            {path.industries && path.industries.length > 0 && (
+              <div className="pd-card-industries">
+                {path.industries.map((ind) => (
+                  <span key={ind} className="pd-industry-tag">
+                    {ind}
+                  </span>
+                ))}
+              </div>
+            )}
 
             <div className="pd-card-footer">
               {path.coverageScore != null && (
