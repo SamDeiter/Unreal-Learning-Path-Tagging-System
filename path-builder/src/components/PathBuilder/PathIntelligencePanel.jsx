@@ -20,7 +20,6 @@ import {
   buildContentSummary,
   enrichGuideWithBloom,
   generateFlashcards,
-  generateQuickQuiz,
 } from "../../services/studyGuideGenerator";
 import { downloadScormPackage } from "../../services/scormPackager";
 import PathWizard from "../BespokePath/PathWizard";
@@ -103,7 +102,6 @@ export default function PathIntelligencePanel() {
   const [generatingQuiz, setGeneratingQuiz] = useState(false);
   const [studyGuide, setStudyGuide] = useState(null);
   const [flashcards, setFlashcards] = useState(null);
-  const [quickQuiz, setQuickQuiz] = useState(null);
   const [exportingScorm, setExportingScorm] = useState(false);
   const [totalQuizQuestions, setTotalQuizQuestions] = useState(10);
 
@@ -1002,36 +1000,6 @@ export default function PathIntelligencePanel() {
                       {flashcards.length > 10 && (
                         <p className="more-items">+{flashcards.length - 10} more cards...</p>
                       )}
-                    </div>
-                  )}
-                </div>
-
-                {/* ── Quick Quiz ──────────────────── */}
-                <div className="export-section" style={{ marginBottom: "16px" }}>
-                  <button
-                    className="export-action-btn quiz-btn"
-                    onClick={() => setQuickQuiz(generateQuickQuiz(courses))}
-                  >
-                    📝 Generate Quick Quiz
-                  </button>
-                  {quickQuiz && (
-                    <div className="export-preview quiz-list">
-                      <span className="card-count">{quickQuiz.length} questions</span>
-                      {quickQuiz.map((q, i) => (
-                        <div key={i} className="quiz-question">
-                          <p className="qq-prompt">
-                            {i + 1}. {q.question}
-                          </p>
-                          <ul className="qq-options">
-                            {q.options.map((opt, j) => (
-                              <li key={j} className={j === q.correctIndex ? "correct" : ""}>
-                                {String.fromCharCode(65 + j)}) {opt}
-                              </li>
-                            ))}
-                          </ul>
-                          <p className="qq-explain">{q.explanation}</p>
-                        </div>
-                      ))}
                     </div>
                   )}
                 </div>
