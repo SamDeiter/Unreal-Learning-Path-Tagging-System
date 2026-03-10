@@ -592,7 +592,7 @@ RULES:
       label: "gapFillStep",
     });
 
-    const responseText = result.data?.text || "";
+    const responseText = result.data?.text || result.data?.response || "";
     const groundingMetadata = result.data?.groundingMetadata || null;
 
     recordTokenUsage(
@@ -601,10 +601,30 @@ RULES:
       Math.ceil(responseText.length / 4)
     );
 
-    const parsed = parseGeminiJSON(responseText);
+    if (!responseText) {
+      devWarn("[GapAnalyzer] Empty response from API for gap fill step");
+      return {
+        segment: { title: `Learn: ${topic}`, text: `Study ${topic} in context of ${query}.` },
+        category: "core",
+        isGapFill: true,
+      };
+    }
+
+    let parsed = parseGeminiJSON(responseText);
     if (!parsed || !parsed.title) {
-      devWarn("[GapAnalyzer] Failed to parse gap fill step response");
-      return null;
+      // Fallback: try to extract content from plain text response
+      devWarn(
+        "[GapAnalyzer] Failed to parse gap fill JSON, building from raw text:",
+        responseText.slice(0, 200)
+      );
+      parsed = {
+        title: `Understanding ${topic}`,
+        summary: responseText
+          .replace(/```json?|```/gi, "")
+          .trim()
+          .slice(0, 500),
+        category: "core",
+      };
     }
 
     // 3. Build step in path-compatible shape
