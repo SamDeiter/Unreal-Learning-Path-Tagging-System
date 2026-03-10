@@ -19,7 +19,7 @@ export const SEGMENT_CATEGORIES = ["foundation", "diagnosis", "fix", "transfer"]
 // Minimum keyword overlap between user query and a classified step's text.
 // Steps below this threshold are demoted to "low" relevance — catches
 // semantically-similar but topically-wrong content that the AI failed to reject.
-const TOPIC_OVERLAP_THRESHOLD = 0.4;
+const TOPIC_OVERLAP_THRESHOLD = 0.25;
 
 // Stop words excluded from topical overlap computation
 const STOP_WORDS = new Set([
@@ -77,6 +77,26 @@ const STOP_WORDS = new Set([
   "make",
   "get",
   "set",
+  "does",
+  "work",
+  "works",
+  "working",
+  "create",
+  "need",
+  "want",
+  "like",
+  "just",
+  "really",
+  "know",
+  "new",
+  "thing",
+  "things",
+  "way",
+  "going",
+  "able",
+  "look",
+  "help",
+  "try",
 ]);
 
 /**

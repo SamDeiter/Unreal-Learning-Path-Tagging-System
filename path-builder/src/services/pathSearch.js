@@ -13,7 +13,6 @@ import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
 import { recordTokenUsage } from "./tokenTracker";
 import { retryWithBackoff } from "../utils/retryWithBackoff";
-import { getSegmentIndex } from "./segmentSearchService";
 import { SEARCH_STOPWORDS } from "../domain/constants";
 
 // ── Constants ──────────────────────────────────────────────────────────
@@ -115,13 +114,29 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
     return segments;
   }
 
+  // ── Lazy-load full-text transcript segments ──────────────────────────
+  let _transcriptSegments = null;
+  async function getTranscriptSegments() {
+    if (!_transcriptSegments) {
+      try {
+        const mod = await import("../data/transcript_segments.json");
+        _transcriptSegments = mod.default || mod;
+      } catch {
+        devWarn("[pathSearch] Could not load transcript_segments.json");
+        _transcriptSegments = {};
+      }
+    }
+    return _transcriptSegments;
+  }
+
   // ── Local keyword RAG search ──────────────────────────────────────────
-  // Searches the 75K+ segment_index.json for keyword matches.
+  // Searches the 75K+ transcript_segments.json for keyword matches.
+  // Uses FULL TEXT (not truncated previews) for best keyword recall.
   // Runs in parallel with vector search for zero added latency.
   async function localKeywordSearch(query) {
     try {
-      const segmentIndex = await getSegmentIndex();
-      if (!segmentIndex) return [];
+      const transcriptSegments = await getTranscriptSegments();
+      if (!transcriptSegments || Object.keys(transcriptSegments).length === 0) return [];
 
       const keywords = query
         .toLowerCase()
@@ -131,14 +146,17 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
 
       const results = [];
 
-      for (const [courseKey, courseData] of Object.entries(segmentIndex)) {
-        if (!courseData?.videos) continue;
+      // transcript_segments.json structure: { courseKey: { videoKey: [{ text, start, end, startSec }] } }
+      for (const [courseKey, videos] of Object.entries(transcriptSegments)) {
+        if (!videos || typeof videos !== "object") continue;
 
-        for (const [videoKey, videoData] of Object.entries(courseData.videos)) {
-          if (!videoData?.segments) continue;
+        for (const [videoKey, segments] of Object.entries(videos)) {
+          if (!Array.isArray(segments)) continue;
 
-          for (const segment of videoData.segments) {
+          for (const segment of segments) {
             const textLower = (segment.text || "").toLowerCase();
+            if (textLower.length < 20) continue; // skip tiny segments
+
             let score = 0;
             const matched = [];
 
@@ -152,21 +170,28 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
               }
             }
 
-            // Require at least 2 keyword matches or a high single-keyword score
+            // Accept: 2+ keyword matches, or 1 keyword with 2+ occurrences
             if (matched.length >= 2 || (matched.length === 1 && score >= 20)) {
-              // Normalize score to 0-1 range (base 0.55, max 0.75)
-              const normalizedSimilarity = Math.min(0.75, 0.55 + (score / 200));
+              // Bonus for multi-keyword matches
+              const multiBonus = matched.length >= 2 ? matched.length * 5 : 0;
+              const totalScore = score + multiBonus;
+
+              // Normalize score to 0-1 range (base 0.55, max 0.78)
+              const normalizedSimilarity = Math.min(0.78, 0.55 + (totalScore / 150));
 
               results.push({
                 id: `rag_${courseKey}_${videoKey}_${results.length}`,
                 type: "keyword_rag",
                 courseCode: courseKey,
                 videoKey: videoKey,
-                videoTitle: videoData.title || videoKey,
+                videoTitle: videoKey,
+                startTimestamp: segment.start || null,
+                endTimestamp: segment.end || null,
+                startSeconds: segment.startSec || null,
                 text: segment.text || "",
                 similarity: normalizedSimilarity,
                 matchedKeywords: matched,
-                source: videoData.source || "local_rag",
+                source: "local_rag",
               });
             }
           }
