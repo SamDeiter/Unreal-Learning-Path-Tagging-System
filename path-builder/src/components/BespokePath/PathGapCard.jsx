@@ -202,9 +202,41 @@ export default function PathGapCard({
                             <div key={si} className="gap-fill-segment">
                               <div className="gap-fill-seg-row">
                                 <div className="gap-fill-seg-info">
-                                  <div className="gap-fill-seg-title">{seg.title}</div>
-                                  {seg.videoTitle && (
-                                    <div className="gap-fill-seg-video">from: {seg.videoTitle}</div>
+                                  <div className="gap-fill-seg-title" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                    {seg.type === "transcript" && "🎥"}
+                                    {seg.type === "docs" && "📄"}
+                                    {seg.type === "epic_learning" && "🎓"}
+                                    <span style={{ fontWeight: 600 }}>{seg.title}</span>
+                                    {seg.type === "transcript" && seg.courseCode && (
+                                      <span className="gap-fill-badge">{seg.courseCode}</span>
+                                    )}
+                                  </div>
+                                  
+                                  {seg.type === "transcript" && seg.videoTitle && seg.videoTitle !== seg.title && (
+                                    <div className="gap-fill-seg-video" style={{ fontSize: "0.8rem", color: "var(--fg-muted)", marginTop: "2px" }}>
+                                      From: <em>{seg.videoTitle}</em>
+                                    </div>
+                                  )}
+                                  
+                                  {seg.type === "transcript" && seg.startTimestamp && (
+                                    <div className="gap-fill-seg-video" style={{ fontSize: "0.75rem", color: "var(--accent-fg)", marginTop: "2px", fontWeight: 500 }}>
+                                      ⏱ {seg.startTimestamp} 
+                                      {seg.endTimestamp ? ` - ${seg.endTimestamp}` : ""}
+                                    </div>
+                                  )}
+
+                                  {seg.type === "docs" && seg.url && (
+                                    <div style={{ fontSize: "0.75rem", color: "var(--accent-fg)", marginTop: "2px" }}>
+                                      <a href={seg.url} target="_blank" rel="noreferrer" style={{ color: "inherit", textDecoration: "none" }}>
+                                        🔗 View Documentation
+                                      </a>
+                                    </div>
+                                  )}
+
+                                  {seg.text && (
+                                    <div className="gap-fill-seg-snippet" style={{fontSize: "0.8rem", color: "var(--fg-muted)", marginTop: "6px", marginBottom: "6px", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", fontStyle: "italic", borderLeft: "2px solid var(--border-muted)", paddingLeft: "8px"}}>
+                                      "{seg.text}"
+                                    </div>
                                   )}
                                   <span className="gap-fill-sim">
                                     {Math.round(seg.similarity * 100)}% relevance

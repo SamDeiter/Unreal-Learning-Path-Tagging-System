@@ -71,7 +71,7 @@ function CoverageGauge({ score }) {
 const TABS = [
   { id: "coverage", icon: "📊", label: "Coverage" },
   { id: "gaps", icon: "⚠", label: "Gaps" },
-  { id: "quiz", icon: "📝", label: "Quiz" },
+  { id: "quiz", icon: "📚", label: "Study" },
   { id: "review", icon: "✅", label: "Review" },
   { id: "export", icon: "📦", label: "Export" },
 ];
@@ -769,10 +769,40 @@ export default function PathIntelligencePanel() {
                                   <div key={si} className="ip-fill-segment-preview">
                                     <div className="ip-fill-seg-row">
                                       <div className="ip-fill-seg-info">
-                                        <div className="ip-fill-seg-title">{seg.title}</div>
-                                        {seg.videoTitle && seg.videoTitle !== seg.title && (
-                                          <div className="ip-fill-seg-video">
-                                            from: {seg.videoTitle}
+                                        <div className="ip-fill-seg-title" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                          {seg.type === "transcript" && "🎥"}
+                                          {seg.type === "docs" && "📄"}
+                                          {seg.type === "epic_learning" && "🎓"}
+                                          <span style={{ fontWeight: 600 }}>{seg.title}</span>
+                                          {seg.type === "transcript" && seg.courseCode && (
+                                            <span className="gap-fill-badge">{seg.courseCode}</span>
+                                          )}
+                                        </div>
+                                        
+                                        {seg.type === "transcript" && seg.videoTitle && seg.videoTitle !== seg.title && (
+                                          <div className="ip-fill-seg-video" style={{ fontSize: "0.8rem", color: "var(--fg-muted)", marginTop: "2px" }}>
+                                            From: <em>{seg.videoTitle}</em>
+                                          </div>
+                                        )}
+                                        
+                                        {seg.type === "transcript" && seg.startTimestamp && (
+                                          <div className="ip-fill-seg-video" style={{ fontSize: "0.75rem", color: "var(--accent-fg)", marginTop: "2px", fontWeight: 500 }}>
+                                            ⏱ {seg.startTimestamp} 
+                                            {seg.endTimestamp ? ` - ${seg.endTimestamp}` : ""}
+                                          </div>
+                                        )}
+
+                                        {seg.type === "docs" && seg.url && (
+                                          <div style={{ fontSize: "0.75rem", color: "var(--accent-fg)", marginTop: "2px" }}>
+                                            <a href={seg.url} target="_blank" rel="noreferrer" style={{ color: "inherit", textDecoration: "none" }}>
+                                              🔗 View Documentation
+                                            </a>
+                                          </div>
+                                        )}
+
+                                        {seg.text && (
+                                          <div className="ip-fill-seg-snippet" style={{fontSize: "0.8rem", color: "var(--fg-muted)", marginTop: "6px", marginBottom: "6px", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", fontStyle: "italic", borderLeft: "2px solid var(--border-muted)", paddingLeft: "8px"}}>
+                                            "{seg.text}"
                                           </div>
                                         )}
                                         <span className="ip-fill-sim">
@@ -905,12 +935,110 @@ export default function PathIntelligencePanel() {
               </div>
             )}
 
-            {/* ════ QUIZ TAB ════ */}
+            {/* ════ STUDY TAB ════ */}
             {activeTab === "quiz" && (
               <div className="ip-tab-pane">
                 <p className="ip-tab-desc">
-                  Generate knowledge-check questions from your path content.
+                  Generate study materials and knowledge-checks from your path content.
                 </p>
+
+                {/* ── Study Guide ─────────────────── */}
+                <div className="export-section" style={{ marginBottom: "16px" }}>
+                  <button
+                    className="export-action-btn study-btn"
+                    onClick={() => {
+                      const guide = buildContentSummary(courses, getCourseSummary);
+                      enrichGuideWithBloom(guide);
+                      setStudyGuide(guide);
+                    }}
+                  >
+                    📄 Generate Study Guide
+                  </button>
+                  {studyGuide && (
+                    <div className="export-preview study-guide-preview">
+                      <h4>{studyGuide.title}</h4>
+                      {(studyGuide.sections || []).map((s, i) => (
+                        <div key={i} className="guide-section">
+                          <div className="guide-heading">
+                            {s.bloom && (
+                              <span
+                                className="bloom-badge-sm"
+                                style={{ color: s.bloom.color }}
+                                title={`Bloom's Taxonomy: ${s.bloom.level}`}
+                              >
+                                {s.bloom.emoji} {s.bloom.level}
+                              </span>
+                            )}
+                            <strong>{s.heading}</strong>
+                          </div>
+                          <p className="guide-content">{s.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Flashcards ──────────────────── */}
+                <div className="export-section" style={{ marginBottom: "16px" }}>
+                  <button
+                    className="export-action-btn flashcard-btn"
+                    onClick={() => setFlashcards(generateFlashcards(courses))}
+                  >
+                    🃏 Generate Flashcards
+                  </button>
+                  {flashcards && (
+                    <div className="export-preview flashcard-list">
+                      <span className="card-count">{flashcards.length} cards</span>
+                      {flashcards.slice(0, 10).map((card, i) => (
+                        <div key={i} className="flashcard">
+                          <div className="fc-front">
+                            <strong>Q:</strong> {card.front}
+                          </div>
+                          <div className="fc-back">
+                            <strong>A:</strong> {card.back}
+                          </div>
+                        </div>
+                      ))}
+                      {flashcards.length > 10 && (
+                        <p className="more-items">+{flashcards.length - 10} more cards...</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Quick Quiz ──────────────────── */}
+                <div className="export-section" style={{ marginBottom: "16px" }}>
+                  <button
+                    className="export-action-btn quiz-btn"
+                    onClick={() => setQuickQuiz(generateQuickQuiz(courses))}
+                  >
+                    📝 Generate Quick Quiz
+                  </button>
+                  {quickQuiz && (
+                    <div className="export-preview quiz-list">
+                      <span className="card-count">{quickQuiz.length} questions</span>
+                      {quickQuiz.map((q, i) => (
+                        <div key={i} className="quiz-question">
+                          <p className="qq-prompt">
+                            {i + 1}. {q.question}
+                          </p>
+                          <ul className="qq-options">
+                            {q.options.map((opt, j) => (
+                              <li key={j} className={j === q.correctIndex ? "correct" : ""}>
+                                {String.fromCharCode(65 + j)}) {opt}
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="qq-explain">{q.explanation}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Deep Quiz (AI Generated) ────── */}
+                <div className="export-section">
+                  <h4 style={{ marginBottom: 8, fontSize: "0.85rem", color: "var(--fg-muted)" }}>Path-Specific AI Quiz</h4>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: "0.8rem" }}>
                   <label htmlFor="quiz-total-questions">Total questions:</label>
                   <input
@@ -1003,6 +1131,7 @@ export default function PathIntelligencePanel() {
                 {quiz && quiz.length === 0 && (
                   <p className="ip-error">Could not generate quiz questions. Try again.</p>
                 )}
+                </div>
               </div>
             )}
 
@@ -1029,115 +1158,6 @@ export default function PathIntelligencePanel() {
               <div className="ip-tab-pane">
                 {pathResult ? (
                   <div className="export-panel">
-                    {/* ── Study Guide ─────────────────── */}
-                    <div className="export-section">
-                      <button
-                        className="export-action-btn study-guide-btn"
-                        onClick={() => {
-                          const summary = buildContentSummary(courses);
-                          const guide = enrichGuideWithBloom({
-                            title: `${learningIntent?.primaryGoal || "Learning Path"} — Study Guide`,
-                            sections: summary.courses.map((c) => ({
-                              heading: c.title,
-                              content: c.summary,
-                            })),
-                          });
-                          setStudyGuide(guide);
-                        }}
-                      >
-                        📄 Generate Study Guide
-                      </button>
-                      {studyGuide && (
-                        <div className="export-preview study-guide-preview">
-                          <h4>{studyGuide.title}</h4>
-                          {(studyGuide.sections || []).map((s, i) => (
-                            <div key={i} className="guide-section">
-                              <div className="guide-heading">
-                                {s.bloom && (
-                                  <span
-                                    className="bloom-badge-sm"
-                                    style={{ color: s.bloom.color }}
-                                    title={`Bloom's Taxonomy: ${s.bloom.level} — ${
-                                      {
-                                        Remember: "Recall facts and basic concepts",
-                                        Understand: "Explain ideas or concepts",
-                                        Apply: "Use information in new situations",
-                                        Analyze: "Draw connections among ideas",
-                                        Evaluate: "Justify a stance or decision",
-                                        Create: "Produce new or original work",
-                                      }[s.bloom.level] || s.bloom.level
-                                    }`}
-                                  >
-                                    {s.bloom.emoji} {s.bloom.level}
-                                  </span>
-                                )}
-                                <strong>{s.heading}</strong>
-                              </div>
-                              <p className="guide-content">{s.content}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* ── Flashcards ──────────────────── */}
-                    <div className="export-section">
-                      <button
-                        className="export-action-btn flashcard-btn"
-                        onClick={() => setFlashcards(generateFlashcards(courses))}
-                      >
-                        🃏 Generate Flashcards
-                      </button>
-                      {flashcards && (
-                        <div className="export-preview flashcard-list">
-                          <span className="card-count">{flashcards.length} cards</span>
-                          {flashcards.slice(0, 10).map((card, i) => (
-                            <div key={i} className="flashcard">
-                              <div className="fc-front">
-                                <strong>Q:</strong> {card.front}
-                              </div>
-                              <div className="fc-back">
-                                <strong>A:</strong> {card.back}
-                              </div>
-                            </div>
-                          ))}
-                          {flashcards.length > 10 && (
-                            <p className="more-items">+{flashcards.length - 10} more cards...</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* ── Quick Quiz ──────────────────── */}
-                    <div className="export-section">
-                      <button
-                        className="export-action-btn quiz-btn"
-                        onClick={() => setQuickQuiz(generateQuickQuiz(courses))}
-                      >
-                        📝 Generate Quick Quiz
-                      </button>
-                      {quickQuiz && (
-                        <div className="export-preview quiz-list">
-                          <span className="card-count">{quickQuiz.length} questions</span>
-                          {quickQuiz.map((q, i) => (
-                            <div key={i} className="quiz-question">
-                              <p className="qq-prompt">
-                                {i + 1}. {q.question}
-                              </p>
-                              <ul className="qq-options">
-                                {q.options.map((opt, j) => (
-                                  <li key={j} className={j === q.correctIndex ? "correct" : ""}>
-                                    {String.fromCharCode(65 + j)}) {opt}
-                                  </li>
-                                ))}
-                              </ul>
-                              <p className="qq-explain">{q.explanation}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
                     {/* ── SCORM Export ────────────────── */}
                     <div className="export-section">
                       <button

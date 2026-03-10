@@ -58,8 +58,9 @@ describe("video_library_enriched.json", () => {
     const videoCourses = courses.filter((c) => Array.isArray(c.videos) && c.videos.length > 0);
     const missing = [];
     for (const course of videoCourses) {
+      const isYouTube = course.source === 'youtube' || (course._url && course._url.includes('youtube'));
       for (const video of course.videos) {
-        if (!video.drive_id) {
+        if (!video.drive_id && !isYouTube) {
           missing.push(`${course.code} → ${video.name || "unnamed"}`);
         }
       }

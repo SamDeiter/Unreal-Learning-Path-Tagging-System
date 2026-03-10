@@ -105,8 +105,8 @@ def main():
     print("=" * 60)
 
     # Load data
-    drive_videos = json.loads((CONTENT_DIR / "drive_video_metadata_final.json").read_text())
-    library = json.loads((CONTENT_DIR / "video_library_enriched.json").read_text())
+    drive_videos = json.loads((CONTENT_DIR / "drive_video_metadata_final.json").read_text(encoding="utf-8"))
+    library = json.loads((CONTENT_DIR / "video_library_enriched.json").read_text(encoding="utf-8"))
     courses = library.get("courses", [])
 
     transcript_ids = {p.stem for p in TRANSCRIPTS_DIR.glob("*.json")}
@@ -128,14 +128,22 @@ def main():
             # Use drive_id field if available (new), else fallback to name lookup
             drive_id = vid.get("drive_id")
             if not drive_id:
-                vid_name = vid.get("name", "")
-                drive_id = name_to_id.get(vid_name)
+                if course.get("source") == "youtube":
+                    drive_id = course.get("code")
+                else:
+                    vid_name = vid.get("name", "")
+                    drive_id = name_to_id.get(vid_name)
 
             if drive_id and drive_id in transcript_ids:
                 transcript_file = TRANSCRIPTS_DIR / f"{drive_id}.json"
                 try:
-                    t_data = json.loads(transcript_file.read_text())
-                    text = t_data.get("text", "") if isinstance(t_data, dict) else ""
+                    t_data = json.loads(transcript_file.read_text(encoding="utf-8"))
+                    text = ""
+                    if isinstance(t_data, dict):
+                        text = t_data.get("text", "")
+                    elif isinstance(t_data, list):
+                        text = " ".join(item.get("text", "") for item in t_data if isinstance(item, dict))
+                    
                     course_text += " " + text
                     matched_vids += 1
                 except Exception:
@@ -167,7 +175,8 @@ def main():
     # Save updated library
     library["courses"] = courses
     (CONTENT_DIR / "video_library_enriched.json").write_text(
-        json.dumps(library, indent=2, ensure_ascii=False)
+        json.dumps(library, indent=2, ensure_ascii=False),
+        encoding="utf-8"
     )
     print(f"\n💾 Saved: {CONTENT_DIR / 'video_library_enriched.json'}")
 

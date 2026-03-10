@@ -608,7 +608,20 @@ export default function BespokePath() {
                       </button>
                     </div>
                     {reviewTab === "checklist" && (
-                      <PathWizard pathResult={pathResult} gaps={pathResult.gaps} />
+                      <PathWizard
+                        pathResult={pathResult}
+                        gaps={pathResult.gaps}
+                        onFixClick={() => {
+                          const gapCard = document.getElementById("gap-analysis-card");
+                          if (gapCard) {
+                            gapCard.scrollIntoView({ behavior: "smooth", block: "start" });
+                            const toggleBtn = document.getElementById("gap-card-toggle-btn");
+                            if (toggleBtn && toggleBtn.getAttribute("aria-expanded") === "false") {
+                              toggleBtn.click();
+                            }
+                          }
+                        }}
+                      />
                     )}
                     {reviewTab === "diff" && (
                       <PathDiff
