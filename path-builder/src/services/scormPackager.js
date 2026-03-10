@@ -249,6 +249,7 @@ export async function previewScormPackage(pathResult) {
       step.segment?.url,
       step._url,
       step.url,
+      step.code,  // course codes are often raw YouTube video IDs (e.g. DEfJEVcQ-eQ)
     ].filter(Boolean);
     // Also check for videos array on the step (library courses store drive_id here)
     const firstVideo = step.videos?.[0] || step.segment?.videos?.[0];
