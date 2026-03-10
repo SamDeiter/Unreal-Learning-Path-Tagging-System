@@ -174,8 +174,17 @@ function AssemblyLine() {
           {courses.length > 0 && (
             <span className="path-summary">
               {courses.length} course{courses.length !== 1 ? "s" : ""} •{" ~"}
-              {courses.reduce((sum, c) => sum + (c.duration || 0), 0).toFixed(1)} hours •{" "}
-              {courses.reduce((sum, c) => sum + (c.video_count || 0), 0)} videos
+              {(
+                courses.reduce((sum, c) => {
+                  const mins =
+                    c.videos?.reduce((s, v) => s + (v.duration_minutes || 0), 0) ||
+                    c.duration_minutes ||
+                    30;
+                  return sum + mins;
+                }, 0) / 60
+              ).toFixed(1)}{" "}
+              hours •{" "}
+              {courses.reduce((sum, c) => sum + (c.video_count || c.videos?.length || 0), 0)} videos
               {loadSummary && (
                 <span
                   className="load-summary"
