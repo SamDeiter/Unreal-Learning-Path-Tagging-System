@@ -24,7 +24,7 @@ import PathGapCard from "../BespokePath/PathGapCard";
 import PathWizard from "../BespokePath/PathWizard";
 import PathDiff from "../BespokePath/PathDiff";
 import PrereqChain from "../BespokePath/PrereqChain";
-import { generateGapFillStep, buildPrereqChain } from "../../services/pathGapAnalyzer";
+import { generateGapFillStep, generateBespokeGapStep, buildPrereqChain } from "../../services/pathGapAnalyzer";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
 
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
@@ -298,19 +298,93 @@ export default function AdaptivePath() {
     }
   }, [expandedStep, pathData]);
 
-  // Gap fill callback — generates a fill step and appends to path
+  // 3-tier gap fill state
+  const [fillResults, setFillResults] = useState({});
+
+  // Gap fill callback — uses 3-tier waterfall, stores structured results
   const handleFillGap = useCallback(
     async (topic) => {
       if (!pathData) return;
-      const fillStep = await generateGapFillStep(topic, pathData.query || query, pathData.path);
-      if (fillStep) {
-        setPathData((prev) => ({
-          ...prev,
-          path: [...prev.path, fillStep],
-        }));
+      const topicStr = typeof topic === "string" ? topic : topic.topic || topic;
+      try {
+        const existingCodes = pathData.path
+          .map((s) => s.segment?.id || s.code)
+          .filter(Boolean);
+        const result = await generateGapFillStep(
+          topicStr, pathData.query || query, pathData.path, existingCodes
+        );
+        setFillResults((prev) => ({ ...prev, [topicStr]: result }));
+      } catch (err) {
+        console.warn("[AdaptivePath] Fill gap failed:", err.message);
+        setFillResults((prev) => ({ ...prev, [topicStr]: { error: true } }));
       }
     },
     [pathData, query]
+  );
+
+  // Add a library course match to the path
+  const handleAddLibraryCourse = useCallback(
+    (courseMatch, topic) => {
+      setPathData((prev) => ({
+        ...prev,
+        path: [...prev.path, {
+          category: "fix",
+          segment: {
+            id: courseMatch.code,
+            title: courseMatch.title,
+            text: courseMatch.description || "",
+            source: "library",
+          },
+        }],
+      }));
+      setFillResults((prev) => ({
+        ...prev,
+        [topic]: { ...prev[topic], addedCode: courseMatch.code },
+      }));
+    },
+    []
+  );
+
+  // Add a single video segment to the path
+  const handleAddSegment = useCallback(
+    (segment, topic, segIndex) => {
+      setPathData((prev) => ({
+        ...prev,
+        path: [...prev.path, {
+          category: "fix",
+          segment: {
+            id: `bespoke-${topic}-${segIndex}`,
+            title: segment.title || `${topic} Segment`,
+            text: segment.text || "",
+            source: segment.videoTitle || "bespoke",
+          },
+        }],
+      }));
+      setFillResults((prev) => ({
+        ...prev,
+        [topic]: {
+          ...prev[topic],
+          addedSegments: [...(prev[topic]?.addedSegments || []), segIndex],
+        },
+      }));
+    },
+    []
+  );
+
+  // Generate a combined bespoke step from segments
+  const handleBespokeGenerate = useCallback(
+    (segments, topic) => {
+      const bespokeStep = generateBespokeGapStep(topic, segments);
+      setPathData((prev) => ({
+        ...prev,
+        path: [...prev.path, bespokeStep],
+      }));
+      setFillResults((prev) => ({
+        ...prev,
+        [topic]: { ...prev[topic], bespokeGenerated: true },
+      }));
+    },
+    []
   );
 
   // Explore callback — resets and pre-fills query
@@ -592,6 +666,10 @@ export default function AdaptivePath() {
                 steps={pathData.path}
                 onFillGap={handleFillGap}
                 onExplore={handleExploreGap}
+                fillResults={fillResults}
+                onAddCourse={handleAddLibraryCourse}
+                onAddSegment={handleAddSegment}
+                onGenerateBespoke={handleBespokeGenerate}
               />
             </aside>
 

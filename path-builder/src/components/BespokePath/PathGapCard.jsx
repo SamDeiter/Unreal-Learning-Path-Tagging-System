@@ -31,6 +31,10 @@ export default function PathGapCard({
   steps,
   onFillGap,
   onExplore,
+  fillResults = {},
+  onAddCourse,
+  onAddSegment,
+  onGenerateBespoke,
 }) {
   const [expanded, setExpanded] = useState(false);
   const [personaGaps, setPersonaGaps] = useState(null);
@@ -128,25 +132,120 @@ export default function PathGapCard({
                       📚 {bs.researchContext}
                     </p>
                   )}
-                  <div className="blind-spot-actions">
-                    <button
-                      className="gap-action-btn fill"
-                      onClick={() => handleFillGap(bs.topic)}
-                      disabled={fillingTopic === bs.topic}
-                      id={`fill-gap-btn-${i}`}
-                    >
-                      {fillingTopic === bs.topic ? "Filling..." : "Fill This Gap"}
-                    </button>
-                    {onExplore && (
-                      <button
-                        className="gap-action-btn explore"
-                        onClick={() => onExplore(bs.topic)}
-                        id={`explore-btn-${i}`}
-                      >
-                        Explore
-                      </button>
-                    )}
-                  </div>
+
+                  {/* ── 3-Tier Fill Results ── */}
+                  {(() => {
+                    const filled = fillResults[bs.topic];
+                    if (!filled) {
+                      // No results yet — show Fill / Explore buttons
+                      return (
+                        <div className="blind-spot-actions">
+                          <button
+                            className="gap-action-btn fill"
+                            onClick={() => handleFillGap(bs.topic)}
+                            disabled={fillingTopic === bs.topic}
+                            id={`fill-gap-btn-${i}`}
+                          >
+                            {fillingTopic === bs.topic ? "Filling..." : "Fill This Gap"}
+                          </button>
+                          {onExplore && (
+                            <button
+                              className="gap-action-btn explore"
+                              onClick={() => onExplore(bs.topic)}
+                              id={`explore-btn-${i}`}
+                            >
+                              Explore
+                            </button>
+                          )}
+                        </div>
+                      );
+                    }
+                    if (filled.error) {
+                      return (
+                        <p className="blind-spot-reason" style={{ color: "#f85149" }}>
+                          Could not generate fill
+                        </p>
+                      );
+                    }
+                    if (filled.source === "library") {
+                      return (
+                        <div className="gap-fill-tier">
+                          <span className="gap-fill-tier-label">📚 Found in course library</span>
+                          {filled.matchedCourses.map((mc) => (
+                            <div key={mc.code} className="gap-fill-match">
+                              <div className="gap-fill-match-info">
+                                <strong>{mc.title || mc.code}</strong>
+                                <span className="gap-fill-sim">
+                                  {Math.round(mc.similarity * 100)}% match
+                                </span>
+                              </div>
+                              {filled.addedCode === mc.code ? (
+                                <span className="gap-fill-added">✅ Added</span>
+                              ) : onAddCourse ? (
+                                <button
+                                  className="gap-action-btn fill"
+                                  onClick={() => onAddCourse(mc, bs.topic)}
+                                >
+                                  ➕ Add
+                                </button>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+                    if (filled.source === "bespoke") {
+                      return (
+                        <div className="gap-fill-tier">
+                          <span className="gap-fill-tier-label">🎬 Video segments found</span>
+                          {filled.segments.slice(0, 3).map((seg, si) => (
+                            <div key={si} className="gap-fill-segment">
+                              <div className="gap-fill-seg-row">
+                                <div className="gap-fill-seg-info">
+                                  <div className="gap-fill-seg-title">{seg.title}</div>
+                                  {seg.videoTitle && (
+                                    <div className="gap-fill-seg-video">from: {seg.videoTitle}</div>
+                                  )}
+                                  <span className="gap-fill-sim">
+                                    {Math.round(seg.similarity * 100)}% relevance
+                                  </span>
+                                </div>
+                                {filled.addedSegments?.includes(si) ? (
+                                  <span className="gap-fill-added">✅</span>
+                                ) : onAddSegment ? (
+                                  <button
+                                    className="gap-action-btn fill"
+                                    onClick={() => onAddSegment(seg, bs.topic, si)}
+                                  >
+                                    ➕
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
+                          ))}
+                          {filled.bespokeGenerated ? (
+                            <span className="gap-fill-added">✅ Bespoke step added</span>
+                          ) : onGenerateBespoke ? (
+                            <button
+                              className="gap-action-btn fill"
+                              onClick={() => onGenerateBespoke(filled.segments, bs.topic)}
+                            >
+                              🎬 Generate Bespoke Step
+                            </button>
+                          ) : null}
+                        </div>
+                      );
+                    }
+                    if (filled.source === "ai" && filled.step) {
+                      return (
+                        <div className="gap-fill-tier">
+                          <span className="gap-fill-tier-label">🤖 AI-generated step</span>
+                          <p className="gap-fill-added">✅ Step "{filled.step.title}" added</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               ))}
             </div>

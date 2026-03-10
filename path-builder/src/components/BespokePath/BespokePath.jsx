@@ -20,7 +20,11 @@ import PathGapCard from "./PathGapCard";
 import PathWizard from "./PathWizard";
 import PathDiff from "./PathDiff";
 import PrereqChain from "./PrereqChain";
-import { generateGapFillStep, buildPrereqChain } from "../../services/pathGapAnalyzer";
+import {
+  generateGapFillStep,
+  generateBespokeGapStep,
+  buildPrereqChain,
+} from "../../services/pathGapAnalyzer";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
 import { generatePathNarration } from "../../services/stepBriefingService";
 import "./BespokePath.css";
@@ -120,6 +124,7 @@ export default function BespokePath() {
   const [prereqChain, setPrereqChain] = useState(null);
   const [struggleBadges, setStruggleBadges] = useState(new Map());
   const [reviewTab, setReviewTab] = useState("checklist"); // "checklist" | "diff" | "dependencies"
+  const [fillResults, setFillResults] = useState({});
 
   const isFollowUp = useRef(false);
 
@@ -143,24 +148,89 @@ export default function BespokePath() {
     });
   }, [pathResult]);
 
-  // Gap fill callback — generates a new step and appends it
+  // Gap fill callback — uses 3-tier waterfall, stores structured results
   const handleFillGap = useCallback(
     async (blind) => {
       if (!pathResult) return;
+      const topic = typeof blind === "string" ? blind : blind.topic || blind;
       try {
-        const newStep = await generateGapFillStep(blind, pathResult.query || query);
-        if (newStep) {
-          setPathResult((prev) => ({
-            ...prev,
-            path: [...prev.path, newStep],
-          }));
-        }
+        const existingCodes = pathResult.path.map((s) => s.segment?.id || s.code).filter(Boolean);
+        const result = await generateGapFillStep(
+          topic,
+          pathResult.query || query,
+          pathResult.path,
+          existingCodes
+        );
+        setFillResults((prev) => ({ ...prev, [topic]: result }));
       } catch (err) {
         console.warn("[BespokePath] Fill gap failed:", err.message);
+        setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
       }
     },
     [pathResult, query]
   );
+
+  // Add a library course match to the path
+  const handleAddLibraryCourse = useCallback((courseMatch, topic) => {
+    setPathResult((prev) => ({
+      ...prev,
+      path: [
+        ...prev.path,
+        {
+          category: "fix",
+          segment: {
+            id: courseMatch.code,
+            title: courseMatch.title,
+            text: courseMatch.description || "",
+            source: "library",
+          },
+        },
+      ],
+    }));
+    setFillResults((prev) => ({
+      ...prev,
+      [topic]: { ...prev[topic], addedCode: courseMatch.code },
+    }));
+  }, []);
+
+  // Add a single video segment to the path
+  const handleAddSegment = useCallback((segment, topic, segIndex) => {
+    setPathResult((prev) => ({
+      ...prev,
+      path: [
+        ...prev.path,
+        {
+          category: "fix",
+          segment: {
+            id: `bespoke-${topic}-${segIndex}`,
+            title: segment.title || `${topic} Segment`,
+            text: segment.text || "",
+            source: segment.videoTitle || "bespoke",
+          },
+        },
+      ],
+    }));
+    setFillResults((prev) => ({
+      ...prev,
+      [topic]: {
+        ...prev[topic],
+        addedSegments: [...(prev[topic]?.addedSegments || []), segIndex],
+      },
+    }));
+  }, []);
+
+  // Generate a combined bespoke step from segments
+  const handleBespokeGenerate = useCallback((segments, topic) => {
+    const bespokeStep = generateBespokeGapStep(topic, segments);
+    setPathResult((prev) => ({
+      ...prev,
+      path: [...prev.path, bespokeStep],
+    }));
+    setFillResults((prev) => ({
+      ...prev,
+      [topic]: { ...prev[topic], bespokeGenerated: true },
+    }));
+  }, []);
 
   // Explore gap callback — opens search for the blind spot topic
   const handleExploreGap = useCallback((blind) => {
@@ -503,6 +573,10 @@ export default function BespokePath() {
                 steps={pathResult.path}
                 onFillGap={handleFillGap}
                 onExplore={handleExploreGap}
+                fillResults={fillResults}
+                onAddCourse={handleAddLibraryCourse}
+                onAddSegment={handleAddSegment}
+                onGenerateBespoke={handleBespokeGenerate}
               />
             </aside>
 
