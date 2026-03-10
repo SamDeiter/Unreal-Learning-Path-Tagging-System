@@ -119,6 +119,29 @@ export default function PathIntelligencePanel() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-sync courseCount + totalMinutes to dashboard storage when courses change
+  useEffect(() => {
+    if (courses.length === 0) return;
+    try {
+      const raw = localStorage.getItem("ue5_saved_paths");
+      if (!raw) return;
+      const paths = JSON.parse(raw);
+      // Find the most recently updated path and sync its stats
+      const sorted = [...paths].sort(
+        (a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
+      );
+      if (sorted.length > 0) {
+        const active = sorted[0];
+        active.courseCount = courses.length;
+        active.totalMinutes = pathStats.totalMinutes || 0;
+        active.updatedAt = new Date().toISOString();
+        localStorage.setItem("ue5_saved_paths", JSON.stringify(paths));
+      }
+    } catch {
+      /* ignore sync errors */
+    }
+  }, [courses.length, pathStats.totalMinutes]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const hasCourses = courses.length > 0;
   const hasGoal = !!learningIntent?.primaryGoal?.trim();
   const hasLevel = !!learningIntent?.skillLevel;
