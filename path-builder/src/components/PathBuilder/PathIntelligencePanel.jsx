@@ -22,6 +22,17 @@ import { downloadScormPackage } from "../../services/scormPackager";
 import PathWizard from "../BespokePath/PathWizard";
 import "./PathIntelligencePanel.css";
 
+const INDUSTRIES = [
+  "All",
+  "General",
+  "Games",
+  "Film & Television",
+  "Architecture",
+  "Simulation",
+  "Automotive",
+  "Media & Entertainment",
+];
+
 // ── Coverage Gauge ─────────────────────────────────────────
 function CoverageGauge({ score }) {
   const radius = 36;
@@ -278,6 +289,35 @@ export default function PathIntelligencePanel() {
             )}
           </div>
 
+          <div className="ip-field">
+            <label>Industry Focus</label>
+            <div className="ip-industry-chips">
+              <button
+                type="button"
+                className={`ip-industry-chip ${!learningIntent.industries?.length ? "selected" : ""}`}
+                onClick={() => handleFieldChange("industries", [])}
+              >
+                All
+              </button>
+              {INDUSTRIES.filter((i) => i !== "All").map((ind) => (
+                <button
+                  key={ind}
+                  type="button"
+                  className={`ip-industry-chip ${learningIntent.industries?.includes(ind) ? "selected" : ""}`}
+                  onClick={() => {
+                    const prev = learningIntent.industries || [];
+                    const next = prev.includes(ind)
+                      ? prev.filter((i) => i !== ind)
+                      : [...prev, ind];
+                    handleFieldChange("industries", next);
+                  }}
+                >
+                  {ind}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="ip-setup-progress">
             <div className="ip-progress-bar">
               <div
@@ -304,7 +344,35 @@ export default function PathIntelligencePanel() {
             <span className="ip-summary-meta">
               {learningIntent.skillLevel} ·{" "}
               {learningIntent.timeBudget === "none" ? "No Limit" : `~${learningIntent.timeBudget}h`}
+              {learningIntent.industries?.length > 0 && (
+                <> · {learningIntent.industries.join(", ")}</>
+              )}
             </span>
+            <div className="ip-industry-chips ip-industry-chips-compact">
+              <button
+                type="button"
+                className={`ip-industry-chip ${!learningIntent.industries?.length ? "selected" : ""}`}
+                onClick={() => handleFieldChange("industries", [])}
+              >
+                All
+              </button>
+              {INDUSTRIES.filter((i) => i !== "All").map((ind) => (
+                <button
+                  key={ind}
+                  type="button"
+                  className={`ip-industry-chip ${learningIntent.industries?.includes(ind) ? "selected" : ""}`}
+                  onClick={() => {
+                    const prev = learningIntent.industries || [];
+                    const next = prev.includes(ind)
+                      ? prev.filter((i) => i !== ind)
+                      : [...prev, ind];
+                    handleFieldChange("industries", next);
+                  }}
+                >
+                  {ind}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Tab Bar */}
