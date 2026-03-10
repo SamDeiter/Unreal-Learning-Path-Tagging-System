@@ -82,7 +82,7 @@ function TagLegend() {
 function AssemblyLine() {
   const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath, pathStats } =
     usePath();
-  const { getCourseSummary, getVideoKeys } = useAugmentationData();
+  useAugmentationData();
 
   // Handle drag start
   const handleDragStart = (e, index) => {
@@ -182,49 +182,6 @@ function AssemblyLine() {
     return classes.join(" ");
   };
 
-  // Render augmentation badge + action for a course
-  const renderAugBadge = (course) => {
-    const aug = getCourseSummary(course.code);
-    if (!aug) return null;
-    const videoKeys = getVideoKeys(course.code);
-    const firstKey = videoKeys[0] || "";
-    const base = import.meta.env.BASE_URL;
-    const needsAug = aug.avgGrade === "D" || aug.avgGrade === "F";
-    return (
-      <>
-        <div className="aug-row">
-          <span
-            className={`aug-badge aug-${aug.avgGrade} aug-clickable`}
-            title={`${aug.avgScore}/55 \u00b7 ${aug.verdict.replace(/_/g, " ")} \u00b7 ${aug.videoCount} videos \u2014 Click to view evaluation`}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (firstKey)
-                window.open(`${base}augmentation_evaluator.html?video=${firstKey}`, "_blank");
-            }}
-          >
-            {aug.avgGrade}
-          </span>
-          <span className="aug-score">{aug.avgScore}/55</span>
-          <div className="aug-bar">
-            <div className="aug-bar-proc" style={{ width: `${aug.avgProcedural}%` }} />
-            <div className="aug-bar-conc" style={{ width: `${aug.avgConceptual}%` }} />
-          </div>
-        </div>
-        {needsAug && firstKey && (
-          <button
-            className="aug-action"
-            title="Open the augmented guided view for this course"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.open(`${base}augmentation_viewer.html?video=${firstKey}`, "_blank");
-            }}
-          >
-            ⚡ View Augmented Guide
-          </button>
-        )}
-      </>
-    );
-  };
 
   return (
     <div className="assembly-line">
@@ -349,9 +306,6 @@ function AssemblyLine() {
                               </button>
                             </div>
 
-                            {/* Augmentation Quality Badge */}
-                            {renderAugBadge(course)}
-
                             {/* Node Content */}
                             <div className="node-content">
                               <div className="node-title-row">
@@ -471,8 +425,6 @@ function AssemblyLine() {
                                 ×
                               </button>
                             </div>
-                            {/* Augmentation Quality Badge */}
-                            {renderAugBadge(course)}
                             <div className="node-content">
                               <div className="node-title-row">
                                 <span className="node-code">{course.code}</span>
