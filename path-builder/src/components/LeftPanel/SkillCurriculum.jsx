@@ -409,7 +409,14 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       learningIntent?.skillLevel === "Beginner" || /\bintro(duction)?\b/i.test(debouncedQuery);
     const UE_INTRO_CODE = "100.01";
 
-    const sorted = [...mergedCourses].sort((a, b) => {
+    // Inject intro course if not already in results (search may not find it)
+    let workingCourses = [...mergedCourses];
+    if (isBeginnerContext && !workingCourses.some((c) => c.code === UE_INTRO_CODE)) {
+      const introCourse = courses.find((c) => c.code === UE_INTRO_CODE);
+      if (introCourse) workingCourses.unshift(introCourse);
+    }
+
+    const sorted = workingCourses.sort((a, b) => {
       // Pin intro course to top for beginners
       if (isBeginnerContext) {
         if (a.code === UE_INTRO_CODE) return -1;
@@ -463,7 +470,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     });
 
     return { tiers, totalCourses: allCourses.length, totalTime, allCourses, learningOutcomes };
-  }, [mergedCourses, pathCourses, timeBudget, debouncedQuery, learningIntent?.skillLevel]);
+  }, [mergedCourses, pathCourses, timeBudget, debouncedQuery, learningIntent?.skillLevel, courses]);
 
   // Reset selection when curriculum changes — start empty, let user choose
   const curriculumKey = curriculum ? curriculum.allCourses.map((c) => c.code).join(",") : "";
