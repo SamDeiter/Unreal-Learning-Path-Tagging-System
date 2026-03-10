@@ -1010,7 +1010,11 @@ export default function PathIntelligencePanel() {
             {activeTab === "review" && (
               <div className="ip-tab-pane">
                 {pathResult ? (
-                  <PathWizard pathResult={pathResult} quiz={quiz} />
+                  <PathWizard
+                    pathResult={pathResult}
+                    gaps={analysis}
+                    onFixClick={() => setActiveTab("coverage")}
+                  />
                 ) : (
                   <div className="ip-empty">
                     <span className="ip-empty-icon">✅</span>

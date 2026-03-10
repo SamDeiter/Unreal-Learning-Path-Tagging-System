@@ -137,7 +137,7 @@ function evaluateChecks(pathResult, gaps) {
   return checks;
 }
 
-export default function PathWizard({ pathResult, gaps }) {
+export default function PathWizard({ pathResult, gaps, onFixClick }) {
   const [signedOff, setSignedOff] = useState(false);
   const [published, setPublished] = useState(false);
   const [scormExporting, setScormExporting] = useState(false);
@@ -215,7 +215,20 @@ export default function PathWizard({ pathResult, gaps }) {
             <div className="wizard-check-content">
               <div className="wizard-check-label">{check.label}</div>
               <div className="wizard-check-detail">{check.detail}</div>
-              {!check.passed && check.fix && <div className="wizard-check-fix">💡 {check.fix}</div>}
+              {!check.passed && check.fix && (
+                <button
+                  className="wizard-check-fix"
+                  style={{
+                    background: "none", border: "none", color: "#f59e0b",
+                    cursor: onFixClick ? "pointer" : "default", padding: 0, fontSize: "inherit",
+                    textAlign: "left",
+                  }}
+                  onClick={() => onFixClick?.(check.id)}
+                  title={onFixClick ? "Click to jump to fix" : undefined}
+                >
+                  💡 {check.fix}{onFixClick ? " →" : ""}
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -234,7 +247,20 @@ export default function PathWizard({ pathResult, gaps }) {
             <div className="wizard-check-content">
               <div className="wizard-check-label">{check.label}</div>
               <div className="wizard-check-detail">{check.detail}</div>
-              {!check.passed && check.fix && <div className="wizard-check-fix">💡 {check.fix}</div>}
+              {!check.passed && check.fix && (
+                <button
+                  className="wizard-check-fix"
+                  style={{
+                    background: "none", border: "none", color: "#f59e0b",
+                    cursor: onFixClick ? "pointer" : "default", padding: 0, fontSize: "inherit",
+                    textAlign: "left",
+                  }}
+                  onClick={() => onFixClick?.(check.id)}
+                  title={onFixClick ? "Click to jump to fix" : undefined}
+                >
+                  💡 {check.fix}{onFixClick ? " →" : ""}
+                </button>
+              )}
             </div>
           </div>
         ))}
