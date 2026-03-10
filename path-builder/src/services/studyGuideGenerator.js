@@ -65,13 +65,29 @@ export function buildContentSummary(courses) {
     const topic = c.tags?.topic || "General";
     topics.add(topic);
 
+    // Build a useful summary from whatever data is available
+    const summary =
+      c.gemini_enriched?.one_sentence_summary ||
+      c.description ||
+      `${c.tags?.level || "Intermediate"} course on ${topic} using ${c.tags?.product || "Unreal Engine"}`;
+
+    // Build outcomes from gemini data, ai_tags, or canonical_tags
+    let outcomes = c.gemini_enriched?.learning_outcomes || [];
+    if (outcomes.length === 0) {
+      const tags = c.ai_tags || c.canonical_tags || [];
+      outcomes = tags.slice(0, 3).map((t) => {
+        const label = typeof t === "string" ? t.replace(/[._]/g, " ") : String(t);
+        return `Understand ${label} concepts in ${topic}`;
+      });
+    }
+
     return {
       code: c.code,
       title: c.title || "Untitled",
       topic,
       level: c.tags?.level || "Intermediate",
-      summary: c.gemini_enriched?.one_sentence_summary || "",
-      outcomes: c.gemini_enriched?.learning_outcomes || [],
+      summary,
+      outcomes,
       videoCount: c.videos?.length || 0,
     };
   });
@@ -126,8 +142,9 @@ export function generateFlashcards(courses) {
   courses.forEach((course) => {
     const topic = course.tags?.topic || "General";
     const level = course.tags?.level || "Intermediate";
+    const product = course.tags?.product || "Unreal Engine";
 
-    // From learning outcomes
+    // From learning outcomes (gemini or generated from tags)
     const outcomes = course.gemini_enriched?.learning_outcomes || [];
     outcomes.forEach((outcome) => {
       cards.push({
@@ -146,6 +163,34 @@ export function generateFlashcards(courses) {
         back: summary,
         topic,
         difficulty: level,
+      });
+    }
+
+    // Fallback: generate cards from ai_tags or canonical_tags
+    if (outcomes.length === 0 && !summary) {
+      const allTags = [
+        ...(course.ai_tags || []),
+        ...(course.canonical_tags || []).map((t) => t.split(".").pop()),
+      ];
+      const uniqueTags = [...new Set(allTags)].filter((t) => t && t.length > 2 && t !== "level");
+
+      // Card: what topic does this course cover?
+      cards.push({
+        front: `What is the main topic of "${course.title}"?`,
+        back: `${topic} — a ${level} course on ${product}`,
+        topic,
+        difficulty: level,
+      });
+
+      // Cards from tag keywords
+      uniqueTags.slice(0, 3).forEach((tag) => {
+        const label = tag.replace(/[._-]/g, " ");
+        cards.push({
+          front: `In the context of ${topic}, what is ${label}?`,
+          back: `${label} is a key concept covered in "${course.title}" (${level})`,
+          topic,
+          difficulty: level,
+        });
       });
     }
   });
@@ -171,7 +216,18 @@ export function generateQuickQuiz(courses, opts = {}) {
 
   courses.forEach((course) => {
     const outcomes = course.gemini_enriched?.learning_outcomes || [];
-    const tags = course.gemini_enriched?.system_tags || course.extracted_tags || [];
+    // Fall back to ai_tags / canonical_tags when system_tags are missing
+    let tags = course.gemini_enriched?.system_tags || course.extracted_tags || [];
+    if (tags.length === 0) {
+      tags = [
+        ...(course.ai_tags || []),
+        ...(course.canonical_tags || []).map((t) => t.split(".").pop()),
+      ].filter((t) => t && t.length > 2 && t !== "level");
+      tags = [...new Set(tags)];
+    }
+
+    const topic = course.tags?.topic || "General";
+    const level = course.tags?.level || "Intermediate";
 
     // Question 1: Topic identification
     if (outcomes.length > 0) {
@@ -183,22 +239,36 @@ export function generateQuickQuiz(courses, opts = {}) {
         courseCode: course.code,
         bloomLevel: "remember",
       });
+    } else if (tags.length >= 2) {
+      // Fallback Q1: identify the course topic
+      const correct = topic;
+      const distractors = ["Animation", "Networking", "Audio Design", "AI Navigation", "Physics"]
+        .filter((d) => d !== correct)
+        .slice(0, 3);
+      const opts = shuffleArray([correct, ...distractors]);
+      questions.push({
+        question: `What is the primary topic of "${course.title}"?`,
+        options: opts,
+        correctIndex: opts.indexOf(correct),
+        explanation: `"${course.title}" is a ${level} course covering ${topic}`,
+        courseCode: course.code,
+        bloomLevel: "remember",
+      });
     }
 
-    // Question 2: Concept application (if we have enough data)
+    // Question 2: Concept application
     if (questionsPerCourse >= 2 && tags.length >= 3) {
-      const topic = course.tags?.topic || tags[0];
+      const correctTag = tags[0].replace(/[._-]/g, " ");
+      const distractorTags = tags.slice(1, 3).map((t) => t.replace(/[._-]/g, " "));
+      const options = shuffleArray([correctTag, ...distractorTags, "Unrelated Concept"]);
       questions.push({
         question: `Which concept is most directly related to ${topic}?`,
-        options: shuffleArray([tags[0], tags[1], tags[2], "Unrelated Concept"]),
-        correctIndex: 0, // Will be wrong after shuffle — fixed below
-        explanation: `${tags[0]} is a core concept in ${topic}`,
+        options,
+        correctIndex: options.indexOf(correctTag),
+        explanation: `${correctTag} is a core concept in ${topic}`,
         courseCode: course.code,
         bloomLevel: "understand",
       });
-      // Fix correct index after shuffle
-      const lastQ = questions[questions.length - 1];
-      lastQ.correctIndex = lastQ.options.indexOf(tags[0]);
     }
   });
 
