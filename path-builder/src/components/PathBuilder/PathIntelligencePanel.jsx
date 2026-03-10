@@ -21,7 +21,9 @@ import {
   enrichGuideWithBloom,
   generateFlashcards,
 } from "../../services/studyGuideGenerator";
-import { downloadScormPackage } from "../../services/scormPackager";
+import { downloadScormPackage, previewScormPackage } from "../../services/scormPackager";
+import { exportScormPackage } from "../../services/scormExportService";
+import { evaluateChecks } from "../../services/pathChecks";
 import PathWizard from "../BespokePath/PathWizard";
 import "./PathIntelligencePanel.css";
 
@@ -62,6 +64,186 @@ function CoverageGauge({ score }) {
         <span className="ip-gauge-pct">{pct}%</span>
         <span className="ip-gauge-sub">coverage</span>
       </div>
+    </div>
+  );
+}
+
+// ── ExportPanel — consolidated sign-off, readiness, download, preview, publish ──
+function ExportPanel({
+  pathResult,
+  analysis,
+  courses: _courses,
+  learningIntent,
+  studyGuide: _studyGuide,
+  flashcards: _flashcards,
+  exportingScorm,
+  setExportingScorm,
+}) {
+  const [signedOff, setSignedOff] = useState(false);
+  const [published, setPublished] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [scormExported, setScormExported] = useState(false);
+  const [scormError, setScormError] = useState(null);
+
+  const checks = useMemo(() => evaluateChecks(pathResult, analysis), [pathResult, analysis]);
+  const passedCount = checks.filter((c) => c.passed).length;
+  const totalCount = checks.length;
+  const allAutoChecksPassed = passedCount === totalCount;
+  const readyToPublish = allAutoChecksPassed && signedOff;
+
+  const scormConfig = useMemo(() => {
+    const path = pathResult?.path || [];
+    return {
+      title: learningIntent?.primaryGoal || "Learning Path",
+      description: learningIntent?.context || "",
+      modules: path.map((step, idx) => ({
+        title: step.title || `Step ${idx + 1}`,
+        htmlContent: `
+          <h2>${step.title || `Step ${idx + 1}`}</h2>
+          ${step.description ? `<p>${step.description}</p>` : ""}
+          ${step.segment?.videoId ? `<p><strong>Video:</strong> ${step.segment.videoId}</p>` : ""}
+          ${step.category ? `<p><strong>Type:</strong> ${step.category}</p>` : ""}
+          ${step.segment?.startTime != null ? `<p><strong>Segment:</strong> ${Math.round(step.segment.startTime / 60)}:${String(Math.round(step.segment.startTime % 60)).padStart(2, "0")} – ${Math.round(step.segment.endTime / 60)}:${String(Math.round(step.segment.endTime % 60)).padStart(2, "0")}</p>` : ""}
+        `,
+      })),
+    };
+  }, [pathResult, learningIntent]);
+
+  const handleDownload = async () => {
+    setExportingScorm(true);
+    setScormError(null);
+    try {
+      await exportScormPackage(pathResult, { includeQuiz: true });
+      setScormExported(true);
+    } catch (err) {
+      console.error("SCORM export failed:", err);
+      setScormError(err.message || "Export failed");
+    } finally {
+      setExportingScorm(false);
+    }
+  };
+
+  const handlePreview = async () => {
+    setPreviewing(true);
+    try {
+      await previewScormPackage(scormConfig);
+    } catch (err) {
+      console.error("Preview failed:", err);
+    } finally {
+      setPreviewing(false);
+    }
+  };
+
+  const handlePublish = () => {
+    if (!readyToPublish) return;
+    setPublished(true);
+  };
+
+  return (
+    <div className="export-panel">
+      {/* ── Readiness Summary ── */}
+      <div className="export-section" style={{ background: "rgba(88,166,255,0.05)", borderRadius: 8, padding: "0.75rem 1rem", marginBottom: "0.75rem" }}>
+        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "#8b949e", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          📋 Readiness
+        </h4>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+          <span style={{ fontSize: "1.1rem" }}>{allAutoChecksPassed ? "✅" : "⚠️"}</span>
+          <span style={{ fontSize: "0.9rem", color: allAutoChecksPassed ? "#3fb950" : "#d29922" }}>
+            {passedCount}/{totalCount} auto-checks passed
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ fontSize: "1.1rem" }}>{signedOff ? "✅" : "⬜"}</span>
+          <span style={{ fontSize: "0.9rem", color: signedOff ? "#3fb950" : "#8b949e" }}>
+            Instructor sign-off
+          </span>
+        </div>
+      </div>
+
+      {/* ── Instructor Sign-off Toggle ── */}
+      <div
+        className="wizard-manual-toggle"
+        onClick={() => setSignedOff(!signedOff)}
+        role="switch"
+        aria-checked={signedOff}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setSignedOff(!signedOff);
+          }
+        }}
+        id="instructor-signoff-toggle"
+        style={{ marginBottom: "0.75rem", padding: "0.5rem 0.75rem", borderRadius: 8, cursor: "pointer", display: "flex", gap: "0.75rem", alignItems: "center", background: signedOff ? "rgba(63,185,80,0.08)" : "rgba(139,148,158,0.06)", border: `1px solid ${signedOff ? "#3fb95040" : "#30363d"}` }}
+      >
+        <div
+          style={{ width: 36, height: 20, borderRadius: 10, background: signedOff ? "#3fb950" : "#484f58", position: "relative", transition: "background 0.2s", flexShrink: 0 }}
+        >
+          <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#fff", position: "absolute", top: 2, left: signedOff ? 18 : 2, transition: "left 0.2s" }} />
+        </div>
+        <div>
+          <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#c9d1d9" }}>Instructor Sign-off</div>
+          <div style={{ fontSize: "0.75rem", color: "#8b949e" }}>
+            I've reviewed the path and confirm it meets quality standards
+          </div>
+        </div>
+      </div>
+
+      {/* ── Action Buttons ── */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        {/* Preview */}
+        <button
+          className="export-action-btn"
+          onClick={handlePreview}
+          disabled={previewing}
+          id="export-preview-btn"
+          style={{ background: "linear-gradient(135deg, #8b5cf6, #6d28d9)", color: "#fff", border: "none", padding: "0.6rem 1rem", borderRadius: 8, cursor: "pointer", fontSize: "0.85rem", fontWeight: 600, opacity: previewing ? 0.7 : 1, transition: "opacity 0.2s" }}
+        >
+          {previewing ? "⏳ Building preview..." : "👁️ Preview SCORM (Learner View)"}
+        </button>
+
+        {/* Download */}
+        <button
+          className="export-action-btn scorm-btn"
+          onClick={handleDownload}
+          disabled={exportingScorm}
+          id="export-download-btn"
+          style={{ background: scormExported ? "linear-gradient(135deg, #10b981, #059669)" : "linear-gradient(135deg, #6366f1, #4f46e5)", color: "#fff", border: "none", padding: "0.6rem 1rem", borderRadius: 8, cursor: "pointer", fontSize: "0.85rem", fontWeight: 600, opacity: exportingScorm ? 0.7 : 1, transition: "all 0.2s" }}
+        >
+          {exportingScorm ? "⏳ Packaging..." : scormExported ? "✅ Downloaded!" : "📦 Download SCORM 1.2"}
+        </button>
+
+        {/* Publish */}
+        {published ? (
+          <div style={{ textAlign: "center", padding: "0.75rem", background: "rgba(63,185,80,0.1)", borderRadius: 8, color: "#3fb950", fontWeight: 600, fontSize: "0.9rem" }}>
+            🎉 Path published successfully!
+          </div>
+        ) : (
+          <>
+            <button
+              className="export-action-btn"
+              onClick={handlePublish}
+              disabled={!readyToPublish}
+              id="export-publish-btn"
+              style={{ background: readyToPublish ? "linear-gradient(135deg, #238636, #2ea043)" : "#21262d", color: readyToPublish ? "#fff" : "#484f58", border: readyToPublish ? "none" : "1px solid #30363d", padding: "0.6rem 1rem", borderRadius: 8, cursor: readyToPublish ? "pointer" : "not-allowed", fontSize: "0.85rem", fontWeight: 600, transition: "all 0.2s" }}
+            >
+              {readyToPublish ? "🚀 Publish Path" : "🔒 Publish Path"}
+            </button>
+            {!readyToPublish && (
+              <p style={{ textAlign: "center", fontSize: "0.75rem", color: "#8b949e", margin: "0.25rem 0 0" }}>
+                {!allAutoChecksPassed ? "Pass all checks on the Review tab first" : "Toggle sign-off above to enable publishing"}
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Error display */}
+      {scormError && (
+        <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#f43f5e", marginTop: "0.5rem" }}>
+          ❌ {scormError}
+        </p>
+      )}
     </div>
   );
 }
@@ -1132,33 +1314,16 @@ export default function PathIntelligencePanel() {
             {activeTab === "export" && (
               <div className="ip-tab-pane">
                 {pathResult ? (
-                  <div className="export-panel">
-                    {/* ── SCORM Export ────────────────── */}
-                    <div className="export-section">
-                      <button
-                        className="export-action-btn scorm-btn"
-                        disabled={exportingScorm}
-                        onClick={async () => {
-                          setExportingScorm(true);
-                          try {
-                            await downloadScormPackage({
-                              title: learningIntent?.primaryGoal || "Learning Path",
-                              courses,
-                              studyGuide,
-                              flashcards,
-                              quickQuiz,
-                            });
-                          } catch (err) {
-                            console.error("SCORM export failed:", err);
-                          } finally {
-                            setExportingScorm(false);
-                          }
-                        }}
-                      >
-                        {exportingScorm ? "⏳ Packaging..." : "📦 Download SCORM Package"}
-                      </button>
-                    </div>
-                  </div>
+                  <ExportPanel
+                    pathResult={pathResult}
+                    analysis={analysis}
+                    courses={courses}
+                    learningIntent={learningIntent}
+                    studyGuide={studyGuide}
+                    flashcards={flashcards}
+                    exportingScorm={exportingScorm}
+                    setExportingScorm={setExportingScorm}
+                  />
                 ) : (
                   <div className="ip-empty">
                     <p>Add courses and set a goal to enable export.</p>

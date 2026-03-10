@@ -219,6 +219,101 @@ export async function downloadScormPackage(config, filename) {
   return { success: true, filename: name };
 }
 
+/**
+ * Preview a SCORM package in a new browser tab.
+ * Builds the package in-memory, extracts SCO HTML files,
+ * and renders them in an iframe-based viewer with navigation.
+ *
+ * @param {Object} config — Same as buildScormPackage
+ */
+export async function previewScormPackage(config) {
+  const { title, modules } = config;
+
+  // Generate SCO HTML pages directly (skip zip round-trip)
+  const scos = modules.map((mod, _idx) => ({
+    title: mod.title,
+    html: generateScoHtml({ title: mod.title, content: mod.htmlContent }),
+  }));
+
+  // Build a viewer HTML page with sidebar nav + iframe
+  const viewerHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SCORM Preview — ${escapeXml(title)}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; display: flex; height: 100vh; background: #0d1117; color: #c9d1d9; }
+    .sidebar { width: 280px; background: #161b22; border-right: 1px solid #30363d; overflow-y: auto; padding: 1rem 0; flex-shrink: 0; }
+    .sidebar h2 { padding: 0 1rem 0.75rem; font-size: 0.85rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; }
+    .sidebar .title { padding: 0 1rem 1rem; font-size: 1.1rem; color: #f0f6fc; border-bottom: 1px solid #30363d; margin-bottom: 0.5rem; }
+    .nav-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; cursor: pointer; transition: background 0.15s; font-size: 0.9rem; }
+    .nav-item:hover { background: #21262d; }
+    .nav-item.active { background: #1f6feb22; border-left: 3px solid #58a6ff; color: #58a6ff; }
+    .nav-item .num { width: 22px; height: 22px; border-radius: 50%; background: #30363d; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; }
+    .nav-item.active .num { background: #1f6feb; color: #fff; }
+    .content { flex: 1; display: flex; flex-direction: column; }
+    .toolbar { height: 42px; background: #161b22; border-bottom: 1px solid #30363d; display: flex; align-items: center; padding: 0 1rem; gap: 0.75rem; font-size: 0.85rem; color: #8b949e; }
+    .toolbar .badge { background: #238636; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
+    iframe { flex: 1; border: none; background: #fff; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="title">${escapeXml(title)}</div>
+    <h2>📦 SCORM Preview</h2>
+    <div id="nav"></div>
+  </div>
+  <div class="content">
+    <div class="toolbar">
+      <span class="badge">SCORM 1.2</span>
+      <span>Learner Preview — <span id="current-title"></span></span>
+    </div>
+    <iframe id="viewer"></iframe>
+  </div>
+  <script>
+    const scos = ${JSON.stringify(scos.map((s) => ({ title: s.title, html: s.html })))};
+    const nav = document.getElementById('nav');
+    const viewer = document.getElementById('viewer');
+    const currentTitle = document.getElementById('current-title');
+    let activeIdx = 0;
+
+    function loadSco(idx) {
+      activeIdx = idx;
+      const blob = new Blob([scos[idx].html], { type: 'text/html' });
+      viewer.src = URL.createObjectURL(blob);
+      currentTitle.textContent = scos[idx].title;
+      document.querySelectorAll('.nav-item').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+    }
+
+    scos.forEach((sco, idx) => {
+      const item = document.createElement('div');
+      item.className = 'nav-item' + (idx === 0 ? ' active' : '');
+      item.innerHTML = '<span class="num">' + (idx + 1) + '</span><span>' + sco.title + '</span>';
+      item.onclick = () => loadSco(idx);
+      nav.appendChild(item);
+    });
+
+    // Listen for SCO navigation messages
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'sco_complete' && activeIdx < scos.length - 1) loadSco(activeIdx + 1);
+      if (e.data?.type === 'sco_previous' && activeIdx > 0) loadSco(activeIdx - 1);
+    });
+
+    if (scos.length > 0) loadSco(0);
+  </script>
+</body>
+</html>`;
+
+  // Open in new tab
+  const blob = new Blob([viewerHtml], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
+}
+
 // ── Helpers ────────────────────────────────────────────────────────
 
 /**

@@ -1,8 +1,8 @@
 /**
- * PathWizard — Completeness checklist for learning path quality
+ * PathWizard — Read-only completeness checklist for learning path quality
  *
- * Auto-evaluates content checks, structural checks, and provides
- * a manual instructor sign-off toggle. Progress bar + gated Publish.
+ * Auto-evaluates content checks and structural checks.
+ * Sign-off, Publish, and Export controls are in the Export tab.
  *
  * Content Checks:
  *   - Has prerequisites (foundation steps)
@@ -15,161 +15,20 @@
  *   - Step count ≤ 7 (cognitive load)
  *   - No video > 6 min (engagement cliff)
  *   - Has bridge narrations (connections)
- *
- * Manual:
- *   - Instructor sign-off
  */
 
-import { useState, useMemo } from "react";
-import { exportScormPackage } from "../../services/scormExportService";
-
-/**
- * Run all checks and return results array.
- * Each check: { id, label, passed, detail, fix?, group }
- */
-function evaluateChecks(pathResult, gaps) {
-  const path = pathResult?.path || [];
-  const bridges = pathResult?.bridges || [];
-  const checks = [];
-
-  // ── Content Checks ──────────────────────────────────────
-  checks.push({
-    id: "has-prerequisites",
-    label: "Has prerequisite steps",
-    passed: path.some((s) => s.category === "foundation"),
-    detail: `${path.filter((s) => s.category === "foundation").length} foundation step(s)`,
-    fix: !path.some((s) => s.category === "foundation")
-      ? "Go to the Gaps tab and add a Beginner-level foundation step"
-      : null,
-    group: "content",
-  });
-
-  checks.push({
-    id: "has-core",
-    label: "Has core solution steps",
-    passed: path.some((s) => s.category === "fix"),
-    detail: `${path.filter((s) => s.category === "fix").length} fix step(s)`,
-    fix: !path.some((s) => s.category === "fix")
-      ? "Go to the Gaps tab and use Fill This Gap to add a core solution step"
-      : null,
-    group: "content",
-  });
-
-  checks.push({
-    id: "has-practice",
-    label: "Has practice / transfer steps",
-    passed: path.some((s) => s.category === "transfer"),
-    detail: `${path.filter((s) => s.category === "transfer").length} transfer step(s)`,
-    fix: !path.some((s) => s.category === "transfer")
-      ? "Go to the Gaps tab and add a hands-on exercise or project step"
-      : null,
-    group: "content",
-  });
-
-  const highGaps = (gaps?.blindSpots || []).filter((b) => b.severity === "high");
-  checks.push({
-    id: "no-high-gaps",
-    label: "No high-severity gaps",
-    passed: highGaps.length === 0,
-    detail:
-      highGaps.length === 0
-        ? "No critical blind spots detected"
-        : `${highGaps.length} high-severity gap(s): ${highGaps.map((g) => g.topic).join(", ")}`,
-    fix: highGaps.length > 0 ? "Go to the Gaps tab and use Fill This Gap for each critical gap" : null,
-    group: "content",
-  });
-
-  const coverageScore = gaps?.coverageScore ?? 1;
-  checks.push({
-    id: "coverage-threshold",
-    label: "Coverage ≥ 70%",
-    passed: coverageScore >= 0.7,
-    detail: `${Math.round(coverageScore * 100)}% corpus coverage`,
-    fix: coverageScore < 0.7 ? "Go to the Gaps tab — fill gaps or add more steps to improve coverage" : null,
-    group: "content",
-  });
-
-  // ── Structural Checks ──────────────────────────────────
-  checks.push({
-    id: "step-count",
-    label: "Step count ≤ 7",
-    passed: path.length <= 7,
-    detail: `${path.length} step(s) — ${path.length <= 7 ? "within cognitive load limit" : "exceeds 5-9 chunk capacity"}`,
-    fix: path.length > 7 ? "Consider consolidating or removing lower-priority steps" : null,
-    group: "structure",
-  });
-
-  // Video length check — best effort (check if segment has duration data)
-  const longVideos = path.filter((s) => {
-    const duration = s.segment?.duration || s.segment?.durationSeconds || 0;
-    return duration > 360; // 6 minutes = 360 seconds
-  });
-  checks.push({
-    id: "no-long-videos",
-    label: "No video step > 6 minutes",
-    passed: longVideos.length === 0,
-    detail:
-      longVideos.length === 0
-        ? "All video segments within engagement window"
-        : `${longVideos.length} step(s) exceed 6-minute engagement cliff`,
-    fix:
-      longVideos.length > 0
-        ? "Consider splitting long videos into shorter segments (3-5 min)"
-        : null,
-    group: "structure",
-  });
-
-  checks.push({
-    id: "has-bridges",
-    label: "Has bridge narrations",
-    passed: bridges.length > 0 && bridges.some((b) => b.text && b.text.length > 0),
-    detail:
-      bridges.length > 0
-        ? `${bridges.filter((b) => b.text).length} bridge narration(s)`
-        : "No bridge narrations generated",
-    fix:
-      bridges.length === 0 || !bridges.some((b) => b.text)
-        ? "Bridge narrations help connect steps — try regenerating the path"
-        : null,
-    group: "structure",
-  });
-
-  return checks;
-}
+import { useMemo } from "react";
+import { evaluateChecks } from "../../services/pathChecks";
 
 export default function PathWizard({ pathResult, gaps, onFixClick }) {
-  const [signedOff, setSignedOff] = useState(false);
-  const [published, setPublished] = useState(false);
-  const [scormExporting, setScormExporting] = useState(false);
-  const [scormExported, setScormExported] = useState(false);
-  const [scormError, setScormError] = useState(null);
-
   const checks = useMemo(() => evaluateChecks(pathResult, gaps), [pathResult, gaps]);
 
   const contentChecks = checks.filter((c) => c.group === "content");
   const structureChecks = checks.filter((c) => c.group === "structure");
-  const passedCount = checks.filter((c) => c.passed).length + (signedOff ? 1 : 0);
-  const totalCount = checks.length + 1; // +1 for sign-off
+  const passedCount = checks.filter((c) => c.passed).length;
+  const totalCount = checks.length;
   const allPassed = passedCount === totalCount;
-  const progressPct = Math.round((passedCount / totalCount) * 100);
-
-  const handlePublish = () => {
-    if (!allPassed) return;
-    setPublished(true);
-  };
-
-  const handleScormExport = async () => {
-    setScormExporting(true);
-    setScormError(null);
-    try {
-      await exportScormPackage(pathResult, { includeQuiz: true });
-      setScormExported(true);
-    } catch (err) {
-      setScormError(err.message || "Export failed");
-    } finally {
-      setScormExporting(false);
-    }
-  };
+  const progressPct = totalCount > 0 ? Math.round((passedCount / totalCount) * 100) : 0;
 
   if (!pathResult) return null;
 
@@ -264,82 +123,6 @@ export default function PathWizard({ pathResult, gaps, onFixClick }) {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Manual Sign-off */}
-      <div className="wizard-group">
-        <h3 className="wizard-group-title">Manual Review</h3>
-        <div
-          className="wizard-manual-toggle"
-          onClick={() => setSignedOff(!signedOff)}
-          role="switch"
-          aria-checked={signedOff}
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setSignedOff(!signedOff);
-            }
-          }}
-          id="instructor-signoff-toggle"
-        >
-          <div className={`wizard-toggle-switch ${signedOff ? "on" : ""}`} />
-          <div>
-            <div className="wizard-toggle-label">Instructor Sign-off</div>
-            <div className="wizard-toggle-desc">
-              I have reviewed the path content and confirm it meets quality standards
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Publish + SCORM Export */}
-      <div className="wizard-publish-area" id="wizard-publish-area">
-        {published ? (
-          <div className="wizard-success-toast" id="publish-success-toast">
-            🎉 Path published successfully!
-          </div>
-        ) : (
-          <>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-              <button
-                className={`wizard-publish-btn ${allPassed ? "ready" : "locked"}`}
-                onClick={handlePublish}
-                disabled={!allPassed}
-                id="wizard-publish-btn"
-              >
-                {allPassed ? "🚀 Publish Path" : "🔒 Publish Path"}
-              </button>
-              <button
-                className="wizard-publish-btn ready"
-                onClick={handleScormExport}
-                disabled={scormExporting}
-                id="wizard-scorm-btn"
-                style={{
-                  background: scormExported
-                    ? "linear-gradient(135deg, #10b981, #059669)"
-                    : "linear-gradient(135deg, #6366f1, #4f46e5)",
-                }}
-              >
-                {scormExporting
-                  ? "⏳ Generating..."
-                  : scormExported
-                    ? "✅ Downloaded!"
-                    : "📦 Export SCORM 1.2"}
-              </button>
-            </div>
-            {!allPassed && (
-              <p className="wizard-publish-hint">
-                Complete all checks and sign off to enable publishing
-              </p>
-            )}
-            {scormError && (
-              <p className="wizard-publish-hint" style={{ color: "#f43f5e" }}>
-                ❌ {scormError}
-              </p>
-            )}
-          </>
-        )}
       </div>
     </div>
   );
