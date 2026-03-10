@@ -113,7 +113,7 @@ function ExportPanel({
       // Enrich path steps with video data from courses before preview
       const enrichedResult = { ...pathResult };
       if (pathResult?.path && courses?.length) {
-        console.debug("[SCORM Preview] Enriching steps. courses:", courses.length, "steps:", pathResult.path.length);
+
         enrichedResult.path = pathResult.path.map((step, i) => {
           const seg = step.segment || {};
           // Already has a usable video reference? Skip enrichment
