@@ -665,19 +665,8 @@ export default function AdaptivePath() {
                 </select>
               </div>
 
-              {/* Gap Analysis Card — below voice selector */}
-              <PathGapCard
-                gaps={pathData.gaps}
-                communityPainPoints={pathData.communityPainPoints}
-                query={pathData.query || query}
-                steps={pathData.path}
-                onFillGap={handleFillGap}
-                onExplore={handleExploreGap}
-                fillResults={fillResults}
-                onAddCourse={handleAddLibraryCourse}
-                onAddSegment={handleAddSegment}
-                onGenerateBespoke={handleBespokeGenerate}
-              />
+              {/* Gap Analysis Card removed — gaps are now auto-filled
+                 into the path by the pipeline (Stage 3.5) */}
             </aside>
 
             {/* Main Content Area */}
