@@ -243,6 +243,25 @@ export async function previewScormPackage(pathResult) {
     const bridge = bridges[idx] || null;
     const bridgeText = bridge?.text || bridge?.narration || "";
 
+    // Extract video embed URL (Google Drive or YouTube)
+    const videoUrl = step.segment?.videoUrl || step.segment?.url || "";
+    let driveId = null;
+    let youtubeId = null;
+    if (videoUrl) {
+      // Google Drive: extract file ID from /file/d/{id}/ or ?id={id}
+      const driveMatch = videoUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || videoUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (driveMatch) driveId = driveMatch[1];
+      // YouTube: extract video ID
+      try {
+        const vUrl = new URL(videoUrl);
+        if (vUrl.hostname.includes("youtube.com")) youtubeId = vUrl.searchParams.get("v");
+        else if (vUrl.hostname.includes("youtu.be")) youtubeId = vUrl.pathname.slice(1);
+      } catch { /* not a valid URL */ }
+    }
+    const startSec = Math.round(step.segment?.startTime || 0);
+    const endSec = Math.round(step.segment?.endTime || 0);
+    const videoTitle = step.segment?.videoTitle || "";
+
     // Category CSS class
     const catLower = category.toLowerCase();
     const catClass = catLower.includes("foundation") ? "cat-foundation"
@@ -276,12 +295,49 @@ export async function previewScormPackage(pathResult) {
     .nav-btn.secondary { background: #30363d; color: var(--text); }
     .nav-btn:hover { opacity: 0.9; }
     .breadcrumb { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; }
+    .video-section { margin: 20px 0; }
+    .video-section h2 { font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .video-embed { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 8px; overflow: hidden; background: #000; }
+    .video-embed iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+    .video-meta { display: flex; gap: 16px; align-items: center; margin-top: 8px; font-size: 0.8rem; color: var(--text-secondary); }
+    .video-meta a { color: var(--accent); text-decoration: none; }
+    .video-meta a:hover { text-decoration: underline; }
+    .timestamp-badge { background: rgba(88, 166, 255, 0.1); padding: 2px 8px; border-radius: 4px; font-family: monospace; }
   </style>
 </head>
 <body>
   <p class="breadcrumb">${escapeXml(pathTitle)} — Step ${idx + 1} of ${steps.length}</p>
   <h1>${escapeXml(title)}</h1>
   ${bridgeText ? `<div class="bridge-box"><strong>Connection:</strong> ${escapeXml(bridgeText)}</div>` : ""}
+  \${(() => {
+    if (driveId) {
+      return \`<div class="video-section">
+        <h2>🎬 Video Reference</h2>
+        <div class="video-embed">
+          <iframe src="https://drive.google.com/file/d/\${driveId}/preview" allow="autoplay" allowfullscreen></iframe>
+        </div>
+        <div class="video-meta">
+          \${videoTitle ? \`<span>\${escapeXml(videoTitle)}</span>\` : ""}
+          \${startSec || endSec ? \`<span class="timestamp-badge">⏱ \${Math.floor(startSec/60)}:\${String(startSec%60).padStart(2,'0')} – \${Math.floor(endSec/60)}:\${String(endSec%60).padStart(2,'0')}</span>\` : ""}
+          <a href="https://drive.google.com/file/d/\${driveId}/view" target="_blank" rel="noopener noreferrer">Open in Drive ↗</a>
+        </div>
+      </div>\`;
+    } else if (youtubeId) {
+      const startParam = startSec ? \`&start=\${startSec}\` : "";
+      return \`<div class="video-section">
+        <h2>🎬 Video Reference</h2>
+        <div class="video-embed">
+          <iframe src="https://www.youtube-nocookie.com/embed/\${youtubeId}?rel=0&modestbranding=1\${startParam}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="video-meta">
+          \${videoTitle ? \`<span>\${escapeXml(videoTitle)}</span>\` : ""}
+          \${startSec || endSec ? \`<span class="timestamp-badge">⏱ \${Math.floor(startSec/60)}:\${String(startSec%60).padStart(2,'0')} – \${Math.floor(endSec/60)}:\${String(endSec%60).padStart(2,'0')}</span>\` : ""}
+          <a href="https://www.youtube.com/watch?v=\${youtubeId}\${startSec ? '&t=' + startSec : ''}" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a>
+        </div>
+      </div>\`;
+    }
+    return "";
+  })()}
   <div class="step-card">
     <div class="step-meta">
       <span class="category-badge ${catClass}">${escapeXml(category)}</span>
