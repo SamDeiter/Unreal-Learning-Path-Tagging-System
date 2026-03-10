@@ -236,27 +236,7 @@ export default function PathStep({
       <header className="step-header">
         <div className="badge-container">
           <span className={`category-badge category-${category}`}>{category.toUpperCase()}</span>
-          {/* Trust badge — visual indicator of content verification status */}
-          {segment.type !== "ai_generated" ? (
-            <span className="trust-badge trust-corpus" title="Matched from course corpus">
-              <span className="trust-dot trust-dot-green"></span>
-            </span>
-          ) : segment.corpusVerified ? (
-            <span
-              className="trust-badge trust-corpus-verified"
-              title={`Matches official content: ${segment.corpusMatch?.videoTitle || ""}`}
-            >
-              <span className="trust-dot trust-dot-yellow-green"></span> Corpus Match
-            </span>
-          ) : segment.sources && segment.sources.length > 0 ? (
-            <span className="trust-badge trust-grounded" title="Verified via Google Search">
-              <span className="trust-dot trust-dot-blue"></span> Grounded
-            </span>
-          ) : (
-            <span className="trust-badge trust-unverified" title="AI-generated, not verified">
-              <span className="trust-dot trust-dot-amber"></span> AI
-            </span>
-          )}
+
           {/* Community struggle badge */}
           {struggleBadge && (
             <span
