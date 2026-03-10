@@ -1110,7 +1110,14 @@ export default function PathIntelligencePanel() {
                   <PathWizard
                     pathResult={pathResult}
                     gaps={analysis}
-                    onFixClick={() => setActiveTab("coverage")}
+                    onFixClick={(checkId) => {
+                      // Content checks → switch to Gaps tab where Fill actions live
+                      const contentChecks = ["has-prerequisites", "has-core", "has-practice", "no-high-gaps", "coverage-threshold"];
+                      if (contentChecks.includes(checkId)) {
+                        setActiveTab("gaps");
+                      }
+                      // Structural checks are hint-only
+                    }}
                   />
                 ) : (
                   <div className="ip-empty">
