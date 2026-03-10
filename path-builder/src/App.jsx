@@ -526,42 +526,7 @@ function App() {
                   </div>
                 )}
                 {activeTab === "builder" && builderView === "editor" && (
-                  <div
-                    className={`builder-layout ${isMobile ? "builder-mobile" : ""}`}
-                    style={{ position: "relative" }}
-                  >
-                    {/* Back to dashboard button */}
-                    <button
-                      className="builder-back-btn"
-                      onClick={() => setBuilderView("dashboard")}
-                      title="Back to Learning Paths Dashboard"
-                      style={{
-                        position: "fixed",
-                        top: 12,
-                        left: isMobile ? 12 : 310,
-                        zIndex: 50,
-                        background: "var(--surface-elevated, #21262d)",
-                        border: "1px solid var(--border, #30363d)",
-                        color: "var(--text-primary, #e6edf3)",
-                        borderRadius: 8,
-                        padding: "6px 14px",
-                        fontSize: "0.82rem",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                        transition: "background 0.15s ease",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = "var(--surface-hover, #30363d)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "var(--surface-elevated, #21262d)")
-                      }
-                    >
-                      ← Learning Paths
-                    </button>
+                  <div className={`builder-layout ${isMobile ? "builder-mobile" : ""}`}>
                     {/* Left: Input Panel — hidden on mobile */}
                     {!isMobile && (
                       <aside className="library-panel">
@@ -569,6 +534,7 @@ function App() {
                           courses={courses}
                           preSelectedSkill={preSelectedSkill}
                           onSkillUsed={() => setPreSelectedSkill(null)}
+                          onBackToDashboard={() => setBuilderView("dashboard")}
                         />
                       </aside>
                     )}

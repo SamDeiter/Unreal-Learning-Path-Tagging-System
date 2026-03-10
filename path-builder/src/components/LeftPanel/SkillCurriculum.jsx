@@ -181,10 +181,10 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
   // Auto-populate search when preSelectedSkill changes (from Analytics insights)
   useEffect(() => {
     if (preSelectedSkill) {
-      setSearchQuery(preSelectedSkill);
+      updateSearch(preSelectedSkill);
       if (onSkillUsed) onSkillUsed(); // Clear after use
     }
-  }, [preSelectedSkill, onSkillUsed]);
+  }, [preSelectedSkill, onSkillUsed, updateSearch]);
 
   // Get all unique skills for autocomplete
   const allSkills = useMemo(() => {
