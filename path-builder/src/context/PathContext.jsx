@@ -24,24 +24,32 @@ const ACTIONS = {
 // Reducer for path state management
 function pathReducer(state, action) {
   switch (action.type) {
-    case ACTIONS.ADD_COURSE:
+    case ACTIONS.ADD_COURSE: {
       // Don't add duplicates
       if (state.courses.find((c) => c.code === action.payload.code)) {
         return state;
       }
+      // Auto-categorize role from level if not explicitly set
+      const autoRole = (() => {
+        if (action.payload.role) return action.payload.role;
+        const level = action.payload.tags?.level;
+        if (level === "Beginner" || level === "Foundation") return "Prerequisite";
+        if (level === "Advanced") return "Supplemental";
+        return "Core";
+      })();
       return {
         ...state,
         courses: [
           ...state.courses,
           {
             ...action.payload,
-            // Default metadata
-            role: action.payload.role || "Core",
+            role: autoRole,
             weight: action.payload.weight || "Medium",
             why: action.payload.why || "Selected from library",
           },
         ],
       };
+    }
 
     case ACTIONS.REMOVE_COURSE:
       return {

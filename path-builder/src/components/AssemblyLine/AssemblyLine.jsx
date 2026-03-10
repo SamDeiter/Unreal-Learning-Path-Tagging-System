@@ -450,7 +450,18 @@ function AssemblyLine() {
             <div className="connector-vertical">
               <div className="connector-line-v"></div>
             </div>
-            <div className="path-item add-more">
+            <div
+              className="path-item add-more"
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                const searchInput = document.querySelector(".sc-search-input");
+                if (searchInput) {
+                  searchInput.focus();
+                  searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+              }}
+              title="Click to search for more courses"
+            >
               <div className="add-node">
                 <span>+</span>
                 <span className="add-text">Add More</span>
