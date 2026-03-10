@@ -20,12 +20,6 @@ import { findCachedPath, cachePath } from "../../services/pathCacheService";
 import { trackSessionCompleted } from "../../services/analyticsService";
 import PathStep from "../BespokePath/PathStep";
 import QuizEngine from "../BespokePath/QuizEngine";
-import PathGapCard from "../BespokePath/PathGapCard";
-import PathWizard from "../BespokePath/PathWizard";
-import PathDiff from "../BespokePath/PathDiff";
-import PrereqChain from "../BespokePath/PrereqChain";
-import { generateGapFillStep, generateBespokeGapStep, buildPrereqChain } from "../../services/pathGapAnalyzer";
-import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
 
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
@@ -300,109 +294,8 @@ export default function AdaptivePath() {
   }, [expandedStep, pathData]);
 
   // 3-tier gap fill state
-  const [fillResults, setFillResults] = useState({});
-
-  // Gap fill callback — uses 3-tier waterfall, stores structured results
-  const handleFillGap = useCallback(
-    async (topic) => {
-      if (!pathData) return;
-      const topicStr = typeof topic === "string" ? topic : topic.topic || topic;
-      try {
-        const existingCodes = pathData.path
-          .map((s) => s.segment?.id || s.code)
-          .filter(Boolean);
-        const result = await generateGapFillStep(
-          topicStr, pathData.query || query, pathData.path, existingCodes
-        );
-        setFillResults((prev) => ({ ...prev, [topicStr]: result }));
-      } catch (err) {
-        console.warn("[AdaptivePath] Fill gap failed:", err.message);
-        setFillResults((prev) => ({ ...prev, [topicStr]: { error: true } }));
-      }
-    },
-    [pathData, query]
-  );
-
-  // Add a library course match to the path
-  const handleAddLibraryCourse = useCallback(
-    (courseMatch, topic) => {
-      const newStep = {
-        category: "fix",
-        segment: {
-          id: courseMatch.code,
-          title: courseMatch.title,
-          text: courseMatch.description || "",
-          source: "library",
-        },
-      };
-      setPathData((prev) => ({
-        ...prev,
-        path: insertAtPhasePosition(prev.path, newStep),
-      }));
-      setFillResults((prev) => ({
-        ...prev,
-        [topic]: { ...prev[topic], addedCode: courseMatch.code },
-      }));
-    },
-    []
-  );
-
-  // Add a single video segment to the path
-  const handleAddSegment = useCallback(
-    (segment, topic, segIndex) => {
-      const newStep = {
-        category: "fix",
-        segment: {
-          id: `bespoke-${topic}-${segIndex}`,
-          title: segment.title || `${topic} Segment`,
-          text: segment.text || "",
-          source: segment.videoTitle || "bespoke",
-        },
-      };
-      setPathData((prev) => ({
-        ...prev,
-        path: insertAtPhasePosition(prev.path, newStep),
-      }));
-      setFillResults((prev) => ({
-        ...prev,
-        [topic]: {
-          ...prev[topic],
-          addedSegments: [...(prev[topic]?.addedSegments || []), segIndex],
-        },
-      }));
-    },
-    []
-  );
-
-  // Generate a combined bespoke step from segments
-  const handleBespokeGenerate = useCallback(
-    (segments, topic) => {
-      const bespokeStep = generateBespokeGapStep(topic, segments);
-      const wrappedStep = {
-        category: "fix",
-        segment: bespokeStep,
-      };
-      setPathData((prev) => ({
-        ...prev,
-        path: insertAtPhasePosition(prev.path, wrappedStep),
-      }));
-      setFillResults((prev) => ({
-        ...prev,
-        [topic]: { ...prev[topic], bespokeGenerated: true },
-      }));
-    },
-    []
-  );
-
-  // Explore callback — resets and pre-fills query
-  const handleExploreGap = useCallback(
-    (topic) => {
-      handleReset();
-      setQuery(topic);
-    },
-    [handleReset]
-  );
-
+  const [fillResults, setFillResults] = useState({});
+
   // ── RENDER: Input Stage ──
   if (!showLevelPicker && !pathLoading && !pendingGeneration && !pathData) {
     return (
@@ -711,56 +604,7 @@ export default function AdaptivePath() {
                   </div>
                 )}
 
-                {expandedStep === -4 ? (
-                  /* Review Phase — Tabbed view: Checklist / Diff / Dependencies */
-                  <div className="step-content-container">
-                    <div className="review-tabs">
-                      <button
-                        className={`review-tab-btn ${reviewTab === "checklist" ? "active" : ""}`}
-                        onClick={() => setReviewTab("checklist")}
-                      >
-                        ✅ Checklist
-                      </button>
-                      <button
-                        className={`review-tab-btn ${reviewTab === "diff" ? "active" : ""}`}
-                        onClick={() => setReviewTab("diff")}
-                      >
-                        📊 Path Changes
-                      </button>
-                      <button
-                        className={`review-tab-btn ${reviewTab === "dependencies" ? "active" : ""}`}
-                        onClick={() => setReviewTab("dependencies")}
-                      >
-                        🔗 Dependencies
-                      </button>
-                    </div>
-                    {reviewTab === "checklist" && (
-                      <PathWizard
-                        pathResult={pathData}
-                        gaps={pathData.gaps}
-                        onFixClick={() => {
-                          const gapCard = document.getElementById("gap-analysis-card");
-                          if (gapCard) {
-                            gapCard.scrollIntoView({ behavior: "smooth", block: "start" });
-                            const toggleBtn = document.getElementById("gap-card-toggle-btn");
-                            if (toggleBtn && toggleBtn.getAttribute("aria-expanded") === "false") {
-                              toggleBtn.click();
-                            }
-                          }
-                        }}
-                      />
-                    )}
-                    {reviewTab === "diff" && (
-                      <PathDiff
-                        originalSteps={originalSteps || pathData.path}
-                        currentSteps={pathData.path}
-                        originalCoverage={originalCoverage}
-                        currentCoverage={pathData.gaps?.coverageScore || 0}
-                      />
-                    )}
-                    {reviewTab === "dependencies" && <PrereqChain chain={prereqChain} />}
-                  </div>
-                ) : expandedStep === -2 ? (
+                {expandedStep === -2 ? (
                   <div className="quiz-phase-container">
                     <div className="step-article">
                       <h1>Knowledge Check</h1>
@@ -990,7 +834,7 @@ export default function AdaptivePath() {
                       setExpandedStep(-4); // Further reading → review
                     }
                   }}
-                  disabled={expandedStep === -4}
+disabled={expandedStep === -3}
                 >
                   <i className="fa-solid fa-chevron-right"></i>
                 </button>
