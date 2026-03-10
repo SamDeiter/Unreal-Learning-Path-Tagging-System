@@ -31,13 +31,31 @@ const HIGH_SEVERITY_THRESHOLD = 0.5; // Below this = high severity gap
 const GAP_FILL_TOP_K = 3; // Segments to fetch for gap context
 const PAIN_POINT_LIMIT = 5; // Max community pain points returned
 
-// Research context distilled from 8 papers (keeps prompt small)
+// Research context distilled from 8+ papers (keeps prompt small)
 const RESEARCH_CONTEXT = `Research-backed UE5 learning gap patterns:
 - Top beginner roadblocks: C++ complexity, Blueprint debugging, material editor workflow, UI/UMG binding, physics/collision setup, animation state machines, networking/replication, packaging/deployment
 - Cognitive load: tutorials > 6 minutes lose learner attention; chunk into 3-5 minute segments
-- "Tutorial hell" pattern: learners follow steps but can't apply concepts independently
+- "Tutorial limbo" pattern: learners follow steps but can't apply concepts independently
 - Missing "why" explanations: procedural knowledge without conceptual grounding creates fragile understanding
-- Prerequisites are often assumed, not taught: editor navigation, project structure, asset pipeline, coordinate systems`;
+- Prerequisites are often assumed, not taught: editor navigation, project structure, asset pipeline, coordinate systems
+- Bloom's taxonomy gaps: paths that stay at Remember/Understand without advancing to Apply/Analyze/Create leave learners unable to build independently
+- Spaced practice: massed practice (all at once) decays quickly; interleaving topics with review checkpoints improves long-term retention
+- Transfer gaps: learners who only see one context (e.g. materials in a cave scene) can't transfer skills to new contexts (e.g. materials for vehicles)
+- Scaffolding removal: guided examples must progressively reduce support — paths that never remove scaffolds create dependency
+- Assessment alignment: if a path teaches "Apply" level skills but only tests "Remember" level, the assessment gives false confidence`;
+
+// Maps research pattern names to short explanations for UI tooltips
+export const RESEARCH_LABELS = {
+  blooms_gap: "Path stays at Remember/Understand — needs Apply/Create activities",
+  spaced_practice: "Topics compressed without review breaks — retention risk",
+  transfer_gap: "Skill only shown in one context — won't transfer to new scenarios",
+  scaffold_removal: "Never removes guided support — creates tutorial dependency",
+  assessment_mismatch: "Assessment tests lower skills than what's taught",
+  cognitive_overload: "Too much content without chunking — attention loss after 6 min",
+  tutorial_limbo: "Step-by-step without independent practice — stuck in limbo, can't apply alone",
+  missing_why: "Procedural 'how' without conceptual 'why' — fragile understanding",
+  assumed_prereq: "Prerequisites assumed, not taught — editor nav, asset pipeline, etc.",
+};
 
 /**
  * Sanitize Gemini JSON output (same pattern as generateHybridPath).
