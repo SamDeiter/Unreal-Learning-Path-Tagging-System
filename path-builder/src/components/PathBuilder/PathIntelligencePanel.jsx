@@ -508,7 +508,22 @@ export default function PathIntelligencePanel() {
                   </div>
                   <div className="ip-stat">
                     <span>Est. Time</span>
-                    <strong>{pathStats.estimatedHours}h</strong>
+                    <strong>
+                      {pathStats.estimatedHours}h
+                      {learningIntent?.timeBudget && learningIntent.timeBudget !== "none" && pathStats.estimatedHours > Number(learningIntent.timeBudget) && (
+                        <span
+                          className="ip-budget-warn"
+                          title={`Path is ${pathStats.estimatedHours}h but your budget is ${learningIntent.timeBudget}h`}
+                          style={{
+                            marginLeft: 4,
+                            fontSize: "0.7rem",
+                            color: pathStats.estimatedHours > Number(learningIntent.timeBudget) * 2 ? "#f85149" : "#d29922",
+                          }}
+                        >
+                          {pathStats.estimatedHours > Number(learningIntent.timeBudget) * 2 ? "🔴" : "⚠️"}
+                        </span>
+                      )}
+                    </strong>
                   </div>
                   {pathStats.levelRange && (
                     <div className="ip-stat">
@@ -732,7 +747,7 @@ export default function PathIntelligencePanel() {
                                     <div className="ip-fill-seg-row">
                                       <div className="ip-fill-seg-info">
                                         <div className="ip-fill-seg-title">{seg.title}</div>
-                                        {seg.videoTitle && (
+                                        {seg.videoTitle && seg.videoTitle !== seg.title && (
                                           <div className="ip-fill-seg-video">
                                             from: {seg.videoTitle}
                                           </div>
