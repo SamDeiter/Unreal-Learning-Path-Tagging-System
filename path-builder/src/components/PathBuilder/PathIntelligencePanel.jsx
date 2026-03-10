@@ -223,6 +223,30 @@ export default function PathIntelligencePanel() {
     [addCourse]
   );
 
+  // ── Add a single video segment as a path step ──
+  const handleAddSegment = useCallback(
+    (segment, topic, segIndex) => {
+      addCourse({
+        code: `bespoke-${topic}-${segIndex}`,
+        title: segment.title || `${topic} Segment`,
+        description: segment.text || "",
+        videoTitle: segment.videoTitle || "",
+        role: "core",
+        type: "bespoke-segment",
+        isGapFill: true,
+        gapTopic: topic,
+      });
+      setFillResults((prev) => ({
+        ...prev,
+        [topic]: {
+          ...prev[topic],
+          addedSegments: [...(prev[topic]?.addedSegments || []), segIndex],
+        },
+      }));
+    },
+    [addCourse]
+  );
+
   // ── Quiz ──
   const handleGenerateQuiz = useCallback(async () => {
     if (!pathResult || generatingQuiz) return;
@@ -669,15 +693,29 @@ export default function PathIntelligencePanel() {
                                 <p className="ip-fill-tier-label">🎬 Video segments found</p>
                                 {filled.segments.slice(0, 3).map((seg, si) => (
                                   <div key={si} className="ip-fill-segment-preview">
-                                    <div className="ip-fill-seg-title">{seg.title}</div>
-                                    {seg.videoTitle && (
-                                      <div className="ip-fill-seg-video">
-                                        from: {seg.videoTitle}
+                                    <div className="ip-fill-seg-row">
+                                      <div className="ip-fill-seg-info">
+                                        <div className="ip-fill-seg-title">{seg.title}</div>
+                                        {seg.videoTitle && (
+                                          <div className="ip-fill-seg-video">
+                                            from: {seg.videoTitle}
+                                          </div>
+                                        )}
+                                        <span className="ip-fill-sim">
+                                          {Math.round(seg.similarity * 100)}% relevance
+                                        </span>
                                       </div>
-                                    )}
-                                    <span className="ip-fill-sim">
-                                      {Math.round(seg.similarity * 100)}% relevance
-                                    </span>
+                                      {filled.addedSegments?.includes(si) ? (
+                                        <span className="ip-gap-status success">✅</span>
+                                      ) : (
+                                        <button
+                                          className="ip-btn small"
+                                          onClick={() => handleAddSegment(seg, topic, si)}
+                                        >
+                                          ➕
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                 ))}
                                 {filled.bespokeGenerated ? (
