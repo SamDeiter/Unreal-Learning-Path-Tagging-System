@@ -22,8 +22,23 @@ import {
 } from "../../services/cognitiveLoadEngine";
 import "./AssemblyLine.css";
 
+// Determine content type from course properties
+function getContentType(course) {
+  const code = course.code || "";
+  if (course.source === "ai_generated" || code.startsWith("ai-"))
+    return { emoji: "🤖", label: "AI", cls: "ct-ai" };
+  if (code.startsWith("bespoke-")) return { emoji: "🎞️", label: "Bespoke", cls: "ct-bespoke" };
+  if (code.startsWith("doc_") || code.startsWith("doc-"))
+    return { emoji: "📄", label: "Doc", cls: "ct-doc" };
+  if (course.has_scorm) return { emoji: "📦", label: "SCORM", cls: "ct-scorm" };
+  if ((course.videos?.length || 0) > 0 || course.video_count > 0)
+    return { emoji: "🎬", label: "Video", cls: "ct-video" };
+  return { emoji: "📄", label: "Course", cls: "ct-default" };
+}
+
 function AssemblyLine() {
-  const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath, pathStats } = usePath();
+  const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath, pathStats } =
+    usePath();
   const { getCourseSummary, getVideoKeys } = useAugmentationData();
 
   // Handle drag start
@@ -285,7 +300,17 @@ function AssemblyLine() {
                               <span className="node-title" title={course.title}>
                                 {course.title}
                               </span>
-                              {renderBloomBadge(course)}
+                              <div className="node-badges">
+                                {renderBloomBadge(course)}
+                                {(() => {
+                                  const ct = getContentType(course);
+                                  return (
+                                    <span className={`content-type-badge ${ct.cls}`}>
+                                      {ct.emoji} {ct.label}
+                                    </span>
+                                  );
+                                })()}
+                              </div>
                             </div>
 
                             {/* Node Controls */}
