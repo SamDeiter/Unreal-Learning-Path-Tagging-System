@@ -221,31 +221,95 @@ export async function downloadScormPackage(config, filename) {
 
 /**
  * Preview a SCORM package in a new browser tab.
- * Builds the package in-memory, extracts SCO HTML files,
- * and renders them in an iframe-based viewer with navigation.
+ * Renders rich step content with segment text, categories, and bridges.
  *
- * @param {Object} config — Same as buildScormPackage
+ * @param {Object} pathResult — The full pathResult from path generation
  */
-export async function previewScormPackage(config) {
-  const { title, modules } = config;
+export async function previewScormPackage(pathResult) {
+  if (!pathResult?.path?.length) throw new Error("No path to preview");
 
-  // Generate SCO HTML pages directly (skip zip round-trip)
-  const scos = modules.map((mod, _idx) => ({
-    title: mod.title,
-    html: generateScoHtml({ title: mod.title, content: mod.htmlContent }),
-  }));
+  const pathTitle = pathResult.query
+    ? `UE5 Learning Path: ${pathResult.query.substring(0, 60)}`
+    : "Learning Path";
+  const steps = pathResult.path;
+  const bridges = pathResult.bridges || [];
 
-  // Encode SCO data as base64 to avoid </script> injection issues
+  // Build rich SCO pages using the same data the download export uses
+  const scos = steps.map((step, idx) => {
+    const title = step.segment?.title || step.title || `Step ${idx + 1}`;
+    const summary = step.segment?.text || step.segment?.summary || step.description || "";
+    const category = step.category || "core";
+    const source = step.segment?.source || step.segment?.type || "";
+    const bridge = bridges[idx] || null;
+    const bridgeText = bridge?.text || bridge?.narration || "";
+
+    // Category CSS class
+    const catLower = category.toLowerCase();
+    const catClass = catLower.includes("foundation") ? "cat-foundation"
+      : (catLower.includes("transfer") || catLower.includes("practice")) ? "cat-transfer"
+      : "cat-core";
+
+    // Build rich HTML for this SCO
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeXml(title)}</title>
+  <style>
+    :root { --bg: #0d1117; --card-bg: #161b22; --text: #e6edf3; --text-secondary: #8b949e; --accent: #58a6ff; --accent-green: #3fb950; --accent-orange: #d29922; --border: #30363d; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 40px; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; margin-bottom: 8px; color: var(--accent); }
+    h2 { font-size: 1.3rem; margin: 24px 0 12px; color: var(--accent-green); }
+    p { margin-bottom: 12px; color: var(--text-secondary); }
+    .step-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .step-meta { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px; display: flex; gap: 16px; align-items: center; }
+    .category-badge { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+    .cat-foundation { background: rgba(88, 166, 255, 0.15); color: #58a6ff; }
+    .cat-core { background: rgba(63, 185, 80, 0.15); color: #3fb950; }
+    .cat-transfer, .cat-practice { background: rgba(210, 153, 34, 0.15); color: #d29922; }
+    .bridge-box { background: rgba(88, 166, 255, 0.05); border-left: 3px solid var(--accent); padding: 12px 16px; margin: 16px 0; border-radius: 0 8px 8px 0; font-style: italic; color: var(--text-secondary); }
+    .nav-buttons { display: flex; gap: 1rem; margin-top: 24px; }
+    .nav-btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; }
+    .nav-btn.primary { background: var(--accent-green); color: #000; }
+    .nav-btn.secondary { background: #30363d; color: var(--text); }
+    .nav-btn:hover { opacity: 0.9; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <p class="breadcrumb">${escapeXml(pathTitle)} — Step ${idx + 1} of ${steps.length}</p>
+  <h1>${escapeXml(title)}</h1>
+  ${bridgeText ? `<div class="bridge-box"><strong>Connection:</strong> ${escapeXml(bridgeText)}</div>` : ""}
+  <div class="step-card">
+    <div class="step-meta">
+      <span class="category-badge ${catClass}">${escapeXml(category)}</span>
+      ${source ? `<span>Source: ${escapeXml(source)}</span>` : ""}
+    </div>
+    ${summary ? `<p>${escapeXml(summary)}</p>` : "<p><em>No content summary available for this step.</em></p>"}
+  </div>
+  <div class="nav-buttons">
+    <button class="nav-btn secondary" onclick="if(window.parent)window.parent.postMessage({type:'sco_previous'},'*')">← Previous</button>
+    <button class="nav-btn primary" onclick="if(window.parent)window.parent.postMessage({type:'sco_complete'},'*')">Complete & Continue →</button>
+  </div>
+</body>
+</html>`;
+
+    return { title, html };
+  });
+
+  // Encode SCO data as base64 to avoid script injection issues
   const scosJson = JSON.stringify(scos.map((s) => ({ title: s.title, html: s.html })));
   const scosBase64 = btoa(unescape(encodeURIComponent(scosJson)));
 
-  // Build a viewer HTML page with sidebar nav + iframe
+  // Build viewer HTML page with sidebar nav + iframe
   const viewerHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCORM Preview — ${escapeXml(title)}</title>
+  <title>SCORM Preview — ${escapeXml(pathTitle)}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, -apple-system, sans-serif; display: flex; height: 100vh; background: #0d1117; color: #c9d1d9; }
@@ -265,7 +329,7 @@ export async function previewScormPackage(config) {
 </head>
 <body>
   <div class="sidebar">
-    <div class="title">${escapeXml(title)}</div>
+    <div class="title">${escapeXml(pathTitle)}</div>
     <h2>📦 SCORM Preview</h2>
     <div id="nav"></div>
   </div>
@@ -276,9 +340,8 @@ export async function previewScormPackage(config) {
     </div>
     <iframe id="viewer"></iframe>
   </div>
-  <script id="sco-data" type="application/json">${scosBase64}</script>
+  <script id="sco-data" type="application/json">${scosBase64}<\/script>
   <script>
-    // Decode base64 SCO data safely (avoids script injection)
     var raw = document.getElementById('sco-data').textContent;
     var scos = JSON.parse(decodeURIComponent(escape(atob(raw))));
     var nav = document.getElementById('nav');
@@ -304,14 +367,13 @@ export async function previewScormPackage(config) {
       nav.appendChild(item);
     });
 
-    // Listen for SCO navigation messages
     window.addEventListener('message', function(e) {
       if (e.data && e.data.type === 'sco_complete' && activeIdx < scos.length - 1) loadSco(activeIdx + 1);
       if (e.data && e.data.type === 'sco_previous' && activeIdx > 0) loadSco(activeIdx - 1);
     });
 
     if (scos.length > 0) loadSco(0);
-  </script>
+  <\/script>
 </body>
 </html>`;
 

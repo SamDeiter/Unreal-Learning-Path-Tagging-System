@@ -73,7 +73,7 @@ function ExportPanel({
   pathResult,
   analysis,
   courses: _courses,
-  learningIntent,
+  learningIntent: _learningIntent,
   studyGuide: _studyGuide,
   flashcards: _flashcards,
   exportingScorm,
@@ -91,23 +91,7 @@ function ExportPanel({
   const allAutoChecksPassed = passedCount === totalCount;
   const readyToPublish = allAutoChecksPassed && signedOff;
 
-  const scormConfig = useMemo(() => {
-    const path = pathResult?.path || [];
-    return {
-      title: learningIntent?.primaryGoal || "Learning Path",
-      description: learningIntent?.context || "",
-      modules: path.map((step, idx) => ({
-        title: step.title || `Step ${idx + 1}`,
-        htmlContent: `
-          <h2>${step.title || `Step ${idx + 1}`}</h2>
-          ${step.description ? `<p>${step.description}</p>` : ""}
-          ${step.segment?.videoId ? `<p><strong>Video:</strong> ${step.segment.videoId}</p>` : ""}
-          ${step.category ? `<p><strong>Type:</strong> ${step.category}</p>` : ""}
-          ${step.segment?.startTime != null ? `<p><strong>Segment:</strong> ${Math.round(step.segment.startTime / 60)}:${String(Math.round(step.segment.startTime % 60)).padStart(2, "0")} – ${Math.round(step.segment.endTime / 60)}:${String(Math.round(step.segment.endTime % 60)).padStart(2, "0")}</p>` : ""}
-        `,
-      })),
-    };
-  }, [pathResult, learningIntent]);
+
 
   const handleDownload = async () => {
     setExportingScorm(true);
@@ -126,7 +110,7 @@ function ExportPanel({
   const handlePreview = async () => {
     setPreviewing(true);
     try {
-      await previewScormPackage(scormConfig);
+      await previewScormPackage(pathResult);
     } catch (err) {
       console.error("Preview failed:", err);
     } finally {
