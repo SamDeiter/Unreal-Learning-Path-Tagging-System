@@ -299,9 +299,22 @@ export default function PathIntelligencePanel() {
   const suggestions = analysis?.suggestions || [];
   const assumedKnowledge = analysis?.assumedKnowledge || [];
   const weaklyCovered = analysis?.weaklyCovered || [];
-  const coverageScore = analysis?.coverageScore ?? 0;
+  const coverageScoreRaw = analysis?.coverageScore ?? 0;
   const corpusStats = analysis?.corpusStats || {};
-  const gapCount = blindSpots.length + weaklyCovered.length;
+
+  // Count successfully filled gaps
+  const filledCount = Object.values(fillResults).filter(
+    (f) => f && !f.error && (f.addedCode || f.generated)
+  ).length;
+
+  // Gap count decreases as gaps are filled
+  const totalGaps = blindSpots.length + weaklyCovered.length;
+  const gapCount = Math.max(0, totalGaps - filledCount);
+
+  // Coverage score increases as gaps are filled (proportional boost)
+  const coverageScore = totalGaps > 0
+    ? Math.min(1, coverageScoreRaw + (filledCount / totalGaps) * (1 - coverageScoreRaw))
+    : coverageScoreRaw;
 
   // ── RENDER ──
   return (
