@@ -4,6 +4,36 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [7.1.0-path-intelligence] - 2026-03-10
+
+### Added
+
+- **Path Gap Analyzer Engine** (`pathGapAnalyzer.js`, 955 lines) — 5-function intelligence engine for learning path quality analysis:
+  - `analyzePathGaps()` — Detects blind spots by generating required subtopics via Gemini, then checking which the path actually covers using 3 matching strategies (topic overlap, substring, word-level). Classifies gaps with severity + research context
+  - `generateGapFillStep()` — 3-tier gap fill: Library Search → Bespoke Segments → AI-Generated Step. Each tier returns structured results for distinct UI rendering
+  - `searchCommunityPainPoints()` — Grounded web search for real UE5 learner struggles from forums, Reddit, Epic Dev Community
+  - `simulatePersonaGaps()` — Re-runs gap analysis from 3 different learner personas (beginner, intermediate artist, C++ programmer) to catch persona-specific blind spots
+  - `buildPrereqChain()` — Builds prerequisite dependency graph between path steps with Gemini classification
+- **Research-Backed Gap Patterns** — 9 research-informed gap categories (Bloom's gap, spaced practice, transfer gap, scaffold removal, assessment mismatch, cognitive overload, tutorial limbo, missing why, assumed prereqs) with `RESEARCH_LABELS` export for UI tooltips
+- **Weakly Covered Detection** — Augmentation quality data integration: courses rated D/F are flagged as "weakly covered" with half-weight in coverage scoring
+- **`PathLoader.jsx`** — Bridge component enabling Edit Path flow from PathDashboard to PathBuilder editor, loading saved path courses + learning intent into PathContext
+- **`generateBespokeGapStep()`** — Converts Tier 2 bespoke segment matches into course-compatible objects for `addCourse()` integration
+- **Persona Real-Data Eval Tests** (`eval_onboarding_realdata.test.js`) — Persona scoring evaluation against the full 2,400+ course catalog with cross-industry blocklists and required topic validation
+- **AssemblyLine Duration Warnings** — Path length indicators: ⚠️ amber at 20+ hours, 🚨 critical at 40+ hours. Cognitive load summary in header bar
+
+### Changed
+
+- **`App.jsx`** — Wired up `onEditPath` handler (was a TODO) to load saved path data into PathContext via `PathLoader`; added `pendingEditPath` state
+- **`AssemblyLine.jsx`** — Added tier-based layout, cognitive load summary, video count, and path duration warnings in the header bar
+- **Path Builder Flow** — Clicking a saved path card on the PathDashboard now loads its courses into the editor (previously just switched views without loading data)
+
+### Fixed
+
+- **URL Health Check False Positives** (closes #1) — `validate_urls.py` now detects `<meta name="robots" content="noindex">` on Epic's SPA redirect stubs and classifies them as `"redirected"` instead of `"broken"`. All 22 flagged URLs were false positives from Epic's doc URL migration
+- **localStorage Key Mismatch** — Identified `PathDashboard` (`ue5_saved_paths`) vs `PathContext` (`ue5-saved-paths`) key discrepancy; `PathLoader` bypasses this by passing path data directly instead of re-reading from storage
+
+---
+
 ## [7.0.0-modular-architecture] - 2026-03-08
 
 ### Added
