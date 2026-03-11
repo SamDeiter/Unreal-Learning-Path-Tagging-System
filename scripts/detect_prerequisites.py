@@ -15,6 +15,13 @@ from pathlib import Path
 
 try:
     from google import genai
+
+# Load .env file for API keys
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass  # dotenv not installed
 except ImportError:
     print("ERROR: google-genai package not installed")
     print("Install with: pip install google-genai")

@@ -19,6 +19,13 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+# Load .env file so scripts pick up project-level keys
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass  # dotenv not installed — rely on system env
+
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
@@ -43,10 +50,10 @@ CHECKPOINT_INTERVAL = 50     # save progress every 50 embeddings
 
 
 def get_api_key():
-    """Get Gemini API key from environment."""
-    key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    """Get Gemini API key from environment. Prefers GEMINI_API_KEY (.env)."""
+    key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not key:
-        print("ERROR: No API key found. Set GOOGLE_API_KEY or GEMINI_API_KEY env var.")
+        print("ERROR: No API key found. Set GEMINI_API_KEY or GOOGLE_API_KEY env var.")
         sys.exit(1)
     return key
 

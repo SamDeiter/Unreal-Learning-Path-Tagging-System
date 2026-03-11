@@ -49,7 +49,7 @@ SCRAPE_DELAY = 0.5          # 500ms between page fetches (be polite)
 
 def get_api_key():
     """Get Gemini API key from environment."""
-    key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not key:
         print("ERROR: No API key found. Set GOOGLE_API_KEY or GEMINI_API_KEY env var.")
         sys.exit(1)
@@ -315,6 +315,13 @@ def embed_text(text, api_key):
     """Call Gemini embedding API."""
     import urllib.error
     import urllib.request
+
+# Load .env file for API keys
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass  # dotenv not installed
 
     url = f"{API_URL}?key={api_key}"
     payload = {

@@ -17,6 +17,13 @@ import re
 import urllib.request
 import urllib.error
 
+# Load .env file for API keys
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass  # dotenv not installed
+
 # ── Configuration ──────────────────────────────────────────────
 LIBRARY_PATH = "path-builder/src/data/video_library_enriched.json"
 OUTPUT_PATH = "path-builder/src/data/display_names.json"
@@ -27,7 +34,7 @@ RETRY_DELAY = 5  # seconds
 
 
 def get_api_key():
-    key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not key:
         print("ERROR: No API key found.")
         print("  Set GOOGLE_API_KEY or GEMINI_API_KEY env var.")

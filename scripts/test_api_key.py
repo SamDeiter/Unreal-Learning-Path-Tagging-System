@@ -2,6 +2,13 @@
 import os
 import google.generativeai as genai
 
+# Load .env file for API keys
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass  # dotenv not installed
+
 key = os.environ.get("GOOGLE_API_KEY", "")
 print(f"Key: {key[:8]}...{key[-4:]}" if len(key) > 12 else f"Key: '{key}'")
 

@@ -18,7 +18,7 @@ API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embe
 
 
 def get_api_key():
-    key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not key:
         print("ERROR: Set GOOGLE_API_KEY or GEMINI_API_KEY env var.")
         sys.exit(1)

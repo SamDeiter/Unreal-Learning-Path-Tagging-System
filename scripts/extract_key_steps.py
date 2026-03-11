@@ -175,6 +175,13 @@ def parse_extraction(raw_text, allowed_keys):
         print("    WARN: Failed to parse JSON, trying to extract...")
         # Try to find JSON in response
         import re
+
+# Load .env file for API keys
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass  # dotenv not installed
         match = re.search(r'\{.*\}', text, re.DOTALL)
         if match:
             try:

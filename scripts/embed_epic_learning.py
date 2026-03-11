@@ -56,7 +56,7 @@ MAX_RETRIES = 5         # more retries for rate-limit resilience
 
 def get_api_key():
     """Get Gemini API key from environment."""
-    key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not key:
         print("ERROR: Set GOOGLE_API_KEY or GEMINI_API_KEY env var.")
         sys.exit(1)

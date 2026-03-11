@@ -22,6 +22,13 @@ import time
 
 import requests
 
+# Load .env file for API keys
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass  # dotenv not installed
+
 # ──────────── Config ────────────
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "path-builder", "src", "data")
 ENRICHED_PATH = os.path.join(DATA_DIR, "video_library_enriched.json")

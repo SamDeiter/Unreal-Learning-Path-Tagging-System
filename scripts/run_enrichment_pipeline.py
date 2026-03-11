@@ -10,6 +10,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Load .env file for API keys
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass  # dotenv not installed
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Load .env file if it exists (no dependency needed)
@@ -33,7 +40,7 @@ SCRIPTS = [
 
 def main():
     # Verify API key is available
-    api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not api_key:
         print("❌ No API key found!")
         print("   Option 1: Create a .env file with GOOGLE_API_KEY=your_key")
