@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback } from "react";
+import { usePath } from "../../context/PathContext";
 import "./PathCreationWizard.css";
 
 const STEPS = [
@@ -49,6 +50,7 @@ const INDUSTRIES = [
 ];
 
 function PathCreationWizard({ onComplete, onCancel }) {
+  const { clearPath } = usePath();
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState("");
   const [goal, setGoal] = useState("");
@@ -83,6 +85,9 @@ function PathCreationWizard({ onComplete, onCancel }) {
   }, [step]);
 
   const handleCreate = useCallback(() => {
+    // Prevent stale state leaking into the new path
+    clearPath();
+    
     onComplete({
       id: crypto.randomUUID(),
       title: title.trim() || goal.trim().slice(0, 50),
@@ -95,7 +100,7 @@ function PathCreationWizard({ onComplete, onCancel }) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
-  }, [onComplete, title, goal, skillLevel, timeBudget, industries]);
+  }, [onComplete, title, goal, skillLevel, timeBudget, industries, clearPath]);
 
   // Auto-set recommended time when skill level changes
   const handleSkillChange = (level) => {
