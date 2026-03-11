@@ -342,7 +342,8 @@ User Question -> [1. pathSearch.js] -> [2. pathSequencer.js] -> [3. pathNarratio
 | ------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------- |
 | **Segment Finder**        | RAG search across 1,900+ transcript embeddings (similarity threshold ≥ 0.65) | Firestore vector search + Vertex AI      |
 | **Workflow Intent Guard** | Rejects segments teaching wrong tools (e.g., Texture Graph for mesh setup)   | Gemini 2.0 Flash                         |
-| **Hybrid Fallback**       | Generates AI content when corpus coverage is too low                         | Gemini 2.0 Flash (general UE5 knowledge) |
+| **Query Feasibility Gate** | Blocks off-topic queries (e.g., "Horses in UE5") from generating hallucinated content — checks query against 80+ UE5 domain terms before allowing hybrid fallback | Client-side `isQueryUE5Relevant()` (no API call) |
+| **Hybrid Fallback**       | Generates AI content when corpus coverage is too low AND query passes feasibility gate | Gemini 2.0 Flash (general UE5 knowledge) |
 | **Path Sequencer**        | Orders clips into Foundation, Diagnosis, Fix, Transfer                       | Gemini 2.0 Flash                         |
 | **Path Renderer**         | Generates bridge narration between clips                                     | Gemini 2.0 Flash                         |
 | **Quiz Generator**        | Creates MCQs testing conceptual understanding                                | Gemini 2.0 Flash                         |

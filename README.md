@@ -21,9 +21,10 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 9. **Content Gap Intelligence** — Tracks where official docs fall short: AI fill rate, top content gaps ranked by AI ratio, most common knowledge gaps, and per-query coverage analysis
 10. **Bespoke Learning Paths** — AI-generated personalized paths using RAG + transcript search, Firestore vector search, security guardrails, and 10 pre-seeded popular paths
 11. **Adaptive Learning Paths** — Diagnostic quiz (with image-based questions) builds a knowledge profile, then generates a depth-adjusted path with Blueprint-first content bias, audio briefings with auto-advance, and an end-of-path knowledge check quiz
-12. **Hybrid AI Fallback** — When corpus coverage is too low, generates learning paths from Gemini's general UE5 knowledge with workflow intent matching (e.g., assumes FAB assets for "create a sword" queries)
-13. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
-14. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
+12. **Hybrid AI Fallback** — When corpus coverage is too low, generates learning paths from Gemini's general UE5 knowledge with workflow intent matching (e.g., assumes FAB assets for "create a sword" queries). Gated by the Query Feasibility Gate to prevent hallucinations on off-topic queries
+13. **Query Feasibility Gate** — Blocks off-topic queries (e.g., "Horses in UE5") from triggering AI-generated paths. Checks queries against 80+ UE5 domain terms before allowing hybrid fallback. Shows a rich "Topic Not Covered" card with clickable UE5 query suggestions
+14. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
+15. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
 
 ---
 

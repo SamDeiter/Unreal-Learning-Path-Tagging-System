@@ -4,6 +4,32 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [7.2.0-feasibility-gate] - 2026-03-10
+
+### Added
+
+- **Phase 0: Query Feasibility Gate** — Prevents hallucinated learning paths for off-topic queries (e.g., "Horses in UE5"):
+  - `isQueryUE5Relevant()` function in `bespokePathService.js` checks queries against 80+ UE5 domain terms and engine-related regex patterns
+  - When `lowCorpusCoverage === true` AND query is NOT UE5-relevant → returns early with "Topic Not Covered" instead of generating fabricated content
+  - When `lowCorpusCoverage === true` AND query IS UE5-relevant → proceeds with hybrid fallback but shows amber `⚠️ AI-Generated` warning banner
+  - Tracks `feasibility_blocked` reason in analytics
+- **"Topic Not Covered" UI** — Rich error card in `AdaptivePath.jsx` with:
+  - 🚫 icon and descriptive heading
+  - 4 clickable UE5-specific query suggestions that auto-fill the search box
+  - Indigo-themed suggestion buttons with hover effects
+- **AI-Generated Warning Banner** — Changed AI-generated path banner from blue "Custom AI-powered path" to amber "⚠️ Generated from AI knowledge — not from our verified course library"
+- **135 New Transcripts** — Batch of course transcripts (115.02 series: Input Delegates, Game World Setup, Saving/Serialization, Subsystems, Animation) expanding the content corpus
+- **Re-embedded Segment Corpus** — Full re-run of `embed_segments.py` across 20,794 chunks using `gemini-embedding-001` model
+
+### Fixed
+
+- **Firebase Web API Key Recovery** — Restored accidentally deleted Firebase Web API key in GCP Console; both localhost and deployed site auth restored
+- **`embed_segments.py` IndentationError** — Fixed leading whitespace on line 1 that prevented the embedding script from running
+- **`test_api_key.py` Hardcoded Key Removal** — Replaced hardcoded API key with `os.environ.get("GOOGLE_API_KEY")` for secure key handling
+- **CI Test Timeout** — Increased `bespokePathService.test.js` timeout from 15s to 30s to prevent flaky failures
+
+---
+
 ## [7.1.0-path-intelligence] - 2026-03-10
 
 ### Added
