@@ -498,6 +498,54 @@ export default function AdaptivePath() {
                   />
                 ) : expandedStep === -3 ? (
                   <FurtherReading steps={pathData.path} />
+                ) : expandedStep === -4 ? (
+                  /* ── Review Phase: path summary & recap ── */
+                  <div className="step-content-container" style={{ padding: "24px" }}>
+                    <h2 style={{ color: "var(--accent-green, #4ade80)", marginBottom: "8px" }}>
+                      ✅ Path Review
+                    </h2>
+                    <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: "24px" }}>
+                      Here&apos;s a recap of everything covered in this learning path.
+                    </p>
+                    {[
+                      { label: "Prerequisites", categories: ["prerequisite", "foundation", "diagnosis"] },
+                      { label: "Core Steps", categories: ["core", "fix"] },
+                      { label: "Practice", categories: ["practice", "transfer"] },
+                    ].map(({ label, categories }) => {
+                      const steps = pathData.path.filter((s) => categories.includes(s.category));
+                      if (steps.length === 0) return null;
+                      return (
+                        <div key={label} style={{ marginBottom: "20px" }}>
+                          <h3 style={{ color: "#e2e8f0", fontSize: "0.9rem", marginBottom: "8px" }}>
+                            {label}
+                          </h3>
+                          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                            {steps.map((step, i) => (
+                              <li
+                                key={i}
+                                style={{
+                                  padding: "10px 14px",
+                                  marginBottom: "6px",
+                                  background: "rgba(255,255,255,0.03)",
+                                  borderRadius: "8px",
+                                  borderLeft: "3px solid var(--accent-blue, #60a5fa)",
+                                }}
+                              >
+                                <strong style={{ color: "#e2e8f0", fontSize: "0.82rem" }}>
+                                  {step.title || step.segment?.title || step.segment?.videoTitle || `Step ${i + 1}`}
+                                </strong>
+                                {step.summary && (
+                                  <p style={{ color: "#94a3b8", fontSize: "0.75rem", margin: "4px 0 0" }}>
+                                    {step.summary}
+                                  </p>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })}
+                  </div>
                 ) : (expandedStep ?? 0) >= 0 && (expandedStep ?? 0) < pathData.path.length ? (
                   <div className="step-content-container">
                     <PathStep
